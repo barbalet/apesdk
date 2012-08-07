@@ -1,0 +1,1 @@
+function ( being ) {  while ( loop < number_beings ){    if ( current_being != loop ){      select_being = loop;      test_x = location_x;      test_y = location_y;      select_being = current_being;      other_visible = is_visible;    }    loop = loop + 1;  }}
