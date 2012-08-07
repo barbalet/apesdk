@@ -1,1 +1,0 @@
-function ( being ) {	while ( loop_value < 32 ) {		energy = hungry * 2;	}}
