@@ -1,0 +1,16 @@
+function ( main ) {
+	test_random = random;
+	escape = 3;
+	random_seed = 345;
+    	test_random = random;
+    	escape = 0;
+    	random_seed = 0 - 1;
+    	test_random = random;
+    	test_random = random;
+    	persist = persist + 1;
+  	if (persist >= 12)
+	{
+		persist = 0;
+		exit = 1;
+	}
+}

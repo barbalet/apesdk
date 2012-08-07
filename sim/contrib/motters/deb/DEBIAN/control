@@ -1,0 +1,12 @@
+Package: nobleape-webserver
+Version: 0.2
+Section: games
+Maintainer: Tom Barbalet <tom@nobleape.com>
+Architecture: all
+Depends: libpng12-0, twidge
+Recommends: 
+Suggests: 
+Essential: no
+Priority: optional
+Homepage: http://www.nobleape.com
+Description: A version of the Noble Ape simulation which can be installed on web servers.
