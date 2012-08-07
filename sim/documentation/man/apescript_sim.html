@@ -1,266 +1,0 @@
-<HTML><HEAD>  <TITLE>Scripting the Simulation</TITLE></HEAD><BODY bgcolor="#ffffff"><FONT FACE="Arial,Geneva,Helvetica" SIZE=3><CENTER><A HREF="apescript_intro.html">Introduction to ApeScript</A> - <A HREF="index.html">Contents</A> - <A HREF="apescript_notes.html">ApeScript Notes</A></CENTER><HR><H2>THE APESCRIPT INTERFACE INTO THE NOBLE APE SIMULATION</H2>Variables automatically defined in <A HREF="apescript_intro.html">ApeScript</A> run in the Noble Ape Simulation.<P><TABLE>
-<TD><B>Variable<TD><B>Type<TD><B>Notes<TR><TD><HR><TD><HR><TD><HR><TR><TD><I>random<TD>output<TD>special - produces a 16-bit random number<TR><TD><I>vector_angle<TD>input/output<TD>values from 0 to 255 with wrap-around (for greater values)<TR><TD><I>vector_x <TD>output<TD>based on vector_angle (-840 to 840)<TR><TD><I>vector_y<TD>output<TD>based on vector_angle (-840 to 840)<TR><TD><HR><TD><B>Land<TD><HR><TR><TD><I>test_x<TD>input/output<TD><TR><TD><I>test_y<TD>input/output<TD><TR><TD><I>test_z<TD>output<TD>based on test_x and test_y, provides numerical land height<TR><TD><TD><TD><HR><TR><TD><I>time<TD>output<TD>constant dt - numerical 24 hour time in minutes (see <A HREF="file.html">File Format</A>)<TR><TD><I>date<TD>output<TD>constant dt - numerical date in days (see <A HREF="file.html">File Format</A>)<TR><TD><I>weather<TD>output<TD>based on test_x and test_y, weather value and time of day/night - Daytime Sun(0), Daytime Cloudy(1), Daytime Rain(2), Nighttime Sun(3), Nighttime Cloudy(4), Nighttime Rain(5), Sunrise/Sunset(6)<TR><TD><I>water_level<TD>output<TD>constant - the numerical water level (from z height)<TR><TD><HR><TD><B>Being<TD><HR><TR><TD><I>number_beings<TD>output<TD>constant dt<TR><TD><I>current_being<TD>output<TD>constant db<TR><TD><I>select_being<TD>input/output<TD>set to current_being initially<TR><TD><TD><TD><HR><TR><TD><I>location_x<TD>output<TD>based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>location_y<TD>output<TD>based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>location_z<TD>output<TD>based on location_x and location_y (ie select_being), provides numerical land height<TR><TD><I>id_number<TD>output<TD>based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>date_of_birth<TD>output<TD>based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>state<TD>output<TD>based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>listen<TD>output<TD>based on select_being from speak (see <A HREF="file.html">File Format</A>)<TR><TD><I>facing<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>speed<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>energy<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>honor<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>parasites<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>height<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>family_name1<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>family_name2<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>goal_type<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>goal_x<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>goal_y<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>drive_hunger<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>drive_social<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>drive_fatigue<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>drive_sex<TD>i/o being<TD>NOT based on select_being (see <A HREF="file.html">File Format</A>)<TR><TD><I>speak<TD>i/o being<TD>NOT based on select_being, to be spoken next dt (see <A HREF="file.html">File Format</A>)<TR><TD><I>hungry<TD>output<TD>constant - the numerical hunger level (from energy)<TR><TD><TD><TD><HR><TR><TD><I>is_visible<TD>output<TD>based on location_x, location_y, facing, test_x and test_y - shows if the test point is visible<BR>(NOTE the distinction between location_x/location_y vs facing if select_being != current_being, is_visible will allow this but it won't produce the desired results)<TR><TD><TD><TD><HR><TR><TD><I>brain_value<TD>i/o being<TD>based on brain_x, brain_y and brain_z<TR><TD><I>brain_x<TD>input/output<TD><TR><TD><I>brain_y<TD>input/output<TD><TR><TD><I>brain_z<TD>input/output<TD><TR><TD><HR><TD><B>Biology<TD><HR><TR><TD><I>biology_operator<TD>input/output<TD><TR><TD><I>biology_output<TD>output<TD>based on test_x, test_y and biology_operator<TR><TD><TD><TD><HR><TR><TD><I>biology_area<TD>output<TD><TR><TD><I>biology_height<TD>output<TD><TR><TD><I>biology_water<TD>output<TD><TR><TD><I>biology_moving_sun<TD>output<TD><TR><TD><I>biology_total_sun<TD>output<TD><TR><TD><TD><TD><HR><TR><TD><I>biology_bush<TD>output<TD><TR><TD><I>biology_grass<TD>output<TD><TR><TD><I>biology_tree<TD>output<TD><TR><TD><TD><TD><HR><TR><TD><I>biology_insect<TD>output<TD><TR><TD><I>biology_mouse<TD>output<TD><TR><TD><I>biology_parrot<TD>output<TD><TR><TD><I>biology_lizard<TD>output<TD><TR><TD><I>biology_eagle<TD>output<TD><TR><TD><HR><TD><HR><TD><HR><TR><TD><TD><B>Key</B><TR><TD><TD><I>constant<TD>remains the same<TR><TD><TD><I>constant db<TD>constant for one being in this time cycle<TR><TD><TD><I>constant dt<TD>constant for all beings in this time cycle<TR><TD><TD><I>input/output<TD>can be read from and written to<TR><TD><TD><I>i/o being<TD>like <I>input/output</I> but set to and from the being<TR><TD><TD><I>output<TD>can only be read from, not written to<TR><TD><TD><I>special<TD>generated every time it is called</TABLE><HR><H2>APESCRIPT ERRORS THAT CAN BE REPORTED IN THE SIMULATION</H2><P>This list shows some of the errors provided by ApeScript and their potential causes. (This document is due for an update with a full list of all the errors.)<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP WIDTH=40% BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>Error</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>Help Text</B>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Unknown error
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Please contact tom at nobleape dot com
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Number expected
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-A non-numeric character is included in a number string.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Number out of range
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Number does not fit in the range
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Maximum numbers reached
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Please contact tom at nobleape dot com
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Maximum script size reached
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Please contact tom at nobleape dot com
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Maximum variables reached
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Please contact tom at nobleape dot com
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Unknown syntax (parser buffer)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Syntax is incorrect
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Unknown syntax (parser convert)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Syntax is incorrect
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Selected entity out of range
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Coordinates out of range
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Value out of range
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Too many }
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-You have closed too many braces. Go back to the code and see if there is an erroneous additional } in the code.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Maximum braces reached
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Please contact tom at nobleape dot com
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-First value failed
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Something is wrong with the first value of an equality, if or while operation. It could be the first and only value in this function.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Second value failed
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Something is wrong with the second number/variable value of an equality, if or while operation.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Unknown syntax (missing =)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Syntax is incorrect
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Unknown syntax (no command)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Syntax is incorrect
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Wrong end
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-A bracket or colon was expected but not found.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Line start incorrect
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-A line of code begins incorrectly. It could start with a number or an operator when if/while or a variable was expected.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Output set as input variable
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-An output only variable is attempting to be set.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-if/while not followed by {
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-All if/while statements require a bracket following the if/while (allowing for any amount of whitespace too).
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Function isn't variable
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Non-function applied
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Function defined prior
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Function out of range
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Without ;
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Without {
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-All if/while statements expect what is executed through the bracket enclosed statement being correct to be followed by inclusive braces { }. There is no single line if or while statements without { } in ApeScript.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Function setting failed
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Error starting main
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Code after main
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-No } to end of file
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Code outside function
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Input variable without equals
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-All variables set require an equals following the variable.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Assign value failed
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Something is wrong with the variable set by an equality.
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Unknown syntax (from interpret)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-Syntax is incorrect
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-No main code
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-* please add text *
-<TR>
-</TABLE>
-</CENTER>
-
-<HR><CENTER><A HREF="apescript_intro.html">Introduction to ApeScript</A> - <A HREF="index.html">Contents</A> - <A HREF="apescript_notes.html">ApeScript Notes</A></CENTER></BODY></HTML>
