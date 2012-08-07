@@ -1,0 +1,1 @@
+function ( being ) {	energy = hungry * 2;}

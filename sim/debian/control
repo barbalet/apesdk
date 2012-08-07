@@ -1,0 +1,10 @@
+Package: nobleape
+Installed-Size: 400
+Architecture: amd64
+Version: 0.694
+Maintainer: Tom Barbalet <tom@nobleape.com>
+Section: games
+Homepage: http://www.nobleape.com
+Depends: libmotif-dev
+Description: An artificial life simulation
+ Noble Ape features a number of autonomous simulation components including a landscape simulation, biological simulation, weather simulation, sentient creature (Noble Ape) simulation and a simple intelligent-agent scripting language (ApeScript). 
