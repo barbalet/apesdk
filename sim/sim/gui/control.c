@@ -35,6 +35,11 @@
 
 /*NOBLEMAKE DEL=""*/
 
+
+#define CONSOLE_REQUIRED
+#define GUI_COMMAND_LINE_HYBRID
+#define CONSOLE_ONLY
+
 #ifndef	_WIN32
 
 #include "../noble/noble.h"

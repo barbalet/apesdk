@@ -1579,27 +1579,43 @@ extern n_uint	brain_hash_count;
 
 #endif
 
+
+#ifdef CONSOLE_REQUIRED
+
 const static noble_console_command control_commands[] =
 {
     {&io_help,               "help",           "[(command)]",          "Displays a list of all the commands"},
-    {&io_quit,               "quit",           "",                     "Quits the console"},
-    {&io_quit,               "exit",           "",                     ""},
-    {&io_quit,               "close",          "",                     ""},
-    {&console_file,          "file",           "[(component)]",        "Information on the file format"},
-    {&console_run,           "run",            "(days|time format)",   "Simulate for a given number of days"},
-    
-    {&console_save,          "save",           "[file]",               "Save a simulation file"},
-#ifndef __APPLE__
+#ifdef CONSOLE_ONLY
+#ifndef GUI_COMMAND_LINE_HYBRID
+    {&console_reset,         "reset",          "",                     "Reset the simulation"},
+    {&console_reset,         "clear"           "",                     ""},
+
     {&console_open,          "open",           "[file]",               "Load a simulation file"},
     {&console_open,          "load",           "",                     ""},
 #endif
     {&console_script,        "script",         "[file]",               "Load an ApeScript sinulation file"},
+    {&console_save,          "save",           "[file]",               "Save a simulation file"},
 
-    {&console_step,          "step",           "",                     "Run for a single logging interval"},
-#ifndef __APPLE__
-    {&console_reset,         "reset",          "",                     "Reset the simulation"},
-    {&console_reset,         "clear"           "",                     ""},
+    {&io_quit,               "quit",           "",                     "Quits the console"},
+    {&io_quit,               "exit",           "",                     ""},
+    {&io_quit,               "close",          "",                     ""},    
+#else
+    {&cle_load,              "load",           "(filename)",           "Load a simulation file"},
+    {&cle_script,            "script",         "(filename)",           "Load apescript file"},
+    {&cle_script,            "apescript",      "",                     ""},
+    {&cle_video,             "video",          "ideosphere|genepool <filename>", "Create a video"},
+    {&cle_video,             "movie",          "genespace|preferences<filename>","Create a video"},
+    {&cle_video,             "film",           "relations <filename>",           "Create a video"},
+    {&longterm_quit,         "quit",           "",                     "Quits the console"},
+    {&longterm_quit,         "exit",           "",                     ""},
+    {&longterm_quit,         "close",          "",                     ""},
+    {&cle_reset,             "reset",          "",                     "Reset the simulation"},
+    {&cle_reset,             "clear"           "",                     ""},    
 #endif
+    
+    {&console_file,          "file",           "[(component)]",        "Information on the file format"},
+    {&console_run,           "run",            "(days|time format)",   "Simulate for a given number of days"},
+    {&console_step,          "step",           "",                     "Run for a single logging interval"},
     {&console_top,           "top",            "",                     "List the top apes"},
     {&console_epic,          "epic",           "",                     "List the most talked about apes"},
     {&console_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
@@ -1635,6 +1651,8 @@ const static noble_console_command control_commands[] =
     {&console_list,          "dir",            "",                     ""},
     {0L, 0L},
 };
+
+#endif
 
 /*NOBLEMAKE END=""*/
 /*NOBLEMAKE DEL=""*/

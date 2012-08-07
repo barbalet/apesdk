@@ -57,6 +57,7 @@
 
 
 /*NOBLEMAKE DEL=""*/
+#define CONSOLE_REQUIRED
 
 #include "noble/noble.h"
 #include "universe/universe.h"
@@ -625,64 +626,6 @@ static n_int longterm_quit(void * ptr, n_string response, n_console_output outpu
     return io_quit(ptr, response, output_function);
 }
 
-
-#ifndef CONSOLE_ONLY
-
-noble_console_command cle_commands[] =
-{
-    {&cle_load,  "load",                       "(filename)",                    "Load a simulation file"},
-    {&cle_script,  "script",                   "(filename)",                    "Load apescript file"},
-    {&cle_script,  "apescript",                     "",                         ""},
-    {&cle_video,  "video",                     "ideosphere|genepool <filename>", "Create a video"},
-    {&cle_video,  "movie",                     "genespace|preferences<filename>","Create a video"},
-    {&cle_video,  "film",                     "relations <filename>",             "Create a video"},
-    {&io_help,              "help",           "[(command)]",          "Displays a list of all the commands"},
-    {&longterm_quit,         "quit",           "",                     "Quits the console"},
-    {&longterm_quit,         "exit",           "",                     ""},
-    {&longterm_quit,         "close",          "",                     ""},
-    {&console_file,          "file",           "[(component)]",        "Information on the file format"},
-    {&console_run,               "run",            "(days|time format)",   "Simulate for a given number of days"},
-    {&console_step,          "step",           "",                     "Run for a single logging interval"},
-    {&cle_reset,         "reset",          "",                     "Reset the simulation"},
-    {&cle_reset,         "clear"           "",                     ""},
-    {&console_top,           "top",            "male|female|juvenile|*",                     "List the top apes"},
-    {&console_epic,          "epic",           "male|female|juvenile|*",                     "List the most talked about apes"},
-    {&console_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
-    {&console_logging,       "logging",        "on|off",               "Turn logging of images and data on or off"},
-    {&console_logging,       "log",            "",                     ""},
-    {&console_simulation,    "simulation",     "",                     ""},
-    {&console_simulation,    "sim",            "",                     "Show simulation parameters"},
-    {&console_watch,         "watch",          "(ape name)|all|off|*", "Watch (specific *) for the current ape"},
-    {&console_watch,         "monitor",        "",                     ""},
-    {&console_being,         "ape",            "",                     "Name of the currently watched ape"},
-    {&console_being,         "pwd",            "",                     ""},
-    {&console_social_graph,  "friends",        "",                     ""},
-    {&console_social_graph,  "social",         "",                     ""},
-    {&console_social_graph,  "socialgraph",    "",                     ""},
-    {&console_social_graph,  "graph",          "(ape name)",           "* Show social graph for a named ape"},
-    {&console_braincode,     "braincode",      "(ape name)",           "* Show braincode for a named ape"},
-    {&console_vascular,      "vascular",       "(ape name)",           "* Show vascular system for a named ape"},
-    {&console_respiration,   "respiration",    "(ape name)",           "* Show respiration system for a named ape"},
-    {&console_respiration,   "breathing",      "",                     ""},
-    {&console_respiration,   "breath",         "",                     ""},
-    {&console_metabolism,    "metabolism",     "(ape name)",           "* Show metabolism for a named ape"},
-    {&console_metabolism,    "chemistry",      "",                     ""},
-    {&console_episodic,      "episodic",       "(ape name)",           "* Show episodic memory for a named ape"},
-    {&console_probes,        "probes",         "(ape name)",           "* Show brain probes for a named ape"},
-    {&console_stats,         "stats",          "(ape name)",           "* Show parameters for a named ape"},
-    {&console_stats,         "status",         "",                     ""},
-    {&console_appearance,    "appearance",     "(ape name)",           "* Show appearance values for a named ape"},
-    {&console_appearance,    "physical",       "",                     ""},
-    {&console_genome,        "genome",         "(ape name)",           "Show genome for a named ape"},
-    {&console_genome,        "genetics",       "",                     ""},
-    {&console_list,          "list",           "",                     "List all ape names"},
-    {&console_list,          "ls",             "",                     ""},
-    {&console_list,          "dir",            "",                     ""},
-    {0L, 0L},
-};
-
-#endif
-
 int main(int argc, n_string argv[])
 {
     n_int return_value = 0;
@@ -710,11 +653,7 @@ int main(int argc, n_string argv[])
     do
     {
         return_value = io_console(local_sim,  
-#ifndef CONSOLE_ONLY
-        cle_commands,
-#else
         (noble_console_command *)control_commands,
-#endif
         io_console_entry,
         io_console_out);
     }
