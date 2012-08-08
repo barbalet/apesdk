@@ -1722,12 +1722,233 @@ static void being_create_family_links(noble_being * mother,
 
 }
 
+/**
+ * Returns the closest beings
+ * @param sim Pointer to the simulation
+ * @param location Array index of the current being
+ * @param max_shout_volume The returned maximum shout volume
+ * @param opposite_sex Array index of the closest being of the opposite sex
+ * @param same_sex Array index of the closest being of the same sex
+ * @param opposite_sex_distance Returned distance to the closest being of the opposite sex
+ * @param same_sex_distance Returned distance to the closest being of the same sex
+ * @return The number of beings in the vicinity
+ */
+static int being_closest(noble_simulation * sim,
+						 n_uint location,
+						 n_uint	* opposite_sex, n_uint * same_sex,
+						 n_uint * opposite_sex_distance, n_uint * same_sex_distance)
+{
+	n_byte        opposite_sex_seen = 0;
+    n_uint	      loop = 0;
+    noble_being * being_buffer = sim->beings;
+    n_uint        number       = sim->num;
+    noble_being * local        = &being_buffer[location];
+    n_vect2       location_vector;
+    n_byte        beings_in_vicinity = 0;
+    n_uint        local_is_female = FIND_SEX(GET_I(local));
+	n_int         max_shout_volume = 127;
+
+	*opposite_sex_distance = 0xffffffff;
+	*same_sex_distance = 0xffffffff;
+	*opposite_sex = NO_BEINGS_FOUND;
+	*same_sex = NO_BEINGS_FOUND;
+
+	while (loop < number)
+    {
+		if (loop != location)
+		{
+			noble_being	* test_being = &being_buffer[loop];
+			n_int         los_previously_calculated = 0;
+			n_int         result_los = 0;
+			/* check distance before line of sight */
+			n_vect2       difference_vector;
+			n_uint         compare_distance;
+
+			vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(test_being));
+
+			vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+
+			compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+
+			if ( compare_distance < SOCIAL_RANGE )
+			{
+				beings_in_vicinity++;
+			}
+			/* listen for the nearest shout out */
+			if ((test_being->state&BEING_STATE_SHOUTING) &&
+				(compare_distance < SHOUT_RANGE) &&
+				(test_being->shout[SHOUT_VOLUME] > max_shout_volume))
+			{
+				max_shout_volume = test_being->shout[SHOUT_VOLUME];
+				local->shout[SHOUT_HEARD] = test_being->shout[SHOUT_CONTENT];
+				local->shout[SHOUT_FAMILY0] = GET_FAMILY_FIRST_NAME(sim,test_being);
+				local->shout[SHOUT_FAMILY1] = GET_FAMILY_SECOND_NAME(sim,test_being);
+			}
+			/* '<' : signed/unsigned mismatch */
+			if ((opposite_sex_seen==0) && ( compare_distance < *opposite_sex_distance ))
+			{
+				if (FIND_SEX(GET_I(test_being)) != local_is_female)
+				{
+					/* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
+					los_previously_calculated = 1;
+					result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
+					if (result_los)
+					{
+						*opposite_sex_distance = compare_distance;
+						*opposite_sex = loop;
+					}
+				}
+			}
+			/* is a mate in view? */
+			if (local->goal[0]==GOAL_MATE)
+			{
+				if ((FIND_SEX(GET_I(test_being)) != local_is_female) &&
+					((local->goal[1]==GET_NAME_GENDER(sim,test_being)) &&
+					 (local->goal[2]==GET_NAME_FAMILY2(sim,test_being))))
+				{
+					if (los_previously_calculated == 0)
+					{
+						los_previously_calculated = 1;
+						result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
+					}
+					if (result_los)
+					{
+						opposite_sex_seen=1;
+						*opposite_sex_distance = compare_distance;
+						*opposite_sex = loop;
+					}
+				}
+			}
+			/* '<' : signed/unsigned mismatch */
+			if ( compare_distance < *same_sex_distance )
+			{
+				if (FIND_SEX(GET_I(test_being)) == local_is_female)
+				{
+					if (los_previously_calculated == 0)
+					{
+						result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x,  (n_byte2)difference_vector.y);
+					}
+					if (result_los)
+					{
+						*same_sex_distance = compare_distance;
+						*same_sex = loop;
+					}
+				}
+			}
+		}
+		loop++;
+	}
+	return beings_in_vicinity;
+}
+
+/**
+ * One being interacts with another
+ * @param sim Pointer to the simulation
+ * @param being_index Array index of the being
+ * @param other_being_index Array index of the other being
+ * @param other_being_distance Distance to the other being
+ * @param facing_direction Direction in which the being is facing
+ * @param awake Whether the being is awake
+ * @param state The state of the being
+ * @param speed The speed of the being
+ * @param energy The energy of the being
+ * @param opposite_sex Non zero if the other being is the opposite sex
+ */
+static void being_interact(noble_simulation * sim,
+						   n_uint   being_index,
+						   n_uint   other_being_index,
+						   n_uint   other_being_distance,
+						   n_int  * facing_direction,
+						   n_int  * awake,
+						   n_byte * state,
+						   n_byte * speed,
+						   n_int  * energy,
+						   n_byte   opposite_sex)
+{
+    noble_being * being_buffer = sim->beings;
+    noble_being * local        = &being_buffer[being_index];
+    n_vect2       location_vector;    
+    n_land      * land         = sim->land;
+    n_byte2     * today        = land->date;
+    n_uint        today_days   = TIME_IN_DAYS(today);
+    n_uint        birth_days   = TIME_IN_DAYS(GET_D(local));
+    n_uint        local_is_female = FIND_SEX(GET_I(local));
+
+	if (other_being_index != NO_BEINGS_FOUND)
+	{
+		noble_being	* other_being = &being_buffer[other_being_index];
+
+		n_vect2 delta_vector;
+
+		/* social networking */
+		n_int being_index;
+		n_byte2 familiarity=0;
+		being_index = social_network(local, other_being, other_being_distance, sim);
+
+		vect2_byte2(&delta_vector, (n_byte2 *)&GET_X(other_being));
+		vect2_subtract(&delta_vector, &location_vector, &delta_vector);
+
+		if (being_index>-1)
+		{
+			social_link * local_social_graph = GET_SOC(sim, local);
+			if (local_social_graph)
+			{
+				familiarity = local_social_graph[being_index].familiarity;
+			}
+		}
+		
+		*facing_direction = math_turn_towards(delta_vector.x, delta_vector.y, (n_byte)*facing_direction, 0);
+
+		if ((genetics_compare(local->mother_new_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
+		{
+#ifdef PARASITES_ON
+			if (social_groom(local, other_being, other_being_distance, *awake, familiarity, sim))
+			{
+				*state |= BEING_STATE_GROOMING;
+				
+				/* both beings stop */
+				*speed = 0;
+				GET_S(other_being) = 0;
+			}
+			else {
+#endif
+				/* squabbling between adults */
+				if ((other_being_distance < SQUABBLE_RANGE) && ((TIME_IN_DAYS(GET_D(other_being))+AGE_OF_MATURITY)<today_days))
+				{
+					n_byte2 squabble_val;
+
+					GET_F(local) = (n_byte) *facing_direction;
+					GET_E(local) = (n_byte2)*energy;
+					GET_S(local) = *speed;
+
+					squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, sim);
+					if (squabble_val != 0)
+					{
+						*state |= squabble_val;
+						*facing_direction = GET_F(local);
+						*energy = GET_E(local);
+						*speed = GET_S(local);
+					}
+				}
+			}
+
+		}
+		if ((other_being_distance < SOCIAL_RANGE) && (being_index>-1))
+		{
+			/* attraction and mating */
+			if (opposite_sex!=0) *state |= social_mate(local, other_being, today, being_index, other_being_distance, sim);
+
+			/* chat */
+			*state |= social_chat(local, other_being, being_index, sim);
+		}
+	}
+}
+
 void being_cycle_awake(noble_simulation * sim, n_uint location)
 {
     n_uint	      loop;
     noble_being * being_buffer = sim->beings;
     n_land  * land         = sim->land;
-    n_uint        number       = sim->num;
     n_byte2     * today        = land->date;
     noble_being * local        = &being_buffer[location];
     n_uint        local_is_female = FIND_SEX(GET_I(local));
@@ -1871,189 +2092,33 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
     else
     {
 
-        n_uint	hone = NO_BEINGS_FOUND;
-        n_uint distance = 0xffffffff;
-        n_uint	same = NO_BEINGS_FOUND;
-        n_uint same_distance = 0xffffffff;
-        n_byte hone_seen = 0;
-        n_int max_shout_volume = 127;
-        loop = 0;
+        n_uint	opposite_sex = NO_BEINGS_FOUND;
+        n_uint opposite_sex_distance = 0xffffffff;
+        n_uint	same_sex = NO_BEINGS_FOUND;
+        n_uint same_sex_distance = 0xffffffff;
 
         /* adjust speed using genetics */
         tmp_speed = (tmp_speed * (GENE_SPEED(GET_G(local))+8)) >> 3;
 
-        while (loop < number)
-        {
-            if (loop != location)
-            {
-                noble_being	* test_being = &being_buffer[loop];
-                n_int         los_previously_calculated = 0;
-                n_int         result_los = 0;
-                /* check distance before line of sight */
-                n_vect2       difference_vector;
-                n_uint         compare_distance;
-
-                vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(test_being));
-
-                vect2_subtract(&difference_vector, &location_vector, &difference_vector);
-
-                compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
-
-                if ( compare_distance < SOCIAL_RANGE )
-                {
-                    beings_in_vicinity++;
-                }
-                /* listen for the nearest shout out */
-                if ((test_being->state&BEING_STATE_SHOUTING) &&
-                        (compare_distance < SHOUT_RANGE) &&
-                        (test_being->shout[SHOUT_VOLUME] > max_shout_volume))
-                {
-                    max_shout_volume = test_being->shout[SHOUT_VOLUME];
-                    local->shout[SHOUT_HEARD] = test_being->shout[SHOUT_CONTENT];
-                    local->shout[SHOUT_FAMILY0] = GET_FAMILY_FIRST_NAME(sim,test_being);
-                    local->shout[SHOUT_FAMILY1] = GET_FAMILY_SECOND_NAME(sim,test_being);
-                }
-                /* '<' : signed/unsigned mismatch */
-                if ((hone_seen==0) && ( compare_distance < distance ))
-                {
-                    if (FIND_SEX(GET_I(test_being)) != local_is_female)
-                    {
-                        /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
-                        los_previously_calculated = 1;
-                        result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
-                        if (result_los)
-                        {
-                            distance = compare_distance;
-                            hone = loop;
-                        }
-                    }
-                }
-                /* is a mate in view? */
-                if (local->goal[0]==GOAL_MATE)
-                {
-                    if ((FIND_SEX(GET_I(test_being)) != local_is_female) &&
-						((local->goal[1]==GET_NAME_GENDER(sim,test_being)) &&
-						 (local->goal[2]==GET_NAME_FAMILY2(sim,test_being))))
-                    {
-                        if (los_previously_calculated == 0)
-                        {
-                            los_previously_calculated = 1;
-                            result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
-                        }
-                        if (result_los)
-                        {
-                            hone_seen=1;
-                            distance = compare_distance;
-                            hone = loop;
-                        }
-                    }
-                }
-                /* '<' : signed/unsigned mismatch */
-                if ( compare_distance < same_distance )
-                {
-                    if (FIND_SEX(GET_I(test_being)) == local_is_female)
-                    {
-                        if (los_previously_calculated == 0)
-                        {
-                            result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x,  (n_byte2)difference_vector.y);
-                        }
-                        if (result_los)
-                        {
-                            same_distance = compare_distance;
-                            same = loop;
-                        }
-                    }
-                }
-            }
-            loop++;
-        }
+		/** Find the closest beings */
+		beings_in_vicinity =
+			being_closest(sim, location,
+						  &opposite_sex, &same_sex,
+						  &opposite_sex_distance, &same_sex_distance);
 
         if (local->drives[DRIVE_SOCIAL] > SOCIAL_THRESHOLD(local))
         {
+			being_interact(sim,
+						   location,
+						   same_sex, same_sex_distance,
+						   &loc_f, &awake, &loc_state,
+						   &loc_s, &loc_e, 0);
 
-            for (loop=0; loop<2; loop++)
-            {
-                n_uint	hone2, distance2;
-
-                if (loop==0)
-                {
-                    hone2 = same;
-                    distance2 = same_distance;
-                }
-                else
-                {
-                    hone2 = hone;
-                    distance2 = distance;
-                }
-
-                if (hone2 != NO_BEINGS_FOUND)
-                {
-                    noble_being	* hone_being = &being_buffer[hone2];
-
-                    n_vect2 delta_vector;
-
-                    /* social networking */
-                    n_int being_index;
-                    n_byte2 familiarity=0;
-                    being_index = social_network(local, hone_being, distance2, sim);
-
-                    vect2_byte2(&delta_vector, (n_byte2 *)&GET_X(hone_being));
-                    vect2_subtract(&delta_vector, &location_vector, &delta_vector);
-
-                    if (being_index>-1)
-                    {
-                        social_link * local_social_graph = GET_SOC(sim, local);
-                        if (local_social_graph)
-                        {
-                            familiarity = local_social_graph[being_index].familiarity;
-                        }
-                    }
-
-					loc_f = math_turn_towards(delta_vector.x, delta_vector.y, (n_byte)loc_f, 0);
-
-                    if ((genetics_compare(local->mother_new_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
-                    {
-#ifdef PARASITES_ON
-                        if (social_groom(local, hone_being, distance2, awake, familiarity, sim))
-                        {
-                            loc_state |= BEING_STATE_GROOMING;
-
-                            /* both beings stop */
-                            loc_s = 0;
-                            GET_S(hone_being) = 0;
-                        }
-                        else
-#endif
-                            /* squabbling between adults */
-                            if ((distance2 < SQUABBLE_RANGE) && ((TIME_IN_DAYS(GET_D(hone_being))+AGE_OF_MATURITY)<today_days))
-                            {
-                                n_byte2 squabble_val;
-
-                                GET_F(local) = (n_byte) loc_f;
-                                GET_E(local) = (n_byte2) loc_e;
-                                GET_S(local) = loc_s;
-
-                                squabble_val = social_squabble(local, hone_being, distance2, local_is_female, sim);
-                                if (squabble_val != 0)
-                                {
-                                    loc_state |= squabble_val;
-                                    loc_f = GET_F(local);
-                                    loc_e = GET_E(local);
-                                    loc_s = GET_S(local);
-                                }
-                            }
-
-                    }
-                    if ((distance2 < SOCIAL_RANGE) && (being_index>-1))
-                    {
-                        /* attraction and mating */
-                        if (loop==1) loc_state |= social_mate(local, hone_being, today, being_index, distance2, sim);
-
-                        /* chat */
-                        loc_state |= social_chat(local, hone_being, being_index, sim);
-                    }
-                }
-            }
+			being_interact(sim,
+						   location,
+						   opposite_sex, opposite_sex_distance,
+						   &loc_f, &awake, &loc_state,
+						   &loc_s, &loc_e, 1);
         }
     }
 
