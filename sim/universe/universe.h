@@ -561,6 +561,9 @@ enum social_action_type
 #define BRAINCODE_INTERNAL                1
 #define BRAINCODE_EXTERNAL                0
 
+/* Number of columns to display when showing the braincode on the console */
+#define BRAINCODE_DISPLAY_COLUMNS         3
+
 /* instruction codes */
 
 enum BRAINCODE_COMMANDS

@@ -478,13 +478,20 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
  * @param local_being being to be analysed
  * @param result resulting text output
  * @param outer if 1 then show the outer braincode, otherwise show the inner
+ * @param columns The number of columns to use for displaying the code
  */
-static void show_braincode(void * ptr, noble_being * local_being, n_string result, n_int outer)
+static void show_braincode(void * ptr, noble_being * local_being, n_string result, n_int outer, n_int columns)
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
 
-    n_int i;
+    n_int i, j, col, offset, program_pointer, instructions_per_column;
     n_byte * code;
+	n_string_block braincode_str;
+	n_byte values[BRAINCODE_BYTES_PER_INSTRUCTION];
+	const n_int spacing_between_columns = 5;
+	
+	if (columns<1) columns=1;
+	instructions_per_column = (BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)/columns;
 
     if (outer==0)
     {
@@ -495,14 +502,34 @@ static void show_braincode(void * ptr, noble_being * local_being, n_string resul
         code = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
     }
 
-    for (i = 0; i < BRAINCODE_SIZE; i++)
-    {
-        result[watch_string_length++] = (char)(65 + (code[i]%60));
-        if ((i > 0) && (i%79 == 0))
-        {
-            result[watch_string_length++] = '\n';
-        }
-    }
+	for (i = 0; i < instructions_per_column; i++)
+	{
+		for (col = 0; col < columns; col++)
+		{
+			offset = i + (col*instructions_per_column);
+			program_pointer = offset + (i*BRAINCODE_BYTES_PER_INSTRUCTION);
+
+			values[0] = BRAINCODE_INSTRUCTION(code, program_pointer);
+			values[1] = BRAINCODE_VALUE(code, program_pointer, 0);
+			values[2] = BRAINCODE_VALUE(code, program_pointer, 1);
+			brain_three_byte_command((n_byte*)braincode_str, values);
+			for (j = 0; j < io_length(braincode_str,STRING_BLOCK_SIZE); j++)
+			{
+				result[watch_string_length++] = braincode_str[j];
+			}
+			if (col<columns-1)
+			{
+				for (j = 0; j < spacing_between_columns; j++)
+				{
+					result[watch_string_length++] = ' ';
+				}
+			}
+			else
+			{
+				result[watch_string_length++] = '\n';
+			}
+		}
+	}
     result[watch_string_length++] = '\n';
 }
 
@@ -779,9 +806,9 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
     }
     result[watch_string_length++]='\n';
     io_string_write(result, "\nInner:\n", &watch_string_length);
-    show_braincode(ptr, local_being, result, 0);
+    show_braincode(ptr, local_being, result, 0, BRAINCODE_DISPLAY_COLUMNS);
     io_string_write(result, "\nOuter:\n", &watch_string_length);
-    show_braincode(ptr, local_being, result, 1);
+    show_braincode(ptr, local_being, result, 1, BRAINCODE_DISPLAY_COLUMNS);
 }
 
 /**
