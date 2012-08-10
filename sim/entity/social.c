@@ -1105,7 +1105,7 @@ n_int social_mate(
             higher status individuals */
         matingprob = math_random(meeter_being->seed);
         if (matingprob <
-                (16384 + (n_byte2)(met_being->honor)*
+                (32000 + (n_byte2)(met_being->honor)*
                  GENE_STATUS_PREFERENCE(GET_G(meeter_being))*MATING_PROB))
         {
 #endif

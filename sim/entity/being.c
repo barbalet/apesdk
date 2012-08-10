@@ -1573,10 +1573,10 @@ static n_int being_turn_away_from_water(n_int loc_f, n_land * land, n_vect2 * lo
 }
 
 /* stuff still goes on during sleep */
-void being_cycle_asleep(noble_simulation * sim, n_uint location)
+void being_cycle_asleep(noble_simulation * sim, n_uint current_being_index)
 {
     noble_being * being_buffer = sim->beings;
-    noble_being * local        = &being_buffer[location];
+    noble_being * local        = &being_buffer[current_being_index];
 
     /* By default return towards a resting state */
 #ifdef METABOLISM_ON
@@ -1723,10 +1723,167 @@ static void being_create_family_links(noble_being * mother,
 }
 
 /**
+ * Follow a being to which we are paying attention
+ * @param sim Pointer to the simulation
+ * @param current_being_index Array index of the current being
+ * @param opposite_sex Array index of the closest being of the opposite sex
+ * @param same_sex Array index of the closest being of the same sex
+ * @param opposite_sex_distance Returned distance to the closest being of the opposite sex
+ * @param same_sex_distance Returned distance to the closest being of the same sex
+ * @return 1 if the attended to being is seen, 0 otherwise
+ */
+static int being_follow(noble_simulation * sim,
+						n_uint current_being_index,
+						n_uint * opposite_sex, n_uint * same_sex,
+						n_uint * opposite_sex_distance, n_uint * same_sex_distance)
+{
+    noble_being * being_buffer = sim->beings;
+    noble_being * local        = &being_buffer[current_being_index];
+    n_vect2       location_vector, difference_vector;
+    social_link * local_social_graph;
+	n_int social_graph_index;
+	n_uint i;
+	n_int result_los;
+
+	*opposite_sex_distance = 0xffffffff;
+	*same_sex_distance = 0xffffffff;
+	*opposite_sex = NO_BEINGS_FOUND;
+	*same_sex = NO_BEINGS_FOUND;
+
+	vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+
+	/* is a mate in view? */
+	if (local->goal[0]==GOAL_MATE)
+	{
+		for (i = 0; i < sim->num; i++)
+		{
+			if (i != current_being_index)
+			{
+				/** get the name of the other being */
+				noble_being * other = &being_buffer[i];
+				n_byte2 other_first_name = GET_NAME_GENDER(sim,other);
+				n_byte2 other_family_name = GET_NAME_FAMILY2(sim,other);
+				/** is this the same as the name of the being to which we are paying attention? */
+				if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(local))) &&
+					(local->goal[1]==other_first_name) &&
+					(local->goal[2]==other_family_name))
+				{
+					vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(other));
+					vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+					result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
+					if (result_los)
+					{
+						n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+						*opposite_sex = i;
+						*opposite_sex_distance = compare_distance;
+						return 1;
+					}
+				}
+			}
+		}
+	}
+
+    local_social_graph = GET_SOC(sim, local);
+    if (local_social_graph == 0L) return 0;
+
+	/** which entry in the social graph are we paying attention to? */
+	social_graph_index = GET_A(local,ATTENTION_ACTOR);
+	/** Does this entry correspond to another being? */
+	if ((social_graph_index>0) &&
+		(local_social_graph[social_graph_index].entity_type==ENTITY_BEING) &&
+		(!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, social_graph_index)))
+	{
+		/** search for the other being */
+		for (i = 0; i < sim->num; i++)
+		{
+			if (i != current_being_index)
+			{
+				/** get the name of the other being */
+				noble_being * other = &being_buffer[i];
+				n_byte2 other_first_name = GET_NAME_GENDER(sim,other);
+				n_byte2 other_family_name = GET_NAME_FAMILY2(sim,other);
+				/** is this the same as the name of the being to which we are paying attention? */
+				if ((local_social_graph[social_graph_index].first_name[BEING_MET]==other_first_name) &&
+					(local_social_graph[social_graph_index].family_name[BEING_MET]==other_family_name))
+				{
+					/** Is this being within sight? */
+					vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(other));
+					vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+					result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
+					if (result_los)
+					{
+						n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+						if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(local)))
+						{
+							*opposite_sex = i;
+							*opposite_sex_distance = compare_distance;
+						}
+						else
+						{
+							*same_sex = i;
+							*same_sex_distance = compare_distance;
+						}
+						return 1;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+/**
+ * Listen for shouts
+ * @param sim Pointer to the simulation
+ * @param current_being_index Array index of the current being
+ */
+static void being_listen(noble_simulation * sim,
+						 n_uint current_being_index)
+{
+	n_int i;
+    noble_being * being_buffer = sim->beings;
+    noble_being * local        = &being_buffer[current_being_index];
+	n_int         max_shout_volume = 127;
+    n_vect2       location_vector, difference_vector;
+	n_uint        compare_distance;
+
+    /* clear shout values */
+    local->shout[SHOUT_CONTENT] = 0;
+    local->shout[SHOUT_HEARD] = 0;
+    if (local->shout[SHOUT_CTR] > 0)
+    {
+        local->shout[SHOUT_CTR]--;
+    }
+
+	vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+	for (i = 0; i < sim->num; i++)
+	{
+		if (i != current_being_index)
+		{
+			noble_being	* other = &being_buffer[i];
+
+			vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(other));
+			vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+			compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+
+			/* listen for the nearest shout out */
+			if ((other->state&BEING_STATE_SHOUTING) &&
+				(compare_distance < SHOUT_RANGE) &&
+				(other->shout[SHOUT_VOLUME] > max_shout_volume))
+			{
+				max_shout_volume = other->shout[SHOUT_VOLUME];
+				local->shout[SHOUT_HEARD] = other->shout[SHOUT_CONTENT];
+				local->shout[SHOUT_FAMILY0] = GET_FAMILY_FIRST_NAME(sim,other);
+				local->shout[SHOUT_FAMILY1] = GET_FAMILY_SECOND_NAME(sim,other);
+			}
+		}
+	}
+}
+
+/**
  * Returns the closest beings
  * @param sim Pointer to the simulation
- * @param location Array index of the current being
- * @param max_shout_volume The returned maximum shout volume
+ * @param current_being_index Array index of the current being
  * @param opposite_sex Array index of the closest being of the opposite sex
  * @param same_sex Array index of the closest being of the same sex
  * @param opposite_sex_distance Returned distance to the closest being of the opposite sex
@@ -1734,7 +1891,7 @@ static void being_create_family_links(noble_being * mother,
  * @return The number of beings in the vicinity
  */
 static int being_closest(noble_simulation * sim,
-						 n_uint location,
+						 n_uint current_being_index,
 						 n_uint	* opposite_sex, n_uint * same_sex,
 						 n_uint * opposite_sex_distance, n_uint * same_sex_distance)
 {
@@ -1742,20 +1899,21 @@ static int being_closest(noble_simulation * sim,
     n_uint	      loop = 0;
     noble_being * being_buffer = sim->beings;
     n_uint        number       = sim->num;
-    noble_being * local        = &being_buffer[location];
+    noble_being * local        = &being_buffer[current_being_index];
     n_vect2       location_vector;
     n_byte        beings_in_vicinity = 0;
     n_uint        local_is_female = FIND_SEX(GET_I(local));
-	n_int         max_shout_volume = 127;
 
 	*opposite_sex_distance = 0xffffffff;
 	*same_sex_distance = 0xffffffff;
 	*opposite_sex = NO_BEINGS_FOUND;
 	*same_sex = NO_BEINGS_FOUND;
 
+	vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+
 	while (loop < number)
     {
-		if (loop != location)
+		if (loop != current_being_index)
 		{
 			noble_being	* test_being = &being_buffer[loop];
 			n_int         los_previously_calculated = 0;
@@ -1774,16 +1932,6 @@ static int being_closest(noble_simulation * sim,
 			{
 				beings_in_vicinity++;
 			}
-			/* listen for the nearest shout out */
-			if ((test_being->state&BEING_STATE_SHOUTING) &&
-				(compare_distance < SHOUT_RANGE) &&
-				(test_being->shout[SHOUT_VOLUME] > max_shout_volume))
-			{
-				max_shout_volume = test_being->shout[SHOUT_VOLUME];
-				local->shout[SHOUT_HEARD] = test_being->shout[SHOUT_CONTENT];
-				local->shout[SHOUT_FAMILY0] = GET_FAMILY_FIRST_NAME(sim,test_being);
-				local->shout[SHOUT_FAMILY1] = GET_FAMILY_SECOND_NAME(sim,test_being);
-			}
 			/* '<' : signed/unsigned mismatch */
 			if ((opposite_sex_seen==0) && ( compare_distance < *opposite_sex_distance ))
 			{
@@ -1791,29 +1939,9 @@ static int being_closest(noble_simulation * sim,
 				{
 					/* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
 					los_previously_calculated = 1;
-					result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
+					result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
 					if (result_los)
 					{
-						*opposite_sex_distance = compare_distance;
-						*opposite_sex = loop;
-					}
-				}
-			}
-			/* is a mate in view? */
-			if (local->goal[0]==GOAL_MATE)
-			{
-				if ((FIND_SEX(GET_I(test_being)) != local_is_female) &&
-					((local->goal[1]==GET_NAME_GENDER(sim,test_being)) &&
-					 (local->goal[2]==GET_NAME_FAMILY2(sim,test_being))))
-				{
-					if (los_previously_calculated == 0)
-					{
-						los_previously_calculated = 1;
-						result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
-					}
-					if (result_los)
-					{
-						opposite_sex_seen=1;
 						*opposite_sex_distance = compare_distance;
 						*opposite_sex = loop;
 					}
@@ -1826,7 +1954,7 @@ static int being_closest(noble_simulation * sim,
 				{
 					if (los_previously_calculated == 0)
 					{
-						result_los = being_los(sim->land, &(sim->beings[location]), (n_byte2)difference_vector.x,  (n_byte2)difference_vector.y);
+						result_los = being_los(sim->land, local, (n_byte2)difference_vector.x,  (n_byte2)difference_vector.y);
 					}
 					if (result_los)
 					{
@@ -1865,17 +1993,17 @@ static void being_interact(noble_simulation * sim,
 						   n_int  * energy,
 						   n_byte   opposite_sex)
 {
-    noble_being * being_buffer = sim->beings;
-    noble_being * local        = &being_buffer[being_index];
-    n_vect2       location_vector;    
-    n_land      * land         = sim->land;
-    n_byte2     * today        = land->date;
-    n_uint        today_days   = TIME_IN_DAYS(today);
-    n_uint        birth_days   = TIME_IN_DAYS(GET_D(local));
-    n_uint        local_is_female = FIND_SEX(GET_I(local));
-
 	if (other_being_index != NO_BEINGS_FOUND)
 	{
+        noble_being * being_buffer = sim->beings;
+        noble_being * local        = &being_buffer[being_index];
+        n_vect2       location_vector;    
+        n_land      * land         = sim->land;
+        n_byte2     * today        = land->date;
+        n_uint        today_days   = TIME_IN_DAYS(today);
+        n_uint        birth_days   = TIME_IN_DAYS(GET_D(local));
+        n_uint        local_is_female = FIND_SEX(GET_I(local));
+
 		noble_being	* other_being = &being_buffer[other_being_index];
 
 		n_vect2 delta_vector;
@@ -1885,6 +2013,7 @@ static void being_interact(noble_simulation * sim,
 		n_byte2 familiarity=0;
 		being_index = social_network(local, other_being, other_being_distance, sim);
 
+		vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
 		vect2_byte2(&delta_vector, (n_byte2 *)&GET_X(other_being));
 		vect2_subtract(&delta_vector, &location_vector, &delta_vector);
 
@@ -1944,33 +2073,31 @@ static void being_interact(noble_simulation * sim,
 	}
 }
 
-void being_cycle_awake(noble_simulation * sim, n_uint location)
+void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 {
     n_uint	      loop;
-    noble_being * being_buffer = sim->beings;
-    n_land  * land         = sim->land;
-    n_byte2     * today        = land->date;
-    noble_being * local        = &being_buffer[location];
-    n_uint        local_is_female = FIND_SEX(GET_I(local));
-
-    n_uint        today_days   = TIME_IN_DAYS(today);
-    n_uint        birth_days   = TIME_IN_DAYS(GET_D(local));
+    n_land      * land               = sim->land;
+    n_byte2     * today              = land->date;
+    noble_being * local              = &(sim->beings[current_being_index]);
+    n_uint        local_is_female    = FIND_SEX(GET_I(local));
+    n_uint        today_days         = TIME_IN_DAYS(today);
+    n_uint        birth_days         = TIME_IN_DAYS(GET_D(local));
     n_byte        beings_in_vicinity = 0;
 
-    n_byte	loc_s        = GET_S(local);
-    n_int	loc_e        = GET_E(local);
-    n_int	loc_f        = GET_F(local);
-    n_int	loc_h        = GET_H(local);
+    n_byte	      loc_s              = GET_S(local);
+    n_int	      loc_e              = GET_E(local);
+    n_int	      loc_f              = GET_F(local);
+    n_int	      loc_h              = GET_H(local);
 
-    n_byte  loc_state = BEING_STATE_ASLEEP;
-    n_int   fat_mass, child_mass = 0;
-    n_int   awake = being_awake(sim, location);
+    n_byte        loc_state          = BEING_STATE_ASLEEP;
+    n_int         fat_mass, child_mass = 0;
+    n_int         awake = being_awake(sim, current_being_index);
 
-    n_int   carrying_child = 0;
+    n_int         carrying_child = 0;
 
-    /* tmp_speed is the optimum speed based on the gradient */
+    /** tmp_speed is the optimum speed based on the gradient */
     n_int	tmp_speed;
-    /* delta_energy is the energy required for movement */
+    /** delta_energy is the energy required for movement */
     n_int	az;
     n_int	delta_z;
 
@@ -1980,13 +2107,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
     n_vect2 looking_vector;
 	n_uint territory_index;
 
-    /* clear shout values */
-    local->shout[SHOUT_CONTENT] = 0;
-    local->shout[SHOUT_HEARD] = 0;
-    if (local->shout[SHOUT_CTR] > 0)
-    {
-        local->shout[SHOUT_CTR]--;
-    }
+	/** Listen for any shouts */
+	being_listen(sim,current_being_index);
 
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);
@@ -1994,7 +2116,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
     being_immune_response(local);
 
 #ifdef BRAINCODE_ON
-    /* may need to add external probe linking too */
+    /** may need to add external probe linking too */
     if (GET_B(sim,local))
     {
         update_brain_probes(sim, local,GET_BRAINCODE_INTERNAL(sim,local));
@@ -2050,14 +2172,14 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
     }
     local->speak = 0;
 
-    /* amount of body fat in kg */
+    /** amount of body fat in kg */
     fat_mass = GET_BODY_FAT(local);
     if (fat_mass > BEING_MAX_MASS_FAT_G)
     {
         fat_mass = BEING_MAX_MASS_FAT_G;
     }
 
-    /* If it sees water in the distance then turn */
+    /** If it sees water in the distance then turn */
 #ifdef LAND_ON
     if (((loc_state & BEING_STATE_SWIMMING) != 0) ||
             (MAP_WATERTEST(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(looking_vector.x)),
@@ -2068,9 +2190,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
 #endif
     {
         loc_f = being_turn_away_from_water(loc_f, land, &location_vector);
-        /* horizontally oriented posture */
+        /** horizontally oriented posture */
         local->posture=0;
-        /* When swimming drop everything except what's on your head or back.
+        /** When swimming drop everything except what's on your head or back.
            Note that the groomed flag is also cleared */
 
         for (loop=0; loop<INVENTORY_SIZE; loop++)
@@ -2080,11 +2202,11 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
                 local->inventory[loop] = 0;
             }
         }
-        /* swimming proficiency */
+        /** swimming proficiency */
         tmp_speed = (tmp_speed * (GENE_SWIM(GET_G(local))+8)) >> 4;
         episodic_store_memory(local, EVENT_SWIM, GET_E(local), sim, GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local), 0, 0, 0);
 #ifdef PARASITES_ON
-        /* bathing removes parasites */
+        /** bathing removes parasites */
         if (local->parasites > 0) local->parasites--;
 #endif
 
@@ -2097,25 +2219,32 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
         n_uint	same_sex = NO_BEINGS_FOUND;
         n_uint same_sex_distance = 0xffffffff;
 
-        /* adjust speed using genetics */
+        /** adjust speed using genetics */
         tmp_speed = (tmp_speed * (GENE_SPEED(GET_G(local))+8)) >> 3;
 
-		/** Find the closest beings */
-		beings_in_vicinity =
-			being_closest(sim, location,
-						  &opposite_sex, &same_sex,
-						  &opposite_sex_distance, &same_sex_distance);
+		/** is the being to which we are paying attention within view? */
+		beings_in_vicinity = being_follow(sim,current_being_index,
+										  &opposite_sex, &same_sex,
+										  &opposite_sex_distance, &same_sex_distance);
+		if (beings_in_vicinity==0)
+		{
+			/** Find the closest beings */
+			beings_in_vicinity =
+				being_closest(sim, current_being_index,
+							  &opposite_sex, &same_sex,
+							  &opposite_sex_distance, &same_sex_distance);
+		}
 
         if (local->drives[DRIVE_SOCIAL] > SOCIAL_THRESHOLD(local))
         {
 			being_interact(sim,
-						   location,
+						   current_being_index,
 						   same_sex, same_sex_distance,
 						   &loc_f, &awake, &loc_state,
 						   &loc_s, &loc_e, 0);
 
 			being_interact(sim,
-						   location,
+						   current_being_index,
 						   opposite_sex, opposite_sex_distance,
 						   &loc_f, &awake, &loc_state,
 						   &loc_s, &loc_e, 1);
@@ -2128,7 +2257,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
         {
             if (loc_s == 0)
             {
-                /* eating when stopped */
+                /** eating when stopped */
                 n_byte  food_type;
                 n_int energy = food_eat(sim->land, sim->weather, location_vector.x, location_vector.y, az, &food_type, local);
                 
@@ -2198,6 +2327,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
 
     /** Create a wander based on the brain value */
     if ((local->goal[0]==GOAL_NONE) &&
+		(beings_in_vicinity==0) &&
 		(math_random(local->seed) < 1000 + 3600*GENE_STAGGER(GET_G(local))))
     {
         n_byte * local_brain = GET_B(sim, local);
@@ -2205,9 +2335,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
 
         if (local_brain != 0L)
         {
-            wander =
-                (math_spread_byte(local_brain[BRAIN_OFFSET(22+(15*32)+(15*32*32))]>>4)) -
-                (math_spread_byte(local_brain[BRAIN_OFFSET(11+(15*32)+(15*32*32))]>>4));
+			wander =
+				(math_spread_byte(local_brain[BRAIN_OFFSET(22+(15*32)+(15*32*32))]>>4)) -
+				(math_spread_byte(local_brain[BRAIN_OFFSET(11+(15*32)+(15*32*32))]>>4));
         }
         else
         {
@@ -2216,11 +2346,11 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
         loc_f = (n_byte)((loc_f + 256 + wander) & 255);
     }
 
-    /* a certain time after giving birth females become receptive again */
+    /** a certain time after giving birth females become receptive again */
     if ((TIME_IN_DAYS(local->date_of_conception) != 0) &&
             ((TIME_IN_DAYS(local->date_of_conception) + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
     {
-        /* zero value indicates ready to conceive */
+        /** zero value indicates ready to conceive */
         local->date_of_conception[0] = 0;
         local->date_of_conception[1] = 0;
     }
@@ -2234,10 +2364,10 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
             n_uint gestation_days = conception_days + GESTATION_DAYS;
             if (today_days > gestation_days)
             {
-                /* A mother could have multiple children, so only find the youngest */
+                /** A mother could have multiple children, so only find the youngest */
                 noble_being * being_child = being_find_child(sim,GET_G(local), CARRYING_DAYS);
 
-                /* Birth */
+                /** Birth */
                 if (being_child == 0L)
                 {
                     (void)being_init(sim, local, -1, 0);
@@ -2248,7 +2378,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
                 }
                 else
                 {
-                    /* mother carries the child */
+                    /** mother carries the child */
                     n_uint carrying_days = conception_days + GESTATION_DAYS + CARRYING_DAYS;
                     if (today_days < carrying_days)
                     {
@@ -2269,60 +2399,60 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
             }
             else
             {
-                /* Compute the mass of the unborn child.
+                /** Compute the mass of the unborn child.
                    This will be added to the mass of the mother */
                 child_mass = (today_days - conception_days) * BIRTH_MASS / GESTATION_DAYS;
             }
         }
 
-        /* child follows the mother */
+        /** child follows the mother */
         if ((genetics_compare(local->mother_new_genetics, 0L)) &&
                 ((birth_days + WEANING_DAYS) > today_days))
         {
             noble_being * mother = being_find_female(sim,local->mother_new_genetics);
             if (mother != 0L)
             {
-                /* orient towards the mother */
+                /** orient towards the mother */
                 n_vect2    mother_vector;
                 vect2_byte2(&mother_vector, (n_byte2 *)&GET_X(mother));
                 vect2_subtract(&mother_vector, &mother_vector, &location_vector);
 
                 loc_f = math_turn_towards(mother_vector.x, mother_vector.y, (n_byte)loc_f, 0);
 
-                /* suckling */
+                /** suckling */
                 if ((loc_state & BEING_STATE_HUNGRY) != 0)
                 {
                     n_int distance = vect2_dot(&mother_vector, &mother_vector, 1, 1);
                     if (distance < SUCKLING_MAX_SEPARATION)
                     {
-                        /* child moves from back to front */
+                        /** child moves from back to front */
                         if (mother->inventory[BODY_BACK] & INVENTORY_CHILD)
                         {
                             mother->inventory[BODY_BACK] -= INVENTORY_CHILD;
                         }
                         mother->inventory[BODY_FRONT] |= INVENTORY_CHILD;
                         GET_A(mother,ATTENTION_BODY) = BODY_FRONT;
-                        /* sucking causes loss of grooming */
+                        /** sucking causes loss of grooming */
                         if (mother->inventory[BODY_FRONT] & INVENTORY_GROOMED)
                         {
                             mother->inventory[BODY_FRONT] -= INVENTORY_GROOMED;
                         }
-                        /* starving mothers stop producing milk */
+                        /** starving mothers stop producing milk */
                         if (GET_E(mother)>BEING_STARVE)
                         {
-                            /* suckling induces relaxation */
+                            /** suckling induces relaxation */
 #ifdef METABOLISM_ON
                             metabolism_suckle(sim,local,mother);
 #endif
-                            /* mother loses energy */
+                            /** mother loses energy */
                             GET_E(mother) -= SUCKLING_ENERGY;
-                            /* child gains energy */
+                            /** child gains energy */
                             loc_e += SUCKLING_ENERGY;
-                            /* update indicators */
+                            /** update indicators */
                             GET_IN(sim).average_energy_input += SUCKLING_ENERGY;
-                            /* set child state to suckling */
+                            /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
-                            /* child acquires immunity from mother */
+                            /** child acquires immunity from mother */
                             being_immune_seed(mother, local);
                             episodic_store_memory(mother, EVENT_SUCKLING, AFFECT_SUCKLING, sim, GET_NAME_GENDER(sim,local), GET_NAME_FAMILY2(sim,local),0,0,0);
                             episodic_store_memory(local, EVENT_SUCKLE, AFFECT_SUCKLING, sim, GET_NAME_GENDER(sim,mother), GET_NAME_FAMILY2(sim,mother),0,0,0);
@@ -2333,7 +2463,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
         }
     }
 
-    /* no longer carrying the child */
+    /** no longer carrying the child */
     if ((carrying_child==0) && (local_is_female == SEX_FEMALE))
     {
         if (local->inventory[BODY_FRONT] & INVENTORY_CHILD)
@@ -2355,14 +2485,14 @@ void being_cycle_awake(noble_simulation * sim, n_uint location)
 		local->territory[territory_index].familiarity++;
 	}
 	else {
-		/* rescale familiarity values */
+		/** rescale familiarity values */
 		for (territory_index=0;territory_index<TERRITORY_AREA;territory_index++) {
 			local->territory[territory_index].familiarity>>=2;
 		}
 	}
 #endif
 
-    /* update biological drives */
+    /** update biological drives */
     drives_cycle(local, beings_in_vicinity, awake, sim);
 
     GET_F(local) = (n_byte)  loc_f;

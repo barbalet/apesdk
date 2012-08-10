@@ -531,9 +531,12 @@ enum social_action_type
 
 #define FISHING_PROB  (1<<8)
 
+/* converts a distance in metres to a squared range value */
+#define METRES_TO_APESPACE(m)   (m*m*80000)
+
 /* shouting */
 #define SHOUT_BYTES	 6
-#define SHOUT_RANGE      5000000
+#define SHOUT_RANGE      METRES_TO_APESPACE(50)
 #define SHOUT_REFRACTORY 10
 #define SHOUT_CONTENT    0
 #define SHOUT_HEARD      1
@@ -646,13 +649,13 @@ enum BRAINCODE_COMMANDS
 
 /* Distance within which social communication can take place.
    Note that this is a squared value */
-#define SOCIAL_RANGE            8000000
+#define SOCIAL_RANGE            METRES_TO_APESPACE(10)
 
 /* range for squabbling */
-#define SQUABBLE_RANGE          (SOCIAL_RANGE>>1)
+#define SQUABBLE_RANGE          METRES_TO_APESPACE(5)
 
 /* Distance within which mating can take place */
-#define MATING_RANGE            (SOCIAL_RANGE>>1)
+#define MATING_RANGE            METRES_TO_APESPACE(2)
 
 /* Tollerance within which social drive continues to increase */
 #define SOCIAL_TOLLERANCE       0
@@ -806,7 +809,7 @@ enum EPISODIC_EVENTS
 #define SUCKLING_ENERGY     2
 
 /* maximum separation between mother and child when suckling */
-#define SUCKLING_MAX_SEPARATION     (SOCIAL_RANGE>>1)
+#define SUCKLING_MAX_SEPARATION     METRES_TO_APESPACE(2)
 
 #ifdef PARASITES_ON
 
@@ -814,7 +817,7 @@ enum EPISODIC_EVENTS
     #define MAX_PARASITES(bei)   ((GENE_HAIR(bei->new_genetics)*255)>>4)
 
     /* maximum distance over which a parasite can hob from one being to another */
-    #define PARASITE_HOP_MAX_DISTANCE  (SOCIAL_RANGE>>1)
+    #define PARASITE_HOP_MAX_DISTANCE  METRES_TO_APESPACE(2)
 
     /* how much energy does a parasite cost the ape per time step */
     #define PARASITE_ENERGY_COST       1
@@ -827,7 +830,7 @@ enum EPISODIC_EVENTS
     #define PARASITE_BREED             10
 
     /* maximum separation between grooming apes */
-    #define GROOMING_MAX_SEPARATION    SOCIAL_RANGE
+    #define GROOMING_MAX_SEPARATION    METRES_TO_APESPACE(2)
 
     /* apes must be moving slowly to be able to groom */
     #define MAX_SPEED_WHILST_GROOMING  30
