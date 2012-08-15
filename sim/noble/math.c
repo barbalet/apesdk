@@ -94,7 +94,7 @@ void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int diviso
 }
 
 /**
- This produces the dot product of two vectors with the scalar multiplier 
+ This produces the dot product of two vectors with the scalar multiplier
  and divisor noted.
  @param initial The first vector
  @param second  The second vector
@@ -302,7 +302,7 @@ void math_patch(n_byte * local_map, n_byte * scratch,
 }
 
 /**
- This is used to produce a series of steps between two points useful for drawing 
+ This is used to produce a series of steps between two points useful for drawing
  a line or a line of sight test.
  @param sx The starting x location.
  @param sy The starting y location.
@@ -425,7 +425,7 @@ n_uint math_hash(n_byte * values, n_uint length)
 #define		NUMBER_TURN_TOWARDS_POINTS	8
 
 /**
- Calculates the direction location needs to turn to turn towards 
+ Calculates the direction location needs to turn to turn towards
  a vector.
  @param px The x vector direction.
  @param py The y vector direction.

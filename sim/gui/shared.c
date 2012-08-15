@@ -338,12 +338,12 @@ static n_int single_entry = 1;
 n_int shared_script_debug_ready(void)
 {
     n_int result = (scdebug_file_ready() != 0L);
-    
+
     if (single_entry == 0)
     {
         return 0;
     }
-    
+
     if (result)
     {
         single_entry = 0;
@@ -371,7 +371,7 @@ n_int shared_script_debug_ready(void)
 
 void shared_script_debug_handle(n_string cStringFileName)
 {
-    
+
 }
 
 #endif

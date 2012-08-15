@@ -122,34 +122,39 @@ void social_graph_link_name(
 
     if (local_social_graph==0) return;
 
-	switch(local_social_graph[social_graph_index].entity_type) {
-	case ENTITY_BEING: {
-		n_byte2 first_name_gender = local_social_graph[social_graph_index].first_name[met];
-		n_byte2 family_name = local_social_graph[social_graph_index].family_name[met];
+    switch(local_social_graph[social_graph_index].entity_type)
+    {
+    case ENTITY_BEING:
+    {
+        n_byte2 first_name_gender = local_social_graph[social_graph_index].first_name[met];
+        n_byte2 family_name = local_social_graph[social_graph_index].family_name[met];
 
-		being_name(((first_name_gender>>8)==SEX_FEMALE),
-				   (first_name_gender&255),
-				   UNPACK_FAMILY_FIRST_NAME(family_name),
-				   UNPACK_FAMILY_SECOND_NAME(family_name),
-				   name);
-		break;
-	}
-	case ENTITY_BEING_GROUP: {		
-		/* TODO */
-		io_string_write(name, "Group", 0);
-		break;
-	}
-	case ENTITY_OBJECT: {
-		/* TODO */
-		io_string_write(name, "Object", 0);
-		break;
-	}
-	case ENTITY_TERRITORY: {
-		/* TODO */
-		io_string_write(name, "Territory", 0);
-		break;
-	}
-	}
+        being_name(((first_name_gender>>8)==SEX_FEMALE),
+                   (first_name_gender&255),
+                   UNPACK_FAMILY_FIRST_NAME(family_name),
+                   UNPACK_FAMILY_SECOND_NAME(family_name),
+                   name);
+        break;
+    }
+    case ENTITY_BEING_GROUP:
+    {
+        /* TODO */
+        io_string_write(name, "Group", 0);
+        break;
+    }
+    case ENTITY_OBJECT:
+    {
+        /* TODO */
+        io_string_write(name, "Object", 0);
+        break;
+    }
+    case ENTITY_TERRITORY:
+    {
+        /* TODO */
+        io_string_write(name, "Territory", 0);
+        break;
+    }
+    }
 }
 
 /**
@@ -181,9 +186,9 @@ static void social_group_align_preferences(
     if (SOCIAL_GRAPH_ENTRY_EMPTY(social_graph,social_graph_index)) return;
 
     /** if you are friendly then make your preferences more similar,
-	otherwise make them more disimilar */
+    otherwise make them more disimilar */
     if (social_graph[social_graph_index].friend_foe >=
-	(n_byte)social_respect_mean(local_sim,meeter_being))
+            (n_byte)social_respect_mean(local_sim,meeter_being))
     {
         incr = 1;
     }
@@ -289,21 +294,21 @@ static n_int social_attraction_height(
                 meeter_being->learned_preference[PREFERENCE_MATE_HEIGHT_MALE+fem]);
 
     /** prefer taller or shorter,
-	< 8  don't care about height
-	12-15 prefer taller
-	8-11 prefer shorter*/
+    < 8  don't care about height
+    12-15 prefer taller
+    8-11 prefer shorter*/
     if (ppref >= 8)
     {
         if ((ppref>=12) && (GET_H(met_being) > GET_H(meeter_being)))
         {
-	    /** prefer taller */
+            /** prefer taller */
             return 1;
         }
         else
         {
             if ((ppref<12) && (GET_H(met_being) < GET_H(meeter_being)))
             {
-	        /** prefer shorter */
+                /** prefer shorter */
                 return 1;
             }
         }
@@ -325,7 +330,7 @@ static n_int social_attraction_frame(
     n_byte fem = (FIND_SEX(GET_I(meeter_being)) == SEX_FEMALE);
 
     /** Either don't care about frame or
-	favour mates who are fatter or thinner */
+    favour mates who are fatter or thinner */
 
     ppref = NATURE_NURTURE(
                 GENE_FRAME_PREFERENCE(GET_G(meeter_being)),
@@ -340,7 +345,7 @@ static n_int social_attraction_frame(
     {
         if ((ppref>11) && (GET_BODY_FAT(met_being) < GET_BODY_FAT(meeter_being)))
         {
-	    /** prefer thinner */
+            /** prefer thinner */
             return 1;
         }
     }
@@ -401,16 +406,16 @@ n_int get_social_link(
     {
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,i))
         {
-			if (graph[i].entity_type==ENTITY_BEING)
-			{
-				if (name==graph[i].first_name[BEING_MET])
-				{
-					if (family_name==graph[i].family_name[BEING_MET])
-					{
-						return i;
-					}
-				}
-			}
+            if (graph[i].entity_type==ENTITY_BEING)
+            {
+                if (name==graph[i].first_name[BEING_MET])
+                {
+                    if (family_name==graph[i].family_name[BEING_MET])
+                    {
+                        return i;
+                    }
+                }
+            }
         }
     }
     return -1;
@@ -439,20 +444,20 @@ static n_int get_stranger_link(
     {
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,i))
         {
-			/** not a family relationship */
-			if (!IS_FAMILY_MEMBER(graph,i))
+            /** not a family relationship */
+            if (!IS_FAMILY_MEMBER(graph,i))
             {
-				/** minimum familiarity */
+                /** minimum familiarity */
                 familiarity = graph[i].familiarity;
                 if (familiarity < stranger)
                 {
-					/** Forget old stuff in order to avoid
-						too much inflexibility */
+                    /** Forget old stuff in order to avoid
+                    	too much inflexibility */
                     time_since_met =
                         TIME_IN_DAYS(sim->land->date) -
                         TIME_IN_DAYS(graph[i].date);
                     if ((time_since_met >= SOCIAL_FORGET_DAYS) ||
-						(TIME_IN_DAYS(graph[i].date)==0))
+                            (TIME_IN_DAYS(graph[i].date)==0))
                     {
                         stranger = familiarity;
                         stranger_index = i;
@@ -462,7 +467,7 @@ static n_int get_stranger_link(
         }
         else
         {
-	    /** If this entry is empty */
+            /** If this entry is empty */
             stranger_index = i;
             break;
         }
@@ -508,7 +513,7 @@ static n_int social_meet(
     else
     {
         /** get the index of an existing social graph entry
-	   which can be overwritten */
+        which can be overwritten */
         index = get_stranger_link(meeter_being,met_being,sim);
     }
 
@@ -520,7 +525,7 @@ static n_int social_meet(
         /** if we havn't met previously */
         if (met==0)
         {
-			/** the prejudice function */
+            /** the prejudice function */
             friend_or_foe =
                 SOCIAL_RESPECT_NORMAL -
                 social_attraction_pheromone(meeter_being,met_being) +
@@ -533,16 +538,16 @@ static n_int social_meet(
                 +episodic_met_being_celebrity(sim,meeter_being,met_being)
 #endif
                 ;
-			/** Met another being */
-			graph[index].entity_type = ENTITY_BEING;
-			/** who did the meeting */
+            /** Met another being */
+            graph[index].entity_type = ENTITY_BEING;
+            /** who did the meeting */
             graph[index].first_name[BEING_MEETER] = meeter_name;
             graph[index].family_name[BEING_MEETER] = meeter_family_name;
-			/** who was met */
+            /** who was met */
             graph[index].first_name[BEING_MET] = met_name;
             graph[index].family_name[BEING_MET] = met_family_name;
 
-			/** initially no attraction */
+            /** initially no attraction */
             graph[index].attraction = 0;
 
             /** limit fof within range */
@@ -552,8 +557,8 @@ static n_int social_meet(
 
             /** initialise the braincode associated with this individual */
             being_init_braincode(sim,meeter_being,met_being,
-				 meeter_being->seed[0]+(met_being->seed[0]<<8),
-				 graph[index].friend_foe,BRAINCODE_EXTERNAL);
+                                 meeter_being->seed[0]+(met_being->seed[0]<<8),
+                                 graph[index].friend_foe,BRAINCODE_EXTERNAL);
         }
 
         /** relax with friends, be viglant with enemies */
@@ -574,10 +579,10 @@ static n_int social_meet(
         graph[index].location[0] = GET_X(meeter_being);
         graph[index].location[1] = GET_Y(meeter_being);
 
-		/** record the state of the met beting */
+        /** record the state of the met beting */
         graph[index].belief = met_being->state;
 
-		/** date of the meeting */
+        /** date of the meeting */
         graph[index].date[0] = sim->land->date[0];
         graph[index].date[1] = sim->land->date[1];
 
@@ -618,7 +623,7 @@ n_int social_get_relationship(
     {
         return -1;
     }
-    
+
     /** Search the social graph */
     for (index = 1; index < SOCIAL_SIZE; index++)
     {
@@ -656,12 +661,12 @@ n_int social_set_relationship(noble_being * meeter_being,
     {
         /** get the social graph */
         meeter_social_graph = GET_SOC(sim, meeter_being);
-        
+
         if (meeter_social_graph == 0L)
         {
             return -1;
         }
-        
+
         /** set the relationship type */
         meeter_social_graph[index].relationship = relationship;
     }
@@ -718,12 +723,12 @@ n_byte social_groom(
     /** hairy beings can carry more parasites */
     max = (n_byte)MAX_PARASITES(meeter_being);
     /** acquire parasites from the environment with some low probability,
-	and existing parasites multiply */
+    and existing parasites multiply */
     if (meeter_being->parasites < max)
     {
         paraprob = math_random(meeter_being->seed);
         if (paraprob < PARASITE_ENVIRONMENT +
-	    (PARASITE_BREED*meeter_being->parasites))
+                (PARASITE_BREED*meeter_being->parasites))
         {
             meeter_being->parasites++;
         }
@@ -739,7 +744,7 @@ n_byte social_groom(
         max = (n_byte)MAX_PARASITES(met_being);
         /** parasite transmission - e.g. flea hop */
         if ((met_being->parasites < max) &&
-	    (met_being->parasites < meeter_being->parasites))
+                (met_being->parasites < meeter_being->parasites))
         {
             met_being->parasites++;
             meeter_being->parasites--;
@@ -750,8 +755,8 @@ n_byte social_groom(
     /** social grooming removes parasites and alters
        social status relationships */
     if ((awake != FULLY_ASLEEP) &&
-	(distance < GROOMING_MAX_SEPARATION) &&
-	(meeter_being->speed < MAX_SPEED_WHILST_GROOMING))
+            (distance < GROOMING_MAX_SEPARATION) &&
+            (meeter_being->speed < MAX_SPEED_WHILST_GROOMING))
     {
         n_int  groomprob = math_random(meeter_being->seed) & 16383;
         if (familiarity > 16) familiarity=16;
@@ -761,14 +766,14 @@ n_byte social_groom(
 
         /** grooming preference */
         gpref = NATURE_NURTURE(
-	    GENE_GROOM(GET_G(meeter_being)),
-	    meeter_being->learned_preference[PREFERENCE_GROOM_MALE+fem]);
+                    GENE_GROOM(GET_G(meeter_being)),
+                    meeter_being->learned_preference[PREFERENCE_GROOM_MALE+fem]);
 
         /** individuals which are familiar tend to groom more often */
         if (groomprob <
                 GROOMING_PROB + (gpref*(1+familiarity)*GROOMING_PROB_HONOR*(1+met_being->honor)))
         {
-	    /** transmit pathogens via touch */
+            /** transmit pathogens via touch */
             being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_TOUCH);
             being_immune_transmit(met_being, meeter_being, PATHOGEN_TRANSMISSION_TOUCH);
 
@@ -870,7 +875,7 @@ n_byte2 social_squabble(
     n_int victor_index, vanquished_index, punchloc;
     /** battle with rival families */
     if ((GET_FAMILY_FIRST_NAME(sim,meeter_being) != GET_FAMILY_FIRST_NAME(sim,met_being)) &&
-	(GET_FAMILY_SECOND_NAME(sim,meeter_being) != GET_FAMILY_SECOND_NAME(sim,met_being)))
+            (GET_FAMILY_SECOND_NAME(sim,meeter_being) != GET_FAMILY_SECOND_NAME(sim,met_being)))
     {
         GET_F(meeter_being) =
             math_turn_towards(delta_x, delta_y, (n_byte)GET_F(meeter_being), 0);
@@ -883,12 +888,12 @@ n_byte2 social_squabble(
         if (math_random(meeter_being->seed) < agro*4096 + agro*meeter_being->honor*10)
         {
 #endif
-	    /** who is the strongest ? */
+            /** who is the strongest ? */
             victor = meeter_being;
             vanquished = met_being;
 
             if (((math_random(meeter_being->seed)&7)*GET_E(meeter_being)) <
-		((math_random(meeter_being->seed)&7)*GET_E(met_being)))
+                    ((math_random(meeter_being->seed)&7)*GET_E(met_being)))
             {
                 victor = met_being;
                 vanquished = meeter_being;
@@ -928,7 +933,7 @@ n_byte2 social_squabble(
             punchloc = math_random(victor->seed) % INVENTORY_SIZE;
             if (distance > SQUABBLE_SHOW_FORCE_DISTANCE)
             {
-	        /** show of force */
+                /** show of force */
                 vanquished->inventory[punchloc] = 0;
                 GET_E(victor) -= SQUABBLE_ENERGY_SHOWFORCE;
                 GET_E(vanquished) -= SQUABBLE_ENERGY_SHOWFORCE;
@@ -937,7 +942,7 @@ n_byte2 social_squabble(
             }
             else
             {
-	        /** attack */
+                /** attack */
                 vanquished->inventory[punchloc] = INVENTORY_WOUND;
                 GET_E(victor) -= SQUABBLE_ENERGY_ATTACK;
                 GET_E(vanquished) -= SQUABBLE_ENERGY_ATTACK;
@@ -945,7 +950,7 @@ n_byte2 social_squabble(
 #ifdef PARASITES_ON
                 if (victor->honor < vanquished->honor)
                 {
-		    /** swap social status */
+                    /** swap social status */
                     temp_hon = victor->honor;
                     victor->honor = vanquished->honor;
                     vanquished->honor = temp_hon;
@@ -1098,7 +1103,7 @@ n_int social_mate(
     if (!meeter_social_graph) return -1;
 
     if ((meeter_being->drives[DRIVE_SEX] > THRESHOLD_SEEK_MATE) &&
-	(met_being->drives[DRIVE_SEX] > THRESHOLD_SEEK_MATE))
+            (met_being->drives[DRIVE_SEX] > THRESHOLD_SEEK_MATE))
     {
 #ifdef PARASITES_ON
         /** mating is probabilistic, with a bias towards
@@ -1109,7 +1114,7 @@ n_int social_mate(
                  GENE_STATUS_PREFERENCE(GET_G(meeter_being))*MATING_PROB))
         {
 #endif
-	    /** attractiveness based upon various criteria */
+            /** attractiveness based upon various criteria */
             attraction = 1 +
                          social_attraction_pheromone(meeter_being,met_being) +
                          social_attraction_pigmentation(meeter_being,met_being) +
@@ -1127,7 +1132,7 @@ n_int social_mate(
                 attraction++;
                 if (distance < MATING_RANGE)
                 {
-		    /** transmit pathogens */
+                    /** transmit pathogens */
                     being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_SEX);
                     being_immune_transmit(met_being, meeter_being, PATHOGEN_TRANSMISSION_SEX);
                     /** check opposite sexes */
@@ -1230,14 +1235,14 @@ static void social_chat_territory(
         {
             if (met_being->territory[idx].name > 0)
             {
-				meeter_being->territory[idx].name =
-					met_being->territory[idx].name;
+                meeter_being->territory[idx].name =
+                    met_being->territory[idx].name;
             }
         }
         else
         {
             if ((met_being->honor < meeter_being->honor) &&
-				(meeter_being->territory[idx].name > 0))
+                    (meeter_being->territory[idx].name > 0))
             {
                 met_being->territory[idx].name =
                     meeter_being->territory[idx].name;
@@ -1299,10 +1304,10 @@ n_int social_chat(
             GET_NAME_GENDER(sim,meeter_being),GET_NAME_FAMILY2(sim,meeter_being),
             GET_NAME_GENDER(sim,met_being),GET_NAME_FAMILY2(sim,met_being), 0);
         /** pick one of the individuals from their graph */
-	idx=-1;
+        idx=-1;
         if (meeter_being->goal[0]==GOAL_MATE)
         {
-	    /** ask about an individual we're searching for */
+            /** ask about an individual we're searching for */
             for (i=1; i<SOCIAL_SIZE; i++)
             {
                 if (!SOCIAL_GRAPH_ENTRY_EMPTY(met_graph,i))
@@ -1316,109 +1321,109 @@ n_int social_chat(
                 }
             }
         }
-	if (idx == -1)
-	{
-	    /** what type of family relationship is currently being attended to */
-	    relationship_index = GET_A(meeter_being,ATTENTION_RELATIONSHIP);
-	    if (relationship_index>0)
-	    {
-	        idx = social_get_relationship(meeter_being,relationship_index,sim);
-	    }
-	    else
-	    {	  
-	        /** choose randomly */
-	        idx = 1+(math_random(meeter_being->seed)%(SOCIAL_SIZE-1));
-	    }
-	}
+        if (idx == -1)
+        {
+            /** what type of family relationship is currently being attended to */
+            relationship_index = GET_A(meeter_being,ATTENTION_RELATIONSHIP);
+            if (relationship_index>0)
+            {
+                idx = social_get_relationship(meeter_being,relationship_index,sim);
+            }
+            else
+            {
+                /** choose randomly */
+                idx = 1+(math_random(meeter_being->seed)%(SOCIAL_SIZE-1));
+            }
+        }
 
-	if (idx > -1)
-	{
-	    /** have I already met this individual? */
-	    name = met_graph[idx].first_name[BEING_MET];
-	    family = met_graph[idx].family_name[BEING_MET];
-	    if (!((name==0) && (family==0)))
-	    {
-	        for (i=1; i<SOCIAL_SIZE; i++)
-		{
-		    if (!SOCIAL_GRAPH_ENTRY_EMPTY(meeter_graph,i))
-		    {
-		        if ((meeter_graph[i].first_name[BEING_MET]==name) &&
-			    (meeter_graph[i].family_name[BEING_MET]==family))
-			{
-			    break;
-			}
-		    }
-		}
+        if (idx > -1)
+        {
+            /** have I already met this individual? */
+            name = met_graph[idx].first_name[BEING_MET];
+            family = met_graph[idx].family_name[BEING_MET];
+            if (!((name==0) && (family==0)))
+            {
+                for (i=1; i<SOCIAL_SIZE; i++)
+                {
+                    if (!SOCIAL_GRAPH_ENTRY_EMPTY(meeter_graph,i))
+                    {
+                        if ((meeter_graph[i].first_name[BEING_MET]==name) &&
+                                (meeter_graph[i].family_name[BEING_MET]==family))
+                        {
+                            break;
+                        }
+                    }
+                }
 
-		if (i<SOCIAL_SIZE)
-		{
-		    /** was already met */
-		    if (met_being->honor > meeter_being->honor)
-		    {
-		        meeter_graph[i].friend_foe++;
-		    }
-		    if (met_being->honor < meeter_being->honor)
-		    {
-		        meeter_graph[i].friend_foe--;
-		    }
-		    if (meeter_graph[i].familiarity < 65535) meeter_graph[i].familiarity++;
+                if (i<SOCIAL_SIZE)
+                {
+                    /** was already met */
+                    if (met_being->honor > meeter_being->honor)
+                    {
+                        meeter_graph[i].friend_foe++;
+                    }
+                    if (met_being->honor < meeter_being->honor)
+                    {
+                        meeter_graph[i].friend_foe--;
+                    }
+                    if (meeter_graph[i].familiarity < 65535) meeter_graph[i].familiarity++;
 
-		    /** update this being's belief */
-		    if (TIME_IN_DAYS(met_graph[idx].date) > TIME_IN_DAYS(meeter_graph[i].date))
-		    {
-		        /** belief about location */
-		        meeter_graph[i].location[0] = met_graph[idx].location[0];
-			meeter_graph[i].location[1] = met_graph[idx].location[1];
-			/** belief about state */
-			meeter_graph[i].belief = met_graph[idx].belief;
-			meeter_graph[i].date[0] = met_graph[idx].date[0];
-			meeter_graph[i].date[1] = met_graph[idx].date[1];
-		    }
-		    speaking |= BEING_STATE_SPEAKING;
-		}
-		else
-		{
-		    /** if we have never met then add to my graph as someone I've
-			"heard of". This is like a prior expectation or second
-			hand information. 
-			The least familiar relationship is replaced */
-		    replace = get_stranger_link(meeter_being,met_being,sim);
-		    if (replace > -1)
-		    {
-		        link0 = (unsigned char*)&meeter_graph[replace];
-			link1 = (unsigned char*)&met_graph[idx];
-			io_copy(link1,link0, sizeof(social_link));
-			meeter_graph[replace].attraction = 0;
-			speaking |= BEING_STATE_SPEAKING;
+                    /** update this being's belief */
+                    if (TIME_IN_DAYS(met_graph[idx].date) > TIME_IN_DAYS(meeter_graph[i].date))
+                    {
+                        /** belief about location */
+                        meeter_graph[i].location[0] = met_graph[idx].location[0];
+                        meeter_graph[i].location[1] = met_graph[idx].location[1];
+                        /** belief about state */
+                        meeter_graph[i].belief = met_graph[idx].belief;
+                        meeter_graph[i].date[0] = met_graph[idx].date[0];
+                        meeter_graph[i].date[1] = met_graph[idx].date[1];
+                    }
+                    speaking |= BEING_STATE_SPEAKING;
+                }
+                else
+                {
+                    /** if we have never met then add to my graph as someone I've
+                    "heard of". This is like a prior expectation or second
+                    hand information.
+                    The least familiar relationship is replaced */
+                    replace = get_stranger_link(meeter_being,met_being,sim);
+                    if (replace > -1)
+                    {
+                        link0 = (unsigned char*)&meeter_graph[replace];
+                        link1 = (unsigned char*)&met_graph[idx];
+                        io_copy(link1,link0, sizeof(social_link));
+                        meeter_graph[replace].attraction = 0;
+                        speaking |= BEING_STATE_SPEAKING;
 
-			/** if this is a family member of the previously unknown
-			    being then make sure that the family member type is
-			    set to OTHER - i.e. not my family someone else's */
-			if (IS_FAMILY_MEMBER(met_graph,idx))
-			{
-			    meeter_graph[replace].relationship =
-			      meeter_graph[replace].relationship+(OTHER_MOTHER-RELATIONSHIP_MOTHER);
-			}
+                        /** if this is a family member of the previously unknown
+                            being then make sure that the family member type is
+                            set to OTHER - i.e. not my family someone else's */
+                        if (IS_FAMILY_MEMBER(met_graph,idx))
+                        {
+                            meeter_graph[replace].relationship =
+                                meeter_graph[replace].relationship+(OTHER_MOTHER-RELATIONSHIP_MOTHER);
+                        }
 
-			/** initialise the braincode */
-			being_init_braincode(
-			    sim,meeter_being,met_being,
-			    meeter_being->seed[1]+(met_being->seed[1]<<8),
-			    met_graph[idx].friend_foe,
-			    BRAINCODE_EXTERNAL);
-		    }
-		}
-	    }
-	}
+                        /** initialise the braincode */
+                        being_init_braincode(
+                            sim,meeter_being,met_being,
+                            meeter_being->seed[1]+(met_being->seed[1]<<8),
+                            met_graph[idx].friend_foe,
+                            BRAINCODE_EXTERNAL);
+                    }
+                }
+            }
+        }
     }
 #endif
 
 #ifdef BRAINCODE_ON
     brain_dialogue(
         sim,1,meeter_being,met_being,
-	GET_BRAINCODE_EXTERNAL(sim,meeter_being),
-	GET_BRAINCODE_EXTERNAL(sim,met_being),
-	being_index,0);
+        GET_BRAINCODE_EXTERNAL(sim,meeter_being),
+        GET_BRAINCODE_EXTERNAL(sim,met_being),
+        being_index,0);
 #endif
 #ifdef EPISODIC_ON
     social_group_align_preferences(
@@ -1445,19 +1450,19 @@ n_int social_goals(
 {
     n_int delta_x=0, delta_y=0, distsqr;
     n_byte2 goal;
-	n_vect2 delta_vector,location_vector;
+    n_vect2 delta_vector,location_vector;
     goal = local->goal[0];
     switch(goal)
     {
-    /** move towards a location */
+        /** move towards a location */
     case GOAL_LOCATION:
     {
         if ((local->state & BEING_STATE_SWIMMING) == 0)
         {
-			vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
-			vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
-			vect2_subtract(&delta_vector, &location_vector, &delta_vector);
-			loc_f = math_turn_towards(delta_vector.x, delta_vector.y, (n_byte)loc_f, 2);
+            vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
+            vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+            vect2_subtract(&delta_vector, &location_vector, &delta_vector);
+            loc_f = math_turn_towards(delta_vector.x, delta_vector.y, (n_byte)loc_f, 2);
         }
         break;
     }
@@ -1468,23 +1473,25 @@ n_int social_goals(
     {
         distsqr = delta_x*delta_x + delta_y*delta_y;
         if ((distsqr < GOAL_RADIUS) ||
-			((local->state & BEING_STATE_SWIMMING) != 0))
+                ((local->state & BEING_STATE_SWIMMING) != 0))
         {
-			/** destination reached - goal cancelled */
+            /** destination reached - goal cancelled */
             local->goal[0] = GOAL_NONE;
             /** clear any script override */
             local->script_overrides -= OVERRIDE_GOAL;
         }
     }
 
-	/** decrement the goal counter */
-	if (local->goal[3] > 0) {
-		local->goal[3]--;
-	}
-	else {
-		/** timed out */
-		local->goal[0] = GOAL_NONE;
-	}
+    /** decrement the goal counter */
+    if (local->goal[3] > 0)
+    {
+        local->goal[3]--;
+    }
+    else
+    {
+        /** timed out */
+        local->goal[0] = GOAL_NONE;
+    }
 
     return loc_f;
 }
@@ -1501,7 +1508,7 @@ void sim_social(noble_simulation * local)
     while ( loop < local->num )
     {
         noble_being *local_being = &(local->beings[loop]);
-		n_byte2 respect_mean = social_respect_mean(local,local_being);
+        n_byte2 respect_mean = social_respect_mean(local,local_being);
         n_uint social_loop = 0;
         n_vect2 location, sum_delta = {0,0};
         n_int   familiar_being_count = 0;

@@ -104,98 +104,98 @@ enum SECONDARY_APESCRIPT
 {
     VARIABLE_VECT_X = (VARIABLE_IF + 1),
     VARIABLE_VECT_Y,
-    
+
     VARIABLE_RANDOM,
     VARIABLE_WATER_LEVEL,
-    
+
     VARIABLE_BIOLOGY_AREA,
     VARIABLE_BIOLOGY_HEIGHT,
-    
+
     VARIABLE_BIOLOGY_WATER,
     VARIABLE_BIOLOGY_MOVING_SUN,
-    
+
     VARIABLE_BIOLOGY_TOTAL_SUN,
     VARIABLE_BIOLOGY_SALT,
     VARIABLE_BIOLOGY_BUSH,
-    
+
     VARIABLE_BIOLOGY_GRASS,
     VARIABLE_BIOLOGY_TREE,
-    
+
     VARIABLE_BIOLOGY_SEAWEED,
     VARIABLE_BIOLOGY_ROCKPOOL,
     VARIABLE_BIOLOGY_BEACH,
-    
+
     VARIABLE_BIOLOGY_INSECT,
     VARIABLE_BIOLOGY_MOUSE,
-    
+
     VARIABLE_BIOLOGY_PARROT,
     VARIABLE_BIOLOGY_LIZARD,
-    
+
     VARIABLE_BIOLOGY_EAGLE,
     VARIABLE_BIOLOGY_OUTPUT,
-    
+
     VARIABLE_HUNGRY,
     VARIABLE_LOCATION_Z,
-    
+
     VARIABLE_TEST_Z,
     VARIABLE_IS_VISIBLE,
-    
+
     VARIABLE_TIME,
     VARIABLE_DATE,
-    
+
     VARIABLE_CURRENT_BEING,
     VARIABLE_NUMBER_BEINGS,
-    
+
     VARIABLE_LOCATION_X,
     VARIABLE_LOCATION_Y,
-    
+
     VARIABLE_STATE,
     VARIABLE_LISTEN,
-    
+
     VARIABLE_ID_NUMBER,
     VARIABLE_DATE_OF_BIRTH,
-    
+
     VARIABLE_WEATHER,  /* Everything after this value can be both set and get */
     VARIABLE_BRAIN_VALUE, /* This is a special case, all the remainder are stored as variables */
-    
+
     VARIABLE_VECT_ANGLE,
     VARIABLE_FACING,
-    
+
     VARIABLE_SPEED,
     VARIABLE_ENERGY,
-    
+
     VARIABLE_HONOR,
     VARIABLE_PARASITES,
     VARIABLE_HEIGHT,
-    
+
     VARIABLE_FIRST_NAME,
     VARIABLE_FAMILY_NAME_ONE,
     VARIABLE_FAMILY_NAME_TWO,
-    
+
     VARIABLE_GOAL_TYPE,
     VARIABLE_GOAL_X,
     VARIABLE_GOAL_Y,
-    
+
     VARIABLE_DRIVE_HUNGER,
     VARIABLE_DRIVE_SOCIAL,
     VARIABLE_DRIVE_FATIGUE,
     VARIABLE_DRIVE_SEX,
-    
+
     VARIABLE_SPEAK,
-    
+
     VARIABLE_BRAIN_X,
     VARIABLE_BRAIN_Y,
-    
+
     VARIABLE_BRAIN_Z,
     VARIABLE_SELECT_BEING,
-    
+
     VARIABLE_TEST_X,
     VARIABLE_TEST_Y,
-    
+
     VARIABLE_BIOLOGY_OPERATOR,
-    
+
     VARIABLE_POSTURE,
-    
+
     VARIABLE_PREFERENCE_MATE_HEIGHT_MALE,
     VARIABLE_PREFERENCE_MATE_HEIGHT_FEMALE,
     VARIABLE_PREFERENCE_MATE_PIGMENTATION_MALE,
@@ -209,18 +209,18 @@ enum SECONDARY_APESCRIPT
     VARIABLE_PREFERENCE_ANECDOTE_EVENT_MUTATION,
     VARIABLE_PREFERENCE_ANECDOTE_AFFECT_MUTATION,
     VARIABLE_PREFERENCE_CHAT,
-    
+
     VARIABLE_ATTENTION_ACTOR_INDEX,
     VARIABLE_ATTENTION_EPISODE_INDEX,
     VARIABLE_ATTENTION_BODY_INDEX,
-    
+
     VARIABLE_SHOUT_CONTENT,
     VARIABLE_SHOUT_HEARD,
     VARIABLE_SHOUT_CTR,
     VARIABLE_SHOUT_VOLUME,
     VARIABLE_SHOUT_FAMILY0,
     VARIABLE_SHOUT_FAMILY1,
-    
+
     VARIABLE_SOCIAL_GRAPH_LOCATION_X,
     VARIABLE_SOCIAL_GRAPH_LOCATION_Y,
     VARIABLE_SOCIAL_GRAPH_TIME,
@@ -232,7 +232,7 @@ enum SECONDARY_APESCRIPT
     VARIABLE_MEMORY_FIRST_NAME,
     VARIABLE_MEMORY_FAMILY_NAME_ONE,
     VARIABLE_MEMORY_FAMILY_NAME_TWO,
-    
+
     VARIABLE_MEMORY_LOCATION_X,
     VARIABLE_MEMORY_LOCATION_Y,
     VARIABLE_MEMORY_TIME,
@@ -246,7 +246,7 @@ enum SECONDARY_APESCRIPT
     VARIABLE_MEMORY_FAMILY_NAME_TWO1,
     VARIABLE_MEMORY_EVENT,
     VARIABLE_MEMORY_AFFECT,
-    
+
     VARIABLE_BEING /* This is a special case, it is the location where the main code starts */
 };
 
@@ -384,6 +384,10 @@ enum
     METABOLISM_GHRELIN,
     METABOLISM_PROLACTIN,
     METABOLISM_MILK,
+    METABOLISM_HEART_RATE,
+    METABOLISM_BREATHING_RATE,
+    METABOLISM_THERMOREGULATOR,
+    METABOLISM_LUNG_CAPACITY,
     METABOLISM_SIZE
 };
 
@@ -494,7 +498,7 @@ enum attention_type
     ATTENTION_EPISODE,
     ATTENTION_BODY,
     ATTENTION_RELATIONSHIP,
-	ATTENTION_TERRITORY,
+    ATTENTION_TERRITORY,
     ATTENTION_SIZE
 };
 
@@ -692,6 +696,12 @@ enum BRAINCODE_COMMANDS
 /* returns height in real units (mm) */
 #define GET_BEING_HEIGHT(bei) (bei->height*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
 
+/* Minimum lung capacity in cubic centimetres */
+#define MIN_LUNG_CAPACITY(bei) (GET_BEING_HEIGHT(bei)*4000/BEING_MAX_HEIGHT_MM)
+
+/* Maximum lung capacity in cubic centimetres */
+#define MAX_LUNG_CAPACITY(bei) (GET_BEING_HEIGHT(bei)*6000/BEING_MAX_HEIGHT_MM)
+
 /* the amount of growth for a given energy intake
    Note that if AGE_OF_MATURITY is changed then this may
    also need to be changed to have a similar adult growth */
@@ -813,37 +823,37 @@ enum EPISODIC_EVENTS
 
 #ifdef PARASITES_ON
 
-    /* maximum number of parasites in the range 0-255 */
-    #define MAX_PARASITES(bei)   ((GENE_HAIR(bei->new_genetics)*255)>>4)
+/* maximum number of parasites in the range 0-255 */
+#define MAX_PARASITES(bei)   ((GENE_HAIR(bei->new_genetics)*255)>>4)
 
-    /* maximum distance over which a parasite can hob from one being to another */
-    #define PARASITE_HOP_MAX_DISTANCE  METRES_TO_APESPACE(2)
+/* maximum distance over which a parasite can hob from one being to another */
+#define PARASITE_HOP_MAX_DISTANCE  METRES_TO_APESPACE(2)
 
-    /* how much energy does a parasite cost the ape per time step */
-    #define PARASITE_ENERGY_COST       1
+/* how much energy does a parasite cost the ape per time step */
+#define PARASITE_ENERGY_COST       1
 
-    /* probability of acquiring a parasite from the environment */
-    #define PARASITE_ENVIRONMENT       5000
+/* probability of acquiring a parasite from the environment */
+#define PARASITE_ENVIRONMENT       5000
 
-    /* multiplying factor used to increase the probability
-       if already carrying parasites */
-    #define PARASITE_BREED             10
+/* multiplying factor used to increase the probability
+   if already carrying parasites */
+#define PARASITE_BREED             10
 
-    /* maximum separation between grooming apes */
-    #define GROOMING_MAX_SEPARATION    METRES_TO_APESPACE(2)
+/* maximum separation between grooming apes */
+#define GROOMING_MAX_SEPARATION    METRES_TO_APESPACE(2)
 
-    /* apes must be moving slowly to be able to groom */
-    #define MAX_SPEED_WHILST_GROOMING  30
+/* apes must be moving slowly to be able to groom */
+#define MAX_SPEED_WHILST_GROOMING  30
 
-    /* the probability of social grooming */
-    #define GROOMING_PROB              10000
+/* the probability of social grooming */
+#define GROOMING_PROB              10000
 
-    /* multiplier used to increase the probability of
-       grooming a higher status individual */
-    #define GROOMING_PROB_HONOR        10
+/* multiplier used to increase the probability of
+   grooming a higher status individual */
+#define GROOMING_PROB_HONOR        10
 
-    /* number of parasites removed at each grooming session */
-    #define PARASITES_REMOVED          2
+/* number of parasites removed at each grooming session */
+#define PARASITES_REMOVED          2
 
 #endif
 
@@ -1064,11 +1074,12 @@ typedef n_c_uint n_genetics;
 #define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(GET_G(bei)),bei->learned_preference[PREFERENCE_SOCIAL]))>>1)
 
 /* Types of entities which it's possible to have a disposition towards */
-enum {
-	ENTITY_BEING=0,
-	ENTITY_BEING_GROUP,
-	ENTITY_OBJECT,
-	ENTITY_TERRITORY
+enum
+{
+    ENTITY_BEING=0,
+    ENTITY_BEING_GROUP,
+    ENTITY_OBJECT,
+    ENTITY_TERRITORY
 };
 
 /*! @struct
@@ -1147,7 +1158,7 @@ typedef struct
 typedef	struct
 {
     n_byte name;
-	n_byte2 familiarity;
+    n_byte2 familiarity;
 }
 noble_place;
 
@@ -1379,9 +1390,6 @@ typedef struct
 #endif
 #ifdef METABOLISM_ON
     noble_vessel vessel[VASCULAR_SIZE];
-    n_byte2 heart_rate_hz; /* Hz x 1000 */
-    n_byte2 breathing_rate_hz; /* Hz x 1000 */
-    n_byte2 thermoregulator;
     n_byte2 metabolism[METABOLISM_SIZE];
 #endif
 #ifdef BRAINCODE_ON
@@ -1411,7 +1419,7 @@ typedef struct
     n_weather * weather;
     noble_being   * beings;
 
-    
+
     n_uint	        num;
     n_uint	        max;
 
@@ -1515,6 +1523,9 @@ noble_simulation;
 
 typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local_being, n_string result);
 
+typedef void (line_braincode)(n_byte * pointer, n_int line);
+
+void console_populate_braincode(noble_simulation * local_sim, line_braincode function);
 
 void *    sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size);
 void      sim_cycle(void);
@@ -1604,7 +1615,7 @@ const static noble_console_command control_commands[] =
 
     {&io_quit,               "quit",           "",                     "Quits the console"},
     {&io_quit,               "exit",           "",                     ""},
-    {&io_quit,               "close",          "",                     ""},    
+    {&io_quit,               "close",          "",                     ""},
 #else
     {&cle_load,              "load",           "(filename)",           "Load a simulation file"},
     {&cle_script,            "script",         "(filename)",           "Load apescript file"},
@@ -1616,9 +1627,9 @@ const static noble_console_command control_commands[] =
     {&longterm_quit,         "exit",           "",                     ""},
     {&longterm_quit,         "close",          "",                     ""},
     {&cle_reset,             "reset",          "",                     "Reset the simulation"},
-    {&cle_reset,             "clear"           "",                     ""},    
+    {&cle_reset,             "clear"           "",                     ""},
 #endif
-    
+
     {&console_file,          "file",           "[(component)]",        "Information on the file format"},
     {&console_run,           "run",            "(days|time format)",   "Simulate for a given number of days"},
     {&console_step,          "step",           "",                     "Run for a single logging interval"},

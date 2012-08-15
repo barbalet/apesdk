@@ -55,13 +55,13 @@ void body_genome_random(noble_simulation * sim, noble_being * local, n_byte2 * l
 void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mother, n_byte2 * local_random);
 
 n_int food_eat(
-               n_land * local_land,
-               n_weather * local_weather,
-               n_int loc_x,
-               n_int loc_y,
-               n_int az,
-               n_byte * food_type,
-               noble_being * local_being);
+    n_land * local_land,
+    n_weather * local_weather,
+    n_int loc_x,
+    n_int loc_y,
+    n_int az,
+    n_byte * food_type,
+    noble_being * local_being);
 
 n_int food_absorption(n_byte food_type, noble_being * local);
 
@@ -83,10 +83,10 @@ void metabolism_suckle(noble_simulation * sim,noble_being * child, noble_being *
 
 
 void social_action(
-                   noble_simulation * sim,
-                   noble_being * meeter_being,
-                   noble_being * met_being,
-                   n_byte action);
+    noble_simulation * sim,
+    noble_being * meeter_being,
+    noble_being * met_being,
+    n_byte action);
 n_int social_network(noble_being * meeter_being, noble_being * met_being, n_int distance, noble_simulation *sim);
 n_int social_set_relationship(noble_being * meeter_being,n_byte relationship,noble_being * met_being,noble_simulation * sim);
 n_int social_get_relationship(noble_being * meeter_being,
@@ -100,25 +100,25 @@ n_int social_goals(noble_being * local, n_int loc_f);
 n_int get_social_link(noble_being * meeter_being, noble_being * met_being, noble_simulation * sim);
 
 n_int episodic_met_being_celebrity(
-                                   noble_simulation * local_sim,
-                                   noble_being * meeter_being,
-                                   noble_being * met_being);
+    noble_simulation * local_sim,
+    noble_being * meeter_being,
+    noble_being * met_being);
 void episodic_store_memory(
-                           noble_being * local, n_byte event, n_int affect,
-                           noble_simulation * local_sim,
-                           n_byte2 name1, n_byte2 family1,
-                           n_byte2 name2, n_byte2 family2, n_byte2 arg);
+    noble_being * local, n_byte event, n_int affect,
+    noble_simulation * local_sim,
+    n_byte2 name1, n_byte2 family1,
+    n_byte2 name2, n_byte2 family2, n_byte2 arg);
 n_byte episodic_intention(
-                          noble_simulation * local_sim,
-                          noble_being * local,
-                          n_int episode_index,
-                          n_byte2 mins_ahead,
-                          n_byte args);
+    noble_simulation * local_sim,
+    noble_being * local,
+    n_int episode_index,
+    n_byte2 mins_ahead,
+    n_byte args);
 void episodic_cycle(noble_simulation * local_sim, noble_being * local);
 n_byte episodic_anecdote(
-                         noble_simulation * local_sim,
-                         noble_being * local,
-                         noble_being * other);
+    noble_simulation * local_sim,
+    noble_being * local,
+    noble_being * other);
 
 void being_init_braincode(noble_simulation * sim,
                           noble_being * local,

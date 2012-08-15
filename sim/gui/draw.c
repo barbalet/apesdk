@@ -235,7 +235,8 @@ static void draw_undraw()
     {
         *undraw_location[undraw_count] = undraw_color[undraw_count];
         undraw_count--;
-    }while(undraw_count > -1);
+    }
+    while(undraw_count > -1);
     undraw_count = 0;
 }
 
@@ -259,7 +260,7 @@ static n_byte pixel_color8_hires(n_int px, n_int py, void * information)
     undraw_location[undraw_count] = location;
     undraw_color[undraw_count] = location[0];
     undraw_count++;
-    
+
     if (undraw_count > UNDRAW_MAX)
     {
         (void)SHOW_ERROR("Erase count outside limit");
@@ -343,7 +344,7 @@ void draw_about(n_string platform)
         io_erase(from_point, 256);
         loop++;
     }
-    
+
     draw_string((n_byte *)SHORT_VERSION_NAME, 8 + 128, 12 + 12+ 128, &local_draw);
 
 
@@ -372,7 +373,7 @@ void draw_about(n_string platform)
 
 #define	ledfir(x,y,c)	if(((val>> c )&1)) (*local_draw)((x + off_x + offset),((y + off_y)),local_info)
 
-/** 
+/**
  This is used to produce letter LED style letters through the generic
  draw function specified.
  @param str The string to be drawn.
@@ -631,7 +632,7 @@ static void draw_terrain(noble_simulation * local_sim)
         {
             return;
         }
-        
+
         if (flatval < 128)   /* if the central map point is underwater,*/
         {
             flatval = 128;   /*    put it on water level */
@@ -718,7 +719,7 @@ static void	draw_meters(noble_simulation * local_sim)
     {
         return;
     }
-    
+
     local_kind.pixel_draw = local_draw;
     local_kind.information = local_info;
 
@@ -1120,8 +1121,8 @@ static void draw_weather(noble_simulation * local_sim)
 static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
 {
     n_byte  cycles_per_sec[20] = {' ', ' ', ' ', ' ', ' ', 'X', '.', 'X', ' ',
-        'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
-    };
+                                  'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
+                                 };
     n_uint	lp = 0, division = 1000000;
     while (lp < 5)
     {
@@ -1135,7 +1136,7 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
             {
                 cycles_per_sec[lp] = (n_byte)('0');
             }
-            
+
         }
         division /= 10;
         lp++;
@@ -1169,13 +1170,13 @@ static void draw_brain(noble_simulation *local_sim)
         n_int	      a12 =  (new_sd[(turn_y) & 255] / 105);
         n_int	      a21 = ((new_sd[(turn_z + 64) & 255] * BRAIN_MAGI) / NEW_SD_MULTIPLE);
         n_int	      a23 = ((new_sd[(turn_z) & 255] * BRAIN_MAGI) / NEW_SD_MULTIPLE);
-        
+
         n_int	      a11 = -((a32 * a23) >> 8);
         n_int	      a13 =  ((a32 * a21) >> 8);
         n_int	      a31 =  ((a12 * a23) >> 8);
         n_int	      a33 = -((a12 * a21) >> 8);
         n_int	      act_x2a, term_1a, term_2a;
-        
+
         n_byte	    * brainptr = local;
         n_byte	    * obrainptr = &local[ BRAIN_OFFSET(32 * 32 * 32) ];
 
@@ -1183,7 +1184,7 @@ static void draw_brain(noble_simulation *local_sim)
         local_mono.information = draw_pointer(NUM_TERRAIN);
 
         draw_brain_cyles_per_second(local_sim->delta_cycles, &local_mono);
-        
+
         if (local == 0L)
         {
             return;
@@ -1263,13 +1264,13 @@ n_int draw_error(n_string error_text)
     SC_DEBUG_STRING(" ]");
     SC_DEBUG_NEWLINE;
     SC_DEBUG_OFF;
-    
+
     if (io_command_line_execution())
     {
         io_console_out(error_text);
         return -1;
     }
-    
+
     if(number_errors == MAX_NUMBER_ERRORS)
     {
         error_text = " ** Maximum errors reached **";
@@ -1467,47 +1468,12 @@ static void draw_errors(noble_simulation * local_sim)
     }
 }
 
-static void draw_braincode(noble_simulation * local_sim)
+static void draw_line_braincode(n_byte * pointer, n_int line)
 {
-    
-    if (local_sim->select != NO_BEINGS_FOUND)
-    {
-    
-        noble_being * local_being = &(local_sim->beings[local_sim->select]);
-        n_byte *internal_bc = GET_BRAINCODE_INTERNAL(local_sim, local_being);
-        n_byte *external_bc = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
-        n_join			local_mono;
-        n_int           loop = 0;
-        local_mono.pixel_draw  = &pixel_grey;
-        local_mono.information = draw_pointer(NUM_TERRAIN);
-        
-        while(loop < 22)
-        {
-            n_string_block command_information;
-            n_string_block first_internal;
-            n_string_block first_external;
-            
-            brain_three_byte_command((n_byte *)first_internal, &internal_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
-            brain_three_byte_command((n_byte *)first_external, &external_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
-            
-            if (loop == 21)
-            {
-                sprintf(command_information, "%s                   %s", first_external, first_internal);
-            }
-            else
-            {
-                n_string_block second_internal;
-                n_string_block second_external;
-                
-                brain_three_byte_command((n_byte *)second_internal, &internal_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
-                brain_three_byte_command((n_byte *)second_external, &external_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
-                sprintf(command_information, "%s  %s   %s  %s",first_external, second_external,first_internal,second_internal);
-            }
-            draw_string((n_byte *)command_information, 4, (loop*12) + 246, &local_mono);
-            loop++;
-        }
-    }
-
+    n_join	local_mono;
+    local_mono.pixel_draw  = &pixel_grey;
+    local_mono.information = draw_pointer(NUM_TERRAIN);
+    draw_string(pointer, 4, (line*12) + 246, &local_mono);
 }
 
 void  draw_cycle(noble_simulation * local_sim, n_byte mod)
@@ -1529,7 +1495,7 @@ void  draw_cycle(noble_simulation * local_sim, n_byte mod)
         }
         if (toggle_braincode)
         {
-            draw_braincode(local_sim);
+            console_populate_braincode(local_sim, draw_line_braincode);
         }
     }
     else

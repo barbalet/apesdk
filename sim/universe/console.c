@@ -38,18 +38,18 @@
 /*NOBLEMAKE DEL=""*/
 
 #ifndef	_WIN32
-    #include "../noble/noble.h"
+#include "../noble/noble.h"
 #else
-    #include "..\noble\noble.h"
+#include "..\noble\noble.h"
 #endif
 
 #include "universe.h"
 #include "universe_internal.h"
 
 #ifndef	_WIN32
-    #include "../entity/entity.h"
+#include "../entity/entity.h"
 #else
-    #include "..\entity\entity.h"
+#include "..\entity\entity.h"
 #endif
 
 #include <stdio.h>
@@ -96,7 +96,7 @@ static void console_warning(void)
  *
  * @param ptr pointer to noble_simulation object
  * @param response command parameters
- * @param output_function 
+ * @param output_function
  */
 n_int console_being(void * ptr, n_string response, n_console_output output_function)
 {
@@ -167,57 +167,57 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
 
         if (found==1)
         {
-	    n_int relationship_index;
-	    char relationship_str1[64],relationship_str2[64];
-	    char met_being_name[64];
-	    char result_str[64];
+            n_int relationship_index;
+            char relationship_str1[64],relationship_str2[64];
+            char met_being_name[64];
+            char result_str[64];
 
-	    /** Print the name and familiarity */
-	    social_graph_link_name(local_sim, local_being, i, BEING_MET, met_being_name);
+            /** Print the name and familiarity */
+            social_graph_link_name(local_sim, local_being, i, BEING_MET, met_being_name);
 
-	    /** type of relationship */
+            /** type of relationship */
 
-	    relationship_index = local_social_graph[i].relationship;
-	    sprintf(relationship_str2," ");
+            relationship_index = local_social_graph[i].relationship;
+            sprintf(relationship_str2," ");
 
-	    if (relationship_index > RELATIONSHIP_SELF)
-	    {
-	        being_relationship_description(relationship_index,relationship_str1);
+            if (relationship_index > RELATIONSHIP_SELF)
+            {
+                being_relationship_description(relationship_index,relationship_str1);
 
-	        if (IS_FAMILY_MEMBER(local_social_graph,i))
-		{
-		    sprintf(relationship_str2," (%s)",relationship_str1);
-		}
-		else
-		{
-		    char meeter_being_name[64];
-		    sprintf(meeter_being_name," ");
-		    social_graph_link_name(local_sim, local_being, i, BEING_MEETER, meeter_being_name);
-		    sprintf(relationship_str2," (%s of %s)",relationship_str1,meeter_being_name);
-		}
-	    }
+                if (IS_FAMILY_MEMBER(local_social_graph,i))
+                {
+                    sprintf(relationship_str2," (%s)",relationship_str1);
+                }
+                else
+                {
+                    char meeter_being_name[64];
+                    sprintf(meeter_being_name," ");
+                    social_graph_link_name(local_sim, local_being, i, BEING_MEETER, meeter_being_name);
+                    sprintf(relationship_str2," (%s of %s)",relationship_str1,meeter_being_name);
+                }
+            }
 
-	    if (i != GET_A(local_being,ATTENTION_ACTOR))
-	    {
-	        /** Not the current focus of attention */
-	        sprintf(result_str,"  %05d  %s%s\n",(int)local_social_graph[i].familiarity,met_being_name,relationship_str2);
-	    }
-	    else
-	    {
-	        /** The current focus of attention */
-	        sprintf(result_str,"  %05d [%s]%s\n",(int)local_social_graph[i].familiarity,met_being_name,relationship_str2);
-	    }
-	    /** Write to the final result string */
-	    io_string_write(result, result_str, &watch_string_length);
+            if (i != GET_A(local_being,ATTENTION_ACTOR))
+            {
+                /** Not the current focus of attention */
+                sprintf(result_str,"  %05d  %s%s\n",(int)local_social_graph[i].familiarity,met_being_name,relationship_str2);
+            }
+            else
+            {
+                /** The current focus of attention */
+                sprintf(result_str,"  %05d [%s]%s\n",(int)local_social_graph[i].familiarity,met_being_name,relationship_str2);
+            }
+            /** Write to the final result string */
+            io_string_write(result, result_str, &watch_string_length);
         }
     }
 }
 
 /**
- * gets the number of mins/hours/days/months/years 
+ * gets the number of mins/hours/days/months/years
  * @param str text to be processed
- * @param number 
- * @param interval 
+ * @param number
+ * @param interval
  * @return number of mins/hours/days/months/years
  */
 n_int get_time_interval(n_string str, n_int * number, n_int * interval)
@@ -415,7 +415,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
         {
             if (index[i*2] > index[j*2])
             {
-	        /** swap */
+                /** swap */
                 temp = index[i*2];
                 index[i*2] = index[j*2];
                 index[j*2] = temp;
@@ -434,7 +434,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
         {
             if (i+j < max3)
             {
-	        /** get the being */
+                /** get the being */
                 local_being = &local_sim->beings[index[(i+j)*2+1]];
 
                 /** get the name of the being */
@@ -442,7 +442,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
                            GET_NAME(local_sim,local_being), GET_FAMILY_FIRST_NAME(local_sim,local_being),
                            GET_FAMILY_SECOND_NAME(local_sim,local_being), name);
                 sprintf(beingstr, "%s%s",beingstr ,(n_string)name);
-                
+
                 if (j < columns-1)
                 {
                     n_int length = io_length(name, STRING_BLOCK_SIZE);
@@ -466,10 +466,58 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
             }
         }
     }
-    
+
 
     io_free(index);
     return 0;
+}
+
+
+
+void console_populate_braincode(noble_simulation * local_sim, line_braincode function)
+{
+    if (local_sim->select != NO_BEINGS_FOUND)
+    {
+
+        noble_being * local_being = &(local_sim->beings[local_sim->select]);
+        n_byte *internal_bc = GET_BRAINCODE_INTERNAL(local_sim, local_being);
+        n_byte *external_bc = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
+        n_int           loop = 0;
+
+        n_string_block  initial_information;
+
+        sprintf(initial_information, "EXT                                                         INT");
+
+        (*function)((n_byte *)initial_information, -1);
+
+        while(loop < 22)
+        {
+            n_string_block command_information;
+            n_string_block first_internal;
+            n_string_block first_external;
+
+            brain_three_byte_command((n_byte *)first_internal, &internal_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
+            brain_three_byte_command((n_byte *)first_external, &external_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
+
+            if (loop == 21)
+            {
+                sprintf(command_information, "%s                   %s", first_external, first_internal);
+            }
+            else
+            {
+                n_string_block second_internal;
+                n_string_block second_external;
+
+                brain_three_byte_command((n_byte *)second_internal, &internal_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
+                brain_three_byte_command((n_byte *)second_external, &external_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
+                sprintf(command_information, "%s  %s   %s  %s",first_external, second_external,first_internal,second_internal);
+            }
+
+            (*function)((n_byte *)command_information, loop);
+            loop++;
+        }
+    }
+
 }
 
 /**
@@ -486,12 +534,12 @@ static void show_braincode(void * ptr, noble_being * local_being, n_string resul
 
     n_int i, j, col, offset, program_pointer, instructions_per_column;
     n_byte * code;
-	n_string_block braincode_str;
-	n_byte values[BRAINCODE_BYTES_PER_INSTRUCTION];
-	const n_int spacing_between_columns = 5;
-	
-	if (columns<1) columns=1;
-	instructions_per_column = (BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)/columns;
+    n_string_block braincode_str;
+    n_byte values[BRAINCODE_BYTES_PER_INSTRUCTION];
+    const n_int spacing_between_columns = 5;
+
+    if (columns<1) columns=1;
+    instructions_per_column = (BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)/columns;
 
     if (outer==0)
     {
@@ -502,34 +550,34 @@ static void show_braincode(void * ptr, noble_being * local_being, n_string resul
         code = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
     }
 
-	for (i = 0; i < instructions_per_column; i++)
-	{
-		for (col = 0; col < columns; col++)
-		{
-			offset = i + (col*instructions_per_column);
-			program_pointer = offset + (i*BRAINCODE_BYTES_PER_INSTRUCTION);
+    for (i = 0; i < instructions_per_column; i++)
+    {
+        for (col = 0; col < columns; col++)
+        {
+            offset = i + (col*instructions_per_column);
+            program_pointer = offset + (i*BRAINCODE_BYTES_PER_INSTRUCTION);
 
-			values[0] = BRAINCODE_INSTRUCTION(code, program_pointer);
-			values[1] = BRAINCODE_VALUE(code, program_pointer, 0);
-			values[2] = BRAINCODE_VALUE(code, program_pointer, 1);
-			brain_three_byte_command((n_byte*)braincode_str, values);
-			for (j = 0; j < io_length(braincode_str,STRING_BLOCK_SIZE); j++)
-			{
-				result[watch_string_length++] = braincode_str[j];
-			}
-			if (col<columns-1)
-			{
-				for (j = 0; j < spacing_between_columns; j++)
-				{
-					result[watch_string_length++] = ' ';
-				}
-			}
-			else
-			{
-				result[watch_string_length++] = '\n';
-			}
-		}
-	}
+            values[0] = BRAINCODE_INSTRUCTION(code, program_pointer);
+            values[1] = BRAINCODE_VALUE(code, program_pointer, 0);
+            values[2] = BRAINCODE_VALUE(code, program_pointer, 1);
+            brain_three_byte_command((n_byte*)braincode_str, values);
+            for (j = 0; j < io_length(braincode_str,STRING_BLOCK_SIZE); j++)
+            {
+                result[watch_string_length++] = braincode_str[j];
+            }
+            if (col<columns-1)
+            {
+                for (j = 0; j < spacing_between_columns; j++)
+                {
+                    result[watch_string_length++] = ' ';
+                }
+            }
+            else
+            {
+                result[watch_string_length++] = '\n';
+            }
+        }
+    }
     result[watch_string_length++] = '\n';
 }
 
@@ -597,7 +645,7 @@ static void watch_vascular(void *ptr, n_string beingname, noble_being * local_be
     const n_int col[] = {24,32,41,53};
 
     io_string_write(result, "\nHeart rate: ", &watch_string_length);
-    sprintf(str,"%d bpm  %.1f Hz\n",local_being->heart_rate_hz*60/1000,local_being->heart_rate_hz/1000.0f);
+    sprintf(str,"%d bpm  %.1f Hz\n",GET_MT(local_being,METABOLISM_HEART_RATE)*60/1000,GET_MT(local_being,METABOLISM_HEART_RATE)/1000.0f);
     io_string_write(result, str, &watch_string_length);
 
     io_string_write(result, "\nVessel                  Radius    Flow   Pressure    Temp C\n", &watch_string_length);
@@ -670,18 +718,21 @@ static void watch_respiration(void *ptr, n_string beingname, noble_being * local
     n_string_block str;
 
     io_string_write(result, "\nBreathing rate: ", &watch_string_length);
-    sprintf(str,"%d Vf   %.1f Hz\n",local_being->breathing_rate_hz*60/1000,local_being->breathing_rate_hz/1000.0f);
+    sprintf(str,"%d Vf   %.1f Hz\n",GET_MT(local_being,METABOLISM_BREATHING_RATE)*60/1000,GET_MT(local_being,METABOLISM_BREATHING_RATE)/1000.0f);
+    io_string_write(result, str, &watch_string_length);
+    io_string_write(result, "Lung Capacity:  ", &watch_string_length);
+    sprintf(str,"%d cm^3\n",GET_MT(local_being,METABOLISM_LUNG_CAPACITY));
     io_string_write(result, str, &watch_string_length);
     sprintf(str,"%s %05u   %s %05u\n",
-			metabolism_description(METABOLISM_OXYGEN),
+            metabolism_description(METABOLISM_OXYGEN),
             GET_MT(local_being,METABOLISM_OXYGEN),
-			metabolism_description(METABOLISM_CO2),
+            metabolism_description(METABOLISM_CO2),
             GET_MT(local_being,METABOLISM_CO2));
     io_string_write(result, str, &watch_string_length);
     sprintf(str,"%s %05u   %s %05u\n",
-			metabolism_description(METABOLISM_GLUCOSE),
+            metabolism_description(METABOLISM_GLUCOSE),
             GET_MT(local_being,METABOLISM_GLUCOSE),
-			metabolism_description(METABOLISM_PYRUVATE),
+            metabolism_description(METABOLISM_PYRUVATE),
             GET_MT(local_being,METABOLISM_PYRUVATE));
     io_string_write(result, str, &watch_string_length);
 #endif
@@ -701,91 +752,99 @@ static void watch_metabolism(void *ptr, n_string beingname, noble_being * local_
 
     io_string_write(result, "\nStomach:\n", &watch_string_length);
     sprintf(str,"  %s:   %d\t%s: %d\n  %s:  %d\t%s:     %d\n  %s:   %d\t%s:   %d\n  %s:  %d\t%s: %d\n",
-			metabolism_description(METABOLISM_WATER),
+            metabolism_description(METABOLISM_WATER),
             GET_MT(local_being,METABOLISM_WATER),
-			metabolism_description(METABOLISM_PROTEIN),
+            metabolism_description(METABOLISM_PROTEIN),
             GET_MT(local_being,METABOLISM_PROTEIN),
-			metabolism_description(METABOLISM_STARCH),
+            metabolism_description(METABOLISM_STARCH),
             GET_MT(local_being,METABOLISM_STARCH),
-			metabolism_description(METABOLISM_FAT),
+            metabolism_description(METABOLISM_FAT),
             GET_MT(local_being,METABOLISM_FAT),
-			metabolism_description(METABOLISM_SUGAR),
+            metabolism_description(METABOLISM_SUGAR),
             GET_MT(local_being,METABOLISM_SUGAR),
-			metabolism_description(METABOLISM_BILE),
+            metabolism_description(METABOLISM_BILE),
             GET_MT(local_being,METABOLISM_BILE),
-			metabolism_description(METABOLISM_LEPTIN),
+            metabolism_description(METABOLISM_LEPTIN),
             GET_MT(local_being,METABOLISM_LEPTIN),
-			metabolism_description(METABOLISM_GHRELIN),
+            metabolism_description(METABOLISM_GHRELIN),
             GET_MT(local_being,METABOLISM_GHRELIN));
     io_string_write(result, str, &watch_string_length);
 
     io_string_write(result, "Liver:\n", &watch_string_length);
     sprintf(str,"  %s: %d\n  %s:  %d\n  %s: %d\n  %s: %d\n  %s: %d\n",
-			metabolism_description(METABOLISM_GLUCOGEN),
+            metabolism_description(METABOLISM_GLUCOGEN),
             GET_MT(local_being,METABOLISM_GLUCOGEN),
-			metabolism_description(METABOLISM_GLYCOGEN),
+            metabolism_description(METABOLISM_GLYCOGEN),
             GET_MT(local_being,METABOLISM_GLYCOGEN),
-			metabolism_description(METABOLISM_ADRENALIN),
+            metabolism_description(METABOLISM_ADRENALIN),
             GET_MT(local_being,METABOLISM_ADRENALIN),
-			metabolism_description(METABOLISM_AMMONIA),
+            metabolism_description(METABOLISM_AMMONIA),
             GET_MT(local_being,METABOLISM_AMMONIA),
-			metabolism_description(METABOLISM_LACTATE),
+            metabolism_description(METABOLISM_LACTATE),
             GET_MT(local_being,METABOLISM_LACTATE));
     io_string_write(result, str, &watch_string_length);
 
     io_string_write(result, "Kidneys:\n", &watch_string_length);
     sprintf(str,"  %s: %d\n",
-			metabolism_description(METABOLISM_UREA),
+            metabolism_description(METABOLISM_UREA),
             GET_MT(local_being,METABOLISM_UREA));
     io_string_write(result, str, &watch_string_length);
 
     io_string_write(result, "Lungs:\n", &watch_string_length);
     sprintf(str,"  %s: %d\n  %s:    %d\n",
-			metabolism_description(METABOLISM_OXYGEN),
+            metabolism_description(METABOLISM_OXYGEN),
             GET_MT(local_being,METABOLISM_OXYGEN),
-			metabolism_description(METABOLISM_CO2),
+            metabolism_description(METABOLISM_CO2),
             GET_MT(local_being,METABOLISM_CO2));
     io_string_write(result, str, &watch_string_length);
 
     io_string_write(result, "Pancreas:\n", &watch_string_length);
     sprintf(str,"  %s: %d\n  %s: %d\n  %s: %d\n",
-			metabolism_description(METABOLISM_FATTY_ACIDS),
+            metabolism_description(METABOLISM_FATTY_ACIDS),
             GET_MT(local_being,METABOLISM_FATTY_ACIDS),
-			metabolism_description(METABOLISM_TRIGLYCERIDE),
+            metabolism_description(METABOLISM_TRIGLYCERIDE),
             GET_MT(local_being,METABOLISM_TRIGLYCERIDE),
-			metabolism_description(METABOLISM_INSULIN),
+            metabolism_description(METABOLISM_INSULIN),
             GET_MT(local_being,METABOLISM_INSULIN));
     io_string_write(result, str, &watch_string_length);
 
     sprintf(str,"%s: %d\n",
-			metabolism_description(METABOLISM_ADIPOSE),
+            metabolism_description(METABOLISM_ADIPOSE),
             GET_MT(local_being,METABOLISM_ADIPOSE));
     io_string_write(result, str, &watch_string_length);
 
     io_string_write(result, "Tissue:\n", &watch_string_length);
     sprintf(str,"  %s: %d   %s: %d\n  %s: %d   %s: %d\n  %s: %d   %s: %d\n  %s: %d   %s: %d\n  %s: %d\n  %s: %d\n",
-			metabolism_description(METABOLISM_PROLACTIN),
+            metabolism_description(METABOLISM_PROLACTIN),
             GET_MT(local_being,METABOLISM_PROLACTIN),
-			metabolism_description(METABOLISM_MILK),
+            metabolism_description(METABOLISM_MILK),
             GET_MT(local_being,METABOLISM_MILK),
-			metabolism_description(METABOLISM_AMINO_ACIDS),
+            metabolism_description(METABOLISM_AMINO_ACIDS),
             GET_MT(local_being,METABOLISM_AMINO_ACIDS),
-			metabolism_description(METABOLISM_MUSCLE),
+            metabolism_description(METABOLISM_MUSCLE),
             GET_MT(local_being,METABOLISM_MUSCLE),
-			metabolism_description(METABOLISM_GLUCOSE),
+            metabolism_description(METABOLISM_GLUCOSE),
             GET_MT(local_being,METABOLISM_GLUCOSE),
-			metabolism_description(METABOLISM_PYRUVATE),
+            metabolism_description(METABOLISM_PYRUVATE),
             GET_MT(local_being,METABOLISM_PYRUVATE),
-			metabolism_description(METABOLISM_ADP),
+            metabolism_description(METABOLISM_ADP),
             GET_MT(local_being,METABOLISM_ADP),
-			metabolism_description(METABOLISM_ATP),
+            metabolism_description(METABOLISM_ATP),
             GET_MT(local_being,METABOLISM_ATP),
-			metabolism_description(METABOLISM_ENERGY),
+            metabolism_description(METABOLISM_ENERGY),
             GET_MT(local_being,METABOLISM_ENERGY),
-			metabolism_description(METABOLISM_HEAT),
+            metabolism_description(METABOLISM_HEAT),
             GET_MT(local_being,METABOLISM_HEAT));
     io_string_write(result, str, &watch_string_length);
 #endif
+}
+
+static n_string static_result;
+
+void watch_line_braincode(n_byte * string, n_int line)
+{
+    io_string_write(static_result, (n_string)string, &watch_string_length);
+    io_string_write(static_result, "\n", &watch_string_length);
 }
 
 /**
@@ -798,17 +857,19 @@ static void watch_metabolism(void *ptr, n_string beingname, noble_being * local_
 static void watch_braincode(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
     n_int i;
-
     io_string_write(result, "\nRegisters:\n", &watch_string_length);
     for (i=0; i<BRAINCODE_PSPACE_REGISTERS; i++)
     {
         result[watch_string_length++]=(char)(65+(local_being->braincode_register[i]%60));
     }
     result[watch_string_length++]='\n';
-    io_string_write(result, "\nInner:\n", &watch_string_length);
-    show_braincode(ptr, local_being, result, 0, BRAINCODE_DISPLAY_COLUMNS);
-    io_string_write(result, "\nOuter:\n", &watch_string_length);
-    show_braincode(ptr, local_being, result, 1, BRAINCODE_DISPLAY_COLUMNS);
+    result[watch_string_length++]='\n';
+
+    static_result = result;
+
+    console_populate_braincode(ptr,watch_line_braincode);
+    result[watch_string_length++]='\n';
+
 }
 
 /**
@@ -960,10 +1021,10 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
         (void)SHOW_ERROR("No being for stats");
         return;
     }
-    
+
 #ifdef METABOLISM_ON
-    heart_rate = local_being->heart_rate_hz*60/1000;
-    breathing_rate = local_being->breathing_rate_hz*60/1000;
+    heart_rate = GET_MT(local_being,METABOLISM_HEART_RATE)*60/1000;
+    breathing_rate = GET_MT(local_being,METABOLISM_BREATHING_RATE)*60/1000;
 #endif
 
     being_state_description(local_being->state, status);
@@ -1033,7 +1094,7 @@ static n_int console_duplicate(void * ptr, n_string response, n_console_output o
             return 0;
         }
         being_set_select_name(local_sim, response);
-        
+
         watch_function(ptr, being_get_select_name(local_sim), local_being, (n_string)beingstr);
         beingstr[watch_string_length] = 0;
         output_function(beingstr);
@@ -1291,7 +1352,7 @@ void watch_being(void * ptr, n_console_output output_function)
         {
         case WATCH_ALL:
         {
-	    watch_stats(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_stats(ptr, being_get_select_name(local_sim), local_being, beingstr);
             break;
         }
         case WATCH_SOCIAL_GRAPH:
@@ -1331,16 +1392,17 @@ void watch_being(void * ptr, n_console_output output_function)
         }
         case WATCH_APPEARANCE:
         {
-	    watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
             break;
         }
         }
 
         beingstr[watch_string_length] = 0;
 
-        if (watch_type!=WATCH_NONE) {
-	    output_function(beingstr);
-	}
+        if (watch_type!=WATCH_NONE)
+        {
+            output_function(beingstr);
+        }
     }
 }
 
@@ -1405,7 +1467,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
         {
             output_function("Stopped watching being states");
         }
-	watch_type=WATCH_NONE;
+        watch_type=WATCH_NONE;
         return 0;
     }
 
@@ -1603,11 +1665,11 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
             seed[1] = local_sim->land->genetics[1];
 
             math_random3(seed);
-            
+
             console_warning();
-            
+
             sim_init(KIND_NEW_SIMULATION, (seed[0]<<16)|seed[1], MAP_AREA, 0);
-            
+
             indicator_index++;
             local_sim->indicators_logging = indicator_index;
         }
@@ -1639,12 +1701,12 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                     n_uint i = 0;
                     n_string_block  output;
                     n_uint end_point = (number * interval_steps[interval]);
-                    n_uint temp_save_interval_steps = save_interval_steps;                    
+                    n_uint temp_save_interval_steps = save_interval_steps;
                     save_interval_steps = 1;
                     sprintf(output, "Running for %d %s", (int)number, interval_description[interval]);
 
                     output_function(output);
-                    
+
                     while(i < end_point)
                     {
                         console_step(ptr, 0, output_function);
@@ -1706,20 +1768,20 @@ static n_byte get_response_mode(n_string response)
     {
         /** females */
         if (io_find(response,0,length,"fem",3)>-1)
-	{
-	    return 1;
-	}
-	/** males */
+        {
+            return 1;
+        }
+        /** males */
         if (io_find(response,0,length,"male",4)>-1)
-	{
-	    return 2;
-	}
-	/** juveniles */
+        {
+            return 2;
+        }
+        /** juveniles */
         if ((io_find(response,0,length,"juv",3)>-1) ||
-	    (io_find(response,0,length,"chil",4)>-1))
-	{
-	    return 3;
-	}
+                (io_find(response,0,length,"chil",4)>-1))
+        {
+            return 3;
+        }
     }
     return 0;
 }
@@ -1729,16 +1791,16 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
 {
     n_file file_opened;
     n_string_block output_string;
-    
+
     if (response==0) return 0;
-    
+
     console_file_exists = 0;
 
-        
+
     file_opened.data = sim_fileout(&(file_opened.location));
-    
+
     file_opened.size = file_opened.location;
-    
+
     io_disk_write(&file_opened, response);
 
     console_file_exists = 1;
@@ -1753,29 +1815,29 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
 n_int console_open(void * ptr, n_string response, n_console_output output_function)
 {
     if (response==0) return 0;
-    
+
     console_file_exists = 0;
-    
+
     if (io_disk_check(response)!=0)
     {
         n_file * file_opened = io_file_new();
         n_string_block output_string;
-        
+
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
             io_file_free(file_opened);
             return 0;
         }
-        
+
         if (sim_filein(file_opened->data, file_opened->location) != 0)
         {
             io_file_free(file_opened);
             return 0;
         }
-        
+
         console_warning();
         sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
-        
+
         io_file_free(file_opened);
         console_file_exists = 1;
         sprintf(console_file_name,"%s",response);
@@ -1789,12 +1851,12 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
 n_int console_script(void * ptr, n_string response, n_console_output output_function)
 {
     if (response==0) return 0;
-        
+
     if (io_disk_check(response)!=0)
     {
         n_file * file_opened = io_file_new();
         n_string_block output_string;
-        
+
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
             io_file_free(file_opened);
@@ -1806,7 +1868,7 @@ n_int console_script(void * ptr, n_string response, n_console_output output_func
             io_file_free(file_opened);
             return 0;
         }
-        
+
         io_file_free(file_opened);
         sprintf(output_string, "ApeScript file %s open\n",response);
         output_function(output_string);
@@ -1853,46 +1915,46 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
             {
                 b = &local_sim->beings[j];
 
-		if (b->honor >= max_honor)
-		{
+                if (b->honor >= max_honor)
+                {
 
-		    passed=0;
-		    switch(mode)
-		    {
-		    case 0:
-		    {
-		        passed=1;
-			break;
-		    }
-		    case 1:
-		    {
-		        if (FIND_SEX(GET_I(b)) == SEX_FEMALE) passed=1;
-			break;
-		    }
-		    case 2:
-		    {
-		        if (FIND_SEX(GET_I(b)) != SEX_FEMALE) passed=1;
-			break;
-		    }
-		    case 3:
-		    {
-		        if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
-			break;
-		    }
-		    }
+                    passed=0;
+                    switch(mode)
+                    {
+                    case 0:
+                    {
+                        passed=1;
+                        break;
+                    }
+                    case 1:
+                    {
+                        if (FIND_SEX(GET_I(b)) == SEX_FEMALE) passed=1;
+                        break;
+                    }
+                    case 2:
+                    {
+                        if (FIND_SEX(GET_I(b)) != SEX_FEMALE) passed=1;
+                        break;
+                    }
+                    case 3:
+                    {
+                        if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
+                        break;
+                    }
+                    }
 
-		    if (passed!=0)
-		    {
-		        winner = j;
-			max_honor = b->honor;
-		    }
+                    if (passed!=0)
+                    {
+                        winner = j;
+                        max_honor = b->honor;
+                    }
 
-		}
+                }
 
             }
         }
 
-	if (winner==-1) break;
+        if (winner==-1) break;
 
         eliminated[winner] = 1;
         b = &local_sim->beings[winner];
@@ -1981,90 +2043,90 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
         /** for all memories */
         for (e = 0; e < EPISODIC_SIZE; e++)
         {
-	    /** non-empty slot */
+            /** non-empty slot */
             if (local_episodic[e].event > 0)
             {
-	        /** j = 0 is the being having the memory
-                 j = 1 is the being who is the subject of the memory */
+                /** j = 0 is the being having the memory
+                     j = 1 is the being who is the subject of the memory */
                 for (j = BEING_MEETER; j <= BEING_MET; j++)
                 {
-		    /** name should be non-zero */
+                    /** name should be non-zero */
                     if (local_episodic[e].first_name[j] +
-			local_episodic[e].family_name[j] > 0)
+                            local_episodic[e].family_name[j] > 0)
                     {
 
-		        passed=0;
-			switch(mode)
-			{
-			case 0:
-			{
-			    passed=1;
-			    break;
-			}
-			case 1:
-			{
-			    if ((local_episodic[e].first_name[j]>>8) == SEX_FEMALE) passed=1;
-			    break;
-			}
-			case 2:
-			{
-			    if ((local_episodic[e].first_name[j]>>8) != SEX_FEMALE) passed=1;
-			    break;
-			}
-			case 3:
-			{
-			    noble_being * b=0L;
-			    char name[32];
-			    being_name((n_byte)((local_episodic[e].first_name[j]>>8)==SEX_FEMALE),
-				       (n_int)(local_episodic[e].first_name[j]&255),
-				       (n_byte)UNPACK_FAMILY_FIRST_NAME(local_episodic[e].family_name[j]),
-				       (n_byte)UNPACK_FAMILY_SECOND_NAME(local_episodic[e].family_name[j]),
-				       name);
-			    b = being_from_name(local_sim, name);
-			    if (b!=0L)
-			    {
-			        if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
-			    }
-			    break;
-			}
-			}
+                        passed=0;
+                        switch(mode)
+                        {
+                        case 0:
+                        {
+                            passed=1;
+                            break;
+                        }
+                        case 1:
+                        {
+                            if ((local_episodic[e].first_name[j]>>8) == SEX_FEMALE) passed=1;
+                            break;
+                        }
+                        case 2:
+                        {
+                            if ((local_episodic[e].first_name[j]>>8) != SEX_FEMALE) passed=1;
+                            break;
+                        }
+                        case 3:
+                        {
+                            noble_being * b=0L;
+                            char name[32];
+                            being_name((n_byte)((local_episodic[e].first_name[j]>>8)==SEX_FEMALE),
+                                       (n_int)(local_episodic[e].first_name[j]&255),
+                                       (n_byte)UNPACK_FAMILY_FIRST_NAME(local_episodic[e].family_name[j]),
+                                       (n_byte)UNPACK_FAMILY_SECOND_NAME(local_episodic[e].family_name[j]),
+                                       name);
+                            b = being_from_name(local_sim, name);
+                            if (b!=0L)
+                            {
+                                if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
+                            }
+                            break;
+                        }
+                        }
 
-			if (passed != 0)
-			{
-			    /** Avoid memories about yourself, since we're interested
-			       in gossip about other beings */
-			    if ((local_episodic[e].first_name[j]!=GET_NAME_GENDER(local_sim,local_being)) ||
-                                (local_episodic[e].family_name[j]!=GET_NAME_FAMILY2(local_sim,local_being)))
-			    {
-			        if (((j == BEING_MET) &&
-				     (local_episodic[e].event != EVENT_SEEK_MATE) &&
-				     (local_episodic[e].event != EVENT_EAT)) ||
-                                    (j == BEING_MEETER))
-				{
-				    /** add this being to the list, or increment its hit score */
-				    for (k = 0; k < max; k++)
-				    {
-				        if (hits[k] == 0) /**< last entry in the list */
-					{
-					    first_name[k] = local_episodic[e].first_name[j];
-					    family_name[k] = local_episodic[e].family_name[j];
-					    break;
-					}
-					if (first_name[k] == local_episodic[e].first_name[j])
-					{
-					    if (family_name[k] == local_episodic[e].family_name[j])
-					    {
-					        /** being found in the list */
-					        break;
-					    }
-					}
-				    }
-				    /** increment the hit score for the being */
-				    if (k < max) hits[k]++;
-				}
-			    }
-			}
-		    }
+                        if (passed != 0)
+                        {
+                            /** Avoid memories about yourself, since we're interested
+                               in gossip about other beings */
+                            if ((local_episodic[e].first_name[j]!=GET_NAME_GENDER(local_sim,local_being)) ||
+                                    (local_episodic[e].family_name[j]!=GET_NAME_FAMILY2(local_sim,local_being)))
+                            {
+                                if (((j == BEING_MET) &&
+                                        (local_episodic[e].event != EVENT_SEEK_MATE) &&
+                                        (local_episodic[e].event != EVENT_EAT)) ||
+                                        (j == BEING_MEETER))
+                                {
+                                    /** add this being to the list, or increment its hit score */
+                                    for (k = 0; k < max; k++)
+                                    {
+                                        if (hits[k] == 0) /**< last entry in the list */
+                                        {
+                                            first_name[k] = local_episodic[e].first_name[j];
+                                            family_name[k] = local_episodic[e].family_name[j];
+                                            break;
+                                        }
+                                        if (first_name[k] == local_episodic[e].first_name[j])
+                                        {
+                                            if (family_name[k] == local_episodic[e].family_name[j])
+                                            {
+                                                /** being found in the list */
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    /** increment the hit score for the being */
+                                    if (k < max) hits[k]++;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -2082,7 +2144,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
              the most popular beings are at the top of the list */
             if (hits[j] > hits[i])
             {
-	        /** swap */
+                /** swap */
                 temp = first_name[j];
                 first_name[j] = first_name[i];
                 first_name[i] = temp;

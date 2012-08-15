@@ -36,9 +36,9 @@
 /*NOBLEMAKE DEL=""*/
 
 #ifndef	_WIN32
-    #include "../noble/noble.h"
+#include "../noble/noble.h"
 #else
-    #include "..\noble\noble.h"
+#include "..\noble\noble.h"
 #endif
 
 #include <stdio.h>
@@ -46,9 +46,9 @@
 #include "universe_internal.h"
 
 #ifndef	_WIN32
-    #include "../entity/entity.h"
+#include "../entity/entity.h"
 #else
-    #include "..\entity\entity.h"
+#include "..\entity\entity.h"
 #endif
 
 #ifdef THREADED
@@ -737,19 +737,19 @@ void sim_cycle(void)
 
 #ifdef SMALL_LAND
 
-    #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
 
 #else
 
-    #ifdef BRAIN_ON
+#ifdef BRAIN_ON
 
-        #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
 
-    #else
+#else
 
-        #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
 
-    #endif
+#endif
 
 #endif
 
@@ -772,7 +772,7 @@ static void sim_memory(n_uint offscreen_size)
     current_location += (MAP_AREA);
 
 #ifndef SMALL_LAND
-    
+
     sim.highres = &offbuffer[ current_location ];
 
     current_location += (2 * HI_RES_MAP_AREA);
@@ -780,11 +780,11 @@ static void sim_memory(n_uint offscreen_size)
     sim.highres_tide = (n_c_uint *) &offbuffer[ current_location ];
 
     current_location += (HI_RES_MAP_AREA/8);
-    
+
 #endif
 
     sim.weather = (n_weather *) &offbuffer[ current_location ];
-    
+
     current_location += sizeof(n_weather);
 
     memory_allocated -= (offscreen_size + current_location);
@@ -833,9 +833,9 @@ static void sim_memory(n_uint offscreen_size)
 
 void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
 {
-    n_uint  lp = 0;    
+    n_uint  lp = 0;
     math_bilinear_512_4096(small_map, map);
-    
+
     while (lp < (HI_RES_MAP_AREA/32))
     {
         tide_block[lp++] = 0;
@@ -911,7 +911,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         sim_thread_init();
     }
 #endif
-    
+
     sim_set_select(0);
 
     return ((void *) offbuffer);

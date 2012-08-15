@@ -34,11 +34,11 @@
  ****************************************************************/
 
 #ifndef	_WIN32
-    #include "../noble/noble.h"
-    #include "../universe/universe.h"
+#include "../noble/noble.h"
+#include "../universe/universe.h"
 #else
-    #include "..\noble\noble.h"
-    #include "..\universe\universe.h"
+#include "..\noble\noble.h"
+#include "..\universe\universe.h"
 #endif
 
 #include "entity_internal.h"
@@ -155,12 +155,12 @@ static void body_action_interactive(noble_simulation * sim, noble_being * local,
     GET_A(other,ATTENTION_BODY) = other_attention;
     episodic_store_memory(
         local, kind, EPISODIC_AFFECT_ZERO, sim,
-	GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-	GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other), 0);
+        GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+        GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other), 0);
     episodic_store_memory(
-	other, kind+1, EPISODIC_AFFECT_ZERO, sim,
-	GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other),
-	GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local), 0);
+        other, kind+1, EPISODIC_AFFECT_ZERO, sim,
+        GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other),
+        GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local), 0);
 }
 
 /*** This block should also be the same function ***/
@@ -187,12 +187,12 @@ static void body_action_interactive_change(noble_simulation * sim, noble_being *
     }
     episodic_store_memory(
         local, kind, EPISODIC_AFFECT_ZERO, sim,
-	GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-	GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other), 0);
+        GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+        GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other), 0);
     episodic_store_memory(
-	other, kind+1, affect, sim,
-	GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other),
-	GET_NAME_GENDER(sim,local), GET_NAME_FAMILY2(sim,local), 0);
+        other, kind+1, affect, sim,
+        GET_NAME_GENDER(sim,other),GET_NAME_FAMILY2(sim,other),
+        GET_NAME_GENDER(sim,local), GET_NAME_FAMILY2(sim,local), 0);
 }
 
 static void body_action_hand_object(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand, n_byte kind)
@@ -207,27 +207,27 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
         if (carrying & INVENTORY_BRANCH)
         {
             episodic_store_memory(
-	        local, kind, EPISODIC_AFFECT_ZERO, sim,
-		GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-		0, 0, (n_byte2)INVENTORY_BRANCH);
+                local, kind, EPISODIC_AFFECT_ZERO, sim,
+                GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                0, 0, (n_byte2)INVENTORY_BRANCH);
         }
         else
         {
             if (carrying & INVENTORY_TWIG)
             {
                 episodic_store_memory(
-	            local, kind, EPISODIC_AFFECT_ZERO, sim,
-		    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-		    0, 0, (n_byte2)INVENTORY_TWIG);
+                    local, kind, EPISODIC_AFFECT_ZERO, sim,
+                    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                    0, 0, (n_byte2)INVENTORY_TWIG);
             }
             else
             {
                 if (carrying & INVENTORY_SPEAR)
                 {
                     episodic_store_memory(
-		        local, kind, EPISODIC_AFFECT_ZERO, sim,
-			GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-			0, 0, (n_byte2)INVENTORY_SPEAR);
+                        local, kind, EPISODIC_AFFECT_ZERO, sim,
+                        GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                        0, 0, (n_byte2)INVENTORY_SPEAR);
                 }
             }
         }
@@ -263,9 +263,9 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
                     OBJECT_TAKE(local,hand,INVENTORY_FISH);
                 }
                 episodic_store_memory(
-		    local, EVENT_FISH, AFFECT_FISH, sim,
-		    GET_NAME_GENDER(sim,local),
-		    GET_NAME_FAMILY2(sim,local), 0,0, 0);
+                    local, EVENT_FISH, AFFECT_FISH, sim,
+                    GET_NAME_GENDER(sim,local),
+                    GET_NAME_FAMILY2(sim,local), 0,0, 0);
             }
         }
     }
@@ -348,9 +348,9 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
             carrying |= 1;
         }
         episodic_store_memory(
-	    local, EVENT_CHEW, EPISODIC_AFFECT_ZERO, sim,
-	    GET_NAME_GENDER(sim,local),
-	    GET_NAME_FAMILY2(sim,local), 0,0, carrying);
+            local, EVENT_CHEW, EPISODIC_AFFECT_ZERO, sim,
+            GET_NAME_GENDER(sim,local),
+            GET_NAME_FAMILY2(sim,local), 0,0, carrying);
     }
     if (carrying & INVENTORY_GRASS)
     {
@@ -406,9 +406,9 @@ static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte
     {
         OBJECTS_DROP(local,hand);
         episodic_store_memory(
-	    local, EVENT_DROP, EPISODIC_AFFECT_ZERO, sim,
-	    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-	    0, 0, carrying);
+            local, EVENT_DROP, EPISODIC_AFFECT_ZERO, sim,
+            GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+            0, 0, carrying);
     }
 }
 
@@ -439,9 +439,9 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                 {
                     OBJECT_TAKE(local,hand,INVENTORY_GRASS);
                     episodic_store_memory(
-		        local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
-			GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-			(n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_GRASS);
+                        local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
+                        GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                        (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_GRASS);
                 }
                 if ((trees>grass) && (trees>bush))
                 {
@@ -449,35 +449,35 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                     {
                         OBJECT_TAKE(local,hand,INVENTORY_BRANCH);
                         episodic_store_memory(
-			    local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
-			    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-			    (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_BRANCH);
+                            local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
+                            GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                            (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_BRANCH);
                     }
                     else
                     {
                         OBJECT_TAKE(local,hand,INVENTORY_NUT);
                         episodic_store_memory(
-			    local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
-			    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-			    (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_NUT);
+                            local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
+                            GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                            (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_NUT);
                     }
                 }
                 if ((bush>grass) && (bush>trees))
                 {
                     OBJECT_TAKE(local,hand,INVENTORY_TWIG);
                     episodic_store_memory(
-		        local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
-			GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-			(n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_TWIG);
+                        local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
+                        GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                        (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_TWIG);
                 }
             }
             else
             {
                 OBJECT_TAKE(local,hand,INVENTORY_ROCK);
                 episodic_store_memory(
-		    local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
-		    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-		    (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_ROCK);
+                    local, (n_byte)EVENT_PICKUP, EPISODIC_AFFECT_ZERO, sim,
+                    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
+                    (n_byte2)0, (n_byte2)0, (n_byte2)INVENTORY_ROCK);
             }
         }
     }

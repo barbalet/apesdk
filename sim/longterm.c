@@ -632,7 +632,7 @@ int main(int argc, n_string argv[])
 
     printf("\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE);
     printf("      For a list of commands type 'help'\n\n");
-    
+
     sprintf(simulation_filename,"%s","realtime.txt");
 
     local_sim = sim_sim();
@@ -652,10 +652,10 @@ int main(int argc, n_string argv[])
     cle_load(local_sim, (n_string)simulation_filename, io_console_out);
     do
     {
-        return_value = io_console(local_sim,  
-        (noble_console_command *)control_commands,
-        io_console_entry,
-        io_console_out);
+        return_value = io_console(local_sim,
+                                  (noble_console_command *)control_commands,
+                                  io_console_entry,
+                                  io_console_out);
     }
     while (return_value == 0);
 

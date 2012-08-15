@@ -146,6 +146,37 @@ n_int	weather_pressure(n_weather * wea, n_int px, n_int py)
     return  wea->atmosphere[WEATHER_MEM(px, py, 0)];
 }
 
+/**
+ * Returns temperature in degrees C x 1000
+ * This is an approximation of temperature which varies daily and annually
+ * @param local_land Land object
+ * @param wea Weather object
+ * @param px x map coordinate
+ * @param py y map coordinate
+ * @returns Temperature in degrees C x 1000
+ */
+n_int	weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int py)
+{
+    const n_int annual_average = 18000;
+    const n_int annual_temperature_variance = 3000;
+    n_int daily_temperature_variance, daily_offset, annual_offset;
+    n_int annual_idx, daily_idx, time_of_day = local_land->time;
+    n_uint annual_time, current_time = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
+
+    annual_time =
+        current_time - ((current_time/(TIME_YEAR_DAYS*TIME_DAY_MINUTES))*(TIME_YEAR_DAYS*TIME_DAY_MINUTES));
+    annual_idx = (annual_time*255/(TIME_YEAR_DAYS*TIME_DAY_MINUTES)) - 64;
+    if (annual_idx<0) annual_idx += 256;
+    annual_offset = new_sd[annual_idx]*annual_temperature_variance/NEW_SD_MULTIPLE;
+
+    daily_temperature_variance = 2000 + (new_sd[annual_idx]*1000/NEW_SD_MULTIPLE);
+    daily_idx = (time_of_day*255/TIME_DAY_MINUTES) - 64;
+    if (daily_idx<0) daily_idx += 256;
+    daily_offset = new_sd[daily_idx]*daily_temperature_variance/NEW_SD_MULTIPLE;
+
+    return annual_average + annual_offset + daily_offset - (wea->atmosphere[WEATHER_MEM(px, py, 0)]/32);
+}
+
 void weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy)
 {
     n_int	local_pressure = weather_pressure(wea, px, py);
@@ -329,13 +360,13 @@ n_int land_operator_interpolated(n_land * local_land, n_weather * local_weather,
     /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
     n_int interpolated;
     interpolated = APESPACE_TO_MAPSPACE(
-                    land_operator(local_land, local_weather, (map_x+1)&(MAP_DIMENSION-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
+                       land_operator(local_land, local_weather, (map_x+1)&(MAP_DIMENSION-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
     interpolated += APESPACE_TO_MAPSPACE(
-                    land_operator(local_land, local_weather, (map_x-1)&(MAP_DIMENSION-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
+                        land_operator(local_land, local_weather, (map_x-1)&(MAP_DIMENSION-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
     interpolated += APESPACE_TO_MAPSPACE(
-                    land_operator(local_land, local_weather, map_x, (map_y+1)&(MAP_DIMENSION-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
+                        land_operator(local_land, local_weather, map_x, (map_y+1)&(MAP_DIMENSION-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
     interpolated += APESPACE_TO_MAPSPACE(
-                    land_operator(local_land, local_weather, map_x, (map_y-1)&(MAP_DIMENSION-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
+                        land_operator(local_land, local_weather, map_x, (map_y-1)&(MAP_DIMENSION-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
     return interpolated >> 1;
 }
 

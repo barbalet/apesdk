@@ -185,7 +185,7 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
         return 7;
     }
     return io_apescript_error(AE_WRONG_END);
-;
+    ;
 }
 
 static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location)

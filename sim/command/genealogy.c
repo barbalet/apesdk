@@ -392,7 +392,7 @@ static n_int genealogy_save_genxml(noble_simulation * sim, n_string filename)
         if (io_disk_check(GENEALOGY_XML_FILENAME))
         {
             io_disk_read(fp, GENEALOGY_XML_FILENAME);
-	}
+        }
 
         io_file_xml_close(fp, "genxml");
         io_disk_write(fp, filename);
@@ -600,7 +600,7 @@ static n_int genealogy_save_gedcom(noble_simulation * sim, n_string filename)
         if (io_disk_check(GENEALOGY_GEDCOM_FILENAME))
         {
             io_disk_read(fp, GENEALOGY_GEDCOM_FILENAME);
-	}
+        }
         io_write(fp, "0 TRLR",1);
         io_disk_write(fp, filename);
         io_file_free(fp);

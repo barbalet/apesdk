@@ -51,6 +51,8 @@
 
 #undef   DEBUG_NON_FILE_HANDLE    /* Stops there being a file handle for debug output */
 
+#define LATITUDE_MEAN_TEMPERATURE 20000
+
 /*! @define */
 #define	SHORT_VERSION_NAME		 "Noble Ape 0.695 "
 #define	FULL_DATE				 __DATE__
@@ -339,22 +341,22 @@ typedef enum
 typedef enum
 {
     AE_NO_ERROR = -1,
-    
+
     AE_UNKNOWN_ERROR,
     AE_NUMBER_EXPECTED,
     AE_NUMBER_OUT_OF_RANGE,
     AE_MAXIMUM_NUMBERS_REACHED,
     AE_MAXIMUM_SCRIPT_SIZE_REACHED,
-    
+
     AE_MAXIMUM_VARIABLES_REACHED,
     AE_UNKNOWN_SYNTAX_PARSER_BUFFER,
     AE_UNKNOWN_SYNTAX_PARSER_CONVERT,
-    
+
     AE_SELECTED_ENTITY_OUT_OF_RANGE,
-    
+
     AE_COORDINATES_OUT_OF_RANGE,
     AE_VALUE_OUT_OF_RANGE,
-    
+
     AE_TOO_MANY_CLOSE_BRACES,
     AE_MAXIMUM_BRACES_REACHED,
     AE_FIRST_VALUE_FAILED,
@@ -362,7 +364,7 @@ typedef enum
     AE_UNKNOWN_SYNTAX_MISSING_EQUALS,
     AE_UNKNOWN_SYNTAX_NO_COMMAND,
     AE_WRONG_END,
-    
+
     AE_LINE_START_INCORRECT,
     AE_OUTPUT_SET_AS_INPUT_VARIABLE,
     AE_IF_WHILE_NOT_FOLLOWED_BY_BRACKET,
@@ -381,9 +383,9 @@ typedef enum
     AE_ASSIGN_VALUE_FAILED,
     AE_UNKNOWN_SYNTAX_FROM_INTERPRET,
     AE_NO_MAIN_CODE,
-    
+
     AE_NUMBER_ERRORS
-}AE_ENUM;
+} AE_ENUM;
 
 typedef struct
 {
@@ -408,7 +410,7 @@ static const n_ae_error apescript_errors[]=
     {AE_SELECTED_ENTITY_OUT_OF_RANGE,      "Selected entity out of range",     "* please add text *"},
     {AE_COORDINATES_OUT_OF_RANGE,          "Coordinates out of range",         "* please add text *"},
     {AE_VALUE_OUT_OF_RANGE,                "Value out of range",               "* please add text *"},
-    
+
     {AE_TOO_MANY_CLOSE_BRACES,             "Too many }",                       "You have closed too many braces. Go back to the code and see if there is an erroneous additional } in the code."},
     {AE_MAXIMUM_BRACES_REACHED,            "Maximum braces reached",           "Please contact tom at nobleape dot com"},
     {AE_FIRST_VALUE_FAILED,                "First value failed",               "Something is wrong with the first value of an equality, if or while operation. It could be the first and only value in this function."},
@@ -416,7 +418,7 @@ static const n_ae_error apescript_errors[]=
     {AE_UNKNOWN_SYNTAX_MISSING_EQUALS,     "Unknown syntax (missing =)",       "Syntax is incorrect"},
     {AE_UNKNOWN_SYNTAX_NO_COMMAND,         "Unknown syntax (no command)",      "Syntax is incorrect"},
     {AE_WRONG_END,                         "Wrong end",                        "A bracket or colon was expected but not found."},
-    
+
     {AE_LINE_START_INCORRECT,              "Line start incorrect",             "A line of code begins incorrectly. It could start with a number or an operator when if/while or a variable was expected."},
     {AE_OUTPUT_SET_AS_INPUT_VARIABLE,      "Output set as input variable",     "An output only variable is attempting to be set."},
     {AE_IF_WHILE_NOT_FOLLOWED_BY_BRACKET,  "if/while not followed by {",       "All if/while statements require a bracket following the if/while (allowing for any amount of whitespace too)."},
@@ -452,14 +454,14 @@ void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
 void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
 void  vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
 void  vect2_multiplier(
-                      n_vect2 * equals, n_vect2 * initial,
-                      n_vect2 * second, n_int multiplier, n_int divisor);
+    n_vect2 * equals, n_vect2 * initial,
+    n_vect2 * second, n_int multiplier, n_int divisor);
 void  vect2_d(
-             n_vect2 * initial, n_vect2 * second,
-             n_int multiplier, n_int divisor);
+    n_vect2 * initial, n_vect2 * second,
+    n_int multiplier, n_int divisor);
 n_int vect2_dot(
-                n_vect2 * initial, n_vect2 * second,
-                n_int multiplier, n_int divisor);
+    n_vect2 * initial, n_vect2 * second,
+    n_int multiplier, n_int divisor);
 void  vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor);
 void  vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
 void  vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
@@ -473,10 +475,10 @@ void    math_random3(n_byte2 * local);
 n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);
 n_int   math_spread_byte(n_byte val);
 void    math_patch(n_byte * local_map, n_byte * scratch,
-                n_patch * func, n_byte2 * arg,
-                n_int patch_bits,
-                n_byte refined_start, n_byte refined_end,
-                n_byte rotate);
+                   n_patch * func, n_byte2 * arg,
+                   n_int patch_bits,
+                   n_byte refined_start, n_byte refined_end,
+                   n_byte rotate);
 
 n_byte     io_entry_execution(n_byte value);
 void       io_lower(n_string value, n_int length);
@@ -521,9 +523,9 @@ n_int      io_disk_append(n_file * local_file, n_string file_name);
 n_int      io_disk_check(n_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
 
-/* 
+/*
  This provides the land interface into entity but not the universe.
- 
+
  This should reduce the use of universe.h in the entity .c/h files.
  */
 
@@ -639,6 +641,7 @@ n_land;
 void  weather_init(n_weather * local_weather, n_land * local_land);
 void  weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
 n_int weather_pressure(n_weather * wea, n_int px, n_int py);
+n_int weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int py);
 void  weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
 void  weather_cycle(n_weather * local_weather);
 n_int weather_seven_values(n_land * local_land, n_weather * local_weather, n_int px, n_int py);

@@ -144,17 +144,17 @@ static void drives_sex(
         /** is the being awake and its sex drive not saturated */
         if ((awake) && (local->drives[DRIVE_SEX] < DRIVES_MAX))
         {
-	    /** increase the sex drive */
+            /** increase the sex drive */
             local->drives[DRIVE_SEX]++;
             /** if sex drive is above a mate seeking threshold and
             the being has no current goal */
             if ((local->drives[DRIVE_SEX]>THRESHOLD_SEEK_MATE) &&
                     (local->goal[0]==GOAL_NONE))
             {
-	        /** either search for a preferred mate, or mate randomly */
+                /** either search for a preferred mate, or mate randomly */
                 if (GENE_MATE_SEEK(GET_G(local))&1)
                 {
-		    /** look for a mate */
+                    /** look for a mate */
 #ifdef EPISODIC_ON
                     if (!local_episodic) return;
 
@@ -163,15 +163,15 @@ static void drives_sex(
                     {
                         if (local_episodic[i].event == EVENT_MATE)
                         {
-			    /** not someone else's mate */
+                            /** not someone else's mate */
                             if ((local_episodic[i].first_name[BEING_MEETER]==GET_NAME_GENDER(local_sim,local)) &&
-				(local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(local_sim,local)))
+                                    (local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(local_sim,local)))
                             {
-			        /** set a goal to seek the remembered mate */
+                                /** set a goal to seek the remembered mate */
                                 local->goal[0]=GOAL_MATE;
                                 local->goal[1]=local_episodic[i].first_name[BEING_MET];
                                 local->goal[2]=local_episodic[i].family_name[BEING_MET];
-								local->goal[3]=GOAL_TIMEOUT;
+                                local->goal[3]=GOAL_TIMEOUT;
                                 /** remember seeking a mate */
                                 episodic_store_memory(
                                     local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
@@ -196,25 +196,25 @@ static void drives_sex(
                             {
                                 if ((local_social_graph[i].attraction) > max)
                                 {
-				    /** who are we most attracted to? */
+                                    /** who are we most attracted to? */
                                     max=local_social_graph[i].attraction;
                                     local->goal[0]=GOAL_MATE;
                                     local->goal[1]=
                                         local_social_graph[i].first_name[BEING_MET];
                                     local->goal[2]=
                                         local_social_graph[i].family_name[BEING_MET];
-									local->goal[3]=GOAL_TIMEOUT;
+                                    local->goal[3]=GOAL_TIMEOUT;
                                 }
                             }
                         }
                         /** if an attractive mate was found then remember this event */
                         if (local->goal[0]==GOAL_MATE)
                         {
-			    episodic_store_memory(
-			        local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
-				local_sim,
-				GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
-				local->goal[1], local->goal[2],0);
+                            episodic_store_memory(
+                                local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
+                                local_sim,
+                                GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
+                                local->goal[1], local->goal[2],0);
                         }
                     }
                 }
@@ -230,7 +230,7 @@ static void drives_sex(
         }
         else
         {
-	    /** while sleeping reduce sex drive */
+            /** while sleeping reduce sex drive */
             if (local->drives[DRIVE_SEX] > 0) local->drives[DRIVE_SEX]--;
         }
         /** if sex drive falls below the mate seeking threshold and the being
@@ -253,7 +253,7 @@ static void drives_fatigue(
 {
     /** if the being is moving fast enough then increase the fatigue drive */
     if ((local->speed > FATIGUE_SPEED_THRESHOLD) &&
-	(local->drives[DRIVE_FATIGUE] < DRIVES_MAX))
+            (local->drives[DRIVE_FATIGUE] < DRIVES_MAX))
     {
         local->drives[DRIVE_FATIGUE]++;
         /** Add extra fatigue when swimming */

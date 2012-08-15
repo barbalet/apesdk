@@ -101,38 +101,42 @@ void metabolism_vascular_description(n_int index, n_string description)
 
 const n_string metabolism_text[] =
 {
-	"",
-	"Protein",
-	"Starch",
-	"Fat",
-	"Sugar",
-	"Water",
-	"Bile",
-	"Glucose",
-	"Muscle",
-	"Amino Acids",
-	"Glucogen",
-	"Adrenalin",
-	"Glycogen",
-	"Ammonia",
-	"Urea",
-	"Lactate",
-	"Oxygen",
-	"CO2",
-	"Fatty Acids",
-	"Triglyceride",
-	"Adipose",
-	"Insulin",
-	"ADP",
-	"ATP",
-	"Energy",
-	"Heat",
-	"Pyruvate",
-	"Waste",
-	"Leptin",
-	"Ghrelin",
-	"prolactin",
-	"Milk"
+    "",
+    "Protein",
+    "Starch",
+    "Fat",
+    "Sugar",
+    "Water",
+    "Bile",
+    "Glucose",
+    "Muscle",
+    "Amino Acids",
+    "Glucogen",
+    "Adrenalin",
+    "Glycogen",
+    "Ammonia",
+    "Urea",
+    "Lactate",
+    "Oxygen",
+    "CO2",
+    "Fatty Acids",
+    "Triglyceride",
+    "Adipose",
+    "Insulin",
+    "ADP",
+    "ATP",
+    "Energy",
+    "Heat",
+    "Pyruvate",
+    "Waste",
+    "Leptin",
+    "Ghrelin",
+    "prolactin",
+    "Milk",
+    "Heart rate Hz",
+    "Breathing rate Hz",
+    "Thermoregulator",
+    "Lung Capacity"
 };
 
 /**
@@ -142,7 +146,7 @@ const n_string metabolism_text[] =
  */
 n_string metabolism_description(n_int index)
 {
-	return metabolism_text[index];
+    return metabolism_text[index];
 }
 
 #ifdef METABOLISM_ON
@@ -205,11 +209,11 @@ void metabolism_vascular_response(noble_simulation * local_sim, noble_being * lo
     /** parasympathetic */
     if (response <= 0)
     {
-		/** return towards a resting heart beat */
-        n_uint hr_diff = local_being->heart_rate_hz - HEART_RATE_RESTING;
+        /** return towards a resting heart beat */
+        n_uint hr_diff = GET_MT(local_being,METABOLISM_HEART_RATE) - HEART_RATE_RESTING;
         n_int mult = response;
         if (mult==0) mult=-1;
-        local_being->heart_rate_hz += (n_int)(1+(hr_diff>>2))*mult;
+        GET_MT(local_being,METABOLISM_HEART_RATE) += (n_int)(1+(hr_diff>>2))*mult;
 
         for (i = 0; i < VASCULAR_SIZE; i++)
         {
@@ -231,7 +235,7 @@ void metabolism_vascular_response(noble_simulation * local_sim, noble_being * lo
                 /** if the response is zero then return towards the default vessel radius */
                 n_int v_diff =
                     (n_int)local_being->vessel[i].constriction -
-                    (n_int)local_being->thermoregulator;
+                    (n_int)GET_MT(local_being,METABOLISM_THERMOREGULATOR);
                 if (v_diff > 1) v_diff=1;
                 if (v_diff < -1) v_diff=-1;
                 local_being->vessel[i].constriction -= v_diff;
@@ -247,19 +251,19 @@ void metabolism_vascular_response(noble_simulation * local_sim, noble_being * lo
         n_uint hr_range = HEART_RATE_MAX(local_sim,local_being) - HEART_RATE_RESTING;
 
         /** a target heart rate for this level of response,
-			with 16 levels possible (which could come from the genome) */
+        	with 16 levels possible (which could come from the genome) */
         n_uint hr_target = HEART_RATE_RESTING + ((hr_range*(n_uint)response)>>4);
 
-        if (local_being->heart_rate_hz < hr_target)
+        if (GET_MT(local_being,METABOLISM_HEART_RATE) < hr_target)
         {
             /** increase heart rate towards the target */
-            local_being->heart_rate_hz += (1+((hr_target - local_being->heart_rate_hz)>>2));
+            GET_MT(local_being,METABOLISM_HEART_RATE) += (1+((hr_target - GET_MT(local_being,METABOLISM_HEART_RATE))>>2));
         }
-        if (local_being->heart_rate_hz > hr_target)
+        if (GET_MT(local_being,METABOLISM_HEART_RATE) > hr_target)
         {
             /** decrease heart rate towards the target */
-            n_uint hr_diff = local_being->heart_rate_hz - hr_target;
-            local_being->heart_rate_hz -= (n_int)(1+(hr_diff>>2));
+            n_uint hr_diff = GET_MT(local_being,METABOLISM_HEART_RATE) - hr_target;
+            GET_MT(local_being,METABOLISM_HEART_RATE) -= (n_int)(1+(hr_diff>>2));
         }
 
         for (i = 0; i < VASCULAR_SIZE; i++)
@@ -358,12 +362,12 @@ static const n_int metabolic_pathway[] =
 };
 
 /**
- * Returns if maximim value for a given metabolism type has been reached
+ * Returns if the given metabolism type is below its maximum capavity
  * @param local_being Pointer to the being
  * @param index Metabolism type index
  * @return Maximum value
  */
-static n_int metabolism_is_capacity(noble_being * local_being, n_byte2 index)
+static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 {
     n_byte2 capacity = 1000;
 
@@ -387,6 +391,12 @@ static n_int metabolism_is_capacity(noble_being * local_being, n_byte2 index)
     case METABOLISM_ADRENALIN:
         capacity = ADRENALIN_MAX;
         break;
+    case METABOLISM_LUNG_CAPACITY:
+        capacity = MAX_LUNG_CAPACITY(local_being);
+        break;
+    case METABOLISM_BREATHING_RATE:
+        capacity = BREATHING_RATE_MAX;
+        break;
     }
     return (GET_MT(local_being,index)<capacity);
 }
@@ -395,8 +405,7 @@ static n_int metabolism_is_capacity(noble_being * local_being, n_byte2 index)
  * Decay a reaction product amount
  * @param local_being Pointer to the being
  * @param pathway
- */
-static void metabolism_decay(noble_being * local_being, n_byte2 pathway)
+ */ static void metabolism_decay(noble_being * local_being, n_byte2 pathway)
 {
     if (GET_MT(local_being,pathway)>0)
     {
@@ -409,8 +418,7 @@ static void metabolism_decay(noble_being * local_being, n_byte2 pathway)
  * @param local_being Pointer to the being
  * @param state The bit to be set active or inactive
  * @param active Whether to set the state as active (1) or inactive (0)
- */
-static void metabolism_set_state(noble_being * local_being, n_byte2 state, n_byte active)
+ */ static void metabolism_set_state(noble_being * local_being, n_byte2 state, n_byte active)
 {
     if (active!=0)
     {
@@ -429,17 +437,16 @@ static void metabolism_set_state(noble_being * local_being, n_byte2 state, n_byt
  * Synthesis of milk
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
- */
-static void metabolism_milk_synthesis(noble_simulation * local_sim, noble_being * local_being)
+ */ static void metabolism_milk_synthesis(noble_simulation * local_sim, noble_being * local_being)
 {
     if (FIND_SEX(GET_I(local_being))==SEX_FEMALE)
     {
         n_uint today = TIME_IN_DAYS(local_sim->land->date);
         n_uint conception_date = TIME_IN_DAYS(local_being->date_of_conception);
         if ((conception_date > 0) &&
-	    (today >= conception_date) &&
-	    (TIME_IN_DAYS(local_sim->land->date) <=
-	     conception_date + GESTATION_DAYS + CARRYING_DAYS))
+                (today >= conception_date) &&
+                (TIME_IN_DAYS(local_sim->land->date) <=
+                 conception_date + GESTATION_DAYS + CARRYING_DAYS))
         {
             /** activate lactation prior to weaning */
             metabolism_set_state(local_being,METABOLISM_STATE_LACTATION,1);
@@ -458,8 +465,7 @@ static void metabolism_milk_synthesis(noble_simulation * local_sim, noble_being 
  * Regulation of hunger
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
- */
-static void metabolism_hunger(noble_simulation * local_sim, noble_being * local_being)
+ */ static void metabolism_hunger(noble_simulation * local_sim, noble_being * local_being)
 {
     /** leptin / ghrelin levels */
     if (GET_MT(local_being,METABOLISM_LEPTIN) > 10 + (GENE_FRAME(GET_G(local_being))*10))
@@ -477,7 +483,7 @@ static void metabolism_hunger(noble_simulation * local_sim, noble_being * local_
     if (((GET_MT(local_being,METABOLISM_PROTEIN)>0) ||
             (GET_MT(local_being,METABOLISM_STARCH)>0) ||
             (GET_MT(local_being,METABOLISM_FAT)>0)) &&
-            metabolism_is_capacity(local_being, METABOLISM_BILE))
+            metabolism_below_capacity(local_being, METABOLISM_BILE))
     {
         GET_MT(local_being,METABOLISM_BILE) += 8;
     }
@@ -488,8 +494,8 @@ static void metabolism_hunger(noble_simulation * local_sim, noble_being * local_
     }
 
     /** if glucose fall below a minimum threshold then enable
-		the starve flag which initiates conversion of muscle
-		back to amino acids and then to glucose */
+    	the starve flag which initiates conversion of muscle
+    	back to amino acids and then to glucose */
     if (GET_MT(local_being,METABOLISM_GLUCOSE) <
             GLUCOSE_THRESHOLD_STARVE)
     {
@@ -507,13 +513,12 @@ static void metabolism_hunger(noble_simulation * local_sim, noble_being * local_
  * Try to keep the glucose level within a range of tollerance
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
- */
-static void metabolism_glucose_homeostasis(noble_simulation * local_sim, noble_being * local_being)
+ */ static void metabolism_glucose_homeostasis(noble_simulation * local_sim, noble_being * local_being)
 {
     n_genetics * genetics = GET_G(local_being);
 
     /** if glucose falls below a minimum level then begin
-		converting glycogen and fat */
+    	converting glycogen and fat */
     if (GET_MT(local_being,METABOLISM_GLUCOSE) <
             GLUCOSE_THRESHOLD_MIN+(GENE_GLUCOSE_THRESHOLD_MIN(genetics)*10))
     {
@@ -523,7 +528,7 @@ static void metabolism_glucose_homeostasis(noble_simulation * local_sim, noble_b
     else
     {
         /** If glucose level exceeds a threshold then begin
-			storing it as glycogen (glycogenesis) and fat */
+        	storing it as glycogen (glycogenesis) and fat */
         if (GET_MT(local_being,METABOLISM_GLUCOSE) >
                 GLUCOSE_THRESHOLD_MAX+(GENE_GLUCOSE_THRESHOLD_MAX(genetics)*10))
         {
@@ -553,8 +558,7 @@ static void metabolism_glucose_homeostasis(noble_simulation * local_sim, noble_b
  * Dump waste products
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
- */
-static void metabolism_waste_products(noble_simulation * local_sim, noble_being * local_being)
+ */ static void metabolism_waste_products(noble_simulation * local_sim, noble_being * local_being)
 {
     n_genetics * genetics = GET_G(local_being);
 
@@ -572,8 +576,7 @@ static void metabolism_waste_products(noble_simulation * local_sim, noble_being 
  * Runs through the metabolic pathways and updates the amounts for each reaction product
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
- */
-static void metabolism_pathways(noble_simulation * local_sim, noble_being * local_being)
+ */ static void metabolism_pathways(noble_simulation * local_sim, noble_being * local_being)
 {
     n_byte2 i,j,p,mstate,index,reactant,product[METABOLISM_MAX_PRODUCTS];
     n_int increment;
@@ -636,11 +639,11 @@ static void metabolism_pathways(noble_simulation * local_sim, noble_being * loca
                     metabolic_pathway[index + 1 + METABOLISM_MAX_PRODUCTS + p + (METABOLISM_MAX_REACTANTS*2)];
 
                 if ((product[p] > 0) &&
-                        ((increment<0) || ((increment>0) && metabolism_is_capacity(local_being,product[p]))))
+                        ((increment<0) || ((increment>0) && metabolism_below_capacity(local_being,product[p]))))
                 {
 
                     /** for particular reactions alter the number of products
-						based upon genetics */
+                    	based upon genetics */
                     switch (product[p])
                     {
                     case METABOLISM_INSULIN:
@@ -695,8 +698,7 @@ static void metabolism_pathways(noble_simulation * local_sim, noble_being * loca
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @param core_temp Core temperature
- */
-static void metabolism_chemistry(noble_simulation * local_sim, noble_being * local_being, n_uint core_temp)
+ */ static void metabolism_chemistry(noble_simulation * local_sim, noble_being * local_being, n_uint core_temp)
 {
     metabolism_milk_synthesis(local_sim, local_being);
     metabolism_hunger(local_sim, local_being);
@@ -710,21 +712,33 @@ static void metabolism_chemistry(noble_simulation * local_sim, noble_being * loc
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @param core_temp Core temperature
- */
-static void metabolism_respiration(noble_simulation * local_sim, noble_being * local_being, n_uint core_temp)
+ */ static void metabolism_respiration(noble_simulation * local_sim, noble_being * local_being, n_uint core_temp)
 {
+    n_int pressure;
+    n_uint lung_surface_area = (n_uint)GET_MT(local_being,METABOLISM_LUNG_CAPACITY)*5; /** approximation from a sphere */
+
+    pressure = 16384-(weather_pressure(local_sim->weather,
+                                       APESPACE_TO_MAPSPACE(local_being->x),
+                                       APESPACE_TO_MAPSPACE(local_being->y))>>4);
+
     /** convert breathing rate into oxygen uptake */
-    if (metabolism_is_capacity(local_being, METABOLISM_OXYGEN))
+    if (metabolism_below_capacity(local_being, METABOLISM_OXYGEN))
     {
-        GET_MT(local_being,METABOLISM_OXYGEN) += 1+(local_being->breathing_rate_hz>>4);
+        n_uint gas_pressure = ((((n_uint)pressure)>>4)*(lung_surface_area>>4))>>5;
+        n_uint oxygen_absorbtion = 1 + ((gas_pressure * (GET_MT(local_being,METABOLISM_BREATHING_RATE)>>6))>>4);
+        /*printf("gas %u %u\n", gas_pressure, oxygen_absorbtion);*/
+        GET_MT(local_being,METABOLISM_OXYGEN) += (n_byte2)oxygen_absorbtion;
     }
 
     /** dump CO2 */
     if (GET_MT(local_being,METABOLISM_CO2) > 0)
     {
-        if (GET_MT(local_being,METABOLISM_CO2)>=local_being->breathing_rate_hz)
+        n_uint gas_pressure = ((((n_uint)pressure)>>4)*(lung_surface_area>>4))>>6;
+        n_uint co2_diffusion = 1 + ((gas_pressure * (GET_MT(local_being,METABOLISM_BREATHING_RATE)>>6))>>4);
+
+        if (GET_MT(local_being,METABOLISM_CO2)>=(n_byte2)co2_diffusion)
         {
-            GET_MT(local_being,METABOLISM_CO2) -= 1+(local_being->breathing_rate_hz>>4);
+            GET_MT(local_being,METABOLISM_CO2) -= (n_byte2)co2_diffusion;
         }
         else
         {
@@ -733,29 +747,48 @@ static void metabolism_respiration(noble_simulation * local_sim, noble_being * l
     }
 
     /** if there is too much co2 then increase breathing rate,
-		for example after running */
+    	for example after running */
     if (GET_MT(local_being,METABOLISM_CO2) > CO2_PANT)
     {
-        if (local_being->breathing_rate_hz < BREATHING_RATE_MAX)
+        /** breathe more often */
+        if (GET_MT(local_being,METABOLISM_BREATHING_RATE) < BREATHING_RATE_MAX)
         {
-            local_being->breathing_rate_hz += 20;
+            GET_MT(local_being,METABOLISM_BREATHING_RATE) += 20;
+        }
+
+        /* breathe more deeply */
+        if (metabolism_below_capacity(local_being, METABOLISM_LUNG_CAPACITY))
+        {
+            GET_MT(local_being,METABOLISM_LUNG_CAPACITY) += 10;
         }
     }
 
     if (core_temp>CORE_TEMPERATURE)
     {
         /** increase breathing rate to remove excess heat */
-        if (local_being->breathing_rate_hz < BREATHING_RATE_MAX)
+        if (GET_MT(local_being,METABOLISM_BREATHING_RATE) < BREATHING_RATE_MAX)
         {
-            local_being->breathing_rate_hz += 10;
+            GET_MT(local_being,METABOLISM_BREATHING_RATE) += 10;
+        }
+
+        /* breathe more deeply */
+        if (metabolism_below_capacity(local_being, METABOLISM_LUNG_CAPACITY))
+        {
+            GET_MT(local_being,METABOLISM_LUNG_CAPACITY) += 5;
         }
     }
     if (core_temp<CORE_TEMPERATURE)
     {
         /** decrease breathing rate to preserve heat */
-        if (local_being->breathing_rate_hz > BREATHING_RATE_MIN)
+        if (GET_MT(local_being,METABOLISM_BREATHING_RATE) > BREATHING_RATE_MIN)
         {
-            local_being->breathing_rate_hz -= 10;
+            GET_MT(local_being,METABOLISM_BREATHING_RATE) -= 10;
+        }
+
+        /* decrease breathing depth */
+        if (GET_MT(local_being,METABOLISM_LUNG_CAPACITY) >= MIN_LUNG_CAPACITY(local_being))
+        {
+            GET_MT(local_being,METABOLISM_LUNG_CAPACITY) -= 10;
         }
     }
 
@@ -780,26 +813,28 @@ static void metabolism_respiration(noble_simulation * local_sim, noble_being * l
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @return Core temperature
- */
-static n_uint metabolism_thermoregulation(noble_simulation * local_sim, noble_being * local_being)
+ */ static n_uint metabolism_thermoregulation(noble_simulation * local_sim, noble_being * local_being)
 {
     n_uint i,index,conduction,water_conduction=0,core_temp=0,diff;
     n_int local_z;
     n_vect2 slope_vector, location_vector;
-    n_int ambient_temperature = CORE_TEMPERATURE*5/10; /**< TODO get this from pressure value */
+    n_int ambient_temperature = weather_temperature(local_sim->land,
+                                local_sim->weather,
+                                APESPACE_TO_MAPSPACE(local_being->x),
+                                APESPACE_TO_MAPSPACE(local_being->y));
 
     local_being->vessel[0].temperature =
         (n_uint)(CORE_TEMPERATURE +
-                 (((n_int)local_being->thermoregulator-VASCULAR_CONSTRICTION_ZERO)*10)-
-                 (n_int)(local_being->breathing_rate_hz*4));
+                 (((n_int)GET_MT(local_being,METABOLISM_THERMOREGULATOR)-VASCULAR_CONSTRICTION_ZERO)*10)-
+                 (n_int)(GET_MT(local_being,METABOLISM_BREATHING_RATE)*4));
 
     /** greater conductivity in water */
     land_vect2(&slope_vector, &local_z,local_sim->land, &location_vector);
     if (WATER_TEST(local_z,local_sim->land->tide_level))
     {
         /** A guess at sea temperature in an equatorial region.
-			Ideally this would come from a sea simulation */
-        ambient_temperature = 24000;
+        	Ideally this would come from a sea simulation */
+        ambient_temperature -= 8000;
         water_conduction = 1;
     }
 
@@ -868,12 +903,12 @@ static n_uint metabolism_thermoregulation(noble_simulation * local_sim, noble_be
     if (core_temp>CORE_TEMPERATURE)
     {
         /** vasodilation */
-        if (local_being->thermoregulator>55) local_being->thermoregulator--;
+        if (GET_MT(local_being,METABOLISM_THERMOREGULATOR)>55) GET_MT(local_being,METABOLISM_THERMOREGULATOR)--;
     }
     if (core_temp<CORE_TEMPERATURE)
     {
         /** vasoconstriction */
-        if (local_being->thermoregulator<200) local_being->thermoregulator++;
+        if (GET_MT(local_being,METABOLISM_THERMOREGULATOR)<200) GET_MT(local_being,METABOLISM_THERMOREGULATOR)++;
     }
     return core_temp;
 }
@@ -886,8 +921,7 @@ static n_uint metabolism_thermoregulation(noble_simulation * local_sim, noble_be
  * In this model pressure is voltage and flow rate is current
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
- */
-static void metabolism_vascular(noble_simulation * local_sim, noble_being * local_being)
+ */ static void metabolism_vascular(noble_simulation * local_sim, noble_being * local_being)
 {
     n_uint i,area,I,index,radius,length,elasticity;
 
@@ -921,7 +955,7 @@ static void metabolism_vascular(noble_simulation * local_sim, noble_being * loca
             (4*area);
 
         /** Vessel compliance (capacitance)
-			How much of the flow can be stored */
+        	How much of the flow can be stored */
         local_being->vessel[i].compliance =
             3*length*3142*
             radius*radius*radius /
@@ -929,8 +963,8 @@ static void metabolism_vascular(noble_simulation * local_sim, noble_being * loca
     }
 
     /** Convert heart rate to blood flow rate in ml per minute.
-		This is scaled by height to take account of different heart sizes */
-    I = (n_uint)local_being->heart_rate_hz * 100 *
+    	This is scaled by height to take account of different heart sizes */
+    I = (n_uint)GET_MT(local_being,METABOLISM_HEART_RATE) * 100 *
         SECONDS_PER_SIMULATION_STEP * (n_uint)local_being->height /
         (1219*BEING_MAX_HEIGHT);
     metabolism_vascular_compartment(I, &local_being->vessel[0]);
@@ -969,8 +1003,7 @@ static void metabolism_vascular(noble_simulation * local_sim, noble_being * loca
  * Update metabolism
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
- */
-void metabolism_cycle(noble_simulation * local_sim, noble_being * local_being)
+ */ void metabolism_cycle(noble_simulation * local_sim, noble_being * local_being)
 {
     n_uint core_temp=0;
 
@@ -990,8 +1023,7 @@ void metabolism_cycle(noble_simulation * local_sim, noble_being * local_being)
  * and Blood Vessel Obstruction Using Lumped Method" by
  * Mohammad Reza Mirzaee, Omid Ghasemalizadeh and Bahar Firoozabadi
  * @param local_being Pointer to the being
- */
-void metabolism_init(noble_being * local_being)
+ */ void metabolism_init(noble_being * local_being)
 {
     n_uint i;
 
@@ -1058,16 +1090,18 @@ void metabolism_init(noble_being * local_being)
         local_being->vessel[i].hardening = 0;
     }
 
-    /** Start heartbeat */
-    local_being->heart_rate_hz = 1219;
-    local_being->breathing_rate_hz = BREATHING_RATE_MIN;
-    local_being->thermoregulator = VASCULAR_CONSTRICTION_ZERO;
-
-    /** chemistry */
     for (i = 0; i < METABOLISM_SIZE; i++)
     {
         GET_MT(local_being,i)=0;
     }
+
+    /** Start heartbeat */
+    GET_MT(local_being,METABOLISM_HEART_RATE) = 1219;
+    GET_MT(local_being,METABOLISM_LUNG_CAPACITY) = MIN_LUNG_CAPACITY(local_being);
+    GET_MT(local_being,METABOLISM_THERMOREGULATOR) = VASCULAR_CONSTRICTION_ZERO;
+    GET_MT(local_being,METABOLISM_BREATHING_RATE) = BREATHING_RATE_MIN;
+
+    /** chemistry */
     GET_MT(local_being,METABOLISM_HEAT)=1000;
     GET_MT(local_being,METABOLISM_ENERGY)=1000;
     GET_MT(local_being,METABOLISM_WATER)=1000;
@@ -1082,8 +1116,7 @@ void metabolism_init(noble_being * local_being)
  * @param sim Pointer to the simulation
  * @param child Pointer to the child being
  * @param mother Pointer to the mother being
- */
-void metabolism_suckle(noble_simulation * sim, noble_being * child, noble_being * mother)
+ */ void metabolism_suckle(noble_simulation * sim, noble_being * child, noble_being * mother)
 {
     n_byte2 suckling_rate = 1 + GENE_SUCKLING_RATE(GET_G(child));
 
@@ -1100,9 +1133,8 @@ void metabolism_suckle(noble_simulation * sim, noble_being * child, noble_being 
  * Ingest various food types
  * @param local_being Pointer to the being
  * @param food_type Type of food being eaten
- */
-void metabolism_eat(noble_being * local_being,
-                    n_byte food_type)
+ */ void metabolism_eat(noble_being * local_being,
+                        n_byte food_type)
 {
     n_int i;
     n_byte2 qty[6];
@@ -1140,7 +1172,7 @@ void metabolism_eat(noble_being * local_being,
 
     for (i=0; i<5; i++)
     {
-        if (GET_MT(local_being,i) < metabolism_is_capacity(local_being, i))
+        if (GET_MT(local_being,i) < metabolism_below_capacity(local_being, i))
         {
             GET_MT(local_being,i) += qty[i];
         }

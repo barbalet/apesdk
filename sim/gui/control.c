@@ -306,12 +306,12 @@ void control_sim_key(noble_simulation * local_sim, n_byte wwind, n_byte2 num)
 void control_sim_simulate(n_byte local_pause, n_uint local_time)
 {
     sim_realtime(local_time);
-    
+
     if (io_command_line_execution())
     {
         return;
     }
-    
+
     if (local_pause != 1)
     {
         sim_cycle();

@@ -77,47 +77,49 @@ void audit_file_apescripterror(FILE * html_write)
 {
     n_string    local_error_string = apescript_errors[0].error_string;
     n_string    local_help_string  = apescript_errors[0].help_string;
-    
+
     n_int   loop = 0;
-    
+
     fprintf(html_write, "<CENTER>\n");
     fprintf(html_write, "<TABLE WIDTH=90%%>\n");
-    
+
     fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP WIDTH=40%% BGCOLOR=\"#eeeeee\">\n");
     fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
     fprintf(html_write, "<B>Error</B>\n");
-    
+
     fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
     fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
     fprintf(html_write, "<B>Help Text</B>\n");
-    
+
     fprintf(html_write, "<TR>\n");
-    
-    
-    do{
-        
+
+
+    do
+    {
+
         local_error_string = apescript_errors[loop].error_string;
         local_help_string  = apescript_errors[loop].help_string;
-        
+
         if ((local_error_string != 0L) && (local_help_string != 0L))
         {
             fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
             fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
             fprintf(html_write, "%s\n",local_error_string);
-            
+
             fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
             fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
             fprintf(html_write, "%s\n",local_help_string);
 
-            
+
             fprintf(html_write, "<TR>\n");
         }
         if (local_error_string != 0L)
         {
             loop++;
         }
-    }while((local_error_string != 0L) && (local_help_string != 0L));
-    
+    }
+    while((local_error_string != 0L) && (local_help_string != 0L));
+
     fprintf(html_write, "</TABLE>\n");
     fprintf(html_write, "</CENTER>\n");
 }
@@ -127,35 +129,36 @@ void audit_file_console(FILE * html_write)
 {
     n_console * local_function = control_commands[0].function;
     n_string    local_command  = control_commands[0].command;
-    
+
     n_int   loop = 0;
-    
+
     fprintf(html_write, "<CENTER>\n");
     fprintf(html_write, "<TABLE WIDTH=90%%>\n");
-    
+
     fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
     fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
     fprintf(html_write, "<B>Command</B>\n");
-    
+
     fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
     fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
     fprintf(html_write, "<B>Addition</B>\n");
-    
+
     fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
     fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
     fprintf(html_write, "<B>Help Information</B>\n");
-    
+
     fprintf(html_write, "<TR>\n");
 
-    
-    do{
+
+    do
+    {
 
         n_string    local_addition = control_commands[loop].addition;
         n_string    local_help_inf = control_commands[loop].help_information;
-        
+
         local_function = control_commands[loop].function;
         local_command  = control_commands[loop].command;
-        
+
         if ((local_command != 0L) && (local_help_inf != 0L))
         {
             if (local_help_inf[0] != 0)
@@ -163,15 +166,15 @@ void audit_file_console(FILE * html_write)
                 fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
                 fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
                 fprintf(html_write, "<B>%s</B>\n",local_command);
-                
+
                 fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
                 fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
                 fprintf(html_write, "%s\n",local_addition);
-                
+
                 fprintf(html_write, "<TD ALIGN=LEFT VALIGN=TOP BGCOLOR=\"#eeeeee\">\n");
                 fprintf(html_write, "<FONT FACE=\"Courier, Courier New\" SIZE=4>\n");
                 fprintf(html_write, "<I>%s</I>\n",local_help_inf);
-                
+
                 fprintf(html_write, "<TR>\n");
             }
         }
@@ -179,8 +182,9 @@ void audit_file_console(FILE * html_write)
         {
             loop++;
         }
-    }while((local_function != 0L) && (local_command != 0L));
-    
+    }
+    while((local_function != 0L) && (local_command != 0L));
+
     fprintf(html_write, "</TABLE>\n");
     fprintf(html_write, "</CENTER>\n");
 }
@@ -295,11 +299,11 @@ void  process_from_source(FILE * html_write, char val1, char val2, char val3)
     {
         audit_file_io(html_write);
     }
-    if ((val1 == 'C') && (val2 == 'O') && (val3 == 'N'))    
+    if ((val1 == 'C') && (val2 == 'O') && (val3 == 'N'))
     {
         audit_file_console(html_write);
     }
-    if ((val1 == 'A') && (val2 == 'E') && (val3 == 'R'))    
+    if ((val1 == 'A') && (val2 == 'E') && (val3 == 'R'))
     {
         audit_file_apescripterror(html_write);
     }

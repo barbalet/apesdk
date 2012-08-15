@@ -116,7 +116,7 @@ void scdebug_file_cleanup(void)
 void scdebug_writeon(n_byte value)
 {
     if (single_entry == 0) return;
-    
+
 #ifndef COMMAND_LINE_DEBUG
     if(value == 1)
     {
@@ -142,13 +142,13 @@ void scdebug_writeon(n_byte value)
         if(file_debug != 0L)
         {
             single_entry = 0;
-/*
-            now handled through scdebug_file_ready
-#ifndef DEBUG_NON_FILE_HANDLE
-            io_disk_write(file_debug, "./apescript_debug.txt");
-            scdebug_file_cleanup();
-#endif
- */
+            /*
+                        now handled through scdebug_file_ready
+            #ifndef DEBUG_NON_FILE_HANDLE
+                        io_disk_write(file_debug, "./apescript_debug.txt");
+                        scdebug_file_cleanup();
+            #endif
+             */
         }
     }
 #endif
@@ -156,7 +156,7 @@ void scdebug_writeon(n_byte value)
 
 n_string scdebug_variable(n_int variable)
 {
-    n_string return_value = 0L;    
+    n_string return_value = 0L;
     if((variable < VARIABLE_MAX)
 #ifndef COMMAND_LINE_DEBUG
             && (file_debug  != 0L)

@@ -80,17 +80,17 @@ void   being_state_description(n_byte2 state, n_string result);
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
 
 void social_graph_link_name(
-                            noble_simulation * local_sim,
-                            noble_being * local_being,
-                            n_int social_graph_index,
-                            n_byte met, n_string name);
+    noble_simulation * local_sim,
+    noble_being * local_being,
+    n_int social_graph_index,
+    n_byte met, n_string name);
 void sim_social(noble_simulation * local);
 
 
 n_int episodic_first_person_memories_percent(
-                                             noble_simulation * local_sim,
-                                             noble_being * local,
-                                             n_byte intention);
+    noble_simulation * local_sim,
+    noble_being * local,
+    n_byte intention);
 
 void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, n_byte transmission_type);
 void body_genome(n_byte maternal, n_genetics * genome, n_byte * genome_str);
@@ -98,14 +98,14 @@ void being_relationship_description(n_int index, n_string description);
 n_string being_body_inventory_description(n_int index);
 
 void brain_dialogue(
-                    noble_simulation * sim,
-                    n_byte awake,
-                    noble_being * meeter_being,
-                    noble_being * met_being,
-                    n_byte		* bc0,
-                    n_byte		* bc1,
-                    n_int being_index,
-                    n_byte internal);
+    noble_simulation * sim,
+    n_byte awake,
+    noble_being * meeter_being,
+    noble_being * met_being,
+    n_byte		* bc0,
+    n_byte		* bc1,
+    n_int being_index,
+    n_byte internal);
 
 void brain_hash(n_byte *local_brain, n_byte * local_brain_hash);
 void brain_cycle(n_byte * local, n_byte2 * constants);

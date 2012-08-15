@@ -34,8 +34,8 @@
  ****************************************************************/
 
 /*! \file   io.c
- *  \brief  Covers the low level input and output relating to memory and files. 
-    In addition to memory and file handling, io has typically been a place holder 
+ *  \brief  Covers the low level input and output relating to memory and files.
+    In addition to memory and file handling, io has typically been a place holder
     for new functionality.
  */
 
@@ -237,12 +237,12 @@ n_int io_disk_write(n_file * local_file, n_string file_name)
     if (out_file == 0L)
     {
         return SHOW_ERROR("Error opening file to write");
-    }    
+    }
     if (local_file->data == 0L)
     {
         return SHOW_ERROR("No data in file to be written");
     }
-    
+
     written_length = fwrite(local_file->data,1,local_file->location, out_file);
     fclose(out_file);
     if (written_length != local_file->location)
@@ -392,7 +392,7 @@ n_byte	io_read(n_file * fil)
     }
     return (val);
 }
-    
+
 /**
  * Converts a tab delimited file to a series of string pointers
  * @param tab_file the pointer to the n_file data that is read from.
@@ -477,7 +477,7 @@ n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value,
 
     return string_point;
 }
-    
+
 /**
  * Read a four byte value from n_file
  * @param fil the pointer to the n_file data that is read from.
@@ -512,7 +512,7 @@ n_int io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char)
         ten_power_place++;
     }
 }
-    
+
 /**
  * Read a number from a string.
  * @param number_string the string to be read from.
@@ -612,7 +612,7 @@ n_int io_number(n_string number_string, n_int * actual_value, n_int * decimal_di
 }
 
 #define	ASCII_WHITESPACE(num) ((((num)>8)&&((num)<14))||((num)==32))
-    
+
 /**
  * Removes the whitespace from the initial file - CRs, LFs, tabs and spaces.
  * @param input the file pointer that will have the white space removed.
@@ -664,8 +664,8 @@ void io_whitespace(n_file * input)
 }
 
 /**
- This is a dynamic write to file function which will increase the file size and 
- allocated a larger data buffer if the original end of the file is reached. It 
+ This is a dynamic write to file function which will increase the file size and
+ allocated a larger data buffer if the original end of the file is reached. It
  is very useful for a number of dynamic file applications through the simulation.
  @param fil The file data to be written to.
  @param byte The byte/character to be written.
@@ -1075,7 +1075,7 @@ n_int	io_read_buff(n_file * fil, n_byte * data, const noble_file_entry * command
             return	out_cnd;			\
     }
 /**
- This function takes a block of data and various format-rules (through the 
+ This function takes a block of data and various format-rules (through the
  commands) and applies these rules to produce an output datafile. In many
  regards this can be thought of as the inverse of io_read_buff.
  @param fil The file data that is produced.
@@ -1693,7 +1693,8 @@ n_int io_apescript_error(AE_ENUM value)
             return SHOW_ERROR(local_error);
         }
         loop++;
-    } while((local_enum != AE_NO_ERROR) && (local_error != 0L));
+    }
+    while((local_enum != AE_NO_ERROR) && (local_error != 0L));
 
     return io_apescript_error(AE_UNKNOWN_ERROR);
 }

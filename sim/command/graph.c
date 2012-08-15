@@ -356,7 +356,7 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
                     {
                         noble_being * local_being2 = &(sim->beings[index[k]]);
                         if ((GET_NAME_FAMILY2(sim, local_being2) == graph[j].family_name[BEING_MET]) &&
-			    (GET_NAME(sim,local_being2) == UNPACK_FAMILY_FIRST_NAME(graph[j].first_name[BEING_MET])))
+                                (GET_NAME(sim,local_being2) == UNPACK_FAMILY_FIRST_NAME(graph[j].first_name[BEING_MET])))
                         {
                             break;
                         }
@@ -600,62 +600,62 @@ static n_uint braincode_standard_deviation(noble_simulation * sim, noble_being *
 */
 
 /* return the number of instruction_types in the braincode */
- /*
+/*
 static void braincode_number_of_instructions(
-    noble_simulation * sim,
-    noble_being * local_being,
-    n_int * no_of_sensors,
-    n_int * no_of_actuators,
-    n_int * no_of_operators,
-    n_int * no_of_conditionals,
-    n_int * no_of_data)
+   noble_simulation * sim,
+   noble_being * local_being,
+   n_int * no_of_sensors,
+   n_int * no_of_actuators,
+   n_int * no_of_operators,
+   n_int * no_of_conditionals,
+   n_int * no_of_data)
 {
 #ifdef BRAINCODE_ON
-    n_int i,j,instruction;
+   n_int i,j,instruction;
 
-    *no_of_sensors = 0;
-    *no_of_actuators = 0;
-    *no_of_operators = 0;
-    *no_of_conditionals = 0;
-    *no_of_data = 0;
+   *no_of_sensors = 0;
+   *no_of_actuators = 0;
+   *no_of_operators = 0;
+   *no_of_conditionals = 0;
+   *no_of_data = 0;
 
-    for (i=0; i<BRAINCODE_SIZE; i+=3)
-    {
-        for (j=0; j<2; j++)
-        {
-            if (j==0)
-            {
-                instruction = GET_BRAINCODE_INTERNAL(sim,local_being)[i] & 63;
-            }
-            else
-            {
-                instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[i] & 63;
-            }
-            if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
-            {
-                *no_of_sensors = *no_of_sensors + 1;
-            }
-            if ((instruction >= BRAINCODE_ACTUATORS_START) && (instruction < BRAINCODE_OPERATORS_START))
-            {
-                *no_of_actuators = *no_of_actuators + 1;
-            }
-            if ((instruction >= BRAINCODE_OPERATORS_START) && (instruction < BRAINCODE_CONDITIONALS_START))
-            {
-                *no_of_operators = *no_of_operators + 1;
-            }
-            if ((instruction >= BRAINCODE_CONDITIONALS_START) && (instruction < BRAINCODE_DATA_START))
-            {
-                *no_of_conditionals = *no_of_conditionals + 1;
-            }
-            if ((instruction >= BRAINCODE_DATA_START) && (instruction < BRAINCODE_INSTRUCTIONS))
-            {
-                *no_of_data = *no_of_data + 1;
-            }
-        }
-    }
+   for (i=0; i<BRAINCODE_SIZE; i+=3)
+   {
+       for (j=0; j<2; j++)
+       {
+           if (j==0)
+           {
+               instruction = GET_BRAINCODE_INTERNAL(sim,local_being)[i] & 63;
+           }
+           else
+           {
+               instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[i] & 63;
+           }
+           if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
+           {
+               *no_of_sensors = *no_of_sensors + 1;
+           }
+           if ((instruction >= BRAINCODE_ACTUATORS_START) && (instruction < BRAINCODE_OPERATORS_START))
+           {
+               *no_of_actuators = *no_of_actuators + 1;
+           }
+           if ((instruction >= BRAINCODE_OPERATORS_START) && (instruction < BRAINCODE_CONDITIONALS_START))
+           {
+               *no_of_operators = *no_of_operators + 1;
+           }
+           if ((instruction >= BRAINCODE_CONDITIONALS_START) && (instruction < BRAINCODE_DATA_START))
+           {
+               *no_of_conditionals = *no_of_conditionals + 1;
+           }
+           if ((instruction >= BRAINCODE_DATA_START) && (instruction < BRAINCODE_INSTRUCTIONS))
+           {
+               *no_of_data = *no_of_data + 1;
+           }
+       }
+   }
 #endif
 }
- */
+*/
 /* return coordinates of the braincode system for phase space plot */
 static void graph_braincode_coords(noble_simulation * sim, noble_being * local_being, n_uint * x, n_uint * y)
 {

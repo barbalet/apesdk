@@ -41,11 +41,11 @@
 /*NOBLEMAKE DEL=""*/
 
 #ifndef	_WIN32
-    #include "../noble/noble.h"
-    #include "../universe/universe.h"
+#include "../noble/noble.h"
+#include "../universe/universe.h"
 #else
-    #include "..\noble\noble.h"
-    #include "..\universe\universe.h"
+#include "..\noble\noble.h"
+#include "..\universe\universe.h"
 #endif
 
 #include "entity_internal.h"
@@ -70,7 +70,7 @@
 
 #define GENE_ENERGY_FROM_SEAWEED(gene)      GENE_VAL_REG(gene, 0, 9, 11, 12)
 
-/** 
+/**
  * How much energy is absorbed from a given type of food
  * @param food_type The type of food
  * @param local pointer to the ape
@@ -107,7 +107,7 @@ static n_int food_location(n_land * local_land, n_weather * local_weather,
                            n_int loc_y,
                            n_int kind)
 {
-    return land_operator_interpolated(local_land, local_weather, loc_x, loc_y, 
+    return land_operator_interpolated(local_land, local_weather, loc_x, loc_y,
                                       (n_byte*)&operators[kind - VARIABLE_BIOLOGY_AREA]);
 }
 
@@ -128,16 +128,16 @@ void food_values(n_land * local_land, n_weather * local_weather,
 {
     /** grass at this location */
     *grass =
-    food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_GRASS)+OFFSET_GRASS;
-    
+        food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_GRASS)+OFFSET_GRASS;
+
     /** trees at this location */
     *trees =
-    food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_TREE);
-    
+        food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_TREE);
+
     /** bushes at this location */
     *bush =
-    food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_BUSH)+OFFSET_BUSH;
-    
+        food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_BUSH)+OFFSET_BUSH;
+
     *grass += LAND_DITHER(*grass, *trees, *bush);
 }
 
@@ -153,7 +153,7 @@ void food_values(n_land * local_land, n_weather * local_weather,
 static n_byte food_eat_land(
     n_land * local_land,
     n_weather * local_weather,
-                            n_int loc_x,
+    n_int loc_x,
     n_int loc_y,
     n_int * energy)
 {
@@ -244,8 +244,8 @@ static n_byte food_intertidal(
  * @return Energy obtained from the food
  */
 n_int food_eat(
-   n_land * local_land,
-   n_weather * local_weather,
+    n_land * local_land,
+    n_weather * local_weather,
     n_int loc_x,
     n_int loc_y,
     n_int az,

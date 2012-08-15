@@ -37,11 +37,11 @@
 /*NOBLEMAKE DEL=""*/
 
 #ifndef	_WIN32
-    #include "../noble/noble.h"
-    #include "../universe/universe.h"
+#include "../noble/noble.h"
+#include "../universe/universe.h"
 #else
-    #include "..\noble\noble.h"
-    #include "..\universe\universe.h"
+#include "..\noble\noble.h"
+#include "..\universe\universe.h"
 #endif
 
 #include "entity_internal.h"
@@ -810,138 +810,138 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
 {
     switch (switcher % 32)
     {
-        case 0:
-            return meeter_being->honor;
-        case 1:
-            return met_being->honor;
-        case 2:
-            return meeter_being->parasites;
-        case 3:
-            return met_being->parasites;
-        case 4:
-            return meeter_being->crowding;
-        case 5:
-            return GET_FAMILY_FIRST_NAME(sim,meeter_being);
-        case 6:
-            return GET_FAMILY_SECOND_NAME(sim,meeter_being);
-        case 7:
-            return GET_FAMILY_FIRST_NAME(sim,met_being);
-        case 8:
-            return GET_FAMILY_SECOND_NAME(sim,met_being);
-        case 9:
-            return meeter_being->facing;
-        case 10:
-            return met_being->facing;
-        case 11:
-            return meeter_being->speed;
-        case 12:
-            return meeter_social_graph[actor_index].familiarity&255;
-        case 13:
-            return meeter_social_graph[actor_index].friend_foe;
-        case 14:
-            return meeter_social_graph[actor_index].attraction;            
-            /* Location */
-        case 15:
-            return (n_byte)(APESPACE_TO_MAPSPACE(meeter_being->x) * 255 / MAP_DIMENSION);
-        case 16:
-            return (n_byte)(APESPACE_TO_MAPSPACE(meeter_being->y) * 255 / MAP_DIMENSION);            
-            /* Being state (lower)*/
-        case 17:
-            return (n_byte)meeter_being->state&255;            
-            /* Being state (upper)*/
-        case 18:
-            return (n_byte)(meeter_being->state>>8)&255;            
-            /* Drives */
-        case 19:
-            return (n_byte)meeter_being->drives[DRIVE_HUNGER];
-        case 20:
-            return (n_byte)meeter_being->drives[DRIVE_SOCIAL];
-        case 21:
-            return (n_byte)meeter_being->drives[DRIVE_FATIGUE];
-        case 22:
-            return (n_byte)meeter_being->drives[DRIVE_SEX];
-            
-            /* Sexisms */
-        case 23:
-            if (FIND_SEX(GET_I(meeter_being)) == FIND_SEX(GET_I(met_being)))
-            {
-                return 0;
-            }
-            else
-            {
-                return 255;
-            }
-            break;
-        case 24:
-            if (FIND_SEX(GET_I(met_being)) == SEX_FEMALE)
-            {
-                return 255;
-            }
-            else
-            {
-                return 0;
-            }
-            break;
-        case 25:
-            if (FIND_SEX(GET_I(met_being)) != SEX_FEMALE)
-            {
-                return 255;
-            }
-            else
-            {
-                return 0;
-            }            
-            /* Overall grooming */
-        case 26:
+    case 0:
+        return meeter_being->honor;
+    case 1:
+        return met_being->honor;
+    case 2:
+        return meeter_being->parasites;
+    case 3:
+        return met_being->parasites;
+    case 4:
+        return meeter_being->crowding;
+    case 5:
+        return GET_FAMILY_FIRST_NAME(sim,meeter_being);
+    case 6:
+        return GET_FAMILY_SECOND_NAME(sim,meeter_being);
+    case 7:
+        return GET_FAMILY_FIRST_NAME(sim,met_being);
+    case 8:
+        return GET_FAMILY_SECOND_NAME(sim,met_being);
+    case 9:
+        return meeter_being->facing;
+    case 10:
+        return met_being->facing;
+    case 11:
+        return meeter_being->speed;
+    case 12:
+        return meeter_social_graph[actor_index].familiarity&255;
+    case 13:
+        return meeter_social_graph[actor_index].friend_foe;
+    case 14:
+        return meeter_social_graph[actor_index].attraction;
+        /* Location */
+    case 15:
+        return (n_byte)(APESPACE_TO_MAPSPACE(meeter_being->x) * 255 / MAP_DIMENSION);
+    case 16:
+        return (n_byte)(APESPACE_TO_MAPSPACE(meeter_being->y) * 255 / MAP_DIMENSION);
+        /* Being state (lower)*/
+    case 17:
+        return (n_byte)meeter_being->state&255;
+        /* Being state (upper)*/
+    case 18:
+        return (n_byte)(meeter_being->state>>8)&255;
+        /* Drives */
+    case 19:
+        return (n_byte)meeter_being->drives[DRIVE_HUNGER];
+    case 20:
+        return (n_byte)meeter_being->drives[DRIVE_SOCIAL];
+    case 21:
+        return (n_byte)meeter_being->drives[DRIVE_FATIGUE];
+    case 22:
+        return (n_byte)meeter_being->drives[DRIVE_SEX];
+
+        /* Sexisms */
+    case 23:
+        if (FIND_SEX(GET_I(meeter_being)) == FIND_SEX(GET_I(met_being)))
         {
-            n_int v=0;
-            n_int n;
-            for (n=0; n<INVENTORY_SIZE; n++)
-            {
-                if (met_being->inventory[n] & INVENTORY_GROOMED) v++;
-            }
-            return (n_byte) (v<<4);
+            return 0;
         }
-        case 27:
+        else
         {
-            n_int v=0;
-            n_int n;
-            for (n=0; n<INVENTORY_SIZE; n++)
-            {
-                if (meeter_being->inventory[n] & INVENTORY_GROOMED) v++;
-            }
-            return (n_byte) (v<<4);
+            return 255;
         }
-            
-        /* Wounds */
-        case 28:
+        break;
+    case 24:
+        if (FIND_SEX(GET_I(met_being)) == SEX_FEMALE)
         {
-            n_int v=0;
-            n_int n;
-            for (n=0; n<INVENTORY_SIZE; n++)
-            {
-                if (met_being->inventory[n] & INVENTORY_WOUND) v++;
-            }
-            return (n_byte) (v<<4);
+            return 255;
         }
-        case 29:
+        else
         {
-            n_int v=0;
-            n_int n;
-            for (n=0; n<INVENTORY_SIZE; n++)
-            {
-                if (meeter_being->inventory[n] & INVENTORY_WOUND) v++;
-            }
-            return (n_byte) (v<<4);
+            return 0;
         }
-            
-            /* Posture */
-        case 30:
-            return GET_PS(meeter_being);
+        break;
+    case 25:
+        if (FIND_SEX(GET_I(met_being)) != SEX_FEMALE)
+        {
+            return 255;
+        }
+        else
+        {
+            return 0;
+        }
+        /* Overall grooming */
+    case 26:
+    {
+        n_int v=0;
+        n_int n;
+        for (n=0; n<INVENTORY_SIZE; n++)
+        {
+            if (met_being->inventory[n] & INVENTORY_GROOMED) v++;
+        }
+        return (n_byte) (v<<4);
     }
-/* case 31: */
+    case 27:
+    {
+        n_int v=0;
+        n_int n;
+        for (n=0; n<INVENTORY_SIZE; n++)
+        {
+            if (meeter_being->inventory[n] & INVENTORY_GROOMED) v++;
+        }
+        return (n_byte) (v<<4);
+    }
+
+    /* Wounds */
+    case 28:
+    {
+        n_int v=0;
+        n_int n;
+        for (n=0; n<INVENTORY_SIZE; n++)
+        {
+            if (met_being->inventory[n] & INVENTORY_WOUND) v++;
+        }
+        return (n_byte) (v<<4);
+    }
+    case 29:
+    {
+        n_int v=0;
+        n_int n;
+        for (n=0; n<INVENTORY_SIZE; n++)
+        {
+            if (meeter_being->inventory[n] & INVENTORY_WOUND) v++;
+        }
+        return (n_byte) (v<<4);
+    }
+
+    /* Posture */
+    case 30:
+        return GET_PS(meeter_being);
+    }
+    /* case 31: */
     return GET_PS(met_being);
-   
+
 }
 
 static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, n_byte internal, n_byte switcher, n_byte * additional_write)
@@ -949,67 +949,69 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
     n_byte half_switcher = switcher >> 1;
     noble_being * important_being = ((switcher & 1) ? met_being : meeter_being);
     switch (half_switcher % 10)
-    { /* Facial characteristics.
-            Here we shift the 0-15 gene values into a 0-255 range */
-        case 0:
-            return GENE_EYE_SHAPE(GET_G(important_being)) << 4;
-        case 1:
-            return GENE_EYE_COLOR(GET_G(important_being)) << 4;
-        case 2:
-            return GENE_EYE_SEPARATION(GET_G(important_being)) << 4;
-        case 3:
-            return GENE_NOSE_SHAPE(GET_G(important_being)) << 4;
-        case 4:
-            return GENE_EAR_SHAPE(GET_G(important_being)) << 4;
-        case 5:
-            return GENE_EYEBROW_SHAPE(GET_G(important_being)) << 4;
-        case 6:
-            return GENE_MOUTH_SHAPE(GET_G(important_being)) << 4;
-        case 7:/* healthyness */
-        {
-            n_byte return_value = 0;
+    {
+        /* Facial characteristics.
+              Here we shift the 0-15 gene values into a 0-255 range */
+    case 0:
+        return GENE_EYE_SHAPE(GET_G(important_being)) << 4;
+    case 1:
+        return GENE_EYE_COLOR(GET_G(important_being)) << 4;
+    case 2:
+        return GENE_EYE_SEPARATION(GET_G(important_being)) << 4;
+    case 3:
+        return GENE_NOSE_SHAPE(GET_G(important_being)) << 4;
+    case 4:
+        return GENE_EAR_SHAPE(GET_G(important_being)) << 4;
+    case 5:
+        return GENE_EYEBROW_SHAPE(GET_G(important_being)) << 4;
+    case 6:
+        return GENE_MOUTH_SHAPE(GET_G(important_being)) << 4;
+    case 7:/* healthyness */
+    {
+        n_byte return_value = 0;
 #ifdef IMMUNE_ON
-            n_int n;
-            noble_immune_system * immune = &(important_being->immune_system);
-            return_value = immune->antigens[0];
-            for (n=1; n<IMMUNE_ANTIGENS; n++)
+        n_int n;
+        noble_immune_system * immune = &(important_being->immune_system);
+        return_value = immune->antigens[0];
+        for (n=1; n<IMMUNE_ANTIGENS; n++)
+        {
+            if (immune->antigens[n]>return_value)
             {
-                if (immune->antigens[n]>return_value)
-                {
-                    return_value = immune->antigens[n];
-                }
+                return_value = immune->antigens[n];
             }
-#endif
-            return return_value;
         }
-        /* the 8 case is covered in the default: */
-        case 9: /* listen for shouts */
-            if ((internal!=0) &&
+#endif
+        return return_value;
+    }
+    /* the 8 case is covered in the default: */
+    case 9: /* listen for shouts */
+        if ((internal!=0) &&
                 (!(meeter_being->state&BEING_STATE_SHOUTING)) &&
                 (!(meeter_being->state&BEING_STATE_SPEAKING)) &&
                 (meeter_being->shout[SHOUT_HEARD]>0))
-            {
-                GET_IN(sim).average_listens++;
+        {
+            GET_IN(sim).average_listens++;
 
-                return meeter_being->shout[SHOUT_HEARD];
-            }
-            break;
-	break;
-            /* listen for name shouts */
-        default:
-            if (switcher == 16) /* positive affect */
-            {
-                n_uint positive = being_affect(sim,meeter_being,1)>>7;
-                if (positive>255) positive=255;
-                return (n_byte)positive;
-                
-            }
-            { /* (switcher == 17) negative affect */
+            return meeter_being->shout[SHOUT_HEARD];
+        }
+        break;
+        break;
+        /* listen for name shouts */
+    default:
+        if (switcher == 16) /* positive affect */
+        {
+            n_uint positive = being_affect(sim,meeter_being,1)>>7;
+            if (positive>255) positive=255;
+            return (n_byte)positive;
 
-                n_uint negative=being_affect(sim,meeter_being,0)>>1;
-                if (negative>255) negative=255;
-                return (n_byte)negative;
-            }        
+        }
+        {
+            /* (switcher == 17) negative affect */
+
+            n_uint negative=being_affect(sim,meeter_being,0)>>1;
+            if (negative>255) negative=255;
+            return (n_byte)negative;
+        }
     }
     return additional_write[0]; /* no op case. Not sure if the compiler will recognize that though */
 }
@@ -1021,23 +1023,25 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
  * @return A byte value indicating the level of familiarity
  */
 static n_byte territory_familiarity(noble_being * local_being,
-									n_byte2 index)
+                                    n_byte2 index)
 {
-	n_byte result=0;
+    n_byte result=0;
 #ifdef TERRITORY_ON
-	n_uint familiarity = (n_uint)(local_being->territory[index].familiarity);
-	n_uint i,max_familiarity = 1;
+    n_uint familiarity = (n_uint)(local_being->territory[index].familiarity);
+    n_uint i,max_familiarity = 1;
 
-	/** find the maximum familiarity */
-	for (i=0;i<TERRITORY_AREA;i++) {
-		if (local_being->territory[i].familiarity > max_familiarity) {
-			max_familiarity = (n_uint)local_being->territory[i].familiarity;
-		}
-	}
+    /** find the maximum familiarity */
+    for (i=0; i<TERRITORY_AREA; i++)
+    {
+        if (local_being->territory[i].familiarity > max_familiarity)
+        {
+            max_familiarity = (n_uint)local_being->territory[i].familiarity;
+        }
+    }
 
-	result = (n_byte)(familiarity*255/max_familiarity);
+    result = (n_byte)(familiarity*255/max_familiarity);
 #endif
-	return result;
+    return result;
 }
 
 #define IS_CONST0 (is_constant0 ? value0 : addr0[0])
@@ -1100,7 +1104,7 @@ void brain_dialogue(
     }
 
     i = 0;
-    
+
     while (itt<max_itterations)
     {
         n_byte instruction = BRAINCODE_INSTRUCTION(bc0, i);
@@ -1154,7 +1158,7 @@ void brain_dialogue(
         }
         case BRAINCODE_SEN2:
         {
-			n_int new_episode_index=-1;
+            n_int new_episode_index=-1;
             n_int switcher = addr0[0]%25;
             switch (switcher)
             {
@@ -1171,27 +1175,27 @@ void brain_dialogue(
                 /* Shift attention to a different territory */
             case 2:
                 territory_index = IS_CONST1;
-                GET_A(meeter_being,ATTENTION_TERRITORY) = territory_index;				
+                GET_A(meeter_being,ATTENTION_TERRITORY) = territory_index;
                 break;
                 /* Shift attention to a body region */
             case 3:
                 GET_A(meeter_being,ATTENTION_BODY) = IS_CONST1 % INVENTORY_SIZE;
                 break;
             case 4: /* Shift attention to a similar location */
-				new_episode_index = attention_similar_place(episode_index, episodic, memory_visited);
-				break;
+                new_episode_index = attention_similar_place(episode_index, episodic, memory_visited);
+                break;
             case 5: /* Shift attention to a similar time */
-				new_episode_index = attention_similar_time(episode_index, episodic, memory_visited);
-				break;
+                new_episode_index = attention_similar_time(episode_index, episodic, memory_visited);
+                break;
             case 6: /* Shift attention to a similar date */
-				new_episode_index = attention_similar_date(episode_index, episodic, memory_visited);
-				break;
+                new_episode_index = attention_similar_date(episode_index, episodic, memory_visited);
+                break;
             case 7: /* Shift attention to a similar name */
-				new_episode_index = attention_similar_name(episode_index, episodic, memory_visited);
-				break;
+                new_episode_index = attention_similar_name(episode_index, episodic, memory_visited);
+                break;
             case 8: /* Shift attention to a similar affect */
-				new_episode_index = attention_similar_affect(episode_index, episodic, memory_visited);
-				break;
+                new_episode_index = attention_similar_affect(episode_index, episodic, memory_visited);
+                break;
             case 9:
                 addr1[0] = episodic[episode_index].event;
                 break;
@@ -1214,7 +1218,7 @@ void brain_dialogue(
             {
                 /* atmosphere pressure */
                 n_int pressure = weather_pressure(sim->weather, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(meeter_being->x)) >> 1, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(meeter_being->y)) >> 1);
-                
+
                 if (pressure > 100000) pressure = 100000;
                 if (pressure < 0) pressure = 0;
                 addr1[0] = (n_byte)(pressure>>9);
@@ -1245,11 +1249,11 @@ void brain_dialogue(
                 break;
             case 20:
                 /* territory familiarity */
-				addr1[0] = territory_familiarity(meeter_being,territory_index);
+                addr1[0] = territory_familiarity(meeter_being,territory_index);
                 break;
             case 21:
                 /* territory familiarity */
-				addr1[0] = territory_familiarity(met_being,territory_index);
+                addr1[0] = territory_familiarity(met_being,territory_index);
                 break;
             case 22:
             {
@@ -1324,28 +1328,28 @@ void brain_dialogue(
             }
             }
 
-			/* If attention has shifted to a new episode */
-			if (new_episode_index>-1)
+            /* If attention has shifted to a new episode */
+            if (new_episode_index>-1)
             {
                 episode_index = new_episode_index;
                 GET_A(meeter_being,ATTENTION_EPISODE) = (n_byte)episode_index;
-				/* Shift attention to the being in this episode */
-				possible_actor_index = get_actor_index_from_episode(meeter_social_graph,episodic,episode_index);
-				if (possible_actor_index>-1)
-				{
-					actor_index = possible_actor_index;
-					/* store the change in attention */
-					GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
-				}
-				/* set territory attention to the location where the episode occurred */
+                /* Shift attention to the being in this episode */
+                possible_actor_index = get_actor_index_from_episode(meeter_social_graph,episodic,episode_index);
+                if (possible_actor_index>-1)
+                {
+                    actor_index = possible_actor_index;
+                    /* store the change in attention */
+                    GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
+                }
+                /* set territory attention to the location where the episode occurred */
                 GET_A(meeter_being,ATTENTION_TERRITORY) =
-					(APESPACE_TO_TERRITORY(episodic[episode_index].location[1])*16)+
-					APESPACE_TO_TERRITORY(episodic[episode_index].location[0]);
-			}
+                    (APESPACE_TO_TERRITORY(episodic[episode_index].location[1])*16)+
+                    APESPACE_TO_TERRITORY(episodic[episode_index].location[0]);
+            }
             break;
         }
         case BRAINCODE_SEN3:
-                
+
             addr1[0] = brain_third_sense(sim,meeter_being, met_being, internal, addr0[0], addr1);
             break;
             /* Action */
@@ -1375,7 +1379,7 @@ void brain_dialogue(
                     meeter_being->goal[0] = GOAL_LOCATION;
                     meeter_being->goal[1] = episodic[episode_index].location[0];
                     meeter_being->goal[2] = episodic[episode_index].location[1];
-					meeter_being->goal[3] = GOAL_TIMEOUT;
+                    meeter_being->goal[3] = GOAL_TIMEOUT;
                 }
                 break;
                 /* alter friend or foe value */
@@ -1776,7 +1780,7 @@ void brain_dialogue(
         {
             n_int v0 = IS_CONST0;
             n_int v1 = IS_CONST1;
-            
+
             i2 = (i + (((v0*256) + v1)*BRAINCODE_BYTES_PER_INSTRUCTION)) % BRAINCODE_SIZE;
             if (i2 <= i)
             {

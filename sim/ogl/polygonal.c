@@ -78,13 +78,13 @@ static GLuint terrain_display_list;
 
 /* TODO: step through the direction facing
    The sections that project forward should be calculated accordingly
- 
+
  +-------+
  |       |
  |       |
  |   *   |
  +-------+
- 
+
  +-------+
  |       |
  |       |
@@ -96,8 +96,8 @@ static GLuint terrain_display_list;
  | *     |
  |       |
  +-------+
- 
- 
+
+
    */
 
 static void polygonal_render_terrain(n_byte * local_land, n_int co_x, n_int co_y)

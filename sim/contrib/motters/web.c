@@ -327,7 +327,7 @@ void create_web_ape_friends(
         for (j = 1; j < SOCIAL_SIZE; j++)
         {
             if ((eliminated[j] == 0) &&
-		(!((local_social_graph[j].first_name[BEING_MET]==0)&&(local_social_graph[j].family_name[BEING_MET]==0))))
+                    (!((local_social_graph[j].first_name[BEING_MET]==0)&&(local_social_graph[j].family_name[BEING_MET]==0))))
             {
                 resp = (n_int)(local_social_graph[j].friend_foe) - social_respect_mean(sim,local_being);
                 attr = local_social_graph[j].attraction;
@@ -381,7 +381,7 @@ void create_web_ape_friends(
                     {
                         if (FIND_SEX(GET_I(b)) == gender)
                         {
-							b2 = b;
+                            b2 = b;
                             break;
                         }
                     }
@@ -940,11 +940,11 @@ void create_web_ape_profile(
     for (i=0; i<EPISODIC_SIZE; i++)
     {
         if ((local_episodic[i].event>0) &&
-	    (local_episodic[i].first_name[BEING_MEETER]==GET_NAME_GENDER(sim,local_being)) &&
-	    (local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(sim,local_being)))
+                (local_episodic[i].first_name[BEING_MEETER]==GET_NAME_GENDER(sim,local_being)) &&
+                (local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(sim,local_being)))
         {
             being_name(((
-	               local_episodic[i].first_name[BEING_MET]>>8) == SEX_FEMALE),
+                            local_episodic[i].first_name[BEING_MET]>>8) == SEX_FEMALE),
                        local_episodic[i].first_name[BEING_MET]&255,
                        UNPACK_FAMILY_FIRST_NAME(local_episodic[i].family_name[BEING_MET]),
                        UNPACK_FAMILY_SECOND_NAME(local_episodic[i].family_name[BEING_MET]),
@@ -1424,7 +1424,7 @@ void create_web_ape_profile(
             days_elapsed =
                 current_date -
                 TIME_IN_DAYS(&(
-			       local_episodic[i].date[0]));
+                                 local_episodic[i].date[0]));
             if (days_elapsed==0)
             {
                 time_elapsed =
@@ -2431,7 +2431,7 @@ void draw_weather(unsigned char * buffer, n_int img_width, n_weather * local_wea
                 {
                     px = map_x*img_width / weather_dimension;
                     p = weather_pressure(local_weather, map_x, map_y);
-                    
+
                     px2 = (map_x+1)*img_width / weather_dimension;
                     py2 = (map_y+1)*img_width / weather_dimension;
 

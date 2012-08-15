@@ -36,18 +36,18 @@
 /*NOBLEMAKE DEL=""*/
 
 #ifndef	_WIN32
-    #include "../noble/noble.h"
+#include "../noble/noble.h"
 #else
-    #include "..\noble\noble.h"
+#include "..\noble\noble.h"
 #endif
 
 #include "universe.h"
 #include "universe_internal.h"
 
 #ifndef	_WIN32
-    #include "../entity/entity.h"
+#include "../entity/entity.h"
 #else
-    #include "..\entity\entity.h"
+#include "..\entity\entity.h"
 #endif
 
 
@@ -495,7 +495,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                             return io_apescript_error(AE_VALUE_OUT_OF_RANGE);
                         }
                         local_number = land_operator_interpolated(local_sim->land, local_sim->weather,
-                                            (n_byte)quick_x, (n_byte)quick_y, (n_byte*)&operators[int_qu_op-VARIABLE_BIOLOGY_AREA]);
+                                       (n_byte)quick_x, (n_byte)quick_y, (n_byte*)&operators[int_qu_op-VARIABLE_BIOLOGY_AREA]);
                     }
                     else
                     {
@@ -914,7 +914,7 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
         local_being->goal[1]  = (n_byte2)local_goal_x;
         local_being->goal[2]  = (n_byte2)local_goal_y;
         local_being->goal[3]  = GOAL_TIMEOUT;
-		
+
         local_being->script_overrides |= OVERRIDE_GOAL;
     }
     if (local_drive_hunger>-1)

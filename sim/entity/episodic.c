@@ -41,11 +41,11 @@
 /*NOBLEMAKE DEL=""*/
 
 #ifndef	_WIN32
-    #include "../noble/noble.h"
-    #include "../universe/universe.h"
+#include "../noble/noble.h"
+#include "../universe/universe.h"
 #else
-    #include "..\noble\noble.h"
-    #include "..\universe\universe.h"
+#include "..\noble\noble.h"
+#include "..\universe\universe.h"
 #endif
 
 #include "entity_internal.h"
@@ -149,9 +149,9 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
         /** remove intentions which are outdated */
         if (local_episodic[i].event >= EVENT_INTENTION)
         {
-	    /** is this my intention, or someone else's? */
+            /** is this my intention, or someone else's? */
             if ((local_episodic[i].first_name[BEING_MEETER]==GET_NAME_GENDER(local_sim,local)) &&
-		(local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(local_sim,local)))
+                    (local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(local_sim,local)))
             {
 
                 if (local_episodic[i].date[0] < local_sim->land->date[0])
@@ -174,7 +174,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
         /** fade towards EPISODIC_AFFECT_ZERO */
         if (local_episodic[i].affect < EPISODIC_AFFECT_ZERO)
         {
-	    /** negative memories fade */
+            /** negative memories fade */
             if (EPISODIC_AFFECT_ZERO - local_episodic[i].affect > 16)
             {
                 local_episodic[i].affect+=(1+GENE_NEGATIVE_AFFECT_FADE(GET_G(local)));
@@ -188,7 +188,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
         {
             if (local_episodic[i].affect > EPISODIC_AFFECT_ZERO)
             {
-	        /** positive memories fade */
+                /** positive memories fade */
                 if (local_episodic[i].affect - EPISODIC_AFFECT_ZERO > 16)
                 {
                     local_episodic[i].affect-=(1+GENE_POSITIVE_AFFECT_FADE(GET_G(local)));
@@ -229,27 +229,27 @@ n_int episodic_met_being_celebrity(
     for (i=0; i<EPISODIC_SIZE; i++)
     {
         aff = (n_int)(meeter_episodic[i].affect) - EPISODIC_AFFECT_ZERO;
-	if (aff>1) aff=1;
-	if (aff<-1) aff=-1;
+        if (aff>1) aff=1;
+        if (aff<-1) aff=-1;
 
-	/** check both the meeter and the met ape for each memory */
+        /** check both the meeter and the met ape for each memory */
         for (j=BEING_MEETER; j<=BEING_MET; j++)
         {
             ctr=0;
-	    /** same first name */
+            /** same first name */
             if (meeter_episodic[i].first_name[j]==first_name)
             {
                 celebrity+=aff;
                 ctr++;
             }
-	    /** same family name */
+            /** same family name */
             if (meeter_episodic[i].family_name[j]==family_name)
             {
                 celebrity+=aff;
                 ctr++;
             }
-	    /** if both first name and family name match then
-		increase the celebrity value further */
+            /** if both first name and family name match then
+            increase the celebrity value further */
             if (ctr==2)
             {
                 celebrity+=aff*2;
@@ -293,7 +293,7 @@ n_int episodic_first_person_memories_percent(
         {
             if (intention!=0)
             {
-	        /** ratio of intentions to other memories */
+                /** ratio of intentions to other memories */
                 if (local_episodic[i].event >= EVENT_INTENTION)
                 {
                     hits++;
@@ -301,9 +301,9 @@ n_int episodic_first_person_memories_percent(
             }
             else
             {
-	        /** ratio of first person memories to other memories */
+                /** ratio of first person memories to other memories */
                 if ((local_episodic[i].first_name[BEING_MEETER] == name) &&
-		    (local_episodic[i].family_name[BEING_MEETER] == family))
+                        (local_episodic[i].family_name[BEING_MEETER] == family))
                 {
                     hits++;
                 }
@@ -364,12 +364,12 @@ static n_int episodic_memory_replace_index(
         /** is this the same type of event */
         if (local_episodic[i].event == event)
         {
-	    /** is this the same being? */
+            /** is this the same being? */
             if ((local_episodic[i].first_name[BEING_MEETER]==name1) &&
-		(local_episodic[i].family_name[BEING_MEETER]==family1))
+                    (local_episodic[i].family_name[BEING_MEETER]==family1))
             {
-	        /** get absolute affect value */
-	        n_int aff1 = ABS((n_int)(local_episodic[i].affect)-EPISODIC_AFFECT_ZERO);
+                /** get absolute affect value */
+                n_int aff1 = ABS((n_int)(local_episodic[i].affect)-EPISODIC_AFFECT_ZERO);
                 /** does this have the least affect (most forgettable) */
                 event_exists = 1;
                 if (aff1 <= min)
@@ -397,8 +397,8 @@ static n_int episodic_memory_replace_index(
         min = abs_aff;
         for (i=0; i<EPISODIC_SIZE; i++)
         {
-	    /** get absolute affect value */
-	    n_int aff1 = ABS((n_int)(local_episodic[i].affect)-EPISODIC_AFFECT_ZERO);
+            /** get absolute affect value */
+            n_int aff1 = ABS((n_int)(local_episodic[i].affect)-EPISODIC_AFFECT_ZERO);
             /** does this have the least affect (most forgettable) */
             if (aff1 < min)
             {
@@ -520,20 +520,20 @@ n_byte episodic_intention(
 
     /** only certain types of events become intentions */
     if (!((event==EVENT_GROOM) ||
-	  (event==EVENT_CHAT)))
+            (event==EVENT_CHAT)))
     {
         return 0;
     }
 
     /** find a memory index to replace */
     replace = episodic_memory_replace_index(
-	          EVENT_INTENTION + event,
-		  (n_int)(local_episodic[episode_index].affect)-EPISODIC_AFFECT_ZERO,
-		  GET_NAME_GENDER(local_sim,local),
-		  GET_NAME_FAMILY2(local_sim,local),
-		  local_episodic[episode_index].first_name[BEING_MET],
-		  local_episodic[episode_index].family_name[BEING_MET],
- 		  local, local_sim);
+                  EVENT_INTENTION + event,
+                  (n_int)(local_episodic[episode_index].affect)-EPISODIC_AFFECT_ZERO,
+                  GET_NAME_GENDER(local_sim,local),
+                  GET_NAME_FAMILY2(local_sim,local),
+                  local_episodic[episode_index].first_name[BEING_MET],
+                  local_episodic[episode_index].family_name[BEING_MET],
+                  local, local_sim);
 
     if (replace == -1) return 0;
 
@@ -569,7 +569,7 @@ n_byte episodic_anecdote(
 
     if (local_episodic == 0L || other_episodic == 0L || local == other)
     {
-      return 0;
+        return 0;
     }
 
     affect = (n_int)(local_episodic[GET_A(local,ATTENTION_EPISODE)].affect)-EPISODIC_AFFECT_ZERO;
@@ -577,8 +577,8 @@ n_byte episodic_anecdote(
 
     /** both protagonists must be awake */
     if ((event==0) ||
-        (being_awake_local(local_sim, local)==FULLY_ASLEEP) ||
-        (being_awake_local(local_sim, other)==FULLY_ASLEEP))
+            (being_awake_local(local_sim, local)==FULLY_ASLEEP) ||
+            (being_awake_local(local_sim, other)==FULLY_ASLEEP))
     {
         return 0;
     }
@@ -591,30 +591,30 @@ n_byte episodic_anecdote(
 
     /** mutate with some probability */
     if (math_random(local->seed) <
-        (ANECDOTE_EVENT_MUTATION_RATE+
-	 (local->learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION])*100)*mult)
+            (ANECDOTE_EVENT_MUTATION_RATE+
+             (local->learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION])*100)*mult)
     {
         event = (n_byte)(math_random(local->seed) % EVENTS);
     }
     if (math_random(local->seed) <
-        (ANECDOTE_AFFECT_MUTATION_RATE+
-	 (local->learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION])*100)*mult)
+            (ANECDOTE_AFFECT_MUTATION_RATE+
+             (local->learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION])*100)*mult)
     {
         /** affect gets exaggerated or downplayed */
         affect = (affect * (64 + (n_int)(math_random(local->seed) & 127))) / 128;
-	/** keep affect within range */
-	if (affect<-32000) affect=-32000;
-	if (affect>32000) affect=32000;
+        /** keep affect within range */
+        if (affect<-32000) affect=-32000;
+        if (affect>32000) affect=32000;
     }
 
     /** find an index within the other episodic memory in which to insert */
     replace = episodic_memory_replace_index(
-        event,affect,
-	local_episodic[GET_A(local,ATTENTION_EPISODE)].first_name[BEING_MEETER],
-	local_episodic[GET_A(local,ATTENTION_EPISODE)].family_name[BEING_MEETER],
-	local_episodic[GET_A(local,ATTENTION_EPISODE)].first_name[BEING_MET],
-	local_episodic[GET_A(local,ATTENTION_EPISODE)].family_name[BEING_MET],
-	local,local_sim);
+                  event,affect,
+                  local_episodic[GET_A(local,ATTENTION_EPISODE)].first_name[BEING_MEETER],
+                  local_episodic[GET_A(local,ATTENTION_EPISODE)].family_name[BEING_MEETER],
+                  local_episodic[GET_A(local,ATTENTION_EPISODE)].first_name[BEING_MET],
+                  local_episodic[GET_A(local,ATTENTION_EPISODE)].family_name[BEING_MET],
+                  local,local_sim);
 
     if (replace==-1) return 0;
 

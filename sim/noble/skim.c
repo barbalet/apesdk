@@ -37,7 +37,7 @@
 /*! \file   skim.c
  *  \brief  This code is maintained to translate between BrainCode
     and ApeScript bytecode. This code has the eventual aim of providing
-    a uniform 1:1 interface and allow dynamic ApeScript to evolve and 
+    a uniform 1:1 interface and allow dynamic ApeScript to evolve and
     produce a human readable version of BrainCode. Could be early days yet,
     time will tell.
  */
