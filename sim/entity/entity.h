@@ -48,9 +48,10 @@
 
 #undef	BRAIN_HASH
 
-#undef  BRAINCODE_SHOW
-
 #define SOFT_BRAIN_ON
+
+#undef  RANDOM_INITIAL_BRAINCODE
+
 
 #define EPISODIC_AFFECT_ZERO (16384)
 
@@ -104,8 +105,7 @@ void brain_dialogue(
     noble_being * met_being,
     n_byte		* bc0,
     n_byte		* bc1,
-    n_int being_index,
-    n_byte internal);
+    n_int being_index);
 
 void brain_hash(n_byte *local_brain, n_byte * local_brain_hash);
 void brain_cycle(n_byte * local, n_byte2 * constants);

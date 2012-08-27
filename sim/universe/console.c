@@ -75,7 +75,7 @@ n_int          console_file_exists = 0;
 n_string_block console_file_name;
 
 void console_external_watch(void)
-{
+{    
     if (io_command_line_execution())
     {
         n_string_block output;
@@ -868,6 +868,8 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
     static_result = result;
 
     console_populate_braincode(ptr,watch_line_braincode);
+    
+    static_result = 0L;
     result[watch_string_length++]='\n';
 
 }
@@ -1279,6 +1281,9 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
     }
 }
 
+
+extern n_int being_remove_internal;
+extern n_int being_remove_external;
 /**
  * Watch a particular being
  * @param ptr pointer to noble_simulation object
@@ -1293,6 +1298,12 @@ void watch_being(void * ptr, n_console_output output_function)
     n_uint i,j;
     n_byte2 state;
 
+    
+    if (being_remove_internal)
+        do{}while(being_remove_internal);
+    
+    being_remove_external = 1;
+    
     if (watch_type == WATCH_STATES)
     {
         n_uint histogram[16];
@@ -1404,6 +1415,7 @@ void watch_being(void * ptr, n_console_output output_function)
             output_function(beingstr);
         }
     }
+    being_remove_external = 0;
 }
 
 /**
@@ -1436,6 +1448,145 @@ n_int console_logging(void * ptr, n_string response, n_console_output output_fun
         indicator_index = 1;
         output_function("Logging turned on");
     }
+    return 0;
+}
+
+
+/**
+ * Compare two braincode arrays
+ * @param braincode0 Braincode array for the first being
+ * @param braincode1 Braincode byte array for the second being
+ * @param block_size The number of instructions to compare within a block
+ * @returns Location of the first match within the first braincode array
+ */
+static n_int console_compare_brain(n_byte * braincode0, n_byte * braincode1, n_int block_size)
+{
+	n_int block_size_bytes = block_size*BRAINCODE_BYTES_PER_INSTRUCTION;
+    n_int loop = 0;
+    while (loop < (BRAINCODE_SIZE - block_size_bytes))
+    {
+        n_int loop2 = 0;
+        while (loop2 < (BRAINCODE_SIZE - block_size_bytes))
+        {
+            n_int block_step = 0;
+            while (block_step < block_size)
+            {
+                if (braincode0[loop + block_step*BRAINCODE_BYTES_PER_INSTRUCTION] ==
+					braincode1[loop2 + block_step*BRAINCODE_BYTES_PER_INSTRUCTION])
+                {
+					block_step++;
+					if (block_step == block_size)
+					{
+						return loop;
+					}
+				}
+                else
+                {
+                    break;
+                }
+            }
+            loop2 += BRAINCODE_BYTES_PER_INSTRUCTION;
+        }
+        loop += BRAINCODE_BYTES_PER_INSTRUCTION;
+    }
+        
+    return -1;
+}
+
+/**
+ * Shows repeated sections of braincode
+ * @param ptr
+ * @param response
+ * @param output_function
+ * @returns 0
+ */
+n_int console_idea(void * ptr, n_string response, n_console_output output_function)
+{
+#ifdef BRAINCODE_ON
+	const n_int min_block_size = 3;
+	const n_int max_block_size = 8;
+	n_uint i, total_matches=0, total_tests=0, histogram[max_block_size - min_block_size + 1];
+    noble_simulation * local_sim = (noble_simulation *) ptr;
+
+	/* clear the histogram */
+	for (i = 0; i <= max_block_size - min_block_size; i++)
+	{
+		histogram[i]=0;
+	}
+
+    if (local_sim->select != NO_BEINGS_FOUND)
+    {
+        n_int loop = 0;
+        while (loop < local_sim->num)
+        {
+            noble_being * local_being = &(local_sim->beings[loop]);
+            n_byte * bc_external = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
+            if (bc_external)
+            {
+            
+                n_int loop2 = loop+1;
+                while (loop2 < local_sim->num)
+                {
+					noble_being * local_being2 = &(local_sim->beings[loop2]);
+					n_byte * bc_external2 = GET_BRAINCODE_EXTERNAL(local_sim, local_being2);
+
+					if (bc_external2)
+                    {
+						n_int   location = 0;
+						n_int   block_size = min_block_size;
+                            
+						while (block_size <= max_block_size)
+                        {
+							location = console_compare_brain(bc_external,
+															 bc_external2,
+															 block_size);
+                                
+							if (location != -1)
+                            {
+								histogram[block_size-min_block_size]++;
+								total_matches++;
+								/* n_string_block output;
+								sprintf(output, "%ld %ld, %ld",loop, loop2, block_size);
+								output_function(output); */
+							}
+							total_tests++;
+							block_size++;
+						}
+					}
+					loop2++;
+				}
+
+            }
+            loop++;
+        }
+    }
+
+	if (total_tests > 0)
+	{
+		n_string_block output;
+		sprintf(output, "Matches %03u.%04u percent\n",
+				(n_c_int)(total_matches*100/total_tests),
+				(n_c_int)(total_matches*1000000/total_tests)%10000);
+		output_function(output);
+
+		sprintf(output, "%s", "Block Percent   Instances");
+		output_function(output);
+
+		sprintf(output, "%s", "-------------------------");
+		output_function(output);
+
+		for (i = 0; i <= max_block_size - min_block_size; i++)
+		{
+			sprintf(output, "%02u    %03u.%04u  %04u",
+					(n_c_int)(i+min_block_size),
+					(n_c_int)(histogram[i]*100/total_tests),
+					(n_c_int)((histogram[i]*1000000/total_tests)%10000),
+					(n_c_int)histogram[i]);
+			output_function(output);
+		}
+	}
+
+#endif
     return 0;
 }
 
@@ -1626,6 +1777,15 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
     return 0;
 }
 
+static n_int simulation_running = 1;
+static n_int simulation_executing = 0;
+
+n_int console_stop(void * ptr, n_string response, n_console_output output_function)
+{
+    simulation_running = 0;
+    return 0;
+}
+
 /**
  *
  * @param ptr
@@ -1649,32 +1809,34 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_int loop = 0;
-    while (loop < save_interval_steps)
+    
+    if (output_function)
+    {
+        if (simulation_executing == 1)
+        {
+            output_function("Simulation already running");
+            return 0;
+        }
+        simulation_executing = 1;
+    }
+    simulation_running = 1;
+    
+    while ((loop < save_interval_steps) && simulation_running)
     {
         sim_cycle();
         watch_being(local_sim, output_function);
         if (local_sim->num == 0)
         {
-            n_string_block  output;
-            n_byte2         seed[2];
-
-            sprintf(output,"*** %d %d %d", local_sim->land->date[1], local_sim->land->date[0], local_sim->land->time);
-            output_function(output);
-
-            seed[0] = local_sim->land->genetics[0];
-            seed[1] = local_sim->land->genetics[1];
-
-            math_random3(seed);
-
-            console_warning();
-
-            sim_init(KIND_NEW_SIMULATION, (seed[0]<<16)|seed[1], MAP_AREA, 0);
-
-            indicator_index++;
-            local_sim->indicators_logging = indicator_index;
+            simulation_running = 0;
         }
         loop++;
     }
+    
+    if (output_function)
+    {
+        simulation_executing = 0;
+    }
+    
     return 0;
 }
 
@@ -1690,6 +1852,15 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
     n_uint run=0;
     n_int  number=0, interval=INTERVAL_DAYS;
 
+    if (simulation_executing == 1)
+    {
+        output_function("Simulation already running");
+        return 0;
+    }
+    simulation_executing = 1;
+    
+    simulation_running = 1;
+    
     if (response != 0L)
     {
         if (io_length(response, STRING_BLOCK_SIZE) > 0)
@@ -1707,9 +1878,9 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
 
                     output_function(output);
 
-                    while(i < end_point)
+                    while ((i < end_point) && simulation_running)
                     {
-                        console_step(ptr, 0, output_function);
+                        console_step(ptr, 0, 0L);
                         i++;
                     }
                     save_interval_steps = temp_save_interval_steps;
@@ -1718,6 +1889,9 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
             }
         }
     }
+    
+    simulation_executing = 0;
+    
     if (run == 0)
     {
         (void)SHOW_ERROR("Time not specified, examples: run 2 days, run 6 hours");

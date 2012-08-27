@@ -175,6 +175,11 @@ void shared_close(void)
 
 void shared_notPause(void)
 {
+    if (control_command_line_execution())
+    {
+        console_stop(0L,"",0L);
+    }
+    
     local_pause = 1 - local_pause;
 }
 

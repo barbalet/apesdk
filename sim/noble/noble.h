@@ -56,7 +56,7 @@
 /*! @define */
 #define	SHORT_VERSION_NAME		 "Noble Ape 0.695 "
 #define	FULL_DATE				 __DATE__
-#define SUBVERSION_VERSION		"SOURCE REVISION 720"
+#define SUBVERSION_VERSION		"SOURCE REVISION 1052"
 
 /*! @define */
 #define	VERSION_NUMBER		     695

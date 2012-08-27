@@ -1423,7 +1423,7 @@ n_int social_chat(
         sim,1,meeter_being,met_being,
         GET_BRAINCODE_EXTERNAL(sim,meeter_being),
         GET_BRAINCODE_EXTERNAL(sim,met_being),
-        being_index,0);
+        being_index);
 #endif
 #ifdef EPISODIC_ON
     social_group_align_preferences(

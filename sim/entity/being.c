@@ -1478,6 +1478,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local, n_b
     {
         return;
     }
+	/* count the inputs and outputs */
     for (i=0; i<BRAINCODE_PROBES; i++)
     {
         if (local->brainprobe[i].type == INPUT_SENSOR)
@@ -1489,45 +1490,42 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local, n_b
             outputs++;
         }
     }
-    /* check to ensure that there is at least one input and one output */
-    if (inputs == 0)
+    /* check to ensure that there are a minimum number of sensors and actuators */
+    if (inputs < (BRAINCODE_PROBES>>2))
     {
         local->brainprobe[0].type = INPUT_SENSOR;
     }
-    if (outputs == 0)
-    {
-        local->brainprobe[0].type = OUTPUT_ACTUATOR;
-        if (inputs == 0)
-        {
-            local->brainprobe[1].type = INPUT_SENSOR;
-        }
-    }
+	else
+	{
+		if (outputs < (BRAINCODE_PROBES>>2))
+		{
+			local->brainprobe[0].type = OUTPUT_ACTUATOR;
+		}
+	}
+	/* update each probe */
     for (i=0; i<BRAINCODE_PROBES; i++)
     {
-        if (local->brainprobe[i].frequency > 0)
+		local->brainprobe[i].state++;		
+		if (local->brainprobe[i].state >= local->brainprobe[i].frequency)
         {
-            local->brainprobe[i].state++;
-            if (local->brainprobe[i].state >= local->brainprobe[i].frequency)
+			/* position within the brain */
+			n_int n1 = brain_probe_to_location(local->brainprobe[i].position);
+			local->brainprobe[i].state = 0;
+			if (local->brainprobe[i].type == INPUT_SENSOR)
             {
-                /* position within the brain */
-                n_int n1 = brain_probe_to_location(local->brainprobe[i].position);
-                local->brainprobe[i].state = 0;
-                if (local->brainprobe[i].type == INPUT_SENSOR)
-                {
-                    /* address within braincode */
-                    n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
-                    /* Change address */
-                    local->brainprobe[i].address = (brain_point[n1] + local->brainprobe[i].address)&255;
-                    /* read from brain */
-                    local_braincode[n2] = (brain_point[n1] + local->brainprobe[i].offset)&255;
-                }
-                else
-                {
-                    /* write to brain */
-                    brain_point[n1] = 255;
-                }
-            }
-        }
+				/* address within braincode */
+				n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
+				/* Change address */
+				/*local->brainprobe[i].address = (brain_point[n1] + local->brainprobe[i].address)&255;*/
+				/* read from brain */
+				local_braincode[n2] = (brain_point[n1] + local->brainprobe[i].offset)&255;
+			}
+			else
+            {
+				/* write to brain */
+				brain_point[n1] = 255;
+			}
+		}
     }
 }
 
@@ -2532,13 +2530,21 @@ void being_init_braincode(noble_simulation * sim,
             math_random3(local_random);
             if (internal!=0)
             {
+#ifdef RANDOM_INITIAL_BRAINCODE
+                GET_BRAINCODE_INTERNAL(sim,local)[ch] = math_random(local_random) & 255;
+#else
                 GET_BRAINCODE_INTERNAL(sim,local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+#endif
                 GET_BRAINCODE_INTERNAL(sim,local)[ch+1] = math_random(local_random) & 255;
                 GET_BRAINCODE_INTERNAL(sim,local)[ch+2] = math_random(local_random) & 255;
             }
             else
             {
+#ifdef RANDOM_INITIAL_BRAINCODE
+                GET_BRAINCODE_INTERNAL(sim,local)[ch] = math_random(local_random) & 255;
+#else
                 GET_BRAINCODE_EXTERNAL(sim,local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+#endif
                 GET_BRAINCODE_EXTERNAL(sim,local)[ch+1] = math_random(local_random) & 255;
                 GET_BRAINCODE_EXTERNAL(sim,local)[ch+2] = math_random(local_random) & 255;
             }
@@ -2773,8 +2779,15 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
         for (ch = 0; ch < BRAINCODE_PROBES; ch++)
         {
             math_random3(local_random);
-            local->brainprobe[ch].type = (n_byte)local_random[0];
-            local->brainprobe[ch].frequency = (n_byte)local_random[1]%BRAINCODE_MAX_FREQUENCY;
+			if ((n_byte)local_random[0]&1)
+			{
+				local->brainprobe[ch].type = INPUT_SENSOR;
+			}
+			else
+			{
+				local->brainprobe[ch].type = OUTPUT_ACTUATOR;
+			}
+            local->brainprobe[ch].frequency = (n_byte)1 + (local_random[1]%BRAINCODE_MAX_FREQUENCY);
             math_random3(local_random);
             local->brainprobe[ch].address = (n_byte)local_random[0];
             local->brainprobe[ch].position = (n_byte)local_random[1];
@@ -2938,29 +2951,26 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 
 void being_tidy(noble_simulation * local_sim)
 {
-    noble_being	*local = local_sim->beings;
-    n_land	*land  = local_sim->land;
-    n_uint     number  = local_sim->num;
-    n_uint	loop = 0;
-    n_int	fat_mass, insulation=0, bulk, conductance, delta_e;
+    noble_being *local  = local_sim->beings;
+    n_land	    *land   = local_sim->land;
+    n_uint       number = local_sim->num;
+    n_uint	     loop   = 0;
+    n_int	     fat_mass, insulation=0, bulk, conductance, delta_e;
 #ifdef PARASITES_ON
-    n_byte max_honor = 1;
+    n_byte       max_honor = 1;
 #endif
     while (loop < number)
     {
         noble_being *local_being = &local[loop];
-        n_int	local_e = GET_E(local_being);
+        n_int	     local_e = GET_E(local_being);
         delta_e = 0;
         conductance = 5;
-
-
 #ifdef PARASITES_ON
         if (local_being->honor > max_honor)
         {
             max_honor = local_being->honor;
         }
 #endif
-
         if(being_awake(local_sim, loop))
         {
             n_int	local_f  = GET_F(local_being);
@@ -3068,8 +3078,6 @@ void being_tidy(noble_simulation * local_sim)
         GET_E(local_being) = (n_byte2)local_e;
         loop++;
     }
-
-
 #ifdef PARASITES_ON
     /* normalize honor values */
     if (max_honor>=254)
@@ -3082,17 +3090,25 @@ void being_tidy(noble_simulation * local_sim)
 #endif
 }
 
+n_int being_remove_internal = 0;
+n_int being_remove_external = 0;
+
 void being_remove(noble_simulation * local_sim)
 {
     noble_being * local = local_sim->beings;
     n_uint	reference = local_sim->select;
-    n_uint end_loop =  local_sim->num;
-    n_uint last_reference = reference;
+    n_uint  end_loop =  local_sim->num;
+    n_uint  last_reference = reference;
     n_uint	count = 0;
-    n_uint loop;
-
     n_uint	possible = NO_BEINGS_FOUND;
-    loop=0;
+    n_uint  loop=0;
+    n_int   selected_died = 0;
+    
+    if (being_remove_external)
+        do{}while(being_remove_external);
+    
+    being_remove_internal = 1;
+    
     while (loop < end_loop)
     {
         if (local[loop].energy == 0)
@@ -3102,6 +3118,8 @@ void being_remove(noble_simulation * local_sim)
             n_uint i = 0;
             n_byte2 name, family_name, met_name, met_family_name;
 
+            
+            
             if (local_sim->ext_death != 0L)
             {
                 local_sim->ext_death(b,local_sim);
@@ -3126,7 +3144,6 @@ void being_remove(noble_simulation * local_sim)
                 }
                 while (child != 0L);
             }
-
             /* set familiarity to zero so that the entry for the removed being will eventually be overwritten */
             name = GET_NAME_GENDER(local_sim,b);
             family_name = GET_NAME_FAMILY2(local_sim,b);
@@ -3164,12 +3181,13 @@ void being_remove(noble_simulation * local_sim)
     loop=0;
     while (loop < end_loop)
     {
+        if ( loop == reference )
+        {
+            possible = count;
+        }
+        
         if (local[loop].energy != 0)
         {
-            if ( loop == reference )
-            {
-                possible = count;
-            }
             if ( count != loop )
             {
                 n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
@@ -3194,15 +3212,35 @@ void being_remove(noble_simulation * local_sim)
 
             count++;
         }
+        else
+        {
+            if (loop == last_reference)
+            {
+                selected_died = 1;
+            }
+        }
         loop++;
     }
-    if ((count != 0) && (possible == NO_BEINGS_FOUND))
+    
+    if (count == 0)
     {
-        possible = 0;
+        possible = NO_BEINGS_FOUND;
     }
+    else
+    {
+        if (possible == NO_BEINGS_FOUND)
+        {
+            possible = 0;
+        }
+        else if (count < possible)
+        {
+            possible = 0;
+        }
+    }
+    
     local_sim->num    = count;
 
-    if (last_reference != possible)
+    if (selected_died)
     {
         sim_set_select(possible);
     }
@@ -3211,6 +3249,8 @@ void being_remove(noble_simulation * local_sim)
     {
         (void)SHOW_ERROR("No Apes remain start new run");
     }
+    
+    being_remove_internal = 0;
 }
 
 

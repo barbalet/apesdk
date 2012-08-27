@@ -190,16 +190,6 @@ const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
     "DAT0",
     "DAT1",
 
-    /* sensors */
-    "SEN ",
-    "SEN2",
-    "SEN3",
-
-    /* actuators */
-    "ACT ",
-    "ACT2",
-    "ACT3",
-
     /* operators */
     "ADD ",
     "SUB ",
@@ -213,7 +203,6 @@ const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
     "SWP ",
     "INV ",
     "STP ",
-    "ANE ",
     "LTP ",
 
     /* conditionals */
@@ -224,7 +213,18 @@ const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
     "OR  ",
     "SEQ ",
     "SNE ",
-    "SLT "
+    "SLT ",
+    
+    /* sensors */
+    "SEN ",
+    "SEN2",
+    "SEN3",
+    
+    /* actuators */
+    "ACT ",
+    "ACT2",
+    "ACT3",
+    "ANE "
 };
 
 void brain_three_byte_command(n_byte * string, n_byte * response)
@@ -241,65 +241,11 @@ void brain_three_byte_command(n_byte * string, n_byte * response)
     switch(instruction)
     {
     case BRAINCODE_AND:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_C;
-        }
-        break;
     case BRAINCODE_OR:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_C;
-        }
-        break;
     case BRAINCODE_MOV:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_C;
-        }
-        break;
     case BRAINCODE_ADD:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_C;
-        }
-        break;
     case BRAINCODE_SUB:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_C;
-        }
-        break;
     case BRAINCODE_MUL:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_C;
-        }
-        break;
     case BRAINCODE_MOD:
         if ((!is_constant0) && (!is_constant1))
         {
@@ -309,39 +255,16 @@ void brain_three_byte_command(n_byte * string, n_byte * response)
         {
             format = BC_FORMAT_C;
         }
-        break;
-    case BRAINCODE_JMP:
-        format = BC_FORMAT_C;
+
         break;
     case BRAINCODE_JMZ:
-        format = BC_FORMAT_E;
-        break;
     case BRAINCODE_JMN:
-        format = BC_FORMAT_E;
-        break;
     case BRAINCODE_DJN:
         format = BC_FORMAT_E;
         break;
+
     case BRAINCODE_SEQ:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_F;
-        }
-        break;
     case BRAINCODE_SNE:
-        if ((!is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_A;
-        }
-        else
-        {
-            format = BC_FORMAT_F;
-        }
-        break;
     case BRAINCODE_SLT:
         if ((!is_constant0) && (!is_constant1))
         {
@@ -353,9 +276,8 @@ void brain_three_byte_command(n_byte * string, n_byte * response)
         }
         break;
     case BRAINCODE_DAT0:
-        format = BC_FORMAT_C;
-        break;
     case BRAINCODE_DAT1:
+    case BRAINCODE_JMP:
         format = BC_FORMAT_C;
         break;
     case BRAINCODE_INV:
@@ -369,19 +291,6 @@ void brain_three_byte_command(n_byte * string, n_byte * response)
         }
         break;
     case BRAINCODE_STP:
-        if ((is_constant0) && (!is_constant1))
-        {
-            format = BC_FORMAT_F;
-        }
-        if ((is_constant0) && (is_constant1))
-        {
-            format = BC_FORMAT_C;
-        }
-        if ((!is_constant0) && (is_constant1))
-        {
-            format = BC_FORMAT_E;
-        }
-        break;
     case BRAINCODE_LTP:
         if ((is_constant0) && (!is_constant1))
         {
@@ -452,25 +361,26 @@ void braincode_statistics(noble_simulation * sim)
                 {
                     instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[j] % BRAINCODE_INSTRUCTIONS;
                 }
-                if ((instruction>=BRAINCODE_DATA_START) && (instruction<BRAINCODE_SENSORS_START))
+                
+                if (instruction < BRAINCODE_OPERATORS_START)
                 {
                     data++;
                 }
-                if ((instruction>=BRAINCODE_SENSORS_START) && (instruction<BRAINCODE_ACTUATORS_START))
-                {
-                    sensors++;
-                }
-                if ((instruction>=BRAINCODE_ACTUATORS_START) && (instruction<BRAINCODE_OPERATORS_START))
-                {
-                    actuators++;
-                }
-                if ((instruction>=BRAINCODE_OPERATORS_START) && (instruction<BRAINCODE_CONDITIONALS_START))
+                else if (instruction < BRAINCODE_CONDITIONALS_START)
                 {
                     operators++;
                 }
-                if ((instruction>=BRAINCODE_CONDITIONALS_START) && (instruction<BRAINCODE_INSTRUCTIONS))
+                else if (instruction < BRAINCODE_SENSORS_START)
                 {
                     conditionals++;
+                }
+                else if (instruction < BRAINCODE_ACTUATORS_START)
+                {
+                    sensors++;
+                }
+                else
+                {
+                    actuators++;
                 }
             }
         }
@@ -489,30 +399,20 @@ void braincode_statistics(noble_simulation * sim)
 static n_byte get_braincode_instruction_type(n_byte instruction_type)
 {
     n_byte2 local_random[2];
-
+    
     math_random3(local_random);
     switch(instruction_type)
     {
-    case 0:
-    {
-        return BRAINCODE_DATA_START+(local_random[0]%(BRAINCODE_SENSORS_START-BRAINCODE_DATA_START));
-    }
-    case 1:
-    {
-        return BRAINCODE_SENSORS_START+(local_random[0]%(BRAINCODE_ACTUATORS_START-BRAINCODE_SENSORS_START));
-    }
-    case 2:
-    {
-        return BRAINCODE_ACTUATORS_START+(local_random[0]%(BRAINCODE_OPERATORS_START-BRAINCODE_ACTUATORS_START));
-    }
-    case 3:
-    {
-        return BRAINCODE_OPERATORS_START+(local_random[0]%(BRAINCODE_CONDITIONALS_START-BRAINCODE_OPERATORS_START));
-    }
-    case 4:
-    {
-        return BRAINCODE_CONDITIONALS_START+(local_random[0]%(BRAINCODE_INSTRUCTIONS-BRAINCODE_CONDITIONALS_START));
-    }
+    case 0: /* GENE_BRAINCODE_SENSORS(genetics);*/
+        return BRAINCODE_DATA_START+(local_random[0]%(BRAINCODE_DATA_NUMBER));
+    case 1: /* GENE_BRAINCODE_ACTUATORS(genetics); */
+        return BRAINCODE_SENSORS_START+(local_random[0]%(BRAINCODE_SENSORS_NUMBER));
+    case 2: /* GENE_BRAINCODE_CONDITIONALS(genetics); */
+        return BRAINCODE_ACTUATORS_START+(local_random[0]%(BRAINCODE_ACTUATORS_NUMBER));
+    case 3: /* GENE_BRAINCODE_OPERATORS(genetics); */
+        return BRAINCODE_OPERATORS_START+(local_random[0]%(BRAINCODE_OPERATORS_NUMBER));
+    case 4: /* GENE_BRAINCODE_DATA(genetics); */
+        return BRAINCODE_CONDITIONALS_START+(local_random[0]%(BRAINCODE_CONDITIONALS_NUMBER));
     }
 
     return BRAINCODE_DATA_START;
@@ -1054,11 +954,11 @@ void brain_dialogue(
     noble_being * met_being,
     n_byte * bc0,
     n_byte * bc1,
-    n_int being_index,
-    n_byte internal)
+    n_int being_index)
 {
 #ifdef EPISODIC_ON
 #ifdef PARASITES_ON
+    n_byte internal = (meeter_being == met_being);
     const n_int BRAINCODE_MIN_LOOP = 8*BRAINCODE_BYTES_PER_INSTRUCTION;
     n_int i = 0, itt = 0, i2;
     n_int actor_index, possible_actor_index;
@@ -1135,18 +1035,6 @@ void brain_dialogue(
             /* Address within the other being */
             addr1 = &bc1[BRAINCODE_ADDRESS(i+value1) - BRAINCODE_SIZE];
         }
-#ifdef BRAINCODE_SHOW
-        if ((&sim->beings[sim->select]) == meeter_being)
-        {
-            n_byte braincode_str[20];
-            n_byte values[BRAINCODE_BYTES_PER_INSTRUCTION];
-            values[0] = bc0[i];
-            values[1] = value0;
-            values[2] = value1;
-            brain_three_byte_command(braincode_str, values);
-            printf("%3d %s\n", (int)i, braincode_str);
-        }
-#endif
 
         switch(instruction)
         {
@@ -1449,7 +1337,7 @@ void brain_dialogue(
             case 5:
             {
                 n_int  n = pspace[0] % BRAINCODE_PROBES;
-                n_byte f = IS_CONST1 % BRAINCODE_MAX_FREQUENCY;
+                n_byte f = 1 + (IS_CONST1 % BRAINCODE_MAX_FREQUENCY);
 
                 if (meeter_being->brainprobe[n].frequency != f)
                 {
@@ -1592,6 +1480,22 @@ void brain_dialogue(
             }
             break;
             }
+            /* spread anecdote */
+        case BRAINCODE_ANE:
+            if (internal == 0)
+            {
+                /* not internal dialogue */
+                /* avoid repeated anecdotes in the same conversation */
+                if (anecdote_episode_index != episode_index)
+                {
+                    if (episodic_anecdote(sim, meeter_being, met_being)!=0)
+                    {
+                        anecdote_episode_index = episode_index;
+                    }
+                }
+            }
+            break;
+                
             /* Logical and */
         case BRAINCODE_AND:
             if (is_constant0)
@@ -1628,54 +1532,42 @@ void brain_dialogue(
             /* Move a block of instructions */
         case BRAINCODE_MVB:
         {
-            n_int ptr0, ptr1, n, dat = 0;
+            n_int ptr0, ptr1, n, instructions_to_copy, dat = 0;
 
             if (meeter_being != met_being)
             {
 
                 if (!is_constant0)
                 {
-                    ptr0 = i + ((n_int)addr0[0]*BRAINCODE_BYTES_PER_INSTRUCTION);
+                    ptr0 = BRAINCODE_ADDRESS(i + ((n_int)addr0[0]*BRAINCODE_BYTES_PER_INSTRUCTION));
                 }
                 else
                 {
-                    ptr0 = i + ((n_int)value0*BRAINCODE_BYTES_PER_INSTRUCTION);
+                    ptr0 = BRAINCODE_ADDRESS(i + ((n_int)value0*BRAINCODE_BYTES_PER_INSTRUCTION));
                 }
 
-                ptr1 = i + ((n_int)IS_CONST1 * BRAINCODE_BYTES_PER_INSTRUCTION);
+                ptr1 = BRAINCODE_ADDRESS(i + ((n_int)IS_CONST1 * BRAINCODE_BYTES_PER_INSTRUCTION));
 
-                /* enforce opposites */
-                if ((BRAINCODE_ADDRESS(ptr0) < BRAINCODE_SIZE) ==
-                        (BRAINCODE_ADDRESS(ptr1) < BRAINCODE_SIZE))
+
+				instructions_to_copy = 1 + (pspace[1]%BRAINCODE_BLOCK_COPY);
+				while (dat < instructions_to_copy)
                 {
-                    if (BRAINCODE_ADDRESS(ptr0) < BRAINCODE_SIZE)
+                    if (ptr0 < BRAINCODE_SIZE)
                     {
-                        ptr1 = (ptr1 % BRAINCODE_SIZE) + BRAINCODE_SIZE;
+                        addr0 = &bc0[ptr0];
                     }
                     else
                     {
-                        ptr1 %= BRAINCODE_SIZE;
-                    }
-                }
-
-                while (dat < BRAINCODE_BLOCK_COPY)
-                {
-                    if (BRAINCODE_ADDRESS(ptr0) < BRAINCODE_SIZE)
-                    {
-                        addr0 = &bc0[BRAINCODE_ADDRESS(ptr0)];
-                    }
-                    else
-                    {
-                        addr0 = &bc1[BRAINCODE_ADDRESS(ptr0)-BRAINCODE_SIZE];
+                        addr0 = &bc1[ptr0 - BRAINCODE_SIZE];
                     }
 
-                    if (BRAINCODE_ADDRESS(ptr1) < BRAINCODE_SIZE)
+                    if (ptr1 < BRAINCODE_SIZE)
                     {
-                        addr1 = &bc0[BRAINCODE_ADDRESS(ptr1)];
+                        addr1 = &bc0[ptr1];
                     }
                     else
                     {
-                        addr1 = &bc1[BRAINCODE_ADDRESS(ptr1) - BRAINCODE_SIZE];
+                        addr1 = &bc1[ptr1 - BRAINCODE_SIZE];
                     }
 
                     for (n = 0; n < BRAINCODE_BYTES_PER_INSTRUCTION; n++)
@@ -1683,8 +1575,8 @@ void brain_dialogue(
                         addr1[n] = addr0[n];
                     }
                     dat++;
-                    ptr0 += BRAINCODE_BYTES_PER_INSTRUCTION;
-                    ptr1 += BRAINCODE_BYTES_PER_INSTRUCTION;
+                    ptr0 = BRAINCODE_ADDRESS(ptr0 + BRAINCODE_BYTES_PER_INSTRUCTION);
+                    ptr1 = BRAINCODE_ADDRESS(ptr1 + BRAINCODE_BYTES_PER_INSTRUCTION);
                 }
             }
             break;
@@ -1940,21 +1832,7 @@ void brain_dialogue(
             addr1[0] = pspace[v0 % BRAINCODE_PSPACE_REGISTERS];
             break;
         }
-        /* spread anecdote */
-        case BRAINCODE_ANE:
-            if (meeter_being != met_being)
-            {
-                /* not internal dialogue */
-                /* avoid repeated anecdotes in the same conversation */
-                if (anecdote_episode_index != episode_index)
-                {
-                    if (episodic_anecdote(sim,meeter_being,met_being)!=0)
-                    {
-                        anecdote_episode_index = episode_index;
-                    }
-                }
-            }
-            break;
+
         }
         i += BRAINCODE_BYTES_PER_INSTRUCTION;
         itt++;

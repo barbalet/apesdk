@@ -1566,7 +1566,7 @@ n_int io_help(void * ptr, n_string response, n_console_output output_function)
                 {
                     n_int command_len = io_length(local_commands[loop].command, 1024);
                     n_int count = io_find(response, 0, response_len, local_commands[loop].command, command_len);
-                    if (count != -1)
+                    if (count == command_len)
                     {
                         io_help_line(&local_commands[loop], output_function);
                         found = 1;

@@ -322,12 +322,17 @@ void sim_brain(noble_simulation * local_sim)
             if (local_brain != 0L)
             {
                 brain_cycle(local_brain, local_brain_state);
-#ifdef BRAINCODE_ON
-                brain_dialogue(local_sim, awake, local_being, local_being, GET_BRAINCODE_INTERNAL(local_sim,local_being), GET_BRAINCODE_EXTERNAL(local_sim,local_being), math_random(local_being->seed)%SOCIAL_SIZE, 1);
-                brain_dialogue(local_sim, awake, local_being, local_being, GET_BRAINCODE_EXTERNAL(local_sim,local_being), GET_BRAINCODE_INTERNAL(local_sim,local_being), math_random(local_being->seed)%SOCIAL_SIZE, 1);
-#endif
             }
         }
+#ifdef BRAINCODE_ON
+        /* This should be independent of the brainstate/cognitive simulation code */
+        {
+            n_byte * local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
+            n_byte * local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
+            brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
+            brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
+        }
+#endif        
         loop++;
     }
 #ifdef BRAIN_HASH

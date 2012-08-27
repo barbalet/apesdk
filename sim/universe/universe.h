@@ -558,7 +558,7 @@ enum social_action_type
 /* maximum frequency of a brain probe */
 #define BRAINCODE_MAX_FREQUENCY            16
 /* number of instructions which a MVB copies */
-#define BRAINCODE_BLOCK_COPY               8
+#define BRAINCODE_BLOCK_COPY               16
 /* typical minimum spacing between MVB instructions */
 #define BRAINCODE_MIN_MVB_SPACING          2
 
@@ -579,16 +579,6 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_DAT0 = 0,
     BRAINCODE_DAT1,
 
-    /* sensors */
-    BRAINCODE_SEN,
-    BRAINCODE_SEN2,
-    BRAINCODE_SEN3,
-
-    /* actuators */
-    BRAINCODE_ACT,
-    BRAINCODE_ACT2,
-    BRAINCODE_ACT3,
-
     /* operators */
     BRAINCODE_ADD,
     BRAINCODE_SUB,
@@ -602,7 +592,6 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_SWP,
     BRAINCODE_INV,
     BRAINCODE_STP,
-    BRAINCODE_ANE,
     BRAINCODE_LTP,
 
     /* conditionals */
@@ -615,13 +604,35 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_SNE,
     BRAINCODE_SLT,
 
+    /* sensors */
+    BRAINCODE_SEN,
+    BRAINCODE_SEN2,
+    BRAINCODE_SEN3,
+    
+    /* actuators */
+    BRAINCODE_ACT,
+    BRAINCODE_ACT2,
+    BRAINCODE_ACT3,
+    BRAINCODE_ANE,
+
+    
     BRAINCODE_INSTRUCTIONS
 };
-#define BRAINCODE_DATA_START         BRAINCODE_DAT0
-#define BRAINCODE_SENSORS_START      BRAINCODE_SEN
-#define BRAINCODE_ACTUATORS_START    BRAINCODE_ACT
-#define BRAINCODE_OPERATORS_START    BRAINCODE_ADD
-#define BRAINCODE_CONDITIONALS_START BRAINCODE_JMZ
+
+#define BRAINCODE_DATA_START          BRAINCODE_DAT0
+#define BRAINCODE_DATA_NUMBER         (1 + BRAINCODE_DAT1 - BRAINCODE_DATA_START)
+
+#define BRAINCODE_OPERATORS_START     BRAINCODE_ADD
+#define BRAINCODE_OPERATORS_NUMBER    (1 + BRAINCODE_LTP - BRAINCODE_OPERATORS_START)
+
+#define BRAINCODE_CONDITIONALS_START  BRAINCODE_JMZ
+#define BRAINCODE_CONDITIONALS_NUMBER (1 + BRAINCODE_SLT - BRAINCODE_CONDITIONALS_START)
+
+#define BRAINCODE_SENSORS_START       BRAINCODE_SEN
+#define BRAINCODE_SENSORS_NUMBER      (1 + BRAINCODE_SEN3 - BRAINCODE_SENSORS_START)
+
+#define BRAINCODE_ACTUATORS_START     BRAINCODE_ACT
+#define BRAINCODE_ACTUATORS_NUMBER    (1 + BRAINCODE_ANE - BRAINCODE_ACTUATORS_START)
 
 #define BRAINCODE_INSTRUCTION(braincode,i) ((braincode[i] & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS)
 #define BRAINCODE_CONSTANT0(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT0_BIT)
@@ -1555,6 +1566,8 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval);
 
 void watch_ape(void * ptr, n_console_output output_function);
 
+n_int console_stop(void * ptr, n_string response, n_console_output output_function);
+n_int console_idea(void * ptr, n_string response, n_console_output output_function);
 n_int console_being(void * ptr, n_string response, n_console_output output_function);
 n_int console_braincode(void * ptr, n_string response, n_console_output output_function);
 n_int console_vascular(void * ptr, n_string response, n_console_output output_function);
@@ -1609,6 +1622,8 @@ const static noble_console_command control_commands[] =
 
     {&console_open,          "open",           "[file]",               "Load a simulation file"},
     {&console_open,          "load",           "",                     ""},
+#else
+    {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 #endif
     {&console_script,        "script",         "[file]",               "Load an ApeScript sinulation file"},
     {&console_save,          "save",           "[file]",               "Save a simulation file"},
@@ -1642,6 +1657,7 @@ const static noble_console_command control_commands[] =
     {&console_simulation,    "sim",            "",                     "Show simulation parameters"},
     {&console_watch,         "watch",          "(ape name)|all|off|*", "Watch (specific *) for the current ape"},
     {&console_watch,         "monitor",        "",                     ""},
+    {&console_idea,          "idea",           "",                     "Track shared braincode between apes"},
     {&console_being,         "ape",            "",                     "Name of the currently watched ape"},
     {&console_being,         "pwd",            "",                     ""},
     {&console_social_graph,  "friends",        "",                     ""},
