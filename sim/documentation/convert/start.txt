@@ -4,4 +4,20 @@
 There is a console command line that enables a greater interface into the simulation. The commands that drive this interface change periodically. These commands are updated automatically into the table below.
 [P]
 $CON$
+[P]
+In order to run the command line version of the Simulation open the Terminal application. It can be found in /Applications/Utilities
+[P]
+Open a Terminal window and type:
+[P][FONT FACE="Courier, Courier New" SIZE=4]
+&nbsp;&nbsp;&nbsp;cd
+[P][FONT FACE="Arial,Geneva,Helvetica" SIZE=3]
+With a space after the cd and drag the Noble Ape application into the Terminal window. Press enter/return. Type:
+[P][FONT FACE="Courier, Courier New" SIZE=4]
+&nbsp;&nbsp;&nbsp;cd Contents/MacOS/
+[FONT FACE="Arial,Geneva,Helvetica" SIZE=3][P]
+Press enter/return. Type:
+[P][FONT FACE="Courier, Courier New" SIZE=4]
+&nbsp;&nbsp;&nbsp;./NobleApe695 c
+[FONT FACE="Arial,Geneva,Helvetica" SIZE=3][P]
+Press enter/return. You are now running the Noble Ape Simulation through the command line. The commands in the table above provide all the commands available. The menu of the Simulation is also usable. There are YouTube videos periodically recorded on the command line version of the Simulation via [A HREF="http://www.youtube.com/barbalet/"]Tom Barbalet's YouTube channel[/A].
 [P]For more information about the console implementation of the Noble Ape Simulation please contact [A HREF="http://www.nobleape.com/tom/"]Tom Barbalet[/A].[HR][CENTER][a HREF="legal.html"]Legal Notice[/a] - [a HREF="index.html"]Contents[/a] - [A HREF="philosophic.html"]Noble Ape Philosophic[/A][/CENTER][/body][/html]

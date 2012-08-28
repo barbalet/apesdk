@@ -56,7 +56,7 @@
 /*! @define */
 #define	SHORT_VERSION_NAME		 "Noble Ape 0.695 "
 #define	FULL_DATE				 __DATE__
-#define SUBVERSION_VERSION		"SOURCE REVISION 1052"
+#define SUBVERSION_VERSION		"SOURCE REVISION 1061"
 
 /*! @define */
 #define	VERSION_NUMBER		     695
@@ -407,9 +407,9 @@ static const n_ae_error apescript_errors[]=
     {AE_UNKNOWN_SYNTAX_PARSER_BUFFER,      "Unknown syntax (parser buffer)",   "Syntax is incorrect"},
     {AE_UNKNOWN_SYNTAX_PARSER_CONVERT,     "Unknown syntax (parser convert)",  "Syntax is incorrect"},
 
-    {AE_SELECTED_ENTITY_OUT_OF_RANGE,      "Selected entity out of range",     "* please add text *"},
-    {AE_COORDINATES_OUT_OF_RANGE,          "Coordinates out of range",         "* please add text *"},
-    {AE_VALUE_OUT_OF_RANGE,                "Value out of range",               "* please add text *"},
+    {AE_SELECTED_ENTITY_OUT_OF_RANGE,      "Selected entity out of range",     "Selected entity is outside the bounds of the number of entities."},
+    {AE_COORDINATES_OUT_OF_RANGE,          "Coordinates out of range",         "Coordinates outside the prescribed range."},
+    {AE_VALUE_OUT_OF_RANGE,                "Value out of range",               "Value outside the presecribed range."},
 
     {AE_TOO_MANY_CLOSE_BRACES,             "Too many }",                       "You have closed too many braces. Go back to the code and see if there is an erroneous additional } in the code."},
     {AE_MAXIMUM_BRACES_REACHED,            "Maximum braces reached",           "Please contact tom at nobleape dot com"},
@@ -422,22 +422,22 @@ static const n_ae_error apescript_errors[]=
     {AE_LINE_START_INCORRECT,              "Line start incorrect",             "A line of code begins incorrectly. It could start with a number or an operator when if/while or a variable was expected."},
     {AE_OUTPUT_SET_AS_INPUT_VARIABLE,      "Output set as input variable",     "An output only variable is attempting to be set."},
     {AE_IF_WHILE_NOT_FOLLOWED_BY_BRACKET,  "if/while not followed by {",       "All if/while statements require a bracket following the if/while (allowing for any amount of whitespace too)."},
-    {AE_FUNCTION_ISNT_VARIABLE,            "Function isn't variable",          "* please add text *"},
-    {AE_NON_FUNCTION_APPLIED,              "Non-function applied",             "* please add text *"},
-    {AE_FUNCTION_DEFINED_PRIOR,            "Function defined prior",           "* please add text *"},
-    {AE_FUNCTION_OUT_OF_RANGE,             "Function out of range",            "* please add text *"},
-    {AE_WITHOUT_SEMICOLON,                 "Without ;",                        "* please add text *"},
+    {AE_FUNCTION_ISNT_VARIABLE,            "Function isn't variable",          "Function must not be a special term."},
+    {AE_NON_FUNCTION_APPLIED,              "Non-function applied",             "Expecting a function."},
+    {AE_FUNCTION_DEFINED_PRIOR,            "Function defined prior",           "Single function definition only."},
+    {AE_FUNCTION_OUT_OF_RANGE,             "Function out of range",            "Function defined outside the range of the code presented."},
+    {AE_WITHOUT_SEMICOLON,                 "Without ;",                        "Semi-colon required."},
     {AE_WITHOUT_OPEN_BRACE,                "Without {",                        "All if/while statements expect what is executed through the bracket enclosed statement being correct to be followed by inclusive braces { }. There is no single line if or while statements without { } in ApeScript."},
 
-    {AE_FUNCTION_SETTING_FAILED,           "Function setting failed",          "* please add text *"},
-    {AE_ERROR_STARTING_MAIN,               "Error starting main",              "* please add text *"},
-    {AE_CODE_AFTER_MAIN,                   "Code after main",                  "* please add text *"},
-    {AE_NO_CLOSE_BRACE_TO_END_OF_FILE,     "No } to end of file",              "* please add text *"},
-    {AE_CODE_OUTSIDE_FUNCTION,             "Code outside function",            "* please add text *"},
+    {AE_FUNCTION_SETTING_FAILED,           "Function setting failed",          "Function could not be set."},
+    {AE_ERROR_STARTING_MAIN,               "Error starting main",              "Main could not be started."},
+    {AE_CODE_AFTER_MAIN,                   "Code after main",                  "All the code in ApeScript must exist before the end of main."},
+    {AE_NO_CLOSE_BRACE_TO_END_OF_FILE,     "No } to end of file",              "Based on the final main function it is expected that the last meaningful character will be }."},
+    {AE_CODE_OUTSIDE_FUNCTION,             "Code outside function",            "All code in ApeScript needs to exist within functions."},
     {AE_INPUT_VARIABLE_WITHOUT_EQUALS,     "Input variable without equals",    "All variables set require an equals following the variable."},
     {AE_ASSIGN_VALUE_FAILED,               "Assign value failed",              "Something is wrong with the variable set by an equality."},
     {AE_UNKNOWN_SYNTAX_FROM_INTERPRET,     "Unknown syntax (from interpret)",  "Syntax is incorrect"},
-    {AE_NO_MAIN_CODE,                      "No main code",                     "* please add text *"},
+    {AE_NO_MAIN_CODE,                      "No main code",                     "APeScript requires a main function."},
 
     {AE_NO_ERROR, 0L, 0L}
 };

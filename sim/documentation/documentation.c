@@ -37,19 +37,28 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define CONSOLE_REQUIRED
+#define CONSOLE_ONLY
+#define GUI_COMMAND_LINE_HYBRID
+
 #ifndef	_WIN32
 
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../universe/universe_internal.h"
+#include "../entity/entity.h"
+#include "../entity/entity_internal.h"
 
 #else
 
 #include "..\noble\noble.h"
 #include "..\universe\universe.h"
 #include "..\universe\universe_internal.h"
+#include "..\entity\entity.h"
+#include "..\entity\entity_internal.h"
 
 #endif
+
 
 /* This is a cheating method initially but we need a fast converter upfront */
 
@@ -237,7 +246,7 @@ void audit_file_io(FILE * html_write)
             {
                 fprintf(html_write, "%d x two_bytes<P>", local_number);
             }
-            if (local_type == FILE_TYPE_BRAINCODE)
+            if (local_type == FILE_TYPE_BYTE_EXT)
             {
                 fprintf(html_write, "%d x brain_code<P>", local_number);
             }

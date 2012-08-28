@@ -56,6 +56,8 @@
 
 /*NOBLEMAKE END=""*/
 
+const n_string RUN_STEP_CONST = "RSC";
+
 /** The type of watch */
 n_int watch_type = WATCH_NONE;
 
@@ -1810,7 +1812,7 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_int loop = 0;
     
-    if (output_function)
+    if (response != RUN_STEP_CONST)
     {
         if (simulation_executing == 1)
         {
@@ -1880,7 +1882,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
 
                     while ((i < end_point) && simulation_running)
                     {
-                        console_step(ptr, 0, 0L);
+                        console_step(ptr, RUN_STEP_CONST, output_function);
                         i++;
                     }
                     save_interval_steps = temp_save_interval_steps;
