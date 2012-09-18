@@ -1,4 +1,4 @@
-#	ubuntu.sh
+#	ubuntu_req.sh
 #
 #	=============================================================
 #
@@ -29,23 +29,13 @@
 #   begun on 13 June 1996. No apes or cats were harmed in the writing
 #   of this software.
 
-if [ $# -ge 1 -a "$1" == "--debug" ]
+# Tested on Ubuntu 10.10, 11.04, 11.10
+
+UBUNTU_VERSION="11.10"
+
+if [ ${UBUNTU_VERSION} == "11.10" ]
 then
-    CFLAGS=-g
+    sudo apt-get install build-essential libmotif-dev libgtk2.0-dev libglib2.0-dev libgdk-pixbuf2.0-dev libgnome2-dev libpng12-dev
 else
-    CFLAGS=-O2 
+    sudo apt-get install build-essential libmotif-dev libgtk2.0-dev libglib2.0-dev libgdk-pixbuf2.0-dev libxprintutil-dev libgnome2-dev libpng12-dev
 fi
-
-INCLUDES="-I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -I/usr/include"
-
-LIBS="-L/usr/lib/gdm -L/usr/lib -L/usr/lib/glib-2.0 -L/usr/lib/gdk-pixbuf-2.0 -L/usr/lib/gtk-2.0 -L/usr/lib/pango-1.0 -L/usr/lib/cairo -lXm -lXt -lX11 -lm"
-
-LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0`"
-
-./linux.sh --additional
-
-gcc ${CFLAGS} ${INCLUDES} -c gtk/platform.c -o platform.o ${LIBS2}
-
-gcc ${CFLAGS} ${INCLUDES} -o ../na io.o math.o parse.o interpret.o being.o body.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o genealogy.o draw.o control.o platform.o console.o ${LIBS2}
-
-rm *.o

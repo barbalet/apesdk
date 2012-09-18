@@ -88,31 +88,69 @@ offsets are wrong. This is a basic check! Run CLE and find out more!
 
 #endif
 
-#ifdef __APPLE__
+#ifndef	_WIN32
 
-static n_int macosx_console_quit = 0;
+#include <pthread.h>
 
-n_int control_command_line_execution(void)
+static n_int gui_console_quit = 0;
+
+n_int control_gui_console_quit(void)
 {
-    return io_command_line_execution();
+    return gui_console_quit;
 }
 
-n_int control_macosx_console_quit(void)
-{
-    return macosx_console_quit;
-}
-
-
-void control_activate_console(void)
+static void control_activate_console(void)
 {
     if (io_console(sim_sim(), (noble_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
     {
-        macosx_console_quit = 1;
+        gui_console_quit = 1;
+    }
+}
+
+n_int control_command_entry = 0;
+
+static void *control_thread(void *threadid)
+{
+    control_command_entry++;
+    control_activate_console();
+    control_command_entry--;
+    pthread_exit(NULL);
+}
+
+void control_thread_console(void)
+{
+    pthread_t console;
+    
+    if (io_command_line_execution() == 0)
+    {
+        return;
+    }
+    
+    if (control_command_entry < 3)
+    {
+        (void)pthread_create(&console,0L, control_thread, 0L);
     }
 }
 
 #endif
 
+static n_int toggle_pause = 0;
+
+void control_about(n_string value)
+{
+    toggle_pause = 1;
+    draw_about(value);
+}
+
+n_int control_toggle_pause(void)
+{
+    if (io_command_line_execution())
+    {
+        console_stop(0L,"",0L);
+    }
+    toggle_pause ^= 1;
+    return toggle_pause;
+}
 
 n_byte control_cursor(n_byte wwind, n_int px, n_int py, n_byte option, n_byte no_bounds)
 {
@@ -303,7 +341,7 @@ void control_sim_key(noble_simulation * local_sim, n_byte wwind, n_byte2 num)
     }
 }
 
-void control_sim_simulate(n_byte local_pause, n_uint local_time)
+void control_sim_simulate(n_uint local_time)
 {
     sim_realtime(local_time);
 
@@ -312,24 +350,29 @@ void control_sim_simulate(n_byte local_pause, n_uint local_time)
         return;
     }
 
-    if (local_pause != 1)
+    if (toggle_pause == 0)
     {
         sim_cycle();
     }
 }
 
-void control_sim_draw(noble_simulation * local_sim, n_byte local_weather)
+void control_sim_draw(noble_simulation * local_sim, n_byte window)
 {
-    draw_cycle(local_sim, local_weather);
+    draw_cycle(local_sim, window);
 }
 
 
-void control_simulate(n_byte local_weather, n_byte local_pause, n_uint local_time)
+void control_simulate(n_uint local_time)
 {
     noble_simulation *sim = sim_sim();
-    control_sim_simulate(local_pause, local_time);
+
+    if (io_command_line_execution() == 0)
+    {
+        control_sim_simulate(local_time);
+    }
+
     control_sim_draw(sim, 0);
-    control_sim_draw(sim, 1 + local_weather);
+    control_sim_draw(sim, 1);
 }
 
 void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)

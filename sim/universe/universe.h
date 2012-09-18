@@ -896,6 +896,7 @@ enum
     WATCH_RESPIRATION,
     WATCH_METABOLISM,
     WATCH_APPEARANCE,
+    WATCH_SPEECH,
     WATCH_STATES
 };
 
@@ -1566,10 +1567,13 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval);
 
 void watch_ape(void * ptr, n_console_output output_function);
 
+n_int console_speak(void * ptr, n_string response, n_console_output output_function);
+
 n_int console_stop(void * ptr, n_string response, n_console_output output_function);
 n_int console_idea(void * ptr, n_string response, n_console_output output_function);
 n_int console_being(void * ptr, n_string response, n_console_output output_function);
 n_int console_braincode(void * ptr, n_string response, n_console_output output_function);
+n_int console_speech(void * ptr, n_string response, n_console_output output_function);
 n_int console_vascular(void * ptr, n_string response, n_console_output output_function);
 n_int console_respiration(void * ptr, n_string response, n_console_output output_function);
 n_int console_metabolism(void * ptr, n_string response, n_console_output output_function);
@@ -1595,6 +1599,12 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
 n_int console_open(void * ptr, n_string response, n_console_output output_function);
 n_int console_script(void * ptr, n_string response, n_console_output output_function);
 
+
+#ifndef SMALL_LAND
+
+void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block);
+
+#endif
 
 #ifdef THREADED
 void sim_draw_thread_on(void);
@@ -1632,8 +1642,8 @@ const static noble_console_command control_commands[] =
     {&io_quit,               "exit",           "",                     ""},
     {&io_quit,               "close",          "",                     ""},
 #else
-    {&cle_load,              "load",           "(filename)",           "Load a simulation file"},
-    {&cle_script,            "script",         "(filename)",           "Load apescript file"},
+    {&cle_load,              "load",           "[file]",               "Load a simulation file"},
+    {&cle_script,            "script",         "[file]",               "Load apescript file"},
     {&cle_script,            "apescript",      "",                     ""},
     {&cle_video,             "video",          "ideosphere|genepool <filename>", "Create a video"},
     {&cle_video,             "movie",          "genespace|preferences<filename>","Create a video"},
@@ -1645,6 +1655,7 @@ const static noble_console_command control_commands[] =
     {&cle_reset,             "clear"           "",                     ""},
 #endif
 
+    {&console_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
     {&console_file,          "file",           "[(component)]",        "Information on the file format"},
     {&console_run,           "run",            "(days|time format)",   "Simulate for a given number of days"},
     {&console_step,          "step",           "",                     "Run for a single logging interval"},
@@ -1665,6 +1676,7 @@ const static noble_console_command control_commands[] =
     {&console_social_graph,  "socialgraph",    "",                     ""},
     {&console_social_graph,  "graph",          "(ape name)",           "* Show social graph for a named ape"},
     {&console_braincode,     "braincode",      "(ape name)",           "* Show braincode for a named ape"},
+    {&console_speech,        "speech",         "(ape name)",           "* Show speech for a named ape"},
     {&console_vascular,      "vascular",       "(ape name)",           "* Show vascular system for a named ape"},
     {&console_respiration,   "respiration",    "(ape name)",           "* Show respiration system for a named ape"},
     {&console_respiration,   "breathing",      "",                     ""},

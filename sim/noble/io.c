@@ -52,7 +52,7 @@ static n_int command_line_execution;
 
 n_int io_command_line_execution(void)
 {
-    if (io_entry_execution(0) == 1)
+    if (io_entry_execution(0,0L) == 1)
     {
         command_line_execution = 1;
     }
@@ -64,11 +64,17 @@ n_int io_command_line_execution(void)
  * @param value entering value.
  * @return previously held value.
  */
-n_byte io_entry_execution(n_byte value)
+n_byte io_entry_execution(n_int argc, n_string * argv)
 {
     static n_byte entry_value = 0;
     n_byte previous = entry_value;
-    entry_value = value;
+    if (argv)
+    {
+        if ((argc == 2) && (argv[1][0] == 'c'))
+        {
+            entry_value = 1;
+        }
+    }
     return previous;
 }
 
@@ -1214,15 +1220,15 @@ n_int io_write_buff(n_file * fil, void * data, const noble_file_entry * commands
                     n_byte *byte_data = (n_byte *)data;
                     if (data_type == FILE_TYPE_BYTE_EXT)
                     {
-                        n_byte block_code[15]= {0};
-                        if (func != 0) (*func)(block_code, byte_data);
+                        n_string_block block_code= {0};
+                        if (func != 0) (*func)((n_string)block_code, byte_data);
                         IO_CHECK_ERROR(io_write(fil, "", 1));
                         IO_CHECK_ERROR(io_write(fil, "", 2));
                         IO_CHECK_ERROR(io_write(fil, "/* ", 0));
 
                         IO_CHECK_ERROR(io_writenumber(fil, loop, 1, 0));
                         IO_CHECK_ERROR(io_write(fil, "", 2));
-                        IO_CHECK_ERROR(io_write(fil, (n_string)block_code, 0));
+                        IO_CHECK_ERROR(io_write(fil, block_code, 0));
                         IO_CHECK_ERROR(io_write(fil, " */", 2));
                     }
 
@@ -1242,7 +1248,7 @@ n_int io_write_buff(n_file * fil, void * data, const noble_file_entry * commands
                         case FILE_TYPE_BYTE_EXT:
                             if((loop != 0) && ((loop % 3) == 0) && (loop != 126))
                             {
-                                n_byte block_code[15] = {0};
+                                n_string_block block_code = {0};
                                 if (func != 0L) (*func)(block_code, &byte_data[data_offset + loop]);
                                 IO_CHECK_ERROR(io_write(fil, "", 1));
                                 IO_CHECK_ERROR(io_write(fil, "", 2));

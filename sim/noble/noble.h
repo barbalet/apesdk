@@ -54,12 +54,12 @@
 #define LATITUDE_MEAN_TEMPERATURE 20000
 
 /*! @define */
-#define	SHORT_VERSION_NAME		 "Noble Ape 0.695 "
+#define	SHORT_VERSION_NAME		 "Noble Ape 0.696 "
 #define	FULL_DATE				 __DATE__
 #define SUBVERSION_VERSION		"SOURCE REVISION 1061"
 
 /*! @define */
-#define	VERSION_NUMBER		     695
+#define	VERSION_NUMBER		     696
 #define	COPYRIGHT_DATE		     "Copyright 1996 - 2012 "
 
 #define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996 - 2012"
@@ -269,7 +269,7 @@ typedef struct
 }
 n_file;
 
-typedef void (n_file_specific)(n_byte * string, n_byte * reference);
+typedef void (n_file_specific)(n_string string, n_byte * reference);
 
 /** \brief new_sd stands for new sine dump and hold the sine and cosine values for the simulation */
 const static n_int	new_sd[256] =
@@ -480,7 +480,7 @@ void    math_patch(n_byte * local_map, n_byte * scratch,
                    n_byte refined_start, n_byte refined_end,
                    n_byte rotate);
 
-n_byte     io_entry_execution(n_byte value);
+n_byte     io_entry_execution(n_int argc, n_string * argv);
 void       io_lower(n_string value, n_int length);
 void       io_whitespace(n_file * input);
 void       io_audit_file(const noble_file_entry * format, n_byte section_to_audit);
@@ -522,6 +522,14 @@ n_int      io_disk_write(n_file * local_file, n_string file_name);
 n_int      io_disk_append(n_file * local_file, n_string file_name);
 n_int      io_disk_check(n_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
+
+
+n_byte     io_read(n_file * fil);
+n_int      io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char);
+n_int      io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line);
+n_int      io_command(n_file * fil, const noble_file_entry * commands);
+n_int      io_read_data(n_file * fil, n_byte2 command, n_byte * data_read);
+void       io_help_line(noble_console_command * specific, n_console_output output_function);
 
 /*
  This provides the land interface into entity but not the universe.

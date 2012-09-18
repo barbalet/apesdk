@@ -47,7 +47,6 @@
     GLubyte        outputBuffer[1024*768*3];
     
     n_int          fIdentification;
-    BOOL           commandLineEntry;
 }
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;

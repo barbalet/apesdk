@@ -108,12 +108,39 @@ void episodic_store_memory(
     noble_simulation * local_sim,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2, n_byte2 arg);
+
+void episodic_food(noble_simulation * local_sim, noble_being * local, n_int energy, n_byte food_type);
+
+void episodic_self(
+                   noble_simulation * local_sim,
+                   noble_being * local,
+                   n_byte event,
+                   n_int affect,
+                   n_byte2 arg);
+
+void episodic_close(
+                    noble_simulation * local_sim,
+                    noble_being * local,
+                    noble_being * other,
+                    n_byte event,
+                    n_int affect,
+                    n_byte2 arg);
+
+void episodic_interaction(
+                          noble_simulation * local_sim,
+                          noble_being * local,
+                          noble_being * other,
+                          n_byte event,
+                          n_int affect,
+                          n_byte2 arg);
+
 n_byte episodic_intention(
     noble_simulation * local_sim,
     noble_being * local,
     n_int episode_index,
     n_byte2 mins_ahead,
     n_byte args);
+
 void episodic_cycle(noble_simulation * local_sim, noble_being * local);
 n_byte episodic_anecdote(
     noble_simulation * local_sim,
@@ -127,7 +154,6 @@ void being_init_braincode(noble_simulation * sim,
                           n_byte friend_foe,
                           n_byte internal);
 
-/*n_byte being_alive(n_byte2 first_name_gender, n_byte2 family_name, noble_simulation * local_sim); not used? */
 n_byte being_awake_local(noble_simulation * sim, noble_being * local);
 
 void drives_cycle(noble_being * local, n_byte social, n_int awake, noble_simulation * sim);

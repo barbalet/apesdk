@@ -88,13 +88,11 @@ n_int shared_script_debug_ready(void);
 
 void shared_script_debug_handle(n_string cStringFileName);
 
-#ifdef __APPLE__
+#ifndef	_WIN32
 
-n_int control_macosx_console_quit(void);
+n_int control_gui_console_quit(void);
 
-n_int control_command_line_execution(void);
-
-void  control_activate_console(void);
+void control_thread_console(void);
 
 #endif
 

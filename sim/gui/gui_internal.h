@@ -40,9 +40,3 @@
 
 
 #endif /* _NOBLEAPE_ENTITY_INTERNAL_H_ */
-
-void draw_toggle_weather(void);
-
-void draw_toggle_brain(void);
-
-void draw_toggle_braincode(void);

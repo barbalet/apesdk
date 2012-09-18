@@ -481,9 +481,6 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number);
 void sim_end_conditions(void * code, void * structure, n_int identifier);
 void sim_start_conditions(void * code, void * structure, n_int identifier);
 
-void being_set_select_name(noble_simulation * sim, n_string name);
-n_string being_get_select_name(noble_simulation * sim);
-
 void console_external_watch(void);
 
 

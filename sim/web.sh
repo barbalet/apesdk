@@ -1,4 +1,4 @@
-#	ubuntu.sh
+#	web.sh
 #
 #	=============================================================
 #
@@ -36,16 +36,12 @@ else
     CFLAGS=-O2 
 fi
 
-INCLUDES="-I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -I/usr/include"
-
-LIBS="-L/usr/lib/gdm -L/usr/lib -L/usr/lib/glib-2.0 -L/usr/lib/gdk-pixbuf-2.0 -L/usr/lib/gtk-2.0 -L/usr/lib/pango-1.0 -L/usr/lib/cairo -lXm -lXt -lX11 -lm"
-
-LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0`"
-
 ./linux.sh --additional
 
-gcc ${CFLAGS} ${INCLUDES} -c gtk/platform.c -o platform.o ${LIBS2}
+gcc ${CFLAGS} -c contrib/motters/cle.c -o cleweb.o
+gcc ${CFLAGS} -c contrib/motters/web.c -o web.o
+gcc ${CFLAGS} -c contrib/motters/pnglite.c -o pnglite.o
 
-gcc ${CFLAGS} ${INCLUDES} -o ../na io.o math.o parse.o interpret.o being.o body.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o genealogy.o draw.o control.o platform.o console.o ${LIBS2}
+gcc -Wall -ansi -pedantic -O3 -o ../naweb cleweb.o pnglite.o -lz sim.o file.o genealogy.o body.o metabolism.o being.o brain.o console.o land.o social.o episodic.o food.o drives.o math.o io.o parse.o interpret.o graph.o web.o
 
 rm *.o

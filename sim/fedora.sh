@@ -54,7 +54,7 @@ INCLUDES="-I/usr/include/openmotif -I/usr/include/gtk-2.0 -I/usr/${LIB}/gtk-2.0/
  
 LIBS="-L/usr/${LIB}/openmotif -L/usr/${LIB}/gdm -L/usr/${LIB} -L/usr/${LIB}/glib-2.0 -L/usr/${LIB}/gdk-pixbuf-2.0 -L/usr/${LIB}/gtk-2.0 -lXm -lXt -lX11 -lm"  
  
- LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0`"
+LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0`"
 
 gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o

@@ -90,20 +90,39 @@ typedef struct
 n_color8;
 
 
+#ifndef	_WIN32
+
+n_int control_gui_console_quit(void);
+static void *control_thread(void *threadid);
+void control_thread_console(void); /* should be internal */
+
+#endif
+
 typedef n_int (*control_file_handle)(n_byte * buff, n_uint len);
 
 typedef void  (*control_mp_define)(n_byte * data);
 
+
+n_int draw_toggle_weather(void);
+
+n_int draw_toggle_brain(void);
+
+n_int draw_toggle_braincode(void);
+
+n_int control_toggle_pause(void);
+
+void control_about(n_string value);
+
 n_byte control_cursor(n_byte  wwind, n_int px, n_int py, n_byte  option, n_byte no_bounds);
 
-void control_simulate(n_byte local_weather, n_byte local_pause, n_uint local_time);
+void control_simulate(n_uint local_time);
 void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option);
 void control_key(n_byte wwind, n_byte2 num);
 
 void control_sim_mouse(noble_simulation * local_sim, n_byte wwind, n_int px, n_int py, n_byte option);
 void control_sim_key(noble_simulation * local_sim, n_byte wwind, n_byte2 num);
 
-void control_sim_simulate(n_byte local_pause, n_uint local_time);
+void control_sim_simulate(n_uint local_time);
 
 void control_sim_draw(noble_simulation * local_sim, n_byte local_weather);
 

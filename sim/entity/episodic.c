@@ -411,26 +411,16 @@ static n_int episodic_memory_replace_index(
     return replace;
 }
 
-/**
- * Updates the episodic memory with details about an event
- * @param local Pointer to the ape
- * @param event The type of event
- * @param affect The affect value associated with the event
- * @param local_sim Pointer to the simulation
- * @param name1 Name of the first ape in the memory (meeter)
- * @param family1 Family name of the first ape in the memory (meeter)
- * @param name2 Name of the second ape in the memory (met)
- * @param family2 Family name of the second ape in the memory (met)
- * @param arg Any additional arguments
- */
-void episodic_store_memory(
-    noble_being * local,
-    n_byte event,
-    n_int affect,
-    noble_simulation * local_sim,
-    n_byte2 name1, n_byte2 family1,
-    n_byte2 name2, n_byte2 family2,
-    n_byte2 arg)
+
+static void episodic_store_full(
+                           noble_being * local,
+                           n_byte event,
+                           n_int affect,
+                           noble_simulation * local_sim,
+                           n_byte2 name1, n_byte2 family1,
+                           n_byte2 name2, n_byte2 family2,
+                           n_byte2 arg,
+                           n_byte food)
 {
     episodic_memory * local_episodic = GET_EPI(local_sim, local);
     n_int replace;
@@ -458,10 +448,85 @@ void episodic_store_memory(
     local_episodic[replace].family_name[BEING_MEETER]=family1;
     local_episodic[replace].first_name[BEING_MET]=name2;
     local_episodic[replace].family_name[BEING_MET]=family2;
-    local_episodic[replace].food=0;
+    local_episodic[replace].food=food;
     local_episodic[replace].arg=arg;
+    
+    if ((event == 0) || (event>EVENT_TICKLED))
+        (void)SHOW_ERROR("Event outside scope");
 }
 
+void episodic_food(noble_simulation * local_sim, noble_being * local, n_int energy, n_byte food_type)
+{
+    episodic_store_full(local, EVENT_EAT, energy, local_sim,
+                        GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
+                        0, 0, 0, food_type);
+}
+
+/**
+ * Updates the episodic memory with details about an event
+ * @param local Pointer to the ape
+ * @param event The type of event
+ * @param affect The affect value associated with the event
+ * @param local_sim Pointer to the simulation
+ * @param name1 Name of the first ape in the memory (meeter)
+ * @param family1 Family name of the first ape in the memory (meeter)
+ * @param name2 Name of the second ape in the memory (met)
+ * @param family2 Family name of the second ape in the memory (met)
+ * @param arg Any additional arguments
+ */
+void episodic_store_memory(
+                           noble_being * local,
+                           n_byte event,
+                           n_int affect,
+                           noble_simulation * local_sim,
+                           n_byte2 name1, n_byte2 family1,
+                           n_byte2 name2, n_byte2 family2,
+                           n_byte2 arg)
+{
+    episodic_store_full(local,event,affect,local_sim,name1,family1,name2,family2, arg, 0);
+}
+
+void episodic_self(
+                   noble_simulation * local_sim,
+                   noble_being * local,
+                   n_byte event,
+                   n_int affect,
+                   n_byte2 arg)
+{
+    episodic_store_memory(local, event, affect, local_sim,
+                          GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
+                          0, 0, arg);
+}
+
+void episodic_close(
+                    noble_simulation * local_sim,
+                    noble_being * local,
+                    noble_being * other,
+                    n_byte event,
+                    n_int affect,
+                    n_byte2 arg)
+{
+    episodic_store_memory(
+                          local, event, affect, local_sim,
+                          GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other),
+                          0,0, arg);
+}
+
+void episodic_interaction(
+                          noble_simulation * local_sim,
+                          noble_being * local,
+                          noble_being * other,
+                          n_byte event,
+                          n_int affect,
+                          n_byte2 arg)
+{
+    episodic_store_memory(
+                      local, event, affect, local_sim,
+                      GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
+                      GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other), arg);
+}
+
+                          
 /**
  * Generate an intention.
  * Note that intentions are stored together with episodic memories,

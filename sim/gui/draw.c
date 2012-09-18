@@ -176,19 +176,22 @@ static n_int toggle_weather = 1;
 static n_int toggle_brain = 1;
 static n_int toggle_braincode = 0;
 
-void draw_toggle_weather(void)
+n_int draw_toggle_weather(void)
 {
     toggle_weather ^= 1;
+    return toggle_weather;
 }
 
-void draw_toggle_brain(void)
+n_int draw_toggle_brain(void)
 {
     toggle_brain ^= 1;
+    return toggle_brain;
 }
 
-void draw_toggle_braincode(void)
+n_int draw_toggle_braincode(void)
 {
     toggle_braincode ^= 1;
+    return toggle_braincode;
 }
 
 /*NOBLEMAKE END=""*/
@@ -1476,15 +1479,15 @@ static void draw_line_braincode(n_byte * pointer, n_int line)
     draw_string(pointer, 4, (line*12) + 246, &local_mono);
 }
 
-void  draw_cycle(noble_simulation * local_sim, n_byte mod)
+void  draw_cycle(noble_simulation * local_sim, n_byte window)
 {
     if (check_about) return;
 #ifdef THREADED
     sim_draw_thread_start(mod);
 #endif
-    draw_apes(local_sim, mod);    // 8
+    draw_apes(local_sim, window);    // 8
 
-    if (mod == 0)
+    if (window == 0)
     {
         draw_terrain(local_sim);
         draw_meters(local_sim);
@@ -1501,7 +1504,10 @@ void  draw_cycle(noble_simulation * local_sim, n_byte mod)
     else
     {
 #ifdef WEATHER_ON
-        if (mod==2) draw_weather(local_sim); // 10
+        if (toggle_weather)
+        {
+           draw_weather(local_sim); // 10 
+        }
 #endif
         /* draw_body(local_sim); */
     }

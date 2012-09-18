@@ -474,8 +474,6 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
-
-
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function)
 {
     if (local_sim->select != NO_BEINGS_FOUND)
@@ -498,8 +496,8 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
             n_string_block first_internal;
             n_string_block first_external;
 
-            brain_three_byte_command((n_byte *)first_internal, &internal_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
-            brain_three_byte_command((n_byte *)first_external, &external_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
+            brain_three_byte_command((n_string)first_internal, &internal_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
+            brain_three_byte_command((n_string)first_external, &external_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
 
             if (loop == 21)
             {
@@ -510,8 +508,8 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
                 n_string_block second_internal;
                 n_string_block second_external;
 
-                brain_three_byte_command((n_byte *)second_internal, &internal_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
-                brain_three_byte_command((n_byte *)second_external, &external_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
+                brain_three_byte_command((n_string)second_internal, &internal_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
+                brain_three_byte_command((n_string)second_external, &external_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
                 sprintf(command_information, "%s  %s   %s  %s",first_external, second_external,first_internal,second_internal);
             }
 
@@ -562,7 +560,7 @@ static void show_braincode(void * ptr, noble_being * local_being, n_string resul
             values[0] = BRAINCODE_INSTRUCTION(code, program_pointer);
             values[1] = BRAINCODE_VALUE(code, program_pointer, 0);
             values[2] = BRAINCODE_VALUE(code, program_pointer, 1);
-            brain_three_byte_command((n_byte*)braincode_str, values);
+            brain_three_byte_command(braincode_str, values);
             for (j = 0; j < io_length(braincode_str,STRING_BLOCK_SIZE); j++)
             {
                 result[watch_string_length++] = braincode_str[j];
@@ -843,7 +841,7 @@ static void watch_metabolism(void *ptr, n_string beingname, noble_being * local_
 
 static n_string static_result;
 
-void watch_line_braincode(n_byte * string, n_int line)
+static void watch_line_braincode(n_byte * string, n_int line)
 {
     io_string_write(static_result, (n_string)string, &watch_string_length);
     io_string_write(static_result, "\n", &watch_string_length);
@@ -875,6 +873,31 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
     result[watch_string_length++]='\n';
 
 }
+
+static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
+{
+    n_int loop = 0;
+    n_byte * external_bc = GET_BRAINCODE_EXTERNAL((noble_simulation*)ptr, local);
+    while (loop < 43)
+    {
+        n_string_block sentence;
+        
+        brain_sentence((n_string)sentence, &external_bc[loop*3]);
+        
+        io_string_write(result, sentence, &watch_string_length);
+        result[watch_string_length++]='.';
+        result[watch_string_length++]=' ';
+        
+        if ((loop % 3) == 2)
+        {
+            result[watch_string_length++]='\n';
+        }
+        loop++;
+    }
+     result[watch_string_length++]='\n';
+}
+
+
 
 /**
  * Shows the social graph for the given being
@@ -1181,6 +1204,11 @@ n_int console_braincode(void * ptr, n_string response, n_console_output output_f
     return console_duplicate(ptr, response, output_function, "Braincode", watch_braincode);
 }
 
+n_int console_speech(void * ptr, n_string response, n_console_output output_function)
+{
+    return console_duplicate(ptr, response, output_function, "Speech", watch_speech);
+}
+
 /**
  * Show the vascular system
  * @param ptr pointer to noble_simulation object
@@ -1291,7 +1319,7 @@ extern n_int being_remove_external;
  * @param ptr pointer to noble_simulation object
  * @param output_function output function to be used
  */
-void watch_being(void * ptr, n_console_output output_function)
+static void watch_being(void * ptr, n_console_output output_function)
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
 
@@ -1406,6 +1434,11 @@ void watch_being(void * ptr, n_console_output output_function)
         case WATCH_APPEARANCE:
         {
             watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
+        case WATCH_SPEECH:
+        {
+            watch_speech(ptr, being_get_select_name(local_sim), local_being, beingstr);
             break;
         }
         }
@@ -1667,13 +1700,21 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 return 0;
             }
             if ((io_find(response,0,length,"episodic",8)>-1) ||
-                    (io_find(response,0,length,"episodic memory",15)>-1) ||
-                    (io_find(response,0,length,"memory",6)>-1))
+                (io_find(response,0,length,"episodic memory",15)>-1) ||
+                (io_find(response,0,length,"memory",6)>-1))
             {
                 watch_type = WATCH_EPISODIC;
                 sprintf(output,"Watching episodic memory for %s\n", being_get_select_name(local_sim));
                 output_function(output);
-
+                
+                return 0;
+            }
+            if (io_find(response,0,length,"speech",6)>-1)
+            {
+                watch_type = WATCH_SPEECH;
+                sprintf(output,"Watching speech for %s\n", being_get_select_name(local_sim));
+                output_function(output);
+                
                 return 0;
             }
             if ((length<5) && (io_find(response,0,length,"all",3)>-1))
@@ -1959,6 +2000,12 @@ static n_byte get_response_mode(n_string response)
             return 3;
         }
     }
+    return 0;
+}
+
+n_int console_speak(void * ptr, n_string response, n_console_output output_function)
+{
+    speak_out(response);
     return 0;
 }
 

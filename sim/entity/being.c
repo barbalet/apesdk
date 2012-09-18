@@ -93,6 +93,7 @@ typedef	struct
 being_draw;
 
 /* not used? */
+#ifdef NOT_USED
 n_byte being_alive(n_byte2 first_name_gender, n_byte2 family_name, noble_simulation * local_sim)
 {
     n_int i,j;
@@ -117,6 +118,7 @@ n_byte being_alive(n_byte2 first_name_gender, n_byte2 family_name, noble_simulat
     }
     return 0;
 }
+#endif
 
 static n_byte	being_ground(n_int px, n_int py, void * params)
 {
@@ -762,6 +764,155 @@ void being_relationship_description(n_int index, n_string description)
     sprintf(description,"%s",relationship_description[index]);
 }
 
+static void being_inventory_string(n_string string, n_int * location, n_int item)
+{
+    switch (item)
+    {
+        case INVENTORY_BRANCH:
+            io_string_write(string,"branch",location);
+            break;
+        case INVENTORY_ROCK:
+            io_string_write(string,"rock",location);
+            break;
+        case INVENTORY_SHELL:
+            io_string_write(string,"shell",location);
+            break;
+        case INVENTORY_TWIG:
+            io_string_write(string,"twig",location);
+            break;
+        case INVENTORY_NUT_CRACKED:
+            io_string_write(string,"cracked nut",location);
+            break;
+        case INVENTORY_GRASS:
+            io_string_write(string,"piece of grass",location);
+            break;
+        case INVENTORY_SCRAPER:
+            io_string_write(string,"scraper",location);
+            break;
+        case INVENTORY_SPEAR:
+            io_string_write(string,"spear",location);
+            break;
+        case INVENTORY_FISH:
+            io_string_write(string,"fish",location);
+            break;
+        case INVENTORY_CHILD:
+        case INVENTORY_WOUND:
+        case INVENTORY_GROOMED:
+        default:
+            io_string_write(string,"thing being carried",location);
+            break;
+    }
+}
+
+static void being_social_event_string(n_string string, n_int * location, n_int event_type, n_string name_str)
+{
+    switch (event_type)
+    {
+        case EVENT_MATE:
+            io_string_write(string,"Mated with ",location);
+            break;
+        case EVENT_FIGHT_WIN:
+            io_string_write(string,"Won a fight with ",location);
+            break;
+        case EVENT_FIGHT_LOSE:
+            io_string_write(string,"Lost a fight with ",location);
+            break;
+        case EVENT_GROOMED:
+            io_string_write(string,"Was groomed by ",location);
+            break;
+        case EVENT_CHAT:
+            io_string_write(string,"Chatted with ",location);
+            break;
+        case EVENT_BIRTH:
+            io_string_write(string,"Gave birth to ",location);
+            break;
+        case EVENT_CARRYING:
+            io_string_write(string,"Was carrying ",location);
+            break;
+        case EVENT_CARRIED:
+            io_string_write(string,"Was being carried by ",location);
+            break;
+        case EVENT_SUCKLING:
+            io_string_write(string,"Was suckling ",location);
+            break;
+        case EVENT_SUCKLE:
+            io_string_write(string,"Was suckling from ",location);
+            break;
+        case EVENT_SEEK_MATE:
+            io_string_write(string,"Searched for mate ",location);
+            break;
+        case EVENT_WHACK:
+            io_string_write(string,"Whacked ",location);
+            break;
+        case EVENT_WHACKED:
+            io_string_write(string,"Was whacked by ",location);
+            break;
+        case EVENT_HURL:
+            io_string_write(string,"Hurled a rock at ",location);
+            break;
+        case EVENT_HURLED:
+            io_string_write(string,"Was hit by a rock hurled by ",location);
+            break;
+        case EVENT_HUG:
+            io_string_write(string,"Hugged ",location);
+            break;
+        case EVENT_HUGGED:
+            io_string_write(string,"Was hugged by ",location);
+            break;
+        case EVENT_PROD:
+            io_string_write(string,"Prodded ",location);
+            break;
+        case EVENT_PRODDED:
+            io_string_write(string,"Was prodded by ",location);
+            break;
+        case EVENT_GIVE:
+            io_string_write(string,"Gave an object to ",location);
+            break;
+        case EVENT_RECEIVE:
+            io_string_write(string,"Received an object from ",location);
+            break;
+        case EVENT_POINT:
+            io_string_write(string,"Pointed at ",location);
+            break;
+        case EVENT_POINTED:
+            io_string_write(string,"Was pointed to by ",location);
+            break;
+        case EVENT_SMILE:
+            io_string_write(string,"Smiled at ",location);
+            break;
+        case EVENT_SMILED:
+            io_string_write(string,"Was smiled at by ",location);
+            break;
+        case EVENT_TICKLE:
+            io_string_write(string,"Tickled ",location);
+            break;
+        case EVENT_TICKLED:
+            io_string_write(string,"Was tickled by ",location);
+            break;
+        case EVENT_GLOWER:
+            io_string_write(string,"Glowered at ",location);
+            break;
+        case EVENT_GLOWERED:
+            io_string_write(string,"Was glowered at by ",location);
+            break;
+        case EVENT_PAT:
+            io_string_write(string,"Patted ",location);
+            break;
+        case EVENT_PATTED:
+            io_string_write(string,"Was patted by ",location);
+            break;
+        default:
+        {
+            n_string_block  number_str;
+            sprintf(number_str,"%ld", event_type);
+            io_string_write(string,"Some action (",location);
+            io_string_write(string,number_str,location);
+            io_string_write(string,") with ",location);
+            break;
+        }
+    }
+    io_string_write(string,name_str,location);
+}
 
 void episode_description(
     noble_simulation * sim,
@@ -796,48 +947,30 @@ void episode_description(
         {
         case EVENT_EAT:
         {
-            io_string_write(str,"Was eating",&string_index);
+            io_string_write(str,"Was eating ",&string_index);
             switch(local_episodic[index].food)
             {
-            case FOOD_VEGETABLE:
-            {
-                io_string_write(str," vegetation",&string_index);
-                break;
+                case FOOD_VEGETABLE:
+                {
+                    io_string_write(str,"vegetation",&string_index);
+                    break;
+                }
+                case FOOD_FRUIT:
+                {
+                    io_string_write(str,"fruit",&string_index);
+                    break;
+                }
+                case FOOD_SHELLFISH:
+                {
+                    io_string_write(str,"shellfish",&string_index);
+                    break;
+                }
+                case FOOD_SEAWEED:
+                {
+                    io_string_write(str,"seaweed",&string_index);
+                    break;
+                }
             }
-            case FOOD_FRUIT:
-            {
-                io_string_write(str," fruit",&string_index);
-                break;
-            }
-            case FOOD_SHELLFISH:
-            {
-                io_string_write(str," shellfish",&string_index);
-                break;
-            }
-            case FOOD_SEAWEED:
-            {
-                io_string_write(str," seaweed",&string_index);
-                break;
-            }
-            }
-            break;
-        }
-        case EVENT_MATE:
-        {
-            io_string_write(str,"Mated with ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_FIGHT_WIN:
-        {
-            io_string_write(str,"Won a fight with ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_FIGHT_LOSE:
-        {
-            io_string_write(str,"Lost a fight with ",&string_index);
-            io_string_write(str,name_str,&string_index);
             break;
         }
         case EVENT_SWIM:
@@ -853,177 +986,9 @@ void episode_description(
             io_string_write(str,being_body_inventory_description(local_episodic[index].arg),&string_index);
             break;
         }
-        case EVENT_GROOMED:
-        {
-            io_string_write(str,"Was groomed by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_CHAT:
-        {
-            io_string_write(str,"Chatted with ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
         case EVENT_SHOUT:
         {
             io_string_write(str,"Shouted ",&string_index);
-            break;
-        }
-        case EVENT_BIRTH:
-        {
-            io_string_write(str,"Gave birth to ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_CARRYING:
-        {
-            io_string_write(str,"Was carrying ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_CARRIED:
-        {
-            io_string_write(str,"Was being carried by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_SUCKLING:
-        {
-            io_string_write(str,"Was suckling ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_SUCKLE:
-        {
-            io_string_write(str,"Was suckling from ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_SEEK_MATE:
-        {
-            io_string_write(str,"Searched for mate ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_WHACK:
-        {
-            io_string_write(str,"Whacked ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_WHACKED:
-        {
-            io_string_write(str,"Was whacked by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_HURL:
-        {
-            io_string_write(str,"Hurled a rock at ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_HURLED:
-        {
-            io_string_write(str,"Was hit by a rock hurled by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_HUG:
-        {
-            io_string_write(str,"Hugged ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_HUGGED:
-        {
-            io_string_write(str,"Was hugged by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_PROD:
-        {
-            io_string_write(str,"Prodded ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_PRODDED:
-        {
-            io_string_write(str,"Was prodded by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_GIVE:
-        {
-            io_string_write(str,"Gave an object to ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_RECEIVE:
-        {
-            io_string_write(str,"Received an object from ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_POINT:
-        {
-            io_string_write(str,"Pointed at ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_POINTED:
-        {
-            io_string_write(str,"Was pointed to by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_SMILE:
-        {
-            io_string_write(str,"Smiled at ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_SMILED:
-        {
-            io_string_write(str,"Was smiled at by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_TICKLE:
-        {
-            io_string_write(str,"Tickled ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_TICKLED:
-        {
-            io_string_write(str,"Was tickled by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_GLOWER:
-        {
-            io_string_write(str,"Glowered at ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_GLOWERED:
-        {
-            io_string_write(str,"Was glowered at by ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_PAT:
-        {
-            io_string_write(str,"Patted ",&string_index);
-            io_string_write(str,name_str,&string_index);
-            break;
-        }
-        case EVENT_PATTED:
-        {
-            io_string_write(str,"Was patted by ",&string_index);
-            io_string_write(str,name_str,&string_index);
             break;
         }
         case EVENT_FISH:
@@ -1070,155 +1035,25 @@ void episode_description(
             break;
         }
         case EVENT_DRAG:
-        {
-            switch(local_episodic[index].arg)
-            {
-            case INVENTORY_BRANCH:
-            {
-                io_string_write(str,"Dragged a branch",&string_index);
-                break;
-            }
-            case INVENTORY_TWIG:
-            {
-                io_string_write(str,"Dragged a twig",&string_index);
-                break;
-            }
-            case INVENTORY_SPEAR:
-            {
-                io_string_write(str,"Dragged a spear",&string_index);
-                break;
-            }
-            }
+            io_string_write(str,"Dragged a ",&string_index);
+            being_inventory_string(str, &string_index, local_episodic[index].arg);
             break;
-        }
         case EVENT_BRANDISH:
-        {
-            switch(local_episodic[index].arg)
-            {
-            case INVENTORY_BRANCH:
-            {
-                io_string_write(str,"Waved a branch",&string_index);
+                io_string_write(str,"Waved a ",&string_index);
+                being_inventory_string(str, &string_index, local_episodic[index].arg);
                 break;
-            }
-            case INVENTORY_TWIG:
-            {
-                io_string_write(str,"Waved a twig",&string_index);
-                break;
-            }
-            case INVENTORY_SPEAR:
-            {
-                io_string_write(str,"Waved a spear",&string_index);
-                break;
-            }
-            }
-            break;
-        }
         case EVENT_DROP:
-        {
-            io_string_write(str,"Dropped a ",&string_index);
-            switch(local_episodic[index].arg)
-            {
-            case INVENTORY_BRANCH:
-            {
-                io_string_write(str,"branch",&string_index);
+                io_string_write(str,"Dropped a ",&string_index);
+                being_inventory_string(str, &string_index, local_episodic[index].arg);
                 break;
-            }
-            case INVENTORY_TWIG:
-            {
-                io_string_write(str,"twig",&string_index);
-                break;
-            }
-            case INVENTORY_SHELL:
-            {
-                io_string_write(str,"shell",&string_index);
-                break;
-            }
-            case INVENTORY_GRASS:
-            {
-                io_string_write(str,"piece of vegetation",&string_index);
-                break;
-            }
-            case INVENTORY_ROCK:
-            {
-                io_string_write(str,"rock",&string_index);
-                break;
-            }
-            case INVENTORY_NUT:
-            {
-                io_string_write(str,"nut",&string_index);
-                break;
-            }
-            case INVENTORY_NUT_CRACKED:
-            {
-                io_string_write(str,"cracked nut",&string_index);
-                break;
-            }
-            case INVENTORY_SCRAPER:
-            {
-                io_string_write(str,"scraper",&string_index);
-                break;
-            }
-            case INVENTORY_SPEAR:
-            {
-                io_string_write(str,"spear",&string_index);
-                break;
-            }
-            case INVENTORY_FISH:
-            {
-                io_string_write(str,"fish",&string_index);
-                break;
-            }
-            default:
-            {
-                io_string_write(str,"thing being carried",&string_index);
-                break;
-            }
-            }
-            break;
-        }
         case EVENT_PICKUP:
-        {
-            io_string_write(str,"Picked up a ",&string_index);
-            switch(local_episodic[index].arg)
-            {
-            case INVENTORY_BRANCH:
-            {
-                io_string_write(str,"branch",&string_index);
+                io_string_write(str,"Picked up a ",&string_index);
+                being_inventory_string(str, &string_index, local_episodic[index].arg);
                 break;
-            }
-            case INVENTORY_TWIG:
-            {
-                io_string_write(str,"twig",&string_index);
+                
+        default:
+                being_social_event_string(str, &string_index, local_episodic[index].event, name_str);
                 break;
-            }
-            case INVENTORY_SHELL:
-            {
-                io_string_write(str,"shell",&string_index);
-                break;
-            }
-            case INVENTORY_GRASS:
-            {
-                io_string_write(str,"piece of vegetation",&string_index);
-                break;
-            }
-            case INVENTORY_ROCK:
-            {
-                io_string_write(str,"rock",&string_index);
-                break;
-            }
-            case INVENTORY_NUT:
-            {
-                io_string_write(str,"nut",&string_index);
-                break;
-            }
-            default:
-            {
-                io_string_write(str,"unknown object",&string_index);
-                break;
-            }
-            }
-            break;
-        }
         }
 
         if (string_index == 0) return;
@@ -2204,7 +2039,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         }
         /** swimming proficiency */
         tmp_speed = (tmp_speed * (GENE_SWIM(GET_G(local))+8)) >> 4;
-        episodic_store_memory(local, EVENT_SWIM, GET_E(local), sim, GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local), 0, 0, 0);
+        
+        episodic_self(sim, local, EVENT_SWIM, GET_E(local), 0);
+        
 #ifdef PARASITES_ON
         /** bathing removes parasites */
         if (local->parasites > 0) local->parasites--;
@@ -2264,12 +2101,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 GET_IN(sim).food[food_type]++;
 
                 /** remember eating */
-                episodic_store_memory(
-                    local, EVENT_EAT, energy, sim,
-                    GET_NAME_GENDER(sim,local),GET_NAME_FAMILY2(sim,local),
-                    food_type, 0, 0);
-
-
+                episodic_food(sim, local, energy, food_type);
+                
                 if (energy > 0)
                 {
 #ifdef METABOLISM_ON
@@ -2373,7 +2206,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                     (void)being_init(sim, local, -1, 0);
                     loc_state |= BEING_STATE_REPRODUCING;
                     being_child = &(sim->beings[sim->num-1]);
-                    episodic_store_memory(local, EVENT_BIRTH, AFFECT_BIRTH, sim, GET_NAME_GENDER(sim,being_child), GET_NAME_FAMILY2(sim,being_child),0,0,0);
+                    episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
                     being_create_family_links(local,being_child,sim);
                 }
                 else
@@ -2392,8 +2225,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                         GET_X(being_child) = GET_X(local);
                         GET_Y(being_child) = GET_Y(local);
                         child_mass = GET_M(being_child);
-                        episodic_store_memory(local, EVENT_CARRYING, AFFECT_CARRYING, sim, GET_NAME_GENDER(sim,being_child), GET_NAME_FAMILY2(sim,being_child),0,0,0);
-                        episodic_store_memory(being_child, EVENT_CARRIED, AFFECT_CARRIED, sim, GET_NAME_GENDER(sim,local), GET_NAME_FAMILY2(sim,local),0,0,0);
+                        episodic_close(sim, local, being_child, EVENT_CARRYING, AFFECT_CARRYING, 0);
+                        episodic_close(sim, being_child, local, EVENT_CARRIED, AFFECT_CARRIED, 0);
                     }
                 }
             }
@@ -2454,8 +2287,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
                             being_immune_seed(mother, local);
-                            episodic_store_memory(mother, EVENT_SUCKLING, AFFECT_SUCKLING, sim, GET_NAME_GENDER(sim,local), GET_NAME_FAMILY2(sim,local),0,0,0);
-                            episodic_store_memory(local, EVENT_SUCKLE, AFFECT_SUCKLING, sim, GET_NAME_GENDER(sim,mother), GET_NAME_FAMILY2(sim,mother),0,0,0);
+                            
+                            episodic_close(sim, mother, local, EVENT_SUCKLING, AFFECT_SUCKLING, 0);
+                            episodic_close(sim, local, mother, EVENT_SUCKLE, AFFECT_SUCKLING, 0);
                         }
                     }
                 }

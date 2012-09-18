@@ -109,19 +109,10 @@
 // per-window timer function, basic time based animation preformed here
 - (void) animationTimer:(NSTimer *)localTimer
 {
-    if (commandLineEntry == YES)
-    {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            commandLineEntry = NO;
-            control_activate_console();
-            commandLineEntry = YES;
-        });
-    }
-    
 #ifndef NEW_OPENGL_ENVIRONMENT
-        shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
+    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
 #else
-        shared_cycle_no_draw(CFAbsoluteTimeGetCurrent (), fIdentification);
+    shared_cycle_no_draw(CFAbsoluteTimeGetCurrent (), fIdentification);
 #endif
 
     if (shared_script_debug_ready())
@@ -131,7 +122,7 @@
     
 	[self drawRect:[self bounds]]; // redraw now instead dirty to enable updates during live resize
     
-    if (control_macosx_console_quit())
+    if (control_gui_console_quit())
     {
         [self quitProcedure];
     }
@@ -249,14 +240,6 @@ n_int   count_switch = 0;
 {
 	fIdentification = shared_init([self bounds].size.height, CFAbsoluteTimeGetCurrent());
     
-    if (control_command_line_execution())
-    {
-        commandLineEntry = YES;
-    }
-    else
-    {
-        commandLineEntry = NO;
-    }
     // start animation timer
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     

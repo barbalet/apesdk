@@ -80,6 +80,9 @@ void   being_cycle_asleep(noble_simulation * sim, n_uint current_being_index);
 void   being_state_description(n_byte2 state, n_string result);
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
 
+void being_set_select_name(noble_simulation * sim, n_string name);
+n_string being_get_select_name(noble_simulation * sim);
+
 void social_graph_link_name(
     noble_simulation * local_sim,
     noble_being * local_being,
@@ -114,7 +117,9 @@ noble_being * being_from_name(noble_simulation * sim, n_string name);
 void being_tidy(noble_simulation * local_sim);
 void being_remove(noble_simulation * local_sim);
 
-void brain_three_byte_command(n_byte * string, n_byte * response);
+void brain_three_byte_command(n_string string, n_byte * response);
+
+void brain_sentence(n_string string, n_byte * response);
 
 void braincode_statistics(noble_simulation * sim);
 
@@ -129,6 +134,8 @@ noble_being * being_find_female(noble_simulation * sim, n_genetics * genetics);
 void          being_move(noble_being * local, n_int vel, n_byte kind);
 n_byte        being_awake(noble_simulation * sim, n_uint reference);
 n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly);
+
+void          speak_out(n_string filename);
 
 
 #endif /* _NOBLEAPE_ENTITY_H_ */

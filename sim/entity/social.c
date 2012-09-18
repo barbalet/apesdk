@@ -792,18 +792,13 @@ n_byte social_groom(
                 met_being->inventory[groomloc] = INVENTORY_GROOMED;
             }
             /** grooming location becomes the new focus of attention */
-            GET_A(meeter_being,ATTENTION_BODY) = groomloc;
+            GET_A(meeter_being, ATTENTION_BODY) = groomloc;
 
             GET_IN(sim).average_grooming++;
 
-            episodic_store_memory(
-                meeter_being, EVENT_GROOM, AFFECT_GROOM, sim,
-                GET_NAME_GENDER(sim,meeter_being),GET_NAME_FAMILY2(sim,meeter_being),
-                GET_NAME_GENDER(sim,met_being),GET_NAME_FAMILY2(sim,met_being), groomloc);
-            episodic_store_memory(
-                met_being, EVENT_GROOMED, AFFECT_GROOM, sim,
-                GET_NAME_GENDER(sim,met_being),GET_NAME_FAMILY2(sim,met_being),
-                GET_NAME_GENDER(sim,meeter_being),GET_NAME_FAMILY2(sim,meeter_being), groomloc);
+            /* question for Bob: should the grooming experience be this mutual? */
+            episodic_interaction(sim, meeter_being, met_being, EVENT_GROOM, AFFECT_GROOM, groomloc);
+            episodic_interaction(sim, met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);
 
             /** the two beings meet and become more friendly */
             meeter_index = social_meet(meeter_being, met_being, sim);
@@ -960,14 +955,9 @@ n_byte2 social_squabble(
             }
 
             /** remember the fight */
-            episodic_store_memory(
-                victor, EVENT_FIGHT_WIN, AFFECT_SQUABBLE_VICTOR, sim,
-                GET_NAME_GENDER(sim,victor),GET_NAME_FAMILY2(sim,victor),
-                GET_NAME_GENDER(sim,vanquished),GET_NAME_FAMILY2(sim,vanquished),(n_byte2)punchloc);
-            episodic_store_memory(
-                vanquished, EVENT_FIGHT_LOSE, AFFECT_SQUABBLE_VANQUISHED, sim,
-                GET_NAME_GENDER(sim,vanquished),GET_NAME_FAMILY2(sim,vanquished),
-                GET_NAME_GENDER(sim,victor),GET_NAME_FAMILY2(sim,victor),(n_byte2)punchloc);
+            
+            episodic_interaction(sim, victor, vanquished, EVENT_FIGHT_WIN, AFFECT_SQUABBLE_VICTOR, punchloc);
+            episodic_interaction(sim, vanquished, victor, EVENT_FIGHT_LOSE, AFFECT_SQUABBLE_VANQUISHED, punchloc);
 
             /** vanquished turns away */
             if (meeter_being == vanquished)
@@ -1059,19 +1049,8 @@ static void social_conception(
     male->goal[0]=GOAL_NONE;
 
     /** remember the event */
-    episodic_store_memory(
-        female, EVENT_MATE,
-        (GENE_MATE_BOND(GET_G(female))*AFFECT_MATE),
-        sim,
-        GET_NAME_GENDER(sim,female),GET_NAME_FAMILY2(sim,female),
-        GET_NAME_GENDER(sim,male),GET_NAME_FAMILY2(sim,male), 0);
-
-    episodic_store_memory(
-        male, EVENT_MATE,
-        (GENE_MATE_BOND(GET_G(male))*AFFECT_MATE),
-        sim,
-        GET_NAME_GENDER(sim,male),GET_NAME_FAMILY2(sim,male),
-        GET_NAME_GENDER(sim,female),GET_NAME_FAMILY2(sim,female), 0);
+    episodic_interaction(sim, female, male, EVENT_MATE,  (GENE_MATE_BOND(GET_G(female))*AFFECT_MATE), 0);
+    episodic_interaction(sim, male, female, EVENT_MATE,  (GENE_MATE_BOND(GET_G(male))*AFFECT_MATE), 0);
 }
 
 /**
@@ -1299,10 +1278,7 @@ n_int social_chat(
     /** do I respect their views ? */
     if ((meeter_graph[being_index].friend_foe) >= respect_mean)
     {
-        episodic_store_memory(
-            meeter_being, EVENT_CHAT, AFFECT_CHAT, sim,
-            GET_NAME_GENDER(sim,meeter_being),GET_NAME_FAMILY2(sim,meeter_being),
-            GET_NAME_GENDER(sim,met_being),GET_NAME_FAMILY2(sim,met_being), 0);
+        episodic_interaction(sim, meeter_being, met_being, EVENT_CHAT, AFFECT_CHAT, 0);
         /** pick one of the individuals from their graph */
         idx=-1;
         if (meeter_being->goal[0]==GOAL_MATE)

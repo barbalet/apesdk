@@ -54,9 +54,6 @@
 #include "gui.h"
 #include "shared.h"
 
-static n_byte  local_weather;
-static n_byte  local_pause;
-
 static n_int   mouse_x, mouse_y;
 static n_byte  mouse_option, mouse_identification;
 static n_byte  mouse_down;
@@ -65,11 +62,12 @@ static n_byte  key_identification;
 static n_byte2 key_value;
 static n_byte  key_down;
 
-void shared_cycle(n_uint ticks, n_int fIdentification)
+static noble_simulation * shared_squared_cycle(n_uint ticks, n_int fIdentification)
 {
     noble_simulation * local_sim = sim_sim();
-    ticks = ticks & 67108863; // 71 58 27 88
-    ticks *= 60;
+    
+    control_thread_console();
+    
     if((mouse_down == 1) && (mouse_identification == fIdentification))
     {
         control_sim_mouse(local_sim, mouse_identification, mouse_x, mouse_y, mouse_option);
@@ -81,40 +79,41 @@ void shared_cycle(n_uint ticks, n_int fIdentification)
             control_sim_key(local_sim, key_identification, key_value);
         }
     }
+    return local_sim;
+}
+
+void shared_cycle(n_uint ticks, n_int fIdentification)
+{
+    noble_simulation * local_sim = shared_squared_cycle(ticks, fIdentification);
+    
+    ticks = ticks & 67108863; // 71 58 27 88
+    ticks *= 60;
+    
     if(fIdentification == NUM_TERRAIN)
     {
-        control_sim_simulate(local_pause, ticks);
+        control_sim_simulate(ticks);
         control_sim_draw(local_sim, 0);
     }
     if(fIdentification == NUM_VIEW)
     {
-        control_sim_draw(local_sim, 1 + local_weather);
+        control_sim_draw(local_sim, 1);
     }
 }
 
 void shared_cycle_no_draw(n_uint ticks, n_int fIdentification)
 {
-    noble_simulation * local_sim = sim_sim();
+    noble_simulation * local_sim = shared_squared_cycle(ticks, fIdentification);
+    
     ticks = ticks & 67108863; // 71 58 27 88
     ticks *= 60;
-    if((mouse_down == 1) && (mouse_identification == fIdentification))
-    {
-        control_sim_mouse(local_sim, mouse_identification, mouse_x, mouse_y, mouse_option);
-    }
-    if((key_down == 1) && (key_identification == fIdentification))
-    {
-        if ((key_identification == NUM_VIEW) || (key_identification == NUM_TERRAIN))
-        {
-            control_sim_key(local_sim, key_identification, key_value);
-        }
-    }
+    
     if(fIdentification == NUM_TERRAIN)
     {
-        control_sim_simulate(local_pause, ticks);
+        control_sim_simulate(ticks);
     }
     if(fIdentification == NUM_VIEW)
     {
-        control_sim_draw(local_sim, 1 + local_weather);
+        control_sim_draw(local_sim, 1);
     }
 }
 
@@ -123,8 +122,6 @@ n_int shared_init(n_int localHeight, n_uint random)
     n_int   fIdentification = -1;
     n_byte2 fit[256 * 3];
 
-    local_weather = 1;
-    local_pause = 0;
     key_down = 0;
     mouse_down = 0;
 
@@ -175,28 +172,22 @@ void shared_close(void)
 
 void shared_notPause(void)
 {
-    if (control_command_line_execution())
-    {
-        console_stop(0L,"",0L);
-    }
-    
-    local_pause = 1 - local_pause;
+    (void)control_toggle_pause();
 }
 
 void shared_notWeather(void)
 {
-    local_weather = 1 - local_weather;
-    draw_toggle_weather();
+    (void)draw_toggle_weather();
 }
 
 void shared_notBrain(void)
 {
-    draw_toggle_brain();
+    (void)draw_toggle_brain();
 }
 
 void shared_notBrainCode(void)
 {
-    draw_toggle_braincode();
+    (void)draw_toggle_braincode();
 }
 
 void shared_keyReceived(n_byte2 value, n_byte fIdentification)
@@ -231,8 +222,7 @@ void shared_mouseUp(void)
 
 void shared_about(n_string value)
 {
-    local_pause = 1;
-    draw_about(value);
+    control_about(value);
 }
 
 n_byte * shared_draw(n_byte fIdentification)

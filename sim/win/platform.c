@@ -64,14 +64,13 @@ static BITMAPINFO	* bmp_info[NUMBER_WINDOWS];
 
 static unsigned char	* local_buffer;
 
-static unsigned char	pause, timed, firedown = 0, firecontrol = 0;
+static unsigned char    firedown = 0, firecontrol = 0;
 static int				fire_x, fire_y;
 static unsigned char	dialog_up = 0;
 static HMENU  hMenu, hMenuPopup[4];
 static HANDLE current_file = NULL;
 static TCHAR current_file_name[MAX_PATH];
 
-n_byte	show_weather;
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 /** Nobleape platform functions **/
@@ -161,7 +160,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     hMenuPopup[2] = CreateMenu();
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PAUSE_HANDLE, TEXT("&Pause"));
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_TIMED_HANDLE, TEXT("&Timed"));
+    
+    
     AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PREV_HANDLE, TEXT("P&revious Ape"));
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NEXT_HANDLE, TEXT ("&Next Ape"));
@@ -199,11 +199,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                                            window_value[2] + WINDOW_OFFSET_X,
                                            window_value[3] + WINDOW_OFFSET_Y,
                                            NULL, NULL, hInstance, NULL) ;
-
-    /** Other initializations **/
-    pause = 0;
-    timed = 0;
-    show_weather = 1;
 
     /* can't close the meters window, it's also the menu window */
     EnableMenuItem(hMenuPopup[0], FILE_CLOSE_HANDLE, MF_DISABLED | MF_GRAYED);
@@ -307,8 +302,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             control_mouse((n_byte)(firedown - 1), fire_x, fire_y, firecontrol);
         }
 
-        control_simulate(show_weather,(n_byte)((pause != 0) || (dialog_up != 0)) ,
-                         ((60*clock())/(CLK_TCK)));
+        control_simulate(((60*clock())/(CLK_TCK)));
+            
         plat_update();
 
         InvalidateRect(global_hwnd[0], NULL, TRUE);
@@ -377,26 +372,17 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         {
             /** Help Menu... **/
         case HELP_ABOUT_HANDLE:
-            pause = 1;
             CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_CHECKED);
 
-            draw_about((unsigned char *)"Windows");
+            control_about((unsigned char *)"Windows");
             return 0;
 
             /** Control Menu... **/
         case CONTROL_PAUSE_HANDLE:
-            pause ^= 1;
-            if (pause)
+            if (control_toggle_pause())
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_CHECKED);
             else
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_UNCHECKED);
-            return 0;
-        case CONTROL_TIMED_HANDLE:
-            timed ^= 1;
-            if (timed)
-                CheckMenuItem(hMenuPopup[2], CONTROL_TIMED_HANDLE, MF_CHECKED);
-            else
-                CheckMenuItem(hMenuPopup[2], CONTROL_TIMED_HANDLE, MF_UNCHECKED);
             return 0;
 
         case CONTROL_PREV_HANDLE:
@@ -424,9 +410,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
 
         case CONTROL_NO_WEATHER_HANDLE:
-
-            show_weather ^= 1;
-            if (show_weather)
+            if (draw_toggle_weather())
                 CheckMenuItem(hMenuPopup[2], CONTROL_NO_WEATHER_HANDLE, MF_UNCHECKED);
             else
                 CheckMenuItem(hMenuPopup[2], CONTROL_NO_WEATHER_HANDLE, MF_CHECKED);

@@ -41,12 +41,16 @@
 
 #include "../noble/noble.h"
 #include "../universe/universe.h"
+#include "../entity/entity_internal.h"
+#include "../entity/entity.h"
 
 
 #else
 
 #include "..\noble\noble.h"
 #include "..\universe\universe.h"
+#include "..\entity\entity_internal.h"
+#include "..\entity\entity.h"
 
 #endif
 

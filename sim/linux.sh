@@ -29,6 +29,8 @@
 #   begun on 13 June 1996. No apes or cats were harmed in the writing
 #   of this software.
 
+SOURCEDIR=.  
+
 if [ $# -ge 1 -a "$1" == "--debug" ]
 then
     CFLAGS=-g
@@ -36,36 +38,48 @@ else
     CFLAGS=-O2 
 fi
 
-gcc ${CFLAGS} -c noble/io.c -o io.o
-gcc ${CFLAGS} -c noble/math.c -o math.o
-gcc ${CFLAGS} -c noble/parse.c -o parse.o
-gcc ${CFLAGS} -c noble/interpret.c -o interpret.o
-gcc ${CFLAGS} -c noble/land.c -o land.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
 
-gcc ${CFLAGS} -c entity/being.c -o being.o
-gcc ${CFLAGS} -c entity/body.c -o body.o
-gcc ${CFLAGS} -c entity/metabolism.c -o metabolism.o
-gcc ${CFLAGS} -c entity/brain.c -o brain.o
-gcc ${CFLAGS} -c entity/social.c -o social.o
-gcc ${CFLAGS} -c entity/episodic.c -o episodic.o
-gcc ${CFLAGS} -c entity/food.c -o food.o
-gcc ${CFLAGS} -c entity/drives.c -o drives.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/being.c -o being.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/body.c -o body.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/metabolism.c -o metabolism.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/brain.c -o brain.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/social.c -o social.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/episodic.c -o episodic.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/food.c -o food.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/drives.c -o drives.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/speak.c -o speak.o
 
-gcc ${CFLAGS} -c universe/file.c -o file.o
-gcc ${CFLAGS} -c universe/console.c -o console.o
-gcc ${CFLAGS} -c universe/sim.c -o sim.o
+gcc ${CFLAGS} -c $SOURCEDIR/universe/file.c -o file.o
+gcc ${CFLAGS} -c $SOURCEDIR/universe/console.c -o console.o
+gcc ${CFLAGS} -c $SOURCEDIR/universe/sim.c -o sim.o
 
-gcc ${CFLAGS} -c command/graph.c -o graph.o
-gcc ${CFLAGS} -c command/genealogy.c -o genealogy.o
+gcc ${CFLAGS} -c $SOURCEDIR/command/graph.c -o graph.o
+gcc ${CFLAGS} -c $SOURCEDIR/command/genealogy.c -o genealogy.o
 
-gcc ${CFLAGS} -c cle.c -o cle.o
+gcc ${CFLAGS} -c $SOURCEDIR/cle.c -o cle.o
 
-gcc ${CFLAGS} -c longterm.c -o longterm.o
+gcc ${CFLAGS} -c $SOURCEDIR/longterm.c -o longterm.o
 
-gcc ${CFLAGS} -I/usr/include -o ../nacle io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o graph.o genealogy.o file.o console.o sim.o cle.o
+gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nacle io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o graph.o genealogy.o speak.o file.o console.o sim.o cle.o
 
-gcc ${CFLAGS} -c contrib/motters/pnglite.c -o pnglite.o
-gcc ${CFLAGS} -I/usr/include -o ../nalongterm io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o genealogy.o file.o console.o sim.o graph.o longterm.o pnglite.o -lz
+gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
+
+gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nalongterm io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o genealogy.o speak.o file.o console.o sim.o graph.o longterm.o pnglite.o -lz
+
+
+if [ $# -ge 1 -a "$1" == "--additional" ]
+then
+
+gcc ${CFLAGS} -c $SOURCEDIR/gui/draw.c -o draw.o
+gcc ${CFLAGS} -c $SOURCEDIR/gui/control.c -o control.o
+
+else
 
 rm *.o
 
+fi
