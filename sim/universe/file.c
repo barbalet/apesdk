@@ -104,6 +104,37 @@ static void fileout_being(n_file * file_out, noble_simulation * value, n_int bei
 }
 
 
+n_file * file_out(void)
+{
+    noble_simulation *local_sim = sim_sim();
+    n_file           *returnFile = io_file_new();
+    n_uint	          loop = 0;    
+    n_string fluff[5] = {SHORT_VERSION_NAME, FULL_DATE, COPYRIGHT_DATE, COPYRIGHT_NAME, COPYRIGHT_FOLLOW };
+
+    if(returnFile == 0L)
+    {
+        return 0L;
+    }
+    if(returnFile->data == 0L)
+    {
+        io_free(returnFile);
+        return 0L;
+    }
+    
+    io_write_buff(returnFile, fluff, 0L, FILE_COPYRIGHT, 0L);
+    
+    fileout_land(returnFile, local_sim, (noble_file_entry *)noble_file_format);
+    
+    while (loop < local_sim->num)
+    {
+        fileout_being(returnFile, local_sim, loop, (noble_file_entry *)noble_file_format);
+        loop++;
+    }
+    
+    /* TODO: Brain block */
+    return returnFile;
+}
+
 n_byte * sim_fileout(n_uint * len)
 {
     noble_simulation *local_sim = sim_sim();
@@ -130,13 +161,122 @@ n_byte * sim_fileout(n_uint * len)
     }
 
     /* TODO: Brain block */
-
+    
     * len = file_pass.location;
     return file_pass.data;
 }
 
-/* takes a file buffer and decodes the file into the global being and land variables */
+n_int	file_in(n_file * input_file)
+{
+    n_int  ret_val;
+    n_byte temp_store[LARGEST_INIT_PTR];
+    n_uint ape_count = 0;
+    n_uint social_count = 0;
+    n_uint episodic_count = 0;
+    
+    noble_simulation * local_sim = sim_sim();
+    
+    input_file->size = input_file->location;
+    input_file->location = 0;
+    
+    io_whitespace(input_file);
+    
+    ret_val = io_read_buff(input_file, temp_store, noble_file_format);
+    
+    if(ret_val != FIL_VER) /* signature must be first */
+        return SHOW_ERROR("Signature not first in file");
+    
+    {
+        n_byte2	*signature = (n_byte2 *)temp_store;
+        
+        if(signature[0] != NOBLE_APE_SIGNATURE) /* not a Noble Ape file */
+            return SHOW_ERROR("Not a Noble Ape File");
+        
+        if(signature[1] > VERSION_NUMBER) /* file version greater than this version */
+            return SHOW_ERROR("File newer than Simulation");
+    }
+    
+    do
+    {
+        n_byte *temp = 0L;
+        ret_val = io_read_buff(input_file, temp_store, noble_file_format);
+        if (ret_val == -1)
+            SHOW_ERROR("Failure in file load");
+        if (ret_val < FILE_EOF)
+        {
+            n_uint	loop_end = 0;
+            switch (ret_val)
+            {
+                case FIL_LAN:
+                    temp = (n_byte*)(local_sim->land);
+                    loop_end = NON_PTR_LAND;
+                    break;
+                case FIL_WEA:
+                    temp = (n_byte*)(local_sim->weather);
+                    loop_end = sizeof(n_int);
+                    break;
+                case FIL_BEI:
+                    temp = (n_byte*) &(local_sim->beings[ape_count]);
+                    loop_end = sizeof(noble_being);
+                    break;
+                case FIL_SOE:
+                    temp = (n_byte*) &(local_sim->social_base[social_count]);
+                    loop_end = sizeof(social_link);
+                    break;
+                case FIL_EPI:
+                    temp = (n_byte*) &(local_sim->episodic_base[social_count]);
+                    loop_end = sizeof(social_link);
+                    break;
+                default:
+                    return SHOW_ERROR("Unknown kind in file"); /*unkown kind*/
+                    break;
+            }
+            if(temp != 0L)
+            {
+                io_copy(temp_store, temp, loop_end);
+            }
+            if (ret_val == FIL_BEI)
+            {
+                ape_count ++;
+                if (ape_count == local_sim->max)
+                {
+                    local_sim->num = ape_count;
+                    return SHOW_ERROR("Too many apes for memory");
+                }
+            }
+            if (ret_val == FIL_SOE)
+            {
+                social_count ++;
+                if (social_count == (local_sim->max * SOCIAL_SIZE))
+                {
+                    local_sim->num = ape_count;
+                    return SHOW_ERROR("Too many social graph events for memory");
+                }
+            }
+            if (ret_val == FIL_EPI)
+            {
+                episodic_count ++;
+                if (episodic_count == (local_sim->max * EPISODIC_SIZE))
+                {
+                    local_sim->num = ape_count;
+                    return SHOW_ERROR("Too many episodic events for memory");
+                }
+            }
+            
+        }
+        
+    }
+    while (ret_val < FILE_EOF);
+    
+    if (ret_val == FILE_EOF)
+    {
+        local_sim->num = ape_count;
+        return 0;
+    }
+    return SHOW_ERROR("Process file failed");
+}
 
+/* takes a file buffer and decodes the file into the global being and land variables */
 n_int	sim_filein(n_byte * buff, n_uint len)
 {
     n_int  ret_val;

@@ -276,6 +276,35 @@ n_int	sim_interpret(n_byte * buff, n_uint len)
     return 0;
 }
 
+n_int     file_interpret(n_file * input_file)
+{
+    input_file->size = input_file->location;
+    input_file->location = 0;
+    
+    interpret = parse_convert(input_file, VARIABLE_BEING, (variable_string *)variable_codes);
+    
+    if(interpret == 0L)
+    {
+        return -1;
+    }
+    else
+    {
+        SC_DEBUG_ON; /* turn on debugging after script loading */
+    }
+    
+    interpret->sc_input  = &sketch_input;
+    interpret->sc_output = &sketch_output;
+    
+    interpret->input_greater   = VARIABLE_WEATHER;
+    interpret->special_less    = VARIABLE_VECT_X;
+    
+    interpret->location = 0;
+    interpret->leave = 0;
+    interpret->localized_leave = 0;
+    
+    return 0;
+}
+
 
 void sim_brain(noble_simulation * local_sim)
 {

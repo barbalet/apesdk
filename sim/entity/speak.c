@@ -230,80 +230,79 @@ void speak_aiff_header(FILE *fptr, n_audio *samples, n_uint nsamples)
 
 static void speak_make(n_string filename, n_int length)
 {
-	FILE     *out_file = 0L;
+    FILE     *out_file = 0L;
     n_double *frequency  = malloc(length * sizeof(n_double));
     n_double *timedomain = malloc(length * sizeof(n_double));
-	n_audio  *output      = malloc(length * sizeof(n_audio));
-	n_int     loop = 0;
+    n_audio  *output      = malloc(length * sizeof(n_audio));
+    n_int     loop = 0;
     n_int     division = MAX_BUFFER/length;
-    
+
     out_file = fopen(filename,"w");
-    
+
     if (out_file == 0L)
     {
         (void)SHOW_ERROR("Failed create speak file!");
         return;
     }
-    
-	while (loop < length)
-	{
-		frequency[loop] = 0;
-		timedomain[loop] = 0;
-		loop++;
-	}
-	
-	frequency[400/division] = 200000/division;
-	frequency[600/division] = 800000/division;
-	frequency[900/division] = 800000/division;
-	frequency[700/division] = 800000/division;
-	frequency[450/division] = 200000/division;
-	frequency[460/division] = 900000/division;
-	frequency[490/division] = 900000/division;
-	
-	ifft(length, timedomain, frequency);
-	
-	loop = 0;
-	while (loop < length)
-	{
-		output[loop] = timedomain[loop];
-		loop++;
-	}
-	
-	loop = 0;
-	while (loop < length)
-	{
-		frequency[loop] = 0;
-		timedomain[loop] = 0;
-		loop++;
-	}
-	
-	frequency[0] = 30000/division;
-	frequency[1] = 30000/division;
-	frequency[2] = 30000/division;
-	frequency[3] = 30000/division;
-	
+
+    while (loop < length)
+    {
+        frequency[loop] = 0;
+        timedomain[loop] = 0;
+        loop++;
+    }
+
+    frequency[400/division] = 200000/division;
+    frequency[600/division] = 800000/division;
+    frequency[900/division] = 800000/division;
+    frequency[700/division] = 800000/division;
+    frequency[450/division] = 200000/division;
+    frequency[460/division] = 900000/division;
+    frequency[490/division] = 900000/division;
+
     ifft(length, timedomain, frequency);
-	
+
+    loop = 0;
+    while (loop < length)
+    {
+        output[loop] = timedomain[loop];
+        loop++;
+    }
+
+    loop = 0;
+    while (loop < length)
+    {
+        frequency[loop] = 0;
+        timedomain[loop] = 0;
+        loop++;
+    }
+
+    frequency[0] = 30000/division;
+    frequency[1] = 30000/division;
+    frequency[2] = 30000/division;
+    frequency[3] = 30000/division;
+
+    ifft(length, timedomain, frequency);
+
     free(frequency);
 
-    
-	loop = 0;
-	while (loop < length)
-	{
-		output[loop] *= timedomain[loop];
-		loop++;
-	}
-	
+    loop = 0;
+    while (loop < length)
+    {
+        output[loop] *= timedomain[loop];
+        loop++;
+    }
+
     free(timedomain);
 
-	speak_aiff_header(out_file,output,length);
-    
-	free(output);
+    speak_aiff_header(out_file,output,length);
 
-	fclose(out_file);
+    free(output);
+
+    fclose(out_file);
 }
 
 void speak_out(n_string filename)
 {
-	speak_make(filename, ACT_BUFFER);
+    speak_make(filename, ACT_BUFFER);
 }

@@ -145,7 +145,7 @@ n_int shared_init(n_int localHeight, n_uint random)
         {
             n_file * tester = io_file_new();
             (void)io_disk_read(tester,"NobleApeAutoload.txt");
-            if(sim_filein(tester->data, tester->location) == 0)
+            if(file_in(tester) == 0)
             {
                 control_init(KIND_LOAD_FILE, 0);
             }
@@ -155,7 +155,7 @@ n_int shared_init(n_int localHeight, n_uint random)
         {
             n_file * tester = io_file_new();
             (void)io_disk_read(tester,"ApeScriptAutoload.txt");
-            (void)sim_interpret(tester->data, tester->location);
+            (void)file_interpret(tester);
             io_file_free(tester);
         }
     }
@@ -257,12 +257,7 @@ void shared_create_preload(n_int exists)
 {
     if (io_disk_check("NobleApeAutoload.txt") == exists)
     {
-        n_uint		buff_len;
-        n_byte * buff = sim_fileout(&buff_len);
-        FILE          * outputfile = fopen("NobleApeAutoload.txt","w");
-        fwrite(buff, buff_len, 1, outputfile);
-        fclose(outputfile);
-        io_free(buff);
+        shared_saveFileName("NobleApeAutoload.txt");
     }
 }
 
@@ -300,11 +295,11 @@ n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 
     if (isScript)
     {
-        returnValue = (sim_interpret(tester->data, tester->location) == 0);
+        returnValue = (file_interpret(tester) == 0);
     }
     else
     {
-        returnValue = (sim_filein(tester->data, tester->location) == 0);
+        returnValue = (file_in(tester) == 0);
         if (returnValue)
         {
             control_init(KIND_LOAD_FILE, 0);
@@ -316,14 +311,12 @@ n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 
 void shared_saveFileName(n_string cStringFileName)
 {
-    n_uint	buff_len;
-    n_byte * buff = 0L;
-    FILE          * outputfile = fopen(cStringFileName,"w");
-
-    buff = sim_fileout(&buff_len);
-    fwrite(buff, buff_len, 1, outputfile);
-    fclose(outputfile);
-    io_free(buff);
+    n_file * file_opened = file_out();
+    if (file_opened != 0L)
+    {
+        io_disk_write(file_opened, cStringFileName);
+        io_file_free(file_opened);
+    }
 }
 
 #ifdef SCRIPT_DEBUG

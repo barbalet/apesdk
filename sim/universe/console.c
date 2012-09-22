@@ -2012,19 +2012,20 @@ n_int console_speak(void * ptr, n_string response, n_console_output output_funct
 
 n_int console_save(void * ptr, n_string response, n_console_output output_function)
 {
-    n_file file_opened;
+    n_file * file_opened;
     n_string_block output_string;
 
     if (response==0) return 0;
 
     console_file_exists = 0;
 
-
-    file_opened.data = sim_fileout(&(file_opened.location));
-
-    file_opened.size = file_opened.location;
-
-    io_disk_write(&file_opened, response);
+    file_opened = file_out();
+    if (file_opened == 0L)
+    {
+        return -1;
+    }
+    io_disk_write(file_opened, response);
+    io_file_free(file_opened);
 
     console_file_exists = 1;
     sprintf(console_file_name,"%s",response);
@@ -2052,7 +2053,7 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
             return 0;
         }
 
-        if (sim_filein(file_opened->data, file_opened->location) != 0)
+        if (file_in(file_opened) != 0)
         {
             io_file_free(file_opened);
             return 0;
@@ -2086,7 +2087,7 @@ n_int console_script(void * ptr, n_string response, n_console_output output_func
             return 0;
         }
         /* one line difference from script_open */
-        if (sim_interpret(file_opened->data, file_opened->location) != 0)
+        if (file_interpret(file_opened) != 0)
         {
             io_file_free(file_opened);
             return 0;
