@@ -1,5 +1,5 @@
 #!/bin/bash
-#	ubuntu.sh
+#	fedora.sh
 #
 #	=============================================================
 #
@@ -29,24 +29,6 @@
 #   This software and Noble Ape are a continuing work of Tom Barbalet,
 #   begun on 13 June 1996. No apes or cats were harmed in the writing
 #   of this software.
-
-if [ $# -ge 1 -a "$1" == "--debug" ]
-then
-    CFLAGS=-g
-else
-    CFLAGS=-O2 
-fi
-
-INCLUDES="-I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -I/usr/include"
-
-LIBS="-L/usr/lib/gdm -L/usr/lib -L/usr/lib/glib-2.0 -L/usr/lib/gdk-pixbuf-2.0 -L/usr/lib/gtk-2.0 -L/usr/lib/pango-1.0 -L/usr/lib/cairo -lXm -lXt -lX11 -lm"
-
-LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0` -lm"
-
-./linux.sh --additional
-
-gcc ${CFLAGS} ${INCLUDES} -c gtk/platform.c -o platform.o ${LIBS2}
-
-gcc ${CFLAGS} ${INCLUDES} -o ../na io.o math.o parse.o interpret.o being.o body.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o genealogy.o draw.o control.o platform.o console.o speak.o ${LIBS2}
-
-rm *.o
+ 
+sudo yum groupinstall "Development Tools"  
+sudo yum install rpmdevtools gtk2-devel glib2-devel libpng-devel  

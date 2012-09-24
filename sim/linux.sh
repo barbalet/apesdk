@@ -1,3 +1,4 @@
+#!/bin/bash
 #	linux.sh
 #
 #	=============================================================
@@ -65,11 +66,11 @@ gcc ${CFLAGS} -c $SOURCEDIR/cle.c -o cle.o
 
 gcc ${CFLAGS} -c $SOURCEDIR/longterm.c -o longterm.o
 
-gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nacle io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o graph.o genealogy.o speak.o file.o console.o sim.o cle.o
+gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nacle io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o graph.o genealogy.o speak.o file.o console.o sim.o cle.o -lm
 
 gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
 
-gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nalongterm io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o genealogy.o speak.o file.o console.o sim.o graph.o longterm.o pnglite.o -lz
+gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nalongterm io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o genealogy.o speak.o file.o console.o sim.o graph.o longterm.o pnglite.o -lz -lm
 
 
 if [ $# -ge 1 -a "$1" == "--additional" ]

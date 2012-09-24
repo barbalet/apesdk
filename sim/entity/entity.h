@@ -135,7 +135,7 @@ void          being_move(noble_being * local, n_int vel, n_byte kind);
 n_byte        being_awake(noble_simulation * sim, n_uint reference);
 n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly);
 
-void          speak_out(n_string filename);
+void          speak_out(n_string filename, n_string paragraph);
 
 
 #endif /* _NOBLEAPE_ENTITY_H_ */

@@ -1556,6 +1556,8 @@ n_int     file_interpret(n_file * input_file);
 void	  sim_close(void);
 void	  sim_populations(n_uint	*total, n_uint * female, n_uint * male);
 
+n_int     file_bin_read(n_string name);
+n_int     file_bin_write(n_string name);
 
 noble_simulation * sim_sim(void);
 

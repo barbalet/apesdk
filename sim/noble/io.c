@@ -78,6 +78,253 @@ n_byte io_entry_execution(n_int argc, n_string * argv)
     return previous;
 }
 
+
+n_int file_chain_write_generate_header(n_file_chain *initial)
+{
+    n_uint       * hash_data;
+    n_uint         count = 0;
+    n_file_chain * local = initial;
+    n_file_chain * header;
+    
+    if (local == 0L)
+    {
+        return SHOW_ERROR("Filechain Format Does not Exist");
+    }
+    
+    header = local;
+    
+    local = (n_file_chain*)header->next;
+    
+    if (local == 0L)
+    {
+        return SHOW_ERROR("Filechain Format Empty");
+    }
+    
+    do {
+        count++;
+        local = (n_file_chain*)local->next;
+    } while (local != 0L);
+        
+    header->data = io_new(count*sizeof(n_uint));
+    header->expected_bytes = count*sizeof(n_uint);
+    hash_data = (n_uint*) header->data;
+    
+    if (hash_data == 0L)
+    {
+        return SHOW_ERROR("Header not allocated");
+    }
+    
+    local = (n_file_chain*)header->next;
+    count = 0;
+    
+    do {
+        hash_data[count] = math_hash(local->data,local->expected_bytes);
+        count++;
+        local = (n_file_chain*)local->next;
+    } while (local != 0L);
+    return 0;
+}
+
+n_file_chain * file_chain_new(n_uint size)
+{
+    n_file_chain * return_value = 0L;
+    n_int          loop = 0;
+    return_value = (n_file_chain*)io_new((size+1)*sizeof(n_file_chain));
+    while (loop < (size+1))
+    {
+        return_value[loop].data = 0L;
+        return_value[loop].expected_bytes = 0;
+        if (loop == size)
+        {
+            return_value[loop].next = 0L;
+        }
+        else
+        {
+            return_value[loop].next = (void*)&return_value[loop+1];
+        }
+        loop++;
+    }
+    return return_value;
+}
+
+void file_chain_free(n_file_chain * value)
+{
+    /* clean up header */
+    if (value->data != 0L)
+    {
+        io_free(value->data);
+    }
+    /* clean up chain */
+    if (value != 0L)
+    {
+        io_free(value);
+    }
+}
+
+n_int file_chain_write(n_string name, n_file_chain * initial)
+{
+    FILE         * write_file = 0L;
+    n_file_chain * local = initial;
+
+    write_file = fopen(name, "wb");
+    
+    if (write_file == 0L)
+    {
+        return SHOW_ERROR("File could not be created");
+    }
+    
+    do {
+        fwrite(local->data,1,local->expected_bytes, write_file);
+        local = (n_file_chain*)local->next;
+    } while (local != 0L);
+    
+    fclose(write_file);
+    return 0;
+}
+
+n_int file_chain_read(n_string name, n_file_chain * initial)
+{
+    FILE         * read_file = 0L;
+    n_file_chain * local = initial;
+    
+    read_file = fopen(name, "rb");
+    
+    if (read_file == 0L)
+    {
+        return SHOW_ERROR("File could not be read");
+    }
+    
+    do {
+        fread(local->data,1,local->expected_bytes, read_file);
+        local = (n_file_chain*)local->next;
+    } while (local != 0L);
+    
+    fclose(read_file);
+    return 0;
+}
+
+
+n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expected_additional_entries)
+{
+    FILE         * read_file = 0L;
+    n_uint       * hash_data = 0L;
+    n_uint         expected_size;
+    n_uint         actual_size;
+    n_uint         loop = 0;
+    read_file = fopen(name,"rb");
+    if (read_file == 0L)
+    {
+        return SHOW_ERROR("File does not exist");
+    }
+    
+    if (header == 0L)
+    {
+        fclose(read_file);
+        return SHOW_ERROR("No header presented");
+    }
+    
+    expected_size = expected_additional_entries * sizeof(n_uint);
+    header->data = 0L;
+    header->data = io_new(expected_size);
+    if (header->data == 0L)
+    {
+        fclose(read_file);
+        return SHOW_ERROR("No hash allocated");
+    }
+    header->expected_bytes = expected_size;
+
+    hash_data = (n_uint*)header->data;
+    actual_size = fread(hash_data, 1, expected_additional_entries*sizeof(n_uint), read_file);
+    if (expected_size != actual_size)
+    {
+        io_free(hash_data);
+        fclose(read_file);
+        return SHOW_ERROR("File too short");
+    }
+    while (loop < expected_additional_entries)
+    {
+        header[loop+1].hash = hash_data[loop];
+        loop++;
+    }
+    fclose(read_file);
+    return 0;
+}
+
+n_int file_chain_read_validate(n_string name, n_file_chain *initial)
+{
+    n_file_chain * local = initial;
+    n_uint         largest_bytes = 0;
+    n_byte       * general_buffer = 0L;
+    FILE         * read_file = 0L;
+    
+    do {
+        if (local->expected_bytes > largest_bytes)
+        {
+            largest_bytes = local->expected_bytes;
+        }
+        local = (n_file_chain*)local->next;
+    } while (local != 0L);
+    
+    read_file = fopen(name,"rb");
+    if (read_file == 0L)
+    {
+        return SHOW_ERROR("File does not exist");
+    }
+    
+    general_buffer = io_new(largest_bytes);
+    if (general_buffer == 0L)
+    {
+        fclose(read_file);
+        return SHOW_ERROR("Validation buffer not created");
+    }
+    
+    /* get past header */
+    local = initial;
+    
+    if (local == 0L)
+    {
+        fclose(read_file);
+        return SHOW_ERROR("File chain invalid");
+    }
+    
+    do {
+        n_uint actual_read = fread(general_buffer, 1, local->expected_bytes, read_file);
+        n_uint actual_hash;
+        if (actual_read != local->expected_bytes)
+        {
+            fclose(read_file);
+            io_free(general_buffer);
+            return SHOW_ERROR("File too short");
+        }
+        
+        actual_hash = math_hash(general_buffer, local->expected_bytes);
+        
+        if (local != initial)
+        {
+            if (actual_hash != local->hash)
+            {
+                fclose(read_file);
+                io_free(general_buffer);
+                
+                local = local->next;
+                
+                return SHOW_ERROR("Hash failed");
+            }
+        }
+        local = (n_file_chain*)local->next;
+    } while (local != 0L);
+    
+    fclose(read_file);
+    io_free(general_buffer);
+    return 0;
+}
+
+void file_chain_bin_name(n_string original, n_string bin_file)
+{
+    sprintf(bin_file, "%s.bin",original);
+}
+
+
 /**
  * This is a historical legacy function as all platforms now use memcpy. Although in the future this may change.
  * @param from pointer to copy from.

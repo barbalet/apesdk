@@ -148,6 +148,7 @@ n_int shared_init(n_int localHeight, n_uint random)
             if(file_in(tester) == 0)
             {
                 control_init(KIND_LOAD_FILE, 0);
+                file_bin_read("NobleApeAutoload.txt");
             }
             io_file_free(tester);
         }
@@ -303,6 +304,7 @@ n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
         if (returnValue)
         {
             control_init(KIND_LOAD_FILE, 0);
+            file_bin_read(cStringFileName);
         }
     }
     io_file_free(tester);
@@ -317,6 +319,7 @@ void shared_saveFileName(n_string cStringFileName)
         io_disk_write(file_opened, cStringFileName);
         io_file_free(file_opened);
     }
+    (void)file_bin_write(cStringFileName);
 }
 
 #ifdef SCRIPT_DEBUG

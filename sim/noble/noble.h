@@ -271,6 +271,15 @@ n_file;
 
 typedef void (n_file_specific)(n_string string, n_byte * reference);
 
+typedef struct
+{
+    void * data;
+    n_uint expected_bytes;
+    n_uint hash;
+    void * next;
+}
+n_file_chain;
+
 /** \brief new_sd stands for new sine dump and hold the sine and cosine values for the simulation */
 const static n_int	new_sd[256] =
 {
@@ -508,6 +517,35 @@ n_int      io_file_xml_string(n_file * file, n_string name, n_string string);
 n_int      io_file_xml_int(n_file * file, n_string name, n_int number);
 n_int      io_number(n_string number_string, n_int * actual_value, n_int * decimal_divisor);
 
+/*
+ 
+ read:
+    io_disk_check
+    file_chain_new
+    add pointers to "to be read"
+    file_chain_read_header
+    file_chain_read_validate
+    file_chain_read
+    file_chain_free
+ 
+ write:
+    file_chain_new
+    add pointers to "to be written"
+    file_chain_write_generate_header
+    file_chain_write
+    file_chain_free
+ */
+
+n_file_chain * file_chain_new(n_uint size);
+void           file_chain_free(n_file_chain * value);
+
+n_int          file_chain_write_generate_header(n_file_chain *initial);
+n_int          file_chain_write(n_string name, n_file_chain * initial);
+n_int          file_chain_read(n_string name, n_file_chain * initial);
+n_int          file_chain_read_header(n_string name, n_file_chain * header, n_uint expected_additional_entries);
+n_int          file_chain_read_validate(n_string name, n_file_chain *initial);
+
+void           file_chain_bin_name(n_string original, n_string bin_file);
 
 n_int      io_command_line_execution(void);
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);

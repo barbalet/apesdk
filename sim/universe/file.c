@@ -390,6 +390,132 @@ n_int	sim_filein(n_byte * buff, n_uint len)
     return SHOW_ERROR("Process file failed");
 }
 
+/*
+ read:
+ io_disk_check
+ file_chain_new
+ add pointers to "to be read"
+ file_chain_read_header
+ file_chain_read_validate
+ file_chain_read
+ file_chain_free
+ */
+n_int file_bin_read(n_string name)
+{
+    noble_simulation * local = sim_sim();
+    n_file_chain     * start = 0L;
+    /* weather, brain, social, episodic */
+    const n_uint       total_ptrs = 4;
+    n_string_block     bin_name;
+    
+    file_chain_bin_name(name, bin_name);
+    
+    if (io_disk_check(name) != 1)
+    {
+        return -1; /* This is legit for no output error */
+    }
+   
+    start = file_chain_new(total_ptrs);
+    
+    if (start == 0L)
+    {
+        return SHOW_ERROR("Header not allocated");
+    }
+    
+    start[1].expected_bytes = sizeof(n_weather);
+    start[1].data           = local->weather;
+    
+    start[2].expected_bytes = local->num * DOUBLE_BRAIN;
+    start[2].data           = local->brain_base;
+
+    start[3].expected_bytes = local->num * (SOCIAL_SIZE * sizeof(social_link));
+    start[3].data           = local->social_base;
+
+    start[4].expected_bytes = local->num  * (EPISODIC_SIZE * sizeof(episodic_memory));
+    start[4].data           = local->episodic_base;
+
+    /* I don't think indicators are wired up properly - what happens to indicators_index for example?
+    start[5].expected_bytes = INDICATORS_BUFFER_SIZE * sizeof(noble_indicators);
+    start[5].data           = local->indicators_base; */
+    
+    if (file_chain_read_header(bin_name, start, total_ptrs) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+    
+    if (file_chain_read_validate(bin_name, start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+    if (file_chain_read(bin_name, start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+    
+    file_chain_free(start);
+    return 0;
+}
+
+/*
+ write:
+ file_chain_new
+ add pointers to "to be written"
+ file_chain_write_generate_header
+ file_chain_write
+ file_chain_free
+ */
+
+n_int file_bin_write(n_string name)
+{
+    noble_simulation * local = sim_sim();
+    n_file_chain     * start = 0L;
+    /* weather, brain, social, episodic */
+    const n_uint       total_ptrs = 4;
+    n_string_block     bin_name;
+    
+    file_chain_bin_name(name, bin_name);
+    
+    start = file_chain_new(total_ptrs);
+    
+    if (start == 0L)
+    {
+        return SHOW_ERROR("Header not allocated");
+    }
+    
+    start[1].expected_bytes = sizeof(n_weather);
+    start[1].data           = local->weather;
+    
+    start[2].expected_bytes = local->num * DOUBLE_BRAIN;
+    start[2].data           = local->brain_base;
+    
+    start[3].expected_bytes = local->num * (SOCIAL_SIZE * sizeof(social_link));
+    start[3].data           = local->social_base;
+    
+    start[4].expected_bytes = local->num  * (EPISODIC_SIZE * sizeof(episodic_memory));
+    start[4].data           = local->episodic_base;
+    
+    /* I don't think indicators are wired up properly - what happens to indicators_index for example?
+     start[5].expected_bytes = INDICATORS_BUFFER_SIZE * sizeof(noble_indicators);
+     start[5].data           = local->indicators_base; */
+    
+    if (file_chain_write_generate_header(start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+    
+    if (file_chain_write(bin_name, start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+    file_chain_free(start);
+    return 0;
+}
+
 
 n_int sketch_input(void *code, n_byte kind, n_int value)
 {

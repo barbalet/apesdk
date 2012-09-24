@@ -57,7 +57,7 @@
 
 typedef	short	n_audio;
 typedef	double	n_double;
-
+typedef	double	n_float;
 
 /* macros */
 #define TWO_PI (6.2831853071795864769252867665590057683943L)
@@ -70,115 +70,167 @@ typedef	double	n_double;
  
  these can contain sounds or pauses
  */
-#define	MAX_BUFFER    (16384*4)
-#define ACT_BUFFER    (16384)
 
-/* FFT recursion */
-static void fft_rec(n_int N, n_int offset, n_int delta,
-            n_double *x,
-            n_double *y,
-            n_double *X,
-            n_double *Y,
-            n_double *XX,
-            n_double *YY
-            )
+#define ACT_BITS      (14)
+#define ACT_BUFFER    (1<<ACT_BITS)
+#define	MAX_BUFFER    (ACT_BUFFER*4)
+
+static n_float frequency[MAX_BUFFER];
+static n_float timedomain[MAX_BUFFER];
+static n_float frequencyi[MAX_BUFFER];
+static n_float timedomaini[MAX_BUFFER];
+
+n_audio  output[MAX_BUFFER];;
+
+n_uint	ReverseBits (n_uint index, n_uint power_sample)
 {
-  n_int N2 = N/2;            /* half the number of points in FFT */
-  n_int k;                   /* generic index */
+    n_uint i = 0;
+    n_uint rev = 0;
+    while(i < power_sample){
+        rev = (rev << 1) | (index & 1);
+        index >>= 1;
+        i++;
+    }
+    return rev;
+}
 
-  if(N != 2)  /* Perform recursive step. */
+void fft_float (n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * RealOut, n_float * ImagOut, n_uint power_sample)
+{
+    n_uint		NumSamples = 1 << power_sample;    /* Number of bits needed to store indices */
+    n_uint		i, j, k, n;
+    n_uint		BlockSize, BlockEnd;
+    
+    n_double angle_numerator = TWO_PI;
+    n_double tr, ti;
+    n_double ar0, ar1, ar2, ai0, ai1, ai2;
+    
+    
+    if ( inverse )
+        angle_numerator = -angle_numerator;
+    
+    /*
+     **   Do simultaneous data copy and bit-reversal ordering into outputs...
+     */
+    
+	i=0;
+	while(i < NumSamples){
+		j = ReverseBits (i, power_sample);
+        RealOut[j] = RealIn[i];
+        ImagOut[j] = ImagIn[i];
+        i++;
+    }
+    
+    /*
+     **   Do the FFT itself...
+     */
+    
+    BlockEnd = 1;
+    BlockSize = 2;
+    while (BlockSize <= NumSamples)
     {
-      /* Calculate two (N/2)-point DFT's. */
-      fft_rec(N2, offset,       2*delta, x, y, XX, YY, X, Y);
-      fft_rec(N2, offset+delta, 2*delta, x, y, XX, YY, X, Y);
-
-      /* Combine the two (N/2)-point DFT's into one N-point DFT. */
-      for(k=0; k<N2; k++)
+        n_double delta_angle = angle_numerator / (double)BlockSize;
+        n_double sm2 = sin ( -2 * delta_angle );
+        n_double sm1 = sin ( -delta_angle );
+        n_double cm2 = cos ( -2 * delta_angle );
+        n_double cm1 = cos ( -delta_angle );
+        n_double w = 2 * cm1;
+        
+		i=0;
+		
+        while(  i < NumSamples )
         {
-          n_int    k00 = offset + k*delta;
-          n_int    k01 = k00 + N2*delta;
-          n_int    k10 = offset + 2*k*delta;
-          n_int    k11 = k10 + delta;
-          n_double cs = cos(TWO_PI*k/(n_double)N);
-          n_double sn = sin(TWO_PI*k/(n_double)N);
-          n_double tmp0 = cs * XX[k11] + sn * YY[k11];
-          n_double tmp1 = cs * YY[k11] - sn * XX[k11];
+            ar2 = cm2;
+            ar1 = cm1;
             
-          X[k01] = XX[k10] - tmp0;
-          Y[k01] = YY[k10] - tmp1;
-          X[k00] = XX[k10] + tmp0;
-          Y[k00] = YY[k10] + tmp1;
+            ai2 = sm2;
+            ai1 = sm1;
+			
+			j=i;
+			n=0;
+            while(n < BlockEnd)
+            {
+                ar0 = w*ar1 - ar2;
+                ar2 = ar1;
+                ar1 = ar0;
+                
+                ai0 = w*ai1 - ai2;
+                ai2 = ai1;
+                ai1 = ai0;
+                
+                k = j + BlockEnd;
+                
+				tr = ar0*RealOut[k] - ai0*ImagOut[k];
+				ti = ar0*ImagOut[k] + ai0*RealOut[k];
+				
+				RealOut[k] = RealOut[j] - tr;
+                ImagOut[k] = ImagOut[j] - ti;
+                
+                RealOut[j] += tr;
+                ImagOut[j] += ti;
+                
+                j++;
+                n++;
+            }
+       		i += BlockSize;
+       	}
+        
+        BlockEnd = BlockSize;
+        BlockSize <<= 1;
+        
+    }
+    
+    /*
+     **   Need to normalize if inverse transform...
+     */
+    
+    if ( inverse )
+    {
+        double denom = (double)NumSamples;
+        
+        for ( i=0; i < NumSamples; i++ )
+        {
+            RealOut[i] /= denom;
+            ImagOut[i] /= denom;
         }
     }
-  else  /* Perform 2-point DFT. */
+}
+
+static n_uint speak_length(n_byte character)
+{
+    switch (character)
     {
-      n_int    k00 = offset; 
-      n_int    k01 = k00 + delta;
-      X[k01] = x[k00] - x[k01];
-      Y[k01] = y[k00] - y[k01];
-      X[k00] = x[k00] + x[k01];
-      Y[k00] = y[k00] + y[k01];
+        case 'a':
+        case 'e':
+        case 'i':
+        case 'o':
+            return 1;
+        case 's':
+        case 'm':
+        case '.':
+            return 2;
+        default:
+            return 0;
     }
 }
 
-
-/* FFT */
-static void fft(n_int N, n_double *y, n_double *X)
+static n_uint speak_length_total(n_string paragraph)
 {
-    n_int loop = 0;
-    /* Declare a pointer to scratch space. */
-    n_double *XX = malloc(N * sizeof(n_double));
-    n_double *YY = malloc(N * sizeof(n_double));
-    
-    n_double *x = malloc(N * sizeof(n_double));
-    n_double *Y = malloc(N * sizeof(n_double));
-    
-    while (loop < N)
-    {
-        x[loop] = Y[loop] = 0;
-        loop++;
-    }
-    
-    /* Calculate FFT by a recursion. */
-    fft_rec(N, 0, 1, x, y, X, Y, XX, YY);
-    
-    /* Free memory. */
-    free(x);
-    free(Y);
-
-    free(XX);
-    free(YY);
+    n_int  loop = 0;
+    n_byte character;
+    n_uint length = 0;
+    do {
+        character = paragraph[loop++];
+        length += 1 << speak_length(character);
+    } while (character != '\n');
+    return length;
 }
 
-
-
-/* IFFT */
-static void ifft(n_int N, n_double *x, n_double *Y)
+void speak_aiff_header(FILE *fptr, n_uint total_samples)
 {
-    n_int N2 = N/2;       /* half the number of points in IFFT */
-    n_int i;              /* generic index */
-
-    /* Calculate IFFT via reciprocity property of DFT. */
-    fft(N, Y, x);
-    x[0] = x[0]/N;
-    x[N2] = x[N2]/N;
-
-    for(i=1; i<N2; i++)
-    {
-        n_double tmp0 = x[i]/N;
-        x[i] = x[N-i]/N;
-        x[N-i] = tmp0;
-    }
-}
-
-void speak_aiff_header(FILE *fptr, n_audio *samples, n_uint nsamples)
-{
-
 	n_uint totalsize;
-	
 	/* Write the form chunk */
 	fprintf(fptr,"FORM");
-	totalsize = 4 + 8 + 18 + 8 + 2 * nsamples + 8;
+	totalsize = 4 + 8 + 18 + 8 + 2 * total_samples + 8;
 	fputc((totalsize & 0xff000000) >> 24,fptr);
 	fputc((totalsize & 0x00ff0000) >> 16,fptr);
 	fputc((totalsize & 0x0000ff00) >> 8,fptr);
@@ -193,13 +245,13 @@ void speak_aiff_header(FILE *fptr, n_audio *samples, n_uint nsamples)
 	fputc(18,fptr);
 	fputc(0,fptr);                               /* Channels = 1 */
 	fputc(1,fptr);
-	fputc((nsamples & 0xff000000) >> 24,fptr);   /* Samples */
-	fputc((nsamples & 0x00ff0000) >> 16,fptr);
-	fputc((nsamples & 0x0000ff00) >> 8,fptr);
-	fputc((nsamples & 0x000000ff),fptr);
+	fputc((total_samples & 0xff000000) >> 24,fptr);   /* Samples */
+	fputc((total_samples & 0x00ff0000) >> 16,fptr);
+	fputc((total_samples & 0x0000ff00) >> 8,fptr);
+	fputc((total_samples & 0x000000ff),fptr);
 	fputc(0,fptr);                               /* Size = 16 */
 	fputc(16,fptr);
-	fputc(0x40,fptr);                            /* 10 byte sampee rate */
+	fputc(0x40,fptr);                            /* 10 byte sample rate */
 	fputc(0x0e,fptr);
 	fputc(0xac,fptr);
 	fputc(0x44,fptr);
@@ -212,10 +264,10 @@ void speak_aiff_header(FILE *fptr, n_audio *samples, n_uint nsamples)
 	
 	/* Write the sound data chunk */
 	fprintf(fptr,"SSND");
-	fputc((2*nsamples+8 & 0xff000000) >> 24,fptr);/* Size      */
-	fputc((2*nsamples+8 & 0x00ff0000) >> 16,fptr);
-	fputc((2*nsamples+8 & 0x0000ff00) >> 8,fptr);
-	fputc((2*nsamples+8 & 0x000000ff),fptr);
+	fputc((2*total_samples+8 & 0xff000000) >> 24,fptr);/* Size      */
+	fputc((2*total_samples+8 & 0x00ff0000) >> 16,fptr);
+	fputc((2*total_samples+8 & 0x0000ff00) >> 8,fptr);
+	fputc((2*total_samples+8 & 0x000000ff),fptr);
 	fputc(0,fptr);                                /* Offset    */
 	fputc(0,fptr);
 	fputc(0,fptr);
@@ -225,84 +277,106 @@ void speak_aiff_header(FILE *fptr, n_audio *samples, n_uint nsamples)
 	fputc(0,fptr);
 	fputc(0,fptr);
 	
-	fwrite(samples,nsamples,2,fptr);
 }
 
-static void speak_make(n_string filename, n_int length)
+static void speak_aiff_body(FILE * fptr, n_audio *samples, n_uint number_samples)
+{
+    fwrite(samples,number_samples,2,fptr);
+}
+
+static void speak_make(n_string filename, n_string paragraph)
 {
     FILE     *out_file = 0L;
-    n_double *frequency  = malloc(length * sizeof(n_double));
-    n_double *timedomain = malloc(length * sizeof(n_double));
-    n_audio  *output      = malloc(length * sizeof(n_audio));
-    n_int     loop = 0;
-    n_int     division = MAX_BUFFER/length;
-
+    
+    n_uint   total_length = ACT_BUFFER * speak_length_total(paragraph);
+    n_int    loop        = 0;
+    n_byte    found_character;
     out_file = fopen(filename,"w");
-
+    
     if (out_file == 0L)
     {
         (void)SHOW_ERROR("Failed create speak file!");
         return;
     }
-
-    while (loop < length)
+    
+    speak_aiff_header(out_file, total_length);
+    do
     {
-        frequency[loop] = 0;
-        timedomain[loop] = 0;
-        loop++;
-    }
+        n_uint    power_sample = (speak_length(found_character = paragraph[loop++])+ACT_BITS);
+        n_uint    length = 1 << power_sample;
+        n_int     division = MAX_BUFFER/length;
+        n_int     loop = 0;
+        while (loop < length)
+        {
+            frequency[loop] = 0;
+            timedomain[loop] = 0;
+            frequencyi[loop] = 0;
+            timedomaini[loop] = 0;
+            loop++;
+        }
 
-    frequency[400/division] = 200000/division;
-    frequency[600/division] = 800000/division;
-    frequency[900/division] = 800000/division;
-    frequency[700/division] = 800000/division;
-    frequency[450/division] = 200000/division;
-    frequency[460/division] = 900000/division;
-    frequency[490/division] = 900000/division;
+        if (found_character !=' ' && found_character != '.')
+        {
+            frequency[400/division] = 200000/division;
+            frequency[600/division] = 800000/division;
+            frequency[900/division] = 800000/division;
+            frequency[700/division] = 800000/division;
+            frequency[450/division] = 200000/division;
+            frequency[460/division] = 900000/division;
+            frequency[490/division] = 900000/division;
 
-    ifft(length, timedomain, frequency);
+            
+            fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
+            
+            loop = 0;
+            while (loop < length)
+            {
+                output[loop] = timedomain[loop];
+                loop++;
+            }
 
-    loop = 0;
-    while (loop < length)
-    {
-        output[loop] = timedomain[loop];
-        loop++;
-    }
+            loop = 0;
+            while (loop < length)
+            {
+                frequency[loop] = 0;
+                timedomain[loop] = 0;
+                frequencyi[loop] = 0;
+                timedomaini[loop] = 0;
+                loop++;
+            }
 
-    loop = 0;
-    while (loop < length)
-    {
-        frequency[loop] = 0;
-        timedomain[loop] = 0;
-        loop++;
-    }
+            frequency[0] = 30000/division;
+            frequency[1] = 30000/division;
+            frequency[2] = 30000/division;
+            frequency[3] = 30000/division;
 
-    frequency[0] = 30000/division;
-    frequency[1] = 30000/division;
-    frequency[2] = 30000/division;
-    frequency[3] = 30000/division;
+            fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
 
-    ifft(length, timedomain, frequency);
+            loop = 0;
+            while (loop < length)
+            {
+                output[loop] *= timedomain[loop];
+                loop++;
+            }
+        }
+        else
+        {
+            loop = 0;
+            while (loop < length)
+            {
+                output[loop] = 0;
+                loop++;
+            }
+        }
+        speak_aiff_body(out_file, output, length);
 
-    free(frequency);
-
-    loop = 0;
-    while (loop < length)
-    {
-        output[loop] *= timedomain[loop];
-        loop++;
-    }
-
-    free(timedomain);
-
-    speak_aiff_header(out_file,output,length);
-
-    free(output);
+    }while (found_character != '\n');
+    
 
     fclose(out_file);
 }
 
-void speak_out(n_string filename)
+void speak_out(n_string filename, n_string paragraph)
 {
-    speak_make(filename, ACT_BUFFER);
+    speak_make(filename, paragraph);
 }

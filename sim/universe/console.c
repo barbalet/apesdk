@@ -874,7 +874,7 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
 
 }
 
-static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
+void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
 {
     n_int loop = 0;
     n_byte * external_bc = GET_BRAINCODE_EXTERNAL((noble_simulation*)ptr, local);
@@ -885,16 +885,15 @@ static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_s
         brain_sentence((n_string)sentence, &external_bc[loop*3]);
         
         io_string_write(result, sentence, &watch_string_length);
-        result[watch_string_length++]='.';
-        result[watch_string_length++]=' ';
-        
-        if ((loop % 3) == 2)
+        result[watch_string_length++]=' ';        
+        if ((loop &3) == 3)
         {
-            result[watch_string_length++]='\n';
+            result[watch_string_length++]='.';
         }
         loop++;
     }
-     result[watch_string_length++]='\n';
+    result[watch_string_length++]='.';
+    result[watch_string_length++]='\n';
 }
 
 
@@ -2005,7 +2004,11 @@ static n_byte get_response_mode(n_string response)
 
 n_int console_speak(void * ptr, n_string response, n_console_output output_function)
 {
-    speak_out(response);
+    n_string_block paragraph;
+    noble_simulation * local_sim = (noble_simulation*) ptr;
+    noble_being * local = &(local_sim->beings[local_sim->select]);
+    watch_speech(ptr, 0L, local, paragraph);
+    speak_out(response, paragraph);
     return 0;
 }
 
@@ -2027,6 +2030,8 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     io_disk_write(file_opened, response);
     io_file_free(file_opened);
 
+    (void)file_bin_write(response);
+    
     console_file_exists = 1;
     sprintf(console_file_name,"%s",response);
     sprintf(output_string, "Simulation file %s saved\n",response);
@@ -2061,8 +2066,10 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
 
         console_warning();
         sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
-
         io_file_free(file_opened);
+        
+        (void)file_bin_read(response);
+        
         console_file_exists = 1;
         sprintf(console_file_name,"%s",response);
         sprintf(output_string, "Simulation file %s open\n",response);

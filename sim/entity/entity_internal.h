@@ -162,4 +162,6 @@ n_byte get_braincode_instruction(noble_being * local_being);
 
 void being_ingest_pathogen(noble_being * local, n_byte food_type);
 
+void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result);
+
 #endif /* _NOBLEAPE_ENTITY_INTERNAL_H_ */

@@ -306,26 +306,26 @@ const n_string braincode_spoken_dictionary[BRAINCODE_INSTRUCTIONS] =
     "o",    /* "DAT1", */
     
     /* operators */
-    "mami", /* "ADD ",*/
-    "vosa", /* "SUB ",*/
+    "mam", /* "ADD ",*/
+    "vos", /* "SUB ",*/
     "sie",  /* "MUL ",*/
     "fes",  /* "DIV ",*/
-    "feso", /* "MOD ",*/
-    "mass", /* "MVB ",*/
-    "vami", /* "MOV ",*/
-    "amov", /* "JMP ",*/
-    "sama", /* "CTR ",*/
-    "maoa", /* "SWP ",*/
-    "ovaf", /* "INV ",*/
+    "feo", /* "MOD ",*/
+    "mas", /* "MVB ",*/
+    "vam", /* "MOV ",*/
+    "amo", /* "JMP ",*/
+    "sam", /* "CTR ",*/
+    "mao", /* "SWP ",*/
+    "ova", /* "INV ",*/
     "eef",  /* "STP ",*/
     "fee",  /* "LTP ",*/
     
     /* conditionals */
-    "omo", /*"JMZ ",*/
+    "om", /*"JMZ ",*/
     "ov",  /*"JMN ",*/
     "fi",  /*"DJN ",*/
-    "ima", /*"AND ",*/
-    "sem", /*"OR  ",*/
+    "im", /*"AND ",*/
+    "se", /*"OR  ",*/
     "es",  /*"SEQ ",*/
     "os",  /*"SNE ",*/
     "is",  /*"SLT ",*/
@@ -366,20 +366,25 @@ static n_byte brain_vc(n_byte value, n_byte vowel)
             return 'f';
         case 2:
             return 's';
+        case 3:
+            return 't';
+        case 4:
+            return 'p';
+        case 5:
+            return 'b';
+        case 6:
+            return 'j';
         default:
             return 'm';
     }
 }
 
-static void brain_longword(n_string output, n_byte value, n_byte define)
+static void brain_longword(n_string output, n_byte value)
 {
-    output[0] = 'v';
-    output[1] = brain_vc((value >> 0) & 3,1);
-    output[2] = brain_vc((value >> 2) & 3,0);
-    output[3] = brain_vc((value >> 4) & 3,1);
-    output[4] = brain_vc((value >> 6) & 3,0);
-    output[5] = define;
-    output[6] = 0;
+    output[0] = brain_vc((value >> 0) & 7,0);
+    output[1] = brain_vc((value >> 3) & 3,1);
+    output[2] = brain_vc((value >> 5) & 7,0);
+    output[4] = 0;
 }
 
 void brain_three_byte_command(n_string string, n_byte * response)
@@ -422,22 +427,22 @@ void brain_sentence(n_string string, n_byte * response)
     n_int  format       = brain_format(instruction, command, value0, value1);
     n_string_block      first_word, second_word;
     
-    brain_longword(first_word, value0, 'f');
-    brain_longword(second_word, value0, 'v');
+    brain_longword(first_word, value0);
+    brain_longword(second_word, value0);
     
     switch(format)
     {
         case BC_FORMAT_A:
-            sprintf((char*)string,"%s o%s i%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_C:
-            sprintf((char*)string,"%s a%s e%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_E:
-            sprintf((char*)string,"%s o%s o%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_F:
-            sprintf((char*)string,"%s e%s %s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_G:
             sprintf((char*)string,"%s %s", braincode_spoken_dictionary[instruction], first_word);
