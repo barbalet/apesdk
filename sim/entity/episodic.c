@@ -59,6 +59,13 @@
 
 #ifdef EPISODIC_ON
 
+n_console_output * local_logging;
+
+void episodic_logging(n_console_output * output_function)
+{
+    local_logging = output_function;
+}
+
 /**
  * If the given episodic memory is an intention, as defined by the event type,
  * then update the learned preferences based upon the intention type.
@@ -424,6 +431,9 @@ static void episodic_store_full(
 {
     episodic_memory * local_episodic = GET_EPI(local_sim, local);
     n_int replace;
+    n_byte  old_event;
+    n_byte2 old_time;
+    n_byte2 new_time;
 
     if (local_episodic == 0L)
     {
@@ -436,14 +446,17 @@ static void episodic_store_full(
 
     if (replace == -1) return;
 
+    old_event = local_episodic[replace].event;
+    old_time = local_episodic[replace].time;
+    
     /** insert the current event into the episodic memory */
-    local_episodic[replace].event=event;
-    local_episodic[replace].affect= (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
-    local_episodic[replace].location[0]=GET_X(local);
-    local_episodic[replace].location[1]=GET_Y(local);
-    local_episodic[replace].time=local_sim->land->time;
-    local_episodic[replace].date[0]=local_sim->land->date[0];
-    local_episodic[replace].date[1]=local_sim->land->date[1];
+    local_episodic[replace].event       = event;
+    local_episodic[replace].affect      = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
+    local_episodic[replace].location[0] = GET_X(local);
+    local_episodic[replace].location[1] = GET_Y(local);
+    local_episodic[replace].time        = new_time =local_sim->land->time;
+    local_episodic[replace].date[0]     = local_sim->land->date[0];
+    local_episodic[replace].date[1]     = local_sim->land->date[1];
     local_episodic[replace].first_name[BEING_MEETER]=name1;
     local_episodic[replace].family_name[BEING_MEETER]=family1;
     local_episodic[replace].first_name[BEING_MET]=name2;
@@ -451,8 +464,28 @@ static void episodic_store_full(
     local_episodic[replace].food=food;
     local_episodic[replace].arg=arg;
     
-    if ((event == 0) || (event>EVENT_TICKLED))
+    if ((event == 0) || (event>=EVENTS))
         (void)SHOW_ERROR("Event outside scope");
+    
+    if (local_logging)
+    {
+        if ((old_event != event) || ((old_time+10) < (new_time))) /* this may need to be changed */
+        {
+            n_string_block description;
+            n_string_block str;
+            n_string_block time;
+            n_string_block combination = {0};
+            being_name((FIND_SEX(GET_I(local)) == SEX_FEMALE), GET_NAME(local_sim, local), GET_FAMILY_FIRST_NAME(local_sim, local), GET_FAMILY_SECOND_NAME(local_sim, local), str);
+
+            episode_description(local_sim, local, replace, description);
+            
+            io_time_to_string(time, local_sim->land->time, local_sim->land->date[0], local_sim->land->date[1]);
+            
+            io_three_string_combination(combination, time, str, description, 35);
+                        
+            (*local_logging)(combination);
+        }
+    }
 }
 
 void episodic_food(noble_simulation * local_sim, noble_being * local, n_int energy, n_byte food_type)

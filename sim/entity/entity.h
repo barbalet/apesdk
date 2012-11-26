@@ -76,7 +76,7 @@ n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index)
 void   being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name);
 n_int  being_init(noble_simulation * sim, noble_being * mother, n_int random_factor, n_byte first_generation);
 void   being_cycle_awake(noble_simulation * sim, n_uint current_being_index);
-void   being_cycle_asleep(noble_simulation * sim, n_uint current_being_index);
+void   being_cycle_universal(noble_simulation * sim, n_uint current_being_index, n_byte awake);
 void   being_state_description(n_byte2 state, n_string result);
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
 
@@ -127,6 +127,8 @@ void episode_description(noble_simulation * sim,
                          noble_being * local_being,
                          n_int index,
                          n_string description);
+
+void episodic_logging(n_console_output * output_function);
 
 n_uint social_respect_mean(noble_simulation * sim, noble_being *local_being);
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family);

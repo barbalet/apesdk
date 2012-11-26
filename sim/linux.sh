@@ -39,38 +39,46 @@ else
     CFLAGS=-O2 
 fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
+if [ $# -ge 1 -a "$1" == "--additional" ]
+then
+COMMANDLINEE=-DNOTHING_NEEDED_HERE
+else
+COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
+fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/entity/being.c -o being.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/body.c -o body.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/metabolism.c -o metabolism.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/brain.c -o brain.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/social.c -o social.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/episodic.c -o episodic.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/food.c -o food.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/drives.c -o drives.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/speak.c -o speak.o
 
-gcc ${CFLAGS} -c $SOURCEDIR/universe/file.c -o file.o
-gcc ${CFLAGS} -c $SOURCEDIR/universe/console.c -o console.o
-gcc ${CFLAGS} -c $SOURCEDIR/universe/sim.c -o sim.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/io.c -o io.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/math.c -o math.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/parse.c -o parse.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/interpret.c -o interpret.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/land.c -o land.o
 
-gcc ${CFLAGS} -c $SOURCEDIR/command/graph.c -o graph.o
-gcc ${CFLAGS} -c $SOURCEDIR/command/genealogy.c -o genealogy.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/being.c -o being.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/body.c -o body.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/metabolism.c -o metabolism.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/brain.c -o brain.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/social.c -o social.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/episodic.c -o episodic.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/food.c -o food.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/drives.c -o drives.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/speak.c -o speak.o
 
-gcc ${CFLAGS} -c $SOURCEDIR/cle.c -o cle.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/file.c -o file.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/console.c -o console.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/sim.c -o sim.o
 
-gcc ${CFLAGS} -c $SOURCEDIR/longterm.c -o longterm.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/command/graph.c -o graph.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/command/genealogy.c -o genealogy.o
 
-gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nacle io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o graph.o genealogy.o speak.o file.o console.o sim.o cle.o -lm
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/cle.c -o cle.o
 
-gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/longterm.c -o longterm.o
 
-gcc ${CFLAGS} -I/usr/include -o $SOURCEDIR/../nalongterm io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o genealogy.o speak.o file.o console.o sim.o graph.o longterm.o pnglite.o -lz -lm
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nacle io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o graph.o genealogy.o speak.o file.o console.o sim.o cle.o -lm -lpthread
+
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
+
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nalongterm io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o genealogy.o speak.o file.o console.o sim.o graph.o longterm.o pnglite.o -lz -lm -lpthread
 
 
 if [ $# -ge 1 -a "$1" == "--additional" ]

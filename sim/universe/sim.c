@@ -35,6 +35,9 @@
 
 /*NOBLEMAKE DEL=""*/
 
+#define CONSOLE_REQUIRED
+#define CONSOLE_ONLY
+
 #ifndef	_WIN32
 #include "../noble/noble.h"
 #else
@@ -85,6 +88,10 @@ n_uint	brain_hash_count;
 #ifdef THREADED
 
 static void sim_indicators(noble_simulation * sim);
+static void sim_brain(noble_simulation * local_sim);
+static void sim_brain_dialogue(noble_simulation * local_sim);
+static void sim_being(noble_simulation * local_sim);
+static void sim_time(noble_simulation * local_sim);
 
 static n_int            thread_on = 0;
 
@@ -108,21 +115,17 @@ void sim_draw_thread_on(void)
     sim_draw_thread = 1;
 }
 
-void sim_draw_thread_start(n_byte mod)
+void sim_draw_thread_start(void)
 {
-    /* find some way of using mod to account for 0 and either 1 or 2 */
-
     pthread_mutex_lock(&draw_mtx);
     while(sim_done < 3)pthread_cond_wait(&draw_cond,&draw_mtx);
     pthread_cond_broadcast(&sim_cond);
     pthread_mutex_unlock(&draw_mtx);
 }
 
-void sim_draw_thread_end(n_byte mod)
+void sim_draw_thread_end(void)
 {
     n_int local_quit;
-    /* find some way of using mod to account for 0 and either 1 or 2 */
-
     pthread_mutex_lock(&quit_mtx);
     local_quit = thread_quit;
     pthread_mutex_unlock(&quit_mtx);
@@ -141,7 +144,7 @@ static void * sim_thread_land(void * id)
 
         land_cycle(sim.land);
 #ifdef WEATHER_ON
-        weather_cycle(sim.weather);
+        weather_cycle(sim.land, sim.weather);
 #endif
         pthread_mutex_lock(&draw_mtx);
         sim_done++;
@@ -194,6 +197,13 @@ static void * sim_thread_brain(void * id)
         pthread_mutex_unlock(&draw_mtx);
         sim_brain(&sim);    /* 4 */
 
+#ifdef BRAINCODE_ON
+        sim_brain_dialogue(&sim);
+#endif
+        
+#ifdef BRAIN_HASH
+        sim_brain_hash(&sim)
+#endif
         pthread_mutex_lock(&draw_mtx);
         sim_done++;
         if(sim_done == 3)
@@ -233,6 +243,48 @@ static void sim_thread_close(void)
         pthread_join(brain_thread, NULL);*/
 }
 #endif
+
+#ifndef	_WIN32
+
+#include <pthread.h>
+
+static n_int sim_quit_value = 0;
+
+n_int sim_thread_console_quit(void)
+{
+    return sim_quit_value;
+}
+
+n_int sim_command_entry = 0;
+
+static void *control_thread(void *threadid)
+{
+    sim_command_entry++;
+    if (io_console(sim_sim(), (noble_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
+    {
+        sim_quit_value = 1;
+    }
+    sim_command_entry--;
+    pthread_exit(NULL);
+}
+
+void sim_thread_console(void)
+{
+    pthread_t console;
+    
+    if (io_command_line_execution() == 0)
+    {
+        return;
+    }
+    
+    if (sim_command_entry < 3)
+    {
+        (void)pthread_create(&console,0L, control_thread, 0L);
+    }
+}
+
+#endif
+
 
 noble_simulation * sim_sim(void)
 {
@@ -306,45 +358,42 @@ n_int     file_interpret(n_file * input_file)
 }
 
 
-void sim_brain(noble_simulation * local_sim)
+static void sim_brain(noble_simulation * local_sim)
 {
     n_uint loop = 0;
-    n_byte awake;
     n_byte2 local_brain_state[3];
-
+    
     while (loop < local_sim->num)
     {
         noble_being		*local_being = &(local_sim->beings[loop]);
-
+        
         if(being_awake(&sim, loop) == 0)
         {
             local_brain_state[0] = GET_BS(local_being, 3);
             local_brain_state[1] = GET_BS(local_being, 4);
             local_brain_state[2] = GET_BS(local_being, 5);
-            awake=0;
         }
         else
         {
             local_brain_state[0] = GET_BS(local_being, 0);
             local_brain_state[1] = GET_BS(local_being, 1);
             local_brain_state[2] = GET_BS(local_being, 2);
-            awake=1;
         }
-
+        
         if(braindisplay == 1)
         {
             local_brain_state[0] = 0;
             local_brain_state[1] = 500;
             local_brain_state[2] = (5*local_brain_state[2])>>3;
         }
-
+        
         if(braindisplay == 2)
         {
             local_brain_state[0] = (9*local_brain_state[0])>>3;
             local_brain_state[1] = 82;
             local_brain_state[2] = 0;
         }
-
+        
         if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
         {
             n_byte			*local_brain = GET_B(local_sim, local_being);
@@ -353,32 +402,54 @@ void sim_brain(noble_simulation * local_sim)
                 brain_cycle(local_brain, local_brain_state);
             }
         }
-#ifdef BRAINCODE_ON
-        /* This should be independent of the brainstate/cognitive simulation code */
-        {
-            n_byte * local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
-            n_byte * local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
-            brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
-            brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
-        }
-#endif        
         loop++;
     }
+}
+
+#ifdef BRAINCODE_ON
+static void sim_brain_dialogue(noble_simulation * local_sim)
+{
+    n_uint loop = 0;
+    n_byte awake;
+    while (loop < local_sim->num)
+    {
+        noble_being		*local_being = &(local_sim->beings[loop]);
+        n_byte          *local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
+        n_byte          *local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
+        if(being_awake(&sim, loop) == 0)
+        {
+            awake=0;
+        }
+        else
+        {
+            awake=1;
+        }
+        /* This should be independent of the brainstate/cognitive simulation code */
+        brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
+        brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
+        loop++;
+    }
+}
+#endif
+
+
 #ifdef BRAIN_HASH
+static void sim_brain_hash(noble_simulation * local_sim)
+{
     brain_hash_count++;
     if((brain_hash_count & 63) == 0)
     {
         n_byte * hash_brain = GET_B(local_sim, &(sim.beings[sim.select]));
-
+        
         brain_hash_count = 0;
-
+        
         if ((sim.select != NO_BEINGS_FOUND) && (hash_brain != 0L))
         {
             brain_hash(hash_brain, brain_hash_out);
         }
     }
-#endif
 }
+#endif
 
 
 void sim_braindisplay(n_byte newval)
@@ -386,7 +457,7 @@ void sim_braindisplay(n_byte newval)
     braindisplay = newval;
 }
 
-void sim_being(noble_simulation * local_sim)
+static void sim_being(noble_simulation * local_sim)
 {
     n_uint loop = 0;
 
@@ -394,7 +465,10 @@ void sim_being(noble_simulation * local_sim)
 
     while (loop < local_sim->num)
     {
-        if(being_awake(local_sim, loop) != 0)
+        n_byte awake = (being_awake(local_sim, loop) != 0);
+        
+        being_cycle_universal(local_sim,loop, awake);
+        if (awake)
         {
             if(interpret_cycle(interpret, -1, local_sim->beings, loop, &sim_start_conditions, &sim_end_conditions) == -1)
             {
@@ -405,16 +479,12 @@ void sim_being(noble_simulation * local_sim)
                 being_cycle_awake(local_sim, loop);
             }
         }
-        else
-        {
-            being_cycle_asleep(local_sim,loop);
-        }
 
         loop++;
     }
 }
 
-void sim_time(noble_simulation * local_sim)
+static void sim_time(noble_simulation * local_sim)
 {
     local_sim->count_cycles += local_sim->num;
 
@@ -753,10 +823,17 @@ void sim_cycle(void)
     land_cycle(sim.land);
     sim_being(&sim);    /* 2 */
 #ifdef WEATHER_ON
-    weather_cycle(sim.weather);
+    weather_cycle(sim.land, sim.weather);
 #endif
     sim_brain(&sim);    /* 4 */
 
+#ifdef BRAINCODE_ON
+    sim_brain_dialogue(&sim);
+#endif
+    
+#ifdef BRAIN_HASH
+    sim_brain_hash(&sim)
+#endif
     being_tidy(&sim);
     being_remove(&sim); /* 6 */
     sim_social(&sim);
@@ -771,17 +848,17 @@ void sim_cycle(void)
 
 #ifdef SMALL_LAND
 
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
 
 #else
 
 #ifdef BRAIN_ON
 
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
 
 #else
 
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_WIDTH*TERRAIN_WINDOW_HEIGHT)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
 
 #endif
 
@@ -916,9 +993,9 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
     if (kind != KIND_MEMORY_SETUP)
     {
-        land_clear(sim.land, kind);
+        land_clear(sim.land, kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
-        land_init(sim.land , &offbuffer[landbuffer_size], AGE_OF_MATURITY);
+        land_init(sim.land , &offbuffer[landbuffer_size]);
 #ifndef SMALL_LAND
         sim_tide_block(sim.land->map, sim.highres, sim.highres_tide);
 #endif
@@ -989,3 +1066,34 @@ void	sim_populations(n_uint	*total, n_uint * female, n_uint * male)
     *male = local_male;
 }
 
+void sim_flood(void)
+{
+    n_uint  loop = 0;
+
+    while (loop < sim.num)
+    {
+        noble_being * local = &sim.beings[loop];
+        n_int         local_x = APESPACE_TO_MAPSPACE(GET_X(local));
+        n_int         local_y = APESPACE_TO_MAPSPACE(GET_Y(local));
+        n_int         local_z = QUICK_LAND(sim.land, local_x, local_y);
+        
+        if (local_z < 160)
+        {
+            GET_E(local) = 0;
+        }
+        
+        loop++;
+    }
+}
+
+void sim_healthy_carrier(void)
+{
+    n_uint  loop = (sim.num >> 2);
+    
+    while (loop < sim.num)
+    {
+        noble_being * local = &sim.beings[loop];
+        GET_E(local) = 0;
+        loop++;
+    }
+}

@@ -54,13 +54,88 @@
 
 /*NOBLEMAKE END=""*/
 
-void weather_cycle(n_weather * local_weather)
+#define WATER_EVAP_TIDE     (0)
+#define WATER_EVAP_REG      (0)
+#define WATER_RELEASE_RAIN  (0)
+
+#undef WEATHER_DEBUG
+
+#ifdef WEATHER_DEBUG
+
+#include <stdio.h>
+
+void weather_debug(n_weather * local_weather)
+{
+    n_int    lx = 0;
+    n_c_int  value_max = -2147483648;
+    n_c_int  value_min = 2147483647;
+    n_c_int    line_average = 0;
+    while (lx < (MAP_DIMENSION/2))
+    {
+        n_int ly = 0;
+        n_c_int point_average = 0;
+        while (ly < (MAP_DIMENSION/2))
+        {
+            n_c_int value = local_weather->atmosphere[ WEATHER_MEM(ly,lx,0) ];
+            if (value > value_max)
+            {
+                value_max = value;
+            }
+            if (value < value_min)
+            {
+                value_min = value;
+            }
+            point_average += value;
+            ly++;
+        }
+        line_average += (point_average >> (MAP_BITS-1));
+        lx++;
+    }
+    printf("WD: range %d - %d, average %d, total pressure %d\n",value_min, value_max,line_average>>(MAP_BITS-1),local_weather->total_pressure);
+}
+
+#endif
+
+void weather_cycle(n_land * local_land, n_weather * local_weather)
 {
     n_c_int       total_pressure = 0;
-    n_int         local_delta = local_weather->total_pressure >> 7;
+    n_int         local_delta = local_weather->total_pressure  >> (MAP_BITS-1);
     n_c_int       * atmosphere  = local_weather->atmosphere;
-
-    n_int	lx = 0;
+    n_int         lx = 0;
+    n_byte        * local_map = local_land->map;
+    n_byte        local_tide = local_land->tide_level;
+    while (lx < MAP_DIMENSION)
+    {
+        n_int ly = 0;
+        while (ly < MAP_DIMENSION)
+        {
+            n_byte  land_value = local_map[lx | (ly << MAP_BITS)];
+            n_uint  location = WEATHER_MEM(ly>>1,lx>>1,0);
+            
+            if (land_value == local_tide)
+            {
+                atmosphere[ location ] += WATER_EVAP_TIDE;
+            }
+            else if (land_value < local_tide)
+            {
+                atmosphere[ location ] += WATER_EVAP_REG;
+            }
+            
+            if ((lx < (MAP_DIMENSION/2))&&(ly < (MAP_DIMENSION/2)))
+            {
+                n_uint  new_location = WEATHER_MEM(ly,lx,0);
+                if (atmosphere[ new_location ] >= WEATHER_RAIN)
+                {
+                    atmosphere[ new_location ] -= WATER_RELEASE_RAIN;
+                }
+            }
+            
+            ly++;
+        }
+        lx++;
+    }
+    
+    lx = 0;
     while ( lx < (MAP_DIMENSION/2) )
     {
         n_int	lx_min = WEATHER_MEM((lx + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0, 0);
@@ -77,13 +152,19 @@ void weather_cycle(n_weather * local_weather)
                 - atmosphere[ lx_val| WEATHER_MEM(0, ( ly + 1 ) & ((MAP_DIMENSION/2)-1), 0 ) ]
                 + atmosphere[ lx_val| WEATHER_MEM(0, ( ly + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0 ) ];
 
-            atmosphere[ WEATHER_MEM(ly,lx,0) ] += (local_atm - local_delta) >> 7;
+            atmosphere[ WEATHER_MEM(ly,lx,0) ] += (local_atm - local_delta) >> (MAP_BITS-1);
             total_pressure += local_atm;
             ly++;
         }
         lx++;
     }
     local_weather->total_pressure = total_pressure;
+    
+    
+#ifdef WEATHER_DEBUG
+    weather_debug(local_weather);
+#endif
+    
 }
 
 void weather_init(n_weather * local_weather, n_land * local_land)
@@ -135,7 +216,7 @@ void weather_init(n_weather * local_weather, n_land * local_land)
     ly = 0;
     while( ly < MAP_DIMENSION )
     {
-        weather_cycle(local_weather);
+        weather_cycle(local_land, local_weather);
         ly++;
     }
 }
@@ -370,7 +451,7 @@ n_int land_operator_interpolated(n_land * local_land, n_weather * local_weather,
     return interpolated >> 1;
 }
 
-void land_clear(n_land * local, KIND_OF_USE kind)
+void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
 {
     n_byte *local_map = local->map;
     n_uint	loop      = 0;
@@ -382,12 +463,12 @@ void land_clear(n_land * local, KIND_OF_USE kind)
     if (kind != KIND_LOAD_FILE)
     {
         local->time = 0;
-        local->date[0] = 0;
+        local->date[0] = start;
         local->date[1] = 0;
     }
 }
 
-void land_init(n_land * local, n_byte * scratch, n_byte2 start)
+void land_init(n_land * local, n_byte * scratch)
 {
     n_byte2	local_random[2];
 
@@ -397,9 +478,6 @@ void land_init(n_land * local, n_byte * scratch, n_byte2 start)
     math_patch(local->map, scratch, &math_random, local_random, MAP_BITS, 0, 7, 1);
 
     land_tide(local);
-
-    local->date[0] = start;
-    local->date[1] = 0;
 }
 
 void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location)

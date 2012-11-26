@@ -62,29 +62,42 @@ static n_byte  key_identification;
 static n_byte2 key_value;
 static n_byte  key_down;
 
-static noble_simulation * shared_squared_cycle(n_uint ticks, n_int fIdentification)
-{
-    noble_simulation * local_sim = sim_sim();
-    
-    control_thread_console();
+static void shared_squared_cycle(n_uint ticks, n_int fIdentification)
+{    
+    sim_thread_console();
     
     if((mouse_down == 1) && (mouse_identification == fIdentification))
     {
-        control_sim_mouse(local_sim, mouse_identification, mouse_x, mouse_y, mouse_option);
+        control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
     }
     if((key_down == 1) && (key_identification == fIdentification))
     {
         if ((key_identification == NUM_VIEW) || (key_identification == NUM_TERRAIN))
         {
-            control_sim_key(local_sim, key_identification, key_value);
+            control_key(key_identification, key_value);
         }
     }
-    return local_sim;
 }
 
 void shared_cycle(n_uint ticks, n_int fIdentification)
+{    
+    ticks = ticks & 67108863; // 71 58 27 88
+    ticks *= 60;
+    
+    if(fIdentification == NUM_TERRAIN)
+    {
+        control_sim_simulate(ticks);
+        draw_cycle(0, 512, 511);
+    }
+    if(fIdentification == NUM_VIEW)
+    {
+        draw_cycle(1, 512, 512);
+    }
+}
+
+void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification)
 {
-    noble_simulation * local_sim = shared_squared_cycle(ticks, fIdentification);
+    shared_squared_cycle(ticks, fIdentification);
     
     ticks = ticks & 67108863; // 71 58 27 88
     ticks *= 60;
@@ -92,32 +105,25 @@ void shared_cycle(n_uint ticks, n_int fIdentification)
     if(fIdentification == NUM_TERRAIN)
     {
         control_sim_simulate(ticks);
-        control_sim_draw(local_sim, 0);
-    }
-    if(fIdentification == NUM_VIEW)
-    {
-        control_sim_draw(local_sim, 1);
     }
 }
 
 void shared_cycle_no_draw(n_uint ticks, n_int fIdentification)
 {
-    noble_simulation * local_sim = shared_squared_cycle(ticks, fIdentification);
+    shared_cycle_really_no_draw(ticks, fIdentification);
     
-    ticks = ticks & 67108863; // 71 58 27 88
-    ticks *= 60;
-    
-    if(fIdentification == NUM_TERRAIN)
-    {
-        control_sim_simulate(ticks);
-    }
     if(fIdentification == NUM_VIEW)
     {
-        control_sim_draw(local_sim, 1);
+        draw_cycle(1, 512, 512);
     }
 }
 
-n_int shared_init(n_int localHeight, n_uint random)
+void shared_cycle_really_draw(n_int fIdentification, n_int dim_x, n_int dim_y)
+{
+    draw_cycle((fIdentification == NUM_VIEW), dim_x, dim_y);
+}
+
+n_int shared_init(n_byte view, n_uint random)
 {
     n_int   fIdentification = -1;
     n_byte2 fit[256 * 3];
@@ -125,19 +131,11 @@ n_int shared_init(n_int localHeight, n_uint random)
     key_down = 0;
     mouse_down = 0;
 
-    if (localHeight == NWIND_GRAPH_Y)
-    {
-        fIdentification = NUM_GRAPH;
-    }
-    if (localHeight == 512)
+    if (view)
     {
         fIdentification = NUM_VIEW;
     }
-#ifdef TERRAIN_WINDOW_512x512
-    if (localHeight == 511)
-#else
-    if (localHeight == 768)
-#endif
+    else
     {
         fIdentification = NUM_TERRAIN;
         (void)control_init(KIND_START_UP, random);
@@ -191,6 +189,16 @@ void shared_notBrainCode(void)
     (void)draw_toggle_braincode();
 }
 
+void shared_flood(void)
+{
+    sim_flood();
+}
+
+void shared_healthy_carrier(void)
+{
+    sim_healthy_carrier();
+}
+
 void shared_keyReceived(n_byte2 value, n_byte fIdentification)
 {
     key_down = 1;
@@ -233,15 +241,8 @@ n_byte * shared_draw(n_byte fIdentification)
 
 void shared_timeForColor(n_byte2 * fit, n_int fIdentification)
 {
-    if (fIdentification != NUM_GRAPH)
-    {
-        noble_simulation * local_sim = sim_sim();
-        draw_color_time(fit, local_sim->land->time);
-    }
-    else
-    {
-        draw_fit(fur_points, fit);
-    }
+    noble_simulation * local_sim = sim_sim();
+    draw_color_time(fit, local_sim->land->time);
 }
 
 void shared_previousApe(void)

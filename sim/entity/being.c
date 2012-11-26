@@ -147,7 +147,7 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     }
 
     {
-        n_int	loc_f = local->facing;
+        n_int	loc_f = GET_F(local);
         n_int	vec_x = VECT_X(loc_f) >> 4;
         n_int	vec_y = VECT_Y(loc_f) >> 4;
         /* check trivial case first - self aware */
@@ -290,7 +290,7 @@ n_byte being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly)
 
        The Noble Ape Simulation universe wraps around in all
        directions you need to calculate the line of site off the map too. */
-    n_int	local_facing = ((local->facing)>>5);
+    n_int	local_facing = ((GET_F(local))>>5);
 
 
     /*
@@ -627,19 +627,6 @@ static void being_immune_response(noble_being * local)
             local->energy=0;
         }
     }
-
-    /*
-     printf("Antibodies:\n");
-     for (i=0;i<IMMUNE_POPULATION;i++)
-     {
-     printf("%d\n", immune->antibodies[i]);
-     }
-     printf("Antigens:\n");
-     for (i=0;i<IMMUNE_ANTIGENS;i++)
-     {
-     printf("%d\n", immune->antigens[i]);
-     }
-     */
 #endif
 }
 
@@ -811,14 +798,14 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
         case EVENT_MATE:
             io_string_write(string,"Mated with ",location);
             break;
-        case EVENT_FIGHT_WIN:
-            io_string_write(string,"Won a fight with ",location);
+        case EVENT_SEEK_MATE:
+            io_string_write(string,"Searched for mate ",location);
             break;
-        case EVENT_FIGHT_LOSE:
-            io_string_write(string,"Lost a fight with ",location);
+        case EVENT_GROOM:
+            io_string_write(string,"Groomed ",location);
             break;
         case EVENT_GROOMED:
-            io_string_write(string,"Was groomed by ",location);
+            io_string_write(string,"Groomed by ",location);
             break;
         case EVENT_CHAT:
             io_string_write(string,"Chatted with ",location);
@@ -826,80 +813,84 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
         case EVENT_BIRTH:
             io_string_write(string,"Gave birth to ",location);
             break;
-        case EVENT_CARRYING:
-            io_string_write(string,"Was carrying ",location);
-            break;
-        case EVENT_CARRIED:
-            io_string_write(string,"Was being carried by ",location);
-            break;
-        case EVENT_SUCKLING:
-            io_string_write(string,"Was suckling ",location);
-            break;
-        case EVENT_SUCKLE:
-            io_string_write(string,"Was suckling from ",location);
-            break;
-        case EVENT_SEEK_MATE:
-            io_string_write(string,"Searched for mate ",location);
-            break;
-        case EVENT_WHACK:
-            io_string_write(string,"Whacked ",location);
-            break;
-        case EVENT_WHACKED:
-            io_string_write(string,"Was whacked by ",location);
-            break;
-        case EVENT_HURL:
+        case EVENT_HURLED:
             io_string_write(string,"Hurled a rock at ",location);
             break;
-        case EVENT_HURLED:
+        case EVENT_HURLED_BY:
             io_string_write(string,"Was hit by a rock hurled by ",location);
             break;
-        case EVENT_HUG:
-            io_string_write(string,"Hugged ",location);
+        
+        case EVENT_HIT:
+            io_string_write(string,"Hit ",location);
+            break;
+        case EVENT_HIT_BY:
+            io_string_write(string,"Hit by ",location);
+            break;
+        case EVENT_CARRIED:
+            io_string_write(string,"Carried ",location);
+            break;
+        case EVENT_CARRIED_BY:
+            io_string_write(string,"Carried by ",location);
+            break;
+        case EVENT_SUCKLED:
+            io_string_write(string,"Suckled ",location);
+            break;
+        case EVENT_SUCKLED_BY:
+            io_string_write(string,"Suckled by ",location);
+            break;
+        case EVENT_WHACKED:
+            io_string_write(string,"Whacked ",location);
+            break;
+        case EVENT_WHACKED_BY:
+            io_string_write(string,"Whacked by ",location);
             break;
         case EVENT_HUGGED:
-            io_string_write(string,"Was hugged by ",location);
+            io_string_write(string,"Hugged ",location);
             break;
-        case EVENT_PROD:
-            io_string_write(string,"Prodded ",location);
+        case EVENT_HUGGED_BY:
+            io_string_write(string,"Hugged by ",location);
             break;
         case EVENT_PRODDED:
-            io_string_write(string,"Was prodded by ",location);
+            io_string_write(string,"Prodded ",location);
             break;
-        case EVENT_GIVE:
-            io_string_write(string,"Gave an object to ",location);
+        case EVENT_PRODDED_BY:
+            io_string_write(string,"Prodded by ",location);
             break;
-        case EVENT_RECEIVE:
-            io_string_write(string,"Received an object from ",location);
+        case EVENT_GIVEN:
+            io_string_write(string,"Given ",location);
+            break;
+        case EVENT_GIVEN_BY:
+            io_string_write(string,"Given by ",location);
             break;
         case EVENT_POINT:
-            io_string_write(string,"Pointed at ",location);
+            io_string_write(string,"Pointed to ",location);
             break;
         case EVENT_POINTED:
-            io_string_write(string,"Was pointed to by ",location);
-            break;
-        case EVENT_SMILE:
-            io_string_write(string,"Smiled at ",location);
+            io_string_write(string,"Pointed to by ",location);
             break;
         case EVENT_SMILED:
-            io_string_write(string,"Was smiled at by ",location);
+            io_string_write(string,"Smiled at ",location);
             break;
-        case EVENT_TICKLE:
-            io_string_write(string,"Tickled ",location);
+        case EVENT_SMILED_BY:
+            io_string_write(string,"Smiled at by ",location);
             break;
         case EVENT_TICKLED:
-            io_string_write(string,"Was tickled by ",location);
+            io_string_write(string,"Tickled ",location);
             break;
-        case EVENT_GLOWER:
-            io_string_write(string,"Glowered at ",location);
+        case EVENT_TICKLED_BY:
+            io_string_write(string,"Tickled by ",location);
             break;
         case EVENT_GLOWERED:
-            io_string_write(string,"Was glowered at by ",location);
+            io_string_write(string,"Glowered at ",location);
             break;
-        case EVENT_PAT:
-            io_string_write(string,"Patted ",location);
+        case EVENT_GLOWERED_BY:
+            io_string_write(string,"Glowered at by ",location);
             break;
         case EVENT_PATTED:
-            io_string_write(string,"Was patted by ",location);
+            io_string_write(string,"Patted ",location);
+            break;
+        case EVENT_PATTED_BY:
+            io_string_write(string,"Patted by ",location);
             break;
         default:
         {
@@ -931,7 +922,7 @@ void episode_description(
     current_date = TIME_IN_DAYS(sim->land->date);
     local_episodic = GET_EPI(sim, local_being);
 
-    if(local_episodic == 0L) return;
+    if(local_episodic == 0L) return (void)SHOW_ERROR("No episodic description");
 
     if ((local_episodic[index].event>0) &&
             (local_episodic[index].first_name[0]==GET_NAME_GENDER(sim,local_being)) &&
@@ -1034,41 +1025,44 @@ void episode_description(
             }
             break;
         }
-        case EVENT_DRAG:
-            io_string_write(str,"Dragged a ",&string_index);
-            being_inventory_string(str, &string_index, local_episodic[index].arg);
-            break;
-        case EVENT_BRANDISH:
+            case EVENT_DRAG:
+                io_string_write(str,"Dragged a ",&string_index);
+                being_inventory_string(str, &string_index, local_episodic[index].arg);
+                break;
+            case EVENT_BRANDISH:
                 io_string_write(str,"Waved a ",&string_index);
                 being_inventory_string(str, &string_index, local_episodic[index].arg);
                 break;
-        case EVENT_DROP:
+            case EVENT_DROP:
                 io_string_write(str,"Dropped a ",&string_index);
                 being_inventory_string(str, &string_index, local_episodic[index].arg);
                 break;
-        case EVENT_PICKUP:
+            case EVENT_PICKUP:
                 io_string_write(str,"Picked up a ",&string_index);
                 being_inventory_string(str, &string_index, local_episodic[index].arg);
                 break;
-                
-        default:
+            default:
                 being_social_event_string(str, &string_index, local_episodic[index].event, name_str);
                 break;
         }
 
-        if (string_index == 0) return;
+        if (string_index == 0) return (void)SHOW_ERROR("No string in episodic description");
 
-        days_elapsed =
-            current_date -
-            TIME_IN_DAYS(&(local_episodic[index].date[0]));
+        days_elapsed = current_date - TIME_IN_DAYS(&(local_episodic[index].date[0]));
         if (days_elapsed==0)
         {
-            time_elapsed =
-                sim->land->time -
-                local_episodic[index].time;
+            time_elapsed = sim->land->time - local_episodic[index].time;
+            
             if (time_elapsed<60)
             {
-                if (time_elapsed<5)
+                if (time_elapsed == 0)
+                {
+                    io_string_write(str," now",&string_index);
+                }
+                else if (time_elapsed == 1)
+                {
+                        io_string_write(str," a minute ago",&string_index);
+                }else if (time_elapsed<5)
                 {
                     io_string_write(str," a few minutes ago",&string_index);
                 }
@@ -1302,7 +1296,7 @@ n_byte being_awake(noble_simulation * sim, n_uint reference)
 n_int brain_probe_to_location(n_int position)
 {
     /* could have a more interesting translation */
-    return (position * (SINGLE_BRAIN>>8));
+    return ((position * (SINGLE_BRAIN>>8))) % SINGLE_BRAIN;
 }
 
 static void update_brain_probes(noble_simulation * sim, noble_being * local, n_byte * local_braincode)
@@ -1354,7 +1348,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local, n_b
 				/*local->brainprobe[i].address = (brain_point[n1] + local->brainprobe[i].address)&255;*/
 				/* read from brain */
 				local_braincode[n2] = (brain_point[n1] + local->brainprobe[i].offset)&255;
-			}
+            }
 			else
             {
 				/* write to brain */
@@ -1407,7 +1401,7 @@ static n_int being_turn_away_from_water(n_int loc_f, n_land * land, n_vect2 * lo
 }
 
 /* stuff still goes on during sleep */
-void being_cycle_asleep(noble_simulation * sim, n_uint current_being_index)
+void being_cycle_universal(noble_simulation * sim, n_uint current_being_index, n_byte awake)
 {
     noble_being * being_buffer = sim->beings;
     noble_being * local        = &being_buffer[current_being_index];
@@ -1416,6 +1410,7 @@ void being_cycle_asleep(noble_simulation * sim, n_uint current_being_index)
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);
 #endif
+    
     being_immune_response(local);
 
 #ifdef BRAINCODE_ON
@@ -1425,7 +1420,11 @@ void being_cycle_asleep(noble_simulation * sim, n_uint current_being_index)
         update_brain_probes(sim, local,GET_BRAINCODE_INTERNAL(sim,local));
     }
 #endif
-    local->state = BEING_STATE_ASLEEP;
+    
+    if (awake == 0)
+    {
+        local->state = BEING_STATE_ASLEEP;
+    }
 }
 
 /* For a new child this populates the social graph with family relationships */
@@ -1944,20 +1943,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     /** Listen for any shouts */
     being_listen(sim,current_being_index);
-
-#ifdef METABOLISM_ON
-    metabolism_cycle(sim, local);
-#endif
-    being_immune_response(local);
-
-#ifdef BRAINCODE_ON
-    /** may need to add external probe linking too */
-    if (GET_B(sim,local))
-    {
-        update_brain_probes(sim, local,GET_BRAINCODE_INTERNAL(sim,local));
-    }
-#endif
-
+    
 #ifdef EPISODIC_ON
     episodic_cycle(sim,local);
 #endif
@@ -2225,8 +2211,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                         GET_X(being_child) = GET_X(local);
                         GET_Y(being_child) = GET_Y(local);
                         child_mass = GET_M(being_child);
-                        episodic_close(sim, local, being_child, EVENT_CARRYING, AFFECT_CARRYING, 0);
-                        episodic_close(sim, being_child, local, EVENT_CARRIED, AFFECT_CARRIED, 0);
+                        episodic_close(sim, local, being_child, EVENT_CARRIED, AFFECT_CARRYING, 0);
+                        episodic_close(sim, being_child, local, EVENT_CARRIED_BY, AFFECT_CARRIED, 0);
                     }
                 }
             }
@@ -2288,8 +2274,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             /** child acquires immunity from mother */
                             being_immune_seed(mother, local);
                             
-                            episodic_close(sim, mother, local, EVENT_SUCKLING, AFFECT_SUCKLING, 0);
-                            episodic_close(sim, local, mother, EVENT_SUCKLE, AFFECT_SUCKLING, 0);
+                            episodic_close(sim, mother, local, EVENT_SUCKLED, AFFECT_SUCKLING, 0);
+                            episodic_close(sim, local, mother, EVENT_SUCKLED_BY, AFFECT_SUCKLING, 0);
                         }
                     }
                 }
@@ -2691,7 +2677,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 
             loc_x = GET_X(mother);
             loc_y = GET_Y(mother);
-            loc_facing = mother->facing;
+            loc_facing = GET_F(mother);
 
             math_random3(local_random);
 
@@ -2951,8 +2937,6 @@ void being_remove(noble_simulation * local_sim)
             noble_being * child;
             n_uint i = 0;
             n_byte2 name, family_name, met_name, met_family_name;
-
-            
             
             if (local_sim->ext_death != 0L)
             {

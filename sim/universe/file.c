@@ -1100,7 +1100,7 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
 
     interp->specific = identifier;
 
-    variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = local_being->facing;
+    variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = GET_F(local_being);
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  local_being->speed;
     variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = local_being->energy;
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
@@ -1169,7 +1169,7 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     if (local_speak < 0)      local_speak = 0;
     if (local_speak > 0xffff) local_speak = 0xffff;
 
-    local_being->facing = (n_byte) local_facing;
+    GET_F(local_being) = (n_byte) local_facing;
     local_being->speed  = (n_byte) local_speed;
     local_being->energy = (n_byte2)local_energy;
     local_being->speak  = (n_byte2)local_speak;

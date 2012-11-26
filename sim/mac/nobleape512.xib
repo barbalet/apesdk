@@ -2,22 +2,22 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">11E53</string>
-		<string key="IBDocument.InterfaceBuilderVersion">2182</string>
-		<string key="IBDocument.AppKitVersion">1138.47</string>
-		<string key="IBDocument.HIToolboxVersion">569.00</string>
+		<string key="IBDocument.SystemVersion">12C54</string>
+		<string key="IBDocument.InterfaceBuilderVersion">2840</string>
+		<string key="IBDocument.AppKitVersion">1187.34</string>
+		<string key="IBDocument.HIToolboxVersion">625.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">2182</string>
+			<string key="NS.object.0">2840</string>
 		</object>
 		<object class="NSArray" key="IBDocument.IntegratedClassDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<string>NSCustomObject</string>
 			<string>NSCustomView</string>
-			<string>NSWindowTemplate</string>
-			<string>NSView</string>
 			<string>NSMenu</string>
 			<string>NSMenuItem</string>
-			<string>NSCustomObject</string>
+			<string>NSView</string>
+			<string>NSWindowTemplate</string>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -511,6 +511,35 @@
 									<reference key="NSOnImage" ref="832797577"/>
 									<reference key="NSMixedImage" ref="114876730"/>
 								</object>
+								<object class="NSMenuItem" id="56005770">
+									<reference key="NSMenu" ref="996486706"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="889729663">
+									<reference key="NSMenu" ref="996486706"/>
+									<string key="NSTitle">Flood</string>
+									<string key="NSKeyEquiv">F</string>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="808217558">
+									<reference key="NSMenu" ref="996486706"/>
+									<string key="NSTitle">Healthy Carrier</string>
+									<string key="NSKeyEquiv">H</string>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
 							</object>
 						</object>
 					</object>
@@ -553,9 +582,9 @@
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
 			<object class="NSWindowTemplate" id="886064502">
-				<int key="NSWindowStyleMask">1</int>
+				<int key="NSWindowStyleMask">9</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{530, 235}, {512, 511}}</string>
+				<string key="NSWindowRect">{{530, 235}, {512, 512}}</string>
 				<int key="NSWTFlags">1881670656</int>
 				<string key="NSWindowTitle">Terrain</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -563,6 +592,8 @@
 					<characters key="NS.bytes">View</characters>
 				</object>
 				<nil key="NSUserInterfaceItemIdentifier"/>
+				<string key="NSWindowContentMaxSize">{2048, 1536}</string>
+				<string key="NSWindowContentMinSize">{512, 512}</string>
 				<object class="NSView" key="NSWindowView" id="707336435">
 					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
@@ -571,20 +602,21 @@
 						<object class="NSCustomView" id="395090502">
 							<reference key="NSNextResponder" ref="707336435"/>
 							<int key="NSvFlags">274</int>
-							<string key="NSFrameSize">{512, 511}</string>
+							<string key="NSFrameSize">{512, 512}</string>
 							<reference key="NSSuperview" ref="707336435"/>
 							<reference key="NSWindow"/>
 							<string key="NSClassName">NobleMacView</string>
 							<string key="NSExtension">NSOpenGLView</string>
 						</object>
 					</object>
-					<string key="NSFrameSize">{512, 511}</string>
+					<string key="NSFrameSize">{512, 512}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="395090502"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1280, 778}}</string>
-				<string key="NSMaxSize">{10000000000000, 10000000000000}</string>
+				<string key="NSMinSize">{512, 534}</string>
+				<string key="NSMaxSize">{2048, 1558}</string>
 				<bool key="NSWindowIsRestorable">YES</bool>
 			</object>
 		</object>
@@ -814,6 +846,22 @@
 						<reference key="destination" ref="1029600051"/>
 					</object>
 					<int key="connectionID">347</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">menuControlFlood:</string>
+						<reference key="source" ref="818030197"/>
+						<reference key="destination" ref="889729663"/>
+					</object>
+					<int key="connectionID">353</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">menuControlHealthyCarrier:</string>
+						<reference key="source" ref="818030197"/>
+						<reference key="destination" ref="808217558"/>
+					</object>
+					<int key="connectionID">354</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1093,6 +1141,9 @@
 							<reference ref="787386507"/>
 							<reference ref="689471092"/>
 							<reference ref="1029600051"/>
+							<reference ref="56005770"/>
+							<reference ref="889729663"/>
+							<reference ref="808217558"/>
 						</object>
 						<reference key="parent" ref="409744361"/>
 					</object>
@@ -1229,6 +1280,21 @@
 						<reference key="object" ref="1029600051"/>
 						<reference key="parent" ref="996486706"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">348</int>
+						<reference key="object" ref="56005770"/>
+						<reference key="parent" ref="996486706"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">349</int>
+						<reference key="object" ref="889729663"/>
+						<reference key="parent" ref="996486706"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">351</int>
+						<reference key="object" ref="808217558"/>
+						<reference key="parent" ref="996486706"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1294,6 +1360,9 @@
 					<string>324.IBPluginDependency</string>
 					<string>332.IBPluginDependency</string>
 					<string>344.IBPluginDependency</string>
+					<string>348.IBPluginDependency</string>
+					<string>349.IBPluginDependency</string>
+					<string>351.IBPluginDependency</string>
 					<string>56.IBPluginDependency</string>
 					<string>57.IBPluginDependency</string>
 					<string>58.IBPluginDependency</string>
@@ -1374,6 +1443,9 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1388,7 +1460,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">347</int>
+			<int key="maxID">354</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1403,6 +1475,8 @@
 							<string>aboutDialog:</string>
 							<string>menuControlClearErrors:</string>
 							<string>menuControlCreateAutoload:</string>
+							<string>menuControlFlood:</string>
+							<string>menuControlHealthyCarrier:</string>
 							<string>menuControlJustDesire:</string>
 							<string>menuControlJustFear:</string>
 							<string>menuControlNext:</string>
@@ -1437,6 +1511,8 @@
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
@@ -1446,6 +1522,8 @@
 							<string>aboutDialog:</string>
 							<string>menuControlClearErrors:</string>
 							<string>menuControlCreateAutoload:</string>
+							<string>menuControlFlood:</string>
+							<string>menuControlHealthyCarrier:</string>
 							<string>menuControlJustDesire:</string>
 							<string>menuControlJustFear:</string>
 							<string>menuControlNext:</string>
@@ -1473,6 +1551,14 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">menuControlCreateAutoload:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">menuControlFlood:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">menuControlHealthyCarrier:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">

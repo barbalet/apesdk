@@ -628,7 +628,6 @@ static n_int longterm_quit(void * ptr, n_string response, n_console_output outpu
 
 int main(int argc, n_string argv[])
 {
-    n_int return_value = 0;
 
     printf("\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE);
     printf("      For a list of commands type 'help'\n\n");
@@ -636,7 +635,8 @@ int main(int argc, n_string argv[])
     sprintf(simulation_filename,"%s","realtime.txt");
 
     local_sim = sim_sim();
-
+    io_command_line_execution_set();
+    
     srand((unsigned int) time(NULL) );
     sim_init(2,rand(),MAP_AREA,0);
 
@@ -649,16 +649,27 @@ int main(int argc, n_string argv[])
 #endif
     }
     local_sim->indicators_logging=indicator_index;
+    
     cle_load(local_sim, (n_string)simulation_filename, io_console_out);
-    do
-    {
-        return_value = io_console(local_sim,
-                                  (noble_console_command *)control_commands,
-                                  io_console_entry,
-                                  io_console_out);
-    }
-    while (return_value == 0);
 
+#ifndef	_WIN32
+    do{
+        sim_thread_console();
+    }while (sim_thread_console_quit() == 0);
+#else
+    {
+        n_int return_value = 0;
+        do
+        {
+            return_value = io_console(local_sim,
+                                      (noble_console_command *)control_commands,
+                                      io_console_entry,
+                                      io_console_out);
+        }
+        while (return_value == 0);
+    }
+#endif
+    
     sim_close();
 
     return(1);

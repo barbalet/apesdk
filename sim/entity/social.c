@@ -956,8 +956,8 @@ n_byte2 social_squabble(
 
             /** remember the fight */
             
-            episodic_interaction(sim, victor, vanquished, EVENT_FIGHT_WIN, AFFECT_SQUABBLE_VICTOR, punchloc);
-            episodic_interaction(sim, vanquished, victor, EVENT_FIGHT_LOSE, AFFECT_SQUABBLE_VANQUISHED, punchloc);
+            episodic_interaction(sim, victor, vanquished, EVENT_HIT, AFFECT_SQUABBLE_VICTOR, punchloc);
+            episodic_interaction(sim, vanquished, victor, EVENT_HIT_BY, AFFECT_SQUABBLE_VANQUISHED, punchloc);
 
             /** vanquished turns away */
             if (meeter_being == vanquished)

@@ -50,12 +50,13 @@
 
 static n_int command_line_execution;
 
+void  io_command_line_execution_set(void)
+{
+    command_line_execution = 1;
+}
+
 n_int io_command_line_execution(void)
 {
-    if (io_entry_execution(0,0L) == 1)
-    {
-        command_line_execution = 1;
-    }
     return command_line_execution;
 }
 
@@ -64,18 +65,15 @@ n_int io_command_line_execution(void)
  * @param value entering value.
  * @return previously held value.
  */
-n_byte io_entry_execution(n_int argc, n_string * argv)
+void io_entry_execution(n_int argc, n_string * argv)
 {
-    static n_byte entry_value = 0;
-    n_byte previous = entry_value;
     if (argv)
     {
         if ((argc == 2) && (argv[1][0] == 'c'))
         {
-            entry_value = 1;
+            io_command_line_execution_set();
         }
     }
-    return previous;
 }
 
 
@@ -127,22 +125,24 @@ n_int file_chain_write_generate_header(n_file_chain *initial)
 
 n_file_chain * file_chain_new(n_uint size)
 {
-    n_file_chain * return_value = 0L;
-    n_int          loop = 0;
-    return_value = (n_file_chain*)io_new((size+1)*sizeof(n_file_chain));
-    while (loop < (size+1))
+    n_file_chain * return_value = (n_file_chain*)io_new((size+1)*sizeof(n_file_chain));
+    if (return_value)
     {
-        return_value[loop].data = 0L;
-        return_value[loop].expected_bytes = 0;
-        if (loop == size)
+        n_int  loop = 0;
+        while (loop < (size+1))
         {
-            return_value[loop].next = 0L;
+            return_value[loop].data = 0L;
+            return_value[loop].expected_bytes = 0;
+            if (loop == size)
+            {
+                return_value[loop].next = 0L;
+            }
+            else
+            {
+                return_value[loop].next = (void*)&return_value[loop+1];
+            }
+            loop++;
         }
-        else
-        {
-            return_value[loop].next = (void*)&return_value[loop+1];
-        }
-        loop++;
     }
     return return_value;
 }
@@ -305,9 +305,6 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
             {
                 fclose(read_file);
                 io_free(general_buffer);
-                
-                local = local->next;
-                
                 return SHOW_ERROR("Hash failed");
             }
         }
@@ -344,7 +341,10 @@ void io_copy(n_byte * from, n_byte * to, n_uint number)
 void *	io_new(n_uint bytes)
 {
     void *	tmp = 0L;
-    tmp = (void *) malloc(bytes);
+    if (bytes)
+    {
+        tmp = (void *) malloc(bytes);
+    }
     return (tmp);
 }
 
@@ -740,7 +740,7 @@ n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value,
  */
 n_int io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char)
 {
-    n_uint temp = 0;
+    n_uint  temp = 0;
     n_int   ten_power_place = 0;
     while (1)
     {
@@ -1771,21 +1771,34 @@ void io_audit_file(const noble_file_entry * format, n_byte section_to_audit)
 noble_console_command * local_commands = 0L;
 
 
-void io_help_line(noble_console_command * specific, n_console_output output_function)
+void io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count)
 {
-    n_int command_length = io_length(specific->command, STRING_BLOCK_SIZE);
-    n_int addition_length = io_length(specific->addition, STRING_BLOCK_SIZE);
-    n_int total = 28 - (command_length + addition_length + 1);
+    n_int command_length = io_length(first, STRING_BLOCK_SIZE);
+    n_int addition_length = io_length(second, STRING_BLOCK_SIZE);
+    n_int total = count - (command_length + addition_length + 1);
     n_int loop2 = 0;
-    n_string_block  string_line = {0};
-    sprintf(string_line," %s %s",specific->command,specific->addition);
+    sprintf(output," %s %s",first, second);
     while (loop2 < total)
     {
-        sprintf(string_line, "%s ", string_line);
+        sprintf(output, "%s ", output);
         loop2++;
-
+        
     }
-    sprintf(string_line, "%s%s", string_line, specific->help_information);
+    sprintf(output, "%s%s", output, third);
+}
+
+void io_time_to_string(n_string value, n_int minutes, n_int days, n_int centuries)
+{
+    n_int military_time = (minutes % 60);
+    n_int hours = (minutes/60);
+    military_time += hours * 100;
+    sprintf(value,"%4ld:%ld/%ld",military_time,days,centuries);
+}
+
+void io_help_line(noble_console_command * specific, n_console_output output_function)
+{
+    n_string_block  string_line = {0};
+    io_three_string_combination(string_line, specific->command, specific->addition, specific->help_information, 28);
     output_function(string_line);
 }
 

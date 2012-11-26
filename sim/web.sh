@@ -42,6 +42,6 @@ gcc ${CFLAGS} -c contrib/motters/cle.c -o cleweb.o
 gcc ${CFLAGS} -c contrib/motters/web.c -o web.o
 gcc ${CFLAGS} -c contrib/motters/pnglite.c -o pnglite.o
 
-gcc -Wall -ansi -pedantic -O3 -o ../naweb cleweb.o pnglite.o -lz sim.o file.o genealogy.o body.o metabolism.o being.o brain.o console.o land.o social.o episodic.o food.o drives.o math.o io.o parse.o interpret.o graph.o web.o
+gcc -Wall -ansi -pedantic -O3 -o ../naweb cleweb.o pnglite.o -lz sim.o file.o genealogy.o body.o metabolism.o being.o brain.o console.o land.o social.o episodic.o food.o drives.o math.o io.o parse.o interpret.o graph.o speak.o web.o -lpthread -lm
 
 rm *.o

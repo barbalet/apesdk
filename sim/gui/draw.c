@@ -156,7 +156,7 @@ static n_byte2 seg14[ 60 ] =
 
 
 
-#define	MAX_NUMBER_ERRORS	18
+#define	MAX_NUMBER_ERRORS	35
 
 static n_byte	number_errors;
 static n_byte	error_array[MAX_NUMBER_ERRORS + 1][31];
@@ -282,17 +282,27 @@ static n_byte pixel_color8(n_int px, n_int py, void * information)
     return 0;
 }
 
+static n_int terrain_dim_x = 512;
+static n_int terrain_dim_y = 511;
+
+static n_byte pixel_map(n_int px, n_int py, void * information)
+{
+    n_byte *byte_info = information;
+    byte_info[ px | (py<<MAP_BITS) ] = COLOUR_YELLOW;
+    return 0;
+}
+
 static n_byte pixel_overlay(n_int px, n_int py, void * information)
 {
     n_byte *byte_info = information;
-    byte_info[ px | (py << TERRAIN_WINDOW_WIDTH_BITS) ] = COLOUR_YELLOW;
+    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
     return 0;
 }
 
 static n_byte pixel_grey(n_int px, n_int py, void * information)
 {
     n_byte *byte_info = information;
-    byte_info[ px | (py << TERRAIN_WINDOW_WIDTH_BITS) ] = COLOUR_GREY;
+    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_GREY;
     return 0;
 }
 
@@ -308,9 +318,6 @@ n_byte * draw_pointer(n_byte which_one)
 
     switch(which_one)
     {
-    case NUM_GRAPH:
-        return GRAPHWINDOW(local_buffer);
-        break;
     case NUM_TERRAIN:
         return TERRAINWINDOW(local_buffer);
         break;
@@ -328,7 +335,7 @@ n_byte * draw_pointer(n_byte which_one)
 void draw_about(n_string platform)
 {
     n_join	local_draw;
-    n_byte *buffer = draw_pointer(NUM_TERRAIN);
+    n_byte *buffer = draw_pointer(NUM_VIEW);
     n_int   loop = 0;
     if(check_about == 1 || buffer == 0L)
     {
@@ -337,13 +344,13 @@ void draw_about(n_string platform)
     }
 
     local_draw.information = buffer;
-    local_draw.pixel_draw  = &pixel_overlay;
+    local_draw.pixel_draw  = &pixel_map;
 
     while (loop < 256)
     {
-        n_int  py = (TERRAIN_WINDOW_HEIGHT/2) - 128 + loop;
-        const n_int px = (TERRAIN_WINDOW_WIDTH/2) - 128;
-        n_byte * from_point = &buffer[(py*TERRAIN_WINDOW_WIDTH) + px];
+        n_int  py = (MAP_DIMENSION/2) - 128 + loop;
+        const n_int px = (MAP_DIMENSION/2) - 128;
+        n_byte * from_point = &buffer[(py*MAP_DIMENSION) + px];
         io_erase(from_point, 256);
         loop++;
     }
@@ -461,20 +468,12 @@ static n_byte2 draw_genetic_patch(n_byte2 * value)
 
 /* this is the ocelot landscape algorithm */
 
-#define	WINDOW_XY(x,y)		( (x) | ( (y) << TERRAIN_WINDOW_WIDTH_BITS ))
-
-#define	HALF_WIDTH_WINDOW	  (TERRAIN_WINDOW_HEIGHT >> 1)
-#define	HALF_WIDTH_WINDOW_H	(TERRAIN_WINDOW_WIDTH >> 1)
-
-
 #define POS_HIRES(num) ((num+(4096*2))&4095)
 
 #define CONVERT_X(x)  (n_uint)((POS_HIRES((x)+co_x)) << 1)
 #define CONVERT_Y(y)  (n_uint)((POS_HIRES((y)+co_y)) << 13)
 
 #define CONVERT_XY(x,y)   (CONVERT_X(x) | CONVERT_Y(y))
-
-#define	OVER_BIG_NUMBER		(TERRAIN_WINDOW_HEIGHT * TERRAIN_WINDOW_WIDTH * 2 * NUMBER_LAND_TILES)
 
 #define	SUBSTA(c)	((c<<8)|c)
 
@@ -600,17 +599,18 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
     }
 }
 
-static void draw_terrain(noble_simulation * local_sim)
+static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 {
     n_byte * buf_offscr = draw_pointer(NUM_TERRAIN);
+    n_int    dim_area = dim_x * dim_y;
     if (local_sim->select == NO_BEINGS_FOUND)
     {
-        io_erase(buf_offscr, TERRAIN_WINDOW_AREA);
+        io_erase(buf_offscr, dim_area);
         return;
     }
     {
+        n_int       lowest_y = dim_y + 256;
         n_byte      * combined = local_sim->highres;
-
         noble_being * loc_being = &(local_sim->beings[local_sim->select]);
         n_int turn = GET_F(loc_being);
         n_int co_x = APESPACE_TO_HR_MAPSPACE(GET_X(loc_being));
@@ -625,7 +625,7 @@ static void draw_terrain(noble_simulation * local_sim)
         n_int vals2 = (vals << 1);
 
         /* start at the left-most row */
-        n_int scrx = (0 - HALF_WIDTH_WINDOW_H);
+        n_int scrx = (0 - (dim_x >> 1));
         n_byte * loc_offscr = buf_offscr;
 
         /* find the central map point */
@@ -640,17 +640,18 @@ static void draw_terrain(noble_simulation * local_sim)
         {
             flatval = 128;   /*    put it on water level */
         }
-        while (scrx < HALF_WIDTH_WINDOW_H)   /* repeat until the right-most row is reached */
+        while (scrx < (dim_x - (dim_x >> 1)))   /* repeat until the right-most row is reached */
         {
-            /* take the very bottom pixel */
-            n_int pixy = WINDOW_XY((scrx + HALF_WIDTH_WINDOW_H), (TERRAIN_WINDOW_HEIGHT - 1));
-            /* start with a map point which is below/off the screen */
-            n_int scry = (BOTTOM_CHECK >> 1) + flatval;
-            /* rotated and add offset (which will be &ed off) */
-            n_int big_x = (OVER_BIG_NUMBER + (scrx * valc) + (vals * (BOTTOM_CHECK - TERRAIN_WINDOW_HEIGHT)));
-            /* rotated and sub offset (subtracted further down) */
-            n_int big_y = (OVER_BIG_NUMBER - (scrx * vals) + (valc * (BOTTOM_CHECK - TERRAIN_WINDOW_HEIGHT)));
 
+            /* take the very bottom pixel */
+            n_int pixy = (scrx + (dim_x >> 1)) + ((dim_y - 1) * dim_x );
+            /* start with a map point which is below/off the screen */
+            n_int scry = (((lowest_y*dim_y)/256) >> 1) + flatval;
+            /* rotated and add offset (which will be &ed off) */
+            n_int big_x = ((vals * (((lowest_y*dim_y)/256) - dim_y)) + (scrx * valc));
+            /* rotated and sub offset (subtracted further down) */
+            n_int big_y = ((valc * (((lowest_y*dim_y)/256) - dim_y)) - (scrx * vals));
+            
             n_uint check_change = CONVERT_X((big_x >> 8)) | CONVERT_Y((big_y >> 8));
 
             n_byte z00   = combined[check_change];
@@ -659,7 +660,7 @@ static void draw_terrain(noble_simulation * local_sim)
             while (pixy > -1)
             {
                 /* the point the pixel y counter needs to reach - relative to flatval through scry */
-                n_int sv_a = WINDOW_XY(0, (scry - z00));
+                n_int sv_a = (scry - z00) * dim_x;
 
                 if (sv_a < -1)       /* if this point is less than minus one, make it minus one */
                 {
@@ -670,7 +671,7 @@ static void draw_terrain(noble_simulation * local_sim)
                     /* fill up to sv_a -1, with colour mapz (if below, do nothing) */
                     /* this could be replaced with a colour/texture map */
                     loc_offscr[pixy] = col00; /* 12.7% */
-                    pixy -= TERRAIN_WINDOW_WIDTH;
+                    pixy -= dim_x;
                 }
                 scry--;           /* next map point from screen value */
                 big_x -= vals2;
@@ -683,6 +684,7 @@ static void draw_terrain(noble_simulation * local_sim)
                     col00 = combined[check_change|1];
                 }
             }
+
             scrx++;               /* next column */
         }
     }
@@ -746,13 +748,13 @@ static void	draw_meters(noble_simulation * local_sim)
         hr++;
     }
 
-#define FACING_OFFSIDE  ((TERRAIN_WINDOW_WIDTH-(512-411)))
-#define SP_EN_OFFSIDE   ((TERRAIN_WINDOW_WIDTH-(512-325)))
+#define FACING_OFFSIDE  ((terrain_dim_x-(512-411)))
+#define SP_EN_OFFSIDE   ((terrain_dim_x-(512-325)))
 
-#define GENETICS_X      ((TERRAIN_WINDOW_WIDTH-(512-(182))))
+#define GENETICS_X      ((terrain_dim_x-(512-(182))))
 #define GENETICS_Y      (50)
 
-#define GENDER_X        (TERRAIN_WINDOW_WIDTH-(512-312))
+#define GENDER_X        (terrain_dim_x-(512-312))
 
     if (local_sim->select != NO_BEINGS_FOUND)
     {
@@ -966,7 +968,7 @@ static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
     }
     if(being_awake(sim, reference) && bei->speak != 0)
     {
-        n_int	local_facing = ((((bei->facing)>>2) + 4) & 63) >> 3;
+        n_int	local_facing = ((((GET_F(bei))>>2) + 4) & 63) >> 3;
         /* D  C
         G       F
 
@@ -1048,7 +1050,7 @@ static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join *
     }
     if(being_awake(sim, reference) && bei->speak != 0)
     {
-        n_int	local_facing = ((((bei->facing)>>2) + 4) & 63) >> 3;
+        n_int	local_facing = ((((GET_F(bei))>>2) + 4) & 63) >> 3;
         /* D  C
          G       F
 
@@ -1146,14 +1148,14 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
     }
     cycles_per_sec[5] = (n_byte)('0' + ((count / 10) % 10));
     cycles_per_sec[7] = (n_byte)('0' + ((count / 1) % 10));
-    draw_string(cycles_per_sec, TERRAIN_WINDOW_WIDTH-112, 100, local_mono);
+    draw_string(cycles_per_sec, terrain_dim_x - 112, 100, local_mono);
 }
 
 /* draws the rotating brain, this is always draw and never erase */
 
-static void draw_brain(noble_simulation *local_sim)
+static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
 {
-    if ((local_sim->select == NO_BEINGS_FOUND) || (check_about != 0) || (number_errors != 0))
+    if ((local_sim->select == NO_BEINGS_FOUND) || (number_errors != 0))
     {
         return;
     }
@@ -1182,6 +1184,9 @@ static void draw_brain(noble_simulation *local_sim)
 
         n_byte	    * brainptr = local;
         n_byte	    * obrainptr = &local[ BRAIN_OFFSET(32 * 32 * 32) ];
+        
+        n_int         center_x = dim_x >> 1;
+        n_int         center_y = dim_y >> 1;
 
         local_mono.pixel_draw  = &pixel_overlay;
         local_mono.information = draw_pointer(NUM_TERRAIN);
@@ -1218,8 +1223,8 @@ static void draw_brain(noble_simulation *local_sim)
                     if ((brainptr[BRAIN_OFFSET(loop)] ^ obrainptr[BRAIN_OFFSET(loop)]) >> 5)
                     {
                         n_int	scr_z = 256 + (act_x1 >> 11);
-                        n_int	s_x = ((act_x2 * scr_z) >> 16) + (TERRAIN_WINDOW_WIDTH/2);
-                        n_int	s_y = ((act_y1 * scr_z) >> 16) + (TERRAIN_WINDOW_HEIGHT/2)-120;
+                        n_int	s_x = ((act_x2 * scr_z) >> 16) + center_x;
+                        n_int	s_y = ((act_y1 * scr_z) >> 16) + center_y - 120;
                         (*local_draw_brain)(s_x, s_y, local_info_brain);
                         if (act_x1 > 0)
                         {
@@ -1467,7 +1472,6 @@ static void draw_errors(noble_simulation * local_sim)
             n_byte * local_array = error_array[loop++];
             draw_string(local_array, 40, (loop*12) + 62, &local_mono);
         }
-        check_about = 0;
     }
 }
 
@@ -1476,25 +1480,41 @@ static void draw_line_braincode(n_byte * pointer, n_int line)
     n_join	local_mono;
     local_mono.pixel_draw  = &pixel_grey;
     local_mono.information = draw_pointer(NUM_TERRAIN);
-    draw_string(pointer, 4, (line*12) + 246, &local_mono);
+    draw_string(pointer, 4 + (terrain_dim_x/2) - 256, (line*12) + 246 + (terrain_dim_y/2) - 256, &local_mono);
 }
 
-void  draw_cycle(noble_simulation * local_sim, n_byte window)
+void  draw_terrain_coord(n_int * co_x, n_int * co_y)
 {
+    *co_x = terrain_dim_x;
+    *co_y = terrain_dim_y;
+}
+
+void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
+{
+    noble_simulation * local_sim = sim_sim();
+
+    if (window == NUM_TERRAIN)
+    {
+        terrain_dim_x = dim_x;
+        terrain_dim_y = dim_y;
+    }
+    
     if (check_about) return;
+        
 #ifdef THREADED
-    sim_draw_thread_start(mod);
+    sim_draw_thread_start();
 #endif
+        
     draw_apes(local_sim, window);    // 8
 
-    if (window == 0)
+    if (window == NUM_TERRAIN)
     {
-        draw_terrain(local_sim);
+        draw_terrain(local_sim,dim_x, dim_y);
         draw_meters(local_sim);
         draw_errors(local_sim); // 12
         if (toggle_brain)
         {
-            draw_brain(local_sim);
+            draw_brain(local_sim,dim_x, dim_y);
         }
         if (toggle_braincode)
         {
@@ -1503,16 +1523,16 @@ void  draw_cycle(noble_simulation * local_sim, n_byte window)
     }
     else
     {
+        
 #ifdef WEATHER_ON
         if (toggle_weather)
         {
            draw_weather(local_sim); // 10 
         }
 #endif
-        /* draw_body(local_sim); */
     }
 #ifdef THREADED
-    sim_draw_thread_end(mod);
+    sim_draw_thread_end();
 #endif
 }
 

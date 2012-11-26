@@ -732,46 +732,46 @@ enum EPISODIC_EVENTS
 {
     EVENT_EAT = 1,
     EVENT_MATE,
-    EVENT_FIGHT_WIN,
-    EVENT_FIGHT_LOSE,
+    EVENT_HIT,
+    EVENT_HIT_BY,
     EVENT_SWIM,
     EVENT_GROOM,
     EVENT_GROOMED,
     EVENT_CHAT,
     EVENT_SHOUT,
     EVENT_BIRTH,
-    EVENT_CARRYING,
     EVENT_CARRIED,
-    EVENT_SUCKLING,
-    EVENT_SUCKLE,
+    EVENT_CARRIED_BY,
+    EVENT_SUCKLED,
+    EVENT_SUCKLED_BY,
     EVENT_SEEK_MATE,
-    EVENT_WHACK,
     EVENT_WHACKED,
-    EVENT_HURL,
+    EVENT_WHACKED_BY,
     EVENT_HURLED,
-    EVENT_HUG,
+    EVENT_HURLED_BY,
     EVENT_HUGGED,
-    EVENT_PROD,
+    EVENT_HUGGED_BY,
     EVENT_PRODDED,
+    EVENT_PRODDED_BY,
     EVENT_DRAG,
     EVENT_BRANDISH,
     EVENT_DROP,
     EVENT_PICKUP,
-    EVENT_GIVE,
-    EVENT_RECEIVE,
+    EVENT_GIVEN,
+    EVENT_GIVEN_BY,
     EVENT_CHEW,
     EVENT_BASH_OBJECTS,
     EVENT_FISH,
-    EVENT_SMILE,
     EVENT_SMILED,
-    EVENT_GLOWER,
+    EVENT_SMILED_BY,
     EVENT_GLOWERED,
-    EVENT_PAT,
+    EVENT_GLOWERED_BY,
     EVENT_PATTED,
+    EVENT_PATTED_BY,
     EVENT_POINT,
     EVENT_POINTED,
-    EVENT_TICKLE,
     EVENT_TICKLED,
+    EVENT_TICKLED_BY,
     EVENTS
 };
 
@@ -1561,14 +1561,13 @@ n_int     file_bin_write(n_string name);
 
 noble_simulation * sim_sim(void);
 
+void sim_flood(void);
+
+void sim_healthy_carrier(void);
+
 void sim_realtime(n_uint time);
 
 void sim_set_select(n_uint number);
-
-void sim_brain(noble_simulation * local_sim);
-void sim_being(noble_simulation * local_sim);
-
-void sim_time(noble_simulation * local_sim);
 
 void sim_debug_csv(n_file * fil, n_byte initial);
 
@@ -1579,6 +1578,7 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval);
 void watch_ape(void * ptr, n_console_output output_function);
 
 n_int console_speak(void * ptr, n_string response, n_console_output output_function);
+n_int console_alphabet(void * ptr, n_string response, n_console_output output_function);
 
 n_int console_stop(void * ptr, n_string response, n_console_output output_function);
 n_int console_idea(void * ptr, n_string response, n_console_output output_function);
@@ -1605,11 +1605,19 @@ n_int console_reset(void * ptr, n_string response, n_console_output output_funct
 n_int console_top(void * ptr, n_string response, n_console_output output_function);
 n_int console_epic(void * ptr, n_string response, n_console_output output_function);
 n_int console_file(void * ptr, n_string response, n_console_output output_function);
+n_int console_event(void * ptr, n_string response, n_console_output output_function);
+
 
 n_int console_save(void * ptr, n_string response, n_console_output output_function);
 n_int console_open(void * ptr, n_string response, n_console_output output_function);
 n_int console_script(void * ptr, n_string response, n_console_output output_function);
 
+#ifndef	_WIN32
+
+n_int sim_thread_console_quit(void);
+void  sim_thread_console(void);
+
+#endif
 
 #ifndef SMALL_LAND
 
@@ -1619,8 +1627,8 @@ void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block);
 
 #ifdef THREADED
 void sim_draw_thread_on(void);
-void sim_draw_thread_start(n_byte mod);
-void sim_draw_thread_end(n_byte mod);
+void sim_draw_thread_start(void);
+void sim_draw_thread_end(void);
 #endif
 
 #ifdef BRAIN_HASH
@@ -1637,16 +1645,14 @@ const static noble_console_command control_commands[] =
 {
     {&io_help,               "help",           "[(command)]",          "Displays a list of all the commands"},
 #ifdef CONSOLE_ONLY
-#ifndef GUI_COMMAND_LINE_HYBRID
+#ifdef COMMAND_LINE_EXPLICIT
     {&console_reset,         "reset",          "",                     "Reset the simulation"},
     {&console_reset,         "clear"           "",                     ""},
 
     {&console_open,          "open",           "[file]",               "Load a simulation file"},
     {&console_open,          "load",           "",                     ""},
-#else
-    {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 #endif
-    {&console_script,        "script",         "[file]",               "Load an ApeScript sinulation file"},
+    {&console_script,        "script",         "[file]",               "Load an ApeScript simulation file"},
     {&console_save,          "save",           "[file]",               "Save a simulation file"},
 
     {&io_quit,               "quit",           "",                     "Quits the console"},
@@ -1665,14 +1671,18 @@ const static noble_console_command control_commands[] =
     {&cle_reset,             "reset",          "",                     "Reset the simulation"},
     {&cle_reset,             "clear"           "",                     ""},
 #endif
+    
+    {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 
     {&console_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
+    {&console_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Noble Ape alphabet"},
     {&console_file,          "file",           "[(component)]",        "Information on the file format"},
-    {&console_run,           "run",            "(days|time format)",   "Simulate for a given number of days"},
+    {&console_run,           "run",            "(time format)|forever","Simulate for a given number of days or forever"},
     {&console_step,          "step",           "",                     "Run for a single logging interval"},
     {&console_top,           "top",            "",                     "List the top apes"},
     {&console_epic,          "epic",           "",                     "List the most talked about apes"},
     {&console_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
+    {&console_event,         "event",          "on|off",               "Turn the episodic event logging on or off"},
     {&console_logging,       "logging",        "on|off",               "Turn logging of images and data on or off"},
     {&console_logging,       "log",            "",                     ""},
     {&console_simulation,    "simulation",     "",                     ""},

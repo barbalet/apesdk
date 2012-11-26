@@ -1,1 +1,1 @@
-emacs -nw pnglite.* ../../universe/*.c ../../universe/*.h *.c *.h ../../noble/*.c ../../entity/*.c ../../entity/*.h ../../noble/*.h ../../longterm.c ../../*.sh  ../../test/*.c ../../command/*.c ../../command/*.h Makefile
+emacs -nw edit.sh pnglite.* ../../universe/*.c ../../universe/*.h *.c *.h ../../noble/*.c ../../entity/*.c ../../entity/*.h ../../noble/*.h ../../longterm.c ../../*.sh  ../../test/*.c ../../command/*.c ../../command/*.h Makefile

@@ -39,6 +39,6 @@
 
 int main(int argc, char *argv[])
 {
-    (void)io_entry_execution(argc, argv);    
+    io_entry_execution(argc, argv);
     return NSApplicationMain(argc,  (const char **) argv);
 }

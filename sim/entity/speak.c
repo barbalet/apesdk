@@ -71,7 +71,7 @@ typedef	double	n_float;
  these can contain sounds or pauses
  */
 
-#define ACT_BITS      (14)
+#define ACT_BITS      (13)
 #define ACT_BUFFER    (1<<ACT_BITS)
 #define	MAX_BUFFER    (ACT_BUFFER*4)
 
@@ -80,7 +80,7 @@ static n_float timedomain[MAX_BUFFER];
 static n_float frequencyi[MAX_BUFFER];
 static n_float timedomaini[MAX_BUFFER];
 
-n_audio  output[MAX_BUFFER];;
+n_audio  output[MAX_BUFFER];
 
 n_uint	ReverseBits (n_uint index, n_uint power_sample)
 {
@@ -204,12 +204,13 @@ static n_uint speak_length(n_byte character)
         case 'i':
         case 'o':
             return 1;
-        case 's':
-        case 'm':
-        case '.':
-            return 2;
-        default:
+        case 'p':
+        case 'b':
+        case 'j':
+        case 't':
             return 0;
+        default:
+            return 2;
     }
 }
 
@@ -220,8 +221,11 @@ static n_uint speak_length_total(n_string paragraph)
     n_uint length = 0;
     do {
         character = paragraph[loop++];
-        length += 1 << speak_length(character);
-    } while (character != '\n');
+		if (character != '\n' && character != 0)
+		{
+			length += 1 << speak_length(character);
+		}
+    } while (character != '\n' && character != 0);
     return length;
 }
 
@@ -264,10 +268,10 @@ void speak_aiff_header(FILE *fptr, n_uint total_samples)
 	
 	/* Write the sound data chunk */
 	fprintf(fptr,"SSND");
-	fputc((2*total_samples+8 & 0xff000000) >> 24,fptr);/* Size      */
-	fputc((2*total_samples+8 & 0x00ff0000) >> 16,fptr);
-	fputc((2*total_samples+8 & 0x0000ff00) >> 8,fptr);
-	fputc((2*total_samples+8 & 0x000000ff),fptr);
+	fputc(((2*total_samples+8) & 0xff000000) >> 24,fptr);/* Size      */
+	fputc(((2*total_samples+8) & 0x00ff0000) >> 16,fptr);
+	fputc(((2*total_samples+8) & 0x0000ff00) >> 8,fptr);
+	fputc(((2*total_samples+8) & 0x000000ff),fptr);
 	fputc(0,fptr);                                /* Offset    */
 	fputc(0,fptr);
 	fputc(0,fptr);
@@ -284,6 +288,82 @@ static void speak_aiff_body(FILE * fptr, n_audio *samples, n_uint number_samples
     fwrite(samples,number_samples,2,fptr);
 }
 
+
+const static n_int set_frequencies[24] = {
+    175,178,180,183,
+    185,188,191,193,
+    196,199,202,205,
+    208,211,214,217,
+    220,223,227,229,
+    233,237,240,244
+};
+
+
+
+
+const static n_int vowel_reorder[8] = {
+    4, 7, 0, 2, 1, 6, 3, 5
+};
+
+const static n_int consonant_reorder[16] =
+{
+    6, 13, 3, 7,   0, 14, 1, 12,
+    9, 11, 2, 15,  4, 10, 5, 8
+};
+
+const static n_int low_freq[13]=
+{
+    60000, 45000, 30000, 55000,
+    30000, 40000, 35000, 60000,
+    40000, 20000, 65000, 40000,
+    30000
+};
+
+static void speak_freq(n_int * high, n_int * low, n_byte value)
+{
+    const n_string character_building = "aeiovfstpbjm";
+    n_int loop = 0;
+    do
+    {
+        if (value != character_building[loop])
+        {
+            loop++;
+        }
+    }
+    while ((loop<12) && (value != character_building[loop]));
+
+    if (loop < 12)
+    {
+        low[1] = low_freq[loop  ]; low[0] = 1;
+        low[3] = low_freq[loop+1]; low[2] = 2;
+
+        if (loop < 4) /* vowel */
+        {
+            high[0] = set_frequencies[vowel_reorder[loop]];     high[1] = 600000;
+            high[2] = set_frequencies[vowel_reorder[loop+1]];   high[3] = 300000;
+            high[4] = set_frequencies[vowel_reorder[loop+2]+2]; high[5] = 200000;
+            high[6] = set_frequencies[vowel_reorder[loop+4]+3]; high[7] =  50000;
+        }
+        else /*consonant */
+        {
+            high[0] = set_frequencies[consonant_reorder[loop-4]];   high[1] = 600000;
+            high[2] = set_frequencies[consonant_reorder[loop-2]+3]; high[3] = 400000;
+            high[4] = set_frequencies[consonant_reorder[loop+1]+8]; high[5] = 100000;
+            high[6] = set_frequencies[consonant_reorder[loop+3]+8]; high[7] =  50000;
+        }
+    }
+    else
+    {
+        low[0] = 0;  low[1] = 0;
+        low[2] = 0;  low[3] = 0;
+        high[0] = 0; high[1] = 0;
+        high[2] = 0; high[3] = 0;
+        high[4] = 0; high[5] = 0;
+        high[6] = 0; high[7] = 0;
+    }
+    
+}
+
 static void speak_make(n_string filename, n_string paragraph)
 {
     FILE     *out_file = 0L;
@@ -291,6 +371,13 @@ static void speak_make(n_string filename, n_string paragraph)
     n_uint   total_length = ACT_BUFFER * speak_length_total(paragraph);
     n_int    loop        = 0;
     n_byte    found_character;
+    
+    if (total_length < 1)
+    {
+        (void)SHOW_ERROR("Speaking length is less than one");
+        return;
+    }
+    
     out_file = fopen(filename,"w");
     
     if (out_file == 0L)
@@ -315,62 +402,70 @@ static void speak_make(n_string filename, n_string paragraph)
             loop++;
         }
 
-        if (found_character !=' ' && found_character != '.')
-        {
-            frequency[400/division] = 200000/division;
-            frequency[600/division] = 800000/division;
-            frequency[900/division] = 800000/division;
-            frequency[700/division] = 800000/division;
-            frequency[450/division] = 200000/division;
-            frequency[460/division] = 900000/division;
-            frequency[490/division] = 900000/division;
+		if (found_character != '\n' && found_character != 0)
+		{
+		
+			if (found_character !=' ' && found_character != '.')
+			{
+				n_int local_high[8], local_low[4];
+				
+				
+				speak_freq(local_high, local_low,found_character);
 
-            
-            fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
-            
-            loop = 0;
-            while (loop < length)
-            {
-                output[loop] = timedomain[loop];
-                loop++;
-            }
+				
+				
+				frequency[local_high[0]/division] = local_high[1]/division;
+				frequency[local_high[2]/division] = local_high[3]/division;
+				
+				frequency[local_high[4]/division] = local_high[5]/division;
 
-            loop = 0;
-            while (loop < length)
-            {
-                frequency[loop] = 0;
-                timedomain[loop] = 0;
-                frequencyi[loop] = 0;
-                timedomaini[loop] = 0;
-                loop++;
-            }
+				frequency[local_high[6]/division] = local_high[7]/division;
 
-            frequency[0] = 30000/division;
-            frequency[1] = 30000/division;
-            frequency[2] = 30000/division;
-            frequency[3] = 30000/division;
+				
+				fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
+				
+				loop = 0;
+				while (loop < length)
+				{
+					output[loop] = timedomain[loop];
+					loop++;
+				}
 
-            fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
+				loop = 0;
+				while (loop < length)
+				{
+					frequency[loop] = 0;
+					timedomain[loop] = 0;
+					frequencyi[loop] = 0;
+					timedomaini[loop] = 0;
+					loop++;
+				}
 
-            loop = 0;
-            while (loop < length)
-            {
-                output[loop] *= timedomain[loop];
-                loop++;
-            }
-        }
-        else
-        {
-            loop = 0;
-            while (loop < length)
-            {
-                output[loop] = 0;
-                loop++;
-            }
-        }
-        speak_aiff_body(out_file, output, length);
+				frequency[local_low[0]] = local_low[1]/division;
+				frequency[local_low[2]] = local_low[3]/division;
 
-    }while (found_character != '\n');
+
+				fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
+
+				loop = 0;
+				while (loop < length)
+				{
+					output[loop] *= timedomain[loop];
+					loop++;
+				}
+			}
+			else
+			{
+				loop = 0;
+				while (loop < length)
+				{
+					output[loop] = 0;
+					loop++;
+				}
+			}
+			speak_aiff_body(out_file, output, length);
+		}
+    } while (found_character != '\n' && found_character != 0);
     
 
     fclose(out_file);

@@ -38,21 +38,13 @@
 #ifndef _NOBLEAPE_GUI_H_
 #define _NOBLEAPE_GUI_H_
 
-#define	OFFSCREENSIZE				(MAP_AREA + TERRAIN_WINDOW_AREA + (NWIND_GRAPH_X * NWIND_GRAPH_Y))
-
-#define NWIND_GRAPH_X               256
-#define NWIND_GRAPH_Y               376
-
-
-#define TERRAIN_WINDOW_AREA			(TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
+#define	OFFSCREENSIZE				(MAP_AREA + TERRAIN_WINDOW_AREA)
 
 #define	TERRAINWINDOW(alpha)   (alpha)
 #define	VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA)
-#define GRAPHWINDOW(alpha)     (alpha + TERRAIN_WINDOW_AREA + MAP_AREA)
 
 #define	NUM_TERRAIN           (0)
 #define	NUM_VIEW			  (1)
-#define NUM_GRAPH             (2)
 
 #define IS_WINDOW_KIND(x,y)			(((x)>>(y))&1)
 
@@ -90,14 +82,6 @@ typedef struct
 n_color8;
 
 
-#ifndef	_WIN32
-
-n_int control_gui_console_quit(void);
-static void *control_thread(void *threadid);
-void control_thread_console(void); /* should be internal */
-
-#endif
-
 typedef n_int (*control_file_handle)(n_byte * buff, n_uint len);
 
 typedef void  (*control_mp_define)(n_byte * data);
@@ -119,12 +103,9 @@ void control_simulate(n_uint local_time);
 void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option);
 void control_key(n_byte wwind, n_byte2 num);
 
-void control_sim_mouse(noble_simulation * local_sim, n_byte wwind, n_int px, n_int py, n_byte option);
-void control_sim_key(noble_simulation * local_sim, n_byte wwind, n_byte2 num);
-
 void control_sim_simulate(n_uint local_time);
 
-void control_sim_draw(noble_simulation * local_sim, n_byte local_weather);
+void  draw_terrain_coord(n_int * co_x, n_int * co_y);
 
 n_byte * control_window(n_byte * initial, n_byte * type, n_int * location, n_byte num);
 
@@ -147,7 +128,7 @@ void draw_about(n_string platform);
 
 void draw_string(n_byte * str, n_int off_x, n_int off_y, n_join * draw);
 
-void  draw_cycle(noble_simulation * local_sim, n_byte mod);
+void  draw_cycle(n_byte mod, n_int dim_x, n_int dim_y);
 
 n_byte * draw_offscreen(n_byte * value);
 

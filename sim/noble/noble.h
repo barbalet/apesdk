@@ -317,27 +317,10 @@ const static n_int	new_sd[256] =
 #define VECT_X(f)         	(OLD_SD_NEW_SD(((f)) + 64))
 #define VECT_Y(f)         	(OLD_SD_NEW_SD((f)))
 
-#define TERRAIN_WINDOW_512x512 /* added for RC 694 */
+#define	TERRAIN_WINDOW_WIDTH			(2048)
+#define	TERRAIN_WINDOW_HEIGHT			(1536)
 
-#ifdef TERRAIN_WINDOW_512x512
-
-#define	TERRAIN_WINDOW_WIDTH_BITS		(9)
-
-#define	TERRAIN_WINDOW_WIDTH			(1<<TERRAIN_WINDOW_WIDTH_BITS)
-#define	TERRAIN_WINDOW_HEIGHT			(512)
-
-#else
-
-#define	TERRAIN_WINDOW_WIDTH_BITS		(10)
-
-#define	TERRAIN_WINDOW_WIDTH			(1<<TERRAIN_WINDOW_WIDTH_BITS)
-#define	TERRAIN_WINDOW_HEIGHT			(768)
-
-
-#endif
-
-#define	BOTTOM_CHECK				((720*TERRAIN_WINDOW_HEIGHT)/256)
-
+#define TERRAIN_WINDOW_AREA			(TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
 
 typedef enum
 {
@@ -489,7 +472,10 @@ void    math_patch(n_byte * local_map, n_byte * scratch,
                    n_byte refined_start, n_byte refined_end,
                    n_byte rotate);
 
-n_byte     io_entry_execution(n_int argc, n_string * argv);
+void       io_entry_execution(n_int argc, n_string * argv);
+void       io_command_line_execution_set(void);
+n_int      io_command_line_execution(void);
+
 void       io_lower(n_string value, n_int length);
 void       io_whitespace(n_file * input);
 void       io_audit_file(const noble_file_entry * format, n_byte section_to_audit);
@@ -547,7 +533,6 @@ n_int          file_chain_read_validate(n_string name, n_file_chain *initial);
 
 void           file_chain_bin_name(n_string original, n_string bin_file);
 
-n_int      io_command_line_execution(void);
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);
 n_string   io_console_entry_clean(n_string string, n_int length);
@@ -561,7 +546,8 @@ n_int      io_disk_append(n_file * local_file, n_string file_name);
 n_int      io_disk_check(n_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
 
-
+void       io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count);
+void       io_time_to_string(n_string value, n_int minutes, n_int days, n_int centuries);
 n_byte     io_read(n_file * fil);
 n_int      io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char);
 n_int      io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line);
@@ -689,11 +675,11 @@ void  weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, 
 n_int weather_pressure(n_weather * wea, n_int px, n_int py);
 n_int weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int py);
 void  weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
-void  weather_cycle(n_weather * local_weather);
+void weather_cycle(n_land * local_land, n_weather * local_weather);
 n_int weather_seven_values(n_land * local_land, n_weather * local_weather, n_int px, n_int py);
 
-void  land_init(n_land * local, n_byte * scratch, n_byte2 start);
-void  land_clear(n_land * local, KIND_OF_USE kind);
+void  land_init(n_land * local, n_byte * scratch);
+void  land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start);
 void  land_cycle(n_land * local_land);
 void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);
 n_int land_operator_interpolated(n_land * local_land, n_weather * local_weather, n_int locx, n_int locy, n_byte * kind);

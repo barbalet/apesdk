@@ -110,7 +110,7 @@
 - (void) animationTimer:(NSTimer *)localTimer
 {
 #ifndef NEW_OPENGL_ENVIRONMENT
-    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
+    shared_cycle_really_no_draw(CFAbsoluteTimeGetCurrent (), fIdentification);
 #else
     shared_cycle_no_draw(CFAbsoluteTimeGetCurrent (), fIdentification);
 #endif
@@ -122,7 +122,7 @@
     
 	[self drawRect:[self bounds]]; // redraw now instead dirty to enable updates during live resize
     
-    if (control_gui_console_quit())
+    if (sim_thread_console_quit())
     {
         [self quitProcedure];
     }
@@ -137,10 +137,8 @@ n_int   count_switch = 0;
     if (polygonal_entry(fIdentification))
 #endif
     {
-        int             dimensionX = 512;
-        int             dimensionY = 512;
-        int             dimension1 = 511;
-        int             dimensionBin = 9;
+        int             dimensionX = rect.size.width;
+        int             dimensionY = rect.size.height;
         int             ly = 0;
         int             loop = 0;
         int				loopColors = 0;
@@ -148,26 +146,14 @@ n_int   count_switch = 0;
         unsigned char   * index = shared_draw(fIdentification);
 
         if (index == 0L) return;
-
-        shared_timeForColor(fit, fIdentification);
-
-        if ([self bounds].size.height == 768)
-        {
-            dimensionX = 1024;
-            dimensionY = 768;
-            dimension1 = 767;
-            
-            dimensionBin = 10;
-        }
         
-        if ([self bounds].size.height == 376)
-        {
-            dimensionX = 256;
-            dimensionY = 376;
-            dimension1 = 375;
-
-            dimensionBin = 8;
-        }
+        
+//        dimensionX = dimensionX - (dimensionX&3);
+//        dimensionY = dimensionY - (dimensionY&3);
+        
+        shared_cycle_really_draw(fIdentification, dimensionX, dimensionY);
+        
+        shared_timeForColor(fit, fIdentification);
 
         while(loopColors < 256)
         {
@@ -180,7 +166,7 @@ n_int   count_switch = 0;
         while(ly < dimensionY)
         {
             int lx = 0;
-            unsigned char * indexLocalX = &index[((dimension1-ly)<<dimensionBin)];
+            unsigned char * indexLocalX = &index[(dimensionY-ly-1)*dimensionX];
             while(lx < dimensionX)
             {
                 unsigned char value = indexLocalX[lx++] ;
@@ -238,7 +224,15 @@ n_int   count_switch = 0;
 
 - (void) awakeFromNib
 {
-	fIdentification = shared_init([self bounds].size.height, CFAbsoluteTimeGetCurrent());
+    NSSize increments;
+    increments.height = 4;
+    increments.width = 4;
+    
+	fIdentification = shared_init([[[self window] title] isEqualToString:@"View"], CFAbsoluteTimeGetCurrent());
+        
+    [[self window] setContentResizeIncrements:increments];
+    
+    [[self window] orderFrontRegardless];
     
     // start animation timer
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
@@ -306,6 +300,16 @@ n_int   count_switch = 0;
 -(IBAction) menuControlJustDesire:(id) sender
 {
     shared_brainDisplay(2);
+}
+
+-(IBAction) menuControlFlood:(id) sender
+{
+    shared_flood();
+}
+
+-(IBAction) menuControlHealthyCarrier:(id) sender
+{
+    shared_healthy_carrier();
 }
 
 -(IBAction) menuQuit:(id) sender

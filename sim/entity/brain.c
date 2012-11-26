@@ -428,7 +428,7 @@ void brain_sentence(n_string string, n_byte * response)
     n_string_block      first_word, second_word;
     
     brain_longword(first_word, value0);
-    brain_longword(second_word, value0);
+    brain_longword(second_word, value1);
     
     switch(format)
     {
@@ -859,9 +859,9 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 8:
         return GET_FAMILY_SECOND_NAME(sim,met_being);
     case 9:
-        return meeter_being->facing;
+        return GET_F(meeter_being);
     case 10:
-        return met_being->facing;
+        return GET_F(met_being);
     case 11:
         return meeter_being->speed;
     case 12:

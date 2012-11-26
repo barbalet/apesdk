@@ -42,7 +42,12 @@ void shared_cycle(n_uint ticks, n_int fIdentification);
 
 void shared_cycle_no_draw(n_uint ticks, n_int fIdentification);
 
-n_int shared_init(n_int localHeight, n_uint random);
+void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification);
+
+void shared_cycle_really_draw(n_int fIdentification, n_int dim_x, n_int dim_y);
+
+
+n_int shared_init(n_byte view, n_uint random);
 
 void shared_close(void);
 
@@ -51,6 +56,9 @@ void shared_notPause(void);
 void shared_notWeather(void);
 void shared_notBrain(void);
 void shared_notBrainCode(void);
+
+void shared_flood(void);
+void shared_healthy_carrier(void);
 
 void shared_keyReceived(n_byte2 value, n_byte fIdentification);
 
@@ -90,9 +98,7 @@ void shared_script_debug_handle(n_string cStringFileName);
 
 #ifndef	_WIN32
 
-n_int control_gui_console_quit(void);
-
-void control_thread_console(void);
+n_int sim_thread_console_quit(void);
 
 #endif
 

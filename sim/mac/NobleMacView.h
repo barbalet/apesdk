@@ -44,7 +44,7 @@
 {
     NSTimer*       timerAnimation;
     GLubyte        colorTable[256][3];
-    GLubyte        outputBuffer[1024*768*3];
+    GLubyte        outputBuffer[2048*1536*3];
     
     n_int          fIdentification;
 }
@@ -80,6 +80,9 @@
 -(IBAction) menuControlNormalBrain:(id) sender;
 -(IBAction) menuControlJustFear:(id) sender;
 -(IBAction) menuControlJustDesire:(id) sender;
+
+-(IBAction) menuControlFlood:(id) sender;
+-(IBAction) menuControlHealthyCarrier:(id) sender;
 
 -(IBAction) menuFileNew:(id) sender;
 -(IBAction) menuFileOpen:(id) sender;

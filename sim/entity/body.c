@@ -60,8 +60,8 @@ static void body_action_give(noble_simulation * sim, noble_being * local, noble_
         GET_A(local,ATTENTION_BODY) = BODY_RIGHT_HAND;
         GET_A(other,ATTENTION_BODY) = BODY_RIGHT_HAND;
         
-        episodic_interaction(sim, local, other, EVENT_GIVE, EPISODIC_AFFECT_ZERO, carrying);
-        episodic_interaction(sim, other, local, EVENT_RECEIVE, AFFECT_RECEIVE, carrying);
+        episodic_interaction(sim, local, other, EVENT_GIVEN, EPISODIC_AFFECT_ZERO, carrying);
+        episodic_interaction(sim, other, local, EVENT_GIVEN_BY, AFFECT_RECEIVE, carrying);
         
         OBJECTS_DROP(local,hand);
         if (OBJECTS_CARRIED(other,BODY_RIGHT_HAND)==0)
@@ -116,16 +116,16 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
         {
             if (hit!=0)
             {
-                episodic_interaction(sim, local, other, EVENT_WHACK, EPISODIC_AFFECT_ZERO, 0);
-                episodic_interaction(sim, other, local, EVENT_WHACKED, AFFECT_WHACKED, 0);
+                episodic_interaction(sim, local, other, EVENT_WHACKED, EPISODIC_AFFECT_ZERO, 0);
+                episodic_interaction(sim, other, local, EVENT_WHACKED_BY, AFFECT_WHACKED, 0);
             }
         }
         if (carrying & INVENTORY_ROCK)
         {
-            episodic_interaction(sim, local, other, EVENT_HURL, EPISODIC_AFFECT_ZERO, 0);
+            episodic_interaction(sim, local, other, EVENT_HURLED, EPISODIC_AFFECT_ZERO, 0);
             if (hit!=0)
             {
-                episodic_interaction(sim, other, local, EVENT_HURLED, AFFECT_HURL, 0);
+                episodic_interaction(sim, other, local, EVENT_HURLED_BY, AFFECT_HURL, 0);
             }
         }
     }
@@ -476,28 +476,28 @@ void social_action(
         {
         case ACTION_PROD:
             body_action_interactive_change(sim, local, other, BODY_RIGHT_HAND, BODY_FRONT,
-                                           EVENT_PROD, 0, AFFECT_PRODDED);
+                                           EVENT_PRODDED, 0, AFFECT_PRODDED);
             break;
         case ACTION_HUG:
             body_action_interactive_change(sim, local, other, BODY_FRONT, BODY_FRONT,
-                                           EVENT_HUG, 1, AFFECT_HUGGED);
+                                           EVENT_HUGGED, 1, AFFECT_HUGGED);
             break;
         case ACTION_SMILE:
             body_action_interactive_change(sim, local, other, BODY_TEETH, BODY_TEETH,
-                                           EVENT_SMILE, 1, AFFECT_SMILED);
+                                           EVENT_SMILED, 1, AFFECT_SMILED);
             break;
         case ACTION_GLOWER:
             body_action_interactive_change(sim, local, other, BODY_HEAD, BODY_HEAD,
-                                           EVENT_GLOWER, 0, AFFECT_GLOWER);
+                                           EVENT_GLOWERED, 0, AFFECT_GLOWER);
             break;
         case ACTION_TICKLE:
-            body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_FRONT, EVENT_TICKLE);
+            body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_FRONT, EVENT_TICKLED);
             break;
         case ACTION_POINT:
             body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_RIGHT_HAND, EVENT_POINT);
             break;
         case ACTION_PAT:
-            body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_BACK, EVENT_PAT);
+            body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_BACK, EVENT_PATTED);
             break;
         case ACTION_BASH:
             body_action_bash(sim, local, other, carrying);

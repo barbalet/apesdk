@@ -1,5 +1,5 @@
 #!/bin/bash
-#	fedora.sh
+#	linux_gui.sh
 #
 #	=============================================================
 #
@@ -46,12 +46,34 @@ then
 else  
 	CFLAGS=-O2  
 fi  
+
+OS=$(awk '/DISTRIB_ID=/' /etc/*-release | sed 's/DISTRIB_ID=//' | tr '[:upper:]' '[:lower:]')
+if [ -z "$OS" ]; then    
+    OS=$(awk '/ID=/' /etc/*-release | sed 's/ID=//' | tr '[:upper:]' '[:lower:]')
+    set -- $OS
+    OS=$1
+fi
+VERSION=$(awk '/DISTRIB_RELEASE=/' /etc/*-release | sed 's/DISTRIB_RELEASE=//' | sed 's/[.]0/./')
+if [ -z "$VERSION" ]; then
+    VERSION=$(awk '/VERSION_ID=/' /etc/*-release | sed 's/VERSION_ID=//' | sed 's/[.]0/./')
+fi
+# Convert floating point version into an integer
+INT_VERSION=`echo $VERSION '*100' | bc -l | awk -F '.' '{ print $1; exit; }'`
+
+
+if [[ $OS == "fedora" || $OS == "redhat" || $OS == "centos" ]]; then
  
-INCLUDES="-I/usr/include/openmotif -I/usr/include/gtk-2.0 -I/usr/${LIB}/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -I/usr/include"  
+	INCLUDES="-I/usr/include/openmotif -I/usr/include/gtk-2.0 -I/usr/${LIB}/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -I/usr/include"  
  
-LIBS="-L/usr/${LIB}/openmotif -L/usr/${LIB}/gdm -L/usr/${LIB} -L/usr/${LIB}/glib-2.0 -L/usr/${LIB}/gdk-pixbuf-2.0 -L/usr/${LIB}/gtk-2.0 -lXm -lXt -lX11 -lm"  
- 
-LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0`-lm"
+	LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0`-lm"
+
+elif [[ $OS == "ubuntu" || $OS == "debian" || $OS == "solusos" ]]; then
+
+	INCLUDES="-I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/lib/glib-2.0/include -I/usr/include/glib-2.0 -I/usr/include"
+
+	LIBS2="`pkg-config --cflags gtk+-2.0` `pkg-config --libs gtk+-2.0` -lm"
+
+fi
 
 ./linux.sh --additional
 
@@ -59,10 +81,10 @@ gcc ${CFLAGS} ${INCLUDES} -c $SOURCEDIR/gtk/platform.c -o platform.o ${LIBS2}
 
 gcc ${CFLAGS} ${INCLUDES} -o $SOURCEDIR/../na io.o math.o parse.o interpret.o being.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o genealogy.o body.o draw.o control.o platform.o console.o speak.o ${LIBS2}
 
-gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/cle.c -o cleweb.o
-gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/web.c -o web.o
-gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
+#gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/cle.c -o cleweb.o
+#gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/web.c -o web.o
+#gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
 
-gcc -Wall -ansi -pedantic -O3 -o ../naweb cleweb.o pnglite.o -lz sim.o file.o genealogy.o body.o being.o metabolism.o brain.o console.o land.o social.o episodic.o food.o drives.o math.o io.o parse.o interpret.o graph.o web.o speak.o -lm
+#gcc -Wall -ansi -pedantic -O3 -o ../naweb cleweb.o pnglite.o -lz sim.o file.o genealogy.o body.o being.o metabolism.o brain.o console.o land.o social.o episodic.o food.o drives.o math.o io.o parse.o interpret.o graph.o web.o speak.o -lm -lpthread
 
 rm *.o 

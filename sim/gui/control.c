@@ -35,11 +35,6 @@
 
 /*NOBLEMAKE DEL=""*/
 
-
-#define CONSOLE_REQUIRED
-#define GUI_COMMAND_LINE_HYBRID
-#define CONSOLE_ONLY
-
 #ifndef	_WIN32
 
 #include "../noble/noble.h"
@@ -88,52 +83,6 @@ offsets are wrong. This is a basic check! Run CLE and find out more!
 
 #endif
 
-#ifndef	_WIN32
-
-#include <pthread.h>
-
-static n_int gui_console_quit = 0;
-
-n_int control_gui_console_quit(void)
-{
-    return gui_console_quit;
-}
-
-static void control_activate_console(void)
-{
-    if (io_console(sim_sim(), (noble_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
-    {
-        gui_console_quit = 1;
-    }
-}
-
-n_int control_command_entry = 0;
-
-static void *control_thread(void *threadid)
-{
-    control_command_entry++;
-    control_activate_console();
-    control_command_entry--;
-    pthread_exit(NULL);
-}
-
-void control_thread_console(void)
-{
-    pthread_t console;
-    
-    if (io_command_line_execution() == 0)
-    {
-        return;
-    }
-    
-    if (control_command_entry < 3)
-    {
-        (void)pthread_create(&console,0L, control_thread, 0L);
-    }
-}
-
-#endif
-
 static n_int toggle_pause = 0;
 
 void control_about(n_string value)
@@ -157,8 +106,7 @@ n_byte control_cursor(n_byte wwind, n_int px, n_int py, n_byte option, n_byte no
     n_int upper_x, upper_y;
     if(wwind == (NUM_TERRAIN))
     {
-        upper_x = TERRAIN_WINDOW_WIDTH;
-        upper_y = TERRAIN_WINDOW_HEIGHT;
+        draw_terrain_coord(&upper_x, &upper_y);
     }
     else
     {
@@ -215,14 +163,14 @@ n_byte control_cursor(n_byte wwind, n_int px, n_int py, n_byte option, n_byte no
 extern n_byte	check_about;
 extern n_uint	tilt_z;
 
-void control_sim_mouse(noble_simulation * local_sim, n_byte wwind, n_int px, n_int py, n_byte option)
+void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
 {
     noble_being	*local;
-
+    noble_simulation * local_sim = sim_sim();
     if (local_sim == 0L)
         return;
-
-    if(wwind == NUM_TERRAIN && check_about == 1)
+    
+    if(wwind == NUM_VIEW && check_about == 1)
     {
         check_about = 0;
         return;
@@ -296,9 +244,10 @@ void control_sim_mouse(noble_simulation * local_sim, n_byte wwind, n_int px, n_i
 
 /* do key down in which window */
 
-void control_sim_key(noble_simulation * local_sim, n_byte wwind, n_byte2 num)
+void control_key(n_byte wwind, n_byte2 num)
 {
     noble_being * local;
+    noble_simulation * local_sim = sim_sim();
     if (local_sim == 0L)
         return;
 
@@ -356,37 +305,16 @@ void control_sim_simulate(n_uint local_time)
     }
 }
 
-void control_sim_draw(noble_simulation * local_sim, n_byte window)
-{
-    draw_cycle(local_sim, window);
-}
-
-
 void control_simulate(n_uint local_time)
 {
-    noble_simulation *sim = sim_sim();
-
     if (io_command_line_execution() == 0)
     {
         control_sim_simulate(local_time);
     }
 
-    control_sim_draw(sim, 0);
-    control_sim_draw(sim, 1);
+    draw_cycle(0, 512, 511);
+    draw_cycle(1, 512, 512);
 }
-
-void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
-{
-    noble_simulation *sim = sim_sim();
-    control_sim_mouse(sim, wwind, px, py, option);
-}
-
-void control_key(n_byte wwind, n_byte2 num)
-{
-    noble_simulation *sim = sim_sim();
-    control_sim_key(sim, wwind, num);
-}
-
 
 void * control_init(KIND_OF_USE kind, n_uint randomise)
 {

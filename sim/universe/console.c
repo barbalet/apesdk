@@ -56,6 +56,9 @@
 
 /*NOBLEMAKE END=""*/
 
+static n_int simulation_running = 1;
+static n_int simulation_executing = 0;
+
 const n_string RUN_STEP_CONST = "RSC";
 
 /** The type of watch */
@@ -83,14 +86,6 @@ void console_external_watch(void)
         n_string_block output;
         sprintf(output,"External Action -> Watching %s\n", being_get_select_name(sim_sim()));
         io_console_out(output);
-    }
-}
-
-static void console_warning(void)
-{
-    if (io_command_line_execution())
-    {
-        io_console_out(" *********************************************\n  Graphical output currently unreliable\n    Please use File menu instead\n *********************************************\n");
     }
 }
 
@@ -297,7 +292,7 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval)
 n_int console_simulation(void * ptr, n_string response, n_console_output output_function)
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
-    n_string_block beingstr;
+    n_string_block beingstr, time;
     n_int i,count=0,juveniles=0;
     n_uint current_date = TIME_IN_DAYS(local_sim->land->date);
 
@@ -326,9 +321,20 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
                 (int)(local_sim->num - count),(local_sim->num - count)*100.0f/local_sim->num);
     }
     sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)local_sim->land->tide_level);
-    sprintf(beingstr,"%sYear: %u   Day: %u   ", beingstr, (unsigned int)current_date/365,(unsigned int)current_date%365);
-    sprintf(beingstr,"%sTime: %02d:%02d", beingstr, (int)local_sim->land->time/60,(int)local_sim->land->time%60);
+    
+    io_time_to_string(time, local_sim->land->time, local_sim->land->date[0], local_sim->land->date[1]);
 
+    sprintf(beingstr,"%s%s", beingstr, time);
+
+    if (simulation_executing)
+    {
+        sprintf(beingstr,"%s Simulation running", beingstr);
+    }
+    else
+    {
+        sprintf(beingstr,"%s Simulation not running", beingstr);
+    }
+    
     output_function(beingstr);
 
     return 0;
@@ -876,21 +882,23 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
 
 void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
 {
-    n_int loop = 0;
+    n_int loop;
     n_byte * external_bc = GET_BRAINCODE_EXTERNAL((noble_simulation*)ptr, local);
-    while (loop < 43)
+	for (loop = 0; loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION; loop++)
     {
         n_string_block sentence;
         
         brain_sentence((n_string)sentence, &external_bc[loop*3]);
         
         io_string_write(result, sentence, &watch_string_length);
-        result[watch_string_length++]=' ';        
         if ((loop &3) == 3)
         {
             result[watch_string_length++]='.';
         }
-        loop++;
+		if (loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION-1)
+		{
+			result[watch_string_length++]=' ';
+		}
     }
     result[watch_string_length++]='.';
     result[watch_string_length++]='\n';
@@ -1452,6 +1460,47 @@ static void watch_being(void * ptr, n_console_output output_function)
     being_remove_external = 0;
 }
 
+static n_int console_on_off(n_string response)
+{
+    n_uint length;
+    
+    if (response == 0) return -1;
+    
+    length = io_length(response,STRING_BLOCK_SIZE);
+    if ((io_find(response,0,length,"off",3)>-1) ||
+        (io_find(response,0,length,"0",1)>-1) ||
+        (io_find(response,0,length,"false",5)>-1) ||
+        (io_find(response,0,length,"no",2)>-1))
+    {
+        return 0;
+    }
+    return 1;
+}
+
+n_int console_event(void * ptr, n_string response, n_console_output output_function)
+{
+    n_int return_response = console_on_off(response);
+
+    if (return_response == -1)
+    {
+        return 0;
+    }
+    
+    if (return_response == 0)
+    {
+        episodic_logging(0L);
+        output_function("Event output turned off");
+    }
+    else
+    {
+        episodic_logging(output_function);
+        output_function("Event output turned on");
+    }
+
+    return 0;
+}
+
+
 /**
  * Enable or disable logging
  * @param ptr pointer to noble_simulation object
@@ -1461,15 +1510,13 @@ static void watch_being(void * ptr, n_console_output output_function)
  */
 n_int console_logging(void * ptr, n_string response, n_console_output output_function)
 {
-    n_uint length;
-
-    if (response == 0) return 0;
-
-    length = io_length(response,STRING_BLOCK_SIZE);
-    if ((io_find(response,0,length,"off",3)>-1) ||
-            (io_find(response,0,length,"0",1)>-1) ||
-            (io_find(response,0,length,"false",5)>-1) ||
-            (io_find(response,0,length,"no",2)>-1))
+    n_int return_response = console_on_off(response);
+    
+    if (return_response == -1)
+    {
+        return 0;
+    }
+    if (return_response == 0)
     {
         nolog = 1;
         indicator_index = 0;
@@ -1537,9 +1584,14 @@ static n_int console_compare_brain(n_byte * braincode0, n_byte * braincode1, n_i
 n_int console_idea(void * ptr, n_string response, n_console_output output_function)
 {
 #ifdef BRAINCODE_ON
+#ifndef CONSOLE_IDEA_MIN_BLOCK_SIZE
+#define CONSOLE_IDEA_MIN_BLOCK_SIZE 3
+#define CONSOLE_IDEA_MAX_BLOCK_SIZE 8
+#endif
 	const n_int min_block_size = 3;
 	const n_int max_block_size = 8;
-	n_uint i, total_matches=0, total_tests=0, histogram[max_block_size - min_block_size + 1];
+	n_uint i, total_matches=0, total_tests=0;
+	n_uint histogram[CONSOLE_IDEA_MIN_BLOCK_SIZE - CONSOLE_IDEA_MIN_BLOCK_SIZE + 1];
     noble_simulation * local_sim = (noble_simulation *) ptr;
 
 	/* clear the histogram */
@@ -1819,9 +1871,6 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
     return 0;
 }
 
-static n_int simulation_running = 1;
-static n_int simulation_executing = 0;
-
 n_int console_stop(void * ptr, n_string response, n_console_output output_function)
 {
     simulation_running = 0;
@@ -1874,7 +1923,7 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
         loop++;
     }
     
-    if (output_function)
+    if (response != RUN_STEP_CONST)
     {
         simulation_executing = 0;
     }
@@ -1891,8 +1940,9 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
  */
 n_int console_run(void * ptr, n_string response, n_console_output output_function)
 {
-    n_uint run=0;
-    n_int  number=0, interval=INTERVAL_DAYS;
+    n_uint run = 0;
+    n_int  number = 0, interval = INTERVAL_DAYS;
+    n_int  forever = 0;
 
     if (simulation_executing == 1)
     {
@@ -1905,30 +1955,47 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
     
     if (response != 0L)
     {
-        if (io_length(response, STRING_BLOCK_SIZE) > 0)
-        {
-            if (get_time_interval(response, &number, &interval) > -1)
+        n_int length = io_length(response,STRING_BLOCK_SIZE);
+        if (length > 0)
+        {            
+            if ((io_find(response,0,length,"forever",7)>-1))
             {
-                if (number > 0)
-                {
-                    n_uint i = 0;
-                    n_string_block  output;
-                    n_uint end_point = (number * interval_steps[interval]);
-                    n_uint temp_save_interval_steps = save_interval_steps;
-                    save_interval_steps = 1;
-                    sprintf(output, "Running for %d %s", (int)number, interval_description[interval]);
-
-                    output_function(output);
-
-                    while ((i < end_point) && simulation_running)
-                    {
-                        console_step(ptr, RUN_STEP_CONST, output_function);
-                        i++;
-                    }
-                    save_interval_steps = temp_save_interval_steps;
-                    run = 1;
-                }
+                forever = 1;
+                number = 1;
             }
+            else if (get_time_interval(response, &number, &interval) <= -1)
+            {
+                number = -1;
+            }
+            
+            if (number > 0)
+            {
+                n_uint i = 0;
+                n_string_block  output;
+                n_uint end_point = (number * interval_steps[interval]);
+                n_uint temp_save_interval_steps = save_interval_steps;
+                save_interval_steps = 1;
+                
+                if (forever)
+                {
+                    sprintf(output, "Running forever (type \"stop\" to end)");
+                }
+                else
+                {
+                    sprintf(output, "Running for %d %s", (int)number, interval_description[interval]);
+                }
+                
+                output_function(output);
+
+                while ((i < end_point) && simulation_running)
+                {
+                    console_step(ptr, RUN_STEP_CONST, output_function);
+                    if (!forever) i++;
+                }
+                save_interval_steps = temp_save_interval_steps;
+                run = 1;
+            }
+            
         }
     }
     
@@ -1942,7 +2009,6 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
 
     return 0;
 }
-
 
 /**
  * Reset the simulation
@@ -1960,8 +2026,6 @@ n_int console_reset(void * ptr, n_string response, n_console_output output_funct
     seed[1] = local_sim->land->genetics[1];
 
     math_random3(seed);
-
-    console_warning();
 
     sim_init(KIND_NEW_SIMULATION, (seed[0]<<16)|seed[1], MAP_AREA, 0);
 
@@ -2009,6 +2073,12 @@ n_int console_speak(void * ptr, n_string response, n_console_output output_funct
     noble_being * local = &(local_sim->beings[local_sim->select]);
     watch_speech(ptr, 0L, local, paragraph);
     speak_out(response, paragraph);
+    return 0;
+}
+
+n_int console_alphabet(void * ptr, n_string response, n_console_output output_function)
+{
+    speak_out(response, " aeio a e i o vfstpbjm abefijmopstv a b e f i j m o p s t v.  .  \n");
     return 0;
 }
 
@@ -2064,7 +2134,6 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
             return 0;
         }
 
-        console_warning();
         sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
         io_file_free(file_opened);
         
