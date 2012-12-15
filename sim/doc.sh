@@ -29,35 +29,15 @@
 #    begun on 13 June 1996. No apes or cats were harmed in the writing
 #    of this software.
 
-if [ $# -ge 1 -a "$1" == "--debug" ]
-then
-    CFLAGS=-g
-else
-    CFLAGS=-O2 
-fi
+./linux.sh --additional
 
-gcc ${CFLAGS} -c ../noble/io.c -o io.o
-gcc ${CFLAGS} -c ../noble/math.c -o math.o
-gcc ${CFLAGS} -c ../noble/parse.c -o parse.o
-gcc ${CFLAGS} -c ../noble/interpret.c -o interpret.o
-gcc ${CFLAGS} -c ../noble/land.c -o land.o
+rm longterm.o
+rm draw.o
+rm control.o
 
-gcc ${CFLAGS} -c ../entity/being.c -o being.o
-gcc ${CFLAGS} -c ../entity/body.c -o body.o
-gcc ${CFLAGS} -c ../entity/metabolism.c -o metabolism.o
-gcc ${CFLAGS} -c ../entity/brain.c -o brain.o
-gcc ${CFLAGS} -c ../entity/social.c -o social.o
-gcc ${CFLAGS} -c ../entity/episodic.c -o episodic.o
-gcc ${CFLAGS} -c ../entity/food.c -o food.o
-gcc ${CFLAGS} -c ../entity/drives.c -o drives.o
+gcc ${CFLAGS} -c ./documentation/documentation.c -o documentation.o
 
-gcc ${CFLAGS} -c ../universe/file.c -o file.o
-gcc ${CFLAGS} -c ../universe/console.c -o console.o
-gcc ${CFLAGS} -c ../universe/sim.c -o sim.o
-
-gcc ${CFLAGS} -c documentation.c -o documentation.o
-
-gcc ${CFLAGS} -I/usr/include -o ./doc io.o math.o parse.o interpret.o console.o documentation.o being.o body.o social.o episodic.o food.o drives.o sim.o file.o brain.o metabolism.o land.o
+gcc ${CFLAGS} -I/usr/include -o ./doc *.o
 
 rm *.o
 

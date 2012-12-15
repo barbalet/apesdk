@@ -400,8 +400,8 @@ int main()
     char	html_file_name[FILE_STRING_SIZE];
     while (loop < NUMBER_OF_FILES)
     {
-        sprintf(text_file_name,"convert/%s.txt",list_of_files[loop]);
-        sprintf(html_file_name,"man/%s.html",list_of_files[loop]);
+        sprintf(text_file_name,"documentation/convert/%s.txt",list_of_files[loop]);
+        sprintf(html_file_name,"documentation/man/%s.html",list_of_files[loop]);
         convert_txt_to_html(text_file_name, html_file_name);
         loop++;
     }

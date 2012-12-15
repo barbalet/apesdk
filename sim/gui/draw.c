@@ -1155,6 +1155,7 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
 
 static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
 {
+    n_byte  draw_big = 1;
     if ((local_sim->select == NO_BEINGS_FOUND) || (number_errors != 0))
     {
         return;
@@ -1170,11 +1171,13 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
         void	    * local_info_brain = draw_pointer(NUM_TERRAIN);
         n_int	      lpx  = 0;
         n_int	      loop = 0;
-
+        n_int         draw_brain_size = (draw_big ? (BRAIN_MAGI) : (BRAIN_MAGI/2));
+        
+        
         n_int	      a32 =  (new_sd[(turn_y + 64) & 255] / 105);
         n_int	      a12 =  (new_sd[(turn_y) & 255] / 105);
-        n_int	      a21 = ((new_sd[(turn_z + 64) & 255] * BRAIN_MAGI) / NEW_SD_MULTIPLE);
-        n_int	      a23 = ((new_sd[(turn_z) & 255] * BRAIN_MAGI) / NEW_SD_MULTIPLE);
+        n_int	      a21 = ((new_sd[(turn_z + 64) & 255] * draw_brain_size) / NEW_SD_MULTIPLE);
+        n_int	      a23 = ((new_sd[(turn_z) & 255] * draw_brain_size) / NEW_SD_MULTIPLE);
 
         n_int	      a11 = -((a32 * a23) >> 8);
         n_int	      a13 =  ((a32 * a21) >> 8);
@@ -1202,8 +1205,8 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
         {
             return;
         }
-        a12 = (a12 * BRAIN_MAGI) >> 8;
-        a32 = (a32 * BRAIN_MAGI) >> 8;
+        a12 = (a12 * draw_brain_size) >> 8;
+        a32 = (a32 * draw_brain_size) >> 8;
         act_x2a = -((a21 + a23) << 4);
         term_1a = -((a11 + a12 + a13) << 4);
         term_2a = -((a31 + a32 + a33) << 4);
@@ -1226,7 +1229,7 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
                         n_int	s_x = ((act_x2 * scr_z) >> 16) + center_x;
                         n_int	s_y = ((act_y1 * scr_z) >> 16) + center_y - 120;
                         (*local_draw_brain)(s_x, s_y, local_info_brain);
-                        if (act_x1 > 0)
+                        if ((act_x1 > 0) && draw_big)
                         {
                             (*local_draw_brain)(s_x - 1, s_y, local_info_brain);
                             (*local_draw_brain)(s_x + 1, s_y, local_info_brain);

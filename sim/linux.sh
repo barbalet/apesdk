@@ -46,7 +46,6 @@ else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/io.c -o io.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/math.c -o math.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/parse.c -o parse.o
@@ -70,16 +69,13 @@ gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/sim.c -o sim.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/command/graph.c -o graph.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/command/genealogy.c -o genealogy.o
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/cle.c -o cle.o
+#gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/cle.c -o cle.o
 
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/longterm.c -o longterm.o
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nacle io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o graph.o genealogy.o speak.o file.o console.o sim.o cle.o -lm -lpthread
+#gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nacle *.o -lm -lpthread
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
-
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nalongterm io.o math.o parse.o interpret.o being.o body.o brain.o land.o social.o episodic.o food.o drives.o metabolism.o genealogy.o speak.o file.o console.o sim.o graph.o longterm.o pnglite.o -lz -lm -lpthread
-
+# gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
 
 if [ $# -ge 1 -a "$1" == "--additional" ]
 then
@@ -88,6 +84,8 @@ gcc ${CFLAGS} -c $SOURCEDIR/gui/draw.c -o draw.o
 gcc ${CFLAGS} -c $SOURCEDIR/gui/control.c -o control.o
 
 else
+
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nalongterm *.o -lz -lm -lpthread
 
 rm *.o
 
