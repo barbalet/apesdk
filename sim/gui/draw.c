@@ -158,8 +158,8 @@ static n_byte2 seg14[ 60 ] =
 
 #define	MAX_NUMBER_ERRORS	35
 
-static n_byte	number_errors;
-static n_byte	error_array[MAX_NUMBER_ERRORS + 1][31];
+static n_byte           number_errors;
+static n_string_block	error_array[MAX_NUMBER_ERRORS + 1];
 
 n_int control_error(n_byte * error_text);
 
@@ -330,13 +330,15 @@ n_byte * draw_pointer(n_byte which_one)
 
 /*	shows the about information */
 
-#define	TAB_LENGTH	(8*4)
+#define	TAB_LENGTH	(36)
 
 void draw_about(n_string platform)
 {
     n_join	local_draw;
     n_byte *buffer = draw_pointer(NUM_VIEW);
     n_int   loop = 0;
+    n_int   line_y_offset = 128 + 24;
+    
     if(check_about == 1 || buffer == 0L)
     {
         check_about = 0;
@@ -346,34 +348,49 @@ void draw_about(n_string platform)
     local_draw.information = buffer;
     local_draw.pixel_draw  = &pixel_map;
 
-    while (loop < 256)
+    while (loop < 214)
     {
         n_int  py = (MAP_DIMENSION/2) - 128 + loop;
-        const n_int px = (MAP_DIMENSION/2) - 128;
+        const n_int px = (MAP_DIMENSION/2) - 200;
         n_byte * from_point = &buffer[(py*MAP_DIMENSION) + px];
-        io_erase(from_point, 256);
+        io_erase(from_point, 400);
         loop++;
     }
 
-    draw_string((n_byte *)SHORT_VERSION_NAME, 8 + 128, 12 + 12+ 128, &local_draw);
+    draw_string(SHORT_VERSION_NAME,     84, line_y_offset, &local_draw);
+    line_y_offset += 12;
+    line_y_offset += 12;
+
+    draw_string(FULL_VERSION_COPYRIGHT, 84 + TAB_LENGTH, line_y_offset, &local_draw);
+    line_y_offset += 12;
+
+    draw_string(COPYRIGHT_FOLLOW,       84 + TAB_LENGTH, line_y_offset, &local_draw);
+    line_y_offset += 12;
+    line_y_offset += 12;
+    
+    
+    draw_string(FULL_DATE,              84, line_y_offset, &local_draw);
+    line_y_offset += 12;
+    line_y_offset += 12;
+
+    draw_string(platform, 84 + TAB_LENGTH, line_y_offset, &local_draw);
+    line_y_offset += 12;
+    line_y_offset += 12;
+    
+    draw_string("This software and Noble Ape are a continuing ", 84, line_y_offset, &local_draw);
+    line_y_offset += 12;
+
+    draw_string("work of Tom Barbalet begun on 13 June 1996.", 84, line_y_offset, &local_draw);
+    line_y_offset += 12;
+    line_y_offset += 12;
 
 
-    draw_string((n_byte *)FULL_DATE,          8 + TAB_LENGTH+ 128, 24 + 12+ 128, &local_draw);
+    draw_string("No apes or cats were harmed in the writing ", 84, line_y_offset, &local_draw);
+    line_y_offset += 12;
 
+    draw_string("of this software.", 84, line_y_offset, &local_draw);
+    line_y_offset += 12;
 
-    draw_string((n_byte *)platform, 8 + 128, 48 + 12+ 128, &local_draw);
-    draw_string((n_byte *)SUBVERSION_VERSION, 8 + TAB_LENGTH+ 128, 60 + 12+ 128, &local_draw);
-
-    draw_string((n_byte *)COPYRIGHT_DATE, 8 + 128, 84 + 12+ 128, &local_draw);
-    draw_string((n_byte *)COPYRIGHT_NAME, 8 + TAB_LENGTH+ 128, 96 + 12+ 128, &local_draw);
-    draw_string((n_byte *)COPYRIGHT_FOLLOW, 8 + TAB_LENGTH+ 128, 108 + 12+ 128, &local_draw);
-
-    draw_string((n_byte *)"This software and Noble Ape", 8+ 128, 132 + 12+ 128, &local_draw);
-    draw_string((n_byte *)"are a continuing work of Tom", 8+ 128, 144 + 12+ 128, &local_draw);
-    draw_string((n_byte *)"Barbalet begun on 13 June 1996", 8+ 128, 156 + 12+ 128, &local_draw);
-
-    draw_string((n_byte *)"No apes or cats were harmed in", 8+ 128, 180 + 12+ 128, &local_draw);
-    draw_string((n_byte *)"the writing of this software", 8+ 128, 192 + 12+ 128, &local_draw);
 
     check_about = 1;
 }
@@ -391,7 +408,7 @@ void draw_about(n_string platform)
  @param off_y The starting y location for the string to be drawn.
  @param draw The generic draw function used to draw the character.
  */
-void draw_string(n_byte * str, n_int off_x, n_int off_y, n_join * draw)
+void draw_string(n_string str, n_int off_x, n_int off_y, n_join * draw)
 {
     n_pixel	* local_draw = draw->pixel_draw;
     void	* local_info = draw->information;
@@ -1125,7 +1142,7 @@ static void draw_weather(noble_simulation * local_sim)
 
 static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
 {
-    n_byte  cycles_per_sec[20] = {' ', ' ', ' ', ' ', ' ', 'X', '.', 'X', ' ',
+    n_string_block  cycles_per_sec = {' ', ' ', ' ', ' ', ' ', 'X', '.', 'X', ' ',
                                   'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
                                  };
     n_uint	lp = 0, division = 1000000;
@@ -1146,8 +1163,8 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
         division /= 10;
         lp++;
     }
-    cycles_per_sec[5] = (n_byte)('0' + ((count / 10) % 10));
-    cycles_per_sec[7] = (n_byte)('0' + ((count / 1) % 10));
+    cycles_per_sec[5] = ('0' + ((count / 10) % 10));
+    cycles_per_sec[7] = ('0' + ((count / 1) % 10));
     draw_string(cycles_per_sec, terrain_dim_x - 112, 100, local_mono);
 }
 
@@ -1291,7 +1308,7 @@ n_int draw_error(n_string error_text)
         error_char_copy = error_array[number_errors][loop] = error_text[loop];
         loop++;
     }
-    while((loop< 64) && (error_char_copy != 0));
+    while((loop< STRING_BLOCK_SIZE) && (error_char_copy != 0));
 
     error_array[number_errors][loop] = 0;
 
@@ -1472,13 +1489,12 @@ static void draw_errors(noble_simulation * local_sim)
         n_int	loop = 0;
         while(loop< (number_errors+1))
         {
-            n_byte * local_array = error_array[loop++];
-            draw_string(local_array, 40, (loop*12) + 62, &local_mono);
+            draw_string(error_array[loop++], 40, (loop*12) + 62, &local_mono);
         }
     }
 }
 
-static void draw_line_braincode(n_byte * pointer, n_int line)
+static void draw_line_braincode(n_string pointer, n_int line)
 {
     n_join	local_mono;
     local_mono.pixel_draw  = &pixel_grey;

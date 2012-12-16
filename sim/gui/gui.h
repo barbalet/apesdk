@@ -126,7 +126,7 @@ n_byte * draw_color_fit();
 
 void draw_about(n_string platform);
 
-void draw_string(n_byte * str, n_int off_x, n_int off_y, n_join * draw);
+void draw_string(n_string str, n_int off_x, n_int off_y, n_join * draw);
 
 void  draw_cycle(n_byte mod, n_int dim_x, n_int dim_y);
 

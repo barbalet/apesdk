@@ -56,20 +56,19 @@
 /*! @define */
 #define	SHORT_VERSION_NAME		 "Noble Ape 0.696 "
 #define	FULL_DATE				 __DATE__
-#define SUBVERSION_VERSION		"SOURCE REVISION 1061"
 
 /*! @define */
 #define	VERSION_NUMBER		     696
 #define	COPYRIGHT_DATE		     "Copyright 1996 - 2012 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996 - 2012"
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2012."
 
 /*! @define */
 #define	NOBLE_APE_SIGNATURE		    (('N'<< 8) | 'A')
 #define	NOBLE_WARFARE_SIGNATURE		(('N'<< 8) | 'W')
 
-#define  COPYRIGHT_NAME		    "Tom Barbalet "
-#define  COPYRIGHT_FOLLOW		"All rights reserved "
+#define  COPYRIGHT_NAME		    "Tom Barbalet"
+#define  COPYRIGHT_FOLLOW		"All rights reserved."
 
 
 #define PACKED_DATA_BLOCK   (32*32*32*2)

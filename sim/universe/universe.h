@@ -1535,7 +1535,7 @@ noble_simulation;
 
 typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local_being, n_string result);
 
-typedef void (line_braincode)(n_byte * pointer, n_int line);
+typedef void (line_braincode)(n_string pointer, n_int line);
 
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function);
 

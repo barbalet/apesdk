@@ -494,7 +494,7 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
 
         sprintf(initial_information, "EXT                                                         INT");
 
-        (*function)((n_byte *)initial_information, -1);
+        (*function)(initial_information, -1);
 
         while(loop < 22)
         {
@@ -519,7 +519,7 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
                 sprintf(command_information, "%s  %s   %s  %s",first_external, second_external,first_internal,second_internal);
             }
 
-            (*function)((n_byte *)command_information, loop);
+            (*function)(command_information, loop);
             loop++;
         }
     }
@@ -847,9 +847,9 @@ static void watch_metabolism(void *ptr, n_string beingname, noble_being * local_
 
 static n_string static_result;
 
-static void watch_line_braincode(n_byte * string, n_int line)
+static void watch_line_braincode(n_string string, n_int line)
 {
-    io_string_write(static_result, (n_string)string, &watch_string_length);
+    io_string_write(static_result, string, &watch_string_length);
     io_string_write(static_result, "\n", &watch_string_length);
 }
 
