@@ -938,7 +938,7 @@ static void watch_episodic(void *ptr, n_string beingname, noble_being * local_be
     for (i = 0; i < EPISODIC_SIZE; i++)
     {
         str[0]='\0';
-        episode_description(local_sim, local_being, i, str);
+        (void)episode_description(local_sim, local_being, i, str);
         if (io_length(str, STRING_BLOCK_SIZE)>0)
         {
             if (GET_A(local_being,ATTENTION_EPISODE) != i)
@@ -1474,7 +1474,16 @@ static n_int console_on_off(n_string response)
     {
         return 0;
     }
-    return 1;
+    
+    if ((io_find(response,0,length,"on",2)>-1) ||
+        (io_find(response,0,length,"1",1)>-1) ||
+        (io_find(response,0,length,"true",4)>-1) ||
+        (io_find(response,0,length,"yes",3)>-1))
+    {
+        return 1;
+    }
+    
+    return -1;
 }
 
 n_int console_event(void * ptr, n_string response, n_console_output output_function)
@@ -1483,17 +1492,22 @@ n_int console_event(void * ptr, n_string response, n_console_output output_funct
 
     if (return_response == -1)
     {
+        if (io_find(response, 0, io_length(response,STRING_BLOCK_SIZE),"social",6)>-1)
+        {
+            episodic_logging(output_function, 1);
+            output_function("Event output for social turned on");
+        }
         return 0;
     }
     
     if (return_response == 0)
     {
-        episodic_logging(0L);
+        episodic_logging(0L, 0);
         output_function("Event output turned off");
     }
     else
     {
-        episodic_logging(output_function);
+        episodic_logging(output_function, 0);
         output_function("Event output turned on");
     }
 

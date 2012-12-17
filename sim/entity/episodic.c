@@ -59,11 +59,13 @@
 
 #ifdef EPISODIC_ON
 
-n_console_output * local_logging;
+static n_console_output * local_logging;
+static n_int local_social;
 
-void episodic_logging(n_console_output * output_function)
+void episodic_logging(n_console_output * output_function, n_int social)
 {
     local_logging = output_function;
+    local_social = social;
 }
 
 /**
@@ -465,7 +467,9 @@ static void episodic_store_full(
     local_episodic[replace].arg=arg;
     
     if ((event == 0) || (event>=EVENTS))
+    {
         (void)SHOW_ERROR("Event outside scope");
+    }
     
     if (local_logging)
     {
@@ -475,9 +479,16 @@ static void episodic_store_full(
             n_string_block str;
             n_string_block time;
             n_string_block combination = {0};
+            n_int social_event;
+            
             being_name((FIND_SEX(GET_I(local)) == SEX_FEMALE), GET_NAME(local_sim, local), GET_FAMILY_FIRST_NAME(local_sim, local), GET_FAMILY_SECOND_NAME(local_sim, local), str);
 
-            episode_description(local_sim, local, replace, description);
+            social_event = episode_description(local_sim, local, replace, description);
+            
+            if ((local_social == 1) && (social_event == 0))
+            {
+                return;
+            }
             
             io_time_to_string(time, local_sim->land->time, local_sim->land->date[0], local_sim->land->date[1]);
             

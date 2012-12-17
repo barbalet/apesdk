@@ -896,7 +896,7 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
         {
             n_string_block  number_str;
             sprintf(number_str,"%ld", event_type);
-            io_string_write(string,"Some action (",location);
+            io_string_write(string,"Some erroneous action (",location);
             io_string_write(string,number_str,location);
             io_string_write(string,") with ",location);
             break;
@@ -905,7 +905,7 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
     io_string_write(string,name_str,location);
 }
 
-void episode_description(
+n_int episode_description(
     noble_simulation * sim,
     noble_being * local_being,
     n_int index,
@@ -913,6 +913,7 @@ void episode_description(
 {
     n_string_block str;
     n_int string_index = 0;
+    n_int social = 0;
 #ifdef EPISODIC_ON
     n_string_block str2, name_str;
     episodic_memory * local_episodic;
@@ -922,7 +923,10 @@ void episode_description(
     current_date = TIME_IN_DAYS(sim->land->date);
     local_episodic = GET_EPI(sim, local_being);
 
-    if(local_episodic == 0L) return (void)SHOW_ERROR("No episodic description");
+    if(local_episodic == 0L)
+    {
+        return SHOW_ERROR("No episodic description");
+    }
 
     if ((local_episodic[index].event>0) &&
             (local_episodic[index].first_name[0]==GET_NAME_GENDER(sim,local_being)) &&
@@ -975,6 +979,8 @@ void episode_description(
             io_string_write(str,name_str,&string_index);
             io_string_write(str,"'s ",&string_index);
             io_string_write(str,being_body_inventory_description(local_episodic[index].arg),&string_index);
+            
+            social = 1;
             break;
         }
         case EVENT_SHOUT:
@@ -1043,10 +1049,14 @@ void episode_description(
                 break;
             default:
                 being_social_event_string(str, &string_index, local_episodic[index].event, name_str);
+                social = 1;
                 break;
         }
 
-        if (string_index == 0) return (void)SHOW_ERROR("No string in episodic description");
+        if (string_index == 0)
+        {
+            return SHOW_ERROR("No string in episodic description");
+        }
 
         days_elapsed = current_date - TIME_IN_DAYS(&(local_episodic[index].date[0]));
         if (days_elapsed==0)
@@ -1101,6 +1111,7 @@ void episode_description(
 #endif
     str[string_index]='\0';
     sprintf(description,"%s",str);
+    return social;
 }
 
 /* Surname = 64, Male = 256, Female = 256 */

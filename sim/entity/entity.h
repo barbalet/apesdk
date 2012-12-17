@@ -123,12 +123,12 @@ void brain_sentence(n_string string, n_byte * response);
 
 void braincode_statistics(noble_simulation * sim);
 
-void episode_description(noble_simulation * sim,
+n_int episode_description(noble_simulation * sim,
                          noble_being * local_being,
                          n_int index,
                          n_string description);
 
-void episodic_logging(n_console_output * output_function);
+void episodic_logging(n_console_output * output_function, n_int social);
 
 n_uint social_respect_mean(noble_simulation * sim, noble_being *local_being);
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family);
