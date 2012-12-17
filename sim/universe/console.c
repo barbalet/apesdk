@@ -2082,10 +2082,11 @@ static n_byte get_response_mode(n_string response)
 
 n_int console_speak(void * ptr, n_string response, n_console_output output_function)
 {
-    n_string_block paragraph;
+    n_string_block paragraph = {0};
     noble_simulation * local_sim = (noble_simulation*) ptr;
     noble_being * local = &(local_sim->beings[local_sim->select]);
     watch_speech(ptr, 0L, local, paragraph);
+    watch_string_length = 0;
     speak_out(response, paragraph);
     return 0;
 }
