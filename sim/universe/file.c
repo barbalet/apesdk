@@ -405,7 +405,7 @@ n_int file_bin_read(n_string name)
     noble_simulation * local = sim_sim();
     n_file_chain     * start = 0L;
     /* weather, brain, social, episodic */
-    const n_uint       total_ptrs = 4;
+    const n_uint       total_ptrs = 2;
     n_string_block     bin_name;
     
     file_chain_bin_name(name, bin_name);
@@ -427,13 +427,13 @@ n_int file_bin_read(n_string name)
     
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
     start[2].data           = local->brain_base;
-
+/*
     start[3].expected_bytes = local->num * (SOCIAL_SIZE * sizeof(social_link));
     start[3].data           = local->social_base;
 
     start[4].expected_bytes = local->num  * (EPISODIC_SIZE * sizeof(episodic_memory));
     start[4].data           = local->episodic_base;
-
+*/
     /* I don't think indicators are wired up properly - what happens to indicators_index for example?
     start[5].expected_bytes = INDICATORS_BUFFER_SIZE * sizeof(noble_indicators);
     start[5].data           = local->indicators_base; */
@@ -473,7 +473,7 @@ n_int file_bin_write(n_string name)
     noble_simulation * local = sim_sim();
     n_file_chain     * start = 0L;
     /* weather, brain, social, episodic */
-    const n_uint       total_ptrs = 4;
+    const n_uint       total_ptrs = 2;
     n_string_block     bin_name;
     
     file_chain_bin_name(name, bin_name);
@@ -490,13 +490,13 @@ n_int file_bin_write(n_string name)
     
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
     start[2].data           = local->brain_base;
-    
+/*
     start[3].expected_bytes = local->num * (SOCIAL_SIZE * sizeof(social_link));
     start[3].data           = local->social_base;
     
     start[4].expected_bytes = local->num  * (EPISODIC_SIZE * sizeof(episodic_memory));
     start[4].data           = local->episodic_base;
-    
+*/
     /* I don't think indicators are wired up properly - what happens to indicators_index for example?
      start[5].expected_bytes = INDICATORS_BUFFER_SIZE * sizeof(noble_indicators);
      start[5].data           = local->indicators_base; */
