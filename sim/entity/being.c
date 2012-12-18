@@ -1183,7 +1183,7 @@ void being_state_description(n_byte2 state, n_string result)
 {
     const n_string state_description[] =
     {
-        "Sleeping","Awake","Forraging","Swimming","Eating","Moving",
+        "Sleeping","Awake","Foraging","Swimming","Eating","Moving",
         "Chatting","Calling","Reproducing","Grooming","Suckling",
         "Displaying","Fighting"
     };
