@@ -1065,7 +1065,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     being_state_description(local_being->state, status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
-    sprintf(str, "\n=== %s ===\n%s\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %d %d\nHonor: %d\t\tHeight: %d\nFacing: %d\t\tSex: %c\nAge: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
+    sprintf(str, "\n=== %s ===\n%s\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %d %d\nHonor: %d\t\tHeight: %d\nFacing: %d\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status, (int)heart_rate, (int)breathing_rate,
             GET_E(local_being),
             GET_X(local_being), GET_Y(local_being),
