@@ -1045,6 +1045,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
  */
 static void watch_stats(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
+    noble_simulation  *local_sim = (noble_simulation *)ptr;
     char str[512],relationship_str[30];
     n_string_block status;
     n_int heart_rate = 0;
@@ -1064,13 +1065,15 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     being_state_description(local_being->state, status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
-    sprintf(str, "\n=== %s ===\n%s\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %d %d\nHonor: %d\t\tHeight: %d\nFacing: %d\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
+    sprintf(str, "\n=== %s ===\n%s\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %d %d\nHonor: %d\t\tHeight: %d\nFacing: %d\t\tSex: %c\nAge: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status, (int)heart_rate, (int)breathing_rate,
             GET_E(local_being),
             GET_X(local_being), GET_Y(local_being),
             local_being->honor,
             GET_BEING_HEIGHT(local_being),
             GET_F(local_being),
+            ((FIND_SEX(GET_I(local_being)) == SEX_FEMALE) ? 'F' : 'M'),
+            TIME_IN_DAYS(local_sim->land->date) - TIME_IN_DAYS(GET_D(local_being)),
             local_being->drives[DRIVE_HUNGER],
             local_being->drives[DRIVE_SOCIAL],
             local_being->drives[DRIVE_FATIGUE],
