@@ -256,7 +256,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
     n_uint         largest_bytes = 0;
     n_byte       * general_buffer = 0L;
     FILE         * read_file = 0L;
-    
+    n_int          count = 0;
     do {
         if (local->expected_bytes > largest_bytes)
         {
@@ -303,12 +303,15 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
         {
             if (actual_hash != local->hash)
             {
+                n_string_block  combination;
                 fclose(read_file);
                 io_free(general_buffer);
-                return SHOW_ERROR("Hash failed");
+                sprintf(combination, "Hash failed (# %ld, actual %ld, expected %ld, bytes %ld)",count, actual_hash, local->hash, local->expected_bytes);
+                return SHOW_ERROR(combination);
             }
         }
         local = (n_file_chain*)local->next;
+        count++;
     } while (local != 0L);
     
     fclose(read_file);
