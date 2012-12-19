@@ -306,7 +306,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
                 n_string_block  combination;
                 fclose(read_file);
                 io_free(general_buffer);
-                sprintf(combination, "Hash failed (# %ld, actual %ld, expected %ld, bytes %ld)",count, actual_hash, local->hash, local->expected_bytes);
+                sprintf(combination, "Hash failed (# %ld, actual %ld, expected %ld, bytes %ld, sizeof %ld)",count, actual_hash, local->hash, local->expected_bytes, sizeof(n_int));
                 return SHOW_ERROR(combination);
             }
         }
