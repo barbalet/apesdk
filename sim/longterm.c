@@ -78,7 +78,6 @@ enum
     PLOTS
 };
 
-extern n_int watch_type;
 extern n_int nolog;
 extern n_int indicator_index;
 extern n_uint save_interval_steps;
@@ -309,7 +308,6 @@ static n_int cle_step(void * ptr, n_string response, n_console_output output_fun
 #endif
     unsigned long length = 0;
     unsigned char *data = 0L;
-    n_string_block filename;
     n_int done = 0;
 
     while (done == 0)

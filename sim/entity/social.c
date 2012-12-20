@@ -137,23 +137,15 @@ void social_graph_link_name(
         break;
     }
     case ENTITY_BEING_GROUP:
-    {
-        /* TODO */
-        io_string_write(name, "Group", 0);
-        break;
-    }
+        /* TODO*/
+
     case ENTITY_OBJECT:
-    {
         /* TODO */
-        io_string_write(name, "Object", 0);
-        break;
-    }
     case ENTITY_TERRITORY:
-    {
         /* TODO */
-        io_string_write(name, "Territory", 0);
+    default:
+            (void)SHOW_ERROR("Unimplemented entity type");
         break;
-    }
     }
 }
 
