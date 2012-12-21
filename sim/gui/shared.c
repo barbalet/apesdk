@@ -290,37 +290,16 @@ void shared_brainDisplay(n_byte value)
 
 n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 {
-    n_byte returnValue;
-
-    n_file	 *tester = io_file_new();
-    (void)io_disk_read(tester,cStringFileName);
-
     if (isScript)
     {
-        returnValue = (file_interpret(tester) == 0);
+        return (console_script(0L, cStringFileName, 0L) == 0);
     }
-    else
-    {
-        returnValue = (file_in(tester) == 0);
-        if (returnValue)
-        {
-            control_init(KIND_LOAD_FILE, 0);
-            file_bin_read(cStringFileName);
-        }
-    }
-    io_file_free(tester);
-    return returnValue;
+    return (console_open(0L, cStringFileName, 0L) == 0);
 }
 
 void shared_saveFileName(n_string cStringFileName)
 {
-    n_file * file_opened = file_out();
-    if (file_opened != 0L)
-    {
-        io_disk_write(file_opened, cStringFileName);
-        io_file_free(file_opened);
-    }
-    (void)file_bin_write(cStringFileName);
+    (void)console_save(0L, cStringFileName, 0L);
 }
 
 #ifdef SCRIPT_DEBUG

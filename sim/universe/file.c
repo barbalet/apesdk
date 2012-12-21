@@ -427,16 +427,6 @@ n_int file_bin_read(n_string name)
     
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
     start[2].data           = local->brain_base;
-/*
-    start[3].expected_bytes = local->num * (SOCIAL_SIZE * sizeof(social_link));
-    start[3].data           = local->social_base;
-
-    start[4].expected_bytes = local->num  * (EPISODIC_SIZE * sizeof(episodic_memory));
-    start[4].data           = local->episodic_base;
-*/
-    /* I don't think indicators are wired up properly - what happens to indicators_index for example?
-    start[5].expected_bytes = INDICATORS_BUFFER_SIZE * sizeof(noble_indicators);
-    start[5].data           = local->indicators_base; */
     
     if (file_chain_read_header(bin_name, start, total_ptrs) != 0)
     {
@@ -490,16 +480,6 @@ n_int file_bin_write(n_string name)
     
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
     start[2].data           = local->brain_base;
-/*
-    start[3].expected_bytes = local->num * (SOCIAL_SIZE * sizeof(social_link));
-    start[3].data           = local->social_base;
-    
-    start[4].expected_bytes = local->num  * (EPISODIC_SIZE * sizeof(episodic_memory));
-    start[4].data           = local->episodic_base;
-*/
-    /* I don't think indicators are wired up properly - what happens to indicators_index for example?
-     start[5].expected_bytes = INDICATORS_BUFFER_SIZE * sizeof(noble_indicators);
-     start[5].data           = local->indicators_base; */
     
     if (file_chain_write_generate_header(start) != 0)
     {

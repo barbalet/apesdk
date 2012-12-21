@@ -2109,7 +2109,8 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     if (response==0) return 0;
 
     console_file_exists = 0;
-
+    console_stop(0L,"",0L);
+    
     file_opened = file_out();
     if (file_opened == 0L)
     {
@@ -2118,13 +2119,19 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     io_disk_write(file_opened, response);
     io_file_free(file_opened);
 
-    (void)file_bin_write(response);
+    if (file_bin_write(response) == -1)
+    {
+        return -1;
+    }
     
     console_file_exists = 1;
-    sprintf(console_file_name,"%s",response);
-    sprintf(output_string, "Simulation file %s saved\n",response);
-    output_function(output_string);
-
+    
+    if (output_function)
+    {
+        sprintf(console_file_name,"%s",response);
+        sprintf(output_string, "Simulation file %s saved\n",response);
+        output_function(output_string);
+    }
     return 0;
 }
 
@@ -2134,6 +2141,7 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
     if (response==0) return 0;
 
     console_file_exists = 0;
+    console_stop(0L,"",0L);
 
     if (io_disk_check(response)!=0)
     {
@@ -2143,24 +2151,31 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
             io_file_free(file_opened);
-            return 0;
+            return -1;
         }
 
         if (file_in(file_opened) != 0)
         {
             io_file_free(file_opened);
-            return 0;
+            return -1;
         }
 
         sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
         io_file_free(file_opened);
         
-        (void)file_bin_read(response);
+        if (file_bin_read(response) == -1)
+        {
+            return -1;
+        }
         
         console_file_exists = 1;
-        sprintf(console_file_name,"%s",response);
-        sprintf(output_string, "Simulation file %s open\n",response);
-        output_function(output_string);
+        
+        if (output_function)
+        {
+            sprintf(console_file_name,"%s",response);
+            sprintf(output_string, "Simulation file %s open\n",response);
+            output_function(output_string);
+        }
     }
     return 0;
 }
@@ -2170,6 +2185,8 @@ n_int console_script(void * ptr, n_string response, n_console_output output_func
 {
     if (response==0) return 0;
 
+    console_stop(0L,"",0L);
+    
     if (io_disk_check(response)!=0)
     {
         n_file * file_opened = io_file_new();
@@ -2178,18 +2195,22 @@ n_int console_script(void * ptr, n_string response, n_console_output output_func
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
             io_file_free(file_opened);
-            return 0;
+            return -1;
         }
         /* one line difference from script_open */
         if (file_interpret(file_opened) != 0)
         {
             io_file_free(file_opened);
-            return 0;
+            return -1;
         }
 
         io_file_free(file_opened);
-        sprintf(output_string, "ApeScript file %s open\n",response);
-        output_function(output_string);
+        
+        if (output_function)
+        {
+            sprintf(output_string, "ApeScript file %s open\n",response);
+            output_function(output_string);
+        }
     }
     return 0;
 }
