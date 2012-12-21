@@ -76,7 +76,7 @@ n_int indicator_index = 1;
 /** How many steps at which to periodically save the simulation */
 n_uint save_interval_steps = 60 * 24;
 
-n_int          console_file_exists = 0;
+n_int          console_file_interaction = 0;
 n_string_block console_file_name;
 
 void console_external_watch(void)
@@ -1925,6 +1925,14 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
             output_function("Simulation already running");
             return 0;
         }
+        
+        if (console_file_interaction)
+        {
+
+            output_function("File interaction in use");
+            return 0;
+        }
+        
         simulation_executing = 1;
     }
     simulation_running = 1;
@@ -1966,6 +1974,13 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
         output_function("Simulation already running");
         return 0;
     }
+    
+    if (console_file_interaction)
+    {
+        output_function("File interaction in use");
+        return 0;
+    }
+    
     simulation_executing = 1;
     
     simulation_running = 1;
@@ -2107,8 +2122,16 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     n_string_block output_string;
 
     if (response==0) return 0;
-
-    console_file_exists = 0;
+    
+    if (console_file_interaction)
+    {
+        if (output_function)
+        {
+            output_function("File interaction in use");
+        }
+        return 0;
+    }
+    
     console_stop(0L,"",0L);
     
     file_opened = file_out();
@@ -2116,15 +2139,17 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     {
         return -1;
     }
+    
+    console_file_interaction = 1;
+    
     io_disk_write(file_opened, response);
     io_file_free(file_opened);
 
     if (file_bin_write(response) == -1)
     {
+        console_file_interaction = 0;
         return -1;
     }
-    
-    console_file_exists = 1;
     
     if (output_function)
     {
@@ -2132,6 +2157,9 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
         sprintf(output_string, "Simulation file %s saved\n",response);
         output_function(output_string);
     }
+    
+    console_file_interaction = 0;
+    
     return 0;
 }
 
@@ -2140,8 +2168,17 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
 {
     if (response==0) return 0;
 
-    console_file_exists = 0;
+    if (console_file_interaction)
+    {
+        if (output_function)
+        {
+            output_function("File interaction in use");
+        }
+        return 0;
+    }
+    
     console_stop(0L,"",0L);
+    console_file_interaction = 1;
 
     if (io_disk_check(response)!=0)
     {
@@ -2168,7 +2205,7 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
             return -1;
         }
         
-        console_file_exists = 1;
+        console_file_interaction = 0;
         
         if (output_function)
         {
