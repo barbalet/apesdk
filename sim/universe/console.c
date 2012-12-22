@@ -1891,6 +1891,10 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
 n_int console_stop(void * ptr, n_string response, n_console_output output_function)
 {
     simulation_running = 0;
+    if (output_function)
+    {
+        output_function("Simulation stopped");
+    }
     return 0;
 }
 
@@ -2132,7 +2136,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
         return 0;
     }
     
-    console_stop(0L,"",0L);
+    console_stop(ptr,"",output_function);
     
     file_opened = file_out();
     if (file_opened == 0L)
@@ -2163,11 +2167,12 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
-/* load simulation data */
-n_int console_open(void * ptr, n_string response, n_console_output output_function)
+
+static /* load simulation-data/script */
+n_int console_base_open(void * ptr, n_string response, n_console_output output_function, n_byte script)
 {
     if (response==0) return 0;
-
+    
     if (console_file_interaction)
     {
         if (output_function)
@@ -2177,34 +2182,44 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
         return 0;
     }
     
-    console_stop(0L,"",0L);
+    console_stop(ptr,"",output_function);
     console_file_interaction = 1;
-
+    
     if (io_disk_check(response)!=0)
     {
         n_file * file_opened = io_file_new();
         n_string_block output_string;
-
+        
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
             io_file_free(file_opened);
             return -1;
         }
-
-        if (file_in(file_opened) != 0)
+        
+        if (script)
         {
+            if (file_interpret(file_opened) != 0)
+            {
+                io_file_free(file_opened);
+                return -1;
+            }
+        }
+        else
+        {
+            if (file_in(file_opened) != 0)
+            {
+                io_file_free(file_opened);
+                return -1;
+            }
+            
+            sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
             io_file_free(file_opened);
-            return -1;
+            
+            if (file_bin_read(response) == -1)
+            {
+                return -1;
+            }
         }
-
-        sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
-        io_file_free(file_opened);
-        
-        if (file_bin_read(response) == -1)
-        {
-            return -1;
-        }
-        
         console_file_interaction = 0;
         
         if (output_function)
@@ -2217,39 +2232,17 @@ n_int console_open(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
+
+/* load simulation data */
+n_int console_open(void * ptr, n_string response, n_console_output output_function)
+{
+    return console_base_open(ptr, response, output_function, 0);
+}
+
 /* load apescript file */
 n_int console_script(void * ptr, n_string response, n_console_output output_function)
 {
-    if (response==0) return 0;
-
-    console_stop(0L,"",0L);
-    
-    if (io_disk_check(response)!=0)
-    {
-        n_file * file_opened = io_file_new();
-        n_string_block output_string;
-
-        if(io_disk_read(file_opened, response) != FILE_OKAY)
-        {
-            io_file_free(file_opened);
-            return -1;
-        }
-        /* one line difference from script_open */
-        if (file_interpret(file_opened) != 0)
-        {
-            io_file_free(file_opened);
-            return -1;
-        }
-
-        io_file_free(file_opened);
-        
-        if (output_function)
-        {
-            sprintf(output_string, "ApeScript file %s open\n",response);
-            output_function(output_string);
-        }
-    }
-    return 0;
+    return console_base_open(ptr, response, output_function, 1);
 }
 
 /**

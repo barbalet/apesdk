@@ -95,7 +95,7 @@ n_int control_toggle_pause(void)
 {
     if (io_command_line_execution())
     {
-        console_stop(0L,"",0L);
+        console_stop(0L,"",io_console_out);
     }
     toggle_pause ^= 1;
     return toggle_pause;
@@ -121,13 +121,13 @@ n_byte control_cursor(n_byte wwind, n_int px, n_int py, n_byte option, n_byte no
         }
         if (option != 0)
         {
-            if ((px>128) && (px < (128+256)))
+            if ((px > (upper_x/4)) && (px < ((upper_x * 3)/4)))
             {
-                if (py < 128)
+                if (py < (upper_y/4))
                 {
                     return CURSOR_ROTATE_DOWN;
                 }
-                else if (py < 256)
+                else if (py < ((upper_y * 3)/4))
                 {
                     return CURSOR_ROTATE_UP;
                 }
