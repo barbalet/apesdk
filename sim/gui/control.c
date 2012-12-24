@@ -91,13 +91,22 @@ void control_about(n_string value)
     draw_about(value);
 }
 
-n_int control_toggle_pause(void)
+n_int control_toggle_pause(n_byte actual_toggle)
 {
     if (io_command_line_execution())
     {
         console_stop(0L,"",io_console_out);
     }
-    toggle_pause ^= 1;
+    
+    if (actual_toggle)
+    {
+        toggle_pause ^= 1;
+    }
+    else
+    {
+        toggle_pause = 1;
+    }
+    
     return toggle_pause;
 }
 

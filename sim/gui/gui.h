@@ -93,7 +93,7 @@ n_int draw_toggle_brain(void);
 
 n_int draw_toggle_braincode(void);
 
-n_int control_toggle_pause(void);
+n_int control_toggle_pause(n_byte actual_toggle);
 
 void control_about(n_string value);
 

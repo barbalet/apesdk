@@ -2167,9 +2167,8 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
-
-static /* load simulation-data/script */
-n_int console_base_open(void * ptr, n_string response, n_console_output output_function, n_byte script)
+/* load simulation-data/script */
+static n_int console_base_open(void * ptr, n_string response, n_console_output output_function, n_byte script)
 {
     if (response==0) return 0;
     
@@ -2211,17 +2210,14 @@ n_int console_base_open(void * ptr, n_string response, n_console_output output_f
                 io_file_free(file_opened);
                 return -1;
             }
-            
             sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
             io_file_free(file_opened);
-            
             if (file_bin_read(response) == -1)
             {
                 return -1;
             }
         }
         console_file_interaction = 0;
-        
         if (output_function)
         {
             sprintf(console_file_name,"%s",response);

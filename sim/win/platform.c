@@ -379,7 +379,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
             /** Control Menu... **/
         case CONTROL_PAUSE_HANDLE:
-            if (control_toggle_pause())
+            if (control_toggle_pause(1))
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_CHECKED);
             else
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_UNCHECKED);

@@ -171,7 +171,7 @@ void shared_close(void)
 
 void shared_notPause(void)
 {
-    (void)control_toggle_pause();
+    (void)control_toggle_pause(1);
 }
 
 void shared_notWeather(void)
@@ -290,6 +290,8 @@ void shared_brainDisplay(n_byte value)
 
 n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 {
+    (void)control_toggle_pause(0);
+    
     if (isScript)
     {
         return (console_script(0L, cStringFileName, 0L) == 0);
@@ -299,6 +301,7 @@ n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 
 void shared_saveFileName(n_string cStringFileName)
 {
+    (void)control_toggle_pause(0);    
     (void)console_save(0L, cStringFileName, 0L);
 }
 
