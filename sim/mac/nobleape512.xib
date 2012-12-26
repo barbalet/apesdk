@@ -476,6 +476,14 @@
 									<reference key="NSOnImage" ref="832797577"/>
 									<reference key="NSMixedImage" ref="114876730"/>
 								</object>
+								<object class="NSMenuItem" id="325690857">
+									<reference key="NSMenu" ref="996486706"/>
+									<string key="NSTitle">Draw Territory</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
 								<object class="NSMenuItem" id="1059087966">
 									<reference key="NSMenu" ref="996486706"/>
 									<bool key="NSIsDisabled">YES</bool>
@@ -595,7 +603,7 @@
 				<string key="NSWindowContentMaxSize">{2048, 1536}</string>
 				<string key="NSWindowContentMinSize">{512, 512}</string>
 				<object class="NSView" key="NSWindowView" id="707336435">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -604,14 +612,11 @@
 							<int key="NSvFlags">274</int>
 							<string key="NSFrameSize">{512, 512}</string>
 							<reference key="NSSuperview" ref="707336435"/>
-							<reference key="NSWindow"/>
 							<string key="NSClassName">NobleMacView</string>
 							<string key="NSExtension">NSOpenGLView</string>
 						</object>
 					</object>
 					<string key="NSFrameSize">{512, 512}</string>
-					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="395090502"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1280, 778}}</string>
@@ -862,6 +867,14 @@
 						<reference key="destination" ref="808217558"/>
 					</object>
 					<int key="connectionID">354</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">menuControlNoTerritory:</string>
+						<reference key="source" ref="818030197"/>
+						<reference key="destination" ref="325690857"/>
+					</object>
+					<int key="connectionID">357</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1144,6 +1157,7 @@
 							<reference ref="56005770"/>
 							<reference ref="889729663"/>
 							<reference ref="808217558"/>
+							<reference ref="325690857"/>
 						</object>
 						<reference key="parent" ref="409744361"/>
 					</object>
@@ -1295,6 +1309,11 @@
 						<reference key="object" ref="808217558"/>
 						<reference key="parent" ref="996486706"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">355</int>
+						<reference key="object" ref="325690857"/>
+						<reference key="parent" ref="996486706"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1363,6 +1382,7 @@
 					<string>348.IBPluginDependency</string>
 					<string>349.IBPluginDependency</string>
 					<string>351.IBPluginDependency</string>
+					<string>355.IBPluginDependency</string>
 					<string>56.IBPluginDependency</string>
 					<string>57.IBPluginDependency</string>
 					<string>58.IBPluginDependency</string>
@@ -1446,6 +1466,7 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1460,7 +1481,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">354</int>
+			<int key="maxID">357</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1482,6 +1503,7 @@
 							<string>menuControlNext:</string>
 							<string>menuControlNoBrain:</string>
 							<string>menuControlNoBrainCode:</string>
+							<string>menuControlNoTerritory:</string>
 							<string>menuControlNoWeather:</string>
 							<string>menuControlNormalBrain:</string>
 							<string>menuControlPause:</string>
@@ -1494,6 +1516,7 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1529,6 +1552,7 @@
 							<string>menuControlNext:</string>
 							<string>menuControlNoBrain:</string>
 							<string>menuControlNoBrainCode:</string>
+							<string>menuControlNoTerritory:</string>
 							<string>menuControlNoWeather:</string>
 							<string>menuControlNormalBrain:</string>
 							<string>menuControlPause:</string>
@@ -1579,6 +1603,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">menuControlNoBrainCode:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">menuControlNoTerritory:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">

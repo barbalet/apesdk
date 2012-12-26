@@ -189,6 +189,11 @@ void shared_notBrainCode(void)
     (void)draw_toggle_braincode();
 }
 
+void shared_notTerritory(void)
+{
+    (void)draw_toggle_territory();
+}
+
 void shared_flood(void)
 {
     sim_flood();

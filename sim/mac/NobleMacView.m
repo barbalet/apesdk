@@ -272,6 +272,11 @@ n_int   count_switch = 0;
     shared_create_preload(0);
 }
 
+-(IBAction) menuControlNoTerritory:(id) sender
+{
+    shared_notTerritory();
+}
+
 -(IBAction) menuControlNoWeather:(id) sender
 {
     shared_notWeather();

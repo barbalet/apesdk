@@ -73,6 +73,7 @@
 -(IBAction) menuControlClearErrors:(id) sender;
 -(IBAction) menuControlCreateAutoload:(id) sender;
 
+-(IBAction) menuControlNoTerritory:(id) sender;
 -(IBAction) menuControlNoWeather:(id) sender;
 -(IBAction) menuControlNoBrain:(id) sender;
 -(IBAction) menuControlNoBrainCode:(id) sender;

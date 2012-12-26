@@ -175,6 +175,7 @@ n_uint	tilt_z = 118;
 static n_int toggle_weather = 1;
 static n_int toggle_brain = 1;
 static n_int toggle_braincode = 0;
+static n_int toggle_territory = 0;
 
 n_int draw_toggle_weather(void)
 {
@@ -192,6 +193,12 @@ n_int draw_toggle_braincode(void)
 {
     toggle_braincode ^= 1;
     return toggle_braincode;
+}
+
+n_int draw_toggle_territory(void)
+{
+    toggle_territory ^= 1;
+    return toggle_territory;
 }
 
 /*NOBLEMAKE END=""*/
@@ -389,8 +396,6 @@ void draw_about(n_string platform)
     line_y_offset += 12;
 
     draw_string("of this software.", 84, line_y_offset, &local_draw);
-    line_y_offset += 12;
-
 
     check_about = 1;
 }
@@ -620,6 +625,12 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 {
     n_byte * buf_offscr = draw_pointer(NUM_TERRAIN);
     n_int    dim_area = dim_x * dim_y;
+    
+    if (buf_offscr == 0L)
+    {
+        return;
+    }
+    
     if (local_sim->select == NO_BEINGS_FOUND)
     {
         io_erase(buf_offscr, dim_area);
@@ -648,18 +659,12 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         /* find the central map point */
         n_int flatval = combined[CONVERT_X(2048) | CONVERT_Y(2048)];
 
-        if (loc_offscr == 0L)
+        if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {
-            return;
-        }
-
-        if (flatval < 128)   /* if the central map point is underwater,*/
-        {
-            flatval = 128;   /*    put it on water level */
+            flatval = WATER_MAP;   /*    put it on water level */
         }
         while (scrx < (dim_x - (dim_x >> 1)))   /* repeat until the right-most row is reached */
         {
-
             /* take the very bottom pixel */
             n_int pixy = (scrx + (dim_x >> 1)) + ((dim_y - 1) * dim_x );
             /* start with a map point which is below/off the screen */
@@ -724,7 +729,6 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
  */
 static void	draw_meters(noble_simulation * local_sim)
 {
-
     n_land  * loc_land  =   local_sim->land;
     noble_being * loc_being = &(local_sim->beings[local_sim->select]);
     n_pixel 	* local_draw = &pixel_overlay;
@@ -1102,7 +1106,46 @@ static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join *
     }
 }
 
-
+static void draw_region(noble_being * local)
+{
+    n_join	local_draw;
+    n_byte * draw = draw_pointer(NUM_VIEW);
+    n_int    ly = 0;
+    
+    if (draw == 0L) return;
+    
+    local_draw.information = draw;
+    local_draw.pixel_draw  = &pixel_map;
+    
+    while (ly < MAP_DIMENSION)
+    {
+        n_int   lx = 63;
+        while (lx < MAP_DIMENSION)
+        {
+            draw[ lx | ((ly) << MAP_BITS) ] = COLOUR_YELLOW;
+            draw[ ly | ((lx) << MAP_BITS) ] = COLOUR_YELLOW;
+            lx += 64;
+        }
+        ly += 2;
+    }
+    ly = 0;
+    while (ly < TERRITORY_DIMENSION)
+    {
+        n_int lx = 0;
+        while (lx < TERRITORY_DIMENSION)
+        {
+            n_string_block string_draw;
+            n_int   value = local->territory[lx + (ly * TERRITORY_DIMENSION)].familiarity;
+            if (value)
+            {
+                sprintf(string_draw,"%ld",value);
+                draw_string(string_draw, (lx*64)+2 , (ly*64)+5, &local_draw);
+            }
+            lx++;
+        }
+        ly++;
+    }
+}
 
 static void draw_weather(noble_simulation * local_sim)
 {
@@ -1437,6 +1480,10 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
     else
     {
         draw_tides(local_sim->land->map, local_col.screen, local_sim->land->tide_level);
+        if (toggle_territory)
+        {
+            draw_region(&(local_sim->beings[local_sim->select]));
+        }
     }
 
     if (local_sim->select != NO_BEINGS_FOUND)
