@@ -1682,7 +1682,7 @@ const static noble_console_command control_commands[] =
     {&console_top,           "top",            "",                     "List the top apes"},
     {&console_epic,          "epic",           "",                     "List the most talked about apes"},
     {&console_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
-    {&console_event,         "event",          "on|social|off",        "Episodic event logging (all) on, social on or all off"},
+    {&console_event,         "event",          "on|social|off",        "Episodic events (all) on, social on or all off"},
     {&console_logging,       "logging",        "on|off",               "Turn logging of images and data on or off"},
     {&console_logging,       "log",            "",                     ""},
     {&console_simulation,    "simulation",     "",                     ""},
