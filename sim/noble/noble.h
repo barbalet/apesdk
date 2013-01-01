@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2012 Tom Barbalet. All rights reserved.
+ Copyright 1996-2013 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -59,9 +59,9 @@
 
 /*! @define */
 #define	VERSION_NUMBER		     696
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2012 "
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2013 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2012."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2013."
 
 /*! @define */
 #define	NOBLE_APE_SIGNATURE		    (('N'<< 8) | 'A')
