@@ -1,6 +1,14 @@
-[HTML]
-[TITLE]the Noble Ape Simulation Manual[/TITLE]
-[BODY bgcolor="#ffffff"]
+[html]
+[head]
+[meta http-equiv="content-type" content="text/html;charset=utf-8"]
+[meta name="AppleTitle" content="Noble Ape Help"]
+[title]the Noble Ape Simulation Manual[/title]
+[meta name="description" content="Main page of the Noble Ape Simulation documentation."]
+[meta name="KEYWORDS" content="legal, started, noble ape, philosophic, file format, apescript"]
+[meta name="ROBOTS" content="KEYWORDS"]
+[meta http-equiv="Pragma" content="no-cache"]
+[/head]
+[body bgcolor="#ffffff"]
 [FONT FACE="Arial,Geneva,Helvetica" SIZE=3]
 [H1]the Noble Ape Simulation Manual[/H1]
 $VER$
@@ -38,7 +46,7 @@ If you have comments, features, bugs or questions, please email them to;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tom at nobleape dot com
 [P]
 Please don't hesitate to get in contact!
-[/BODY]
-[/HTML]
+[/body]
+[/html]
 
 

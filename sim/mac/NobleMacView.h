@@ -92,6 +92,9 @@
 
 -(IBAction) menuQuit:(id) sender;
 
+-(IBAction) loadManual:(id) sender;
+-(IBAction) loadSimulationPage:(id) sender;
+
 -(void)keyUp:(NSEvent *)theEvent;
 -(void)keyDown:(NSEvent *)theEvent;
 

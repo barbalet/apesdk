@@ -391,6 +391,16 @@ n_int   count_switch = 0;
      }];
 }
 
+-(IBAction) loadManual:(id) sender
+{
+    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/man/"]];
+}
+
+-(IBAction) loadSimulationPage:(id)sender
+{
+    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/sim/"]];
+}
+
 #pragma mark ---- Method Overrides ----
 
 - (void)keyUp:(NSEvent *)theEvent

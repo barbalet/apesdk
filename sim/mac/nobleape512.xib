@@ -551,6 +551,38 @@
 							</object>
 						</object>
 					</object>
+					<object class="NSMenuItem" id="725641097">
+						<reference key="NSMenu" ref="597462191"/>
+						<string key="NSTitle">Online</string>
+						<string key="NSKeyEquiv"/>
+						<int key="NSKeyEquivModMask">1048576</int>
+						<int key="NSMnemonicLoc">2147483647</int>
+						<reference key="NSOnImage" ref="832797577"/>
+						<reference key="NSMixedImage" ref="114876730"/>
+						<string key="NSAction">submenuAction:</string>
+						<object class="NSMenu" key="NSSubmenu" id="697389637">
+							<string key="NSTitle">Online</string>
+							<object class="NSMutableArray" key="NSMenuItems">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMenuItem" id="695640596">
+									<reference key="NSMenu" ref="697389637"/>
+									<string key="NSTitle">Documentation</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="322346975">
+									<reference key="NSMenu" ref="697389637"/>
+									<string key="NSTitle">Simulation Page</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+							</object>
+						</object>
+					</object>
 				</object>
 				<string key="NSName">_NSMainMenu</string>
 			</object>
@@ -876,6 +908,22 @@
 					</object>
 					<int key="connectionID">357</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">loadManual:</string>
+						<reference key="source" ref="818030197"/>
+						<reference key="destination" ref="695640596"/>
+					</object>
+					<int key="connectionID">406</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">loadSimulationPage:</string>
+						<reference key="source" ref="818030197"/>
+						<reference key="destination" ref="322346975"/>
+					</object>
+					<int key="connectionID">407</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -915,6 +963,7 @@
 							<reference ref="344461847"/>
 							<reference ref="148359174"/>
 							<reference ref="409744361"/>
+							<reference ref="725641097"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">MainMenu</string>
@@ -1314,6 +1363,35 @@
 						<reference key="object" ref="325690857"/>
 						<reference key="parent" ref="996486706"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">363</int>
+						<reference key="object" ref="725641097"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="697389637"/>
+						</object>
+						<reference key="parent" ref="597462191"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">364</int>
+						<reference key="object" ref="697389637"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="695640596"/>
+							<reference ref="322346975"/>
+						</object>
+						<reference key="parent" ref="725641097"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">400</int>
+						<reference key="object" ref="695640596"/>
+						<reference key="parent" ref="697389637"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">404</int>
+						<reference key="object" ref="322346975"/>
+						<reference key="parent" ref="697389637"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1383,6 +1461,10 @@
 					<string>349.IBPluginDependency</string>
 					<string>351.IBPluginDependency</string>
 					<string>355.IBPluginDependency</string>
+					<string>363.IBPluginDependency</string>
+					<string>364.IBPluginDependency</string>
+					<string>400.IBPluginDependency</string>
+					<string>404.IBPluginDependency</string>
 					<string>56.IBPluginDependency</string>
 					<string>57.IBPluginDependency</string>
 					<string>58.IBPluginDependency</string>
@@ -1467,6 +1549,10 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1481,7 +1567,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">357</int>
+			<int key="maxID">407</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1494,6 +1580,8 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>aboutDialog:</string>
+							<string>loadManual:</string>
+							<string>loadSimulationPage:</string>
 							<string>menuControlClearErrors:</string>
 							<string>menuControlCreateAutoload:</string>
 							<string>menuControlFlood:</string>
@@ -1516,6 +1604,8 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1543,6 +1633,8 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>aboutDialog:</string>
+							<string>loadManual:</string>
+							<string>loadSimulationPage:</string>
 							<string>menuControlClearErrors:</string>
 							<string>menuControlCreateAutoload:</string>
 							<string>menuControlFlood:</string>
@@ -1567,6 +1659,14 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">aboutDialog:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">loadManual:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">loadSimulationPage:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
