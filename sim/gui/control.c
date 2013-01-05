@@ -76,13 +76,6 @@
 
 #define CURSOR_SELECT         7
 
-
-#if (END_BEFORE_BRAIN_PTR != NON_PTR_BEING)
-
-offsets are wrong. This is a basic check! Run CLE and find out more!
-
-#endif
-
 static n_int toggle_pause = 0;
 
 void control_about(n_string value)

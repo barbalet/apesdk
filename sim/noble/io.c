@@ -1759,8 +1759,8 @@ void io_audit_file(const noble_file_entry * format, n_byte section_to_audit)
                 printout_characters[4] = local_characters[4];
                 printout_characters[5] = local_characters[5];
 
-                printf("%s is %d * %d = %d bytes, reported offset %d, actual offset %d\n", printout_characters,
-                       local_number, local_type, (local_number * local_type), (int)local_location, (int)being_counter);
+                printf("%s \t %d * %d = %d bytes \t reported/actual/diff offset %d / %d / %d\n", printout_characters,
+                       local_number, local_type, (local_number * local_type), (int)local_location, (int)being_counter, ((int)local_location - (int)being_counter));
 
                 being_counter += (local_number * local_type);
             }

@@ -36,6 +36,8 @@
 
 #define CONSOLE_ONLY /* Please maintain this define until after ALIFE XIII July 22nd */
 #undef SAVE_IMAGES
+#define CONSOLE_REQUIRED
+#undef AUDIT_FILE
 
 #include <stdio.h>
 #include <string.h>
@@ -57,10 +59,12 @@
 
 
 /*NOBLEMAKE DEL=""*/
-#define CONSOLE_REQUIRED
 
 #include "noble/noble.h"
 #include "universe/universe.h"
+#ifdef AUDIT_FILE
+#include "universe/universe_internal.h"
+#endif
 #include "command/command.h"
 
 /* this was added to avoid a CPU fan */
@@ -169,6 +173,61 @@ static void plot(n_string filename, n_int img_width, n_int img_height, n_byte pl
 
 #endif
 
+#ifdef AUDIT_FILE
+
+static void audit_print_offset(n_byte * start, n_byte * point, char * text)
+{
+    printf("%s %ld\n", text, (unsigned long)(point - start));
+}
+
+static void audit_compart_offset()
+{
+    noble_being local;
+    n_byte * start = (n_byte *)&local;
+    audit_print_offset(start,(n_byte *)&(local.state),"state");
+    audit_print_offset(start,(n_byte *)&(local.crowding),"crowding");
+    audit_print_offset(start,(n_byte *)&(local.parasites),"parasites");
+    audit_print_offset(start,(n_byte *)&(local.honor),"honor");
+    
+    audit_print_offset(start,(n_byte *)&(local.date_of_conception[0]),"date_of_conception[0]");
+    audit_print_offset(start,(n_byte *)&(local.mother_new_genetics[0]),"mother_new_genetics[0]");
+    audit_print_offset(start,(n_byte *)&(local.father_new_genetics[0]),"father_new_genetics[0]");
+    
+    audit_print_offset(start,(n_byte *)&(local.father_honor),"father_honor");
+    audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
+    
+    audit_print_offset(start,(n_byte *)&(local.new_genetics[0]),"new_genetics[0]");
+    
+    audit_print_offset(start,(n_byte *)&(local.social_x),"social_x");
+    
+    audit_print_offset(start,(n_byte *)&(local.drives[0]),"drives[0]");
+    audit_print_offset(start,(n_byte *)&(local.goal[0]),"goal[0]");
+    audit_print_offset(start,(n_byte *)&(local.learned_preference[0]),"learned_preference[0]");
+    audit_print_offset(start,(n_byte *)&(local.territory[0]),"territory[0]");
+    audit_print_offset(start,(n_byte *)&(local.immune_system),"immune_system[0]");
+    audit_print_offset(start,(n_byte *)&(local.brainprobe[0]),"brainprobe[0]");
+}
+
+static void audit(void)
+{
+    
+    printf("sizeof(n_byte) %d\n",(int)sizeof(n_byte));
+    printf("sizeof(n_byte2) %d\n",(int)sizeof(n_byte2));
+    printf("sizeof(n_uint) %d\n",(int)sizeof(n_uint));
+    
+    printf("NON_PTR_BEING %d\n",(int)NON_PTR_BEING);
+    
+    printf("sizeof(n_byte	*)) %d \n", (int)sizeof(n_byte	*));
+
+    io_audit_file(noble_file_format, FIL_VER);
+    io_audit_file(noble_file_format, FIL_LAN);
+    io_audit_file(noble_file_format, FIL_BEI);
+    io_audit_file(noble_file_format, FIL_SOE);
+    io_audit_file(noble_file_format, FIL_EPI);
+    audit_compart_offset();
+}
+
+#endif
 
 /*NOBLEMAKE END=""*/
 
@@ -632,6 +691,10 @@ int main(int argc, n_string argv[])
 
     sprintf(simulation_filename,"%s","realtime.txt");
 
+#ifdef AUDIT_FILE
+    audit();
+#endif
+    
     local_sim = sim_sim();
     io_command_line_execution_set();
     
