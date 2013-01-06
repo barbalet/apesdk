@@ -139,24 +139,6 @@ n_int shared_init(n_byte view, n_uint random)
     {
         fIdentification = NUM_TERRAIN;
         (void)control_init(KIND_START_UP, random);
-        if (io_disk_check("NobleApeAutoload.txt") == 1)
-        {
-            n_file * tester = io_file_new();
-            (void)io_disk_read(tester,"NobleApeAutoload.txt");
-            if(file_in(tester) == 0)
-            {
-                control_init(KIND_LOAD_FILE, 0);
-                file_bin_read("NobleApeAutoload.txt");
-            }
-            io_file_free(tester);
-        }
-        if (io_disk_check("ApeScriptAutoload.txt") == 1)
-        {
-            n_file * tester = io_file_new();
-            (void)io_disk_read(tester,"ApeScriptAutoload.txt");
-            (void)file_interpret(tester);
-            io_file_free(tester);
-        }
     }
 
     draw_fit(land_points, fit);
@@ -165,7 +147,6 @@ n_int shared_init(n_byte view, n_uint random)
 
 void shared_close(void)
 {
-    shared_create_preload(1);
     sim_close();
 }
 
@@ -258,14 +239,6 @@ void shared_previousApe(void)
 void shared_nextApe(void)
 {
     (void)control_key(0, 2078);
-}
-
-void shared_create_preload(n_int exists)
-{
-    if (io_disk_check("NobleApeAutoload.txt") == exists)
-    {
-        shared_saveFileName("NobleApeAutoload.txt");
-    }
 }
 
 void shared_clearErrors(void)

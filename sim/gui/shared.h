@@ -81,8 +81,6 @@ void shared_previousApe(void);
 
 void shared_nextApe(void);
 
-void shared_create_preload(n_int exists);
-
 void shared_clearErrors(void);
 
 void shared_new(n_uint seed);

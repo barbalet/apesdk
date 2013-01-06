@@ -403,26 +403,6 @@
 									<reference key="NSOnImage" ref="832797577"/>
 									<reference key="NSMixedImage" ref="114876730"/>
 								</object>
-								<object class="NSMenuItem" id="701272094">
-									<reference key="NSMenu" ref="996486706"/>
-									<string key="NSTitle">Create Autoload file</string>
-									<string key="NSKeyEquiv">d</string>
-									<int key="NSKeyEquivModMask">1048576</int>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="832797577"/>
-									<reference key="NSMixedImage" ref="114876730"/>
-								</object>
-								<object class="NSMenuItem" id="1069311290">
-									<reference key="NSMenu" ref="996486706"/>
-									<bool key="NSIsDisabled">YES</bool>
-									<bool key="NSIsSeparator">YES</bool>
-									<string key="NSTitle"/>
-									<string key="NSKeyEquiv"/>
-									<int key="NSKeyEquivModMask">1048576</int>
-									<int key="NSMnemonicLoc">2147483647</int>
-									<reference key="NSOnImage" ref="832797577"/>
-									<reference key="NSMixedImage" ref="114876730"/>
-								</object>
 								<object class="NSMenuItem" id="204153935">
 									<reference key="NSMenu" ref="996486706"/>
 									<string key="NSTitle">Previous</string>
@@ -779,14 +759,6 @@
 						<reference key="destination" ref="787386507"/>
 					</object>
 					<int key="connectionID">326</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">menuControlCreateAutoload:</string>
-						<reference key="source" ref="818030197"/>
-						<reference key="destination" ref="701272094"/>
-					</object>
-					<int key="connectionID">327</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -1197,8 +1169,6 @@
 							<reference ref="913833820"/>
 							<reference ref="730356110"/>
 							<reference ref="1059087966"/>
-							<reference ref="1069311290"/>
-							<reference ref="701272094"/>
 							<reference ref="737706327"/>
 							<reference ref="787386507"/>
 							<reference ref="689471092"/>
@@ -1314,18 +1284,8 @@
 						<reference key="parent" ref="217568027"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">317</int>
-						<reference key="object" ref="1069311290"/>
-						<reference key="parent" ref="996486706"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">318</int>
 						<reference key="object" ref="787386507"/>
-						<reference key="parent" ref="996486706"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">322</int>
-						<reference key="object" ref="701272094"/>
 						<reference key="parent" ref="996486706"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -1451,9 +1411,7 @@
 					<string>270.IBPluginDependency</string>
 					<string>29.IBPluginDependency</string>
 					<string>311.IBPluginDependency</string>
-					<string>317.IBPluginDependency</string>
 					<string>318.IBPluginDependency</string>
-					<string>322.IBPluginDependency</string>
 					<string>324.IBPluginDependency</string>
 					<string>332.IBPluginDependency</string>
 					<string>344.IBPluginDependency</string>
@@ -1551,8 +1509,6 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1583,7 +1539,6 @@
 							<string>loadManual:</string>
 							<string>loadSimulationPage:</string>
 							<string>menuControlClearErrors:</string>
-							<string>menuControlCreateAutoload:</string>
 							<string>menuControlFlood:</string>
 							<string>menuControlHealthyCarrier:</string>
 							<string>menuControlJustDesire:</string>
@@ -1625,7 +1580,6 @@
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
-							<string>id</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
@@ -1636,7 +1590,6 @@
 							<string>loadManual:</string>
 							<string>loadSimulationPage:</string>
 							<string>menuControlClearErrors:</string>
-							<string>menuControlCreateAutoload:</string>
 							<string>menuControlFlood:</string>
 							<string>menuControlHealthyCarrier:</string>
 							<string>menuControlJustDesire:</string>
@@ -1671,10 +1624,6 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">menuControlClearErrors:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
-								<string key="name">menuControlCreateAutoload:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -1759,6 +1708,10 @@
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencies">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.macosx</string>
 			<integer value="1050" key="NS.object.0"/>
+		</object>
+		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencyDefaults">
+			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.macosx</string>
+			<real value="1070" key="NS.object.0"/>
 		</object>
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDevelopmentDependencies">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin.InterfaceBuilder3</string>

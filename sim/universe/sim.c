@@ -54,7 +54,7 @@
 #include "..\entity\entity.h"
 #endif
 
-#ifdef THREADED
+#ifndef	_WIN32
 
 #include <pthread.h>
 #include <unistd.h>
@@ -248,38 +248,66 @@ static void sim_thread_close(void)
 
 #include <pthread.h>
 
-static n_int sim_quit_value = 0;
+static n_int      sim_quit_value = 0;
+static pthread_t  threads[3] = {0};
+static n_byte     threads_running[3] = {0};
 
 n_int sim_thread_console_quit(void)
 {
     return sim_quit_value;
 }
 
-n_int sim_command_entry = 0;
-
-static void *control_thread(void *threadid)
+static void sim_console_clean_up(void)
 {
-    sim_command_entry++;
+    n_int loop = 0;
+    
+    if ((io_command_line_execution() == 0) || sim_quit_value)
+    {
+        return;
+    }
+    
+    sim_quit_value = 1;
+    while (loop < 3)
+    {
+        if (threads_running[loop] != 0)
+        {
+            pthread_cancel(threads[loop]);
+        }
+        loop++;
+    }
+}
+
+static void *sim_thread(void *threadid)
+{
+    n_byte *local = (n_byte *)threadid;
     if (io_console(sim_sim(), (noble_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
     {
-        sim_quit_value = 1;
+        sim_console_clean_up();
     }
-    sim_command_entry--;
+    local[0] = 0;
     pthread_exit(NULL);
 }
 
 void sim_thread_console(void)
-{
-    pthread_t console;
-    
+{    
     if (io_command_line_execution() == 0)
     {
         return;
     }
     
-    if (sim_command_entry < 3)
+    if ((threads_running[0] == 0)||(threads_running[1] == 0)||(threads_running[2] == 0))
     {
-        (void)pthread_create(&console,0L, control_thread, 0L);
+        n_int loop = 0;
+        while (loop < 3)
+        {
+            if (threads_running[loop] == 0)
+            {
+                threads_running[loop] = 1;
+                pthread_create(&threads[loop], 0L, sim_thread, &threads_running[loop]);
+                return;
+            }
+            loop++;
+        }
     }
 }
 
@@ -1028,10 +1056,14 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     return ((void *) offbuffer);
 }
 
-void	sim_close(void)
+void sim_close(void)
 {
 #ifdef THREADED
     sim_thread_close();
+#endif
+    
+#ifdef _WIN32
+    sim_console_clean_up();
 #endif
     io_free((void *) offbuffer);
     interpret_cleanup(interpret);
@@ -1043,7 +1075,7 @@ void sim_set_select(n_uint number)
     console_external_watch();
 }
 
-void	sim_populations(n_uint	*total, n_uint * female, n_uint * male)
+void sim_populations(n_uint	*total, n_uint * female, n_uint * male)
 {
     n_uint  loop = 0;
     n_uint  local_female = 0;

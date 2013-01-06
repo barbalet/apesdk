@@ -71,7 +71,6 @@
 -(IBAction) menuControlNext:(id) sender;
 
 -(IBAction) menuControlClearErrors:(id) sender;
--(IBAction) menuControlCreateAutoload:(id) sender;
 
 -(IBAction) menuControlNoTerritory:(id) sender;
 -(IBAction) menuControlNoWeather:(id) sender;

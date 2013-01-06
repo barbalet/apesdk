@@ -267,11 +267,6 @@ n_int   count_switch = 0;
     shared_clearErrors();
 }
 
--(IBAction) menuControlCreateAutoload:(id) sender
-{
-    shared_create_preload(0);
-}
-
 -(IBAction) menuControlNoTerritory:(id) sender
 {
     shared_notTerritory();
