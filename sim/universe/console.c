@@ -79,6 +79,11 @@ n_uint save_interval_steps = 60 * 24;
 n_int          console_file_interaction = 0;
 n_string_block console_file_name;
 
+n_int console_executing(void)
+{
+    return simulation_executing;
+}
+
 void console_external_watch(void)
 {    
     if (io_command_line_execution())
@@ -2545,3 +2550,8 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
+n_int console_quit(void * ptr, n_string response, n_console_output output_function)
+{
+    (void)console_stop(ptr, response, output_function);
+    return io_quit(ptr, response, output_function);
+}

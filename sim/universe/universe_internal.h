@@ -480,6 +480,8 @@ void sim_start_conditions(void * code, void * structure, n_int identifier);
 
 void console_external_watch(void);
 
+n_int console_executing(void);
+
 
 #endif /* _NOBLEAPE_UNIVERSE_INTERNAL_H_ */
 

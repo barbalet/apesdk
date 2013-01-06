@@ -1612,6 +1612,8 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
 n_int console_open(void * ptr, n_string response, n_console_output output_function);
 n_int console_script(void * ptr, n_string response, n_console_output output_function);
 
+n_int console_quit(void * ptr, n_string response, n_console_output output_function);
+
 #ifndef	_WIN32
 
 n_int sim_thread_console_quit(void);
@@ -1655,9 +1657,9 @@ const static noble_console_command control_commands[] =
     {&console_script,        "script",         "[file]",               "Load an ApeScript simulation file"},
     {&console_save,          "save",           "[file]",               "Save a simulation file"},
 
-    {&io_quit,               "quit",           "",                     "Quits the console"},
-    {&io_quit,               "exit",           "",                     ""},
-    {&io_quit,               "close",          "",                     ""},
+    {&console_quit,               "quit",           "",                     "Quits the console"},
+    {&console_quit,               "exit",           "",                     ""},
+    {&console_quit,               "close",          "",                     ""},
 #else
     {&cle_load,              "load",           "[file]",               "Load a simulation file"},
     {&cle_script,            "script",         "[file]",               "Load apescript file"},

@@ -265,8 +265,12 @@ static void sim_console_clean_up(void)
     {
         return;
     }
-    
     sim_quit_value = 1;
+
+    console_quit(0L,0L,0L);
+
+    while (console_executing()){}
+    
     while (loop < 3)
     {
         if (threads_running[loop] != 0)
