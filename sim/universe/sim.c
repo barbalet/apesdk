@@ -249,8 +249,8 @@ static void sim_thread_close(void)
 #include <pthread.h>
 
 static n_int      sim_quit_value = 0;
-static pthread_t  threads[3] = {0};
-static n_byte     threads_running[3] = {0};
+static pthread_t  threads[2] = {0};
+static n_byte     threads_running[2] = {0};
 
 n_int sim_thread_console_quit(void)
 {
@@ -271,7 +271,7 @@ static void sim_console_clean_up(void)
 
     while (console_executing()){}
     
-    while (loop < 3)
+    while (loop < 2)
     {
         if (threads_running[loop] != 0)
         {
@@ -299,10 +299,10 @@ void sim_thread_console(void)
         return;
     }
     
-    if ((threads_running[0] == 0)||(threads_running[1] == 0)||(threads_running[2] == 0))
+    if ((threads_running[0] == 0)||(threads_running[1] == 0))
     {
         n_int loop = 0;
-        while (loop < 3)
+        while (loop < 2)
         {
             if (threads_running[loop] == 0)
             {
@@ -1062,12 +1062,11 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
 void sim_close(void)
 {
-#ifdef THREADED
-    sim_thread_close();
-#endif
-    
 #ifdef _WIN32
     sim_console_clean_up();
+#endif
+#ifdef THREADED
+    sim_thread_close();
 #endif
     io_free((void *) offbuffer);
     interpret_cleanup(interpret);
