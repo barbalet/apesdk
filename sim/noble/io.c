@@ -49,6 +49,7 @@
 /*NOBLEMAKE END=""*/
 
 static n_int command_line_execution;
+static n_int command_line_external_exit = 0;
 
 void  io_command_line_execution_set(void)
 {
@@ -1875,6 +1876,11 @@ void io_console_out(n_string value)
     fflush(stdout);
 }
 
+void io_console_quit(void)
+{
+    command_line_external_exit = 1;
+}
+
 n_int io_console(void * ptr, noble_console_command * commands, n_console_input input_function, n_console_output output_function)
 {
     n_string_block buffer;
@@ -1911,14 +1917,25 @@ n_int io_console(void * ptr, noble_console_command * commands, n_console_input i
                 n_int count = io_find((n_string)buffer, 0, buffer_len, commands[loop].command, command_len);
                 if (count != -1)
                 {
+                    n_int return_value;
                     n_console * function = commands[loop].function;
                     if (IS_SPACE(buffer[count]))
                     {
-                        return (*function)(ptr,(n_string)&buffer[count+1], output_function);
+                        return_value = (*function)(ptr,(n_string)&buffer[count+1], output_function);
+                        if (command_line_external_exit)
+                        {
+                            return 1;
+                        }
+                        return return_value;
                     }
                     else if (buffer[count] == 0)
                     {
-                        return (*function)(ptr,0L, output_function);
+                        return_value = (*function)(ptr,0L, output_function);
+                        if (command_line_external_exit)
+                        {
+                            return 1;
+                        }
+                        return return_value;
                     }
                 }
                 loop++;

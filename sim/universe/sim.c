@@ -265,6 +265,7 @@ static void sim_console_clean_up(void)
     {
         return;
     }
+    
     sim_quit_value = 1;
 
     console_quit(0L,0L,0L);
@@ -1062,6 +1063,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
 void sim_close(void)
 {
+    io_console_quit();
 #ifdef _WIN32
     sim_console_clean_up();
 #endif

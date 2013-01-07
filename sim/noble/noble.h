@@ -554,6 +554,8 @@ n_int      io_command(n_file * fil, const noble_file_entry * commands);
 n_int      io_read_data(n_file * fil, n_byte2 command, n_byte * data_read);
 void       io_help_line(noble_console_command * specific, n_console_output output_function);
 
+void       io_console_quit(void);
+
 /*
  This provides the land interface into entity but not the universe.
 
