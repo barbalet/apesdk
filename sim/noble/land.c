@@ -54,6 +54,37 @@
 
 /*NOBLEMAKE END=""*/
 
+/*
+ 
+ Resources
+ 
+ Wood
+ Meat - Fish
+ Meat - Animals
+ Gold
+ Silver
+ Tin
+ Lead
+ Copper
+ Stone
+ Limestone
+ 
+ Landscape Changes
+ 
+ Path
+ Road
+ Hut
+ Smelter/Blacksmith
+ Boat Building
+ Boat
+ 
+ Posessions
+ 
+ ?
+ 
+ */
+
+
 #define WATER_EVAP_TIDE     (0)
 #define WATER_EVAP_REG      (0)
 #define WATER_RELEASE_RAIN  (0)
@@ -296,7 +327,33 @@ n_int	weather_seven_values(n_land * local_land, n_weather * local_weather, n_int
     return ret_val;
 }
 
-
+n_int time_actual_to_perceived(n_int actual_time)
+{
+    if (actual_time >= DUSK_END_POINT)
+    {
+        n_int relative_time = actual_time - DUSK_END_POINT;
+        return (238 - 16) + NIGHT_TIME_DIVISION(relative_time);
+    }
+    if (actual_time >= DAY_END_POINT)
+    {
+        n_int relative_time = actual_time - DAY_END_POINT;
+        return (238 - 16 - 4) + DAWN_DUSK_TIME_DIVISION(relative_time);
+    }
+    if (actual_time >= DAWN_END_POINT)
+    {
+        n_int relative_time = actual_time - DAWN_END_POINT;
+        return (238 - 16 - 4 - 192) + DAY_TIME_DIVISION(relative_time);
+    }
+    if (actual_time >= NIGHT_END_POINT)
+    {
+        n_int relative_time = actual_time - NIGHT_END_POINT;
+        return (238 - 16 - 4 - 192 - 4) + DAWN_DUSK_TIME_DIVISION(relative_time);
+    }
+    {
+        n_int relative_time = actual_time;
+        return NIGHT_TIME_DIVISION(relative_time);
+    }
+}
 
 static void land_tide(n_land * local_land)
 {

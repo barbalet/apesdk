@@ -636,6 +636,27 @@ void       io_console_quit(void);
 #define IS_NIGHT(num)		((((num)>>5) <  (11))||(((num)>>5) >  (36)))
 #define	IS_DAWNDUSK(num)	((((num)>>5) == (11))||(((num)>>5) == (36)))
 
+
+#define NIGHT_END_POINT     (256)
+#define DAWN_END_POINT      (384)
+#define DAY_END_POINT       (1152)
+#define DUSK_END_POINT      (1184)
+
+#define MAX_MODIFIED_TIME   (238)
+
+#define NIGHT_TIME_DIVISION(time)     ((time)>>4)
+#define DAWN_DUSK_TIME_DIVISION(time) ((time)>>3)
+#define DAY_TIME_DIVISION(time)       ((time)>>2)
+
+/*
+  Night 1184  - 1439
+  Night 0 - 351
+  Dawn  352 - 383
+  Day   384 - 1151
+  Dusk  1152 - 1183
+ 
+ */
+
 /*! @struct
  @field atmosphere The atmosphere is represented by two 128 x 128 integer.
  buffers, one containing the static flow map and one containing the dynamic
