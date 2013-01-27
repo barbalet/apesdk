@@ -154,8 +154,6 @@ void being_init_braincode(noble_simulation * sim,
                           n_byte friend_foe,
                           n_byte internal);
 
-n_byte being_awake_local(noble_simulation * sim, noble_being * local);
-
 void drives_cycle(noble_being * local, n_byte social, n_int awake, noble_simulation * sim);
 
 n_byte get_braincode_instruction(noble_being * local_being);

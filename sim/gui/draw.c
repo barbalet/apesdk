@@ -987,7 +987,7 @@ static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
         }
         start_point++;
     }
-    if(being_awake(sim, reference) && bei->speak != 0)
+    if(being_awake_local(sim, bei) && bei->speak != 0)
     {
         n_int	local_facing = ((((GET_F(bei))>>2) + 4) & 63) >> 3;
         /* D  C
@@ -1069,7 +1069,7 @@ static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join *
         }
         start_point++;
     }
-    if(being_awake(sim, reference) && bei->speak != 0)
+    if(being_awake_local(sim, bei) && bei->speak != 0)
     {
         n_int	local_facing = ((((GET_F(bei))>>2) + 4) & 63) >> 3;
         /* D  C

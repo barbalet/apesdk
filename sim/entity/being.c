@@ -1270,12 +1270,6 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
     return FULLY_ASLEEP;
 }
 
-n_byte being_awake(noble_simulation * sim, n_uint reference)
-{
-    noble_being * local = &(sim->beings[reference]);
-    return being_awake_local(sim, local);
-}
-
 #ifdef BRAINCODE_ON
 
 n_int brain_probe_to_location(n_int position)
@@ -1911,7 +1905,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
     n_int         fat_mass, child_mass = 0;
-    n_int         awake = being_awake(sim, current_being_index);
+    n_int         awake = being_awake_local(sim, local);
 
     n_int         carrying_child = 0;
 
@@ -2777,7 +2771,7 @@ void being_tidy(noble_simulation * local_sim)
             max_honor = local_being->honor;
         }
 #endif
-        if(being_awake(local_sim, loop))
+        if(being_awake_local(local_sim, local_being))
         {
             n_int	local_f  = GET_F(local_being);
             n_int	local_s  = GET_S(local_being);
