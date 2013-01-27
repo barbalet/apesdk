@@ -618,30 +618,31 @@ static n_int get_actor_index_from_episode(
     return actor_index;
 }
 
-/* returns the index to an episodic memory with a similar time to the current one */
-static n_int attention_similar_time(
-    n_int episode_index,
-    episodic_memory * episodic,
-    n_int * memory_visited)
+typedef n_int (n_similar)(episodic_memory * episodic, n_int * carry_through);
+
+static n_int attention_similar(n_int episode_index,
+                               episodic_memory * episodic,
+                               n_int * memory_visited,
+                               n_int * carry_through,
+                               n_similar function)
 {
-    n_int i,dt,min=-1;
-    n_byte2 time = episodic[episode_index].time;
-    n_int next_episode_index = -1;
+    n_int i;
     n_int visited_max = memory_visited[episode_index] - (EPISODIC_SIZE>>1);
-
+    n_int min=-1;
+    n_int next_episode_index = -1;
     if (visited_max<0) visited_max=0;
-
+    
     for (i = 0; i < EPISODIC_SIZE; i++)
     {
         if (episodic[i].event == 0) continue;
-
+        
         if (i != episode_index)
         {
             /* was this episode recently visited? */
             if (memory_visited[i] <= visited_max)
             {
                 /* time between episodes */
-                dt = episodic[i].time - time;
+                n_int dt = function(&episodic[i], carry_through);
                 if (dt < 0) dt = -dt;
                 if ((min == -1) || (dt < min))
                 {
@@ -660,180 +661,100 @@ static n_int attention_similar_time(
     return next_episode_index;
 }
 
-/* returns the index to an episodic memory with a similar affect value to the current one */
-static n_int attention_similar_affect(
-    n_int episode_index,
-    episodic_memory * episodic,
-    n_int * memory_visited)
+static n_int similar_time(episodic_memory * episodic, n_int * carry_through)
 {
-    n_int i,da,min=-1;
-    n_byte2 affect = episodic[episode_index].affect;
-    n_int next_episode_index = -1;
-    n_int visited_max = memory_visited[episode_index] - (EPISODIC_SIZE>>1);
-
-    if (visited_max<0) visited_max=0;
-
-    for (i = 0; i < EPISODIC_SIZE; i++)
+    n_int dt = episodic->time - carry_through[0];
+    if (dt < 0)
     {
-        if (episodic[i].event == 0) continue;
-
-        if (i != episode_index)
-        {
-            /* was this episode recently visited? */
-            if (memory_visited[i] <= visited_max)
-            {
-                /* similarity */
-                da = episodic[i].affect - affect;
-                if (da < 0) da = -da;
-                if ((min == -1) || (da < min))
-                {
-                    /* record most similar affect */
-                    min = da;
-                    next_episode_index = i;
-                }
-            }
-        }
+        dt = - dt;
     }
-    if (next_episode_index>-1)
-    {
-        /* mark this episode as having been visited */
-        memory_visited[next_episode_index] = memory_visited[episode_index]+1;
-    }
-    return next_episode_index;
+    return dt;
 }
 
-/* returns the index to an episodic memory with a similar name to the current one */
-static n_int attention_similar_name(
-    n_int episode_index,
-    episodic_memory * episodic,
-    n_int * memory_visited)
+static n_int attention_similar_time(n_int episode_index,
+                                    episodic_memory * episodic,
+                                    n_int * memory_visited)
 {
-    n_int   i,similarity,max=-1;
-    n_int   next_episode_index = -1;
-    n_int   visited_max = memory_visited[episode_index] - (EPISODIC_SIZE>>1);
-    n_byte  first_name = UNPACK_FAMILY_FIRST_NAME(episodic[episode_index].family_name[BEING_MET]);
-    n_byte  second_name = UNPACK_FAMILY_SECOND_NAME(episodic[episode_index].family_name[BEING_MET]);
-    n_byte2 name = episodic[episode_index].first_name[BEING_MET];
-
-    if (visited_max < 0) visited_max = 0;
-
-    for (i = 0; i < EPISODIC_SIZE; i++)
-    {
-        if (episodic[i].event == 0) continue;
-
-        if (i != episode_index)
-        {
-            /* was this episode recently visited? */
-            if (memory_visited[i] <= visited_max)
-            {
-                similarity = 0;
-                if (UNPACK_FAMILY_FIRST_NAME(episodic[i].family_name[BEING_MET]) == first_name) similarity++;
-                if (UNPACK_FAMILY_SECOND_NAME(episodic[i].family_name[BEING_MET]) == second_name) similarity++;
-                if (episodic[i].first_name[BEING_MET] == name) similarity++;
-
-                if ((max == -1) || (similarity > max))
-                {
-                    /* record most similar name */
-                    max = similarity;
-                    next_episode_index = i;
-                }
-            }
-        }
-    }
-    if (next_episode_index>-1)
-    {
-        /* mark this episode as having been visited */
-        memory_visited[next_episode_index] = memory_visited[episode_index]+1;
-    }
-    return next_episode_index;
+    n_int time = episodic[episode_index].time;
+    return attention_similar(episode_index, episodic, memory_visited, &time, similar_time);
 }
 
-/* returns the index to an episodic memory with a similar date to the current one */
-static n_int attention_similar_date(
-    n_int episode_index,
-    episodic_memory * episodic,
-    n_int * memory_visited)
+static n_int similar_affect(episodic_memory * episodic, n_int * carry_through)
 {
-    n_int i,dt0,dt1,min=-1;
-    n_int next_episode_index = -1;
-    n_int visited_max = memory_visited[episode_index] - (EPISODIC_SIZE>>1);
-
-    if (visited_max<0) visited_max=0;
-
-    for (i = 0; i < EPISODIC_SIZE; i++)
+    n_int dt = episodic->affect - carry_through[0];
+    if (dt < 0)
     {
-        if (episodic[i].event == 0) continue;
-
-        if (i != episode_index)
-        {
-            /* was this episode recently visited? */
-            if (memory_visited[i] <= visited_max)
-            {
-                /* time between episodes */
-                dt0 = episodic[i].date[0] - episodic[episode_index].date[0];
-                dt1 = episodic[i].date[1] - episodic[episode_index].date[1];
-                if (dt0 < 0) dt0 = -dt0;
-                if (dt1 < 0) dt1 = -dt1;
-                if ((min == -1) || (dt0+dt1 < min))
-                {
-                    /* record most similar time */
-                    min = dt0 + dt1;
-                    next_episode_index = i;
-                }
-            }
-        }
+        dt = - dt;
     }
-    if (next_episode_index>-1)
-    {
-        /* mark this episode as having been visited */
-        memory_visited[next_episode_index] = memory_visited[episode_index]+1;
-    }
-    return next_episode_index;
+    return dt;
 }
 
-/* returns the index to an episodic memory with a similar location to the current one */
-static n_int attention_similar_place(
-    n_int episode_index,
-    episodic_memory * episodic,
-    n_int * memory_visited)
+static n_int attention_similar_affect(n_int episode_index,
+                                    episodic_memory * episodic,
+                                    n_int * memory_visited)
 {
-    n_int i,dx,dy,min=-1;
-    n_byte2 location_x = episodic[episode_index].location[0];
-    n_byte2 location_y = episodic[episode_index].location[1];
-    n_int next_episode_index = -1;
-    n_int visited_max = memory_visited[episode_index] - (EPISODIC_SIZE>>1);
+    n_int affect = episodic[episode_index].affect;
+    return attention_similar(episode_index, episodic, memory_visited, &affect, similar_affect);
+}
 
-    if (visited_max<0) visited_max=0;
+static n_int similar_name(episodic_memory * episodic, n_int * carry_through)
+{
+    n_int similarity = 3;
+    
+    if (UNPACK_FAMILY_FIRST_NAME(episodic->family_name[BEING_MET]) == carry_through[0]) similarity--;
+    if (UNPACK_FAMILY_SECOND_NAME(episodic->family_name[BEING_MET]) == carry_through[1]) similarity--;
+    if (episodic->first_name[BEING_MET] == carry_through[2]) similarity--;
+    return similarity;
+}
 
-    for (i = 0; i < EPISODIC_SIZE; i++)
+static n_int attention_similar_name(n_int episode_index,
+                                      episodic_memory * episodic,
+                                      n_int * memory_visited)
+{
+    n_int name[3];
+    
+    name[0] = UNPACK_FAMILY_FIRST_NAME(episodic[episode_index].family_name[BEING_MET]);
+    name[1] = UNPACK_FAMILY_SECOND_NAME(episodic[episode_index].family_name[BEING_MET]);
+    name[2] = episodic[episode_index].first_name[BEING_MET];
+    
+    return attention_similar(episode_index, episodic, memory_visited, name, similar_name);
+}
+
+static n_int similar_date(episodic_memory * episodic, n_int * carry_through)
+{
+    n_int dt = TIME_IN_DAYS(episodic->date) - carry_through[0];
+    if (dt < 0)
     {
-        if (episodic[i].event == 0) continue;
+        dt = - dt;
+    }
+    return dt;
+}
 
-        if (i != episode_index)
-        {
-            /* was this episode recently visited? */
-            if (memory_visited[i] <= visited_max)
-            {
-                /* distance between episodes */
-                dx = episodic[i].location[0] - location_x;
-                dy = episodic[i].location[1] - location_y;
-                if (dx < 0) dx = -dx;
-                if (dy < 0) dy = -dy;
-                if ((min == -1) || (dx + dy < min))
-                {
-                    /* record minimum distance */
-                    min = dx + dy;
-                    next_episode_index = i;
-                }
-            }
-        }
-    }
-    if (next_episode_index>-1)
-    {
-        /* mark this episode as having been visited */
-        memory_visited[next_episode_index] = memory_visited[episode_index]+1;
-    }
-    return next_episode_index;
+static n_int attention_similar_date(n_int episode_index,
+                                    episodic_memory * episodic,
+                                    n_int * memory_visited)
+{
+    n_int time = TIME_IN_DAYS(&episodic[episode_index].date[0]);
+    return attention_similar(episode_index, episodic, memory_visited, &time, similar_date);
+}
+
+static n_int similar_place(episodic_memory * episodic, n_int * carry_through)
+{
+    n_int dx = episodic->location[0] - carry_through[0];
+    n_int dy = episodic->location[1] - carry_through[1];
+    // should be calculated in the future with wrap around comparison
+    n_int da = (dx * dx) + (dy * dy);
+    return da;
+}
+
+static n_int attention_similar_place(n_int episode_index,
+                                    episodic_memory * episodic,
+                                    n_int * memory_visited)
+{
+    n_int location[2];
+    location[0] = episodic[episode_index].location[0];
+    location[1] = episodic[episode_index].location[1];
+    return attention_similar(episode_index, episodic, memory_visited, location, similar_place);
 }
 
 static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, social_link * meeter_social_graph, n_int actor_index, n_byte switcher)
