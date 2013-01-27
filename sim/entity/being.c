@@ -92,33 +92,7 @@ typedef	struct
 }
 being_draw;
 
-/* not used? */
-#ifdef NOT_USED
-n_byte being_alive(n_byte2 first_name_gender, n_byte2 family_name, noble_simulation * local_sim)
-{
-    n_int i,j;
-    noble_being * b;
-    social_link * social_graph;
 
-    for (j = 0; j < local_sim->num; j++)
-    {
-        b = &local_sim->beings[j];
-        social_graph = GET_SOC(local_sim, b);
-
-        for (i=1; i<SOCIAL_SIZE; i++)
-        {
-            if (social_graph[i].first_name[BEING_MET] == first_name_gender)
-            {
-                if (social_graph[i].family_name[BEING_MET] == family_name)
-                {
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
-}
-#endif
 
 static n_byte	being_ground(n_int px, n_int py, void * params)
 {
