@@ -229,65 +229,91 @@ static n_uint speak_length_total(n_string paragraph)
     return length;
 }
 
-void speak_aiff_header(FILE *fptr, n_uint total_samples)
+void aiff_header(n_byte * header)
 {
-	n_uint totalsize;
-	/* Write the form chunk */
-	fprintf(fptr,"FORM");
-	totalsize = 4 + 8 + 18 + 8 + 2 * total_samples + 8;
-	fputc((totalsize & 0xff000000) >> 24,fptr);
-	fputc((totalsize & 0x00ff0000) >> 16,fptr);
-	fputc((totalsize & 0x0000ff00) >> 8,fptr);
-	fputc((totalsize & 0x000000ff),fptr);
-	fprintf(fptr,"AIFF");
-	
-	/* Write the common chunk */
-	fprintf(fptr,"COMM");
-	fputc(0,fptr);                               /* Size */
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(18,fptr);
-	fputc(0,fptr);                               /* Channels = 1 */
-	fputc(1,fptr);
-	fputc((total_samples & 0xff000000) >> 24,fptr);   /* Samples */
-	fputc((total_samples & 0x00ff0000) >> 16,fptr);
-	fputc((total_samples & 0x0000ff00) >> 8,fptr);
-	fputc((total_samples & 0x000000ff),fptr);
-	fputc(0,fptr);                               /* Size = 16 */
-	fputc(16,fptr);
-	fputc(0x40,fptr);                            /* 10 byte sample rate */
-	fputc(0x0e,fptr);
-	fputc(0xac,fptr);
-	fputc(0x44,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);
-	
-	/* Write the sound data chunk */
-	fprintf(fptr,"SSND");
-	fputc(((2*total_samples+8) & 0xff000000) >> 24,fptr);/* Size      */
-	fputc(((2*total_samples+8) & 0x00ff0000) >> 16,fptr);
-	fputc(((2*total_samples+8) & 0x0000ff00) >> 8,fptr);
-	fputc(((2*total_samples+8) & 0x000000ff),fptr);
-	fputc(0,fptr);                                /* Offset    */
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);                                /* Block     */
-	fputc(0,fptr);
-	fputc(0,fptr);
-	fputc(0,fptr);
-	
+    header[0] =  'F';
+    header[1] =  'O';
+    header[2] =  'R';
+    header[3] =  'M';
+
+    header[8]  = 'A';
+    header[9]  = 'I';
+    header[10] = 'F';
+    header[11] = 'F';
+    
+    header[12] = 'C';
+    header[13] = 'O';
+    header[14] = 'M';
+    header[15] = 'M';
+
+    header[19] = 18;
+
+    header[21] = 1;
+    
+    header[27] = 16;
+    
+    header[28] = 0x40;
+    header[29] = 0x0e;
+    header[30] = 0xac;
+    header[31] = 0x44;
+    
+    header[38] = 'S';
+    header[39] = 'S';
+    header[40] = 'N';
+    header[41] = 'D';
+}
+
+void aiff_uint(n_byte * buffer, n_uint value)
+{
+    buffer[0] = (value & 0xff000000) >> 24;
+    buffer[1] = (value & 0x00ff0000) >> 16;
+    buffer[2] = (value & 0x0000ff00) >> 8;
+    buffer[3] = (value & 0x000000ff) >> 0;
+}
+
+n_uint aiff_uint_out(n_byte * buffer)
+{
+    return (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+}
+
+n_uint aiff_total_size(n_uint total_samples)
+{
+    return 4 + 8 + 18 + 8 + (2 * total_samples) + 8;
+}
+
+n_uint aiff_sound_size(n_uint total_samples)
+{
+    return (2 * total_samples) + 8;
+}
+
+n_int aiff_sample_size(n_uint total_size)
+{
+    n_int total_samples2 = ((n_int)total_size) - 4 - 8 - 18 - 8 - 8;
+    if (total_samples2 < 0)
+    {
+        return SHOW_ERROR("Total AIFF samples less than zero");
+    }
+    if (total_samples2 & 1)
+    {
+        return SHOW_ERROR("Non multiple of 2 in AIFF file size");
+    }
+    return total_samples2 >> 1;
+}
+
+void speak_aiff_header(FILE * fptr, n_uint total_samples)
+{
+    n_byte header[54] = {0};
+    aiff_header(header);
+    aiff_uint(&header[4],  aiff_total_size(total_samples));
+    aiff_uint(&header[22], total_samples);
+    aiff_uint(&header[42], aiff_sound_size(total_samples));
+    fwrite(header, 54, 1, fptr);
 }
 
 static void speak_aiff_body(FILE * fptr, n_audio *samples, n_uint number_samples)
 {
     fwrite(samples,number_samples,2,fptr);
 }
-
 
 const static n_int set_frequencies[24] = {
     175,178,180,183,
@@ -297,8 +323,6 @@ const static n_int set_frequencies[24] = {
     220,223,227,229,
     233,237,240,244
 };
-
-
 
 
 const static n_int vowel_reorder[8] = {
@@ -416,9 +440,7 @@ static void speak_make(n_string filename, n_string paragraph)
 				
 				frequency[local_high[0]/division] = local_high[1]/division;
 				frequency[local_high[2]/division] = local_high[3]/division;
-				
 				frequency[local_high[4]/division] = local_high[5]/division;
-
 				frequency[local_high[6]/division] = local_high[7]/division;
 
 				

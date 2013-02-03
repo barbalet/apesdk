@@ -137,19 +137,15 @@ n_int   count_switch = 0;
     if (polygonal_entry(fIdentification))
 #endif
     {
-        int             dimensionX = rect.size.width;
-        int             dimensionY = rect.size.height;
-        int             ly = 0;
-        int             loop = 0;
-        int				loopColors = 0;
-        unsigned short	fit[256*3];
-        unsigned char   * index = shared_draw(fIdentification);
+        n_c_int           dimensionX = rect.size.width;
+        n_c_int           dimensionY = rect.size.height;
+        n_int           ly = 0;
+        n_int           loop = 0;
+        n_int			loopColors = 0;
+        n_byte2         fit[256*3];
+        n_byte        * index = shared_draw(fIdentification);
 
         if (index == 0L) return;
-        
-        
-//        dimensionX = dimensionX - (dimensionX&3);
-//        dimensionY = dimensionY - (dimensionY&3);
         
         shared_cycle_really_draw(fIdentification, dimensionX, dimensionY);
         
@@ -165,8 +161,8 @@ n_int   count_switch = 0;
         loop = 0;
         while(ly < dimensionY)
         {
-            int lx = 0;
-            unsigned char * indexLocalX = &index[(dimensionY-ly-1)*dimensionX];
+            n_int    lx = 0;
+            n_byte * indexLocalX = &index[(dimensionY-ly-1)*dimensionX];
             while(lx < dimensionX)
             {
                 unsigned char value = indexLocalX[lx++] ;
@@ -405,7 +401,7 @@ n_int   count_switch = 0;
 
 - (void)keyDown:(NSEvent *)theEvent
 {
-    unsigned short local_key = 0;
+    n_byte2  local_key = 0;
     if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
     {
         local_key = 2048;
@@ -446,8 +442,8 @@ n_int   count_switch = 0;
 - (void)mouseDown:(NSEvent *)theEvent
 {
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    int location_x = location.x;
-    int location_y = location.y;
+    n_int location_x = location.x;
+    n_int location_y = location.y;
     if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
     {
         shared_mouseOption(1);
