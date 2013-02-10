@@ -414,48 +414,59 @@ n_int io_aiff_header_check_length(n_byte * header)
     }
     total_size = io_aiff_uint_out(&header[4]);
     loop = 8;
-    while (loop < 22)
+    while (loop < 16)
     {
-        if ((loop != 16) && (loop != 17) && (loop != 18) && (loop != 20))
+        if (comparison[loop] != header[loop])
         {
-            if (comparison[loop] != header[loop])
-            {                
-                return SHOW_ERROR("AIFF fails second section");
-            }
+            return SHOW_ERROR("AIFF fails second section");
         }
         loop++;
     }
+    
+    loop = 21;
+    while (loop < 22)
+    {
+        if (comparison[loop] != header[loop])
+        {
+            return SHOW_ERROR("AIFF fails second section");
+        }
+        loop++;
+    }
+    
     total_samples = io_aiff_uint_out(&header[22]);
     loop = 27;
-    while (loop < 42)
+    while (loop < 32)
     {
-        if ((loop != 32) && (loop != 33) && (loop != 34) && (loop != 35) && (loop != 36) && (loop != 37))
-        {
             if (comparison[loop] != header[loop])
             {
                 return SHOW_ERROR("AIFF fails third section");
             }
+        loop++;
+    }
+    
+    loop = 38;
+    while (loop < 42)
+    {
+        if (comparison[loop] != header[loop])
+        {
+            return SHOW_ERROR("AIFF fails fourth section");
         }
         loop++;
     }
+    
     sound_size = io_aiff_uint_out(&header[42]);
 
     loop = 46;
-    while (loop < 54)
+    while (loop < 48)
     {
-        if ((loop != 48) && (loop != 49) && (loop != 50) && (loop != 51) && (loop != 52) && (loop != 53))
+        if (comparison[loop] != header[loop])
         {
-            if (comparison[loop] != header[loop])
-            {
-                return SHOW_ERROR("AIFF fails fourth section");
-            }
+            return SHOW_ERROR("AIFF fails fifth section");
         }
         loop++;
     }
-    if (total_size != io_aiff_total_size(total_samples))
-    {
-        return SHOW_ERROR("AIFF fails total size compare");
-    }
+    /* if (total_size != io_aiff_total_size(total_samples)) - this is not a valid comparison */
+    
     if (sound_size != io_aiff_sound_size(total_samples))
     {
         return SHOW_ERROR("AIFF fails sound size compare");
