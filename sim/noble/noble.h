@@ -471,6 +471,14 @@ void    math_patch(n_byte * local_map, n_byte * scratch,
                    n_byte refined_start, n_byte refined_end,
                    n_byte rotate);
 
+void       io_aiff_header(n_byte * header);
+void       io_aiff_uint(n_byte * buffer, n_uint value);
+n_uint     io_aiff_uint_out(n_byte * buffer);
+n_uint     io_aiff_total_size(n_uint total_samples);
+n_uint     io_aiff_sound_size(n_uint total_samples);
+n_int      io_aiff_sample_size(n_uint total_size);
+n_int      io_aiff_header_check_length(n_byte * header);
+
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);
 n_int      io_command_line_execution(void);
@@ -531,6 +539,8 @@ n_int          file_chain_read_header(n_string name, n_file_chain * header, n_ui
 n_int          file_chain_read_validate(n_string name, n_file_chain *initial);
 
 void           file_chain_bin_name(n_string original, n_string bin_file);
+
+n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_function);
 
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);

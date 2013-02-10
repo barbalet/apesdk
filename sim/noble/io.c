@@ -326,6 +326,166 @@ void file_chain_bin_name(n_string original, n_string bin_file)
 }
 
 
+void io_aiff_header(n_byte * header)
+{
+    header[0] =  'F';
+    header[1] =  'O';
+    header[2] =  'R';
+    header[3] =  'M';
+    
+    header[8]  = 'A';
+    header[9]  = 'I';
+    header[10] = 'F';
+    header[11] = 'F';
+    
+    header[12] = 'C';
+    header[13] = 'O';
+    header[14] = 'M';
+    header[15] = 'M';
+    
+    header[19] = 18;
+    
+    header[21] = 1;
+    
+    header[27] = 16;
+    
+    header[28] = 0x40;
+    header[29] = 0x0e;
+    header[30] = 0xac;
+    header[31] = 0x44;
+    
+    header[38] = 'S';
+    header[39] = 'S';
+    header[40] = 'N';
+    header[41] = 'D';
+}
+
+void io_aiff_uint(n_byte * buffer, n_uint value)
+{
+    buffer[0] = (value & 0xff000000) >> 24;
+    buffer[1] = (value & 0x00ff0000) >> 16;
+    buffer[2] = (value & 0x0000ff00) >> 8;
+    buffer[3] = (value & 0x000000ff) >> 0;
+}
+
+n_uint io_aiff_uint_out(n_byte * buffer)
+{
+    return (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+}
+
+n_uint io_aiff_total_size(n_uint total_samples)
+{
+    return 4 + 8 + 18 + 8 + (2 * total_samples) + 8;
+}
+
+n_uint io_aiff_sound_size(n_uint total_samples)
+{
+    return (2 * total_samples) + 8;
+}
+
+n_int io_aiff_sample_size(n_uint total_size)
+{
+    n_int total_samples2 = ((n_int)total_size) - 4 - 8 - 18 - 8 - 8;
+    if (total_samples2 < 0)
+    {
+        return SHOW_ERROR("Total AIFF samples less than zero");
+    }
+    if (total_samples2 & 1)
+    {
+        return SHOW_ERROR("Non multiple of 2 in AIFF file size");
+    }
+    return total_samples2 >> 1;
+}
+
+n_int io_aiff_header_check_length(n_byte * header)
+{
+    n_byte  comparison[54];
+    io_aiff_header(comparison);
+    n_uint  total_size, total_samples, sound_size;
+    n_int   loop = 0;
+
+    while (loop < 4)
+    {
+        if (comparison[loop] != header[loop])
+        {
+            return SHOW_ERROR("AIFF fails header section");
+        }
+        loop++;
+    }
+    total_size = io_aiff_uint_out(&header[4]);
+    loop = 8;
+    while (loop < 22)
+    {
+        if ((loop != 16) && (loop != 17) && (loop != 18) && (loop != 20))
+        {
+            if (comparison[loop] != header[loop])
+            {                
+                return SHOW_ERROR("AIFF fails second section");
+            }
+        }
+        loop++;
+    }
+    total_samples = io_aiff_uint_out(&header[22]);
+    loop = 27;
+    while (loop < 42)
+    {
+        if ((loop != 32) && (loop != 33) && (loop != 34) && (loop != 35) && (loop != 36) && (loop != 37))
+        {
+            if (comparison[loop] != header[loop])
+            {
+                return SHOW_ERROR("AIFF fails third section");
+            }
+        }
+        loop++;
+    }
+    sound_size = io_aiff_uint_out(&header[42]);
+
+    loop = 46;
+    while (loop < 54)
+    {
+        if ((loop != 48) && (loop != 49) && (loop != 50) && (loop != 51) && (loop != 52) && (loop != 53))
+        {
+            if (comparison[loop] != header[loop])
+            {
+                return SHOW_ERROR("AIFF fails fourth section");
+            }
+        }
+        loop++;
+    }
+    if (total_size != io_aiff_total_size(total_samples))
+    {
+        return SHOW_ERROR("AIFF fails total size compare");
+    }
+    if (sound_size != io_aiff_sound_size(total_samples))
+    {
+        return SHOW_ERROR("AIFF fails sound size compare");
+    }
+    return total_samples;
+}
+
+n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_function)
+{
+    FILE * test_file = fopen(response, "rb");
+    n_byte header[54]={0};
+    if (test_file == 0L)
+    {
+        (void)SHOW_ERROR("AIFF test open failed");
+    }
+    else
+    {
+        n_string_block output;
+        n_int samples;
+        fread(header, 1, 54, test_file);
+        
+        samples = io_aiff_header_check_length(header);
+        
+        sprintf(output, "%ld\n",samples);
+        output_function(output);
+        fclose(test_file);
+    }
+    return 0;
+}
+
 /**
  * This is a historical legacy function as all platforms now use memcpy. Although in the future this may change.
  * @param from pointer to copy from.

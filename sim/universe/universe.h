@@ -1717,6 +1717,12 @@ const static noble_console_command control_commands[] =
     {&console_list,          "list",           "",                     "List all ape names"},
     {&console_list,          "ls",             "",                     ""},
     {&console_list,          "dir",            "",                     ""},
+
+    
+    {&io_aiff_test,          "aiff",           "",                     "Test if a file is AIFF compatible"},
+
+    
+    
     {0L, 0L},
 };
 
