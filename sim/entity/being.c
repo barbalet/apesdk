@@ -2493,21 +2493,24 @@ static n_int being_set_unique_name(noble_simulation * sim,
  * @param first_generation If non zero this is the first generation
  * @return 0
  */
-n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_factor, n_byte first_generation)
+n_int being_init(noble_simulation * sim, noble_being * mother,
+				 n_int random_factor, n_byte first_generation)
 {
 
     if((sim->num + 1) >= sim->max)
         return 0;
 
     {
-        noble_being * local = &(sim->beings[sim->num]); /** this is the being to be born */
+		/** this is the being to be born */
+        noble_being * local = &(sim->beings[sim->num]);
         n_land  * land  = sim->land;
         n_byte2	      local_random[2];
         n_int	      loc_x;
         n_int         loc_y;
         n_byte	      loc_facing;
         n_byte        ch;
-        n_byte2		  numerical_brain_location = local->brain_memory_location;
+        n_byte2		  numerical_brain_location =
+			local->brain_memory_location;
         n_byte      * brain_memory;
 #ifdef EPISODIC_ON
         social_link * local_social_graph = GET_SOC(sim, local);
@@ -2532,8 +2535,10 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 
         local->goal[0]=GOAL_NONE;
 
-        /** Set learned preferences to 0.5 (no preference in either direction.
-        	This may seem like tabla rasa, but there are genetic biases */
+        /** Set learned preferences to 0.5 (no preference in
+			either direction.
+        	This may seem like tabla rasa, but there are genetic
+			biases */
         for (ch = 0; ch < PREFERENCES; ch++)
         {
             local->learned_preference[ch]=127;
@@ -2541,10 +2546,16 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 
         being_immune_init(local);
 
-        for (ch=0; ch<ATTENTION_SIZE; ch++)
+        for (ch = 0; ch < ATTENTION_SIZE; ch++)
         {
             local->attention[ch]=0;
         }
+
+		/** clear the generation numbers for mother and father */
+        for (ch = 0; ch < 3; ch++)
+		{
+			local->generation[ch] = 0;
+		}
 
 #ifdef BRAINCODE_ON
 
@@ -2554,18 +2565,29 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
         for (ch = 0; ch < BRAINCODE_SIZE; ch+=3)
         {
             math_random3(local_random);
-            GET_BRAINCODE_INTERNAL(sim,local)[ch] = (math_random(local_random) & 192) | (math_random(local_random) % (BRAINCODE_DAT+1));
-            GET_BRAINCODE_INTERNAL(sim,local)[ch+1] = math_random(local_random) & 255;
-            GET_BRAINCODE_INTERNAL(sim,local)[ch+2] = math_random(local_random) & 255;
+            GET_BRAINCODE_INTERNAL(sim,local)[ch] =
+				(math_random(local_random) & 192) |
+				(math_random(local_random) % (BRAINCODE_DAT+1));
+            GET_BRAINCODE_INTERNAL(sim,local)[ch+1] =
+				math_random(local_random) & 255;
+            GET_BRAINCODE_INTERNAL(sim,local)[ch+2] =
+				math_random(local_random) & 255;
             math_random3(local_random);
-            GET_BRAINCODE_EXTERNAL(sim,local)[ch] = (math_random(local_random) & 192) | (math_random(local_random) % (BRAINCODE_DAT+1));
-            GET_BRAINCODE_EXTERNAL(sim,local)[ch+1] = math_random(local_random) & 255;
-            GET_BRAINCODE_EXTERNAL(sim,local)[ch+2] = math_random(local_random) & 255;
+            GET_BRAINCODE_EXTERNAL(sim,local)[ch] =
+				(math_random(local_random) & 192) |
+				(math_random(local_random) % (BRAINCODE_DAT+1));
+            GET_BRAINCODE_EXTERNAL(sim,local)[ch+1] =
+				math_random(local_random) & 255;
+            GET_BRAINCODE_EXTERNAL(sim,local)[ch+2] =
+				math_random(local_random) & 255;
         }
 #else
-        /** initially seed the brain with instructions which are genetically biased */
-        being_init_braincode(sim,local,0L,random_factor,0,BRAINCODE_INTERNAL);
-        being_init_braincode(sim,local,0L,random_factor,0,BRAINCODE_EXTERNAL);
+        /** initially seed the brain with instructions which
+			are genetically biased */
+        being_init_braincode(sim,local,0L,random_factor,0,
+							 BRAINCODE_INTERNAL);
+        being_init_braincode(sim,local,0L,random_factor,0,
+							 BRAINCODE_EXTERNAL);
 #endif
 
         /** randomly initialize registers */
@@ -2587,7 +2609,8 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 			{
 				local->brainprobe[ch].type = OUTPUT_ACTUATOR;
 			}
-            local->brainprobe[ch].frequency = (n_byte)1 + (local_random[1]%BRAINCODE_MAX_FREQUENCY);
+            local->brainprobe[ch].frequency =
+				(n_byte)1 + (local_random[1]%BRAINCODE_MAX_FREQUENCY);
             math_random3(local_random);
             local->brainprobe[ch].address = (n_byte)local_random[0];
             local->brainprobe[ch].position = (n_byte)local_random[1];
@@ -2638,17 +2661,23 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 
             do
             {
-                loc_x = (n_byte2)(math_random(local_random) & APESPACE_BOUNDS);
-                loc_y = (n_byte2)(math_random(local_random) & APESPACE_BOUNDS);
+                loc_x =	(n_byte2)(math_random(local_random) &
+								  APESPACE_BOUNDS);
+                loc_y = (n_byte2)(math_random(local_random) &
+								  APESPACE_BOUNDS);
                 loop ++;
             }
-            while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y))));
+            while ((loop < 20) &&
+				   (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(loc_x),
+								  APESPACE_TO_MAPSPACE(loc_y))));
 
             body_genome_random(sim, local, local_random);
 
             loc_facing = (n_byte)(math_random(local_random) & 255);
-            local->social_x = local->social_nx = (math_random(local_random) & 32767)+16384;
-            local->social_y = local->social_ny = (math_random(local_random) & 32767)+16384;
+            local->social_x = local->social_nx =
+				(math_random(local_random) & 32767)+16384;
+            local->social_y = local->social_ny =
+				(math_random(local_random) & 32767)+16384;
         }
         else
         {
@@ -2674,7 +2703,8 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
             local->social_y = local->social_ny = mother->social_y;
             body_genetics(sim,local,mother,local_random);
 
-            mother->seed[0] = local_random[0]; /** this stops identical births */
+			/** this stops identical births */
+            mother->seed[0] = local_random[0];
             mother->seed[1] = local_random[1];
 #ifdef PARASITES_ON
             /** ascribed social status */
@@ -2682,9 +2712,39 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 #endif
 
             genetics_set(local->mother_new_genetics, GET_G(mother));
-            genetics_set(local->father_new_genetics, mother->father_new_genetics);
+            genetics_set(local->father_new_genetics,
+						 mother->father_new_genetics);
 
-            being_set_unique_name(sim,local,random_factor,GET_NAME_FAMILY2(sim,mother),mother->father_name[1]);
+            being_set_unique_name(sim,local,random_factor,
+								  GET_NAME_FAMILY2(sim,mother),
+								  mother->father_name[1]);
+
+			/** set the maternal generation number */
+			if (mother->generation[GENERATION_MATERNAL] >
+				mother->generation[GENERATION_PATERNAL])
+			{
+				if (mother->generation[GENERATION_MATERNAL] <
+					MAX_GENERATION)
+				{
+					local->generation[GENERATION_MATERNAL] =
+						mother->generation[GENERATION_MATERNAL]+1;
+				}
+			}
+			else
+			{
+				if (mother->generation[GENERATION_PATERNAL] <
+					MAX_GENERATION)
+				{
+					local->generation[GENERATION_MATERNAL] =
+						mother->generation[GENERATION_PATERNAL]+1;
+				}
+			}
+			/** set the paternal generation number */
+			if (mother->generation[GENERATION_FATHER] < MAX_GENERATION)
+			{
+				local->generation[GENERATION_PATERNAL] =
+					mother->generation[GENERATION_FATHER]+1;
+			}
         }
 
         GET_F(local) = loc_facing;
@@ -2705,8 +2765,10 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
             /** produce an initial distribution of heights and masses*/
             local->date_of_birth[0] = 0;
             math_random3(local_random);
-            local->height = BIRTH_HEIGHT + (local_random[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
-            local->mass = BIRTH_MASS + (local_random[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
+            local->height = BIRTH_HEIGHT +
+				(local_random[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
+            local->mass = BIRTH_MASS +
+				(local_random[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
         }
         local->crowding = MIN_CROWDING;
 
@@ -2716,7 +2778,8 @@ n_int being_init(noble_simulation * sim, noble_being * mother, n_int random_fact
 
         if (GET_B(sim,local))
         {
-            /** These magic numbers were found in March 2001 - feel free to change them! */
+            /** These magic numbers were found in March 2001 -
+				feel free to change them! */
 
 #ifdef SOFT_BRAIN_ON
             GET_BS(local, 0) = 171;
