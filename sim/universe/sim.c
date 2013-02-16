@@ -552,78 +552,71 @@ n_int     file_interpret(n_file * input_file)
     return 0;
 }
 
+static void sim_brain_no_return(noble_simulation * local_sim, noble_being * local_being)
+{
+    n_byte2 local_brain_state[3];
+
+    if(being_awake_local(&sim, local_being) == 0)
+    {
+        local_brain_state[0] = GET_BS(local_being, 3);
+        local_brain_state[1] = GET_BS(local_being, 4);
+        local_brain_state[2] = GET_BS(local_being, 5);
+    }
+    else
+    {
+        local_brain_state[0] = GET_BS(local_being, 0);
+        local_brain_state[1] = GET_BS(local_being, 1);
+        local_brain_state[2] = GET_BS(local_being, 2);
+    }
+    
+    if(braindisplay == 1)
+    {
+        local_brain_state[0] = 0;
+        local_brain_state[1] = 500;
+        local_brain_state[2] = (5*local_brain_state[2])>>3;
+    }
+    
+    if(braindisplay == 2)
+    {
+        local_brain_state[0] = (9*local_brain_state[0])>>3;
+        local_brain_state[1] = 82;
+        local_brain_state[2] = 0;
+    }
+    
+    if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
+    {
+        n_byte			*local_brain = GET_B(local_sim, local_being);
+        if (local_brain != 0L)
+        {
+            brain_cycle(local_brain, local_brain_state);
+        }
+    }    
+}
 
 static void sim_brain(noble_simulation * local_sim)
 {
-    n_uint loop = 0;
-    n_byte2 local_brain_state[3];
-    
-    while (loop < local_sim->num)
-    {
-        noble_being		*local_being = &(local_sim->beings[loop]);
-        
-        if(being_awake_local(&sim, local_being) == 0)
-        {
-            local_brain_state[0] = GET_BS(local_being, 3);
-            local_brain_state[1] = GET_BS(local_being, 4);
-            local_brain_state[2] = GET_BS(local_being, 5);
-        }
-        else
-        {
-            local_brain_state[0] = GET_BS(local_being, 0);
-            local_brain_state[1] = GET_BS(local_being, 1);
-            local_brain_state[2] = GET_BS(local_being, 2);
-        }
-        
-        if(braindisplay == 1)
-        {
-            local_brain_state[0] = 0;
-            local_brain_state[1] = 500;
-            local_brain_state[2] = (5*local_brain_state[2])>>3;
-        }
-        
-        if(braindisplay == 2)
-        {
-            local_brain_state[0] = (9*local_brain_state[0])>>3;
-            local_brain_state[1] = 82;
-            local_brain_state[2] = 0;
-        }
-        
-        if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
-        {
-            n_byte			*local_brain = GET_B(local_sim, local_being);
-            if (local_brain != 0L)
-            {
-                brain_cycle(local_brain, local_brain_state);
-            }
-        }
-        loop++;
-    }
+    being_loop_no_return(local_sim, sim_brain_no_return);
 }
 
 #ifdef BRAINCODE_ON
+
+static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_being * local_being)
+{
+    n_byte     awake = 1;
+    n_byte    *local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
+    n_byte    *local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
+    if(being_awake_local(&sim, local_being) == 0)
+    {
+        awake=0;
+    }
+    /* This should be independent of the brainstate/cognitive simulation code */
+    brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
+    brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
+}
+
 static void sim_brain_dialogue(noble_simulation * local_sim)
 {
-    n_uint loop = 0;
-    n_byte awake;
-    while (loop < local_sim->num)
-    {
-        noble_being		*local_being = &(local_sim->beings[loop]);
-        n_byte          *local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
-        n_byte          *local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
-        if(being_awake_local(&sim, local_being) == 0)
-        {
-            awake=0;
-        }
-        else
-        {
-            awake=1;
-        }
-        /* This should be independent of the brainstate/cognitive simulation code */
-        brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
-        brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
-        loop++;
-    }
+    being_loop_no_return(local_sim, sim_brain_dialogue_no_return);
 }
 #endif
 
@@ -652,6 +645,7 @@ void sim_braindisplay(n_byte newval)
     braindisplay = newval;
 }
 
+
 static void sim_being(noble_simulation * local_sim)
 {
     n_uint loop = 0;
@@ -660,9 +654,12 @@ static void sim_being(noble_simulation * local_sim)
 
     while (loop < local_sim->num)
     {
-        n_byte awake = (being_awake_local(local_sim, &(local_sim->beings[loop])) != 0);
+        noble_being * local_being = &(local_sim->beings[loop]);
         
-        being_cycle_universal(local_sim,loop, awake);
+        n_byte awake = (being_awake_local(local_sim, local_being) != 0);
+        
+        being_cycle_universal(local_sim,local_being, awake);
+        
         if (awake)
         {
             if(interpret_cycle(interpret, -1, local_sim->beings, loop, &sim_start_conditions, &sim_end_conditions) == -1)

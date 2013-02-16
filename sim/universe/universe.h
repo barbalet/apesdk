@@ -916,7 +916,8 @@ enum GENERATION_NUM
 {
 	GENERATION_MATERNAL = 0,
 	GENERATION_PATERNAL,
-	GENERATION_FATHER
+	GENERATION_FATHER,
+    GENERATION_TOTAL
 };
 
 /* speed of running away */
@@ -1406,7 +1407,7 @@ typedef struct
     n_byte learned_preference[PREFERENCES];
 
 	/* generation number from the mother and father */
-	n_uint generation[2];
+	n_uint generation[GENERATION_TOTAL];
 	/* temporary father generation value used during gestation */
 	n_uint father_generation;
 

@@ -93,56 +93,15 @@ typedef	struct
 being_draw;
 
 
-void being_loop_no_return(noble_simulation * sim, noble_being * compare, void * additional, being_no_return bnr_func)
+void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
 {
     n_uint loop = 0;
     while (loop < sim->num)
     {
         noble_being * output = &(sim->beings[loop]);
-        if (output != compare)
-        {
-            (bnr_func)(sim, output, additional);
-        }
+        (bnr_func)(sim, output);
         loop++;
     }
-}
-
-n_int being_loop_return_int(noble_simulation * sim, noble_being * compare, void * additional, being_return_int bri_func)
-{
-    n_uint loop = 0;
-    while (loop < sim->num)
-    {
-        noble_being * output = &(sim->beings[loop]);
-        if (output != compare)
-        {
-            n_int return_response = (bri_func)(sim, output, additional);
-            if (return_response != -1)
-            {
-                return return_response;
-            }
-        }
-        loop++;
-    }
-    return -1;
-}
-
-void * being_loop_return_pointer(noble_simulation * sim, noble_being * compare, void * additional, being_return_pointer brp_func)
-{
-    n_uint loop = 0;
-    while (loop < sim->num)
-    {
-        noble_being * output = &(sim->beings[loop]);
-        if (output != compare)
-        {
-            void * return_response = (brp_func)(sim, output, additional);
-            if (return_response)
-            {
-                return return_response;
-            }
-        }
-        loop++;
-    }
-    return 0L;
 }
 
 static n_byte	being_ground(n_int px, n_int py, void * params)
@@ -1432,11 +1391,8 @@ static n_int being_turn_away_from_water(n_int loc_f, n_land * land, n_vect2 * lo
 }
 
 /* stuff still goes on during sleep */
-void being_cycle_universal(noble_simulation * sim, n_uint current_being_index, n_byte awake)
+void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
-    noble_being * being_buffer = sim->beings;
-    noble_being * local        = &being_buffer[current_being_index];
-
     /* By default return towards a resting state */
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);

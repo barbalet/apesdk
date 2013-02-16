@@ -1479,75 +1479,74 @@ n_int social_goals(
 }
 
 
+
+static void sim_social_initial_no_return(noble_simulation * local, noble_being * local_being)
+{
+    n_byte2 respect_mean = social_respect_mean(local,local_being);
+    n_uint social_loop = 0;
+    n_vect2 location, sum_delta = {0,0};
+    n_int   familiar_being_count = 0;
+    vect2_byte2(&location,(n_byte2 *)&(local_being->social_x));
+    while ( social_loop < SOCIAL_SIZE )
+    {
+        social_link * specific_individual = &(GET_SOC(local,local_being)[social_loop]);
+        noble_being  * specific_being;
+        
+        if (!specific_individual) return;
+        
+        if (!SOCIAL_GRAPH_ENTRY_EMPTY(GET_SOC(local,local_being),social_loop))
+        {
+            
+            specific_being = being_find_name(local, specific_individual->first_name[BEING_MET], specific_individual->family_name[BEING_MET]);
+            
+            if (specific_being != 0L)
+            {
+                n_vect2 weighted_delta;
+                n_vect2 familiar_location;
+                n_int	local_friend_or_foe = specific_individual->friend_foe;
+                n_int	distance_squared;
+                
+                local_friend_or_foe -= respect_mean;
+                
+                familiar_being_count++;
+                
+                vect2_byte2(&familiar_location,(n_byte2 *)&(specific_being->social_x));
+                
+                vect2_subtract(&weighted_delta, &familiar_location, &location);
+                
+                distance_squared = vect2_dot(&weighted_delta, &weighted_delta, 1, 512);
+                
+                if (distance_squared<0) distance_squared=0;  /**< Bug fix for division by zero on the following line */
+                
+                vect2_d(&sum_delta,&weighted_delta, local_friend_or_foe * 2048,
+                        (distance_squared + 1));
+            }
+        }
+        
+        social_loop++;
+    }
+    
+    if (familiar_being_count != 0)
+    {
+        vect2_d(&location,&sum_delta,1,(familiar_being_count*20));
+    }
+    vect2_back_byte2(&location,(n_byte2 *)&(local_being->social_nx));
+}
+
+static void sim_social_secondary_no_return(noble_simulation * local, noble_being * local_being)
+{
+    local_being->social_x = local_being->social_nx;
+    local_being->social_y = local_being->social_ny;
+}
+
 /**
  * This is the spatial social simulation
  * @param local Pointer to the ape
  */
 void sim_social(noble_simulation * local)
 {
-    n_uint loop = 0;
-    /** calculate social pulls */
-    while ( loop < local->num )
-    {
-        noble_being *local_being = &(local->beings[loop]);
-        n_byte2 respect_mean = social_respect_mean(local,local_being);
-        n_uint social_loop = 0;
-        n_vect2 location, sum_delta = {0,0};
-        n_int   familiar_being_count = 0;
-        vect2_byte2(&location,(n_byte2 *)&(local_being->social_x));
-        while ( social_loop < SOCIAL_SIZE )
-        {
-            social_link * specific_individual = &(GET_SOC(local,local_being)[social_loop]);
-            noble_being  * specific_being;
-
-            if (!specific_individual) return;
-
-            if (!SOCIAL_GRAPH_ENTRY_EMPTY(GET_SOC(local,local_being),social_loop))
-            {
-
-                specific_being = being_find_name(local, specific_individual->first_name[BEING_MET], specific_individual->family_name[BEING_MET]);
-
-                if (specific_being != 0L)
-                {
-                    n_vect2 weighted_delta;
-                    n_vect2 familiar_location;
-                    n_int	local_friend_or_foe = specific_individual->friend_foe;
-                    n_int	distance_squared;
-
-                    local_friend_or_foe -= respect_mean;
-
-                    familiar_being_count++;
-
-                    vect2_byte2(&familiar_location,(n_byte2 *)&(specific_being->social_x));
-
-                    vect2_subtract(&weighted_delta, &familiar_location, &location);
-
-                    distance_squared = vect2_dot(&weighted_delta, &weighted_delta, 1, 512);
-
-                    if (distance_squared<0) distance_squared=0;  /**< Bug fix for division by zero on the following line */
-
-                    vect2_d(&sum_delta,&weighted_delta, local_friend_or_foe * 2048,
-                            (distance_squared + 1));
-                }
-            }
-
-            social_loop++;
-        }
-
-        if (familiar_being_count != 0)
-        {
-            vect2_d(&location,&sum_delta,1,(familiar_being_count*20));
-        }
-        vect2_back_byte2(&location,(n_byte2 *)&(local_being->social_nx));
-        loop++;
-    }
+    being_loop_no_return(local, sim_social_initial_no_return);
     /** implement social pulls after all calculations*/
-    loop = 0;
-    while ( loop < local->num )
-    {
-        noble_being *local_being = &(local->beings[loop]);
-        local_being->social_x = local_being->social_nx;
-        local_being->social_y = local_being->social_ny;
-        loop++;
-    }
+    being_loop_no_return(local, sim_social_secondary_no_return);
+
 }
