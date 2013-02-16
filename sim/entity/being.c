@@ -93,6 +93,57 @@ typedef	struct
 being_draw;
 
 
+void being_loop_no_return(noble_simulation * sim, noble_being * compare, void * additional, being_no_return bnr_func)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        if (output != compare)
+        {
+            (bnr_func)(sim, output, additional);
+        }
+        loop++;
+    }
+}
+
+n_int being_loop_return_int(noble_simulation * sim, noble_being * compare, void * additional, being_return_int bri_func)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        if (output != compare)
+        {
+            n_int return_response = (bri_func)(sim, output, additional);
+            if (return_response != -1)
+            {
+                return return_response;
+            }
+        }
+        loop++;
+    }
+    return -1;
+}
+
+void * being_loop_return_pointer(noble_simulation * sim, noble_being * compare, void * additional, being_return_pointer brp_func)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        if (output != compare)
+        {
+            void * return_response = (brp_func)(sim, output, additional);
+            if (return_response)
+            {
+                return return_response;
+            }
+        }
+        loop++;
+    }
+    return 0L;
+}
 
 static n_byte	being_ground(n_int px, n_int py, void * params)
 {
@@ -187,7 +238,6 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
 {
     n_int i;
     noble_being * b;
-    n_string_block str;
 
     if (io_length(name,STRING_BLOCK_SIZE)<10) return NO_BEINGS_FOUND;
 
@@ -196,6 +246,7 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
     for (i = 0; i < (n_int)(sim->num); i++)
     {
         b = &sim->beings[i];
+        n_string_block str;
         being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(sim,b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), str);
 
         io_lower(str, io_length(str,STRING_BLOCK_SIZE));

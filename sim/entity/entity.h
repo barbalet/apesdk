@@ -67,6 +67,14 @@ enum BRAINPROBE_TYPE
     OUTPUT_ACTUATOR
 };
 
+typedef n_int (being_no_return)(noble_simulation * sim, noble_being * actual, void * additional);
+typedef n_int (being_return_int)(noble_simulation * sim, noble_being * actual, void * additional);
+typedef void * (being_return_pointer)(noble_simulation * sim, noble_being * actual, void * additional);
+
+n_int being_loop_return_int(noble_simulation * sim, noble_being * compare, void * additional, being_return_int bri_func);
+void * being_loop_return_pointer(noble_simulation * sim, noble_being * compare, void * additional, being_return_pointer brp_func);
+
+
 n_int  brain_probe_to_location(n_int position);
 
 void   metabolism_vascular_description(n_int index, n_string description);
