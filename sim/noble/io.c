@@ -400,9 +400,10 @@ n_int io_aiff_sample_size(n_uint total_size)
 n_int io_aiff_header_check_length(n_byte * header)
 {
     n_byte  comparison[54];
-    io_aiff_header(comparison);
     n_uint  total_size, total_samples, sound_size;
     n_int   loop = 0;
+
+    io_aiff_header(comparison);
 
     while (loop < 4)
     {
