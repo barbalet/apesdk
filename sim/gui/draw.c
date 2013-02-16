@@ -1571,13 +1571,13 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
     sim_draw_thread_start();
 #endif
         
-    draw_apes(local_sim, window);    // 8
+    draw_apes(local_sim, window);    /* 8 */
 
     if (window == NUM_TERRAIN)
     {
         draw_terrain(local_sim,dim_x, dim_y);
         draw_meters(local_sim);
-        draw_errors(local_sim); // 12
+        draw_errors(local_sim); /* 12 */
         if (toggle_brain)
         {
             draw_brain(local_sim,dim_x, dim_y);
@@ -1593,7 +1593,7 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
 #ifdef WEATHER_ON
         if (toggle_weather)
         {
-           draw_weather(local_sim); // 10 
+           draw_weather(local_sim); /* 10 */
         }
 #endif
     }

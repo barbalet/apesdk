@@ -721,40 +721,37 @@ static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
  This is the main cause of variation between siblings. */
 static void genetics_transpose(noble_being * local, n_byte2 * local_random)
 {
-    n_byte p,length,source_ch,dest_ch,source_offset,dest_offset,inversion;
-    n_int ctr1,ctr2;
-
     math_random3(local_random);
+    
     if (local_random[0] < MUTATION_TRANSPOSE_PROB)
     {
         /* number of bits to transpose */
-        length = local_random[1]&15;
         /* chromosome numbers */
-        math_random3(local_random);
-        source_ch = local_random[0]%CHROMOSOMES;
-        dest_ch = local_random[1]%CHROMOSOMES;
         /* locations within the chromosomes */
-        math_random3(local_random);
-        source_offset = local_random[0]&31;
-        dest_offset = local_random[1]&31;
+        n_byte source_offset = (local_random[0]>>8)&31;
+        n_byte dest_offset   = local_random[1]&31;
         /* whether to invert the sequence */
+        n_byte inversion     = (local_random[0]>>13) & 1;
+        n_byte source_ch     = (local_random[1]>>5) % CHROMOSOMES;
+        n_byte dest_ch       = (local_random[1]>>7) % CHROMOSOMES;
+        n_int  ctr1          = source_offset;
+        n_byte p             = 0;
         math_random3(local_random);
-        inversion = local_random[0]&1;
-        ctr1=source_offset;
-        for (p = 0; p < length; p++, ctr1++)
+        while (p < (local_random[1]&15))
         {
-            if (ctr1>=32) ctr1-=32;
+            n_int ctr2;
+            ctr1 = (ctr1 & 31);
+            
             if (inversion==0)
             {
                 ctr2=(n_int)(dest_offset+p);
-                if (ctr2>=32) ctr2-=32;
             }
             else
             {
                 /* inverted sequence */
-                ctr2=(n_int)dest_offset-p;
-                if (ctr2<0) ctr2+=32;
+                ctr2=(n_int)dest_offset-p+32;
             }
+            ctr2 = (ctr2 & 31);
             /* clear destination bit */
             if ((GET_G(local)[dest_ch] & (1<<ctr2)) != 0)
             {
@@ -765,6 +762,8 @@ static void genetics_transpose(noble_being * local, n_byte2 * local_random)
             {
                 GET_G(local)[dest_ch] |= (1 << ctr2);
             }
+            p++;
+            ctr1++;
         }
     }
 }
