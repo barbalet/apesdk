@@ -742,7 +742,7 @@ static n_int similar_place(episodic_memory * episodic, n_int * carry_through)
 {
     n_int dx = episodic->location[0] - carry_through[0];
     n_int dy = episodic->location[1] - carry_through[1];
-    // should be calculated in the future with wrap around comparison
+    /* should be calculated in the future with wrap around comparison */
     n_int da = (dx * dx) + (dy * dy);
     return da;
 }
