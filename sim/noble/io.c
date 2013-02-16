@@ -397,6 +397,20 @@ n_int io_aiff_sample_size(n_uint total_size)
     return total_samples2 >> 1;
 }
 
+static n_int io_scan(n_byte * v1, n_byte * v2, n_uint start, n_uint stop)
+{
+    n_int   loop = start;
+    while (loop < stop)
+    {
+        if (v1[loop] != v2[loop])
+        {
+            return -1;
+        }
+        loop++;
+    }
+    return 0;
+}
+
 n_int io_aiff_header_check_length(n_byte * header)
 {
     n_byte  comparison[54];
