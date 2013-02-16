@@ -910,6 +910,15 @@ enum
 #define ENERGY_NUT                  200
 #define ENERGY_FISH                 600
 
+/* a maximum generation number to prevent overflows */
+#define MAX_GENERATION              4294967294
+enum GENERATION_NUM
+{
+	GENERATION_MATERNAL = 0,
+	GENERATION_PATERNAL,
+	GENERATION_FATHER
+};
+
 /* speed of running away */
 #define SQUABBLE_FLEE_SPEED         20
 
@@ -1367,6 +1376,7 @@ typedef struct
 #ifdef PARASITES_ON
     n_byte parasites;
 #endif
+	/* social status value */
     n_byte honor;
 
     n_byte2	date_of_conception[2];
@@ -1394,6 +1404,12 @@ typedef struct
     n_byte drives[DRIVES];
     n_byte2 goal[4];
     n_byte learned_preference[PREFERENCES];
+
+	/* generation number from the mother and father */
+	n_uint generation[2];
+	/* temporary father generation value used during gestation */
+	n_uint father_generation;
+
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
 #endif

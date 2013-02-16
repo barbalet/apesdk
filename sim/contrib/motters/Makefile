@@ -9,6 +9,7 @@ debug:
 clean:
 	rm -f naweb
 
-
+cleanall:
+	rm -f naweb *.png realtime.* *.htm *.csv
 
 
