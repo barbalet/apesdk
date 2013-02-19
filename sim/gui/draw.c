@@ -637,7 +637,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         return;
     }
     {
-        n_int       lowest_y = dim_y + 256;
+        n_int       lowest_y = ((dim_y + 256) * dim_y)/256;
         n_byte      * combined = local_sim->highres;
         noble_being * loc_being = &(local_sim->beings[local_sim->select]);
         n_int turn = GET_F(loc_being);
@@ -656,23 +656,31 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         n_int scrx = (0 - (dim_x >> 1));
         n_byte * loc_offscr = buf_offscr;
 
+        n_int   lowest_s = ((vals * (((lowest_y)) - dim_y)));
+        n_int   lowest_c = ((valc * (((lowest_y)) - dim_y)));
+        
         /* find the central map point */
         n_int flatval = combined[CONVERT_X(2048) | CONVERT_Y(2048)];
+        
+        n_int const_lowdiv2;
 
         if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {
             flatval = WATER_MAP;   /*    put it on water level */
         }
+        
+        const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
+        
         while (scrx < (dim_x - (dim_x >> 1)))   /* repeat until the right-most row is reached */
         {
             /* take the very bottom pixel */
             n_int pixy = (scrx + (dim_x >> 1)) + ((dim_y - 1) * dim_x );
             /* start with a map point which is below/off the screen */
-            n_int scry = (((lowest_y*dim_y)/256) >> 1) + flatval;
+            n_int scry = const_lowdiv2;
             /* rotated and add offset (which will be &ed off) */
-            n_int big_x = ((vals * (((lowest_y*dim_y)/256) - dim_y)) + (scrx * valc));
+            n_int big_x = lowest_s + (scrx * valc);
             /* rotated and sub offset (subtracted further down) */
-            n_int big_y = ((valc * (((lowest_y*dim_y)/256) - dim_y)) - (scrx * vals));
+            n_int big_y = lowest_c - (scrx * vals);
             
             n_uint check_change = CONVERT_X((big_x >> 8)) | CONVERT_Y((big_y >> 8));
 
