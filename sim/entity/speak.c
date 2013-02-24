@@ -97,12 +97,10 @@ n_uint	ReverseBits (n_uint index, n_uint power_sample)
 void fft_float (n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * RealOut, n_float * ImagOut, n_uint power_sample)
 {
     n_uint		NumSamples = 1 << power_sample;    /* Number of bits needed to store indices */
-    n_uint		i, j, k, n;
+    n_uint		i, j;
     n_uint		BlockSize, BlockEnd;
     
     n_double angle_numerator = TWO_PI;
-    n_double tr, ti;
-    n_double ar0, ar1, ar2, ai0, ai1, ai2;
     
     
     if ( inverse )
@@ -139,35 +137,39 @@ void fft_float (n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * Re
 		
         while(  i < NumSamples )
         {
-            ar2 = cm2;
-            ar1 = cm1;
+            n_uint j=i;
+			n_uint n=0;
             
-            ai2 = sm2;
-            ai1 = sm1;
+            n_double ar2 = cm2;
+            n_double ar1 = cm1;
+            
+            n_double ai2 = sm2;
+            n_double ai1 = sm1;
 			
-			j=i;
-			n=0;
+
             while(n < BlockEnd)
             {
-                ar0 = w*ar1 - ar2;
+                n_double ar0 = w*ar1 - ar2;
+                n_double ai0 = w*ai1 - ai2;
+                
                 ar2 = ar1;
                 ar1 = ar0;
                 
-                ai0 = w*ai1 - ai2;
                 ai2 = ai1;
                 ai1 = ai0;
                 
-                k = j + BlockEnd;
-                
-				tr = ar0*RealOut[k] - ai0*ImagOut[k];
-				ti = ar0*ImagOut[k] + ai0*RealOut[k];
-				
-				RealOut[k] = RealOut[j] - tr;
-                ImagOut[k] = ImagOut[j] - ti;
-                
-                RealOut[j] += tr;
-                ImagOut[j] += ti;
-                
+                {
+                    n_uint   k = j + BlockEnd;
+                    
+                    n_double tr = ar0*RealOut[k] - ai0*ImagOut[k];
+                    n_double ti = ar0*ImagOut[k] + ai0*RealOut[k];
+                    
+                    RealOut[k] = RealOut[j] - tr;
+                    ImagOut[k] = ImagOut[j] - ti;
+                    
+                    RealOut[j] += tr;
+                    ImagOut[j] += ti;
+                }
                 j++;
                 n++;
             }
@@ -185,12 +187,13 @@ void fft_float (n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * Re
     
     if ( inverse )
     {
-        double denom = (double)NumSamples;
-        
-        for ( i=0; i < NumSamples; i++ )
+        n_double denom = (n_double) NumSamples;
+        i = 0;
+        while  (i < NumSamples)
         {
             RealOut[i] /= denom;
             ImagOut[i] /= denom;
+            i++;
         }
     }
 }
