@@ -80,9 +80,9 @@ static n_float timedomain[MAX_BUFFER];
 static n_float frequencyi[MAX_BUFFER];
 static n_float timedomaini[MAX_BUFFER];
 
-n_audio  output[MAX_BUFFER];
+static n_audio  output[MAX_BUFFER];
 
-n_uint	ReverseBits (n_uint index, n_uint power_sample)
+static n_uint	ReverseBits (n_uint index, n_uint power_sample)
 {
     n_uint i = 0;
     n_uint rev = 0;
@@ -94,14 +94,13 @@ n_uint	ReverseBits (n_uint index, n_uint power_sample)
     return rev;
 }
 
-void fft_float (n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * RealOut, n_float * ImagOut, n_uint power_sample)
+static void fft_float(n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * RealOut, n_float * ImagOut, n_uint power_sample)
 {
     n_uint		NumSamples = 1 << power_sample;    /* Number of bits needed to store indices */
     n_uint		i, j;
     n_uint		BlockSize, BlockEnd;
     
     n_double angle_numerator = TWO_PI;
-    
     
     if ( inverse )
         angle_numerator = -angle_numerator;
@@ -146,7 +145,6 @@ void fft_float (n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * Re
             n_double ai2 = sm2;
             n_double ai1 = sm1;
 			
-
             while(n < BlockEnd)
             {
                 n_double ar0 = w*ar1 - ar2;
@@ -320,6 +318,20 @@ static void speak_freq(n_int * high, n_int * low, n_byte value)
     
 }
 
+static void fft_clear_buffers(n_uint power_sample)
+{
+    n_uint    length = 1 << power_sample;
+    n_int     loop = 0;
+    while (loop < length)
+    {
+        frequency[loop] = 0;
+        timedomain[loop] = 0;
+        frequencyi[loop] = 0;
+        timedomaini[loop] = 0;
+        loop++;
+    }
+}
+
 static void speak_make(n_string filename, n_string paragraph)
 {
     FILE     *out_file = 0L;
@@ -349,14 +361,8 @@ static void speak_make(n_string filename, n_string paragraph)
         n_uint    length = 1 << power_sample;
         n_int     division = MAX_BUFFER/length;
         n_int     loop = 0;
-        while (loop < length)
-        {
-            frequency[loop] = 0;
-            timedomain[loop] = 0;
-            frequencyi[loop] = 0;
-            timedomaini[loop] = 0;
-            loop++;
-        }
+
+        fft_clear_buffers(power_sample);
 
 		if (found_character != '\n' && found_character != 0)
 		{
@@ -365,16 +371,12 @@ static void speak_make(n_string filename, n_string paragraph)
 			{
 				n_int local_high[8], local_low[4];
 				
-				
 				speak_freq(local_high, local_low,found_character);
-
-				
 				
 				frequency[local_high[0]/division] = local_high[1]/division;
 				frequency[local_high[2]/division] = local_high[3]/division;
 				frequency[local_high[4]/division] = local_high[5]/division;
 				frequency[local_high[6]/division] = local_high[7]/division;
-
 				
 				fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
 				
@@ -385,19 +387,10 @@ static void speak_make(n_string filename, n_string paragraph)
 					loop++;
 				}
 
-				loop = 0;
-				while (loop < length)
-				{
-					frequency[loop] = 0;
-					timedomain[loop] = 0;
-					frequencyi[loop] = 0;
-					timedomaini[loop] = 0;
-					loop++;
-				}
+                fft_clear_buffers(power_sample);
 
 				frequency[local_low[0]] = local_low[1]/division;
 				frequency[local_low[2]] = local_low[3]/division;
-
 
 				fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
 
