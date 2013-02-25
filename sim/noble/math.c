@@ -564,6 +564,30 @@ void math_bilinear_512_4096(n_byte * side512, n_byte * data)
     }
 }
 
+/* math_newton_root may need to be obsoleted */
+n_uint math_root(n_uint input)
+{
+    n_uint op  = input;
+    n_uint res = 0;
+    n_uint one = 1uL << ((sizeof(n_uint) * 8) - 2);
+    /* "one" starts at the highest power of four <= than the argument. */
+    while (one > op)
+    {
+        one >>= 2;
+    }
+    while (one != 0)
+    {
+        if (op >= res + one)
+        {
+            op = op - (res + one);
+            res = res +  2 * one;
+        }
+        res >>= 1;
+        one >>= 2;
+    }
+    return res;
+}
+
 /* achieve a newton square root */
 n_uint	math_newton_root(n_uint squ)
 {
