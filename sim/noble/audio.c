@@ -73,11 +73,27 @@ void audio_fft(n_byte inverse, n_uint power_sample)
     n_uint		i;
     n_uint		BlockSize, BlockEnd;
     
+    n_double   *d_in, *d_ini, *d_out, *d_outi;
+    
     n_double angle_numerator = TWO_PI;
     
     if ( inverse )
     {
         angle_numerator = -angle_numerator;
+        
+        d_in  = frequency;
+        d_ini = frequencyi;
+        
+        d_out  = timedomain;
+        d_outi = timedomaini;
+    }
+    else
+    {
+        d_in  = timedomain;
+        d_ini = timedomaini;
+        
+        d_out  = frequency;
+        d_outi = frequencyi;
     }
     
     /*
@@ -87,8 +103,8 @@ void audio_fft(n_byte inverse, n_uint power_sample)
 	i=0;
 	while(i < NumSamples){
 		n_uint j = audio_reverse_bits (i, power_sample);
-        timedomaini[j] = frequency[i];
-        timedomain[j] = frequencyi[i];
+        d_outi[j] = d_in[i];
+        d_out[j]  = d_ini[i];
         i++;
     }
     
@@ -134,14 +150,14 @@ void audio_fft(n_byte inverse, n_uint power_sample)
                 {
                     n_uint   k = j + BlockEnd;
                     
-                    n_double tr = ar0*timedomaini[k] - ai0*timedomain[k];
-                    n_double ti = ar0*timedomain[k] + ai0*timedomaini[k];
+                    n_double tr = ar0*d_outi[k] - ai0*d_out[k];
+                    n_double ti = ar0*d_out[k] + ai0*d_outi[k];
                     
-                    timedomaini[k] = timedomaini[j] - tr;
-                    timedomain[k] = timedomain[j] - ti;
+                    d_outi[k] = d_outi[j] - tr;
+                    d_out[k] = d_out[j] - ti;
                     
-                    timedomaini[j] += tr;
-                    timedomain[j] += ti;
+                    d_outi[j] += tr;
+                    d_out[j] += ti;
                 }
                 j++;
                 n++;
@@ -164,8 +180,8 @@ void audio_fft(n_byte inverse, n_uint power_sample)
         i = 0;
         while  (i < NumSamples)
         {
-            timedomaini[i] /= denom;
-            timedomain[i] /= denom;
+            d_outi[i] /= denom;
+            d_out[i] /= denom;
             i++;
         }
     }
@@ -173,7 +189,7 @@ void audio_fft(n_byte inverse, n_uint power_sample)
 
 void audio_clear_buffers(n_uint length)
 {
-    n_int     loop = 0;
+    n_uint     loop = 0;
     while (loop < length)
     {
         frequency[loop] = 0;
@@ -186,7 +202,7 @@ void audio_clear_buffers(n_uint length)
 
 void audio_clear_output(n_audio * audio, n_uint length)
 {
-    n_int     loop = 0;
+    n_uint     loop = 0;
     while (loop < length)
     {
         audio[loop] = 0;
@@ -194,9 +210,19 @@ void audio_clear_output(n_audio * audio, n_uint length)
     }
 }
 
+void audio_equal_input(n_audio * audio, n_uint length)
+{
+    n_uint     loop = 0;
+    while (loop < length)
+    {
+        timedomain[loop] = audio[loop];
+        loop++;
+    }
+}
+
 void audio_equal_output(n_audio * audio, n_uint length)
 {
-    n_int     loop = 0;
+    n_uint     loop = 0;
     while (loop < length)
     {
         audio[loop] = timedomain[loop];
@@ -206,7 +232,7 @@ void audio_equal_output(n_audio * audio, n_uint length)
 
 void audio_multiply_output(n_audio * audio, n_uint length)
 {
-    n_int     loop = 0;
+    n_uint     loop = 0;
     while (loop < length)
     {
         audio[loop] *= timedomain[loop];
@@ -214,7 +240,21 @@ void audio_multiply_output(n_audio * audio, n_uint length)
     }
 }
 
+n_uint audio_power(n_audio * audio, n_uint length)
+{
+    n_uint   loop = 0;
+    n_uint   output = 0;
+    while  (loop < length)
+    {
+        n_int  audio_value = audio[loop];
+        output += (audio_value * audio_value);
+        loop++;
+    }
+    return output;
+}
+
 void audio_set_frequency(n_uint entry, n_uint value)
 {
     frequency[entry] = value/1E+00;
 }
+

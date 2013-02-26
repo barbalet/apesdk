@@ -121,7 +121,10 @@ typedef	short	n_audio;
 void audio_fft(n_byte inverse, n_uint power_sample);
 void audio_clear_buffers(n_uint length);
 void audio_clear_output(n_audio * audio, n_uint length);
+
 void audio_equal_output(n_audio * audio, n_uint length);
+void audio_equal_input(n_audio * audio, n_uint length);
+
 void audio_multiply_output(n_audio * audio, n_uint length);
 void audio_set_frequency(n_uint entry, n_uint value);
 
@@ -472,6 +475,7 @@ void  vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 n_uint  math_hash(n_byte * values, n_uint length);
 void    math_bilinear_512_4096(n_byte * side512, n_byte * data);
 n_uint  math_newton_root(n_uint squ);
+n_uint  math_root(n_uint squ);
 n_byte  math_turn_towards(n_int px, n_int py, n_byte fac, n_byte turn);
 n_byte2 math_random(n_byte2 * local);
 void    math_random3(n_byte2 * local);
