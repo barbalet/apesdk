@@ -253,6 +253,27 @@ n_uint audio_power(n_audio * audio, n_uint length)
     return output;
 }
 
+void audio_noise_reduction(n_uint point_squared, n_uint length)
+{
+    n_uint  loop = 0;
+    while (loop < length)
+    {
+        n_uint value = (frequency[loop]*frequency[loop]) + (frequencyi[loop]*frequencyi[loop]);
+        if (value > point_squared)
+        {
+            n_double  square_rooted = (math_root(value)) / 1E+00;
+            frequency[loop] = square_rooted;
+        }
+        else
+        {
+            frequency[loop] = 0E+00;
+        }
+        frequencyi[loop] = 0E+00;
+        loop++;
+    }
+    
+}
+
 void audio_set_frequency(n_uint entry, n_uint value)
 {
     frequency[entry] = value/1E+00;
