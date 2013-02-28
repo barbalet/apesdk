@@ -35,8 +35,8 @@
 
 /*NOBLEMAKE VAR=""*/
 
-#ifndef _NOBLEAPE_GUI_H_
-#define _NOBLEAPE_GUI_H_
+#ifndef NOBLEAPE_GUI_H
+#define NOBLEAPE_GUI_H
 
 #define	OFFSCREENSIZE				(MAP_AREA + TERRAIN_WINDOW_AREA)
 
@@ -134,7 +134,7 @@ void  draw_cycle(n_byte mod, n_int dim_x, n_int dim_y);
 
 n_byte * draw_offscreen(n_byte * value);
 
-#endif /* _NOBLEAPE_GUI_H_ */
+#endif /* NOBLEAPE_GUI_H */
 
 /*NOBLEMAKE END=""*/
 

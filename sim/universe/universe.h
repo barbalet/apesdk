@@ -34,8 +34,8 @@
  ****************************************************************/
 
 /*NOBLEMAKE DEL=""*/
-#ifndef _NOBLEAPE_UNIVERSE_H_
-#define _NOBLEAPE_UNIVERSE_H_
+#ifndef NOBLEAPE_UNIVERSE_H
+#define NOBLEAPE_UNIVERSE_H
 /*NOBLEMAKE END=""*/
 
 /*NOBLEMAKE VAR=""*/
@@ -473,19 +473,22 @@ enum BODY_INVENTORY_TYPES
     INVENTORY_SIZE
 };
 
-#define INVENTORY_CHILD        1
-#define INVENTORY_WOUND        2
-#define INVENTORY_GROOMED      4
-#define INVENTORY_BRANCH       8
-#define INVENTORY_ROCK         16
-#define INVENTORY_SHELL        32
-#define INVENTORY_TWIG         64
-#define INVENTORY_NUT          128
-#define INVENTORY_NUT_CRACKED  256
-#define INVENTORY_GRASS        512
-#define INVENTORY_SCRAPER      1024
-#define INVENTORY_SPEAR        2048
-#define INVENTORY_FISH         4096
+enum inventory_type
+{
+    INVENTORY_CHILD = 1,
+    INVENTORY_WOUND = 2,
+    INVENTORY_GROOMED = 4,
+    INVENTORY_BRANCH = 8,
+    INVENTORY_ROCK = 16,
+    INVENTORY_SHELL = 32,
+    INVENTORY_TWIG = 64,
+    INVENTORY_NUT = 128,
+    INVENTORY_NUT_CRACKED = 256,
+    INVENTORY_GRASS = 512,
+    INVENTORY_SCRAPER = 1024,
+    INVENTORY_SPEAR = 2048,
+    INVENTORY_FISH = 4096
+};
 
 #define VALUABLE_OBJECT    (INVENTORY_NUT & INVENTORY_SHELL)
 
@@ -1749,7 +1752,7 @@ const static noble_console_command control_commands[] =
 /*NOBLEMAKE DEL=""*/
 
 
-#endif /* _NOBLEAPE_UNIVERSE_H_ */
+#endif /* NOBLEAPE_UNIVERSE_H */
 
 /*NOBLEMAKE END=""*/
 

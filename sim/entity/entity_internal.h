@@ -34,8 +34,8 @@
  ****************************************************************/
 
 /*NOBLEMAKE DEL=""*/
-#ifndef _NOBLEAPE_ENTITY_INTERNAL_H_
-#define _NOBLEAPE_ENTITY_INTERNAL_H_
+#ifndef NOBLEAPE_ENTITY_INTERNAL_H
+#define NOBLEAPE_ENTITY_INTERNAL_H
 /*NOBLEMAKE END=""*/
 
 #define VISUAL_DISTANCE_SQUARED (4000*4000)
@@ -162,4 +162,4 @@ void being_ingest_pathogen(noble_being * local, n_byte food_type);
 
 void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result);
 
-#endif /* _NOBLEAPE_ENTITY_INTERNAL_H_ */
+#endif /* NOBLEAPE_ENTITY_INTERNAL_H */

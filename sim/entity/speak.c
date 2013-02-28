@@ -254,7 +254,11 @@ static void speak_make(n_string filename, n_string paragraph)
     } while (found_character != '\n' && found_character != 0);
     
 
-    fclose(out_file);
+    if (fclose(out_file) != 0)
+    {
+        (void)SHOW_ERROR("Failed to close speak file");
+    }
+    return;
 }
 
 void speak_out(n_string filename, n_string paragraph)

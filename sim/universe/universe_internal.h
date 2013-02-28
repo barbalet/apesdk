@@ -36,8 +36,8 @@
 
 /*NOBLEMAKE VAR=""*/
 
-#ifndef _NOBLEAPE_UNIVERSE_INTERNAL_H_
-#define _NOBLEAPE_UNIVERSE_INTERNAL_H_
+#ifndef NOBLEAPE_UNIVERSE_INTERNAL_H
+#define NOBLEAPE_UNIVERSE_INTERNAL_H
 
 
 #define USE_FIL_VER
@@ -322,6 +322,6 @@ void console_external_watch(void);
 n_int console_executing(void);
 
 
-#endif /* _NOBLEAPE_UNIVERSE_INTERNAL_H_ */
+#endif /* NOBLEAPE_UNIVERSE_INTERNAL_H */
 
 /*NOBLEMAKE END=""*/

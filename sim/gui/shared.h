@@ -35,8 +35,8 @@
 
 /*NOBLEMAKE VAR=""*/
 
-#ifndef _NOBLEAPE_SHARED_H_
-#define _NOBLEAPE_SHARED_H_
+#ifndef NOBLEAPE_SHARED_H
+#define NOBLEAPE_SHARED_H
 
 void shared_cycle(n_uint ticks, n_int fIdentification);
 
@@ -101,7 +101,7 @@ n_int sim_thread_console_quit(void);
 
 #endif
 
-#endif /* _NOBLEAPE_SHARED_H_ */
+#endif /* NOBLEAPE_SHARED_H */
 
 /*NOBLEMAKE END=""*/
 

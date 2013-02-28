@@ -34,9 +34,9 @@
  ****************************************************************/
 
 /*NOBLEMAKE DEL=""*/
-#ifndef _NOBLEAPE_GUI_INTERNAL_H_
-#define _NOBLEAPE_GUI_INTERNAL_H_
+#ifndef NOBLEAPE_GUI_INTERNAL_H
+#define NOBLEAPE_GUI_INTERNAL_H
 /*NOBLEMAKE END=""*/
 
 
-#endif /* _NOBLEAPE_ENTITY_INTERNAL_H_ */
+#endif /* NOBLEAPE_ENTITY_INTERNAL_H */

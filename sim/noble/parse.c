@@ -322,13 +322,15 @@ static n_int parse_write_code(n_interpret * final_prog, n_byte value, n_byte cod
 #endif
     }
 
-
 #ifdef ROUGH_CODE_OUT
     if (value == ';' || value == '{' || value == '}')
     {
         fprintf(rough_code_file, "\n");
     }
-    fclose(rough_code_file);
+    if (fclose(rough_code_file) != 0)
+    {
+        return SHOW_ERROR("File failed to close");
+    }
 #endif
     return 0;
 }

@@ -34,8 +34,8 @@
  ****************************************************************/
 
 /*NOBLEMAKE DEL=""*/
-#ifndef _NOBLEAPE_ENTITY_H_
-#define _NOBLEAPE_ENTITY_H_
+#ifndef NOBLEAPE_ENTITY_H
+#define NOBLEAPE_ENTITY_H
 /*NOBLEMAKE END=""*/
 
 #define	LAND_ON
@@ -55,9 +55,12 @@
 
 #define EPISODIC_AFFECT_ZERO (16384)
 
-#define BEING_HUNGRY				(10*128)
-#define	BEING_FULL 			(BEING_HUNGRY*3)
-#define	BEING_STARVE 		(BEING_HUNGRY*2)
+enum being_energy
+{
+    BEING_HUNGRY = (10*128),
+    BEING_STARVE = (BEING_HUNGRY*2),
+    BEING_FULL   = (BEING_HUNGRY*3)
+};
 
 #define SOCIAL_RESPECT_NORMAL	127
 
@@ -145,4 +148,4 @@ n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 
 void          speak_out(n_string filename, n_string paragraph);
 
 
-#endif /* _NOBLEAPE_ENTITY_H_ */
+#endif /* NOBLEAPE_ENTITY_H */
