@@ -178,13 +178,17 @@ typedef	struct
 noble_file_entry;
 
 /* include externally, if needed */
-#define	FILE_TYPE_BYTE			0x01
-#define	FILE_TYPE_BYTE2			0x02
-#define FILE_TYPE_BYTE_EXT		0x03
 
-#define	FILE_TYPE_PACKED		0x05
 
 #define FILE_COPYRIGHT      0x00
+
+enum file_element_type
+{
+    FILE_TYPE_BYTE		= 0x01,
+    FILE_TYPE_BYTE2		= 0x02,
+    FILE_TYPE_BYTE_EXT	= 0x03,
+    FILE_TYPE_PACKED	= 0x05
+};
 
 #define FILE_INCL(num)      ((num) & 0xf0)
 #define FILE_KIND(num)      ((num) & 0x0f)
@@ -332,10 +336,12 @@ const static n_int	new_sd[256] =
 #define VECT_X(f)         	(OLD_SD_NEW_SD(((f)) + 64))
 #define VECT_Y(f)         	(OLD_SD_NEW_SD((f)))
 
-#define	TERRAIN_WINDOW_WIDTH			(2048)
-#define	TERRAIN_WINDOW_HEIGHT			(1536)
-
-#define TERRAIN_WINDOW_AREA			(TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
+enum window_information
+{
+    TERRAIN_WINDOW_WIDTH		= (2048),
+    TERRAIN_WINDOW_HEIGHT       = (1536),
+    TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
+};
 
 typedef enum
 {

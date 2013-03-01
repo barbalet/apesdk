@@ -60,7 +60,7 @@
 
 /* the weather/time of day icons hard coded */
 
-static n_byte	icns[896] =
+static const n_byte	icns[896] =
 {
     /* sunny day */
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -132,7 +132,7 @@ static n_byte	icns[896] =
 
 /* n_byte segment = seg14[ conv[ character_value ]]; */
 
-static n_byte	conv[ 96 ] =
+static const n_byte	conv[ 96 ] =
 {
     0, 40, 41, 0, 0, 0, 0, 42, 43, 44, 38, 39, 45, 11, 46, 47, 1, 2, 3, 4, 5, 6, 7,
     8, 9, 10, 48, 49, 0, 50, 0, 51, 0, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
@@ -143,7 +143,7 @@ static n_byte	conv[ 96 ] =
 
 /* one bit per segment */
 
-static n_byte2 seg14[ 60 ] =
+static const n_byte2 seg14[ 60 ] =
 {
     0x0000, 0x3F00, 0x1800, 0x36C0, 0x3CC0, 0x19C0, 0x2DC0, 0x2FC0, 0x3800, 0x3FC0,
     0x3DC0, 0x00C0, 0x3BC0, 0x3CA1, 0x2700, 0x3C21, 0x27C0, 0x23C0, 0x2F80, 0x1BC0,
@@ -737,17 +737,17 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
  */
 static void	draw_meters(noble_simulation * local_sim)
 {
-    n_land  * loc_land  =   local_sim->land;
-    noble_being * loc_being = &(local_sim->beings[local_sim->select]);
-    n_pixel 	* local_draw = &pixel_overlay;
-    n_byte		* local_info = draw_pointer(NUM_TERRAIN);
-    n_byte 		* local_icon;
-    n_int		  ha1 = 6;
-    n_int		  ha2 = 0;
-    n_int		  hr = 0;
-    n_int		  pntx = 0;
-    n_int		  pnty;
-    n_join		  local_kind;
+    n_land       * loc_land  =   local_sim->land;
+    noble_being  * loc_being = &(local_sim->beings[local_sim->select]);
+    n_pixel 	 * local_draw = &pixel_overlay;
+    n_byte		 * local_info = draw_pointer(NUM_TERRAIN);
+    const n_byte * local_icon;
+    n_int		   ha1 = 6;
+    n_int		   ha2 = 0;
+    n_int		   hr = 0;
+    n_int		   pntx = 0;
+    n_int		   pnty;
+    n_join		   local_kind;
 
     if (local_info == 0L)
     {

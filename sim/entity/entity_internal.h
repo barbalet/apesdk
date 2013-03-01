@@ -40,9 +40,12 @@
 
 #define VISUAL_DISTANCE_SQUARED (4000*4000)
 
-#define FULLY_ASLEEP    0
-#define SLIGHTLY_AWAKE  1
-#define FULLY_AWAKE     2
+enum sleep_state
+{
+    FULLY_ASLEEP   =   0,
+    SLIGHTLY_AWAKE =   1,
+    FULLY_AWAKE    =   2
+};
 
 #define CONSUME_E(being,max_energy,food)  ((max_energy)*(1+food_absorption(food,being))>>3)
 #define CONSUME(being,max_energy,food)  (GET_E(being)+=(n_byte2)CONSUME_E(being,max_energy,food))

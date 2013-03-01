@@ -542,15 +542,19 @@ enum social_action_type
 #define METRES_TO_APESPACE(m)   (m*m*80000)
 
 /* shouting */
-#define SHOUT_BYTES	 6
 #define SHOUT_RANGE      METRES_TO_APESPACE(50)
 #define SHOUT_REFRACTORY 10
-#define SHOUT_CONTENT    0
-#define SHOUT_HEARD      1
-#define SHOUT_CTR        2
-#define SHOUT_VOLUME     3
-#define SHOUT_FAMILY0    4
-#define SHOUT_FAMILY1    5
+
+enum shout_elements
+{
+    SHOUT_CONTENT = 0,
+    SHOUT_HEARD,
+    SHOUT_CTR,
+    SHOUT_VOLUME,
+    SHOUT_FAMILY0,
+    SHOUT_FAMILY1,
+    SHOUT_BYTES
+};
 
 /* maximum bytes in a braincode program */
 #define BRAINCODE_SIZE                    128
@@ -568,8 +572,12 @@ enum social_action_type
 #define BRAINCODE_CONSTANT0_BIT		  (64)
 #define BRAINCODE_CONSTANT1_BIT		  (128)
 
-#define BRAINCODE_INTERNAL                1
-#define BRAINCODE_EXTERNAL                0
+
+enum braincode_locations
+{
+    BRAINCODE_EXTERNAL = 0,
+    BRAINCODE_INTERNAL
+};
 
 /* Number of columns to display when showing the braincode on the console */
 #define BRAINCODE_DISPLAY_COLUMNS         3
@@ -659,8 +667,11 @@ enum BRAINCODE_COMMANDS
 #define ANECDOTE_AFFECT_MUTATION_RATE  5000
 
 /* used in the social graph */
-#define BEING_MEETER 0  /* the first person, I/me */
-#define BEING_MET    1  /* the second person, You */
+enum being_interaction_social
+{
+    BEING_MEETER = 0,  /* the first person, I/me */
+    BEING_MET          /* the second person, You */
+};
 
 /* number of days after which social graph entries may be forgotten */
 #define SOCIAL_FORGET_DAYS      10
@@ -799,17 +810,23 @@ enum EPISODIC_EVENTS
 #define GOAL_RADIUS         40000
 
 /* different types of goal */
-#define GOAL_NONE           0
-#define GOAL_LOCATION       1
-#define GOAL_MATE           2
+enum goal_types
+{
+    GOAL_NONE           = 0,
+    GOAL_LOCATION       = 1,
+    GOAL_MATE           = 2
+};
 
-#define DRIVES              4    /* number of biological drives */
 #define DRIVES_MAX          255  /* maximum value of each drive */
-#define DRIVE_HUNGER        0
-#define DRIVE_SOCIAL        1
-#define DRIVE_FATIGUE       2
-#define DRIVE_SEX           3
 
+enum drives_definition
+{
+    DRIVE_HUNGER = 0,
+    DRIVE_SOCIAL,
+    DRIVE_FATIGUE,
+    DRIVE_SEX,
+    DRIVES   /* number of biological drives */
+};
 
 /* honor multiplier used to calculate the probability of a female mating */
 #define MATING_PROB         12
@@ -905,13 +922,17 @@ enum
 
 /* maximum energy obtainable from different types of food */
 
-#define ENERGY_GRASS                50
-#define ENERGY_BUSH                 100
-#define ENERGY_FRUIT                100
-#define ENERGY_SEAWEED              30
-#define ENERGY_SHELLFISH            300
-#define ENERGY_NUT                  200
-#define ENERGY_FISH                 600
+
+enum energy_types
+{
+    ENERGY_GRASS               = 50,
+    ENERGY_BUSH                = 100,
+    ENERGY_FRUIT               = 100,
+    ENERGY_SEAWEED             = 30,
+    ENERGY_SHELLFISH           = 300,
+    ENERGY_NUT                 = 200,
+    ENERGY_FISH                = 600
+};
 
 /* a maximum generation number to prevent overflows */
 #define MAX_GENERATION              4294967294
@@ -959,33 +980,39 @@ enum GENERATION_NUM
   ((enjoyment)+(interest)-(anger)-(disgust)-(dissmell)-(distress)-(fear)-(shame))
 
 /* Affect values are composed from primitives */
-#define AFFECT_MATE                 COMPOSITE_AFFECT(1000,0,0,      0,0,0,       0,0,0)
-#define AFFECT_BIRTH                COMPOSITE_AFFECT(1500,0,1000,   0,100,100,   200,200,50)
-#define AFFECT_CARRYING             COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0)
-#define AFFECT_CARRIED              COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0)
-#define AFFECT_SUCKLING             COMPOSITE_AFFECT(500,0,0,       0,0,0,       0,0,0)
-#define AFFECT_CHAT                 COMPOSITE_AFFECT(0,100,0,       0,0,0,       0,0,0)
-#define AFFECT_GROOM                COMPOSITE_AFFECT(50,50,0,       0,0,0,       0,0,0)
-#define AFFECT_SEEK_MATE            COMPOSITE_AFFECT(0,600,0,       0,0,0,       0,0,0)
-#define AFFECT_SQUABBLE_VICTOR      COMPOSITE_AFFECT(1100,0,100,    0,0,0,       100,0,0)
-#define AFFECT_SQUABBLE_VANQUISHED  COMPOSITE_AFFECT(0,0,100,       200,0,0,     600,100,100)
-#define AFFECT_WHACKED              COMPOSITE_AFFECT(0,0,100,       20,0,0,      20,20,40)
-#define AFFECT_HURL                 COMPOSITE_AFFECT(0,0,0,         100,0,0,     0,0,0)
-#define AFFECT_HUGGED               COMPOSITE_AFFECT(100,0,0,       0,0,0,       0,0,0)
-#define AFFECT_PRODDED              COMPOSITE_AFFECT(0,0,0,         0,0,0,       5,0,5)
-#define AFFECT_RECEIVE              COMPOSITE_AFFECT(25,25,0,       0,0,0,       0,0,0)
-#define AFFECT_FISH                 COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0)
-#define AFFECT_SMILED               COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0)
-#define AFFECT_GLOWER               COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0)
 
+enum affect_type
+{
+    AFFECT_MATE                 = COMPOSITE_AFFECT(1000,0,0,      0,0,0,       0,0,0),
+    AFFECT_BIRTH                = COMPOSITE_AFFECT(1500,0,1000,   0,100,100,   200,200,50),
+    AFFECT_CARRYING             = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
+    AFFECT_CARRIED              = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
+    AFFECT_SUCKLING             = COMPOSITE_AFFECT(500,0,0,       0,0,0,       0,0,0),
+    AFFECT_CHAT                 = COMPOSITE_AFFECT(0,100,0,       0,0,0,       0,0,0),
+    AFFECT_GROOM                = COMPOSITE_AFFECT(50,50,0,       0,0,0,       0,0,0),
+    AFFECT_SEEK_MATE            = COMPOSITE_AFFECT(0,600,0,       0,0,0,       0,0,0),
+    AFFECT_SQUABBLE_VICTOR      = COMPOSITE_AFFECT(1100,0,100,    0,0,0,       100,0,0),
+    AFFECT_SQUABBLE_VANQUISHED  = COMPOSITE_AFFECT(0,0,100,       200,0,0,     600,100,100),
+    AFFECT_WHACKED              = COMPOSITE_AFFECT(0,0,100,       20,0,0,      20,20,40),
+    AFFECT_HURL                 = COMPOSITE_AFFECT(0,0,0,         100,0,0,     0,0,0),
+    AFFECT_HUGGED               = COMPOSITE_AFFECT(100,0,0,       0,0,0,       0,0,0),
+    AFFECT_PRODDED              = COMPOSITE_AFFECT(0,0,0,         0,0,0,       5,0,5),
+    AFFECT_RECEIVE              = COMPOSITE_AFFECT(25,25,0,       0,0,0,       0,0,0),
+    AFFECT_FISH                 = COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0),
+    AFFECT_SMILED               = COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0),
+    AFFECT_GLOWER               = COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0)
+};
 /* ------- ------- ------- GENETICS FOR THE NOBLE APES (BETA) ------- ------- ------- */
 
 typedef n_c_uint n_genetics;
 
-#define MUTATION_MATERNAL           0
-#define MUTATION_PATERNAL           1
-#define MUTATION_MATERNAL_DUPLICATE 2
-#define MUTATION_PATERNAL_DUPLICATE 3
+enum mutation_type
+{
+    MUTATION_MATERNAL = 0,
+    MUTATION_PATERNAL,
+    MUTATION_MATERNAL_DUPLICATE,
+    MUTATION_PATERNAL_DUPLICATE
+};
 
 #define DIPLOID(parent1,parent2)    ((parent1)|((parent2)<<16))
 #define CHROMOSOME_FROM_MOTHER(ch)  (((ch)>>16)&65535)
@@ -1737,11 +1764,8 @@ const static noble_console_command control_commands[] =
     {&console_list,          "list",           "",                     "List all ape names"},
     {&console_list,          "ls",             "",                     ""},
     {&console_list,          "dir",            "",                     ""},
-
     
-    {&io_aiff_test,          "aiff",           "",                     "Test if a file is AIFF compatible"},
-
-    
+    /*{&io_aiff_test,          "aiff",           "",                     "Test if a file is AIFF compatible"},*/
     
     {0L, 0L},
 };

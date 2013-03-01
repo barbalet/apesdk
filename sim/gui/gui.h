@@ -43,16 +43,21 @@
 #define	TERRAINWINDOW(alpha)   (alpha)
 #define	VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA)
 
-#define	NUM_TERRAIN           (0)
-#define	NUM_VIEW			  (1)
+enum window_num
+{
+    NUM_TERRAIN = (0),
+    NUM_VIEW	= (1)
+};
 
 #define IS_WINDOW_KIND(x,y)			(((x)>>(y))&1)
 
-
-#define COLOUR_GREY         (252)
-#define COLOUR_YELLOW       (253)
-#define COLOUR_RED_DARK     (254)
-#define COLOUR_RED          (255)
+enum colour_type
+{
+    COLOUR_GREY      =   (252),
+    COLOUR_YELLOW    =   (253),
+    COLOUR_RED_DARK  =   (254),
+    COLOUR_RED       =   (255)
+};
 
 #define	NON_INTERPOLATED COLOUR_GREY
 

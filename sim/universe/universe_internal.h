@@ -140,15 +140,17 @@
 
 #define	LARGEST_INIT_PTR	((NON_PTR_BEING > NON_PTR_LAND) ? NON_PTR_BEING : NON_PTR_LAND)
 
-#define FIL_VER (0x10)
-#define FIL_LAN (0x20)
-#define FIL_BEI (0x30)
-#define FIL_SOE (0x40)
-#define FIL_EPI (0x50)
-#define FIL_WEA (0x60)
-#define FIL_BRA (0x70)
-#define FIL_END (0x80)
-
+enum file_section_type
+{
+    FIL_VER = (0x10),
+    FIL_LAN = (0x20),
+    FIL_BEI = (0x30),
+    FIL_SOE = (0x40),
+    FIL_EPI = (0x50),
+    FIL_WEA = (0x60),
+    FIL_BRA = (0x70),
+    FIL_END = (0x80)
+};
 
 const static noble_file_entry noble_file_format[]=
 {
