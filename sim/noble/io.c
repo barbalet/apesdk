@@ -162,6 +162,24 @@ void file_chain_free(n_file_chain * value)
     }
 }
 
+static n_int io_uniform_handle_fclose(FILE * file_ptr)
+{
+    if (fclose(file_ptr) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    return 0;
+}
+
+static n_int io_uniform_handle_fclose_double_error(FILE * file_ptr, n_string error)
+{
+    if (fclose(file_ptr) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    return SHOW_ERROR(error);
+}
+
 n_int file_chain_write(n_string name, n_file_chain * initial)
 {
     FILE         * write_file = 0L;
@@ -179,11 +197,7 @@ n_int file_chain_write(n_string name, n_file_chain * initial)
         local = (n_file_chain*)local->next;
     } while (local != 0L);
     
-    if (fclose(write_file) != 0)
-    {
-        return SHOW_ERROR("File could not be closed");
-    }
-    return 0;
+    return io_uniform_handle_fclose(write_file);
 }
 
 n_int file_chain_read(n_string name, n_file_chain * initial)
@@ -202,12 +216,8 @@ n_int file_chain_read(n_string name, n_file_chain * initial)
         fread(local->data,1,local->expected_bytes, read_file);
         local = (n_file_chain*)local->next;
     } while (local != 0L);
-    
-    if (fclose(read_file) != 0)
-    {
-        return SHOW_ERROR("File could not be closed");
-    }
-    return 0;
+
+    return io_uniform_handle_fclose(read_file);
 }
 
 
@@ -226,11 +236,7 @@ n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expect
     
     if (header == 0L)
     {
-        if (fclose(read_file) != 0)
-        {
-            return SHOW_ERROR("File could not be closed");
-        }
-        return SHOW_ERROR("No header presented");
+        return io_uniform_handle_fclose_double_error(read_file, "No header presented");
     }
     
     expected_size = expected_additional_entries * sizeof(n_uint);
@@ -238,11 +244,8 @@ n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expect
     header->data = io_new(expected_size);
     if (header->data == 0L)
     {
-        if (fclose(read_file) != 0)
-        {
-            return SHOW_ERROR("File could not be closed");
-        }
-        return SHOW_ERROR("No hash allocated");
+        return io_uniform_handle_fclose_double_error(read_file, "No hash allocated");
+
     }
     header->expected_bytes = expected_size;
 
@@ -251,22 +254,14 @@ n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expect
     if (expected_size != actual_size)
     {
         io_free(hash_data);
-        if (fclose(read_file) != 0)
-        {
-            return SHOW_ERROR("File could not be closed");
-        }
-        return SHOW_ERROR("File too short");
+        return io_uniform_handle_fclose_double_error(read_file, "File too short");
     }
     while (loop < expected_additional_entries)
     {
         header[loop+1].hash = hash_data[loop];
         loop++;
     }
-    if (fclose(read_file) != 0)
-    {
-        return SHOW_ERROR("File could not be closed");
-    }
-    return 0;
+    return io_uniform_handle_fclose(read_file);
 }
 
 n_int file_chain_read_validate(n_string name, n_file_chain *initial)
@@ -293,11 +288,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
     general_buffer = io_new(largest_bytes);
     if (general_buffer == 0L)
     {
-        if (fclose(read_file) != 0)
-        {
-            return SHOW_ERROR("File could not be closed");
-        }
-        return SHOW_ERROR("Validation buffer not created");
+        return io_uniform_handle_fclose_double_error(read_file, "Validation buffer not created");
     }
     
     /* get past header */
@@ -305,11 +296,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
     
     if (local == 0L)
     {
-        if (fclose(read_file) != 0)
-        {
-            return SHOW_ERROR("File could not be closed");
-        }
-        return SHOW_ERROR("File chain invalid");
+        return io_uniform_handle_fclose_double_error(read_file, "File chain invalid");
     }
     
     do {
@@ -318,11 +305,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
         if (actual_read != local->expected_bytes)
         {
             io_free(general_buffer);
-            if (fclose(read_file) != 0)
-            {
-                return SHOW_ERROR("File could not be closed");
-            }
-            return SHOW_ERROR("File too short");
+            return io_uniform_handle_fclose_double_error(read_file, "File too short");
         }
         
         actual_hash = math_hash(general_buffer, local->expected_bytes);
@@ -333,12 +316,8 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
             {
                 n_string_block  combination;
                 io_free(general_buffer);
-                if (fclose(read_file) != 0)
-                {
-                    return SHOW_ERROR("File could not be closed");
-                }
                 sprintf(combination, "Hash failed (# %ld, actual %ld, expected %ld, bytes %ld, sizeof %ld)",count, actual_hash, local->hash, local->expected_bytes, sizeof(n_int));
-                return SHOW_ERROR(combination);
+                return io_uniform_handle_fclose_double_error(read_file, combination);
             }
         }
         local = (n_file_chain*)local->next;
@@ -347,12 +326,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
     
     io_free(general_buffer);
     
-    if (fclose(read_file) != 0)
-    {
-        return SHOW_ERROR("File could not be closed");
-    }
-    
-    return 0;
+    return io_uniform_handle_fclose(read_file);
 }
 
 void file_chain_bin_name(n_string original, n_string bin_file)
@@ -489,26 +463,22 @@ n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_f
 {
     FILE * test_file = fopen(response, "rb");
     n_byte header[54]={0};
+    n_string_block output;
+    n_int samples;
+    
     if (test_file == 0L)
     {
         (void)SHOW_ERROR("AIFF test open failed");
+        return 0;
     }
-    else
-    {
-        n_string_block output;
-        n_int samples;
-        fread(header, 1, 54, test_file);
-        
-        samples = io_aiff_header_check_length(header);
-        
-        sprintf(output, "%ld\n",samples);
-        output_function(output);
-        if (fclose(test_file) != 0)
-        {
-            return SHOW_ERROR("File could not be closed");
-        }
-    }
-    return 0;
+
+    fread(header, 1, 54, test_file);
+    
+    samples = io_aiff_header_check_length(header);
+    
+    sprintf(output, "%ld\n",samples);
+    output_function(output);
+    return io_uniform_handle_fclose(test_file);
 }
 
 /**
@@ -657,11 +627,7 @@ n_int io_disk_read(n_file * local_file, n_string file_name)
             }
         }
     }
-    if (fclose(in_file) != 0)
-    {
-        return SHOW_ERROR("File could not be closed");
-    }
-    return FILE_OKAY;
+    return io_uniform_handle_fclose(in_file);
 }
 
 /**
