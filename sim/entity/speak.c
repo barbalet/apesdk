@@ -99,7 +99,7 @@ static n_uint speak_length_total(n_string paragraph)
     return length;
 }
 
-void speak_aiff_header(FILE * fptr, n_uint total_samples)
+static void speak_aiff_header(FILE * fptr, n_uint total_samples)
 {
     n_byte header[54] = {0};
     io_aiff_header(header);

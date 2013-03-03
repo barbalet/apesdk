@@ -885,7 +885,7 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
 
 }
 
-void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
+static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
 {
     n_int loop;
     n_byte * external_bc = GET_BRAINCODE_EXTERNAL((noble_simulation*)ptr, local);

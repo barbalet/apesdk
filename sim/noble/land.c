@@ -327,7 +327,8 @@ n_int	weather_seven_values(n_land * local_land, n_weather * local_weather, n_int
     return ret_val;
 }
 
-n_int time_actual_to_perceived(n_int actual_time)
+/* Not currently used yet */
+static n_int time_actual_to_perceived(n_int actual_time)
 {
     if (actual_time >= DUSK_END_POINT)
     {
