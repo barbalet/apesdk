@@ -492,8 +492,8 @@ static n_byte2 draw_genetic_patch(n_byte2 * value)
 
 #define POS_HIRES(num) ((num+(4096*2))&4095)
 
-#define CONVERT_X(x)  (n_uint)((POS_HIRES((x)+co_x)) << 1)
-#define CONVERT_Y(y)  (n_uint)((POS_HIRES((y)+co_y)) << 13)
+#define CONVERT_X(x)  (n_uint)((POS_HIRES((x)+co_x)) )
+#define CONVERT_Y(y)  (n_uint)((POS_HIRES((y)+co_y)) << 12)
 
 #define CONVERT_XY(x,y)   (CONVERT_X(x) | CONVERT_Y(y))
 
@@ -638,7 +638,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
     }
     {
         n_int       lowest_y = ((dim_y + 256) * dim_y)/256;
-        n_byte      * combined = local_sim->highres;
+        n_byte2      * combined = (n_byte2 *)local_sim->highres;
         noble_being * loc_being = &(local_sim->beings[local_sim->select]);
         n_int turn = GET_F(loc_being);
         n_int co_x = APESPACE_TO_HR_MAPSPACE(GET_X(loc_being));
@@ -660,7 +660,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         n_int   lowest_c = ((valc * (((lowest_y)) - dim_y)));
         
         /* find the central map point */
-        n_int flatval = combined[CONVERT_X(2048) | CONVERT_Y(2048)];
+        n_int flatval = combined[CONVERT_X(2048) | CONVERT_Y(2048)] & 255;
         
         n_int const_lowdiv2;
 
@@ -675,6 +675,9 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         {
             /* take the very bottom pixel */
             n_int pixy = (scrx + (dim_x >> 1)) + ((dim_y - 1) * dim_x );
+            
+            n_int actual = (dim_y - 1);
+
             /* start with a map point which is below/off the screen */
             n_int scry = const_lowdiv2;
             /* rotated and add offset (which will be &ed off) */
@@ -684,24 +687,30 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
             
             n_uint check_change = CONVERT_X((big_x >> 8)) | CONVERT_Y((big_y >> 8));
 
-            n_byte z00   = combined[check_change];
-            n_byte col00 = combined[check_change|1];
+            n_byte2 value = combined[check_change];
+            n_byte col00   = value >> 8;
+            n_int z00 = value & 255;
 
-            while (pixy > -1)
+            //while (pixy > -1)
+            while(actual > -1)
             {
                 /* the point the pixel y counter needs to reach - relative to flatval through scry */
-                n_int sv_a = (scry - z00) * dim_x;
-
-                if (sv_a < -1)       /* if this point is less than minus one, make it minus one */
-                {
-                    sv_a = -1;       /*    ie don't overshoot */
-                }
-                while ( pixy > sv_a ) /* 38.1% */
+                //n_int sv_a = (scry - z00) * dim_x;
+                //n_int sv_a = (scry - z00);
+                
+                //while ( pixy > sv_a ) /* 38.1% */
+                //while (actual > sv_a)
+                
+                
+                
+                //while ((actual + z00) > scry)
+                while (((actual + z00) > scry) && (pixy > -1))
                 {
                     /* fill up to sv_a -1, with colour mapz (if below, do nothing) */
                     /* this could be replaced with a colour/texture map */
                     loc_offscr[pixy] = col00; /* 12.7% */
                     pixy -= dim_x;
+                    actual--;
                 }
                 scry--;           /* next map point from screen value */
                 big_x -= vals2;
@@ -710,8 +719,14 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
                 if (pixy > -1)
                 {
                     check_change = CONVERT_X((big_x >> 8)) | CONVERT_Y((big_y >> 8)); /* 4.4% */
-                    z00   = combined[check_change];
-                    col00 = combined[check_change|1];
+                    
+                    value = combined[check_change];
+                    col00   = value >> 8;
+                    z00 = value & 255;
+                }
+                else
+                {
+                    break;
                 }
             }
 

@@ -49,7 +49,7 @@
 // per-window timer function, basic time based animation preformed here
 - (void)animationTimer
 {
-    shared_cycle(CFAbsoluteTimeGetCurrent(), fIdentification);
+    shared_cycle_no_draw(CFAbsoluteTimeGetCurrent(), fIdentification);
     [self setNeedsDisplay];
 }
 
