@@ -451,7 +451,7 @@ static const n_ae_error apescript_errors[]=
     {AE_INPUT_VARIABLE_WITHOUT_EQUALS,     "Input variable without equals",    "All variables set require an equals following the variable."},
     {AE_ASSIGN_VALUE_FAILED,               "Assign value failed",              "Something is wrong with the variable set by an equality."},
     {AE_UNKNOWN_SYNTAX_FROM_INTERPRET,     "Unknown syntax (from interpret)",  "Syntax is incorrect"},
-    {AE_NO_MAIN_CODE,                      "No main code",                     "APeScript requires a main function."},
+    {AE_NO_MAIN_CODE,                      "No main code",                     "ApeScript requires a main function."},
 
     {AE_NO_ERROR, 0L, 0L}
 };
@@ -803,10 +803,10 @@ enum SYNTAX_ADDITIONAL_BRAINCODE
 
 #define	CODE_VALUE_REQUIRED(num)	(((num) == '=' || (num) == 'n') || ((num) == 't'))
 
-#define	SIZEOF_NUMBER_WRITE      2
+#define	SIZEOF_NUMBER_WRITE      (sizeof(n_int))
 
-#define	INT_TO_BYTES(byt,num)	(byt)[0] = (n_byte)(((num)&255)); (byt)[1] = (n_byte)(((num)>>8)&255)
-#define	BYTES_TO_INT(byt)		((byt)[0] | ((byt)[1] << 8))
+void io_int_to_bytes(n_int value, n_byte * bytes);
+n_int io_bytes_to_int(n_byte * bytes);
 
 #define	VARIABLE_INPUT(num,code)		((num)>((code)->input_greater))
 #define	VARIABLE_SPECIAL(num,code)	    ((num)<((code)->special_less))
@@ -819,7 +819,7 @@ enum SYNTAX_ADDITIONAL_BRAINCODE
 #define	VARIABLE_MAX			256
 
 #define	BRACES_MAX			    16
-#define SIZE_OF_EVALUATE	    8  /* (tA=XtB) */
+#define SIZE_OF_EVALUATE	    (SIZEOF_NUMBER_WRITE+SIZEOF_NUMBER_WRITE+1)  /* (tA=XtB) */
 
 #define CYCLE_COUNT_RESET	    4096
 

@@ -259,13 +259,13 @@ static n_int parse_number(n_interpret * interpret, const n_byte * number)
     }
     while((number[point_counter]!=0) && (out_value>-1));
 
-    if((out_value < 0) || (out_value > 0xffff))
+    if((out_value < 0) || (out_value > 0x7fffffff))
     {
         return io_apescript_error(AE_NUMBER_OUT_OF_RANGE);
     }
 
     /* is this number already stored? */
-    while(loop<number_num)
+    while(loop < number_num)
     {
         if(interpret->number_buffer[loop] == out_value)
             return loop;
@@ -273,7 +273,7 @@ static n_int parse_number(n_interpret * interpret, const n_byte * number)
     }
     /* if not, add it to the number store */
     interpret->number_buffer[loop] = out_value;
-    if(number_num<NUMBER_MAX)
+    if(number_num < NUMBER_MAX)
     {
         number_num++;
     }
@@ -335,7 +335,7 @@ static n_int parse_write_code(n_interpret * final_prog, n_byte value, n_byte cod
     return 0;
 }
 
-static n_int	parse_string(const n_byte * test, const n_byte * compare, n_int number)
+static n_int parse_string(const n_byte * test, const n_byte * compare, n_int number)
 {
     n_int		loop = 0;
     while(loop<number)
@@ -366,18 +366,20 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
         }
         break;
     case ('t'):
-        while((loop<variable_num) && (result == -1))
+        while((loop < variable_num) && (result == -1))
         {
-            if(parse_string(variable_codes[loop],buffer,VARIABLE_WIDTH) == 1)
+            if(parse_string(variable_codes[loop], buffer, VARIABLE_WIDTH) == 1)
+            {
                 result = loop;
+            }
             loop++;
         }
         if(result == -1)
         {
-            if(variable_num<VARIABLE_MAX)
+            if(variable_num < VARIABLE_MAX)
             {
                 n_int loop2 = 0;
-                while(loop2<(VARIABLE_WIDTH))
+                while(loop2 < (VARIABLE_WIDTH))
                 {
                     variable_codes[variable_num][loop2] = buffer[loop2];
                     loop2++;
@@ -396,10 +398,12 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
         }
         break;
     case ('='):
-        while((loop<SYNTAX_NUM) && (result == -1))
+        while((loop < SYNTAX_NUM) && (result == -1))
         {
             if(parse_string(syntax_codes[loop],buffer,SYNTAX_WIDTH) == 1)
+            {
                 result = loop;
+            }
             loop++;
         }
         if(result == -1)  /* no error reported up until now */
@@ -417,7 +421,9 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
         while((value = buffer[loop++]) != 0)
         {
             if(parse_write_code(final_prog, value, 0) == -1)
+            {
                 return -1;
+            }
         }
     }
     break;
@@ -530,35 +536,34 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     }
     {
         n_byte	local_numbers[SIZEOF_NUMBER_WRITE];
+        n_int   loop_sizeof_number;
         /* this is the one special case for direct writing as the original stamp size was allowed */
-        INT_TO_BYTES(final_prog->binary_code->data,final_prog->binary_code->location); /* write the basic size header */
+        io_int_to_bytes(final_prog->binary_code->location,final_prog->binary_code->data); /* write the basic size header */
         end_loop = number_num;
         loop = 1;
-        INT_TO_BYTES(local_numbers,number_num); /* write the number of numbers */
-
-        if(io_file_write(final_prog->binary_code, local_numbers[0]) == -1)
+        io_int_to_bytes(number_num,local_numbers); /* write the number of numbers */
+        loop_sizeof_number = 0;
+        while (loop_sizeof_number < SIZEOF_NUMBER_WRITE)
         {
-            interpret_cleanup(final_prog);
-            return 0L;
-        }
-        if(io_file_write(final_prog->binary_code, local_numbers[1]) == -1)
-        {
-            interpret_cleanup(final_prog);
-            return 0L;
-        }
-
-        while(loop<end_loop)
-        {
-            INT_TO_BYTES(local_numbers,(final_prog->number_buffer[loop])); /* write the numbers */
-            if(io_file_write(final_prog->binary_code, local_numbers[0]) == -1)
+            if(io_file_write(final_prog->binary_code, local_numbers[loop_sizeof_number]) == -1)
             {
                 interpret_cleanup(final_prog);
                 return 0L;
             }
-            if(io_file_write(final_prog->binary_code, local_numbers[1]) == -1)
+            loop_sizeof_number++;
+        }
+        while(loop<end_loop)
+        {
+            io_int_to_bytes((final_prog->number_buffer[loop]),local_numbers); /* write the numbers */
+            loop_sizeof_number = 0;
+            while (loop_sizeof_number < SIZEOF_NUMBER_WRITE)
             {
-                interpret_cleanup(final_prog);
-                return 0L;
+                if(io_file_write(final_prog->binary_code, local_numbers[loop_sizeof_number]) == -1)
+                {
+                    interpret_cleanup(final_prog);
+                    return 0L;
+                }
+                loop_sizeof_number++;
             }
             loop++;
         }

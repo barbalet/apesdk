@@ -284,9 +284,9 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
                 n_byte	function_location[SIZE_OF_EVALUATE] = {'f',0};
                 n_byte	*location_write =(n_byte *)&function_location[1];
                 n_int	continuation = return_value + 4 + location;
-                INT_TO_BYTES(location_write,output_number);
+                io_int_to_bytes(output_number, location_write);
                 location_write = (n_byte *)&function_location[1 + SIZEOF_NUMBER_WRITE];
-                INT_TO_BYTES(location_write,continuation);
+                io_int_to_bytes(continuation,location_write);
                 if(interpret_braces(code, (n_byte *)function_location, 0) == -1)
                 {
                     return -1; /* Enough information presented by this point */
@@ -407,9 +407,9 @@ static void interpret_start(n_interpret * interp)
     n_byte	*local_data     = interp->binary_code->data;
     n_int	*local_number   = interp->number_buffer;
     n_int	*local_variable = interp->variable_references;
-    n_int	 end_loop = BYTES_TO_INT(local_data);
+    n_int	 end_loop = io_bytes_to_int(local_data);
     n_byte	*start_numbers = &local_data[end_loop];
-    n_int	 local_number_num = BYTES_TO_INT(start_numbers);
+    n_int	 local_number_num = io_bytes_to_int(start_numbers);
     n_int	 loop = 0;
     interp->main_status = MAIN_NOT_RUN;
     interp->braces_count = 0;
@@ -422,7 +422,7 @@ static void interpret_start(n_interpret * interp)
     local_number[0] = 0;
     while(loop < local_number_num)
     {
-        local_number[loop] = BYTES_TO_INT(&start_numbers[loop*SIZEOF_NUMBER_WRITE]);
+        local_number[loop] = io_bytes_to_int(&start_numbers[loop*SIZEOF_NUMBER_WRITE]);
         loop++;
     }
     loop = 0;
@@ -437,7 +437,7 @@ static n_int	interpret_code(n_interpret * interp)
     n_byte	*local_data  = interp->binary_code->data;
     n_int	 loop        = SIZEOF_NUMBER_WRITE;
     n_int	 cycle_count = 0;
-    n_int	 end_loop    = BYTES_TO_INT(local_data);
+    n_int	 end_loop    = io_bytes_to_int(local_data);
 
     if (interp->location != 0)
     {
@@ -474,11 +474,11 @@ static n_int	interpret_code(n_interpret * interp)
                 if(first_evaluate == 'f')
                 {
                     local_brace->evaluate[0] = 'r';
-                    loop = BYTES_TO_INT(&(local_brace->evaluate[1]));
+                    loop = io_bytes_to_int(&(local_brace->evaluate[1]));
                 }
                 else   /* end of the run function , put back to where 'run' is called */
                 {
-                    loop = BYTES_TO_INT(&(local_brace->evaluate[1 + SIZEOF_NUMBER_WRITE]));
+                    loop = io_bytes_to_int(&(local_brace->evaluate[1 + SIZEOF_NUMBER_WRITE]));
                     if(interpret_braces(interp,0L,-1) == -1)  /* remove the run function from braces */
                     {
                         return -1; /* Enough information presented by this point */
