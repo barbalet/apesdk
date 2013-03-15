@@ -45,7 +45,7 @@
 #undef   NEW_OPENGL_ENVIRONMENT
 
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
-#undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output */
+/*#undef   COMMAND_LINE_DEBUG        Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
 #undef   SKIM_TO_BRIANCODE        /* Skims the interpret stream to braincode printf output currently - only with lance */
 
