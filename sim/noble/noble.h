@@ -129,6 +129,7 @@ void   audio_multiply_output(n_audio * audio, n_uint length);
 void   audio_set_frequency(n_uint entry, n_uint value);
 n_uint audio_power(n_audio * audio, n_uint length);
 void   audio_noise_reduction(n_uint point_squared, n_uint length);
+n_uint audio_max(n_audio * audio, n_uint length);
 
 /*! @struct
 @field signature The program signature defined as NOBLE_APE_SIGNATURE
