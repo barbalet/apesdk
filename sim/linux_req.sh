@@ -68,6 +68,8 @@ elif [ $OS == "debian" ]; then
 elif [[ $OS == "fedora" || $OS == "redhat" || $OS == "centos" ]]; then
 	sudo yum groupinstall "Development Tools"  
 	sudo yum install rpmdevtools gtk2-devel glib2-devel libpng-devel
+elif [[ $OS == "linuxmint" && $INT_VERSION -ge "1300" ]]; then
+	sudo apt-get install build-essential libmotif-dev libgtk2.0-dev libglib2.0-dev libgdk-pixbuf2.0-dev libgnome2-dev libpng12-dev	
 else
 	echo "Operating system not recognised"
 fi

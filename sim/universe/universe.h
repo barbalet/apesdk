@@ -67,7 +67,7 @@
  what these operator sums represent.
  */
 
-static const n_byte	operators[17][6] =
+static const n_byte	operators[17][7] =
 {
     /*AHWOUS*/
     "+.....", /* Area */
