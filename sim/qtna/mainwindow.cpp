@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     firedown = 0;
     firecontrol = 0;
-    current_display = 0;
+    current_display = WND_MAP;
 
     this->show();
     init();
@@ -33,7 +33,11 @@ MainWindow::~MainWindow()
     }
 
     sim_close();
-    delete image;
+    for (int i = 0; i < 2; i++) {
+        delete image_item[i];
+        delete image_scene[i];
+        delete image[i];
+    }
 
     delete ui;
 }
@@ -55,40 +59,49 @@ void MainWindow::init()
         palette.push_back(qRgb(((fit[i * 3 + 0] >> 8)), ((fit[i * 3 + 1] >> 8)), (fit[i * 3 + 2] >> 8)));
     }
 
+    QGraphicsView * g = ui->graphicsView;
+
     /* create an image */
-    image = new QImage((unsigned char*)VIEWWINDOW(local_buffer), WND_WIDTH_MAP, WND_HEIGHT_MAP, QImage::Format_Indexed8);
-    if (!image->isNull()) {
-        image->setColorTable(palette);
-        image->setColorCount(256);
-        QGraphicsView * g = ui->graphicsView;
+    for (i = 0; i < NUM_WINDOWS; i++)
+    {
+        switch(i) {
+        case WND_MAP: {
+            image[WND_MAP] = new QImage((unsigned char*)VIEWWINDOW(local_buffer), WND_WIDTH_MAP, WND_HEIGHT_MAP, QImage::Format_Indexed8);
+            break;
+        }
+        case WND_TERRAIN: {
+            image[WND_TERRAIN] = new QImage((unsigned char*)TERRAINWINDOW(local_buffer), WND_WIDTH_MAP, WND_HEIGHT_MAP, QImage::Format_Indexed8);
+            break;
+        }
+        }
 
-        image_scene = new QGraphicsScene();
-        image_item = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
-        image_scene->setSceneRect(image->rect());
+        if (!image[i]->isNull()) {
+            if ((i == WND_MAP) || (i == WND_TERRAIN)) {
+                image[i]->setColorTable(palette);
+                image[i]->setColorCount(256);
+            }
 
-        g->setScene(image_scene);
-        g->scene()->addItem(image_item);
-        g->fitInView(image->rect(), Qt::KeepAspectRatio);
+            image_scene[i] = new QGraphicsScene();
+            image_item[i] = new QGraphicsPixmapItem(QPixmap::fromImage(*image[i]));
+            image_scene[i]->setSceneRect(image[i]->rect());
 
-        g->show();
+            if (i == current_display) {
+                g->setScene(image_scene[i]);
+                g->scene()->addItem(image_item[i]);
+                g->fitInView(image[i]->rect(), Qt::KeepAspectRatio);
+                g->show();
+            }
+        }
     }
-    //control_init(KIND_NEW_SIMULATION,clock());
 }
 
-void MainWindow::update()
+// reset the simulation
+void MainWindow::resetSim()
 {
-    switch(current_display) {
-    case WND_TERRAIN: {
-        imageData = (unsigned char*)TERRAINWINDOW(local_buffer);
-        break;
-    }
-    case WND_MAP: {
-        imageData = (unsigned char*)VIEWWINDOW(local_buffer);
-        break;
-    }
-    }
+    control_init(KIND_NEW_SIMULATION,clock());
 }
 
+// save the simulation
 unsigned char MainWindow::file_save()
 {
     unsigned long buff_len;
@@ -101,13 +114,13 @@ unsigned char MainWindow::file_save()
 
     if (file == NULL)
     {
-        QMessageBox::information(this, "","Unable to open file for writing!");
+        QMessageBox::information(this, this->windowTitle(),"Unable to open file for writing!");
         return 0;
     }
 
     if (fwrite(buff,sizeof(unsigned char), buff_len, file) != buff_len)
     {
-        QMessageBox::information(this, "","Unable to write!");
+        QMessageBox::information(this, this->windowTitle(),"Unable to write!");
         return 0;
     }
 
@@ -118,6 +131,7 @@ unsigned char MainWindow::file_save()
     return 1;
 }
 
+// save the simulation with a filename
 unsigned char MainWindow::file_save_as()
 {
     QString filename =
@@ -136,6 +150,7 @@ unsigned char MainWindow::file_save_as()
     return 1;
 }
 
+// a single simulation step
 bool MainWindow::refresh()
 {
     sim_thread_console();
@@ -145,7 +160,6 @@ bool MainWindow::refresh()
         control_mouse((n_byte)(firedown - 1), fire_x, fire_y, firecontrol);
     }
     control_simulate((60*clock())/CLOCKS_PER_SEC);
-    update();
     window_updated = 0;
 
     if (sim_thread_console_quit())
@@ -172,6 +186,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     if (!initialised) return;
     QGraphicsView * g = ui->graphicsView;
-    g->fitInView(image->rect(), Qt::KeepAspectRatio);
+
+    g->setScene(image_scene[current_display]);
+    g->fitInView(image[current_display]->rect(), Qt::KeepAspectRatio);
     g->show();
 }

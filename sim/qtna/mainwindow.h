@@ -40,9 +40,10 @@ extern "C" {
 #define WND_HEIGHT_MAP         512
 #define WND_WIDTH_MAP          512
 
-#define WND_TERRAIN 0
-#define WND_MAP 1
+#define WND_TERRAIN  0
+#define WND_MAP      1
 
+#define NUM_WINDOWS  2
 
 namespace Ui {
 class MainWindow;
@@ -55,7 +56,6 @@ protected:
     int current_display;
 
     unsigned char check;
-    unsigned char * imageData;
     unsigned char* local_buffer;
     QVector<QRgb> palette;
     unsigned char window_updated;
@@ -66,12 +66,11 @@ protected:
     int firecontrol;
     int fire_x, fire_y;
 
-    QImage * image;
-    QGraphicsScene * image_scene;
-    QGraphicsPixmapItem * image_item;
+    QImage * image[NUM_WINDOWS];
+    QGraphicsScene * image_scene[NUM_WINDOWS];
+    QGraphicsPixmapItem * image_item[NUM_WINDOWS];
 
     void init();
-    void update();
     bool refresh();
 
 private:
@@ -82,6 +81,7 @@ private:
 protected slots:
     unsigned char file_save_as();
     unsigned char file_save();
+    void resetSim();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
