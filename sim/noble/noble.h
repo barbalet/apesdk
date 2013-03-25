@@ -131,6 +131,8 @@ n_uint audio_power(n_audio * audio, n_uint length);
 void   audio_noise_reduction(n_uint point_squared, n_uint length);
 n_uint audio_max(n_audio * audio, n_uint length);
 
+void   audio_combine(n_audio * master, n_audio * secondary, n_uint length);
+
 /*! @struct
 @field signature The program signature defined as NOBLE_APE_SIGNATURE
 through the Noble Ape Simulation file handling etc.
@@ -566,6 +568,11 @@ n_int          file_chain_read_validate(n_string name, n_file_chain *initial);
 void           file_chain_bin_name(n_string original, n_string bin_file);
 
 n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_function);
+
+
+void       io_file_aiff_header(void * fptr, n_uint total_samples);
+
+void       io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples);
 
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);

@@ -334,6 +334,20 @@ void file_chain_bin_name(n_string original, n_string bin_file)
     sprintf(bin_file, "%s.bin",original);
 }
 
+void io_file_aiff_header(void * fptr, n_uint total_samples)
+{
+    n_byte header[54] = {0};
+    io_aiff_header(header);
+    io_aiff_uint(&header[4],  io_aiff_total_size(total_samples));
+    io_aiff_uint(&header[22], total_samples);
+    io_aiff_uint(&header[42], io_aiff_sound_size(total_samples));
+    fwrite(header, 54, 1, (FILE*)fptr);
+}
+
+void io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples)
+{
+    fwrite(samples,number_samples,2,(FILE*)fptr);
+}
 
 void io_aiff_header(n_byte * header)
 {

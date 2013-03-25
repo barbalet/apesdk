@@ -99,21 +99,6 @@ static n_uint speak_length_total(n_string paragraph)
     return length;
 }
 
-static void speak_aiff_header(FILE * fptr, n_uint total_samples)
-{
-    n_byte header[54] = {0};
-    io_aiff_header(header);
-    io_aiff_uint(&header[4],  io_aiff_total_size(total_samples));
-    io_aiff_uint(&header[22], total_samples);
-    io_aiff_uint(&header[42], io_aiff_sound_size(total_samples));
-    fwrite(header, 54, 1, fptr);
-}
-
-static void speak_aiff_body(FILE * fptr, n_audio *samples, n_uint number_samples)
-{
-    fwrite(samples,number_samples,2,fptr);
-}
-
 const static n_int set_frequencies[24] = {
     175,178,180,183,
     185,188,191,193,
@@ -209,7 +194,7 @@ static void speak_make(n_string filename, n_string paragraph)
         return;
     }
     
-    speak_aiff_header(out_file, total_length);
+    io_file_aiff_header(out_file, total_length);
     do
     {
         n_uint    power_sample = (speak_length(found_character = paragraph[loop++]) + AUDIO_FFT_MAX_BITS - 2);
@@ -249,7 +234,7 @@ static void speak_make(n_string filename, n_string paragraph)
 			{
 				audio_clear_output(output, length);
 			}
-			speak_aiff_body(out_file, output, length);
+			io_file_aiff_body(out_file, output, length);
 		}
     } while (found_character != '\n' && found_character != 0);
     

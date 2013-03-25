@@ -290,6 +290,18 @@ n_uint audio_max(n_audio * audio, n_uint length)
     return output;
 }
 
+void audio_combine(n_audio * master, n_audio * secondary, n_uint length)
+{
+    n_uint loop = 0;
+    while (loop < length)
+    {
+        n_int duplicate = (master[loop] + secondary[loop])/2;
+        n_audio value = duplicate / 2;
+        master[loop] = value;
+        loop++;
+    }
+}
+
 void audio_noise_reduction(n_uint point_squared, n_uint length)
 {
     n_uint  loop = 0;
@@ -307,7 +319,6 @@ void audio_noise_reduction(n_uint point_squared, n_uint length)
         audio_set_frequency(loop, root);
         loop++;
     }
-    
 }
 
 void audio_set_frequency(n_uint entry, n_uint value)
