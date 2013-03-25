@@ -113,7 +113,7 @@ typedef	long long			n_int;
 
 #endif
 
-typedef	short	n_audio;
+typedef	float	n_audio;
 
 #define AUDIO_FFT_MAX_BITS      (15)
 #define AUDIO_FFT_MAX_BUFFER    (1<<AUDIO_FFT_MAX_BITS)
@@ -573,6 +573,8 @@ n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_f
 void       io_file_aiff_header(void * fptr, n_uint total_samples);
 
 void       io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples);
+
+n_int      io_file_aiff_header_check_length(void * fptr);
 
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);
