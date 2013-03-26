@@ -103,6 +103,7 @@ protected slots:
     void menuControlShowBrainFear();
     void menuControlShowBrainDesire();
     void menuControlFlood();
+    void menuControlHealthyCarrier();
 
     void slotTimeout();
     void createPalette();

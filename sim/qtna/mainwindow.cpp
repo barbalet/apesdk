@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionBrainFear,SIGNAL(triggered()),this,SLOT(menuControlShowBrainFear()));
     connect(ui->actionBrainDesire,SIGNAL(triggered()),this,SLOT(menuControlShowBrainDesire()));
     connect(ui->actionFlood,SIGNAL(triggered()),this,SLOT(menuControlFlood()));
+    connect(ui->actionHealthyCarrier,SIGNAL(triggered()),this,SLOT(menuControlHealthyCarrier()));
     initialised = true;
 }
 
@@ -155,7 +156,21 @@ void MainWindow::menuControlShowBrainDesire()
 
 void MainWindow::menuControlFlood()
 {
-    shared_flood();
+    QMessageBox::StandardButton reply;
+    reply =
+        QMessageBox::question(this,
+                              tr("Great Flood"),
+                                 "Many apes will drown.  Do you wish to continue?",
+                                 QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+    {
+        shared_flood();
+    }
+}
+
+void MainWindow::menuControlHealthyCarrier()
+{
+    shared_healthy_carrier();
 }
 
 /* reset the simulation */
@@ -169,7 +184,7 @@ void MainWindow::menuNew()
                                  QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
     {
-        control_init(KIND_NEW_SIMULATION,clock());
+        shared_new(clock());
     }
 }
 

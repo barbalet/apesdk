@@ -74,6 +74,7 @@
     <addaction name="actionBrainDesire"/>
     <addaction name="separator"/>
     <addaction name="actionFlood"/>
+    <addaction name="actionHealthyCarrier"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -227,6 +228,11 @@
   <action name="actionFlood">
    <property name="text">
     <string>Flood</string>
+   </property>
+  </action>
+  <action name="actionHealthyCarrier">
+   <property name="text">
+    <string>Healthy Carrier</string>
    </property>
   </action>
  </widget>
