@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionViewTerrain,SIGNAL(triggered()),this,SLOT(menuViewTerrain()));
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
+    connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
     initialised = true;
 }
 
@@ -68,9 +69,18 @@ void MainWindow::init()
 }
 
 /* reset the simulation */
-void MainWindow::resetSim()
+void MainWindow::menuNew()
 {
-    control_init(KIND_NEW_SIMULATION,clock());
+    QMessageBox::StandardButton reply;
+    reply =
+        QMessageBox::question(this,
+                              tr("New Simulation"),
+                                 "Do you really want create a new simulation?",
+                                 QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+    {
+        control_init(KIND_NEW_SIMULATION,clock());
+    }
 }
 
 /* save the simulation */

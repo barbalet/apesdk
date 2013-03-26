@@ -87,8 +87,8 @@ private:
 protected slots:
     unsigned char menuSaveAs();
     unsigned char menuSave();
+    void menuNew();
 
-    void resetSim();
     void slotTimeout();
     void createPalette();
     void menuViewMap();
