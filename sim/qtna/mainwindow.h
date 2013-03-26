@@ -91,6 +91,7 @@ protected slots:
     void menuNew();
     int menuOpen();
     int menuOpenScript();
+    void menuAbout();
 
     void slotTimeout();
     void createPalette();

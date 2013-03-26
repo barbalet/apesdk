@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
     connect(ui->actionOpen,SIGNAL(triggered()),this,SLOT(menuOpen()));
     connect(ui->actionOpenScript,SIGNAL(triggered()),this,SLOT(menuOpenScript()));
+    connect(ui->actionAbout,SIGNAL(triggered()),this,SLOT(menuAbout()));
     initialised = true;
 }
 
@@ -69,6 +70,11 @@ void MainWindow::init()
 
     connect(&simTimer, SIGNAL(timeout()), SLOT(slotTimeout()));
     simTimer.start(TIMER_RATE_MSEC);
+}
+
+void MainWindow::menuAbout()
+{
+    shared_about("PC INTEL Qt");
 }
 
 /* reset the simulation */
