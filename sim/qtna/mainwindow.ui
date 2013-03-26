@@ -59,6 +59,7 @@
     <addaction name="actionPause"/>
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
+    <addaction name="actionTerritory"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -145,6 +146,14 @@
   <action name="actionPrevious">
    <property name="text">
     <string>Previous Ape</string>
+   </property>
+  </action>
+  <action name="actionTerritory">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Territory</string>
    </property>
   </action>
  </widget>

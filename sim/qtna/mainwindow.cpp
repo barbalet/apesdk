@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionPause,SIGNAL(triggered()),this,SLOT(menuControlPause()));
     connect(ui->actionNext,SIGNAL(triggered()),this,SLOT(menuControlNext()));
     connect(ui->actionPrevious,SIGNAL(triggered()),this,SLOT(menuControlPrevious()));
+    connect(ui->actionTerritory,SIGNAL(triggered()),this,SLOT(menuControlTerritory()));
     initialised = true;
 }
 
@@ -95,6 +96,12 @@ void MainWindow::menuControlPrevious()
 void MainWindow::menuControlNext()
 {
     shared_nextApe();
+}
+
+void MainWindow::menuControlTerritory()
+{
+    shared_notTerritory();
+    ui->actionTerritory->setChecked(ui->actionTerritory->isChecked());
 }
 
 /* reset the simulation */
