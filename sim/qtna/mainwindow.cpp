@@ -5,18 +5,48 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-
+    /* set some default values */
+    initialised = false;
     window_updated = 0xFF;
-
     firedown = 0;
     firecontrol = 0;
     current_display = WND_MAP;
+    next_display = -1;
+    current_filename="";
+
+    for (int i = 0; i < NUM_WINDOWS; i++)
+    {
+        image_item[i] = NULL;
+        image_scene[i] = NULL;
+        image[i] = NULL;
+    }
+
+    ui->setupUi(this);
 
     this->show();
     init();
 
     connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(close()));
+    connect(ui->actionViewMap,SIGNAL(triggered()),this,SLOT(menuViewMap()));
+    connect(ui->actionViewTerrain,SIGNAL(triggered()),this,SLOT(menuViewTerrain()));
+    connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
+    connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
+    connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
+    connect(ui->actionOpen,SIGNAL(triggered()),this,SLOT(menuOpen()));
+    connect(ui->actionOpenScript,SIGNAL(triggered()),this,SLOT(menuOpenScript()));
+    connect(ui->actionAbout,SIGNAL(triggered()),this,SLOT(menuAbout()));
+    connect(ui->actionPause,SIGNAL(triggered()),this,SLOT(menuControlPause()));
+    connect(ui->actionNext,SIGNAL(triggered()),this,SLOT(menuControlNext()));
+    connect(ui->actionPrevious,SIGNAL(triggered()),this,SLOT(menuControlPrevious()));
+    connect(ui->actionTerritory,SIGNAL(triggered()),this,SLOT(menuControlTerritory()));
+    connect(ui->actionWeather,SIGNAL(triggered()),this,SLOT(menuControlWeather()));
+    connect(ui->actionShowBrain,SIGNAL(triggered()),this,SLOT(menuControlShowBrain()));
+    connect(ui->actionShowBraincode,SIGNAL(triggered()),this,SLOT(menuControlShowBraincode()));
+    connect(ui->actionBrainNormal,SIGNAL(triggered()),this,SLOT(menuControlShowBrainNormal()));
+    connect(ui->actionBrainFear,SIGNAL(triggered()),this,SLOT(menuControlShowBrainFear()));
+    connect(ui->actionBrainDesire,SIGNAL(triggered()),this,SLOT(menuControlShowBrainDesire()));
+    connect(ui->actionFlood,SIGNAL(triggered()),this,SLOT(menuControlFlood()));
+    connect(ui->actionHealthyCarrier,SIGNAL(triggered()),this,SLOT(menuControlHealthyCarrier()));
     initialised = true;
 }
 
@@ -33,10 +63,11 @@ MainWindow::~MainWindow()
     }
 
     sim_close();
-    for (int i = 0; i < 2; i++) {
-        delete image_item[i];
-        delete image_scene[i];
-        delete image[i];
+    for (int i = 0; i < NUM_WINDOWS; i++)
+    {
+        if (image_item[i] != NULL) delete image_item[i];
+        if (image_scene[i] != NULL) delete image_scene[i];
+        if (image[i] != NULL) delete image[i];
     }
 
     delete ui;
@@ -44,95 +75,168 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
-    int i = 0;
-    unsigned short fit[256*3];
-
-    /* Let's create the palette for terrain drawing */
-
-    draw_fit(land_points, fit);
-
     /* Now, get the location of the graphics buffers */
     local_buffer = (unsigned char *) control_init(KIND_START_UP, time(NULL));
 
-    for (i = 0; i < 256; i++)
+    refresh();
+
+    connect(&simTimer, SIGNAL(timeout()), SLOT(slotTimeout()));
+    simTimer.start(TIMER_RATE_MSEC);
+}
+
+void MainWindow::menuAbout()
+{
+    shared_about("PC INTEL Qt");
+}
+
+/* toggle pause */
+void MainWindow::menuControlPause()
+{
+    shared_notPause();
+    ui->actionPause->setChecked(ui->actionPause->isChecked());
+}
+
+void MainWindow::menuControlPrevious()
+{
+    shared_previousApe();
+}
+
+void MainWindow::menuControlNext()
+{
+    shared_nextApe();
+}
+
+void MainWindow::menuControlTerritory()
+{
+    shared_notTerritory();
+    ui->actionTerritory->setChecked(ui->actionTerritory->isChecked());
+}
+
+void MainWindow::menuControlWeather()
+{
+    shared_notWeather();
+    ui->actionWeather->setChecked(ui->actionWeather->isChecked());
+}
+
+void MainWindow::menuControlShowBrain()
+{
+    shared_notBrain();
+    ui->actionShowBrain->setChecked(ui->actionShowBrain->isChecked());
+}
+
+void MainWindow::menuControlShowBraincode()
+{
+    shared_notBrainCode();
+    ui->actionShowBraincode->setChecked(ui->actionShowBraincode->isChecked());
+}
+
+void MainWindow::menuControlShowBrainNormal()
+{
+    shared_brainDisplay(3);
+    ui->actionBrainDesire->setChecked(false);
+    ui->actionBrainNormal->setChecked(true);
+    ui->actionBrainFear->setChecked(false);
+}
+
+void MainWindow::menuControlShowBrainFear()
+{
+    shared_brainDisplay(1);
+    ui->actionBrainDesire->setChecked(false);
+    ui->actionBrainFear->setChecked(true);
+    ui->actionBrainNormal->setChecked(false);
+}
+
+void MainWindow::menuControlShowBrainDesire()
+{
+    shared_brainDisplay(2);
+    ui->actionBrainDesire->setChecked(true);
+    ui->actionBrainFear->setChecked(false);
+    ui->actionBrainNormal->setChecked(false);
+}
+
+void MainWindow::menuControlFlood()
+{
+    QMessageBox::StandardButton reply;
+    reply =
+        QMessageBox::question(this,
+                              tr("Great Flood"),
+                                 "Many apes will drown.  Do you wish to continue?",
+                                 QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
     {
-        palette.push_back(qRgb(((fit[i * 3 + 0] >> 8)), ((fit[i * 3 + 1] >> 8)), (fit[i * 3 + 2] >> 8)));
-    }
-
-    QGraphicsView * g = ui->graphicsView;
-
-    /* create an image */
-    for (i = 0; i < NUM_WINDOWS; i++)
-    {
-        switch(i) {
-        case WND_MAP: {
-            image[WND_MAP] = new QImage((unsigned char*)VIEWWINDOW(local_buffer), WND_WIDTH_MAP, WND_HEIGHT_MAP, QImage::Format_Indexed8);
-            break;
-        }
-        case WND_TERRAIN: {
-            image[WND_TERRAIN] = new QImage((unsigned char*)TERRAINWINDOW(local_buffer), WND_WIDTH_MAP, WND_HEIGHT_MAP, QImage::Format_Indexed8);
-            break;
-        }
-        }
-
-        if (!image[i]->isNull()) {
-            if ((i == WND_MAP) || (i == WND_TERRAIN)) {
-                image[i]->setColorTable(palette);
-                image[i]->setColorCount(256);
-            }
-
-            image_scene[i] = new QGraphicsScene();
-            image_item[i] = new QGraphicsPixmapItem(QPixmap::fromImage(*image[i]));
-            image_scene[i]->setSceneRect(image[i]->rect());
-
-            if (i == current_display) {
-                g->setScene(image_scene[i]);
-                g->scene()->addItem(image_item[i]);
-                g->fitInView(image[i]->rect(), Qt::KeepAspectRatio);
-                g->show();
-            }
-        }
+        shared_flood();
     }
 }
 
-// reset the simulation
-void MainWindow::resetSim()
+void MainWindow::menuControlHealthyCarrier()
 {
-    control_init(KIND_NEW_SIMULATION,clock());
+    shared_healthy_carrier();
 }
 
-// save the simulation
-unsigned char MainWindow::file_save()
+/* reset the simulation */
+void MainWindow::menuNew()
 {
-    unsigned long buff_len;
-    unsigned char* buff;
-    FILE* file;
-
-    buff = sim_fileout(&buff_len);
-
-    file = fopen(current_file_name,"w");
-
-    if (file == NULL)
+    QMessageBox::StandardButton reply;
+    reply =
+        QMessageBox::question(this,
+                              tr("New Simulation"),
+                                 "Do you really want create a new simulation?",
+                                 QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
     {
-        QMessageBox::information(this, this->windowTitle(),"Unable to open file for writing!");
-        return 0;
+        shared_new(clock());
     }
+}
 
-    if (fwrite(buff,sizeof(unsigned char), buff_len, file) != buff_len)
+/* open an existing simulation file */
+int MainWindow::menuOpen()
+{
+    QString filename =
+        QFileDialog::getOpenFileName(this,
+            tr("Open Simulation File"),
+            QDir::homePath(),
+            tr("Noble Ape Files (*.txt)"));
+
+    if (filename.length() == 0) return -1;
+
+    if (!shared_openFileName((n_string)filename.toStdString().c_str(),0))
     {
-        QMessageBox::information(this, this->windowTitle(),"Unable to write!");
-        return 0;
+        QMessageBox::information(this, "Open simulation file","Unable to read from file!");
     }
-
-    fclose(file);
-
-    io_free(buff);
 
     return 1;
 }
 
-// save the simulation with a filename
-unsigned char MainWindow::file_save_as()
+/* open an existing apescript file */
+int MainWindow::menuOpenScript()
+{
+    QString filename =
+        QFileDialog::getOpenFileName(this,
+            tr("Open Apescript File"),
+            QDir::homePath(),
+            tr("Apescript Files (*.ape)"));
+
+    if (filename.length() == 0) return -1;
+
+    if (!shared_openFileName((n_string)filename.toStdString().c_str(),1))
+    {
+        QMessageBox::information(this, "Open apescript file","Unable to read from file!");
+    }
+    shared_notPause();
+
+    return 1;
+}
+
+/* save the simulation */
+unsigned char MainWindow::menuSave()
+{
+    if (current_filename == "") return menuSaveAs();
+    shared_saveFileName((n_string)current_filename.toStdString().c_str());
+    return 1;
+}
+
+/* save the simulation with a filename */
+unsigned char MainWindow::menuSaveAs()
 {
     QString filename =
         QFileDialog::getSaveFileName(this,
@@ -140,19 +244,42 @@ unsigned char MainWindow::file_save_as()
             QDir::homePath(),
             tr("Noble Ape files (*.txt)"));
 
-    // if no filename was given
+    /* if no filename was given */
     if (filename.length()==0) return 0;
 
-    sprintf(current_file_name,"%s",filename.toStdString().c_str());
-
-    file_save();
-
+    current_filename = filename;
+    shared_saveFileName((n_string)filename.toStdString().c_str());
     return 1;
 }
 
-// a single simulation step
+/* creates a palette of 256 colours */
+void MainWindow::createPalette()
+{
+    draw_fit(land_points, fit);
+
+    palette.clear();
+    for (int i = 0; i < 256; i++)
+    {
+        palette.push_back(qRgb(((fit[i * 3 + 0] >> 8)), ((fit[i * 3 + 1] >> 8)), (fit[i * 3 + 2] >> 8)));
+    }
+}
+
+/* a single simulation step */
 bool MainWindow::refresh()
 {
+    QGraphicsView * g = ui->graphicsView;
+    unsigned char * img = NULL;
+    QImage::Format format = QImage::Format_Indexed8;
+    int img_width=0,img_height=0;
+
+    if (next_display > -1)
+    {
+        current_display = next_display;
+        next_display = -1;
+    }
+
+    createPalette();
+
     sim_thread_console();
 
     if (firedown != 0)
@@ -167,10 +294,79 @@ bool MainWindow::refresh()
         exit(0);
     }
 
+    switch(current_display)
+    {
+    case WND_MAP:
+    {
+        img = (unsigned char*)VIEWWINDOW(local_buffer);
+        format = QImage::Format_Indexed8;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
+    case WND_TERRAIN:
+    {
+        img = (unsigned char*)TERRAINWINDOW(local_buffer);
+        format = QImage::Format_Indexed8;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
+    }
+
+    if (img == NULL)
+    {
+        qDebug("%s", "WARNING: No image was specified");
+        return false;
+    }
+
+    if (image[current_display]==NULL)
+    {
+        /* allocate a new image */
+        image[current_display] =
+            new QImage(img, img_width, img_height, format);
+    }
+    else
+    {
+        /* copy data into the existing image */
+        for (int y = 0; y < image[current_display]->height(); y++)
+        {
+            memcpy((void*)image[current_display]->scanLine(y),
+                   (void*)&img[y*image[current_display]->bytesPerLine()],
+                   image[current_display]->bytesPerLine());
+        }
+    }
+
+    if ((current_display == WND_MAP) || (current_display == WND_TERRAIN))
+    {
+        image[current_display]->setColorTable(palette);
+        image[current_display]->setColorCount(256);
+    }
+
+    if (image_scene[current_display] != NULL)
+    {
+        /* free previous allocations */
+        delete image_item[current_display];
+        delete image_scene[current_display];
+        image_scene[current_display] = NULL;
+        image_item[current_display] = NULL;
+    }
+
+    /* Allocating each time seems to be needed to refresh the image.
+       Maybe there is a better way */
+    image_scene[current_display] = new QGraphicsScene();
+    image_item[current_display] = new QGraphicsPixmapItem(QPixmap::fromImage(*image[current_display]));
+    image_scene[current_display]->setSceneRect(image[current_display]->rect());
+    g->setScene(image_scene[current_display]);
+    g->scene()->addItem(image_item[current_display]);
+
+    g->fitInView(image[current_display]->rect(), Qt::KeepAspectRatio);
+    g->show();
+
     return true;
 }
 
-// Mouse click events
+/* Mouse click events */
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if(obj == ui->graphicsView && event->type() == QEvent::MouseButtonPress)
@@ -181,13 +377,27 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return false;
 }
 
-// Form resized
+/* Form resized */
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     if (!initialised) return;
-    QGraphicsView * g = ui->graphicsView;
+    refresh();
+}
 
-    g->setScene(image_scene[current_display]);
-    g->fitInView(image[current_display]->rect(), Qt::KeepAspectRatio);
-    g->show();
+/* Timer event */
+void MainWindow::slotTimeout()
+{
+    if (!initialised) return;
+    refresh();
+}
+
+
+void MainWindow::menuViewMap()
+{
+    next_display = WND_MAP;
+}
+
+void MainWindow::menuViewTerrain()
+{
+    next_display = WND_TERRAIN;
 }
