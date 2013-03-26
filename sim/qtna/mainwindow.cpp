@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionBrainNormal,SIGNAL(triggered()),this,SLOT(menuControlShowBrainNormal()));
     connect(ui->actionBrainFear,SIGNAL(triggered()),this,SLOT(menuControlShowBrainFear()));
     connect(ui->actionBrainDesire,SIGNAL(triggered()),this,SLOT(menuControlShowBrainDesire()));
+    connect(ui->actionFlood,SIGNAL(triggered()),this,SLOT(menuControlFlood()));
     initialised = true;
 }
 
@@ -150,6 +151,11 @@ void MainWindow::menuControlShowBrainDesire()
     ui->actionBrainDesire->setChecked(true);
     ui->actionBrainFear->setChecked(false);
     ui->actionBrainNormal->setChecked(false);
+}
+
+void MainWindow::menuControlFlood()
+{
+    shared_flood();
 }
 
 /* reset the simulation */

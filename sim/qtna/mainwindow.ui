@@ -72,6 +72,8 @@
     <addaction name="actionBrainNormal"/>
     <addaction name="actionBrainFear"/>
     <addaction name="actionBrainDesire"/>
+    <addaction name="separator"/>
+    <addaction name="actionFlood"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -220,6 +222,11 @@
    </property>
    <property name="text">
     <string>Desire Brain</string>
+   </property>
+  </action>
+  <action name="actionFlood">
+   <property name="text">
+    <string>Flood</string>
    </property>
   </action>
  </widget>

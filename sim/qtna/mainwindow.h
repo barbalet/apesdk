@@ -102,6 +102,7 @@ protected slots:
     void menuControlShowBrainNormal();
     void menuControlShowBrainFear();
     void menuControlShowBrainDesire();
+    void menuControlFlood();
 
     void slotTimeout();
     void createPalette();
