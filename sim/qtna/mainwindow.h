@@ -90,6 +90,7 @@ protected slots:
     unsigned char menuSave();
     void menuNew();
     int menuOpen();
+    int menuOpenScript();
 
     void slotTimeout();
     void createPalette();

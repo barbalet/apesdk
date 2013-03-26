@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
     connect(ui->actionOpen,SIGNAL(triggered()),this,SLOT(menuOpen()));
+    connect(ui->actionOpenScript,SIGNAL(triggered()),this,SLOT(menuOpenScript()));
     initialised = true;
 }
 
@@ -99,6 +100,26 @@ int MainWindow::menuOpen()
     if (!shared_openFileName((n_string)filename.toStdString().c_str(),0))
     {
         QMessageBox::information(this, "Open simulation file","Unable to read from file!");
+    }
+    shared_notPause();
+
+    return 1;
+}
+
+/* open an existing apescript file */
+int MainWindow::menuOpenScript()
+{
+    QString filename =
+        QFileDialog::getOpenFileName(this,
+            tr("Open Apescript File"),
+            QDir::homePath(),
+            tr("Apescript Files (*.ape)"));
+
+    if (filename.length() == 0) return -1;
+
+    if (!shared_openFileName((n_string)filename.toStdString().c_str(),1))
+    {
+        QMessageBox::information(this, "Open apescript file","Unable to read from file!");
     }
     shared_notPause();
 
