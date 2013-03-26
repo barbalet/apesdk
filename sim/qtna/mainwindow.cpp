@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionOpenScript,SIGNAL(triggered()),this,SLOT(menuOpenScript()));
     connect(ui->actionAbout,SIGNAL(triggered()),this,SLOT(menuAbout()));
     connect(ui->actionPause,SIGNAL(triggered()),this,SLOT(menuControlPause()));
+    connect(ui->actionNext,SIGNAL(triggered()),this,SLOT(menuControlNext()));
+    connect(ui->actionPrevious,SIGNAL(triggered()),this,SLOT(menuControlPrevious()));
     initialised = true;
 }
 
@@ -83,6 +85,16 @@ void MainWindow::menuControlPause()
 {
     shared_notPause();
     ui->actionPause->setChecked(ui->actionPause->isChecked());
+}
+
+void MainWindow::menuControlPrevious()
+{
+    shared_previousApe();
+}
+
+void MainWindow::menuControlNext()
+{
+    shared_nextApe();
 }
 
 /* reset the simulation */

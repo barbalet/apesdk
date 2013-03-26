@@ -93,6 +93,8 @@ protected slots:
     int menuOpenScript();
     void menuAbout();
     void menuControlPause();
+    void menuControlPrevious();
+    void menuControlNext();
 
     void slotTimeout();
     void createPalette();

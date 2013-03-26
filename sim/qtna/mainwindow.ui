@@ -57,6 +57,8 @@
      <string>Control</string>
     </property>
     <addaction name="actionPause"/>
+    <addaction name="actionNext"/>
+    <addaction name="actionPrevious"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -133,6 +135,16 @@
    </property>
    <property name="text">
     <string>Pause</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="text">
+    <string>Next Ape</string>
+   </property>
+  </action>
+  <action name="actionPrevious">
+   <property name="text">
+    <string>Previous Ape</string>
    </property>
   </action>
  </widget>
