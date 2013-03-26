@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionOpen,SIGNAL(triggered()),this,SLOT(menuOpen()));
     connect(ui->actionOpenScript,SIGNAL(triggered()),this,SLOT(menuOpenScript()));
     connect(ui->actionAbout,SIGNAL(triggered()),this,SLOT(menuAbout()));
+    connect(ui->actionPause,SIGNAL(triggered()),this,SLOT(menuControlPause()));
     initialised = true;
 }
 
@@ -77,6 +78,13 @@ void MainWindow::menuAbout()
     shared_about("PC INTEL Qt");
 }
 
+/* toggle pause */
+void MainWindow::menuControlPause()
+{
+    shared_notPause();
+    ui->actionPause->setChecked(ui->actionPause->isChecked());
+}
+
 /* reset the simulation */
 void MainWindow::menuNew()
 {
@@ -107,7 +115,6 @@ int MainWindow::menuOpen()
     {
         QMessageBox::information(this, "Open simulation file","Unable to read from file!");
     }
-    shared_notPause();
 
     return 1;
 }

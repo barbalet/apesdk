@@ -54,8 +54,9 @@
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
-     <string>Window</string>
+     <string>Control</string>
     </property>
+    <addaction name="actionPause"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -121,6 +122,17 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Pause</string>
    </property>
   </action>
  </widget>
