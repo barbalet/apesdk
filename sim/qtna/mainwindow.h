@@ -24,6 +24,7 @@ extern "C" {
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../gui/gui.h"
+#include "../gui/shared.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,7 +47,7 @@ extern "C" {
 
 #define NUM_WINDOWS  2
 
-#define TIMER_RATE_MSEC 10
+#define TIMER_RATE_MSEC (1000/120)
 
 namespace Ui {
 class MainWindow;
@@ -63,7 +64,7 @@ protected:
     QVector<QRgb> palette;
     unsigned char window_updated;
 
-    char current_file_name[256];
+    QString current_filename;
 
     unsigned char firedown;
     int firecontrol;
@@ -88,6 +89,7 @@ protected slots:
     unsigned char menuSaveAs();
     unsigned char menuSave();
     void menuNew();
+    int menuOpen();
 
     void slotTimeout();
     void createPalette();

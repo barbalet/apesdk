@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     firecontrol = 0;
     current_display = WND_MAP;
     next_display = -1;
+    current_filename="";
 
     for (int i = 0; i < NUM_WINDOWS; i++)
     {
@@ -31,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
+    connect(ui->actionOpen,SIGNAL(triggered()),this,SLOT(menuOpen()));
     initialised = true;
 }
 
@@ -83,33 +85,31 @@ void MainWindow::menuNew()
     }
 }
 
+/* open an existing simulation file */
+int MainWindow::menuOpen()
+{
+    QString filename =
+        QFileDialog::getOpenFileName(this,
+            tr("Open Simulation File"),
+            QDir::homePath(),
+            tr("Noble Ape Files (*.txt)"));
+
+    if (filename.length() == 0) return -1;
+
+    if (!shared_openFileName((n_string)filename.toStdString().c_str(),0))
+    {
+        QMessageBox::information(this, "Open simulation file","Unable to read from file!");
+    }
+    shared_notPause();
+
+    return 1;
+}
+
 /* save the simulation */
 unsigned char MainWindow::menuSave()
 {
-    unsigned long buff_len;
-    unsigned char* buff;
-    FILE* file;
-
-    buff = sim_fileout(&buff_len);
-
-    file = fopen(current_file_name,"w");
-
-    if (file == NULL)
-    {
-        QMessageBox::information(this, this->windowTitle(),"Unable to open file for writing!");
-        return 0;
-    }
-
-    if (fwrite(buff,sizeof(unsigned char), buff_len, file) != buff_len)
-    {
-        QMessageBox::information(this, this->windowTitle(),"Unable to write!");
-        return 0;
-    }
-
-    fclose(file);
-
-    io_free(buff);
-
+    if (current_filename == "") return menuSaveAs();
+    shared_saveFileName((n_string)current_filename.toStdString().c_str());
     return 1;
 }
 
@@ -125,9 +125,9 @@ unsigned char MainWindow::menuSaveAs()
     /* if no filename was given */
     if (filename.length()==0) return 0;
 
-    sprintf(current_file_name,"%s",filename.toStdString().c_str());
-
-    return menuSave();
+    current_filename = filename;
+    shared_saveFileName((n_string)filename.toStdString().c_str());
+    return 1;
 }
 
 /* creates a palette of 256 colours */
