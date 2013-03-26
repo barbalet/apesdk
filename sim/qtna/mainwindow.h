@@ -85,8 +85,8 @@ private:
     void resizeEvent(QResizeEvent *event);
 
 protected slots:
-    unsigned char file_save_as();
-    unsigned char file_save();
+    unsigned char menuSaveAs();
+    unsigned char menuSave();
 
     void resetSim();
     void slotTimeout();

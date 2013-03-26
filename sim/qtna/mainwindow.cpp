@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(close()));
     connect(ui->actionViewMap,SIGNAL(triggered()),this,SLOT(menuViewMap()));
     connect(ui->actionViewTerrain,SIGNAL(triggered()),this,SLOT(menuViewTerrain()));
+    connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
+    connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     initialised = true;
 }
 
@@ -72,7 +74,7 @@ void MainWindow::resetSim()
 }
 
 /* save the simulation */
-unsigned char MainWindow::file_save()
+unsigned char MainWindow::menuSave()
 {
     unsigned long buff_len;
     unsigned char* buff;
@@ -102,7 +104,7 @@ unsigned char MainWindow::file_save()
 }
 
 /* save the simulation with a filename */
-unsigned char MainWindow::file_save_as()
+unsigned char MainWindow::menuSaveAs()
 {
     QString filename =
         QFileDialog::getSaveFileName(this,
@@ -115,9 +117,7 @@ unsigned char MainWindow::file_save_as()
 
     sprintf(current_file_name,"%s",filename.toStdString().c_str());
 
-    file_save();
-
-    return 1;
+    return menuSave();
 }
 
 /* creates a palette of 256 colours */
