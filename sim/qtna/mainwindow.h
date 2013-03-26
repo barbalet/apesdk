@@ -96,6 +96,7 @@ protected slots:
     void menuControlPrevious();
     void menuControlNext();
     void menuControlTerritory();
+    void menuControlWeather();
 
     void slotTimeout();
     void createPalette();
