@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 protected:
-    int current_display;
+    int current_display, next_display;
 
     unsigned char check;
     unsigned char* local_buffer;
@@ -91,6 +91,8 @@ protected slots:
     void resetSim();
     void slotTimeout();
     void createPalette();
+    void menuViewMap();
+    void menuViewTerrain();
 
 public:
     explicit MainWindow(QWidget *parent = 0);

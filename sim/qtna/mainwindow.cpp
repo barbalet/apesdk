@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     firedown = 0;
     firecontrol = 0;
     current_display = WND_MAP;
+    next_display = -1;
 
     for (int i = 0; i < NUM_WINDOWS; i++)
     {
@@ -25,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
     init();
 
     connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(close()));
+    connect(ui->actionViewMap,SIGNAL(triggered()),this,SLOT(menuViewMap()));
+    connect(ui->actionViewTerrain,SIGNAL(triggered()),this,SLOT(menuViewTerrain()));
     initialised = true;
 }
 
@@ -137,6 +140,12 @@ bool MainWindow::refresh()
     QImage::Format format = QImage::Format_Indexed8;
     int img_width=0,img_height=0;
 
+    if (next_display > -1)
+    {
+        current_display = next_display;
+        next_display = -1;
+    }
+
     createPalette();
 
     sim_thread_console();
@@ -179,7 +188,7 @@ bool MainWindow::refresh()
         return false;
     }
 
-    if (!initialised)
+    if (image[current_display]==NULL)
     {
         /* allocate a new image */
         image[current_display] =
@@ -196,14 +205,13 @@ bool MainWindow::refresh()
         }
     }
 
-
     if ((current_display == WND_MAP) || (current_display == WND_TERRAIN))
     {
         image[current_display]->setColorTable(palette);
         image[current_display]->setColorCount(256);
     }
 
-    if (initialised)
+    if (image_scene[current_display] != NULL)
     {
         /* free previous allocations */
         delete image_item[current_display];
@@ -251,3 +259,13 @@ void MainWindow::slotTimeout()
     refresh();
 }
 
+
+void MainWindow::menuViewMap()
+{
+    next_display = WND_MAP;
+}
+
+void MainWindow::menuViewTerrain()
+{
+    next_display = WND_TERRAIN;
+}
