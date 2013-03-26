@@ -18,6 +18,7 @@
 #include <QPixmap>
 #include <QVector>
 #include <QRgb>
+#include <QTimer>
 
 extern "C" {
 #include "../noble/noble.h"
@@ -44,6 +45,8 @@ extern "C" {
 #define WND_MAP      1
 
 #define NUM_WINDOWS  2
+
+#define TIMER_RATE_MSEC 10
 
 namespace Ui {
 class MainWindow;
@@ -74,14 +77,20 @@ protected:
     bool refresh();
 
 private:
+    QTimer simTimer;
     bool initialised;
+    unsigned short fit[256*3];
+
     bool eventFilter(QObject *obj, QEvent *event);
     void resizeEvent(QResizeEvent *event);
 
 protected slots:
     unsigned char file_save_as();
     unsigned char file_save();
+
     void resetSim();
+    void slotTimeout();
+    void createPalette();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
