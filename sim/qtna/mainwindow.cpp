@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionTerritory,SIGNAL(triggered()),this,SLOT(menuControlTerritory()));
     connect(ui->actionWeather,SIGNAL(triggered()),this,SLOT(menuControlWeather()));
     connect(ui->actionShowBrain,SIGNAL(triggered()),this,SLOT(menuControlShowBrain()));
+    connect(ui->actionShowBraincode,SIGNAL(triggered()),this,SLOT(menuControlShowBraincode()));
     initialised = true;
 }
 
@@ -116,6 +117,12 @@ void MainWindow::menuControlShowBrain()
 {
     shared_notBrain();
     ui->actionShowBrain->setChecked(ui->actionShowBrain->isChecked());
+}
+
+void MainWindow::menuControlShowBraincode()
+{
+    shared_notBrainCode();
+    ui->actionShowBraincode->setChecked(ui->actionShowBraincode->isChecked());
 }
 
 /* reset the simulation */

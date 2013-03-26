@@ -98,6 +98,7 @@ protected slots:
     void menuControlTerritory();
     void menuControlWeather();
     void menuControlShowBrain();
+    void menuControlShowBraincode();
 
     void slotTimeout();
     void createPalette();

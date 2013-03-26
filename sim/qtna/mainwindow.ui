@@ -62,6 +62,7 @@
     <addaction name="actionTerritory"/>
     <addaction name="actionWeather"/>
     <addaction name="actionShowBrain"/>
+    <addaction name="actionShowBraincode"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -175,6 +176,14 @@
    </property>
    <property name="text">
     <string>Show Brain</string>
+   </property>
+  </action>
+  <action name="actionShowBraincode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Braincode</string>
    </property>
   </action>
  </widget>
