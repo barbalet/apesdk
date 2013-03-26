@@ -99,6 +99,9 @@ protected slots:
     void menuControlWeather();
     void menuControlShowBrain();
     void menuControlShowBraincode();
+    void menuControlShowBrainNormal();
+    void menuControlShowBrainFear();
+    void menuControlShowBrainDesire();
 
     void slotTimeout();
     void createPalette();
