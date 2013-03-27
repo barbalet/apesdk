@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     current_display = WND_MAP;
     next_display = -1;
     current_filename="";
+    clear_graph = 1;
 
     for (int i = 0; i < NUM_WINDOWS; i++)
     {
@@ -20,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
         image_scene[i] = NULL;
         image[i] = NULL;
     }
+
+    img_graph = NULL;
 
     ui->setupUi(this);
 
@@ -30,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionViewMap,SIGNAL(triggered()),this,SLOT(menuViewMap()));
     connect(ui->actionViewTerrain,SIGNAL(triggered()),this,SLOT(menuViewTerrain()));
     connect(ui->actionViewIdeosphere,SIGNAL(triggered()),this,SLOT(menuViewIdeosphere()));
+    connect(ui->actionViewBraincode,SIGNAL(triggered()),this,SLOT(menuViewBraincode()));
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
@@ -74,7 +78,7 @@ MainWindow::~MainWindow()
         if (image_scene[i] != NULL) delete image_scene[i];
         if (image[i] != NULL) delete image[i];
     }
-    free(img_ideosphere);
+    free(img_graph);
 
     delete ui;
 }
@@ -91,7 +95,8 @@ void MainWindow::init()
     /* Now, get the location of the graphics buffers */
     local_buffer = (unsigned char *) control_init(KIND_START_UP, time(NULL));
 
-    img_ideosphere = (unsigned char *)malloc(WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
+    /* RGB image used for additional graphs */
+    img_graph = (unsigned char *)malloc(WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
 
     refresh();
 
@@ -330,8 +335,18 @@ bool MainWindow::refresh()
     }
     case WND_IDEOSPHERE:
     {
-        graph_ideosphere(sim_sim(), img_ideosphere, WND_WIDTH_MAP, WND_HEIGHT_MAP);
-        img = img_ideosphere;
+        graph_ideosphere(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        img = img_graph;
+        format = QImage::Format_RGB888;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
+    case WND_BRAINCODE:
+    {
+        graph_braincode(sim_sim(), &(sim_sim()->beings[sim_sim()->select]), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP,clear_graph);
+        clear_graph = 0;
+        img = img_graph;
         format = QImage::Format_RGB888;
         img_width = WND_WIDTH_MAP;
         img_height = WND_HEIGHT_MAP;
@@ -437,4 +452,10 @@ void MainWindow::menuViewTerrain()
 void MainWindow::menuViewIdeosphere()
 {
     next_display = WND_IDEOSPHERE;
+}
+
+void MainWindow::menuViewBraincode()
+{
+    next_display = WND_BRAINCODE;
+    clear_graph = 1;
 }

@@ -55,6 +55,7 @@
     <addaction name="actionViewMap"/>
     <addaction name="actionViewTerrain"/>
     <addaction name="actionViewIdeosphere"/>
+    <addaction name="actionViewBraincode"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -239,6 +240,11 @@
   <action name="actionViewIdeosphere">
    <property name="text">
     <string>Ideosphere</string>
+   </property>
+  </action>
+  <action name="actionViewBraincode">
+   <property name="text">
+    <string>Braincode</string>
    </property>
   </action>
  </widget>

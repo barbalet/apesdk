@@ -47,8 +47,10 @@ extern "C" {
 #define WND_TERRAIN            0
 #define WND_MAP                1
 #define WND_IDEOSPHERE         2
+#define WND_BRAINCODE          3
 
-#define NUM_WINDOWS            3
+#define NUM_WINDOWS            4
+#define NUM_GRAPHS             2
 
 #define TIMER_RATE_MSEC        (1000/120)
 
@@ -64,9 +66,10 @@ protected:
 
     unsigned char check;
     unsigned char* local_buffer;
-    unsigned char * img_ideosphere;
+    unsigned char * img_graph;
     QVector<QRgb> palette;
     unsigned char window_updated;
+    int clear_graph;
 
     QString current_filename;
 
@@ -110,6 +113,7 @@ protected slots:
     void menuControlFlood();
     void menuControlHealthyCarrier();
     void menuViewIdeosphere();
+    void menuViewBraincode();
 
     void slotTimeout();
     void createPalette();
