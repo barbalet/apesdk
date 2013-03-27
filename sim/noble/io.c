@@ -398,7 +398,7 @@ n_uint io_aiff_uint_out(n_byte * buffer)
 
 n_uint io_aiff_total_size(n_uint total_samples)
 {
-    return 4 + 8 + 18 + 8 + (2 * total_samples) + 8;
+    return 4 + 8 + 18 + 8 + (sizeof(n_audio) * total_samples) + 8;
 }
 
 n_uint io_aiff_sound_size(n_uint total_samples)
@@ -413,11 +413,11 @@ n_int io_aiff_sample_size(n_uint total_size)
     {
         return SHOW_ERROR("Total AIFF samples less than zero");
     }
-    if (total_samples2 & 1)
+    if (total_samples2 % sizeof(n_audio))
     {
         return SHOW_ERROR("Non multiple of 2 in AIFF file size");
     }
-    return total_samples2 >> 1;
+    return total_samples2 / sizeof(n_audio);
 }
 
 static n_int io_scan(n_byte * v1, n_byte * v2, n_uint start, n_uint stop)
@@ -469,7 +469,7 @@ n_int io_file_aiff_header_check_length(void * fptr)
         return SHOW_ERROR("AIFF fails fourth section");
     }
     
-    actual[0]=actual[1]=actual[2]=actual[3]=actual[4]=0;
+    actual[0] = actual[1] = actual[2] = actual[3] = actual[4] = 0;
     
     do {
         actual[3] = actual[2];
@@ -494,71 +494,6 @@ n_int io_file_aiff_header_check_length(void * fptr)
      }
      
      return total_samples;
-
-}
-
-n_int io_aiff_header_check_length(n_byte * header)
-{
-    n_byte  comparison[54];
-    n_uint  total_samples, sound_size;
-    
-    io_aiff_header(comparison);
-    
-    if (io_scan(comparison, header, 0, 4))
-    {
-        return SHOW_ERROR("AIFF fails first section");
-    }
-    if (io_scan(comparison, header, 8, 16))
-    {
-        return SHOW_ERROR("AIFF fails second section");
-    }
-    if (io_scan(comparison, header, 21, 22))
-    {
-        return SHOW_ERROR("AIFF fails third section");
-    }
-    total_samples = io_aiff_uint_out(&header[22]);
-    if (io_scan(comparison, header, 27, 32))
-    {
-        return SHOW_ERROR("AIFF fails fourth section");
-    }
-    if (io_scan(comparison, header, 38, 42))
-    {
-        return SHOW_ERROR("AIFF fails fifth section");
-    }
-    sound_size = io_aiff_uint_out(&header[42]);
-    if (io_scan(comparison, header, 46, 48))
-    {
-        return SHOW_ERROR("AIFF fails sixth section");
-    }
-    /* if (total_size != io_aiff_total_size(total_samples)) - this is not a valid comparison */
-    if (sound_size != io_aiff_sound_size(total_samples))
-    {
-        return SHOW_ERROR("AIFF fails sound size compare");
-    }
-    
-    return total_samples;
-}
-
-n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_function)
-{
-    FILE * test_file = fopen(response, "rb");
-    n_byte header[54]={0};
-    n_string_block output;
-    n_int samples;
-    
-    if (test_file == 0L)
-    {
-        (void)SHOW_ERROR("AIFF test open failed");
-        return 0;
-    }
-
-    fread(header, 1, 54, test_file);
-    
-    samples = io_aiff_header_check_length(header);
-    
-    sprintf(output, "%ld\n",samples);
-    output_function(output);
-    return io_uniform_handle_fclose(test_file);
 }
 
 /**
