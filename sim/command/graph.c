@@ -264,24 +264,9 @@ void graph_genepool(noble_simulation * sim, n_byte * buffer, n_int img_width, n_
     index = (n_int*)io_new(sim->num*sizeof(n_int));
     graph_being_index(sim,index,1);
 
-    /* clear the image */
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=0;
-
     n = 0;
     if (sim->num>0)
     {
-        if (sim->num*2 < max_height)
-        {
-            max_height = sim->num*2;
-        }
-        else
-        {
-            if (sim->num < max_height)
-            {
-                max_height = sim->num;
-            }
-        }
-
         for (y = 0; y < max_height; y++)
         {
             i = index[y*(sim->num-1)/max_height];
