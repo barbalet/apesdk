@@ -19,12 +19,14 @@
 #include <QVector>
 #include <QRgb>
 #include <QTimer>
+#include <QMouseEvent>
 
 extern "C" {
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../gui/gui.h"
 #include "../gui/shared.h"
+#include "../command/command.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,12 +44,13 @@ extern "C" {
 #define WND_HEIGHT_MAP         512
 #define WND_WIDTH_MAP          512
 
-#define WND_TERRAIN  0
-#define WND_MAP      1
+#define WND_TERRAIN            0
+#define WND_MAP                1
+#define WND_IDEOSPHERE         2
 
-#define NUM_WINDOWS  2
+#define NUM_WINDOWS            3
 
-#define TIMER_RATE_MSEC (1000/120)
+#define TIMER_RATE_MSEC        (1000/120)
 
 namespace Ui {
 class MainWindow;
@@ -61,6 +64,7 @@ protected:
 
     unsigned char check;
     unsigned char* local_buffer;
+    unsigned char * img_ideosphere;
     QVector<QRgb> palette;
     unsigned char window_updated;
 
@@ -82,12 +86,13 @@ private:
     bool initialised;
     unsigned short fit[256*3];
 
-    bool eventFilter(QObject *obj, QEvent *event);
     void resizeEvent(QResizeEvent *event);
 
 protected slots:
     unsigned char menuSaveAs();
     unsigned char menuSave();
+    bool eventFilter(QObject *obj, QEvent *event);
+    void closeApp();
     void menuNew();
     int menuOpen();
     int menuOpenScript();
@@ -104,6 +109,7 @@ protected slots:
     void menuControlShowBrainDesire();
     void menuControlFlood();
     void menuControlHealthyCarrier();
+    void menuViewIdeosphere();
 
     void slotTimeout();
     void createPalette();

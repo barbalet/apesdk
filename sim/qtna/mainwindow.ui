@@ -54,6 +54,7 @@
     </property>
     <addaction name="actionViewMap"/>
     <addaction name="actionViewTerrain"/>
+    <addaction name="actionViewIdeosphere"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -233,6 +234,11 @@
   <action name="actionHealthyCarrier">
    <property name="text">
     <string>Healthy Carrier</string>
+   </property>
+  </action>
+  <action name="actionViewIdeosphere">
+   <property name="text">
+    <string>Ideosphere</string>
    </property>
   </action>
  </widget>

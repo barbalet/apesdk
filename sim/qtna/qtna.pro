@@ -17,7 +17,8 @@ SOURCES += main.cpp\
         ../gui/*.c\
         ../universe/*.c\
         ../noble/*.c\
-        ../entity/*.c
+        ../entity/*.c\
+        ../command/*.c
 
 HEADERS  += mainwindow.h
 

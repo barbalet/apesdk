@@ -26,9 +26,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->show();
     init();
 
-    connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(close()));
+    connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(closeApp()));
     connect(ui->actionViewMap,SIGNAL(triggered()),this,SLOT(menuViewMap()));
     connect(ui->actionViewTerrain,SIGNAL(triggered()),this,SLOT(menuViewTerrain()));
+    connect(ui->actionViewIdeosphere,SIGNAL(triggered()),this,SLOT(menuViewIdeosphere()));
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
@@ -47,6 +48,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionBrainDesire,SIGNAL(triggered()),this,SLOT(menuControlShowBrainDesire()));
     connect(ui->actionFlood,SIGNAL(triggered()),this,SLOT(menuControlFlood()));
     connect(ui->actionHealthyCarrier,SIGNAL(triggered()),this,SLOT(menuControlHealthyCarrier()));
+
+    ui->graphicsView->installEventFilter(this);
+    ui->graphicsView->setMouseTracking(true);
+
     initialised = true;
 }
 
@@ -69,14 +74,24 @@ MainWindow::~MainWindow()
         if (image_scene[i] != NULL) delete image_scene[i];
         if (image[i] != NULL) delete image[i];
     }
+    free(img_ideosphere);
 
     delete ui;
+}
+
+/* closes the application */
+void MainWindow::closeApp()
+{
+    shared_close();
+    close();
 }
 
 void MainWindow::init()
 {
     /* Now, get the location of the graphics buffers */
     local_buffer = (unsigned char *) control_init(KIND_START_UP, time(NULL));
+
+    img_ideosphere = (unsigned char *)malloc(WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
 
     refresh();
 
@@ -271,14 +286,13 @@ bool MainWindow::refresh()
     unsigned char * img = NULL;
     QImage::Format format = QImage::Format_Indexed8;
     int img_width=0,img_height=0;
+    bool create_palette = false;
 
     if (next_display > -1)
     {
         current_display = next_display;
         next_display = -1;
     }
-
-    createPalette();
 
     sim_thread_console();
 
@@ -302,12 +316,23 @@ bool MainWindow::refresh()
         format = QImage::Format_Indexed8;
         img_width = WND_WIDTH_MAP;
         img_height = WND_HEIGHT_MAP;
+        create_palette = true;
         break;
     }
     case WND_TERRAIN:
     {
         img = (unsigned char*)TERRAINWINDOW(local_buffer);
         format = QImage::Format_Indexed8;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        create_palette = true;
+        break;
+    }
+    case WND_IDEOSPHERE:
+    {
+        graph_ideosphere(sim_sim(), img_ideosphere, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        img = img_ideosphere;
+        format = QImage::Format_RGB888;
         img_width = WND_WIDTH_MAP;
         img_height = WND_HEIGHT_MAP;
         break;
@@ -337,8 +362,9 @@ bool MainWindow::refresh()
         }
     }
 
-    if ((current_display == WND_MAP) || (current_display == WND_TERRAIN))
+    if (create_palette)
     {
+        createPalette();
         image[current_display]->setColorTable(palette);
         image[current_display]->setColorCount(256);
     }
@@ -369,11 +395,17 @@ bool MainWindow::refresh()
 /* Mouse click events */
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    if(obj == ui->graphicsView && event->type() == QEvent::MouseButtonPress)
+    if (obj == ui->graphicsView)
     {
+        if (event->type() == QEvent::MouseButtonPress)
+        {            
+            int x = ((QMouseEvent*)event)->pos().x();
+            int y = ((QMouseEvent*)event)->pos().y();
+            QString str = "Pos " + QString::number(x) + " " + QString::number(y);
+            qDebug("%s", str.toStdString().c_str());
+        }
 
     }
-
     return false;
 }
 
@@ -400,4 +432,9 @@ void MainWindow::menuViewMap()
 void MainWindow::menuViewTerrain()
 {
     next_display = WND_TERRAIN;
+}
+
+void MainWindow::menuViewIdeosphere()
+{
+    next_display = WND_IDEOSPHERE;
 }
