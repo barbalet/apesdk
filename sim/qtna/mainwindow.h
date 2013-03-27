@@ -18,11 +18,13 @@
 #include <QPixmap>
 #include <QVector>
 #include <QRgb>
+#include <QTimer>
 
 extern "C" {
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../gui/gui.h"
+#include "../gui/shared.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,6 +47,8 @@ extern "C" {
 
 #define NUM_WINDOWS  2
 
+#define TIMER_RATE_MSEC (1000/120)
+
 namespace Ui {
 class MainWindow;
 }
@@ -53,14 +57,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 protected:
-    int current_display;
+    int current_display, next_display;
 
     unsigned char check;
     unsigned char* local_buffer;
     QVector<QRgb> palette;
     unsigned char window_updated;
 
-    char current_file_name[256];
+    QString current_filename;
 
     unsigned char firedown;
     int firecontrol;
@@ -74,14 +78,37 @@ protected:
     bool refresh();
 
 private:
+    QTimer simTimer;
     bool initialised;
+    unsigned short fit[256*3];
+
     bool eventFilter(QObject *obj, QEvent *event);
     void resizeEvent(QResizeEvent *event);
 
 protected slots:
-    unsigned char file_save_as();
-    unsigned char file_save();
-    void resetSim();
+    unsigned char menuSaveAs();
+    unsigned char menuSave();
+    void menuNew();
+    int menuOpen();
+    int menuOpenScript();
+    void menuAbout();
+    void menuControlPause();
+    void menuControlPrevious();
+    void menuControlNext();
+    void menuControlTerritory();
+    void menuControlWeather();
+    void menuControlShowBrain();
+    void menuControlShowBraincode();
+    void menuControlShowBrainNormal();
+    void menuControlShowBrainFear();
+    void menuControlShowBrainDesire();
+    void menuControlFlood();
+    void menuControlHealthyCarrier();
+
+    void slotTimeout();
+    void createPalette();
+    void menuViewMap();
+    void menuViewTerrain();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
