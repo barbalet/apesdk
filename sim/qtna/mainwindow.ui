@@ -54,6 +54,14 @@
     </property>
     <addaction name="actionViewMap"/>
     <addaction name="actionViewTerrain"/>
+    <addaction name="actionViewIdeosphere"/>
+    <addaction name="actionViewBraincode"/>
+    <addaction name="actionViewGenepool"/>
+    <addaction name="actionViewHonor"/>
+    <addaction name="actionViewPathogens"/>
+    <addaction name="actionViewRelationships"/>
+    <addaction name="actionViewPreferences"/>
+    <addaction name="actionViewPhasespace"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -233,6 +241,46 @@
   <action name="actionHealthyCarrier">
    <property name="text">
     <string>Healthy Carrier</string>
+   </property>
+  </action>
+  <action name="actionViewIdeosphere">
+   <property name="text">
+    <string>Ideosphere</string>
+   </property>
+  </action>
+  <action name="actionViewBraincode">
+   <property name="text">
+    <string>Braincode</string>
+   </property>
+  </action>
+  <action name="actionViewGenepool">
+   <property name="text">
+    <string>Gene Pool</string>
+   </property>
+  </action>
+  <action name="actionViewHonor">
+   <property name="text">
+    <string>Honor Distribution</string>
+   </property>
+  </action>
+  <action name="actionViewPathogens">
+   <property name="text">
+    <string>Population Immunity</string>
+   </property>
+  </action>
+  <action name="actionViewRelationships">
+   <property name="text">
+    <string>Relationship Matrix</string>
+   </property>
+  </action>
+  <action name="actionViewPreferences">
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionViewPhasespace">
+   <property name="text">
+    <string>Phasespace</string>
    </property>
   </action>
  </widget>

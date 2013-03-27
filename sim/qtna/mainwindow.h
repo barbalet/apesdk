@@ -19,12 +19,14 @@
 #include <QVector>
 #include <QRgb>
 #include <QTimer>
+#include <QMouseEvent>
 
 extern "C" {
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../gui/gui.h"
 #include "../gui/shared.h"
+#include "../command/command.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,12 +44,21 @@ extern "C" {
 #define WND_HEIGHT_MAP         512
 #define WND_WIDTH_MAP          512
 
-#define WND_TERRAIN  0
-#define WND_MAP      1
+enum {
+    WND_TERRAIN = 0,
+    WND_MAP,
+    WND_IDEOSPHERE,
+    WND_BRAINCODE,
+    WND_GENEPOOL,
+    WND_HONOR,
+    WND_PATHOGENS,
+    WND_RELATIONSHIPS,
+    WND_PREFERENCES,
+    WND_PHASESPACE,
+    NUM_WINDOWS
+};
 
-#define NUM_WINDOWS  2
-
-#define TIMER_RATE_MSEC (1000/120)
+#define TIMER_RATE_MSEC        (1000/120)
 
 namespace Ui {
 class MainWindow;
@@ -61,8 +72,10 @@ protected:
 
     unsigned char check;
     unsigned char* local_buffer;
+    unsigned char * img_graph;
     QVector<QRgb> palette;
     unsigned char window_updated;
+    int clear_graph;
 
     QString current_filename;
 
@@ -82,12 +95,13 @@ private:
     bool initialised;
     unsigned short fit[256*3];
 
-    bool eventFilter(QObject *obj, QEvent *event);
     void resizeEvent(QResizeEvent *event);
 
 protected slots:
     unsigned char menuSaveAs();
     unsigned char menuSave();
+    bool eventFilter(QObject *obj, QEvent *event);
+    void closeApp();
     void menuNew();
     int menuOpen();
     int menuOpenScript();
@@ -105,10 +119,23 @@ protected slots:
     void menuControlFlood();
     void menuControlHealthyCarrier();
 
-    void slotTimeout();
-    void createPalette();
+    /* Why aren't these all just parameterised in a single function?
+       It's a quirk of Qt which doesn't allow more slot parameters
+       than signal parameters */
+    void menuView(int display, int clear);
     void menuViewMap();
     void menuViewTerrain();
+    void menuViewIdeosphere();
+    void menuViewBraincode();
+    void menuViewGenepool();
+    void menuViewHonor();
+    void menuViewPathogens();
+    void menuViewRelationships();
+    void menuViewPreferences();
+    void menuViewPhasespace();
+
+    void slotTimeout();
+    void createPalette();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
