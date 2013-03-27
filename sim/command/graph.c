@@ -212,25 +212,10 @@ void graph_ideosphere(noble_simulation * sim, n_byte * buffer, n_int img_width, 
 
     graph_being_index(sim, index,0);
 
-    /* clear the image */
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=0;
-
     half_width = img_width/2;
     n = 0;
     if (sim->num>0)
     {
-        if (sim->num*2 < max_height)
-        {
-            max_height = sim->num*2;
-        }
-        else
-        {
-            if (sim->num < max_height)
-            {
-                max_height = sim->num;
-            }
-        }
-
         for (y = 0; y < max_height; y++)
         {
             i = index[y*(sim->num-1)/max_height];
@@ -279,24 +264,9 @@ void graph_genepool(noble_simulation * sim, n_byte * buffer, n_int img_width, n_
     index = (n_int*)io_new(sim->num*sizeof(n_int));
     graph_being_index(sim,index,1);
 
-    /* clear the image */
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=0;
-
     n = 0;
     if (sim->num>0)
     {
-        if (sim->num*2 < max_height)
-        {
-            max_height = sim->num*2;
-        }
-        else
-        {
-            if (sim->num < max_height)
-            {
-                max_height = sim->num;
-            }
-        }
-
         for (y = 0; y < max_height; y++)
         {
             i = index[y*(sim->num-1)/max_height];
@@ -700,8 +670,8 @@ static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int
         {
         case 0:
             graph_braincode_coords(sim, &(sim->beings[i]), &x, &y);
-            x = x * (grid-1) / (256*BRAINCODE_SIZE);
-            y = (grid-1) - (y * (grid-1) / (255*BRAINCODE_SIZE));
+            x = x * (img_width-1) / (256*BRAINCODE_SIZE);
+            y = (img_height-1) - (y * (img_height-1) / (255*BRAINCODE_SIZE));
             break;
         case 1:
             graph_genespace_coords(&(sim->beings[i]), &x, &y);
