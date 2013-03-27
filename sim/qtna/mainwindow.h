@@ -54,6 +54,7 @@ enum {
     WND_PATHOGENS,
     WND_RELATIONSHIPS,
     WND_PREFERENCES,
+    WND_PHASESPACE,
     NUM_WINDOWS
 };
 
@@ -131,6 +132,7 @@ protected slots:
     void menuViewPathogens();
     void menuViewRelationships();
     void menuViewPreferences();
+    void menuViewPhasespace();
 
     void slotTimeout();
     void createPalette();

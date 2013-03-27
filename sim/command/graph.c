@@ -700,8 +700,8 @@ static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int
         {
         case 0:
             graph_braincode_coords(sim, &(sim->beings[i]), &x, &y);
-            x = x * (grid-1) / (256*BRAINCODE_SIZE);
-            y = (grid-1) - (y * (grid-1) / (255*BRAINCODE_SIZE));
+            x = x * (img_width-1) / (256*BRAINCODE_SIZE);
+            y = (img_height-1) - (y * (img_height-1) / (255*BRAINCODE_SIZE));
             break;
         case 1:
             graph_genespace_coords(&(sim->beings[i]), &x, &y);

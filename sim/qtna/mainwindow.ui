@@ -61,6 +61,7 @@
     <addaction name="actionViewPathogens"/>
     <addaction name="actionViewRelationships"/>
     <addaction name="actionViewPreferences"/>
+    <addaction name="actionViewPhasespace"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -275,6 +276,11 @@
   <action name="actionViewPreferences">
    <property name="text">
     <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionViewPhasespace">
+   <property name="text">
+    <string>Phasespace</string>
    </property>
   </action>
  </widget>
