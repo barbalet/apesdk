@@ -34,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionViewTerrain,SIGNAL(triggered()),this,SLOT(menuViewTerrain()));
     connect(ui->actionViewIdeosphere,SIGNAL(triggered()),this,SLOT(menuViewIdeosphere()));
     connect(ui->actionViewBraincode,SIGNAL(triggered()),this,SLOT(menuViewBraincode()));
+    connect(ui->actionViewGenepool,SIGNAL(triggered()),this,SLOT(menuViewGenepool()));
+    connect(ui->actionViewHonor,SIGNAL(triggered()),this,SLOT(menuViewHonor()));
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
@@ -352,6 +354,24 @@ bool MainWindow::refresh()
         img_height = WND_HEIGHT_MAP;
         break;
     }
+    case WND_GENEPOOL:
+    {
+        graph_genepool(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        img = img_graph;
+        format = QImage::Format_RGB888;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
+    case WND_HONOR:
+    {
+        graph_honor_distribution(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        img = img_graph;
+        format = QImage::Format_RGB888;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
     }
 
     if (img == NULL)
@@ -438,24 +458,38 @@ void MainWindow::slotTimeout()
     refresh();
 }
 
-
 void MainWindow::menuViewMap()
 {
-    next_display = WND_MAP;
+    menuView(WND_MAP,0);
 }
 
 void MainWindow::menuViewTerrain()
 {
-    next_display = WND_TERRAIN;
+    menuView(WND_TERRAIN,0);
 }
 
 void MainWindow::menuViewIdeosphere()
 {
-    next_display = WND_IDEOSPHERE;
+    menuView(WND_IDEOSPHERE,0);
 }
 
 void MainWindow::menuViewBraincode()
 {
-    next_display = WND_BRAINCODE;
-    clear_graph = 1;
+    menuView(WND_BRAINCODE,1);
+}
+
+void MainWindow::menuViewGenepool()
+{
+    menuView(WND_GENEPOOL,0);
+}
+
+void MainWindow::menuViewHonor()
+{
+    menuView(WND_HONOR,0);
+}
+
+void MainWindow::menuView(int display, int clear)
+{
+    next_display = display;
+    clear_graph = clear;
 }

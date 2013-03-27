@@ -56,6 +56,8 @@
     <addaction name="actionViewTerrain"/>
     <addaction name="actionViewIdeosphere"/>
     <addaction name="actionViewBraincode"/>
+    <addaction name="actionViewGenepool"/>
+    <addaction name="actionViewHonor"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -245,6 +247,16 @@
   <action name="actionViewBraincode">
    <property name="text">
     <string>Braincode</string>
+   </property>
+  </action>
+  <action name="actionViewGenepool">
+   <property name="text">
+    <string>Gene Pool</string>
+   </property>
+  </action>
+  <action name="actionViewHonor">
+   <property name="text">
+    <string>Honor</string>
    </property>
   </action>
  </widget>

@@ -48,9 +48,10 @@ extern "C" {
 #define WND_MAP                1
 #define WND_IDEOSPHERE         2
 #define WND_BRAINCODE          3
+#define WND_GENEPOOL           4
+#define WND_HONOR              5
 
-#define NUM_WINDOWS            4
-#define NUM_GRAPHS             2
+#define NUM_WINDOWS            6
 
 #define TIMER_RATE_MSEC        (1000/120)
 
@@ -112,13 +113,20 @@ protected slots:
     void menuControlShowBrainDesire();
     void menuControlFlood();
     void menuControlHealthyCarrier();
+
+    /* Why aren't these all just parameterised in a single function?
+       It's a quirk of Qt which doesn't allow more slot parameters
+       than signal parameters */
+    void menuView(int display, int clear);
+    void menuViewMap();
+    void menuViewTerrain();
     void menuViewIdeosphere();
     void menuViewBraincode();
+    void menuViewGenepool();
+    void menuViewHonor();
 
     void slotTimeout();
     void createPalette();
-    void menuViewMap();
-    void menuViewTerrain();
 
 public:
     explicit MainWindow(QWidget *parent = 0);
