@@ -60,6 +60,7 @@
     <addaction name="actionViewHonor"/>
     <addaction name="actionViewPathogens"/>
     <addaction name="actionViewRelationships"/>
+    <addaction name="actionViewPreferences"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -269,6 +270,11 @@
   <action name="actionViewRelationships">
    <property name="text">
     <string>Relationship Matrix</string>
+   </property>
+  </action>
+  <action name="actionViewPreferences">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>

@@ -44,16 +44,18 @@ extern "C" {
 #define WND_HEIGHT_MAP         512
 #define WND_WIDTH_MAP          512
 
-#define WND_TERRAIN            0
-#define WND_MAP                1
-#define WND_IDEOSPHERE         2
-#define WND_BRAINCODE          3
-#define WND_GENEPOOL           4
-#define WND_HONOR              5
-#define WND_PATHOGENS          6
-#define WND_RELATIONSHIPS      7
-
-#define NUM_WINDOWS            8
+enum {
+    WND_TERRAIN = 0,
+    WND_MAP,
+    WND_IDEOSPHERE,
+    WND_BRAINCODE,
+    WND_GENEPOOL,
+    WND_HONOR,
+    WND_PATHOGENS,
+    WND_RELATIONSHIPS,
+    WND_PREFERENCES,
+    NUM_WINDOWS
+};
 
 #define TIMER_RATE_MSEC        (1000/120)
 
@@ -128,6 +130,7 @@ protected slots:
     void menuViewHonor();
     void menuViewPathogens();
     void menuViewRelationships();
+    void menuViewPreferences();
 
     void slotTimeout();
     void createPalette();

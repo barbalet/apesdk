@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionViewHonor,SIGNAL(triggered()),this,SLOT(menuViewHonor()));
     connect(ui->actionViewPathogens,SIGNAL(triggered()),this,SLOT(menuViewPathogens()));
     connect(ui->actionViewRelationships,SIGNAL(triggered()),this,SLOT(menuViewRelationships()));
+    connect(ui->actionViewPreferences,SIGNAL(triggered()),this,SLOT(menuViewPreferences()));
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
@@ -392,6 +393,15 @@ bool MainWindow::refresh()
         img_height = WND_HEIGHT_MAP;
         break;
     }
+    case WND_PREFERENCES:
+    {
+        graph_preferences(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        img = img_graph;
+        format = QImage::Format_RGB888;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
     }
 
     if (img == NULL)
@@ -516,6 +526,11 @@ void MainWindow::menuViewPathogens()
 void MainWindow::menuViewRelationships()
 {
     menuView(WND_RELATIONSHIPS,0);
+}
+
+void MainWindow::menuViewPreferences()
+{
+    menuView(WND_PREFERENCES,0);
 }
 
 
