@@ -51,8 +51,9 @@ extern "C" {
 #define WND_GENEPOOL           4
 #define WND_HONOR              5
 #define WND_PATHOGENS          6
+#define WND_RELATIONSHIPS      7
 
-#define NUM_WINDOWS            7
+#define NUM_WINDOWS            8
 
 #define TIMER_RATE_MSEC        (1000/120)
 
@@ -126,6 +127,7 @@ protected slots:
     void menuViewGenepool();
     void menuViewHonor();
     void menuViewPathogens();
+    void menuViewRelationships();
 
     void slotTimeout();
     void createPalette();

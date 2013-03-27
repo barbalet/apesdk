@@ -59,6 +59,7 @@
     <addaction name="actionViewGenepool"/>
     <addaction name="actionViewHonor"/>
     <addaction name="actionViewPathogens"/>
+    <addaction name="actionViewRelationships"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -263,6 +264,11 @@
   <action name="actionViewPathogens">
    <property name="text">
     <string>Population Immunity</string>
+   </property>
+  </action>
+  <action name="actionViewRelationships">
+   <property name="text">
+    <string>Relationship Matrix</string>
    </property>
   </action>
  </widget>
