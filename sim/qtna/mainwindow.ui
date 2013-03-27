@@ -58,6 +58,7 @@
     <addaction name="actionViewBraincode"/>
     <addaction name="actionViewGenepool"/>
     <addaction name="actionViewHonor"/>
+    <addaction name="actionViewPathogens"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -256,7 +257,12 @@
   </action>
   <action name="actionViewHonor">
    <property name="text">
-    <string>Honor</string>
+    <string>Honor Distribution</string>
+   </property>
+  </action>
+  <action name="actionViewPathogens">
+   <property name="text">
+    <string>Population Immunity</string>
    </property>
   </action>
  </widget>

@@ -50,8 +50,9 @@ extern "C" {
 #define WND_BRAINCODE          3
 #define WND_GENEPOOL           4
 #define WND_HONOR              5
+#define WND_PATHOGENS          6
 
-#define NUM_WINDOWS            6
+#define NUM_WINDOWS            7
 
 #define TIMER_RATE_MSEC        (1000/120)
 
@@ -124,6 +125,7 @@ protected slots:
     void menuViewBraincode();
     void menuViewGenepool();
     void menuViewHonor();
+    void menuViewPathogens();
 
     void slotTimeout();
     void createPalette();
