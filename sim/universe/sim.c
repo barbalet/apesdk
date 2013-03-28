@@ -1275,7 +1275,7 @@ void sim_flood(void)
         
         if (local_z < 160)
         {
-            GET_E(local) = 0;
+            GET_E(local) = BEING_DEAD;
         }
         
         loop++;
@@ -1289,7 +1289,7 @@ void sim_healthy_carrier(void)
     while (loop < sim.num)
     {
         noble_being * local = &sim.beings[loop];
-        GET_E(local) = 0;
+        GET_E(local) = BEING_DEAD;
         loop++;
     }
 }

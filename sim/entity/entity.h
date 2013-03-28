@@ -57,6 +57,7 @@
 
 enum being_energy
 {
+    BEING_DEAD   = 0,
     BEING_HUNGRY = (10*128),
     BEING_STARVE = (BEING_HUNGRY*2),
     BEING_FULL   = (BEING_HUNGRY*3)

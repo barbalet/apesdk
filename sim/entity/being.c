@@ -600,7 +600,7 @@ static void being_immune_response(noble_being * local)
         }
     }
     math_random3(local_random);
-    if ((local_random[0]<(total_antigens>>2)) && (local->energy>0))
+    if ((local_random[0] < (total_antigens>>2)) && (local->energy > BEING_DEAD))
     {
         if (local->energy>PATHOGEN_SEVERITY(max_severity))
         {
@@ -608,7 +608,7 @@ static void being_immune_response(noble_being * local)
         }
         else
         {
-            local->energy=0;
+            local->energy = BEING_DEAD;
         }
     }
 #endif
@@ -1246,6 +1246,11 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 {
     n_land  * land  =   sim->land;
 
+    if(GET_E(local) == BEING_DEAD)
+    {
+        return FULLY_ASLEEP;
+    }
+    
     /* if it is not night, the being is fully awake */
     if(IS_NIGHT(land->time) == 0)
     {
@@ -2076,7 +2081,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
                 
-                if (energy > 0)
+                if (energy > BEING_DEAD)
                 {
 #ifdef METABOLISM_ON
                     metabolism_vascular_response(sim, local, VASCULAR_PARASYMPATHETIC);
@@ -2940,9 +2945,9 @@ void being_tidy(noble_simulation * local_sim)
             }
         }
 
-        if (local_e < 0)
+        if (local_e < BEING_DEAD)
         {
-            local_e = 0;
+            local_e = BEING_DEAD;
         }
 
         GET_E(local_being) = (n_byte2)local_e;
@@ -2981,7 +2986,7 @@ void being_remove(noble_simulation * local_sim)
     
     while (loop < end_loop)
     {
-        if (local[loop].energy == 0)
+        if (local[loop].energy == BEING_DEAD)
         {
             noble_being * b = &local[loop];
             noble_being * child;
@@ -2994,7 +2999,7 @@ void being_remove(noble_simulation * local_sim)
             }
 
             /* Did the being drown? */
-            if (b->state&BEING_STATE_SWIMMING)
+            if (b->state & BEING_STATE_SWIMMING)
             {
                 GET_IN(local_sim).drownings++;
             }
@@ -3017,7 +3022,7 @@ void being_remove(noble_simulation * local_sim)
             family_name = GET_NAME_FAMILY2(local_sim,b);
             while (i < end_loop)
             {
-                if (local[i].energy != 0)
+                if (local[i].energy != BEING_DEAD)
                 {
                     noble_being * b2 = &local[i];
                     social_link * b2_social_graph = GET_SOC(local_sim, b2);
@@ -3054,7 +3059,7 @@ void being_remove(noble_simulation * local_sim)
             possible = count;
         }
         
-        if (local[loop].energy != 0)
+        if (local[loop].energy != BEING_DEAD)
         {
             if ( count != loop )
             {
