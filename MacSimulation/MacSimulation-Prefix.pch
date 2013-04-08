@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'MacSimulation' target in the 'MacSimulation' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
