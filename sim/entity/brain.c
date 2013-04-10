@@ -87,18 +87,17 @@
 #define	B_N_LH (br[(loc+F_X)&B_WR]+br[(loc+F_Y)&B_WR]+br[(loc+F_Z)&B_WR])
 #define	B_N_UH (br[(loc+B_Z)&B_WR]+br[(loc+B_Y)&B_WR]+br[(loc+B_X)&B_WR])
 
-
 void brain_cycle(n_byte * local, n_byte2 * constants)
 {
-    static n_byte frame[B_SIZE];
-    n_byte  *br = local, *obr = &local[B_SIZE];
+    n_byte br[B_SIZE];
+    n_byte  *bract = local, *obr = &local[B_SIZE];
     n_int  l_a = constants[0], l_c = constants[2];
     n_int  l_b = constants[1] + l_c, loc = 0;
     n_int  average;
     n_int  obr_tmp;
     n_int  br_tmp;
 
-    io_copy(br, frame, B_SIZE);
+    io_copy(bract, br, B_SIZE);
 
     while (loc < F_Z)
     {
@@ -121,19 +120,19 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         average =  br[loc-F_Z];
         average += br[loc-F_Y];
         average += br[loc-F_X];
-        br_tmp = br[loc];
+        
+        br_tmp = br[loc]; 
+        
         average += br[loc+F_X];
         average += br[loc+F_Y];
         average += br[loc+F_Z];
+        
         obr_tmp = obr[loc];
-
         average *= l_a;
         obr_tmp *= l_c;
-
-        br_tmp *= l_b;        
+        br_tmp *= l_b;
         br_tmp -= obr_tmp;
         average += br_tmp;
-        
         br[loc++] = (n_byte)(average>>10);
     }
     while (loc < B_SIZE)
@@ -152,7 +151,8 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         br[loc++] = (n_byte)(average>>10);
     }
 
-    io_copy(frame, obr, B_SIZE);
+    io_copy(bract, obr, B_SIZE);
+    io_copy(br, bract, B_SIZE);
 
 }
 

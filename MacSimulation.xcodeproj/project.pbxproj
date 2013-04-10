@@ -410,8 +410,11 @@
 				CONFIGURATION_TEMP_DIR = "../$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MacSimulation/MacSimulation-Prefix.pch";
+				GCC_UNROLL_LOOPS = YES;
 				INFOPLIST_FILE = "MacSimulation/MacSimulation-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -421,10 +424,14 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_TEMP_DIR = "../$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MacSimulation/MacSimulation-Prefix.pch";
+				GCC_UNROLL_LOOPS = YES;
 				INFOPLIST_FILE = "MacSimulation/MacSimulation-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.7;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
