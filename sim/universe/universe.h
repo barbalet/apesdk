@@ -42,7 +42,7 @@
 
 /* displays and simulates ape's brain */
 
-#define  THREADED
+#undef  THREADED
 
 #undef  SMALL_LAND
 
@@ -1530,8 +1530,6 @@ noble_simulation;
 #define GET_M(bei)      ((bei)->mass)
 #define GET_FR(bei)     (GENE_FRAME(bei->new_genetics))
 
-#define GET_IN(sim)     (sim->indicators_base[sim->indicator_index])
-
 #define	GET_X(bei)	((bei)->x)
 #define	GET_Y(bei)	((bei)->y)
 
@@ -1566,7 +1564,6 @@ noble_simulation;
 
 #define GET_BRAINCODE_INTERNAL(sim,bei) ((&GET_SOC(sim,bei)[0])->braincode)
 #define GET_BRAINCODE_EXTERNAL(sim,bei) ((&GET_SOC(sim,bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
-
 
 #define	BRAIN_OFFSET(num)	(num)
 

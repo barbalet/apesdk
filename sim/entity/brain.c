@@ -91,15 +91,18 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
 {
     n_byte br[B_SIZE];
     n_byte  *bract = local, *obr = &local[B_SIZE];
-    n_int  l_a = constants[0], l_c = constants[2];
-    n_int  l_b = constants[1] + l_c, loc = 0;
+    n_int  l_a = constants[0];
+    n_int  l_c = constants[2];
+    n_int  l_b = constants[1] + l_c;
+    n_int  loc = 0;
     n_int  average;
     n_int  obr_tmp;
     n_int  br_tmp;
-
+    n_int  count = F_Z;
+    
     io_copy(bract, br, B_SIZE);
 
-    while (loc < F_Z)
+    do
     {
         average = (B_P_LH + B_N_UH);
         br_tmp = br[loc];
@@ -113,9 +116,11 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         average += br_tmp;
 
         br[loc++] = (n_byte)(average>>10);
-    }
-        
-    while (loc < B_Z)
+        count--;
+                
+    }while(count);
+    count = B_Z - F_Z;
+    do
     {
         average =  br[loc-F_Z];
         average += br[loc-F_Y];
@@ -134,8 +139,10 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         br_tmp -= obr_tmp;
         average += br_tmp;
         br[loc++] = (n_byte)(average>>10);
-    }
-    while (loc < B_SIZE)
+        count--;
+    }while (count);
+    count = F_Z;
+    do
     {
         average = B_P_UH;
         br_tmp = br[loc];
@@ -149,7 +156,8 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         average += br_tmp;
 
         br[loc++] = (n_byte)(average>>10);
-    }
+        count--;
+    }while (count);
 
     io_copy(bract, obr, B_SIZE);
     io_copy(br, bract, B_SIZE);
