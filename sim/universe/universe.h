@@ -42,7 +42,7 @@
 
 /* displays and simulates ape's brain */
 
-#undef  THREADED
+#define  THREADED
 
 #undef  SMALL_LAND
 
@@ -1300,69 +1300,59 @@ noble_immune_system;
 
 #endif
 
-/*! @struct
- @field population size of the population
- @field parasites number of parasites
- @field population_density population numbers in different areas of the map
- @field average_age_days average age in days
- @field average_mobility average movement
- @field average_energy average energy per being
- @field average_energy_input average energy increase
- @field average_energy_output average energy used
- @field average_amorousness average attraction value
- @field average_cohesion average friend_or_foe value
- @field average_familiarity average familiarity value
- @field average_social_links average number of social links (x100)
- @field average_antigens average number of antigens
- @field average_antibodies average number of antibodies
- @field average_chat average number of chat events
- @field drownings number of drowning events
- @field ideology_sd standard deviation of the ideosphere
- @field genetics_sd standard deviation of genetics
- @field family_name_sd standard deviation of family names
- @field drives average drive values
- @field food Food types consumed
- @discussion structure storing indicator values
- */
-typedef struct
-{
-    n_byte2 population;
-    n_uint parasites;
-    n_byte2 population_density[8*8];
-    n_uint average_age_days;
-    n_byte2 average_mobility;
-    n_byte2 average_energy;
-    n_uint average_energy_input;
-    n_uint average_energy_output;
-    n_byte average_amorousness;
-    n_byte2 average_cohesion;
-    n_byte average_familiarity;
-    n_byte2 average_social_links;
-    n_uint average_positive_affect;
-    n_uint average_negative_affect;
-    n_byte2 average_antigens;
-    n_byte2 average_antibodies;
-    n_byte2 average_chat;
-    n_byte2 average_shouts;
-    n_byte2 average_listens;
-    n_byte2 average_grooming;
-    n_byte2 average_parasite_mobility;
-    n_uint average_brainprobe_activity;
-    n_byte2 drownings;
-    n_byte2 ideology_sd;
-    n_byte2 genetics_sd;
-    n_byte2 family_name_sd;
-    n_byte2 drives[DRIVES];
-    n_byte2 food[FOOD_TYPES];
-    n_byte2 average_first_person;
-    n_byte2 average_intentions;
-    n_byte2 average_sensors;
-    n_byte2 average_actuators;
-    n_byte2 average_operators;
-    n_byte2 average_conditionals;
-    n_byte2 average_data;
-} noble_indicators;
 
+enum indicator_type
+{
+    IT_POPULATION = 0,
+    IT_PARASITES,
+    IT_POPULATION_DENSITY,
+    IT_POPULATION_DENSITY_END = IT_POPULATION_DENSITY + (8*8),
+    IT_AVERAGE_AGE_DAYS,
+    IT_AVERAGE_MOBILITY,
+    IT_AVERAGE_ENERGY,
+    IT_AVERAGE_ENERGY_INPUT,
+    IT_AVERAGE_ENERGY_OUTPUT,
+    IT_AVERAGE_AMOROUSNESS,
+    IT_AVERAGE_COHESION,
+    IT_AVERAGE_FAMILIARITY,
+    IT_AVERAGE_SOCIAL_LINKS,
+    IT_AVERAGE_POSITIVE_AFFECT,
+    IT_AVERAGE_NEGATIVE_AFFECT,
+    IT_AVERAGE_ANTIGENS,
+    IT_AVERAGE_ANTIBODIES,
+    
+    IT_AVERAGE_CHAT,
+    IT_AVERAGE_SHOUTS,
+    IT_AVERAGE_LISTENS,
+    IT_AVERAGE_GROOMING,
+
+    IT_AVERAGE_PARASITE_MOBILITY,
+    IT_AVERAGE_BRAINPROBE_ACTIVITY,
+
+    IT_DROWNINGS,
+    IT_IDEOLOGY_SD,
+    IT_GENETICS_SD,
+    IT_FAMILY_NAME_SD,
+    
+    IT_DRIVES,
+    
+    IT_DRIVES_END = IT_DRIVES + DRIVES,
+    
+    IT_FOOD,
+    
+    IT_FOOD_END = IT_FOOD + FOOD_TYPES,
+    
+    IT_AVERAGE_FIRST_PERSON,
+    IT_AVERAGE_INTENTIONS,
+    IT_AVERAGE_SENSORS,
+    IT_AVERAGE_ACTUATORS,
+    IT_AVERAGE_OPERATORS,
+    IT_AVERAGE_CONDITIONALS,
+    IT_AVERAGE_DATA,
+    
+    IT_NUMBER_ENTRIES
+};
+    
 typedef struct
 {
     n_byte2	x;
@@ -1461,6 +1451,22 @@ noble_being;
 typedef void (being_birth_event)(noble_being * born, noble_being * mother, void * sim);
 typedef void (being_death_event)(noble_being * deceased, void * sim);
 
+
+#define INDICATOR_ACCESS(sim, index)     sim->indicators_base[(sim->indicator_index * IT_NUMBER_ENTRIES) + (index)]
+
+#define INDICATOR_SET(sim, index, val)         INDICATOR_ACCESS(sim, index) = (val)
+#define INDICATOR_ADD(sim, index, val)         INDICATOR_ACCESS(sim, index) += (val)
+#define INDICATOR_INC(sim, index)              INDICATOR_ACCESS(sim, index) ++
+
+#define INDICATOR_DIVIDE(sim, index, value)        INDICATOR_ACCESS(sim, index) /= (value)
+
+#define INDICATOR_NORMALIZE(sim, index)        INDICATOR_DIVIDE(sim, index, sim->num)
+#define INDICATOR_MULTIPLY(sim, index, value)  INDICATOR_ACCESS(sim, index) *= value
+
+#define INDICATOR_NAME(sim, index)             sim->indicators_name[(index)]
+#define INDICATOR_INIT_NAME(sim, index, string) sim.indicators_name[(index)] = string
+
+
 /*! @struct
  @field land The n_land pointer.
  @field weather The n_weather pointer.
@@ -1496,8 +1502,10 @@ typedef struct
 
     n_uint          indicator_index;
     n_uint          indicators_logging;
-    noble_indicators * indicators_base;
-
+    
+    n_uint          indicators_base[IT_NUMBER_ENTRIES * INDICATORS_BUFFER_SIZE];
+    n_string        indicators_name[IT_NUMBER_ENTRIES];
+    
     being_birth_event * ext_birth;
     being_death_event * ext_death;
 

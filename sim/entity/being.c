@@ -2075,9 +2075,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 /** eating when stopped */
                 n_byte  food_type;
                 n_int energy = food_eat(sim->land, sim->weather, location_vector.x, location_vector.y, az, &food_type, local);
-
-                GET_IN(sim).food[food_type]++;
-
+                
+                INDICATOR_INC(sim, IT_FOOD+food_type);
+                
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
                 
@@ -2088,7 +2088,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 #endif
 
                     loc_e += energy;
-                    GET_IN(sim).average_energy_input += energy;
+                    
+                    INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, energy);
+                    
                     loc_state |= BEING_STATE_EATING;
                     /** grow */
                     if (loc_h < BEING_MAX_HEIGHT)
@@ -2260,7 +2262,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             /** child gains energy */
                             loc_e += SUCKLING_ENERGY;
                             /** update indicators */
-                            GET_IN(sim).average_energy_input += SUCKLING_ENERGY;
+                            
+                            INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, SUCKLING_ENERGY);
+                            
                             /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
@@ -2316,7 +2320,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     local->state = loc_state;
-    GET_IN(sim).average_mobility+=(n_uint)loc_s;
+    
+    INDICATOR_ADD(sim, IT_AVERAGE_MOBILITY, loc_s);
 }
 
 
@@ -2930,7 +2935,8 @@ void being_tidy(noble_simulation * local_sim)
         }
 
         local_e -= delta_e;
-        GET_IN(local_sim).average_energy_output += delta_e;
+        
+        INDICATOR_ADD(local_sim, IT_AVERAGE_ENERGY_OUTPUT, delta_e);
 
         if (land->time == 0)
         {
@@ -3001,7 +3007,7 @@ void being_remove(noble_simulation * local_sim)
             /* Did the being drown? */
             if (b->state & BEING_STATE_SWIMMING)
             {
-                GET_IN(local_sim).drownings++;
+                INDICATOR_INC(local_sim, IT_DROWNINGS);
             }
 
             /* remove all children's maternal links if the mother dies */

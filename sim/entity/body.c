@@ -103,13 +103,15 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
             {
                 hit=1;
                 GET_E(other) -= SQUABBLE_ENERGY_ROCK_HURL;
-                GET_IN(sim).average_energy_output += SQUABBLE_ENERGY_ROCK_HURL;
+                
+                INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_ROCK_HURL);
             }
             if ((carrying & INVENTORY_BRANCH) && (math_random(other->seed)>WHACK_ACCURACY))
             {
                 hit=1;
                 GET_E(other) -= SQUABBLE_ENERGY_BRANCH_WHACK;
-                GET_IN(sim).average_energy_output += SQUABBLE_ENERGY_BRANCH_WHACK;
+                
+                INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_BRANCH_WHACK);
             }
         }
         if (carrying & INVENTORY_BRANCH)
