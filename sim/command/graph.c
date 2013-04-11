@@ -658,11 +658,13 @@ static void graph_genespace_coords(noble_being * local_being, n_uint * x, n_uint
 static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type)
 {
 #ifdef PARASITES_ON
-    const int grid = 32;
     n_uint i,x=0,y=0,n;
 
     /* clear the image */
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
+	for (i = 0; i < img_width*img_height*3; i++)
+	{
+		buffer[i] = 255;
+	}
 
     for (i=0; i<sim->num; i++)
     {

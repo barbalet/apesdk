@@ -196,8 +196,14 @@ n_int file_chain_read(n_string name, n_file_chain * initial)
     }
     
     do {
-        fread(local->data,1,local->expected_bytes, read_file);
-        local = (n_file_chain*)local->next;
+        if (fread(local->data,1,local->expected_bytes, read_file) > 0)
+		{
+			local = (n_file_chain*)local->next;
+		}
+		else
+		{
+			local = 0L;
+		}
     } while (local != 0L);
     
     fclose(read_file);
@@ -400,7 +406,7 @@ n_int io_aiff_sample_size(n_uint total_size)
 n_int io_aiff_header_check_length(n_byte * header)
 {
     n_byte  comparison[54];
-    n_uint  total_size, total_samples, sound_size;
+    n_uint  total_samples, sound_size;
     n_int   loop = 0;
 
     io_aiff_header(comparison);
@@ -413,7 +419,8 @@ n_int io_aiff_header_check_length(n_byte * header)
         }
         loop++;
     }
-    total_size = io_aiff_uint_out(&header[4]);
+    /*total_size = */
+	io_aiff_uint_out(&header[4]);
     loop = 8;
     while (loop < 16)
     {
@@ -487,9 +494,10 @@ n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_f
     {
         n_string_block output;
         n_int samples;
-        fread(header, 1, 54, test_file);
-        
-        samples = io_aiff_header_check_length(header);
+        if (fread(header, 1, 54, test_file) > 0)
+		{        
+			samples = io_aiff_header_check_length(header);
+		}
         
         sprintf(output, "%ld\n",samples);
         output_function(output);
