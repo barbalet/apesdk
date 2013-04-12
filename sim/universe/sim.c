@@ -693,7 +693,10 @@ static void sim_indicators(noble_simulation * sim)
     n_uint b;
     n_int i,n,diff;
     n_uint current_date;
-    n_uint average_cohesion=0,average_amorousness=0,average_familiarity=0,average_energy=0;
+    n_uint average_cohesion=0;
+    n_uint average_amorousness=0;
+    n_uint average_familiarity=0;
+    n_uint average_energy=0;
     n_uint social_links=0;
     n_byte x,y;
     social_link * local_social_graph;
@@ -752,8 +755,7 @@ static void sim_indicators(noble_simulation * sim)
 #endif
 
     INDICATOR_SET(sim, IT_PARASITES, 0);
-    INDICATOR_SET(sim, IT_AVERAGE_ANTIGENS, 0);
-    INDICATOR_SET(sim, IT_AVERAGE_ANTIBODIES, 0);
+    INDICATOR_SET(sim, IT_AVERAGE_AGE_DAYS, 0);
     
     for (b=0; b<sim->num; b++)
     {
@@ -833,6 +835,18 @@ static void sim_indicators(noble_simulation * sim)
 #endif
     }
     
+    INDICATOR_ADD(sim, IT_AVERAGE_ANTIGENS, average_antigens);
+    INDICATOR_ADD(sim, IT_AVERAGE_ANTIBODIES, average_antibodies);
+    
+    INDICATOR_SET(sim, IT_AVERAGE_SOCIAL_LINKS, social_links);
+
+    INDICATOR_SET(sim, IT_AVERAGE_POSITIVE_AFFECT, positive_affect);
+    INDICATOR_SET(sim, IT_AVERAGE_NEGATIVE_AFFECT, negative_affect);
+    INDICATOR_SET(sim, IT_AVERAGE_ENERGY, average_energy);
+    
+    INDICATOR_SET(sim, IT_AVERAGE_FIRST_PERSON, average_first_person);
+    INDICATOR_SET(sim, IT_AVERAGE_INTENTIONS, average_intentions);
+    
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_PARASITE_MOBILITY, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_GROOMING, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_SHOUTS, 100);
@@ -868,27 +882,13 @@ static void sim_indicators(noble_simulation * sim)
 #ifdef BRAINCODE_ON
     braincode_statistics(sim);
 #endif
-    if (social_links>0)
-    {
-        INDICATOR_SET(sim, IT_AVERAGE_COHESION, average_cohesion);
-        INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
-        
-        INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, average_familiarity);
-        INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, average_amorousness);
-        
-        INDICATOR_DIVIDE(sim, IT_AVERAGE_COHESION, social_links);
-        INDICATOR_DIVIDE(sim, IT_AVERAGE_FAMILIARITY, social_links);
-        INDICATOR_DIVIDE(sim, IT_AVERAGE_AMOROUSNESS, social_links);
-    }
-    else
-    {        
-        INDICATOR_SET(sim, IT_AVERAGE_COHESION, SOCIAL_RESPECT_NORMAL);
-        INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
-        
-        INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, 0);
-        INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, 0);
-    }
 
+    INDICATOR_SET(sim, IT_AVERAGE_COHESION, average_cohesion);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
+    
+    INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, average_familiarity);
+    INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, average_amorousness);
+ 
     /* family name variance */
     for (i=0; i<2; i++)
     {
@@ -1185,6 +1185,7 @@ static void sim_memory(n_uint offscreen_size)
                                   
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_ANTIGENS,"Average Antigens");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_ANTIBODIES,"Average Antibodies");
+                                  
     INDICATOR_INIT_NAME(sim, IT_IDEOLOGY_SD,"Ideological Variation");
     INDICATOR_INIT_NAME(sim, IT_GENETICS_SD,"Genetic Variation (x100)");
     INDICATOR_INIT_NAME(sim, IT_FAMILY_NAME_SD,"Family Name Variation (x100)");

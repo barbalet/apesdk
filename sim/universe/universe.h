@@ -1320,7 +1320,7 @@ enum indicator_type
     IT_AVERAGE_NEGATIVE_AFFECT,
     IT_AVERAGE_ANTIGENS,
     IT_AVERAGE_ANTIBODIES,
-    
+        
     IT_AVERAGE_CHAT,
     IT_AVERAGE_SHOUTS,
     IT_AVERAGE_LISTENS,
@@ -1452,18 +1452,16 @@ typedef void (being_birth_event)(noble_being * born, noble_being * mother, void 
 typedef void (being_death_event)(noble_being * deceased, void * sim);
 
 
-#define INDICATOR_ACCESS(sim, index)     sim->indicators_base[(sim->indicator_index * IT_NUMBER_ENTRIES) + (index)]
+#define INDICATOR_ACCESS(sim, index)            sim->indicators_base[(sim->indicator_index * IT_NUMBER_ENTRIES) + (index)]
 
-#define INDICATOR_SET(sim, index, val)         INDICATOR_ACCESS(sim, index) = (val)
-#define INDICATOR_ADD(sim, index, val)         INDICATOR_ACCESS(sim, index) += (val)
-#define INDICATOR_INC(sim, index)              INDICATOR_ACCESS(sim, index) ++
+#define INDICATOR_SET(sim, index, val)          INDICATOR_ACCESS(sim, index) = (val)
+#define INDICATOR_ADD(sim, index, val)          INDICATOR_ACCESS(sim, index) += (val)
+#define INDICATOR_INC(sim, index)               INDICATOR_ACCESS(sim, index) ++
 
-#define INDICATOR_DIVIDE(sim, index, value)        INDICATOR_ACCESS(sim, index) /= (value)
+#define INDICATOR_NORMALIZE(sim, index)         INDICATOR_ACCESS(sim, index) /= sim->num
+#define INDICATOR_MULTIPLY(sim, index, value)   INDICATOR_ACCESS(sim, index) *= value
 
-#define INDICATOR_NORMALIZE(sim, index)        INDICATOR_DIVIDE(sim, index, sim->num)
-#define INDICATOR_MULTIPLY(sim, index, value)  INDICATOR_ACCESS(sim, index) *= value
-
-#define INDICATOR_NAME(sim, index)             sim->indicators_name[(index)]
+#define INDICATOR_NAME(sim, index)              sim->indicators_name[(index)]
 #define INDICATOR_INIT_NAME(sim, index, string) sim.indicators_name[(index)] = string
 
 
