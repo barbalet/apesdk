@@ -753,9 +753,6 @@ static void sim_indicators(noble_simulation * sim)
         mean_braincode[n]=0;
     }
 #endif
-
-    INDICATOR_SET(sim, IT_PARASITES, 0);
-    INDICATOR_SET(sim, IT_AVERAGE_AGE_DAYS, 0);
     
     for (b=0; b<sim->num; b++)
     {
@@ -835,8 +832,8 @@ static void sim_indicators(noble_simulation * sim)
 #endif
     }
     
-    INDICATOR_ADD(sim, IT_AVERAGE_ANTIGENS, average_antigens);
-    INDICATOR_ADD(sim, IT_AVERAGE_ANTIBODIES, average_antibodies);
+    INDICATOR_SET(sim, IT_AVERAGE_ANTIGENS, average_antigens);
+    INDICATOR_SET(sim, IT_AVERAGE_ANTIBODIES, average_antibodies);
     
     INDICATOR_SET(sim, IT_AVERAGE_SOCIAL_LINKS, social_links);
 
@@ -889,12 +886,32 @@ static void sim_indicators(noble_simulation * sim)
     INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, average_familiarity);
     INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, average_amorousness);
  
+    if (social_links > 0)
+    {
+        INDICATOR_SET(sim, IT_AVERAGE_COHESION, average_cohesion);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
+        
+        INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, average_familiarity);
+        INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, average_amorousness);
+        
+        INDICATOR_DIVIDE(sim, IT_AVERAGE_COHESION, social_links);
+        INDICATOR_DIVIDE(sim, IT_AVERAGE_FAMILIARITY, social_links);
+        INDICATOR_DIVIDE(sim, IT_AVERAGE_AMOROUSNESS, social_links);
+    }
+    else
+    {
+        INDICATOR_SET(sim, IT_AVERAGE_COHESION, SOCIAL_RESPECT_NORMAL);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
+    }
+    
     /* family name variance */
     for (i=0; i<2; i++)
     {
         family[i]/=sim->num;
     }
+    
     sd = 0;
+    
     for (b=0; b<sim->num; b++)
     {
         local_being = &(sim->beings[b]);
@@ -1178,6 +1195,7 @@ static void sim_memory(n_uint offscreen_size)
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_ENERGY_OUTPUT,"Average Energy Output");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_AMOROUSNESS,"Average Amorousness");
 
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_FAMILIARITY,"Average Familiarity");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_COHESION,"Average Cohesion (x100)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_SOCIAL_LINKS,"Average Social Links (x100)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_POSITIVE_AFFECT,"Average Positive Affect (x100)");
