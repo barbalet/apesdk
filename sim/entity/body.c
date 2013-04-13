@@ -296,6 +296,45 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2], &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
                    &keypoints[SKELETON_LEFT_SHOULDER*2], &keypoints[SKELETON_LEFT_SHOULDER*2+1],
                    &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
+                   points, &i);
+
+    /* left scapula */
+    outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
+                   keypoints[SKELETON_LEFT_SHOULDER*2],
+                   keypoints[SKELETON_LEFT_SHOULDER*2+1],
+                   0, scale_width, scale_length,
+                   angle-600,
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right scapula */
+    outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
+                   keypoints[SKELETON_RIGHT_SHOULDER*2],
+                   keypoints[SKELETON_RIGHT_SHOULDER*2+1],
+                   1, scale_width, scale_length,
+                   angle+500,
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* ribs */
+    outline_points(bone_ribs, bone_points[BONE_RIBS],4,
+                   keypoints[SKELETON_NECK*2], keypoints[SKELETON_NECK*2+1], 0,
+                   scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_LUMBAR*2],
+                   &keypoints[SKELETON_LUMBAR*2+1],
+                   &keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2], &keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2+1],
+                   &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2], &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
+                   &keypoints[SKELETON_LEFT_SHOULDER*2], &keypoints[SKELETON_LEFT_SHOULDER*2+1],
+                   &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
                    points, &no_of_points);
 
     /* position of the top of the pelvis */
@@ -505,33 +544,6 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
-
-    /* left scapula */
-    outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
-                   keypoints[SKELETON_LEFT_SHOULDER*2],
-                   keypoints[SKELETON_LEFT_SHOULDER*2+1],
-                   0, scale_width, scale_length,
-                   angle-600,
-                   &extra_x[0], &extra_y[0],
-                   &extra_x[0], &extra_y[0],
-                   &extra_x[1], &extra_y[1],
-                   &extra_x[2], &extra_y[2],
-                   &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
-
-    /* right scapula */
-    outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
-                   keypoints[SKELETON_RIGHT_SHOULDER*2],
-                   keypoints[SKELETON_RIGHT_SHOULDER*2+1],
-                   1, scale_width, scale_length,
-                   angle+500,
-                   &extra_x[0], &extra_y[0],
-                   &extra_x[0], &extra_y[0],
-                   &extra_x[1], &extra_y[1],
-                   &extra_x[2], &extra_y[2],
-                   &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
-
 
     vertical = keypoints[SKELETON_NECK*2+1];
     for (i = 0; i < SKELETON_VERTIBRA_RIBS; i++)
