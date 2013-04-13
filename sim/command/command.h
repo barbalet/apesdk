@@ -76,5 +76,11 @@ void graph_phasespace(noble_simulation * sim, n_byte * buffer, n_int img_width, 
 void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte * buffer, n_int img_width, n_int img_height, n_byte clear);
 
 void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_vascular(noble_being * being,
+                    n_byte * buffer,
+                    n_int img_width, n_int img_height,
+                    n_int tx, n_int ty, n_int bx, n_int by,
+                    n_byte thickness,
+                    n_byte clear);
 
 #endif /* _NOBLEAPE_COMMAND_H_ */

@@ -41,8 +41,646 @@
 #include "..\universe\universe.h"
 #endif
 
+#include <math.h>
 #include "entity_internal.h"
 #include "entity.h"
+
+enum {
+    BONE_ARM_UPPER = 0,
+    BONE_ARM_LOWER1,
+    BONE_ARM_LOWER2,
+    BONE_CLAVICAL,
+    BONE_LEG_UPPER,
+    BONE_LEG_LOWER1,
+    BONE_LEG_LOWER2,
+    BONE_PELVIS,
+    BONE_HAND,
+    BONE_FINGER,
+    BONE_VERTIBRA,
+    BONE_SCAPULA,
+    BONE_RIBS,
+    BONES
+};
+
+const n_int bone_points[] = {
+    54, /* arm upper */
+    44, /* arm lower1 */
+    41, /* arm lower2 */
+    33, /* clavical */
+    58, /* leg upper */
+    30, /* leg lower1 */
+    37, /* leg lower2 */
+    88, /* pelvis */
+    24, /* hand */
+    33, /* finger */
+    36, /* vertibra */
+    48, /* scapula */
+    82  /* ribs */
+};
+
+const n_int bone_arm_upper[] = {
+    42,0, 53,475, /* axis */
+    49,0,    16,8,     9,21,    2,37,    5,50,  10,64,  14,77,  14,95,  12,143,  12,193,
+    10,241,  12,259,  18,286,  21,314,  21,343, 20,372, 17,408, 13,424,  5,438,   1,444,
+    3,458,   14,470,  18,472,  28,473,  42,477, 52,476, 63,469, 75,477, 92,477,  90,458,
+    99,455, 107,450, 111,440, 107,429, 100,425, 88,418, 77,407, 69,393, 65,382,  62,347,
+    60,313,  56,270,  51,218,  52,174,  52,127, 54,88,  57,71,  64,68,  69,54,   75,47,
+    81,36,   84,27,   77,10,   67,1
+};
+
+const n_int bone_arm_lower1[] = {
+    34,4, 59,346, /* axis */
+    48,0,   35,0,   21,1,   14,9,   15,15,  22,23,  24,31,  24,42,  20,67,  15,102,
+    9,132,  4,157,  2,177,  3,197,   7,225, 11,258, 16,290, 18,308, 19,327, 20,337,
+    19,347, 23,351, 36,349, 50,347, 60,342, 70,340, 72,336, 72,331, 67,327, 51,314,
+    46,305, 40,285, 33,259, 31,233, 28,208, 28,183, 30,166, 37,131, 48,77,  52,60,
+    45,45,  43,31,  45,13,  44,4
+};
+
+const n_int bone_arm_lower2[] = {
+    34,4, 59,346, /* axis */
+    65,0,   53,0,   48,11,  45,25,   40,40,   35,102,  35,127,  35,151,  39,178,  43,209,
+    48,237, 54,266, 58,299, 60,317,  55,329,  53,339,  54,343,  69,344,  80,346,  88,349,
+    91,343, 89,335, 84,324, 78,314,  75,293,  74,271,  70,239,  64,207,  60,174,  57,132,
+    58,112, 62,77,  65,58,  72,48,   74,35,   85,27,   95,23,   98,16,   96,8,    86,5,
+    77,2
+};
+
+const n_int bone_clavical[] = {
+    23,201, 31,13, /* axis */
+    26,4,    20,12,   19,22,   24,30,   30,39,   29,53,   24,77,   15,100,   10,114,   6,130,
+    4,146,   5,159,   9,176,   14,189,  15,200,  18,206,  23,207,  28,206,   31,199,  31,192,
+    27,182, 25,173,  22,156,   22,143,  24,126,  28,110,  39,88,   45,68,    49,52,   50,40,
+    48,27,  43,12,   38,7
+};
+
+const n_int bone_leg_upper[] = {
+    119,33, 80,416, /* axis */
+    47,3,    36,7,   30,15,   27,22,   23,43,   19,73,   18,90,   20,112,   22,140,   23,178,
+    24,223,  29,286, 32,330,  30,360,  26,378,  24,386,  28,398,  36,410,   49,419,   65,425,
+    78,422,  84,417, 91,410, 102,405, 114,408, 126,408, 133,401, 134,389,  135,373,  125,362,
+    114,354, 99,347, 89,330,  78,305,  71,274,  64,221,  64,174,  67,126,   73,93,    76,77,
+    87,67,   99,63, 111,59,  116,61,  121,63,  126,58,  127,51,  122,38,   117,22,   109,14,
+    99,13,   91,19,  86,24,   78,26,   70,25,   64,17,   66,7,    60,3
+};
+
+const n_int bone_leg_lower1[] = {
+    94,5, 46,287, /* axis */
+    23,26,  14,33,  12,45,  14,55,  16,68,  17,101,  18,132,  18,166,  17,195,  18,223,
+    20,241, 17,251, 11,260,  5,269,  5,275, 14,280,  25,284,  33,283,  37,275,  36,261,
+    32,240, 28,210, 27,171, 30,154, 31,134, 30,94,   31,69,   36,48,   36,36,   32,27
+};
+
+const n_int bone_leg_lower2[] = {
+    94,5, 46,287, /* axis */
+    66,1,   44,1,    28,1,    24,8,   25,24,  34,37,   41,49,   49,66,   54,85,   58,106,
+    59,130, 59,165,  57,196,  51,227, 45,245, 40,254,  36,266,  39,280,  47,287,  59,287,
+    77,281, 87,277,  90,272,  90,265, 84,250, 83,230,  83,188,  83,149,  85,109,  88,74,
+    92,47,  100,38, 110,29,  116,18,  114,6,  98,5,    80,1
+};
+
+const n_int bone_pelvis[] = {
+    214,27, 203,382, /* axis */
+    213,24,    183,21,    166,22,    156,18,    139,12,    118,6,    100,6,    79,8,    68,11,    60,19,
+    46,34,      35,49,    25,65,     17,81,      9,96,     6,108,    6,122,   15,136,   27,150,   44,165,
+    59,181,     71,197,   75,221,    78,240,    77,255,    84,254,   97,259, 104,271,  107,284,  106,295,
+    105,303,   112,315,  116,330,   118,347,   112,358,   105,365,  101,367, 102,376,  111,384,  127,393,
+    141,393,   158,390,  177,387,   189,381,   201,369,   213,359,  215,336, 216,349,  218,358,  225,370,
+    240,380,   254,385,  272,387,   294,387,   307,387,   316,375,  317,367, 310,357,  300,337,  300,320,
+    308,308,   316,304,  321,294,   320,283,   322,275,   321,266,  330,259, 342,254,  349,245,  348,217,
+    354,192,   364,176,  381,162,   402,144,   423,131,   432,121,  433,104, 427,84,   411,60,   392,37,
+    377,22,    360,11,   336,7,     311,11,    277,18,    258,25,   244,26,  222,24,
+    101,272, /* left leg */
+    321,265  /* right leg */
+};
+
+const n_int bone_hand[] = {
+    20,6, 14,100, /* axis */
+    19,4,  12,6,    9,12,   9,23,   10,40,    9,59,    8,75,    6,86,    3,91,    8,98,
+    9,102, 15,102, 20,101, 24,96,   27,90,   27,84,   24,76,   23,64,   24,40,   24,24,
+    26,18, 29,10,  28,4,   23,3
+};
+
+const n_int bone_finger[] = {
+    14,1, 15,114, /* axis */
+    13,1,    6,3,   4,6,   3,10,    6,14,    6,26,    6,40,    8,52,    9,56,    8,60,
+    6,66,    6,72,  8,82,  7,92,    9,98,   10,104,  11,112,  14,114,  16,113,  18,107,
+    19,100, 19,92, 20,86, 20,78,   20,68,   23,60,   25,52,   26,44,   24,34,   23,18,
+    23,7,   21,3,  16,2
+};
+
+const n_int bone_vertibra[] = {
+    53,1, 53,47, /* axis */
+    53,2,   41,2,   30,4,   22,7,   22,16,   22,24,   20,32,   14,32,   4,34,   1,36,
+    1,42,   5,46,  14,48,  18,48,   18,54,   24,53,   33,50,   43,48,  53,49,  62,50,
+    72,53, 81,56,  87,56,  88,50,   95,50,   98,48,  100,42,   98,38,  91,37,  84,35,
+    84,33, 84,24,  86,14,  84,10,   74,6,    62,0
+};
+
+const n_int bone_scapula[] = {
+    35,0, 134,214, /* axis */
+    37,3,     22,7,    11,15,    6,21,   4,28,    4,40,    9,58,    19,80,    38,113,    60,142,
+    81,178,  101,204, 114,219, 128,226, 138,230, 153,221, 165,211, 171,194,  173,170,   175,143,
+    177,116, 176,97,  168,81,  177,69,  187,60,  188,41,  184,23,  175,13,   162,11,    151,12,
+    146,22,  136,34,  128,46,  118,59,  113,56,  109,43,  100,34,  93,34,    84,36,     83,46,
+    75,51,    67,52,   58,42,   58,34,   48,27,   51,19,   52,12,  45,6
+};
+
+const n_int bone_ribs[] = {
+    227,11, 212,350, /* axis */
+    226,10,   199,7,   177,15,   152,25,   139,37,  122,52,   112,62,   104,75,   91,93,   85,108,
+    76,127,   69,149,  62,169,   61,183,   53,208,  53,218,   44,230,   39,244,   40,255,  36,262,
+    30,278,   28,295,  28,299,   22,317,   22,336,  23,348,   16,365,   15,389,   14,411,  10,437,
+    13,449,   18,446,  18,434,   33,425,   56,407,  83,392,  116,382,  141,373,  159,362, 173,351,
+    184,351, 213,348, 235,355,  242,356,  244,352, 264,363,  283,377,  304,386,  333,396, 355,409,
+    375,423, 395,443, 409,458,  416,450,  419,440, 415,429,  417,404,  411,383,  408,366, 411,348,
+    411,327, 409,315, 407,296,  402,278,  395,267, 393,243,  385,232,  384,213,  379,200, 371,194,
+    367,172, 359,155, 357,134,  344,114,  334,90,  322,80,   318,67,   301,47,   289,30,  275,22,
+    247,15,  227,12,
+    35,3, 416,3, /* shoulder sockets */
+    35,-20, 416,-20, /* shoulders */
+};
+
+static void outline_points(const n_int * source_points,
+                           n_int no_of_source_points, n_int extra_points,
+                           n_int x, n_int y,
+                           n_byte mirror,
+                           n_int scale_width, n_int scale_length,
+                           n_int angle,
+                           n_int *axis_x, n_int *axis_y,
+                           n_int *extra_x1, n_int *extra_y1,
+                           n_int *extra_x2, n_int *extra_y2,
+                           n_int *extra_x3, n_int *extra_y3,
+                           n_int *extra_x4, n_int *extra_y4,
+                           n_int * points, n_int * no_of_points)
+{
+    n_int i, px=0,py=0,dx,dy,axis_length,point_length;
+    n_int pivot_x = source_points[0];
+    n_int pivot_y = source_points[1];
+    float axis_angle, point_angle;
+    float ang = angle*3.1415927f/3600;
+
+    dx = (source_points[2] - pivot_x)*scale_width/1000;
+    dy = (source_points[3] - pivot_y)*scale_length/1000;
+    axis_length = (n_int)sqrt(dx*dx + dy*dy);
+    if (axis_length < 1) axis_length=1;
+    if (mirror != 0)
+    {
+        dx = -dx;
+    }
+    axis_angle = (float)acos(dx/(float)axis_length);
+    if (dy < 0) axis_angle = (2*3.1415927f)-axis_angle;
+
+    *axis_x = x + (n_int)(axis_length*sin(ang+(3.1415927f/2)-axis_angle));
+    *axis_y = y + (n_int)(axis_length*cos(ang+(3.1415927f/2)-axis_angle));
+
+    for (i = 2; i < no_of_source_points + 2 + extra_points; i++)
+    {
+        dx = (source_points[i*2]-pivot_x)*scale_width/1000;
+        dy = (source_points[i*2+1]-pivot_y)*scale_length/1000;
+        point_length = (n_int)sqrt(dx*dx + dy*dy);
+        if (point_length < 1) point_length=1;
+        if (mirror != 0)
+        {
+            dx = -dx;
+        }
+        point_angle = (float)acos(dx/(float)point_length);
+        if (dy < 0) point_angle = (2*3.1415927f)-point_angle;
+
+        px = x + (n_int)(point_length*sin(ang+point_angle-axis_angle));
+        py = y + (n_int)(point_length*cos(ang+point_angle-axis_angle));
+
+        if (i < no_of_source_points + 2)
+        {
+            points[(*no_of_points)*2] = px;
+            points[(*no_of_points)*2+1] = py;
+            *no_of_points = *no_of_points + 1;
+        }
+
+        *extra_x1 = *extra_x2;
+        *extra_y1 = *extra_y2;
+        *extra_x2 = *extra_x3;
+        *extra_y2 = *extra_y3;
+        *extra_x3 = *extra_x4;
+        *extra_y3 = *extra_y4;
+        *extra_x4 = px;
+        *extra_y4 = py;
+    }
+
+    points[(*no_of_points)*2] = 9999;
+    points[(*no_of_points)*2+1] = 9999;
+    *no_of_points = *no_of_points + 1;
+}
+
+/* returns a set of points corresponding to key locations on the skeleton */
+n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points)
+{
+    n_int scale_width=1000, scale_length=1000, angle=0;
+    n_int extra_x[4], extra_y[4];
+    n_int i, vertical, vertibra_x=0, vertibra_y=0, no_of_points = 0;
+    n_int arm_angle = 30; /* angle of arms in degrees */
+    n_int leg_angle = 20;
+
+    /* position of the bottom of the neck */
+    keypoints[SKELETON_NECK*2] = 0;
+    keypoints[SKELETON_NECK*2+1] = 0;
+
+    /* position of the bottom of the ribs */
+    outline_points(bone_ribs, bone_points[BONE_RIBS],4,
+                   keypoints[SKELETON_NECK*2], keypoints[SKELETON_NECK*2+1], 0,
+                   scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_LUMBAR*2],
+                   &keypoints[SKELETON_LUMBAR*2+1],
+                   &keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2], &keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2+1],
+                   &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2], &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
+                   &keypoints[SKELETON_LEFT_SHOULDER*2], &keypoints[SKELETON_LEFT_SHOULDER*2+1],
+                   &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
+                   points, &i);
+
+    /* left scapula */
+    outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
+                   keypoints[SKELETON_LEFT_SHOULDER*2],
+                   keypoints[SKELETON_LEFT_SHOULDER*2+1],
+                   0, scale_width, scale_length,
+                   angle-600,
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right scapula */
+    outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
+                   keypoints[SKELETON_RIGHT_SHOULDER*2],
+                   keypoints[SKELETON_RIGHT_SHOULDER*2+1],
+                   1, scale_width, scale_length,
+                   angle+500,
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* ribs */
+    outline_points(bone_ribs, bone_points[BONE_RIBS],4,
+                   keypoints[SKELETON_NECK*2], keypoints[SKELETON_NECK*2+1], 0,
+                   scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_LUMBAR*2],
+                   &keypoints[SKELETON_LUMBAR*2+1],
+                   &keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2], &keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2+1],
+                   &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2], &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
+                   &keypoints[SKELETON_LEFT_SHOULDER*2], &keypoints[SKELETON_LEFT_SHOULDER*2+1],
+                   &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
+                   points, &no_of_points);
+
+    /* position of the top of the pelvis */
+    keypoints[SKELETON_PELVIS*2] = keypoints[SKELETON_LUMBAR*2];
+    keypoints[SKELETON_PELVIS*2+1] =
+        keypoints[SKELETON_LUMBAR*2+1] +
+        ((keypoints[SKELETON_LUMBAR*2+1]-keypoints[SKELETON_NECK*2+1])*40/100);
+
+    /* position of hips */
+    outline_points(bone_pelvis, bone_points[BONE_PELVIS],2,
+                   keypoints[SKELETON_PELVIS*2], keypoints[SKELETON_PELVIS*2+1],
+                   0, scale_width, scale_length,
+                   angle,
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &keypoints[SKELETON_LEFT_HIP*2], &keypoints[SKELETON_LEFT_HIP*2+1],
+                   &keypoints[SKELETON_RIGHT_HIP*2], &keypoints[SKELETON_RIGHT_HIP*2+1],
+                   points, &no_of_points);
+
+    /* left upper leg */
+    outline_points(bone_leg_upper, bone_points[BONE_LEG_UPPER],0,
+                   keypoints[SKELETON_LEFT_HIP*2], keypoints[SKELETON_LEFT_HIP*2+1],
+                   0, scale_width, scale_length,
+                   angle+(leg_angle*10),
+                   &keypoints[SKELETON_LEFT_KNEE*2],
+                   &keypoints[SKELETON_LEFT_KNEE*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* left lower leg 1 */
+    outline_points(bone_leg_lower1, bone_points[BONE_LEG_LOWER1],0,
+                   keypoints[SKELETON_LEFT_KNEE*2], keypoints[SKELETON_LEFT_KNEE*2+1],
+                   0, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_LEFT_ANKLE*2],
+                   &keypoints[SKELETON_LEFT_ANKLE*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* left lower leg 2 */
+    outline_points(bone_leg_lower2, bone_points[BONE_LEG_LOWER2],0,
+                   keypoints[SKELETON_LEFT_KNEE*2], keypoints[SKELETON_LEFT_KNEE*2+1],
+                   0, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_LEFT_ANKLE*2],
+                   &keypoints[SKELETON_LEFT_ANKLE*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right upper leg */
+    outline_points(bone_leg_upper, bone_points[BONE_LEG_UPPER],0,
+                   keypoints[SKELETON_RIGHT_HIP*2], keypoints[SKELETON_RIGHT_HIP*2+1],
+                   1, scale_width, scale_length,
+                   angle-(leg_angle*10),
+                   &keypoints[SKELETON_RIGHT_KNEE*2],
+                   &keypoints[SKELETON_RIGHT_KNEE*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right lower leg 1 */
+    outline_points(bone_leg_lower1, bone_points[BONE_LEG_LOWER1],0,
+                   keypoints[SKELETON_RIGHT_KNEE*2], keypoints[SKELETON_RIGHT_KNEE*2+1],
+                   1, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_RIGHT_ANKLE*2],
+                   &keypoints[SKELETON_RIGHT_ANKLE*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right lower leg 2 */
+    outline_points(bone_leg_lower2, bone_points[BONE_LEG_LOWER2],0,
+                   keypoints[SKELETON_RIGHT_KNEE*2], keypoints[SKELETON_RIGHT_KNEE*2+1],
+                   1, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_RIGHT_ANKLE*2],
+                   &keypoints[SKELETON_RIGHT_ANKLE*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* left upper arm */
+    outline_points(bone_arm_upper, bone_points[BONE_ARM_UPPER],0,
+                   keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2],
+                   keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2+1],
+                   0, scale_width, scale_length,
+                   angle+(arm_angle*10),
+                   &keypoints[SKELETON_LEFT_ELBOW*2],
+                   &keypoints[SKELETON_LEFT_ELBOW*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* left lower arm 1 */
+    outline_points(bone_arm_lower1, bone_points[BONE_ARM_LOWER1],0,
+                   keypoints[SKELETON_LEFT_ELBOW*2],
+                   keypoints[SKELETON_LEFT_ELBOW*2+1],
+                   0, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_LEFT_WRIST*2],
+                   &keypoints[SKELETON_LEFT_WRIST*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* left lower arm 2 */
+    outline_points(bone_arm_lower2, bone_points[BONE_ARM_LOWER2],0,
+                   keypoints[SKELETON_LEFT_ELBOW*2],
+                   keypoints[SKELETON_LEFT_ELBOW*2+1],
+                   0, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_LEFT_WRIST*2],
+                   &keypoints[SKELETON_LEFT_WRIST*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right upper arm */
+    outline_points(bone_arm_upper, bone_points[BONE_ARM_UPPER],0,
+                   keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2],
+                   keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
+                   1, scale_width, scale_length,
+                   angle-(arm_angle*10),
+                   &keypoints[SKELETON_RIGHT_ELBOW*2],
+                   &keypoints[SKELETON_RIGHT_ELBOW*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right lower arm 1 */
+    outline_points(bone_arm_lower1, bone_points[BONE_ARM_LOWER1],0,
+                   keypoints[SKELETON_RIGHT_ELBOW*2],
+                   keypoints[SKELETON_RIGHT_ELBOW*2+1],
+                   1, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_RIGHT_WRIST*2],
+                   &keypoints[SKELETON_RIGHT_WRIST*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* left lower arm 2 */
+    outline_points(bone_arm_lower2, bone_points[BONE_ARM_LOWER2],0,
+                   keypoints[SKELETON_RIGHT_ELBOW*2],
+                   keypoints[SKELETON_RIGHT_ELBOW*2+1],
+                   1, scale_width, scale_length,
+                   angle,
+                   &keypoints[SKELETON_RIGHT_WRIST*2],
+                   &keypoints[SKELETON_RIGHT_WRIST*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* left clavical */
+    outline_points(bone_clavical, bone_points[BONE_CLAVICAL],0,
+                   keypoints[SKELETON_LEFT_SHOULDER*2],
+                   keypoints[SKELETON_LEFT_SHOULDER*2+1],
+                   0, scale_width, scale_length,
+                   angle-1800,
+                   &keypoints[SKELETON_LEFT_COLLAR*2],
+                   &keypoints[SKELETON_LEFT_COLLAR*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right clavical */
+    outline_points(bone_clavical, bone_points[BONE_CLAVICAL],0,
+                   keypoints[SKELETON_RIGHT_SHOULDER*2],
+                   keypoints[SKELETON_RIGHT_SHOULDER*2+1],
+                   1, scale_width, scale_length,
+                   angle+1700,
+                   &keypoints[SKELETON_RIGHT_COLLAR*2],
+                   &keypoints[SKELETON_RIGHT_COLLAR*2+1],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    vertical = keypoints[SKELETON_NECK*2+1];
+    for (i = 0; i < SKELETON_VERTIBRA_RIBS; i++)
+    {
+        outline_points(bone_vertibra, bone_points[BONE_VERTIBRA],0,
+                       keypoints[SKELETON_NECK*2]+((keypoints[SKELETON_LUMBAR*2]-keypoints[SKELETON_NECK*2])*i/SKELETON_VERTIBRA_RIBS),
+                       vertical,
+                       0,
+                       (scale_width*5/10)+((scale_width*5/10)*i/SKELETON_VERTIBRA_RIBS),
+                       (scale_length*5/10)+((scale_length*5/10)*i/SKELETON_VERTIBRA_RIBS),
+                       angle,
+                       &vertibra_x, &vertibra_y,
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[1], &extra_y[1],
+                       &extra_x[2], &extra_y[2],
+                       &extra_x[3], &extra_y[3],
+                       points, &no_of_points);
+        vertical = vertibra_y;
+    }
+
+    vertical = keypoints[SKELETON_LUMBAR*2+1];
+    for (i = 0; i < SKELETON_LUMBAR_VERTIBRA; i++)
+    {
+        outline_points(bone_vertibra, bone_points[BONE_VERTIBRA],0,
+                       keypoints[SKELETON_LUMBAR*2],
+                       vertical,
+                       0, scale_width, scale_length,
+                       angle,
+                       &vertibra_x, &vertibra_y,
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[1], &extra_y[1],
+                       &extra_x[2], &extra_y[2],
+                       &extra_x[3], &extra_y[3],
+                       points, &no_of_points);
+        vertical = vertibra_y;
+    }
+    for (i = 0; i < SKELETON_LUMBAR_VERTIBRA2; i++)
+    {
+        outline_points(bone_vertibra, bone_points[BONE_VERTIBRA],0,
+                       keypoints[SKELETON_LUMBAR*2],
+                       vertical,
+                       0, scale_width*(SKELETON_LUMBAR_VERTIBRA2-i)/SKELETON_LUMBAR_VERTIBRA2,
+                       ((scale_length*2/3)*(SKELETON_LUMBAR_VERTIBRA2-i)/SKELETON_LUMBAR_VERTIBRA2),
+                       angle,
+                       &vertibra_x, &vertibra_y,
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[1], &extra_y[1],
+                       &extra_x[2], &extra_y[2],
+                       &extra_x[3], &extra_y[3],
+                       points, &no_of_points);
+        vertical = vertibra_y;
+    }
+
+    n_int knuckle_x=0, knuckle_y=0;
+    for (i = 0; i < 4; i++)
+    {
+        /* left hand */
+        outline_points(bone_hand, bone_points[BONE_HAND],0,
+                       keypoints[SKELETON_LEFT_WRIST*2]-(i*15),
+                       keypoints[SKELETON_LEFT_WRIST*2+1],
+                       0, scale_width, scale_length,
+                       angle+200-(i*400/4),
+                       &knuckle_x, &knuckle_y,
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[1], &extra_y[1],
+                       &extra_x[2], &extra_y[2],
+                       &extra_x[3], &extra_y[3],
+                       points, &no_of_points);
+
+        /* left finger */
+        outline_points(bone_finger, bone_points[BONE_FINGER],0,
+                       knuckle_x, knuckle_y,
+                       0, scale_width, scale_length,
+                       angle+400-(i*800/4),
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[1], &extra_y[1],
+                       &extra_x[2], &extra_y[2],
+                       &extra_x[3], &extra_y[3],
+                       points, &no_of_points);
+
+        /* right hand */
+        outline_points(bone_hand, bone_points[BONE_HAND],0,
+                       keypoints[SKELETON_RIGHT_WRIST*2]+((3-i)*15),
+                       keypoints[SKELETON_RIGHT_WRIST*2+1],
+                       1, scale_width, scale_length,
+                       angle+200-(i*400/4),
+                       &knuckle_x, &knuckle_y,
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[1], &extra_y[1],
+                       &extra_x[2], &extra_y[2],
+                       &extra_x[3], &extra_y[3],
+                       points, &no_of_points);
+
+        /* right finger */
+        outline_points(bone_finger, bone_points[BONE_FINGER],0,
+                       knuckle_x, knuckle_y,
+                       1, scale_width, scale_length,
+                       angle+400-(i*800/4),
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[0], &extra_y[0],
+                       &extra_x[1], &extra_y[1],
+                       &extra_x[2], &extra_y[2],
+                       &extra_x[3], &extra_y[3],
+                       points, &no_of_points);
+    }
+
+    /* left thumb */
+    outline_points(bone_finger, bone_points[BONE_FINGER],0,
+                   keypoints[SKELETON_LEFT_WRIST*2]-50,
+                   keypoints[SKELETON_LEFT_WRIST*2+1],
+                   0, scale_width, scale_length,
+                   angle-800,
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /* right thumb */
+    outline_points(bone_finger, bone_points[BONE_FINGER],0,
+                   keypoints[SKELETON_RIGHT_WRIST*2]+50,
+                   keypoints[SKELETON_RIGHT_WRIST*2+1],
+                   1, scale_width, scale_length,
+                   angle+800,
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[0], &extra_y[0],
+                   &extra_x[1], &extra_y[1],
+                   &extra_x[2], &extra_y[2],
+                   &extra_x[3], &extra_y[3],
+                   points, &no_of_points);
+
+    /*printf("no_of_points %d\n",no_of_points*2);*/
+
+    return no_of_points;
+}
 
 static void body_action_give(noble_simulation * sim, noble_being * local, noble_being * other, n_byte2 carrying)
 {
