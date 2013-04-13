@@ -54,14 +54,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-
-typedef	short	n_audio;
-typedef	double	n_double;
-typedef	double	n_float;
-
-/* macros */
-#define TWO_PI (6.2831853071795864769252867665590057683943L)
-
 /* the sound lengths vary from:
  
  (8k)  0.185 sec to
@@ -71,129 +63,7 @@ typedef	double	n_float;
  these can contain sounds or pauses
  */
 
-#define ACT_BITS      (13)
-#define ACT_BUFFER    (1<<ACT_BITS)
-#define	MAX_BUFFER    (ACT_BUFFER*4)
-
-static n_float frequency[MAX_BUFFER];
-static n_float timedomain[MAX_BUFFER];
-static n_float frequencyi[MAX_BUFFER];
-static n_float timedomaini[MAX_BUFFER];
-
-n_audio  output[MAX_BUFFER];
-
-n_uint	ReverseBits (n_uint index, n_uint power_sample)
-{
-    n_uint i = 0;
-    n_uint rev = 0;
-    while(i < power_sample){
-        rev = (rev << 1) | (index & 1);
-        index >>= 1;
-        i++;
-    }
-    return rev;
-}
-
-void fft_float (n_byte inverse, n_float * RealIn, n_float * ImagIn, n_float * RealOut, n_float * ImagOut, n_uint power_sample)
-{
-    n_uint		NumSamples = 1 << power_sample;    /* Number of bits needed to store indices */
-    n_uint		i, j, k, n;
-    n_uint		BlockSize, BlockEnd;
-    
-    n_double angle_numerator = TWO_PI;
-    n_double tr, ti;
-    n_double ar0, ar1, ar2, ai0, ai1, ai2;
-    
-    
-    if ( inverse )
-        angle_numerator = -angle_numerator;
-    
-    /*
-     **   Do simultaneous data copy and bit-reversal ordering into outputs...
-     */
-    
-	i=0;
-	while(i < NumSamples){
-		j = ReverseBits (i, power_sample);
-        RealOut[j] = RealIn[i];
-        ImagOut[j] = ImagIn[i];
-        i++;
-    }
-    
-    /*
-     **   Do the FFT itself...
-     */
-    
-    BlockEnd = 1;
-    BlockSize = 2;
-    while (BlockSize <= NumSamples)
-    {
-        n_double delta_angle = angle_numerator / (double)BlockSize;
-        n_double sm2 = sin ( -2 * delta_angle );
-        n_double sm1 = sin ( -delta_angle );
-        n_double cm2 = cos ( -2 * delta_angle );
-        n_double cm1 = cos ( -delta_angle );
-        n_double w = 2 * cm1;
-        
-		i=0;
-		
-        while(  i < NumSamples )
-        {
-            ar2 = cm2;
-            ar1 = cm1;
-            
-            ai2 = sm2;
-            ai1 = sm1;
-			
-			j=i;
-			n=0;
-            while(n < BlockEnd)
-            {
-                ar0 = w*ar1 - ar2;
-                ar2 = ar1;
-                ar1 = ar0;
-                
-                ai0 = w*ai1 - ai2;
-                ai2 = ai1;
-                ai1 = ai0;
-                
-                k = j + BlockEnd;
-                
-				tr = ar0*RealOut[k] - ai0*ImagOut[k];
-				ti = ar0*ImagOut[k] + ai0*RealOut[k];
-				
-				RealOut[k] = RealOut[j] - tr;
-                ImagOut[k] = ImagOut[j] - ti;
-                
-                RealOut[j] += tr;
-                ImagOut[j] += ti;
-                
-                j++;
-                n++;
-            }
-       		i += BlockSize;
-       	}
-        
-        BlockEnd = BlockSize;
-        BlockSize <<= 1;
-        
-    }
-    
-    /*
-     **   Need to normalize if inverse transform...
-     */
-    
-    if ( inverse )
-    {
-        double denom = (double)NumSamples;
-        
-        for ( i=0; i < NumSamples; i++ )
-        {
-            RealOut[i] /= denom;
-            ImagOut[i] /= denom;
-        }
-    }
-}
+static n_audio  output[AUDIO_FFT_MAX_BUFFER];
 
 static n_uint speak_length(n_byte character)
 {
@@ -227,21 +97,6 @@ static n_uint speak_length_total(n_string paragraph)
 		}
     } while (character != '\n' && character != 0);
     return length;
-}
-
-void speak_aiff_header(FILE * fptr, n_uint total_samples)
-{
-    n_byte header[54] = {0};
-    io_aiff_header(header);
-    io_aiff_uint(&header[4],  io_aiff_total_size(total_samples));
-    io_aiff_uint(&header[22], total_samples);
-    io_aiff_uint(&header[42], io_aiff_sound_size(total_samples));
-    fwrite(header, 54, 1, fptr);
-}
-
-static void speak_aiff_body(FILE * fptr, n_audio *samples, n_uint number_samples)
-{
-    fwrite(samples,number_samples,2,fptr);
 }
 
 const static n_int set_frequencies[24] = {
@@ -321,9 +176,9 @@ static void speak_make(n_string filename, n_string paragraph)
 {
     FILE     *out_file = 0L;
     
-    n_uint   total_length = ACT_BUFFER * speak_length_total(paragraph);
-    n_int    loop        = 0;
-    n_byte    found_character;
+    n_uint   total_length = AUDIO_FFT_MAX_BUFFER * speak_length_total(paragraph) >> 2;
+    n_int    loop         = 0;
+    n_byte   found_character;
     
     if (total_length < 1)
     {
@@ -339,21 +194,14 @@ static void speak_make(n_string filename, n_string paragraph)
         return;
     }
     
-    speak_aiff_header(out_file, total_length);
+    io_file_aiff_header(out_file, total_length);
     do
     {
-        n_uint    power_sample = (speak_length(found_character = paragraph[loop++])+ACT_BITS);
+        n_uint    power_sample = (speak_length(found_character = paragraph[loop++]) + AUDIO_FFT_MAX_BITS - 2);
         n_uint    length = 1 << power_sample;
-        n_int     division = MAX_BUFFER/length;
-        n_int     loop = 0;
-        while (loop < length)
-        {
-            frequency[loop] = 0;
-            timedomain[loop] = 0;
-            frequencyi[loop] = 0;
-            timedomaini[loop] = 0;
-            loop++;
-        }
+        n_int     division = AUDIO_FFT_MAX_BUFFER / length;
+
+        audio_clear_buffers(length);
 
 		if (found_character != '\n' && found_character != 0)
 		{
@@ -362,64 +210,40 @@ static void speak_make(n_string filename, n_string paragraph)
 			{
 				n_int local_high[8], local_low[4];
 				
-				
 				speak_freq(local_high, local_low,found_character);
-
 				
+                audio_set_frequency(local_high[0]/division, local_high[1]/division);
+				audio_set_frequency(local_high[2]/division, local_high[3]/division);
+				audio_set_frequency(local_high[4]/division, local_high[5]/division);
+				audio_set_frequency(local_high[6]/division, local_high[7]/division);
 				
-				frequency[local_high[0]/division] = local_high[1]/division;
-				frequency[local_high[2]/division] = local_high[3]/division;
-				frequency[local_high[4]/division] = local_high[5]/division;
-				frequency[local_high[6]/division] = local_high[7]/division;
-
+				audio_fft(1, power_sample);
 				
-				fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
-				
-				loop = 0;
-				while (loop < length)
-				{
-					output[loop] = timedomain[loop];
-					loop++;
-				}
+				audio_equal_output(output, length);
 
-				loop = 0;
-				while (loop < length)
-				{
-					frequency[loop] = 0;
-					timedomain[loop] = 0;
-					frequencyi[loop] = 0;
-					timedomaini[loop] = 0;
-					loop++;
-				}
+                audio_clear_buffers(length);
 
-				frequency[local_low[0]] = local_low[1]/division;
-				frequency[local_low[2]] = local_low[3]/division;
+				audio_set_frequency(local_low[0], local_low[1]/division);
+				audio_set_frequency(local_low[2], local_low[3]/division);
 
+				audio_fft(1, power_sample);
 
-				fft_float(1, frequency, frequencyi, timedomaini, timedomain, power_sample);
-
-				loop = 0;
-				while (loop < length)
-				{
-					output[loop] *= timedomain[loop];
-					loop++;
-				}
+				audio_multiply_output(output, length);
 			}
 			else
 			{
-				loop = 0;
-				while (loop < length)
-				{
-					output[loop] = 0;
-					loop++;
-				}
+				audio_clear_output(output, length);
 			}
-			speak_aiff_body(out_file, output, length);
+			io_file_aiff_body(out_file, output, length);
 		}
     } while (found_character != '\n' && found_character != 0);
     
 
-    fclose(out_file);
+    if (fclose(out_file) != 0)
+    {
+        (void)SHOW_ERROR("Failed to close speak file");
+    }
+    return;
 }
 
 void speak_out(n_string filename, n_string paragraph)

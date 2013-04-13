@@ -60,7 +60,7 @@
 
 /* the weather/time of day icons hard coded */
 
-static n_byte	icns[896] =
+static const n_byte	icns[896] =
 {
     /* sunny day */
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -132,7 +132,7 @@ static n_byte	icns[896] =
 
 /* n_byte segment = seg14[ conv[ character_value ]]; */
 
-static n_byte	conv[ 96 ] =
+static const n_byte	conv[ 96 ] =
 {
     0, 40, 41, 0, 0, 0, 0, 42, 43, 44, 38, 39, 45, 11, 46, 47, 1, 2, 3, 4, 5, 6, 7,
     8, 9, 10, 48, 49, 0, 50, 0, 51, 0, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
@@ -143,7 +143,7 @@ static n_byte	conv[ 96 ] =
 
 /* one bit per segment */
 
-static n_byte2 seg14[ 60 ] =
+static const n_byte2 seg14[ 60 ] =
 {
     0x0000, 0x3F00, 0x1800, 0x36C0, 0x3CC0, 0x19C0, 0x2DC0, 0x2FC0, 0x3800, 0x3FC0,
     0x3DC0, 0x00C0, 0x3BC0, 0x3CA1, 0x2700, 0x3C21, 0x27C0, 0x23C0, 0x2F80, 0x1BC0,
@@ -492,8 +492,8 @@ static n_byte2 draw_genetic_patch(n_byte2 * value)
 
 #define POS_HIRES(num) ((num+(4096*2))&4095)
 
-#define CONVERT_X(x)  (n_uint)((POS_HIRES((x)+co_x)) << 1)
-#define CONVERT_Y(y)  (n_uint)((POS_HIRES((y)+co_y)) << 13)
+#define CONVERT_X(x, cx)  (n_uint)((POS_HIRES((x)+cx)) )
+#define CONVERT_Y(y, cy)  (n_uint)((POS_HIRES((y)+cy)) << 12)
 
 #define CONVERT_XY(x,y)   (CONVERT_X(x) | CONVERT_Y(y))
 
@@ -624,7 +624,6 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
 static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 {
     n_byte * buf_offscr = draw_pointer(NUM_TERRAIN);
-    n_int    dim_area = dim_x * dim_y;
     
     if (buf_offscr == 0L)
     {
@@ -633,80 +632,76 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
     
     if (local_sim->select == NO_BEINGS_FOUND)
     {
-        io_erase(buf_offscr, dim_area);
+        io_erase(buf_offscr, dim_x * dim_y);
         return;
     }
     {
-        n_int       lowest_y = dim_y + 256;
-        n_byte      * combined = local_sim->highres;
+        const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
+        n_byte2      * combined = (n_byte2 *)local_sim->highres;
         noble_being * loc_being = &(local_sim->beings[local_sim->select]);
-        n_int turn = GET_F(loc_being);
-        n_int co_x = APESPACE_TO_HR_MAPSPACE(GET_X(loc_being));
-        n_int co_y = APESPACE_TO_HR_MAPSPACE(GET_Y(loc_being));
+        const n_int turn = GET_F(loc_being);
+        const n_int co_x = APESPACE_TO_HR_MAPSPACE(GET_X(loc_being));
+        const n_int co_y = APESPACE_TO_HR_MAPSPACE(GET_Y(loc_being));
 
         /* get the local cos value for the turn angle */
-        n_int valc = (new_sd[((turn) + 128) & 255] / 105);
+        const n_int valc = (new_sd[((turn) + 128) & 255] / 105);
         /* get the local sin value for the turn angle */
-        n_int vals = (new_sd[((turn) + 128 + 64) & 255] / 105);
+        const n_int vals = (new_sd[((turn) + 128 + 64) & 255] / 105);
 
-        n_int valc2 = (valc << 1);
-        n_int vals2 = (vals << 1);
+        const n_int valc2 = (valc << 1);
+        const n_int vals2 = (vals << 1);
+        n_byte * loc_offscr = buf_offscr;
 
         /* start at the left-most row */
         n_int scrx = (0 - (dim_x >> 1));
-        n_byte * loc_offscr = buf_offscr;
 
+        const n_int   lowest_s = ((vals * (((lowest_y)) - dim_y)));
+        const n_int   lowest_c = ((valc * (((lowest_y)) - dim_y)));
+        
         /* find the central map point */
-        n_int flatval = combined[CONVERT_X(2048) | CONVERT_Y(2048)];
+        n_int flatval = combined[CONVERT_X(2048, co_x) | CONVERT_Y(2048, co_y)] & 255;
+        
+        n_int const_lowdiv2;
 
         if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {
             flatval = WATER_MAP;   /*    put it on water level */
         }
+        
+        const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
+        
         while (scrx < (dim_x - (dim_x >> 1)))   /* repeat until the right-most row is reached */
         {
             /* take the very bottom pixel */
             n_int pixy = (scrx + (dim_x >> 1)) + ((dim_y - 1) * dim_x );
-            /* start with a map point which is below/off the screen */
-            n_int scry = (((lowest_y*dim_y)/256) >> 1) + flatval;
-            /* rotated and add offset (which will be &ed off) */
-            n_int big_x = ((vals * (((lowest_y*dim_y)/256) - dim_y)) + (scrx * valc));
-            /* rotated and sub offset (subtracted further down) */
-            n_int big_y = ((valc * (((lowest_y*dim_y)/256) - dim_y)) - (scrx * vals));
             
-            n_uint check_change = CONVERT_X((big_x >> 8)) | CONVERT_Y((big_y >> 8));
+            n_int actual = (dim_y - 1);
 
-            n_byte z00   = combined[check_change];
-            n_byte col00 = combined[check_change|1];
-
-            while (pixy > -1)
+            /* start with a map point which is below/off the screen */
+            n_int scry = const_lowdiv2;
+            /* rotated and add offset (which will be &ed off) */
+            n_int big_x = lowest_s + (scrx * valc);
+            /* rotated and sub offset (subtracted further down) */
+            n_int big_y = lowest_c - (scrx * vals);
+            
+            while(actual > -1)
             {
-                /* the point the pixel y counter needs to reach - relative to flatval through scry */
-                n_int sv_a = (scry - z00) * dim_x;
-
-                if (sv_a < -1)       /* if this point is less than minus one, make it minus one */
+                const n_uint check_change = CONVERT_X((big_x >> 8),co_x) | CONVERT_Y((big_y >> 8), co_y);
+                const n_byte2  value = combined[check_change];
+                const n_int    z00 = value & 255;
+                const n_byte   col00   = value >> 8;
+                n_int aval = (scry - z00);
+                if (aval < -1) aval = -1;
+                while (actual > aval)
                 {
-                    sv_a = -1;       /*    ie don't overshoot */
-                }
-                while ( pixy > sv_a ) /* 38.1% */
-                {
-                    /* fill up to sv_a -1, with colour mapz (if below, do nothing) */
-                    /* this could be replaced with a colour/texture map */
-                    loc_offscr[pixy] = col00; /* 12.7% */
+                    loc_offscr[pixy] = col00;
                     pixy -= dim_x;
+                    actual--;
                 }
                 scry--;           /* next map point from screen value */
                 big_x -= vals2;
                 big_y -= valc2;
-
-                if (pixy > -1)
-                {
-                    check_change = CONVERT_X((big_x >> 8)) | CONVERT_Y((big_y >> 8)); /* 4.4% */
-                    z00   = combined[check_change];
-                    col00 = combined[check_change|1];
-                }
             }
-
             scrx++;               /* next column */
         }
     }
@@ -729,17 +724,17 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
  */
 static void	draw_meters(noble_simulation * local_sim)
 {
-    n_land  * loc_land  =   local_sim->land;
-    noble_being * loc_being = &(local_sim->beings[local_sim->select]);
-    n_pixel 	* local_draw = &pixel_overlay;
-    n_byte		* local_info = draw_pointer(NUM_TERRAIN);
-    n_byte 		* local_icon;
-    n_int		  ha1 = 6;
-    n_int		  ha2 = 0;
-    n_int		  hr = 0;
-    n_int		  pntx = 0;
-    n_int		  pnty;
-    n_join		  local_kind;
+    n_land       * loc_land  =   local_sim->land;
+    noble_being  * loc_being = &(local_sim->beings[local_sim->select]);
+    n_pixel 	 * local_draw = &pixel_overlay;
+    n_byte		 * local_info = draw_pointer(NUM_TERRAIN);
+    const n_byte * local_icon;
+    n_int		   ha1 = 6;
+    n_int		   ha2 = 0;
+    n_int		   hr = 0;
+    n_int		   pntx = 0;
+    n_int		   pnty;
+    n_join		   local_kind;
 
     if (local_info == 0L)
     {
@@ -1571,13 +1566,15 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
     sim_draw_thread_start();
 #endif
         
-    draw_apes(local_sim, window);    // 8
+    draw_apes(local_sim, window);    /* 8 */
 
     if (window == NUM_TERRAIN)
     {
+
         draw_terrain(local_sim,dim_x, dim_y);
         draw_meters(local_sim);
-        draw_errors(local_sim); // 12
+        draw_errors(local_sim); /* 12 */
+        
         if (toggle_brain)
         {
             draw_brain(local_sim,dim_x, dim_y);
@@ -1593,7 +1590,7 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
 #ifdef WEATHER_ON
         if (toggle_weather)
         {
-           draw_weather(local_sim); // 10 
+           draw_weather(local_sim); /* 10 */
         }
 #endif
     }

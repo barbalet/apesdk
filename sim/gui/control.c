@@ -64,17 +64,19 @@
 
 /* shows which cursor is expected based on the window the mouse is over and the mouse location */
 
-#define CURSOR_NULL 0
+enum cursor_type
+{
+    CURSOR_NULL          = 0,
+    CURSOR_MOVE_BACKWARD = 1,
+    CURSOR_MOVE_FORWARD  = 2,
+    CURSOR_MOVE_LEFT     = 3,
+    CURSOR_MOVE_RIGHT    = 4,
 
-#define CURSOR_MOVE_BACKWARD  1
-#define CURSOR_MOVE_FORWARD   2
-#define CURSOR_MOVE_LEFT      3
-#define CURSOR_MOVE_RIGHT     4
+    CURSOR_ROTATE_UP     = 5,
+    CURSOR_ROTATE_DOWN   = 6,
 
-#define CURSOR_ROTATE_UP      5
-#define CURSOR_ROTATE_DOWN    6
-
-#define CURSOR_SELECT         7
+    CURSOR_SELECT        = 7
+};
 
 static n_int toggle_pause = 0;
 

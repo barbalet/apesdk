@@ -885,7 +885,7 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
 
 }
 
-void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
+static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
 {
     n_int loop;
     n_byte * external_bc = GET_BRAINCODE_EXTERNAL((noble_simulation*)ptr, local);
@@ -1070,7 +1070,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     being_state_description(local_being->state, status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
-    sprintf(str, "\n=== %s ===\n%s\nGeneration %d:%d\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %d %d\nHonor: %d\t\tHeight: %d\nFacing: %d\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
+    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %d %d\nHonor: %d\t\tHeight: %d\nFacing: %d\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
 			(int)local_being->generation[GENERATION_MATERNAL],
 			(int)local_being->generation[GENERATION_PATERNAL],

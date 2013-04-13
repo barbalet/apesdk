@@ -87,20 +87,22 @@
 #define	B_N_LH (br[(loc+F_X)&B_WR]+br[(loc+F_Y)&B_WR]+br[(loc+F_Z)&B_WR])
 #define	B_N_UH (br[(loc+B_Z)&B_WR]+br[(loc+B_Y)&B_WR]+br[(loc+B_X)&B_WR])
 
-
 void brain_cycle(n_byte * local, n_byte2 * constants)
 {
-    static n_byte frame[B_SIZE];
-    n_byte  *br = local, *obr = &local[B_SIZE];
-    n_int  l_a = constants[0], l_c = constants[2];
-    n_int  l_b = constants[1] + l_c, loc = 0;
+    n_byte br[B_SIZE];
+    n_byte  *bract = local, *obr = &local[B_SIZE];
+    n_int  l_a = constants[0];
+    n_int  l_c = constants[2];
+    n_int  l_b = constants[1] + l_c;
+    n_int  loc = 0;
     n_int  average;
     n_int  obr_tmp;
     n_int  br_tmp;
+    n_int  count = F_Z;
+    
+    io_copy(bract, br, B_SIZE);
 
-    io_copy(br, frame, B_SIZE);
-
-    while (loc < F_Z)
+    do
     {
         average = (B_P_LH + B_N_UH);
         br_tmp = br[loc];
@@ -114,29 +116,33 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         average += br_tmp;
 
         br[loc++] = (n_byte)(average>>10);
-    }
-        
-    while (loc < B_Z)
+        count--;
+                
+    }while(count);
+    count = B_Z - F_Z;
+    do
     {
         average =  br[loc-F_Z];
         average += br[loc-F_Y];
         average += br[loc-F_X];
-        br_tmp = br[loc];
+        
+        br_tmp = br[loc]; 
+        
         average += br[loc+F_X];
         average += br[loc+F_Y];
         average += br[loc+F_Z];
+        
         obr_tmp = obr[loc];
-
         average *= l_a;
         obr_tmp *= l_c;
-
-        br_tmp *= l_b;        
+        br_tmp *= l_b;
         br_tmp -= obr_tmp;
         average += br_tmp;
-        
         br[loc++] = (n_byte)(average>>10);
-    }
-    while (loc < B_SIZE)
+        count--;
+    }while (count);
+    count = F_Z;
+    do
     {
         average = B_P_UH;
         br_tmp = br[loc];
@@ -150,9 +156,11 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         average += br_tmp;
 
         br[loc++] = (n_byte)(average>>10);
-    }
+        count--;
+    }while (count);
 
-    io_copy(frame, obr, B_SIZE);
+    io_copy(bract, obr, B_SIZE);
+    io_copy(br, bract, B_SIZE);
 
 }
 
@@ -460,14 +468,11 @@ void braincode_statistics(noble_simulation * sim)
 {
     n_int i,j,k,instruction;
     noble_being * local_being;
-    noble_indicators * indicators;
     n_uint sensors = 0;
     n_uint actuators = 0;
     n_uint operators = 0;
     n_uint conditionals = 0;
     n_uint data = 0;
-
-    indicators = &(sim->indicators_base[sim->indicator_index]);
 
     for (i=0; i<(n_int)(sim->num); i++)
     {
@@ -510,11 +515,23 @@ void braincode_statistics(noble_simulation * sim)
     }
     if (sim->num>0)
     {
-        indicators->average_sensors = (n_byte2)(sensors*10/sim->num);
-        indicators->average_actuators = (n_byte2)(actuators*10/sim->num);
-        indicators->average_operators = (n_byte2)(operators*10/sim->num);
-        indicators->average_conditionals = (n_byte2)(conditionals*10/sim->num);
-        indicators->average_data = (n_byte2)(data*10/sim->num);
+        INDICATOR_SET(sim, IT_AVERAGE_SENSORS, sensors);
+        INDICATOR_SET(sim, IT_AVERAGE_ACTUATORS, actuators);
+        INDICATOR_SET(sim, IT_AVERAGE_OPERATORS, operators);
+        INDICATOR_SET(sim, IT_AVERAGE_CONDITIONALS, conditionals);
+        INDICATOR_SET(sim, IT_AVERAGE_DATA, data);
+        
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_SENSORS, 10);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_ACTUATORS, 10);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_OPERATORS, 10);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_CONDITIONALS, 10);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_DATA, 10);
+                
+        INDICATOR_NORMALIZE(sim, IT_AVERAGE_SENSORS);
+        INDICATOR_NORMALIZE(sim, IT_AVERAGE_ACTUATORS);
+        INDICATOR_NORMALIZE(sim, IT_AVERAGE_OPERATORS);
+        INDICATOR_NORMALIZE(sim, IT_AVERAGE_CONDITIONALS);
+        INDICATOR_NORMALIZE(sim, IT_AVERAGE_DATA);
     }
 }
 
@@ -941,7 +958,9 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
                 (!(meeter_being->state&BEING_STATE_SPEAKING)) &&
                 (meeter_being->shout[SHOUT_HEARD]>0))
         {
-            GET_IN(sim).average_listens++;
+            
+            INDICATOR_INC(sim, IT_AVERAGE_LISTENS);
+
 
             return meeter_being->shout[SHOUT_HEARD];
         }
@@ -1397,7 +1416,7 @@ void brain_dialogue(
 
                 if (meeter_being->brainprobe[n].frequency != f)
                 {
-                    GET_IN(sim).average_brainprobe_activity++;
+                    INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
                 }
                 meeter_being->brainprobe[n].frequency = f;
                 break;
@@ -1415,7 +1434,7 @@ void brain_dialogue(
                 n_byte typ = IS_CONST1 & 1;
                 if (meeter_being->brainprobe[n].type != typ)
                 {
-                    GET_IN(sim).average_brainprobe_activity++;
+                    INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
                 }
                 meeter_being->brainprobe[n].type = typ;
                 break;
@@ -1427,7 +1446,7 @@ void brain_dialogue(
 
                 if (meeter_being->brainprobe[n].address != adr)
                 {
-                    GET_IN(sim).average_brainprobe_activity++;
+                    INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
                 }
                 meeter_being->brainprobe[n].address = adr;
                 break;
@@ -1453,7 +1472,8 @@ void brain_dialogue(
                     meeter_being->shout[SHOUT_VOLUME] = pspace[0];
                     /* type of message */
                     meeter_being->shout[SHOUT_CONTENT] = msg;
-                    GET_IN(sim).average_shouts++;
+                    INDICATOR_INC(sim, IT_AVERAGE_SHOUTS);
+
                 }
                 break;
             }
@@ -1475,8 +1495,8 @@ void brain_dialogue(
                 n_int n = pspace[0] % BRAINCODE_PROBES;
                 n_byte offset = IS_CONST1;
                 if (meeter_being->brainprobe[n].offset != offset)
-                {
-                    GET_IN(sim).average_brainprobe_activity++;
+                {                    
+                    INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
                 }
 
                 meeter_being->brainprobe[n].offset = offset;
@@ -1502,7 +1522,7 @@ void brain_dialogue(
 
                 if (meeter_being->brainprobe[n].position != p)
                 {
-                    GET_IN(sim).average_brainprobe_activity++;
+                    INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
                 }
 
                 meeter_being->brainprobe[n].position = p;

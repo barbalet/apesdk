@@ -49,32 +49,29 @@
 // per-window timer function, basic time based animation preformed here
 - (void)animationTimer
 {
-    shared_cycle(CFAbsoluteTimeGetCurrent(), fIdentification);
+    shared_cycle_no_draw(CFAbsoluteTimeGetCurrent(), fIdentification);
     [self setNeedsDisplay];
 }
 
 - (void) drawRect:(CGRect)rect;
 {
     CGContextRef  context = UIGraphicsGetCurrentContext();
-    int             dimX = 512;
-    int             dimY = 512;
-    int             dimension1 = 511;
-    int             dimensionBin = 9;
+    int             dimensionX = rect.size.width;
+    int             dimensionY = rect.size.height;
     int             ly = 0;
     int             loop = 0;
-    unsigned char * indexLocalX;
-    unsigned char * index;
+    int             loopColors=0;
+
+    unsigned char * index = shared_draw(fIdentification);
     unsigned short fit[256 * 3];
-    int            loopColors=0;
-    int localHeight = [self bounds].size.height;
 
     CGContextSaveGState(context);
 
-    index = shared_draw(fIdentification);
-
-    if (index == 0L) return;
-
+    shared_cycle_really_draw(fIdentification, dimensionX, dimensionY);
+    
     shared_timeForColor(fit, fIdentification);
+    
+    if (index == 0L) return;
 
     while(loopColors < 256)
     {
@@ -86,43 +83,19 @@
 
         loopColors++;
     }
-
-    if (localHeight == 256)
-    {
-        dimX = 256;
-        dimY = 256;
-        dimension1 = 255;
-        dimensionBin = 8;
-    }
-
-    if (localHeight == 768)
-    {
-        dimX = 1024;
-        dimY = 768;
-        dimension1 = 767;
-        dimensionBin = 10;
-    }
-    
-    if (localHeight == 1024)
-    {
-        dimX = 1024;
-        dimY = 768;
-        dimension1 = 767;
-        dimensionBin = 10;
-        
-    }
     
     loop = 0;
-    while(ly < dimY)
+    while(ly < dimensionY)
     {
-        int lx = 0;
-        indexLocalX = &index[((dimension1 - ly)<<dimensionBin)];
-        while(lx < dimX)
+        n_int    lx = 0;
+        n_byte * indexLocalX = &index[(dimensionY-ly-1)*dimensionX];
+        while(lx < dimensionX)
         {
             offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
         }
         ly++;
     }
+    
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
     if ( local_image )
     {
@@ -193,7 +166,7 @@
     int localHeight = [self bounds].size.height;
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 
-    fIdentification = shared_init(localHeight, 256, 768, CFAbsoluteTimeGetCurrent());
+    fIdentification = shared_init(localHeight == 512, CFAbsoluteTimeGetCurrent());
     
     switch(localHeight)
     {

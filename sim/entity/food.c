@@ -252,7 +252,7 @@ n_int food_eat(
     n_byte * food_type,
     noble_being * local_being)
 {
-    n_int energy = 0, max_energy = 0;
+    n_int energy = BEING_DEAD, max_energy = BEING_DEAD;
     *food_type = FOOD_VEGETABLE;
     if (az > TIDE_MAX)
     {

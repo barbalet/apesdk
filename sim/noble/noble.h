@@ -45,7 +45,7 @@
 #undef   NEW_OPENGL_ENVIRONMENT
 
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
-#undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output */
+/*#undef   COMMAND_LINE_DEBUG        Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
 #undef   SKIM_TO_BRIANCODE        /* Skims the interpret stream to braincode printf output currently - only with lance */
 
@@ -113,6 +113,26 @@ typedef	long long			n_int;
 
 #endif
 
+typedef	short	n_audio;
+
+#define AUDIO_FFT_MAX_BITS      (15)
+#define AUDIO_FFT_MAX_BUFFER    (1<<AUDIO_FFT_MAX_BITS)
+
+void   audio_fft(n_byte inverse, n_uint power_sample);
+void   audio_clear_buffers(n_uint length);
+void   audio_clear_output(n_audio * audio, n_uint length);
+
+void   audio_equal_output(n_audio * audio, n_uint length);
+void   audio_equal_input(n_audio * audio, n_uint length);
+
+void   audio_multiply_output(n_audio * audio, n_uint length);
+void   audio_set_frequency(n_uint entry, n_uint value);
+n_uint audio_power(n_audio * audio, n_uint length);
+void   audio_noise_reduction(n_uint point_squared, n_uint length);
+n_uint audio_max(n_audio * audio, n_uint length);
+
+void   audio_combine(n_audio * master, n_audio * secondary, n_uint length);
+
 /*! @struct
 @field signature The program signature defined as NOBLE_APE_SIGNATURE
 through the Noble Ape Simulation file handling etc.
@@ -162,13 +182,17 @@ typedef	struct
 noble_file_entry;
 
 /* include externally, if needed */
-#define	FILE_TYPE_BYTE			0x01
-#define	FILE_TYPE_BYTE2			0x02
-#define FILE_TYPE_BYTE_EXT		0x03
 
-#define	FILE_TYPE_PACKED		0x05
 
 #define FILE_COPYRIGHT      0x00
+
+enum file_element_type
+{
+    FILE_TYPE_BYTE		= 0x01,
+    FILE_TYPE_BYTE2		= 0x02,
+    FILE_TYPE_BYTE_EXT	= 0x03,
+    FILE_TYPE_PACKED	= 0x05
+};
 
 #define FILE_INCL(num)      ((num) & 0xf0)
 #define FILE_KIND(num)      ((num) & 0x0f)
@@ -316,10 +340,12 @@ const static n_int	new_sd[256] =
 #define VECT_X(f)         	(OLD_SD_NEW_SD(((f)) + 64))
 #define VECT_Y(f)         	(OLD_SD_NEW_SD((f)))
 
-#define	TERRAIN_WINDOW_WIDTH			(2048)
-#define	TERRAIN_WINDOW_HEIGHT			(1536)
-
-#define TERRAIN_WINDOW_AREA			(TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
+enum window_information
+{
+    TERRAIN_WINDOW_WIDTH		= (2048),
+    TERRAIN_WINDOW_HEIGHT       = (1536),
+    TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
+};
 
 typedef enum
 {
@@ -428,7 +454,7 @@ static const n_ae_error apescript_errors[]=
     {AE_INPUT_VARIABLE_WITHOUT_EQUALS,     "Input variable without equals",    "All variables set require an equals following the variable."},
     {AE_ASSIGN_VALUE_FAILED,               "Assign value failed",              "Something is wrong with the variable set by an equality."},
     {AE_UNKNOWN_SYNTAX_FROM_INTERPRET,     "Unknown syntax (from interpret)",  "Syntax is incorrect"},
-    {AE_NO_MAIN_CODE,                      "No main code",                     "APeScript requires a main function."},
+    {AE_NO_MAIN_CODE,                      "No main code",                     "ApeScript requires a main function."},
 
     {AE_NO_ERROR, 0L, 0L}
 };
@@ -460,6 +486,7 @@ void  vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 n_uint  math_hash(n_byte * values, n_uint length);
 void    math_bilinear_512_4096(n_byte * side512, n_byte * data);
 n_uint  math_newton_root(n_uint squ);
+n_uint  math_root(n_uint squ);
 n_byte  math_turn_towards(n_int px, n_int py, n_byte fac, n_byte turn);
 n_byte2 math_random(n_byte2 * local);
 void    math_random3(n_byte2 * local);
@@ -477,7 +504,6 @@ n_uint     io_aiff_uint_out(n_byte * buffer);
 n_uint     io_aiff_total_size(n_uint total_samples);
 n_uint     io_aiff_sound_size(n_uint total_samples);
 n_int      io_aiff_sample_size(n_uint total_size);
-n_int      io_aiff_header_check_length(n_byte * header);
 
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);
@@ -540,7 +566,11 @@ n_int          file_chain_read_validate(n_string name, n_file_chain *initial);
 
 void           file_chain_bin_name(n_string original, n_string bin_file);
 
-n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_function);
+void       io_file_aiff_header(void * fptr, n_uint total_samples);
+
+void       io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples);
+
+n_int      io_file_aiff_header_check_length(void * fptr);
 
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);
@@ -779,10 +809,10 @@ enum SYNTAX_ADDITIONAL_BRAINCODE
 
 #define	CODE_VALUE_REQUIRED(num)	(((num) == '=' || (num) == 'n') || ((num) == 't'))
 
-#define	SIZEOF_NUMBER_WRITE      2
+#define	SIZEOF_NUMBER_WRITE      (sizeof(n_int))
 
-#define	INT_TO_BYTES(byt,num)	(byt)[0] = (n_byte)(((num)&255)); (byt)[1] = (n_byte)(((num)>>8)&255)
-#define	BYTES_TO_INT(byt)		((byt)[0] | ((byt)[1] << 8))
+void io_int_to_bytes(n_int value, n_byte * bytes);
+n_int io_bytes_to_int(n_byte * bytes);
 
 #define	VARIABLE_INPUT(num,code)		((num)>((code)->input_greater))
 #define	VARIABLE_SPECIAL(num,code)	    ((num)<((code)->special_less))
@@ -795,7 +825,7 @@ enum SYNTAX_ADDITIONAL_BRAINCODE
 #define	VARIABLE_MAX			256
 
 #define	BRACES_MAX			    16
-#define SIZE_OF_EVALUATE	    8  /* (tA=XtB) */
+#define SIZE_OF_EVALUATE	    (SIZEOF_NUMBER_WRITE+SIZEOF_NUMBER_WRITE+1)  /* (tA=XtB) */
 
 #define CYCLE_COUNT_RESET	    4096
 

@@ -34,8 +34,8 @@
  ****************************************************************/
 
 /*NOBLEMAKE DEL=""*/
-#ifndef _NOBLEAPE_UNIVERSE_H_
-#define _NOBLEAPE_UNIVERSE_H_
+#ifndef NOBLEAPE_UNIVERSE_H
+#define NOBLEAPE_UNIVERSE_H
 /*NOBLEMAKE END=""*/
 
 /*NOBLEMAKE VAR=""*/
@@ -473,19 +473,22 @@ enum BODY_INVENTORY_TYPES
     INVENTORY_SIZE
 };
 
-#define INVENTORY_CHILD        1
-#define INVENTORY_WOUND        2
-#define INVENTORY_GROOMED      4
-#define INVENTORY_BRANCH       8
-#define INVENTORY_ROCK         16
-#define INVENTORY_SHELL        32
-#define INVENTORY_TWIG         64
-#define INVENTORY_NUT          128
-#define INVENTORY_NUT_CRACKED  256
-#define INVENTORY_GRASS        512
-#define INVENTORY_SCRAPER      1024
-#define INVENTORY_SPEAR        2048
-#define INVENTORY_FISH         4096
+enum inventory_type
+{
+    INVENTORY_CHILD = 1,
+    INVENTORY_WOUND = 2,
+    INVENTORY_GROOMED = 4,
+    INVENTORY_BRANCH = 8,
+    INVENTORY_ROCK = 16,
+    INVENTORY_SHELL = 32,
+    INVENTORY_TWIG = 64,
+    INVENTORY_NUT = 128,
+    INVENTORY_NUT_CRACKED = 256,
+    INVENTORY_GRASS = 512,
+    INVENTORY_SCRAPER = 1024,
+    INVENTORY_SPEAR = 2048,
+    INVENTORY_FISH = 4096
+};
 
 #define VALUABLE_OBJECT    (INVENTORY_NUT & INVENTORY_SHELL)
 
@@ -539,15 +542,19 @@ enum social_action_type
 #define METRES_TO_APESPACE(m)   (m*m*80000)
 
 /* shouting */
-#define SHOUT_BYTES	 6
 #define SHOUT_RANGE      METRES_TO_APESPACE(50)
 #define SHOUT_REFRACTORY 10
-#define SHOUT_CONTENT    0
-#define SHOUT_HEARD      1
-#define SHOUT_CTR        2
-#define SHOUT_VOLUME     3
-#define SHOUT_FAMILY0    4
-#define SHOUT_FAMILY1    5
+
+enum shout_elements
+{
+    SHOUT_CONTENT = 0,
+    SHOUT_HEARD,
+    SHOUT_CTR,
+    SHOUT_VOLUME,
+    SHOUT_FAMILY0,
+    SHOUT_FAMILY1,
+    SHOUT_BYTES
+};
 
 /* maximum bytes in a braincode program */
 #define BRAINCODE_SIZE                    128
@@ -565,8 +572,12 @@ enum social_action_type
 #define BRAINCODE_CONSTANT0_BIT		  (64)
 #define BRAINCODE_CONSTANT1_BIT		  (128)
 
-#define BRAINCODE_INTERNAL                1
-#define BRAINCODE_EXTERNAL                0
+
+enum braincode_locations
+{
+    BRAINCODE_EXTERNAL = 0,
+    BRAINCODE_INTERNAL
+};
 
 /* Number of columns to display when showing the braincode on the console */
 #define BRAINCODE_DISPLAY_COLUMNS         3
@@ -656,8 +667,11 @@ enum BRAINCODE_COMMANDS
 #define ANECDOTE_AFFECT_MUTATION_RATE  5000
 
 /* used in the social graph */
-#define BEING_MEETER 0  /* the first person, I/me */
-#define BEING_MET    1  /* the second person, You */
+enum being_interaction_social
+{
+    BEING_MEETER = 0,  /* the first person, I/me */
+    BEING_MET          /* the second person, You */
+};
 
 /* number of days after which social graph entries may be forgotten */
 #define SOCIAL_FORGET_DAYS      10
@@ -796,17 +810,23 @@ enum EPISODIC_EVENTS
 #define GOAL_RADIUS         40000
 
 /* different types of goal */
-#define GOAL_NONE           0
-#define GOAL_LOCATION       1
-#define GOAL_MATE           2
+enum goal_types
+{
+    GOAL_NONE           = 0,
+    GOAL_LOCATION       = 1,
+    GOAL_MATE           = 2
+};
 
-#define DRIVES              4    /* number of biological drives */
 #define DRIVES_MAX          255  /* maximum value of each drive */
-#define DRIVE_HUNGER        0
-#define DRIVE_SOCIAL        1
-#define DRIVE_FATIGUE       2
-#define DRIVE_SEX           3
 
+enum drives_definition
+{
+    DRIVE_HUNGER = 0,
+    DRIVE_SOCIAL,
+    DRIVE_FATIGUE,
+    DRIVE_SEX,
+    DRIVES   /* number of biological drives */
+};
 
 /* honor multiplier used to calculate the probability of a female mating */
 #define MATING_PROB         12
@@ -902,13 +922,17 @@ enum
 
 /* maximum energy obtainable from different types of food */
 
-#define ENERGY_GRASS                50
-#define ENERGY_BUSH                 100
-#define ENERGY_FRUIT                100
-#define ENERGY_SEAWEED              30
-#define ENERGY_SHELLFISH            300
-#define ENERGY_NUT                  200
-#define ENERGY_FISH                 600
+
+enum energy_types
+{
+    ENERGY_GRASS               = 50,
+    ENERGY_BUSH                = 100,
+    ENERGY_FRUIT               = 100,
+    ENERGY_SEAWEED             = 30,
+    ENERGY_SHELLFISH           = 300,
+    ENERGY_NUT                 = 200,
+    ENERGY_FISH                = 600
+};
 
 /* a maximum generation number to prevent overflows */
 #define MAX_GENERATION              4294967294
@@ -916,7 +940,8 @@ enum GENERATION_NUM
 {
 	GENERATION_MATERNAL = 0,
 	GENERATION_PATERNAL,
-	GENERATION_FATHER
+	GENERATION_FATHER,
+    GENERATION_TOTAL
 };
 
 /* speed of running away */
@@ -955,33 +980,39 @@ enum GENERATION_NUM
   ((enjoyment)+(interest)-(anger)-(disgust)-(dissmell)-(distress)-(fear)-(shame))
 
 /* Affect values are composed from primitives */
-#define AFFECT_MATE                 COMPOSITE_AFFECT(1000,0,0,      0,0,0,       0,0,0)
-#define AFFECT_BIRTH                COMPOSITE_AFFECT(1500,0,1000,   0,100,100,   200,200,50)
-#define AFFECT_CARRYING             COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0)
-#define AFFECT_CARRIED              COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0)
-#define AFFECT_SUCKLING             COMPOSITE_AFFECT(500,0,0,       0,0,0,       0,0,0)
-#define AFFECT_CHAT                 COMPOSITE_AFFECT(0,100,0,       0,0,0,       0,0,0)
-#define AFFECT_GROOM                COMPOSITE_AFFECT(50,50,0,       0,0,0,       0,0,0)
-#define AFFECT_SEEK_MATE            COMPOSITE_AFFECT(0,600,0,       0,0,0,       0,0,0)
-#define AFFECT_SQUABBLE_VICTOR      COMPOSITE_AFFECT(1100,0,100,    0,0,0,       100,0,0)
-#define AFFECT_SQUABBLE_VANQUISHED  COMPOSITE_AFFECT(0,0,100,       200,0,0,     600,100,100)
-#define AFFECT_WHACKED              COMPOSITE_AFFECT(0,0,100,       20,0,0,      20,20,40)
-#define AFFECT_HURL                 COMPOSITE_AFFECT(0,0,0,         100,0,0,     0,0,0)
-#define AFFECT_HUGGED               COMPOSITE_AFFECT(100,0,0,       0,0,0,       0,0,0)
-#define AFFECT_PRODDED              COMPOSITE_AFFECT(0,0,0,         0,0,0,       5,0,5)
-#define AFFECT_RECEIVE              COMPOSITE_AFFECT(25,25,0,       0,0,0,       0,0,0)
-#define AFFECT_FISH                 COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0)
-#define AFFECT_SMILED               COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0)
-#define AFFECT_GLOWER               COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0)
 
+enum affect_type
+{
+    AFFECT_MATE                 = COMPOSITE_AFFECT(1000,0,0,      0,0,0,       0,0,0),
+    AFFECT_BIRTH                = COMPOSITE_AFFECT(1500,0,1000,   0,100,100,   200,200,50),
+    AFFECT_CARRYING             = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
+    AFFECT_CARRIED              = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
+    AFFECT_SUCKLING             = COMPOSITE_AFFECT(500,0,0,       0,0,0,       0,0,0),
+    AFFECT_CHAT                 = COMPOSITE_AFFECT(0,100,0,       0,0,0,       0,0,0),
+    AFFECT_GROOM                = COMPOSITE_AFFECT(50,50,0,       0,0,0,       0,0,0),
+    AFFECT_SEEK_MATE            = COMPOSITE_AFFECT(0,600,0,       0,0,0,       0,0,0),
+    AFFECT_SQUABBLE_VICTOR      = COMPOSITE_AFFECT(1100,0,100,    0,0,0,       100,0,0),
+    AFFECT_SQUABBLE_VANQUISHED  = COMPOSITE_AFFECT(0,0,100,       200,0,0,     600,100,100),
+    AFFECT_WHACKED              = COMPOSITE_AFFECT(0,0,100,       20,0,0,      20,20,40),
+    AFFECT_HURL                 = COMPOSITE_AFFECT(0,0,0,         100,0,0,     0,0,0),
+    AFFECT_HUGGED               = COMPOSITE_AFFECT(100,0,0,       0,0,0,       0,0,0),
+    AFFECT_PRODDED              = COMPOSITE_AFFECT(0,0,0,         0,0,0,       5,0,5),
+    AFFECT_RECEIVE              = COMPOSITE_AFFECT(25,25,0,       0,0,0,       0,0,0),
+    AFFECT_FISH                 = COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0),
+    AFFECT_SMILED               = COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0),
+    AFFECT_GLOWER               = COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0)
+};
 /* ------- ------- ------- GENETICS FOR THE NOBLE APES (BETA) ------- ------- ------- */
 
 typedef n_c_uint n_genetics;
 
-#define MUTATION_MATERNAL           0
-#define MUTATION_PATERNAL           1
-#define MUTATION_MATERNAL_DUPLICATE 2
-#define MUTATION_PATERNAL_DUPLICATE 3
+enum mutation_type
+{
+    MUTATION_MATERNAL = 0,
+    MUTATION_PATERNAL,
+    MUTATION_MATERNAL_DUPLICATE,
+    MUTATION_PATERNAL_DUPLICATE
+};
 
 #define DIPLOID(parent1,parent2)    ((parent1)|((parent2)<<16))
 #define CHROMOSOME_FROM_MOTHER(ch)  (((ch)>>16)&65535)
@@ -1269,69 +1300,57 @@ noble_immune_system;
 
 #endif
 
-/*! @struct
- @field population size of the population
- @field parasites number of parasites
- @field population_density population numbers in different areas of the map
- @field average_age_days average age in days
- @field average_mobility average movement
- @field average_energy average energy per being
- @field average_energy_input average energy increase
- @field average_energy_output average energy used
- @field average_amorousness average attraction value
- @field average_cohesion average friend_or_foe value
- @field average_familiarity average familiarity value
- @field average_social_links average number of social links (x100)
- @field average_antigens average number of antigens
- @field average_antibodies average number of antibodies
- @field average_chat average number of chat events
- @field drownings number of drowning events
- @field ideology_sd standard deviation of the ideosphere
- @field genetics_sd standard deviation of genetics
- @field family_name_sd standard deviation of family names
- @field drives average drive values
- @field food Food types consumed
- @discussion structure storing indicator values
- */
-typedef struct
-{
-    n_byte2 population;
-    n_uint parasites;
-    n_byte2 population_density[8*8];
-    n_uint average_age_days;
-    n_byte2 average_mobility;
-    n_byte2 average_energy;
-    n_uint average_energy_input;
-    n_uint average_energy_output;
-    n_byte average_amorousness;
-    n_byte2 average_cohesion;
-    n_byte average_familiarity;
-    n_byte2 average_social_links;
-    n_uint average_positive_affect;
-    n_uint average_negative_affect;
-    n_byte2 average_antigens;
-    n_byte2 average_antibodies;
-    n_byte2 average_chat;
-    n_byte2 average_shouts;
-    n_byte2 average_listens;
-    n_byte2 average_grooming;
-    n_byte2 average_parasite_mobility;
-    n_uint average_brainprobe_activity;
-    n_byte2 drownings;
-    n_byte2 ideology_sd;
-    n_byte2 genetics_sd;
-    n_byte2 family_name_sd;
-    n_byte2 drives[DRIVES];
-    n_byte2 food[FOOD_TYPES];
-    n_byte2 average_first_person;
-    n_byte2 average_intentions;
-    n_byte2 average_sensors;
-    n_byte2 average_actuators;
-    n_byte2 average_operators;
-    n_byte2 average_conditionals;
-    n_byte2 average_data;
-} noble_indicators;
 
+enum indicator_type
+{
+    IT_POPULATION = 0,
+    IT_PARASITES,
+    IT_POPULATION_DENSITY,
+    IT_POPULATION_DENSITY_END = IT_POPULATION_DENSITY + (8*8),
+    IT_AVERAGE_AGE_DAYS,
+    IT_AVERAGE_MOBILITY,
+    IT_AVERAGE_ENERGY,
+    IT_AVERAGE_ENERGY_INPUT,
+    IT_AVERAGE_ENERGY_OUTPUT,
+    IT_AVERAGE_AMOROUSNESS,
+    IT_AVERAGE_COHESION,
+    IT_AVERAGE_FAMILIARITY,
+    IT_AVERAGE_SOCIAL_LINKS,
+    IT_AVERAGE_POSITIVE_AFFECT,
+    IT_AVERAGE_NEGATIVE_AFFECT,
+    IT_AVERAGE_ANTIGENS,
+    IT_AVERAGE_ANTIBODIES,
+        
+    IT_AVERAGE_CHAT,
+    IT_AVERAGE_SHOUTS,
+    IT_AVERAGE_LISTENS,
+    IT_AVERAGE_GROOMING,
+
+    IT_AVERAGE_PARASITE_MOBILITY,
+    IT_AVERAGE_BRAINPROBE_ACTIVITY,
+
+    IT_DROWNINGS,
+    IT_IDEOLOGY_SD,
+    IT_GENETICS_SD,
+    IT_FAMILY_NAME_SD,
+    
+    IT_DRIVES,
+    IT_DRIVES_END = IT_DRIVES + DRIVES,
+    
+    IT_FOOD,
+    IT_FOOD_END = IT_FOOD + FOOD_TYPES,
+    
+    IT_AVERAGE_FIRST_PERSON,
+    IT_AVERAGE_INTENTIONS,
+    IT_AVERAGE_SENSORS,
+    IT_AVERAGE_ACTUATORS,
+    IT_AVERAGE_OPERATORS,
+    IT_AVERAGE_CONDITIONALS,
+    IT_AVERAGE_DATA,
+    
+    IT_NUMBER_ENTRIES
+};
+    
 typedef struct
 {
     n_byte2	x;
@@ -1406,7 +1425,7 @@ typedef struct
     n_byte learned_preference[PREFERENCES];
 
 	/* generation number from the mother and father */
-	n_uint generation[3];
+	n_uint generation[GENERATION_TOTAL];
 	/* temporary father generation value used during gestation */
 	n_uint father_generation;
 
@@ -1429,6 +1448,21 @@ noble_being;
 
 typedef void (being_birth_event)(noble_being * born, noble_being * mother, void * sim);
 typedef void (being_death_event)(noble_being * deceased, void * sim);
+
+
+#define INDICATOR_ACCESS(sim, index)            sim->indicators_base[(sim->indicator_index * IT_NUMBER_ENTRIES) + (index)]
+
+#define INDICATOR_SET(sim, index, val)          INDICATOR_ACCESS(sim, index) = (val)
+#define INDICATOR_ADD(sim, index, val)          INDICATOR_ACCESS(sim, index) += (val)
+#define INDICATOR_INC(sim, index)               INDICATOR_ACCESS(sim, index) ++
+
+#define INDICATOR_DIVIDE(sim, index, value)     INDICATOR_ACCESS(sim, index) /= (value)
+#define INDICATOR_NORMALIZE(sim, index)         INDICATOR_DIVIDE(sim, index, sim->num)
+#define INDICATOR_MULTIPLY(sim, index, value)   INDICATOR_ACCESS(sim, index) *= value
+
+#define INDICATOR_NAME(sim, index)              sim->indicators_name[(index)]
+#define INDICATOR_INIT_NAME(sim, index, string) sim.indicators_name[(index)] = string
+
 
 /*! @struct
  @field land The n_land pointer.
@@ -1465,8 +1499,10 @@ typedef struct
 
     n_uint          indicator_index;
     n_uint          indicators_logging;
-    noble_indicators * indicators_base;
-
+    
+    n_uint          indicators_base[IT_NUMBER_ENTRIES * INDICATORS_BUFFER_SIZE];
+    n_string        indicators_name[IT_NUMBER_ENTRIES];
+    
     being_birth_event * ext_birth;
     being_death_event * ext_death;
 
@@ -1490,8 +1526,6 @@ noble_simulation;
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
 #define GET_FR(bei)     (GENE_FRAME(bei->new_genetics))
-
-#define GET_IN(sim)     (sim->indicators_base[sim->indicator_index])
 
 #define	GET_X(bei)	((bei)->x)
 #define	GET_Y(bei)	((bei)->y)
@@ -1527,7 +1561,6 @@ noble_simulation;
 
 #define GET_BRAINCODE_INTERNAL(sim,bei) ((&GET_SOC(sim,bei)[0])->braincode)
 #define GET_BRAINCODE_EXTERNAL(sim,bei) ((&GET_SOC(sim,bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
-
 
 #define	BRAIN_OFFSET(num)	(num)
 
@@ -1733,11 +1766,6 @@ const static noble_console_command control_commands[] =
     {&console_list,          "list",           "",                     "List all ape names"},
     {&console_list,          "ls",             "",                     ""},
     {&console_list,          "dir",            "",                     ""},
-
-    
-    {&io_aiff_test,          "aiff",           "",                     "Test if a file is AIFF compatible"},
-
-    
     
     {0L, 0L},
 };
@@ -1748,7 +1776,7 @@ const static noble_console_command control_commands[] =
 /*NOBLEMAKE DEL=""*/
 
 
-#endif /* _NOBLEAPE_UNIVERSE_H_ */
+#endif /* NOBLEAPE_UNIVERSE_H */
 
 /*NOBLEMAKE END=""*/
 

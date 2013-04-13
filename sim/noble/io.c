@@ -162,6 +162,24 @@ void file_chain_free(n_file_chain * value)
     }
 }
 
+static n_int io_uniform_handle_fclose(FILE * file_ptr)
+{
+    if (fclose(file_ptr) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    return 0;
+}
+
+static n_int io_uniform_handle_fclose_double_error(FILE * file_ptr, n_string error)
+{
+    if (fclose(file_ptr) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    return SHOW_ERROR(error);
+}
+
 n_int file_chain_write(n_string name, n_file_chain * initial)
 {
     FILE         * write_file = 0L;
@@ -179,8 +197,7 @@ n_int file_chain_write(n_string name, n_file_chain * initial)
         local = (n_file_chain*)local->next;
     } while (local != 0L);
     
-    fclose(write_file);
-    return 0;
+    return io_uniform_handle_fclose(write_file);
 }
 
 n_int file_chain_read(n_string name, n_file_chain * initial)
@@ -196,18 +213,11 @@ n_int file_chain_read(n_string name, n_file_chain * initial)
     }
     
     do {
-        if (fread(local->data,1,local->expected_bytes, read_file) > 0)
-		{
-			local = (n_file_chain*)local->next;
-		}
-		else
-		{
-			local = 0L;
-		}
+        fread(local->data,1,local->expected_bytes, read_file);
+        local = (n_file_chain*)local->next;
     } while (local != 0L);
-    
-    fclose(read_file);
-    return 0;
+
+    return io_uniform_handle_fclose(read_file);
 }
 
 
@@ -226,8 +236,7 @@ n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expect
     
     if (header == 0L)
     {
-        fclose(read_file);
-        return SHOW_ERROR("No header presented");
+        return io_uniform_handle_fclose_double_error(read_file, "No header presented");
     }
     
     expected_size = expected_additional_entries * sizeof(n_uint);
@@ -235,8 +244,8 @@ n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expect
     header->data = io_new(expected_size);
     if (header->data == 0L)
     {
-        fclose(read_file);
-        return SHOW_ERROR("No hash allocated");
+        return io_uniform_handle_fclose_double_error(read_file, "No hash allocated");
+
     }
     header->expected_bytes = expected_size;
 
@@ -245,16 +254,14 @@ n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expect
     if (expected_size != actual_size)
     {
         io_free(hash_data);
-        fclose(read_file);
-        return SHOW_ERROR("File too short");
+        return io_uniform_handle_fclose_double_error(read_file, "File too short");
     }
     while (loop < expected_additional_entries)
     {
         header[loop+1].hash = hash_data[loop];
         loop++;
     }
-    fclose(read_file);
-    return 0;
+    return io_uniform_handle_fclose(read_file);
 }
 
 n_int file_chain_read_validate(n_string name, n_file_chain *initial)
@@ -281,8 +288,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
     general_buffer = io_new(largest_bytes);
     if (general_buffer == 0L)
     {
-        fclose(read_file);
-        return SHOW_ERROR("Validation buffer not created");
+        return io_uniform_handle_fclose_double_error(read_file, "Validation buffer not created");
     }
     
     /* get past header */
@@ -290,8 +296,7 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
     
     if (local == 0L)
     {
-        fclose(read_file);
-        return SHOW_ERROR("File chain invalid");
+        return io_uniform_handle_fclose_double_error(read_file, "File chain invalid");
     }
     
     do {
@@ -299,9 +304,8 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
         n_uint actual_hash;
         if (actual_read != local->expected_bytes)
         {
-            fclose(read_file);
             io_free(general_buffer);
-            return SHOW_ERROR("File too short");
+            return io_uniform_handle_fclose_double_error(read_file, "File too short");
         }
         
         actual_hash = math_hash(general_buffer, local->expected_bytes);
@@ -311,19 +315,18 @@ n_int file_chain_read_validate(n_string name, n_file_chain *initial)
             if (actual_hash != local->hash)
             {
                 n_string_block  combination;
-                fclose(read_file);
                 io_free(general_buffer);
                 sprintf(combination, "Hash failed (# %ld, actual %ld, expected %ld, bytes %ld, sizeof %ld)",count, actual_hash, local->hash, local->expected_bytes, sizeof(n_int));
-                return SHOW_ERROR(combination);
+                return io_uniform_handle_fclose_double_error(read_file, combination);
             }
         }
         local = (n_file_chain*)local->next;
         count++;
     } while (local != 0L);
     
-    fclose(read_file);
     io_free(general_buffer);
-    return 0;
+    
+    return io_uniform_handle_fclose(read_file);
 }
 
 void file_chain_bin_name(n_string original, n_string bin_file)
@@ -331,6 +334,20 @@ void file_chain_bin_name(n_string original, n_string bin_file)
     sprintf(bin_file, "%s.bin",original);
 }
 
+void io_file_aiff_header(void * fptr, n_uint total_samples)
+{
+    n_byte header[54] = {0};
+    io_aiff_header(header);
+    io_aiff_uint(&header[4],  io_aiff_total_size(total_samples));
+    io_aiff_uint(&header[22], total_samples);
+    io_aiff_uint(&header[42], io_aiff_sound_size(total_samples));
+    fwrite(header, 54, 1, (FILE*)fptr);
+}
+
+void io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples)
+{
+    fwrite(samples,number_samples,sizeof(n_audio),(FILE*)fptr);
+}
 
 void io_aiff_header(n_byte * header)
 {
@@ -381,7 +398,7 @@ n_uint io_aiff_uint_out(n_byte * buffer)
 
 n_uint io_aiff_total_size(n_uint total_samples)
 {
-    return 4 + 8 + 18 + 8 + (2 * total_samples) + 8;
+    return 4 + 8 + 18 + 8 + (sizeof(n_audio) * total_samples) + 8;
 }
 
 n_uint io_aiff_sound_size(n_uint total_samples)
@@ -396,114 +413,87 @@ n_int io_aiff_sample_size(n_uint total_size)
     {
         return SHOW_ERROR("Total AIFF samples less than zero");
     }
-    if (total_samples2 & 1)
+    if (total_samples2 % sizeof(n_audio))
     {
         return SHOW_ERROR("Non multiple of 2 in AIFF file size");
     }
-    return total_samples2 >> 1;
+    return total_samples2 / sizeof(n_audio);
 }
 
-n_int io_aiff_header_check_length(n_byte * header)
+static n_int io_scan(n_byte * v1, n_byte * v2, n_uint start, n_uint stop)
 {
-    n_byte  comparison[54];
-    n_uint  total_samples, sound_size;
-    n_int   loop = 0;
-
-    io_aiff_header(comparison);
-
-    while (loop < 4)
+    n_int   loop = start;
+    while (loop < stop)
     {
-        if (comparison[loop] != header[loop])
+        if (v1[loop] != v2[loop])
         {
-            return SHOW_ERROR("AIFF fails header section");
-        }
-        loop++;
-    }
-    /*total_size = */
-	io_aiff_uint_out(&header[4]);
-    loop = 8;
-    while (loop < 16)
-    {
-        if (comparison[loop] != header[loop])
-        {
-            return SHOW_ERROR("AIFF fails second section");
-        }
-        loop++;
-    }
-    
-    loop = 21;
-    while (loop < 22)
-    {
-        if (comparison[loop] != header[loop])
-        {
-            return SHOW_ERROR("AIFF fails second section");
-        }
-        loop++;
-    }
-    
-    total_samples = io_aiff_uint_out(&header[22]);
-    loop = 27;
-    while (loop < 32)
-    {
-            if (comparison[loop] != header[loop])
+            n_int loop2 = start;
+            while (loop2 < stop)
             {
-                return SHOW_ERROR("AIFF fails third section");
+                printf("Diff %ld %2x %c  %2x %c\n",loop2, v1[loop2], v1[loop2], v2[loop2], v2[loop2]);
+                loop2++;
             }
-        loop++;
-    }
-    
-    loop = 38;
-    while (loop < 42)
-    {
-        if (comparison[loop] != header[loop])
-        {
-            return SHOW_ERROR("AIFF fails fourth section");
+            return 1;
         }
         loop++;
-    }
-    
-    sound_size = io_aiff_uint_out(&header[42]);
-
-    loop = 46;
-    while (loop < 48)
-    {
-        if (comparison[loop] != header[loop])
-        {
-            return SHOW_ERROR("AIFF fails fifth section");
-        }
-        loop++;
-    }
-    /* if (total_size != io_aiff_total_size(total_samples)) - this is not a valid comparison */
-    
-    if (sound_size != io_aiff_sound_size(total_samples))
-    {
-        return SHOW_ERROR("AIFF fails sound size compare");
-    }
-    return total_samples;
-}
-
-n_int      io_aiff_test(void * ptr, n_string response, n_console_output output_function)
-{
-    FILE * test_file = fopen(response, "rb");
-    n_byte header[54]={0};
-    if (test_file == 0L)
-    {
-        (void)SHOW_ERROR("AIFF test open failed");
-    }
-    else
-    {
-        n_string_block output;
-        n_int samples;
-        if (fread(header, 1, 54, test_file) > 0)
-		{        
-			samples = io_aiff_header_check_length(header);
-		}
-        
-        sprintf(output, "%ld\n",samples);
-        output_function(output);
-        fclose(test_file);
     }
     return 0;
+}
+
+n_int io_file_aiff_header_check_length(void * fptr)
+{
+    n_byte  comparison[54] = {0};
+    n_byte  actual[54] = {0};
+    n_uint  total_samples, sound_size;
+    n_int   not_found = 1;
+
+    io_aiff_header(comparison);
+    
+    fread(actual,1,38,(FILE *)fptr);
+    
+    if (io_scan(comparison, actual, 0, 4))
+    {
+        return SHOW_ERROR("AIFF fails first section");
+    }
+    if (io_scan(comparison, actual, 8, 16))
+    {
+        return SHOW_ERROR("AIFF fails second section");
+    }
+    if (io_scan(comparison, actual, 21, 22))
+    {
+        return SHOW_ERROR("AIFF fails third section");
+    }
+    total_samples = io_aiff_uint_out(&actual[22]);
+    if (io_scan(comparison, actual, 27, 32))
+    {
+        return SHOW_ERROR("AIFF fails fourth section");
+    }
+    
+    actual[0] = actual[1] = actual[2] = actual[3] = actual[4] = 0;
+    
+    do {
+        actual[3] = actual[2];
+        actual[2] = actual[1];
+        actual[1] = actual[0];
+        fread(actual,1,1, (FILE *)fptr);        
+        if ((actual[0] == 'D') && (actual[1] == 'N') && (actual[2] == 'S') && (actual[3] == 'S'))
+        {
+            not_found = 0;
+        }
+    } while ((!feof((FILE *)fptr)) && not_found);
+    if (feof((FILE *)fptr))
+    {
+        return SHOW_ERROR("AIFF sound marker not found");
+    }
+    fread(actual,1,6,(FILE *)fptr);
+    sound_size = io_aiff_uint_out(actual);
+     /* if (total_size != io_aiff_total_size(total_samples)) - this is not a valid comparison */
+     if (sound_size != io_aiff_sound_size(total_samples))
+     {
+         return SHOW_ERROR("AIFF fails sound size compare");
+     }
+     
+     return total_samples;
 }
 
 /**
@@ -618,6 +608,50 @@ void io_file_free(n_file * file)
     io_free(file);
 }
 
+void io_int_to_bytes(n_int value, n_byte * bytes)
+{
+    n_uint unsigned_value;
+    if (SIZEOF_NUMBER_WRITE == 8)
+    {
+        unsigned_value = value + 0x80000000;
+        bytes[0] = (unsigned_value >> 0) & 255;
+        bytes[1] = (unsigned_value >> 8) & 255;
+        bytes[2] = (unsigned_value >> 16) & 255;
+        bytes[3] = (unsigned_value >> 24) & 255;
+        bytes[4] = (unsigned_value >> 32) & 255;
+        bytes[5] = (unsigned_value >> 40) & 255;
+        bytes[6] = (unsigned_value >> 48) & 255;
+        bytes[7] = (unsigned_value >> 56) & 255;
+    }
+    else
+    {
+        unsigned_value = value + 0x8000;
+        bytes[0] = (unsigned_value >> 0) & 255;
+        bytes[1] = (unsigned_value >> 8) & 255;
+        bytes[2] = (unsigned_value >> 16) & 255;
+        bytes[3] = (unsigned_value >> 24) & 255;
+    }
+}
+
+n_int io_bytes_to_int(n_byte * bytes)
+{
+    n_uint unsigned_value;
+    n_uint return_value;
+
+    unsigned_value  = ((n_uint)bytes[0] << 0)  | ((n_uint)bytes[1] << 8)  | ((n_uint)bytes[2] << 16) | ((n_uint)bytes[3] << 24);
+
+    if (SIZEOF_NUMBER_WRITE == 8)
+    {
+        unsigned_value |= ((n_uint)bytes[4] << 32) | ((n_uint)bytes[5] << 40) | ((n_uint)bytes[6] << 48) | ((n_uint)bytes[7] << 56);
+        return_value = unsigned_value - 0x80000000;
+    }
+    else
+    {
+        return_value = unsigned_value - 0x8000;
+    }
+    return return_value;
+}
+
 /**
  * Reads a file from disk.
  * @param local_file the pointer to the n_file data that will have the file stored in it.
@@ -652,8 +686,7 @@ n_int io_disk_read(n_file * local_file, n_string file_name)
             }
         }
     }
-    fclose(in_file);
-    return FILE_OKAY;
+    return io_uniform_handle_fclose(in_file);
 }
 
 /**
@@ -681,7 +714,12 @@ n_int io_disk_write(n_file * local_file, n_string file_name)
     }
 
     written_length = fwrite(local_file->data,1,local_file->location, out_file);
-    fclose(out_file);
+    
+    if (fclose(out_file) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    
     if (written_length != local_file->location)
     {
         return SHOW_ERROR("File did not complete write");
@@ -707,7 +745,12 @@ n_int io_disk_append(n_file * local_file, n_string file_name)
 #endif
 
     written_length = fwrite(local_file->data,1,local_file->location, out_file);
-    fclose(out_file);
+
+    if (fclose(out_file) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    
     if (written_length != local_file->location)
     {
         return SHOW_ERROR("File did not complete write");
@@ -733,7 +776,11 @@ n_int io_disk_check(n_string file_name)
 
     if (local_check_file == 0L)
         return 0;
-    fclose(local_check_file);
+    
+    if (fclose(local_check_file) != 0)
+    {
+        return 0;
+    }
     return 1;
 }
 

@@ -34,15 +34,18 @@
  ****************************************************************/
 
 /*NOBLEMAKE DEL=""*/
-#ifndef _NOBLEAPE_ENTITY_INTERNAL_H_
-#define _NOBLEAPE_ENTITY_INTERNAL_H_
+#ifndef NOBLEAPE_ENTITY_INTERNAL_H
+#define NOBLEAPE_ENTITY_INTERNAL_H
 /*NOBLEMAKE END=""*/
 
 #define VISUAL_DISTANCE_SQUARED (4000*4000)
 
-#define FULLY_ASLEEP    0
-#define SLIGHTLY_AWAKE  1
-#define FULLY_AWAKE     2
+enum sleep_state
+{
+    FULLY_ASLEEP   =   0,
+    SLIGHTLY_AWAKE =   1,
+    FULLY_AWAKE    =   2
+};
 
 #define CONSUME_E(being,max_energy,food)  ((max_energy)*(1+food_absorption(food,being))>>3)
 #define CONSUME(being,max_energy,food)  (GET_E(being)+=(n_byte2)CONSUME_E(being,max_energy,food))
@@ -161,6 +164,4 @@ n_byte get_braincode_instruction(noble_being * local_being);
 
 void being_ingest_pathogen(noble_being * local, n_byte food_type);
 
-void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result);
-
-#endif /* _NOBLEAPE_ENTITY_INTERNAL_H_ */
+#endif /* NOBLEAPE_ENTITY_INTERNAL_H */

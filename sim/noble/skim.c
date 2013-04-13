@@ -222,7 +222,7 @@ void skim_show(n_file * binary_code)
     n_byte   line_count = 0;
     n_byte * local_buffer = &((binary_code->data)[SIZEOF_NUMBER_WRITE]);
     n_int    loop = 0;
-    n_int    loop_end = BYTES_TO_INT(binary_code->data) - SIZEOF_NUMBER_WRITE;
+    n_int    loop_end = io_bytes_to_int(binary_code->data) - SIZEOF_NUMBER_WRITE;
     while (loop < loop_end)
     {
         n_byte value = local_buffer[loop++];

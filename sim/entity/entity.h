@@ -34,8 +34,8 @@
  ****************************************************************/
 
 /*NOBLEMAKE DEL=""*/
-#ifndef _NOBLEAPE_ENTITY_H_
-#define _NOBLEAPE_ENTITY_H_
+#ifndef NOBLEAPE_ENTITY_H
+#define NOBLEAPE_ENTITY_H
 /*NOBLEMAKE END=""*/
 
 #define	LAND_ON
@@ -55,9 +55,13 @@
 
 #define EPISODIC_AFFECT_ZERO (16384)
 
-#define BEING_HUNGRY				(10*128)
-#define	BEING_FULL 			(BEING_HUNGRY*3)
-#define	BEING_STARVE 		(BEING_HUNGRY*2)
+enum being_energy
+{
+    BEING_DEAD   = 0,
+    BEING_HUNGRY = (10*128),
+    BEING_STARVE = (BEING_HUNGRY*2),
+    BEING_FULL   = (BEING_HUNGRY*3)
+};
 
 #define SOCIAL_RESPECT_NORMAL	127
 
@@ -66,6 +70,10 @@ enum BRAINPROBE_TYPE
     INPUT_SENSOR = 0,
     OUTPUT_ACTUATOR
 };
+
+typedef void (being_no_return)(noble_simulation * sim, noble_being * actual);
+
+void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func);
 
 n_int  brain_probe_to_location(n_int position);
 
@@ -76,7 +84,7 @@ n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index)
 void   being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name);
 n_int  being_init(noble_simulation * sim, noble_being * mother, n_int random_factor, n_byte first_generation);
 void   being_cycle_awake(noble_simulation * sim, n_uint current_being_index);
-void   being_cycle_universal(noble_simulation * sim, n_uint current_being_index, n_byte awake);
+void   being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake);
 void   being_state_description(n_byte2 state, n_string result);
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
 
@@ -167,4 +175,4 @@ enum {
 #define SKELETON_LUMBAR_VERTIBRA2 8
 #define SKELETON_VERTIBRA_RIBS    10
 
-#endif /* _NOBLEAPE_ENTITY_H_ */
+#endif /* NOBLEAPE_ENTITY_H */

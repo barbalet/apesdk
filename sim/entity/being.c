@@ -93,6 +93,16 @@ typedef	struct
 being_draw;
 
 
+void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        (bnr_func)(sim, output);
+        loop++;
+    }
+}
 
 static n_byte	being_ground(n_int px, n_int py, void * params)
 {
@@ -187,7 +197,6 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
 {
     n_int i;
     noble_being * b;
-    n_string_block str;
 
     if (io_length(name,STRING_BLOCK_SIZE)<10) return NO_BEINGS_FOUND;
 
@@ -196,6 +205,7 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
     for (i = 0; i < (n_int)(sim->num); i++)
     {
         b = &sim->beings[i];
+        n_string_block str;
         being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(sim,b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), str);
 
         io_lower(str, io_length(str,STRING_BLOCK_SIZE));
@@ -590,7 +600,7 @@ static void being_immune_response(noble_being * local)
         }
     }
     math_random3(local_random);
-    if ((local_random[0]<(total_antigens>>2)) && (local->energy>0))
+    if ((local_random[0] < (total_antigens>>2)) && (local->energy > BEING_DEAD))
     {
         if (local->energy>PATHOGEN_SEVERITY(max_severity))
         {
@@ -598,7 +608,7 @@ static void being_immune_response(noble_being * local)
         }
         else
         {
-            local->energy=0;
+            local->energy = BEING_DEAD;
         }
     }
 #endif
@@ -1236,6 +1246,11 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 {
     n_land  * land  =   sim->land;
 
+    if(GET_E(local) == BEING_DEAD)
+    {
+        return FULLY_ASLEEP;
+    }
+    
     /* if it is not night, the being is fully awake */
     if(IS_NIGHT(land->time) == 0)
     {
@@ -1378,11 +1393,8 @@ static n_int being_turn_away_from_water(n_int loc_f, n_land * land, n_vect2 * lo
 }
 
 /* stuff still goes on during sleep */
-void being_cycle_universal(noble_simulation * sim, n_uint current_being_index, n_byte awake)
+void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
-    noble_being * being_buffer = sim->beings;
-    noble_being * local        = &being_buffer[current_being_index];
-
     /* By default return towards a resting state */
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);
@@ -2060,20 +2072,22 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 /** eating when stopped */
                 n_byte  food_type;
                 n_int energy = food_eat(sim->land, sim->weather, location_vector.x, location_vector.y, az, &food_type, local);
-
-                GET_IN(sim).food[food_type]++;
-
+                
+                INDICATOR_INC(sim, IT_FOOD+food_type);
+                
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
                 
-                if (energy > 0)
+                if (energy > BEING_DEAD)
                 {
 #ifdef METABOLISM_ON
                     metabolism_vascular_response(sim, local, VASCULAR_PARASYMPATHETIC);
 #endif
 
                     loc_e += energy;
-                    GET_IN(sim).average_energy_input += energy;
+                    
+                    INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, energy);
+                    
                     loc_state |= BEING_STATE_EATING;
                     /** grow */
                     if (loc_h < BEING_MAX_HEIGHT)
@@ -2245,7 +2259,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             /** child gains energy */
                             loc_e += SUCKLING_ENERGY;
                             /** update indicators */
-                            GET_IN(sim).average_energy_input += SUCKLING_ENERGY;
+                            
+                            INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, SUCKLING_ENERGY);
+                            
                             /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
@@ -2301,7 +2317,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     local->state = loc_state;
-    GET_IN(sim).average_mobility+=(n_uint)loc_s;
+    
+    INDICATOR_ADD(sim, IT_AVERAGE_MOBILITY, loc_s);
 }
 
 
@@ -2915,7 +2932,8 @@ void being_tidy(noble_simulation * local_sim)
         }
 
         local_e -= delta_e;
-        GET_IN(local_sim).average_energy_output += delta_e;
+        
+        INDICATOR_ADD(local_sim, IT_AVERAGE_ENERGY_OUTPUT, delta_e);
 
         if (land->time == 0)
         {
@@ -2930,9 +2948,9 @@ void being_tidy(noble_simulation * local_sim)
             }
         }
 
-        if (local_e < 0)
+        if (local_e < BEING_DEAD)
         {
-            local_e = 0;
+            local_e = BEING_DEAD;
         }
 
         GET_E(local_being) = (n_byte2)local_e;
@@ -2971,7 +2989,7 @@ void being_remove(noble_simulation * local_sim)
     
     while (loop < end_loop)
     {
-        if (local[loop].energy == 0)
+        if (local[loop].energy == BEING_DEAD)
         {
             noble_being * b = &local[loop];
             noble_being * child;
@@ -2984,9 +3002,9 @@ void being_remove(noble_simulation * local_sim)
             }
 
             /* Did the being drown? */
-            if (b->state&BEING_STATE_SWIMMING)
+            if (b->state & BEING_STATE_SWIMMING)
             {
-                GET_IN(local_sim).drownings++;
+                INDICATOR_INC(local_sim, IT_DROWNINGS);
             }
 
             /* remove all children's maternal links if the mother dies */
@@ -3007,7 +3025,7 @@ void being_remove(noble_simulation * local_sim)
             family_name = GET_NAME_FAMILY2(local_sim,b);
             while (i < end_loop)
             {
-                if (local[i].energy != 0)
+                if (local[i].energy != BEING_DEAD)
                 {
                     noble_being * b2 = &local[i];
                     social_link * b2_social_graph = GET_SOC(local_sim, b2);
@@ -3044,7 +3062,7 @@ void being_remove(noble_simulation * local_sim)
             possible = count;
         }
         
-        if (local[loop].energy != 0)
+        if (local[loop].energy != BEING_DEAD)
         {
             if ( count != loop )
             {

@@ -67,6 +67,168 @@
 
 static n_byte  braindisplay = 3;
 
+static variable_string	apescript_variable_codes[VARIABLE_MAX]=
+{
+    /* 0 */ /* special "variables" */
+    "function",
+    "run",
+    
+    /* 2 */
+    "while",
+    "if",
+    
+    /* output only */
+    "vector_x",
+    "vector_y",
+    /* 6 */
+    "random",
+    "water_level",
+    
+    "biology_area",
+    "biology_height",
+    
+    "biology_water",
+    "biology_moving_sun",
+    
+    "biology_total_sun",
+    "biology_salt",
+    "biology_bush",
+    
+    "biology_grass",
+    "biology_tree",
+    
+    "biology_seaweed",
+    "biology_rockpool",
+    "biology_beach",
+    
+    "biology_insect",
+    "biology_mouse",
+    
+    "biology_parrot",
+    "biology_lizard",
+    
+    "biology_eagle",
+    "biology_output",
+    
+    "hungry",
+    "location_z",
+    /* 10 */
+    "test_z",
+    "is_visible",
+    
+    "time",
+    "date",
+    /* 14 */
+    "current_being",
+    "number_beings",
+    
+    "location_x",
+    "location_y",
+    
+    "state",  /* new ! */
+    "listen", /* new ! */
+    
+    /* 18 */
+    "id_number",
+    "date_of_birth",
+    
+    "weather",
+    "brain_value",		/* special input/output */
+    /* actual variables start here */
+    /* 22 */
+    "vector_angle",
+    "facing",
+    
+    "speed",
+    "energy",
+    
+    "honor",
+    "parasites",
+    "height",
+    
+    "first_name",
+    "family_name_one",
+    "family_name_two",
+    
+    "goal_type",
+    "goal_x",
+    "goal_y",
+    
+    "drive_hunger",
+    "drive_social",
+    "drive_fatigue",
+    "drive_sex",
+    
+    "speak", /* new ! */
+    
+    /* 26 */
+    "brain_x",
+    "brain_y",
+    
+    "brain_z",
+    "select_being",
+    /* 30 */
+    "test_x",
+    "test_y",
+    
+    "biology_operator",
+    
+    "posture",
+    
+    "preference_mate_height_male",
+    "preference_mate_height_female",
+    "preference_mate_pigment_male",
+    "preference_mate_pigment_female",
+    "preference_mate_hair_male",
+    "preference_mate_hair_female",
+    "preference_mate_frame_male",
+    "preference_mate_frame_female",
+    "preference_groom_male",
+    "preference_groom_female",
+    "preference_anecdote_event",
+    "preference_anecdote_affect",
+    "preference_chat",
+    
+    "attention_actor_index",
+    "attention_episode_index",
+    "attention_body_index",
+    
+    "shout_content",
+    "shout_heard",
+    "shout_counter",
+    "shout_volume",
+    "shout_family_first",
+    "shout_family_last",
+    
+    "social_graph_location_x",
+    "social_graph_location_y",
+    "social_graph_time",
+    "social_graph_date",
+    "social_graph_century",
+    "social_graph_attraction",
+    "social_graph_fof",
+    "social_graph_familiarity",
+    "social_graph_first_name",
+    "social_graph_family_first",
+    "social_graph_family_last",
+    
+    "memory_location_x",
+    "memory_location_y",
+    "memory_time",
+    "memory_date",
+    "memory_century",
+    "memory_first_name_zero",
+    "memory_family_first_zero",
+    "memory_family_last_zero",
+    "memory_first_name_one",
+    "memory_family_first_one",
+    "memory_family_last_one",
+    "memory_event",
+    "memory_affect",
+    
+    "being"
+};
+
 n_byte	* offbuffer = 0L;
 
 /* Twice the minimum number of apes the Simulation will allow to run */
@@ -167,6 +329,7 @@ static void * sim_thread_being(void * id)
         if(thread_on ==1 ) pthread_cond_wait(&sim_cond, &draw_mtx);
         sim_done--;
         pthread_mutex_unlock(&draw_mtx);
+        
         sim_being(&sim);    /* 2 */
         being_tidy(&sim);
         being_remove(&sim); /* 6 */
@@ -195,6 +358,7 @@ static void * sim_thread_brain(void * id)
         if(thread_on ==1 ) pthread_cond_wait(&sim_cond, &draw_mtx);
         sim_done--;
         pthread_mutex_unlock(&draw_mtx);
+        
         sim_brain(&sim);    /* 4 */
 
 #ifdef BRAINCODE_ON
@@ -206,6 +370,7 @@ static void * sim_thread_brain(void * id)
 #endif
         pthread_mutex_lock(&draw_mtx);
         sim_done++;
+        
         if(sim_done == 3)
         {
             pthread_cond_signal(&draw_cond);
@@ -238,9 +403,6 @@ static void sim_thread_close(void)
     thread_quit = 1;
     pthread_mutex_unlock(&quit_mtx);
 
-    /*  pthread_join(land_thread, NULL);
-        pthread_join(being_thread, NULL);
-        pthread_join(brain_thread, NULL);*/
 }
 #endif
 
@@ -337,7 +499,7 @@ n_int	sim_interpret(n_byte * buff, n_uint len)
     local . location = 0;
     local . data = buff;
 
-    interpret = parse_convert(&local, VARIABLE_BEING, (variable_string *)variable_codes);
+    interpret = parse_convert(&local, VARIABLE_BEING, (variable_string *)apescript_variable_codes);
 
     if(interpret == 0L)
     {
@@ -366,7 +528,7 @@ n_int     file_interpret(n_file * input_file)
     input_file->size = input_file->location;
     input_file->location = 0;
     
-    interpret = parse_convert(input_file, VARIABLE_BEING, (variable_string *)variable_codes);
+    interpret = parse_convert(input_file, VARIABLE_BEING, (variable_string *)apescript_variable_codes);
     
     if(interpret == 0L)
     {
@@ -390,78 +552,71 @@ n_int     file_interpret(n_file * input_file)
     return 0;
 }
 
+static void sim_brain_no_return(noble_simulation * local_sim, noble_being * local_being)
+{
+    n_byte2 local_brain_state[3];
+
+    if(being_awake_local(&sim, local_being) == 0)
+    {
+        local_brain_state[0] = GET_BS(local_being, 3);
+        local_brain_state[1] = GET_BS(local_being, 4);
+        local_brain_state[2] = GET_BS(local_being, 5);
+    }
+    else
+    {
+        local_brain_state[0] = GET_BS(local_being, 0);
+        local_brain_state[1] = GET_BS(local_being, 1);
+        local_brain_state[2] = GET_BS(local_being, 2);
+    }
+    
+    if(braindisplay == 1)
+    {
+        local_brain_state[0] = 0;
+        local_brain_state[1] = 500;
+        local_brain_state[2] = (5*local_brain_state[2])>>3;
+    }
+    
+    if(braindisplay == 2)
+    {
+        local_brain_state[0] = (9*local_brain_state[0])>>3;
+        local_brain_state[1] = 82;
+        local_brain_state[2] = 0;
+    }
+    
+    if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
+    {
+        n_byte			*local_brain = GET_B(local_sim, local_being);
+        if (local_brain != 0L)
+        {
+            brain_cycle(local_brain, local_brain_state);
+        }
+    }    
+}
 
 static void sim_brain(noble_simulation * local_sim)
 {
-    n_uint loop = 0;
-    n_byte2 local_brain_state[3];
-    
-    while (loop < local_sim->num)
-    {
-        noble_being		*local_being = &(local_sim->beings[loop]);
-        
-        if(being_awake_local(&sim, local_being) == 0)
-        {
-            local_brain_state[0] = GET_BS(local_being, 3);
-            local_brain_state[1] = GET_BS(local_being, 4);
-            local_brain_state[2] = GET_BS(local_being, 5);
-        }
-        else
-        {
-            local_brain_state[0] = GET_BS(local_being, 0);
-            local_brain_state[1] = GET_BS(local_being, 1);
-            local_brain_state[2] = GET_BS(local_being, 2);
-        }
-        
-        if(braindisplay == 1)
-        {
-            local_brain_state[0] = 0;
-            local_brain_state[1] = 500;
-            local_brain_state[2] = (5*local_brain_state[2])>>3;
-        }
-        
-        if(braindisplay == 2)
-        {
-            local_brain_state[0] = (9*local_brain_state[0])>>3;
-            local_brain_state[1] = 82;
-            local_brain_state[2] = 0;
-        }
-        
-        if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
-        {
-            n_byte			*local_brain = GET_B(local_sim, local_being);
-            if (local_brain != 0L)
-            {
-                brain_cycle(local_brain, local_brain_state);
-            }
-        }
-        loop++;
-    }
+    being_loop_no_return(local_sim, sim_brain_no_return);
 }
 
 #ifdef BRAINCODE_ON
+
+static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_being * local_being)
+{
+    n_byte     awake = 1;
+    n_byte    *local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
+    n_byte    *local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
+    if(being_awake_local(&sim, local_being) == 0)
+    {
+        awake=0;
+    }
+    /* This should be independent of the brainstate/cognitive simulation code */
+    brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
+    brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
+}
+
 static void sim_brain_dialogue(noble_simulation * local_sim)
 {
-    n_uint loop = 0;
-    n_byte awake;
-    while (loop < local_sim->num)
-    {
-        noble_being		*local_being = &(local_sim->beings[loop]);
-        n_byte          *local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
-        n_byte          *local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
-        if(being_awake_local(&sim, local_being) == 0)
-        {
-            awake=0;
-        }
-        else
-        {
-            awake=1;
-        }
-        /* This should be independent of the brainstate/cognitive simulation code */
-        brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
-        brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
-        loop++;
-    }
+    being_loop_no_return(local_sim, sim_brain_dialogue_no_return);
 }
 #endif
 
@@ -490,6 +645,7 @@ void sim_braindisplay(n_byte newval)
     braindisplay = newval;
 }
 
+
 static void sim_being(noble_simulation * local_sim)
 {
     n_uint loop = 0;
@@ -498,9 +654,12 @@ static void sim_being(noble_simulation * local_sim)
 
     while (loop < local_sim->num)
     {
-        n_byte awake = (being_awake_local(local_sim, &(local_sim->beings[loop])) != 0);
+        noble_being * local_being = &(local_sim->beings[loop]);
         
-        being_cycle_universal(local_sim,loop, awake);
+        n_byte awake = (being_awake_local(local_sim, local_being) != 0);
+        
+        being_cycle_universal(local_sim,local_being, awake);
+        
         if (awake)
         {
             if(interpret_cycle(interpret, -1, local_sim->beings, loop, &sim_start_conditions, &sim_end_conditions) == -1)
@@ -531,11 +690,13 @@ static void sim_time(noble_simulation * local_sim)
 
 static void sim_indicators(noble_simulation * sim)
 {
-    noble_indicators * indicators;
     n_uint b;
     n_int i,n,diff;
     n_uint current_date;
-    n_uint average_cohesion=0,average_amorousness=0,average_familiarity=0,average_energy=0;
+    n_uint average_cohesion=0;
+    n_uint average_amorousness=0;
+    n_uint average_familiarity=0;
+    n_uint average_energy=0;
     n_uint social_links=0;
     n_byte x,y;
     social_link * local_social_graph;
@@ -558,9 +719,9 @@ static void sim_indicators(noble_simulation * sim)
 #endif
 
     if (sim->land->time%INDICATORS_FREQUENCY!=0) return;
-
-    indicators = &(sim->indicators_base[sim->indicator_index]);
-    indicators->population = (n_byte2)(sim->num);
+    
+    INDICATOR_SET(sim, IT_POPULATION, sim->num);
+    
     if (sim->num==0)
     {
         return;
@@ -569,8 +730,8 @@ static void sim_indicators(noble_simulation * sim)
     current_date = TIME_IN_DAYS(sim->land->date);
 
     for (i=0; i<8*8; i++)
-    {
-        indicators->population_density[i]=0;
+    {        
+        INDICATOR_SET(sim, IT_POPULATION_DENSITY + i, 0);
     }
 
     for (n=0; n<8*CHROMOSOMES; n++)
@@ -592,22 +753,21 @@ static void sim_indicators(noble_simulation * sim)
         mean_braincode[n]=0;
     }
 #endif
-
-    indicators->parasites=0;
-    indicators->average_antigens=0;
-    indicators->average_antibodies=0;
+    
     for (b=0; b<sim->num; b++)
     {
         local_being = &(sim->beings[b]);
         local_dob = TIME_IN_DAYS(GET_D(local_being));
-        indicators->average_age_days += current_date - local_dob;
+                
+        INDICATOR_ADD(sim, IT_AVERAGE_AGE_DAYS, current_date - local_dob);
+        
         average_energy += (n_uint)GET_E(local_being);
 #ifdef EPISODIC_ON
         average_first_person += (n_uint)episodic_first_person_memories_percent(sim,local_being,0);
         average_intentions += (n_uint)episodic_first_person_memories_percent(sim,local_being,1);
 #endif
 #ifdef PARASITES_ON
-        indicators->parasites += local_being->parasites;
+        INDICATOR_ADD(sim, IT_PARASITES, local_being->parasites);
 #endif
 
         /* family */
@@ -623,7 +783,8 @@ static void sim_indicators(noble_simulation * sim)
         /* population density */
         x = (n_byte)(APESPACE_TO_MAPSPACE(local_being->x) * 8 / MAP_DIMENSION);
         y = (n_byte)(APESPACE_TO_MAPSPACE(local_being->y) * 8 / MAP_DIMENSION);
-        indicators->population_density[y*8+x]++;
+        
+        INDICATOR_INC(sim, IT_POPULATION_DENSITY + (y * 8) + x);
 
         /* affect */
         positive_affect += being_affect(sim,local_being,1);
@@ -670,44 +831,81 @@ static void sim_indicators(noble_simulation * sim)
         }
 #endif
     }
-    indicators->average_brainprobe_activity = indicators->average_brainprobe_activity/(n_uint)sim->num;
-    indicators->average_parasite_mobility = (n_byte2)((n_uint)indicators->average_parasite_mobility*100/sim->num);
-    indicators->average_grooming = (n_byte2)((n_uint)indicators->average_grooming*100/sim->num);
-    indicators->average_shouts = (n_byte2)(((n_uint)(indicators->average_shouts)*100)/sim->num);
-    indicators->average_listens = (n_byte2)(((n_uint)(indicators->average_shouts)*100)/sim->num);
-    indicators->average_chat = (n_byte2)((indicators->average_chat * 100) / sim->num);
-    indicators->average_age_days /= sim->num;
-    indicators->average_energy_input /= sim->num;
-    indicators->average_energy_output /= sim->num;
-    indicators->average_mobility /= (n_byte2)sim->num;
-    indicators->average_social_links = (n_byte2)((social_links*100) / sim->num);
-    indicators->average_positive_affect = (n_uint)((positive_affect*100) / sim->num);
-    indicators->average_negative_affect = (n_uint)((negative_affect*100) / sim->num);
-    indicators->average_energy = (n_byte2)(average_energy / sim->num);
-    indicators->average_first_person = (n_byte2)(average_first_person * 10 / sim->num);
-    indicators->average_intentions = (n_byte2)(average_intentions * 10 / sim->num);
+    
+    INDICATOR_SET(sim, IT_AVERAGE_ANTIGENS, average_antigens);
+    INDICATOR_SET(sim, IT_AVERAGE_ANTIBODIES, average_antibodies);
+    
+    INDICATOR_SET(sim, IT_AVERAGE_SOCIAL_LINKS, social_links);
+
+    INDICATOR_SET(sim, IT_AVERAGE_POSITIVE_AFFECT, positive_affect);
+    INDICATOR_SET(sim, IT_AVERAGE_NEGATIVE_AFFECT, negative_affect);
+    INDICATOR_SET(sim, IT_AVERAGE_ENERGY, average_energy);
+    
+    INDICATOR_SET(sim, IT_AVERAGE_FIRST_PERSON, average_first_person);
+    INDICATOR_SET(sim, IT_AVERAGE_INTENTIONS, average_intentions);
+    
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_PARASITE_MOBILITY, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_GROOMING, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_SHOUTS, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_LISTENS, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_CHAT, 100);
+    
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_SOCIAL_LINKS, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_POSITIVE_AFFECT, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_NEGATIVE_AFFECT, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_ENERGY, 100);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_FIRST_PERSON, 10);
+    INDICATOR_MULTIPLY(sim, IT_AVERAGE_INTENTIONS, 10);
+    
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_PARASITE_MOBILITY);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_GROOMING);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_SHOUTS);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_LISTENS);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_CHAT);
+    
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_SOCIAL_LINKS);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_POSITIVE_AFFECT);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_NEGATIVE_AFFECT);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_ENERGY);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_FIRST_PERSON);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_INTENTIONS);
+
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_AGE_DAYS);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_ENERGY_INPUT);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_ENERGY_OUTPUT);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_MOBILITY);
+    
 #ifdef BRAINCODE_ON
     braincode_statistics(sim);
 #endif
-    if (social_links>0)
+ 
+    if (social_links > 0)
     {
-        indicators->average_cohesion = (n_byte2)((average_cohesion*100) / social_links);
-        indicators->average_familiarity = (n_byte)(average_familiarity / social_links);
-        indicators->average_amorousness = (n_byte)(average_amorousness / social_links);
+        INDICATOR_SET(sim, IT_AVERAGE_COHESION, average_cohesion);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
+        
+        INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, average_familiarity);
+        INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, average_amorousness);
+        
+        INDICATOR_DIVIDE(sim, IT_AVERAGE_COHESION, social_links);
+        INDICATOR_DIVIDE(sim, IT_AVERAGE_FAMILIARITY, social_links);
+        INDICATOR_DIVIDE(sim, IT_AVERAGE_AMOROUSNESS, social_links);
     }
     else
     {
-        indicators->average_cohesion = SOCIAL_RESPECT_NORMAL*100;
-        indicators->average_familiarity=0;
-        indicators->average_amorousness=0;
+        INDICATOR_SET(sim, IT_AVERAGE_COHESION, SOCIAL_RESPECT_NORMAL);
+        INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
     }
-
+    
     /* family name variance */
     for (i=0; i<2; i++)
     {
         family[i]/=sim->num;
     }
+    
     sd = 0;
+    
     for (b=0; b<sim->num; b++)
     {
         local_being = &(sim->beings[b]);
@@ -717,12 +915,17 @@ static void sim_indicators(noble_simulation * sim)
         diff = (n_int)ABS(GET_FAMILY_SECOND_NAME(sim,local_being) - (n_int)family[1]);
         sd += (n_uint)diff;
     }
-    indicators->family_name_sd = (n_byte2)((sd*100) / sim->num);
 
+    INDICATOR_SET(sim, IT_FAMILY_NAME_SD, sd);
+    INDICATOR_MULTIPLY(sim, IT_FAMILY_NAME_SD, 100);
+    INDICATOR_NORMALIZE(sim, IT_FAMILY_NAME_SD);
+    
     /* drives */
     for (i=0; i<DRIVES; i++)
-    {
-        indicators->drives[i] = (n_byte2)((drives[i]*100) / sim->num);
+    {        
+        INDICATOR_SET(sim, IT_DRIVES + i, drives[i]);
+        INDICATOR_MULTIPLY(sim, IT_DRIVES + i, 100);
+        INDICATOR_NORMALIZE(sim, IT_DRIVES + i);
     }
 
     /* genetics variance */
@@ -740,8 +943,11 @@ static void sim_indicators(noble_simulation * sim)
             sd += (n_uint)diff;
         }
     }
-    indicators->genetics_sd = (n_byte2)((sd*100)/sim->num);
 
+    INDICATOR_SET(sim, IT_GENETICS_SD, sd);
+    INDICATOR_MULTIPLY(sim, IT_GENETICS_SD, 100);
+    INDICATOR_NORMALIZE(sim, IT_IDEOLOGY_SD);
+    
     sd = 0;
 #ifdef BRAINCODE_ON
     /* ideology variance */
@@ -762,12 +968,17 @@ static void sim_indicators(noble_simulation * sim)
             sd += (n_uint)diff;
         }
     }
-    indicators->ideology_sd = (n_byte2)(sd/sim->num);
+    
+    INDICATOR_SET(sim, IT_IDEOLOGY_SD, sd);
+    INDICATOR_NORMALIZE(sim, IT_IDEOLOGY_SD);
+    
 #endif
 
 #ifdef IMMUNE_ON
-    indicators->average_antibodies = (n_byte2)(average_antibodies/sim->num);
-    indicators->average_antigens = (n_byte2)(average_antigens/sim->num);
+    
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_ANTIBODIES);
+    INDICATOR_NORMALIZE(sim, IT_AVERAGE_ANTIGENS);
+    
 #endif
 
     if (sim->indicators_logging!=0)
@@ -779,8 +990,24 @@ static void sim_indicators(noble_simulation * sim)
             fp = fopen(filename,"w");
             if (fp!=NULL)
             {
-                fprintf(fp,"%s","Population,Drownings,Parasites,Average Parasite Mobility (x100),Average Chat (x100),Average Age (days),Average Mobility,Average Energy,Average Energy Input,Average Energy Output,Average Amorousness,Average Cohesion (x100),Average Familiarity,Average Social Links (x100),Average Positive Affect (x100),Average Negative Affect (x100),Average Antigens,Average Antibodies,Ideological Variation,Genetic Variation,Family Name Variation,");
-                fprintf(fp,"%s","Average Shouts,Average Listens,Average Grooming (x100),Average Brainprobe Activity (x100),Average Hunger,Average Social Drive,Average Fatigue,Average Sex Drive,Food (Vegetable),Food (Fruit),Food (Shellfish),Food (Seaweed),Average First Person Percent,Average Intentions Percent,Average Braincode Sensors,Average Braincode Actuators,Average Braincode Operators,Average Braincode Conditionals,Average Braincode Data\n");
+                
+                n_int loop = 0;
+                while (loop < IT_NUMBER_ENTRIES)
+                {
+                    n_string indicator_name = INDICATOR_NAME(sim, loop);
+                    if (indicator_name)
+                    {
+                        if (loop < (IT_NUMBER_ENTRIES-1))
+                        {
+                            fprintf(fp,"%s,",indicator_name);
+                        }
+                        else
+                        {
+                            fprintf(fp,"%s\n",indicator_name);
+                        }
+                    }
+                    loop++;
+                }
             }
         }
         else
@@ -790,47 +1017,22 @@ static void sim_indicators(noble_simulation * sim)
         }
         if (fp!=NULL)
         {
-            fprintf(fp,"%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",
-                    (unsigned int)indicators->population,
-                    (unsigned int)indicators->drownings,
-                    (unsigned int)indicators->parasites,
-                    (unsigned int)indicators->average_parasite_mobility,
-                    (unsigned int)indicators->average_chat,
-                    (unsigned int)indicators->average_age_days,
-                    (unsigned int)indicators->average_mobility,
-                    (unsigned int)indicators->average_energy,
-                    (unsigned int)indicators->average_energy_input,
-                    (unsigned int)indicators->average_energy_output,
-                    (unsigned int)indicators->average_amorousness,
-                    (unsigned int)indicators->average_cohesion,
-                    (unsigned int)indicators->average_familiarity,
-                    (unsigned int)indicators->average_social_links,
-                    (unsigned int)indicators->average_positive_affect,
-                    (unsigned int)indicators->average_negative_affect,
-                    (unsigned int)indicators->average_antigens,
-                    (unsigned int)indicators->average_antibodies,
-                    (unsigned int)indicators->ideology_sd,
-                    (unsigned int)indicators->genetics_sd,
-                    (unsigned int)indicators->family_name_sd,
-                    (unsigned int)indicators->average_shouts,
-                    (unsigned int)indicators->average_listens,
-                    (unsigned int)indicators->average_grooming,
-                    (unsigned int)indicators->average_brainprobe_activity,
-                    (unsigned int)indicators->drives[DRIVE_HUNGER],
-                    (unsigned int)indicators->drives[DRIVE_SOCIAL],
-                    (unsigned int)indicators->drives[DRIVE_FATIGUE],
-                    (unsigned int)indicators->drives[DRIVE_SEX],
-                    (unsigned int)indicators->food[FOOD_VEGETABLE],
-                    (unsigned int)indicators->food[FOOD_FRUIT],
-                    (unsigned int)indicators->food[FOOD_SHELLFISH],
-                    (unsigned int)indicators->food[FOOD_SEAWEED],
-                    (unsigned int)indicators->average_first_person,
-                    (unsigned int)indicators->average_intentions,
-                    (unsigned int)indicators->average_sensors,
-                    (unsigned int)indicators->average_actuators,
-                    (unsigned int)indicators->average_operators,
-                    (unsigned int)indicators->average_conditionals,
-                    (unsigned int)indicators->average_data);
+            n_int loop = 0;
+            while (loop < IT_NUMBER_ENTRIES)
+            {
+                if (INDICATOR_NAME(sim, loop))
+                {
+                    if (loop < (IT_NUMBER_ENTRIES-1))
+                    {
+                        fprintf(fp,"%lu,",INDICATOR_ACCESS(sim, loop));
+                    }
+                    else
+                    {
+                        fprintf(fp,"%lu\n",INDICATOR_ACCESS(sim, loop));
+                    }
+                }
+                loop++;
+            }
             fclose(fp);
         }
     }
@@ -842,9 +1044,7 @@ static void sim_indicators(noble_simulation * sim)
         sim->indicator_index = 0;
     }
 
-    indicators = &(sim->indicators_base[sim->indicator_index]);
-
-    io_erase((n_byte *)indicators, sizeof(noble_indicators));
+    io_erase((n_byte *) &(sim->indicators_base[sim->indicator_index * IT_NUMBER_ENTRIES]), IT_NUMBER_ENTRIES*sizeof(n_uint));
 }
 
 /* this is a protoype for the order of these functions it is not used here explicitly */
@@ -887,11 +1087,11 @@ void sim_cycle(void)
 
 #ifdef BRAIN_ON
 
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
 
 #else
 
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
 
 #endif
 
@@ -936,9 +1136,9 @@ static void sim_memory(n_uint offscreen_size)
     sim.max = LARGE_SIM;
 #else
 #ifdef BRAIN_ON
-    sim.max = memory_allocated / (sizeof(noble_being) + DOUBLE_BRAIN + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory)) + INDICATORS_BUFFER_SIZE * sizeof(noble_indicators));
+    sim.max = memory_allocated / (sizeof(noble_being) + DOUBLE_BRAIN + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory)));
 #else
-    sim.max = memory_allocated / (sizeof(noble_being) + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory)) + INDICATORS_BUFFER_SIZE * sizeof(noble_indicators));
+    sim.max = memory_allocated / (sizeof(noble_being) + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory));
 #endif
 #endif
     sim.beings = (noble_being *) & offbuffer[ current_location ];
@@ -967,10 +1167,62 @@ static void sim_memory(n_uint offscreen_size)
 #endif
         lpx ++;
     }
-    sim.indicators_base = (noble_indicators*)&offbuffer[ current_location  ];
-    io_erase((n_byte *)sim.indicators_base, INDICATORS_BUFFER_SIZE * sizeof(noble_indicators));
+    io_erase((n_byte *)sim.indicators_base, INDICATORS_BUFFER_SIZE * IT_NUMBER_ENTRIES);
     sim.indicator_index = 0;
     sim.indicators_logging=0;
+                             
+    io_erase((n_byte *)sim.indicators_name, sizeof(n_string) * IT_NUMBER_ENTRIES);
+
+    /* By setting these names, these indicate the values to be outputted. Set more to get more! */
+                                  
+    INDICATOR_INIT_NAME(sim, IT_POPULATION,"Population");
+    INDICATOR_INIT_NAME(sim, IT_DROWNINGS,"Drownings");
+    INDICATOR_INIT_NAME(sim, IT_PARASITES,"Parasites");
+                                  
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_PARASITE_MOBILITY,"Average Parasite Mobility (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_CHAT,"Average Chat (x100)");
+                                  
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_AGE_DAYS,"Average Age (days)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_MOBILITY,"Average Mobility");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_ENERGY,"Average Energy (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_ENERGY_INPUT,"Average Energy Input");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_ENERGY_OUTPUT,"Average Energy Output");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_AMOROUSNESS,"Average Amorousness");
+
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_FAMILIARITY,"Average Familiarity");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_COHESION,"Average Cohesion (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_SOCIAL_LINKS,"Average Social Links (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_POSITIVE_AFFECT,"Average Positive Affect (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_NEGATIVE_AFFECT,"Average Negative Affect (x100)");
+                                  
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_ANTIGENS,"Average Antigens");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_ANTIBODIES,"Average Antibodies");
+                                  
+    INDICATOR_INIT_NAME(sim, IT_IDEOLOGY_SD,"Ideological Variation");
+    INDICATOR_INIT_NAME(sim, IT_GENETICS_SD,"Genetic Variation (x100)");
+    INDICATOR_INIT_NAME(sim, IT_FAMILY_NAME_SD,"Family Name Variation (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_SHOUTS,"Average Shouts (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_LISTENS,"Average Listens (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_GROOMING,"Average Grooming (x100)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY,"Average Brainprobe Activity (x100)");
+                                  
+    INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_HUNGER,"Average Hunger (x100)");
+    INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_SOCIAL,"Average Social Drive (x100)");
+    INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_FATIGUE,"Average Fatigue (x100)");
+    INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_SEX,"Average Sex Drive (x100)");
+                                  
+    INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_VEGETABLE,"Food (Vegetable)");
+    INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_FRUIT,"Food (Fruit)");
+    INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_SHELLFISH,"Food (Shellfish)");
+    INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_SEAWEED,"Food (Seaweed)");
+                                  
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_FIRST_PERSON,"Average First Person (x10)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_INTENTIONS,"Average Intentions (x10)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_SENSORS,"Average Braincode Sensors (x10)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_ACTUATORS,"Average Braincode Actuators (x10)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_OPERATORS,"Average Braincode Operators (x10)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_CONDITIONALS,"Average Braincode Conditionals (x10)");
+    INDICATOR_INIT_NAME(sim, IT_AVERAGE_DATA,"Average Braincode Data (x10)");
 }
 
 #ifndef SMALL_LAND
@@ -1116,7 +1368,7 @@ void sim_flood(void)
         
         if (local_z < 160)
         {
-            GET_E(local) = 0;
+            GET_E(local) = BEING_DEAD;
         }
         
         loop++;
@@ -1130,7 +1382,7 @@ void sim_healthy_carrier(void)
     while (loop < sim.num)
     {
         noble_being * local = &sim.beings[loop];
-        GET_E(local) = 0;
+        GET_E(local) = BEING_DEAD;
         loop++;
     }
 }

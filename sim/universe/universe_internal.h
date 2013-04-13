@@ -36,8 +36,8 @@
 
 /*NOBLEMAKE VAR=""*/
 
-#ifndef _NOBLEAPE_UNIVERSE_INTERNAL_H_
-#define _NOBLEAPE_UNIVERSE_INTERNAL_H_
+#ifndef NOBLEAPE_UNIVERSE_INTERNAL_H
+#define NOBLEAPE_UNIVERSE_INTERNAL_H
 
 
 #define USE_FIL_VER
@@ -55,7 +55,7 @@
 
 /* Time definitions */
 
-#define GENERATIONS_BYTES (sizeof(n_uint)*3)
+#define GENERATIONS_BYTES (sizeof(n_uint)*GENERATION_TOTAL)
 #define DRIVES_BYTES    (DRIVES)
 #define GOALS_BYTES	(sizeof(n_byte2)*3)
 
@@ -140,15 +140,17 @@
 
 #define	LARGEST_INIT_PTR	((NON_PTR_BEING > NON_PTR_LAND) ? NON_PTR_BEING : NON_PTR_LAND)
 
-#define FIL_VER (0x10)
-#define FIL_LAN (0x20)
-#define FIL_BEI (0x30)
-#define FIL_SOE (0x40)
-#define FIL_EPI (0x50)
-#define FIL_WEA (0x60)
-#define FIL_BRA (0x70)
-#define FIL_END (0x80)
-
+enum file_section_type
+{
+    FIL_VER = (0x10),
+    FIL_LAN = (0x20),
+    FIL_BEI = (0x30),
+    FIL_SOE = (0x40),
+    FIL_EPI = (0x50),
+    FIL_WEA = (0x60),
+    FIL_BRA = (0x70),
+    FIL_END = (0x80)
+};
 
 const static noble_file_entry noble_file_format[]=
 {
@@ -305,168 +307,6 @@ const static noble_file_entry noble_file_format[]=
 
 };
 
-static variable_string	variable_codes[VARIABLE_MAX]=
-{
-    /* 0 */ /* special "variables" */
-    "function",
-    "run",
-
-    /* 2 */
-    "while",
-    "if",
-
-    /* output only */
-    "vector_x",
-    "vector_y",
-    /* 6 */
-    "random",
-    "water_level",
-
-    "biology_area",
-    "biology_height",
-
-    "biology_water",
-    "biology_moving_sun",
-
-    "biology_total_sun",
-    "biology_salt",
-    "biology_bush",
-
-    "biology_grass",
-    "biology_tree",
-
-    "biology_seaweed",
-    "biology_rockpool",
-    "biology_beach",
-
-    "biology_insect",
-    "biology_mouse",
-
-    "biology_parrot",
-    "biology_lizard",
-
-    "biology_eagle",
-    "biology_output",
-
-    "hungry",
-    "location_z",
-    /* 10 */
-    "test_z",
-    "is_visible",
-
-    "time",
-    "date",
-    /* 14 */
-    "current_being",
-    "number_beings",
-
-    "location_x",
-    "location_y",
-
-    "state",  /* new ! */
-    "listen", /* new ! */
-
-    /* 18 */
-    "id_number",
-    "date_of_birth",
-
-    "weather",
-    "brain_value",		/* special input/output */
-    /* actual variables start here */
-    /* 22 */
-    "vector_angle",
-    "facing",
-
-    "speed",
-    "energy",
-
-    "honor",
-    "parasites",
-    "height",
-
-    "first_name",
-    "family_name_one",
-    "family_name_two",
-
-    "goal_type",
-    "goal_x",
-    "goal_y",
-
-    "drive_hunger",
-    "drive_social",
-    "drive_fatigue",
-    "drive_sex",
-
-    "speak", /* new ! */
-
-    /* 26 */
-    "brain_x",
-    "brain_y",
-
-    "brain_z",
-    "select_being",
-    /* 30 */
-    "test_x",
-    "test_y",
-
-    "biology_operator",
-
-    "posture",
-
-    "preference_mate_height_male",
-    "preference_mate_height_female",
-    "preference_mate_pigment_male",
-    "preference_mate_pigment_female",
-    "preference_mate_hair_male",
-    "preference_mate_hair_female",
-    "preference_mate_frame_male",
-    "preference_mate_frame_female",
-    "preference_groom_male",
-    "preference_groom_female",
-    "preference_anecdote_event",
-    "preference_anecdote_affect",
-    "preference_chat",
-
-    "attention_actor_index",
-    "attention_episode_index",
-    "attention_body_index",
-
-    "shout_content",
-    "shout_heard",
-    "shout_counter",
-    "shout_volume",
-    "shout_family_first",
-    "shout_family_last",
-
-    "social_graph_location_x",
-    "social_graph_location_y",
-    "social_graph_time",
-    "social_graph_date",
-    "social_graph_century",
-    "social_graph_attraction",
-    "social_graph_fof",
-    "social_graph_familiarity",
-    "social_graph_first_name",
-    "social_graph_family_first",
-    "social_graph_family_last",
-
-    "memory_location_x",
-    "memory_location_y",
-    "memory_time",
-    "memory_date",
-    "memory_century",
-    "memory_first_name_zero",
-    "memory_family_first_zero",
-    "memory_family_last_zero",
-    "memory_first_name_one",
-    "memory_family_first_one",
-    "memory_family_last_one",
-    "memory_event",
-    "memory_affect",
-
-    "being"
-};
-
 #define	BRAIN_LOCATION(lx, ly, lz)	(BRAIN_OFFSET((lx)|((ly)<<5)|((lz)<<10)))
 
 #define	TRACK_BRAIN(loc,lx,ly,lz)	((loc)[BRAIN_LOCATION(lx, ly, lz)])
@@ -484,6 +324,6 @@ void console_external_watch(void);
 n_int console_executing(void);
 
 
-#endif /* _NOBLEAPE_UNIVERSE_INTERNAL_H_ */
+#endif /* NOBLEAPE_UNIVERSE_INTERNAL_H */
 
 /*NOBLEMAKE END=""*/

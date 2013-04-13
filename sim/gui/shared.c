@@ -81,7 +81,7 @@ static void shared_squared_cycle(n_uint ticks, n_int fIdentification)
 
 void shared_cycle(n_uint ticks, n_int fIdentification)
 {    
-    ticks = ticks & 67108863; // 71 58 27 88
+    ticks = ticks & 67108863; /* 71 58 27 88 */
     ticks *= 60;
     
     if(fIdentification == NUM_TERRAIN)
@@ -99,7 +99,7 @@ void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification)
 {
     shared_squared_cycle(ticks, fIdentification);
     
-    ticks = ticks & 67108863; // 71 58 27 88
+    ticks = ticks & 67108863; /* 71 58 27 88 */
     ticks *= 60;
     
     if(fIdentification == NUM_TERRAIN)

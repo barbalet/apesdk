@@ -1143,7 +1143,7 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     if (local_speed > 39) local_speed = 39;
     if (local_speed < 0)  local_speed = 0;
 
-    if (local_energy < 0) local_energy = 0;
+    if (local_energy < BEING_DEAD) local_energy = BEING_DEAD;
     if (local_energy > BEING_FULL) local_energy = BEING_FULL;
 
     if (local_speak < 0)      local_speak = 0;
