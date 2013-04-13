@@ -879,12 +879,6 @@ static void sim_indicators(noble_simulation * sim)
 #ifdef BRAINCODE_ON
     braincode_statistics(sim);
 #endif
-
-    INDICATOR_SET(sim, IT_AVERAGE_COHESION, average_cohesion);
-    INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
-    
-    INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, average_familiarity);
-    INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, average_amorousness);
  
     if (social_links > 0)
     {
