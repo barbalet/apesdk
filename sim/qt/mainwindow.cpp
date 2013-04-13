@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionViewRelationships,SIGNAL(triggered()),this,SLOT(menuViewRelationships()));
     connect(ui->actionViewPreferences,SIGNAL(triggered()),this,SLOT(menuViewPreferences()));
     connect(ui->actionViewPhasespace,SIGNAL(triggered()),this,SLOT(menuViewPhasespace()));
+    connect(ui->actionViewVascular,SIGNAL(triggered()),this,SLOT(menuViewVascular()));
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
     connect(ui->actionNew,SIGNAL(triggered()),this,SLOT(menuNew()));
@@ -412,6 +413,19 @@ bool MainWindow::refresh()
         img_height = WND_HEIGHT_MAP;
         break;
     }
+    case WND_VASCULAR:
+    {
+        graph_vascular(&(sim_sim()->beings[sim_sim()->select]), img_graph,
+                       WND_WIDTH_MAP, WND_HEIGHT_MAP,
+                       WND_WIDTH_MAP*10/100,WND_HEIGHT_MAP*10/100,
+                       WND_WIDTH_MAP*40/100,WND_HEIGHT_MAP*90/100,
+                       1, 1);
+        img = img_graph;
+        format = QImage::Format_RGB888;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
     }
 
     if (img == NULL)
@@ -546,6 +560,11 @@ void MainWindow::menuViewPreferences()
 void MainWindow::menuViewPhasespace()
 {
     menuView(WND_PHASESPACE,0);
+}
+
+void MainWindow::menuViewVascular()
+{
+    menuView(WND_VASCULAR,0);
 }
 
 

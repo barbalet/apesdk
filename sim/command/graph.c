@@ -53,8 +53,13 @@
 #include <stdio.h>
 #include "command.h"
 
+
 /* draws a line */
-static void graph_line(n_byte * buffer, n_int img_width, n_int img_height, n_int prev_x, n_int prev_y, n_int x, n_int y, n_byte r,n_byte g,n_byte b,n_byte thickness)
+static void graph_line(n_byte * buffer,
+                       n_int img_width, n_int img_height,
+                       n_int prev_x, n_int prev_y, n_int x, n_int y,
+                       n_byte r, n_byte g, n_byte b,
+                       n_byte thickness)
 {
     n_int i,max;
 
@@ -84,6 +89,178 @@ static void graph_line(n_byte * buffer, n_int img_width, n_int img_height, n_int
                 buffer[n+2] = b;
             }
         }
+    }
+}
+
+static void graph_fill_polygon(n_int * points, n_int no_of_points,
+                               n_byte r, n_byte g, n_byte b, n_byte transparency,
+                               n_byte * buffer, n_int img_width, n_int img_height)
+{
+    const n_int MAX_POLYGON_CORNERS = 1000;
+    n_int nodes, nodeX[MAX_POLYGON_CORNERS], i, j, swap, n, x, y;
+    n_int min_x = 99999, min_y = 99999;
+    n_int max_x = -99999, max_y = -99999;
+
+    for (i = 0; i < no_of_points; i++)
+    {
+        x = points[i*2];
+        y = points[i*2+1];
+        if ((x==9999) || (y==9999)) continue;
+        if (x < min_x) min_x = x;
+        if (y < min_y) min_y = y;
+        if (x > max_x) max_x = x;
+        if (y > max_y) max_y = y;
+    }
+
+    if (min_x < 0) min_x = 0;
+    if (min_y < 0) min_y = 0;
+    if (max_x >= img_width) max_x = img_width-1;
+    if (max_y >= img_height) max_y = img_height-1;
+
+    for (y = min_y; y <= max_y; y++)
+    {
+        /*  Build a list of nodes */
+        nodes = 0;
+        j = no_of_points-1;
+        for (i = 0; i < no_of_points; i++)
+        {
+            if (((points[i*2+1] < y) && (points[j*2+1] >= y)) ||
+                ((points[j*2+1] < y) && (points[i*2+1] >= y)))
+            {
+                nodeX[nodes++] =
+                        points[i*2] + (y - points[i*2+1]) *
+                        (points[j*2] - points[i*2]) /
+                        (points[j*2+1] - points[i*2+1]);
+            }
+            j = i;
+            if (nodes == MAX_POLYGON_CORNERS) break;
+        }
+
+        /*  Sort the nodes, via a simple “Bubble” sort */
+        i = 0;
+        while (i < nodes-1)
+        {
+            if (nodeX[i] > nodeX[i+1])
+            {
+                swap = nodeX[i];
+                nodeX[i] = nodeX[i+1];
+                nodeX[i+1] = swap;
+                if (i) i--;
+            }
+            else
+            {
+                i++;
+            }
+        }
+
+        /*  Fill the pixels between node pairs */
+        for (i = 0; i < nodes; i += 2)
+        {
+            if (nodeX[i] >= max_x) break;
+            if (nodeX[i+1] > min_x)
+            {
+                /* range check */
+                if (nodeX[i] <= min_x) nodeX[i] = min_x+1;
+                if (nodeX[i+1] >= max_x) nodeX[i+1] = max_x-1;
+
+                for (x = nodeX[i]; x < nodeX[i+1]; x++)
+                {
+                    n = ((y*img_width)+x)*3;
+                    if (transparency == 0)
+                    {
+                        buffer[n] = b;
+                        buffer[n+1] = g;
+                        buffer[n+2] = r;
+                    }
+                    else
+                    {
+                        buffer[n] = ((b*(255-transparency)) + (buffer[n]*transparency))/256;
+                        buffer[n+1] = ((g*(255-transparency)) + (buffer[n+1]*transparency))/256;
+                        buffer[n+2] = ((r*(255-transparency)) + (buffer[n+2]*transparency))/256;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void graph_vascular(noble_being * being,
+                    n_byte * buffer,
+                    n_int img_width, n_int img_height,
+                    n_int tx, n_int ty, n_int bx, n_int by,
+                    n_byte thickness,
+                    n_byte clear)
+{
+    n_int keypoints[SKELETON_POINTS*2];
+    n_int skeleton_points[8000];
+    n_int min_x = 99999, min_y = 99999;
+    n_int max_x = -99999, max_y = -99999;
+    n_int x,y,prev_x=0,prev_y=0,i,no_of_points,first_point=0,ctr=0;
+    n_byte r=150, g=150, b=150, bone_shade=220;
+
+    /* clear the image if necessary */
+    if (clear != 0)
+    {
+        for (i = 0; i < img_width*img_height*3; i++)
+        {
+            buffer[i] = 255;
+        }
+    }
+
+    /* get points on the skeleton */
+    no_of_points = body_skeleton_points(being, keypoints, skeleton_points);
+
+    /* get the bounding box for the points */
+    for (i = 0; i < no_of_points; i++)
+    {
+        x = skeleton_points[i*2];
+        y = skeleton_points[i*2+1];
+        if ((x==9999) || (y==9999)) continue;
+        if (x < min_x) min_x = x;
+        if (y < min_y) min_y = y;
+        if (x > max_x) max_x = x;
+        if (y > max_y) max_y = y;
+    }
+
+    for (i = 0; i < no_of_points; i++)
+    {
+        if (skeleton_points[i*2] != 9999)
+        {
+            skeleton_points[i*2] = tx + ((skeleton_points[i*2] - min_x)*(bx - tx)/(max_x - min_x));
+            skeleton_points[i*2+1] = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+        }
+    }
+
+    for (i = 0; i < no_of_points; i++)
+    {
+        x = skeleton_points[i*2];
+        y = skeleton_points[i*2+1];
+        if (i > 0)
+        {
+            if ((x!=9999) && (prev_x!=9999))
+            {
+                if (first_point == -1)
+                {
+                    first_point = i;
+                }
+                graph_line(buffer, img_width, img_height,
+                           prev_x, prev_y, x, y,
+                           r, g, b, thickness);
+            }        
+            else
+            {
+                if ((first_point > -1) && (i - first_point > 2))
+                {
+                    graph_fill_polygon(&skeleton_points[first_point*2], i - first_point,
+                                       bone_shade, bone_shade, bone_shade, 127,
+                                       buffer, img_width, img_height);
+                    ctr++;
+                }
+                first_point = -1;
+            }
+        }
+        prev_x = x;
+        prev_y = y;
     }
 }
 
@@ -658,11 +835,13 @@ static void graph_genespace_coords(noble_being * local_being, n_uint * x, n_uint
 static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type)
 {
 #ifdef PARASITES_ON
-    const int grid = 32;
     n_uint i,x=0,y=0,n;
 
     /* clear the image */
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
+	for (i = 0; i < img_width*img_height*3; i++)
+	{
+		buffer[i] = 255;
+	}
 
     for (i=0; i<sim->num; i++)
     {
