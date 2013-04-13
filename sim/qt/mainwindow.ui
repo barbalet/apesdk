@@ -62,6 +62,7 @@
     <addaction name="actionViewRelationships"/>
     <addaction name="actionViewPreferences"/>
     <addaction name="actionViewPhasespace"/>
+    <addaction name="actionViewVascular"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -281,6 +282,11 @@
   <action name="actionViewPhasespace">
    <property name="text">
     <string>Phasespace</string>
+   </property>
+  </action>
+  <action name="actionViewVascular">
+   <property name="text">
+    <string>Vascular</string>
    </property>
   </action>
  </widget>

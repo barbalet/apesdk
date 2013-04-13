@@ -53,8 +53,13 @@
 #include <stdio.h>
 #include "command.h"
 
+
 /* draws a line */
-static void graph_line(n_byte * buffer, n_int img_width, n_int img_height, n_int prev_x, n_int prev_y, n_int x, n_int y, n_byte r,n_byte g,n_byte b,n_byte thickness)
+static void graph_line(n_byte * buffer,
+                       n_int img_width, n_int img_height,
+                       n_int prev_x, n_int prev_y, n_int x, n_int y,
+                       n_byte r,n_byte g,n_byte b,
+                       n_byte thickness)
 {
     n_int i,max;
 
@@ -84,6 +89,62 @@ static void graph_line(n_byte * buffer, n_int img_width, n_int img_height, n_int
                 buffer[n+2] = b;
             }
         }
+    }
+}
+
+void graph_vascular(noble_being * being,
+                    n_byte * buffer,
+                    n_int img_width, n_int img_height,
+                    n_int tx, n_int ty, n_int bx, n_int by,
+                    n_byte thickness,
+                    n_byte clear)
+{
+    n_int keypoints[SKELETON_POINTS*2];
+    n_int skeleton_points[8000];
+    n_int min_x = 99999, min_y = 99999;
+    n_int max_x = -99999, max_y = -99999;
+    n_int x,y,prev_x=0,prev_y=0,i,no_of_points;
+    n_byte r=150, g=150, b=150;
+
+    /* clear the image if necessary */
+    if (clear != 0)
+    {
+        for (i = 0; i < img_width*img_height*3; i++)
+        {
+            buffer[i] = 255;
+        }
+    }
+
+    /* get points on the skeleton */
+    no_of_points = body_skeleton_points(being, keypoints, skeleton_points);
+
+    /* get the bounding box for the points */
+    for (i = 0; i < no_of_points; i++)
+    {
+        x = skeleton_points[i*2];
+        y = skeleton_points[i*2+1];
+        if ((x==9999) || (y==9999)) continue;
+        if (x < min_x) min_x = x;
+        if (y < min_y) min_y = y;
+        if (x > max_x) max_x = x;
+        if (y > max_y) max_y = y;
+    }
+
+    for (i = 0; i < no_of_points; i++)
+    {
+        x = tx + ((skeleton_points[i*2] - min_x)*(bx - tx)/(max_x - min_x));
+        y = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+        if (i > 0)
+        {
+            if ((skeleton_points[i*2]!=9999) && (skeleton_points[i*2-2]!=9999))
+            {
+                graph_line(buffer, img_width, img_height,
+                           prev_x, prev_y, x, y,
+                           r, g, b, 1);
+            }
+        }
+        prev_x = x;
+        prev_y = y;
     }
 }
 

@@ -20,6 +20,9 @@ SOURCES += main.cpp\
         ../entity/*.c\
         ../command/*.c
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    ../command/command.h \
+    ../entity/entity_internal.h \
+    ../entity/entity.h
 
 FORMS    += mainwindow.ui
