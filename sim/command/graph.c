@@ -97,7 +97,7 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
                                n_byte * buffer, n_int img_width, n_int img_height)
 {
     const n_int MAX_POLYGON_CORNERS = 1000;
-    n_int nodes, nodeX[MAX_POLYGON_CORNERS], i, j, swap, n, x, y;
+    n_int nodes, nodeX[MAX_POLYGON_CORNERS]={0}, i, j, swap, n, x, y;
     n_int min_x = 99999, min_y = 99999;
     n_int max_x = -99999, max_y = -99999;
 
@@ -226,8 +226,11 @@ void graph_vascular(noble_being * being,
     {
         if (skeleton_points[i*2] != 9999)
         {
-            skeleton_points[i*2] = tx + ((skeleton_points[i*2] - min_x)*(bx - tx)/(max_x - min_x));
-            skeleton_points[i*2+1] = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+            if ((max_x - min_x) && (max_y - min_y))
+            {
+                skeleton_points[i*2] = tx + ((skeleton_points[i*2] - min_x)*(bx - tx)/(max_x - min_x));
+                skeleton_points[i*2+1] = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+            }
         }
     }
 

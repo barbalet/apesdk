@@ -56,7 +56,6 @@ enum sleep_state
 
 void body_genome_random(noble_simulation * sim, noble_being * local, n_byte2 * local_random);
 void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mother, n_byte2 * local_random);
-n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points);
 
 n_int food_eat(
     n_land * local_land,

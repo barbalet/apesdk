@@ -250,11 +250,12 @@ static void outline_points(const n_int * source_points,
         px = x + (n_int)(point_length*sin(ang+point_angle-axis_angle));
         py = y + (n_int)(point_length*cos(ang+point_angle-axis_angle));
 
-        if (i < no_of_source_points + 2)
+        if ((i < no_of_source_points + 2) && no_of_points && points)
         {
-            points[(*no_of_points)*2] = px;
-            points[(*no_of_points)*2+1] = py;
-            *no_of_points = *no_of_points + 1;
+            n_int local_no_of_points = (*no_of_points);
+            points[local_no_of_points*2] = px;
+            points[local_no_of_points*2+1] = py;
+            *no_of_points = local_no_of_points + 1;
         }
 
         *extra_x1 = *extra_x2;
@@ -266,10 +267,14 @@ static void outline_points(const n_int * source_points,
         *extra_x4 = px;
         *extra_y4 = py;
     }
+    if ((no_of_points) && (points))
+    {
+        n_int local_no_of_points = (*no_of_points);
 
-    points[(*no_of_points)*2] = 9999;
-    points[(*no_of_points)*2+1] = 9999;
-    *no_of_points = *no_of_points + 1;
+        points[local_no_of_points*2] = 9999;
+        points[local_no_of_points*2+1] = 9999;
+        *no_of_points = local_no_of_points + 1;
+    }
 }
 
 /* returns a set of points corresponding to key locations on the skeleton */

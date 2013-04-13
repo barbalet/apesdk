@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A13678E171A175E001F2BF9 /* genealogy.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A13678C171A175E001F2BF9 /* genealogy.c */; };
+		4A13678F171A175E001F2BF9 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A13678D171A175E001F2BF9 /* graph.c */; };
 		4A36001817124025004DAFBA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A36001717124025004DAFBA /* Cocoa.framework */; };
 		4A36002217124025004DAFBA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A36002017124025004DAFBA /* InfoPlist.strings */; };
 		4A36002B17124025004DAFBA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A36002A17124025004DAFBA /* AppDelegate.m */; };
@@ -40,6 +42,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4A13678B171A175E001F2BF9 /* command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = command.h; sourceTree = "<group>"; };
+		4A13678C171A175E001F2BF9 /* genealogy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = genealogy.c; sourceTree = "<group>"; };
+		4A13678D171A175E001F2BF9 /* graph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = graph.c; sourceTree = "<group>"; };
 		4A36001417124025004DAFBA /* MacSimulation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSimulation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A36001717124025004DAFBA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A36001A17124025004DAFBA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -101,10 +106,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A13678A171A175E001F2BF9 /* command */ = {
+			isa = PBXGroup;
+			children = (
+				4A13678B171A175E001F2BF9 /* command.h */,
+				4A13678C171A175E001F2BF9 /* genealogy.c */,
+				4A13678D171A175E001F2BF9 /* graph.c */,
+			);
+			name = command;
+			path = sim/command;
+			sourceTree = "<group>";
+		};
 		4A36000B17124025004DAFBA = {
 			isa = PBXGroup;
 			children = (
 				4A360076171240F1004DAFBA /* nobleape.icns */,
+				4A13678A171A175E001F2BF9 /* command */,
 				4A3600341712409A004DAFBA /* entity */,
 				4A3600401712409A004DAFBA /* gui */,
 				4A3600471712409A004DAFBA /* mac */,
@@ -327,6 +344,8 @@
 				4A3600731712409A004DAFBA /* console.c in Sources */,
 				4A3600741712409A004DAFBA /* file.c in Sources */,
 				4A3600751712409A004DAFBA /* sim.c in Sources */,
+				4A13678E171A175E001F2BF9 /* genealogy.c in Sources */,
+				4A13678F171A175E001F2BF9 /* graph.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
