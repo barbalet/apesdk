@@ -217,8 +217,8 @@ static void outline_points(const n_int * source_points,
     n_int i, px=0,py=0,dx,dy,axis_length,point_length;
     n_int pivot_x = source_points[0];
     n_int pivot_y = source_points[1];
-    float axis_angle, point_angle;
-    float ang = angle*3.1415927f/3600;
+    n_double axis_angle, point_angle;
+    n_double ang = angle * TWO_PI / 7200;
 
     dx = (source_points[2] - pivot_x)*scale_width/1000;
     dy = (source_points[3] - pivot_y)*scale_length/1000;
@@ -228,11 +228,11 @@ static void outline_points(const n_int * source_points,
     {
         dx = -dx;
     }
-    axis_angle = (float)acos(dx/(float)axis_length);
-    if (dy < 0) axis_angle = (2*3.1415927f)-axis_angle;
+    axis_angle = acos(dx / axis_length);
+    if (dy < 0) axis_angle = (TWO_PI)-axis_angle;
 
-    *axis_x = x + (n_int)(axis_length*sin(ang+(3.1415927f/2)-axis_angle));
-    *axis_y = y + (n_int)(axis_length*cos(ang+(3.1415927f/2)-axis_angle));
+    *axis_x = x + (n_int)(axis_length*sin(ang+(TWO_PI/4)-axis_angle));
+    *axis_y = y + (n_int)(axis_length*cos(ang+(TWO_PI/4)-axis_angle));
 
     for (i = 2; i < no_of_source_points + 2 + extra_points; i++)
     {
@@ -244,8 +244,8 @@ static void outline_points(const n_int * source_points,
         {
             dx = -dx;
         }
-        point_angle = (float)acos(dx/(float)point_length);
-        if (dy < 0) point_angle = (2*3.1415927f)-point_angle;
+        point_angle = acos(dx / point_length);
+        if (dy < 0) point_angle = (TWO_PI)-point_angle;
 
         px = x + (n_int)(point_length*sin(ang+point_angle-axis_angle));
         py = y + (n_int)(point_length*cos(ang+point_angle-axis_angle));

@@ -45,15 +45,10 @@
 #include "math.h"
 /*NOBLEMAKE END=""*/
 
-typedef	double	n_double;
-typedef	double	n_float;
-
-#define TWO_PI (6.2831853071795864769252867665590057683943L)
-
-static n_float frequency[AUDIO_FFT_MAX_BUFFER];
-static n_float timedomain[AUDIO_FFT_MAX_BUFFER];
-static n_float frequencyi[AUDIO_FFT_MAX_BUFFER];
-static n_float timedomaini[AUDIO_FFT_MAX_BUFFER];
+static n_double frequency[AUDIO_FFT_MAX_BUFFER];
+static n_double timedomain[AUDIO_FFT_MAX_BUFFER];
+static n_double frequencyi[AUDIO_FFT_MAX_BUFFER];
+static n_double timedomaini[AUDIO_FFT_MAX_BUFFER];
 
 static n_uint	audio_reverse_bits (n_uint index, n_uint power_sample)
 {

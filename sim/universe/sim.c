@@ -1156,7 +1156,7 @@ static void sim_memory(n_uint offscreen_size)
     current_location += (sizeof(n_uint)*2) + (sim.max * (SOCIAL_SIZE * sizeof(social_link)));
     sim.episodic_base = (episodic_memory *) &offbuffer[current_location];
     io_erase((n_byte *)sim.episodic_base, sim.max * (EPISODIC_SIZE * sizeof(episodic_memory)));
-    current_location += (sizeof(n_uint)*2) + (sim.max * (EPISODIC_SIZE * sizeof(episodic_memory)));
+    /*current_location += (sizeof(n_uint)*2) + (sim.max * (EPISODIC_SIZE * sizeof(episodic_memory))); current_location never read */
     while (lpx < sim.max)
     {
         noble_being * local = &(sim.beings[ lpx ]);
