@@ -40,12 +40,15 @@
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../entity/entity.h"
+#include "../command/command.h"
 
 #else
 
 #include "..\noble\noble.h"
 #include "..\universe\universe.h"
 #include "..\entity\entity.h"
+#include "..\command\command.h"
+
 
 #endif
 
@@ -330,6 +333,9 @@ n_byte * draw_pointer(n_byte which_one)
         break;
     case NUM_VIEW:
         return VIEWWINDOW(local_buffer);
+        break;
+    case NUM_GRAPH:
+        return GRAPHWINDOW(local_buffer);
         break;
     }
     return 0L;
@@ -1565,9 +1571,12 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
 #ifdef THREADED
     sim_draw_thread_start();
 #endif
-        
-    draw_apes(local_sim, window);    /* 8 */
-
+    
+    if (window != NUM_GRAPH)
+    {
+        draw_apes(local_sim, window);    /* 8 */
+    }
+    
     if (window == NUM_TERRAIN)
     {
 
@@ -1584,7 +1593,7 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
             console_populate_braincode(local_sim, draw_line_braincode);
         }
     }
-    else
+    if (window == NUM_VIEW)
     {
         
 #ifdef WEATHER_ON
@@ -1593,6 +1602,17 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
            draw_weather(local_sim); /* 10 */
         }
 #endif
+    }
+    if (window == NUM_GRAPH)
+    {
+        if (local_sim->select != NO_BEINGS_FOUND)
+        {
+            graph_vascular(&local_sim->beings[local_sim->select], draw_pointer(NUM_GRAPH),
+                           dim_x, dim_y,
+                           dim_x*10/100,dim_y*10/100,
+                           dim_x*40/100,dim_y*90/100,
+                           1, 1);
+        }
     }
 #ifdef THREADED
     sim_draw_thread_end();

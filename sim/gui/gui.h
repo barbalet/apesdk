@@ -38,15 +38,15 @@
 #ifndef NOBLEAPE_GUI_H
 #define NOBLEAPE_GUI_H
 
-#define	OFFSCREENSIZE				(MAP_AREA + TERRAIN_WINDOW_AREA)
-
 #define	TERRAINWINDOW(alpha)   (alpha)
 #define	VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA)
+#define GRAPHWINDOW(alpha)     (alpha + (MAP_AREA + TERRAIN_WINDOW_AREA))
 
 enum window_num
 {
     NUM_TERRAIN = (0),
-    NUM_VIEW	= (1)
+    NUM_VIEW	= (1),
+    NUM_GRAPH   = (2)
 };
 
 #define IS_WINDOW_KIND(x,y)			(((x)>>(y))&1)

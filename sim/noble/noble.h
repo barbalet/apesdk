@@ -348,7 +348,11 @@ enum window_information
 {
     TERRAIN_WINDOW_WIDTH		= (2048),
     TERRAIN_WINDOW_HEIGHT       = (1536),
-    TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
+    TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT),
+    
+    GRAPH_WINDOW_WIDTH		    = (512),
+    GRAPH_WINDOW_HEIGHT         = (512),
+    GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3),
 };
 
 typedef enum
@@ -649,6 +653,8 @@ void       io_console_quit(void);
 
 
 #define LAND_DITHER(x,y,z)             (((x+y+z)&15)-(((x&y)|z)&7)-((x|(y&z))&7))
+
+#define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA + GRAPH_WINDOW_AREA)
 
 #define SECONDS_PER_SIMULATION_STEP (60)
 

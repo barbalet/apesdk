@@ -36,6 +36,7 @@
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../gui/shared.h"
+#include "../gui/gui.h"
 #include "../ogl/ogl.h"
 
 #import "NobleMacView.h"
@@ -132,22 +133,26 @@ n_int   count_switch = 0;
 
 - (void) drawRect:(NSRect)rect
 {
+    n_c_int         dimensionX = rect.size.width;
+    n_c_int         dimensionY = rect.size.height;
+    n_byte        * index = shared_draw(fIdentification);
+
+    if (index == 0L) return;
+    
     [[self openGLContext] makeCurrentContext];
+    
 #ifdef NEW_OPENGL_ENVIRONMENT
-    if (polygonal_entry(fIdentification))
+    This is currently broken
 #endif
+                
+    shared_cycle_really_draw(fIdentification, dimensionX, dimensionY);
+    
+    if (fIdentification != NUM_GRAPH)
     {
-        n_c_int           dimensionX = rect.size.width;
-        n_c_int           dimensionY = rect.size.height;
         n_int           ly = 0;
         n_int           loop = 0;
         n_int			loopColors = 0;
         n_byte2         fit[256*3];
-        n_byte        * index = shared_draw(fIdentification);
-
-        if (index == 0L) return;
-        
-        shared_cycle_really_draw(fIdentification, dimensionX, dimensionY);
         
         shared_timeForColor(fit, fIdentification);
 
@@ -172,8 +177,23 @@ n_int   count_switch = 0;
             }
             ly++;
         }
-        glDrawPixels(dimensionX,dimensionY,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
+
     }
+    else
+    {        
+        n_int loop = 0;
+        n_int loop_end = dimensionX*dimensionY;
+        while (loop < loop_end)
+        {
+            n_int inverse = loop_end - loop - 1;
+            
+            outputBuffer[(loop*3)] = index[(inverse*3)];
+            outputBuffer[(loop*3)+1] = index[(inverse*3)+1];
+            outputBuffer[(loop*3)+2] = index[(inverse*3)+2];
+            loop++;
+        }
+    }
+    glDrawPixels(dimensionX,dimensionY,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
     [[self openGLContext] flushBuffer];
 }
 
@@ -221,10 +241,22 @@ n_int   count_switch = 0;
 - (void) awakeFromNib
 {
     NSSize increments;
+    n_byte  window_value = NUM_TERRAIN;
+    
     increments.height = 4;
     increments.width = 4;
     
-	fIdentification = shared_init([[[self window] title] isEqualToString:@"View"], CFAbsoluteTimeGetCurrent());
+    if ([[[self window] title] isEqualToString:@"View"])
+    {
+        window_value = NUM_VIEW;
+    }
+    
+    if ([[[self window] title] isEqualToString:@"Graph"])
+    {
+        window_value = NUM_GRAPH;
+    }
+    
+	fIdentification = shared_init(window_value, CFAbsoluteTimeGetCurrent());
         
     [[self window] setContentResizeIncrements:increments];
     

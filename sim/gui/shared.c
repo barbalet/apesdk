@@ -120,29 +120,23 @@ void shared_cycle_no_draw(n_uint ticks, n_int fIdentification)
 
 void shared_cycle_really_draw(n_int fIdentification, n_int dim_x, n_int dim_y)
 {
-    draw_cycle((fIdentification == NUM_VIEW), dim_x, dim_y);
+    draw_cycle(fIdentification, dim_x, dim_y);
 }
 
 n_int shared_init(n_byte view, n_uint random)
 {
-    n_int   fIdentification = -1;
     n_byte2 fit[256 * 3];
 
     key_down = 0;
     mouse_down = 0;
 
-    if (view)
+    if (view == NUM_TERRAIN)
     {
-        fIdentification = NUM_VIEW;
-    }
-    else
-    {
-        fIdentification = NUM_TERRAIN;
         (void)control_init(KIND_START_UP, random);
     }
 
     draw_fit(land_points, fit);
-    return fIdentification;
+    return (n_int)view;
 }
 
 void shared_close(void)
