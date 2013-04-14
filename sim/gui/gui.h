@@ -59,6 +59,21 @@ enum colour_type
     COLOUR_RED       =   (255)
 };
 
+enum graph_commands
+{
+    GC_CLEAR_BRAINCODE = -1,
+    
+    GC_IDEOSPHERE = 0,
+    GC_BRAINCODE,
+    GC_GENEPOOL,
+    GC_HONOR,
+    GC_PATHOGENS,
+    GC_RELATIONSHIPS,
+    GC_PREFERENCES,
+    GC_PHASESPACE,
+    GC_VASCULAR
+};
+
 #define	NON_INTERPOLATED COLOUR_GREY
 
 
@@ -138,6 +153,8 @@ void draw_string(n_string str, n_int off_x, n_int off_y, n_join * draw);
 void  draw_cycle(n_byte mod, n_int dim_x, n_int dim_y);
 
 n_byte * draw_offscreen(n_byte * value);
+
+void draw_graph_command(n_int gc_val);
 
 #endif /* NOBLEAPE_GUI_H */
 

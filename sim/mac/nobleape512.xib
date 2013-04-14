@@ -531,6 +531,135 @@
 							</object>
 						</object>
 					</object>
+					<object class="NSMenuItem" id="995635972">
+						<reference key="NSMenu" ref="597462191"/>
+						<string key="NSTitle">Graph</string>
+						<string key="NSKeyEquiv"/>
+						<int key="NSKeyEquivModMask">1048576</int>
+						<int key="NSMnemonicLoc">2147483647</int>
+						<reference key="NSOnImage" ref="832797577"/>
+						<reference key="NSMixedImage" ref="114876730"/>
+						<string key="NSAction">submenuAction:</string>
+						<object class="NSMenu" key="NSSubmenu" id="487282832">
+							<string key="NSTitle">Graph</string>
+							<object class="NSMutableArray" key="NSMenuItems">
+								<bool key="EncodedWithXMLCoder">YES</bool>
+								<object class="NSMenuItem" id="482607837">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Ideosphere</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="28143224">
+									<reference key="NSMenu" ref="487282832"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="882646189">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Brain Code</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="975319287">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Clear Brain Code</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="107550508">
+									<reference key="NSMenu" ref="487282832"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="261591586">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Genepool</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="663114261">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Honor</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="1062719507">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Pathogens</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="780397930">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Relationships</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="290040013">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Preferences</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="850985287">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Phasespace</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="280314597">
+									<reference key="NSMenu" ref="487282832"/>
+									<string key="NSTitle">Vascular</string>
+									<string key="NSKeyEquiv"/>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+								<object class="NSMenuItem" id="681513491">
+									<reference key="NSMenu" ref="487282832"/>
+									<bool key="NSIsDisabled">YES</bool>
+									<bool key="NSIsSeparator">YES</bool>
+									<string key="NSTitle"/>
+									<string key="NSKeyEquiv"/>
+									<int key="NSKeyEquivModMask">1048576</int>
+									<int key="NSMnemonicLoc">2147483647</int>
+									<reference key="NSOnImage" ref="832797577"/>
+									<reference key="NSMixedImage" ref="114876730"/>
+								</object>
+							</object>
+						</object>
+					</object>
 					<object class="NSMenuItem" id="725641097">
 						<reference key="NSMenu" ref="597462191"/>
 						<string key="NSTitle">Online</string>
@@ -588,7 +717,6 @@
 							<string key="NSFrameSize">{512, 512}</string>
 							<reference key="NSSuperview" ref="264490215"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSClassName">NobleMacView</string>
 							<string key="NSExtension">NSOpenGLView</string>
 						</object>
@@ -624,7 +752,6 @@
 							<string key="NSFrameSize">{512, 512}</string>
 							<reference key="NSSuperview" ref="977473304"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
 							<string key="NSClassName">NobleMacView</string>
 							<string key="NSExtension">NSOpenGLView</string>
 						</object>
@@ -933,6 +1060,86 @@
 					</object>
 					<int key="connectionID">407</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphIdeosphere:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="482607837"/>
+					</object>
+					<int key="connectionID">448</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphBraincode:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="882646189"/>
+					</object>
+					<int key="connectionID">449</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphClearBraincode:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="975319287"/>
+					</object>
+					<int key="connectionID">450</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphGenepool:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="261591586"/>
+					</object>
+					<int key="connectionID">451</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphHonor:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="663114261"/>
+					</object>
+					<int key="connectionID">452</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphPathogens:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="1062719507"/>
+					</object>
+					<int key="connectionID">453</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphRelationships:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="780397930"/>
+					</object>
+					<int key="connectionID">454</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphPreferences:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="290040013"/>
+					</object>
+					<int key="connectionID">455</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphPhasespace:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="850985287"/>
+					</object>
+					<int key="connectionID">456</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">graphVascular:</string>
+						<reference key="source" ref="458802754"/>
+						<reference key="destination" ref="280314597"/>
+					</object>
+					<int key="connectionID">457</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -973,6 +1180,7 @@
 							<reference ref="148359174"/>
 							<reference ref="409744361"/>
 							<reference ref="725641097"/>
+							<reference ref="995635972"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">MainMenu</string>
@@ -1413,6 +1621,101 @@
 						<reference key="object" ref="458802754"/>
 						<reference key="parent" ref="977473304"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">411</int>
+						<reference key="object" ref="995635972"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="487282832"/>
+						</object>
+						<reference key="parent" ref="597462191"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">412</int>
+						<reference key="object" ref="487282832"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="850985287"/>
+							<reference ref="681513491"/>
+							<reference ref="290040013"/>
+							<reference ref="780397930"/>
+							<reference ref="882646189"/>
+							<reference ref="280314597"/>
+							<reference ref="1062719507"/>
+							<reference ref="663114261"/>
+							<reference ref="261591586"/>
+							<reference ref="28143224"/>
+							<reference ref="107550508"/>
+							<reference ref="482607837"/>
+							<reference ref="975319287"/>
+						</object>
+						<reference key="parent" ref="995635972"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">413</int>
+						<reference key="object" ref="850985287"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">416</int>
+						<reference key="object" ref="681513491"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">417</int>
+						<reference key="object" ref="290040013"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">418</int>
+						<reference key="object" ref="780397930"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">419</int>
+						<reference key="object" ref="882646189"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">424</int>
+						<reference key="object" ref="280314597"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">427</int>
+						<reference key="object" ref="1062719507"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">428</int>
+						<reference key="object" ref="663114261"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">429</int>
+						<reference key="object" ref="261591586"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">430</int>
+						<reference key="object" ref="482607837"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">444</int>
+						<reference key="object" ref="28143224"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">445</int>
+						<reference key="object" ref="107550508"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">446</int>
+						<reference key="object" ref="975319287"/>
+						<reference key="parent" ref="487282832"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1491,6 +1794,21 @@
 					<string>408.NSWindowTemplate.visibleAtLaunch</string>
 					<string>409.IBPluginDependency</string>
 					<string>410.IBPluginDependency</string>
+					<string>411.IBPluginDependency</string>
+					<string>412.IBPluginDependency</string>
+					<string>413.IBPluginDependency</string>
+					<string>416.IBPluginDependency</string>
+					<string>417.IBPluginDependency</string>
+					<string>418.IBPluginDependency</string>
+					<string>419.IBPluginDependency</string>
+					<string>424.IBPluginDependency</string>
+					<string>427.IBPluginDependency</string>
+					<string>428.IBPluginDependency</string>
+					<string>429.IBPluginDependency</string>
+					<string>430.IBPluginDependency</string>
+					<string>444.IBPluginDependency</string>
+					<string>445.IBPluginDependency</string>
+					<string>446.IBPluginDependency</string>
 					<string>56.IBPluginDependency</string>
 					<string>57.IBPluginDependency</string>
 					<string>58.IBPluginDependency</string>
@@ -1584,6 +1902,21 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1598,7 +1931,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">410</int>
+			<int key="maxID">457</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1611,6 +1944,16 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>aboutDialog:</string>
+							<string>graphBraincode:</string>
+							<string>graphClearBraincode:</string>
+							<string>graphGenepool:</string>
+							<string>graphHonor:</string>
+							<string>graphIdeosphere:</string>
+							<string>graphPathogens:</string>
+							<string>graphPhasespace:</string>
+							<string>graphPreferences:</string>
+							<string>graphRelationships:</string>
+							<string>graphVascular:</string>
 							<string>loadManual:</string>
 							<string>loadSimulationPage:</string>
 							<string>menuControlClearErrors:</string>
@@ -1634,6 +1977,16 @@
 						</object>
 						<object class="NSArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1662,6 +2015,16 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>aboutDialog:</string>
+							<string>graphBraincode:</string>
+							<string>graphClearBraincode:</string>
+							<string>graphGenepool:</string>
+							<string>graphHonor:</string>
+							<string>graphIdeosphere:</string>
+							<string>graphPathogens:</string>
+							<string>graphPhasespace:</string>
+							<string>graphPreferences:</string>
+							<string>graphRelationships:</string>
+							<string>graphVascular:</string>
 							<string>loadManual:</string>
 							<string>loadSimulationPage:</string>
 							<string>menuControlClearErrors:</string>
@@ -1687,6 +2050,46 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">aboutDialog:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphBraincode:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphClearBraincode:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphGenepool:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphHonor:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphIdeosphere:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphPathogens:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphPhasespace:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphPreferences:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphRelationships:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">graphVascular:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">

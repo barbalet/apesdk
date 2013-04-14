@@ -94,6 +94,17 @@
 -(IBAction) loadManual:(id) sender;
 -(IBAction) loadSimulationPage:(id) sender;
 
+-(IBAction) graphClearBraincode:(id)sender;
+-(IBAction) graphIdeosphere:(id)sender;
+-(IBAction) graphBraincode:(id)sender;
+-(IBAction) graphGenepool:(id)sender;
+-(IBAction) graphHonor:(id)sender;
+-(IBAction) graphPathogens:(id)sender;
+-(IBAction) graphRelationships:(id)sender;
+-(IBAction) graphPreferences:(id)sender;
+-(IBAction) graphPhasespace:(id)sender;
+-(IBAction) graphVascular:(id)sender;
+
 -(void)keyUp:(NSEvent *)theEvent;
 -(void)keyDown:(NSEvent *)theEvent;
 

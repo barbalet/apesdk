@@ -424,6 +424,56 @@ n_int   count_switch = 0;
     [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/sim/"]];
 }
 
+-(IBAction) graphClearBraincode:(id)sender
+{
+    shared_graph_command(GC_CLEAR_BRAINCODE);
+}
+
+-(IBAction) graphIdeosphere:(id)sender
+{
+    shared_graph_command(GC_IDEOSPHERE);
+}
+
+-(IBAction) graphBraincode:(id)sender
+{
+    shared_graph_command(GC_BRAINCODE);
+}
+
+-(IBAction) graphGenepool:(id)sender
+{
+    shared_graph_command(GC_GENEPOOL);
+}
+
+-(IBAction) graphHonor:(id)sender
+{
+    shared_graph_command(GC_HONOR);
+}
+
+-(IBAction) graphPathogens:(id)sender
+{
+    shared_graph_command(GC_PATHOGENS);
+}
+
+-(IBAction) graphRelationships:(id)sender
+{
+    shared_graph_command(GC_RELATIONSHIPS);
+}
+
+-(IBAction) graphPreferences:(id)sender
+{
+    shared_graph_command(GC_PREFERENCES);
+}
+
+-(IBAction) graphPhasespace:(id)sender
+{
+    shared_graph_command(GC_PHASESPACE);
+}
+
+-(IBAction) graphVascular:(id)sender
+{
+    shared_graph_command(GC_VASCULAR);
+}
+
 #pragma mark ---- Method Overrides ----
 
 - (void)keyUp:(NSEvent *)theEvent

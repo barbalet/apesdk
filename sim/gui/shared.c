@@ -277,6 +277,11 @@ void shared_saveFileName(n_string cStringFileName)
     (void)console_save(0L, cStringFileName, 0L);
 }
 
+void shared_graph_command(n_int gc_used)
+{
+    draw_graph_command(gc_used);
+}
+
 #ifdef SCRIPT_DEBUG
 
 static n_int single_entry = 1;

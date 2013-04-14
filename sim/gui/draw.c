@@ -180,6 +180,22 @@ static n_int toggle_brain = 1;
 static n_int toggle_braincode = 0;
 static n_int toggle_territory = 0;
 
+static n_int  graph_state = GC_VASCULAR;
+static n_byte graph_clear = 1;
+
+void draw_graph_command(n_int gc_val)
+{
+    if (gc_val == GC_CLEAR_BRAINCODE)
+    {
+        graph_clear = 1;
+        graph_state = GC_BRAINCODE;
+    }
+    else
+    {
+        graph_state = gc_val;
+    }
+}
+
 n_int draw_toggle_weather(void)
 {
     toggle_weather ^= 1;
@@ -1550,6 +1566,54 @@ static void draw_line_braincode(n_string pointer, n_int line)
     draw_string(pointer, 4 + (terrain_dim_x/2) - 256, (line*12) + 246 + (terrain_dim_y/2) - 256, &local_mono);
 }
 
+void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
+{
+    n_byte * graph = draw_pointer(NUM_GRAPH);
+    
+    switch (graph_state)
+    {
+        case GC_IDEOSPHERE:
+            graph_ideosphere(local_sim, graph, dim_x, dim_y);
+            break;
+        case GC_BRAINCODE:
+            if (local_sim->select != NO_BEINGS_FOUND)
+            {
+                graph_braincode(local_sim, &local_sim->beings[local_sim->select],graph, dim_x, dim_y, graph_clear);
+                graph_clear = 0;
+            }
+            break;
+        case GC_HONOR:
+            graph_honor_distribution(local_sim, graph, dim_x, dim_y);
+            break;
+        case GC_PATHOGENS:
+            graph_pathogens(local_sim, graph, dim_x, dim_y);
+            break;
+        case GC_RELATIONSHIPS:
+            graph_relationship_matrix(local_sim, graph, dim_x, dim_y);
+            break;
+        case GC_GENEPOOL:
+            graph_genepool(local_sim, graph, dim_x, dim_y);
+            break;
+        case GC_PREFERENCES:
+            graph_preferences(local_sim, graph, dim_x, dim_y);
+            break;
+        case GC_PHASESPACE:
+            graph_phasespace(local_sim, graph, dim_x, dim_y, 0, 0);
+            break;
+        case GC_VASCULAR:
+        default:
+            if (local_sim->select != NO_BEINGS_FOUND)
+            {
+                graph_vascular(&local_sim->beings[local_sim->select], graph,
+                               dim_x, dim_y,
+                               dim_x*10/100,dim_y*10/100,
+                               dim_x*40/100,dim_y*90/100,
+                               1, 1);
+            }
+            break;
+    }
+}
+
 void  draw_terrain_coord(n_int * co_x, n_int * co_y)
 {
     *co_x = terrain_dim_x;
@@ -1605,14 +1669,7 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
     }
     if (window == NUM_GRAPH)
     {
-        if (local_sim->select != NO_BEINGS_FOUND)
-        {
-            graph_vascular(&local_sim->beings[local_sim->select], draw_pointer(NUM_GRAPH),
-                           dim_x, dim_y,
-                           dim_x*10/100,dim_y*10/100,
-                           dim_x*40/100,dim_y*90/100,
-                           1, 1);
-        }
+        draw_graph(local_sim, dim_x, dim_y);
     }
 #ifdef THREADED
     sim_draw_thread_end();

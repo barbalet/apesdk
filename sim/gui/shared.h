@@ -95,6 +95,8 @@ n_int shared_script_debug_ready(void);
 
 void shared_script_debug_handle(n_string cStringFileName);
 
+void shared_graph_command(n_int gc_used);
+
 #ifndef	_WIN32
 
 n_int sim_thread_console_quit(void);
