@@ -53,6 +53,14 @@
 #include <stdio.h>
 #include "command.h"
 
+static void graph_clear(n_byte * buffer, n_int img_width, n_int img_height)
+{
+    n_int i;
+    for (i = 0; i < img_width*img_height*3; i++)
+    {
+        buffer[i] = 255;
+    }
+}
 
 /* draws a line */
 static void graph_line(n_byte * buffer,
@@ -174,7 +182,7 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
                     }
                     else
                     {
-                        buffer[n] = ((b*(255-transparency)) + (buffer[n]*transparency))/256;
+                        buffer[n]   = ((b*(255-transparency)) + (buffer[n]*transparency))/256;
                         buffer[n+1] = ((g*(255-transparency)) + (buffer[n+1]*transparency))/256;
                         buffer[n+2] = ((r*(255-transparency)) + (buffer[n+2]*transparency))/256;
                     }
@@ -201,10 +209,7 @@ void graph_vascular(noble_being * being,
     /* clear the image if necessary */
     if (clear != 0)
     {
-        for (i = 0; i < img_width*img_height*3; i++)
-        {
-            buffer[i] = 255;
-        }
+        graph_clear(buffer, img_height, img_width);
     }
     
     /* get points on the skeleton */
@@ -270,7 +275,8 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
     n_int i,j;
     n_int prev_x = -1, prev_y=-1;
     n_int x,y;
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
+    
+    graph_clear(buffer, img_height, img_width);
     
     for (i = 0; i < sim->num; i++)
     {
@@ -480,8 +486,8 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
     n_int *index = (n_int*)io_new(sim->num*sizeof(n_int));
     graph_being_index(sim,index,1);
     
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
-    
+    graph_clear(buffer, img_height, img_width);
+
     for (i = 0; i < sim->num; i++)
     {
         noble_being * local_being = &(sim->beings[index[i]]);
@@ -567,7 +573,7 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
     antibodies = (n_c_uint*)io_new(256*sizeof(n_c_uint));
     antigens = (n_c_uint*)io_new(256*sizeof(n_c_uint));
     
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
+    graph_clear(buffer, img_height, img_width);
     
     for (i=0; i<256; i++)
     {
@@ -652,7 +658,8 @@ void graph_age_demographic(noble_simulation * sim, n_byte * buffer, n_int img_wi
     {
         age_group[i]=0;
     }
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
+    
+    graph_clear(buffer, img_height, img_width);
     
     current_date = TIME_IN_DAYS(sim->land->date);
     
@@ -695,7 +702,7 @@ void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_i
     {
         height_group[i]=0;
     }
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
+    graph_clear(buffer, img_height, img_width);
     
     for (i = 0; i < sim->num; i++)
     {
@@ -718,91 +725,91 @@ void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_i
 }
 
 /* return the braincode standard deviation */
-/*
- static n_uint braincode_standard_deviation(noble_simulation * sim, noble_being * local_being)
- {
- n_uint sd = 0;
- #ifdef BRAINCODE_ON
- n_int i,av=0,diff;
- 
- for (i=0; i<BRAINCODE_SIZE; i++)
- {
- av += GET_BRAINCODE_INTERNAL(sim,local_being)[i];
- av += GET_BRAINCODE_EXTERNAL(sim,local_being)[i];
- }
- av /= (BRAINCODE_SIZE*2);
- 
- for (i=0; i<BRAINCODE_SIZE; i++)
- {
- diff = (n_int)(GET_BRAINCODE_INTERNAL(sim,local_being)[i]) - av;
- if (diff<0) diff=-diff;
- sd += (n_uint)(diff);
- diff = (n_int)(GET_BRAINCODE_EXTERNAL(sim,local_being)[i]) - av;
- if (diff<0) diff=-diff;
- sd += (n_uint)(diff);
- }
- #endif
- return sd;
- }
- */
+
+static n_uint braincode_standard_deviation(noble_simulation * sim, noble_being * local_being)
+{
+    n_uint sd = 0;
+#ifdef BRAINCODE_ON
+    n_int i,av=0,diff;
+
+    for (i=0; i<BRAINCODE_SIZE; i++)
+    {
+        av += GET_BRAINCODE_INTERNAL(sim,local_being)[i];
+        av += GET_BRAINCODE_EXTERNAL(sim,local_being)[i];
+    }
+    av /= (BRAINCODE_SIZE*2);
+
+    for (i=0; i<BRAINCODE_SIZE; i++)
+    {
+        diff = (n_int)(GET_BRAINCODE_INTERNAL(sim,local_being)[i]) - av;
+        if (diff<0) diff=-diff;
+        sd += (n_uint)(diff);
+        diff = (n_int)(GET_BRAINCODE_EXTERNAL(sim,local_being)[i]) - av;
+        if (diff<0) diff=-diff;
+        sd += (n_uint)(diff);
+    }
+#endif
+    return sd;
+}
+
 
 /* return the number of instruction_types in the braincode */
-/*
- static void braincode_number_of_instructions(
- noble_simulation * sim,
- noble_being * local_being,
- n_int * no_of_sensors,
- n_int * no_of_actuators,
- n_int * no_of_operators,
- n_int * no_of_conditionals,
- n_int * no_of_data)
- {
- #ifdef BRAINCODE_ON
- n_int i,j,instruction;
- 
- *no_of_sensors = 0;
- *no_of_actuators = 0;
- *no_of_operators = 0;
- *no_of_conditionals = 0;
- *no_of_data = 0;
- 
- for (i=0; i<BRAINCODE_SIZE; i+=3)
- {
- for (j=0; j<2; j++)
- {
- if (j==0)
- {
- instruction = GET_BRAINCODE_INTERNAL(sim,local_being)[i] & 63;
- }
- else
- {
- instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[i] & 63;
- }
- if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
- {
- *no_of_sensors = *no_of_sensors + 1;
- }
- if ((instruction >= BRAINCODE_ACTUATORS_START) && (instruction < BRAINCODE_OPERATORS_START))
- {
- *no_of_actuators = *no_of_actuators + 1;
- }
- if ((instruction >= BRAINCODE_OPERATORS_START) && (instruction < BRAINCODE_CONDITIONALS_START))
- {
- *no_of_operators = *no_of_operators + 1;
- }
- if ((instruction >= BRAINCODE_CONDITIONALS_START) && (instruction < BRAINCODE_DATA_START))
- {
- *no_of_conditionals = *no_of_conditionals + 1;
- }
- if ((instruction >= BRAINCODE_DATA_START) && (instruction < BRAINCODE_INSTRUCTIONS))
- {
- *no_of_data = *no_of_data + 1;
- }
- }
- }
- #endif
- }
- */
+
+static void braincode_number_of_instructions(
+    noble_simulation * sim,
+    noble_being * local_being,
+    n_int * no_of_sensors,
+    n_int * no_of_actuators,
+    n_int * no_of_operators,
+    n_int * no_of_conditionals,
+    n_int * no_of_data)
+{
+#ifdef BRAINCODE_ON
+    n_int i,j,instruction;
+
+    *no_of_sensors = 0;
+    *no_of_actuators = 0;
+    *no_of_operators = 0;
+    *no_of_conditionals = 0;
+    *no_of_data = 0;
+
+    for (i=0; i<BRAINCODE_SIZE; i+=3)
+    {
+        for (j=0; j<2; j++)
+        {
+            if (j==0)
+            {
+                instruction = GET_BRAINCODE_INTERNAL(sim,local_being)[i] & 63;
+            }
+            else
+            {
+                instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[i] & 63;
+            }
+            if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
+            {
+                *no_of_sensors = *no_of_sensors + 1;
+            }
+            if ((instruction >= BRAINCODE_ACTUATORS_START) && (instruction < BRAINCODE_OPERATORS_START))
+            {
+                *no_of_actuators = *no_of_actuators + 1;
+            }
+            if ((instruction >= BRAINCODE_OPERATORS_START) && (instruction < BRAINCODE_CONDITIONALS_START))
+            {
+                *no_of_operators = *no_of_operators + 1;
+            }
+            if ((instruction >= BRAINCODE_CONDITIONALS_START) && (instruction < BRAINCODE_DATA_START))
+            {
+                *no_of_conditionals = *no_of_conditionals + 1;
+            }
+            if ((instruction >= BRAINCODE_DATA_START) && (instruction < BRAINCODE_INSTRUCTIONS))
+            {
+                *no_of_data = *no_of_data + 1;
+            }
+        }
+    }
+#endif
+}
+
 /* return coordinates of the braincode system for phase space plot */
 static void graph_braincode_coords(noble_simulation * sim, noble_being * local_being, n_uint * x, n_uint * y)
 {
@@ -838,11 +845,8 @@ static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int
     n_uint i,x=0,y=0,n;
     
     /* clear the image */
-	for (i = 0; i < img_width*img_height*3; i++)
-	{
-		buffer[i] = 255;
-	}
-    
+    graph_clear(buffer, img_height, img_width);
+
     for (i=0; i<sim->num; i++)
     {
         switch(graph_type)
@@ -1004,7 +1008,7 @@ void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width,
     noble_being * local_being;
     
     /* clear the image */
-    for (i = 0; i < img_width*img_height*3; i++) buffer[i]=255;
+    graph_clear(buffer, img_height, img_width);
     
     for (i = 0; i < sim->num; i++)
     {
