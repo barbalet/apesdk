@@ -122,7 +122,39 @@ void weather_debug(n_weather * local_weather)
         line_average += (point_average >> (MAP_BITS-1));
         lx++;
     }
-    printf("WD: range %d - %d, average %d, total pressure %d\n",value_min, value_max,line_average>>(MAP_BITS-1),local_weather->total_pressure);
+    printf("WD: range %d - %d (%d), average %d, total pressure %d WEATHER_RAIN %d, WEATHER_CLOUD %d\n",value_min, value_max, value_max - value_min, line_average>>(MAP_BITS-1),local_weather->total_pressure, WEATHER_RAIN, WEATHER_CLOUD);
+}
+
+void weather_adjust(n_weather * local_weather)
+{
+    n_int    lx = 0;
+    n_c_int  line_average = 0;
+    while (lx < (MAP_DIMENSION/2))
+    {
+        n_int ly = 0;
+        n_c_int point_average = 0;
+        while (ly < (MAP_DIMENSION/2))
+        {
+            n_c_int value = local_weather->atmosphere[ WEATHER_MEM(ly,lx,0) ];
+
+            point_average += value;
+            ly++;
+        }
+        line_average += (point_average >> (MAP_BITS-1));
+        lx++;
+    }    
+    line_average = line_average >> (MAP_BITS-1);
+    lx = 0;
+    while (lx < (MAP_DIMENSION/2))
+    {
+        n_int ly = 0;
+        while (ly < (MAP_DIMENSION/2))
+        {
+            local_weather->atmosphere[ WEATHER_MEM(ly,lx,0) ] -= line_average;
+            ly++;
+        }
+        lx++;
+    }
 }
 
 #endif
@@ -189,11 +221,23 @@ void weather_cycle(n_land * local_land, n_weather * local_weather)
         }
         lx++;
     }
+#ifdef WEATHER_DEBUG
+
+    local_weather->total_pressure = 0; /*total_pressure;*/
+
+#else
+    
     local_weather->total_pressure = total_pressure;
     
+#endif
     
 #ifdef WEATHER_DEBUG
-    weather_debug(local_weather);
+    if (local_land ->time == 1)
+    {
+        weather_debug(local_weather);
+    }
+    
+    weather_adjust(local_weather);
 #endif
     
 }
