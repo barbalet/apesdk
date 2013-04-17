@@ -711,14 +711,11 @@ void       io_console_quit(void);
  @field atmosphere The atmosphere is represented by two 128 x 128 integer.
  buffers, one containing the static flow map and one containing the dynamic
  buffer showing the actual pressure map.
- @field total_pressure This is the normalized total pressure that is used
- like a pressure cooker release valve to stop a weather simulation explosion.
  @discussion As with a majority of the Noble Ape Simulation, the weather
  method is completely self-rolled.
  */
 typedef struct
 {
-    n_c_int			total_pressure;
     n_c_int			atmosphere[ MAP_AREA / 2];
 }
 n_weather;

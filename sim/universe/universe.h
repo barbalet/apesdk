@@ -46,7 +46,6 @@
 
 #undef  SMALL_LAND
 
-
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 #define PARASITES_ON  /* entity */
 #define TERRITORY_ON  /* entity */

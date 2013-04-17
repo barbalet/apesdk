@@ -84,11 +84,6 @@
  
  */
 
-
-#define WATER_EVAP_TIDE     (0)
-#define WATER_EVAP_REG      (0)
-#define WATER_RELEASE_RAIN  (0)
-
 #undef WEATHER_DEBUG
 
 #ifdef WEATHER_DEBUG
@@ -122,83 +117,35 @@ void weather_debug(n_weather * local_weather)
         line_average += (point_average >> (MAP_BITS-1));
         lx++;
     }
-    printf("WD: range %d - %d (%d), average %d, total pressure %d WEATHER_RAIN %d, WEATHER_CLOUD %d\n",value_min, value_max, value_max - value_min, line_average>>(MAP_BITS-1),local_weather->total_pressure, WEATHER_RAIN, WEATHER_CLOUD);
-}
-
-void weather_adjust(n_weather * local_weather)
-{
-    n_int    lx = 0;
-    n_c_int  line_average = 0;
-    while (lx < (MAP_DIMENSION/2))
-    {
-        n_int ly = 0;
-        n_c_int point_average = 0;
-        while (ly < (MAP_DIMENSION/2))
-        {
-            n_c_int value = local_weather->atmosphere[ WEATHER_MEM(ly,lx,0) ];
-
-            point_average += value;
-            ly++;
-        }
-        line_average += (point_average >> (MAP_BITS-1));
-        lx++;
-    }    
-    line_average = line_average >> (MAP_BITS-1);
-    lx = 0;
-    while (lx < (MAP_DIMENSION/2))
-    {
-        n_int ly = 0;
-        while (ly < (MAP_DIMENSION/2))
-        {
-            local_weather->atmosphere[ WEATHER_MEM(ly,lx,0) ] -= line_average;
-            ly++;
-        }
-        lx++;
-    }
+    printf("WD: range %d - %d (%d), average %d, WEATHER_RAIN %d, WEATHER_CLOUD %d\n",value_min, value_max, value_max - value_min, line_average>>(MAP_BITS-1), WEATHER_RAIN, WEATHER_CLOUD);
 }
 
 #endif
 
-void weather_cycle(n_land * local_land, n_weather * local_weather)
+
+static n_int weather_delta(n_weather * local_weather)
 {
-    n_c_int       total_pressure = 0;
-    n_int         local_delta = local_weather->total_pressure  >> (MAP_BITS-1);
-    n_c_int       * atmosphere  = local_weather->atmosphere;
-    n_int         lx = 0;
-    n_byte        * local_map = local_land->map;
-    n_byte        local_tide = local_land->tide_level;
-    while (lx < MAP_DIMENSION)
+    n_int    lx = 0;
+    n_int  average = 0;
+    while (lx < (MAP_DIMENSION/2))
     {
         n_int ly = 0;
-        while (ly < MAP_DIMENSION)
+        while (ly < (MAP_DIMENSION/2))
         {
-            n_byte  land_value = local_map[lx | (ly << MAP_BITS)];
-            n_uint  location = WEATHER_MEM(ly>>1,lx>>1,0);
-            
-            if (land_value == local_tide)
-            {
-                atmosphere[ location ] += WATER_EVAP_TIDE;
-            }
-            else if (land_value < local_tide)
-            {
-                atmosphere[ location ] += WATER_EVAP_REG;
-            }
-            
-            if ((lx < (MAP_DIMENSION/2))&&(ly < (MAP_DIMENSION/2)))
-            {
-                n_uint  new_location = WEATHER_MEM(ly,lx,0);
-                if (atmosphere[ new_location ] >= WEATHER_RAIN)
-                {
-                    atmosphere[ new_location ] -= WATER_RELEASE_RAIN;
-                }
-            }
-            
+            average += local_weather->atmosphere[ WEATHER_MEM(ly,lx,0) ];
             ly++;
         }
         lx++;
     }
-    
-    lx = 0;
+    average = average >> (MAP_BITS-1);
+    return average;
+}
+
+void weather_cycle(n_land * local_land, n_weather * local_weather)
+{
+    n_int         local_delta = weather_delta(local_weather);
+    n_c_int       * atmosphere  = local_weather->atmosphere;
+    n_int         lx = 0;
     while ( lx < (MAP_DIMENSION/2) )
     {
         n_int	lx_min = WEATHER_MEM((lx + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0, 0);
@@ -209,38 +156,26 @@ void weather_cycle(n_land * local_land, n_weather * local_weather)
         {
             n_int	ly_val = WEATHER_MEM(0,ly,0);
             n_int	local_atm =
-                atmosphere[ lx_val | ly_val | CONST_BACK ]
-                - atmosphere[ lx_plu | ly_val ]
-                + atmosphere[ lx_min| ly_val ]
-                - atmosphere[ lx_val| WEATHER_MEM(0, ( ly + 1 ) & ((MAP_DIMENSION/2)-1), 0 ) ]
-                + atmosphere[ lx_val| WEATHER_MEM(0, ( ly + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0 ) ];
-
+            atmosphere[ lx_val | ly_val | CONST_BACK ]
+            - atmosphere[ lx_plu | ly_val ]
+            + atmosphere[ lx_min| ly_val ]
+            - atmosphere[ lx_val| WEATHER_MEM(0, ( ly + 1 ) & ((MAP_DIMENSION/2)-1), 0 ) ]
+            + atmosphere[ lx_val| WEATHER_MEM(0, ( ly + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0 ) ];
+            
             atmosphere[ WEATHER_MEM(ly,lx,0) ] += (local_atm - local_delta) >> (MAP_BITS-1);
-            total_pressure += local_atm;
             ly++;
         }
+        
         lx++;
     }
-#ifdef WEATHER_DEBUG
-
-    local_weather->total_pressure = 0; /*total_pressure;*/
-
-#else
-    
-    local_weather->total_pressure = total_pressure;
-    
-#endif
-    
 #ifdef WEATHER_DEBUG
     if (local_land ->time == 1)
     {
         weather_debug(local_weather);
     }
-    
-    weather_adjust(local_weather);
 #endif
-    
 }
+
 
 void weather_init(n_weather * local_weather, n_land * local_land)
 {
