@@ -204,8 +204,8 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
 
     for (i = 0; i < (n_int)(sim->num); i++)
     {
-        b = &sim->beings[i];
         n_string_block str;
+        b = &sim->beings[i];
         being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(sim,b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), str);
 
         io_lower(str, io_length(str,STRING_BLOCK_SIZE));

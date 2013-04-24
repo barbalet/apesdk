@@ -44,27 +44,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-// ==================================
-
 #pragma mark ---- OpenGL Utils ----
-
-
-// ===================================
 
 @implementation NobleMacView
 
-// pixel format definition
+/* pixel format definition */
 + (NSOpenGLPixelFormat*) basicPixelFormat
 {
     
 #ifndef NEW_OPENGL_ENVIRONMENT    
     NSOpenGLPixelFormatAttribute attributes [] = {
         NSOpenGLPFAWindow,
-        NSOpenGLPFADoubleBuffer,	// double buffered
+        NSOpenGLPFADoubleBuffer,	/* double buffered */
         NSOpenGLPFADepthSize,
-        (NSOpenGLPixelFormatAttribute)16, // 16 bit depth buffer
-        (NSOpenGLPixelFormatAttribute)0//nil
+        (NSOpenGLPixelFormatAttribute)16, /* 16 bit depth buffer */
+        (NSOpenGLPixelFormatAttribute)0 /*nil*/
     };
 #else
 	NSOpenGLPixelFormatAttribute attributes [] = {
@@ -105,9 +99,7 @@
 }
 
 
-// ---------------------------------
-
-// per-window timer function, basic time based animation preformed here
+/* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
 #ifndef NEW_OPENGL_ENVIRONMENT
@@ -121,7 +113,7 @@
         [self debugOutput];
     }
     
-	[self drawRect:[self bounds]]; // redraw now instead dirty to enable updates during live resize
+	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
     
     if (sim_thread_console_quit())
     {
@@ -206,8 +198,6 @@ n_int   count_switch = 0;
     exit(0);
 }
 
-// ---------------------------------
-
 -(id) initWithFrame:(NSRect) frameRect
 {
     NSOpenGLPixelFormat * pf = [NobleMacView basicPixelFormat];
@@ -215,28 +205,20 @@ n_int   count_switch = 0;
     return self;
 }
 
-// ---------------------------------
-
 - (BOOL)acceptsFirstResponder
 {
     return YES;
 }
-
-// ---------------------------------
 
 - (BOOL)becomeFirstResponder
 {
     return YES;
 }
 
-// ---------------------------------
-
 - (BOOL)resignFirstResponder
 {
     return YES;
 }
-
-// ---------------------------------
 
 - (void) awakeFromNib
 {
@@ -262,7 +244,7 @@ n_int   count_switch = 0;
     
     [[self window] orderFrontRegardless];
     
-    // start animation timer
+    /* start animation timer */
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
@@ -490,11 +472,11 @@ n_int   count_switch = 0;
     }
     if ([theEvent modifierFlags] & NSNumericPadKeyMask)
     {
-        // arrow keys have this mask
+        /* arrow keys have this mask */
         NSString *theArrow = [theEvent charactersIgnoringModifiers];
         unichar keyChar = 0;
         if ( [theArrow length] == 0 )
-            return;            // reject dead keys
+            return;            /* reject dead keys */
         if ( [theArrow length] == 1 )
         {
             keyChar = [theArrow characterAtIndex:0];

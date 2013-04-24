@@ -406,22 +406,22 @@ void brain_three_byte_command(n_string string, n_byte * response)
     switch(format)
     {
         case BC_FORMAT_A:
-            sprintf((char*)string,"%s  %03d  %03d", braincode_mnemonic[instruction], value0, value1);
+            sprintf(string,"%s  %03d  %03d", braincode_mnemonic[instruction], value0, value1);
             break;
         case BC_FORMAT_C:
-            sprintf((char*)string,"%s *%03d *%03d", braincode_mnemonic[instruction], value0, value1);
+            sprintf(string,"%s *%03d *%03d", braincode_mnemonic[instruction], value0, value1);
             break;
         case BC_FORMAT_E:
-            sprintf((char*)string,"%s  %03d *%03d", braincode_mnemonic[instruction], value0, value1);
+            sprintf(string,"%s  %03d *%03d", braincode_mnemonic[instruction], value0, value1);
             break;
         case BC_FORMAT_F:
-            sprintf((char*)string,"%s *%03d  %03d", braincode_mnemonic[instruction], value0, value1);
+            sprintf(string,"%s *%03d  %03d", braincode_mnemonic[instruction], value0, value1);
             break;
         case BC_FORMAT_G:
-            sprintf((char*)string,"%s  %03d  ---", braincode_mnemonic[instruction], value0);
+            sprintf(string,"%s  %03d  ---", braincode_mnemonic[instruction], value0);
             break;
         default:
-            sprintf((char*)string,"%s  ---  %03d", braincode_mnemonic[instruction], value1);
+            sprintf(string,"%s  ---  %03d", braincode_mnemonic[instruction], value1);
             break;
     }
 }
@@ -441,22 +441,22 @@ void brain_sentence(n_string string, n_byte * response)
     switch(format)
     {
         case BC_FORMAT_A:
-            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_C:
-            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_E:
-            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_F:
-            sprintf((char*)string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
             break;
         case BC_FORMAT_G:
-            sprintf((char*)string,"%s %s", braincode_spoken_dictionary[instruction], first_word);
+            sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], first_word);
             break;
         default:
-            sprintf((char*)string,"%s %s", braincode_spoken_dictionary[instruction], second_word);
+            sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], second_word);
             break;
     }
 }

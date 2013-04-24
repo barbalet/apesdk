@@ -100,11 +100,12 @@ static void graph_line(n_byte * buffer,
     }
 }
 
+#define  MAX_POLYGON_CORNERS 1000
+
 static void graph_fill_polygon(n_int * points, n_int no_of_points,
                                n_byte r, n_byte g, n_byte b, n_byte transparency,
                                n_byte * buffer, n_int img_width, n_int img_height)
 {
-    const n_int MAX_POLYGON_CORNERS = 1000;
     n_int nodes, nodeX[MAX_POLYGON_CORNERS], i, j, swap, n, x, y;
     n_int min_x = 99999, min_y = 99999;
     n_int max_x = -99999, max_y = -99999;

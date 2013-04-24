@@ -352,7 +352,7 @@ enum window_information
     
     GRAPH_WINDOW_WIDTH		    = (512),
     GRAPH_WINDOW_HEIGHT         = (512),
-    GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3),
+    GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3)
 };
 
 typedef enum

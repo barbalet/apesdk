@@ -280,7 +280,8 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
     n_int i, vertical, vertibra_x=0, vertibra_y=0, no_of_points = 0;
     n_int arm_angle = 30; /* angle of arms in degrees */
     n_int leg_angle = 20;
-    
+    n_int knuckle_x = 0;
+    n_int knuckle_y = 0;
     /* position of the bottom of the neck */
     keypoints[SKELETON_NECK*2] = 0;
     keypoints[SKELETON_NECK*2+1] = 0;
@@ -597,7 +598,6 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
         vertical = vertibra_y;
     }
     
-    n_int knuckle_x=0, knuckle_y=0;
     for (i = 0; i < 4; i++)
     {
         /* left hand */
