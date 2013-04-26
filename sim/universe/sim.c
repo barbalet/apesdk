@@ -1316,7 +1316,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 void sim_close(void)
 {
     io_console_quit();
-#ifdef _WIN32
+#ifndef _WIN32
     sim_console_clean_up();
 #endif
 #ifdef THREADED

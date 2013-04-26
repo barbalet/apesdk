@@ -64,8 +64,9 @@ static n_byte  key_down;
 
 static void shared_squared_cycle(n_uint ticks, n_int fIdentification)
 {    
+#ifndef	_WIN32 
     sim_thread_console();
-    
+#endif 
     if((mouse_down == 1) && (mouse_identification == fIdentification))
     {
         control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
