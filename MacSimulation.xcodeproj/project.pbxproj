@@ -69,7 +69,6 @@
 		4A3600411712409A004DAFBA /* control.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = control.c; sourceTree = "<group>"; };
 		4A3600421712409A004DAFBA /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw.c; sourceTree = "<group>"; };
 		4A3600431712409A004DAFBA /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
-		4A3600441712409A004DAFBA /* gui_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui_internal.h; sourceTree = "<group>"; };
 		4A3600451712409A004DAFBA /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shared.c; sourceTree = "<group>"; };
 		4A3600461712409A004DAFBA /* shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
 		4A3600481712409A004DAFBA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -206,7 +205,6 @@
 				4A3600411712409A004DAFBA /* control.c */,
 				4A3600421712409A004DAFBA /* draw.c */,
 				4A3600431712409A004DAFBA /* gui.h */,
-				4A3600441712409A004DAFBA /* gui_internal.h */,
 				4A3600451712409A004DAFBA /* shared.c */,
 				4A3600461712409A004DAFBA /* shared.h */,
 			);

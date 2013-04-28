@@ -38,6 +38,18 @@
 #define NOBLEAPE_ENTITY_H
 /*NOBLEMAKE END=""*/
 
+#ifndef	_WIN32
+
+#include "../noble/noble.h"
+#include "../universe/universe.h"
+
+#else
+
+#include "..\noble\noble.h"
+#include "..\universe\universe.h"
+
+#endif
+
 #define	LAND_ON
 #define	BRAIN_ON /* currently has to be included episodic doesn't work without it */
 #define	WEATHER_ON

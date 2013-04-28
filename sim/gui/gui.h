@@ -38,6 +38,22 @@
 #ifndef NOBLEAPE_GUI_H
 #define NOBLEAPE_GUI_H
 
+#ifndef	_WIN32
+
+#include "../noble/noble.h"
+#include "../universe/universe.h"
+#include "../entity/entity.h"
+#include "../command/command.h"
+
+#else
+
+#include "..\noble\noble.h"
+#include "..\universe\universe.h"
+#include "..\entity\entity.h"
+#include "..\command\command.h"
+
+#endif
+
 #define	TERRAINWINDOW(alpha)   (alpha)
 #define	VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA)
 #define GRAPHWINDOW(alpha)     (alpha + (MAP_AREA + TERRAIN_WINDOW_AREA))

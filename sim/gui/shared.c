@@ -38,19 +38,6 @@
 
 #include <stdio.h>
 
-#ifndef	_WIN32
-
-#include "../noble/noble.h"
-#include "../universe/universe.h"
-
-#else
-
-#include "..\noble\noble.h"
-#include "..\universe\universe.h"
-
-#endif
-
-#include "gui_internal.h"
 #include "gui.h"
 #include "shared.h"
 

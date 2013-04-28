@@ -38,6 +38,17 @@
 #ifndef _NOBLEAPE_COMMAND_H_
 #define _NOBLEAPE_COMMAND_H_
 
+#ifndef	_WIN32
+
+#include "../noble/noble.h"
+#include "../entity/entity.h"
+
+#else
+
+#include "..\noble\noble.h"
+#include "..\entity\entity.h"
+
+#endif
 
 #define GENEALOGY_ON
 

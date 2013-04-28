@@ -41,23 +41,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef	_WIN32
-
-#include "../noble/noble.h"
-#include "../universe/universe.h"
-#include "../universe/universe_internal.h"
-#include "../entity/entity.h"
-
-#else
-
-#include "..\noble\noble.h"
-#include "..\universe\universe.h"
-#include "..\universe\universe_internal.h"
-#include "..\entity\entity.h"
-
-#endif
-
 #include "command.h"
+
 /*NOBLEMAKE END=""*/
 
 /*NOBLEMAKE VAR=""*/

@@ -35,22 +35,6 @@
 
 /*NOBLEMAKE DEL=""*/
 
-#ifndef	_WIN32
-
-#include "../noble/noble.h"
-#include "../universe/universe.h"
-#include "../entity/entity.h"
-
-#define	NOBLELIB_INTERFACE
-
-#else
-
-#include "..\noble\noble.h"
-#include "..\universe\universe.h"
-#include "..\entity\entity.h"
-
-#endif
-
 #include "gui.h"
 
 /*NOBLEMAKE END=""*/

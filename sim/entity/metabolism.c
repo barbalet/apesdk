@@ -37,24 +37,11 @@
 
 /*NOBLEMAKE DEL=""*/
 
-#ifndef	_WIN32
-
-#include "../noble/noble.h"
-#include "../universe/universe.h"
-#include "../entity/entity_internal.h"
-#include "../entity/entity.h"
-
-
-#else
-
-#include "..\noble\noble.h"
-#include "..\universe\universe.h"
-#include "..\entity\entity_internal.h"
-#include "..\entity\entity.h"
-
-#endif
+#include "entity.h"
+#include "entity_internal.h"
 
 #include <stdio.h>
+
 /*NOBLEMAKE END=""*/
 
 /*NOBLEMAKE VAR=""*/

@@ -38,21 +38,18 @@
 #define CONSOLE_REQUIRED
 #define CONSOLE_ONLY
 
-#ifndef	_WIN32
-#include "../noble/noble.h"
-#else
-#include "..\noble\noble.h"
-#endif
 
 #include <stdio.h>
-#include "universe.h"
-#include "universe_internal.h"
+
 
 #ifndef	_WIN32
 #include "../entity/entity.h"
 #else
 #include "..\entity\entity.h"
 #endif
+
+#include "universe_internal.h"
+
 
 #ifndef	_WIN32
 

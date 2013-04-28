@@ -39,7 +39,8 @@
  */
 
 /*NOBLEMAKE VAR=""*/
-
+#ifndef _NOBLEAPE_NOBLE_H_
+#define _NOBLEAPE_NOBLE_H_
 /*	Variable Definitions */
 
 #undef   NEW_OPENGL_ENVIRONMENT
@@ -984,5 +985,5 @@ void     scdebug_writeon(n_byte value);
 /*NOBLEMAKE SET="interpret.c"*/
 /*NOBLEMAKE SET="math.c"*/
 
-
+#endif /* _NOBLEAPE_NOBLE_H_ */
 

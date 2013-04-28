@@ -33,17 +33,9 @@
  
  ****************************************************************/
 
-#ifndef	_WIN32
-#include "../noble/noble.h"
-#include "../universe/universe.h"
-#else
-#include "..\noble\noble.h"
-#include "..\universe\universe.h"
-#endif
-
 #include <math.h>
-#include "entity_internal.h"
 #include "entity.h"
+#include "entity_internal.h"
 
 enum {
     BONE_ARM_UPPER = 0,
