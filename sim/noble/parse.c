@@ -168,7 +168,7 @@ n_string scdebug_variable(n_int variable)
     return return_value;
 }
 
-void scdebug_string(n_string string)
+void scdebug_string(n_constant_string string)
 {
     if (single_entry == 0) return;
 

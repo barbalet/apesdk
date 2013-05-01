@@ -764,7 +764,7 @@ n_int io_disk_append(n_file * local_file, n_string file_name)
  * @param file_name the name of the file to be appended.
  * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
  */
-n_int io_disk_check(n_string file_name)
+n_int io_disk_check(n_constant_string file_name)
 {
 #ifndef _WIN32
     FILE * local_check_file = fopen(file_name,"rb");
@@ -1271,7 +1271,7 @@ n_int io_find(n_string check, n_int from, n_int max, n_string value_find, n_int 
 /* writes a string, adding a new line if required in the OS correct format */
 #define FILE_MACRO_WRITE(ch)		if(io_file_write(fil,(ch)) == -1) return -1
 
-n_int io_write(n_file * fil, n_string ch, n_byte new_line)
+n_int io_write(n_file * fil, n_constant_string ch, n_byte new_line)
 {
     if (ch[0] != 0)
     {
@@ -2097,7 +2097,7 @@ n_string io_console_entry(n_string string, n_int length)
     return io_console_entry_clean(string, length);
 }
 
-void io_console_out(n_string value)
+void io_console_out(n_constant_string value)
 {
     printf("%s\n", value);
     fflush(stdout);
@@ -2195,7 +2195,7 @@ n_int io_apescript_error(AE_ENUM value)
 {
     n_int    loop = 0;
     AE_ENUM  local_enum;
-    n_string local_error;
+    n_constant_string local_error;
 
     do
     {

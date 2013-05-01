@@ -197,7 +197,7 @@ void shared_mouseUp(void)
     mouse_down = 0;
 }
 
-void shared_about(n_string value)
+void shared_about(n_constant_string value)
 {
     control_about(value);
 }

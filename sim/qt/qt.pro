@@ -21,7 +21,10 @@ SOURCES += main.cpp\
         ../command/*.c
 
 HEADERS  += mainwindow.h \
+    ../noble/noble.h \
     ../command/command.h \
+    ../gui/gui.h \
+    ../gui/shared.h \
     ../entity/entity_internal.h \
     ../entity/entity.h
 

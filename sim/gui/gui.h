@@ -133,7 +133,7 @@ n_int draw_toggle_territory(void);
 
 n_int control_toggle_pause(n_byte actual_toggle);
 
-void control_about(n_string value);
+void control_about(n_constant_string value);
 
 n_byte control_cursor(n_byte  wwind, n_int px, n_int py, n_byte  option, n_byte no_bounds);
 
@@ -162,9 +162,9 @@ n_byte * draw_pointer(n_byte which_one);
 
 n_byte * draw_color_fit();
 
-void draw_about(n_string platform);
+void draw_about(n_constant_string platform);
 
-void draw_string(n_string str, n_int off_x, n_int off_y, n_join * draw);
+void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw);
 
 void  draw_cycle(n_byte mod, n_int dim_x, n_int dim_y);
 

@@ -343,7 +343,7 @@ n_byte * draw_pointer(n_byte which_one)
 
 #define	TAB_LENGTH	(36)
 
-void draw_about(n_string platform)
+void draw_about(n_constant_string platform)
 {
     n_join	local_draw;
     n_byte *buffer = draw_pointer(NUM_VIEW);
@@ -417,7 +417,7 @@ void draw_about(n_string platform)
  @param off_y The starting y location for the string to be drawn.
  @param draw The generic draw function used to draw the character.
  */
-void draw_string(n_string str, n_int off_x, n_int off_y, n_join * draw)
+void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 {
     n_pixel	* local_draw = draw->pixel_draw;
     void	* local_info = draw->information;
@@ -1318,7 +1318,7 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
     }
 }
 
-n_int draw_error(n_string error_text)
+n_int draw_error(n_constant_string error_text)
 {
     n_int	loop = 0;
     n_byte	error_char_copy;

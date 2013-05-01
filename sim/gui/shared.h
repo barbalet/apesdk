@@ -71,7 +71,7 @@ void shared_mouseReceived(n_int valX, n_int valY, n_byte fIdentification);
 
 void shared_mouseUp(void);
 
-void shared_about(n_string value);
+void shared_about(n_constant_string value);
 
 n_byte * shared_draw(n_byte fIdentification);
 

@@ -64,7 +64,7 @@ enum cursor_type
 
 static n_int toggle_pause = 0;
 
-void control_about(n_string value)
+void control_about(n_constant_string value)
 {
     toggle_pause = 1;
     draw_about(value);

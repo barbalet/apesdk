@@ -82,6 +82,8 @@ typedef	double	n_double;
  @discussion This is the string format for the Noble Ape development */
 typedef char *          n_string;
 
+typedef const char *    n_constant_string;
+
 #define STRING_BLOCK_SIZE (2048)
 
 typedef char       n_string_block[STRING_BLOCK_SIZE];
@@ -226,7 +228,7 @@ enum file_element_type
 
 typedef n_string (n_console_input)(n_string value, n_int length);
 
-typedef void (n_console_output)(n_string value);
+typedef void (n_console_output)(n_constant_string value);
 
 /*! @typedef
  @field px The x location of the window buffer being drawn.
@@ -416,8 +418,8 @@ typedef enum
 typedef struct
 {
     AE_ENUM  enum_value;
-    n_string error_string;
-    n_string help_string;
+    n_constant_string error_string;
+    n_constant_string help_string;
 }
 n_ae_error;
 
@@ -468,7 +470,7 @@ static const n_ae_error apescript_errors[]=
     {AE_NO_ERROR, 0L, 0L}
 };
 
-extern n_int draw_error(n_string error_text);
+extern n_int draw_error(n_constant_string error_text);
 
 /* "---1---2---3---4---5---6---7--" */ /* length of the errors */
 
@@ -526,7 +528,7 @@ void       io_string_write(n_string dest, n_string insert, n_int * pos);
 n_int      io_read_bin(n_file * fil, n_byte * local_byte);
 n_int      io_file_write(n_file * fil, n_byte byte);
 void       io_file_reused(n_file * fil);
-n_int      io_write(n_file * fil, n_string ch, n_byte new_line);
+n_int      io_write(n_file * fil, n_constant_string ch, n_byte new_line);
 n_int      io_writenumber(n_file * fil, n_int loc_val, n_uint numer, n_uint denom);
 n_int      io_length(n_string value, n_int max);
 n_int      io_find(n_string check, n_int from, n_int max, n_string value_find, n_int value_find_length);
@@ -585,13 +587,13 @@ n_int      io_quit(void * ptr, n_string response, n_console_output output_functi
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);
 n_string   io_console_entry_clean(n_string string, n_int length);
 n_string   io_console_entry(n_string string, n_int length);
-void       io_console_out(n_string value);
+void       io_console_out(n_constant_string value);
 n_int      io_console(void * ptr, noble_console_command * commands, n_console_input input_function, n_console_output output_function);
 void       io_erase(n_byte * buf_offscr, n_uint nestop);
 n_int      io_disk_read(n_file * local_file, n_string file_name);
 n_int      io_disk_write(n_file * local_file, n_string file_name);
 n_int      io_disk_append(n_file * local_file, n_string file_name);
-n_int      io_disk_check(n_string file_name);
+n_int      io_disk_check(n_constant_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
 
 void       io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count);
@@ -950,7 +952,7 @@ void skim_show(n_file * binary_code);
 n_file * scdebug_file_ready(void);
 void     scdebug_file_cleanup(void);
 
-void     scdebug_string(n_string string);
+void     scdebug_string(n_constant_string string);
 void     scdebug_int(n_int number);
 void     scdebug_newline(void);
 void     scdebug_tabstep(n_int steps);
