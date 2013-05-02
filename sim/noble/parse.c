@@ -536,7 +536,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     }
     {
         n_byte	local_numbers[SIZEOF_NUMBER_WRITE];
-        n_int   loop_sizeof_number;
+        n_uint   loop_sizeof_number;
         /* this is the one special case for direct writing as the original stamp size was allowed */
         io_int_to_bytes(final_prog->binary_code->location,final_prog->binary_code->data); /* write the basic size header */
         end_loop = number_num;

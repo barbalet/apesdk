@@ -258,7 +258,7 @@ void graph_vascular(noble_being * being,
 /* Shows distribution of honor.  Note that beings are sorted in order of honor */
 void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
 {
-    n_int i,j;
+    n_uint i,j;
     n_int prev_x = -1, prev_y=-1;
     n_int x,y;
     
@@ -267,7 +267,7 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
     for (i = 0; i < sim->num; i++)
     {
         noble_being * local_being = &(sim->beings[i]);
-        n_int idx = i;
+        n_uint idx = i;
         n_int max = local_being->honor;
         for (j = i+1; j < sim->num; j++)
         {
@@ -326,7 +326,8 @@ static void graph_being_index(noble_simulation * sim, n_int *index, n_byte score
 {
 #ifdef BRAINCODE_ON
 #ifdef PARASITES_ON
-    n_int i,score;
+    n_int score;
+    n_uint i;
     n_byte * used = (unsigned char*)io_new(sim->num);
     for (i = 0; i < sim->num; i++)
     {
@@ -338,7 +339,7 @@ static void graph_being_index(noble_simulation * sim, n_int *index, n_byte score
     {
         if (used[i]==0)
         {
-            n_int j;
+            n_uint j;
             n_int max = -1;
             n_int idx = -1;
             for (j = 0; j < sim->num; j++)
@@ -467,8 +468,8 @@ void graph_genepool(noble_simulation * sim, n_byte * buffer, n_int img_width, n_
 void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
 {
 #ifdef PARASITES_ON
-    n_int i,j,k,x,y;
-    
+    n_int j,x,y;
+    n_uint i, k;
     n_int *index = (n_int*)io_new(sim->num*sizeof(n_int));
     graph_being_index(sim,index,1);
     
@@ -638,6 +639,7 @@ void graph_age_demographic(noble_simulation * sim, n_byte * buffer, n_int img_wi
     n_int prev_x = 0, prev_y=img_height-1;
     n_int x,y;
     n_uint current_date;
+    n_uint j;
     
     age_group = (n_int*)io_new(groups*sizeof(n_int));
     for (i=0; i<groups; i++)
@@ -649,9 +651,9 @@ void graph_age_demographic(noble_simulation * sim, n_byte * buffer, n_int img_wi
     
     current_date = TIME_IN_DAYS(sim->land->date);
     
-    for (i = 0; i < sim->num; i++)
+    for (j = 0; j < sim->num; j++)
     {
-        noble_being * local_being = &(sim->beings[i]);
+        noble_being * local_being = &(sim->beings[j]);
         n_uint local_dob = TIME_IN_DAYS(GET_D(local_being));
         n_int age_days = current_date - local_dob;
         if (age_days >= max_age) age_days = max_age-1;
@@ -680,6 +682,7 @@ void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_i
     n_int groups = BEING_MAX_HEIGHT/divisor;
     n_int * height_group;
     n_int i,idx,max=1;
+    n_uint j;
     n_int prev_x = 0, prev_y=img_height-1;
     n_int x,y;
     
@@ -690,9 +693,9 @@ void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_i
     }
     graph_clear(buffer, img_height, img_width);
     
-    for (i = 0; i < sim->num; i++)
+    for (j = 0; j < sim->num; j++)
     {
-        noble_being * local_being = &(sim->beings[i]);
+        noble_being * local_being = &(sim->beings[j]);
         idx = GET_H(local_being)/divisor;
         height_group[idx]++;
         if (height_group[idx] > max) max = height_group[idx];
@@ -867,10 +870,11 @@ static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_
 {
 #ifdef BRAINCODE_ON
     const n_int grid = 32;
-    n_uint x=0,y=0,n0,n1,i,tx,ty,bx,by,xx,yy;
+    n_uint x=0,y=0,n0,n1,tx,ty,bx,by,xx,yy;
     n_uint density[32*32],max=1;
     n_byte r,b;
-    
+    n_int i;
+    n_uint j;
     for (i = 0; i < img_width*img_height*3; i+=3)
     {
         buffer[i]=0;
@@ -879,17 +883,17 @@ static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_
     }
     for (i = 0; i < grid*grid; i++) density[i]=0;
     
-    for (i=0; i < sim->num; i++)
+    for (j=0; j < sim->num; j++)
     {
         switch(graph_type)
         {
             case 0:
-                graph_braincode_coords(sim, &(sim->beings[i]), &x, &y);
+                graph_braincode_coords(sim, &(sim->beings[j]), &x, &y);
                 x = x * (grid-1) / (256*BRAINCODE_SIZE);
                 y = (grid-1) - (y * (grid-1) / (255*BRAINCODE_SIZE));
                 break;
             case 1:
-                graph_genespace_coords(&(sim->beings[i]), &x, &y);
+                graph_genespace_coords(&(sim->beings[j]), &x, &y);
                 x = x * (grid-1) / (4*8*CHROMOSOMES);
                 y = (grid-1) - (y * (grid-1) / (4*8*CHROMOSOMES));
                 break;
@@ -990,7 +994,8 @@ void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte *
  */
 void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
 {
-    n_int i,p,x=0,y=0,n,half=PREFERENCES/2;
+    n_uint i;
+    n_int p,x=0,y=0,n,half=PREFERENCES/2;
     noble_being * local_being;
     
     /* clear the image */

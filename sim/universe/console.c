@@ -292,9 +292,9 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_string_block beingstr, time;
-    n_int i,count=0,juveniles=0;
+    n_int count=0,juveniles=0;
     n_uint current_date = TIME_IN_DAYS(local_sim->land->date);
-
+    n_uint i;
     for (i = 0; i < local_sim->num; i++)
     {
         noble_being * local_being = &local_sim->beings[i];
@@ -1337,7 +1337,8 @@ static void watch_being(void * ptr, n_console_output output_function)
 
     noble_being * local_being;
     n_string_block beingstr;
-    n_uint i,j;
+    n_uint i;
+    n_int  j;
     n_byte2 state;
 
     
@@ -1621,7 +1622,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
 
     if (local_sim->select != NO_BEINGS_FOUND)
     {
-        n_int loop = 0;
+        n_uint loop = 0;
         while (loop < local_sim->num)
         {
             noble_being * local_being = &(local_sim->beings[loop]);
@@ -1629,7 +1630,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
             if (bc_external)
             {
             
-                n_int loop2 = loop+1;
+                n_uint loop2 = loop+1;
                 while (loop2 < local_sim->num)
                 {
 					noble_being * local_being2 = &(local_sim->beings[loop2]);
@@ -1922,7 +1923,7 @@ n_int console_file(void * ptr, n_string response, n_console_output output_functi
 n_int console_step(void * ptr, n_string response, n_console_output output_function)
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
-    n_int loop = 0;
+    n_uint loop = 0;
     
     if (response != RUN_STEP_CONST)
     {
@@ -2254,7 +2255,8 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 {
 #ifdef PARASITES_ON
     noble_simulation * local_sim = (noble_simulation *) ptr;
-    n_int i,j;
+    n_uint i,j;
+    n_int  k;
     n_uint max=10;
     n_byte * eliminated;
     n_uint current_date,local_dob,age_in_years,age_in_months,age_in_days;
@@ -2331,7 +2333,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
         being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(local_sim,b), GET_FAMILY_FIRST_NAME(local_sim,b), GET_FAMILY_SECOND_NAME(local_sim,b), str);
         sprintf(output_value, "%s%s", output_value,str);
 
-        for (j=0; j<25-io_length(str,STRING_BLOCK_SIZE); j++) sprintf(output_value, "%s ", output_value);
+        for (k=0; k<25-io_length(str,STRING_BLOCK_SIZE); k++) sprintf(output_value, "%s ", output_value);
 
         if (FIND_SEX(GET_I(b)) == SEX_FEMALE)
         {

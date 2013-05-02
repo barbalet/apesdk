@@ -56,7 +56,7 @@ static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
     }
     else
     {
-        n_int		loop = 0;
+        n_uint		loop = 0;
         n_byte		*local_evaluate;
         if(local_b_count == BRACES_MAX)
         {

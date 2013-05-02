@@ -1654,7 +1654,7 @@ static int being_follow(noble_simulation * sim,
 static void being_listen(noble_simulation * sim,
                          n_uint current_being_index)
 {
-    n_int i;
+    n_uint i;
     noble_being * being_buffer = sim->beings;
     noble_being * local        = &being_buffer[current_being_index];
     n_int         max_shout_volume = 127;
@@ -2408,7 +2408,8 @@ static n_int being_set_unique_name(noble_simulation * sim,
                                    n_byte2 mother_family_name,
                                    n_byte2 father_family_name)
 {
-    n_int i,samples=0,found=0;
+    n_uint i;
+    n_int samples=0,found=0;
     n_byte2 possible_family_name;
     n_byte2 possible_first_name;
     n_byte2 local_random[2];

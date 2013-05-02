@@ -303,7 +303,7 @@ const static noble_file_entry noble_file_format[]=
     /*    {{'b', 'r', 'd', 'a', 't', '='}, FIL_BRA | DONTFILE_TYPE_PACKED, DOUBLE_BRAIN/PACKED_DATA_BLOCK, 1 },*/
 #endif
 
-    {{0, 0, 0, 0, 0, 0},0, 0, 0}
+    {{0, 0, 0, 0, 0, 0},0, 0, 0, 0L}
 
 };
 

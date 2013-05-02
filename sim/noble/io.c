@@ -129,7 +129,7 @@ n_file_chain * file_chain_new(n_uint size)
     n_file_chain * return_value = (n_file_chain*)io_new((size+1)*sizeof(n_file_chain));
     if (return_value)
     {
-        n_int  loop = 0;
+        n_uint  loop = 0;
         while (loop < (size+1))
         {
             return_value[loop].data = 0L;
@@ -422,12 +422,12 @@ n_int io_aiff_sample_size(n_uint total_size)
 
 static n_int io_scan(n_byte * v1, n_byte * v2, n_uint start, n_uint stop)
 {
-    n_int   loop = start;
+    n_uint   loop = start;
     while (loop < stop)
     {
         if (v1[loop] != v2[loop])
         {
-            n_int loop2 = start;
+            n_uint loop2 = start;
             while (loop2 < stop)
             {
                 printf("Diff %ld %2x %c  %2x %c\n",loop2, v1[loop2], v1[loop2], v2[loop2], v2[loop2]);
