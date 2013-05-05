@@ -97,7 +97,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 #define	Y_DELTA	36
 #define	X_DELTA	20
-    int	window_value[4] = {0, -300, MAP_DIMENSION, MAP_DIMENSION};
+    int	window_value[4] = {0, -300, 512, 512};
 
     /** Locals specific to Windows... **/
     MSG msg ;

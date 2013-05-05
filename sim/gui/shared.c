@@ -49,11 +49,27 @@ static n_byte  key_identification;
 static n_byte2 key_value;
 static n_byte  key_down;
 
-static void shared_squared_cycle(n_uint ticks, n_int fIdentification)
+void shared_cycle(n_uint ticks, n_int fIdentification)
 {    
-#ifndef	_WIN32 
+    ticks = ticks & 67108863; /* 71 58 27 88 */
+    ticks *= 60;
+    
+    if(fIdentification == NUM_TERRAIN)
+    {
+        control_sim_simulate(ticks);
+        draw_cycle(0, 512, 512);
+    }
+    if(fIdentification == NUM_VIEW)
+    {
+        draw_cycle(1, 512, 512);
+    }
+}
+
+void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification)
+{
+#ifndef	_WIN32
     sim_thread_console();
-#endif 
+#endif
     if((mouse_down == 1) && (mouse_identification == fIdentification))
     {
         control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
@@ -65,27 +81,6 @@ static void shared_squared_cycle(n_uint ticks, n_int fIdentification)
             control_key(key_identification, key_value);
         }
     }
-}
-
-void shared_cycle(n_uint ticks, n_int fIdentification)
-{    
-    ticks = ticks & 67108863; /* 71 58 27 88 */
-    ticks *= 60;
-    
-    if(fIdentification == NUM_TERRAIN)
-    {
-        control_sim_simulate(ticks);
-        draw_cycle(0, 512, 511);
-    }
-    if(fIdentification == NUM_VIEW)
-    {
-        draw_cycle(1, 512, 512);
-    }
-}
-
-void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification)
-{
-    shared_squared_cycle(ticks, fIdentification);
     
     ticks = ticks & 67108863; /* 71 58 27 88 */
     ticks *= 60;
