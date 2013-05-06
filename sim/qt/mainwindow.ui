@@ -6,17 +6,42 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>342</height>
+    <width>512</width>
+    <height>512</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Noble Ape</string>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QGraphicsView" name="graphicsView"/>
+     <widget class="QGraphicsView" name="graphicsView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>512</width>
+        <height>512</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>512</width>
+        <height>512</height>
+       </size>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -25,8 +50,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>302</width>
-     <height>18</height>
+     <width>512</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

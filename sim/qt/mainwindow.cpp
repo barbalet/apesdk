@@ -68,17 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    if (io_disk_check("NobleApeAutoload.txt") == 1)
-    {
-        unsigned long		buff_len;
-        unsigned char * buff = sim_fileout(&buff_len);
-        FILE          * outputfile = fopen("NobleApeAutoload.txt","w");
-        fwrite(buff, buff_len, 1, outputfile);
-        fclose(outputfile);
-        io_free(buff);
-    }
-
-    sim_close();
+    shared_close();
     for (int i = 0; i < NUM_WINDOWS; i++)
     {
         if (image_item[i] != NULL) delete image_item[i];
@@ -93,7 +83,6 @@ MainWindow::~MainWindow()
 /* closes the application */
 void MainWindow::closeApp()
 {
-    shared_close();
     close();
 }
 
@@ -113,7 +102,7 @@ void MainWindow::init()
 
 void MainWindow::menuAbout()
 {
-    shared_about("PC INTEL Qt");
+    shared_about("Qt");
 }
 
 /* toggle pause */
