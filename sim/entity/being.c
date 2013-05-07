@@ -1331,7 +1331,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 				n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
                 n_int n3 = (brain_point[n1] + local->brainprobe[i].offset)&255;
 				/* read from brain */
-                local_braincode[n2] = n3;
+                local_braincode[n2] = (n_byte)n3;
             }
 			else
             {

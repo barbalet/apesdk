@@ -190,8 +190,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     window_value[0] += MAP_DIMENSION + X_DELTA;
 
-    window_value[2] = TERRAIN_WINDOW_WIDTH;
-    window_value[3] = TERRAIN_WINDOW_HEIGHT;
+    window_value[2] = 512;
+    window_value[3] = 512;
 
     global_hwnd[WINDOW_TWO] = CreateWindow(szAppName, TEXT ( "Noble Ape: Terrain" ),
                                            WS_OVERLAPPED,
@@ -299,7 +299,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     case WM_PAINT:
         if (firedown != 0)
         {
-            control_mouse((n_byte)(firedown - 1), fire_x, fire_y, firecontrol);
+            control_mouse((n_byte)firedown, fire_x, fire_y, firecontrol);
         }
 
         control_simulate(((60*clock())/(CLK_TCK)));
@@ -351,7 +351,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         {
             if(firecontrol)
                 response |= 2048;
-            control_key((n_byte)(windownum - 1), response);
+            control_key((n_byte)windownum, response);
         }
     }
     return 0;

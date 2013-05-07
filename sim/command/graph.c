@@ -518,14 +518,14 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
                                 v = (graph[j].friend_foe - respect_threshold)*8;
                                 if (v>255) v=255;
                                 buffer[n] = 0;
-                                buffer[n+1] = v;
+                                buffer[n+1] = (n_byte)v;
                                 buffer[n+2] = 0;
                             }
                             else
                             {
                                 v = (respect_threshold - graph[j].friend_foe)*8;
                                 if (v>255) v=255;
-                                buffer[n] = v;
+                                buffer[n] = (n_byte)v;
                                 buffer[n+1] = 0;
                                 buffer[n+2] = 0;
                             }
@@ -553,7 +553,8 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
 #ifdef IMMUNE_ON
     noble_being * local_being;
     n_int j,n,p;
-    n_int max_val=1,max,x,y;
+    n_uint max_val=1;
+	n_int max,x,y;
     noble_immune_system * immune;
 #endif
     
@@ -869,8 +870,9 @@ static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int
 static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type)
 {
 #ifdef BRAINCODE_ON
-    const n_int grid = 32;
-    n_uint x=0,y=0,n0,n1,tx,ty,bx,by,xx,yy;
+    const n_uint grid = 32;
+    n_uint x=0,y=0;
+	n_uint n0,n1,tx,ty,bx,by,xx,yy;
     n_uint density[32*32],max=1;
     n_byte r,b;
     n_int i;
@@ -881,7 +883,8 @@ static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_
         buffer[i+1]=0;
         buffer[i+2]=255;
     }
-    for (i = 0; i < grid*grid; i++) density[i]=0;
+
+	io_erase((n_byte*)density, sizeof(n_uint)*32*32);
     
     for (j=0; j < sim->num; j++)
     {
@@ -901,9 +904,9 @@ static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_
         density[y*grid+x]++;
     }
     
-    for (i = 0; i < grid*grid; i++)
+    for (j = 0; j < grid*grid; j++)
     {
-        if (density[i] > max) max = density[i];
+        if (density[j] > max) max = density[j];
     }
     
     n0 = 0;
@@ -913,7 +916,7 @@ static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_
         {
             if (density[n0] > 0)
             {
-                r = density[n0]*255/max;
+                r = (n_byte)(density[n0]*255/max);
                 b = 255-r;
                 
                 tx = x * img_width / grid;
