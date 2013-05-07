@@ -62,9 +62,12 @@ static HWND           global_hwnd[NUMBER_WINDOWS];
 static HBITMAP        offscreen[NUMBER_WINDOWS];
 static BITMAPINFO	* bmp_info[NUMBER_WINDOWS];
 
+static n_int		  window_definition[NUMBER_WINDOWS] = {NUM_VIEW, NUM_TERRAIN};
+
 static unsigned char	* local_buffer;
 
-static unsigned char    firedown = 0, firecontrol = 0;
+static n_int            firedown = -1;
+static unsigned char    firecontrol = 0;
 static int				fire_x, fire_y;
 static unsigned char	dialog_up = 0;
 static HMENU  hMenu, hMenuPopup[4];
@@ -76,7 +79,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 /** Nobleape platform functions **/
 
 static void plat_update();
-static unsigned char plat_ourwind(HWND hwnd);
+static n_int plat_ourwind(HWND hwnd);
 static unsigned char plat_file_open();
 static unsigned char plat_file_save();
 static unsigned char plat_file_save_as();
@@ -297,9 +300,9 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 1;
 
     case WM_PAINT:
-        if (firedown != 0)
+        if (firedown != -1)
         {
-            control_mouse((n_byte)firedown, fire_x, fire_y, firecontrol);
+            control_mouse(firedown, fire_x, fire_y, firecontrol);
         }
 
         control_simulate(((60*clock())/(CLK_TCK)));
@@ -316,7 +319,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 0;
 
     case WM_LBUTTONUP:
-        firedown = 0;
+        firedown = -1;
         return 0;
 
     case WM_MOUSEMOVE:
@@ -350,8 +353,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         if(response != 0)
         {
             if(firecontrol)
+			{
                 response |= 2048;
-            control_key((n_byte)windownum, response);
+			}
+			if (windownum != -1)
+			{
+				control_key(windownum, response);
+			}
         }
     }
     return 0;
@@ -507,17 +515,17 @@ static void plat_update()
     }
 }
 
-static unsigned char plat_ourwind(HWND hwnd)
+static n_int plat_ourwind(HWND hwnd)
 {
     unsigned char	lp = 0;
     while (lp < NUMBER_WINDOWS)
     {
         if (hwnd == global_hwnd[lp])
-            return (unsigned char)(lp + 1);
+            return window_definition[lp];
         lp++;
     }
 
-    return 0;
+    return -1;
 }
 
 static unsigned char plat_file_open(control_file_handle cfh)
