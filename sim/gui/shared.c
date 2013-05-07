@@ -127,9 +127,9 @@ void shared_close(void)
     sim_close();
 }
 
-void shared_notPause(void)
+n_int shared_notPause(void)
 {
-    (void)control_toggle_pause(1);
+    return control_toggle_pause(1);
 }
 
 void shared_notWeather(void)

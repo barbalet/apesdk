@@ -32,9 +32,9 @@
  of this software.
 
  ****************************************************************/
-
+#include "../noble/noble.h"
+#include "../universe/universe.h"
 #include "../gui/gui.h"
-#include "../gui/shared.h"
 #include "platform.h"
 #include <windows.h>
 #include <time.h>
@@ -69,7 +69,6 @@ static unsigned char	* local_buffer;
 static n_int            firedown = -1;
 static unsigned char    firecontrol = 0;
 static int				fire_x, fire_y;
-
 static unsigned char	dialog_up = 0;
 static HMENU  hMenu, hMenuPopup[4];
 static HANDLE current_file = NULL;
@@ -170,6 +169,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PREV_HANDLE, TEXT("P&revious Ape"));
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NEXT_HANDLE, TEXT ("&Next Ape"));
     AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_CREATE_AUTOLOAD, TEXT("Create Autoload File"));
+    AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_CLEAR_ERRORS, TEXT ("Clear Errors"));
     AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NO_WEATHER_HANDLE, TEXT("No &Weather"));
@@ -205,15 +206,38 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     /* can't close the meters window, it's also the menu window */
     EnableMenuItem(hMenuPopup[0], FILE_CLOSE_HANDLE, MF_DISABLED | MF_GRAYED);
 
-    
+
+    /* this is called here to allow for the gworld memory allocation first */
+    local_buffer = (unsigned char *) control_init(2, tmpres);
+
+    if (io_disk_check((unsigned char *)"NobleApeAutoload.txt") == 1)
+    {
+        n_file	  tester;
+        tester.size = 4096;
+        tester.data = io_new(4096);
+        tester.location = 0;
+        (void)io_disk_read(&tester,(unsigned char *)"NobleApeAutoload.txt");
+        if(sim_filein(tester.data, tester.location) == 0)
+        {
+            control_init(0, 0);
+        }
+        io_free(tester.data);
+    }
+    if (io_disk_check((unsigned char *)"ApeScriptAutoload.txt") == 1)
+    {
+        n_file	  tester;
+        tester.size = 4096;
+        tester.data = io_new(4096);
+        tester.location = 0;
+        (void)io_disk_read(&tester,"ApeScriptAutoload.txt");
+        (void)sim_interpret(tester.data, tester.location);
+        io_free(tester.data);
+    }
 
     loop = 0;
 
     while (loop < NUMBER_WINDOWS)
     {
-        window_definition[loop] = shared_init(window_definition[loop], tmpres);
-
-        
         bmp_info[loop] = (LPBITMAPINFO) malloc(sizeof(BYTE) * (sizeof(BITMAPINFOHEADER)
                                                + (256 * sizeof(RGBQUAD))));
 
@@ -276,20 +300,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 1;
 
     case WM_PAINT:
-            
-        /*
-            
         if (firedown != -1)
         {
             control_mouse(firedown, fire_x, fire_y, firecontrol);
         }
 
         control_simulate(((60*clock())/(CLK_TCK)));
-        */
-        if (firedown != -1)
-        {
-            shared_cycle_real_no_draw(firedown,(60*clock())/(CLK_TCK));
-        }
+            
         plat_update();
 
         InvalidateRect(global_hwnd[0], NULL, TRUE);
@@ -341,22 +358,16 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 			}
 			if (windownum != -1)
 			{
-				/*control_key(windownum, response);*/
-                
-                shared_keyReceived(response, windownum);
+				control_key(windownum, response);
 			}
         }
     }
     return 0;
     case WM_KEYUP:
-        /*
-            if(wParam == VK_CONTROL)
+        if(wParam == VK_CONTROL)
         {
             firecontrol = 0;
         }
-         */
-            
-        shared_keyUp();
         return 0;
     case WM_CLOSE:
 
@@ -371,22 +382,34 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case HELP_ABOUT_HANDLE:
             CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_CHECKED);
 
-            shared_about((unsigned char *)"Windows");
+            control_about((unsigned char *)"Windows");
             return 0;
 
             /** Control Menu... **/
         case CONTROL_PAUSE_HANDLE:
-            if (shared_notPause())
+            if (control_toggle_pause(1))
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_CHECKED);
             else
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_UNCHECKED);
             return 0;
 
         case CONTROL_PREV_HANDLE:
-            shared_previousApe();
+            control_key(0, 2079);
             return 0;
         case CONTROL_NEXT_HANDLE:
-            shared_nextApe();
+            control_key(0, 2078);
+            return 0;
+
+        case CONTROL_CREATE_AUTOLOAD:
+            if (io_disk_check((unsigned char *)"NobleApeAutoload.txt") == 0)
+            {
+                unsigned long		buff_len;
+                unsigned char * buff = sim_fileout(&buff_len);
+                FILE          * outputfile = fopen("NobleApeAutoload.txt","w");
+                fwrite(buff, buff_len, 1, outputfile);
+                fclose(outputfile);
+                io_free(buff);
+            }
             return 0;
 
         case CONTROL_CLEAR_ERRORS:
@@ -473,8 +496,14 @@ static void plat_update()
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);
         hdcMem = CreateCompatibleDC(hdc[lp]);
-        
-        value = shared_draw(window_definition[lp]);
+        if (lp == 0)
+        {
+            value = VIEWWINDOW(local_buffer);
+        }
+        else
+        {
+            value = TERRAINWINDOW(local_buffer);
+        }
 
         SetDIBits(hdcMem, offscreen[lp], 0, 512-lp, value, bmp_info[lp], DIB_RGB_COLORS);
 

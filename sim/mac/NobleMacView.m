@@ -257,7 +257,7 @@ n_int   count_switch = 0;
 
 -(IBAction) menuControlPause:(id) sender
 {
-    shared_notPause();
+    (void)shared_notPause(); /* should handle check mark */
 }
 
 -(IBAction) menuControlPrevious:(id) sender

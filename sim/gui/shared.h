@@ -51,7 +51,7 @@ n_int shared_init(n_byte view, n_uint random);
 
 void shared_close(void);
 
-void shared_notPause(void);
+n_int shared_notPause(void);
 
 void shared_notWeather(void);
 void shared_notBrain(void);
