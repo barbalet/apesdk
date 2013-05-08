@@ -40,12 +40,7 @@
 
 void shared_cycle(n_uint ticks, n_int fIdentification);
 
-void shared_cycle_no_draw(n_uint ticks, n_int fIdentification);
-
-void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification);
-
-void shared_cycle_really_draw(n_int fIdentification, n_int dim_x, n_int dim_y);
-
+void shared_cycle_draw(n_int fIdentification, n_int dim_x, n_int dim_y);
 
 n_int shared_init(n_byte view, n_uint random);
 

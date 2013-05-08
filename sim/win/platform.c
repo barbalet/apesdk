@@ -285,10 +285,10 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         
         if (firedown != -1)
         {*/
-        shared_cycle_really_no_draw((60*clock())/(CLK_TCK), NUM_VIEW);
-		shared_cycle_really_no_draw((60*clock())/(CLK_TCK), NUM_TERRAIN);
-		shared_cycle_really_draw(NUM_VIEW, 512, 512);
-		shared_cycle_really_draw(NUM_TERRAIN, 512, 512);
+        shared_cycle((60*clock())/(CLK_TCK), NUM_VIEW);
+		shared_cycle((60*clock())/(CLK_TCK), NUM_TERRAIN);
+		shared_cycle_draw(NUM_VIEW, 512, 512);
+		shared_cycle_draw(NUM_TERRAIN, 512, 512);
         /*
 		}*/
         plat_update();

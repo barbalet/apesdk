@@ -101,9 +101,7 @@
 - (void) animationTimer:(NSTimer *)localTimer
 {
 #ifndef NEW_OPENGL_ENVIRONMENT
-    shared_cycle_really_no_draw(CFAbsoluteTimeGetCurrent (), fIdentification);
-#else
-    shared_cycle_no_draw(CFAbsoluteTimeGetCurrent (), fIdentification);
+    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
 #endif
 
     if (shared_script_debug_ready())
@@ -135,7 +133,7 @@ n_int   count_switch = 0;
     This is currently broken
 #endif
                 
-    shared_cycle_really_draw(fIdentification, dimensionX, dimensionY);
+    shared_cycle_draw(fIdentification, dimensionX, dimensionY);
     
     if (fIdentification != NUM_GRAPH)
     {

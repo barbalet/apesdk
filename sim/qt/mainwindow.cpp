@@ -296,8 +296,8 @@ bool MainWindow::refresh()
         next_display = -1;
     }
 
-    shared_cycle_really_no_draw((60*clock())/CLOCKS_PER_SEC,NUM_TERRAIN);
-    shared_cycle_really_no_draw((60*clock())/CLOCKS_PER_SEC,NUM_VIEW);
+    shared_cycle((60*clock())/CLOCKS_PER_SEC,NUM_TERRAIN);
+    shared_cycle((60*clock())/CLOCKS_PER_SEC,NUM_VIEW);
 
     window_updated = 0;
 
@@ -313,7 +313,7 @@ bool MainWindow::refresh()
     {
     case WND_MAP:
     {
-        shared_cycle_really_draw(NUM_VIEW, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        shared_cycle_draw(NUM_VIEW, WND_WIDTH_MAP, WND_HEIGHT_MAP);
         img = shared_draw(NUM_VIEW);
         format = QImage::Format_Indexed8;
         img_width = WND_WIDTH_MAP;
@@ -323,7 +323,7 @@ bool MainWindow::refresh()
     }
     case WND_TERRAIN:
     {
-        shared_cycle_really_draw(NUM_TERRAIN, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        shared_cycle_draw(NUM_TERRAIN, WND_WIDTH_MAP, WND_HEIGHT_MAP);
 
         img = shared_draw(NUM_TERRAIN);
         format = QImage::Format_Indexed8;

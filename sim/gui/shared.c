@@ -50,22 +50,6 @@ static n_byte2 key_value;
 static n_byte  key_down;
 
 void shared_cycle(n_uint ticks, n_int fIdentification)
-{    
-    ticks = ticks & 67108863; /* 71 58 27 88 */
-    ticks *= 60;
-    
-    if(fIdentification == NUM_TERRAIN)
-    {
-        control_sim_simulate(ticks);
-        draw_cycle(0, 512, 512);
-    }
-    if(fIdentification == NUM_VIEW)
-    {
-        draw_cycle(1, 512, 512);
-    }
-}
-
-void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification)
 {
 #ifndef	_WIN32
     sim_thread_console();
@@ -91,17 +75,7 @@ void shared_cycle_really_no_draw(n_uint ticks, n_int fIdentification)
     }
 }
 
-void shared_cycle_no_draw(n_uint ticks, n_int fIdentification)
-{
-    shared_cycle_really_no_draw(ticks, fIdentification);
-    
-    if(fIdentification == NUM_VIEW)
-    {
-        draw_cycle(1, 512, 512);
-    }
-}
-
-void shared_cycle_really_draw(n_int fIdentification, n_int dim_x, n_int dim_y)
+void shared_cycle_draw(n_int fIdentification, n_int dim_x, n_int dim_y)
 {
     draw_cycle(fIdentification, dim_x, dim_y);
 }
