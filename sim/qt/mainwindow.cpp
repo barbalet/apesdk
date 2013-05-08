@@ -89,7 +89,8 @@ void MainWindow::closeApp()
 void MainWindow::init()
 {
     /* Now, get the location of the graphics buffers */
-    local_buffer = (unsigned char *) control_init(KIND_START_UP, time(NULL));
+    (void)shared_init(NUM_VIEW, time(NULL));
+    (void)shared_init(NUM_TERRAIN, time(NULL));
 
     /* RGB image used for additional graphs */
     img_graph = (unsigned char *)malloc(WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
@@ -295,14 +296,13 @@ bool MainWindow::refresh()
         next_display = -1;
     }
 
-    sim_thread_console();
+    shared_cycle_really_no_draw((60*clock())/CLOCKS_PER_SEC,NUM_TERRAIN);
+    shared_cycle_really_no_draw((60*clock())/CLOCKS_PER_SEC,NUM_VIEW);
 
-    if (firedown != 0)
-    {
-        control_mouse((n_byte)(firedown - 1), fire_x, fire_y, firecontrol);
-    }
-    control_simulate((60*clock())/CLOCKS_PER_SEC);
     window_updated = 0;
+
+
+
 
     if (sim_thread_console_quit())
     {
@@ -313,7 +313,8 @@ bool MainWindow::refresh()
     {
     case WND_MAP:
     {
-        img = (unsigned char*)VIEWWINDOW(local_buffer);
+        shared_cycle_really_draw(NUM_VIEW, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        img = shared_draw(NUM_VIEW);
         format = QImage::Format_Indexed8;
         img_width = WND_WIDTH_MAP;
         img_height = WND_HEIGHT_MAP;
@@ -322,7 +323,9 @@ bool MainWindow::refresh()
     }
     case WND_TERRAIN:
     {
-        img = (unsigned char*)TERRAINWINDOW(local_buffer);
+        shared_cycle_really_draw(NUM_TERRAIN, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+
+        img = shared_draw(NUM_TERRAIN);
         format = QImage::Format_Indexed8;
         img_width = WND_WIDTH_MAP;
         img_height = WND_HEIGHT_MAP;
