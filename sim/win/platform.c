@@ -64,11 +64,8 @@ static BITMAPINFO	* bmp_info[NUMBER_WINDOWS];
 
 static n_int		  window_definition[NUMBER_WINDOWS] = {NUM_VIEW, NUM_TERRAIN};
 
-static unsigned char	* local_buffer;
-
 static n_int            firedown = -1;
 static unsigned char    firecontrol = 0;
-static int				fire_x, fire_y;
 
 static unsigned char	dialog_up = 0;
 static HMENU  hMenu, hMenuPopup[4];
@@ -285,11 +282,15 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         }
 
         control_simulate(((60*clock())/(CLK_TCK)));
-        */
+        
         if (firedown != -1)
-        {
-            shared_cycle_real_no_draw(firedown,(60*clock())/(CLK_TCK));
-        }
+        {*/
+        shared_cycle_really_no_draw((60*clock())/(CLK_TCK), NUM_VIEW);
+		shared_cycle_really_no_draw((60*clock())/(CLK_TCK), NUM_TERRAIN);
+		shared_cycle_really_draw(NUM_VIEW, 512, 512);
+		shared_cycle_really_draw(NUM_TERRAIN, 512, 512);
+        /*
+		}*/
         plat_update();
 
         InvalidateRect(global_hwnd[0], NULL, TRUE);
@@ -297,17 +298,19 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         return 0;
 
-    case WM_LBUTTONDOWN:
-        firedown = plat_ourwind(hwnd);
-        return 0;
-
     case WM_LBUTTONUP:
         firedown = -1;
+		shared_mouseUp();
         return 0;
 
+
+    case WM_LBUTTONDOWN:
+        firedown = plat_ourwind(hwnd);
     case WM_MOUSEMOVE:
-        fire_x = LOWORD(lParam);
-        fire_y = HIWORD(lParam);
+        if (firedown != -1)
+		{
+			shared_mouseReceived(LOWORD(lParam), HIWORD(lParam), firedown);
+		}
         return 0;
 
     case WM_KEYDOWN:
@@ -340,9 +343,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                 response |= 2048;
 			}
 			if (windownum != -1)
-			{
-				/*control_key(windownum, response);*/
-                
+			{   
                 shared_keyReceived(response, windownum);
 			}
         }
@@ -470,6 +471,7 @@ static void plat_update()
         SIZE            sz;
         HDC             hdcMem;
         unsigned char * value;
+
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);
         hdcMem = CreateCompatibleDC(hdc[lp]);
