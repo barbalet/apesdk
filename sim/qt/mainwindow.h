@@ -26,7 +26,6 @@ extern "C" {
 #include "../universe/universe.h"
 #include "../gui/gui.h"
 #include "../gui/shared.h"
-#include "../command/command.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

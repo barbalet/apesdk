@@ -79,12 +79,12 @@ fi
 
 gcc ${CFLAGS} ${INCLUDES} -c $SOURCEDIR/gtk/platform.c -o platform.o ${LIBS2}
 
-gcc ${CFLAGS} ${INCLUDES} -o $SOURCEDIR/../na io.o math.o parse.o interpret.o being.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o genealogy.o body.o draw.o control.o platform.o console.o speak.o ${LIBS2}
+gcc ${CFLAGS} ${INCLUDES} -o $SOURCEDIR/../na io.o math.o parse.o interpret.o being.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o body.o audio.o draw.o control.o platform.o console.o speak.o ${LIBS2}
 
 #gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/cle.c -o cleweb.o
 #gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/web.c -o web.o
 #gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
 
-#gcc -Wall -ansi -pedantic -O3 -o ../naweb cleweb.o pnglite.o -lz sim.o file.o genealogy.o body.o being.o metabolism.o brain.o console.o land.o social.o episodic.o food.o drives.o math.o io.o parse.o interpret.o graph.o web.o speak.o -lm -lpthread
+#gcc -Wall -ansi -pedantic -O3 -o ../naweb cleweb.o pnglite.o -lz sim.o file.o body.o being.o metabolism.o brain.o console.o land.o social.o episodic.o food.o drives.o math.o io.o parse.o interpret.o web.o speak.o -lm -lpthread
 
 rm *.o 

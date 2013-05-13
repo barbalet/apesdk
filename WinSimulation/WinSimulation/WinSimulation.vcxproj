@@ -74,7 +74,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\sim\command\command.h" />
     <ClInclude Include="..\..\sim\entity\entity.h" />
     <ClInclude Include="..\..\sim\entity\entity_internal.h" />
     <ClInclude Include="..\..\sim\gui\gui.h" />
@@ -85,8 +84,6 @@
     <ClInclude Include="..\..\sim\win\platform.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\sim\command\genealogy.c" />
-    <ClCompile Include="..\..\sim\command\graph.c" />
     <ClCompile Include="..\..\sim\entity\being.c" />
     <ClCompile Include="..\..\sim\entity\body.c" />
     <ClCompile Include="..\..\sim\entity\brain.c" />

@@ -67,9 +67,6 @@ gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/file.c -o file.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/console.c -o console.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/sim.c -o sim.o
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/command/graph.c -o graph.o
-gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/command/genealogy.c -o genealogy.o
-
 #gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/cle.c -o cle.o
 
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/longterm.c -o longterm.o

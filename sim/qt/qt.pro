@@ -17,12 +17,10 @@ SOURCES += main.cpp\
         ../gui/*.c\
         ../universe/*.c\
         ../noble/*.c\
-        ../entity/*.c\
-        ../command/*.c
+        ../entity/*.c
 
 HEADERS  += mainwindow.h \
     ../noble/noble.h \
-    ../command/command.h \
     ../gui/gui.h \
     ../gui/shared.h \
     ../entity/entity_internal.h \

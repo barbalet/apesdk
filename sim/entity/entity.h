@@ -83,6 +83,21 @@ enum BRAINPROBE_TYPE
     OUTPUT_ACTUATOR
 };
 
+#define GENEALOGY_ON
+
+enum GENEALOGY_FORMAT
+{
+    GENEALOGY_NONE = 0,
+    GENEALOGY_GENXML,
+    GENEALOGY_GEDCOM,
+    GENEALOGY_FORMATS
+};
+
+void genealogy_log(noble_simulation * sim,n_byte value);
+n_int genealogy_save(noble_simulation * sim, n_string filename);
+void genealogy_birth(noble_being * child, noble_being * mother, void * sim);
+void genealogy_death(noble_being * local_being, void * sim);
+
 typedef void (being_no_return)(noble_simulation * sim, noble_being * actual);
 
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func);

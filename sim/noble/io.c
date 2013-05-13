@@ -213,7 +213,11 @@ n_int file_chain_read(n_string name, n_file_chain * initial)
     }
     
     do {
-        fread(local->data,1,local->expected_bytes, read_file);
+        if (fread(local->data,1,local->expected_bytes, read_file) != local->expected_bytes)
+        {
+            (void) io_uniform_handle_fclose(read_file);
+            return SHOW_ERROR("Could not read all expected");
+        }
         local = (n_file_chain*)local->next;
     } while (local != 0L);
 
@@ -449,7 +453,10 @@ n_int io_file_aiff_header_check_length(void * fptr)
 
     io_aiff_header(comparison);
     
-    fread(actual,1,38,(FILE *)fptr);
+    if (fread(actual,1,38,(FILE *)fptr) != 38)
+    {
+        return SHOW_ERROR("Could not read all of AIFF header");
+    }
     
     if (io_scan(comparison, actual, 0, 4))
     {
@@ -475,7 +482,10 @@ n_int io_file_aiff_header_check_length(void * fptr)
         actual[3] = actual[2];
         actual[2] = actual[1];
         actual[1] = actual[0];
-        fread(actual,1,1, (FILE *)fptr);        
+        if (fread(actual,1,1, (FILE *)fptr) != 1)
+        {
+            return SHOW_ERROR("Could not read all of AIFF header");
+        }
         if ((actual[0] == 'D') && (actual[1] == 'N') && (actual[2] == 'S') && (actual[3] == 'S'))
         {
             not_found = 0;
@@ -485,7 +495,10 @@ n_int io_file_aiff_header_check_length(void * fptr)
     {
         return SHOW_ERROR("AIFF sound marker not found");
     }
-    fread(actual,1,6,(FILE *)fptr);
+    if (fread(actual,1,6,(FILE *)fptr) != 6)
+    {
+        return SHOW_ERROR("Could not read section of AIFF header");
+    }
     sound_size = io_aiff_uint_out(actual);
      /* if (total_size != io_aiff_total_size(total_samples)) - this is not a valid comparison */
      if (sound_size != io_aiff_sound_size(total_samples))

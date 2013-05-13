@@ -43,14 +43,12 @@
 #include "../noble/noble.h"
 #include "../universe/universe.h"
 #include "../entity/entity.h"
-#include "../command/command.h"
 
 #else
 
 #include "..\noble\noble.h"
 #include "..\universe\universe.h"
 #include "..\entity\entity.h"
-#include "..\command\command.h"
 
 #endif
 
@@ -122,6 +120,35 @@ typedef n_int (*control_file_handle)(n_byte * buff, n_uint len);
 
 typedef void  (*control_mp_define)(n_byte * data);
 
+/*
+ n_uint braincode_standard_deviation(noble_being * local_being);
+ void braincode_number_of_instructions(
+ noble_being * local_being,
+ n_int * no_of_sensors,
+ n_int * no_of_actuators,
+ n_int * no_of_operators,
+ n_int * no_of_conditionals,
+ n_int * no_of_data);
+ */
+/* graph functions */
+/*void graph_line(n_byte * buffer, n_int img_width, n_int img_height, n_int prev_x, n_int prev_y, n_int x, n_int y, n_byte r,n_byte g,n_byte b,n_byte thickness);*/
+void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_ideosphere(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_genepool(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_age_demographic(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_phasespace(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type, n_byte data_type);
+void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte * buffer, n_int img_width, n_int img_height, n_byte clear);
+
+void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_vascular(noble_being * being,
+                    n_byte * buffer,
+                    n_int img_width, n_int img_height,
+                    n_int tx, n_int ty, n_int bx, n_int by,
+                    n_byte thickness,
+                    n_byte clear);
 
 n_int draw_toggle_weather(void);
 

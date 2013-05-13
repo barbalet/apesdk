@@ -65,7 +65,6 @@
 #ifdef AUDIT_FILE
 #include "universe/universe_internal.h"
 #endif
-#include "command/command.h"
 
 /* this was added to avoid a CPU fan */
 
