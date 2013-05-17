@@ -89,7 +89,7 @@ n_int control_toggle_pause(n_byte actual_toggle)
     return toggle_pause;
 }
 
-n_byte control_cursor(n_byte wwind, n_int px, n_int py, n_byte option, n_byte no_bounds)
+static n_byte control_cursor(n_byte wwind, n_int px, n_int py, n_byte option, n_byte no_bounds)
 {
     n_int upper_x, upper_y;
     if(wwind == (NUM_TERRAIN))
@@ -291,17 +291,6 @@ void control_sim_simulate(n_uint local_time)
     {
         sim_cycle();
     }
-}
-
-void control_simulate(n_uint local_time)
-{
-    if (io_command_line_execution() == 0)
-    {
-        control_sim_simulate(local_time);
-    }
-
-    draw_cycle(0, 512, 511);
-    draw_cycle(1, 512, 512);
 }
 
 void * control_init(KIND_OF_USE kind, n_uint randomise)

@@ -162,9 +162,6 @@ n_int control_toggle_pause(n_byte actual_toggle);
 
 void control_about(n_constant_string value);
 
-n_byte control_cursor(n_byte  wwind, n_int px, n_int py, n_byte  option, n_byte no_bounds);
-
-void control_simulate(n_uint local_time);
 void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option);
 void control_key(n_byte wwind, n_byte2 num);
 

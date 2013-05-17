@@ -273,18 +273,6 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 1;
 
     case WM_PAINT:
-            
-        /*
-            
-        if (firedown != -1)
-        {
-            control_mouse(firedown, fire_x, fire_y, firecontrol);
-        }
-
-        control_simulate(((60*clock())/(CLK_TCK)));
-        
-        if (firedown != -1)
-        {*/
         shared_cycle((60*clock())/(CLK_TCK), NUM_VIEW);
 		shared_cycle((60*clock())/(CLK_TCK), NUM_TERRAIN);
 		shared_cycle_draw(NUM_VIEW, 512, 512);
