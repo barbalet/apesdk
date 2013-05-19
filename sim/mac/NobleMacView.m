@@ -33,10 +33,7 @@
 
  ****************************************************************/
 
-#include "../gui/gui.h"
 #include "../gui/shared.h"
-#include "../ogl/ogl.h"
-
 #import "NobleMacView.h"
 
 #include <stdio.h>

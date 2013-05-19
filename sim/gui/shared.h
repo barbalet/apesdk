@@ -38,6 +38,16 @@
 #ifndef NOBLEAPE_SHARED_H
 #define NOBLEAPE_SHARED_H
 
+#ifndef	_WIN32
+
+#include "../noble/noble.h"
+
+#else
+
+#include "..\noble\noble.h"
+
+#endif
+
 void shared_cycle(n_uint ticks, n_int fIdentification);
 
 void shared_cycle_draw(n_int fIdentification, n_int dim_x, n_int dim_y);

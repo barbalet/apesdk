@@ -19,7 +19,6 @@
 		4A3600621712409A004DAFBA /* metabolism.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003D1712409A004DAFBA /* metabolism.c */; };
 		4A3600631712409A004DAFBA /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003E1712409A004DAFBA /* social.c */; };
 		4A3600641712409A004DAFBA /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003F1712409A004DAFBA /* speak.c */; };
-		4A3600651712409A004DAFBA /* control.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600411712409A004DAFBA /* control.c */; };
 		4A3600661712409A004DAFBA /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600421712409A004DAFBA /* draw.c */; };
 		4A3600671712409A004DAFBA /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600451712409A004DAFBA /* shared.c */; };
 		4A3600681712409A004DAFBA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600481712409A004DAFBA /* main.m */; };
@@ -61,7 +60,6 @@
 		4A36003D1712409A004DAFBA /* metabolism.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = metabolism.c; sourceTree = "<group>"; };
 		4A36003E1712409A004DAFBA /* social.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = social.c; sourceTree = "<group>"; };
 		4A36003F1712409A004DAFBA /* speak.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = speak.c; sourceTree = "<group>"; };
-		4A3600411712409A004DAFBA /* control.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = control.c; sourceTree = "<group>"; };
 		4A3600421712409A004DAFBA /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw.c; sourceTree = "<group>"; };
 		4A3600431712409A004DAFBA /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
 		4A3600451712409A004DAFBA /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shared.c; sourceTree = "<group>"; };
@@ -185,7 +183,6 @@
 		4A3600401712409A004DAFBA /* gui */ = {
 			isa = PBXGroup;
 			children = (
-				4A3600411712409A004DAFBA /* control.c */,
 				4A3600421712409A004DAFBA /* draw.c */,
 				4A3600431712409A004DAFBA /* gui.h */,
 				4A3600451712409A004DAFBA /* shared.c */,
@@ -310,7 +307,6 @@
 				4A3600621712409A004DAFBA /* metabolism.c in Sources */,
 				4A3600631712409A004DAFBA /* social.c in Sources */,
 				4A3600641712409A004DAFBA /* speak.c in Sources */,
-				4A3600651712409A004DAFBA /* control.c in Sources */,
 				4A3600661712409A004DAFBA /* draw.c in Sources */,
 				4A3600671712409A004DAFBA /* shared.c in Sources */,
 				4A3600681712409A004DAFBA /* main.m in Sources */,

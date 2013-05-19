@@ -93,7 +93,6 @@
     <ClCompile Include="..\..\sim\entity\metabolism.c" />
     <ClCompile Include="..\..\sim\entity\social.c" />
     <ClCompile Include="..\..\sim\entity\speak.c" />
-    <ClCompile Include="..\..\sim\gui\control.c" />
     <ClCompile Include="..\..\sim\gui\draw.c" />
     <ClCompile Include="..\..\sim\gui\shared.c" />
     <ClCompile Include="..\..\sim\noble\audio.c" />

@@ -347,6 +347,29 @@ const static n_int	new_sd[256] =
 #define VECT_X(f)         	(OLD_SD_NEW_SD(((f)) + 64))
 #define VECT_Y(f)         	(OLD_SD_NEW_SD((f)))
 
+enum window_num
+{
+    NUM_TERRAIN = (0),
+    NUM_VIEW	= (1),
+    NUM_GRAPH   = (2)
+};
+
+
+enum graph_commands
+{
+    GC_CLEAR_BRAINCODE = -1,
+    
+    GC_IDEOSPHERE = 0,
+    GC_BRAINCODE,
+    GC_GENEPOOL,
+    GC_HONOR,
+    GC_PATHOGENS,
+    GC_RELATIONSHIPS,
+    GC_PREFERENCES,
+    GC_PHASESPACE,
+    GC_VASCULAR
+};
+
 enum window_information
 {
     TERRAIN_WINDOW_WIDTH		= (2048),

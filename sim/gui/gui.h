@@ -56,13 +56,6 @@
 #define	VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA)
 #define GRAPHWINDOW(alpha)     (alpha + (MAP_AREA + TERRAIN_WINDOW_AREA))
 
-enum window_num
-{
-    NUM_TERRAIN = (0),
-    NUM_VIEW	= (1),
-    NUM_GRAPH   = (2)
-};
-
 #define IS_WINDOW_KIND(x,y)			(((x)>>(y))&1)
 
 enum colour_type
@@ -71,21 +64,6 @@ enum colour_type
     COLOUR_YELLOW    =   (253),
     COLOUR_RED_DARK  =   (254),
     COLOUR_RED       =   (255)
-};
-
-enum graph_commands
-{
-    GC_CLEAR_BRAINCODE = -1,
-    
-    GC_IDEOSPHERE = 0,
-    GC_BRAINCODE,
-    GC_GENEPOOL,
-    GC_HONOR,
-    GC_PATHOGENS,
-    GC_RELATIONSHIPS,
-    GC_PREFERENCES,
-    GC_PHASESPACE,
-    GC_VASCULAR
 };
 
 #define	NON_INTERPOLATED COLOUR_GREY
