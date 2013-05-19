@@ -79,7 +79,7 @@ fi
 
 gcc ${CFLAGS} ${INCLUDES} -c $SOURCEDIR/gtk/platform.c -o platform.o ${LIBS2}
 
-gcc ${CFLAGS} ${INCLUDES} -o $SOURCEDIR/../na io.o math.o parse.o interpret.o being.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o body.o audio.o draw.o control.o platform.o console.o speak.o ${LIBS2}
+gcc ${CFLAGS} ${INCLUDES} -o $SOURCEDIR/../na io.o math.o parse.o interpret.o being.o brain.o metabolism.o land.o social.o episodic.o food.o drives.o sim.o file.o body.o audio.o draw.o platform.o console.o speak.o ${LIBS2}
 
 #gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/cle.c -o cleweb.o
 #gcc ${CFLAGS} -c $SOURCEDIR/contrib/motters/web.c -o web.o

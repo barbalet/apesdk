@@ -79,7 +79,6 @@ if [ $# -ge 1 -a "$1" == "--additional" ]
 then
 
 gcc ${CFLAGS} -c $SOURCEDIR/gui/draw.c -o draw.o
-gcc ${CFLAGS} -c $SOURCEDIR/gui/control.c -o control.o
 
 else
 
