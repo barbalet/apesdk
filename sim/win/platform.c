@@ -379,7 +379,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             return 0;
 
         case CONTROL_CLEAR_ERRORS:
-            (void)draw_error(0L);
+            shared_clearErrors();
             return 0;
 
 
@@ -393,7 +393,16 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
             /** File Menu... **/
         case FILE_NEW_HANDLE:
-            control_init(1, clock());
+			{
+				FILETIME ft;
+			    unsigned long tmpres = 0;
+
+				GetSystemTimeAsFileTime(&ft);
+
+				tmpres = ft.dwHighDateTime;
+				tmpres ^= ft.dwLowDateTime;
+				shared_new(tmpres);
+			}
             return 0;
 
         case FILE_OPEN_HANDLE:

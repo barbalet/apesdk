@@ -72,12 +72,6 @@ enum cursor_type
 
 static n_int toggle_pause = 0;
 
-void control_about(n_constant_string value)
-{
-    toggle_pause = 1;
-    draw_about(value);
-}
-
 n_int control_toggle_pause(n_byte actual_toggle)
 {
     if (io_command_line_execution())
@@ -188,7 +182,7 @@ void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
         else
         {
             n_uint	desired_ape = local_sim->select;
-            n_uint high_squ = 31;
+            n_uint  high_squ = 31;
             n_uint	loop = 0;
             
             while (loop < local_sim->num)
@@ -435,7 +429,8 @@ void shared_mouseUp(void)
 
 void shared_about(n_constant_string value)
 {
-    control_about(value);
+    toggle_pause = 1;
+    draw_about(value);
 }
 
 n_byte * shared_draw(n_byte fIdentification)

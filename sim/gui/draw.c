@@ -1602,7 +1602,7 @@ void  draw_terrain_coord(n_int * co_x, n_int * co_y)
     *co_y = terrain_dim_y;
 }
 
-void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
+void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
 {
     noble_simulation * local_sim = sim_sim();
 
