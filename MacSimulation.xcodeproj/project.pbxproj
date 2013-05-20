@@ -36,6 +36,7 @@
 		4A3600751712409A004DAFBA /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600591712409A004DAFBA /* sim.c */; };
 		4A360077171240F1004DAFBA /* nobleape.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4A360076171240F1004DAFBA /* nobleape.icns */; };
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
+		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -83,6 +84,7 @@
 		4A36005B1712409A004DAFBA /* universe_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe_internal.h; sourceTree = "<group>"; };
 		4A360076171240F1004DAFBA /* nobleape.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = nobleape.icns; sourceTree = "<group>"; };
 		4A360078171240FE004DAFBA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		4A7DC3E31749CD710013F2E9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +214,7 @@
 				4A3600501712409A004DAFBA /* io.c */,
 				4A3600511712409A004DAFBA /* land.c */,
 				4A3600521712409A004DAFBA /* math.c */,
+				4A7DC3E31749CD710013F2E9 /* network.c */,
 				4A3600531712409A004DAFBA /* noble.h */,
 				4A3600541712409A004DAFBA /* parse.c */,
 				4A3600551712409A004DAFBA /* skim.c */,
@@ -321,6 +324,7 @@
 				4A3600731712409A004DAFBA /* console.c in Sources */,
 				4A3600741712409A004DAFBA /* file.c in Sources */,
 				4A3600751712409A004DAFBA /* sim.c in Sources */,
+				4A7DC3E41749CD710013F2E9 /* network.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
