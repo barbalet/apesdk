@@ -136,20 +136,7 @@ n_int draw_toggle_braincode(void);
 
 n_int draw_toggle_territory(void);
 
-n_int control_toggle_pause(n_byte actual_toggle);
-
-void control_about(n_constant_string value);
-
-void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option);
-void control_key(n_byte wwind, n_byte2 num);
-
-void control_sim_simulate(n_uint local_time);
-
 void  draw_terrain_coord(n_int * co_x, n_int * co_y);
-
-n_byte * control_window(n_byte * initial, n_byte * type, n_int * location, n_byte num);
-
-void * control_init(KIND_OF_USE kind, n_uint randomise);
 
 void draw_fit(n_byte * points, n_byte2 * color_fit);
 

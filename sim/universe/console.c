@@ -2290,26 +2290,26 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
                     passed=0;
                     switch(mode)
                     {
-                    case 0:
-                    {
-                        passed=1;
-                        break;
-                    }
-                    case 1:
-                    {
-                        if (FIND_SEX(GET_I(b)) == SEX_FEMALE) passed=1;
-                        break;
-                    }
-                    case 2:
-                    {
-                        if (FIND_SEX(GET_I(b)) != SEX_FEMALE) passed=1;
-                        break;
-                    }
-                    case 3:
-                    {
-                        if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
-                        break;
-                    }
+                        case 0:
+                        {
+                            passed=1;
+                            break;
+                        }
+                        case 1:
+                        {
+                            if (FIND_SEX(GET_I(b)) == SEX_FEMALE) passed=1;
+                            break;
+                        }
+                        case 2:
+                        {
+                            if (FIND_SEX(GET_I(b)) != SEX_FEMALE) passed=1;
+                            break;
+                        }
+                        case 3:
+                        {
+                            if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
+                            break;
+                        }
                     }
 
                     if (passed!=0)

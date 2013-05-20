@@ -223,10 +223,6 @@ n_int draw_toggle_territory(void)
 
 /* this needs to be grouped eventually, it is here as a test */
 
-#define UNDRAW
-
-#ifdef UNDRAW
-
 #define UNDRAW_MAX          4000
 
 static n_byte * undraw_location[UNDRAW_MAX];
@@ -251,8 +247,6 @@ static void draw_undraw()
     undraw_count = 0;
 }
 
-#endif
-
 static n_byte * local_offscreen = 0L;
 
 n_byte * draw_offscreen(n_byte * value)
@@ -265,9 +259,6 @@ static n_byte pixel_color8_hires(n_int px, n_int py, void * information)
 {
     n_color8	*local_col = information;
     n_byte      *location = &local_col->screen[ (px<<1) | (py<<(HI_RES_MAP_BITS+1)) | 1 ];
-
-#ifdef UNDRAW
-
     undraw_location[undraw_count] = location;
     undraw_color[undraw_count] = location[0];
     undraw_count++;
@@ -276,9 +267,6 @@ static n_byte pixel_color8_hires(n_int px, n_int py, void * information)
     {
         (void)SHOW_ERROR("Erase count outside limit");
     }
-
-#endif
-
     location[0] = local_col->color;
     return 0;
 }
@@ -1448,17 +1436,8 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
 
     if (lores == 0) /* set up drawing environ */
     {
-#ifdef UNDRAW
         draw_undraw();
-#else
-        n_int loop = 0;
-        n_byte * data = local_sim->highres;
-        while (loop < (HI_RES_MAP_AREA*2))
-        {
-            data[loop|1] = data[loop];
-            loop += 2;
-        }
-#endif
+
         local_col.screen = local_sim->highres;
     }
     else

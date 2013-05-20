@@ -54,25 +54,9 @@ static n_byte  key_down;
 
 /*NOBLEMAKE END=""*/
 
-/* shows which cursor is expected based on the window the mouse is over and the mouse location */
-
-enum cursor_type
-{
-    CURSOR_NULL          = 0,
-    CURSOR_MOVE_BACKWARD = 1,
-    CURSOR_MOVE_FORWARD  = 2,
-    CURSOR_MOVE_LEFT     = 3,
-    CURSOR_MOVE_RIGHT    = 4,
-    
-    CURSOR_ROTATE_UP     = 5,
-    CURSOR_ROTATE_DOWN   = 6,
-    
-    CURSOR_SELECT        = 7
-};
-
 static n_int toggle_pause = 0;
 
-n_int control_toggle_pause(n_byte actual_toggle)
+static n_int control_toggle_pause(n_byte actual_toggle)
 {
     if (io_command_line_execution())
     {
@@ -91,69 +75,12 @@ n_int control_toggle_pause(n_byte actual_toggle)
     return toggle_pause;
 }
 
-static n_byte control_cursor(n_byte wwind, n_int px, n_int py, n_byte option, n_byte no_bounds)
-{
-    n_int upper_x, upper_y;
-    if(wwind == (NUM_TERRAIN))
-    {
-        draw_terrain_coord(&upper_x, &upper_y);
-    }
-    else
-    {
-        upper_x = MAP_DIMENSION;
-        upper_y = MAP_DIMENSION;
-    }
-    if ((py > -1 && py < upper_y && px > -1 && px < upper_x) || no_bounds)
-    {
-        if (wwind != (NUM_TERRAIN))
-        {
-            return CURSOR_SELECT;
-        }
-        if (option != 0)
-        {
-            if ((px > (upper_x/4)) && (px < ((upper_x * 3)/4)))
-            {
-                if (py < (upper_y/4))
-                {
-                    return CURSOR_ROTATE_DOWN;
-                }
-                else if (py < ((upper_y * 3)/4))
-                {
-                    return CURSOR_ROTATE_UP;
-                }
-            }
-        }
-        else
-        {
-            n_int sx = px + py - ((upper_x + upper_y)>>1);
-            n_int sy = px - py;
-            if ((sx * sx) + (sy * sy) > 16384)
-            {
-                if (sx > 0)
-                {
-                    if (sy > 0)
-                    {
-                        return CURSOR_MOVE_RIGHT;
-                    }
-                    return CURSOR_MOVE_BACKWARD;
-                }
-                if (sy > 0)
-                {
-                    return CURSOR_MOVE_FORWARD;
-                }
-                return CURSOR_MOVE_LEFT;
-            }
-        }
-    }
-    return CURSOR_NULL;
-}
-
 /* do mouse down interaction over a window, at a point, with keys possibly pressed */
 
 extern n_byte	check_about;
 extern n_uint	tilt_z;
 
-void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
+static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
 {
     noble_being	*local;
     noble_simulation * local_sim = sim_sim();
@@ -206,27 +133,51 @@ void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     }
     if (wwind == NUM_TERRAIN)
     {
-        n_byte ch_cursor = control_cursor(wwind, px, py, option, 1);
-        switch (ch_cursor)
+        n_int upper_x, upper_y;
+        draw_terrain_coord(&upper_x, &upper_y);
+        if (option != 0)
         {
-            case CURSOR_MOVE_BACKWARD:
-                being_move(local, -32, 1);
-                break;
-            case CURSOR_MOVE_FORWARD:
-                being_move(local, 32, 1);
-                break;
-            case CURSOR_MOVE_LEFT:
-                being_move(local, 1, 0);
-                break;
-            case CURSOR_MOVE_RIGHT:
-                being_move(local, -1, 0);
-                break;
-            case CURSOR_ROTATE_UP:
-                tilt_z = ((tilt_z + 255) & 255);
-                break;
-            case CURSOR_ROTATE_DOWN:
-                tilt_z = ((tilt_z + 1) & 255);
-                break;
+            if ((px > (upper_x/4)) && (px < ((upper_x * 3)/4)))
+            {
+                if (py < (upper_y/4))
+                {
+                    tilt_z = ((tilt_z + 1) & 255);
+                }
+                else if (py < ((upper_y * 3)/4))
+                {
+                    tilt_z = ((tilt_z + 255) & 255);
+                }
+            }
+        }
+        else
+        {
+            n_int sx = px + py - ((upper_x + upper_y)>>1);
+            n_int sy = px - py;
+            if ((sx * sx) + (sy * sy) > 16384)
+            {
+                if (sx > 0)
+                {
+                    if (sy > 0)
+                    {
+                        being_move(local, -1, 0);
+                    }
+                    else
+                    {
+                        being_move(local, -32, 1);
+                    }
+                }
+                else
+                {
+                    if (sy > 0)
+                    {
+                        being_move(local, 32, 1);
+                    }
+                    else
+                    {
+                        being_move(local, 1, 0);
+                    }
+                }
+            }
         }
     }
 }
@@ -234,7 +185,7 @@ void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
 
 /* do key down in which window */
 
-void control_key(n_byte wwind, n_byte2 num)
+static void control_key(n_byte wwind, n_byte2 num)
 {
     noble_being * local;
     noble_simulation * local_sim = sim_sim();
@@ -280,7 +231,7 @@ void control_key(n_byte wwind, n_byte2 num)
     }
 }
 
-void control_sim_simulate(n_uint local_time)
+static void control_sim_simulate(n_uint local_time)
 {
     sim_realtime(local_time);
     
@@ -295,7 +246,7 @@ void control_sim_simulate(n_uint local_time)
     }
 }
 
-void * control_init(KIND_OF_USE kind, n_uint randomise)
+static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
     (void)draw_error(0L);
     draw_undraw_clear();
