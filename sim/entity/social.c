@@ -113,20 +113,19 @@ void social_graph_link_name(
     switch(local_social_graph[social_graph_index].entity_type)
     {
     case ENTITY_BEING:
-    {
-        n_byte2 first_name_gender = local_social_graph[social_graph_index].first_name[met];
-        n_byte2 family_name = local_social_graph[social_graph_index].family_name[met];
+        {
+            n_byte2 first_name_gender = local_social_graph[social_graph_index].first_name[met];
+            n_byte2 family_name = local_social_graph[social_graph_index].family_name[met];
 
-        being_name(((first_name_gender>>8)==SEX_FEMALE),
-                   (first_name_gender&255),
-                   UNPACK_FAMILY_FIRST_NAME(family_name),
-                   UNPACK_FAMILY_SECOND_NAME(family_name),
-                   name);
-        break;
-    }
+            being_name(((first_name_gender>>8)==SEX_FEMALE),
+                       (first_name_gender&255),
+                       UNPACK_FAMILY_FIRST_NAME(family_name),
+                       UNPACK_FAMILY_SECOND_NAME(family_name),
+                       name);
+            break;
+        }
     case ENTITY_BEING_GROUP:
         /* TODO*/
-
     case ENTITY_OBJECT:
         /* TODO */
     case ENTITY_TERRITORY:
@@ -469,12 +468,6 @@ static n_int social_meet(
 {
     n_int friend_or_foe,index=-1;
 
-    n_byte2 meeter_name = GET_NAME_GENDER(sim,meeter_being);
-    n_byte2 meeter_family_name = GET_NAME_FAMILY2(sim,meeter_being);
-
-    n_byte2 met_name = GET_NAME_GENDER(sim,met_being);
-    n_byte2 met_family_name = GET_NAME_FAMILY2(sim,met_being);
-
     n_byte2 familiarity=0;
     social_link * graph = GET_SOC(sim, meeter_being);
     n_byte2 met=0;
@@ -514,18 +507,18 @@ static n_int social_meet(
                 social_attraction_frame(meeter_being,met_being) +
                 social_attraction_hair(meeter_being,met_being)
 #ifdef EPISODIC_ON
-
-                +episodic_met_being_celebrity(sim,meeter_being,met_being)
+                + episodic_met_being_celebrity(sim,meeter_being,met_being)
 #endif
                 ;
             /** Met another being */
             graph[index].entity_type = ENTITY_BEING;
+
             /** who did the meeting */
-            graph[index].first_name[BEING_MEETER] = meeter_name;
-            graph[index].family_name[BEING_MEETER] = meeter_family_name;
+            graph[index].first_name[BEING_MEETER] = GET_NAME_GENDER(sim,meeter_being);
+            graph[index].family_name[BEING_MEETER] = GET_NAME_FAMILY2(sim,meeter_being);
             /** who was met */
-            graph[index].first_name[BEING_MET] = met_name;
-            graph[index].family_name[BEING_MET] = met_family_name;
+            graph[index].first_name[BEING_MET] = GET_NAME_GENDER(sim,met_being);
+            graph[index].family_name[BEING_MET] = GET_NAME_FAMILY2(sim,met_being);
 
             /** initially no attraction */
             graph[index].attraction = 0;
@@ -540,21 +533,18 @@ static n_int social_meet(
                                  meeter_being->seed[0]+(met_being->seed[0]<<8),
                                  graph[index].friend_foe,BRAINCODE_EXTERNAL);
         }
-
+        
+#ifdef METABOLISM_ON
         /** relax with friends, be viglant with enemies */
         if (graph[index].friend_foe > social_respect_mean(sim,meeter_being))
         {
-#ifdef METABOLISM_ON
             metabolism_vascular_response(sim, meeter_being, VASCULAR_PARASYMPATHETIC);
-#endif
         }
         else
         {
-#ifdef METABOLISM_ON
             metabolism_vascular_response(sim, meeter_being, VASCULAR_SYMPATHETIC*10);
-#endif
         }
-
+#endif
         /** this being was seen somewhere in my vicinity */
         graph[index].location[0] = GET_X(meeter_being);
         graph[index].location[1] = GET_Y(meeter_being);
@@ -567,15 +557,17 @@ static n_int social_meet(
         graph[index].date[1] = sim->land->date[1];
 
         /** getting more familiar */
-        if (familiarity < 65535) graph[index].familiarity=familiarity+1;
-
+        if (familiarity < 65535)
+        {
+            graph[index].familiarity = familiarity + 1;
+        }
+        
         /** friendliness can be increased simply through familiarity */
         if (graph[index].friend_foe < 255)
         {
             graph[index].friend_foe++;
         }
     }
-
     return index;
 }
 

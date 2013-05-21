@@ -1357,17 +1357,18 @@ typedef struct
     n_byte	facing;
     n_byte	speed;
     n_byte2	energy;
-    n_byte2	date_of_birth[2];
+    n_byte2	date_of_birth[2]; /* constant */
     n_byte2	speak;
     n_byte2 seed[2];
     n_byte2	state;
 
-    n_byte2   brain_memory_location;
+    n_byte2   brain_memory_location; /* not constant but should be */
 
     /* The basic brain formula is;
      b(t+1) = a*l + b(t)*m + (b(t)-b(t-1))*n;
      the first three values are l, m, n for awake, then l, m, n for asleep */
-    n_byte2	brain_state[6];
+    
+    n_byte2	brain_state[6];  /* constant for now */
 
     /* height in arbitrary units
            can be converted to real units with GET_BEING_HEIGHT */
@@ -1397,22 +1398,21 @@ typedef struct
 	/* social status value */
     n_byte honor;
 
-    n_byte2	date_of_conception[2];
+    n_byte2	date_of_conception[2]; /* constant */
 
     /* indexes to current focus of attention*/
     n_byte attention[ATTENTION_SIZE];
 
-    n_genetics mother_new_genetics[CHROMOSOMES];
+    n_genetics mother_new_genetics[CHROMOSOMES]; /* constant */
 
-    n_byte2 unused1;
+    n_byte2 unused1;                             /* constant */
 
-    n_genetics father_new_genetics[CHROMOSOMES];
+    n_genetics father_new_genetics[CHROMOSOMES]; /* constant */
 
+    n_byte  father_honor;                       /* constant */
+    n_byte2 father_name[2];                     /* constant */
 
-    n_byte  father_honor;
-    n_byte2 father_name[2];
-
-    n_genetics new_genetics[CHROMOSOMES];
+    n_genetics new_genetics[CHROMOSOMES];       /* constant */
 
     n_byte2     social_x;
     n_byte2     social_y;
@@ -1422,11 +1422,11 @@ typedef struct
     n_byte drives[DRIVES];
     n_byte2 goal[4];
     n_byte learned_preference[PREFERENCES];
-
+                                                        /* around here the previous file system breaks */
 	/* generation number from the mother and father */
-	n_uint generation[GENERATION_TOTAL];
+	n_uint generation[GENERATION_TOTAL];            /* constant */
 	/* temporary father generation value used during gestation */
-	n_uint father_generation;
+	n_uint father_generation;                       /* seems to be unused */
 
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];

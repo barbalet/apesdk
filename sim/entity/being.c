@@ -3074,7 +3074,7 @@ void being_remove(noble_simulation * local_sim)
         if (local[loop].energy != BEING_DEAD)
         {
             if ( count != loop )
-            {
+            { /* the logic associated with copying th brsin memory location doesn't make sense */
                 n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
                 n_byte       * new_brain = GET_B(local_sim, &local[ count ]);
                 n_byte       * old_brain = GET_B(local_sim, &local[ loop ]);
