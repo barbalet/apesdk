@@ -100,6 +100,26 @@ typedef	struct
 }
 being_draw;
 
+n_int being_location_x(noble_being * value)
+{
+    return value->x;
+}
+
+n_int being_location_y(noble_being * value)
+{
+    return value->y;
+}
+
+n_byte2 * being_location(noble_being * value)
+{
+    return &(value->x);
+}
+
+void being_set_location(noble_being * value, n_byte2 * from)
+{
+    value->x = from[0];
+    value->y = from[1];
+}
 
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
 {
@@ -126,8 +146,8 @@ static n_byte	being_ground(n_int px, n_int py, void * params)
 
 static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx, n_int ly)
 {
-    n_int	start_x = GET_X(local);
-    n_int	start_y = GET_Y(local);
+    n_int	start_x = being_location_x(local);
+    n_int	start_y = being_location_y(local);
     n_int	delta_x = lx - start_x;
     n_int	delta_y = ly - start_y;
 
@@ -1220,8 +1240,9 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
     n_int	loc_f = GET_F(local);
     if (kind > 0)
     {
-        n_int	loc_x = (n_int)GET_X(local);
-        n_int	loc_y = (n_int)GET_Y(local);
+        n_int	loc_x = being_location_x(local);
+        n_int	loc_y = being_location_y(local);
+        n_byte2 loc[2];
         if (kind == 1)
         {
             loc_x += (rel_vel * VECT_X(loc_f)) >> 9;
@@ -1234,8 +1255,9 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
             else
                 loc_x += 500-(rel_vel * 200);
         }
-        GET_X(local) = APESPACE_WRAP(loc_x);
-        GET_Y(local) = APESPACE_WRAP(loc_y);
+        loc[0] = APESPACE_WRAP(loc_x);
+        loc[1] = APESPACE_WRAP(loc_y);
+        being_set_location(local, loc);
     }
     else
     {
@@ -1580,7 +1602,7 @@ static int being_follow(noble_simulation * sim,
     *opposite_sex = NO_BEINGS_FOUND;
     *same_sex = NO_BEINGS_FOUND;
 
-    vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+    vect2_byte2(&location_vector, being_location(local));
 
     /* is a mate in view? */
     if (local->goal[0]==GOAL_MATE)
@@ -1598,7 +1620,7 @@ static int being_follow(noble_simulation * sim,
                         (local->goal[1]==other_first_name) &&
                         (local->goal[2]==other_family_name))
                 {
-                    vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(other));
+                    vect2_byte2(&difference_vector, being_location(local));
                     vect2_subtract(&difference_vector, &location_vector, &difference_vector);
                     result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
                     if (result_los)
@@ -1637,7 +1659,7 @@ static int being_follow(noble_simulation * sim,
                         (local_social_graph[social_graph_index].family_name[BEING_MET]==other_family_name))
                 {
                     /** Is this being within sight? */
-                    vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(other));
+                    vect2_byte2(&difference_vector, being_location(local));
                     vect2_subtract(&difference_vector, &location_vector, &difference_vector);
                     result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
                     if (result_los)
@@ -1685,14 +1707,14 @@ static void being_listen(noble_simulation * sim,
         local->shout[SHOUT_CTR]--;
     }
 
-    vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+    vect2_byte2(&location_vector, being_location(local));
     for (i = 0; i < sim->num; i++)
     {
         if (i != current_being_index)
         {
             noble_being	* other = &being_buffer[i];
 
-            vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(other));
+            vect2_byte2(&difference_vector, being_location(local));
             vect2_subtract(&difference_vector, &location_vector, &difference_vector);
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
 
@@ -1739,7 +1761,7 @@ static int being_closest(noble_simulation * sim,
     *opposite_sex = NO_BEINGS_FOUND;
     *same_sex = NO_BEINGS_FOUND;
 
-    vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+    vect2_byte2(&location_vector, being_location(local));
 
     while (loop < number)
     {
@@ -1752,7 +1774,7 @@ static int being_closest(noble_simulation * sim,
             n_vect2       difference_vector;
             n_uint         compare_distance;
 
-            vect2_byte2(&difference_vector, (n_byte2 *)&GET_X(test_being));
+            vect2_byte2(&difference_vector, being_location(test_being));
 
             vect2_subtract(&difference_vector, &location_vector, &difference_vector);
 
@@ -1843,8 +1865,8 @@ static void being_interact(noble_simulation * sim,
         n_byte2 familiarity=0;
         being_index = social_network(local, other_being, other_being_distance, sim);
 
-        vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
-        vect2_byte2(&delta_vector, (n_byte2 *)&GET_X(other_being));
+        vect2_byte2(&location_vector, being_location(local));
+        vect2_byte2(&delta_vector, being_location(other_being));
         vect2_subtract(&delta_vector, &location_vector, &delta_vector);
 
         if (being_index>-1)
@@ -1945,7 +1967,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     episodic_cycle(sim,local);
 #endif
 
-    vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+    vect2_byte2(&location_vector, being_location(local));
     vect2_direction(&facing_vector,(n_byte)loc_f,4);
 
     land_vect2(&slope_vector,&az,land,&location_vector);
@@ -2207,8 +2229,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             GET_A(local,ATTENTION_BODY) = BODY_BACK;
                         }
                         carrying_child = 1;
-                        GET_X(being_child) = GET_X(local);
-                        GET_Y(being_child) = GET_Y(local);
+                        
+                        being_set_location(being_child, being_location(local));
+                        
                         child_mass = GET_M(being_child);
                         episodic_close(sim, local, being_child, EVENT_CARRIED, AFFECT_CARRYING, 0);
                         episodic_close(sim, being_child, local, EVENT_CARRIED_BY, AFFECT_CARRIED, 0);
@@ -2232,7 +2255,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             {
                 /** orient towards the mother */
                 n_vect2    mother_vector;
-                vect2_byte2(&mother_vector, (n_byte2 *)&GET_X(mother));
+                vect2_byte2(&mother_vector, being_location(mother));
                 vect2_subtract(&mother_vector, &mother_vector, &location_vector);
 
                 loc_f = math_turn_towards(mother_vector.x, mother_vector.y, (n_byte)loc_f, 0);
@@ -2865,7 +2888,7 @@ void being_tidy(noble_simulation * local_sim)
             n_vect2	location_vector;
             n_vect2	facing_vector;
 
-            vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local_being));
+            vect2_byte2(&location_vector, being_location(local_being));
             vect2_direction(&facing_vector,(n_byte)local_f,1);
 
             if (local_s > 0)

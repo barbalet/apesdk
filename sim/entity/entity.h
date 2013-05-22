@@ -93,6 +93,15 @@ enum GENEALOGY_FORMAT
     GENEALOGY_FORMATS
 };
 
+n_int being_location_x(noble_being * value);
+
+n_int being_location_y(noble_being * value);
+
+n_byte2 * being_location(noble_being * value);
+
+void being_set_location(noble_being * value, n_byte2 * from);
+
+
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
 void genealogy_birth(noble_being * child, noble_being * mother, void * sim);

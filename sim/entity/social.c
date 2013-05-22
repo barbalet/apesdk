@@ -1426,7 +1426,7 @@ n_int social_goals(
         if ((local->state & BEING_STATE_SWIMMING) == 0)
         {
             vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
-            vect2_byte2(&location_vector, (n_byte2 *)&GET_X(local));
+            vect2_byte2(&location_vector, being_location(local));
             vect2_subtract(&delta_vector, &location_vector, &delta_vector);
             loc_f = math_turn_towards(delta_vector.x, delta_vector.y, (n_byte)loc_f, 2);
         }
