@@ -446,8 +446,10 @@ static void episodic_store_full(
     /** insert the current event into the episodic memory */
     local_episodic[replace].event       = event;
     local_episodic[replace].affect      = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
-    local_episodic[replace].location[0] = GET_X(local);
-    local_episodic[replace].location[1] = GET_Y(local);
+    
+    /* could be handled with vector set */
+    local_episodic[replace].location[0] = being_location_x(local);
+    local_episodic[replace].location[1] = being_location_y(local);
     local_episodic[replace].time        = new_time =local_sim->land->time;
     local_episodic[replace].date[0]     = local_sim->land->date[0];
     local_episodic[replace].date[1]     = local_sim->land->date[1];

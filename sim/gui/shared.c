@@ -103,8 +103,12 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     {
         if (option)
         {
-            GET_X(local) = APESPACE_CONFINED(MAPSPACE_TO_APESPACE(px));
-            GET_Y(local) = APESPACE_CONFINED(MAPSPACE_TO_APESPACE(py));
+            n_byte2    location[2];
+            
+            location[0] = APESPACE_CONFINED(MAPSPACE_TO_APESPACE(px));
+            location[1] = APESPACE_CONFINED(MAPSPACE_TO_APESPACE(py));
+            
+            being_set_location(local, location);
         }
         else
         {
@@ -115,8 +119,8 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
             while (loop < local_sim->num)
             {
                 noble_being	* current_ape = &(local_sim->beings[loop]);
-                n_int	screen_x = APESPACE_TO_MAPSPACE(GET_X(current_ape)) - px;
-                n_int	screen_y = APESPACE_TO_MAPSPACE(GET_Y(current_ape)) - py;
+                n_int	screen_x = APESPACE_TO_MAPSPACE(being_location_x(current_ape)) - px;
+                n_int	screen_y = APESPACE_TO_MAPSPACE(being_location_y(current_ape)) - py;
                 n_uint	current_squ = (screen_x * screen_x) + (screen_y * screen_y);
                 if (high_squ > current_squ)
                 {

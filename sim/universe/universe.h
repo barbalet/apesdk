@@ -1526,9 +1526,6 @@ noble_simulation;
 #define GET_M(bei)      ((bei)->mass)
 #define GET_FR(bei)     (GENE_FRAME(bei->new_genetics))
 
-#define	GET_X(bei)	((bei)->x)
-#define	GET_Y(bei)	((bei)->y)
-
 #define	GET_D(bei)	((bei)->date_of_birth)
 #define GET_G(bei)  ((bei)->new_genetics)
 

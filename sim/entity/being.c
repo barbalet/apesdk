@@ -1291,7 +1291,7 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 
     /* ... fully awake to swim */
 
-    if(WATER_TEST(QUICK_LAND(land, APESPACE_TO_MAPSPACE(GET_X(local)), APESPACE_TO_MAPSPACE(GET_Y(local))),land->tide_level))
+    if(WATER_TEST(QUICK_LAND(land, APESPACE_TO_MAPSPACE(being_location_x(local)), APESPACE_TO_MAPSPACE(being_location_y(local))),land->tide_level))
     {
         return FULLY_AWAKE;
     }
@@ -2551,8 +2551,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         noble_being * local = &(sim->beings[sim->num]);
         n_land  * land  = sim->land;
         n_byte2	      local_random[2];
-        n_int	      loc_x;
-        n_int         loc_y;
         n_byte	      loc_facing;
         n_byte        ch;
         n_byte2		  numerical_brain_location =
@@ -2698,6 +2696,8 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         being_set_unique_name(sim,local,random_factor,0,0);
         if(random_factor > -1)
         {
+            n_byte2  location[2];
+            
             n_int loop = 0;
 
             local_random[0] = (n_byte2)(random_factor & 0xffff);
@@ -2707,16 +2707,14 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
             do
             {
-                loc_x =	(n_byte2)(math_random(local_random) &
-								  APESPACE_BOUNDS);
-                loc_y = (n_byte2)(math_random(local_random) &
-								  APESPACE_BOUNDS);
+                location[0] = (n_byte2)(math_random(local_random) & APESPACE_BOUNDS);
+                location[1] = (n_byte2)(math_random(local_random) & APESPACE_BOUNDS);
                 loop ++;
             }
-            while ((loop < 20) &&
-				   (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(loc_x),
-								  APESPACE_TO_MAPSPACE(loc_y))));
+            while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1]))));
 
+            being_set_location(local, location);
+            
             body_genome_random(sim, local, local_random);
 
             loc_facing = (n_byte)(math_random(local_random) & 255);
@@ -2730,8 +2728,8 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             local_random[0] = mother->seed[0];
             local_random[1] = mother->seed[1];
 
-            loc_x = GET_X(mother);
-            loc_y = GET_Y(mother);
+            being_set_location(local, being_location(mother));
+
             loc_facing = GET_F(mother);
 
             math_random3(local_random);
@@ -2796,8 +2794,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         GET_F(local) = loc_facing;
 
         GET_E(local) = (n_byte2)(BEING_FULL + 15);
-        GET_X(local) = (n_byte2)loc_x;
-        GET_Y(local) = (n_byte2)loc_y;
 
         local->date_of_birth[0] = land->date[0];
         local->date_of_birth[1] = land->date[1];
@@ -2893,10 +2889,16 @@ void being_tidy(noble_simulation * local_sim)
 
             if (local_s > 0)
             {
+                n_byte2 location[2];
+                
                 vect2_d(&location_vector, &facing_vector, local_s, 512);
 
-                GET_X(local_being) = (n_byte2)APESPACE_WRAP(location_vector.x);
-                GET_Y(local_being) = (n_byte2)APESPACE_WRAP(location_vector.y);
+                /* vector to n_byte2 may do incorrect wrap around MUST be improved */
+                
+                location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
+                location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
+                
+                being_set_location(local_being, location);
             }
 
             {

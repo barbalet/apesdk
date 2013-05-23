@@ -632,8 +632,8 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         n_byte2      * combined = (n_byte2 *)local_sim->highres;
         noble_being * loc_being = &(local_sim->beings[local_sim->select]);
         const n_int turn = GET_F(loc_being);
-        const n_int co_x = APESPACE_TO_HR_MAPSPACE(GET_X(loc_being));
-        const n_int co_y = APESPACE_TO_HR_MAPSPACE(GET_Y(loc_being));
+        const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
+        const n_int co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
 
         /* get the local cos value for the turn angle */
         const n_int valc = (new_sd[((turn) + 128) & 255] / 105);
@@ -940,8 +940,8 @@ static void	draw_meters(noble_simulation * local_sim)
 static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
 {
     noble_being  *bei   = &(sim->beings[reference]);
-    n_int		  magx = APESPACE_TO_MAPSPACE(GET_X(bei));
-    n_int		  magy = APESPACE_TO_MAPSPACE(GET_Y(bei));
+    n_int		  magx = APESPACE_TO_MAPSPACE(being_location_x(bei));
+    n_int		  magy = APESPACE_TO_MAPSPACE(being_location_y(bei));
     n_pixel   *local_draw = draw->pixel_draw;
     void	    *local_info = draw->information;
     n_int		  ty;
@@ -1021,8 +1021,8 @@ static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
 static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join * draw)
 {
     noble_being  *bei   = &(sim->beings[reference]);
-    n_int		  magx = APESPACE_TO_HR_MAPSPACE(GET_X(bei));
-    n_int		  magy = APESPACE_TO_HR_MAPSPACE(GET_Y(bei));
+    n_int		  magx = APESPACE_TO_HR_MAPSPACE(being_location_x(bei));
+    n_int		  magy = APESPACE_TO_HR_MAPSPACE(being_location_y(bei));
     n_pixel     *local_draw = draw->pixel_draw;
     void	    *local_info = draw->information;
     n_int		  ty;
@@ -1482,7 +1482,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         while (loop < local_sim->num)
         {
             noble_being *bei = &(local_sim->beings[loop]);
-            if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), GET_X(bei), GET_Y(bei)) == 1)
+            if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), being_location_x(bei), being_location_y(bei)) == 1)
             {
                 local_col.color = COLOUR_RED;
             }

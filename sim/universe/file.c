@@ -704,8 +704,8 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
 
                 if(second_value == VARIABLE_LOCATION_Z)
                 {
-                    quick_x = GET_X(local_current);
-                    quick_y = GET_Y(local_current);
+                    quick_x = being_location_x(local_current);
+                    quick_y = being_location_y(local_current);
                 }
                 else
                 {
@@ -882,11 +882,11 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         break;
 
                     case	VARIABLE_LOCATION_X:
-                        local_number = GET_X(local_being);
+                        local_number = being_location_x(local_being);
                         break;
 
                     case	VARIABLE_LOCATION_Y:
-                        local_number = GET_Y(local_being);
+                        local_number = being_location_y(local_being);
                         break;
 
                     case	VARIABLE_ID_NUMBER:

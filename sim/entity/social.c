@@ -546,8 +546,8 @@ static n_int social_meet(
         }
 #endif
         /** this being was seen somewhere in my vicinity */
-        graph[index].location[0] = GET_X(meeter_being);
-        graph[index].location[1] = GET_Y(meeter_being);
+        graph[index].location[0] = being_location_x(meeter_being);
+        graph[index].location[1] = being_location_y(meeter_being);
 
         /** record the state of the met beting */
         graph[index].belief = met_being->state;
@@ -832,8 +832,8 @@ n_byte2 social_squabble(
     noble_simulation * sim)
 {
     /** distance between beings */
-    n_int delta_x = GET_X(met_being) - GET_X(meeter_being);
-    n_int delta_y = GET_Y(met_being) - GET_Y(meeter_being);
+    n_int delta_x = being_location_x(met_being) - being_location_x(meeter_being);
+    n_int delta_y = being_location_y(met_being) - being_location_y(meeter_being);
 #ifdef PARASITES_ON
     n_byte2 agro;
     n_byte temp_hon;
