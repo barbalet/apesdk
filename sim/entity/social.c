@@ -831,9 +831,6 @@ n_byte2 social_squabble(
     n_int is_female,
     noble_simulation * sim)
 {
-    /** distance between beings */
-    n_int delta_x = being_location_x(met_being) - being_location_x(meeter_being);
-    n_int delta_y = being_location_y(met_being) - being_location_y(meeter_being);
 #ifdef PARASITES_ON
     n_byte2 agro;
     n_byte temp_hon;
@@ -841,12 +838,18 @@ n_byte2 social_squabble(
     n_byte2 ret_val = 0;
     noble_being * victor, * vanquished;
     n_int victor_index, vanquished_index, punchloc;
+    n_vect2 met_vector, meeter_vector, delta;
+    
+    /** distance between beings */
+    vect2_byte2(&met_vector, being_location(met_being));
+    vect2_byte2(&meeter_vector, being_location(meeter_being));
+    vect2_subtract(&delta, &met_vector, &meeter_vector);
+    
     /** battle with rival families */
     if ((GET_FAMILY_FIRST_NAME(sim,meeter_being) != GET_FAMILY_FIRST_NAME(sim,met_being)) &&
             (GET_FAMILY_SECOND_NAME(sim,meeter_being) != GET_FAMILY_SECOND_NAME(sim,met_being)))
     {
-        GET_F(meeter_being) =
-            math_turn_towards(delta_x, delta_y, (n_byte)GET_F(meeter_being), 0);
+        GET_F(meeter_being) = math_turn_towards(&delta, (n_byte)GET_F(meeter_being), 0);
 
 #ifdef PARASITES_ON
         /** high ranking apes will more aggressively defend their honor */
@@ -938,13 +941,15 @@ n_byte2 social_squabble(
             /** vanquished turns away */
             if (meeter_being == vanquished)
             {
-                GET_F(vanquished) =
-                    math_turn_towards(-delta_x, -delta_y, (n_byte)GET_F(vanquished), 0);
+                n_vect2 negative_delta, zero = {0};
+                
+                vect2_subtract(&negative_delta, &zero, &delta);
+                
+                GET_F(vanquished) = math_turn_towards(&delta, (n_byte)GET_F(vanquished), 0);
             }
             else
             {
-                GET_F(vanquished) =
-                    math_turn_towards(delta_x, delta_y, (n_byte)GET_F(vanquished), 0);
+                GET_F(vanquished) = math_turn_towards(&delta, (n_byte)GET_F(vanquished), 0);
             }
 
             /** vanquished flees */
@@ -1428,7 +1433,7 @@ n_int social_goals(
             vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
             vect2_byte2(&location_vector, being_location(local));
             vect2_subtract(&delta_vector, &location_vector, &delta_vector);
-            loc_f = math_turn_towards(delta_vector.x, delta_vector.y, (n_byte)loc_f, 2);
+            loc_f = math_turn_towards(&delta_vector, (n_byte)loc_f, 2);
         }
         break;
     }

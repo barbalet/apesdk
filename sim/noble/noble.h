@@ -521,7 +521,7 @@ n_uint  math_hash(n_byte * values, n_uint length);
 void    math_bilinear_512_4096(n_byte * side512, n_byte * data);
 n_uint  math_newton_root(n_uint squ);
 n_uint  math_root(n_uint squ);
-n_byte  math_turn_towards(n_int px, n_int py, n_byte fac, n_byte turn);
+n_byte  math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn);
 n_byte2 math_random(n_byte2 * local);
 void    math_random3(n_byte2 * local);
 n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);

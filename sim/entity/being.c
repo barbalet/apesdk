@@ -121,6 +121,12 @@ void being_set_location(noble_being * value, n_byte2 * from)
     value->y = from[1];
 }
 
+void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta)
+{
+    delta->x = primary->x - secondary->x;
+    delta->y = primary->y - secondary->y;
+}
+
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
 {
     n_uint loop = 0;
@@ -1620,7 +1626,7 @@ static int being_follow(noble_simulation * sim,
                         (local->goal[1]==other_first_name) &&
                         (local->goal[2]==other_family_name))
                 {
-                    vect2_byte2(&difference_vector, being_location(local));
+                    vect2_byte2(&difference_vector, being_location(other));
                     vect2_subtract(&difference_vector, &location_vector, &difference_vector);
                     result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
                     if (result_los)
@@ -1659,7 +1665,7 @@ static int being_follow(noble_simulation * sim,
                         (local_social_graph[social_graph_index].family_name[BEING_MET]==other_family_name))
                 {
                     /** Is this being within sight? */
-                    vect2_byte2(&difference_vector, being_location(local));
+                    vect2_byte2(&difference_vector, being_location(other));
                     vect2_subtract(&difference_vector, &location_vector, &difference_vector);
                     result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
                     if (result_los)
@@ -1714,7 +1720,7 @@ static void being_listen(noble_simulation * sim,
         {
             noble_being	* other = &being_buffer[i];
 
-            vect2_byte2(&difference_vector, being_location(local));
+            vect2_byte2(&difference_vector, being_location(other));
             vect2_subtract(&difference_vector, &location_vector, &difference_vector);
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
 
@@ -1775,7 +1781,6 @@ static int being_closest(noble_simulation * sim,
             n_uint         compare_distance;
 
             vect2_byte2(&difference_vector, being_location(test_being));
-
             vect2_subtract(&difference_vector, &location_vector, &difference_vector);
 
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
@@ -1878,7 +1883,7 @@ static void being_interact(noble_simulation * sim,
             }
         }
 
-        *facing_direction = math_turn_towards(delta_vector.x, delta_vector.y, (n_byte)*facing_direction, 0);
+        *facing_direction = math_turn_towards(&delta_vector, (n_byte)*facing_direction, 0);
 
         if ((genetics_compare(local->mother_new_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
         {
@@ -2258,7 +2263,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 vect2_byte2(&mother_vector, being_location(mother));
                 vect2_subtract(&mother_vector, &mother_vector, &location_vector);
 
-                loc_f = math_turn_towards(mother_vector.x, mother_vector.y, (n_byte)loc_f, 0);
+                loc_f = math_turn_towards(&mother_vector, (n_byte)loc_f, 0);
 
                 /** suckling */
                 if ((loc_state & BEING_STATE_HUNGRY) != 0)

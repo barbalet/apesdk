@@ -434,20 +434,31 @@ n_uint math_hash(n_byte * values, n_uint length)
  (it may not be the number of angle units turned).
  @return The new direction facing value.
  */
-n_byte math_turn_towards(n_int px, n_int py, n_byte fac, n_byte turn)
+n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
 {
     n_int track[NUMBER_TURN_TOWARDS_POINTS] =
     {
         64, 64, 32, 16, 8, 4, 2, 1
     };
-    n_int best_p = ((VECT_X( fac ) * px) + (VECT_Y( fac ) * py));
+    n_vect2 vector_facing;
+    n_int best_p;
     n_int best_f = fac;
     n_int loop = turn;
+
+    vect2_direction(&vector_facing, best_f, 1);
+    
+    best_p = vect2_dot(p, &vector_facing, 1, 1);
+
+    
     while (loop < NUMBER_TURN_TOWARDS_POINTS)
     {
         n_int loc_track = track[loop];
         n_int loc_f = (best_f + loc_track) & 255;
-        n_int project1 = ((VECT_X( loc_f ) * px) + (VECT_Y( loc_f ) * py));
+        n_int project1;
+        
+        vect2_direction(&vector_facing, loc_f, 1);
+        project1 = vect2_dot(p, &vector_facing, 1, 1);
+
         if (project1 > best_p)
         {
             best_f = loc_f;
@@ -456,7 +467,11 @@ n_byte math_turn_towards(n_int px, n_int py, n_byte fac, n_byte turn)
         else
         {
             n_int loc_f2 = (best_f + 256 - loc_track) & 255;
-            n_int project2 = ((VECT_X( loc_f2 ) * px) + (VECT_Y( loc_f2 ) * py));
+            n_int project2;
+            
+            vect2_direction(&vector_facing, loc_f, 1);
+            project2 = vect2_dot(p, &vector_facing, 1, 1);
+            
             if (project2 > best_p)
             {
                 best_f = loc_f2;
