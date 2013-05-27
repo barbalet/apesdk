@@ -293,12 +293,12 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_string_block beingstr, time;
     n_int count=0,juveniles=0;
-    n_uint current_date = TIME_IN_DAYS(local_sim->land->date);
+    n_int current_date = TIME_IN_DAYS(local_sim->land->date);
     n_uint i;
     for (i = 0; i < local_sim->num; i++)
     {
         noble_being * local_being = &local_sim->beings[i];
-        n_uint local_dob = TIME_IN_DAYS(GET_D(local_being));
+        n_int local_dob = being_dob(local_being);
         if (FIND_SEX(GET_I(local_being)) == SEX_FEMALE)
         {
             count++;
@@ -1075,7 +1075,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
             GET_BEING_HEIGHT(local_being),
             GET_F(local_being),
             ((FIND_SEX(GET_I(local_being)) == SEX_FEMALE) ? 'F' : 'M'),
-            TIME_IN_DAYS(local_sim->land->date) - TIME_IN_DAYS(GET_D(local_being)),
+            TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being),
             local_being->drives[DRIVE_HUNGER],
             local_being->drives[DRIVE_SOCIAL],
             local_being->drives[DRIVE_FATIGUE],
@@ -2345,7 +2345,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
         }
 
         current_date = TIME_IN_DAYS(local_sim->land->date);
-        local_dob = TIME_IN_DAYS(GET_D(b));
+        local_dob = being_dob(b);
         age_in_years = AGE_IN_YEARS(local_sim,b);
         age_in_months = ((current_date - local_dob) - (age_in_years * TIME_YEAR_DAYS)) / (TIME_YEAR_DAYS/12);
         age_in_days = (current_date - local_dob) - ((TIME_YEAR_DAYS/12) * age_in_months) - (age_in_years * TIME_YEAR_DAYS);

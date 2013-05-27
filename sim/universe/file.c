@@ -569,7 +569,7 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
         local_being->goal[2] = (n_byte2) value;
         break;
     case VARIABLE_POSTURE:
-        local_being->posture = (n_byte) value;
+        GET_PS(local_being) = (n_byte) value;
         break;
 
     case VARIABLE_DRIVE_HUNGER:
@@ -865,7 +865,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         local_number = local_being->goal[2];
                         break;
                     case VARIABLE_POSTURE:
-                        local_number = local_being->posture;
+                        local_number = GET_PS(local_being);
                         break;
 
                     case VARIABLE_DRIVE_HUNGER:
@@ -894,7 +894,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         break;
 
                     case	VARIABLE_DATE_OF_BIRTH:
-                        local_number = TIME_IN_DAYS(GET_D(local_being));
+                        local_number = being_dob(local_being);
                         break;
                     case	VARIABLE_STATE:
                         local_number = local_being->state;
@@ -1073,7 +1073,7 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
     interp->specific = identifier;
 
     variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = GET_F(local_being);
-    variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  local_being->speed;
+    variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
     variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = local_being->energy;
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
     variables[VARIABLE_SPEAK - VARIABLE_VECT_ANGLE] = local_being->speak;
@@ -1142,7 +1142,7 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     if (local_speak > 0xffff) local_speak = 0xffff;
 
     GET_F(local_being) = (n_byte) local_facing;
-    local_being->speed  = (n_byte) local_speed;
+    being_set_speed(local_being, (n_byte) local_speed);
     local_being->energy = (n_byte2)local_energy;
     local_being->speak  = (n_byte2)local_speak;
     local_being->height  = (n_byte2)local_height;

@@ -121,10 +121,25 @@ void being_set_location(noble_being * value, n_byte2 * from)
     value->y = from[1];
 }
 
+n_int being_speed(noble_being * value)
+{
+    return value->speed;
+}
+
+void being_set_speed(noble_being * value, n_byte sp)
+{
+    value->speed = sp;
+}
+
 void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta)
 {
     delta->x = primary->x - secondary->x;
     delta->y = primary->y - secondary->y;
+}
+
+n_int being_dob(noble_being * value)
+{
+    return TIME_IN_DAYS(value->date_of_birth);
 }
 
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
@@ -650,7 +665,7 @@ static void being_immune_response(noble_being * local)
 
 static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_uint max_age)
 {
-    n_uint today = TIME_IN_DAYS(sim->land->date);
+    n_int today = TIME_IN_DAYS(sim->land->date);
     n_uint loop = 0;
     while ( loop < sim->num )
     {
@@ -663,7 +678,7 @@ static noble_being * being_find_child(noble_simulation * sim, n_genetics * genet
             }
             else
             {
-                if (today - TIME_IN_DAYS(GET_D(local)) < max_age)
+                if ((today - being_dob(local)) < max_age)
                     return local;
             }
         }
@@ -1311,7 +1326,7 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 
     /* ... slightly awake to slow down */
 
-    if(local->speed > 0)
+    if(being_speed(local) > 0)
     {
         return SLIGHTLY_AWAKE;
     }
@@ -1597,7 +1612,7 @@ static int being_follow(noble_simulation * sim,
 {
     noble_being * being_buffer = sim->beings;
     noble_being * local        = &being_buffer[current_being_index];
-    n_vect2       location_vector, difference_vector;
+    n_vect2       difference_vector;
     social_link * local_social_graph;
     n_int social_graph_index;
     n_uint i;
@@ -1607,8 +1622,6 @@ static int being_follow(noble_simulation * sim,
     *same_sex_distance = 0xffffffff;
     *opposite_sex = NO_BEINGS_FOUND;
     *same_sex = NO_BEINGS_FOUND;
-
-    vect2_byte2(&location_vector, being_location(local));
 
     /* is a mate in view? */
     if (local->goal[0]==GOAL_MATE)
@@ -1626,8 +1639,7 @@ static int being_follow(noble_simulation * sim,
                         (local->goal[1]==other_first_name) &&
                         (local->goal[2]==other_family_name))
                 {
-                    vect2_byte2(&difference_vector, being_location(other));
-                    vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+                    being_delta(local, other, &difference_vector);
                     result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
                     if (result_los)
                     {
@@ -1665,8 +1677,7 @@ static int being_follow(noble_simulation * sim,
                         (local_social_graph[social_graph_index].family_name[BEING_MET]==other_family_name))
                 {
                     /** Is this being within sight? */
-                    vect2_byte2(&difference_vector, being_location(other));
-                    vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+                    being_delta(local, other, &difference_vector);
                     result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
                     if (result_los)
                     {
@@ -1702,7 +1713,7 @@ static void being_listen(noble_simulation * sim,
     noble_being * being_buffer = sim->beings;
     noble_being * local        = &being_buffer[current_being_index];
     n_int         max_shout_volume = 127;
-    n_vect2       location_vector, difference_vector;
+    n_vect2       difference_vector;
     n_uint        compare_distance;
 
     /* clear shout values */
@@ -1712,18 +1723,14 @@ static void being_listen(noble_simulation * sim,
     {
         local->shout[SHOUT_CTR]--;
     }
-
-    vect2_byte2(&location_vector, being_location(local));
     for (i = 0; i < sim->num; i++)
     {
         if (i != current_being_index)
         {
             noble_being	* other = &being_buffer[i];
 
-            vect2_byte2(&difference_vector, being_location(other));
-            vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+            being_delta(local, other, &difference_vector);
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
-
             /* listen for the nearest shout out */
             if ((other->state&BEING_STATE_SHOUTING) &&
                     (compare_distance < SHOUT_RANGE) &&
@@ -1758,7 +1765,6 @@ static int being_closest(noble_simulation * sim,
     noble_being * being_buffer = sim->beings;
     n_uint        number       = sim->num;
     noble_being * local        = &being_buffer[current_being_index];
-    n_vect2       location_vector;
     n_byte        beings_in_vicinity = 0;
     n_uint        local_is_female = FIND_SEX(GET_I(local));
 
@@ -1766,8 +1772,6 @@ static int being_closest(noble_simulation * sim,
     *same_sex_distance = 0xffffffff;
     *opposite_sex = NO_BEINGS_FOUND;
     *same_sex = NO_BEINGS_FOUND;
-
-    vect2_byte2(&location_vector, being_location(local));
 
     while (loop < number)
     {
@@ -1780,8 +1784,7 @@ static int being_closest(noble_simulation * sim,
             n_vect2       difference_vector;
             n_uint         compare_distance;
 
-            vect2_byte2(&difference_vector, being_location(test_being));
-            vect2_subtract(&difference_vector, &location_vector, &difference_vector);
+            being_delta(local, test_being, &difference_vector);
 
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
 
@@ -1846,7 +1849,7 @@ static void being_interact(noble_simulation * sim,
                            n_int  * facing_direction,
                            n_int  * awake,
                            n_byte * state,
-                           n_byte * speed,
+                           n_int  * speed,
                            n_int  * energy,
                            n_byte   opposite_sex)
 {
@@ -1854,11 +1857,10 @@ static void being_interact(noble_simulation * sim,
     {
         noble_being * being_buffer = sim->beings;
         noble_being * local        = &being_buffer[being_index];
-        n_vect2       location_vector;
         n_land      * land         = sim->land;
         n_byte2     * today        = land->date;
-        n_uint        today_days   = TIME_IN_DAYS(today);
-        n_uint        birth_days   = TIME_IN_DAYS(GET_D(local));
+        n_int         today_days   = TIME_IN_DAYS(today);
+        n_int         birth_days   = being_dob(local);
         n_uint        local_is_female = FIND_SEX(GET_I(local));
 
         noble_being	* other_being = &being_buffer[other_being_index];
@@ -1866,13 +1868,10 @@ static void being_interact(noble_simulation * sim,
         n_vect2 delta_vector;
 
         /* social networking */
-        n_int being_index;
         n_byte2 familiarity=0;
-        being_index = social_network(local, other_being, other_being_distance, sim);
+        n_int   being_index = social_network(local, other_being, other_being_distance, sim);
 
-        vect2_byte2(&location_vector, being_location(local));
-        vect2_byte2(&delta_vector, being_location(other_being));
-        vect2_subtract(&delta_vector, &location_vector, &delta_vector);
+        being_delta(local, other_being, &delta_vector);
 
         if (being_index>-1)
         {
@@ -1894,19 +1893,19 @@ static void being_interact(noble_simulation * sim,
 
                 /* both beings stop */
                 *speed = 0;
-                GET_S(other_being) = 0;
+                being_set_speed(other_being, 0);
             }
             else
             {
 #endif
                 /* squabbling between adults */
-                if ((other_being_distance < SQUABBLE_RANGE) && ((TIME_IN_DAYS(GET_D(other_being))+AGE_OF_MATURITY)<today_days))
+                if ((other_being_distance < SQUABBLE_RANGE) && ((being_dob(other_being)+AGE_OF_MATURITY)<today_days))
                 {
                     n_byte2 squabble_val;
 
                     GET_F(local) = (n_byte) *facing_direction;
                     GET_E(local) = (n_byte2)*energy;
-                    GET_S(local) = *speed;
+                    being_set_speed(local, *speed);
 
                     squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, sim);
                     if (squabble_val != 0)
@@ -1914,7 +1913,7 @@ static void being_interact(noble_simulation * sim,
                         *state |= squabble_val;
                         *facing_direction = GET_F(local);
                         *energy = GET_E(local);
-                        *speed = GET_S(local);
+                        *speed = being_speed(local);
                     }
                 }
             }
@@ -1938,11 +1937,11 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     n_byte2     * today              = land->date;
     noble_being * local              = &(sim->beings[current_being_index]);
     n_uint        local_is_female    = FIND_SEX(GET_I(local));
-    n_uint        today_days         = TIME_IN_DAYS(today);
-    n_uint        birth_days         = TIME_IN_DAYS(GET_D(local));
+    n_int         today_days         = TIME_IN_DAYS(today);
+    n_int         birth_days         = being_dob(local);
     n_byte        beings_in_vicinity = 0;
 
-    n_byte	      loc_s              = GET_S(local);
+    n_int	      loc_s              = being_speed(local);
     n_int	      loc_e              = GET_E(local);
     n_int	      loc_f              = GET_F(local);
     n_int	      loc_h              = GET_H(local);
@@ -2036,7 +2035,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     {
         loc_f = being_turn_away_from_water(loc_f, land, &location_vector);
         /** horizontally oriented posture */
-        local->posture=0;
+        GET_PS(local) = 0;
         /** When swimming drop everything except what's on your head or back.
            Note that the groomed flag is also cleared */
 
@@ -2349,7 +2348,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     GET_F(local) = (n_byte)  loc_f;
     GET_E(local) = (n_byte2) loc_e;
-    GET_S(local) = (n_byte)  loc_s;
+    being_set_speed(local, (n_byte)  loc_s);
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     local->state = loc_state;
@@ -2810,7 +2809,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         else
         {
             /** produce an initial distribution of heights and masses*/
-            local->date_of_birth[0] = 0;
             math_random3(local_random);
             local->height = BIRTH_HEIGHT +
 				(local_random[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
@@ -2884,7 +2882,7 @@ void being_tidy(noble_simulation * local_sim)
         if(being_awake_local(local_sim, local_being))
         {
             n_int	local_f  = GET_F(local_being);
-            n_int	local_s  = GET_S(local_being);
+            n_int	local_s  = being_speed(local_being);
 
             n_vect2	location_vector;
             n_vect2	facing_vector;
@@ -2959,7 +2957,7 @@ void being_tidy(noble_simulation * local_sim)
         }
         else
         {
-            GET_S(local_being) = 0;
+            being_set_speed(local_being, 0);
             delta_e += (7) >> 2;
         }
 

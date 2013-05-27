@@ -729,7 +729,7 @@ n_byte social_groom(
        social status relationships */
     if ((awake != FULLY_ASLEEP) &&
             (distance < GROOMING_MAX_SEPARATION) &&
-            (meeter_being->speed < MAX_SPEED_WHILST_GROOMING))
+            (being_speed(meeter_being) < MAX_SPEED_WHILST_GROOMING))
     {
         n_int  groomprob = math_random(meeter_being->seed) & 16383;
         if (familiarity > 16) familiarity=16;
@@ -838,12 +838,11 @@ n_byte2 social_squabble(
     n_byte2 ret_val = 0;
     noble_being * victor, * vanquished;
     n_int victor_index, vanquished_index, punchloc;
-    n_vect2 met_vector, meeter_vector, delta;
+    n_vect2 delta;
     
     /** distance between beings */
-    vect2_byte2(&met_vector, being_location(met_being));
-    vect2_byte2(&meeter_vector, being_location(meeter_being));
-    vect2_subtract(&delta, &met_vector, &meeter_vector);
+    being_delta(met_being, meeter_being, &delta);
+
     
     /** battle with rival families */
     if ((GET_FAMILY_FIRST_NAME(sim,meeter_being) != GET_FAMILY_FIRST_NAME(sim,met_being)) &&
@@ -953,7 +952,7 @@ n_byte2 social_squabble(
             }
 
             /** vanquished flees */
-            GET_S(vanquished) = SQUABBLE_FLEE_SPEED;
+            being_set_speed(vanquished, SQUABBLE_FLEE_SPEED);
 #ifdef PARASITES_ON
         }
 #endif

@@ -754,7 +754,7 @@ static void sim_indicators(noble_simulation * sim)
     for (b=0; b<sim->num; b++)
     {
         local_being = &(sim->beings[b]);
-        local_dob = TIME_IN_DAYS(GET_D(local_being));
+        local_dob = being_dob(local_being);
                 
         INDICATOR_ADD(sim, IT_AVERAGE_AGE_DAYS, current_date - local_dob);
         

@@ -793,7 +793,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 10:
         return GET_F(met_being);
     case 11:
-        return meeter_being->speed;
+        return being_speed(meeter_being);
     case 12:
         return meeter_social_graph[actor_index].familiarity&255;
     case 13:

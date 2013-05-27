@@ -871,8 +871,8 @@ static void	draw_meters(noble_simulation * local_sim)
         pnty = (new_sd[ (GET_F(loc_being) ) & 255 ] / 2016);
         (void)math_join(75+ FACING_OFFSIDE, 25, pntx, FH_DELTA(pnty), &local_kind);
 
-        if ((GET_S(loc_being)) != 0)
-            (void)math_join(106 +SP_EN_OFFSIDE, FH_SCREEN(45-GET_S(loc_being)), 6, 0, &local_kind);
+        if (being_speed(loc_being) != 0)
+            (void)math_join(106 +SP_EN_OFFSIDE, FH_SCREEN(45-being_speed(loc_being)), 6, 0, &local_kind);
         if ((GET_E(loc_being)) > 127)
             (void)math_join(106 + 18 + SP_EN_OFFSIDE, FH_SCREEN(45-(GET_E(loc_being) >> 7)), 6, 0, &local_kind);
 
@@ -2254,7 +2254,7 @@ void graph_age_demographic(noble_simulation * sim, n_byte * buffer, n_int img_wi
     for (j = 0; j < sim->num; j++)
     {
         noble_being * local_being = &(sim->beings[j]);
-        n_uint local_dob = TIME_IN_DAYS(GET_D(local_being));
+        n_uint local_dob = being_dob(local_being);
         n_int age_days = current_date - local_dob;
         if (age_days >= max_age) age_days = max_age-1;
         idx = age_days/divisor;

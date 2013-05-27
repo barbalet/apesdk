@@ -240,7 +240,7 @@ static void drives_fatigue(
     noble_being * local)
 {
     /** if the being is moving fast enough then increase the fatigue drive */
-    if ((local->speed > FATIGUE_SPEED_THRESHOLD) &&
+    if ((being_speed(local) > FATIGUE_SPEED_THRESHOLD) &&
             (local->drives[DRIVE_FATIGUE] < DRIVES_MAX))
     {
         local->drives[DRIVE_FATIGUE]++;

@@ -100,8 +100,10 @@ n_int being_location_y(noble_being * value);
 n_byte2 * being_location(noble_being * value);
 
 void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta);
-
 void being_set_location(noble_being * value, n_byte2 * from);
+
+n_int being_speed(noble_being * value);
+void being_set_speed(noble_being * value, n_byte sp);
 
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);

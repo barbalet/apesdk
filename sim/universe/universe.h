@@ -1520,7 +1520,6 @@ noble_simulation;
 #endif
 #define GET_A(bei,index) ((bei)->attention[index])
 #define	GET_F(bei)	((bei)->facing)
-#define	GET_S(bei)	((bei)->speed)
 #define	GET_E(bei)	((bei)->energy)
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
