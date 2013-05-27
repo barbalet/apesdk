@@ -1072,7 +1072,7 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
 
     interp->specific = identifier;
 
-    variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = GET_F(local_being);
+    variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = being_facing(local_being);
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
     variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = local_being->energy;
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;

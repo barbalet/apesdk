@@ -142,6 +142,71 @@ n_int being_dob(noble_being * value)
     return TIME_IN_DAYS(value->date_of_birth);
 }
 
+void being_facing_towards(noble_being * value, n_vect2 * vector)
+{
+    value->facing = math_turn_towards(vector, value->facing, 0);
+}
+
+static void being_wander(noble_being * value, n_int wander)
+{
+    value->facing = (n_byte)((value->facing + 256 + wander) & 255);
+}
+
+void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
+{
+    vect2_direction(vect, value->facing,divisor);
+}
+
+static void being_turn_away_from_water(noble_being * value, n_land * land)
+{
+    n_int   loc_f = value->facing;
+    n_int	it_water_turn = 0;
+    n_vect2 location_vector;
+    
+    vect2_byte2(&location_vector, being_location(value));
+    
+    while (it_water_turn < 4)
+    {
+        /* find higher land first */
+        n_int    iturn = 5 - it_water_turn;
+        n_int    iturn_plus  = loc_f + iturn;
+        n_int    iturn_minus = loc_f + (256-iturn);
+        
+        n_byte   turn_plus  = (n_byte)((iturn_plus)  & 255);
+        n_byte   turn_minus = (n_byte)((iturn_minus) & 255);
+        n_vect2  temp_vector;
+        
+        n_int  z_plus;
+        n_int  z_minus;
+        
+        vect2_direction(&temp_vector, turn_plus, 4);
+        vect2_add(&temp_vector, &temp_vector, &location_vector);
+        
+        z_plus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        
+        vect2_direction(&temp_vector, turn_minus, 4);
+        vect2_add(&temp_vector, &temp_vector, &location_vector);
+        
+        z_minus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        
+        if (z_minus>z_plus)
+        {
+            loc_f = turn_minus;
+        }
+        else
+        {
+            loc_f = turn_plus;
+        }
+        it_water_turn++;
+    }
+    value->facing = (n_byte)loc_f;
+}
+
+n_int being_facing(noble_being * value)
+{
+    return value->facing;
+}
+
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
 {
     n_uint loop = 0;
@@ -180,6 +245,8 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     }
 
     {
+        /*rewrite with vectors */
+        
         n_int	loc_f = GET_F(local);
         n_int	vec_x = VECT_X(loc_f) >> 4;
         n_int	vec_y = VECT_Y(loc_f) >> 4;
@@ -323,7 +390,7 @@ n_byte being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly)
 
        The Noble Ape Simulation universe wraps around in all
        directions you need to calculate the line of site off the map too. */
-    n_int	local_facing = ((GET_F(local))>>5);
+    n_int	local_facing = ((being_facing(local))>>5);
 
 
     /*
@@ -1258,32 +1325,31 @@ void being_state_description(n_byte2 state, n_string result)
  */
 void being_move(noble_being * local, n_int rel_vel, n_byte kind)
 {
-    n_int	loc_f = GET_F(local);
     if (kind > 0)
     {
-        n_int	loc_x = being_location_x(local);
-        n_int	loc_y = being_location_y(local);
+        n_vect2 location_vector;
         n_byte2 loc[2];
+        vect2_byte2(&location_vector, being_location(local));
         if (kind == 1)
         {
-            loc_x += (rel_vel * VECT_X(loc_f)) >> 9;
-            loc_y += (rel_vel * VECT_Y(loc_f)) >> 9;
+            n_vect2 facing_vector;
+            being_facing_vector(local, &facing_vector, 1);
+            vect2_d(&location_vector, &facing_vector, rel_vel, 512);
         }
         else
         {
             if (rel_vel < 2)
-                loc_y -= (rel_vel * 200)-100;
+                location_vector.y -= (rel_vel * 200)-100;
             else
-                loc_x += 500-(rel_vel * 200);
+                location_vector.x += 500-(rel_vel * 200);
         }
-        loc[0] = APESPACE_WRAP(loc_x);
-        loc[1] = APESPACE_WRAP(loc_y);
+        loc[0] = APESPACE_WRAP(location_vector.x);
+        loc[1] = APESPACE_WRAP(location_vector.y);
         being_set_location(local, loc);
     }
     else
     {
-        loc_f = loc_f - rel_vel + 256;
-        GET_F(local) = (n_byte)(loc_f & 255);
+        being_wander(local, -rel_vel);
     }
 }
 
@@ -1402,46 +1468,6 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 }
 
 #endif
-
-static n_int being_turn_away_from_water(n_int loc_f, n_land * land, n_vect2 * location_vector)
-{
-    n_int	it_water_turn = 0;
-    while (it_water_turn < 4)
-    {
-        /* find higher land first */
-        n_int    iturn = 5 - it_water_turn;
-        n_int    iturn_plus  = loc_f + iturn;
-        n_int    iturn_minus = loc_f + (256-iturn);
-
-        n_byte   turn_plus  = (n_byte)((iturn_plus)  & 255);
-        n_byte   turn_minus = (n_byte)((iturn_minus) & 255);
-        n_vect2  temp_vector;
-
-        n_int  z_plus;
-        n_int  z_minus;
-
-        vect2_direction(&temp_vector, turn_plus, 4);
-        vect2_add(&temp_vector, &temp_vector, location_vector);
-
-        z_plus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
-
-        vect2_direction(&temp_vector, turn_minus, 4);
-        vect2_add(&temp_vector, &temp_vector, location_vector);
-
-        z_minus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
-
-        if (z_minus>z_plus)
-        {
-            loc_f = turn_minus;
-        }
-        else
-        {
-            loc_f = turn_plus;
-        }
-        it_water_turn++;
-    }
-    return loc_f;
-}
 
 /* stuff still goes on during sleep */
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
@@ -1835,7 +1861,6 @@ static int being_closest(noble_simulation * sim,
  * @param being_index Array index of the being
  * @param other_being_index Array index of the other being
  * @param other_being_distance Distance to the other being
- * @param facing_direction Direction in which the being is facing
  * @param awake Whether the being is awake
  * @param state The state of the being
  * @param speed The speed of the being
@@ -1846,7 +1871,6 @@ static void being_interact(noble_simulation * sim,
                            n_uint   being_index,
                            n_uint   other_being_index,
                            n_uint   other_being_distance,
-                           n_int  * facing_direction,
                            n_int  * awake,
                            n_byte * state,
                            n_int  * speed,
@@ -1882,8 +1906,8 @@ static void being_interact(noble_simulation * sim,
             }
         }
 
-        *facing_direction = math_turn_towards(&delta_vector, (n_byte)*facing_direction, 0);
-
+        being_facing_towards(local, &delta_vector);
+        
         if ((genetics_compare(local->mother_new_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
         {
 #ifdef PARASITES_ON
@@ -1903,7 +1927,6 @@ static void being_interact(noble_simulation * sim,
                 {
                     n_byte2 squabble_val;
 
-                    GET_F(local) = (n_byte) *facing_direction;
                     GET_E(local) = (n_byte2)*energy;
                     being_set_speed(local, *speed);
 
@@ -1911,7 +1934,6 @@ static void being_interact(noble_simulation * sim,
                     if (squabble_val != 0)
                     {
                         *state |= squabble_val;
-                        *facing_direction = GET_F(local);
                         *energy = GET_E(local);
                         *speed = being_speed(local);
                     }
@@ -1943,7 +1965,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     n_int	      loc_s              = being_speed(local);
     n_int	      loc_e              = GET_E(local);
-    n_int	      loc_f              = GET_F(local);
     n_int	      loc_h              = GET_H(local);
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
@@ -1972,8 +1993,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 #endif
 
     vect2_byte2(&location_vector, being_location(local));
-    vect2_direction(&facing_vector,(n_byte)loc_f,4);
-
+    
+    being_facing_vector(local, &facing_vector, 4);
+    
     land_vect2(&slope_vector,&az,land,&location_vector);
 
     vect2_add(&looking_vector, &location_vector, &facing_vector);
@@ -2033,7 +2055,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     if ((loc_state & BEING_STATE_SWIMMING) != 0)
 #endif
     {
-        loc_f = being_turn_away_from_water(loc_f, land, &location_vector);
+        being_turn_away_from_water(local, land);
+        
         /** horizontally oriented posture */
         GET_PS(local) = 0;
         /** When swimming drop everything except what's on your head or back.
@@ -2086,13 +2109,13 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             being_interact(sim,
                            current_being_index,
                            same_sex, same_sex_distance,
-                           &loc_f, &awake, &loc_state,
+                           &awake, &loc_state,
                            &loc_s, &loc_e, 0);
 
             being_interact(sim,
                            current_being_index,
                            opposite_sex, opposite_sex_distance,
-                           &loc_f, &awake, &loc_state,
+                           &awake, &loc_state,
                            &loc_s, &loc_e, 1);
         }
     }
@@ -2141,7 +2164,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         else
         {
             /** orient towards a goal */
-            loc_f = social_goals(local, loc_f);
+            social_goals(local);
             if (loc_s==0)
             {
                 loc_s = 10;
@@ -2187,7 +2210,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         {
             wander = math_spread_byte(math_random(local->seed) & 7);
         }
-        loc_f = (n_byte)((loc_f + 256 + wander) & 255);
+        
+        being_wander(local, wander);
     }
 
     /** a certain time after giving birth females become receptive again */
@@ -2259,10 +2283,10 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             {
                 /** orient towards the mother */
                 n_vect2    mother_vector;
-                vect2_byte2(&mother_vector, being_location(mother));
-                vect2_subtract(&mother_vector, &mother_vector, &location_vector);
-
-                loc_f = math_turn_towards(&mother_vector, (n_byte)loc_f, 0);
+                
+                being_delta(mother, local, &mother_vector);
+                
+                being_facing_towards(local, &mother_vector);
 
                 /** suckling */
                 if ((loc_state & BEING_STATE_HUNGRY) != 0)
@@ -2346,7 +2370,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     /** update biological drives */
     drives_cycle(local, beings_in_vicinity, awake, sim);
 
-    GET_F(local) = (n_byte)  loc_f;
     GET_E(local) = (n_byte2) loc_e;
     being_set_speed(local, (n_byte)  loc_s);
     GET_H(local) = (n_byte2) loc_h;
@@ -2881,15 +2904,15 @@ void being_tidy(noble_simulation * local_sim)
 #endif
         if(being_awake_local(local_sim, local_being))
         {
-            n_int	local_f  = GET_F(local_being);
             n_int	local_s  = being_speed(local_being);
 
             n_vect2	location_vector;
             n_vect2	facing_vector;
 
             vect2_byte2(&location_vector, being_location(local_being));
-            vect2_direction(&facing_vector,(n_byte)local_f,1);
 
+            being_facing_vector(local_being, &facing_vector, 1);
+            
             if (local_s > 0)
             {
                 n_byte2 location[2];

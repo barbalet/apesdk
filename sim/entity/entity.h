@@ -105,6 +105,11 @@ void being_set_location(noble_being * value, n_byte2 * from);
 n_int being_speed(noble_being * value);
 void being_set_speed(noble_being * value, n_byte sp);
 
+void being_facing_towards(noble_being * value, n_vect2 * vector);
+void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor);
+
+n_int being_facing(noble_being * value);
+
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
 void genealogy_birth(noble_being * child, noble_being * mother, void * sim);

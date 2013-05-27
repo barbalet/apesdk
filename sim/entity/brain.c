@@ -789,9 +789,9 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 8:
         return GET_FAMILY_SECOND_NAME(sim,met_being);
     case 9:
-        return GET_F(meeter_being);
+        return being_facing(meeter_being);
     case 10:
-        return GET_F(met_being);
+        return being_facing(met_being);
     case 11:
         return being_speed(meeter_being);
     case 12:

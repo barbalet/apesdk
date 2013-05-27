@@ -1064,7 +1064,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     being_state_description(local_being->state, status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
-    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %d\nFacing: %d\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
+    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
 			(n_uint)local_being->generation[GENERATION_MATERNAL],
 			(n_uint)local_being->generation[GENERATION_PATERNAL],
@@ -1073,7 +1073,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
             being_location_x(local_being), being_location_y(local_being),
             local_being->honor,
             GET_BEING_HEIGHT(local_being),
-            GET_F(local_being),
+            being_facing(local_being),
             ((FIND_SEX(GET_I(local_being)) == SEX_FEMALE) ? 'F' : 'M'),
             TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being),
             local_being->drives[DRIVE_HUNGER],

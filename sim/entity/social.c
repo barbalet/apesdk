@@ -848,8 +848,8 @@ n_byte2 social_squabble(
     if ((GET_FAMILY_FIRST_NAME(sim,meeter_being) != GET_FAMILY_FIRST_NAME(sim,met_being)) &&
             (GET_FAMILY_SECOND_NAME(sim,meeter_being) != GET_FAMILY_SECOND_NAME(sim,met_being)))
     {
-        GET_F(meeter_being) = math_turn_towards(&delta, (n_byte)GET_F(meeter_being), 0);
-
+        being_facing_towards(meeter_being, &delta);
+        
 #ifdef PARASITES_ON
         /** high ranking apes will more aggressively defend their honor */
         agro = GENE_AGGRESSION(GET_G(meeter_being));
@@ -944,11 +944,11 @@ n_byte2 social_squabble(
                 
                 vect2_subtract(&negative_delta, &zero, &delta);
                 
-                GET_F(vanquished) = math_turn_towards(&delta, (n_byte)GET_F(vanquished), 0);
+                being_facing_towards(vanquished, &negative_delta);
             }
             else
             {
-                GET_F(vanquished) = math_turn_towards(&delta, (n_byte)GET_F(vanquished), 0);
+                being_facing_towards(vanquished, &delta);
             }
 
             /** vanquished flees */
@@ -1414,9 +1414,8 @@ n_int social_chat(
  * @param loc_f The direction facing
  * @return The new direction facing
  */
-n_int social_goals(
-    noble_being * local,
-    n_int loc_f)
+void social_goals(
+    noble_being * local)
 {
     n_int delta_x=0, delta_y=0, distsqr;
     n_byte2 goal;
@@ -1431,8 +1430,8 @@ n_int social_goals(
         {
             vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
             vect2_byte2(&location_vector, being_location(local));
-            vect2_subtract(&delta_vector, &location_vector, &delta_vector);
-            loc_f = math_turn_towards(&delta_vector, (n_byte)loc_f, 2);
+            vect2_subtract(&delta_vector, &location_vector, &delta_vector);            
+            being_facing_towards(local, &delta_vector);
         }
         break;
     }
@@ -1462,8 +1461,6 @@ n_int social_goals(
         /** timed out */
         local->goal[0] = GOAL_NONE;
     }
-
-    return loc_f;
 }
 
 

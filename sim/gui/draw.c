@@ -631,7 +631,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
         n_byte2      * combined = (n_byte2 *)local_sim->highres;
         noble_being * loc_being = &(local_sim->beings[local_sim->select]);
-        const n_int turn = GET_F(loc_being);
+        const n_int turn = being_facing(loc_being);
         const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         const n_int co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
 
@@ -867,8 +867,13 @@ static void	draw_meters(noble_simulation * local_sim)
 #endif
 
         /* draw direction facing */
+        /* rewrite with vectors */
+        
         pntx = (new_sd[((GET_F(loc_being) ) + 64) & 255] / 2016);
         pnty = (new_sd[ (GET_F(loc_being) ) & 255 ] / 2016);
+        
+        
+        
         (void)math_join(75+ FACING_OFFSIDE, 25, pntx, FH_DELTA(pnty), &local_kind);
 
         if (being_speed(loc_being) != 0)
@@ -976,7 +981,7 @@ static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
     }
     if(being_awake_local(sim, bei) && bei->speak != 0)
     {
-        n_int	local_facing = ((((GET_F(bei))>>2) + 4) & 63) >> 3;
+        n_int	local_facing = ((((being_facing(bei))>>2) + 4) & 63) >> 3;
         /* D  C
         G       F
 
@@ -1058,7 +1063,7 @@ static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join *
     }
     if(being_awake_local(sim, bei) && bei->speak != 0)
     {
-        n_int	local_facing = ((((GET_F(bei))>>2) + 4) & 63) >> 3;
+        n_int	local_facing = ((((being_facing(bei))>>2) + 4) & 63) >> 3;
         /* D  C
          G       F
 
