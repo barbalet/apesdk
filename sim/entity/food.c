@@ -71,7 +71,7 @@ n_int food_absorption(
     n_byte food_type,
     noble_being * local)
 {
-    n_genetics * genetics = GET_G(local);
+    n_genetics * genetics = being_genetics(local);
 
     /** note that the absorbition for different foods is normalised */
     n_int absorb_denom =

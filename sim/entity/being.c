@@ -168,6 +168,11 @@ n_int being_facing(noble_being * value)
     return value->facing;
 }
 
+n_genetics * being_genetics(noble_being * value)
+{
+    return value->genetics;
+}
+
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
     n_int	it_water_turn = 0;
@@ -747,7 +752,7 @@ static noble_being * being_find_child(noble_simulation * sim, n_genetics * genet
     while ( loop < sim->num )
     {
         noble_being * local = &(sim->beings[loop]);
-        if (genetics_compare(local->mother_new_genetics, genetics))
+        if (genetics_compare(local->mother_genetics, genetics))
         {
             if (max_age == 0)
             {
@@ -771,7 +776,7 @@ noble_being * being_find_female(noble_simulation * sim, n_genetics * genetics)
     {
         noble_being * local = &(sim->beings[loop]);
 
-        if (genetics_compare(GET_G(local), genetics))
+        if (genetics_compare(being_genetics(local), genetics))
         {
             if (FIND_SEX(GET_I(local)) == SEX_FEMALE)
             {
@@ -1907,7 +1912,7 @@ static void being_interact(noble_simulation * sim,
 
         being_delta(local, other_being, &delta_vector);
 
-        if (being_index>-1)
+        if (being_index > -1)
         {
             social_link * local_social_graph = GET_SOC(sim, local);
             if (local_social_graph)
@@ -1918,7 +1923,7 @@ static void being_interact(noble_simulation * sim,
 
         being_facing_towards(local, &delta_vector);
         
-        if ((genetics_compare(local->mother_new_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
+        if ((genetics_compare(local->mother_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
         {
 #ifdef PARASITES_ON
             if (social_groom(local, other_being, other_being_distance, *awake, familiarity, sim))
@@ -1983,6 +1988,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     n_int         carrying_child = 0;
 
+    n_genetics *  genetics = being_genetics(local);
+    
     /** tmp_speed is the optimum speed based on the gradient */
     n_int	tmp_speed;
     /** delta_energy is the energy required for movement */
@@ -2080,7 +2087,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             }
         }
         /** swimming proficiency */
-        tmp_speed = (tmp_speed * (GENE_SWIM(GET_G(local))+8)) >> 4;
+        tmp_speed = (tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
         
         episodic_self(sim, local, EVENT_SWIM, GET_E(local), 0);
         
@@ -2099,7 +2106,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         n_uint same_sex_distance = 0xffffffff;
 
         /** adjust speed using genetics */
-        tmp_speed = (tmp_speed * (GENE_SPEED(GET_G(local))+8)) >> 3;
+        tmp_speed = (tmp_speed * (GENE_SPEED(genetics)+8)) >> 3;
 
         /** is the being to which we are paying attention within view? */
         beings_in_vicinity = being_follow(sim,current_being_index,
@@ -2150,7 +2157,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 #ifdef METABOLISM_ON
                     metabolism_vascular_response(sim, local, VASCULAR_PARASYMPATHETIC);
 #endif
-
                     loc_e += energy;
                     
                     INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, energy);
@@ -2205,7 +2211,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     /** Create a wander based on the brain value */
     if ((local->goal[0]==GOAL_NONE) &&
             (beings_in_vicinity==0) &&
-            (math_random(local->seed) < 1000 + 3600*GENE_STAGGER(GET_G(local))))
+            (math_random(local->seed) < 1000 + 3600*GENE_STAGGER(genetics)))
     {
         n_byte * local_brain = GET_B(sim, local);
         n_int	 wander = 0;
@@ -2243,7 +2249,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             if (today_days > gestation_days)
             {
                 /** A mother could have multiple children, so only find the youngest */
-                noble_being * being_child = being_find_child(sim,GET_G(local), CARRYING_DAYS);
+                noble_being * being_child = being_find_child(sim, genetics, CARRYING_DAYS);
 
                 /** Birth */
                 if (being_child == 0L)
@@ -2285,10 +2291,10 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         }
 
         /** child follows the mother */
-        if ((genetics_compare(local->mother_new_genetics, 0L)) &&
+        if ((genetics_compare(local->mother_genetics, 0L)) &&
                 ((birth_days + WEANING_DAYS) > today_days))
         {
-            noble_being * mother = being_find_female(sim,local->mother_new_genetics);
+            noble_being * mother = being_find_female(sim,local->mother_genetics);
             if (mother != 0L)
             {
                 /** orient towards the mother */
@@ -2592,6 +2598,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         social_link * local_social_graph = GET_SOC(sim, local);
         episodic_memory * local_episodic = GET_EPI(sim, local);
 #endif
+        n_genetics * mother_genetics = 0L;
 
 
         /***********************************************
@@ -2669,13 +2676,14 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         }
         else
         {
+            mother_genetics = being_genetics(mother);
             local->seed[0] = mother->seed[1];
             local->seed[1] = mother->seed[0];
             math_random(mother->seed);
             
             math_random3(local->seed);
             
-            local->seed[1] = GET_G(mother)[0];
+            local->seed[1] = mother_genetics[0];
             
             math_random3(local->seed);
             
@@ -2801,9 +2809,9 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             local->honor = (mother->honor + mother->father_honor) >> 2;
 #endif
 
-            genetics_set(local->mother_new_genetics, GET_G(mother));
-            genetics_set(local->father_new_genetics,
-						 mother->father_new_genetics);
+            genetics_set(local->mother_genetics, mother_genetics);
+            genetics_set(local->father_genetics,
+						 mother->father_genetics);
 
             being_set_unique_name(sim,local,random_factor,
 								  GET_NAME_FAMILY2(sim,mother),
@@ -2907,6 +2915,7 @@ void being_tidy(noble_simulation * local_sim)
     {
         noble_being *local_being = &local[loop];
         n_int	     local_e = GET_E(local_being);
+        n_genetics  *genetics = being_genetics(local_being);
         delta_e = 0;
         conductance = 5;
 #ifdef PARASITES_ON
@@ -2964,7 +2973,7 @@ void being_tidy(noble_simulation * local_sim)
                     delta_e += (delta_energy + 10 - insulation) >> 3;
                     conductance = 4;
 #ifdef METABOLISM_ON
-                    metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(1+GENE_SWIM(GET_G(local_being))));
+                    metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(1+GENE_SWIM(genetics)));
 #endif
                 }
                 else
@@ -2972,9 +2981,9 @@ void being_tidy(noble_simulation * local_sim)
                     if (delta_z > 0)
                     {
                         /* going uphill */
-                        delta_energy += GENE_HILL_CLIMB(GET_G(local_being));
+                        delta_energy += GENE_HILL_CLIMB(genetics);
 #ifdef METABOLISM_ON
-                        metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(8+(GENE_HILL_CLIMB(GET_G(local_being))>>1)));
+                        metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(8+(GENE_HILL_CLIMB(genetics)>>1)));
 #endif
                     }
                     else
@@ -3000,7 +3009,7 @@ void being_tidy(noble_simulation * local_sim)
         if (delta_e > 0)
         {
             /* hairy creatures are better insulated */
-            delta_e -= ((GENE_HAIR(GET_G(local_being))*delta_e)>>conductance);
+            delta_e -= ((GENE_HAIR(genetics)*delta_e)>>conductance);
             if (delta_e < 1) delta_e = 1;
         }
 
@@ -3066,6 +3075,7 @@ void being_remove(noble_simulation * local_sim)
         {
             noble_being * b = &local[loop];
             noble_being * child;
+            n_genetics  * genetics = being_genetics(b);
             n_uint i = 0;
             n_byte2 name, family_name, met_name, met_family_name;
             
@@ -3085,10 +3095,10 @@ void being_remove(noble_simulation * local_sim)
             {
                 do
                 {
-                    child = being_find_child(local_sim,GET_G(b),0);
+                    child = being_find_child(local_sim, genetics, 0);
                     if (child != 0L)
                     {
-                        genetics_zero(child->mother_new_genetics);
+                        genetics_zero(child->mother_genetics);
                     }
                 }
                 while (child != 0L);
@@ -3240,13 +3250,13 @@ static void genealogy_being_id(noble_being * local_being, n_file * fp, int paren
     switch(parent)
     {
         case 1:
-            genome = local_being->mother_new_genetics;
+            genome = local_being->mother_genetics;
             break;
         case 2:
-            genome = local_being->father_new_genetics;
+            genome = local_being->father_genetics;
             break;
         default:
-            genome = GET_G(local_being);
+            genome = being_genetics(local_being);
     }
     
     for (ch = 0; ch < CHROMOSOMES; ch++)
@@ -3656,7 +3666,7 @@ static void genealogy_birth_gedcom(noble_being * child, noble_being * mother, no
              io_write(fp, "", 1);
              */
             
-            if (!empty_genetics(child->father_new_genetics))
+            if (!empty_genetics(child->father_genetics))
             {
                 io_write(fp, "1 FAMC @F", 0);
                 genealogy_being_id(child,fp,0);

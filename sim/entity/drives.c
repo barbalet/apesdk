@@ -140,7 +140,7 @@ static void drives_sex(
                     (local->goal[0]==GOAL_NONE))
             {
                 /** either search for a preferred mate, or mate randomly */
-                if (GENE_MATE_SEEK(GET_G(local))&1)
+                if (GENE_MATE_SEEK(being_genetics(local))&1)
                 {
                     /** look for a mate */
 #ifdef EPISODIC_ON

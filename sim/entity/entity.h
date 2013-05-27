@@ -111,6 +111,8 @@ void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor);
 n_int being_facing(noble_being * value);
 void being_wander(noble_being * value, n_int wander);
 
+n_genetics * being_genetics(noble_being * value);
+
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
 void genealogy_birth(noble_being * child, noble_being * mother, void * sim);

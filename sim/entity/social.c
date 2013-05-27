@@ -1011,9 +1011,10 @@ static void social_conception(
     /** store the date of conception */
     female->date_of_conception[0] = today[0];
     female->date_of_conception[1] = today[1];
-
+    
+    /** store the father's genetics */
     /** store the family name, ID and honor of the father */
-    genetics_set(female->father_new_genetics, GET_G(male));
+    genetics_set(female->father_genetics, GET_G(male));
 
     female->father_honor     = male->honor;
     female->father_name[0]   = GET_NAME_GENDER(sim,male);
@@ -1033,8 +1034,6 @@ static void social_conception(
 			male->generation[GENERATION_PATERNAL];
 	}
 
-    /** store the father's genetics */
-    genetics_set(female->father_new_genetics, GET_G(male));
 
     /** reset sex drive and goal */
     female->drives[DRIVE_SEX]=0;

@@ -803,7 +803,7 @@ static void sim_indicators(noble_simulation * sim)
         /* average genome */
         for (n=0; n<8*CHROMOSOMES; n++)
         {
-            mean_genome[n] += GET_NUCLEOTIDE(GET_G(local_being),n);
+            mean_genome[n] += GET_NUCLEOTIDE(being_genetics(local_being),n);
         }
 
 #ifdef BRAINCODE_ON
@@ -933,10 +933,12 @@ static void sim_indicators(noble_simulation * sim)
     }
     for (b=0; b<sim->num; b++)
     {
+        n_genetics  * genetics;
         local_being = &(sim->beings[b]);
+        genetics = being_genetics(local_being);
         for (n=0; n<8*CHROMOSOMES; n++)
         {
-            diff = (n_int)ABS(GET_NUCLEOTIDE(GET_G(local_being),n) - (n_int)mean_genome[n]);
+            diff = (n_int)ABS(GET_NUCLEOTIDE(genetics,n) - (n_int)mean_genome[n]);
             sd += (n_uint)diff;
         }
     }

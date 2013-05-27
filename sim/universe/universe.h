@@ -854,7 +854,7 @@ enum drives_definition
 #ifdef PARASITES_ON
 
 /* maximum number of parasites in the range 0-255 */
-#define MAX_PARASITES(bei)   ((GENE_HAIR(bei->new_genetics)*255)>>4)
+#define MAX_PARASITES(bei)   ((GENE_HAIR(bei->genetics)*255)>>4)
 
 /* maximum distance over which a parasite can hob from one being to another */
 #define PARASITE_HOP_MAX_DISTANCE  METRES_TO_APESPACE(2)
@@ -1403,16 +1403,16 @@ typedef struct
     /* indexes to current focus of attention*/
     n_byte attention[ATTENTION_SIZE];
 
-    n_genetics mother_new_genetics[CHROMOSOMES]; /* constant */
+    n_genetics mother_genetics[CHROMOSOMES]; /* constant */
 
     n_byte2 unused1;                             /* constant */
 
-    n_genetics father_new_genetics[CHROMOSOMES]; /* constant */
+    n_genetics father_genetics[CHROMOSOMES]; /* constant */
 
     n_byte  father_honor;                       /* constant */
     n_byte2 father_name[2];                     /* constant */
 
-    n_genetics new_genetics[CHROMOSOMES];       /* constant */
+    n_genetics genetics[CHROMOSOMES];       /* constant */
 
     n_byte2     social_x;
     n_byte2     social_y;
@@ -1522,13 +1522,13 @@ noble_simulation;
 #define	GET_E(bei)	((bei)->energy)
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
-#define GET_FR(bei)     (GENE_FRAME(bei->new_genetics))
+#define GET_FR(bei)     (GENE_FRAME(bei->genetics))
 
 #define	GET_D(bei)	((bei)->date_of_birth)
-#define GET_G(bei)  ((bei)->new_genetics)
+#define GET_G(bei)  ((bei)->genetics)
 
 #define	GET_I(bei)	(GET_G(bei)[CHROMOSOME_Y])
-#define	GET_MI(bei)	((bei)->mother_new_genetics[0])
+#define	GET_MI(bei)	((bei)->mother_genetics[0])
 
 #define GET_PS(bei)     ((bei)->posture)
 

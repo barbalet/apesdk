@@ -727,6 +727,7 @@ static void	draw_meters(noble_simulation * local_sim)
     n_int		   pntx = 0;
     n_int		   pnty;
     n_join		   local_kind;
+    n_genetics    *genetics = GET_G(loc_being);
 
     if (local_info == 0L)
     {
@@ -814,7 +815,7 @@ static void	draw_meters(noble_simulation * local_sim)
         while (ha2 < CHROMOSOMES)
         {
             n_int	ha3 = 0;
-            n_byte2	genetic_block = loc_being->new_genetics[ha2];
+            n_byte2	genetic_block = genetics[ha2];
             ha1 = 6;
             while (ha3 < 8)
             {

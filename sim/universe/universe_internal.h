@@ -112,10 +112,10 @@
 
 
 
-#define NEW_GENETICS_BYTES    (sizeof(n_genetics)*CHROMOSOMES)
-#define NEW_GENETICS_ENTRIES  1
+#define GENETICS_BYTES    (sizeof(n_genetics)*CHROMOSOMES)
+#define GENETICS_ENTRIES  1
 
-#define PARENT_BYTES    (9+(NEW_GENETICS_BYTES*2))
+#define PARENT_BYTES    (9+(GENETICS_BYTES*2))
 
 #define INVENTORY_BYTES  (INVENTORY_SIZE*sizeof(n_byte2))
 
@@ -125,11 +125,11 @@
 
 #define OFFSET_PARENTING	(OFFSET_PARASITES+PARA_BYTES)
 
-#define OFFSET_GENETICS		(OFFSET_PARENTING+14+NEW_GENETICS_BYTES+(CHROMOSOMES*4))
-#define OFFSET_SOCIAL		(OFFSET_GENETICS+NEW_GENETICS_BYTES)
+#define OFFSET_GENETICS		(OFFSET_PARENTING+14+GENETICS_BYTES+(CHROMOSOMES*4))
+#define OFFSET_SOCIAL		(OFFSET_GENETICS+GENETICS_BYTES)
 #define OFFSET_EPISODIC		(OFFSET_SOCIAL+SOCIAL_BYTES)
 #define OFFSET_TERRITORY	(OFFSET_EPISODIC+EPISODIC_BYTES+DRIVES_BYTES+GOALS_BYTES+PREFERENCES+GENERATIONS_BYTES)
-#define OFFSET_IMMUNE		((OFFSET_GENETICS+NEW_GENETICS_BYTES+DRIVES_BYTES+6+PREFERENCES+GENERATIONS_BYTES+8)+TERRITORY_BYTES)
+#define OFFSET_IMMUNE		((OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+PREFERENCES+GENERATIONS_BYTES+8)+TERRITORY_BYTES)
 #define OFFSET_VASCULAR	        (OFFSET_IMMUNE+IMMUNE_BYTES)
 #define OFFSET_METABOLISM       (OFFSET_VASCULAR+(VASCULAR_BYTES*VASCULAR_SIZE))
 
@@ -209,32 +209,32 @@ const static noble_file_entry noble_file_format[]=
     {{'a', 'c', 't', 'i', 'x', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, OFFSET_PARENTING+4, "Attention actor index"}, /*n_byte attention_actor_index;*/
     {{'e', 'p', 'i', 'i', 'x', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, OFFSET_PARENTING+5, "Attention episode index"}, /*n_byte attention_episode_index;*/
 
-    {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+6), "Mother genetics"}, /*n_byte2 mother_new_genetics[CHROMOSOMES];*/
+    {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+6), "Mother genetics"}, /*n_byte2 mother_genetics[CHROMOSOMES];*/
 
-    {{'f', 'a', 'm', 'i', 'l', '='}, FIL_BEI | FILE_TYPE_BYTE,  2, (OFFSET_PARENTING+6+NEW_GENETICS_BYTES), "Family names"}, /*n_byte  family[2];*/
+    {{'f', 'a', 'm', 'i', 'l', '='}, FIL_BEI | FILE_TYPE_BYTE,  2, (OFFSET_PARENTING+6+GENETICS_BYTES), "Family names"}, /*n_byte  family[2];*/
 
-    {{'u', 'n', 'u', 's', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, (OFFSET_PARENTING+8+NEW_GENETICS_BYTES), "Unused"}, /* unused */
-
-
-    {{'f', 'a', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+10+NEW_GENETICS_BYTES), "Father genetics"}, /*n_byte2 father_new_genetics[CHROMOSOMES];*/
-
-    {{'f', 'a', 't', 'h', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE , 1, (OFFSET_PARENTING+10+NEW_GENETICS_BYTES+(CHROMOSOMES*4)), "Father honor"}, /*n_byte  father_honor; */
-    {{'f', 'a', 't', 'h', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE , 2, (OFFSET_PARENTING+11+NEW_GENETICS_BYTES+(CHROMOSOMES*4)), "Father family names"}, /*n_byte  father_name[2];*/
-
-    {{'u', 'n', 'u', 's', 'c', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, (OFFSET_PARENTING+13+NEW_GENETICS_BYTES+(CHROMOSOMES*4)), "Unused"}, /*unused*/
-
-    {{'g', 'e', 'n', 'e', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, OFFSET_GENETICS, "Genetics"}, /*n_int   new_genetics[CHROMOSOMES];*/
-
-    {{'s', 'o', 's', 'i', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, (OFFSET_GENETICS+NEW_GENETICS_BYTES), "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
+    {{'u', 'n', 'u', 's', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, (OFFSET_PARENTING+8+GENETICS_BYTES), "Unused"}, /* unused */
 
 
-    {{'d', 'r', 'i', 'v', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, DRIVES, (OFFSET_GENETICS+NEW_GENETICS_BYTES+8), "Drives"}, /*n_byte   drives[DRIVES];*/
-    {{'g', 'o', 'a', 'l', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 3, (OFFSET_GENETICS+NEW_GENETICS_BYTES+DRIVES_BYTES+8), "Goals"},
+    {{'f', 'a', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+10+GENETICS_BYTES), "Father genetics"}, /*n_byte2 father_genetics[CHROMOSOMES];*/
 
-    {{'p', 'r', 'e', 'f', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, PREFERENCES, (OFFSET_GENETICS+NEW_GENETICS_BYTES+DRIVES_BYTES+6+8), "Preferences"},
-    {{'g', 'e', 'n', 'e', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE, GENERATIONS_BYTES, (OFFSET_GENETICS+NEW_GENETICS_BYTES+DRIVES_BYTES+6+8+PREFERENCES), "Generations"},
+    {{'f', 'a', 't', 'h', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE , 1, (OFFSET_PARENTING+10+GENETICS_BYTES+(CHROMOSOMES*4)), "Father honor"}, /*n_byte  father_honor; */
+    {{'f', 'a', 't', 'h', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE , 2, (OFFSET_PARENTING+11+GENETICS_BYTES+(CHROMOSOMES*4)), "Father family names"}, /*n_byte  father_name[2];*/
+
+    {{'u', 'n', 'u', 's', 'c', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, (OFFSET_PARENTING+13+GENETICS_BYTES+(CHROMOSOMES*4)), "Unused"}, /*unused*/
+
+    {{'g', 'e', 'n', 'e', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, OFFSET_GENETICS, "Genetics"}, /*n_int   genetics[CHROMOSOMES];*/
+
+    {{'s', 'o', 's', 'i', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, (OFFSET_GENETICS+GENETICS_BYTES), "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
+
+
+    {{'d', 'r', 'i', 'v', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, DRIVES, (OFFSET_GENETICS+GENETICS_BYTES+8), "Drives"}, /*n_byte   drives[DRIVES];*/
+    {{'g', 'o', 'a', 'l', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 3, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+8), "Goals"},
+
+    {{'p', 'r', 'e', 'f', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, PREFERENCES, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+8), "Preferences"},
+    {{'g', 'e', 'n', 'e', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE, GENERATIONS_BYTES, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+8+PREFERENCES), "Generations"},
 #ifdef TERRITORY_ON
-    {{'t', 'e', 'r', 'i', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES/2, (OFFSET_GENETICS+NEW_GENETICS_BYTES+DRIVES_BYTES+6+PREFERENCES+GENERATIONS_BYTES+8), "Territory information"},
+    {{'t', 'e', 'r', 'i', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES/2, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+PREFERENCES+GENERATIONS_BYTES+8), "Territory information"},
 #endif
 #ifdef IMMUNE_ON
     {{'i', 'm', 'm', 'u', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, IMMUNE_BYTES, OFFSET_IMMUNE, "Immune system information"},

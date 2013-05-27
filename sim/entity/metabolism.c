@@ -459,7 +459,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  */ static void metabolism_hunger(noble_simulation * local_sim, noble_being * local_being)
 {
     /** leptin / ghrelin levels */
-    if (GET_MT(local_being,METABOLISM_LEPTIN) > 10 + (GENE_FRAME(GET_G(local_being))*10))
+    if (GET_MT(local_being,METABOLISM_LEPTIN) > 10 + (GENE_FRAME(being_genetics(local_being))*10))
     {
         /** disable the hunger flag if leptin is above a threshold */
         metabolism_set_state(local_being,METABOLISM_STATE_HUNGER,0);
@@ -506,7 +506,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  * @param local_being Pointer to the being
  */ static void metabolism_glucose_homeostasis(noble_simulation * local_sim, noble_being * local_being)
 {
-    n_genetics * genetics = GET_G(local_being);
+    n_genetics * genetics = being_genetics(local_being);
 
     /** if glucose falls below a minimum level then begin
     	converting glycogen and fat */
@@ -551,7 +551,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  * @param local_being Pointer to the being
  */ static void metabolism_waste_products(noble_simulation * local_sim, noble_being * local_being)
 {
-    n_genetics * genetics = GET_G(local_being);
+    n_genetics * genetics = being_genetics(local_being);
 
     if (GET_MT(local_being,METABOLISM_UREA)>50+(GENE_BLADDER_CAPACITY(genetics)<<2))
     {
@@ -571,7 +571,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 {
     n_byte2 i,j,p,mstate,index,reactant,product[METABOLISM_MAX_PRODUCTS];
     n_int increment;
-    n_genetics * genetics = GET_G(local_being);
+    n_genetics * genetics = being_genetics(local_being);
     const n_byte2 stride = 2 + (METABOLISM_MAX_PRODUCTS*2) + (METABOLISM_MAX_REACTANTS*2);
 
     /** update metabolic pathways */
@@ -1109,7 +1109,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  * @param mother Pointer to the mother being
  */ void metabolism_suckle(noble_simulation * sim, noble_being * child, noble_being * mother)
 {
-    n_byte2 suckling_rate = 1 + GENE_SUCKLING_RATE(GET_G(child));
+    n_byte2 suckling_rate = 1 + GENE_SUCKLING_RATE(being_genetics(child));
 
     metabolism_vascular_response(sim, mother, VASCULAR_PARASYMPATHETIC);
     metabolism_vascular_response(sim, child, VASCULAR_PARASYMPATHETIC);
