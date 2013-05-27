@@ -147,9 +147,15 @@ void being_facing_towards(noble_being * value, n_vect2 * vector)
     value->facing = math_turn_towards(vector, value->facing, 0);
 }
 
-static void being_wander(noble_being * value, n_int wander)
+void being_wander(noble_being * value, n_int wander)
 {
     value->facing = (n_byte)((value->facing + 256 + wander) & 255);
+}
+
+
+static void being_facing_init(noble_being * value)
+{
+    value->facing = (n_byte)(math_random(value->seed) & 255);
 }
 
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
@@ -157,9 +163,13 @@ void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
     vect2_direction(vect, value->facing,divisor);
 }
 
+n_int being_facing(noble_being * value)
+{
+    return value->facing;
+}
+
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
-    n_int   loc_f = value->facing;
     n_int	it_water_turn = 0;
     n_vect2 location_vector;
     
@@ -169,6 +179,7 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
     {
         /* find higher land first */
         n_int    iturn = 5 - it_water_turn;
+        n_int    loc_f = being_facing(value);
         n_int    iturn_plus  = loc_f + iturn;
         n_int    iturn_minus = loc_f + (256-iturn);
         
@@ -189,22 +200,16 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
         
         z_minus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
         
-        if (z_minus>z_plus)
+        if (z_minus > z_plus)
         {
-            loc_f = turn_minus;
+            being_wander(value, -iturn);
         }
-        else
+        else if (z_minus < z_plus)
         {
-            loc_f = turn_plus;
+            being_wander(value, iturn);
         }
         it_water_turn++;
     }
-    value->facing = (n_byte)loc_f;
-}
-
-n_int being_facing(noble_being * value)
-{
-    return value->facing;
 }
 
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
@@ -232,49 +237,53 @@ static n_byte	being_ground(n_int px, n_int py, void * params)
 
 static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx, n_int ly)
 {
-    n_int	start_x = being_location_x(local);
-    n_int	start_y = being_location_y(local);
-    n_int	delta_x = lx - start_x;
-    n_int	delta_y = ly - start_y;
-
+    n_vect2    start, delta, vector_facing;
+    
+    vect2_byte2(&start, being_location(local));
+    
+    delta.x = lx;
+    delta.y = ly;
+    
+    vect2_subtract(&delta, &delta, &start);
+    
     {
-        n_int distance_squared = (delta_x * delta_x) + (delta_y * delta_y);
+        n_int distance_squared = vect2_dot(&delta, &delta, 1, 1);
         /* TODO: This should also include weather conditions (eg seeing through the rain) */
         if (distance_squared > VISUAL_DISTANCE_SQUARED)
             return 0;
     }
 
+    /* check trivial case first - self aware */
+
+    if ((delta.x == 0) && (delta.y == 0))
     {
-        /*rewrite with vectors */
-        
-        n_int	loc_f = GET_F(local);
-        n_int	vec_x = VECT_X(loc_f) >> 4;
-        n_int	vec_y = VECT_Y(loc_f) >> 4;
-        /* check trivial case first - self aware */
-        if ((delta_x == 0) && (delta_y == 0))
-            return 1;
-        vec_x = (vec_x) * (delta_x >> 6);
-        vec_y = (vec_y) * (delta_y >> 6);
-        if ((vec_x + vec_y) < 0) /* if it is behind, it can't be in the line of sight */
-            return 0;
+        return 1;
+    }
+    being_facing_vector(local, &vector_facing, 16);
+    
+    /* if it is behind, it can't be in the line of sight */
+    if (vect2_dot(&vector_facing, &delta, 1, 64) < 0)
+    {
+        return 0;
     }
 
+
     /* move everything from being co-ordinates to map co-ordinates */
-    start_x = APESPACE_TO_MAPSPACE(start_x);
-    start_y = APESPACE_TO_MAPSPACE(start_y);
-    delta_x = APESPACE_TO_MAPSPACE(delta_x);
-    delta_y = APESPACE_TO_MAPSPACE(delta_y);
+    start.x = APESPACE_TO_MAPSPACE(start.x);
+    start.y = APESPACE_TO_MAPSPACE(start.y);
+    delta.x = APESPACE_TO_MAPSPACE(delta.x);
+    delta.y = APESPACE_TO_MAPSPACE(delta.y);
 
     /* check trivial case first - self aware (after co-ord translation) */
-    if ((delta_x == 0) && (delta_y == 0))
+    if ((delta.x == 0) && (delta.y == 0))
     {
         return 1;
     }
 
     {
-        n_int	start_z = (n_int)WALK_ON_WATER(QUICK_LAND(land, start_x, start_y),land->tide_level) + 3; /* the nominal height of the Noble Ape */
-        n_int	delta_z = ((n_int)WALK_ON_WATER(QUICK_LAND(land, (start_x + delta_x), (start_y + delta_y)),land->tide_level)) - start_z + 3; /* the nominal height of the Noble Ape */
-        n_int	common_divisor = (delta_x * delta_x) + (delta_y * delta_y);
+        n_int	start_z = (n_int)WALK_ON_WATER(QUICK_LAND(land, start.x, start.y),land->tide_level) + 3; /* the nominal height of the Noble Ape */
+        n_int	delta_z = ((n_int)WALK_ON_WATER(QUICK_LAND(land, (start.x + delta.x), (start.y + delta.y)),land->tide_level)) - start_z + 3; /* the nominal height of the Noble Ape */
+        n_int	common_divisor = vect2_dot(&delta, &delta, 1, 1);
         being_draw 	  translate;
 
         if(common_divisor == 0)
@@ -283,14 +292,15 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
         }
 
         {
-            n_int	offset_x = (512 * delta_x * delta_z) / common_divisor;
-            n_int	offset_y = (512 * delta_y * delta_z) / common_divisor;
-
-            start_z -= ((start_x * offset_x) + (start_y * offset_y)) >> 9;
-
+            n_vect2 offset = {0};
+            
+            vect2_d(&offset, &delta, 512 * delta_z, common_divisor);
+            
+            start_z -= vect2_dot(&start, &offset, 1, 512);
+            
             translate.start_z = start_z;
-            translate.offset_x = offset_x;
-            translate.offset_y = offset_y;
+            translate.offset_x = offset.x;
+            translate.offset_y = offset.y;
         }
 
         translate.land = land;
@@ -299,7 +309,7 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
             being_point.information = (void *) &translate;
             being_point.pixel_draw  = &being_ground;
 
-            if(math_join(start_x, start_y, delta_x, delta_y, &being_point))
+            if(math_join(start.x, start.y, delta.x, delta.y, &being_point))
             {
                 return 0;
             }
@@ -2384,19 +2394,16 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 void being_init_braincode(noble_simulation * sim,
                           noble_being * local,
                           noble_being * other,
-                          n_int random_factor,
+                          n_byte2* local_random,
                           n_byte friend_foe,
                           n_byte internal)
 {
-    n_byte2 local_random[2];
     n_uint ch,i,most_similar_index,diff,min,actor_index;
     social_link * graph;
 
     if (other==0L)
     {
         /* initially seed the brain with instructions which are random but genetically biased */
-        local_random[0] = (n_byte2)(random_factor & 0xffff);
-        local_random[1] = (n_byte2)(random_factor & 0xffff);
         for (ch = 0; ch < BRAINCODE_SIZE; ch+=3)
         {
             math_random3(local_random);
@@ -2577,8 +2584,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 		/** this is the being to be born */
         noble_being * local = &(sim->beings[sim->num]);
         n_land  * land  = sim->land;
-        n_byte2	      local_random[2];
-        n_byte	      loc_facing;
         n_byte        ch;
         n_byte2		  numerical_brain_location =
 			local->brain_memory_location;
@@ -2655,24 +2660,52 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 #else
         /** initially seed the brain with instructions which
 			are genetically biased */
-        being_init_braincode(sim,local,0L,random_factor,0,
+
+        
+        if (random_factor > -1)
+        {
+            local->seed[0] = (n_byte2)(random_factor & 0xffff);
+            local->seed[1] = (n_byte2)(random_factor & 0xffff);
+        }
+        else
+        {
+            local->seed[0] = mother->seed[1];
+            local->seed[1] = mother->seed[0];
+            math_random(mother->seed);
+            
+            math_random3(local->seed);
+            
+            local->seed[1] = GET_G(mother)[0];
+            
+            math_random3(local->seed);
+            
+            local->seed[1] = sim->land->time;
+            
+            math_random3(local->seed);
+
+        }
+    
+        math_random3(local->seed);
+
+        being_init_braincode(sim,local,0L,local->seed,0,
 							 BRAINCODE_INTERNAL);
-        being_init_braincode(sim,local,0L,random_factor,0,
+        being_init_braincode(sim,local,0L,local->seed,0,
 							 BRAINCODE_EXTERNAL);
+
 #endif
 
         /** randomly initialize registers */
         for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
         {
-            math_random3(local_random);
-            local->braincode_register[ch]=(n_byte)local_random[0];
+            math_random3(local->seed);
+            local->braincode_register[ch]=(n_byte)local->seed[0];
         }
 
         /** initialize brainprobes */
         for (ch = 0; ch < BRAINCODE_PROBES; ch++)
         {
-            math_random3(local_random);
-			if ((n_byte)local_random[0]&1)
+            math_random3(local->seed);
+			if ((n_byte)local->seed[0]&1)
 			{
 				local->brainprobe[ch].type = INPUT_SENSOR;
 			}
@@ -2681,12 +2714,12 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 				local->brainprobe[ch].type = OUTPUT_ACTUATOR;
 			}
             local->brainprobe[ch].frequency =
-				(n_byte)1 + (local_random[1]%BRAINCODE_MAX_FREQUENCY);
-            math_random3(local_random);
-            local->brainprobe[ch].address = (n_byte)local_random[0];
-            local->brainprobe[ch].position = (n_byte)local_random[1];
-            math_random3(local_random);
-            local->brainprobe[ch].offset = (n_byte)local_random[0];
+				(n_byte)1 + (local->seed[1]%BRAINCODE_MAX_FREQUENCY);
+            math_random3(local->seed);
+            local->brainprobe[ch].address = (n_byte)local->seed[0];
+            local->brainprobe[ch].position = (n_byte)local->seed[1];
+            math_random3(local->seed);
+            local->brainprobe[ch].offset = (n_byte)local->seed[0];
         }
 
 
@@ -2720,6 +2753,9 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             }
         }
 #endif
+        
+        being_facing_init(local);
+        
         being_set_unique_name(sim,local,random_factor,0,0);
         if(random_factor > -1)
         {
@@ -2727,56 +2763,39 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             
             n_int loop = 0;
 
-            local_random[0] = (n_byte2)(random_factor & 0xffff);
-            local_random[1] = (n_byte2)(random_factor & 0xffff);
-
-            math_random3(local_random);
+            math_random3(local->seed);
 
             do
             {
-                location[0] = (n_byte2)(math_random(local_random) & APESPACE_BOUNDS);
-                location[1] = (n_byte2)(math_random(local_random) & APESPACE_BOUNDS);
+                location[0] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
+                location[1] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
                 loop ++;
             }
             while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1]))));
 
             being_set_location(local, location);
             
-            body_genome_random(sim, local, local_random);
+            body_genome_random(sim, local, local->seed);
 
-            loc_facing = (n_byte)(math_random(local_random) & 255);
             local->social_x = local->social_nx =
-				(math_random(local_random) & 32767)+16384;
+				(math_random(local->seed) & 32767)+16384;
             local->social_y = local->social_ny =
-				(math_random(local_random) & 32767)+16384;
+				(math_random(local->seed) & 32767)+16384;
         }
         else
         {
-            local_random[0] = mother->seed[0];
-            local_random[1] = mother->seed[1];
+
 
             being_set_location(local, being_location(mother));
 
-            loc_facing = GET_F(mother);
-
-            math_random3(local_random);
-
-            local_random[1] = GET_G(mother)[0];
-
-            math_random3(local_random);
-
-            local_random[1] = sim->land->time;
-
-            math_random3(local_random);
-
-            (void) math_random(local_random);
+            /* this is the same as equals */
+            being_wander(local, being_facing(mother) - being_facing(local));
+            
+            (void) math_random(local->seed);
             local->social_x = local->social_nx = mother->social_x;
             local->social_y = local->social_ny = mother->social_y;
-            body_genetics(sim,local,mother,local_random);
+            body_genetics(sim,local,mother,local->seed);
 
-			/** this stops identical births */
-            mother->seed[0] = local_random[0];
-            mother->seed[1] = local_random[1];
 #ifdef PARASITES_ON
             /** ascribed social status */
             local->honor = (mother->honor + mother->father_honor) >> 2;
@@ -2818,8 +2837,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 			}
         }
 
-        GET_F(local) = loc_facing;
-
         GET_E(local) = (n_byte2)(BEING_FULL + 15);
 
         local->date_of_birth[0] = land->date[0];
@@ -2832,17 +2849,13 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         else
         {
             /** produce an initial distribution of heights and masses*/
-            math_random3(local_random);
+            math_random3(local->seed);
             local->height = BIRTH_HEIGHT +
-				(local_random[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
+				(local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
             local->mass = BIRTH_MASS +
-				(local_random[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
+				(local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
         }
         local->crowding = MIN_CROWDING;
-
-        math_random3(local_random);
-        local->seed[0] = local_random[0];
-        local->seed[1] = local_random[1];
 
         if (GET_B(sim,local))
         {

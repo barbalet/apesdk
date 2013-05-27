@@ -1140,8 +1140,9 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
 
     if (local_speak < 0)      local_speak = 0;
     if (local_speak > 0xffff) local_speak = 0xffff;
-
-    GET_F(local_being) = (n_byte) local_facing;
+    
+    being_wander(local_being, local_facing - being_facing(local_being));
+    
     being_set_speed(local_being, (n_byte) local_speed);
     local_being->energy = (n_byte2)local_energy;
     local_being->speak  = (n_byte2)local_speak;

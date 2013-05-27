@@ -530,7 +530,7 @@ static n_int social_meet(
 
             /** initialise the braincode associated with this individual */
             being_init_braincode(sim,meeter_being,met_being,
-                                 meeter_being->seed[0]+(met_being->seed[0]<<8),
+                                 meeter_being->seed,
                                  graph[index].friend_foe,BRAINCODE_EXTERNAL);
         }
         
@@ -1378,7 +1378,7 @@ n_int social_chat(
                         /** initialise the braincode */
                         being_init_braincode(
                             sim,meeter_being,met_being,
-                            meeter_being->seed[1]+(met_being->seed[1]<<8),
+                            meeter_being->seed,
                             met_graph[idx].friend_foe,
                             BRAINCODE_EXTERNAL);
                     }

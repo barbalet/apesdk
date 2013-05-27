@@ -153,7 +153,7 @@ n_byte episodic_anecdote(
 void being_init_braincode(noble_simulation * sim,
                           noble_being * local,
                           noble_being * other,
-                          n_int random_factor,
+                          n_byte2* local_random,
                           n_byte friend_foe,
                           n_byte internal);
 

@@ -867,15 +867,12 @@ static void	draw_meters(noble_simulation * local_sim)
 #endif
 
         /* draw direction facing */
-        /* rewrite with vectors */
+        {
+            n_vect2 direction_facing;
+            being_facing_vector(loc_being, &direction_facing, 63);
+            (void)math_join(75+ FACING_OFFSIDE, 25, direction_facing.x, FH_DELTA(direction_facing.y), &local_kind);
+        }
         
-        pntx = (new_sd[((GET_F(loc_being) ) + 64) & 255] / 2016);
-        pnty = (new_sd[ (GET_F(loc_being) ) & 255 ] / 2016);
-        
-        
-        
-        (void)math_join(75+ FACING_OFFSIDE, 25, pntx, FH_DELTA(pnty), &local_kind);
-
         if (being_speed(loc_being) != 0)
             (void)math_join(106 +SP_EN_OFFSIDE, FH_SCREEN(45-being_speed(loc_being)), 6, 0, &local_kind);
         if ((GET_E(loc_being)) > 127)

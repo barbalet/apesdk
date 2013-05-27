@@ -109,6 +109,7 @@ void being_facing_towards(noble_being * value, n_vect2 * vector);
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor);
 
 n_int being_facing(noble_being * value);
+void being_wander(noble_being * value, n_int wander);
 
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
