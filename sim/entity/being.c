@@ -102,23 +102,23 @@ being_draw;
 
 n_int being_location_x(noble_being * value)
 {
-    return value->x;
+    return value->location[0];
 }
 
 n_int being_location_y(noble_being * value)
 {
-    return value->y;
+    return value->location[1];
 }
 
 n_byte2 * being_location(noble_being * value)
 {
-    return &(value->x);
+    return value->location;
 }
 
 void being_set_location(noble_being * value, n_byte2 * from)
 {
-    value->x = from[0];
-    value->y = from[1];
+    value->location[0] = from[0];
+    value->location[1] = from[1];
 }
 
 n_int being_speed(noble_being * value)
@@ -133,8 +133,8 @@ void being_set_speed(noble_being * value, n_byte sp)
 
 void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta)
 {
-    delta->x = primary->x - secondary->x;
-    delta->y = primary->y - secondary->y;
+    delta->x = primary->location[0] - secondary->location[0];
+    delta->y = primary->location[1] - secondary->location[1];
 }
 
 n_int being_dob(noble_being * value)
@@ -144,33 +144,38 @@ n_int being_dob(noble_being * value)
 
 void being_facing_towards(noble_being * value, n_vect2 * vector)
 {
-    value->facing = math_turn_towards(vector, value->facing, 0);
+    value->direction_facing = math_turn_towards(vector, value->direction_facing, 0);
 }
 
 void being_wander(noble_being * value, n_int wander)
 {
-    value->facing = (n_byte)((value->facing + 256 + wander) & 255);
+    value->direction_facing = (n_byte)((value->direction_facing + 256 + wander) & 255);
 }
 
 
 static void being_facing_init(noble_being * value)
 {
-    value->facing = (n_byte)(math_random(value->seed) & 255);
+    value->direction_facing = (n_byte)(math_random(value->seed) & 255);
 }
 
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
 {
-    vect2_direction(vect, value->facing,divisor);
+    vect2_direction(vect, value->direction_facing, divisor);
 }
 
 n_int being_facing(noble_being * value)
 {
-    return value->facing;
+    return value->direction_facing;
 }
 
 n_genetics * being_genetics(noble_being * value)
 {
-    return value->genetics;
+    return value->genes;
+}
+
+n_int   being_energy(noble_being * value)
+{
+    return value->energy;
 }
 
 static void being_turn_away_from_water(noble_being * value, n_land * land)
@@ -2322,8 +2327,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                         {
                             mother->inventory[BODY_FRONT] -= INVENTORY_GROOMED;
                         }
-                        /** starving mothers stop producing milk */
-                        if (GET_E(mother)>BEING_STARVE)
+                        /** hungry mothers stop producing milk */
+                        if (GET_E(mother)>BEING_HUNGRY)
                         {
                             /** suckling induces relaxation */
 #ifdef METABOLISM_ON
@@ -2366,8 +2371,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
 #ifdef TERRITORY_ON
     territory_index =
-        APESPACE_TO_TERRITORY(local->y)*TERRITORY_DIMENSION +
-        APESPACE_TO_TERRITORY(local->x);
+        APESPACE_TO_TERRITORY(being_location_y(local))*TERRITORY_DIMENSION +
+        APESPACE_TO_TERRITORY(being_location_x(local));
 
     if (local->territory[territory_index].familiarity<65534)
     {
@@ -3025,7 +3030,7 @@ void being_tidy(noble_simulation * local_sim)
             {
                 if(math_random(local_being->seed) < (age_in_years - 29))
                 {
-                    local_e -= BEING_STARVE;
+                    local_e -= BEING_HUNGRY;
                 }
             }
         }
@@ -3420,9 +3425,9 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             io_write(fp, "<pnp>",0);
             
             
-            io_writenumber(fp, child->x, 1, 0);
+            io_writenumber(fp, being_location_x(child), 1, 0);
             io_file_write(fp, ' ');
-            io_writenumber(fp, child->y, 1, 0);
+            io_writenumber(fp, being_location_y(child), 1, 0);
             
             io_file_xml_close(fp, "pnp");
             io_file_xml_close(fp, "place");
@@ -3504,9 +3509,9 @@ static void genealogy_death_genxml(noble_being * local_being, noble_simulation *
             io_file_xml_open(fp, "place");
             io_write(fp, "<pnp>",0);
             
-            io_writenumber(fp, local_being->x, 1, 0);
+            io_writenumber(fp, being_location_x(local_being), 1, 0);
             io_file_write(fp, ' ');
-            io_writenumber(fp, local_being->y, 1, 0);
+            io_writenumber(fp, being_location_y(local_being), 1, 0);
             
             io_file_xml_close(fp, "pnp");
             io_file_xml_close(fp, "place");

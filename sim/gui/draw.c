@@ -874,12 +874,23 @@ static void	draw_meters(noble_simulation * local_sim)
             (void)math_join(75+ FACING_OFFSIDE, 25, direction_facing.x, FH_DELTA(direction_facing.y), &local_kind);
         }
         
-        if (being_speed(loc_being) != 0)
-            (void)math_join(106 +SP_EN_OFFSIDE, FH_SCREEN(45-being_speed(loc_being)), 6, 0, &local_kind);
-        if ((GET_E(loc_being)) > 127)
-            (void)math_join(106 + 18 + SP_EN_OFFSIDE, FH_SCREEN(45-(GET_E(loc_being) >> 7)), 6, 0, &local_kind);
+        {
+            n_int   local_speed = being_speed(loc_being);
+            n_int   local_energy = being_energy(loc_being);
+            n_int   local_x = being_location_x(loc_being);
+            n_int   local_y = being_location_y(loc_being);
+            
+            if (local_speed != 0)
+            {
+                (void)math_join(106 +SP_EN_OFFSIDE, FH_SCREEN(45-local_speed), 6, 0, &local_kind);
+            }
+            if (local_energy > 127)
+            {
+                (void)math_join(106 + 18 + SP_EN_OFFSIDE, FH_SCREEN(45-(local_energy >> 7)), 6, 0, &local_kind);
 
-        local_icon = &icns[weather_seven_values(local_sim->land, local_sim->weather, loc_being->x, loc_being->y) << 7];
+            }
+            local_icon = &icns[weather_seven_values(local_sim->land, local_sim->weather, local_x, local_y) << 7];
+        }
 
     }
     else

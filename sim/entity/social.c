@@ -1172,8 +1172,8 @@ static void social_chat_territory(
 #ifdef TERRITORY_ON
     n_int idx=0,idx2,i=0,x,y;
 
-    idx = APESPACE_TO_TERRITORY(meeter_being->y)*TERRITORY_DIMENSION +
-          APESPACE_TO_TERRITORY(meeter_being->x);
+    idx = APESPACE_TO_TERRITORY(being_location_y(meeter_being))*TERRITORY_DIMENSION +
+          APESPACE_TO_TERRITORY(being_location_x(meeter_being));
     if (meeter_being->territory[idx].name==0)
     {
         i=0;

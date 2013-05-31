@@ -71,7 +71,6 @@ enum being_energy
 {
     BEING_DEAD   = 0,
     BEING_HUNGRY = (10*128),
-    BEING_STARVE = (BEING_HUNGRY*2),
     BEING_FULL   = (BEING_HUNGRY*3)
 };
 
@@ -112,6 +111,8 @@ n_int being_facing(noble_being * value);
 void being_wander(noble_being * value, n_int wander);
 
 n_genetics * being_genetics(noble_being * value);
+
+n_int being_energy(noble_being * value);
 
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);

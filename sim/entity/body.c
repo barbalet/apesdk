@@ -1018,7 +1018,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
             if (az > TIDE_MAX)
             {
                 n_int grass, trees, bush;
-                food_values(sim->land, sim->weather, local->x, local->y, &grass, &trees, &bush);
+                food_values(sim->land, sim->weather, being_location_x(local), being_location_y(local), &grass, &trees, &bush);
                 
                 if ((grass>bush) && (grass>trees))
                 {

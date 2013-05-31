@@ -778,8 +778,8 @@ static void sim_indicators(noble_simulation * sim)
         }
 
         /* population density */
-        x = (n_byte)(APESPACE_TO_MAPSPACE(local_being->x) * 8 / MAP_DIMENSION);
-        y = (n_byte)(APESPACE_TO_MAPSPACE(local_being->y) * 8 / MAP_DIMENSION);
+        x = (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(local_being)) * 8 / MAP_DIMENSION);
+        y = (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(local_being)) * 8 / MAP_DIMENSION);
         
         INDICATOR_INC(sim, IT_POPULATION_DENSITY + (y * 8) + x);
 

@@ -709,8 +709,8 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
     n_uint lung_surface_area = (n_uint)GET_MT(local_being,METABOLISM_LUNG_CAPACITY)*5; /** approximation from a sphere */
 
     pressure = 16384-(weather_pressure(local_sim->weather,
-                                       APESPACE_TO_MAPSPACE(local_being->x),
-                                       APESPACE_TO_MAPSPACE(local_being->y))>>4);
+                                       APESPACE_TO_MAPSPACE(being_location_x(local_being)),
+                                       APESPACE_TO_MAPSPACE(being_location_y(local_being)))>>4);
 
     /** convert breathing rate into oxygen uptake */
     if (metabolism_below_capacity(local_being, METABOLISM_OXYGEN))
@@ -811,8 +811,8 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
     n_vect2 slope_vector, location_vector;
     n_int ambient_temperature = weather_temperature(local_sim->land,
                                 local_sim->weather,
-                                APESPACE_TO_MAPSPACE(local_being->x),
-                                APESPACE_TO_MAPSPACE(local_being->y));
+                                APESPACE_TO_MAPSPACE(being_location_x(local_being)),
+                                APESPACE_TO_MAPSPACE(being_location_y(local_being)));
 
     local_being->vessel[0].temperature =
         (n_uint)(CORE_TEMPERATURE +

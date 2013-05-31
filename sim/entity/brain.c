@@ -802,9 +802,9 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return meeter_social_graph[actor_index].attraction;
         /* Location */
     case 15:
-        return (n_byte)(APESPACE_TO_MAPSPACE(meeter_being->x) * 255 / MAP_DIMENSION);
+        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(meeter_being)) * 255 / MAP_DIMENSION);
     case 16:
-        return (n_byte)(APESPACE_TO_MAPSPACE(meeter_being->y) * 255 / MAP_DIMENSION);
+        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / MAP_DIMENSION);
         /* Being state (lower)*/
     case 17:
         return (n_byte)meeter_being->state&255;
@@ -1116,6 +1116,8 @@ void brain_dialogue(
         {
             n_int new_episode_index=-1;
             n_int switcher = addr0[0]%25;
+            n_int local_x = APESPACE_TO_MAPSPACE(being_location_x(meeter_being));
+            n_int local_y = APESPACE_TO_MAPSPACE(being_location_y(meeter_being));
             switch (switcher)
             {
                 /* Shift attention to a different actor */
@@ -1173,7 +1175,7 @@ void brain_dialogue(
             case 15:
             {
                 /* atmosphere pressure */
-                n_int pressure = weather_pressure(sim->weather, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(meeter_being->x)) >> 1, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(meeter_being->y)) >> 1);
+                n_int pressure = weather_pressure(sim->weather, POSITIVE_LAND_COORD(local_x) >> 1, POSITIVE_LAND_COORD(local_y) >> 1);
 
                 if (pressure > 100000) pressure = 100000;
                 if (pressure < 0) pressure = 0;
@@ -1184,7 +1186,7 @@ void brain_dialogue(
             {
                 /* wind magnitude */
                 n_int w_dx=0, w_dy=0;
-                weather_wind_vector(sim->weather, APESPACE_TO_MAPSPACE(meeter_being->x), APESPACE_TO_MAPSPACE(meeter_being->y), &w_dx, &w_dy);
+                weather_wind_vector(sim->weather, local_x, local_y, &w_dx, &w_dy);
                 if (w_dx<0) w_dx=-w_dx;
                 if (w_dy<0) w_dy=-w_dy;
                 addr1[0] = (n_byte)((w_dx+w_dy)>>7);

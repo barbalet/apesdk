@@ -854,7 +854,7 @@ enum drives_definition
 #ifdef PARASITES_ON
 
 /* maximum number of parasites in the range 0-255 */
-#define MAX_PARASITES(bei)   ((GENE_HAIR(bei->genetics)*255)>>4)
+#define MAX_PARASITES(bei)   ((GENE_HAIR(being_genetics(bei))*255)>>4)
 
 /* maximum distance over which a parasite can hob from one being to another */
 #define PARASITE_HOP_MAX_DISTANCE  METRES_TO_APESPACE(2)
@@ -1352,9 +1352,8 @@ enum indicator_type
     
 typedef struct
 {
-    n_byte2	x;
-    n_byte2	y;
-    n_byte	facing;
+    n_byte2	location[2];
+    n_byte	direction_facing;
     n_byte	speed;
     n_byte2	energy;
     n_byte2	date_of_birth[2]; /* constant */
@@ -1412,7 +1411,7 @@ typedef struct
     n_byte  father_honor;                       /* constant */
     n_byte2 father_name[2];                     /* constant */
 
-    n_genetics genetics[CHROMOSOMES];       /* constant */
+    n_genetics genes[CHROMOSOMES];       /* constant */
 
     n_byte2     social_x;
     n_byte2     social_y;
@@ -1522,7 +1521,7 @@ noble_simulation;
 #define	GET_E(bei)	((bei)->energy)
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
-#define GET_FR(bei)     (GENE_FRAME(bei->genetics))
+#define GET_FR(bei)     (GENE_FRAME(being_genetics(bei)))
 
 #define	GET_D(bei)	((bei)->date_of_birth)
 
