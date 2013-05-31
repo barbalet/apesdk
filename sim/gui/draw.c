@@ -727,7 +727,7 @@ static void	draw_meters(noble_simulation * local_sim)
     n_int		   pntx = 0;
     n_int		   pnty;
     n_join		   local_kind;
-    n_genetics    *genetics = GET_G(loc_being);
+    n_genetics    *genetics = being_genetics(loc_being);
 
     if (local_info == 0L)
     {
@@ -1898,7 +1898,7 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
 static n_int graph_being_score(noble_simulation * sim, noble_being * local_being, n_byte score_type)
 {
     n_int nucleotide,i,score = 0;
-    n_byte * bases = (n_byte*)GET_G(local_being);
+    n_byte * bases = (n_byte*)being_genetics(local_being);
     
     switch (score_type)
     {
@@ -2043,7 +2043,7 @@ void graph_genepool(noble_simulation * sim, n_byte * buffer, n_int img_width, n_
         {
             i = index[y*(sim->num-1)/max_height];
             local_being = &(sim->beings[i]);
-            bases = GET_G(local_being);
+            bases = being_genetics(local_being);
             for (x = 0; x < img_width; x++, n+=3)
             {
                 nucleotide = x * (CHROMOSOMES*16) / img_width;
@@ -2419,14 +2419,15 @@ static void graph_braincode_coords(noble_simulation * sim, noble_being * local_b
 static void graph_genespace_coords(noble_being * local_being, n_uint * x, n_uint * y)
 {
     n_int ch,b;
+    n_genetics * genetics = being_genetics(local_being);
     *x=0;
     *y=0;
     for (ch=0; ch<CHROMOSOMES; ch++)
     {
         for (b=0; b<8; b++)
         {
-            *x = *x + ((GET_G(local_being)[ch]>>(b*2))&3);
-            *y = *y + ((GET_G(local_being)[ch]>>(16+(b*2)))&3);
+            *x = *x + ((genetics[ch]>>(b*2))&3);
+            *y = *y + ((genetics[ch]>>(16+(b*2)))&3);
         }
     }
 }

@@ -596,7 +596,8 @@ static void show_braincode(void * ptr, noble_being * local_being, n_string resul
 static void watch_appearance(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
     n_string_block str;
-
+    n_genetics * genetics = being_genetics(local_being);
+    
     sprintf(str,"Height: %.3f m\n", (int)GET_BEING_HEIGHT(local_being)/1000.0f);
     io_string_write(result, str, &watch_string_length);
 
@@ -606,32 +607,32 @@ static void watch_appearance(void *ptr, n_string beingname, noble_being * local_
     sprintf(str,"Body fat: %.2f Kg\n", (float)GET_BODY_FAT(local_being)/100.0f);
     io_string_write(result, str, &watch_string_length);
 
-    sprintf(str,"Hair length: %.1f mm\n", (float)(GENE_HAIR(GET_G(local_being))*100.0f/160.0f));
+    sprintf(str,"Hair length: %.1f mm\n", (float)(GENE_HAIR(genetics)*100.0f/160.0f));
     io_string_write(result, str, &watch_string_length);
 
-    sprintf(str,"Pigmentation: %02d\n", (int)(GENE_PIGMENTATION(GET_G(local_being))));
+    sprintf(str,"Pigmentation: %02d\n", (int)(GENE_PIGMENTATION(genetics)));
     io_string_write(result, str, &watch_string_length);
 
-    sprintf(str,"Body frame: %02d\n", (int)(GENE_FRAME(GET_G(local_being))));
+    sprintf(str,"Body frame: %02d\n", (int)(GENE_FRAME(genetics)));
     io_string_write(result, str, &watch_string_length);
 
     sprintf(str,"Eye separation: %.1f mm\n",
-            80.0f + ((float)(GENE_EYE_SEPARATION(GET_G(local_being)))));
+            80.0f + ((float)(GENE_EYE_SEPARATION(genetics))));
     io_string_write(result, str, &watch_string_length);
 
     sprintf(str,"Eye color: %02d       Eye shape: %02d\n",
-            (int)(GENE_EYE_COLOR(GET_G(local_being))),
-            (int)(GENE_EYE_SHAPE(GET_G(local_being))));
+            (int)(GENE_EYE_COLOR(genetics)),
+            (int)(GENE_EYE_SHAPE(genetics)));
     io_string_write(result, str, &watch_string_length);
 
     sprintf(str,"Nose shape: %02d      Ear shape: %02d\n",
-            (int)(GENE_NOSE_SHAPE(GET_G(local_being))),
-            (int)(GENE_EAR_SHAPE(GET_G(local_being))));
+            (int)(GENE_NOSE_SHAPE(genetics)),
+            (int)(GENE_EAR_SHAPE(genetics)));
     io_string_write(result, str, &watch_string_length);
 
     sprintf(str,"Eyebrow shape: %02d   Mouth shape: %02d\n",
-            (int)(GENE_EYEBROW_SHAPE(GET_G(local_being))),
-            (int)(GENE_MOUTH_SHAPE(GET_G(local_being))));
+            (int)(GENE_EYEBROW_SHAPE(genetics)),
+            (int)(GENE_MOUTH_SHAPE(genetics)));
     io_string_write(result, str, &watch_string_length);
 }
 
@@ -967,7 +968,7 @@ static void watch_genome(void *ptr, n_string beingname, noble_being * local_bein
 
     for (i = 0; i < 2; i++)
     {
-        body_genome((n_byte)i, GET_G(local_being), genome);
+        body_genome((n_byte)i, being_genetics(local_being), genome);
         for (j = 0; j < CHROMOSOMES*8; j++)
         {
             if ((j>0) && (j%8==0))

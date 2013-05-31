@@ -140,7 +140,8 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
 {
     n_int i;
     episodic_memory * local_episodic = GET_EPI(local_sim, local);
-
+    n_genetics * genetics = being_genetics(local);
+    
     if (!local_episodic) return;
 
     for (i=0; i<EPISODIC_SIZE; i++)
@@ -178,7 +179,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
             /** negative memories fade */
             if (EPISODIC_AFFECT_ZERO - local_episodic[i].affect > 16)
             {
-                local_episodic[i].affect+=(1+GENE_NEGATIVE_AFFECT_FADE(GET_G(local)));
+                local_episodic[i].affect+=(1+GENE_NEGATIVE_AFFECT_FADE(genetics));
             }
             else
             {
@@ -192,7 +193,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
                 /** positive memories fade */
                 if (local_episodic[i].affect - EPISODIC_AFFECT_ZERO > 16)
                 {
-                    local_episodic[i].affect-=(1+GENE_POSITIVE_AFFECT_FADE(GET_G(local)));
+                    local_episodic[i].affect-=(1+GENE_POSITIVE_AFFECT_FADE(genetics));
                 }
                 else
                 {

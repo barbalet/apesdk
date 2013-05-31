@@ -1122,7 +1122,7 @@ enum mutation_type
 #define GENE_SUCKLING_RATE(gene)            GENE_VAL_REG(gene, 4, 14, 10, 15)
 
 /* A social drive threshold value above which beings interact */
-#define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(GET_G(bei)),bei->learned_preference[PREFERENCE_SOCIAL]))>>1)
+#define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->learned_preference[PREFERENCE_SOCIAL]))>>1)
 
 /* Types of entities which it's possible to have a disposition towards */
 enum
@@ -1525,9 +1525,8 @@ noble_simulation;
 #define GET_FR(bei)     (GENE_FRAME(bei->genetics))
 
 #define	GET_D(bei)	((bei)->date_of_birth)
-#define GET_G(bei)  ((bei)->genetics)
 
-#define	GET_I(bei)	(GET_G(bei)[CHROMOSOME_Y])
+#define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
 #define	GET_MI(bei)	((bei)->mother_genetics[0])
 
 #define GET_PS(bei)     ((bei)->posture)

@@ -554,7 +554,7 @@ static n_byte get_braincode_instruction_type(n_byte instruction_type)
 n_byte get_braincode_instruction(noble_being * local_being)
 {
     n_byte2 prob[5], total, index;
-    n_genetics * genetics = GET_G(local_being);
+    n_genetics * genetics = being_genetics(local_being);
     n_byte  i;
     const n_byte2 min=2;
 
@@ -908,24 +908,25 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
 {
     n_byte half_switcher = switcher >> 1;
     noble_being * important_being = ((switcher & 1) ? met_being : meeter_being);
+    n_genetics * genetics = being_genetics(important_being);
     switch (half_switcher % 10)
     {
         /* Facial characteristics.
               Here we shift the 0-15 gene values into a 0-255 range */
     case 0:
-        return GENE_EYE_SHAPE(GET_G(important_being)) << 4;
+        return GENE_EYE_SHAPE(genetics) << 4;
     case 1:
-        return GENE_EYE_COLOR(GET_G(important_being)) << 4;
+        return GENE_EYE_COLOR(genetics) << 4;
     case 2:
-        return GENE_EYE_SEPARATION(GET_G(important_being)) << 4;
+        return GENE_EYE_SEPARATION(genetics) << 4;
     case 3:
-        return GENE_NOSE_SHAPE(GET_G(important_being)) << 4;
+        return GENE_NOSE_SHAPE(genetics) << 4;
     case 4:
-        return GENE_EAR_SHAPE(GET_G(important_being)) << 4;
+        return GENE_EAR_SHAPE(genetics) << 4;
     case 5:
-        return GENE_EYEBROW_SHAPE(GET_G(important_being)) << 4;
+        return GENE_EYEBROW_SHAPE(genetics) << 4;
     case 6:
-        return GENE_MOUTH_SHAPE(GET_G(important_being)) << 4;
+        return GENE_MOUTH_SHAPE(genetics) << 4;
     case 7:/* healthyness */
     {
         n_byte return_value = 0;

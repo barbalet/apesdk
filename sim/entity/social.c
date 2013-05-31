@@ -210,10 +210,10 @@ static n_int social_attraction_pigmentation(
     /** Either no preference for pigmentation, or only
         favour attractive mates */
     ppref = NATURE_NURTURE(
-                GENE_PIGMENTATION_PREFERENCE(GET_G(being_meeter)),
+                GENE_PIGMENTATION_PREFERENCE(being_genetics(being_meeter)),
                 being_meeter->learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE+fem]);
 
-    pdiff = GENE_PIGMENTATION(GET_G(being_met)) - ppref;
+    pdiff = GENE_PIGMENTATION(being_genetics(being_met)) - ppref;
 
     if ((pdiff >= -2) && (pdiff <= 2))
     {
@@ -240,9 +240,9 @@ static n_int social_attraction_hair(
        favour attractive mates */
 
     ppref = NATURE_NURTURE(
-                GENE_HAIR_PREFERENCE(GET_G(meeter_being)),
+                GENE_HAIR_PREFERENCE(being_genetics(meeter_being)),
                 meeter_being->learned_preference[PREFERENCE_MATE_HAIR_MALE+fem]);
-    pdiff = GENE_HAIR(GET_G(met_being)) - ppref;
+    pdiff = GENE_HAIR(being_genetics(met_being)) - ppref;
 
     if ((pdiff >= -2) && (pdiff <= 2))
     {
@@ -269,7 +269,7 @@ static n_int social_attraction_height(
        favour mates who are taller or shorter */
 
     ppref = NATURE_NURTURE(
-                GENE_HEIGHT_PREFERENCE(GET_G(meeter_being)),
+                GENE_HEIGHT_PREFERENCE(being_genetics(meeter_being)),
                 meeter_being->learned_preference[PREFERENCE_MATE_HEIGHT_MALE+fem]);
 
     /** prefer taller or shorter,
@@ -312,7 +312,7 @@ static n_int social_attraction_frame(
     favour mates who are fatter or thinner */
 
     ppref = NATURE_NURTURE(
-                GENE_FRAME_PREFERENCE(GET_G(meeter_being)),
+                GENE_FRAME_PREFERENCE(being_genetics(meeter_being)),
                 meeter_being->learned_preference[PREFERENCE_MATE_FRAME_MALE+fem]);
 
     if ((ppref>6) && (ppref<=11) && (GET_BODY_FAT(met_being) > GET_BODY_FAT(meeter_being)))
@@ -343,11 +343,14 @@ static n_int social_attraction_pheromone(
     noble_being * met_being)
 {
     n_int ch, i, different = 0;
+    n_genetics * meeter_genetics = being_genetics(meeter_being);
+    n_genetics * met_genetics = being_genetics(met_being);
+    
     for (ch = 0; ch < CHROMOSOMES; ch++)
     {
         for (i = 0; i < 32; i++)
         {
-            if (((GET_G(meeter_being)[ch] >> i) & 1) != ((GET_G(met_being)[ch] >> i) & 1))
+            if (((meeter_genetics[ch] >> i) & 1) != ((met_genetics[ch] >> i) & 1))
             {
                 different++;
             }
@@ -355,7 +358,7 @@ static n_int social_attraction_pheromone(
     }
     if (different < MINIMUM_GENETIC_VARIATION)
     {
-        return 0-GENE_INCEST_AVERSION(GET_G(meeter_being));
+        return 0-GENE_INCEST_AVERSION(meeter_genetics);
     }
     else
     {
@@ -739,7 +742,7 @@ n_byte social_groom(
 
         /** grooming preference */
         gpref = NATURE_NURTURE(
-                    GENE_GROOM(GET_G(meeter_being)),
+                    GENE_GROOM(being_genetics(meeter_being)),
                     meeter_being->learned_preference[PREFERENCE_GROOM_MALE+fem]);
 
         /** individuals which are familiar tend to groom more often */
@@ -852,7 +855,7 @@ n_byte2 social_squabble(
         
 #ifdef PARASITES_ON
         /** high ranking apes will more aggressively defend their honor */
-        agro = GENE_AGGRESSION(GET_G(meeter_being));
+        agro = GENE_AGGRESSION(being_genetics(meeter_being));
         /** females are less agressive (less testosterone) */
         if (is_female) agro >>= 3;
         if (math_random(meeter_being->seed) < agro*4096 + agro*meeter_being->honor*10)
@@ -1014,7 +1017,7 @@ static void social_conception(
     
     /** store the father's genetics */
     /** store the family name, ID and honor of the father */
-    genetics_set(female->father_genetics, GET_G(male));
+    genetics_set(female->father_genetics, being_genetics(male));
 
     female->father_honor     = male->honor;
     female->father_name[0]   = GET_NAME_GENDER(sim,male);
@@ -1042,8 +1045,8 @@ static void social_conception(
     male->goal[0]=GOAL_NONE;
 
     /** remember the event */
-    episodic_interaction(sim, female, male, EVENT_MATE,  (GENE_MATE_BOND(GET_G(female))*AFFECT_MATE), 0);
-    episodic_interaction(sim, male, female, EVENT_MATE,  (GENE_MATE_BOND(GET_G(male))*AFFECT_MATE), 0);
+    episodic_interaction(sim, female, male, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(female))*AFFECT_MATE), 0);
+    episodic_interaction(sim, male, female, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(male))*AFFECT_MATE), 0);
 }
 
 /**
@@ -1083,7 +1086,7 @@ n_int social_mate(
         matingprob = math_random(meeter_being->seed);
         if (matingprob <
                 (32000 + (n_byte2)(met_being->honor)*
-                 GENE_STATUS_PREFERENCE(GET_G(meeter_being))*MATING_PROB))
+                 GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB))
         {
 #endif
             /** attractiveness based upon various criteria */
