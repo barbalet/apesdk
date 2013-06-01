@@ -178,6 +178,11 @@ n_int   being_energy(noble_being * value)
     return value->energy;
 }
 
+n_int   being_hungry(noble_being * value)
+{
+    return (being_energy(value) < BEING_HUNGRY);
+}
+
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
     n_int	it_water_turn = 0;
@@ -1405,7 +1410,7 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 
     /* ... slightly awake to eat */
 
-    if(GET_E(local) < BEING_HUNGRY)
+    if(being_hungry(local))
     {
         return SLIGHTLY_AWAKE;
     }
@@ -2046,7 +2051,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     {
 
-        n_int   hungry = (loc_e < BEING_HUNGRY);
+        n_int   hungry = being_hungry(local);
 
         if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING | BEING_STATE_MOVING)) == BEING_STATE_AWAKE)
         {
@@ -2094,7 +2099,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         /** swimming proficiency */
         tmp_speed = (tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
         
-        episodic_self(sim, local, EVENT_SWIM, GET_E(local), 0);
+        episodic_self(sim, local, EVENT_SWIM, being_energy(local), 0);
         
 #ifdef PARASITES_ON
         /** bathing removes parasites */
@@ -2328,7 +2333,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             mother->inventory[BODY_FRONT] -= INVENTORY_GROOMED;
                         }
                         /** hungry mothers stop producing milk */
-                        if (GET_E(mother)>BEING_HUNGRY)
+                        if (!being_hungry(mother))
                         {
                             /** suckling induces relaxation */
 #ifdef METABOLISM_ON
@@ -2919,7 +2924,6 @@ void being_tidy(noble_simulation * local_sim)
     while (loop < number)
     {
         noble_being *local_being = &local[loop];
-        n_int	     local_e = GET_E(local_being);
         n_genetics  *genetics = being_genetics(local_being);
         delta_e = 0;
         conductance = 5;
@@ -3018,7 +3022,7 @@ void being_tidy(noble_simulation * local_sim)
             if (delta_e < 1) delta_e = 1;
         }
 
-        local_e -= delta_e;
+        GET_E(local) -= delta_e;
         
         INDICATOR_ADD(local_sim, IT_AVERAGE_ENERGY_OUTPUT, delta_e);
 
@@ -3030,17 +3034,16 @@ void being_tidy(noble_simulation * local_sim)
             {
                 if(math_random(local_being->seed) < (age_in_years - 29))
                 {
-                    local_e -= BEING_HUNGRY;
+                    GET_E(local) -= BEING_HUNGRY;
                 }
             }
         }
 
-        if (local_e < BEING_DEAD)
+        if (GET_E(local) < BEING_DEAD)
         {
-            local_e = BEING_DEAD;
+            GET_E(local) = BEING_DEAD;
         }
 
-        GET_E(local_being) = (n_byte2)local_e;
         loop++;
     }
 #ifdef PARASITES_ON

@@ -67,9 +67,10 @@
 
 #define EPISODIC_AFFECT_ZERO (16384)
 
-enum being_energy
+enum being_energy_consts
 {
     BEING_DEAD   = 0,
+    BEING_BITE_SIZE = 320,
     BEING_HUNGRY = (10*128),
     BEING_FULL   = (BEING_HUNGRY*3)
 };
@@ -113,6 +114,7 @@ void being_wander(noble_being * value, n_int wander);
 n_genetics * being_genetics(noble_being * value);
 
 n_int being_energy(noble_being * value);
+n_int being_hungry(noble_being * value);
 
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);

@@ -47,9 +47,6 @@ enum sleep_state
     FULLY_AWAKE    =   2
 };
 
-#define CONSUME_E(being,max_energy,food)  ((max_energy)*(1+food_absorption(food,being))>>3)
-#define CONSUME(being,max_energy,food)  (GET_E(being)+=(n_byte2)CONSUME_E(being,max_energy,food))
-
 /* offsets applied to land operator values */
 #define OFFSET_GRASS    40
 #define OFFSET_BUSH     14
@@ -66,7 +63,7 @@ n_int food_eat(
     n_byte * food_type,
     noble_being * local_being);
 
-n_int food_absorption(n_byte food_type, noble_being * local);
+n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type);
 
 void food_values(n_land * local_land, n_weather * local_weather,
                  n_int loc_x,
