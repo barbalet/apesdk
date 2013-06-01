@@ -68,35 +68,29 @@
  * @param local pointer to the ape
  */
 n_int food_absorption(
-    noble_being * local,
-    n_int max_energy,
-    n_byte food_type)
+    n_byte food_type,
+    noble_being * local)
 {
     n_genetics * genetics = being_genetics(local);
+
     /** note that the absorbition for different foods is normalised */
     n_int absorb_denom =
         1 + GENE_ENERGY_FROM_VEGETABLES(genetics) +
         GENE_ENERGY_FROM_FRUITS(genetics) +
         GENE_ENERGY_FROM_SHELLFISH(genetics);
-    
-    n_int return_value = 0;
 
     switch (food_type)
     {
-        case FOOD_VEGETABLE:
-            return_value = (GENE_ENERGY_FROM_VEGETABLES(genetics) << 4) / absorb_denom;
-            break;
-        case FOOD_FRUIT:
-            return_value = (GENE_ENERGY_FROM_FRUITS(genetics) << 4) / absorb_denom;
-            break;
-        case FOOD_SHELLFISH:
-            return_value = (GENE_ENERGY_FROM_SHELLFISH(genetics) << 4) / absorb_denom;
-            break;
-        case FOOD_SEAWEED:
-            return_value = (GENE_ENERGY_FROM_SEAWEED(genetics) << 4) / absorb_denom;
-            break;
+    case FOOD_VEGETABLE:
+        return (GENE_ENERGY_FROM_VEGETABLES(genetics) << 4) / absorb_denom;
+    case FOOD_FRUIT:
+        return (GENE_ENERGY_FROM_FRUITS(genetics) << 4) / absorb_denom;
+    case FOOD_SHELLFISH:
+        return (GENE_ENERGY_FROM_SHELLFISH(genetics) << 4) / absorb_denom;
+    case FOOD_SEAWEED:
+        return (GENE_ENERGY_FROM_SEAWEED(genetics) << 4) / absorb_denom;
     }
-    return ((max_energy)*(1+return_value)>>3);
+    return 0L;
 }
 
 
@@ -269,12 +263,9 @@ n_int food_eat(
     /** ingest pathogens from certain foods */
     being_ingest_pathogen(local_being, *food_type);
 
-    energy = food_absorption(local_being,*food_type,max_energy);
+    energy = CONSUME_E(local_being,max_energy,*food_type);
 
-    if (energy > BEING_BITE_SIZE)
-    {
-        energy = BEING_BITE_SIZE; /**< can only eat so much in one go */
-    }
+    if (energy > 320) energy = 320; /**< can only eat so much in one go */
 
     return energy;
 }

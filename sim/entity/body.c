@@ -943,8 +943,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
     }
     if (carrying & INVENTORY_GRASS)
     {
-        
-        GET_E(local)+=(n_byte2)food_absorption(local, ENERGY_GRASS,FOOD_VEGETABLE);
+        CONSUME(local,ENERGY_GRASS,FOOD_VEGETABLE);
         OBJECTS_DROP(local,hand);
     }
     else
@@ -952,7 +951,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
         if (carrying & INVENTORY_FISH)
         {
             /* consume fish */
-            GET_E(local)+=(n_byte2)food_absorption(local, ENERGY_FISH,FOOD_SHELLFISH);
+            CONSUME(local,ENERGY_FISH,FOOD_SHELLFISH);
             OBJECTS_DROP(local,hand);
         }
         else
@@ -960,7 +959,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
             if (carrying & INVENTORY_NUT_CRACKED)
             {
                 /* consume nut */
-                GET_E(local)+=(n_byte2)food_absorption(local, ENERGY_NUT,FOOD_VEGETABLE);
+                CONSUME(local,ENERGY_NUT,FOOD_VEGETABLE);
                 OBJECTS_DROP(local,hand);
             }
         }
