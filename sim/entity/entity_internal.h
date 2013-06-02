@@ -48,7 +48,6 @@ enum sleep_state
 };
 
 #define CONSUME_E(being,max_energy,food)  ((max_energy)*(1+food_absorption(food,being))>>3)
-#define CONSUME(being,max_energy,food)  (GET_E(being)+=(n_byte2)CONSUME_E(being,max_energy,food))
 
 /* offsets applied to land operator values */
 #define OFFSET_GRASS    40
