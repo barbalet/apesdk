@@ -1065,12 +1065,12 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     being_state_description(local_being->state, status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
-    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %d\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
+    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
 			(n_uint)local_being->generation[GENERATION_MATERNAL],
 			(n_uint)local_being->generation[GENERATION_PATERNAL],
 			(int)heart_rate, (int)breathing_rate,
-            GET_E(local_being),
+            being_energy(local_being),
             being_location_x(local_being), being_location_y(local_being),
             local_being->honor,
             GET_BEING_HEIGHT(local_being),

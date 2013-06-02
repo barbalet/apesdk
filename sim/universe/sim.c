@@ -758,7 +758,7 @@ static void sim_indicators(noble_simulation * sim)
                 
         INDICATOR_ADD(sim, IT_AVERAGE_AGE_DAYS, current_date - local_dob);
         
-        average_energy += (n_uint)GET_E(local_being);
+        average_energy += (n_uint)being_energy(local_being);
 #ifdef EPISODIC_ON
         average_first_person += (n_uint)episodic_first_person_memories_percent(sim,local_being,0);
         average_intentions += (n_uint)episodic_first_person_memories_percent(sim,local_being,1);

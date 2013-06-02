@@ -1382,8 +1382,10 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
 n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 {
     n_land  * land  =   sim->land;
-
-    if(GET_E(local) == BEING_DEAD)
+    n_int     local_energy = being_energy(local);
+    
+    
+    if(local_energy == BEING_DEAD)
     {
         return FULLY_ASLEEP;
     }
@@ -1405,7 +1407,7 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 
     /* ... slightly awake to eat */
 
-    if(GET_E(local) < BEING_HUNGRY)
+    if(local_energy < BEING_HUNGRY)
     {
         return SLIGHTLY_AWAKE;
     }
@@ -1943,18 +1945,16 @@ static void being_interact(noble_simulation * sim,
             {
 #endif
                 /* squabbling between adults */
-                if ((other_being_distance < SQUABBLE_RANGE) && ((being_dob(other_being)+AGE_OF_MATURITY)<today_days))
+                if ((other_being_distance < SQUABBLE_RANGE) && ((being_dob(other_being)+AGE_OF_MATURITY) < today_days))
                 {
                     n_byte2 squabble_val;
-
                     GET_E(local) = (n_byte2)*energy;
                     being_set_speed(local, *speed);
-
                     squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, sim);
                     if (squabble_val != 0)
                     {
                         *state |= squabble_val;
-                        *energy = GET_E(local);
+                        *energy = being_energy(local);
                         *speed = being_speed(local);
                     }
                 }
@@ -1964,7 +1964,10 @@ static void being_interact(noble_simulation * sim,
         if ((other_being_distance < SOCIAL_RANGE) && (being_index>-1))
         {
             /* attraction and mating */
-            if (opposite_sex!=0) *state |= social_mate(local, other_being, today, being_index, other_being_distance, sim);
+            if (opposite_sex != 0)
+            {
+                *state |= social_mate(local, other_being, today, being_index, other_being_distance, sim);
+            }
 
             /* chat */
             *state |= social_chat(local, other_being, being_index, sim);
@@ -1984,7 +1987,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     n_byte        beings_in_vicinity = 0;
 
     n_int	      loc_s              = being_speed(local);
-    n_int	      loc_e              = GET_E(local);
+    n_int	      loc_e              = being_energy(local);
     n_int	      loc_h              = GET_H(local);
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
@@ -2094,7 +2097,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         /** swimming proficiency */
         tmp_speed = (tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
         
-        episodic_self(sim, local, EVENT_SWIM, GET_E(local), 0);
+        episodic_self(sim, local, EVENT_SWIM, being_energy(local), 0);
         
 #ifdef PARASITES_ON
         /** bathing removes parasites */
@@ -2328,7 +2331,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             mother->inventory[BODY_FRONT] -= INVENTORY_GROOMED;
                         }
                         /** hungry mothers stop producing milk */
-                        if (GET_E(mother)>BEING_HUNGRY)
+                        if (being_energy(mother) > BEING_HUNGRY)
                         {
                             /** suckling induces relaxation */
 #ifdef METABOLISM_ON
@@ -2919,7 +2922,7 @@ void being_tidy(noble_simulation * local_sim)
     while (loop < number)
     {
         noble_being *local_being = &local[loop];
-        n_int	     local_e = GET_E(local_being);
+        n_int	     local_e = being_energy(local_being);
         n_genetics  *genetics = being_genetics(local_being);
         delta_e = 0;
         conductance = 5;

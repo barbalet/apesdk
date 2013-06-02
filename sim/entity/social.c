@@ -865,8 +865,8 @@ n_byte2 social_squabble(
             victor = meeter_being;
             vanquished = met_being;
 
-            if (((math_random(meeter_being->seed)&7)*GET_E(meeter_being)) <
-                    ((math_random(meeter_being->seed)&7)*GET_E(met_being)))
+            if (((math_random(meeter_being->seed)&7)*being_energy(meeter_being)) <
+                    ((math_random(meeter_being->seed)&7)*being_energy(met_being)))
             {
                 victor = met_being;
                 vanquished = meeter_being;

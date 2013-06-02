@@ -328,7 +328,7 @@ enum PREFERENCES_MATE
 #define PATHOGEN_ENVIRONMENT_PROB             100
 #define PATHOGEN_MUTATION_PROB                100
 #define ANTIBODY_DEPLETION_PROB               100
-#define ANTIBODY_GENERATION_PROB(bei)         (GET_E(bei))
+#define ANTIBODY_GENERATION_PROB(bei)         (being_energy(bei))
 #define IMMUNE_STRENGTH_ALPHA                 2
 #define ALPHA_RANK                            250
 #define RANK_STRESS(bei)                      (255 - (bei)->honor)
@@ -709,7 +709,7 @@ enum being_interaction_social
 #define FAT_MASS(frame,energy) (MIN( ((BEING_MAX_MASS_FAT_G*energy*frame)>>(4+12)),BEING_MAX_MASS_FAT_G))
 
 /* returns the amount of body fat in 10g increments */
-#define GET_BODY_FAT(bei) (FAT_MASS(GET_FR(bei),GET_E(bei)))
+#define GET_BODY_FAT(bei) (FAT_MASS(GET_FR(bei),being_energy(bei)))
 
 /* maximum height of the being (in millimetres) */
 #define BEING_MAX_HEIGHT_MM 2000
