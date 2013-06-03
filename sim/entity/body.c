@@ -746,7 +746,7 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
         }
         if (carrying & INVENTORY_BRANCH)
         {
-            if (hit!=0)
+            if (hit != 0)
             {
                 episodic_interaction(sim, local, other, EVENT_WHACKED, EPISODIC_AFFECT_ZERO, 0);
                 episodic_interaction(sim, other, local, EVENT_WHACKED_BY, AFFECT_WHACKED, 0);
@@ -755,7 +755,7 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
         if (carrying & INVENTORY_ROCK)
         {
             episodic_interaction(sim, local, other, EVENT_HURLED, EPISODIC_AFFECT_ZERO, 0);
-            if (hit!=0)
+            if (hit != 0)
             {
                 episodic_interaction(sim, other, local, EVENT_HURLED_BY, AFFECT_HURL, 0);
             }

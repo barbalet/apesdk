@@ -178,6 +178,11 @@ n_int   being_energy(noble_being * value)
     return value->energy;
 }
 
+void   being_set_energy(noble_being * value, n_int energy)
+{
+    value->energy = energy;
+}
+
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
     n_int	it_water_turn = 0;
@@ -1948,7 +1953,7 @@ static void being_interact(noble_simulation * sim,
                 if ((other_being_distance < SQUABBLE_RANGE) && ((being_dob(other_being)+AGE_OF_MATURITY) < today_days))
                 {
                     n_byte2 squabble_val;
-                    GET_E(local) = (n_byte2)*energy;
+                    being_set_energy(local, *energy);
                     being_set_speed(local, *speed);
                     squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, sim);
                     if (squabble_val != 0)
@@ -2394,7 +2399,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     /** update biological drives */
     drives_cycle(local, beings_in_vicinity, awake, sim);
 
-    GET_E(local) = (n_byte2) loc_e;
+    being_set_energy(local, loc_e);
     being_set_speed(local, (n_byte)  loc_s);
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
@@ -2853,7 +2858,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 			}
         }
 
-        GET_E(local) = (n_byte2)(BEING_FULL + 15);
+        being_set_energy(local, BEING_FULL + 15);
 
         local->date_of_birth[0] = land->date[0];
         local->date_of_birth[1] = land->date[1];
@@ -3043,7 +3048,7 @@ void being_tidy(noble_simulation * local_sim)
             local_e = BEING_DEAD;
         }
 
-        GET_E(local_being) = (n_byte2)local_e;
+        being_set_energy(local_being, local_e);
         loop++;
     }
 #ifdef PARASITES_ON
