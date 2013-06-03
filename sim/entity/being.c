@@ -123,12 +123,12 @@ void being_set_location(noble_being * value, n_byte2 * from)
 
 n_int being_speed(noble_being * value)
 {
-    return value->speed;
+    return value->velocity;
 }
 
 void being_set_speed(noble_being * value, n_byte sp)
 {
-    value->speed = sp;
+    value->velocity = sp;
 }
 
 void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta)
@@ -175,12 +175,17 @@ n_genetics * being_genetics(noble_being * value)
 
 n_int   being_energy(noble_being * value)
 {
-    return value->energy;
+    return value->stored_energy;
 }
 
 void   being_set_energy(noble_being * value, n_int energy)
 {
-    value->energy = energy;
+    value->stored_energy = energy;
+}
+
+void   being_energy_delta(noble_being * value, n_int delta)
+{
+    being_set_energy(value, being_energy(value) + delta);
 }
 
 static void being_turn_away_from_water(noble_being * value, n_land * land)
@@ -741,15 +746,15 @@ static void being_immune_response(noble_being * local)
         }
     }
     math_random3(local_random);
-    if ((local_random[0] < (total_antigens>>2)) && (local->energy > BEING_DEAD))
+    if ((local_random[0] < (total_antigens>>2)) && (being_energy(local) > BEING_DEAD))
     {
-        if (local->energy>PATHOGEN_SEVERITY(max_severity))
+        if (being_energy(local)>PATHOGEN_SEVERITY(max_severity))
         {
-            local->energy-=PATHOGEN_SEVERITY(max_severity);
+            being_energy_delta(local, 0-PATHOGEN_SEVERITY(max_severity));
         }
         else
         {
-            local->energy = BEING_DEAD;
+            being_set_energy(local, BEING_DEAD);
         }
     }
 #endif
@@ -2058,7 +2063,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
         if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING | BEING_STATE_MOVING)) == BEING_STATE_AWAKE)
         {
-            hungry = (n_byte)(loc_e < BEING_FULL);
+            hungry = (loc_e < BEING_FULL);
         }
 
         if (hungry != 0)
@@ -2343,7 +2348,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             metabolism_suckle(sim,local,mother);
 #endif
                             /** mother loses energy */
-                            GET_E(mother) -= SUCKLING_ENERGY;
+                            being_energy_delta(mother, 0 - SUCKLING_ENERGY);
                             /** child gains energy */
                             loc_e += SUCKLING_ENERGY;
                             /** update indicators */
@@ -2400,7 +2405,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     drives_cycle(local, beings_in_vicinity, awake, sim);
 
     being_set_energy(local, loc_e);
-    being_set_speed(local, (n_byte)  loc_s);
+    being_set_speed(local, loc_s);
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     local->state = loc_state;
@@ -3084,7 +3089,7 @@ void being_remove(noble_simulation * local_sim)
     
     while (loop < end_loop)
     {
-        if (local[loop].energy == BEING_DEAD)
+        if (being_energy(&(local[loop])) == BEING_DEAD)
         {
             noble_being * b = &local[loop];
             noble_being * child;
@@ -3121,7 +3126,7 @@ void being_remove(noble_simulation * local_sim)
             family_name = GET_NAME_FAMILY2(local_sim,b);
             while (i < end_loop)
             {
-                if (local[i].energy != BEING_DEAD)
+                if (being_energy(&(local[i])) != BEING_DEAD)
                 {
                     noble_being * b2 = &local[i];
                     social_link * b2_social_graph = GET_SOC(local_sim, b2);
@@ -3157,8 +3162,8 @@ void being_remove(noble_simulation * local_sim)
         {
             possible = count;
         }
-        
-        if (local[loop].energy != BEING_DEAD)
+                    
+        if (being_energy(&(local[loop])) != BEING_DEAD)
         {
             if ( count != loop )
             { /* the logic associated with copying th brsin memory location doesn't make sense */

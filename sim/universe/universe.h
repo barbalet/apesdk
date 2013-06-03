@@ -1354,8 +1354,8 @@ typedef struct
 {
     n_byte2	location[2];
     n_byte	direction_facing;
-    n_byte	speed;
-    n_byte2	energy;
+    n_byte	velocity;
+    n_byte2	stored_energy;
     n_byte2	date_of_birth[2]; /* constant */
     n_byte2	speak;
     n_byte2 seed[2];
@@ -1518,7 +1518,6 @@ noble_simulation;
 #define	GET_MT(bei,index) ((bei)->metabolism[index])
 #endif
 #define GET_A(bei,index) ((bei)->attention[index])
-#define	GET_E(bei)	((bei)->energy)
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
 #define GET_FR(bei)     (GENE_FRAME(being_genetics(bei)))

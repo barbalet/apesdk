@@ -1074,7 +1074,7 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
 
     variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = being_facing(local_being);
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
-    variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = local_being->energy;
+    variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = being_energy(local_being);
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
     variables[VARIABLE_SPEAK - VARIABLE_VECT_ANGLE] = local_being->speak;
     variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = local_being->height;
@@ -1144,7 +1144,8 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     being_wander(local_being, local_facing - being_facing(local_being));
     
     being_set_speed(local_being, (n_byte) local_speed);
-    local_being->energy = (n_byte2)local_energy;
+    being_set_energy(local_being, local_energy);
+    
     local_being->speak  = (n_byte2)local_speak;
     local_being->height  = (n_byte2)local_height;
     if (local_goal_type!=GOAL_NONE)

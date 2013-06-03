@@ -115,6 +115,8 @@ n_genetics * being_genetics(noble_being * value);
 n_int being_energy(noble_being * value);
 void   being_set_energy(noble_being * value, n_int energy);
 
+void   being_energy_delta(noble_being * value, n_int delta);
+
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
 void genealogy_birth(noble_being * child, noble_being * mother, void * sim);

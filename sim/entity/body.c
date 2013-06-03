@@ -732,14 +732,14 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
             if ((carrying & INVENTORY_ROCK) && (math_random(other->seed)>THROW_ACCURACY))
             {
                 hit=1;
-                GET_E(other) -= SQUABBLE_ENERGY_ROCK_HURL;
+                being_energy_delta(other, 0 - SQUABBLE_ENERGY_ROCK_HURL);
                 
                 INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_ROCK_HURL);
             }
             if ((carrying & INVENTORY_BRANCH) && (math_random(other->seed)>WHACK_ACCURACY))
             {
                 hit=1;
-                GET_E(other) -= SQUABBLE_ENERGY_BRANCH_WHACK;
+                being_energy_delta(other, 0 - SQUABBLE_ENERGY_BRANCH_WHACK);
                 
                 INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_BRANCH_WHACK);
             }
@@ -944,15 +944,15 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
     if (carrying & INVENTORY_GRASS)
     {
         /* consume grass */
-        GET_E(local) += (n_byte2)food_absorption(local, ENERGY_GRASS, FOOD_VEGETABLE);
+        being_energy_delta(local, food_absorption(local, ENERGY_GRASS, FOOD_VEGETABLE));
         OBJECTS_DROP(local,hand);
     }
     else
     {
         if (carrying & INVENTORY_FISH)
         {
-            /* consume fish */            
-            GET_E(local) += (n_byte2)food_absorption(local, ENERGY_FISH, FOOD_SHELLFISH);
+            /* consume fish */
+            being_energy_delta(local, food_absorption(local, ENERGY_FISH, FOOD_SHELLFISH));
             OBJECTS_DROP(local,hand);
         }
         else
@@ -960,7 +960,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
             if (carrying & INVENTORY_NUT_CRACKED)
             {
                 /* consume nut */
-                GET_E(local) += (n_byte2)food_absorption(local, ENERGY_NUT, FOOD_VEGETABLE);
+                being_energy_delta(local, food_absorption(local, ENERGY_NUT, FOOD_VEGETABLE));
                 OBJECTS_DROP(local,hand);
             }
         }

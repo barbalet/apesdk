@@ -710,7 +710,7 @@ n_byte social_groom(
     }
 
     /** parasites sap energy */
-    GET_E(meeter_being) -= PARASITE_ENERGY_COST*meeter_being->parasites;
+    being_energy_delta(meeter_being, 0 - (PARASITE_ENERGY_COST*meeter_being->parasites));
 
     INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, PARASITE_ENERGY_COST*meeter_being->parasites);
     
@@ -908,8 +908,8 @@ n_byte2 social_squabble(
             {
                 /** show of force */
                 vanquished->inventory[punchloc] = 0;
-                GET_E(victor) -= SQUABBLE_ENERGY_SHOWFORCE;
-                GET_E(vanquished) -= SQUABBLE_ENERGY_SHOWFORCE;
+                being_energy_delta(victor, 0 - SQUABBLE_ENERGY_SHOWFORCE);
+                being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_SHOWFORCE);
                 
                 INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_SHOWFORCE*2);
                 
@@ -919,8 +919,8 @@ n_byte2 social_squabble(
             {
                 /** attack */
                 vanquished->inventory[punchloc] = INVENTORY_WOUND;
-                GET_E(victor) -= SQUABBLE_ENERGY_ATTACK;
-                GET_E(vanquished) -= SQUABBLE_ENERGY_ATTACK;
+                being_energy_delta(victor, 0 - SQUABBLE_ENERGY_ATTACK);
+                being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_ATTACK);
                 INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_ATTACK*2);
 
 #ifdef PARASITES_ON
