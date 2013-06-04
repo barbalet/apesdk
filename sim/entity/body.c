@@ -286,8 +286,8 @@ void body_skeleton_gene(noble_being * being, n_byte keypoint, n_int * scale_widt
     const n_int MAX_SEGMENT_VARIANCE = 200;
 
     /** these are 4 bit gene values in the range 0-15 */
-    n_byte gene_val1 = GENE_HOX(GET_G(being),keypoint);
-    n_byte gene_val2 = GENE_HOX(GET_G(being),20-keypoint);
+    n_byte gene_val1 = GENE_HOX(being_genetics(being),keypoint);
+    n_byte gene_val2 = GENE_HOX(being_genetics(being),20-keypoint);
 
     /** convert the gene values into scaling values */
     *scale_width = 1000 - MAX_SEGMENT_VARIANCE + (((n_int)gene_val1)*MAX_SEGMENT_VARIANCE*2/15);

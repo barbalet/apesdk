@@ -52,8 +52,9 @@
 #include "../../noble/noble.h"
 #include "../../universe/universe.h"
 #include "../../universe/universe_internal.h"
+#include "../../entity/entity.h"
 #include "../../entity/entity_internal.h"
-#include "../../command/command.h"
+#include "../../gui/gui.h"
 #include "web.h"
 
 #define NOBLE_WEB
@@ -86,14 +87,6 @@ void plat_copy(n_byte * from, n_byte * to, n_uint number);
 void plat_cycle();
 
 /*NOBLEMAKE END=""*/
-
-
-n_int draw_error(n_string error_text)
-{
-    printf("ERROR: %s\n",(const char *) error_text);
-    return -1;
-}
-
 
 void * plat_new(unsigned long bytes, unsigned char critical)
 {
@@ -207,55 +200,6 @@ n_uint	plat_variable_hash(n_byte * data, n_uint length, n_byte shift)
 }
 
 
-noble_being check_delta = {0};
-
-void plat_debug_being(noble_being * test, n_byte initial)
-{
-    if(initial)
-        plat_copy((n_byte*)test,(n_byte *)&check_delta,sizeof(noble_being));
-    else
-    {
-        FILE * append_write = 0L;
-
-        append_write = fopen("data_delta.txt","a");
-
-        if(append_write != 0L)
-        {
-
-            if(check_delta.x != test->x)
-                fprintf(append_write, "new x = %d;\n",test->x);
-            if(check_delta.y != test->y)
-                fprintf(append_write, "new y = %d;\n",test->y);
-            if(check_delta.facing != test->facing)
-                fprintf(append_write, "new facing = %d;\n",test->facing);
-
-            if(check_delta.speed != test->speed)
-                fprintf(append_write, "new speed = %d;\n",test->speed);
-            if(check_delta.energy != test->energy)
-                fprintf(append_write, "new energy = %d;\n",test->energy);
-
-            if (genetics_compare(check_delta.new_genetics, test->new_genetics) != 0)
-            {
-                n_int i;
-                fprintf(append_write, "new new_genetics = ");
-                for (i = 0; i < CHROMOSOMES; i++)
-                {
-                    fprintf(append_write, "%d ",(int)test->new_genetics[i]);
-                }
-                fprintf(append_write, "\n");
-            }
-
-            if(TIME_IN_DAYS(check_delta.date_of_birth) != TIME_IN_DAYS(test->date_of_birth))
-                fprintf(append_write, "new date_of_birth = %d;\n",(int)TIME_IN_DAYS(test->date_of_birth));
-
-            if(check_delta.state != test->state)
-                fprintf(append_write, "new state = %d;\n",test->state);
-
-            fprintf(append_write,"---\n");
-            fclose(append_write);
-        }
-    }
-}
 
 #ifdef NOBLE_WEB
 
@@ -279,9 +223,9 @@ void sim_fileoutImageApe(
     n_int img_width_small = 320;
     n_int px,py;
 
-    px = (n_int)(APESPACE_TO_MAPSPACE(local_being->x))*
+    px = (n_int)(APESPACE_TO_MAPSPACE(being_location_x(local_being)))*
          img_width/MAP_DIMENSION;
-    py = (n_int)(APESPACE_TO_MAPSPACE(local_being->y))*
+    py = (n_int)(APESPACE_TO_MAPSPACE(being_location_y(local_being)))*
          img_width/MAP_DIMENSION;
 
     tx = px - img_width * width_percent / 200;

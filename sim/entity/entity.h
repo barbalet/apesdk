@@ -92,6 +92,8 @@ enum GENEALOGY_FORMAT
     GENEALOGY_FORMATS
 };
 
+n_int being_dob(noble_being * value);
+
 n_int being_location_x(noble_being * value);
 
 n_int being_location_y(noble_being * value);
