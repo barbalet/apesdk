@@ -1528,7 +1528,8 @@ static void draw_errors(noble_simulation * local_sim)
         n_int	loop = 0;
         while(loop< (number_errors+1))
         {
-            draw_string(error_array[loop++], 40, (loop*12) + 62, &local_mono);
+            draw_string(error_array[loop], 40, (loop*12) + 62, &local_mono);
+			loop++;
         }
     }
 }

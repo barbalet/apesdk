@@ -49,17 +49,18 @@
 #else
 
 #include "../../noble/noble.h"
+#include "../../gui/gui.h"
 #include "../../universe/universe.h"
 #include "../../entity/entity.h"
 #include "../../universe/universe_internal.h"
 #include "../../entity/entity_internal.h"
-#include "../../command/command.h"
 
 #endif
 
 #else
 
 #include "..\..\noble\noble.h"
+#include "..\..\gui\gui.h"
 #include "..\..\universe\universe.h"
 #include "..\..\entity\entity.h"
 #include "..\..\universe\universe_internal.h"
@@ -642,7 +643,7 @@ void create_web_ape_profile(
 
     for (i=0; i<2; i++)
     {
-        body_genome((n_byte)i, GET_G(local_being), genome);
+        body_genome((n_byte)i, being_genetics(local_being), genome);
         for (j = 0; j < CHROMOSOMES*8; j++)
         {
             if ((j>0) && (j%8==0))
@@ -792,7 +793,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
 
-    sprintf(str,"%d", (int)(GENE_HAIR(GET_G(local_being))*100/16));
+    sprintf(str,"%d", (int)(GENE_HAIR(being_genetics(local_being))*100/16));
 
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
@@ -815,7 +816,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    Energy: ", 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
-    sprintf(str,"%d", (int)GET_E(local_being));
+    sprintf(str,"%d", (int)being_energy(local_being));
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                </tr>", 1);
@@ -856,7 +857,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    Speed: ", 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
-    sprintf(str,"%d metres per min", (int)(GET_S(local_being))*10/15);
+    sprintf(str,"%d metres per min", (int)(being_speed(local_being))*10/15);
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                </tr>", 1);
@@ -868,7 +869,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
     sprintf(
         str,"%d degrees",
-        (((int)(GET_F(local_being))*360/256) + 90) % 360);
+        (((int)(being_facing(local_being))*360/256) + 90) % 360);
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                </tr>", 1);
@@ -1675,8 +1676,8 @@ void draw_beings(unsigned char* buffer, n_int img_width, n_int num, noble_being 
     for (i=0; i <num; i++)
     {
         noble_being * local_being = (noble_being *)(&(beings[i]));
-        px = (n_int)(APESPACE_TO_MAPSPACE(GET_X(local_being)))*img_width/MAP_DIMENSION;
-        py = (n_int)(APESPACE_TO_MAPSPACE(GET_Y(local_being)))*img_width/MAP_DIMENSION;
+        px = (n_int)(APESPACE_TO_MAPSPACE(being_location_x(local_being)))*img_width/MAP_DIMENSION;
+        py = (n_int)(APESPACE_TO_MAPSPACE(being_location_y(local_being)))*img_width/MAP_DIMENSION;
         if ((px >= 0) && (px < img_width) &&
                 (py >= 0) && (py < img_width))
         {
@@ -2221,7 +2222,7 @@ void update_log(char * filename, noble_simulation * sim)
             {
                 males++;
             }
-            animal_biomass += GET_E(local_being);
+            animal_biomass += being_energy(local_being);
 
 #ifdef PARASITES_ON
             parasites += local_being->parasites;

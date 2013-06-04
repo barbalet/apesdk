@@ -69,7 +69,7 @@ static void fileout_land(n_file * file_out, noble_simulation * value, noble_file
 #endif
 }
 
-static void fileout_being(n_file * file_out, noble_simulation * value, n_int being, noble_file_entry * format)
+static void fileout_being(n_file * file_out, noble_simulation * value, n_uint being, noble_file_entry * format)
 {
     n_int loop = (SOCIAL_SIZE * being);
     n_int loop_end = loop + SOCIAL_SIZE;
@@ -146,10 +146,9 @@ n_byte * sim_fileout(n_uint * len)
 
     fileout_land(&file_pass, local_sim, (noble_file_entry *)noble_file_format);
 
-    while (loop < local_sim->num)
+    for (loop = 0; loop < local_sim->num; loop++)
     {
         fileout_being(&file_pass, local_sim, loop, (noble_file_entry *)noble_file_format);
-        loop++;
     }
 
     /* TODO: Brain block */
