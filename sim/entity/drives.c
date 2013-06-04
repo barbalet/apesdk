@@ -46,13 +46,13 @@
 /*NOBLEMAKE END=""*/
 
 
-/* Mate seeking */
+/** Mate seeking */
 
 #define GENE_MATE_SEEK(gene)                GENE_VAL_REG(gene, 8, 9, 14, 2)
 
 
 /**
- * Update the hunger drive
+ * @brief Update the hunger drive
  * @param local Pointer to the ape
  */
 static void drives_hunger(
@@ -74,7 +74,7 @@ static void drives_hunger(
 }
 
 /**
- * Social drive governs how likely the being is to interact with others.
+ * @brief Social drive governs how likely the being is to interact with others.
  * This affects behaviors such as grooming, chatting and mating
  * @param local Pointer to the ape
  * @param beings_in_vicinity The number of other apes in the vicinity
@@ -108,7 +108,7 @@ static void drives_sociability(
 }
 
 /**
- * Updates the sex drive
+ * @brief Updates the sex drive
  * @param local Pointer to the ape
  * @param awake whether the ape is awake
  * @param local_sim Pointer to the simulation
@@ -232,7 +232,7 @@ static void drives_sex(
 }
 
 /**
- * Updates the fatigue drive.  This doesn't do much, but is
+ * @brief Updates the fatigue drive.  This doesn't do much, but is
  * accessible to the braincode.
  * @param local Pointer to the ape
  */
@@ -260,7 +260,7 @@ static void drives_fatigue(
 }
 
 /**
- * Update biological drives
+ * @brief Update biological drives
  * @param local Pointer to the ape
  * @param beings_in_vicinity The number of other apes within the vicinity
  * @param awake Whether the ape is awake

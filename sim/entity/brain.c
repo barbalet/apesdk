@@ -73,12 +73,17 @@
 
 /*NOBLEMAKE END=""*/
 
-/* positive and negative, lower and upper halves */
+/** positive and negative, lower and upper halves */
 #define B_P_LH (br[loc+F_Z]+br[loc+F_Y]+br[loc+F_X])
 #define	B_P_UH (br[loc-F_X]+br[loc-F_Y]+br[loc-F_Z])
 #define	B_N_LH (br[(loc+F_X)&B_WR]+br[(loc+F_Y)&B_WR]+br[(loc+F_Z)&B_WR])
 #define	B_N_UH (br[(loc+B_Z)&B_WR]+br[(loc+B_Y)&B_WR]+br[(loc+B_X)&B_WR])
 
+/**
+ * @brief Updates the brain
+ * @param local Pointer to the brain array
+ * @param constants Array containing brain constants
+ */
 void brain_cycle(n_byte * local, n_byte2 * constants)
 {
     n_byte br[B_SIZE];
@@ -156,7 +161,7 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
 
 }
 
-void brain_hash(n_byte *local_brain, n_byte * local_brain_hash)   /* THIS IS WRONG! FIX!*/
+void brain_hash(n_byte *local_brain, n_byte * local_brain_hash)   /**< TODO THIS IS WRONG! FIX!*/
 {
     const n_byte	*known_values = (n_byte *)"0123456789ABCDEF";
     n_uint	hash_value = 0;
@@ -177,8 +182,8 @@ void brain_hash(n_byte *local_brain, n_byte * local_brain_hash)   /* THIS IS WRO
 
 
 
-/*     "XXX_#NNN_#NNN"*/
-/*     "0123456789012"*/
+/**     "XXX_#NNN_#NNN"*/
+/**     "0123456789012"*/
 
 #define BC_FORMAT_A      0
 #define BC_FORMAT_C      1
@@ -189,11 +194,11 @@ void brain_hash(n_byte *local_brain, n_byte * local_brain_hash)   /* THIS IS WRO
 
 const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
 {
-    /* data */
+    /** data */
     "DAT0",
     "DAT1",
 
-    /* operators */
+    /** operators */
     "ADD ",
     "SUB ",
     "MUL ",
@@ -208,7 +213,7 @@ const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
     "STP ",
     "LTP ",
 
-    /* conditionals */
+    /** conditionals */
     "JMZ ",
     "JMN ",
     "DJN ",
@@ -218,18 +223,26 @@ const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
     "SNE ",
     "SLT ",
     
-    /* sensors */
+    /** sensors */
     "SEN ",
     "SEN2",
     "SEN3",
     
-    /* actuators */
+    /** actuators */
     "ACT ",
     "ACT2",
     "ACT3",
     "ANE "
 };
 
+/**
+ * @brief Returns the type of formatting of a three byte instruction
+ * @param instruction The instruction type
+ * @param command Whether the subsequent two bytes are constants or variables
+ * @param value0 The first argument
+ * @param value1 The second argument
+ * @return The format type used to display a three byte instruction
+ */
 static n_int brain_format(n_byte instruction, n_byte command, n_byte value0, n_byte value1)
 {
     n_byte is_constant0 = ((command & BRAINCODE_CONSTANT0_BIT) != 0);
@@ -297,49 +310,49 @@ static n_int brain_format(n_byte instruction, n_byte command, n_byte value0, n_b
     return BC_FORMAT_A;
 }
 
-/* "aeio" "fmsv"; */
+/** "aeio" "fmsv"; */
 
 const n_string braincode_spoken_dictionary[BRAINCODE_INSTRUCTIONS] =
 {
-    /* data */
-    "a",    /* "DAT0", */
-    "o",    /* "DAT1", */
+    /** data */
+    "a",    /**< "DAT0", */
+    "o",    /**< "DAT1", */
     
-    /* operators */
-    "mam", /* "ADD ",*/
-    "vos", /* "SUB ",*/
-    "sie",  /* "MUL ",*/
-    "fes",  /* "DIV ",*/
-    "feo", /* "MOD ",*/
-    "mas", /* "MVB ",*/
-    "vam", /* "MOV ",*/
-    "amo", /* "JMP ",*/
-    "sam", /* "CTR ",*/
-    "mao", /* "SWP ",*/
-    "ova", /* "INV ",*/
-    "eef",  /* "STP ",*/
-    "fee",  /* "LTP ",*/
+    /** operators */
+    "mam", /**< "ADD ",*/
+    "vos", /**< "SUB ",*/
+    "sie",  /**< "MUL ",*/
+    "fes",  /**< "DIV ",*/
+    "feo", /**< "MOD ",*/
+    "mas", /**< "MVB ",*/
+    "vam", /**< "MOV ",*/
+    "amo", /**< "JMP ",*/
+    "sam", /**< "CTR ",*/
+    "mao", /**< "SWP ",*/
+    "ova", /**< "INV ",*/
+    "eef",  /**< "STP ",*/
+    "fee",  /**< "LTP ",*/
     
-    /* conditionals */
-    "om", /*"JMZ ",*/
-    "ov",  /*"JMN ",*/
-    "fi",  /*"DJN ",*/
-    "im", /*"AND ",*/
-    "se", /*"OR  ",*/
-    "es",  /*"SEQ ",*/
-    "os",  /*"SNE ",*/
-    "is",  /*"SLT ",*/
+    /** conditionals */
+    "om", /**< "JMZ ",*/
+    "ov",  /**< "JMN ",*/
+    "fi",  /**< "DJN ",*/
+    "im", /**< "AND ",*/
+    "se", /**< "OR  ",*/
+    "es",  /**< "SEQ ",*/
+    "os",  /**< "SNE ",*/
+    "is",  /**< "SLT ",*/
     
-    /* sensors */
-    "favos", /*"SEN ",*/
-    "vamos", /*"SEN2",*/
-    "famov", /*"SEN3",*/
+    /** sensors */
+    "favos", /**< "SEN ",*/
+    "vamos", /**< "SEN2",*/
+    "famov", /**< "SEN3",*/
     
-    /* actuators */
-    "iema", /*"ACT ",*/
-    "iova", /*"ACT2",*/
-    "iafi", /*"ACT3",*/
-    "ovma", /*"ANE "*/
+    /** actuators */
+    "iema", /**< "ACT ",*/
+    "iova", /**< "ACT2",*/
+    "iafi", /**< "ACT3",*/
+    "ovma", /**< "ANE "*/
 };
 
 static n_byte brain_vc(n_byte value, n_byte vowel)
@@ -387,6 +400,11 @@ static void brain_longword(n_string output, n_byte value)
     output[4] = 0;
 }
 
+/**
+ * @brief prints a three byte instruction in the appropriate format
+ * @param string The returned string
+ * @param response Array containing the three byte instruction
+ */
 void brain_three_byte_command(n_string string, n_byte * response)
 {
     n_byte command      = response[0];
@@ -418,6 +436,11 @@ void brain_three_byte_command(n_string string, n_byte * response)
     }
 }
 
+/**
+ * @brief A simple sort of sentence construction from three byte instructions
+ * @param string The returned sentence
+ * @param response Array containing three byte instruction
+ */
 void brain_sentence(n_string string, n_byte * response)
 {
     n_byte command      = response[0];
@@ -455,7 +478,10 @@ void brain_sentence(n_string string, n_byte * response)
 
 #ifdef BRAINCODE_ON
 
-/* gathers statistics on braincode instructions */
+/**
+ * @brief gathers statistics on braincode instructions
+ * @param sim Pointer to the simulation object
+ */
 void braincode_statistics(noble_simulation * sim)
 {
     n_int i,j,k,instruction;
@@ -527,7 +553,11 @@ void braincode_statistics(noble_simulation * sim)
     }
 }
 
-/* returns a random braincode instruction of the given type */
+/**
+ * @brief returns a random braincode instruction of the given type
+ * @param instruction_type Number indicating the type of instruction
+ * @return braincode instruction
+ */
 static n_byte get_braincode_instruction_type(n_byte instruction_type)
 {
     n_byte2 local_random[2];
@@ -535,22 +565,26 @@ static n_byte get_braincode_instruction_type(n_byte instruction_type)
     math_random3(local_random);
     switch(instruction_type)
     {
-    case 0: /* GENE_BRAINCODE_SENSORS(genetics);*/
+    case 0: /**< GENE_BRAINCODE_SENSORS(genetics);*/
         return BRAINCODE_DATA_START+(local_random[0]%(BRAINCODE_DATA_NUMBER));
-    case 1: /* GENE_BRAINCODE_ACTUATORS(genetics); */
+    case 1: /**< GENE_BRAINCODE_ACTUATORS(genetics); */
         return BRAINCODE_SENSORS_START+(local_random[0]%(BRAINCODE_SENSORS_NUMBER));
-    case 2: /* GENE_BRAINCODE_CONDITIONALS(genetics); */
+    case 2: /**< GENE_BRAINCODE_CONDITIONALS(genetics); */
         return BRAINCODE_ACTUATORS_START+(local_random[0]%(BRAINCODE_ACTUATORS_NUMBER));
-    case 3: /* GENE_BRAINCODE_OPERATORS(genetics); */
+    case 3: /**< GENE_BRAINCODE_OPERATORS(genetics); */
         return BRAINCODE_OPERATORS_START+(local_random[0]%(BRAINCODE_OPERATORS_NUMBER));
-    case 4: /* GENE_BRAINCODE_DATA(genetics); */
+    case 4: /**< GENE_BRAINCODE_DATA(genetics); */
         return BRAINCODE_CONDITIONALS_START+(local_random[0]%(BRAINCODE_CONDITIONALS_NUMBER));
     }
 
     return BRAINCODE_DATA_START;
 }
 
-/* returns a random braincode instruction */
+/**
+ * @brief returns a random braincode instruction
+ * @param local_being Pointer to the being
+ * @return braincode instruction
+ */
 n_byte get_braincode_instruction(noble_being * local_being)
 {
     n_byte2 prob[5], total, index;
@@ -587,6 +621,12 @@ n_byte get_braincode_instruction(noble_being * local_being)
     return get_braincode_instruction_type(4);
 }
 
+/**
+ * @brief
+ * @param social_graph
+ * @param value
+ * @return
+ */
 static n_int get_actor_index(social_link * social_graph, n_int value)
 {
     n_int i;
@@ -601,7 +641,13 @@ static n_int get_actor_index(social_link * social_graph, n_int value)
     return value % i;
 }
 
-/* returns the social graph index for a being with the same (or similar) name to the given episodic memory event */
+/**
+ * @brief returns the social graph index for a being with the same (or similar) name to the given episodic memory event
+ * @param social_graph Pointer to the social graph
+ * @param episodic_event Pointer to the episodic memory
+ * @param episode_index Index of the episode which is the current focus of attention
+ * @return Social graph index
+ */
 static n_int get_actor_index_from_episode(
     social_link * social_graph,
     episodic_memory * episodic_event,
@@ -629,6 +675,15 @@ static n_int get_actor_index_from_episode(
 
 typedef n_int (n_similar)(episodic_memory * episodic, n_int * carry_through);
 
+/**
+ * @brief Returns the index of the most similar episodic memory
+ * @param episode_index Current episodic memory index
+ * @param episodic Pointer to the episodic memory
+ * @param memory_visited Array which keeps track of which episodic memories have already been visited
+ * @param carry_through The property to be compared against
+ * @param function The similarity function to be used to do the comparrisson
+ * @return Episodic memory index of the most similar event
+ */
 static n_int attention_similar(n_int episode_index,
                                episodic_memory * episodic,
                                n_int * memory_visited,
@@ -647,16 +702,16 @@ static n_int attention_similar(n_int episode_index,
         
         if (i != episode_index)
         {
-            /* was this episode recently visited? */
+            /** was this episode recently visited? */
             if (memory_visited[i] <= visited_max)
             {
-                /* time between episodes */
-                n_int dt = function(&episodic[i], carry_through);
-                if (dt < 0) dt = -dt;
-                if ((min == -1) || (dt < min))
+                /** difference between episodes */
+                n_int diff = function(&episodic[i], carry_through);
+                if (diff < 0) diff = -diff;
+                if ((min == -1) || (diff < min))
                 {
-                    /* record most similar time */
-                    min = dt;
+                    /** record most similar */
+                    min = diff;
                     next_episode_index = i;
                 }
             }
@@ -664,12 +719,18 @@ static n_int attention_similar(n_int episode_index,
     }
     if (next_episode_index>-1)
     {
-        /* mark this episode as having been visited */
+        /** mark this episode as having been visited */
         memory_visited[next_episode_index] = memory_visited[episode_index]+1;
     }
     return next_episode_index;
 }
 
+/**
+ * @brief returns the temporal proximity of an episodic event to the given reference time
+ * @param episodic Pointer to the episodic memory event
+ * @param carry_through Time to be compared against
+ * @return Absolute temporal proximity
+ */
 static n_int similar_time(episodic_memory * episodic, n_int * carry_through)
 {
     n_int dt = episodic->time - carry_through[0];
@@ -680,6 +741,13 @@ static n_int similar_time(episodic_memory * episodic, n_int * carry_through)
     return dt;
 }
 
+/**
+ * @brief Returns the temporal proximity of an episodic memory event to the given time
+ * @param episode_index Index of the current focus of attention within the episodic memory
+ * @param episodic Pointer to the episodic memory
+ * @param memory_visited Time to be compared against
+ * @return Absolute temporal proximity
+ */
 static n_int attention_similar_time(n_int episode_index,
                                     episodic_memory * episodic,
                                     n_int * memory_visited)
@@ -688,16 +756,28 @@ static n_int attention_similar_time(n_int episode_index,
     return attention_similar(episode_index, episodic, memory_visited, &time, similar_time);
 }
 
+/**
+ * @brief Returns the affective similarity of the given affect value to an episodic memory event
+ * @param episodic Pointer to the episodic memory event
+ * @param carry_through Affect value to be compared against
+ * @return Absolute difference in affect value
+ */
 static n_int similar_affect(episodic_memory * episodic, n_int * carry_through)
 {
-    n_int dt = episodic->affect - carry_through[0];
-    if (dt < 0)
+    n_int da = episodic->affect - carry_through[0];
+    if (da < 0)
     {
-        dt = - dt;
+        da = - da;
     }
-    return dt;
+    return da;
 }
-
+/**
+ * @brief Returns the affective similarity of the given affect value to an episodic memory event
+ * @param episode_index Index of the current focus of attention within the episodic memory
+ * @param episodic Pointer to the episodic memory
+ * @param memory_visited Affect value to be compared against
+ * @return Absolute difference in affect value
+ */
 static n_int attention_similar_affect(n_int episode_index,
                                     episodic_memory * episodic,
                                     n_int * memory_visited)
@@ -706,6 +786,12 @@ static n_int attention_similar_affect(n_int episode_index,
     return attention_similar(episode_index, episodic, memory_visited, &affect, similar_affect);
 }
 
+/**
+ * @brief Returns the similarity between a given episodic memory event and the given family name
+ * @param episodic Pointer to the episodic memory event
+ * @param carry_through Family name to be compared against
+ * @return Similarity value in the range 0-3
+ */
 static n_int similar_name(episodic_memory * episodic, n_int * carry_through)
 {
     n_int similarity = 3;
@@ -716,6 +802,13 @@ static n_int similar_name(episodic_memory * episodic, n_int * carry_through)
     return similarity;
 }
 
+/**
+ * @brief Returns the similarity between a given episodic memory event and the given being name
+ * @param episode_index Index of the current focus of attention within the episodic memory
+ * @param episodic Pointer to the episodic memory
+ * @param memory_visited Affect value to be compared against
+ * @return Similarity value
+ */
 static n_int attention_similar_name(n_int episode_index,
                                       episodic_memory * episodic,
                                       n_int * memory_visited)
@@ -729,16 +822,29 @@ static n_int attention_similar_name(n_int episode_index,
     return attention_similar(episode_index, episodic, memory_visited, name, similar_name);
 }
 
+/**
+ * @brief Returns the similarity of a given date to the date of the given episodic memory event
+ * @param episodic Pointer to the episodic memory event
+ * @param carry_through Date to be compared against
+ * @return Absolute difference in date value
+ */
 static n_int similar_date(episodic_memory * episodic, n_int * carry_through)
 {
-    n_int dt = TIME_IN_DAYS(episodic->date) - carry_through[0];
-    if (dt < 0)
+    n_int dd = TIME_IN_DAYS(episodic->date) - carry_through[0];
+    if (dd < 0)
     {
-        dt = - dt;
+        dd = - dd;
     }
-    return dt;
+    return dd;
 }
 
+/**
+ * @brief Returns the similarity of a given date to the date of the given episodic memory event
+ * @param episode_index Index of the current focus of attention within the episodic memory
+ * @param episodic Pointer to the episodic memory
+ * @param memory_visited Date to be compared against
+ * @return Similarity value
+ */
 static n_int attention_similar_date(n_int episode_index,
                                     episodic_memory * episodic,
                                     n_int * memory_visited)
@@ -747,15 +853,28 @@ static n_int attention_similar_date(n_int episode_index,
     return attention_similar(episode_index, episodic, memory_visited, &time, similar_date);
 }
 
+/**
+ * @brief Returns the similarity between the given episodic memory event place and a given reference location
+ * @param episodic Pointer to the episodic memory event
+ * @param carry_through 2D coordinate of the place to be compared against
+ * @return Similarity value (2D distance squared)
+ */
 static n_int similar_place(episodic_memory * episodic, n_int * carry_through)
 {
     n_int dx = episodic->location[0] - carry_through[0];
     n_int dy = episodic->location[1] - carry_through[1];
-    /* should be calculated in the future with wrap around comparison */
+    /** TODO should be calculated in the future with wrap around comparison */
     n_int da = (dx * dx) + (dy * dy);
     return da;
 }
 
+/**
+ * @brief Returns the similarity between the given episodic memory event place and a given reference location
+ * @param episode_index Index of the episodic memory which is the current focus of attention
+ * @param episodic Pointer to the episodic memory
+ * @param memory_visited 2D coordinate of the place to be compared against
+ * @return Similarity value (2D distance squared)
+ */
 static n_int attention_similar_place(n_int episode_index,
                                     episodic_memory * episodic,
                                     n_int * memory_visited)
@@ -766,6 +885,16 @@ static n_int attention_similar_place(n_int episode_index,
     return attention_similar(episode_index, episodic, memory_visited, location, similar_place);
 }
 
+/**
+ * @brief Returns a sensor value
+ * @param sim Pointer to the simulation object
+ * @param meeter_being Pointer to the being doing the meeting
+ * @param met_being Pointer to the being which was met
+ * @param meeter_social_graph Pointer to the meeter being's social graph
+ * @param actor_index Social graph index of the being which is the current focus of attention
+ * @param switcher The type of sensor
+ * @return Sensor value
+ */
 static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, social_link * meeter_social_graph, n_int actor_index, n_byte switcher)
 {
     switch (switcher % 32)
@@ -800,18 +929,18 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return meeter_social_graph[actor_index].friend_foe;
     case 14:
         return meeter_social_graph[actor_index].attraction;
-        /* Location */
+        /** Location */
     case 15:
         return (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(meeter_being)) * 255 / MAP_DIMENSION);
     case 16:
         return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / MAP_DIMENSION);
-        /* Being state (lower)*/
+        /** Being state (lower)*/
     case 17:
         return (n_byte)meeter_being->state&255;
-        /* Being state (upper)*/
+        /** Being state (upper)*/
     case 18:
         return (n_byte)(meeter_being->state>>8)&255;
-        /* Drives */
+        /** Drives */
     case 19:
         return (n_byte)meeter_being->drives[DRIVE_HUNGER];
     case 20:
@@ -821,7 +950,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 22:
         return (n_byte)meeter_being->drives[DRIVE_SEX];
 
-        /* Sexisms */
+        /** Sexisms */
     case 23:
         if (FIND_SEX(GET_I(meeter_being)) == FIND_SEX(GET_I(met_being)))
         {
@@ -851,7 +980,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         {
             return 0;
         }
-        /* Overall grooming */
+        /** Overall grooming */
     case 26:
     {
         n_int v=0;
@@ -873,7 +1002,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return (n_byte) (v<<4);
     }
 
-    /* Wounds */
+    /** Wounds */
     case 28:
     {
         n_int v=0;
@@ -895,15 +1024,25 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return (n_byte) (v<<4);
     }
 
-    /* Posture */
+    /** Posture */
     case 30:
         return GET_PS(meeter_being);
     }
-    /* case 31: */
+    /** case 31: */
     return GET_PS(met_being);
 
 }
 
+/**
+ * @brief Returns a sensor value
+ * @param sim Pointer to the simulation object
+ * @param meeter_being Pointer to the being doing the meeting
+ * @param met_being Pointer to the being which was met
+ * @param internal Non-zero if this is an internal dialogue
+ * @param switcher The type of sensor
+ * @param additional_write No operation value
+ * @return Sensor value
+ */
 static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, n_byte internal, n_byte switcher, n_byte * additional_write)
 {
     n_byte half_switcher = switcher >> 1;
@@ -911,7 +1050,7 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
     n_genetics * genetics = being_genetics(important_being);
     switch (half_switcher % 10)
     {
-        /* Facial characteristics.
+        /** Facial characteristics.
               Here we shift the 0-15 gene values into a 0-255 range */
     case 0:
         return GENE_EYE_SHAPE(genetics) << 4;
@@ -944,8 +1083,8 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
 #endif
         return return_value;
     }
-    /* the 8 case is covered in the default: */
-    case 9: /* listen for shouts */
+    /** the 8 case is covered in the default: */
+    case 9: /** listen for shouts */
         if ((internal!=0) &&
                 (!(meeter_being->state&BEING_STATE_SHOUTING)) &&
                 (!(meeter_being->state&BEING_STATE_SPEAKING)) &&
@@ -959,9 +1098,9 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
         }
         break;
         break;
-        /* listen for name shouts */
+        /** listen for name shouts */
     default:
-        if (switcher == 16) /* positive affect */
+        if (switcher == 16) /** positive affect */
         {
             n_uint positive = being_affect(sim,meeter_being,1)>>7;
             if (positive>255) positive=255;
@@ -976,11 +1115,11 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
             return (n_byte)negative;
         }
     }
-    return additional_write[0]; /* no op case. Not sure if the compiler will recognize that though */
+    return additional_write[0]; /** no op case. Not sure if the compiler will recognize that though */
 }
 
 /**
- * Returns a byte value indicating how familiar the being is with a place
+ * @brief Returns a byte value indicating how familiar the being is with a place
  * @param local_being Pointer to the being
  * @param index an index number corresponding to the place
  * @return A byte value indicating the level of familiarity
@@ -1015,6 +1154,16 @@ static n_byte territory_familiarity(noble_being * local_being,
 #define IS_CONST0 (is_constant0 ? value0 : addr0[0])
 #define IS_CONST1 (is_constant1 ? value1 : addr1[0])
 
+/**
+ * @brief Two beings meet and chat, or a being engages in an internal dialogue
+ * @param sim Pointer to the simulation object
+ * @param awake Whether the being is awake
+ * @param meeter_being Pointer to the being doing the meeting
+ * @param met_being Pointer to the being which was met
+ * @param bc0 Braincode of the meeter
+ * @param bc1 Braincode of the met
+ * @param being_index Social graph index of the being which is the current focus of attention
+ */
 void brain_dialogue(
     noble_simulation * sim,
     n_byte awake,
@@ -1055,16 +1204,16 @@ void brain_dialogue(
 
     if (meeter_being == met_being)
     {
-        /* fixed number of itterations for internal dialogue */
+        /** fixed number of itterations for internal dialogue */
         max_itterations = BRAINCODE_MAX_ADDRESS/BRAINCODE_BYTES_PER_INSTRUCTION;
     }
     else
     {
-        /* variable number of itterations for chat */
+        /** variable number of itterations for chat */
         max_itterations = 8 + meeter_being->learned_preference[PREFERENCE_CHAT];
     }
 
-    /* clear episodes visited.
+    /** clear episodes visited.
        This array helps to avoid repeatedly visiting the same memories */
     for (i = 0; i < EPISODIC_SIZE; i++)
     {
@@ -1085,28 +1234,28 @@ void brain_dialogue(
 
         if (BRAINCODE_ADDRESS(i+value0) < BRAINCODE_SIZE)
         {
-            /* address within this being */
+            /** address within this being */
             addr0 = &bc0[BRAINCODE_ADDRESS(i+value0)];
         }
         else
         {
-            /* Address within the other being */
+            /** Address within the other being */
             addr0 = &bc1[BRAINCODE_ADDRESS(i+value0) - BRAINCODE_SIZE];
         }
         if (BRAINCODE_ADDRESS(i+value1) < BRAINCODE_SIZE)
         {
-            /* Address within this being */
+            /** Address within this being */
             addr1 = &bc0[BRAINCODE_ADDRESS(i+value1)];
         }
         else
         {
-            /* Address within the other being */
+            /** Address within the other being */
             addr1 = &bc1[BRAINCODE_ADDRESS(i+value1) - BRAINCODE_SIZE];
         }
 
         switch(instruction)
         {
-            /* General sensor */
+            /** General sensor */
         case BRAINCODE_SEN:
         {
             addr1[0] = brain_first_sense(sim,meeter_being, met_being, meeter_social_graph, actor_index, addr0[0]);
@@ -1120,38 +1269,38 @@ void brain_dialogue(
             n_int local_y = APESPACE_TO_MAPSPACE(being_location_y(meeter_being));
             switch (switcher)
             {
-                /* Shift attention to a different actor */
+                /** Shift attention to a different actor */
             case 0:
                 actor_index = get_actor_index(meeter_social_graph, IS_CONST1 % SOCIAL_SIZE);
-                /* store the current focus of attention */
+                /** store the current focus of attention */
                 GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
                 break;
-                /* Shift attention to a different episode */
+                /** Shift attention to a different episode */
             case 1:
                 new_episode_index = IS_CONST1 % EPISODIC_SIZE;
                 break;
-                /* Shift attention to a different territory */
+                /** Shift attention to a different territory */
             case 2:
                 territory_index = IS_CONST1;
                 GET_A(meeter_being,ATTENTION_TERRITORY) = territory_index;
                 break;
-                /* Shift attention to a body region */
+                /** Shift attention to a body region */
             case 3:
                 GET_A(meeter_being,ATTENTION_BODY) = IS_CONST1 % INVENTORY_SIZE;
                 break;
-            case 4: /* Shift attention to a similar location */
+            case 4: /** Shift attention to a similar location */
                 new_episode_index = attention_similar_place(episode_index, episodic, memory_visited);
                 break;
-            case 5: /* Shift attention to a similar time */
+            case 5: /** Shift attention to a similar time */
                 new_episode_index = attention_similar_time(episode_index, episodic, memory_visited);
                 break;
-            case 6: /* Shift attention to a similar date */
+            case 6: /** Shift attention to a similar date */
                 new_episode_index = attention_similar_date(episode_index, episodic, memory_visited);
                 break;
-            case 7: /* Shift attention to a similar name */
+            case 7: /** Shift attention to a similar name */
                 new_episode_index = attention_similar_name(episode_index, episodic, memory_visited);
                 break;
-            case 8: /* Shift attention to a similar affect */
+            case 8: /** Shift attention to a similar affect */
                 new_episode_index = attention_similar_affect(episode_index, episodic, memory_visited);
                 break;
             case 9:
@@ -1174,7 +1323,7 @@ void brain_dialogue(
                 break;
             case 15:
             {
-                /* atmosphere pressure */
+                /** atmosphere pressure */
                 n_int pressure = weather_pressure(sim->weather, POSITIVE_LAND_COORD(local_x) >> 1, POSITIVE_LAND_COORD(local_y) >> 1);
 
                 if (pressure > 100000) pressure = 100000;
@@ -1184,7 +1333,7 @@ void brain_dialogue(
             }
             case 16:
             {
-                /* wind magnitude */
+                /** wind magnitude */
                 n_int w_dx=0, w_dy=0;
                 weather_wind_vector(sim->weather, local_x, local_y, &w_dx, &w_dy);
                 if (w_dx<0) w_dx=-w_dx;
@@ -1196,26 +1345,26 @@ void brain_dialogue(
                 addr1[0] = (n_byte)(sim->land->time>>3);
                 break;
             case 18:
-                /* attention to body */
+                /** attention to body */
                 addr1[0] = GET_A(meeter_being,ATTENTION_BODY)*30;
                 break;
             case 19:
 #ifdef TERRITORY_ON
-                /* territory name */
+                /** territory name */
                 addr1[0] = meeter_being->territory[territory_index].name;
 #endif
                 break;
             case 20:
-                /* territory familiarity */
+                /** territory familiarity */
                 addr1[0] = territory_familiarity(meeter_being,territory_index);
                 break;
             case 21:
-                /* territory familiarity */
+                /** territory familiarity */
                 addr1[0] = territory_familiarity(met_being,territory_index);
                 break;
             case 22:
             {
-                /* carrying object */
+                /** carrying object */
                 n_byte2 carrying = OBJECTS_CARRIED(meeter_being,BODY_RIGHT_HAND);
                 n_byte2 obj_type=0;
 
@@ -1266,40 +1415,40 @@ void brain_dialogue(
             }
             case 23:
             {
-                /* shift attention to a given social graph entry based on relationship */
+                /** shift attention to a given social graph entry based on relationship */
                 n_int idx = social_get_relationship(meeter_being,relationship_index,sim);
                 if (idx > -1)
                 {
                     actor_index = idx;
-                    /* store the current focus of attention */
+                    /** store the current focus of attention */
                     GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
                 }
                 break;
             }
             case 24:
             {
-                /* shift attention to a different relationship type */
+                /** shift attention to a different relationship type */
                 relationship_index = 1+(addr1[0]%(OTHER_MOTHER-1));
-                /* store the current relationship attention */
+                /** store the current relationship attention */
                 GET_A(meeter_being,ATTENTION_RELATIONSHIP) = (n_byte)relationship_index;
                 break;
             }
             }
 
-            /* If attention has shifted to a new episode */
+            /** If attention has shifted to a new episode */
             if (new_episode_index>-1)
             {
                 episode_index = new_episode_index;
                 GET_A(meeter_being,ATTENTION_EPISODE) = (n_byte)episode_index;
-                /* Shift attention to the being in this episode */
+                /** Shift attention to the being in this episode */
                 possible_actor_index = get_actor_index_from_episode(meeter_social_graph,episodic,episode_index);
                 if (possible_actor_index>-1)
                 {
                     actor_index = possible_actor_index;
-                    /* store the change in attention */
+                    /** store the change in attention */
                     GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
                 }
-                /* set territory attention to the location where the episode occurred */
+                /** set territory attention to the location where the episode occurred */
                 GET_A(meeter_being,ATTENTION_TERRITORY) =
                     (APESPACE_TO_TERRITORY(episodic[episode_index].location[1])*16)+
                     APESPACE_TO_TERRITORY(episodic[episode_index].location[0]);
@@ -1310,12 +1459,12 @@ void brain_dialogue(
 
             addr1[0] = brain_third_sense(sim,meeter_being, met_being, internal, addr0[0], addr1);
             break;
-            /* Action */
+            /** Action */
         case BRAINCODE_ACT:
         {
             switch(addr0[0]%6)
             {
-                /* individual or social action */
+                /** individual or social action */
             case 0:
                 if ((awake != 0) && (addr0[0] > 127))
                 {
@@ -1330,7 +1479,7 @@ void brain_dialogue(
                     addr0[0] = 0;
                 }
                 break;
-                /* Set location goal */
+                /** Set location goal */
             case 1:
                 if (!(meeter_being->script_overrides&OVERRIDE_GOAL))
                 {
@@ -1340,7 +1489,7 @@ void brain_dialogue(
                     meeter_being->goal[3] = GOAL_TIMEOUT;
                 }
                 break;
-                /* alter friend or foe value */
+                /** alter friend or foe value */
             case 2:
             {
                 n_byte fof0=pspace[0];
@@ -1362,7 +1511,7 @@ void brain_dialogue(
                 }
                 break;
             }
-            /* alter attraction */
+            /** alter attraction */
             case 3:
             {
                 n_byte att0=addr1[0],att1=pspace[0];
@@ -1383,9 +1532,9 @@ void brain_dialogue(
                 }
                 break;
             }
-            /* alter familiarity */
+            /** alter familiarity */
             case 4:
-                /* The values 10 and 20 meetings were just found experimentally */
+                /** The values 10 and 20 meetings were just found experimentally */
                 if ((addr1[0]>100) && (addr1[0]<150))
                 {
                     if (meeter_social_graph[actor_index].familiarity < 65535)
@@ -1403,7 +1552,7 @@ void brain_dialogue(
                     }
                 }
                 break;
-                /* brainprobe frequency */
+                /** brainprobe frequency */
             case 5:
             {
                 n_int  n = pspace[0] % BRAINCODE_PROBES;
@@ -1434,7 +1583,7 @@ void brain_dialogue(
                 meeter_being->brainprobe[n].type = typ;
                 break;
             }
-            case 1: /* brainprobe address */
+            case 1: /** brainprobe address */
             {
                 n_int n = pspace[0] % BRAINCODE_PROBES;
                 n_byte adr = IS_CONST1;
@@ -1446,7 +1595,7 @@ void brain_dialogue(
                 meeter_being->brainprobe[n].address = adr;
                 break;
             }
-            case 2: /* shout out */
+            case 2: /** shout out */
             {
                 n_byte msg = addr1[0];
                 if (is_constant1)
@@ -1463,16 +1612,16 @@ void brain_dialogue(
                 {
                     meeter_being->shout[SHOUT_CTR] = SHOUT_REFRACTORY;
                     meeter_being->state |= BEING_STATE_SHOUTING;
-                    /* volume of message */
+                    /** volume of message */
                     meeter_being->shout[SHOUT_VOLUME] = pspace[0];
-                    /* type of message */
+                    /** type of message */
                     meeter_being->shout[SHOUT_CONTENT] = msg;
                     INDICATOR_INC(sim, IT_AVERAGE_SHOUTS);
 
                 }
                 break;
             }
-            case 3: /* intention */
+            case 3: /** intention */
             {
                 if (intention_episode_index != episode_index)
                 {
@@ -1485,7 +1634,7 @@ void brain_dialogue(
                 }
                 break;
             }
-            case 4: /* brainprobe offset */
+            case 4: /** brainprobe offset */
             {
                 n_int n = pspace[0] % BRAINCODE_PROBES;
                 n_byte offset = IS_CONST1;
@@ -1497,7 +1646,7 @@ void brain_dialogue(
                 meeter_being->brainprobe[n].offset = offset;
                 break;
             }
-            case 5: /* posture */
+            case 5: /** posture */
                 if (awake != 0)
                 {
                     GET_PS(meeter_being)=addr1[0];
@@ -1509,7 +1658,7 @@ void brain_dialogue(
         case BRAINCODE_ACT3:
             switch(addr0[0]%2)
             {
-                /* brainprobe position */
+                /** brainprobe position */
             case 0:
             {
                 n_int  n = pspace[0] % BRAINCODE_PROBES;
@@ -1523,7 +1672,7 @@ void brain_dialogue(
                 meeter_being->brainprobe[n].position = p;
                 break;
             }
-            /* alter learned preferences */
+            /** alter learned preferences */
             case 1:
             {
                 n_int n;
@@ -1551,12 +1700,12 @@ void brain_dialogue(
             }
             break;
             }
-            /* spread anecdote */
+            /** spread anecdote */
         case BRAINCODE_ANE:
             if (internal == 0)
             {
-                /* not internal dialogue */
-                /* avoid repeated anecdotes in the same conversation */
+                /** not internal dialogue */
+                /** avoid repeated anecdotes in the same conversation */
                 if (anecdote_episode_index != episode_index)
                 {
                     if (episodic_anecdote(sim, meeter_being, met_being)!=0)
@@ -1567,7 +1716,7 @@ void brain_dialogue(
             }
             break;
                 
-            /* Logical and */
+            /** Logical and */
         case BRAINCODE_AND:
             if (is_constant0)
             {
@@ -1578,7 +1727,7 @@ void brain_dialogue(
                 if ((addr0[0]>127) && (addr1[0]>127)) i += BRAINCODE_BYTES_PER_INSTRUCTION;
             }
             break;
-            /* Logical or */
+            /** Logical or */
         case BRAINCODE_OR:
             if (is_constant0)
             {
@@ -1589,7 +1738,7 @@ void brain_dialogue(
                 if ((addr0[0]>127) || (addr1[0]>127)) i += BRAINCODE_BYTES_PER_INSTRUCTION;
             }
             break;
-            /* Move a byte, with no particular alignment */
+            /** Move a byte, with no particular alignment */
         case BRAINCODE_MOV:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1600,7 +1749,7 @@ void brain_dialogue(
                 addr1[0] = value0;
             }
             break;
-            /* Move a block of instructions */
+            /** Move a block of instructions */
         case BRAINCODE_MVB:
         {
             n_int ptr0, ptr1, n, instructions_to_copy, dat = 0;
@@ -1652,7 +1801,7 @@ void brain_dialogue(
             }
             break;
         }
-        /* Add */
+        /** Add */
         case BRAINCODE_ADD:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1663,7 +1812,7 @@ void brain_dialogue(
                 addr1[0] += value0;
             }
             break;
-            /* Subtract */
+            /** Subtract */
         case BRAINCODE_SUB:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1674,7 +1823,7 @@ void brain_dialogue(
                 addr1[0] -= value0;
             }
             break;
-            /* Multiply */
+            /** Multiply */
         case BRAINCODE_MUL:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1685,7 +1834,7 @@ void brain_dialogue(
                 addr1[0] *= value0;
             }
             break;
-            /* Divide */
+            /** Divide */
         case BRAINCODE_DIV:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1696,7 +1845,7 @@ void brain_dialogue(
                 addr1[0] >>= (value0%4);
             }
             break;
-            /* Modulus */
+            /** Modulus */
         case BRAINCODE_MOD:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1713,7 +1862,7 @@ void brain_dialogue(
                 }
             }
             break;
-            /* Count up or down */
+            /** Count up or down */
         case BRAINCODE_CTR:
             if (addr0[0] > 127)
             {
@@ -1738,7 +1887,7 @@ void brain_dialogue(
                 }
             }
             break;
-            /* Goto */
+            /** Goto */
         case BRAINCODE_JMP:
         {
             n_int v0 = IS_CONST0;
@@ -1756,7 +1905,7 @@ void brain_dialogue(
             i = i2-BRAINCODE_BYTES_PER_INSTRUCTION;
             break;
         }
-        /* Goto if zero */
+        /** Goto if zero */
         case BRAINCODE_JMZ:
         {
             n_int v0 = IS_CONST0;
@@ -1778,7 +1927,7 @@ void brain_dialogue(
             }
             break;
         }
-        /* Goto if not zero */
+        /** Goto if not zero */
         case BRAINCODE_JMN:
         {
             n_int v0 = IS_CONST0;
@@ -1797,7 +1946,7 @@ void brain_dialogue(
             }
             break;
         }
-        /* Goto and decrement if not zero */
+        /** Goto and decrement if not zero */
         case BRAINCODE_DJN:
             if (addr0[0]-1 != 0)
             {
@@ -1814,7 +1963,7 @@ void brain_dialogue(
                 i = i2-BRAINCODE_BYTES_PER_INSTRUCTION;
             }
             break;
-            /* If two values are equal then skip the next n instructions */
+            /** If two values are equal then skip the next n instructions */
         case BRAINCODE_SEQ:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1831,7 +1980,7 @@ void brain_dialogue(
                 }
             }
             break;
-            /* If two values are not equal then skip the next n instructions */
+            /** If two values are not equal then skip the next n instructions */
         case BRAINCODE_SNE:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1848,7 +1997,7 @@ void brain_dialogue(
                 }
             }
             break;
-            /* Skip the next n instructions if less than */
+            /** Skip the next n instructions if less than */
         case BRAINCODE_SLT:
             if ((!is_constant0) && (!is_constant1))
             {
@@ -1865,11 +2014,11 @@ void brain_dialogue(
                 }
             }
             break;
-            /* No operation (data only) */
+            /** No operation (data only) */
         case BRAINCODE_DAT0:
         case BRAINCODE_DAT1:
             break;
-            /* swap */
+            /** swap */
         case BRAINCODE_SWP:
         {
             n_byte tmp = addr0[0];
@@ -1877,7 +2026,7 @@ void brain_dialogue(
             addr1[0] = tmp;
             break;
         }
-        /* invert */
+        /** invert */
         case BRAINCODE_INV:
             if (is_constant0)
             {
@@ -1888,7 +2037,7 @@ void brain_dialogue(
                 addr1[0] = 255 - addr1[0];
             }
             break;
-            /* Save to Pspace */
+            /** Save to Pspace */
         case BRAINCODE_STP:
         {
             n_byte v0 = IS_CONST0;
@@ -1896,7 +2045,7 @@ void brain_dialogue(
             pspace[v0 % BRAINCODE_PSPACE_REGISTERS] = v1;
             break;
         }
-        /* Load from Pspace */
+        /** Load from Pspace */
         case BRAINCODE_LTP:
         {
             n_byte v0 = IS_CONST0;

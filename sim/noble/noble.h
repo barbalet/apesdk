@@ -311,7 +311,7 @@ typedef struct
 n_file_chain;
 
 /** \brief new_sd stands for new sine dump and hold the sine and cosine values for the simulation */
-const static n_int	new_sd[256] =
+static const n_int	new_sd[256] =
 {
     0, 659, 1318, 1977, 2634, 3290, 3944, 4595, 5244, 5889, 6531, 7169, 7802,
     8431, 9055, 9673, 10286, 10892, 11492, 12085, 12671, 13249, 13819, 14380,

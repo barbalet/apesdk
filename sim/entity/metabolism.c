@@ -47,7 +47,7 @@
 /*NOBLEMAKE VAR=""*/
 
 /**
- * Returns a text description of the given vascular component
+ * @brief Returns a text description of the given vascular component
  * @param index Array index of the vascualr component
  * @param description Returned description
  */
@@ -131,7 +131,7 @@ const n_string metabolism_text[] =
 };
 
 /**
- * Returns a description of the given metabolism index
+ * @brief Returns a description of the given metabolism index
  * @param index Index of the metabolism component
  * @return String describing the metabolism component
  */
@@ -143,7 +143,7 @@ n_string metabolism_description(n_int index)
 #ifdef METABOLISM_ON
 
 /**
- * Simulate a compartment containing a resistor, inductor and capacitor
+ * @brief Simulate a compartment containing a resistor, inductor and capacitor
  * @param I Current
  * @param vessel Pointer to the compartment
  */
@@ -188,7 +188,7 @@ static void metabolism_vascular_compartment(n_uint I, noble_vessel * vessel)
 }
 
 /**
- * Adjust heart rate and vascular system
+ * @brief Adjust heart rate and vascular system
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @param response Positive (sympathetic) or negative (parasympathetic) response
@@ -275,7 +275,7 @@ void metabolism_vascular_response(noble_simulation * local_sim, noble_being * lo
 }
 
 /**
- * Returns the radius of a vessel for the given being
+ * @brief Returns the radius of a vessel for the given being
  * @param local_being Pointer to the being
  * @param vessel_index Index number of the vessel
  * @return Radius of the vessel
@@ -353,7 +353,7 @@ static const n_int metabolic_pathway[] =
 };
 
 /**
- * Returns if the given metabolism type is below its maximum capavity
+ * @brief Returns if the given metabolism type is below its maximum capavity
  * @param local_being Pointer to the being
  * @param index Metabolism type index
  * @return Maximum value
@@ -393,7 +393,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Decay a reaction product amount
+ * @brief Decay a reaction product amount
  * @param local_being Pointer to the being
  * @param pathway
  */ static void metabolism_decay(noble_being * local_being, n_byte2 pathway)
@@ -405,7 +405,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Set a given metabolism state as active or inactive
+ * @brief Set a given metabolism state as active or inactive
  * @param local_being Pointer to the being
  * @param state The bit to be set active or inactive
  * @param active Whether to set the state as active (1) or inactive (0)
@@ -425,7 +425,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Synthesis of milk
+ * @brief Synthesis of milk
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  */ static void metabolism_milk_synthesis(noble_simulation * local_sim, noble_being * local_being)
@@ -453,7 +453,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Regulation of hunger
+ * @brief Regulation of hunger
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  */ static void metabolism_hunger(noble_simulation * local_sim, noble_being * local_being)
@@ -501,7 +501,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Try to keep the glucose level within a range of tollerance
+ * @brief Try to keep the glucose level within a range of tollerance
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  */ static void metabolism_glucose_homeostasis(noble_simulation * local_sim, noble_being * local_being)
@@ -546,7 +546,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Dump waste products
+ * @brief Dump waste products
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  */ static void metabolism_waste_products(noble_simulation * local_sim, noble_being * local_being)
@@ -564,7 +564,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Runs through the metabolic pathways and updates the amounts for each reaction product
+ * @brief Runs through the metabolic pathways and updates the amounts for each reaction product
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  */ static void metabolism_pathways(noble_simulation * local_sim, noble_being * local_being)
@@ -685,7 +685,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Biochemistry simulation
+ * @brief Biochemistry simulation
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @param core_temp Core temperature
@@ -699,7 +699,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Respiration system
+ * @brief Respiration system
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @param core_temp Core temperature
@@ -747,7 +747,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
             GET_MT(local_being,METABOLISM_BREATHING_RATE) += 20;
         }
 
-        /* breathe more deeply */
+        /** breathe more deeply */
         if (metabolism_below_capacity(local_being, METABOLISM_LUNG_CAPACITY))
         {
             GET_MT(local_being,METABOLISM_LUNG_CAPACITY) += 10;
@@ -762,7 +762,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
             GET_MT(local_being,METABOLISM_BREATHING_RATE) += 10;
         }
 
-        /* breathe more deeply */
+        /** breathe more deeply */
         if (metabolism_below_capacity(local_being, METABOLISM_LUNG_CAPACITY))
         {
             GET_MT(local_being,METABOLISM_LUNG_CAPACITY) += 5;
@@ -776,7 +776,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
             GET_MT(local_being,METABOLISM_BREATHING_RATE) -= 10;
         }
 
-        /* decrease breathing depth */
+        /** decrease breathing depth */
         if (GET_MT(local_being,METABOLISM_LUNG_CAPACITY) >= MIN_LUNG_CAPACITY(local_being))
         {
             GET_MT(local_being,METABOLISM_LUNG_CAPACITY) -= 10;
@@ -800,7 +800,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Updates body temperature and returns the core temperature in C x 1000
+ * @brief Updates body temperature and returns the core temperature in C x 1000
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @return Core temperature
@@ -905,7 +905,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Update blood pressure and flow rate.
+ * @brief Update blood pressure and flow rate.
  * Based on "Simulating of Human Cardiovascular System
  * and Blood Vessel Obstruction Using Lumped Method" by
  * Mohammad Reza Mirzaee, Omid Ghasemalizadeh and Bahar Firoozabadi
@@ -991,7 +991,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Update metabolism
+ * @brief Update metabolism
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  */ void metabolism_cycle(noble_simulation * local_sim, noble_being * local_being)
@@ -1009,7 +1009,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Initialize vascular system.
+ * @brief Initialize vascular system.
  * Based on "Simulating of Human Cardiovascular System
  * and Blood Vessel Obstruction Using Lumped Method" by
  * Mohammad Reza Mirzaee, Omid Ghasemalizadeh and Bahar Firoozabadi
@@ -1017,6 +1017,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  */ void metabolism_init(noble_being * local_being)
 {
     n_uint i;
+    const n_uint fields = 5;
 
     /**
       l = length (cm x 1000)
@@ -1060,13 +1061,13 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 
     for (i=0; i<VASCULAR_SIZE; i++)
     {
-        local_being->vessel[i].length = (n_byte2)vascular_params[i*5];
-        local_being->vessel[i].thickness = (n_byte2)vascular_params[i*5+1];
-        local_being->vessel[i].radius = (n_byte2)vascular_params[i*5+2];
-        local_being->vessel[i].elasticity = (n_byte2)vascular_params[i*5+3];
-        if (vascular_params[i*5+4] > 0)
+        local_being->vessel[i].length = (n_byte2)vascular_params[i*fields];
+        local_being->vessel[i].thickness = (n_byte2)vascular_params[i*fields+1];
+        local_being->vessel[i].radius = (n_byte2)vascular_params[i*fields+2];
+        local_being->vessel[i].elasticity = (n_byte2)vascular_params[i*fields+3];
+        if (vascular_params[i*fields+4] > 0)
         {
-            local_being->vessel[i].parent = (n_byte2)vascular_params[i*5+4]-1;
+            local_being->vessel[i].parent = (n_byte2)vascular_params[i*fields+4]-1;
         }
         else
         {
@@ -1103,7 +1104,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Suckling behavior
+ * @brief Suckling behavior
  * @param sim Pointer to the simulation
  * @param child Pointer to the child being
  * @param mother Pointer to the mother being
@@ -1121,7 +1122,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 }
 
 /**
- * Ingest various food types
+ * @brief Ingest various food types
  * @param local_being Pointer to the being
  * @param food_type Type of food being eaten
  */ void metabolism_eat(noble_being * local_being,

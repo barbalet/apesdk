@@ -36,12 +36,12 @@
 #include "entity.h"
 #include "entity_internal.h"
 
-/* working on the real solution */
+/** working on the real solution */
 
 #include <stdio.h>
 #include <stdlib.h>
 
-/* the sound lengths vary from:
+/** the sound lengths vary from:
  
  (8k)  0.185 sec to
  (16k) 0.371 sec to
@@ -132,14 +132,14 @@ static void speak_freq(n_int * high, n_int * low, n_byte value)
         low[1] = low_freq[loop  ]; low[0] = 1;
         low[3] = low_freq[loop+1]; low[2] = 2;
 
-        if (loop < 4) /* vowel */
+        if (loop < 4) /**< vowel */
         {
             high[0] = set_frequencies[vowel_reorder[loop]];     high[1] = 600000;
             high[2] = set_frequencies[vowel_reorder[loop+1]];   high[3] = 300000;
             high[4] = set_frequencies[vowel_reorder[loop+2]+2]; high[5] = 200000;
             high[6] = set_frequencies[vowel_reorder[loop+4]+3]; high[7] =  50000;
         }
-        else /*consonant */
+        else /**< consonant */
         {
             high[0] = set_frequencies[consonant_reorder[loop-4]];   high[1] = 600000;
             high[2] = set_frequencies[consonant_reorder[loop-2]+3]; high[3] = 400000;

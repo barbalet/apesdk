@@ -45,51 +45,51 @@
 
 /*NOBLEMAKE END=""*/
 
-/* Status preference */
+/** Status preference */
 
 #define GENE_STATUS_PREFERENCE(gene)        GENE_VAL_REG(gene, 15, 12, 10, 1)
 
-/* Pigmentation preference */
+/** Pigmentation preference */
 
 #define GENE_PIGMENTATION_PREFERENCE(gene)  GENE_VAL_REG(gene, 5, 3, 11, 4)
 
-/* mating preference for height */
+/** mating preference for height */
 
 #define GENE_HEIGHT_PREFERENCE(gene)        GENE_VAL_REG(gene, 9, 8, 14, 10)
 
 
-/* mating preference for frame */
+/** mating preference for frame */
 
 #define GENE_FRAME_PREFERENCE(gene)         GENE_VAL_REG(gene, 9, 0, 8, 2)
 
 
-/* mating preference for hair length */
+/** mating preference for hair length */
 
 #define GENE_HAIR_PREFERENCE(gene)          GENE_VAL_REG(gene, 10, 7, 14, 15)
 
-/* Groom */
+/** Groom */
 
 #define GENE_GROOM(gene)                    GENE_VAL_REG(gene, 14, 2, 5, 10)
 
-/* Aggression */
+/** Aggression */
 
 #define GENE_AGGRESSION(gene)               GENE_VAL_REG(gene, 11, 3, 5, 0)
 
-/* Mate bond */
+/** Mate bond */
 
 #define GENE_MATE_BOND(gene)                GENE_VAL_REG(gene, 10, 2, 4, 0)
 
-/* Degree of aversion to incest */
+/** Degree of aversion to incest */
 
 #define GENE_INCEST_AVERSION(gene)          GENE_VAL_REG(gene, 10, 8, 4, 9)
 
-/* Latent energy use */
+/** Latent energy use */
 
 #define GENE_LATENT_ENERGY_USE(gene)        GENE_VAL_REG(gene, 14, 3, 6, 10)
 
 
 /**
- * Returns a string for the name of the ape in the given social graph array index.
+ * @brief Returns a string for the name of the ape in the given social graph array index.
  * @param local_sim Pointer to the simulation
  * @param localbeing Pinter to the ape
  * @param social_graph_index Array index within the social graph
@@ -125,11 +125,11 @@ void social_graph_link_name(
             break;
         }
     case ENTITY_BEING_GROUP:
-        /* TODO*/
+        /** TODO*/
     case ENTITY_OBJECT:
-        /* TODO */
+        /** TODO */
     case ENTITY_TERRITORY:
-        /* TODO */
+        /** TODO */
     default:
             (void)SHOW_ERROR("Unimplemented entity type");
         break;
@@ -137,7 +137,7 @@ void social_graph_link_name(
 }
 
 /**
- * Align learned preferences with another ape, depending upon
+ * @brief Align learned preferences with another ape, depending upon
  * whether it is part of the ingroup or outgroup.
  * @param local_sim Pointer to the simulation
  * @param meeter_being Pointer to the ape doing the meeting
@@ -195,7 +195,7 @@ static void social_group_align_preferences(
 }
 
 /**
- * What is the pigmentation attractiveness of met ape to the meeter being ?
+ * @brief What is the pigmentation attractiveness of met ape to the meeter being ?
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @return Attractiveness value
@@ -296,7 +296,7 @@ static n_int social_attraction_height(
 }
 
 /**
- * What is the frame attractiveness of the met ape to the meeter being ?
+ * @brief What is the frame attractiveness of the met ape to the meeter being ?
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @return Attractiveness value
@@ -332,7 +332,7 @@ static n_int social_attraction_frame(
 }
 
 /**
- * What is the pheromone attractiveness of the met ape to the meeter being ?
+ * @brief What is the pheromone attractiveness of the met ape to the meeter being ?
  * Pheromone attraction is inversely proportional to genetic similarity.
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
@@ -367,7 +367,7 @@ static n_int social_attraction_pheromone(
 }
 
 /**
- * If two beings have previously met return the social graph index
+ * @brief If two beings have previously met return the social graph index
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @param sim Pointer to the simulation
@@ -404,7 +404,7 @@ n_int get_social_link(
 }
 
 /**
- * Returns the social graph index for the least familiar ape
+ * @brief Returns the social graph index for the least familiar ape
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @param sim Pointer to the simulation
@@ -458,7 +458,7 @@ static n_int get_stranger_link(
 }
 
 /**
- * When two beings meet this updates the social graph
+ * @brief When two beings meet this updates the social graph
  * @param meeter_being Pointer to the being doing the meeting
  * @param met_being Pointer to the being who was met
  * @param sim Pointer to the simulation
@@ -575,7 +575,7 @@ static n_int social_meet(
 }
 
 /**
- * Returns the social graph index of the given relationship type.
+ * @brief Returns the social graph index of the given relationship type.
  * This can be used for example to search for the father of an
  * ape within the social graph.
  * @param meeter_being Pointer to the ape
@@ -612,7 +612,7 @@ n_int social_get_relationship(
 }
 
 /**
- * Set the relationship type between two apes
+ * @brief Set the relationship type between two apes
  * @param meeter_being Pointer to the ape doing the meeting
  * @param relationship The type of relationship
  * @param met_being Pointer to the ape being met
@@ -649,7 +649,7 @@ n_int social_set_relationship(noble_being * meeter_being,
 }
 
 /**
- * When two apes meet within a given maximum range
+ * @brief When two apes meet within a given maximum range
  * this updates the social graph of both.
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
@@ -674,7 +674,7 @@ n_int social_network(
 #ifdef PARASITES_ON
 
 /**
- * Grooming behavior
+ * @brief Grooming behavior
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @param distance Distance between the apes
@@ -771,8 +771,6 @@ n_byte social_groom(
             GET_A(meeter_being, ATTENTION_BODY) = groomloc;
 
             INDICATOR_INC(sim, IT_AVERAGE_GROOMING);
-            
-            /* question for Bob: should the grooming experience be this mutual? */
             episodic_interaction(sim, meeter_being, met_being, EVENT_GROOM, AFFECT_GROOM, groomloc);
             episodic_interaction(sim, met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);
 
@@ -819,7 +817,7 @@ n_byte social_groom(
 #endif
 
 /**
- * Squabbling and fighting
+ * @brief Squabbling and fighting
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @param distance Distance between the apes
@@ -965,7 +963,7 @@ n_byte2 social_squabble(
 }
 
 /**
- * Returns the average friend or foe value
+ * @brief Returns the average friend or foe value
  * @param sim Pointer to the simulation
  * @param local_being Pointer to the ape
  * @return The average friend or foe value for all social graph entries
@@ -998,7 +996,7 @@ n_uint social_respect_mean(
 }
 
 /**
- * Update for a conception event. This stores the date,
+ * @brief Update for a conception event. This stores the date,
  * details of the father and resets drives and goals.
  * @param female Pointer to the mother
  * @param male Pointer to the father
@@ -1050,7 +1048,7 @@ static void social_conception(
 }
 
 /**
- * Mating behavior
+ * @brief Mating behavior
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape whi is being met
  * @param today The current date
@@ -1155,7 +1153,7 @@ n_int social_mate(
 }
 
 /**
- * When two beings meet agree on the name for the current territory
+ * @brief When two beings meet agree on the name for the current territory
  * @param meeter_being Pointer to the being doing the meeting
  * @param met_being Pointer to the being whi is being met
  * @param being_index Array index for the met individual within the social graph of the meeter
@@ -1228,7 +1226,7 @@ static void social_chat_territory(
 }
 
 /**
- * Dialogue between beings
+ * @brief Dialogue between beings
  * @param meeter_being Pointer to the being doing the meeting
  * @param met_being Pointer to the being which is being met
  * @param being_index Array index for the met individual within the social graph of the meeter
@@ -1411,7 +1409,7 @@ n_int social_chat(
 }
 
 /**
- * Goal oriented behavior
+ * @brief Goal oriented behavior
  * @param local Pointer to the ape
  * @param loc_f The direction facing
  * @return The new direction facing
@@ -1520,6 +1518,11 @@ static void sim_social_initial_no_return(noble_simulation * local, noble_being *
     vect2_back_byte2(&location,(n_byte2 *)&(local_being->social_nx));
 }
 
+/**
+ * @brief
+ * @param local Pointer to the simulation object
+ * @param local_being Pointer to the being
+ */
 static void sim_social_secondary_no_return(noble_simulation * local, noble_being * local_being)
 {
     local_being->social_x = local_being->social_nx;
@@ -1527,7 +1530,7 @@ static void sim_social_secondary_no_return(noble_simulation * local, noble_being
 }
 
 /**
- * This is the spatial social simulation
+ * @brief This is the spatial social simulation
  * @param local Pointer to the ape
  */
 void sim_social(noble_simulation * local)

@@ -126,7 +126,10 @@ void graph_vascular(noble_being * being,
                     n_int img_width, n_int img_height,
                     n_int tx, n_int ty, n_int bx, n_int by,
                     n_byte thickness,
-                    n_byte clear);
+                    n_byte clear,
+                    n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
+                    n_int hip_angle, n_int knee_angle,
+                    n_byte show_skeleton_keypoints);
 
 n_int draw_toggle_weather(void);
 

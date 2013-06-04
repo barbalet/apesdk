@@ -62,34 +62,34 @@
 #define GENEALOGY_EVENT_DEATH "E2"
 #define GENEALOGY_YEAR_ZERO   1900
 
-/* Genealogy format GenXML 2.0
+/** Genealogy format GenXML 2.0
  http://cosoft.org/genxml */
 
 #define	WALK_ON_WATER(pz,w)	(((pz)<w) ? w : (pz))
 
-/* Swim - better or worse at swimming both speed and energy use */
+/** Swim - better or worse at swimming both speed and energy use */
 
 #define GENE_SWIM(gene)                     GENE_VAL_REG(gene, 9, 11, 13, 7)
 
-/* Speed on land - faster v. slower */
+/** Speed on land - faster v. slower */
 
 #define GENE_SPEED(gene)                    GENE_VAL_REG(gene, 14, 5, 12, 10)
 
-/* Control on random wander - more or less random wander */
+/** Control on random wander - more or less random wander */
 
 #define GENE_STAGGER(gene)                  GENE_VAL_REG(gene, 12, 14, 3, 11)
 
-/* Hill climbing - improved energy use for climbing */
+/** Hill climbing - improved energy use for climbing */
 
 #define GENE_HILL_CLIMB(gene)               GENE_VAL_REG(gene, 4, 6, 5, 2)
 
-/* checks the being's line of sight to a point
+/** checks the being's line of sight to a point
 
 	NB: As the direction of scanning can't be determined, the breaking sight point
         can't be detected through tracking the being_ground results.
 */
 
-/* returning 0 - not in line of sight, 1 - in line of sight */
+/** returning 0 - not in line of sight, 1 - in line of sight */
 
 typedef	struct
 {
@@ -232,6 +232,12 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
     }
 }
 
+/**
+ * @brief Applies a function to each being in the simulation
+ * @param sim Pointer to the simulation object
+ * @param bnr_func The function to be applied
+ */
+
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
 {
     n_uint loop = 0;
@@ -243,6 +249,13 @@ void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
     }
 }
 
+/**
+ * @brief Check if a being is on ground or in water
+ * @param px x coordinate of the being location
+ * @param py y coordinate of the being location
+ * @param params
+ * @return 1 if on ground, 0 otherwise
+ */
 static n_byte	being_ground(n_int px, n_int py, void * params)
 {
     being_draw * being_pixel = (being_draw *) params;
@@ -273,7 +286,7 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
             return 0;
     }
 
-    /* check trivial case first - self aware */
+    /** check trivial case first - self aware */
 
     if ((delta.x == 0) && (delta.y == 0))
     {
@@ -288,7 +301,7 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     }
 
 
-    /* move everything from being co-ordinates to map co-ordinates */
+    /** move everything from being co-ordinates to map co-ordinates */
     start.x = APESPACE_TO_MAPSPACE(start.x);
     start.y = APESPACE_TO_MAPSPACE(start.y);
     delta.x = APESPACE_TO_MAPSPACE(delta.x);
@@ -338,7 +351,12 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     return 1;
 }
 
-/* return the being object with the given name */
+/**
+ * @brief return the being array index with the given name
+ * @param sim Pointer to the simulation object
+ * @param name Name of the being
+ * @return Array index of the being within the simulation object
+ */
 static n_uint being_num_from_name(noble_simulation * sim, n_string name)
 {
     n_int i;
@@ -393,7 +411,12 @@ n_string being_get_select_name(noble_simulation * sim)
     return (n_string)name;
 }
 
-/* return the being object with the given name */
+/**
+ * @brief return the being object with the given name
+ * @param sim Pointer to the simulation object
+ * @param name Name of the being
+ * @return Pointer to the being, or NO_BEINGS_FOUND
+ */
 noble_being * being_from_name(noble_simulation * sim, n_string name)
 {
     n_uint response = being_num_from_name(sim, name);
@@ -513,7 +536,7 @@ static void being_immune_seed(noble_being * mother, noble_being * child)
     noble_immune_system * immune_mother = &(mother->immune_system);
     noble_immune_system * immune_child = &(child->immune_system);
 
-    /* child acquires mother's antibodies */
+    /** child acquires mother's antibodies */
     for (i=0; i<IMMUNE_POPULATION; i++)
     {
         immune_child->shape_antibody[i]=immune_mother->shape_antibody[i];
@@ -557,10 +580,10 @@ void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, 
     noble_immune_system * immune0 = &(meeter_being->immune_system);
     noble_immune_system * immune1 = &(met_being->immune_system);
 
-    /* pathogen obtained from environment */
+    /** pathogen obtained from environment */
     being_acquire_pathogen(meeter_being, transmission_type);
 
-    /* pathogen transmitted between beings */
+    /** pathogen transmitted between beings */
     math_random3(local_random);
     if (local_random[0] < PATHOGEN_TRANSMISSION_PROB)
     {
@@ -569,7 +592,7 @@ void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, 
         if ((immune0->antigens[i]>0) &&
                 (PATHOGEN_TRANSMISSION(immune0->shape_antigen[i])==transmission_type))
         {
-            /* does the other being already carry this pathogen ? */
+            /** does the other being already carry this pathogen ? */
             for (j = 0; j < IMMUNE_ANTIGENS; j++)
             {
                 if (immune0->shape_antigen[i]==immune1->shape_antigen[j])
@@ -583,7 +606,7 @@ void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, 
                 j = local_random[1]%IMMUNE_ANTIGENS;
                 if (immune1->antigens[j]<=MIN_ANTIGENS)
                 {
-                    /* spread pathogen */
+                    /** spread pathogen */
                     immune1->shape_antigen[j]=immune0->shape_antigen[i];
                 }
             }
@@ -602,7 +625,7 @@ static void being_immune_response(noble_being * local)
     n_byte2 * local_random = local->seed;
     noble_immune_system * immune = &(local->immune_system);
 
-    /* antibodies die at some fixed rate */
+    /** antibodies die at some fixed rate */
     math_random3(local_random);
     if (local_random[0]<ANTIBODY_DEPLETION_PROB)
     {
@@ -613,12 +636,12 @@ static void being_immune_response(noble_being * local)
         }
     }
 
-    /* pick an antigen */
+    /** pick an antigen */
     math_random3(local_random);
     i = local_random[0]%IMMUNE_ANTIGENS;
     if (immune->antigens[i] != 0)
     {
-        /* mutate with some probability */
+        /** mutate with some probability */
         if (local_random[1]<PATHOGEN_MUTATION_PROB)
         {
             math_random3(local_random);
@@ -632,7 +655,7 @@ static void being_immune_response(noble_being * local)
             }
         }
 
-        /* try to find a matching antibody */
+        /** try to find a matching antibody */
         max_bits_matched=0;
         best_match=0;
         for (j = 0; j < IMMUNE_POPULATION; j++)
@@ -641,7 +664,7 @@ static void being_immune_response(noble_being * local)
                     ((~immune->shape_antibody[j]) & (~immune->shape_antigen[i]));
             if (match!=0)
             {
-                /* how good is the fit ? */
+                /** how good is the fit ? */
                 bits_matched=0;
                 for (bit=0; bit<8; bit++)
                 {
@@ -650,7 +673,7 @@ static void being_immune_response(noble_being * local)
                         bits_matched++;
                     }
                 }
-                /* record best fit */
+                /** record best fit */
                 if (bits_matched>max_bits_matched)
                 {
                     max_bits_matched=bits_matched;
@@ -659,7 +682,7 @@ static void being_immune_response(noble_being * local)
             }
         }
 
-        /* select the antibody with the smallest population */
+        /** select the antibody with the smallest population */
         min_antibodies=immune->antibodies[0];
         j=0;
         for (k=1; k<IMMUNE_POPULATION; k++)
@@ -671,22 +694,22 @@ static void being_immune_response(noble_being * local)
             }
         }
 
-        /* match antigen and antibody */
+        /** match antigen and antibody */
         if (max_bits_matched>IMMUNE_FIT)
         {
-            /* Antibodies multiply
+            /** Antibodies multiply
              A better fit results in more antibodies */
             if (immune->antibodies[best_match]<255-max_bits_matched)
             {
                 immune->antibodies[best_match]+=(n_byte)max_bits_matched;
-                /* apply a minimum threshold so that generated
+                /** apply a minimum threshold so that generated
                  antibodies don't overwrite known good fits */
                 if (immune->antibodies[best_match]<MIN_ANTIBODIES)
                 {
                     immune->antibodies[best_match]=MIN_ANTIBODIES;
                 }
             }
-            /* antigens are depleted according to the immune system strength */
+            /** antigens are depleted according to the immune system strength */
             if (immune->antigens[i]>IMMUNE_STRENGTH(local))
             {
                 immune->antigens[i]-=IMMUNE_STRENGTH(local);
@@ -695,7 +718,7 @@ static void being_immune_response(noble_being * local)
             {
                 immune->antigens[i]=0;
             }
-            /* clone antibody with mutation */
+            /** clone antibody with mutation */
             if (j!=best_match)
             {
                 immune->antibodies[j]=1;
@@ -714,13 +737,13 @@ static void being_immune_response(noble_being * local)
         }
         else
         {
-            /* If pathogens are not challenged they multiply */
+            /** If pathogens are not challenged they multiply */
             if (immune->antigens[i]<255)
             {
                 immune->antigens[i]++;
             }
 
-            /* produce differently shaped antibodies */
+            /** produce differently shaped antibodies */
             math_random3(local_random);
             if (local_random[0]<ANTIBODY_GENERATION_PROB(local))
             {
@@ -731,7 +754,7 @@ static void being_immune_response(noble_being * local)
         }
     }
 
-    /* Energy level is reduced based upon pathogens.
+    /** Energy level is reduced based upon pathogens.
      Note that not all pathogens have the same energy cost. */
     total_antigens=0;
     max_severity=0;
@@ -820,7 +843,7 @@ noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_by
     return 0L;
 }
 
-/* returns the total positive and negative affect within memory */
+/** returns the total positive and negative affect within memory */
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive)
 {
     n_uint affect = 0;
@@ -1244,7 +1267,7 @@ n_int episode_description(
     return social;
 }
 
-/* Surname = 64, Male = 256, Female = 256 */
+/** Surname = 64, Male = 256, Female = 256 */
 const n_string EnglishNames[576] =
 {
     "Adams","Allen","Bailey","Baker","Barnes","Bell","Brooks","Brown","Butler","Clark","Cook","Cooper","Davies","Davis","Evans",
@@ -1400,36 +1423,36 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
         return FULLY_ASLEEP;
     }
     
-    /* if it is not night, the being is fully awake */
+    /** if it is not night, the being is fully awake */
     if(IS_NIGHT(land->time) == 0)
     {
         return FULLY_AWAKE;
     }
 
-    /* if it  night the being is... */
+    /** if it  night the being is... */
 
-    /* ... fully awake to swim */
+    /** ... fully awake to swim */
 
     if(WATER_TEST(QUICK_LAND(land, APESPACE_TO_MAPSPACE(being_location_x(local)), APESPACE_TO_MAPSPACE(being_location_y(local))),land->tide_level))
     {
         return FULLY_AWAKE;
     }
 
-    /* ... slightly awake to eat */
+    /** ... slightly awake to eat */
 
     if(local_energy < BEING_HUNGRY)
     {
         return SLIGHTLY_AWAKE;
     }
 
-    /* ... slightly awake to slow down */
+    /** ... slightly awake to slow down */
 
     if(being_speed(local) > 0)
     {
         return SLIGHTLY_AWAKE;
     }
 
-    /* ... asleep */
+    /** ... asleep */
 
     return FULLY_ASLEEP;
 }
@@ -1438,7 +1461,7 @@ n_byte being_awake_local(noble_simulation * sim, noble_being * local)
 
 n_int brain_probe_to_location(n_int position)
 {
-    /* could have a more interesting translation */
+    /** could have a more interesting translation */
     return ((position * (SINGLE_BRAIN>>8))) % SINGLE_BRAIN;
 }
 
@@ -1446,7 +1469,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 {
     n_byte * brain_point = GET_B(sim, local);
     n_int    i, inputs = 0, outputs = 0;
-	/* count the inputs and outputs */
+    /** count the inputs and outputs */
     for (i=0; i<BRAINCODE_PROBES; i++)
     {
         if (local->brainprobe[i].type == INPUT_SENSOR)
@@ -1458,7 +1481,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
             outputs++;
         }
     }
-    /* check to ensure that there are a minimum number of sensors and actuators */
+    /** check to ensure that there are a minimum number of sensors and actuators */
     if (inputs < (BRAINCODE_PROBES>>2))
     {
         local->brainprobe[0].type = INPUT_SENSOR;
@@ -1470,13 +1493,13 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 			local->brainprobe[0].type = OUTPUT_ACTUATOR;
 		}
 	}
-	/* update each probe */
+	/** update each probe */
     for (i=0; i<BRAINCODE_PROBES; i++)
     {
 		local->brainprobe[i].state++;		
 		if (local->brainprobe[i].state >= local->brainprobe[i].frequency)
         {
-			/* position within the brain */
+			/** position within the brain */
 			n_int n1 = brain_probe_to_location(local->brainprobe[i].position);
             
 			local->brainprobe[i].state = 0;
@@ -1484,15 +1507,15 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 			if (local->brainprobe[i].type == INPUT_SENSOR)
             {
                 n_byte * local_braincode = GET_BRAINCODE_INTERNAL(sim,local);
-				/* address within braincode */
+				/** address within braincode */
 				n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
                 n_int n3 = (brain_point[n1] + local->brainprobe[i].offset)&255;
-				/* read from brain */
+				/** read from brain */
                 local_braincode[n2] = (n_byte)n3;
             }
 			else
             {
-				/* write to brain */
+				/** write to brain */
 				brain_point[n1] = 255;
 			}
 		}
@@ -1501,7 +1524,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 
 #endif
 
-/* stuff still goes on during sleep */
+/** stuff still goes on during sleep */
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
     /* By default return towards a resting state */
@@ -1512,7 +1535,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     being_immune_response(local);
 
 #ifdef BRAINCODE_ON
-    /* may need to add external probe linking too */
+    /** may need to add external probe linking too */
     if (GET_B(sim,local))
     {
         update_brain_probes(sim, local);
@@ -1540,7 +1563,7 @@ static void being_create_family_links(noble_being * mother,
 
     if (mother==0L) return;
 
-    /* First tow entries in the array are parents.
+    /** First tow entries in the array are parents.
        Subsequent entries are grandparents */
     parent[0] = mother;
     parent[1] = being_find_name(sim, mother->father_name[0], mother->father_name[1]);
@@ -1560,23 +1583,23 @@ static void being_create_family_links(noble_being * mother,
     child_relation[5] = RELATIONSHIP_PATERNAL_GRANDMOTHER;
 
 
-    /* grandparents */
-    for (j = 0; j < 2; j++) /* maternal or paternal */
+    /** grandparents */
+    for (j = 0; j < 2; j++) /** maternal or paternal */
     {
         if (parent[j])
         {
-            /* social graph for mother or father */
+            /** social graph for mother or father */
             parent_social_graph = GET_SOC(sim, parent[j]);
             if (parent_social_graph)
             {
-                for (i = 0; i < 2; i++) /* grandmother or grandfather */
+                for (i = 0; i < 2; i++) /** grandmother or grandfather */
                 {
                     parent[2+(j*2)+i] = 0L;
-                    /* graph index for parent's mother or father */
+                    /** graph index for parent's mother or father */
                     index = social_get_relationship(parent[j],RELATIONSHIP_MOTHER+i,sim);
                     if ((index > -1) && (parent_social_graph != 0L))
                     {
-                        /* store the grandparent reference if still living */
+                        /** store the grandparent reference if still living */
                         parent[2+(j*2)+i] =
                             being_find_name(sim,
                                             parent_social_graph[index].first_name[BEING_MET],
@@ -1587,7 +1610,7 @@ static void being_create_family_links(noble_being * mother,
         }
     }
 
-    /* brothers and sisters */
+    /** brothers and sisters */
     sibling_relation = RELATIONSHIP_BROTHER;
     if (FIND_SEX(GET_I(child)) == SEX_FEMALE)
     {
@@ -1596,7 +1619,7 @@ static void being_create_family_links(noble_being * mother,
 
     for (j = 0; j < 2; j++)
     {
-        /* social graph for mother or father */
+        /** social graph for mother or father */
         if (parent[j])
         {
             parent_social_graph = GET_SOC(sim, parent[j]);
@@ -1626,12 +1649,12 @@ static void being_create_family_links(noble_being * mother,
         }
     }
 
-    /* set relationships */
+    /** set relationships */
     for (i = 0; i < 6; i++)
     {
         if (parent[i]==0L) continue;
 
-        /* create the parent/child social graph relation */
+        /** create the parent/child social graph relation */
         if (FIND_SEX(GET_I(child)) == SEX_FEMALE)
         {
             social_set_relationship(parent[i], parent_relation[i], child, sim);
@@ -1681,7 +1704,7 @@ static int being_follow(noble_simulation * sim,
     *opposite_sex = NO_BEINGS_FOUND;
     *same_sex = NO_BEINGS_FOUND;
 
-    /* is a mate in view? */
+    /** is a mate in view? */
     if (local->goal[0]==GOAL_MATE)
     {
         for (i = 0; i < sim->num; i++)
@@ -1774,7 +1797,7 @@ static void being_listen(noble_simulation * sim,
     n_vect2       difference_vector;
     n_uint        compare_distance;
 
-    /* clear shout values */
+    /** clear shout values */
     local->shout[SHOUT_CONTENT] = 0;
     local->shout[SHOUT_HEARD] = 0;
     if (local->shout[SHOUT_CTR] > 0)
@@ -1789,7 +1812,7 @@ static void being_listen(noble_simulation * sim,
 
             being_delta(local, other, &difference_vector);
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
-            /* listen for the nearest shout out */
+            /** listen for the nearest shout out */
             if ((other->state&BEING_STATE_SHOUTING) &&
                     (compare_distance < SHOUT_RANGE) &&
                     (other->shout[SHOUT_VOLUME] > max_shout_volume))
@@ -1838,7 +1861,7 @@ static int being_closest(noble_simulation * sim,
             noble_being	* test_being = &being_buffer[loop];
             n_int         los_previously_calculated = 0;
             n_int         result_los = 0;
-            /* check distance before line of sight */
+            /** check distance before line of sight */
             n_vect2       difference_vector;
             n_uint         compare_distance;
 
@@ -1865,7 +1888,7 @@ static int being_closest(noble_simulation * sim,
                     }
                 }
             }
-            /* '<' : signed/unsigned mismatch */
+            /** '<' : signed/unsigned mismatch */
             if ( compare_distance < *same_sex_distance )
             {
                 if (FIND_SEX(GET_I(test_being)) == local_is_female)
@@ -1923,7 +1946,7 @@ static void being_interact(noble_simulation * sim,
 
         n_vect2 delta_vector;
 
-        /* social networking */
+        /** social networking */
         n_byte2 familiarity=0;
         n_int   being_index = social_network(local, other_being, other_being_distance, sim);
 
@@ -2414,7 +2437,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 }
 
 
-/* initialise inner or outer braincode */
+/** initialise inner or outer braincode */
 void being_init_braincode(noble_simulation * sim,
                           noble_being * local,
                           noble_being * other,
@@ -2427,7 +2450,7 @@ void being_init_braincode(noble_simulation * sim,
 
     if (other==0L)
     {
-        /* initially seed the brain with instructions which are random but genetically biased */
+        /** initially seed the brain with instructions which are random but genetically biased */
         for (ch = 0; ch < BRAINCODE_SIZE; ch+=3)
         {
             math_random3(local_random);
@@ -2455,7 +2478,7 @@ void being_init_braincode(noble_simulation * sim,
     }
     else
     {
-        /* initialise based upon a similar being */
+        /** initialise based upon a similar being */
         graph = GET_SOC(sim, local);
 
         if (graph == 0L)
@@ -2467,7 +2490,7 @@ void being_init_braincode(noble_simulation * sim,
         min=99999;
         actor_index = GET_A(local,ATTENTION_ACTOR);
 
-        /* Find the entry in the social graph with the most similar friend or foe value.
+        /** Find the entry in the social graph with the most similar friend or foe value.
            The FOF value is used because when two beings meet for the first time this
            value is calculated based upon a variety of genetic and learned dispositions.
            Notice also that the search includes index zero, which is the self. */
@@ -2492,12 +2515,12 @@ void being_init_braincode(noble_simulation * sim,
             }
         }
 
-        /* Copy braincode for the most similar individual */
+        /** Copy braincode for the most similar individual */
         io_copy(graph[most_similar_index].braincode, graph[actor_index].braincode, BRAINCODE_SIZE);
     }
 }
 
-/* Assign a unique name to the given being, based upon the given family names */
+/** Assign a unique name to the given being, based upon the given family names */
 
 static n_int being_set_unique_name(noble_simulation * sim,
                                    noble_being * local_being,
@@ -2511,12 +2534,12 @@ static n_int being_set_unique_name(noble_simulation * sim,
     n_byte2 possible_first_name;
     n_byte2 local_random[2];
 
-    /* random number initialization */
+    /** random number initialization */
     local_random[0] = (n_byte2)(random_factor & 0xffff);
     local_random[1] = (n_byte2)(random_factor & 0xffff);
     math_random3(local_random);
 
-    /* if no mother and father are specified then randomly create names */
+    /** if no mother and father are specified then randomly create names */
     if ((mother_family_name==0) &&
             (father_family_name==0))
     {
@@ -2528,12 +2551,12 @@ static n_int being_set_unique_name(noble_simulation * sim,
                             (math_random(local_random) & FAMILY_NAME_AND_MOD));
     }
 
-    /* conventional family name */
+    /** conventional family name */
     possible_family_name =
         GET_NAME_FAMILY(UNPACK_FAMILY_FIRST_NAME(mother_family_name),
                         UNPACK_FAMILY_SECOND_NAME(father_family_name));
 
-    /* avoid the same two family names */
+    /** avoid the same two family names */
     if (UNPACK_FAMILY_FIRST_NAME(mother_family_name) ==
             UNPACK_FAMILY_SECOND_NAME(father_family_name))
     {
@@ -2544,17 +2567,17 @@ static n_int being_set_unique_name(noble_simulation * sim,
 
     while ((found == 0) && (samples < 2048))
     {
-        /* choose a first_name at random */
+        /** choose a first_name at random */
         possible_first_name = (math_random(local_random) & 255) | (FIND_SEX(GET_I(local_being))<<8);
 
         if (samples == 1024)
         {
-            /* switch naming order */
+            /** switch naming order */
             possible_family_name =
                 GET_NAME_FAMILY(UNPACK_FAMILY_SECOND_NAME(mother_family_name),
                                 UNPACK_FAMILY_FIRST_NAME(father_family_name));
 
-            /* avoid the same two family names */
+            /** avoid the same two family names */
             if (UNPACK_FAMILY_SECOND_NAME(mother_family_name) ==
                     UNPACK_FAMILY_FIRST_NAME(father_family_name))
             {
@@ -2564,7 +2587,7 @@ static n_int being_set_unique_name(noble_simulation * sim,
             }
         }
 
-        /* does the name already exist in the population */
+        /** does the name already exist in the population */
         found = 1;
         for (i = 0; i < sim->num; i++)
         {
@@ -2814,7 +2837,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
             being_set_location(local, being_location(mother));
 
-            /* this is the same as equals */
+            /** this is the same as equals */
             being_wander(local, being_facing(mother) - being_facing(local));
             
             (void) math_random(local->seed);
@@ -2981,7 +3004,7 @@ void being_tidy(noble_simulation * local_sim)
                 if (WATER_TEST(local_z,land->tide_level))
                 {
                     delta_energy = ((delta_energy * delta_energy) >> 9);
-                    /* the more body fat, the less energy is lost whilst swimming */
+                    /** the more body fat, the less energy is lost whilst swimming */
                     fat_mass = GET_BODY_FAT(local_being);
                     if (fat_mass > BEING_MAX_MASS_FAT_G)
                     {
@@ -2998,7 +3021,7 @@ void being_tidy(noble_simulation * local_sim)
                 {
                     if (delta_z > 0)
                     {
-                        /* going uphill */
+                        /** going uphill */
                         delta_energy += GENE_HILL_CLIMB(genetics);
 #ifdef METABOLISM_ON
                         metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(8+(GENE_HILL_CLIMB(genetics)>>1)));
@@ -3026,7 +3049,7 @@ void being_tidy(noble_simulation * local_sim)
 
         if (delta_e > 0)
         {
-            /* hairy creatures are better insulated */
+            /** hairy creatures are better insulated */
             delta_e -= ((GENE_HAIR(genetics)*delta_e)>>conductance);
             if (delta_e < 1) delta_e = 1;
         }
@@ -3038,7 +3061,7 @@ void being_tidy(noble_simulation * local_sim)
         if (land->time == 0)
         {
             n_int age_in_years = AGE_IN_YEARS(local_sim,local_being);
-            /* this simulates natural death or at least some trauma the ape may or may not be able to recover from */
+            /** this simulates natural death or at least some trauma the ape may or may not be able to recover from */
             if (age_in_years > 29)
             {
                 if(math_random(local_being->seed) < (age_in_years - 29))
@@ -3057,7 +3080,7 @@ void being_tidy(noble_simulation * local_sim)
         loop++;
     }
 #ifdef PARASITES_ON
-    /* normalize honor values */
+    /** normalize honor values */
     if (max_honor>=254)
     {
         for(loop=0; loop < number ; loop++)
@@ -3102,13 +3125,13 @@ void being_remove(noble_simulation * local_sim)
                 local_sim->ext_death(b,local_sim);
             }
 
-            /* Did the being drown? */
+            /** Did the being drown? */
             if (b->state & BEING_STATE_SWIMMING)
             {
                 INDICATOR_INC(local_sim, IT_DROWNINGS);
             }
 
-            /* remove all children's maternal links if the mother dies */
+            /** remove all children's maternal links if the mother dies */
             if (GET_I(b) > 0)
             {
                 do
@@ -3121,7 +3144,7 @@ void being_remove(noble_simulation * local_sim)
                 }
                 while (child != 0L);
             }
-            /* set familiarity to zero so that the entry for the removed being will eventually be overwritten */
+            /** set familiarity to zero so that the entry for the removed being will eventually be overwritten */
             name = GET_NAME_GENDER(local_sim,b);
             family_name = GET_NAME_FAMILY2(local_sim,b);
             while (i < end_loop)
@@ -3166,7 +3189,7 @@ void being_remove(noble_simulation * local_sim)
         if (being_energy(&(local[loop])) != BEING_DEAD)
         {
             if ( count != loop )
-            { /* the logic associated with copying th brsin memory location doesn't make sense */
+            { /** the logic associated with copying th brsin memory location doesn't make sense */
                 n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
                 n_byte       * new_brain = GET_B(local_sim, &local[ count ]);
                 n_byte       * old_brain = GET_B(local_sim, &local[ loop ]);
@@ -3558,7 +3581,7 @@ static n_int genealogy_save_genxml(noble_simulation * sim, n_string filename)
     return 0;
 }
 
-/* GEDCOM 5.5 http://en.wikipedia.org/wiki/GEDCOM */
+/** GEDCOM 5.5 http://en.wikipedia.org/wiki/GEDCOM */
 
 static void genealogy_today_gedcom(noble_simulation * sim, n_file * fp)
 {

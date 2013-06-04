@@ -37,23 +37,6 @@
 #include "entity.h"
 #include "entity_internal.h"
 
-enum {
-    BONE_ARM_UPPER = 0,
-    BONE_ARM_LOWER1,
-    BONE_ARM_LOWER2,
-    BONE_CLAVICAL,
-    BONE_LEG_UPPER,
-    BONE_LEG_LOWER1,
-    BONE_LEG_LOWER2,
-    BONE_PELVIS,
-    BONE_HAND,
-    BONE_FINGER,
-    BONE_VERTIBRA,
-    BONE_SCAPULA,
-    BONE_RIBS,
-    BONES
-};
-
 const n_int bone_points[] = {
     54, /* arm upper */
     44, /* arm lower1 */
@@ -193,6 +176,30 @@ const n_int bone_ribs[] = {
     35,-20, 416,-20, /* shoulders */
 };
 
+/**
+ * @brief Returns an array of 2D points used for drawing diagrams
+ * @param source_points Array of 2D points which is the template
+ * @param no_of_source_points Number of 2D points in the template
+ * @param extra_points
+ * @param x The starting x coordinate
+ * @param y The starting y coordinate
+ * @param mirror Flip in the vertical axis
+ * @param scale_width Horizontal scaling factor x1000
+ * @param scale_length Length (vertical) scaling factor x1000
+ * @param angle Rotation angle of the result
+ * @param axis_x Returned x coordinate such that (x,y)-(axis_x,axis_y) defines the axis of the object
+ * @param axis_y Returned y coordinate such that (x,y)-(axis_x,axis_y) defines the axis of the object
+ * @param extra_x1
+ * @param extra_y1
+ * @param extra_x2
+ * @param extra_y2
+ * @param extra_x3
+ * @param extra_y3
+ * @param extra_x4
+ * @param extra_y4
+ * @param points Returned 2D points
+ * @param no_of_points Number of returned 2D points
+ */
 static void outline_points(const n_int * source_points,
                            n_int no_of_source_points, n_int extra_points,
                            n_int x, n_int y,
@@ -264,21 +271,57 @@ static void outline_points(const n_int * source_points,
     *no_of_points = *no_of_points + 1;
 }
 
-/* returns a set of points corresponding to key locations on the skeleton */
-n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points)
+/**
+ * @brief Returns vertical and horizontal scaling factors based upon the
+ * genetics for a particular body segment
+ * @param being Pointer to the being object
+ * @param keypoint The index within the BONES enumeration
+ * @param scale_width The returned width scale for the bone x1000
+ * @param scale_length The returned length scale for the bone x1000
+ */
+void body_skeleton_gene(noble_being * being, n_byte keypoint, n_int * scale_width, n_int * scale_length)
+{
+    /** the maximum variation in body segment proportions,
+        typically in the range 0-500 */
+    const n_int MAX_SEGMENT_VARIANCE = 200;
+
+    /** these are 4 bit gene values in the range 0-15 */
+    n_byte gene_val1 = GENE_HOX(GET_G(being),keypoint);
+    n_byte gene_val2 = GENE_HOX(GET_G(being),20-keypoint);
+
+    /** convert the gene values into scaling values */
+    *scale_width = 1000 - MAX_SEGMENT_VARIANCE + (((n_int)gene_val1)*MAX_SEGMENT_VARIANCE*2/15);
+    *scale_length = 1000 - MAX_SEGMENT_VARIANCE + (((n_int)gene_val2)*MAX_SEGMENT_VARIANCE*2/15);
+}
+
+/**
+ * @brief returns a set of points corresponding to key locations on the skeleton
+ * @param being Pointer to the being object
+ * @param keypoints Array which returns the x,y coordinates of each key point on the skeleton
+ * @param points The returned 2D points of the skeleton diagram
+ * @param shoulder_angle Angle of the shoulders in degrees
+ * @param elbow_angle Angle of the elbows in degrees
+ * @param wrist_angle Angle of the wrists in degrees
+ * @param hip_angle Angle of the hips in degrees
+ * @param knee_angle Angle of the knees in degrees
+ * @return Number of 2D points within the skeleton diagram
+ */
+n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points,
+                           n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
+                           n_int hip_angle, n_int knee_angle)
 {
     n_int scale_width=1000, scale_length=1000, angle=0;
     n_int extra_x[4], extra_y[4];
     n_int i, vertical, vertibra_x=0, vertibra_y=0, no_of_points = 0;
-    n_int arm_angle = 30; /* angle of arms in degrees */
-    n_int leg_angle = 20;
     n_int knuckle_x = 0;
     n_int knuckle_y = 0;
-    /* position of the bottom of the neck */
+
+    /** position of the bottom of the neck */
     keypoints[SKELETON_NECK*2] = 0;
     keypoints[SKELETON_NECK*2+1] = 0;
-    
-    /* position of the bottom of the ribs */
+
+    /** position of the bottom of the ribs */
+    body_skeleton_gene(being, BONE_RIBS, &scale_width, &scale_length);
     outline_points(bone_ribs, bone_points[BONE_RIBS],4,
                    keypoints[SKELETON_NECK*2], keypoints[SKELETON_NECK*2+1], 0,
                    scale_width, scale_length,
@@ -291,7 +334,8 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
                    points, &i);
     
-    /* left scapula */
+    /** left scapula */
+    body_skeleton_gene(being, BONE_SCAPULA, &scale_width, &scale_length);
     outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
                    keypoints[SKELETON_LEFT_SHOULDER*2],
                    keypoints[SKELETON_LEFT_SHOULDER*2+1],
@@ -304,7 +348,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right scapula */
+    /** right scapula */
     outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
                    keypoints[SKELETON_RIGHT_SHOULDER*2],
                    keypoints[SKELETON_RIGHT_SHOULDER*2+1],
@@ -317,7 +361,8 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* ribs */
+    /** ribs */
+    body_skeleton_gene(being, BONE_RIBS, &scale_width, &scale_length);
     outline_points(bone_ribs, bone_points[BONE_RIBS],4,
                    keypoints[SKELETON_NECK*2], keypoints[SKELETON_NECK*2+1], 0,
                    scale_width, scale_length,
@@ -330,13 +375,14 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
                    points, &no_of_points);
     
-    /* position of the top of the pelvis */
+    /** position of the top of the pelvis */
     keypoints[SKELETON_PELVIS*2] = keypoints[SKELETON_LUMBAR*2];
     keypoints[SKELETON_PELVIS*2+1] =
     keypoints[SKELETON_LUMBAR*2+1] +
     ((keypoints[SKELETON_LUMBAR*2+1]-keypoints[SKELETON_NECK*2+1])*40/100);
     
-    /* position of hips */
+    /** position of hips */
+    body_skeleton_gene(being, BONE_PELVIS, &scale_width, &scale_length);
     outline_points(bone_pelvis, bone_points[BONE_PELVIS],2,
                    keypoints[SKELETON_PELVIS*2], keypoints[SKELETON_PELVIS*2+1],
                    0, scale_width, scale_length,
@@ -348,11 +394,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &keypoints[SKELETON_RIGHT_HIP*2], &keypoints[SKELETON_RIGHT_HIP*2+1],
                    points, &no_of_points);
     
-    /* left upper leg */
+    /** left upper leg */
+    body_skeleton_gene(being, BONE_LEG_UPPER, &scale_width, &scale_length);
     outline_points(bone_leg_upper, bone_points[BONE_LEG_UPPER],0,
                    keypoints[SKELETON_LEFT_HIP*2], keypoints[SKELETON_LEFT_HIP*2+1],
                    0, scale_width, scale_length,
-                   angle+(leg_angle*10),
+                   angle+(hip_angle*10),
                    &keypoints[SKELETON_LEFT_KNEE*2],
                    &keypoints[SKELETON_LEFT_KNEE*2+1],
                    &extra_x[0], &extra_y[0],
@@ -361,11 +408,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* left lower leg 1 */
+    /** left lower leg 1 */
+    body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
     outline_points(bone_leg_lower1, bone_points[BONE_LEG_LOWER1],0,
                    keypoints[SKELETON_LEFT_KNEE*2], keypoints[SKELETON_LEFT_KNEE*2+1],
                    0, scale_width, scale_length,
-                   angle,
+                   angle+(knee_angle*10),
                    &keypoints[SKELETON_LEFT_ANKLE*2],
                    &keypoints[SKELETON_LEFT_ANKLE*2+1],
                    &extra_x[0], &extra_y[0],
@@ -374,11 +422,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* left lower leg 2 */
+    /** left lower leg 2 */
+    body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
     outline_points(bone_leg_lower2, bone_points[BONE_LEG_LOWER2],0,
                    keypoints[SKELETON_LEFT_KNEE*2], keypoints[SKELETON_LEFT_KNEE*2+1],
                    0, scale_width, scale_length,
-                   angle,
+                   angle+(knee_angle*10),
                    &keypoints[SKELETON_LEFT_ANKLE*2],
                    &keypoints[SKELETON_LEFT_ANKLE*2+1],
                    &extra_x[0], &extra_y[0],
@@ -387,11 +436,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right upper leg */
+    /** right upper leg */
+    body_skeleton_gene(being, BONE_LEG_UPPER, &scale_width, &scale_length);
     outline_points(bone_leg_upper, bone_points[BONE_LEG_UPPER],0,
                    keypoints[SKELETON_RIGHT_HIP*2], keypoints[SKELETON_RIGHT_HIP*2+1],
                    1, scale_width, scale_length,
-                   angle-(leg_angle*10),
+                   angle-(hip_angle*10),
                    &keypoints[SKELETON_RIGHT_KNEE*2],
                    &keypoints[SKELETON_RIGHT_KNEE*2+1],
                    &extra_x[0], &extra_y[0],
@@ -400,11 +450,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right lower leg 1 */
+    /** right lower leg 1 */
+    body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
     outline_points(bone_leg_lower1, bone_points[BONE_LEG_LOWER1],0,
                    keypoints[SKELETON_RIGHT_KNEE*2], keypoints[SKELETON_RIGHT_KNEE*2+1],
                    1, scale_width, scale_length,
-                   angle,
+                   angle-(knee_angle*10),
                    &keypoints[SKELETON_RIGHT_ANKLE*2],
                    &keypoints[SKELETON_RIGHT_ANKLE*2+1],
                    &extra_x[0], &extra_y[0],
@@ -413,11 +464,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right lower leg 2 */
+    /** right lower leg 2 */
+    body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
     outline_points(bone_leg_lower2, bone_points[BONE_LEG_LOWER2],0,
                    keypoints[SKELETON_RIGHT_KNEE*2], keypoints[SKELETON_RIGHT_KNEE*2+1],
                    1, scale_width, scale_length,
-                   angle,
+                   angle-(knee_angle*10),
                    &keypoints[SKELETON_RIGHT_ANKLE*2],
                    &keypoints[SKELETON_RIGHT_ANKLE*2+1],
                    &extra_x[0], &extra_y[0],
@@ -426,12 +478,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* left upper arm */
+    /** left upper arm */
+    body_skeleton_gene(being, BONE_ARM_UPPER, &scale_width, &scale_length);
     outline_points(bone_arm_upper, bone_points[BONE_ARM_UPPER],0,
                    keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2],
                    keypoints[SKELETON_LEFT_SHOULDER_SOCKET*2+1],
                    0, scale_width, scale_length,
-                   angle+(arm_angle*10),
+                   angle+(shoulder_angle*10),
                    &keypoints[SKELETON_LEFT_ELBOW*2],
                    &keypoints[SKELETON_LEFT_ELBOW*2+1],
                    &extra_x[0], &extra_y[0],
@@ -440,12 +493,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* left lower arm 1 */
+    /** left lower arm 1 */
+    body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
     outline_points(bone_arm_lower1, bone_points[BONE_ARM_LOWER1],0,
                    keypoints[SKELETON_LEFT_ELBOW*2],
                    keypoints[SKELETON_LEFT_ELBOW*2+1],
                    0, scale_width, scale_length,
-                   angle,
+                   angle+(elbow_angle*10),
                    &keypoints[SKELETON_LEFT_WRIST*2],
                    &keypoints[SKELETON_LEFT_WRIST*2+1],
                    &extra_x[0], &extra_y[0],
@@ -454,12 +508,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* left lower arm 2 */
+    /** left lower arm 2 */
+    body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
     outline_points(bone_arm_lower2, bone_points[BONE_ARM_LOWER2],0,
                    keypoints[SKELETON_LEFT_ELBOW*2],
                    keypoints[SKELETON_LEFT_ELBOW*2+1],
                    0, scale_width, scale_length,
-                   angle,
+                   angle+(elbow_angle*10),
                    &keypoints[SKELETON_LEFT_WRIST*2],
                    &keypoints[SKELETON_LEFT_WRIST*2+1],
                    &extra_x[0], &extra_y[0],
@@ -468,12 +523,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right upper arm */
+    /** right upper arm */
+    body_skeleton_gene(being, BONE_ARM_UPPER, &scale_width, &scale_length);
     outline_points(bone_arm_upper, bone_points[BONE_ARM_UPPER],0,
                    keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2],
                    keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
                    1, scale_width, scale_length,
-                   angle-(arm_angle*10),
+                   angle-(shoulder_angle*10),
                    &keypoints[SKELETON_RIGHT_ELBOW*2],
                    &keypoints[SKELETON_RIGHT_ELBOW*2+1],
                    &extra_x[0], &extra_y[0],
@@ -482,12 +538,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right lower arm 1 */
+    /** right lower arm 1 */
+    body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
     outline_points(bone_arm_lower1, bone_points[BONE_ARM_LOWER1],0,
                    keypoints[SKELETON_RIGHT_ELBOW*2],
                    keypoints[SKELETON_RIGHT_ELBOW*2+1],
                    1, scale_width, scale_length,
-                   angle,
+                   angle-(elbow_angle*10),
                    &keypoints[SKELETON_RIGHT_WRIST*2],
                    &keypoints[SKELETON_RIGHT_WRIST*2+1],
                    &extra_x[0], &extra_y[0],
@@ -496,12 +553,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* left lower arm 2 */
+    /** left lower arm 2 */
+    body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
     outline_points(bone_arm_lower2, bone_points[BONE_ARM_LOWER2],0,
                    keypoints[SKELETON_RIGHT_ELBOW*2],
                    keypoints[SKELETON_RIGHT_ELBOW*2+1],
                    1, scale_width, scale_length,
-                   angle,
+                   angle-(elbow_angle*10),
                    &keypoints[SKELETON_RIGHT_WRIST*2],
                    &keypoints[SKELETON_RIGHT_WRIST*2+1],
                    &extra_x[0], &extra_y[0],
@@ -510,7 +568,8 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* left clavical */
+    /** left clavical */
+    body_skeleton_gene(being, BONE_CLAVICAL, &scale_width, &scale_length);
     outline_points(bone_clavical, bone_points[BONE_CLAVICAL],0,
                    keypoints[SKELETON_LEFT_SHOULDER*2],
                    keypoints[SKELETON_LEFT_SHOULDER*2+1],
@@ -524,7 +583,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right clavical */
+    /** right clavical */
     outline_points(bone_clavical, bone_points[BONE_CLAVICAL],0,
                    keypoints[SKELETON_RIGHT_SHOULDER*2],
                    keypoints[SKELETON_RIGHT_SHOULDER*2+1],
@@ -541,6 +600,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
     vertical = keypoints[SKELETON_NECK*2+1];
     for (i = 0; i < SKELETON_VERTIBRA_RIBS; i++)
     {
+        body_skeleton_gene(being, BONE_RIBS, &scale_width, &scale_length);
         outline_points(bone_vertibra, bone_points[BONE_VERTIBRA],0,
                        keypoints[SKELETON_NECK*2]+((keypoints[SKELETON_LUMBAR*2]-keypoints[SKELETON_NECK*2])*i/SKELETON_VERTIBRA_RIBS),
                        vertical,
@@ -592,12 +652,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
     
     for (i = 0; i < 4; i++)
     {
-        /* left hand */
+        /** left hand */
+        body_skeleton_gene(being, BONE_HAND, &scale_width, &scale_length);
         outline_points(bone_hand, bone_points[BONE_HAND],0,
                        keypoints[SKELETON_LEFT_WRIST*2]-(i*15),
                        keypoints[SKELETON_LEFT_WRIST*2+1],
                        0, scale_width, scale_length,
-                       angle+200-(i*400/4),
+                       angle+200-(i*400/4)+(wrist_angle*10),
                        &knuckle_x, &knuckle_y,
                        &extra_x[0], &extra_y[0],
                        &extra_x[1], &extra_y[1],
@@ -605,11 +666,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[3], &extra_y[3],
                        points, &no_of_points);
         
-        /* left finger */
+        /** left finger */
+        body_skeleton_gene(being, BONE_FINGER, &scale_width, &scale_length);
         outline_points(bone_finger, bone_points[BONE_FINGER],0,
                        knuckle_x, knuckle_y,
                        0, scale_width, scale_length,
-                       angle+400-(i*800/4),
+                       angle+400-(i*800/4)+(wrist_angle*10),
                        &extra_x[0], &extra_y[0],
                        &extra_x[0], &extra_y[0],
                        &extra_x[1], &extra_y[1],
@@ -617,12 +679,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[3], &extra_y[3],
                        points, &no_of_points);
         
-        /* right hand */
+        /** right hand */
+        body_skeleton_gene(being, BONE_HAND, &scale_width, &scale_length);
         outline_points(bone_hand, bone_points[BONE_HAND],0,
                        keypoints[SKELETON_RIGHT_WRIST*2]+((3-i)*15),
                        keypoints[SKELETON_RIGHT_WRIST*2+1],
                        1, scale_width, scale_length,
-                       angle+200-(i*400/4),
+                       angle+200-(i*400/4)-(wrist_angle*10),
                        &knuckle_x, &knuckle_y,
                        &extra_x[0], &extra_y[0],
                        &extra_x[1], &extra_y[1],
@@ -630,11 +693,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[3], &extra_y[3],
                        points, &no_of_points);
         
-        /* right finger */
+        /** right finger */
+        body_skeleton_gene(being, BONE_FINGER, &scale_width, &scale_length);
         outline_points(bone_finger, bone_points[BONE_FINGER],0,
                        knuckle_x, knuckle_y,
                        1, scale_width, scale_length,
-                       angle+400-(i*800/4),
+                       angle+400-(i*800/4)-(wrist_angle*10),
                        &extra_x[0], &extra_y[0],
                        &extra_x[0], &extra_y[0],
                        &extra_x[1], &extra_y[1],
@@ -643,12 +707,13 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        points, &no_of_points);
     }
     
-    /* left thumb */
+    /** left thumb */
+    body_skeleton_gene(being, BONE_FINGER, &scale_width, &scale_length);
     outline_points(bone_finger, bone_points[BONE_FINGER],0,
                    keypoints[SKELETON_LEFT_WRIST*2]-50,
                    keypoints[SKELETON_LEFT_WRIST*2+1],
                    0, scale_width, scale_length,
-                   angle-800,
+                   angle-800+(wrist_angle*10),
                    &extra_x[0], &extra_y[0],
                    &extra_x[0], &extra_y[0],
                    &extra_x[1], &extra_y[1],
@@ -656,12 +721,12 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /* right thumb */
+    /** right thumb */
     outline_points(bone_finger, bone_points[BONE_FINGER],0,
                    keypoints[SKELETON_RIGHT_WRIST*2]+50,
                    keypoints[SKELETON_RIGHT_WRIST*2+1],
                    1, scale_width, scale_length,
-                   angle+800,
+                   angle+800-(wrist_angle*10),
                    &extra_x[0], &extra_y[0],
                    &extra_x[0], &extra_y[0],
                    &extra_x[1], &extra_y[1],
@@ -669,11 +734,16 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[3], &extra_y[3],
                    points, &no_of_points);
     
-    /*printf("no_of_points %d\n",no_of_points*2);*/
-    
     return no_of_points;
 }
 
+/**
+ * @brief One being gives something to another
+ * @param sim Pointer to the simulation object
+ * @param local The being doing the giving
+ * @param other The being receiving
+ * @param carrying objects being carried
+ */
 static void body_action_give(noble_simulation * sim, noble_being * local, noble_being * other, n_byte2 carrying)
 {
     n_byte hand = BODY_RIGHT_HAND;
@@ -705,6 +775,13 @@ static void body_action_give(noble_simulation * sim, noble_being * local, noble_
     }
 }
 
+/**
+ * @brief One being bashes another
+ * @param sim Pointer to the simulation object
+ * @param local The being doing the bashing
+ * @param other The being being bashed
+ * @param carrying Objects being carried
+ */
 static void body_action_bash(noble_simulation * sim, noble_being * local, noble_being * other, n_byte2 carrying)
 {
     n_byte hand = BODY_RIGHT_HAND;
@@ -764,6 +841,15 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
     
 }
 
+/**
+ * @brief Remember interaction between two beings
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the first being
+ * @param other Pointer to the second being
+ * @param local_attention Focus of attention for the first being
+ * @param other_attention Focus of attention for the second being
+ * @param kind The type of event
+ */
 static void body_action_interactive(noble_simulation * sim, noble_being * local, noble_being * other,
                                     n_byte local_attention, n_byte other_attention, n_byte kind)
 {
@@ -800,6 +886,14 @@ static void body_action_interactive_change(noble_simulation * sim, noble_being *
     episodic_interaction(sim, other, local, kind+1, affect, 0);
 }
 
+/**
+ * @brief Carry an object in a hand
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param carrying Objects which are carried
+ * @param hand left or right hand
+ * @param kind The kind of object
+ */
 static void body_action_hand_object(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand, n_byte kind)
 {
     if (carrying == 0)
@@ -830,6 +924,13 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
     }
 }
 
+/**
+ * @brief Performs a jabbing action
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param carrying Objects which are carried
+ * @param hand Left or right hand
+ */
 static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     n_byte carrying2 = OBJECTS_CARRIED(local,BODY_LEFT_HAND);
@@ -863,19 +964,26 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
     }
 }
 
+/**
+ * @brief Bashes one object on another.  Both objects must be carried.
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param carrying Things which are carried
+ * @param hand left or right hand
+ */
 static void body_action_bash_objects(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     n_byte carrying2 = OBJECTS_CARRIED(local,BODY_LEFT_HAND);
     if ((carrying & INVENTORY_ROCK) && (carrying2 & INVENTORY_ROCK))
     {
-        /* bash two rocks to make a scraper */
+        /** bash two rocks to make a scraper */
         OBJECTS_DROP(local,hand);
         OBJECT_TAKE(local,hand,INVENTORY_SCRAPER);
     }
     if (((carrying & INVENTORY_ROCK) && (carrying2 & INVENTORY_NUT)) ||
         ((carrying & INVENTORY_NUT) && (carrying2 & INVENTORY_ROCK)))
     {
-        /* bash nut with a rock */
+        /** bash nut with a rock */
         if (carrying & INVENTORY_NUT)
         {
             OBJECTS_DROP(local,hand);
@@ -890,7 +998,7 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
     if (((carrying & INVENTORY_BRANCH) && (carrying2 & INVENTORY_SCRAPER)) ||
         ((carrying & INVENTORY_SCRAPER) && (carrying2 & INVENTORY_BRANCH)))
     {
-        /* use a scraper to make a spear */
+        /** use a scraper to make a spear */
         if (carrying & INVENTORY_BRANCH)
         {
             OBJECTS_DROP(local,hand);
@@ -905,7 +1013,7 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
     if (((carrying & INVENTORY_BRANCH) && (carrying2 & INVENTORY_NUT)) ||
         ((carrying & INVENTORY_NUT) && (carrying2 & INVENTORY_BRANCH)))
     {
-        /* whack nut with a branch */
+        /** whack nut with a branch */
         if (carrying & INVENTORY_NUT)
         {
             OBJECTS_DROP(local,hand);
@@ -919,7 +1027,13 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
     }
 }
 
-
+/**
+ * @brief A being chews on something
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param carrying Things which are carried
+ * @param hand left or right hand
+ */
 static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if (!((carrying & INVENTORY_GRASS) ||
@@ -943,7 +1057,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
     }
     if (carrying & INVENTORY_GRASS)
     {
-        /* consume grass */
+        /** consume grass */
         being_energy_delta(local, food_absorption(local, ENERGY_GRASS, FOOD_VEGETABLE));
         OBJECTS_DROP(local,hand);
     }
@@ -951,7 +1065,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
     {
         if (carrying & INVENTORY_FISH)
         {
-            /* consume fish */
+            /** consume fish */
             being_energy_delta(local, food_absorption(local, ENERGY_FISH, FOOD_SHELLFISH));
             OBJECTS_DROP(local,hand);
         }
@@ -959,14 +1073,20 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
         {
             if (carrying & INVENTORY_NUT_CRACKED)
             {
-                /* consume nut */
+                /** consume nut */
                 being_energy_delta(local, food_absorption(local, ENERGY_NUT, FOOD_VEGETABLE));
                 OBJECTS_DROP(local,hand);
             }
         }
     }
 }
-
+/**
+ * @brief If anything is being carried in a hand this swaps it between hands
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param carrying Things which are carried
+ * @param hand left or right hand
+ */
 static void body_action_swap_hands(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if ((carrying != 0) && (OBJECTS_CARRIED(local,BODY_LEFT_HAND)==0))
@@ -985,6 +1105,13 @@ static void body_action_swap_hands(noble_simulation * sim, noble_being * local, 
     }
 }
 
+/**
+ * @brief A being drops something
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param carrying Things which are carried
+ * @param hand left or right hand
+ */
 static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if (carrying == 0)
@@ -999,6 +1126,13 @@ static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte
     }
 }
 
+/**
+ * @brief A being picks something up
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param carrying Things being carried by the being
+ * @param hand left or right hand
+ */
 static void body_action_pickup(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if ((carrying != 0) && (GET_PS(local)>=POSTURE_CROUCHING))
@@ -1054,6 +1188,13 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
     }
 }
 
+/**
+ * @brief Performs a given action
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being performing the action
+ * @param other Pointer to another being involved in the action
+ * @param action The type of action
+ */
 void social_action(
                    noble_simulation * sim,
                    noble_being * local,
@@ -1071,7 +1212,7 @@ void social_action(
     carrying = OBJECTS_CARRIED(local,hand);
     if (other == 0L)
     {
-        /* individual action */
+        /** individual action */
         switch(action%INDIVIDUAL_ACTIONS)
         {
             case ACTION_JAB:
@@ -1102,7 +1243,7 @@ void social_action(
     }
     else
     {
-        /* social action */
+        /** social action */
         switch(action%SOCIAL_ACTIONS)
         {
             case ACTION_PROD:
@@ -1140,7 +1281,12 @@ void social_action(
     }
 }
 
-
+/**
+ * @brief Compares two genetics and returns 1 if they are the same
+ * @param genetics_a First genetics
+ * @param genetics_b Second genetics
+ * @return 1 if the two genetics are the same, 0 otherwise
+ */
 n_int genetics_compare(n_genetics * genetics_a, n_genetics * genetics_b)
 {
     n_int loop = 0;
@@ -1162,6 +1308,11 @@ n_int genetics_compare(n_genetics * genetics_a, n_genetics * genetics_b)
     return 1;
 }
 
+/**
+ * @brief Sets genetics A to be the same as genetics B
+ * @param genetics_a The destination genetics
+ * @param genetics_b The source genetics
+ */
 void genetics_set(n_genetics * genetics_a, n_genetics * genetics_b)
 {
     n_int loop = 0;
@@ -1172,6 +1323,10 @@ void genetics_set(n_genetics * genetics_a, n_genetics * genetics_b)
     }
 }
 
+/**
+ * @brief Creates a blank genome
+ * @param genetics_a The genetics to be cleared
+ */
 void genetics_zero(n_genetics * genetics_a)
 {
     n_int loop = 0;
@@ -1182,6 +1337,12 @@ void genetics_zero(n_genetics * genetics_a)
     }
 }
 
+/**
+ * @brief Returns 1 if the given genetics are unique within the population
+ * @param local Pointer to the simulation object
+ * @param genetics The new genetics to be compared
+ * @return 1 if the given genetics are unique in the population
+ */
 static n_int genetics_unique(noble_simulation * local, n_genetics * genetics)
 {
     n_uint         loop = 0;
@@ -1202,9 +1363,16 @@ static n_int genetics_unique(noble_simulation * local, n_genetics * genetics)
     return 1;
 }
 
-/* Returns the 2 bit gene value from the given point within a diploid chromosome.
- This includes mutations */
-static n_int genetics_child_gene(n_int chromosome, n_int point, n_byte2 mutation_prob, n_byte2 * random)
+/**
+ * @brief Returns the 2 bit gene value from the given point within a diploid chromosome.
+   This includes mutations
+ * @param chromosome The chromosome as a 32 bit value.  Lower 16 bits are from father, upper 16 bits from mother
+ * @param point The index within the chromosome
+ * @param mutation_prob The probability of mutation
+ * @param random Random number generator seed
+ * @return 2 bit gene value
+ */
+static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mutation_prob, n_byte2 * random)
 {
     n_byte2 mutation_type;
     n_int child_gene = 0;
@@ -1215,21 +1383,25 @@ static n_int genetics_child_gene(n_int chromosome, n_int point, n_byte2 mutation
         mutation_type = (random[1] & 7);
         switch(mutation_type)
         {
+            /** mutation on the maternal chromosome */
             case MUTATION_MATERNAL:
                 child_gene = DIPLOID(
                                      (math_random(random) & 3),
                                      ((CHROMOSOME_FROM_FATHER(chromosome) >> point ) & 3));
                 break;
+            /** mutation on the paternal chromosome */
             case MUTATION_PATERNAL:
                 child_gene = DIPLOID(
                                      ((CHROMOSOME_FROM_MOTHER(chromosome) >> point ) & 3),
                                      (math_random(random) & 3));
                 break;
+            /** duplicate of the maternal gene on both sides */
             case MUTATION_MATERNAL_DUPLICATE:
                 child_gene = DIPLOID(
                                      ((CHROMOSOME_FROM_MOTHER(chromosome) >> point ) & 3),
                                      ((CHROMOSOME_FROM_MOTHER(chromosome) >> point ) & 3));
                 break;
+            /** duplicate of the paternal gene on both sides */
             case MUTATION_PATERNAL_DUPLICATE:
                 child_gene = DIPLOID(
                                      ((CHROMOSOME_FROM_FATHER(chromosome) >> point ) & 3),
@@ -1243,7 +1415,7 @@ static n_int genetics_child_gene(n_int chromosome, n_int point, n_byte2 mutation
     }
     else
     {
-        /* normal gene */
+       /** normal gene.  What grandparent genes get into the current generation is randomly chosen */
         if ((math_random(random) & 1)!=0)
         {
             child_gene = DIPLOID(
@@ -1260,30 +1432,38 @@ static n_int genetics_child_gene(n_int chromosome, n_int point, n_byte2 mutation
     return child_gene;
 }
 
-/* Performs crossover and mutation */
+/**
+ * @brief Performs crossover and mutation
+ * @param mother Chromosome of the mother (first 16 bits from maternal grandfather, second 16 bits from maternal grandmother)
+ * @param father Chromosome of the father (first 16 bits from paternal grandfather, second 16 bits from paternal grandmother)
+ * @param random Random number generator seed
+ * @return Child chromosome
+ */
 static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byte2 * random)
 {
     n_int loop = 0;
     n_genetics result = 0;
-    n_int point, point2, parent;
+    n_int point, point2;
     n_int deletion_point = 16;
     n_byte2 prob;
-    
-    /* randomly select a crossover point */
+    n_genetics parent;
+
+    /** randomly select a crossover point */
     n_int crossover_point = (math_random(random) >> 13) << 1;
     
-    /* gene insertion/deletion */
+    /** gene insertion/deletion */
     if (math_random(random) < MUTATION_DELETION_PROB)
     {
         deletion_point = (math_random(random) >> 13) << 1;
     }
     
     point = point2 = crossover_point - 8;
+    /** for every 2 bit gene in the 16 bit chromosome */
     while(loop< 16)
     {
         if (loop == deletion_point) point2 -= 2;
         
-        /* equal genetic contribution from mother and father */
+        /** equal genetic contribution from mother and father */
         if (point2 < 0)
         {
             point2 += 16;
@@ -1296,7 +1476,7 @@ static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byt
         if (loop < 8)
         {
             parent=father;
-            /* higher mutation probability in males */
+            /** higher mutation probability in males */
             prob = MUTATION_CROSSOVER_PROB*50;
         }
         else
@@ -1313,7 +1493,12 @@ static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byt
     return result;
 }
 
-/* Mutates a single chromosome, without crossover */
+/**
+ * @brief Mutates a single chromosome, without crossover
+ * @param chromosome The chromosome to be mutated
+ * @param random Random number generator seed
+ * @return The mutated chromosome
+ */
 static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
 {
     n_genetics result = 0;
@@ -1321,12 +1506,13 @@ static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
     n_int loop = 0;
     n_int deletion_point = 16;
     
-    /* gene insertion/deletion */
+    /** gene insertion/deletion */
     if (math_random(random) < MUTATION_DELETION_PROB)
     {
         deletion_point = (math_random(random) >> 13) << 1;
     }
     
+    /** for every 2 bit gene in the 16 bit chromosome */
     point = 0;
     while(loop< 16)
     {
@@ -1347,20 +1533,24 @@ static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
     return result;
 }
 
-/* Transposes segments of the genome between chromosomes or within the same chromosome.
- This is the main cause of variation between siblings. */
+/**
+ * @brief Transposes segments of the genome between chromosomes or within the same chromosome.
+ This is the main cause of variation between siblings.
+ * @param local Pointer to the being
+ * @param local_random Random number generator seed
+ */
 static void genetics_transpose(noble_being * local, n_byte2 * local_random)
 {
     math_random3(local_random);
     
     if (local_random[0] < MUTATION_TRANSPOSE_PROB)
     {
-        /* number of bits to transpose */
-        /* chromosome numbers */
-        /* locations within the chromosomes */
+        /** number of bits to transpose */
+        /** chromosome numbers */
+        /** locations within the chromosomes */
         n_byte source_offset = (local_random[0]>>8)&31;
         n_byte dest_offset   = local_random[1]&31;
-        /* whether to invert the sequence */
+        /** whether to invert the sequence */
         n_byte inversion     = (local_random[0]>>13) & 1;
         n_byte source_ch     = (local_random[1]>>5) % CHROMOSOMES;
         n_byte dest_ch       = (local_random[1]>>7) % CHROMOSOMES;
@@ -1379,16 +1569,16 @@ static void genetics_transpose(noble_being * local, n_byte2 * local_random)
             }
             else
             {
-                /* inverted sequence */
+                /** inverted sequence */
                 ctr2=(n_int)dest_offset-p+32;
             }
             ctr2 = (ctr2 & 31);
-            /* clear destination bit */
+            /** clear destination bit */
             if ((genetics[dest_ch] & (1<<ctr2)) != 0)
             {
                 genetics[dest_ch] ^= (1 << ctr2);
             }
-            /* set destination bit */
+            /** set destination bit */
             if ((genetics[source_ch] & (1<<ctr1)) != 0)
             {
                 genetics[dest_ch] |= (1 << ctr2);
@@ -1399,6 +1589,15 @@ static void genetics_transpose(noble_being * local, n_byte2 * local_random)
     }
 }
 
+/**
+ * @brief Generates the genetics of a being given its parents.
+ * The mother carries the genetics of the father after conception, just in case the father
+ * dies before birth
+ * @param sim Pointer to the simulation object
+ * @param local The being whose genetics is to be calculated
+ * @param mother The mother of the being
+ * @param local_random Random number generator seed
+ */
 void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mother, n_byte2 * local_random)
 {
     n_c_uint ch;
@@ -1408,13 +1607,13 @@ void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mo
     n_genetics * mother_genetics = being_genetics(mother);
     n_genetics * father_genetics = mother->father_genetics;
     
-    /* determine the sex */
+    /** determine the sex */
     math_random3(local_random);
     sex |= (local_random[0]&1);
     
     do
     {
-        /* crossover and mutation */
+        /** crossover and mutation */
         for (ch = 0; ch < CHROMOSOMES; ch++)
         {
             if (ch != CHROMOSOME_Y)
@@ -1422,7 +1621,7 @@ void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mo
                 genetics[ch] = genetics_crossover(mother_genetics[ch], father_genetics[ch], local_random);
             }
         }
-        /* Y chromosome does not undergo crossover and passes from father to son */
+        /** Y chromosome does not undergo crossover and passes from father to son */
         if (sex != SEX_FEMALE)
         {
             GET_I(local) = genetics_mutate(father_genetics[CHROMOSOME_Y], local_random);
@@ -1431,15 +1630,21 @@ void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mo
         {
             GET_I(local) = genetics_mutate(mother_genetics[CHROMOSOME_Y], local_random);
         }
-        /* transpose genes between chromosomes */
+        /** transpose genes between chromosomes */
         genetics_transpose(local, local_random);
-        /* align the sex genetics */
+        /** align the sex genetics */
         GET_I(local) &= ~1;
         GET_I(local) |= sex;
     }
     while (genetics_unique(sim, genetics) == 0);
 }
 
+/**
+ * @brief Assigns a random genome to a being
+ * @param sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param local_random Random number generator seed
+ */
 void body_genome_random(noble_simulation * sim, noble_being * local, n_byte2 * local_random)
 {
     n_genetics * genetics = being_genetics(local);
@@ -1448,8 +1653,12 @@ void body_genome_random(noble_simulation * sim, noble_being * local, n_byte2 * l
     {
         n_int ch,loop,gene;
         
+        /** for every chromosome */
         for (ch = 0; ch < CHROMOSOMES; ch++)
         {
+            /** for each 2 bit gene in the chromosome.
+                Each chromosome is 16 bits long with the full
+                32 bit value containing the chromosome pair */
             genetics[ch] = 0;
             for (loop=0; loop<16; loop+=2)
             {
@@ -1464,23 +1673,35 @@ void body_genome_random(noble_simulation * sim, noble_being * local, n_byte2 * l
     while (genetics_unique(sim, genetics) == 0);
 }
 
+/**
+ * @brief Returns a string of letters representing the genome
+ * @param maternal Show either the maternal or paternal side of each chromosome
+ * @param genome The genome to be shown
+ * @param genome_str The returned string
+ */
 void body_genome(n_byte maternal, n_genetics * genome, n_byte * genome_str)
 {
     n_byte string_point = 0;
     n_int ch, value;
     
     n_byte nucleotide[] = { 'A', 'T', 'C', 'G' };
+    /** for every chromosome */
     for (ch = 0; ch < CHROMOSOMES; ch++)
     {
+        /** for each 2 bit gene in the chromosome.
+            Each chromosome is 16 bits long with the full
+            32 bit value containing the chromosome pair */
         n_byte gene_point = 0;
         while (gene_point < 16)
         {
             if (maternal!=0)
             {
+                /** the maternal part of the diplod */
                 value = ( CHROMOSOME_FROM_MOTHER(genome[ch]) >> gene_point ) & 3;
             }
             else
             {
+                /** the paternal part of the diploid */
                 value = ( CHROMOSOME_FROM_FATHER(genome[ch]) >> gene_point ) & 3;
             }
             genome_str[string_point++] = nucleotide[value];

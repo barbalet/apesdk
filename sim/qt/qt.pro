@@ -24,6 +24,7 @@ HEADERS  += mainwindow.h \
     ../gui/gui.h \
     ../gui/shared.h \
     ../entity/entity_internal.h \
-    ../entity/entity.h
+    ../entity/entity.h \
+    ../universe/universe.h
 
 FORMS    += mainwindow.ui

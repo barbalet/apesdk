@@ -1579,11 +1579,16 @@ void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         default:
             if (local_sim->select != NO_BEINGS_FOUND)
             {
+                /** set this to a non-zero value to show key points on the skeleton
+                    which may be useful for debugging */
+                n_byte show_skeleton_keypoints = 0;
                 graph_vascular(&local_sim->beings[local_sim->select], graph,
                                dim_x, dim_y,
                                dim_x*10/100,dim_y*10/100,
                                dim_x*40/100,dim_y*90/100,
-                               1, 1);
+                               1, 1,
+                               30, 0, 20, 20, 0,
+                               show_skeleton_keypoints);
             }
             break;
     }
@@ -1698,8 +1703,92 @@ static void graph_line(n_byte * buffer,
     }
 }
 
+
+/**
+ * @brief Draws a curve using three points
+ * @param buffer Image buffer (three bytes per pixel)
+ * @param img_width Width of the image
+ * @param img_height Height of the image
+ * @param x0 x coordinate of the start point
+ * @param y0 y coordinate of the start point
+ * @param x1 x coordinate of the middle point
+ * @param y1 y coordinate of the middle point
+ * @param x0 x coordinate of the end point
+ * @param y0 y coordinate of the end point
+ * @param r red
+ * @param g green
+ * @param b blue
+ * @param radius_percent Radius of the curve as a percentage
+ * @param start_thickness Thickness of the curve at the start point 
+ * @param end_thickness Thickness of the curve at the end point 
+ */
+static void graph_curve(n_byte * buffer,
+						n_int img_width, n_int img_height,
+						n_int x0, n_int y0,
+						n_int x1, n_int y1,
+						n_int x2, n_int y2,
+						n_byte r, n_byte g, n_byte b,
+						n_byte radius_percent,
+						n_uint start_thickness,
+						n_uint end_thickness)
+{
+    n_int pts[8], x, y, prev_x=0, prev_y=0;
+    n_uint i;
+    const n_uint divisions = 20;
+    double c[5],d[5],f;
+
+	/** turn three points into four using the curve radius */
+	pts[0] = x0;
+	pts[1] = y1;
+	pts[2] = x1 + ((x0 - x1)*radius_percent/100);
+	pts[3] = y1 + ((y0 - y1)*radius_percent/100);
+	pts[4] = x1 + ((x2 - x1)*radius_percent/100);
+	pts[5] = y1 + ((y2 - y1)*radius_percent/100);
+	pts[6] = x2;
+	pts[7] = y2;
+   
+    c[0] = (-pts[0*2] + 3 * pts[1*2] - 3 * pts[2*2] + pts[3*2]) / 6.0;
+    c[1] = (3 * pts[0*2] - 6 * pts[1*2] + 3 * pts[2*2]) / 6.0;
+    c[2] = (-3 * pts[0*2] + 3 * pts[2*2]) / 6.0;
+    c[3] = (pts[0*2] + 4 * pts[1*2] + pts[2*2]) / 6.0;
+    d[0] = (-pts[(0*2)+1] + 3 * pts[(1*2)+1] - 3 * pts[(2*2)+1] + pts[(3*2)+1]) / 6.0;
+    d[1] = (3 * pts[(0*2)+1] - 6 * pts[(1*2)+1] + 3 * pts[(2*2)+1]) / 6.0;
+    d[2] = (-3 * pts[(0*2)+1] + 3 * pts[(2*2)+1]) / 6.0;
+    d[3] = (pts[(0*2)+1] + 4 * pts[(1*2)+1] + pts[(2*2)+1]) / 6.0;
+
+    for (i = 0; i < divisions; i++)
+	{
+		f = (double)i / (double)divisions;
+        x = (n_int)((c[2] + f * (c[1] + f * c[0])) * f + c[3]);
+        y = (n_int)((d[2] + f * (d[1] + f * d[0])) * f + d[3]);
+
+        if (i > 0) {
+            graph_line(buffer, img_width, img_height,
+                       prev_x, prev_y, x, y,
+                       r, g, b,
+                       start_thickness +
+                       ((end_thickness - start_thickness) * i / divisions));
+        }
+		prev_x = x;
+		prev_y = y;
+	}
+
+}
+
 #define  MAX_POLYGON_CORNERS 1000
 
+/**
+ * @brief Draw a filled polygon
+ * @param points Array containing 2D points
+ * @param no_of_points The number of 2D points
+ * @param r Red
+ * @param g Green
+ * @param b Blue
+ * @param transparency Degree of transparency
+ * @param buffer Image buffer (3 bytes per pixel)
+ * @param img_width Image width
+ * @param img_height Image height
+ */
 static void graph_fill_polygon(n_int * points, n_int no_of_points,
                                n_byte r, n_byte g, n_byte b, n_byte transparency,
                                n_byte * buffer, n_int img_width, n_int img_height)
@@ -1726,7 +1815,7 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
     
     for (y = min_y; y <= max_y; y++)
     {
-        /*  Build a list of nodes */
+        /**  Build a list of nodes */
         nodes = 0;
         j = no_of_points-1;
         for (i = 0; i < no_of_points; i++)
@@ -1743,7 +1832,7 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
             if (nodes == MAX_POLYGON_CORNERS) break;
         }
         
-        /*  Sort the nodes, via a simple “Bubble” sort */
+        /**  Sort the nodes, via a simple “Bubble” sort */
         i = 0;
         while (i < nodes-1)
         {
@@ -1760,13 +1849,13 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
             }
         }
         
-        /*  Fill the pixels between node pairs */
+        /**  Fill the pixels between node pairs */
         for (i = 0; i < nodes; i += 2)
         {
             if (nodeX[i] >= max_x) break;
             if (nodeX[i+1] > min_x)
             {
-                /* range check */
+                /** range check */
                 if (nodeX[i] <= min_x) nodeX[i] = min_x+1;
                 if (nodeX[i+1] >= max_x) nodeX[i+1] = max_x-1;
                 
@@ -1791,30 +1880,48 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
     }
 }
 
-void graph_vascular(noble_being * being,
-                    n_byte * buffer,
-                    n_int img_width, n_int img_height,
-                    n_int tx, n_int ty, n_int bx, n_int by,
-                    n_byte thickness,
-                    n_byte clear)
+
+/**
+ * @brief Draws a the skeleton
+ * @param being Pointer to the being
+ * @param buffer Image buffer (3 bytes per pixel)
+ * @param img_width Image width
+ * @param img_height Image height
+ * @param tx Top left coordinate of the bounding box
+ * @param ty Top coordinate of the bounding box
+ * @param bx Bottom right coordinate of the bounding box
+ * @param by Bottom coordinate of the bounding box
+ * @param thickness Thickness of the outline in pixels
+ * @param returned 2D keypoints on the skeleton
+ * @param shoulder_angle Angle of the shoulders in degrees
+ * @param elbow_angle Angle of the elbows in degrees
+ * @param wrist_angle Angle of the wrists in degrees
+ * @param hip_angle Angle of the hips in degrees
+ * @param knee_angle Angle of the knees in degrees
+ * @param show_keypoints If non-zero show key points on the skeleton
+ */
+static void draw_skeleton(noble_being * being,
+                          n_byte * buffer,
+                          n_int img_width, n_int img_height,
+                          n_int tx, n_int ty, n_int bx, n_int by,
+                          n_byte thickness,
+                          n_int * keypoints,
+                          n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
+                          n_int hip_angle, n_int knee_angle,
+                          n_byte show_keypoints)
 {
-    n_int keypoints[SKELETON_POINTS*2];
     n_int skeleton_points[8000];
     n_int min_x = 99999, min_y = 99999;
     n_int max_x = -99999, max_y = -99999;
     n_int x,y,prev_x=0,prev_y=0,i,no_of_points,first_point=0,ctr=0;
     n_byte r=150, g=150, b=150, bone_shade=220;
     
-    /* clear the image if necessary */
-    if (clear != 0)
-    {
-        graph_erase(buffer, img_height, img_width);
-    }
+    /** get points on the skeleton */
+    no_of_points = body_skeleton_points(being, keypoints, skeleton_points,
+                                        shoulder_angle, elbow_angle, wrist_angle,
+                                        hip_angle, knee_angle);
     
-    /* get points on the skeleton */
-    no_of_points = body_skeleton_points(being, keypoints, skeleton_points);
-    
-    /* get the bounding box for the points */
+    /** get the bounding box for the points */
     for (i = 0; i < no_of_points; i++)
     {
         x = skeleton_points[i*2];
@@ -1826,6 +1933,17 @@ void graph_vascular(noble_being * being,
         if (y > max_y) max_y = y;
     }
     
+    /** rescale the skeleton keypoints into the bounding box */
+    for (i = 0; i < SKELETON_POINTS; i++)
+    {
+        if (keypoints[i*2] != 9999)
+        {
+            keypoints[i*2] = tx + ((keypoints[i*2] - min_x)*(bx - tx)/(max_x - min_x));
+            keypoints[i*2+1] = ty + ((keypoints[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+        }
+    }
+
+    /** rescale the drawing points into the bounding box */
     for (i = 0; i < no_of_points; i++)
     {
         if (skeleton_points[i*2] != 9999)
@@ -1834,7 +1952,8 @@ void graph_vascular(noble_being * being,
             skeleton_points[i*2+1] = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
         }
     }
-    
+
+    /** do the drawing */
     for (i = 0; i < no_of_points; i++)
     {
         x = skeleton_points[i*2];
@@ -1866,9 +1985,218 @@ void graph_vascular(noble_being * being,
         prev_x = x;
         prev_y = y;
     }
+    /** optionally show the keypoints on the skeleton */
+    if (show_keypoints != 0)
+    {
+       for (i = 0; i < SKELETON_POINTS; i++)
+       {
+           if (keypoints[i*2] != 9999)
+           {
+               graph_line(buffer, img_width, img_height,
+                          keypoints[i*2]-10, keypoints[i*2+1], keypoints[i*2]+10, keypoints[i*2+1],
+                          0, 255, 0, 1);
+               graph_line(buffer, img_width, img_height,
+                          keypoints[i*2], keypoints[i*2+1]-10, keypoints[i*2], keypoints[i*2+1]+10,
+                          0, 255, 0, 1);
+           }
+       }
+    }
 }
 
-/* Shows distribution of honor.  Note that beings are sorted in order of honor */
+/**
+ * @brief body_point_relative_to_skeleton
+ * @param keypoints Key points on the skeleton
+ * @param start_keypoint_index Index of the start skeleton keypoint
+ * @param end_keypoint_index Index of the end skeleton keypoint
+ * @param distance_along_axis_percent Distance of the point along the axis between the start and end skeleton keypoints
+ * @param distance_from_axis_percent Distance perpendicular to the axis as a percentage of the axis length
+ * @param x Returned x coordinate
+ * @param y Returned y coordinate
+ */
+static void point_relative_to_skeleton(n_int * keypoints,
+                                       n_int start_keypoint_index,
+                                       n_int end_keypoint_index,
+                                       n_int distance_along_axis_percent,
+                                       n_int distance_from_axis_percent,
+                                       n_int * x, n_int * y)
+{
+    /** length of the axis */
+    n_int dx = keypoints[end_keypoint_index*2] - keypoints[start_keypoint_index*2];
+    n_int dy = keypoints[end_keypoint_index*2+1] - keypoints[start_keypoint_index*2+1];
+
+    /** point position on the axis */
+    n_int axis_x = keypoints[start_keypoint_index*2] + (dx * distance_along_axis_percent / 100);
+    n_int axis_y = keypoints[start_keypoint_index*2+1] + (dy * distance_along_axis_percent / 100);
+
+    /** point position */
+    *x = axis_x + (dy * distance_from_axis_percent / 100);
+    *y = axis_y + (dx * distance_from_axis_percent / 100);
+}
+
+const n_int no_of_vascular_diagram_points = 40;
+const n_int vascular_diagram_fields = 10;
+const n_int vascular_diagram_points[] =
+{
+    -1, SKELETON_NECK, SKELETON_LUMBAR, 0, 0, SKELETON_NECK, SKELETON_LUMBAR, 90, 0, 2, /**< 0 */
+
+    /** left arm */
+    0, SKELETON_NECK, SKELETON_LUMBAR, 0, 0, SKELETON_NECK, SKELETON_LEFT_SHOULDER, 100, 0, 12, /**< 1 */
+    1, SKELETON_LEFT_SHOULDER, SKELETON_LEFT_ELBOW, 0, 0, SKELETON_LEFT_SHOULDER, SKELETON_LEFT_ELBOW, 100, 0, 12, /**< 2 */
+    2, SKELETON_LEFT_ELBOW, SKELETON_LEFT_WRIST, 0, 0, SKELETON_LEFT_ELBOW, SKELETON_LEFT_WRIST, 100, 3, 19, /**< 3 */
+    2, SKELETON_LEFT_ELBOW, SKELETON_LEFT_WRIST, 0, 0, SKELETON_LEFT_ELBOW, SKELETON_LEFT_WRIST, 100, -3, 20, /**< 4 */
+
+    /** right arm */
+    0, SKELETON_NECK, SKELETON_LUMBAR, 0, 0, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, 10, 0, 8, /**< 5 */
+    5, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, 10, 0, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, 100, 0, 9, /**< 6 */
+    6, SKELETON_RIGHT_SHOULDER, SKELETON_RIGHT_ELBOW, 0, 0, SKELETON_RIGHT_SHOULDER, SKELETON_RIGHT_ELBOW, 100, 0, 9, /**< 7 */
+    7, SKELETON_RIGHT_ELBOW, SKELETON_RIGHT_WRIST, 0, 0, SKELETON_RIGHT_ELBOW, SKELETON_RIGHT_WRIST, 100, -3, 14, /**< 8 */
+    7, SKELETON_RIGHT_ELBOW, SKELETON_RIGHT_WRIST, 0, 0, SKELETON_RIGHT_ELBOW, SKELETON_RIGHT_WRIST, 100, 3, 13, /**< 9 */
+
+    /** abdomen */
+    0, SKELETON_NECK, SKELETON_LUMBAR, 90, 0, SKELETON_NECK, SKELETON_LUMBAR, 95, 20, 21, /**< 10 */
+    10, SKELETON_NECK, SKELETON_LUMBAR, 90, 0, SKELETON_LUMBAR, SKELETON_PELVIS, 50, 0, 3, /**< 11 */
+    11, SKELETON_LUMBAR, SKELETON_PELVIS, 50, 0, SKELETON_LUMBAR, SKELETON_PELVIS, 60, 40, 22, /**< 12 */
+    11, SKELETON_LUMBAR, SKELETON_PELVIS, 50, 0, SKELETON_LUMBAR, SKELETON_PELVIS, 60, -40, 22, /**< 13 */
+    11, SKELETON_LUMBAR, SKELETON_PELVIS, 50, 0, SKELETON_LUMBAR, SKELETON_PELVIS, 80, 40, 23, /**< 14 */
+    11, SKELETON_LUMBAR, SKELETON_PELVIS, 50, 0, SKELETON_LUMBAR, SKELETON_PELVIS, 90, 0, 4, /**< 15 */
+    15, SKELETON_LUMBAR, SKELETON_PELVIS, 90, 0, SKELETON_LUMBAR, SKELETON_PELVIS, 100, 30, 24, /**< 16 */
+    15, SKELETON_LUMBAR, SKELETON_PELVIS, 90, 0, SKELETON_LUMBAR, SKELETON_PELVIS, 150, 0, 4, /**< 17 */
+
+    /** left leg */
+    17, SKELETON_LUMBAR, SKELETON_PELVIS, 150, 0, SKELETON_PELVIS, SKELETON_LEFT_HIP, 100, 0, 5, /**< 18 */
+    18, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 0, 0, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 20, 12, 5, /**< 19 */
+    19, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 20, 12, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 90, 12, 25, /**< 20 */
+    19, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 20, 12, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 100, 5, 6, /**< 21 */
+    21, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 100, 5, SKELETON_LEFT_KNEE, SKELETON_LEFT_ANKLE, 40, 5, 7, /**< 22 */
+    21, SKELETON_LEFT_HIP, SKELETON_LEFT_KNEE, 100, 5, SKELETON_LEFT_KNEE, SKELETON_LEFT_ANKLE, 60, 15, 26, /**< 23 */
+    22, SKELETON_LEFT_KNEE, SKELETON_LEFT_ANKLE, 40, 5, SKELETON_LEFT_KNEE, SKELETON_LEFT_ANKLE, 95, 0, 27, /**< 24 */
+    22, SKELETON_LEFT_KNEE, SKELETON_LEFT_ANKLE, 40, 5, SKELETON_LEFT_KNEE, SKELETON_LEFT_ANKLE, 95, 10, 28, /**< 25 */
+
+    /** right leg */
+    17, SKELETON_LUMBAR, SKELETON_PELVIS, 150, 0, SKELETON_PELVIS, SKELETON_RIGHT_HIP, 100, 0, 5, /**< 26 */
+    26, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 0, 0, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 20, -12, 5, /**< 27 */
+    27, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 20, -12, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 90, -12, 25, /**< 28 */
+    27, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 20, -12, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 100, -5, 6, /**< 29 */
+    29, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 100, -5, SKELETON_RIGHT_KNEE, SKELETON_RIGHT_ANKLE, 40, -5, 7, /**< 30 */
+    29, SKELETON_RIGHT_HIP, SKELETON_RIGHT_KNEE, 100, -5, SKELETON_RIGHT_KNEE, SKELETON_RIGHT_ANKLE, 60, -15, 26, /**< 31 */
+    30, SKELETON_RIGHT_KNEE, SKELETON_RIGHT_ANKLE, 40, -5, SKELETON_RIGHT_KNEE, SKELETON_RIGHT_ANKLE, 95, 0, 27, /**< 32 */
+    30, SKELETON_RIGHT_KNEE, SKELETON_RIGHT_ANKLE, 40, -5, SKELETON_RIGHT_KNEE, SKELETON_RIGHT_ANKLE, 95, -10, 28, /**< 33 */
+
+    /** right neck */
+    5, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, 10, 0, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, -15, 80, 10, /**< 34 */
+    34, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, -15, 80, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, -25, 150, 15, /**< 35 */
+    34, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, -15, 80, SKELETON_NECK, SKELETON_RIGHT_SHOULDER, -45, 150, 16, /**< 36 */
+
+    /** left neck */
+    -1, SKELETON_NECK, SKELETON_LEFT_SHOULDER, 20, 0, SKELETON_NECK, SKELETON_LEFT_SHOULDER, 15, -80, 11, /**< 37 */
+    37, SKELETON_NECK, SKELETON_LEFT_SHOULDER, 16, -80, SKELETON_NECK, SKELETON_LEFT_SHOULDER, 10, -130, 17, /**< 38 */
+    37, SKELETON_NECK, SKELETON_LEFT_SHOULDER, 16, -80, SKELETON_NECK, SKELETON_LEFT_SHOULDER, 30, -130, 18, /**< 39 */
+};
+
+
+/**
+ * @brief Draws a representation of the vascular system
+ * @param being Pointer to the being
+ * @param buffer Image buffer (3 bytes per pixel)
+ * @param img_width Image width
+ * @param img_height Image height
+ * @param tx Top left coordinate of the bounding box
+ * @param ty Top coordinate of the bounding box
+ * @param bx Bottom right coordinate of the bounding box
+ * @param by Bottom coordinate of the bounding box
+ * @param thickness Thickness of the outline in pixels
+ * @param clear Non zero if the image should be cleared before drawing
+ * @param shoulder_angle Angle of the shoulders in degrees
+ * @param elbow_angle Angle of the elbows in degrees
+ * @param wrist_angle Angle of the wrists in degrees
+ * @param hip_angle Angle of the hips in degrees
+ * @param knee_angle Angle of the knees in degrees
+ * @param show_skeleton_keypoints If non-zero show key points on the skeleton
+*/
+void graph_vascular(noble_being * being,
+                    n_byte * buffer,
+                    n_int img_width, n_int img_height,
+                    n_int tx, n_int ty, n_int bx, n_int by,
+                    n_byte thickness,
+                    n_byte clear,
+                    n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
+                    n_int hip_angle, n_int knee_angle,
+                    n_byte show_skeleton_keypoints)
+{
+    n_int keypoints[SKELETON_POINTS*2];
+    n_int i,x[3],y[3],vascular_model_index,previous_index;
+    n_uint start_thickness=4, end_thickness=4;
+
+    /** clear the image if necessary */
+    if (clear != 0)
+    {
+        graph_erase(buffer, img_height, img_width);
+    }
+
+    /** draw the skeleton */
+    draw_skeleton(being, buffer, img_width, img_height,
+                  tx, ty, bx, by, thickness, keypoints,
+                  shoulder_angle, elbow_angle, wrist_angle,
+                  hip_angle, knee_angle, show_skeleton_keypoints);
+
+    for (i = 0; i < no_of_vascular_diagram_points; i++)
+    {
+        /** index of the previous segment */
+        previous_index = vascular_diagram_points[i*vascular_diagram_fields];
+        x[0] = -1;
+        if (previous_index > -1)
+        {
+            /** end point of the vessel */
+            point_relative_to_skeleton(keypoints,
+                                       vascular_diagram_points[previous_index*vascular_diagram_fields+5],
+                                       vascular_diagram_points[previous_index*vascular_diagram_fields+6],
+                                       vascular_diagram_points[previous_index*vascular_diagram_fields+7],
+                                       vascular_diagram_points[previous_index*vascular_diagram_fields+8],
+                                       &x[0], &y[0]);
+        }
+
+        /** beginning point of the vessel */
+        point_relative_to_skeleton(keypoints,
+                                   vascular_diagram_points[i*vascular_diagram_fields+1],
+                                   vascular_diagram_points[i*vascular_diagram_fields+2],
+                                   vascular_diagram_points[i*vascular_diagram_fields+3],
+                                   vascular_diagram_points[i*vascular_diagram_fields+4],
+                                   &x[1], &y[1]);
+
+        /** end point of the vessel */
+        point_relative_to_skeleton(keypoints,
+                                   vascular_diagram_points[i*vascular_diagram_fields+5],
+                                   vascular_diagram_points[i*vascular_diagram_fields+6],
+                                   vascular_diagram_points[i*vascular_diagram_fields+7],
+                                   vascular_diagram_points[i*vascular_diagram_fields+8],
+                                   &x[2], &y[2]);
+
+        /** compartment index within the vascular simulation */
+        vascular_model_index = vascular_diagram_points[i*vascular_diagram_fields+9];
+
+        if (x[0]!=-1) {
+            /* draw a curve */
+            graph_curve(buffer, img_width, img_height,
+                        x[0],y[0], x[1],y[1], x[2],y[2],
+                        255,0,0,
+                        10,start_thickness,end_thickness);
+        }
+        else {
+            /* draw a line */
+            graph_line(buffer, img_width, img_height,
+                       x[1], y[1], x[2], y[2],
+                       255,0,0, end_thickness);
+        }
+    }
+}
+
+/**
+ * @brief Shows distribution of honor.  Note that beings are sorted in order of honor
+ * @param sim Pointer to the simulation object
+ * @param buffer Image buffer (3 bytes per pixel)
+ * @param img_width Image width
+ * @param img_height Image height
+ */
 void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
 {
     n_uint i,j;

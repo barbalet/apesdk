@@ -407,11 +407,16 @@ bool MainWindow::refresh()
     }
     case WND_VASCULAR:
     {
+        /** set this to a non-zero value to show key points on the skeleton
+            which may be useful for debugging */
+        n_byte show_skeleton_keypoints = 0;
         graph_vascular(&(sim_sim()->beings[sim_sim()->select]), img_graph,
                        WND_WIDTH_MAP, WND_HEIGHT_MAP,
                        WND_WIDTH_MAP*10/100,WND_HEIGHT_MAP*10/100,
                        WND_WIDTH_MAP*40/100,WND_HEIGHT_MAP*90/100,
-                       1, 1);
+                       1, 1,
+                       30, 0, 20, 20, 0,
+                       show_skeleton_keypoints);
         img = img_graph;
         format = QImage::Format_RGB888;
         img_width = WND_WIDTH_MAP;

@@ -61,7 +61,7 @@ void episodic_logging(n_console_output * output_function, n_int social)
 }
 
 /**
- * If the given episodic memory is an intention, as defined by the event type,
+ * @brief If the given episodic memory is an intention, as defined by the event type,
  * then update the learned preferences based upon the intention type.
  * For example, if the ape intends to chat then the chatting preference
  * may be increased which makes chatting more likely.
@@ -121,7 +121,7 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
 }
 
 /**
- * Update the episodic memories for a given ape.
+ * @brief Update the episodic memories for a given ape.
  * This is based upon a fading memory model in which older memories
  * are replaced by newer ones.  Each memory has an associated affect
  * value indicating its emotional impact, and this fades over time.
@@ -205,7 +205,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
 }
 
 /**
- * Returns a celebrity factor based upon how many apes within
+ * @brief Returns a celebrity factor based upon how many apes within
  * the episodic memory of the given ape have a similar name to the
  * met ape, and their friend or foe values.
  * This means that initial beliefs about other apes are partly
@@ -266,7 +266,7 @@ n_int episodic_met_being_celebrity(
 }
 
 /**
- * This returns the percentage of episodic memories or intentions which are first person.
+ * @brief This returns the percentage of episodic memories or intentions which are first person.
  * Some memories originate from the self and others are acquired from others via chatting.
  * @param local_sim pointer to the simulation
  * @param local pointer to the ape
@@ -328,7 +328,7 @@ n_int episodic_first_person_memories_percent(
 }
 
 /**
- * Returns the index of the the episodic memory which can be overwritten with a new one.
+ * @brief Returns the index of the the episodic memory which can be overwritten with a new one.
  * @param event The type of event
  * @param affect The affect value associated with the event
  * @param name1 Name of the first ape in the memory (meeter)
@@ -413,7 +413,19 @@ static n_int episodic_memory_replace_index(
     return replace;
 }
 
-
+/**
+ * @brief Stores an episodic memory
+ * @param local Pointer to the being
+ * @param event The type of event
+ * @param affect Affect value associated with the event
+ * @param local_sim Pointer to the simulation
+ * @param name1 First name of a being participating in the event
+ * @param family1 Family names of a being participating in the event
+ * @param name2 First name of a second being participating in the event
+ * @param family2 Family names of a second being participating in the event
+ * @param arg Any additional argument
+ * @param food Type of food
+ */
 static void episodic_store_full(
                            noble_being * local,
                            n_byte event,
@@ -447,8 +459,7 @@ static void episodic_store_full(
     /** insert the current event into the episodic memory */
     local_episodic[replace].event       = event;
     local_episodic[replace].affect      = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
-    
-    /* could be handled with vector set */
+
     local_episodic[replace].location[0] = being_location_x(local);
     local_episodic[replace].location[1] = being_location_y(local);
     local_episodic[replace].time        = new_time =local_sim->land->time;
@@ -468,7 +479,7 @@ static void episodic_store_full(
     
     if (local_logging)
     {
-        if ((old_event != event) || ((old_time+10) < (new_time))) /* this may need to be changed */
+        if ((old_event != event) || ((old_time+10) < (new_time))) /**< TODO this may need to be changed */
         {
             n_string_block description;
             n_string_block str;
@@ -493,7 +504,13 @@ static void episodic_store_full(
         }
     }
 }
-
+/**
+ * @brief Remember eating
+ * @param local_sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param energy Energy obtained from food
+ * @param food_type The type of food
+ */
 void episodic_food(noble_simulation * local_sim, noble_being * local, n_int energy, n_byte food_type)
 {
     episodic_store_full(local, EVENT_EAT, energy, local_sim,
@@ -502,7 +519,7 @@ void episodic_food(noble_simulation * local_sim, noble_being * local, n_int ener
 }
 
 /**
- * Updates the episodic memory with details about an event
+ * @brief Updates the episodic memory with details about an event
  * @param local Pointer to the ape
  * @param event The type of event
  * @param affect The affect value associated with the event
@@ -524,7 +541,14 @@ void episodic_store_memory(
 {
     episodic_store_full(local,event,affect,local_sim,name1,family1,name2,family2, arg, 0);
 }
-
+/**
+ * @brief Store an episodic memory about the self
+ * @param local_sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param event The type of event
+ * @param affect An affect value associated with the event
+ * @param arg Any additional argument
+ */
 void episodic_self(
                    noble_simulation * local_sim,
                    noble_being * local,
@@ -536,7 +560,15 @@ void episodic_self(
                           GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
                           0, 0, arg);
 }
-
+/**
+ * @brief Remember an event which occurerd between being in close proximity
+ * @param local_sim Pointer to the simulation object
+ * @param local Pointer to the first being
+ * @param other Pointer to the second being
+ * @param event The type of event
+ * @param affect Affect value associated with the event
+ * @param arg Any additional argument
+ */
 void episodic_close(
                     noble_simulation * local_sim,
                     noble_being * local,
@@ -550,7 +582,15 @@ void episodic_close(
                           GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other),
                           0,0, arg);
 }
-
+/**
+ * @brief Remember a particular interaction between two beings
+ * @param local_sim Pointer to the simulation object
+ * @param local Pointer to the being
+ * @param other Pointer to the being being interacted with
+ * @param event The type of event
+ * @param affect The affect associated with the interaction
+ * @param arg Any additional argument
+ */
 void episodic_interaction(
                           noble_simulation * local_sim,
                           noble_being * local,
@@ -567,7 +607,7 @@ void episodic_interaction(
 
                           
 /**
- * Generate an intention.
+ * @brief Generate an intention.
  * Note that intentions are stored together with episodic memories,
  * with the event type making the difference between a memory about
  * the past and an intention about the future.
@@ -654,7 +694,7 @@ n_byte episodic_intention(
 }
 
 /**
- * Copy an episodic memory (an anecdote) from one ape to another during chat.
+ * @brief Copy an episodic memory (an anecdote) from one ape to another during chat.
  * @param local_sim Pointer to the simulation
  * @param local Pointer to the ape conveying the anecdote
  * @param other Pointer to the ape to which the anecdote will be copied

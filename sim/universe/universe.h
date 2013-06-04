@@ -319,6 +319,25 @@ enum PREFERENCES_MATE
     PREFERENCES
 };
 
+
+enum BODY_BONES
+{
+    BONE_ARM_UPPER = 0,
+    BONE_ARM_LOWER1,
+    BONE_ARM_LOWER2,
+    BONE_CLAVICAL,
+    BONE_LEG_UPPER,
+    BONE_LEG_LOWER1,
+    BONE_LEG_LOWER2,
+    BONE_PELVIS,
+    BONE_HAND,
+    BONE_FINGER,
+    BONE_VERTIBRA,
+    BONE_SCAPULA,
+    BONE_RIBS,
+    BONES
+};
+
 #define IMMUNE_FIT                            5
 #define MIN_ANTIBODIES                        16
 #define MIN_ANTIGENS                          8
@@ -415,7 +434,7 @@ enum
 
 
 
-const static n_int interval_steps[] =
+static const n_int interval_steps[] =
 { 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
 const static n_constant_string interval_description[] = { "mins","hours","days","months","years" };
 
@@ -1042,6 +1061,13 @@ enum mutation_type
 
 /*#define GENE_RATE_OF_GROWTH(gene)           GENE_VAL_REG(gene, 11, 5, 13, 11) not used */
 
+/* Returns a value for a gene corresponding to a body segment
+   The number of body segments defined by the constant BONES
+   is assumed to be < 18 */
+#define GENE_HOX(gene,bodyseg)              GENE_VAL_REG(gene, 2+(bodyseg), 4+(bodyseg), 18-(bodyseg), 21-(bodyseg))
+
+/* this may become redundant since body frame will
+   be determined by other genes */
 #define GENE_FRAME(gene)                    GENE_VAL_REG(gene, 10, 11, 1, 6)
 
 /* hair length */
@@ -1240,7 +1266,7 @@ noble_brain_probe;
 #ifdef METABOLISM_ON
 
 /*! @struct
- @field parent array index of the parent vessel
+ @field parent array index of the parent
  @field constriction Constriction or dilation (mm 127=none)
  @field hardening Reduction in elasticity (Mpa x 1000)
  @field length length (cm x 1000)

@@ -45,27 +45,28 @@
 
 /*NOBLEMAKE END=""*/
 
-/* Various energy use and addition through eating characteristics */
-/* Energy from vegetables */
+/** Various energy use and addition through eating characteristics */
+/** Energy from vegetables */
 
 #define GENE_ENERGY_FROM_VEGETABLES(gene)   GENE_VAL_REG(gene, 3, 13, 15, 3)
 
-/* Energy from fruits */
+/** Energy from fruits */
 
 #define GENE_ENERGY_FROM_FRUITS(gene)       GENE_VAL_REG(gene, 14, 7, 6, 4)
 
-/* Energy from shellfish */
+/** Energy from shellfish */
 
 #define GENE_ENERGY_FROM_SHELLFISH(gene)    GENE_VAL_REG(gene, 10, 12, 12, 2)
 
-/* Energy from seaweed */
+/** Energy from seaweed */
 
 #define GENE_ENERGY_FROM_SEAWEED(gene)      GENE_VAL_REG(gene, 0, 9, 11, 12)
 
 /**
- * How much energy is absorbed from a given type of food
+ * @brief How much energy is absorbed from a given type of food
  * @param food_type The type of food
  * @param local pointer to the ape
+ * @return Energy absorbed
  */
 n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
 {
@@ -106,7 +107,15 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
     return return_value;
 }
 
-
+/**
+ * @brief Returns the amount of food of the given type at the given location
+ * @param local_land Pointer to the land
+ * @param local_weather Pointer to the weather
+ * @param loc_x x coordinate
+ * @param loc_y y coordinate
+ * @param kind The type of food
+ * @return The amount of food of the given type at this location
+ */
 static n_int food_location(n_land * local_land, n_weather * local_weather,
                            n_int loc_x,
                            n_int loc_y,
@@ -117,7 +126,7 @@ static n_int food_location(n_land * local_land, n_weather * local_weather,
 }
 
 /**
- * Returns the values for grass, trees and bushes at the given location
+ * @brief Returns the values for grass, trees and bushes at the given location
  * @param local_land Pointer to the land
  * @param local_weather Pointer to the weather
  * @param loc_x X ape coordinate on the map
@@ -148,7 +157,7 @@ void food_values(n_land * local_land, n_weather * local_weather,
 
 
 /**
- * Returns the dominant food type on land and its associated maximum energy value
+ * @brief Returns the dominant food type on land and its associated maximum energy value
  * @param sim Pointer to the simulation
  * @param loc_x X ape coordinate
  * @param loc_y Y ape coordinate
@@ -188,7 +197,7 @@ static n_byte food_eat_land(
 }
 
 /**
- * Returns the dominant food type in the intertidal zone and its associated maximum energy value
+ * @brief Returns the dominant food type in the intertidal zone and its associated maximum energy value
  * @param sim Pointer to the simulation
  * @param loc_x X ape coordinate
  * @param loc_y Y ape coordinate
@@ -240,7 +249,7 @@ static n_byte food_intertidal(
 }
 
 /**
- * Eat food at the given location and return the energy increase
+ * @brief Eat food at the given location and return the energy increase
  * @param sim Pointer to the simulation
  * @param loc_x X ape coordinate
  * @param loc_y Y ape coordinate
