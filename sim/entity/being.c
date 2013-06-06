@@ -188,6 +188,27 @@ void   being_energy_delta(noble_being * value, n_int delta)
     being_set_energy(value, being_energy(value) + delta);
 }
 
+n_int   being_drive(noble_being * value, enum drives_definition drive)
+{
+    return value->drives[drive];
+}
+
+void    being_inc_drive(noble_being * value, enum drives_definition drive)
+{
+    if (value->drives[drive] < DRIVES_MAX)
+    {
+        value->drives[drive]++;
+    }
+}
+
+void    being_dec_drive(noble_being * value, enum drives_definition drive)
+{
+    if (value->drives[drive] > 0)
+    {
+        value->drives[drive]--;
+    }
+}
+
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
     n_int	it_water_turn = 0;

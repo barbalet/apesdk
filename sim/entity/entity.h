@@ -117,6 +117,10 @@ void   being_set_energy(noble_being * value, n_int energy);
 
 void   being_energy_delta(noble_being * value, n_int delta);
 
+n_int   being_drive(noble_being * value, enum drives_definition drive);
+void    being_inc_drive(noble_being * value, enum drives_definition drive);
+void    being_dec_drive(noble_being * value, enum drives_definition drive);
+
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
 void genealogy_birth(noble_being * child, noble_being * mother, void * sim);
