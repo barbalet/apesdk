@@ -55,21 +55,20 @@
  * @brief Update the hunger drive
  * @param local Pointer to the ape
  */
-static void drives_hunger(
-    noble_being * local)
+static void drives_hunger(noble_being * local)
 {
     /** if the being is hungry and its hunger drive is not already saturated */
-    if ((being_energy(local) < BEING_HUNGRY) && (local->drives[DRIVE_HUNGER] < DRIVES_MAX))
+    if (being_energy(local) < BEING_HUNGRY)
     {
         /** increase hunger drive */
-        local->drives[DRIVE_HUNGER]++;
+        being_inc_drive(local, DRIVE_HUNGER);
         /** decrease sex drive (hunger subsumes sex) */
-        if (local->drives[DRIVE_SEX] > 0) local->drives[DRIVE_SEX]--;
+        being_dec_drive(local, DRIVE_SEX);
     }
     else
     {
         /** otherwise decrease hunger drive */
-        if (local->drives[DRIVE_HUNGER] > 0) local->drives[DRIVE_HUNGER]--;
+        being_dec_drive(local, DRIVE_HUNGER);
     }
 }
 
@@ -84,16 +83,15 @@ static void drives_sociability(
     n_byte beings_in_vicinity)
 {
     /** if the being is not overcrowded and its social drive is not saturated */
-    if ((beings_in_vicinity < local->crowding+SOCIAL_TOLLERANCE) &&
-            (local->drives[DRIVE_SOCIAL] < DRIVES_MAX))
+    if (beings_in_vicinity < local->crowding + SOCIAL_TOLLERANCE)
     {
         /** increase the social drive */
-        local->drives[DRIVE_SOCIAL]++;
+        being_inc_drive(local, DRIVE_SOCIAL);
     }
     else
     {
         /** decrease the social drive */
-        if (local->drives[DRIVE_SOCIAL] > 0) local->drives[DRIVE_SOCIAL]--;
+        being_dec_drive(local, DRIVE_SOCIAL);
     }
 
     /** Adjust crowding (typical expected number of neighbours). */
@@ -130,13 +128,14 @@ static void drives_sex(
     if (age_in_days > AGE_OF_MATURITY)
     {
         /** is the being awake and its sex drive not saturated */
-        if ((awake) && (local->drives[DRIVE_SEX] < DRIVES_MAX))
+        if (awake)
         {
             /** increase the sex drive */
-            local->drives[DRIVE_SEX]++;
+            being_inc_drive(local, DRIVE_SEX);
+
             /** if sex drive is above a mate seeking threshold and
             the being has no current goal */
-            if ((local->drives[DRIVE_SEX]>THRESHOLD_SEEK_MATE) &&
+            if ((being_drive(local, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
                     (local->goal[0]==GOAL_NONE))
             {
                 /** either search for a preferred mate, or mate randomly */
@@ -210,20 +209,20 @@ static void drives_sex(
             /** during gestation reduce the sex drive */
             if (TIME_IN_DAYS(local->date_of_conception) != 0)
             {
-                if (local->drives[DRIVE_SEX] >= GESTATION_SEX_DRIVE_DECREMENT)
+                if (being_drive(local, DRIVE_SEX) >= GESTATION_SEX_DRIVE_DECREMENT)
                 {
-                    local->drives[DRIVE_SEX]-=GESTATION_SEX_DRIVE_DECREMENT;
+                    being_dec_drive(local, DRIVE_SEX);
                 }
             }
         }
         else
         {
             /** while sleeping reduce sex drive */
-            if (local->drives[DRIVE_SEX] > 0) local->drives[DRIVE_SEX]--;
+            being_dec_drive(local, DRIVE_SEX);
         }
         /** if sex drive falls below the mate seeking threshold and the being
             is seeking a mate, then stop seeking a mate */
-        if ((local->drives[DRIVE_SEX]<THRESHOLD_SEEK_MATE) &&
+        if ((being_drive(local, DRIVE_SEX) < THRESHOLD_SEEK_MATE) &&
                 (local->goal[0]==GOAL_MATE))
         {
             local->goal[0]=GOAL_NONE;
@@ -240,22 +239,21 @@ static void drives_fatigue(
     noble_being * local)
 {
     /** if the being is moving fast enough then increase the fatigue drive */
-    if ((being_speed(local) > FATIGUE_SPEED_THRESHOLD) &&
-            (local->drives[DRIVE_FATIGUE] < DRIVES_MAX))
+    if (being_speed(local) > FATIGUE_SPEED_THRESHOLD)
     {
-        local->drives[DRIVE_FATIGUE]++;
+        being_inc_drive(local, DRIVE_FATIGUE);
         /** Add extra fatigue when swimming */
         if (local->state&BEING_STATE_SWIMMING)
         {
-            local->drives[DRIVE_FATIGUE]++;
+            being_inc_drive(local, DRIVE_FATIGUE);
         }
         /** As fatigue increases, sex drive decreases */
-        if (local->drives[DRIVE_SEX] > 0) local->drives[DRIVE_SEX]--;
+        being_dec_drive(local, DRIVE_SEX);
     }
     else
     {
         /** When resting fatigue drive decreases */
-        if (local->drives[DRIVE_FATIGUE] > 0) local->drives[DRIVE_FATIGUE]--;
+        being_dec_drive(local, DRIVE_FATIGUE);
     }
 }
 

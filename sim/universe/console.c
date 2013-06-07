@@ -1077,10 +1077,10 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
             being_facing(local_being),
             ((FIND_SEX(GET_I(local_being)) == SEX_FEMALE) ? 'F' : 'M'),
             TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being),
-            local_being->drives[DRIVE_HUNGER],
-            local_being->drives[DRIVE_SOCIAL],
-            local_being->drives[DRIVE_FATIGUE],
-            local_being->drives[DRIVE_SEX],
+            (int)being_drive(local_being, DRIVE_HUNGER),
+            (int)being_drive(local_being, DRIVE_SOCIAL),
+            (int)being_drive(local_being, DRIVE_FATIGUE),
+            (int)being_drive(local_being, DRIVE_SEX),
             being_body_inventory_description(GET_A(local_being,ATTENTION_BODY)),
             relationship_str
            );

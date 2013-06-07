@@ -753,6 +753,7 @@ static void sim_indicators(noble_simulation * sim)
     
     for (b=0; b<sim->num; b++)
     {
+        enum drives_definition dd;
         local_being = &(sim->beings[b]);
         local_dob = being_dob(local_being);
                 
@@ -772,9 +773,9 @@ static void sim_indicators(noble_simulation * sim)
         family[1]+=GET_FAMILY_SECOND_NAME(sim,local_being);
 
         /* drives */
-        for (i=0; i<DRIVES; i++)
+        for (dd=DRIVE_HUNGER; dd<DRIVES; dd++)
         {
-            drives[i] += local_being->drives[i];
+            drives[i] += being_drive(local_being, dd);
         }
 
         /* population density */

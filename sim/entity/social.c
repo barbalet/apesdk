@@ -1037,8 +1037,9 @@ static void social_conception(
 
 
     /** reset sex drive and goal */
-    female->drives[DRIVE_SEX]=0;
-    male->drives[DRIVE_SEX]=0;
+    being_reset_drive(female, DRIVE_SEX);
+    being_reset_drive(male, DRIVE_SEX);
+    
     female->goal[0]=GOAL_NONE;
     male->goal[0]=GOAL_NONE;
 
@@ -1075,8 +1076,8 @@ n_int social_mate(
 
     if (!meeter_social_graph) return -1;
 
-    if ((meeter_being->drives[DRIVE_SEX] > THRESHOLD_SEEK_MATE) &&
-            (met_being->drives[DRIVE_SEX] > THRESHOLD_SEEK_MATE))
+    if ((being_drive(meeter_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
+            (being_drive(met_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE))
     {
 #ifdef PARASITES_ON
         /** mating is probabilistic, with a bias towards

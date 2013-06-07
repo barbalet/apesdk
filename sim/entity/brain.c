@@ -942,13 +942,13 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return (n_byte)(meeter_being->state>>8)&255;
         /** Drives */
     case 19:
-        return (n_byte)meeter_being->drives[DRIVE_HUNGER];
+        return (n_byte)being_drive(meeter_being, DRIVE_HUNGER);
     case 20:
-        return (n_byte)meeter_being->drives[DRIVE_SOCIAL];
+        return (n_byte)being_drive(meeter_being, DRIVE_SOCIAL);
     case 21:
-        return (n_byte)meeter_being->drives[DRIVE_FATIGUE];
+        return (n_byte)being_drive(meeter_being, DRIVE_FATIGUE);
     case 22:
-        return (n_byte)meeter_being->drives[DRIVE_SEX];
+        return (n_byte)being_drive(meeter_being, DRIVE_SEX);
 
         /** Sexisms */
     case 23:

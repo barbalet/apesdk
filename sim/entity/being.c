@@ -209,6 +209,11 @@ void    being_dec_drive(noble_being * value, enum drives_definition drive)
     }
 }
 
+void    being_reset_drive(noble_being * value, enum drives_definition drive)
+{
+    value->drives[drive] = 0;
+}
+
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
     n_int	it_water_turn = 0;
@@ -2183,7 +2188,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                               &opposite_sex_distance, &same_sex_distance);
         }
 
-        if (local->drives[DRIVE_SOCIAL] > SOCIAL_THRESHOLD(local))
+        if (being_drive(local, DRIVE_SOCIAL) > SOCIAL_THRESHOLD(local))
         {
             being_interact(sim,
                            current_being_index,
