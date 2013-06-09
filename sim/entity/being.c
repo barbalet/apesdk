@@ -214,6 +214,16 @@ void    being_reset_drive(noble_being * value, enum drives_definition drive)
     value->drives[drive] = 0;
 }
 
+n_int   being_height(noble_being * value)
+{
+    return value->height;
+}
+
+n_int   being_mass(noble_being * value)
+{
+    return value->mass;
+}
+
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
     n_int	it_water_turn = 0;
