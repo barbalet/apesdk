@@ -737,7 +737,7 @@ enum being_interaction_social
 #define BEING_MAX_HEIGHT    65535
 
 /* returns height in real units (mm) */
-#define GET_BEING_HEIGHT(bei) (bei->height*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
+#define GET_BEING_HEIGHT(bei) (GET_H(bei)*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
 
 /* Minimum lung capacity in cubic centimetres */
 #define MIN_LUNG_CAPACITY(bei) (GET_BEING_HEIGHT(bei)*4000/BEING_MAX_HEIGHT_MM)

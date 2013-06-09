@@ -547,7 +547,7 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
         break;
 #endif
     case VARIABLE_HEIGHT:
-        local_being->height = (n_byte2) value;
+        GET_H(local_being) = (n_byte2) value;
         break;
     case VARIABLE_FAMILY_NAME_ONE:
         SET_FAMILY_NAME(local_sim, local_being,
@@ -844,7 +844,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         break;
 #endif
                     case VARIABLE_HEIGHT:
-                        local_number = local_being->height;
+                        local_number = GET_H(local_being);
                         break;
                     case VARIABLE_FIRST_NAME:
                         local_number = GET_NAME_GENDER(local_sim,local_being);
@@ -1077,7 +1077,7 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
     variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = being_energy(local_being);
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
     variables[VARIABLE_SPEAK - VARIABLE_VECT_ANGLE] = local_being->speak;
-    variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = local_being->height;
+    variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = GET_H(local_being);
     variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->goal[0];
     variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->goal[1];
     variables[VARIABLE_GOAL_Y - VARIABLE_VECT_ANGLE] = local_being->goal[2];
@@ -1147,7 +1147,7 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     being_set_energy(local_being, local_energy);
     
     local_being->speak  = (n_byte2)local_speak;
-    local_being->height  = (n_byte2)local_height;
+    GET_H(local_being)  = (n_byte2)local_height;
     if (local_goal_type!=GOAL_NONE)
     {
         local_being->goal[0]  = (n_byte2)local_goal_type;

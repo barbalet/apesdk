@@ -285,7 +285,7 @@ n_int metabolism_vascular_radius(noble_being * local_being, n_int vessel_index)
     return ((n_int)local_being->vessel[vessel_index].radius -
             (((n_int)local_being->vessel[vessel_index].constriction-VASCULAR_CONSTRICTION_ZERO)*
              (n_int)local_being->vessel[vessel_index].radius/256)) *
-           (n_uint)local_being->height/BEING_MAX_HEIGHT;
+           (n_uint)GET_H(local_being)/BEING_MAX_HEIGHT;
 }
 
 /** metabolism state flags */
@@ -925,7 +925,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
         radius = (n_uint)metabolism_vascular_radius(local_being, i);
 
         /** scale vessel length depending upon height */
-        length = (n_uint)local_being->height*(n_uint)local_being->vessel[i].length/BEING_MAX_HEIGHT;
+        length = (n_uint)GET_H(local_being)*(n_uint)local_being->vessel[i].length/BEING_MAX_HEIGHT;
 
         /** elasticity taking into account hardening */
         elasticity =
@@ -956,7 +956,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
     /** Convert heart rate to blood flow rate in ml per minute.
     	This is scaled by height to take account of different heart sizes */
     I = (n_uint)GET_MT(local_being,METABOLISM_HEART_RATE) * 100 *
-        SECONDS_PER_SIMULATION_STEP * (n_uint)local_being->height /
+        SECONDS_PER_SIMULATION_STEP * (n_uint)GET_H(local_being) /
         (1219*BEING_MAX_HEIGHT);
     metabolism_vascular_compartment(I, &local_being->vessel[0]);
 

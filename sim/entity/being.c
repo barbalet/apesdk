@@ -2922,16 +2922,16 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         local->date_of_birth[1] = land->date[1];
         if (first_generation == 0)
         {
-            local->height = BIRTH_HEIGHT;
-            local->mass = BIRTH_MASS;
+            GET_H(local) = BIRTH_HEIGHT;
+            GET_M(local) = BIRTH_MASS;
         }
         else
         {
             /** produce an initial distribution of heights and masses*/
             math_random3(local->seed);
-            local->height = BIRTH_HEIGHT +
+            GET_H(local) = BIRTH_HEIGHT +
 				(local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
-            local->mass = BIRTH_MASS +
+            GET_M(local) = BIRTH_MASS +
 				(local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
         }
         local->crowding = MIN_CROWDING;
