@@ -553,7 +553,7 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
 {
     n_byte2 local_brain_state[3];
 
-    if(being_awake_local(&sim, local_being) == 0)
+    if(being_awake(&sim, local_being) == 0)
     {
         local_brain_state[0] = GET_BS(local_being, 3);
         local_brain_state[1] = GET_BS(local_being, 4);
@@ -602,7 +602,7 @@ static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_bei
     n_byte     awake = 1;
     n_byte    *local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
     n_byte    *local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
-    if(being_awake_local(&sim, local_being) == 0)
+    if(being_awake(&sim, local_being) == 0)
     {
         awake=0;
     }
@@ -653,7 +653,7 @@ static void sim_being(noble_simulation * local_sim)
     {
         noble_being * local_being = &(local_sim->beings[loop]);
         
-        n_byte awake = (being_awake_local(local_sim, local_being) != 0);
+        n_byte awake = (being_awake(local_sim, local_being) != 0);
         
         being_cycle_universal(local_sim,local_being, awake);
         

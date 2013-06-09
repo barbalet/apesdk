@@ -447,7 +447,7 @@ static void episodic_store_full(
         return;
     }
 
-    if (being_awake_local(local_sim, local)==FULLY_ASLEEP) return;
+    if (being_awake(local_sim, local)==FULLY_ASLEEP) return;
 
     replace = episodic_memory_replace_index(event,affect,name1,family1,name2,family2,local,local_sim);
 
@@ -721,13 +721,13 @@ n_byte episodic_anecdote(
 
     /** both protagonists must be awake */
     if ((event==0) ||
-            (being_awake_local(local_sim, local)==FULLY_ASLEEP) ||
-            (being_awake_local(local_sim, other)==FULLY_ASLEEP))
+            (being_awake(local_sim, local) == FULLY_ASLEEP) ||
+            (being_awake(local_sim, other) == FULLY_ASLEEP))
     {
         return 0;
     }
 
-    if (being_awake_local(local_sim, local)!=FULLY_AWAKE)
+    if (being_awake(local_sim, local) != FULLY_AWAKE)
     {
         /** more likely to make errors while drowsy */
         mult=2;

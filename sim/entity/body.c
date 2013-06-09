@@ -1204,7 +1204,7 @@ void social_action(
     n_byte2 carrying;
     n_byte hand = BODY_RIGHT_HAND;
     
-    if (being_awake_local(sim, local) == FULLY_ASLEEP)
+    if (being_awake(sim, local) == FULLY_ASLEEP)
     {
         return;
     }

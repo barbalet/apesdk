@@ -202,7 +202,7 @@ n_uint social_respect_mean(noble_simulation * sim, noble_being *local_being);
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family);
 noble_being * being_find_female(noble_simulation * sim, n_genetics * genetics);
 void          being_move(noble_being * local, n_int vel, n_byte kind);
-n_byte        being_awake_local(noble_simulation * sim, noble_being * local);
+n_byte        being_awake(noble_simulation * sim, noble_being * local);
 
 n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly);
 

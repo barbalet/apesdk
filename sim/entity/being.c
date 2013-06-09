@@ -1438,7 +1438,7 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
  @param reference The specific Noble Ape checked for being awake
  @return 2 is fully awake, 1 is slightly awake to eat, 0 is asleep
  */
-n_byte being_awake_local(noble_simulation * sim, noble_being * local)
+n_byte being_awake(noble_simulation * sim, noble_being * local)
 {
     n_land  * land  =   sim->land;
     n_int     local_energy = being_energy(local);
@@ -1571,6 +1571,8 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     if (awake == 0)
     {
         local->state = BEING_STATE_ASLEEP;
+        
+        being_reset_drive(local, DRIVE_FATIGUE);
     }
 }
 
@@ -2021,7 +2023,7 @@ static void being_interact(noble_simulation * sim,
 
         }
         if ((other_being_distance < SOCIAL_RANGE) && (being_index>-1))
-        {
+        {            
             /* attraction and mating */
             if (opposite_sex != 0)
             {
@@ -2051,7 +2053,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
     n_int         fat_mass, child_mass = 0;
-    n_int         awake = being_awake_local(sim, local);
+    n_int         awake = being_awake(sim, local);
 
     n_int         carrying_child = 0;
 
@@ -2225,6 +2227,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                     metabolism_vascular_response(sim, local, VASCULAR_PARASYMPATHETIC);
 #endif
                     loc_e += energy;
+                    
+                    being_reset_drive(local, DRIVE_HUNGER);
                     
                     INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, energy);
                     
@@ -2991,7 +2995,7 @@ void being_tidy(noble_simulation * local_sim)
             max_honor = local_being->honor;
         }
 #endif
-        if(being_awake_local(local_sim, local_being))
+        if(being_awake(local_sim, local_being))
         {
             n_int	local_s  = being_speed(local_being);
 

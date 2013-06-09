@@ -1245,7 +1245,6 @@ n_int social_chat(
 #ifdef PARASITES_ON
     n_byte2 name, family;
     n_int replace;
-    n_byte *link0,*link1;
 #endif
     n_int speaking = 0;
     social_link * meeter_graph = GET_SOC(sim, meeter_being);
@@ -1267,7 +1266,7 @@ n_int social_chat(
     INDICATOR_INC(sim, IT_AVERAGE_CHAT);
 
     /** agree upon terrirory */
-    social_chat_territory(meeter_being,met_being,being_index,meeter_graph,respect_mean);
+    social_chat_territory(meeter_being, met_being,being_index,meeter_graph,respect_mean);
 
 #ifdef PARASITES_ON
     /** do I respect their views ? */
@@ -1361,9 +1360,7 @@ n_int social_chat(
                     replace = get_stranger_link(meeter_being,met_being,sim);
                     if (replace > -1)
                     {
-                        link0 = (unsigned char*)&meeter_graph[replace];
-                        link1 = (unsigned char*)&met_graph[idx];
-                        io_copy(link1,link0, sizeof(social_link));
+                        io_copy((n_byte *)&met_graph[idx], (n_byte *)&meeter_graph[replace], sizeof(social_link));
                         meeter_graph[replace].attraction = 0;
                         speaking |= BEING_STATE_SPEAKING;
 
@@ -1389,12 +1386,16 @@ n_int social_chat(
     }
 #endif
 
+    being_reset_drive(met_being, DRIVE_SOCIAL);
+    being_reset_drive(meeter_being, DRIVE_SOCIAL);
+    
 #ifdef BRAINCODE_ON
     brain_dialogue(
         sim,1,meeter_being,met_being,
         GET_BRAINCODE_EXTERNAL(sim,meeter_being),
         GET_BRAINCODE_EXTERNAL(sim,met_being),
         being_index);
+    
 #endif
 #ifdef EPISODIC_ON
     social_group_align_preferences(
