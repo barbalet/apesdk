@@ -52,6 +52,16 @@
 
 #undef   DEBUG_NON_FILE_HANDLE    /* Stops there being a file handle for debug output */
 
+#ifdef COMMAND_LINE_EXPLICIT
+
+#define  NOBLE_APE_ASSERT
+
+#else
+
+#undef   NOBLE_APE_ASSERT
+
+#endif
+
 #define LATITUDE_MEAN_TEMPERATURE 20000
 
 /*! @define */
@@ -76,16 +86,6 @@
 typedef	double	n_double;
 
 #define TWO_PI (6.2831853071795864769252867665590057683943L)
-
-#ifdef NOBLE_APE_ASSERT
-
-#define NA_ASSERT(test, message) if(!(test))printf("Assert: %s, %s, %d\n", message, __FILE__, __LINE__)
-
-#else
-
-#define NA_ASSERT(test, message) /* test message */
-
-#endif
 
 /*! @typedef n_string
  @discussion This is the string format for the Noble Ape development */
@@ -130,6 +130,19 @@ typedef	long long			n_int;
 #endif
 
 typedef	short	n_audio;
+
+
+#ifdef NOBLE_APE_ASSERT
+
+#define NA_ASSERT(test, message) if(!(test))io_assert(message, __FILE__, __LINE__)
+
+void io_assert(n_string message, n_string file_loc, n_int line);
+
+#else
+
+#define NA_ASSERT(test, message) /* test message */
+
+#endif
 
 #define AUDIO_FFT_MAX_BITS      (15)
 #define AUDIO_FFT_MAX_BUFFER    (1<<AUDIO_FFT_MAX_BITS)

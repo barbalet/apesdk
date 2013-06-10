@@ -51,6 +51,8 @@
  */
 void vect2_byte2(n_vect2 * converter, n_byte2 * input)
 {
+    NA_ASSERT(converter, "converter NULL");
+    NA_ASSERT(input, "input NULL");
     converter->x = input[0];
     converter->y = input[1];
 }
@@ -63,6 +65,9 @@ void vect2_byte2(n_vect2 * converter, n_byte2 * input)
  */
 void vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
 {
+    NA_ASSERT(equals, "equals NULL");
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
     equals->x = initial->x + second->x;
     equals->y = initial->y + second->y;
 }
@@ -75,6 +80,9 @@ void vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
  */
 void vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
 {
+    NA_ASSERT(equals, "equals NULL");
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
     equals->x = initial->x - second->x;
     equals->y = initial->y - second->y;
 }
@@ -83,12 +91,19 @@ void vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
 void vect2_multiplier(n_vect2 * equals, n_vect2 * initial, n_vect2 * second,
                       n_int multiplier, n_int divisor)
 {
+    NA_ASSERT(equals, "equals NULL");
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    NA_ASSERT(divisor, "divisor ZERO");
     equals->x = (multiplier * initial->x * second->x) / divisor;
     equals->y = (multiplier * initial->y * second->y) / divisor;
 }
 
 void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int divisor)
 {
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    NA_ASSERT(divisor, "divisor ZERO");
     initial->x += ( (multiplier * second->x) / divisor);
     initial->y += ( (multiplier * second->y) / divisor);
 }
@@ -104,23 +119,32 @@ void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int diviso
 n_int vect2_dot(n_vect2 * initial, n_vect2 * second,
                 n_int multiplier, n_int divisor)
 {
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    NA_ASSERT(divisor, "divisor ZERO");
     return (multiplier * ((initial->x * second->x) + (initial->y * second->y))) / divisor;
 }
 
 void vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor)
 {
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(divisor, "divisor ZERO");
     initial->x = VECT_X(direction) / divisor;
     initial->y = VECT_Y(direction) / divisor;
 }
 
 void vect2_offset(n_vect2 * initial, n_int dx, n_int dy)
 {
+    NA_ASSERT(initial, "initial NULL");
     initial->x += dx;
     initial->y += dy;
 }
 
 void vect2_back_byte2(n_vect2 * converter, n_byte2 * output)
 {
+    NA_ASSERT(converter, "converter NULL");
+    NA_ASSERT(output, "output NULL");
+
     if (converter->x > 65535) converter->x = 65535;
     if (converter->y > 65535) converter->y = 65535;
     if (converter->x < 0) converter->x = 0;
@@ -161,7 +185,10 @@ void math_patch(n_byte * local_map, n_byte * scratch,
     /** internal tile size is 2^refine */
     n_int	refine = refined_start;
     n_int   loop = 0;
-
+    NA_ASSERT(local_map, "local_map NULL");
+    NA_ASSERT(scratch, "scratch NULL");
+    NA_ASSERT(func, "func NULL");
+    NA_ASSERT(arg, "arg NULL");
     /**
      *  Average value in the byte array should start at 128.
      */
@@ -317,8 +344,17 @@ n_byte math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw)
     n_int	  px = sx;
     n_int	  py = sy;
 
-    n_pixel	* local_draw = draw->pixel_draw;
-    void	* local_info = draw->information;
+    n_pixel	* local_draw;
+    void	* local_info;
+    
+    NA_ASSERT(draw, "draw NULL");
+    
+    local_draw = draw->pixel_draw;
+    local_info = draw->information;
+    
+    NA_ASSERT(local_draw, "local_draw NULL");
+    NA_ASSERT(local_info, "local_info NULL");
+
     if ((*local_draw)(px, py, local_info))
     {
         return 1;
@@ -393,6 +429,8 @@ n_uint math_hash(n_byte * values, n_uint length)
     n_uint	loop = 0;
     n_byte2	round[5]= {0xfa78, 0xfad7, 0x53e7, 0xa728, 0x2c81};
 
+    NA_ASSERT(values, "values NULL");
+    
     if (sizeof(n_uint) == 8)
     {
         n_uint  big_round[4];
@@ -445,6 +483,8 @@ n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
     n_int best_f = fac;
     n_int loop = turn;
 
+    NA_ASSERT(p, "p NULL");
+    
     vect2_direction(&vector_facing, best_f, 1);
 
     best_p = vect2_dot(p, &vector_facing, 1, 1);
@@ -503,8 +543,14 @@ n_int math_spread_byte(n_byte val)
  */
 n_byte2 math_random(n_byte2 * local)
 {
-    n_byte2 tmp0 = local[0];
-    n_byte2 tmp1 = local[1];
+    n_byte2 tmp0;
+    n_byte2 tmp1;
+    
+    NA_ASSERT(local, "local NULL");
+
+    tmp0 = local[0];
+    tmp1 = local[1];
+    
     local[0] = tmp1;
     switch (tmp0 & 7)
     {
@@ -526,6 +572,8 @@ n_byte2 math_random(n_byte2 * local)
 
 void math_random3(n_byte2 * local)
 {
+    NA_ASSERT(local, "local NULL");
+
     (void)math_random(local);
     (void)math_random(local);
     (void)math_random(local);
@@ -535,6 +583,10 @@ void math_random3(n_byte2 * local)
 void math_bilinear_512_4096(n_byte * side512, n_byte * data)
 {
     n_int loop_y = 0;
+    
+    NA_ASSERT(side512, "side512 NULL");
+    NA_ASSERT(data, "data NULL");
+
     while (loop_y < 4096)
     {
 

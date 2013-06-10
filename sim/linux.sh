@@ -82,7 +82,7 @@ gcc ${CFLAGS} -c $SOURCEDIR/gui/draw.c -o draw.o
 
 else
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nalongterm *.o -lz -lm -lpthread
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../../nalongterm *.o -lz -lm -lpthread
 
 rm *.o
 

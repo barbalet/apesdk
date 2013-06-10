@@ -2239,3 +2239,11 @@ n_int io_apescript_error(AE_ENUM value)
     return io_apescript_error(AE_UNKNOWN_ERROR);
 }
 
+#ifdef NOBLE_APE_ASSERT
+
+void io_assert(n_string message, n_string file_loc, n_int line)
+{
+    printf("Assert: %s, %s, %ld\n", message, file_loc, line);
+}
+
+#endif
