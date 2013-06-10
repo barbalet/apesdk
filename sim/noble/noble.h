@@ -71,12 +71,21 @@
 #define  COPYRIGHT_NAME		    "Tom Barbalet"
 #define  COPYRIGHT_FOLLOW		"All rights reserved."
 
-
 #define PACKED_DATA_BLOCK   (32*32*32*2)
 
 typedef	double	n_double;
 
 #define TWO_PI (6.2831853071795864769252867665590057683943L)
+
+#ifdef NOBLE_APE_ASSERT
+
+#define NA_ASSERT(test, message) if(!(test))printf("Assert: %s, %s, %d\n", message, __FILE__, __LINE__)
+
+#else
+
+#define NA_ASSERT(test, message) /* test message */
+
+#endif
 
 /*! @typedef n_string
  @discussion This is the string format for the Noble Ape development */
