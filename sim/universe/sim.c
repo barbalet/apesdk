@@ -69,109 +69,109 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     /* 0 */ /* special "variables" */
     "function",
     "run",
-    
+
     /* 2 */
     "while",
     "if",
-    
+
     /* output only */
     "vector_x",
     "vector_y",
     /* 6 */
     "random",
     "water_level",
-    
+
     "biology_area",
     "biology_height",
-    
+
     "biology_water",
     "biology_moving_sun",
-    
+
     "biology_total_sun",
     "biology_salt",
     "biology_bush",
-    
+
     "biology_grass",
     "biology_tree",
-    
+
     "biology_seaweed",
     "biology_rockpool",
     "biology_beach",
-    
+
     "biology_insect",
     "biology_mouse",
-    
+
     "biology_parrot",
     "biology_lizard",
-    
+
     "biology_eagle",
     "biology_output",
-    
+
     "hungry",
     "location_z",
     /* 10 */
     "test_z",
     "is_visible",
-    
+
     "time",
     "date",
     /* 14 */
     "current_being",
     "number_beings",
-    
+
     "location_x",
     "location_y",
-    
+
     "state",  /* new ! */
     "listen", /* new ! */
-    
+
     /* 18 */
     "id_number",
     "date_of_birth",
-    
+
     "weather",
     "brain_value",		/* special input/output */
     /* actual variables start here */
     /* 22 */
     "vector_angle",
     "facing",
-    
+
     "speed",
     "energy",
-    
+
     "honor",
     "parasites",
     "height",
-    
+
     "first_name",
     "family_name_one",
     "family_name_two",
-    
+
     "goal_type",
     "goal_x",
     "goal_y",
-    
+
     "drive_hunger",
     "drive_social",
     "drive_fatigue",
     "drive_sex",
-    
+
     "speak", /* new ! */
-    
+
     /* 26 */
     "brain_x",
     "brain_y",
-    
+
     "brain_z",
     "select_being",
     /* 30 */
     "test_x",
     "test_y",
-    
+
     "biology_operator",
-    
+
     "posture",
-    
+
     "preference_mate_height_male",
     "preference_mate_height_female",
     "preference_mate_pigment_male",
@@ -185,18 +185,18 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "preference_anecdote_event",
     "preference_anecdote_affect",
     "preference_chat",
-    
+
     "attention_actor_index",
     "attention_episode_index",
     "attention_body_index",
-    
+
     "shout_content",
     "shout_heard",
     "shout_counter",
     "shout_volume",
     "shout_family_first",
     "shout_family_last",
-    
+
     "social_graph_location_x",
     "social_graph_location_y",
     "social_graph_time",
@@ -208,7 +208,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "social_graph_first_name",
     "social_graph_family_first",
     "social_graph_family_last",
-    
+
     "memory_location_x",
     "memory_location_y",
     "memory_time",
@@ -222,7 +222,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "memory_family_last_one",
     "memory_event",
     "memory_affect",
-    
+
     "being"
 };
 
@@ -326,7 +326,7 @@ static void * sim_thread_being(void * id)
         if(thread_on ==1 ) pthread_cond_wait(&sim_cond, &draw_mtx);
         sim_done--;
         pthread_mutex_unlock(&draw_mtx);
-        
+
         sim_being(&sim);    /* 2 */
         being_tidy(&sim);
         being_remove(&sim); /* 6 */
@@ -355,19 +355,19 @@ static void * sim_thread_brain(void * id)
         if(thread_on ==1 ) pthread_cond_wait(&sim_cond, &draw_mtx);
         sim_done--;
         pthread_mutex_unlock(&draw_mtx);
-        
+
         sim_brain(&sim);    /* 4 */
 
 #ifdef BRAINCODE_ON
         sim_brain_dialogue(&sim);
 #endif
-        
+
 #ifdef BRAIN_HASH
         sim_brain_hash(&sim)
 #endif
         pthread_mutex_lock(&draw_mtx);
         sim_done++;
-        
+
         if(sim_done == 3)
         {
             pthread_cond_signal(&draw_cond);
@@ -419,18 +419,18 @@ n_int sim_thread_console_quit(void)
 static void sim_console_clean_up(void)
 {
     n_int loop = 0;
-    
+
     if ((io_command_line_execution() == 0) || sim_quit_value)
     {
         return;
     }
-    
+
     sim_quit_value = 1;
 
     console_quit(0L,0L,0L);
 
-    while (console_executing()){}
-    
+    while (console_executing()) {}
+
     while (loop < 2)
     {
         if (threads_running[loop] != 0)
@@ -453,12 +453,12 @@ static void *sim_thread(void *threadid)
 }
 
 void sim_thread_console(void)
-{    
+{
     if (io_command_line_execution() == 0)
     {
         return;
     }
-    
+
     if ((threads_running[0] == 0)||(threads_running[1] == 0))
     {
         n_int loop = 0;
@@ -524,9 +524,9 @@ n_int     file_interpret(n_file * input_file)
 {
     input_file->size = input_file->location;
     input_file->location = 0;
-    
+
     interpret = parse_convert(input_file, VARIABLE_BEING, (variable_string *)apescript_variable_codes);
-    
+
     if(interpret == 0L)
     {
         return -1;
@@ -535,17 +535,17 @@ n_int     file_interpret(n_file * input_file)
     {
         SC_DEBUG_ON; /* turn on debugging after script loading */
     }
-    
+
     interpret->sc_input  = &sketch_input;
     interpret->sc_output = &sketch_output;
-    
+
     interpret->input_greater   = VARIABLE_WEATHER;
     interpret->special_less    = VARIABLE_VECT_X;
-    
+
     interpret->location = 0;
     interpret->leave = 0;
     interpret->localized_leave = 0;
-    
+
     return 0;
 }
 
@@ -565,21 +565,21 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
         local_brain_state[1] = GET_BS(local_being, 1);
         local_brain_state[2] = GET_BS(local_being, 2);
     }
-    
+
     if(braindisplay == 1)
     {
         local_brain_state[0] = 0;
         local_brain_state[1] = 500;
         local_brain_state[2] = (5*local_brain_state[2])>>3;
     }
-    
+
     if(braindisplay == 2)
     {
         local_brain_state[0] = (9*local_brain_state[0])>>3;
         local_brain_state[1] = 82;
         local_brain_state[2] = 0;
     }
-    
+
     if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
     {
         n_byte			*local_brain = GET_B(local_sim, local_being);
@@ -587,7 +587,7 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
         {
             brain_cycle(local_brain, local_brain_state);
         }
-    }    
+    }
 }
 
 static void sim_brain(noble_simulation * local_sim)
@@ -625,9 +625,9 @@ static void sim_brain_hash(noble_simulation * local_sim)
     if((brain_hash_count & 63) == 0)
     {
         n_byte * hash_brain = GET_B(local_sim, &(sim.beings[sim.select]));
-        
+
         brain_hash_count = 0;
-        
+
         if ((sim.select != NO_BEINGS_FOUND) && (hash_brain != 0L))
         {
             brain_hash(hash_brain, brain_hash_out);
@@ -652,11 +652,11 @@ static void sim_being(noble_simulation * local_sim)
     while (loop < local_sim->num)
     {
         noble_being * local_being = &(local_sim->beings[loop]);
-        
+
         n_byte awake = (being_awake(local_sim, local_being) != 0);
-        
+
         being_cycle_universal(local_sim,local_being, awake);
-        
+
         if (awake)
         {
             if(interpret_cycle(interpret, -1, local_sim->beings, loop, &sim_start_conditions, &sim_end_conditions) == -1)
@@ -716,9 +716,9 @@ static void sim_indicators(noble_simulation * sim)
 #endif
 
     if (sim->land->time%INDICATORS_FREQUENCY!=0) return;
-    
+
     INDICATOR_SET(sim, IT_POPULATION, sim->num);
-    
+
     if (sim->num==0)
     {
         return;
@@ -727,7 +727,7 @@ static void sim_indicators(noble_simulation * sim)
     current_date = TIME_IN_DAYS(sim->land->date);
 
     for (i=0; i<8*8; i++)
-    {        
+    {
         INDICATOR_SET(sim, IT_POPULATION_DENSITY + i, 0);
     }
 
@@ -750,15 +750,15 @@ static void sim_indicators(noble_simulation * sim)
         mean_braincode[n]=0;
     }
 #endif
-    
+
     for (b=0; b<sim->num; b++)
     {
         enum drives_definition dd;
         local_being = &(sim->beings[b]);
         local_dob = being_dob(local_being);
-                
+
         INDICATOR_ADD(sim, IT_AVERAGE_AGE_DAYS, current_date - local_dob);
-        
+
         average_energy += (n_uint)being_energy(local_being);
 #ifdef EPISODIC_ON
         average_first_person += (n_uint)episodic_first_person_memories_percent(sim,local_being,0);
@@ -781,7 +781,7 @@ static void sim_indicators(noble_simulation * sim)
         /* population density */
         x = (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(local_being)) * 8 / MAP_DIMENSION);
         y = (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(local_being)) * 8 / MAP_DIMENSION);
-        
+
         INDICATOR_INC(sim, IT_POPULATION_DENSITY + (y * 8) + x);
 
         /* affect */
@@ -829,38 +829,38 @@ static void sim_indicators(noble_simulation * sim)
         }
 #endif
     }
-    
+
     INDICATOR_SET(sim, IT_AVERAGE_ANTIGENS, average_antigens);
     INDICATOR_SET(sim, IT_AVERAGE_ANTIBODIES, average_antibodies);
-    
+
     INDICATOR_SET(sim, IT_AVERAGE_SOCIAL_LINKS, social_links);
 
     INDICATOR_SET(sim, IT_AVERAGE_POSITIVE_AFFECT, positive_affect);
     INDICATOR_SET(sim, IT_AVERAGE_NEGATIVE_AFFECT, negative_affect);
     INDICATOR_SET(sim, IT_AVERAGE_ENERGY, average_energy);
-    
+
     INDICATOR_SET(sim, IT_AVERAGE_FIRST_PERSON, average_first_person);
     INDICATOR_SET(sim, IT_AVERAGE_INTENTIONS, average_intentions);
-    
+
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_PARASITE_MOBILITY, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_GROOMING, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_SHOUTS, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_LISTENS, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_CHAT, 100);
-    
+
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_SOCIAL_LINKS, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_POSITIVE_AFFECT, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_NEGATIVE_AFFECT, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_ENERGY, 100);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_FIRST_PERSON, 10);
     INDICATOR_MULTIPLY(sim, IT_AVERAGE_INTENTIONS, 10);
-    
+
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_PARASITE_MOBILITY);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_GROOMING);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_SHOUTS);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_LISTENS);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_CHAT);
-    
+
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_SOCIAL_LINKS);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_POSITIVE_AFFECT);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_NEGATIVE_AFFECT);
@@ -873,19 +873,19 @@ static void sim_indicators(noble_simulation * sim)
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_ENERGY_INPUT);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_ENERGY_OUTPUT);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_MOBILITY);
-    
+
 #ifdef BRAINCODE_ON
     braincode_statistics(sim);
 #endif
- 
+
     if (social_links > 0)
     {
         INDICATOR_SET(sim, IT_AVERAGE_COHESION, average_cohesion);
         INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
-        
+
         INDICATOR_SET(sim, IT_AVERAGE_FAMILIARITY, average_familiarity);
         INDICATOR_SET(sim, IT_AVERAGE_AMOROUSNESS, average_amorousness);
-        
+
         INDICATOR_DIVIDE(sim, IT_AVERAGE_COHESION, social_links);
         INDICATOR_DIVIDE(sim, IT_AVERAGE_FAMILIARITY, social_links);
         INDICATOR_DIVIDE(sim, IT_AVERAGE_AMOROUSNESS, social_links);
@@ -895,15 +895,15 @@ static void sim_indicators(noble_simulation * sim)
         INDICATOR_SET(sim, IT_AVERAGE_COHESION, SOCIAL_RESPECT_NORMAL);
         INDICATOR_MULTIPLY(sim, IT_AVERAGE_COHESION, 100);
     }
-    
+
     /* family name variance */
     for (i=0; i<2; i++)
     {
         family[i]/=sim->num;
     }
-    
+
     sd = 0;
-    
+
     for (b=0; b<sim->num; b++)
     {
         local_being = &(sim->beings[b]);
@@ -917,10 +917,10 @@ static void sim_indicators(noble_simulation * sim)
     INDICATOR_SET(sim, IT_FAMILY_NAME_SD, sd);
     INDICATOR_MULTIPLY(sim, IT_FAMILY_NAME_SD, 100);
     INDICATOR_NORMALIZE(sim, IT_FAMILY_NAME_SD);
-    
+
     /* drives */
     for (i=0; i<DRIVES; i++)
-    {        
+    {
         INDICATOR_SET(sim, IT_DRIVES + i, drives[i]);
         INDICATOR_MULTIPLY(sim, IT_DRIVES + i, 100);
         INDICATOR_NORMALIZE(sim, IT_DRIVES + i);
@@ -947,7 +947,7 @@ static void sim_indicators(noble_simulation * sim)
     INDICATOR_SET(sim, IT_GENETICS_SD, sd);
     INDICATOR_MULTIPLY(sim, IT_GENETICS_SD, 100);
     INDICATOR_NORMALIZE(sim, IT_IDEOLOGY_SD);
-    
+
     sd = 0;
 #ifdef BRAINCODE_ON
     /* ideology variance */
@@ -968,17 +968,17 @@ static void sim_indicators(noble_simulation * sim)
             sd += (n_uint)diff;
         }
     }
-    
+
     INDICATOR_SET(sim, IT_IDEOLOGY_SD, sd);
     INDICATOR_NORMALIZE(sim, IT_IDEOLOGY_SD);
-    
+
 #endif
 
 #ifdef IMMUNE_ON
-    
+
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_ANTIBODIES);
     INDICATOR_NORMALIZE(sim, IT_AVERAGE_ANTIGENS);
-    
+
 #endif
 
     if (sim->indicators_logging!=0)
@@ -990,7 +990,7 @@ static void sim_indicators(noble_simulation * sim)
             fp = fopen(filename,"w");
             if (fp!=NULL)
             {
-                
+
                 n_int loop = 0;
                 while (loop < IT_NUMBER_ENTRIES)
                 {
@@ -1063,7 +1063,7 @@ void sim_cycle(void)
 #ifdef BRAINCODE_ON
     sim_brain_dialogue(&sim);
 #endif
-    
+
 #ifdef BRAIN_HASH
     sim_brain_hash(&sim)
 #endif
@@ -1170,18 +1170,18 @@ static void sim_memory(n_uint offscreen_size)
     io_erase((n_byte *)sim.indicators_base, INDICATORS_BUFFER_SIZE * IT_NUMBER_ENTRIES);
     sim.indicator_index = 0;
     sim.indicators_logging=0;
-                             
+
     io_erase((n_byte *)sim.indicators_name, sizeof(n_string) * IT_NUMBER_ENTRIES);
 
     /* By setting these names, these indicate the values to be outputted. Set more to get more! */
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_POPULATION,"Population");
     INDICATOR_INIT_NAME(sim, IT_DROWNINGS,"Drownings");
     INDICATOR_INIT_NAME(sim, IT_PARASITES,"Parasites");
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_PARASITE_MOBILITY,"Average Parasite Mobility (x100)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_CHAT,"Average Chat (x100)");
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_AGE_DAYS,"Average Age (days)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_MOBILITY,"Average Mobility");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_ENERGY,"Average Energy (x100)");
@@ -1194,10 +1194,10 @@ static void sim_memory(n_uint offscreen_size)
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_SOCIAL_LINKS,"Average Social Links (x100)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_POSITIVE_AFFECT,"Average Positive Affect (x100)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_NEGATIVE_AFFECT,"Average Negative Affect (x100)");
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_ANTIGENS,"Average Antigens");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_ANTIBODIES,"Average Antibodies");
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_IDEOLOGY_SD,"Ideological Variation");
     INDICATOR_INIT_NAME(sim, IT_GENETICS_SD,"Genetic Variation (x100)");
     INDICATOR_INIT_NAME(sim, IT_FAMILY_NAME_SD,"Family Name Variation (x100)");
@@ -1205,17 +1205,17 @@ static void sim_memory(n_uint offscreen_size)
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_LISTENS,"Average Listens (x100)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_GROOMING,"Average Grooming (x100)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY,"Average Brainprobe Activity (x100)");
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_HUNGER,"Average Hunger (x100)");
     INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_SOCIAL,"Average Social Drive (x100)");
     INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_FATIGUE,"Average Fatigue (x100)");
     INDICATOR_INIT_NAME(sim, IT_DRIVES + DRIVE_SEX,"Average Sex Drive (x100)");
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_VEGETABLE,"Food (Vegetable)");
     INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_FRUIT,"Food (Fruit)");
     INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_SHELLFISH,"Food (Shellfish)");
     INDICATOR_INIT_NAME(sim, IT_FOOD + FOOD_SEAWEED,"Food (Seaweed)");
-                                  
+
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_FIRST_PERSON,"Average First Person (x10)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_INTENTIONS,"Average Intentions (x10)");
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_SENSORS,"Average Braincode Sensors (x10)");
@@ -1365,12 +1365,12 @@ void sim_flood(void)
         n_int         local_x = APESPACE_TO_MAPSPACE(being_location_x(local));
         n_int         local_y = APESPACE_TO_MAPSPACE(being_location_y(local));
         n_int         local_z = QUICK_LAND(sim.land, local_x, local_y);
-        
+
         if (local_z < 160)
         {
             being_set_energy(local, BEING_DEAD);
         }
-        
+
         loop++;
     }
 }
@@ -1378,7 +1378,7 @@ void sim_flood(void)
 void sim_healthy_carrier(void)
 {
     n_uint  loop = (sim.num >> 2);
-    
+
     while (loop < sim.num)
     {
         noble_being * local = &sim.beings[loop];

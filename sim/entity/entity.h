@@ -195,9 +195,9 @@ void brain_sentence(n_string string, n_byte * response);
 void braincode_statistics(noble_simulation * sim);
 
 n_int episode_description(noble_simulation * sim,
-                         noble_being * local_being,
-                         n_int index,
-                         n_string description);
+                          noble_being * local_being,
+                          n_int index,
+                          n_string description);
 
 void episodic_logging(n_console_output * output_function, n_int social);
 
@@ -211,7 +211,8 @@ n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 
 
 void          speak_out(n_string filename, n_string paragraph);
 
-enum {
+enum
+{
     SKELETON_NECK = 0,
     SKELETON_LUMBAR,
     SKELETON_PELVIS,

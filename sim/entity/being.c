@@ -228,9 +228,9 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
     n_int	it_water_turn = 0;
     n_vect2 location_vector;
-    
+
     vect2_byte2(&location_vector, being_location(value));
-    
+
     while (it_water_turn < 4)
     {
         /* find higher land first */
@@ -238,24 +238,24 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
         n_int    loc_f = being_facing(value);
         n_int    iturn_plus  = loc_f + iturn;
         n_int    iturn_minus = loc_f + (256-iturn);
-        
+
         n_byte   turn_plus  = (n_byte)((iturn_plus)  & 255);
         n_byte   turn_minus = (n_byte)((iturn_minus) & 255);
         n_vect2  temp_vector;
-        
+
         n_int  z_plus;
         n_int  z_minus;
-        
+
         vect2_direction(&temp_vector, turn_plus, 4);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
-        
+
         z_plus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
-        
+
         vect2_direction(&temp_vector, turn_minus, 4);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
-        
+
         z_minus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
-        
+
         if (z_minus > z_plus)
         {
             being_wander(value, -iturn);
@@ -307,14 +307,14 @@ static n_byte	being_ground(n_int px, n_int py, void * params)
 static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx, n_int ly)
 {
     n_vect2    start, delta, vector_facing;
-    
+
     vect2_byte2(&start, being_location(local));
-    
+
     delta.x = lx;
     delta.y = ly;
-    
+
     vect2_subtract(&delta, &delta, &start);
-    
+
     {
         n_int distance_squared = vect2_dot(&delta, &delta, 1, 1);
         /* TODO: This should also include weather conditions (eg seeing through the rain) */
@@ -329,7 +329,7 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
         return 1;
     }
     being_facing_vector(local, &vector_facing, 16);
-    
+
     /* if it is behind, it can't be in the line of sight */
     if (vect2_dot(&vector_facing, &delta, 1, 64) < 0)
     {
@@ -362,11 +362,11 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
 
         {
             n_vect2 offset = {0};
-            
+
             vect2_d(&offset, &delta, 512 * delta_z, common_divisor);
-            
+
             start_z -= vect2_dot(&start, &offset, 1, 512);
-            
+
             translate.start_z = start_z;
             translate.offset_x = offset.x;
             translate.offset_y = offset.y;
@@ -944,39 +944,39 @@ static void being_inventory_string(n_string string, n_int * location, n_int item
 {
     switch (item)
     {
-        case INVENTORY_BRANCH:
-            io_string_write(string,"branch",location);
-            break;
-        case INVENTORY_ROCK:
-            io_string_write(string,"rock",location);
-            break;
-        case INVENTORY_SHELL:
-            io_string_write(string,"shell",location);
-            break;
-        case INVENTORY_TWIG:
-            io_string_write(string,"twig",location);
-            break;
-        case INVENTORY_NUT_CRACKED:
-            io_string_write(string,"cracked nut",location);
-            break;
-        case INVENTORY_GRASS:
-            io_string_write(string,"piece of grass",location);
-            break;
-        case INVENTORY_SCRAPER:
-            io_string_write(string,"scraper",location);
-            break;
-        case INVENTORY_SPEAR:
-            io_string_write(string,"spear",location);
-            break;
-        case INVENTORY_FISH:
-            io_string_write(string,"fish",location);
-            break;
-        case INVENTORY_CHILD:
-        case INVENTORY_WOUND:
-        case INVENTORY_GROOMED:
-        default:
-            io_string_write(string,"thing being carried",location);
-            break;
+    case INVENTORY_BRANCH:
+        io_string_write(string,"branch",location);
+        break;
+    case INVENTORY_ROCK:
+        io_string_write(string,"rock",location);
+        break;
+    case INVENTORY_SHELL:
+        io_string_write(string,"shell",location);
+        break;
+    case INVENTORY_TWIG:
+        io_string_write(string,"twig",location);
+        break;
+    case INVENTORY_NUT_CRACKED:
+        io_string_write(string,"cracked nut",location);
+        break;
+    case INVENTORY_GRASS:
+        io_string_write(string,"piece of grass",location);
+        break;
+    case INVENTORY_SCRAPER:
+        io_string_write(string,"scraper",location);
+        break;
+    case INVENTORY_SPEAR:
+        io_string_write(string,"spear",location);
+        break;
+    case INVENTORY_FISH:
+        io_string_write(string,"fish",location);
+        break;
+    case INVENTORY_CHILD:
+    case INVENTORY_WOUND:
+    case INVENTORY_GROOMED:
+    default:
+        io_string_write(string,"thing being carried",location);
+        break;
     }
 }
 
@@ -984,112 +984,112 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
 {
     switch (event_type)
     {
-        case EVENT_MATE:
-            io_string_write(string,"Mated with ",location);
-            break;
-        case EVENT_SEEK_MATE:
-            io_string_write(string,"Searched for mate ",location);
-            break;
-        case EVENT_GROOM:
-            io_string_write(string,"Groomed ",location);
-            break;
-        case EVENT_GROOMED:
-            io_string_write(string,"Groomed by ",location);
-            break;
-        case EVENT_CHAT:
-            io_string_write(string,"Chatted with ",location);
-            break;
-        case EVENT_BIRTH:
-            io_string_write(string,"Gave birth to ",location);
-            break;
-        case EVENT_HURLED:
-            io_string_write(string,"Hurled a rock at ",location);
-            break;
-        case EVENT_HURLED_BY:
-            io_string_write(string,"Was hit by a rock hurled by ",location);
-            break;
-        
-        case EVENT_HIT:
-            io_string_write(string,"Hit ",location);
-            break;
-        case EVENT_HIT_BY:
-            io_string_write(string,"Hit by ",location);
-            break;
-        case EVENT_CARRIED:
-            io_string_write(string,"Carried ",location);
-            break;
-        case EVENT_CARRIED_BY:
-            io_string_write(string,"Carried by ",location);
-            break;
-        case EVENT_SUCKLED:
-            io_string_write(string,"Suckled ",location);
-            break;
-        case EVENT_SUCKLED_BY:
-            io_string_write(string,"Suckled by ",location);
-            break;
-        case EVENT_WHACKED:
-            io_string_write(string,"Whacked ",location);
-            break;
-        case EVENT_WHACKED_BY:
-            io_string_write(string,"Whacked by ",location);
-            break;
-        case EVENT_HUGGED:
-            io_string_write(string,"Hugged ",location);
-            break;
-        case EVENT_HUGGED_BY:
-            io_string_write(string,"Hugged by ",location);
-            break;
-        case EVENT_PRODDED:
-            io_string_write(string,"Prodded ",location);
-            break;
-        case EVENT_PRODDED_BY:
-            io_string_write(string,"Prodded by ",location);
-            break;
-        case EVENT_GIVEN:
-            io_string_write(string,"Given ",location);
-            break;
-        case EVENT_GIVEN_BY:
-            io_string_write(string,"Given by ",location);
-            break;
-        case EVENT_POINT:
-            io_string_write(string,"Pointed to ",location);
-            break;
-        case EVENT_POINTED:
-            io_string_write(string,"Pointed to by ",location);
-            break;
-        case EVENT_SMILED:
-            io_string_write(string,"Smiled at ",location);
-            break;
-        case EVENT_SMILED_BY:
-            io_string_write(string,"Smiled at by ",location);
-            break;
-        case EVENT_TICKLED:
-            io_string_write(string,"Tickled ",location);
-            break;
-        case EVENT_TICKLED_BY:
-            io_string_write(string,"Tickled by ",location);
-            break;
-        case EVENT_GLOWERED:
-            io_string_write(string,"Glowered at ",location);
-            break;
-        case EVENT_GLOWERED_BY:
-            io_string_write(string,"Glowered at by ",location);
-            break;
-        case EVENT_PATTED:
-            io_string_write(string,"Patted ",location);
-            break;
-        case EVENT_PATTED_BY:
-            io_string_write(string,"Patted by ",location);
-            break;
-        default:
-        {
-            n_string_block  number_str;
-            sprintf(number_str,"%ld", event_type);
-            io_string_write(string,"Some erroneous action (",location);
-            io_string_write(string,number_str,location);
-            io_string_write(string,") with ",location);
-            break;
-        }
+    case EVENT_MATE:
+        io_string_write(string,"Mated with ",location);
+        break;
+    case EVENT_SEEK_MATE:
+        io_string_write(string,"Searched for mate ",location);
+        break;
+    case EVENT_GROOM:
+        io_string_write(string,"Groomed ",location);
+        break;
+    case EVENT_GROOMED:
+        io_string_write(string,"Groomed by ",location);
+        break;
+    case EVENT_CHAT:
+        io_string_write(string,"Chatted with ",location);
+        break;
+    case EVENT_BIRTH:
+        io_string_write(string,"Gave birth to ",location);
+        break;
+    case EVENT_HURLED:
+        io_string_write(string,"Hurled a rock at ",location);
+        break;
+    case EVENT_HURLED_BY:
+        io_string_write(string,"Was hit by a rock hurled by ",location);
+        break;
+
+    case EVENT_HIT:
+        io_string_write(string,"Hit ",location);
+        break;
+    case EVENT_HIT_BY:
+        io_string_write(string,"Hit by ",location);
+        break;
+    case EVENT_CARRIED:
+        io_string_write(string,"Carried ",location);
+        break;
+    case EVENT_CARRIED_BY:
+        io_string_write(string,"Carried by ",location);
+        break;
+    case EVENT_SUCKLED:
+        io_string_write(string,"Suckled ",location);
+        break;
+    case EVENT_SUCKLED_BY:
+        io_string_write(string,"Suckled by ",location);
+        break;
+    case EVENT_WHACKED:
+        io_string_write(string,"Whacked ",location);
+        break;
+    case EVENT_WHACKED_BY:
+        io_string_write(string,"Whacked by ",location);
+        break;
+    case EVENT_HUGGED:
+        io_string_write(string,"Hugged ",location);
+        break;
+    case EVENT_HUGGED_BY:
+        io_string_write(string,"Hugged by ",location);
+        break;
+    case EVENT_PRODDED:
+        io_string_write(string,"Prodded ",location);
+        break;
+    case EVENT_PRODDED_BY:
+        io_string_write(string,"Prodded by ",location);
+        break;
+    case EVENT_GIVEN:
+        io_string_write(string,"Given ",location);
+        break;
+    case EVENT_GIVEN_BY:
+        io_string_write(string,"Given by ",location);
+        break;
+    case EVENT_POINT:
+        io_string_write(string,"Pointed to ",location);
+        break;
+    case EVENT_POINTED:
+        io_string_write(string,"Pointed to by ",location);
+        break;
+    case EVENT_SMILED:
+        io_string_write(string,"Smiled at ",location);
+        break;
+    case EVENT_SMILED_BY:
+        io_string_write(string,"Smiled at by ",location);
+        break;
+    case EVENT_TICKLED:
+        io_string_write(string,"Tickled ",location);
+        break;
+    case EVENT_TICKLED_BY:
+        io_string_write(string,"Tickled by ",location);
+        break;
+    case EVENT_GLOWERED:
+        io_string_write(string,"Glowered at ",location);
+        break;
+    case EVENT_GLOWERED_BY:
+        io_string_write(string,"Glowered at by ",location);
+        break;
+    case EVENT_PATTED:
+        io_string_write(string,"Patted ",location);
+        break;
+    case EVENT_PATTED_BY:
+        io_string_write(string,"Patted by ",location);
+        break;
+    default:
+    {
+        n_string_block  number_str;
+        sprintf(number_str,"%ld", event_type);
+        io_string_write(string,"Some erroneous action (",location);
+        io_string_write(string,number_str,location);
+        io_string_write(string,") with ",location);
+        break;
+    }
     }
     io_string_write(string,name_str,location);
 }
@@ -1134,26 +1134,26 @@ n_int episode_description(
             io_string_write(str,"Was eating ",&string_index);
             switch(local_episodic[index].food)
             {
-                case FOOD_VEGETABLE:
-                {
-                    io_string_write(str,"vegetation",&string_index);
-                    break;
-                }
-                case FOOD_FRUIT:
-                {
-                    io_string_write(str,"fruit",&string_index);
-                    break;
-                }
-                case FOOD_SHELLFISH:
-                {
-                    io_string_write(str,"shellfish",&string_index);
-                    break;
-                }
-                case FOOD_SEAWEED:
-                {
-                    io_string_write(str,"seaweed",&string_index);
-                    break;
-                }
+            case FOOD_VEGETABLE:
+            {
+                io_string_write(str,"vegetation",&string_index);
+                break;
+            }
+            case FOOD_FRUIT:
+            {
+                io_string_write(str,"fruit",&string_index);
+                break;
+            }
+            case FOOD_SHELLFISH:
+            {
+                io_string_write(str,"shellfish",&string_index);
+                break;
+            }
+            case FOOD_SEAWEED:
+            {
+                io_string_write(str,"seaweed",&string_index);
+                break;
+            }
             }
             break;
         }
@@ -1168,7 +1168,7 @@ n_int episode_description(
             io_string_write(str,name_str,&string_index);
             io_string_write(str,"'s ",&string_index);
             io_string_write(str,being_body_inventory_description(local_episodic[index].arg),&string_index);
-            
+
             social = 1;
             break;
         }
@@ -1220,26 +1220,26 @@ n_int episode_description(
             }
             break;
         }
-            case EVENT_DRAG:
-                io_string_write(str,"Dragged a ",&string_index);
-                being_inventory_string(str, &string_index, local_episodic[index].arg);
-                break;
-            case EVENT_BRANDISH:
-                io_string_write(str,"Waved a ",&string_index);
-                being_inventory_string(str, &string_index, local_episodic[index].arg);
-                break;
-            case EVENT_DROP:
-                io_string_write(str,"Dropped a ",&string_index);
-                being_inventory_string(str, &string_index, local_episodic[index].arg);
-                break;
-            case EVENT_PICKUP:
-                io_string_write(str,"Picked up a ",&string_index);
-                being_inventory_string(str, &string_index, local_episodic[index].arg);
-                break;
-            default:
-                being_social_event_string(str, &string_index, local_episodic[index].event, name_str);
-                social = 1;
-                break;
+        case EVENT_DRAG:
+            io_string_write(str,"Dragged a ",&string_index);
+            being_inventory_string(str, &string_index, local_episodic[index].arg);
+            break;
+        case EVENT_BRANDISH:
+            io_string_write(str,"Waved a ",&string_index);
+            being_inventory_string(str, &string_index, local_episodic[index].arg);
+            break;
+        case EVENT_DROP:
+            io_string_write(str,"Dropped a ",&string_index);
+            being_inventory_string(str, &string_index, local_episodic[index].arg);
+            break;
+        case EVENT_PICKUP:
+            io_string_write(str,"Picked up a ",&string_index);
+            being_inventory_string(str, &string_index, local_episodic[index].arg);
+            break;
+        default:
+            being_social_event_string(str, &string_index, local_episodic[index].event, name_str);
+            social = 1;
+            break;
         }
 
         if (string_index == 0)
@@ -1251,7 +1251,7 @@ n_int episode_description(
         if (days_elapsed==0)
         {
             time_elapsed = sim->land->time - local_episodic[index].time;
-            
+
             if (time_elapsed<60)
             {
                 if (time_elapsed == 0)
@@ -1260,8 +1260,9 @@ n_int episode_description(
                 }
                 else if (time_elapsed == 1)
                 {
-                        io_string_write(str," a minute ago",&string_index);
-                }else if (time_elapsed<5)
+                    io_string_write(str," a minute ago",&string_index);
+                }
+                else if (time_elapsed<5)
                 {
                     io_string_write(str," a few minutes ago",&string_index);
                 }
@@ -1452,13 +1453,13 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 {
     n_land  * land  =   sim->land;
     n_int     local_energy = being_energy(local);
-    
-    
+
+
     if(local_energy == BEING_DEAD)
     {
         return FULLY_ASLEEP;
     }
-    
+
     /** if it is not night, the being is fully awake */
     if(IS_NIGHT(land->time) == 0)
     {
@@ -1522,39 +1523,39 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
     {
         local->brainprobe[0].type = INPUT_SENSOR;
     }
-	else
-	{
-		if (outputs < (BRAINCODE_PROBES>>2))
-		{
-			local->brainprobe[0].type = OUTPUT_ACTUATOR;
-		}
-	}
-	/** update each probe */
+    else
+    {
+        if (outputs < (BRAINCODE_PROBES>>2))
+        {
+            local->brainprobe[0].type = OUTPUT_ACTUATOR;
+        }
+    }
+    /** update each probe */
     for (i=0; i<BRAINCODE_PROBES; i++)
     {
-		local->brainprobe[i].state++;		
-		if (local->brainprobe[i].state >= local->brainprobe[i].frequency)
+        local->brainprobe[i].state++;
+        if (local->brainprobe[i].state >= local->brainprobe[i].frequency)
         {
-			/** position within the brain */
-			n_int n1 = brain_probe_to_location(local->brainprobe[i].position);
-            
-			local->brainprobe[i].state = 0;
-            
-			if (local->brainprobe[i].type == INPUT_SENSOR)
+            /** position within the brain */
+            n_int n1 = brain_probe_to_location(local->brainprobe[i].position);
+
+            local->brainprobe[i].state = 0;
+
+            if (local->brainprobe[i].type == INPUT_SENSOR)
             {
                 n_byte * local_braincode = GET_BRAINCODE_INTERNAL(sim,local);
-				/** address within braincode */
-				n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
+                /** address within braincode */
+                n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
                 n_int n3 = (brain_point[n1] + local->brainprobe[i].offset)&255;
-				/** read from brain */
+                /** read from brain */
                 local_braincode[n2] = (n_byte)n3;
             }
-			else
+            else
             {
-				/** write to brain */
-				brain_point[n1] = 255;
-			}
-		}
+                /** write to brain */
+                brain_point[n1] = 255;
+            }
+        }
     }
 }
 
@@ -1567,7 +1568,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);
 #endif
-    
+
     being_immune_response(local);
 
 #ifdef BRAINCODE_ON
@@ -1577,11 +1578,11 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
         update_brain_probes(sim, local);
     }
 #endif
-    
+
     if (awake == 0)
     {
         local->state = BEING_STATE_ASLEEP;
-        
+
         being_reset_drive(local, DRIVE_FATIGUE);
     }
 }
@@ -2000,7 +2001,7 @@ static void being_interact(noble_simulation * sim,
         }
 
         being_facing_towards(local, &delta_vector);
-        
+
         if ((genetics_compare(local->mother_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
         {
 #ifdef PARASITES_ON
@@ -2033,7 +2034,7 @@ static void being_interact(noble_simulation * sim,
 
         }
         if ((other_being_distance < SOCIAL_RANGE) && (being_index>-1))
-        {            
+        {
             /* attraction and mating */
             if (opposite_sex != 0)
             {
@@ -2068,7 +2069,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     n_int         carrying_child = 0;
 
     n_genetics *  genetics = being_genetics(local);
-    
+
     /** tmp_speed is the optimum speed based on the gradient */
     n_int	tmp_speed;
     /** delta_energy is the energy required for movement */
@@ -2083,15 +2084,15 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     /** Listen for any shouts */
     being_listen(sim,current_being_index);
-    
+
 #ifdef EPISODIC_ON
     episodic_cycle(sim,local);
 #endif
 
     vect2_byte2(&location_vector, being_location(local));
-    
+
     being_facing_vector(local, &facing_vector, 4);
-    
+
     land_vect2(&slope_vector,&az,land,&location_vector);
 
     vect2_add(&looking_vector, &location_vector, &facing_vector);
@@ -2152,7 +2153,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 #endif
     {
         being_turn_away_from_water(local, land);
-        
+
         /** horizontally oriented posture */
         GET_PS(local) = 0;
         /** When swimming drop everything except what's on your head or back.
@@ -2167,9 +2168,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         }
         /** swimming proficiency */
         tmp_speed = (tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
-        
+
         episodic_self(sim, local, EVENT_SWIM, being_energy(local), 0);
-        
+
 #ifdef PARASITES_ON
         /** bathing removes parasites */
         if (local->parasites > 0) local->parasites--;
@@ -2225,23 +2226,23 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 /** eating when stopped */
                 n_byte  food_type;
                 n_int energy = food_eat(sim->land, sim->weather, location_vector.x, location_vector.y, az, &food_type, local);
-                
+
                 INDICATOR_INC(sim, IT_FOOD+food_type);
-                
+
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
-                
+
                 if (energy > BEING_DEAD)
                 {
 #ifdef METABOLISM_ON
                     metabolism_vascular_response(sim, local, VASCULAR_PARASYMPATHETIC);
 #endif
                     loc_e += energy;
-                    
+
                     being_reset_drive(local, DRIVE_HUNGER);
-                    
+
                     INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, energy);
-                    
+
                     loc_state |= BEING_STATE_EATING;
                     /** grow */
                     if (loc_h < BEING_MAX_HEIGHT)
@@ -2307,7 +2308,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         {
             wander = math_spread_byte(math_random(local->seed) & 7);
         }
-        
+
         being_wander(local, wander);
     }
 
@@ -2354,9 +2355,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             GET_A(local,ATTENTION_BODY) = BODY_BACK;
                         }
                         carrying_child = 1;
-                        
+
                         being_set_location(being_child, being_location(local));
-                        
+
                         child_mass = GET_M(being_child);
                         episodic_close(sim, local, being_child, EVENT_CARRIED, AFFECT_CARRYING, 0);
                         episodic_close(sim, being_child, local, EVENT_CARRIED_BY, AFFECT_CARRIED, 0);
@@ -2380,9 +2381,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             {
                 /** orient towards the mother */
                 n_vect2    mother_vector;
-                
+
                 being_delta(mother, local, &mother_vector);
-                
+
                 being_facing_towards(local, &mother_vector);
 
                 /** suckling */
@@ -2415,14 +2416,14 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             /** child gains energy */
                             loc_e += SUCKLING_ENERGY;
                             /** update indicators */
-                            
+
                             INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, SUCKLING_ENERGY);
-                            
+
                             /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
                             being_immune_seed(mother, local);
-                            
+
                             episodic_close(sim, mother, local, EVENT_SUCKLED, AFFECT_SUCKLING, 0);
                             episodic_close(sim, local, mother, EVENT_SUCKLED_BY, AFFECT_SUCKLING, 0);
                         }
@@ -2472,7 +2473,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     local->state = loc_state;
-    
+
     INDICATOR_ADD(sim, IT_AVERAGE_MOBILITY, loc_s);
 }
 
@@ -2661,19 +2662,19 @@ static n_int being_set_unique_name(noble_simulation * sim,
  * @return 0
  */
 n_int being_init(noble_simulation * sim, noble_being * mother,
-				 n_int random_factor, n_byte first_generation)
+                 n_int random_factor, n_byte first_generation)
 {
 
     if((sim->num + 1) >= sim->max)
         return 0;
 
     {
-		/** this is the being to be born */
+        /** this is the being to be born */
         noble_being * local = &(sim->beings[sim->num]);
         n_land  * land  = sim->land;
         n_byte        ch;
         n_byte2		  numerical_brain_location =
-			local->brain_memory_location;
+            local->brain_memory_location;
         n_byte      * brain_memory;
 #ifdef EPISODIC_ON
         social_link * local_social_graph = GET_SOC(sim, local);
@@ -2700,9 +2701,9 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         local->goal[0]=GOAL_NONE;
 
         /** Set learned preferences to 0.5 (no preference in
-			either direction.
+        	either direction.
         	This may seem like tabla rasa, but there are genetic
-			biases */
+        	biases */
         for (ch = 0; ch < PREFERENCES; ch++)
         {
             local->learned_preference[ch]=127;
@@ -2715,11 +2716,11 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             local->attention[ch]=0;
         }
 
-		/** clear the generation numbers for mother and father */
+        /** clear the generation numbers for mother and father */
         for (ch = 0; ch < 3; ch++)
-		{
-			local->generation[ch] = 0;
-		}
+        {
+            local->generation[ch] = 0;
+        }
 
 #ifdef BRAINCODE_ON
 
@@ -2730,26 +2731,26 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         {
             math_random3(local_random);
             GET_BRAINCODE_INTERNAL(sim,local)[ch] =
-				(math_random(local_random) & 192) |
-				(math_random(local_random) % (BRAINCODE_DAT+1));
+                (math_random(local_random) & 192) |
+                (math_random(local_random) % (BRAINCODE_DAT+1));
             GET_BRAINCODE_INTERNAL(sim,local)[ch+1] =
-				math_random(local_random) & 255;
+                math_random(local_random) & 255;
             GET_BRAINCODE_INTERNAL(sim,local)[ch+2] =
-				math_random(local_random) & 255;
+                math_random(local_random) & 255;
             math_random3(local_random);
             GET_BRAINCODE_EXTERNAL(sim,local)[ch] =
-				(math_random(local_random) & 192) |
-				(math_random(local_random) % (BRAINCODE_DAT+1));
+                (math_random(local_random) & 192) |
+                (math_random(local_random) % (BRAINCODE_DAT+1));
             GET_BRAINCODE_EXTERNAL(sim,local)[ch+1] =
-				math_random(local_random) & 255;
+                math_random(local_random) & 255;
             GET_BRAINCODE_EXTERNAL(sim,local)[ch+2] =
-				math_random(local_random) & 255;
+                math_random(local_random) & 255;
         }
 #else
         /** initially seed the brain with instructions which
-			are genetically biased */
+        	are genetically biased */
 
-        
+
         if (random_factor > -1)
         {
             local->seed[0] = (n_byte2)(random_factor & 0xffff);
@@ -2761,25 +2762,25 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             local->seed[0] = mother->seed[1];
             local->seed[1] = mother->seed[0];
             math_random(mother->seed);
-            
+
             math_random3(local->seed);
-            
+
             local->seed[1] = mother_genetics[0];
-            
+
             math_random3(local->seed);
-            
+
             local->seed[1] = sim->land->time;
-            
+
             math_random3(local->seed);
 
         }
-    
+
         math_random3(local->seed);
 
         being_init_braincode(sim,local,0L,local->seed,0,
-							 BRAINCODE_INTERNAL);
+                             BRAINCODE_INTERNAL);
         being_init_braincode(sim,local,0L,local->seed,0,
-							 BRAINCODE_EXTERNAL);
+                             BRAINCODE_EXTERNAL);
 
 #endif
 
@@ -2794,16 +2795,16 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         for (ch = 0; ch < BRAINCODE_PROBES; ch++)
         {
             math_random3(local->seed);
-			if ((n_byte)local->seed[0]&1)
-			{
-				local->brainprobe[ch].type = INPUT_SENSOR;
-			}
-			else
-			{
-				local->brainprobe[ch].type = OUTPUT_ACTUATOR;
-			}
+            if ((n_byte)local->seed[0]&1)
+            {
+                local->brainprobe[ch].type = INPUT_SENSOR;
+            }
+            else
+            {
+                local->brainprobe[ch].type = OUTPUT_ACTUATOR;
+            }
             local->brainprobe[ch].frequency =
-				(n_byte)1 + (local->seed[1]%BRAINCODE_MAX_FREQUENCY);
+                (n_byte)1 + (local->seed[1]%BRAINCODE_MAX_FREQUENCY);
             math_random3(local->seed);
             local->brainprobe[ch].address = (n_byte)local->seed[0];
             local->brainprobe[ch].position = (n_byte)local->seed[1];
@@ -2842,14 +2843,14 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             }
         }
 #endif
-        
+
         being_facing_init(local);
-        
+
         being_set_unique_name(sim,local,random_factor,0,0);
         if(random_factor > -1)
         {
             n_byte2  location[2];
-            
+
             n_int loop = 0;
 
             math_random3(local->seed);
@@ -2863,13 +2864,13 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1]))));
 
             being_set_location(local, location);
-            
+
             body_genome_random(sim, local, local->seed);
 
             local->social_x = local->social_nx =
-				(math_random(local->seed) & 32767)+16384;
+                                  (math_random(local->seed) & 32767)+16384;
             local->social_y = local->social_ny =
-				(math_random(local->seed) & 32767)+16384;
+                                  (math_random(local->seed) & 32767)+16384;
         }
         else
         {
@@ -2879,7 +2880,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
             /** this is the same as equals */
             being_wander(local, being_facing(mother) - being_facing(local));
-            
+
             (void) math_random(local->seed);
             local->social_x = local->social_nx = mother->social_x;
             local->social_y = local->social_ny = mother->social_y;
@@ -2892,38 +2893,38 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
             genetics_set(local->mother_genetics, mother_genetics);
             genetics_set(local->father_genetics,
-						 mother->father_genetics);
+                         mother->father_genetics);
 
             being_set_unique_name(sim,local,random_factor,
-								  GET_NAME_FAMILY2(sim,mother),
-								  mother->father_name[1]);
+                                  GET_NAME_FAMILY2(sim,mother),
+                                  mother->father_name[1]);
 
-			/** set the maternal generation number */
-			if (mother->generation[GENERATION_MATERNAL] >
-				mother->generation[GENERATION_PATERNAL])
-			{
-				if (mother->generation[GENERATION_MATERNAL] <
-					MAX_GENERATION)
-				{
-					local->generation[GENERATION_MATERNAL] =
-						mother->generation[GENERATION_MATERNAL]+1;
-				}
-			}
-			else
-			{
-				if (mother->generation[GENERATION_PATERNAL] <
-					MAX_GENERATION)
-				{
-					local->generation[GENERATION_MATERNAL] =
-						mother->generation[GENERATION_PATERNAL]+1;
-				}
-			}
-			/** set the paternal generation number */
-			if (mother->generation[GENERATION_FATHER] < MAX_GENERATION)
-			{
-				local->generation[GENERATION_PATERNAL] =
-					mother->generation[GENERATION_FATHER]+1;
-			}
+            /** set the maternal generation number */
+            if (mother->generation[GENERATION_MATERNAL] >
+                    mother->generation[GENERATION_PATERNAL])
+            {
+                if (mother->generation[GENERATION_MATERNAL] <
+                        MAX_GENERATION)
+                {
+                    local->generation[GENERATION_MATERNAL] =
+                        mother->generation[GENERATION_MATERNAL]+1;
+                }
+            }
+            else
+            {
+                if (mother->generation[GENERATION_PATERNAL] <
+                        MAX_GENERATION)
+                {
+                    local->generation[GENERATION_MATERNAL] =
+                        mother->generation[GENERATION_PATERNAL]+1;
+                }
+            }
+            /** set the paternal generation number */
+            if (mother->generation[GENERATION_FATHER] < MAX_GENERATION)
+            {
+                local->generation[GENERATION_PATERNAL] =
+                    mother->generation[GENERATION_FATHER]+1;
+            }
         }
 
         being_set_energy(local, BEING_FULL + 15);
@@ -2940,16 +2941,16 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             /** produce an initial distribution of heights and masses*/
             math_random3(local->seed);
             GET_H(local) = BIRTH_HEIGHT +
-				(local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
+                           (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
             GET_M(local) = BIRTH_MASS +
-				(local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
+                           (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
         }
         local->crowding = MIN_CROWDING;
 
         if (GET_B(sim,local))
         {
             /** These magic numbers were found in March 2001 -
-				feel free to change them! */
+            	feel free to change them! */
 
 #ifdef SOFT_BRAIN_ON
             GET_BS(local, 0) = 171;
@@ -3015,18 +3016,18 @@ void being_tidy(noble_simulation * local_sim)
             vect2_byte2(&location_vector, being_location(local_being));
 
             being_facing_vector(local_being, &facing_vector, 1);
-            
+
             if (local_s > 0)
             {
                 n_byte2 location[2];
-                
+
                 vect2_d(&location_vector, &facing_vector, local_s, 512);
 
                 /* vector to n_byte2 may do incorrect wrap around MUST be improved */
-                
+
                 location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
                 location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
-                
+
                 being_set_location(local_being, location);
             }
 
@@ -3095,7 +3096,7 @@ void being_tidy(noble_simulation * local_sim)
         }
 
         local_e -= delta_e;
-        
+
         INDICATOR_ADD(local_sim, IT_AVERAGE_ENERGY_OUTPUT, delta_e);
 
         if (land->time == 0)
@@ -3144,12 +3145,13 @@ void being_remove(noble_simulation * local_sim)
     n_uint	possible = NO_BEINGS_FOUND;
     n_uint  loop=0;
     n_int   selected_died = 0;
-    
+
     if (being_remove_external)
-        do{}while(being_remove_external);
-    
+        do {}
+        while(being_remove_external);
+
     being_remove_internal = 1;
-    
+
     while (loop < end_loop)
     {
         if (being_energy(&(local[loop])) == BEING_DEAD)
@@ -3159,7 +3161,7 @@ void being_remove(noble_simulation * local_sim)
             n_genetics  * genetics = being_genetics(b);
             n_uint i = 0;
             n_byte2 name, family_name, met_name, met_family_name;
-            
+
             if (local_sim->ext_death != 0L)
             {
                 local_sim->ext_death(b,local_sim);
@@ -3225,11 +3227,12 @@ void being_remove(noble_simulation * local_sim)
         {
             possible = count;
         }
-                    
+
         if (being_energy(&(local[loop])) != BEING_DEAD)
         {
             if ( count != loop )
-            { /** the logic associated with copying th brsin memory location doesn't make sense */
+            {
+                /** the logic associated with copying th brsin memory location doesn't make sense */
                 n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
                 n_byte       * new_brain = GET_B(local_sim, &local[ count ]);
                 n_byte       * old_brain = GET_B(local_sim, &local[ loop ]);
@@ -3261,7 +3264,7 @@ void being_remove(noble_simulation * local_sim)
         }
         loop++;
     }
-    
+
     if (count == 0)
     {
         possible = NO_BEINGS_FOUND;
@@ -3277,7 +3280,7 @@ void being_remove(noble_simulation * local_sim)
             possible = 0;
         }
     }
-    
+
     local_sim->num    = count;
 
     if (selected_died)
@@ -3289,7 +3292,7 @@ void being_remove(noble_simulation * local_sim)
     {
         (void)SHOW_ERROR("No Apes remain start new run");
     }
-    
+
     being_remove_internal = 0;
 }
 
@@ -3327,19 +3330,19 @@ static void genealogy_being_id(noble_being * local_being, n_file * fp, int paren
 {
     n_genetics * genome;
     n_int ch;
-    
+
     switch(parent)
     {
-        case 1:
-            genome = local_being->mother_genetics;
-            break;
-        case 2:
-            genome = local_being->father_genetics;
-            break;
-        default:
-            genome = being_genetics(local_being);
+    case 1:
+        genome = local_being->mother_genetics;
+        break;
+    case 2:
+        genome = local_being->father_genetics;
+        break;
+    default:
+        genome = being_genetics(local_being);
     }
-    
+
     for (ch = 0; ch < CHROMOSOMES; ch++)
     {
         io_writenumber(fp, genome[ch],1,0);
@@ -3349,15 +3352,15 @@ static void genealogy_being_id(noble_being * local_being, n_file * fp, int paren
 static void genealogy_today(noble_simulation * sim, n_file * fp)
 {
     n_int local_dob=0;
-    
+
     n_int current_date = TIME_IN_DAYS(sim->land->date);
-    
+
     n_int age_in_years = (current_date - local_dob) / TIME_YEAR_DAYS;
     n_int age_in_months = ((current_date - local_dob) - (age_in_years * TIME_YEAR_DAYS)) / (TIME_YEAR_DAYS/12);
     n_int age_in_days = (current_date - local_dob) - ((TIME_YEAR_DAYS/12) * age_in_months) - (age_in_years * TIME_YEAR_DAYS);
-    
+
     if (age_in_months>11) age_in_months=11;
-    
+
     io_writenumber(fp, (age_in_years+GENEALOGY_YEAR_ZERO), 1, 0);
     io_file_write(fp,'-');
     io_writenumber(fp, age_in_months, 1, 0);
@@ -3371,60 +3374,60 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
     n_string_block str, first_name, surnames;
     n_int n;
     n_uint i;
-    
+
     if (log_genealogy!=0)
     {
         if (!io_disk_check(GENEALOGY_XML_FILENAME))
         {
             fp = io_file_new();
-            
+
             if (fp == 0L) return;
-            
+
             io_file_xml_open(fp, "?xml version='1.0' encoding='ISO-8859-1'?");
             io_file_xml_open(fp, "genxml");
-            
+
             io_file_xml_open(fp, "file");
             io_file_xml_int(fp, "version", 200);
             io_file_xml_int(fp, "level", 2);
             io_file_xml_close(fp, "file");
-            
+
             io_file_xml_open(fp, "header");
             io_file_xml_string(fp, "exportingsystem", "Noble Ape");
             io_file_xml_string(fp, "version", "0.0");
             io_file_xml_close(fp, "header");
-            
+
             io_write(fp,"<eventtype id=\"",0);
             io_write(fp,GENEALOGY_EVENT_BIRTH,0);
             io_write(fp,"\" class=\"birth\">",1);
-            
-            
+
+
             io_file_xml_string(fp, "description", "born");
             io_file_xml_string(fp, "gedcomtag", "BIRT");
-            
+
             io_file_xml_int(fp, "roles", 1);
             io_file_xml_close(fp,  "eventtype");
-            
+
             io_write(fp, "<eventtype id=\"",0);
             io_write(fp, GENEALOGY_EVENT_BIRTH,0);
             io_write(fp, "\" class=\"death\">",1);
-            
+
             io_file_xml_string(fp, "description", "died");
             io_file_xml_string(fp, "gedcomtag", "DEAT");
-            
+
             io_file_xml_int(fp, "roles", 1);
             io_file_xml_close(fp,  "eventtype");
-            
+
             io_disk_write(fp,GENEALOGY_XML_FILENAME);
-            
+
             io_file_free(fp);
             fp = 0L;
         }
-        
+
         fp = io_file_new();
-        
+
         if (fp != 0L)
         {
-            
+
             io_write(fp, "<person id=\"", 0);
             genealogy_being_id(child,fp,0);
             io_write(fp, "\" sex=\"", 0);
@@ -3437,12 +3440,12 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
                 io_write(fp,"female",0);
             }
             io_write(fp, "\">", 1);
-            
+
             io_file_xml_open(fp, "personalname");
-            
-            
+
+
             being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), GET_NAME(sim,child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
-            
+
             for (i=0; i<strlen((char*)str); i++)
             {
                 if (str[i]==' ') break;
@@ -3457,71 +3460,71 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
                 i++;
             }
             surnames[n]='\0';
-            
+
             io_write(fp,"<np tp=\"unkw\">",0);
             io_write(fp,(n_string)first_name,0);
             io_write(fp,"</np>",1);
-            
+
             io_write(fp,"<np tp=\"surn\">",0);
             io_write(fp,(n_string)surnames,0);
             io_write(fp,"</np>",1);
-            
+
             io_file_xml_close(fp, "personalname");
             io_file_xml_close(fp, "person");
-            
-            
+
+
             io_write(fp, "<assertion id=\"BIRTH",0);
-            
+
             genealogy_being_id(child,fp,0);
-            
+
             io_write(fp, "\">",1);
-            
-            
+
+
             io_write(fp, "<event type=\"",0);
-            
+
             io_write(fp, GENEALOGY_EVENT_BIRTH,0);
-            
+
             io_write(fp, "\">",1);
-            
-            
+
+
             io_write(fp, "<principal>",0);
             genealogy_being_id(child,fp,0);
             io_file_xml_close(fp, "principal");
-            
-            
-            
+
+
+
             io_file_xml_open(fp, "date");
             io_write(fp, "<exact>",0);
             genealogy_today(sim,fp);
             io_file_xml_close(fp, "exact");
             io_file_xml_close(fp, "date");
-            
-            
+
+
             io_file_xml_open(fp, "place");
             io_write(fp, "<pnp>",0);
-            
-            
+
+
             io_writenumber(fp, being_location_x(child), 1, 0);
             io_file_write(fp, ' ');
             io_writenumber(fp, being_location_y(child), 1, 0);
-            
+
             io_file_xml_close(fp, "pnp");
             io_file_xml_close(fp, "place");
-            
-            
+
+
             io_file_xml_close(fp, "event");
             io_file_xml_close(fp, "assertion");
-            
-            
-            
+
+
+
             io_write(fp, "<assertion id=\"REL",0);
             genealogy_being_id(child,fp,0);
             io_write(fp, "\">",1);
-            
+
             io_file_xml_open(fp, "relationship");
-            
+
             io_file_xml_string(fp, "relation", "biological");
-            
+
             io_write(fp, "<child>",0);
             genealogy_being_id(child,fp,0);
             io_file_xml_close(fp, "child");
@@ -3530,14 +3533,14 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             io_file_xml_close(fp, "mother");
             io_write(fp, "<father>",0);
             genealogy_being_id(child,fp,2);
-            
-            
+
+
             io_file_xml_close(fp, "father");
             io_file_xml_close(fp, "relationship");
             io_file_xml_close(fp, "assertion");
-            
+
             io_disk_append(fp,GENEALOGY_XML_FILENAME);
-            
+
             io_file_free(fp);
         }
     }
@@ -3546,55 +3549,55 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
 static void genealogy_death_genxml(noble_being * local_being, noble_simulation * sim)
 {
     n_file * fp;
-    
+
     if (log_genealogy!=0)
     {
         fp = io_file_new();
         if (fp != 0L)
         {
-            
+
             io_write(fp, "<assertion id=\"DEATH",0);
             genealogy_being_id(local_being,fp,0);
             io_write(fp, "\">",1);
-            
-            
+
+
             io_write(fp, "<event type=\"",0);
-            
+
             io_write(fp, GENEALOGY_EVENT_DEATH,0);
-            
+
             io_write(fp, "\">",1);
-            
+
             io_write(fp, "<principal>",0);
-            
+
             genealogy_being_id(local_being,fp,0);
-            
+
             io_file_xml_close(fp, "principal");
-            
+
             io_file_xml_open(fp, "date");
             io_write(fp, "<exact>",0);
-            
+
             genealogy_today(sim,fp);
-            
+
             io_file_xml_close(fp, "exact");
             io_file_xml_close(fp, "date");
-            
+
             io_file_xml_close(fp, "event");
             io_file_xml_close(fp, "assertion");
-            
-            
+
+
             io_file_xml_open(fp, "place");
             io_write(fp, "<pnp>",0);
-            
+
             io_writenumber(fp, being_location_x(local_being), 1, 0);
             io_file_write(fp, ' ');
             io_writenumber(fp, being_location_y(local_being), 1, 0);
-            
+
             io_file_xml_close(fp, "pnp");
             io_file_xml_close(fp, "place");
-            
+
             io_file_xml_close(fp, "event");
             io_file_xml_close(fp, "assertion");
-            
+
             io_disk_append(fp,GENEALOGY_XML_FILENAME);
             io_file_free(fp);
         }
@@ -3604,7 +3607,7 @@ static void genealogy_death_genxml(noble_being * local_being, noble_simulation *
 static n_int genealogy_save_genxml(noble_simulation * sim, n_string filename)
 {
     n_file * fp;
-    
+
     if (log_genealogy!=0)
     {
         fp = io_file_new();
@@ -3612,7 +3615,7 @@ static n_int genealogy_save_genxml(noble_simulation * sim, n_string filename)
         {
             io_disk_read(fp, GENEALOGY_XML_FILENAME);
         }
-        
+
         io_file_xml_close(fp, "genxml");
         io_disk_write(fp, filename);
         io_file_free(fp);
@@ -3634,10 +3637,10 @@ static void genealogy_today_gedcom(noble_simulation * sim, n_file * fp)
     };
     n_int	current_date = TIME_IN_DAYS(sim->land->date);
     n_int days_month[12] = {31, 28, 31, 30,
-        31, 30, 31, 31,
-        30, 31, 30, 31
-    };
-    
+                            31, 30, 31, 31,
+                            30, 31, 30, 31
+                           };
+
     n_int years = current_date / TIME_YEAR_DAYS;
     n_int days = current_date % TIME_YEAR_DAYS;
     n_int loop = 0;
@@ -3652,9 +3655,9 @@ static void genealogy_today_gedcom(noble_simulation * sim, n_file * fp)
         {
             io_writenumber(fp, (years+GENEALOGY_YEAR_ZERO), 1, 0);
             io_file_write(fp,' ');
-            
+
             io_write(fp, month[loop], 0);
-            
+
             io_file_write(fp,' ');
             io_writenumber(fp, (days+1), 1, 0);
             return;
@@ -3669,14 +3672,14 @@ static void genealogy_birth_gedcom(noble_being * child, noble_being * mother, no
     n_int n;
     n_uint i;
     n_file * fp;
-    
+
     if (log_genealogy!=0)
     {
         if (!io_disk_check(GENEALOGY_GEDCOM_FILENAME))
         {
             fp = io_file_new();
             if (fp == 0L) return;
-            
+
             io_write(fp, "0 HEAD", 1);
             io_write(fp, "1 SOUR Noble Ape", 1);
             io_write(fp, "2 VERS V0.0", 1);
@@ -3686,20 +3689,20 @@ static void genealogy_birth_gedcom(noble_being * child, noble_being * mother, no
             io_write(fp, "1 GEDC", 1);
             io_write(fp, "2 VERS 5.5", 1);
             io_write(fp, "1 CHAR ASCII", 1);
-            
+
             io_disk_write(fp,GENEALOGY_GEDCOM_FILENAME);
-            
+
             io_file_free(fp);
             fp = 0L;
         }
-        
+
         fp = io_file_new();
-        
+
         if (fp != 0L)
         {
-            
+
             being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), GET_NAME(sim,child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
-            
+
             for (i=0; i<strlen((char*)str); i++)
             {
                 if (str[i]==' ') break;
@@ -3714,21 +3717,21 @@ static void genealogy_birth_gedcom(noble_being * child, noble_being * mother, no
                 i++;
             }
             surnames[n]='\0';
-            
+
             io_write(fp, "0 @I", 0);
             genealogy_being_id(child,fp,0);
-            
+
             io_write(fp, "@ INDI", 1);
-            
-            
+
+
             io_write(fp, "1 NAME ", 0);
             io_write(fp, (n_string)first_name, 0);
             io_write(fp, " /", 0);
             io_write(fp, (n_string)surnames, 0);
             io_write(fp, "/", 1);
-            
+
             io_write(fp, "1 SEX ", 0);
-            
+
             if (FIND_SEX(GET_I(child))!=SEX_FEMALE)
             {
                 io_write(fp, "M", 1);
@@ -3746,36 +3749,36 @@ static void genealogy_birth_gedcom(noble_being * child, noble_being * mother, no
              genealogy_place_name(child,fp);
              io_write(fp, "", 1);
              */
-            
+
             if (!empty_genetics(child->father_genetics))
             {
                 io_write(fp, "1 FAMC @F", 0);
                 genealogy_being_id(child,fp,0);
                 io_write(fp, "@", 1);
-                
+
                 io_write(fp, "0 @F", 0);
                 genealogy_being_id(child,fp,0);
                 io_write(fp, "@ FAM", 1);
-                
+
                 io_write(fp, "1 HUSB @I", 0);
                 genealogy_being_id(child,fp,2);
                 io_write(fp, "@", 1);
                 io_write(fp, "1 WIFE @I", 0);
                 genealogy_being_id(child,fp,1);
                 io_write(fp, "@", 1);
-                
+
                 io_write(fp, "1 MARR", 1);
                 io_write(fp, "2 DATE ", 0);
                 genealogy_today_gedcom(sim,fp);
                 io_write(fp, "", 1);
-                
+
                 io_write(fp, "1 CHIL @I", 0);
                 genealogy_being_id(child,fp,0);
                 io_write(fp, "@", 1);
             }
-            
+
             io_disk_append(fp,GENEALOGY_GEDCOM_FILENAME);
-            
+
             io_file_free(fp);
         }
     }
@@ -3786,15 +3789,15 @@ static void genealogy_death_gedcom(noble_being * local_being, noble_simulation *
     if (log_genealogy!=0)
     {
         n_file * fp = io_file_new();
-        
+
         if (fp == 0L) return;
-        
+
         io_write(fp, "0 @I", 0);
         genealogy_being_id(local_being,fp,0);
         io_write(fp, "@ INDI", 1);
-        
+
         io_write(fp, "1 DEAT", 1);
-        
+
         io_write(fp, "2 DATE ", 0);
         genealogy_today_gedcom(sim,fp);
         io_write(fp, "", 1);
@@ -3804,7 +3807,7 @@ static void genealogy_death_gedcom(noble_being * local_being, noble_simulation *
          io_write(fp, "", 1);
          */
         io_disk_append(fp,GENEALOGY_GEDCOM_FILENAME);
-        
+
         io_file_free(fp);
     }
 }
@@ -3812,7 +3815,7 @@ static void genealogy_death_gedcom(noble_being * local_being, noble_simulation *
 static n_int genealogy_save_gedcom(noble_simulation * sim, n_string filename)
 {
     n_file * fp;
-    
+
     if (log_genealogy!=0)
     {
         fp = io_file_new();
@@ -3832,12 +3835,12 @@ void genealogy_birth(noble_being * child, noble_being * mother, void * sim)
 {
     switch(log_genealogy)
     {
-        case GENEALOGY_GENXML:
-            genealogy_birth_genxml(child, mother, (noble_simulation *)sim);
-            break;
-        case GENEALOGY_GEDCOM:
-            genealogy_birth_gedcom(child, mother, (noble_simulation *)sim);
-            break;
+    case GENEALOGY_GENXML:
+        genealogy_birth_genxml(child, mother, (noble_simulation *)sim);
+        break;
+    case GENEALOGY_GEDCOM:
+        genealogy_birth_gedcom(child, mother, (noble_simulation *)sim);
+        break;
     }
 }
 
@@ -3845,27 +3848,27 @@ void genealogy_death(noble_being * local_being, void * sim)
 {
     switch(log_genealogy)
     {
-        case GENEALOGY_GENXML:
-            genealogy_death_genxml(local_being, (noble_simulation *)sim);
-            break;
-        case GENEALOGY_GEDCOM:
-            genealogy_death_gedcom(local_being, (noble_simulation *)sim);
-            break;
+    case GENEALOGY_GENXML:
+        genealogy_death_genxml(local_being, (noble_simulation *)sim);
+        break;
+    case GENEALOGY_GEDCOM:
+        genealogy_death_gedcom(local_being, (noble_simulation *)sim);
+        break;
     }
 }
 
 n_int genealogy_save(noble_simulation * sim, n_string filename)
 {
     n_int retval=0;
-    
+
     switch(log_genealogy)
     {
-        case GENEALOGY_GENXML:
-            retval = genealogy_save_genxml(sim, filename);
-            break;
-        case GENEALOGY_GEDCOM:
-            retval = genealogy_save_gedcom(sim, filename);
-            break;
+    case GENEALOGY_GENXML:
+        retval = genealogy_save_genxml(sim, filename);
+        break;
+    case GENEALOGY_GEDCOM:
+        retval = genealogy_save_gedcom(sim, filename);
+        break;
     }
     return retval;
 }

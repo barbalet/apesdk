@@ -113,17 +113,17 @@ void social_graph_link_name(
     switch(local_social_graph[social_graph_index].entity_type)
     {
     case ENTITY_BEING:
-        {
-            n_byte2 first_name_gender = local_social_graph[social_graph_index].first_name[met];
-            n_byte2 family_name = local_social_graph[social_graph_index].family_name[met];
+    {
+        n_byte2 first_name_gender = local_social_graph[social_graph_index].first_name[met];
+        n_byte2 family_name = local_social_graph[social_graph_index].family_name[met];
 
-            being_name(((first_name_gender>>8)==SEX_FEMALE),
-                       (first_name_gender&255),
-                       UNPACK_FAMILY_FIRST_NAME(family_name),
-                       UNPACK_FAMILY_SECOND_NAME(family_name),
-                       name);
-            break;
-        }
+        being_name(((first_name_gender>>8)==SEX_FEMALE),
+                   (first_name_gender&255),
+                   UNPACK_FAMILY_FIRST_NAME(family_name),
+                   UNPACK_FAMILY_SECOND_NAME(family_name),
+                   name);
+        break;
+    }
     case ENTITY_BEING_GROUP:
         /** TODO*/
     case ENTITY_OBJECT:
@@ -131,7 +131,7 @@ void social_graph_link_name(
     case ENTITY_TERRITORY:
         /** TODO */
     default:
-            (void)SHOW_ERROR("Unimplemented entity type");
+        (void)SHOW_ERROR("Unimplemented entity type");
         break;
     }
 }
@@ -345,7 +345,7 @@ static n_int social_attraction_pheromone(
     n_int ch, i, different = 0;
     n_genetics * meeter_genetics = being_genetics(meeter_being);
     n_genetics * met_genetics = being_genetics(met_being);
-    
+
     for (ch = 0; ch < CHROMOSOMES; ch++)
     {
         for (i = 0; i < 32; i++)
@@ -536,7 +536,7 @@ static n_int social_meet(
                                  meeter_being->seed,
                                  graph[index].friend_foe,BRAINCODE_EXTERNAL);
         }
-        
+
 #ifdef METABOLISM_ON
         /** relax with friends, be viglant with enemies */
         if (graph[index].friend_foe > social_respect_mean(sim,meeter_being))
@@ -564,7 +564,7 @@ static n_int social_meet(
         {
             graph[index].familiarity = familiarity + 1;
         }
-        
+
         /** friendliness can be increased simply through familiarity */
         if (graph[index].friend_foe < 255)
         {
@@ -713,7 +713,7 @@ n_byte social_groom(
     being_energy_delta(meeter_being, 0 - (PARASITE_ENERGY_COST*meeter_being->parasites));
 
     INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, PARASITE_ENERGY_COST*meeter_being->parasites);
-    
+
     if (distance < PARASITE_HOP_MAX_DISTANCE)
     {
         /** hairy beings can carry more parasites */
@@ -840,17 +840,17 @@ n_byte2 social_squabble(
     noble_being * victor, * vanquished;
     n_int victor_index, vanquished_index, punchloc;
     n_vect2 delta;
-    
+
     /** distance between beings */
     being_delta(met_being, meeter_being, &delta);
 
-    
+
     /** battle with rival families */
     if ((GET_FAMILY_FIRST_NAME(sim,meeter_being) != GET_FAMILY_FIRST_NAME(sim,met_being)) &&
             (GET_FAMILY_SECOND_NAME(sim,meeter_being) != GET_FAMILY_SECOND_NAME(sim,met_being)))
     {
         being_facing_towards(meeter_being, &delta);
-        
+
 #ifdef PARASITES_ON
         /** high ranking apes will more aggressively defend their honor */
         agro = GENE_AGGRESSION(being_genetics(meeter_being));
@@ -908,9 +908,9 @@ n_byte2 social_squabble(
                 vanquished->inventory[punchloc] = 0;
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_SHOWFORCE);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_SHOWFORCE);
-                
+
                 INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_SHOWFORCE*2);
-                
+
                 ret_val |= BEING_STATE_SHOWFORCE;
             }
             else
@@ -934,7 +934,7 @@ n_byte2 social_squabble(
             }
 
             /** remember the fight */
-            
+
             episodic_interaction(sim, victor, vanquished, EVENT_HIT, AFFECT_SQUABBLE_VICTOR, punchloc);
             episodic_interaction(sim, vanquished, victor, EVENT_HIT_BY, AFFECT_SQUABBLE_VANQUISHED, punchloc);
 
@@ -942,9 +942,9 @@ n_byte2 social_squabble(
             if (meeter_being == vanquished)
             {
                 n_vect2 negative_delta, zero = {0};
-                
+
                 vect2_subtract(&negative_delta, &zero, &delta);
-                
+
                 being_facing_towards(vanquished, &negative_delta);
             }
             else
@@ -1012,7 +1012,7 @@ static void social_conception(
     /** store the date of conception */
     female->date_of_conception[0] = today[0];
     female->date_of_conception[1] = today[1];
-    
+
     /** store the father's genetics */
     /** store the family name, ID and honor of the father */
     genetics_set(female->father_genetics, being_genetics(male));
@@ -1020,26 +1020,26 @@ static void social_conception(
     female->father_honor     = male->honor;
     female->father_name[0]   = GET_NAME_GENDER(sim,male);
     female->father_name[1]   =
-		GET_SELF(sim,male).family_name[BEING_MET];
+        GET_SELF(sim,male).family_name[BEING_MET];
 
-	/** generation number of the child's father */
-	if (male->generation[GENERATION_MATERNAL] >
-		male->generation[GENERATION_PATERNAL])
-	{
-		female->generation[GENERATION_FATHER] =
-			male->generation[GENERATION_MATERNAL];
-	}
-	else
-	{
-		female->generation[GENERATION_FATHER] =
-			male->generation[GENERATION_PATERNAL];
-	}
+    /** generation number of the child's father */
+    if (male->generation[GENERATION_MATERNAL] >
+            male->generation[GENERATION_PATERNAL])
+    {
+        female->generation[GENERATION_FATHER] =
+            male->generation[GENERATION_MATERNAL];
+    }
+    else
+    {
+        female->generation[GENERATION_FATHER] =
+            male->generation[GENERATION_PATERNAL];
+    }
 
 
     /** reset sex drive and goal */
     being_reset_drive(female, DRIVE_SEX);
     being_reset_drive(male, DRIVE_SEX);
-    
+
     female->goal[0]=GOAL_NONE;
     male->goal[0]=GOAL_NONE;
 
@@ -1262,7 +1262,7 @@ n_int social_chat(
 
     meeter_being->speak = 0;
 
-    /** Record the chat event */    
+    /** Record the chat event */
     INDICATOR_INC(sim, IT_AVERAGE_CHAT);
 
     /** agree upon terrirory */
@@ -1388,14 +1388,14 @@ n_int social_chat(
 
     being_reset_drive(met_being, DRIVE_SOCIAL);
     being_reset_drive(meeter_being, DRIVE_SOCIAL);
-    
+
 #ifdef BRAINCODE_ON
     brain_dialogue(
         sim,1,meeter_being,met_being,
         GET_BRAINCODE_EXTERNAL(sim,meeter_being),
         GET_BRAINCODE_EXTERNAL(sim,met_being),
         being_index);
-    
+
 #endif
 #ifdef EPISODIC_ON
     social_group_align_preferences(
@@ -1432,7 +1432,7 @@ void social_goals(
         {
             vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
             vect2_byte2(&location_vector, being_location(local));
-            vect2_subtract(&delta_vector, &location_vector, &delta_vector);            
+            vect2_subtract(&delta_vector, &location_vector, &delta_vector);
             being_facing_towards(local, &delta_vector);
         }
         break;
@@ -1478,41 +1478,41 @@ static void sim_social_initial_no_return(noble_simulation * local, noble_being *
     {
         social_link * specific_individual = &(GET_SOC(local,local_being)[social_loop]);
         noble_being  * specific_being;
-        
+
         if (!specific_individual) return;
-        
+
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(GET_SOC(local,local_being),social_loop))
         {
-            
+
             specific_being = being_find_name(local, specific_individual->first_name[BEING_MET], specific_individual->family_name[BEING_MET]);
-            
+
             if (specific_being != 0L)
             {
                 n_vect2 weighted_delta;
                 n_vect2 familiar_location;
                 n_int	local_friend_or_foe = specific_individual->friend_foe;
                 n_int	distance_squared;
-                
+
                 local_friend_or_foe -= respect_mean;
-                
+
                 familiar_being_count++;
-                
+
                 vect2_byte2(&familiar_location,(n_byte2 *)&(specific_being->social_x));
-                
+
                 vect2_subtract(&weighted_delta, &familiar_location, &location);
-                
+
                 distance_squared = vect2_dot(&weighted_delta, &weighted_delta, 1, 512);
-                
+
                 if (distance_squared<0) distance_squared=0;  /**< Bug fix for division by zero on the following line */
-                
+
                 vect2_d(&sum_delta,&weighted_delta, local_friend_or_foe * 2048,
                         (distance_squared + 1));
             }
         }
-        
+
         social_loop++;
     }
-    
+
     if (familiar_being_count != 0)
     {
         vect2_d(&location,&sum_delta,1,(familiar_being_count*20));

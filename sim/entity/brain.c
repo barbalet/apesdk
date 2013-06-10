@@ -96,7 +96,7 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
     n_int  obr_tmp;
     n_int  br_tmp;
     n_int  count = F_Z;
-    
+
     io_copy(bract, br, B_SIZE);
 
     do
@@ -107,28 +107,29 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
 
         average *= l_a;
         obr_tmp *= l_c;
-        
-        br_tmp *= l_b;        
+
+        br_tmp *= l_b;
         br_tmp -= obr_tmp;
         average += br_tmp;
 
         br[loc++] = (n_byte)(average>>10);
         count--;
-                
-    }while(count);
+
+    }
+    while(count);
     count = B_Z - F_Z;
     do
     {
         average =  br[loc-F_Z];
         average += br[loc-F_Y];
         average += br[loc-F_X];
-        
-        br_tmp = br[loc]; 
-        
+
+        br_tmp = br[loc];
+
         average += br[loc+F_X];
         average += br[loc+F_Y];
         average += br[loc+F_Z];
-        
+
         obr_tmp = obr[loc];
         average *= l_a;
         obr_tmp *= l_c;
@@ -137,7 +138,8 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
         average += br_tmp;
         br[loc++] = (n_byte)(average>>10);
         count--;
-    }while (count);
+    }
+    while (count);
     count = F_Z;
     do
     {
@@ -154,7 +156,8 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
 
         br[loc++] = (n_byte)(average>>10);
         count--;
-    }while (count);
+    }
+    while (count);
 
     io_copy(bract, obr, B_SIZE);
     io_copy(br, bract, B_SIZE);
@@ -222,12 +225,12 @@ const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
     "SEQ ",
     "SNE ",
     "SLT ",
-    
+
     /** sensors */
     "SEN ",
     "SEN2",
     "SEN3",
-    
+
     /** actuators */
     "ACT ",
     "ACT2",
@@ -247,65 +250,65 @@ static n_int brain_format(n_byte instruction, n_byte command, n_byte value0, n_b
 {
     n_byte is_constant0 = ((command & BRAINCODE_CONSTANT0_BIT) != 0);
     n_byte is_constant1 = ((command & BRAINCODE_CONSTANT1_BIT) != 0);
-    
+
     switch(instruction)
     {
-        case BRAINCODE_AND:
-        case BRAINCODE_OR:
-        case BRAINCODE_MOV:
-        case BRAINCODE_ADD:
-        case BRAINCODE_SUB:
-        case BRAINCODE_MUL:
-        case BRAINCODE_MOD:
-            if ((!is_constant0) && (!is_constant1))
-            {
-                return BC_FORMAT_A;
-            }
-            return BC_FORMAT_C;
-            break;
-        case BRAINCODE_JMZ:
-        case BRAINCODE_JMN:
-        case BRAINCODE_DJN:
-            return BC_FORMAT_E;
-            break;
-        case BRAINCODE_SEQ:
-        case BRAINCODE_SNE:
-        case BRAINCODE_SLT:
-            if ((!is_constant0) && (!is_constant1))
-            {
-                return BC_FORMAT_A;
-            }
+    case BRAINCODE_AND:
+    case BRAINCODE_OR:
+    case BRAINCODE_MOV:
+    case BRAINCODE_ADD:
+    case BRAINCODE_SUB:
+    case BRAINCODE_MUL:
+    case BRAINCODE_MOD:
+        if ((!is_constant0) && (!is_constant1))
+        {
+            return BC_FORMAT_A;
+        }
+        return BC_FORMAT_C;
+        break;
+    case BRAINCODE_JMZ:
+    case BRAINCODE_JMN:
+    case BRAINCODE_DJN:
+        return BC_FORMAT_E;
+        break;
+    case BRAINCODE_SEQ:
+    case BRAINCODE_SNE:
+    case BRAINCODE_SLT:
+        if ((!is_constant0) && (!is_constant1))
+        {
+            return BC_FORMAT_A;
+        }
+        return BC_FORMAT_F;
+        break;
+    case BRAINCODE_DAT0:
+    case BRAINCODE_DAT1:
+    case BRAINCODE_JMP:
+        return BC_FORMAT_C;
+        break;
+    case BRAINCODE_INV:
+        if (is_constant0)
+        {
+            return BC_FORMAT_G;
+        }
+
+        return BC_FORMAT_H;
+
+        break;
+    case BRAINCODE_STP:
+    case BRAINCODE_LTP:
+        if ((is_constant0) && (!is_constant1))
+        {
             return BC_FORMAT_F;
-            break;
-        case BRAINCODE_DAT0:
-        case BRAINCODE_DAT1:
-        case BRAINCODE_JMP:
+        }
+        if ((is_constant0) && (is_constant1))
+        {
             return BC_FORMAT_C;
-            break;
-        case BRAINCODE_INV:
-            if (is_constant0)
-            {
-                return BC_FORMAT_G;
-            }
-
-            return BC_FORMAT_H;
-
-            break;
-        case BRAINCODE_STP:
-        case BRAINCODE_LTP:
-            if ((is_constant0) && (!is_constant1))
-            {
-                return BC_FORMAT_F;
-            }
-            if ((is_constant0) && (is_constant1))
-            {
-                return BC_FORMAT_C;
-            }
-            if ((!is_constant0) && (is_constant1))
-            {
-                return BC_FORMAT_E;
-            }
-            break;
+        }
+        if ((!is_constant0) && (is_constant1))
+        {
+            return BC_FORMAT_E;
+        }
+        break;
     }
     return BC_FORMAT_A;
 }
@@ -317,7 +320,7 @@ const n_string braincode_spoken_dictionary[BRAINCODE_INSTRUCTIONS] =
     /** data */
     "a",    /**< "DAT0", */
     "o",    /**< "DAT1", */
-    
+
     /** operators */
     "mam", /**< "ADD ",*/
     "vos", /**< "SUB ",*/
@@ -332,7 +335,7 @@ const n_string braincode_spoken_dictionary[BRAINCODE_INSTRUCTIONS] =
     "ova", /**< "INV ",*/
     "eef",  /**< "STP ",*/
     "fee",  /**< "LTP ",*/
-    
+
     /** conditionals */
     "om", /**< "JMZ ",*/
     "ov",  /**< "JMN ",*/
@@ -342,12 +345,12 @@ const n_string braincode_spoken_dictionary[BRAINCODE_INSTRUCTIONS] =
     "es",  /**< "SEQ ",*/
     "os",  /**< "SNE ",*/
     "is",  /**< "SLT ",*/
-    
+
     /** sensors */
     "favos", /**< "SEN ",*/
     "vamos", /**< "SEN2",*/
     "famov", /**< "SEN3",*/
-    
+
     /** actuators */
     "iema", /**< "ACT ",*/
     "iova", /**< "ACT2",*/
@@ -361,34 +364,34 @@ static n_byte brain_vc(n_byte value, n_byte vowel)
     {
         switch (value)
         {
-            case 3:
-                return 'a';
-            case 1:
-                return 'e';
-            case 2:
-                return 'i';
-            default:
-                return 'o';
+        case 3:
+            return 'a';
+        case 1:
+            return 'e';
+        case 2:
+            return 'i';
+        default:
+            return 'o';
         }
     }
     switch (value)
     {
-        case 0:
-            return 'v';
-        case 1:
-            return 'f';
-        case 2:
-            return 's';
-        case 3:
-            return 't';
-        case 4:
-            return 'p';
-        case 5:
-            return 'b';
-        case 6:
-            return 'j';
-        default:
-            return 'm';
+    case 0:
+        return 'v';
+    case 1:
+        return 'f';
+    case 2:
+        return 's';
+    case 3:
+        return 't';
+    case 4:
+        return 'p';
+    case 5:
+        return 'b';
+    case 6:
+        return 'j';
+    default:
+        return 'm';
     }
 }
 
@@ -412,27 +415,27 @@ void brain_three_byte_command(n_string string, n_byte * response)
     n_byte value1       = response[2];
     n_byte instruction  = (command & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS;
     n_int  format       = brain_format(instruction, command, value0, value1);
-    
+
     switch(format)
     {
-        case BC_FORMAT_A:
-            sprintf(string,"%s  %03d  %03d", braincode_mnemonic[instruction], value0, value1);
-            break;
-        case BC_FORMAT_C:
-            sprintf(string,"%s *%03d *%03d", braincode_mnemonic[instruction], value0, value1);
-            break;
-        case BC_FORMAT_E:
-            sprintf(string,"%s  %03d *%03d", braincode_mnemonic[instruction], value0, value1);
-            break;
-        case BC_FORMAT_F:
-            sprintf(string,"%s *%03d  %03d", braincode_mnemonic[instruction], value0, value1);
-            break;
-        case BC_FORMAT_G:
-            sprintf(string,"%s  %03d  ---", braincode_mnemonic[instruction], value0);
-            break;
-        default:
-            sprintf(string,"%s  ---  %03d", braincode_mnemonic[instruction], value1);
-            break;
+    case BC_FORMAT_A:
+        sprintf(string,"%s  %03d  %03d", braincode_mnemonic[instruction], value0, value1);
+        break;
+    case BC_FORMAT_C:
+        sprintf(string,"%s *%03d *%03d", braincode_mnemonic[instruction], value0, value1);
+        break;
+    case BC_FORMAT_E:
+        sprintf(string,"%s  %03d *%03d", braincode_mnemonic[instruction], value0, value1);
+        break;
+    case BC_FORMAT_F:
+        sprintf(string,"%s *%03d  %03d", braincode_mnemonic[instruction], value0, value1);
+        break;
+    case BC_FORMAT_G:
+        sprintf(string,"%s  %03d  ---", braincode_mnemonic[instruction], value0);
+        break;
+    default:
+        sprintf(string,"%s  ---  %03d", braincode_mnemonic[instruction], value1);
+        break;
     }
 }
 
@@ -449,30 +452,30 @@ void brain_sentence(n_string string, n_byte * response)
     n_byte instruction  = (command & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS;
     n_int  format       = brain_format(instruction, command, value0, value1);
     n_string_block      first_word, second_word;
-    
+
     brain_longword(first_word, value0);
     brain_longword(second_word, value1);
-    
+
     switch(format)
     {
-        case BC_FORMAT_A:
-            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
-            break;
-        case BC_FORMAT_C:
-            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
-            break;
-        case BC_FORMAT_E:
-            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
-            break;
-        case BC_FORMAT_F:
-            sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
-            break;
-        case BC_FORMAT_G:
-            sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], first_word);
-            break;
-        default:
-            sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], second_word);
-            break;
+    case BC_FORMAT_A:
+        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+        break;
+    case BC_FORMAT_C:
+        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+        break;
+    case BC_FORMAT_E:
+        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+        break;
+    case BC_FORMAT_F:
+        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+        break;
+    case BC_FORMAT_G:
+        sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], first_word);
+        break;
+    default:
+        sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], second_word);
+        break;
     }
 }
 
@@ -507,7 +510,7 @@ void braincode_statistics(noble_simulation * sim)
                 {
                     instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[j] % BRAINCODE_INSTRUCTIONS;
                 }
-                
+
                 if (instruction < BRAINCODE_OPERATORS_START)
                 {
                     data++;
@@ -538,13 +541,13 @@ void braincode_statistics(noble_simulation * sim)
         INDICATOR_SET(sim, IT_AVERAGE_OPERATORS, operators);
         INDICATOR_SET(sim, IT_AVERAGE_CONDITIONALS, conditionals);
         INDICATOR_SET(sim, IT_AVERAGE_DATA, data);
-        
+
         INDICATOR_MULTIPLY(sim, IT_AVERAGE_SENSORS, 10);
         INDICATOR_MULTIPLY(sim, IT_AVERAGE_ACTUATORS, 10);
         INDICATOR_MULTIPLY(sim, IT_AVERAGE_OPERATORS, 10);
         INDICATOR_MULTIPLY(sim, IT_AVERAGE_CONDITIONALS, 10);
         INDICATOR_MULTIPLY(sim, IT_AVERAGE_DATA, 10);
-                
+
         INDICATOR_NORMALIZE(sim, IT_AVERAGE_SENSORS);
         INDICATOR_NORMALIZE(sim, IT_AVERAGE_ACTUATORS);
         INDICATOR_NORMALIZE(sim, IT_AVERAGE_OPERATORS);
@@ -561,7 +564,7 @@ void braincode_statistics(noble_simulation * sim)
 static n_byte get_braincode_instruction_type(n_byte instruction_type)
 {
     n_byte2 local_random[2];
-    
+
     math_random3(local_random);
     switch(instruction_type)
     {
@@ -695,11 +698,11 @@ static n_int attention_similar(n_int episode_index,
     n_int min=-1;
     n_int next_episode_index = -1;
     if (visited_max<0) visited_max=0;
-    
+
     for (i = 0; i < EPISODIC_SIZE; i++)
     {
         if (episodic[i].event == 0) continue;
-        
+
         if (i != episode_index)
         {
             /** was this episode recently visited? */
@@ -779,8 +782,8 @@ static n_int similar_affect(episodic_memory * episodic, n_int * carry_through)
  * @return Absolute difference in affect value
  */
 static n_int attention_similar_affect(n_int episode_index,
-                                    episodic_memory * episodic,
-                                    n_int * memory_visited)
+                                      episodic_memory * episodic,
+                                      n_int * memory_visited)
 {
     n_int affect = episodic[episode_index].affect;
     return attention_similar(episode_index, episodic, memory_visited, &affect, similar_affect);
@@ -795,7 +798,7 @@ static n_int attention_similar_affect(n_int episode_index,
 static n_int similar_name(episodic_memory * episodic, n_int * carry_through)
 {
     n_int similarity = 3;
-    
+
     if (UNPACK_FAMILY_FIRST_NAME(episodic->family_name[BEING_MET]) == carry_through[0]) similarity--;
     if (UNPACK_FAMILY_SECOND_NAME(episodic->family_name[BEING_MET]) == carry_through[1]) similarity--;
     if (episodic->first_name[BEING_MET] == carry_through[2]) similarity--;
@@ -810,15 +813,15 @@ static n_int similar_name(episodic_memory * episodic, n_int * carry_through)
  * @return Similarity value
  */
 static n_int attention_similar_name(n_int episode_index,
-                                      episodic_memory * episodic,
-                                      n_int * memory_visited)
+                                    episodic_memory * episodic,
+                                    n_int * memory_visited)
 {
     n_int name[3];
-    
+
     name[0] = UNPACK_FAMILY_FIRST_NAME(episodic[episode_index].family_name[BEING_MET]);
     name[1] = UNPACK_FAMILY_SECOND_NAME(episodic[episode_index].family_name[BEING_MET]);
     name[2] = episodic[episode_index].first_name[BEING_MET];
-    
+
     return attention_similar(episode_index, episodic, memory_visited, name, similar_name);
 }
 
@@ -876,8 +879,8 @@ static n_int similar_place(episodic_memory * episodic, n_int * carry_through)
  * @return Similarity value (2D distance squared)
  */
 static n_int attention_similar_place(n_int episode_index,
-                                    episodic_memory * episodic,
-                                    n_int * memory_visited)
+                                     episodic_memory * episodic,
+                                     n_int * memory_visited)
 {
     n_int location[2];
     location[0] = episodic[episode_index].location[0];
@@ -1090,7 +1093,7 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
                 (!(meeter_being->state&BEING_STATE_SPEAKING)) &&
                 (meeter_being->shout[SHOUT_HEARD]>0))
         {
-            
+
             INDICATOR_INC(sim, IT_AVERAGE_LISTENS);
 
 
@@ -1143,9 +1146,9 @@ static n_byte territory_familiarity(noble_being * local_being,
 
     if (max_familiarity == 0)
     {
-       return 0; 
+        return 0;
     }
-    
+
     result = (n_byte)(familiarity*255/max_familiarity);
 #endif
     return result;
@@ -1639,7 +1642,7 @@ void brain_dialogue(
                 n_int n = pspace[0] % BRAINCODE_PROBES;
                 n_byte offset = IS_CONST1;
                 if (meeter_being->brainprobe[n].offset != offset)
-                {                    
+                {
                     INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
                 }
 
@@ -1715,7 +1718,7 @@ void brain_dialogue(
                 }
             }
             break;
-                
+
             /** Logical and */
         case BRAINCODE_AND:
             if (is_constant0)
@@ -1769,8 +1772,8 @@ void brain_dialogue(
                 ptr1 = BRAINCODE_ADDRESS(i + ((n_int)IS_CONST1 * BRAINCODE_BYTES_PER_INSTRUCTION));
 
 
-				instructions_to_copy = 1 + (pspace[1]%BRAINCODE_BLOCK_COPY);
-				while (dat < instructions_to_copy)
+                instructions_to_copy = 1 + (pspace[1]%BRAINCODE_BLOCK_COPY);
+                while (dat < instructions_to_copy)
                 {
                     if (ptr0 < BRAINCODE_SIZE)
                     {

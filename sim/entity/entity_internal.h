@@ -47,7 +47,7 @@ enum sleep_state
     FULLY_AWAKE    =   2
 };
 
-#define CONSUME_E(being, max_energy, food)  
+#define CONSUME_E(being, max_energy, food)
 
 /* offsets applied to land operator values */
 #define OFFSET_GRASS    40
@@ -114,27 +114,27 @@ void episodic_store_memory(
 void episodic_food(noble_simulation * local_sim, noble_being * local, n_int energy, n_byte food_type);
 
 void episodic_self(
-                   noble_simulation * local_sim,
-                   noble_being * local,
-                   n_byte event,
-                   n_int affect,
-                   n_byte2 arg);
+    noble_simulation * local_sim,
+    noble_being * local,
+    n_byte event,
+    n_int affect,
+    n_byte2 arg);
 
 void episodic_close(
-                    noble_simulation * local_sim,
-                    noble_being * local,
-                    noble_being * other,
-                    n_byte event,
-                    n_int affect,
-                    n_byte2 arg);
+    noble_simulation * local_sim,
+    noble_being * local,
+    noble_being * other,
+    n_byte event,
+    n_int affect,
+    n_byte2 arg);
 
 void episodic_interaction(
-                          noble_simulation * local_sim,
-                          noble_being * local,
-                          noble_being * other,
-                          n_byte event,
-                          n_int affect,
-                          n_byte2 arg);
+    noble_simulation * local_sim,
+    noble_being * local,
+    noble_being * other,
+    n_byte event,
+    n_int affect,
+    n_byte2 arg);
 
 n_byte episodic_intention(
     noble_simulation * local_sim,

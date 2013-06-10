@@ -161,8 +161,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     hMenuPopup[2] = CreateMenu();
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PAUSE_HANDLE, TEXT("&Pause"));
-    
-    
+
+
     AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PREV_HANDLE, TEXT("P&revious Ape"));
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NEXT_HANDLE, TEXT ("&Next Ape"));
@@ -202,7 +202,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     /* can't close the meters window, it's also the menu window */
     EnableMenuItem(hMenuPopup[0], FILE_CLOSE_HANDLE, MF_DISABLED | MF_GRAYED);
 
-    
+
 
     loop = 0;
 
@@ -210,7 +210,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     {
         window_definition[loop] = shared_init(window_definition[loop], tmpres);
 
-        
+
         bmp_info[loop] = (LPBITMAPINFO) malloc(sizeof(BYTE) * (sizeof(BITMAPINFOHEADER)
                                                + (256 * sizeof(RGBQUAD))));
 
@@ -274,11 +274,11 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
     case WM_PAINT:
         shared_cycle((60*clock())/(CLK_TCK), NUM_VIEW);
-		shared_cycle((60*clock())/(CLK_TCK), NUM_TERRAIN);
-		shared_cycle_draw(NUM_VIEW, 512, 512);
-		shared_cycle_draw(NUM_TERRAIN, 512, 512);
+        shared_cycle((60*clock())/(CLK_TCK), NUM_TERRAIN);
+        shared_cycle_draw(NUM_VIEW, 512, 512);
+        shared_cycle_draw(NUM_TERRAIN, 512, 512);
         /*
-		}*/
+        }*/
         plat_update();
 
         InvalidateRect(global_hwnd[0], NULL, TRUE);
@@ -288,7 +288,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
     case WM_LBUTTONUP:
         firedown = -1;
-		shared_mouseUp();
+        shared_mouseUp();
         return 0;
 
 
@@ -296,9 +296,9 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         firedown = plat_ourwind(hwnd);
     case WM_MOUSEMOVE:
         if (firedown != -1)
-		{
-			shared_mouseReceived(LOWORD(lParam), HIWORD(lParam), firedown);
-		}
+        {
+            shared_mouseReceived(LOWORD(lParam), HIWORD(lParam), firedown);
+        }
         return 0;
 
     case WM_KEYDOWN:
@@ -327,13 +327,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         if(response != 0)
         {
             if(firecontrol)
-			{
+            {
                 response |= 2048;
-			}
-			if (windownum != -1)
-			{   
+            }
+            if (windownum != -1)
+            {
                 shared_keyReceived(response, windownum);
-			}
+            }
         }
     }
     return 0;
@@ -344,7 +344,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             firecontrol = 0;
         }
          */
-            
+
         shared_keyUp();
         return 0;
     case WM_CLOSE:
@@ -393,17 +393,17 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
             /** File Menu... **/
         case FILE_NEW_HANDLE:
-			{
-				FILETIME ft;
-			    unsigned long tmpres = 0;
+        {
+            FILETIME ft;
+            unsigned long tmpres = 0;
 
-				GetSystemTimeAsFileTime(&ft);
+            GetSystemTimeAsFileTime(&ft);
 
-				tmpres = ft.dwHighDateTime;
-				tmpres ^= ft.dwLowDateTime;
-				shared_new(tmpres);
-			}
-            return 0;
+            tmpres = ft.dwHighDateTime;
+            tmpres ^= ft.dwLowDateTime;
+            shared_new(tmpres);
+        }
+        return 0;
 
         case FILE_OPEN_HANDLE:
 
@@ -472,7 +472,7 @@ static void plat_update()
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);
         hdcMem = CreateCompatibleDC(hdc[lp]);
-        
+
         value = shared_draw(window_definition[lp]);
 
         SetDIBits(hdcMem, offscreen[lp], 0, 512-lp, value, bmp_info[lp], DIB_RGB_COLORS);

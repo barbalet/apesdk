@@ -141,7 +141,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
     n_int i;
     episodic_memory * local_episodic = GET_EPI(local_sim, local);
     n_genetics * genetics = being_genetics(local);
-    
+
     if (!local_episodic) return;
 
     for (i=0; i<EPISODIC_SIZE; i++)
@@ -427,14 +427,14 @@ static n_int episodic_memory_replace_index(
  * @param food Type of food
  */
 static void episodic_store_full(
-                           noble_being * local,
-                           n_byte event,
-                           n_int affect,
-                           noble_simulation * local_sim,
-                           n_byte2 name1, n_byte2 family1,
-                           n_byte2 name2, n_byte2 family2,
-                           n_byte2 arg,
-                           n_byte food)
+    noble_being * local,
+    n_byte event,
+    n_int affect,
+    noble_simulation * local_sim,
+    n_byte2 name1, n_byte2 family1,
+    n_byte2 name2, n_byte2 family2,
+    n_byte2 arg,
+    n_byte food)
 {
     episodic_memory * local_episodic = GET_EPI(local_sim, local);
     n_int replace;
@@ -455,7 +455,7 @@ static void episodic_store_full(
 
     old_event = local_episodic[replace].event;
     old_time = local_episodic[replace].time;
-    
+
     /** insert the current event into the episodic memory */
     local_episodic[replace].event       = event;
     local_episodic[replace].affect      = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
@@ -471,12 +471,12 @@ static void episodic_store_full(
     local_episodic[replace].family_name[BEING_MET]=family2;
     local_episodic[replace].food=food;
     local_episodic[replace].arg=arg;
-    
+
     if ((event == 0) || (event>=EVENTS))
     {
         (void)SHOW_ERROR("Event outside scope");
     }
-    
+
     if (local_logging)
     {
         if ((old_event != event) || ((old_time+10) < (new_time))) /**< TODO this may need to be changed */
@@ -486,20 +486,20 @@ static void episodic_store_full(
             n_string_block time;
             n_string_block combination = {0};
             n_int social_event;
-            
+
             being_name((FIND_SEX(GET_I(local)) == SEX_FEMALE), GET_NAME(local_sim, local), GET_FAMILY_FIRST_NAME(local_sim, local), GET_FAMILY_SECOND_NAME(local_sim, local), str);
 
             social_event = episode_description(local_sim, local, replace, description);
-            
+
             if ((local_social == 1) && (social_event == 0))
             {
                 return;
             }
-            
+
             io_time_to_string(time, local_sim->land->time, local_sim->land->date[0], local_sim->land->date[1]);
-            
+
             io_three_string_combination(combination, time, str, description, 35);
-                        
+
             (*local_logging)(combination);
         }
     }
@@ -531,13 +531,13 @@ void episodic_food(noble_simulation * local_sim, noble_being * local, n_int ener
  * @param arg Any additional arguments
  */
 void episodic_store_memory(
-                           noble_being * local,
-                           n_byte event,
-                           n_int affect,
-                           noble_simulation * local_sim,
-                           n_byte2 name1, n_byte2 family1,
-                           n_byte2 name2, n_byte2 family2,
-                           n_byte2 arg)
+    noble_being * local,
+    n_byte event,
+    n_int affect,
+    noble_simulation * local_sim,
+    n_byte2 name1, n_byte2 family1,
+    n_byte2 name2, n_byte2 family2,
+    n_byte2 arg)
 {
     episodic_store_full(local,event,affect,local_sim,name1,family1,name2,family2, arg, 0);
 }
@@ -550,11 +550,11 @@ void episodic_store_memory(
  * @param arg Any additional argument
  */
 void episodic_self(
-                   noble_simulation * local_sim,
-                   noble_being * local,
-                   n_byte event,
-                   n_int affect,
-                   n_byte2 arg)
+    noble_simulation * local_sim,
+    noble_being * local,
+    n_byte event,
+    n_int affect,
+    n_byte2 arg)
 {
     episodic_store_memory(local, event, affect, local_sim,
                           GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
@@ -570,17 +570,17 @@ void episodic_self(
  * @param arg Any additional argument
  */
 void episodic_close(
-                    noble_simulation * local_sim,
-                    noble_being * local,
-                    noble_being * other,
-                    n_byte event,
-                    n_int affect,
-                    n_byte2 arg)
+    noble_simulation * local_sim,
+    noble_being * local,
+    noble_being * other,
+    n_byte event,
+    n_int affect,
+    n_byte2 arg)
 {
     episodic_store_memory(
-                          local, event, affect, local_sim,
-                          GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other),
-                          0,0, arg);
+        local, event, affect, local_sim,
+        GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other),
+        0,0, arg);
 }
 /**
  * @brief Remember a particular interaction between two beings
@@ -592,20 +592,20 @@ void episodic_close(
  * @param arg Any additional argument
  */
 void episodic_interaction(
-                          noble_simulation * local_sim,
-                          noble_being * local,
-                          noble_being * other,
-                          n_byte event,
-                          n_int affect,
-                          n_byte2 arg)
+    noble_simulation * local_sim,
+    noble_being * local,
+    noble_being * other,
+    n_byte event,
+    n_int affect,
+    n_byte2 arg)
 {
     episodic_store_memory(
-                      local, event, affect, local_sim,
-                      GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
-                      GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other), arg);
+        local, event, affect, local_sim,
+        GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
+        GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other), arg);
 }
 
-                          
+
 /**
  * @brief Generate an intention.
  * Note that intentions are stored together with episodic memories,

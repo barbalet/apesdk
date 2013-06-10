@@ -79,7 +79,7 @@ n_int console_executing(void)
 }
 
 void console_external_watch(void)
-{    
+{
     if (io_command_line_execution())
     {
         n_string_block output;
@@ -320,7 +320,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
                 (int)(local_sim->num - count),(local_sim->num - count)*100.0f/local_sim->num);
     }
     sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)local_sim->land->tide_level);
-    
+
     io_time_to_string(time, local_sim->land->time, local_sim->land->date[0], local_sim->land->date[1]);
 
     sprintf(beingstr,"%s%s", beingstr, time);
@@ -333,7 +333,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     {
         sprintf(beingstr,"%s Simulation not running", beingstr);
     }
-    
+
     output_function(beingstr);
 
     return 0;
@@ -597,7 +597,7 @@ static void watch_appearance(void *ptr, n_string beingname, noble_being * local_
 {
     n_string_block str;
     n_genetics * genetics = being_genetics(local_being);
-    
+
     sprintf(str,"Height: %.3f m\n", (int)GET_BEING_HEIGHT(local_being)/1000.0f);
     io_string_write(result, str, &watch_string_length);
 
@@ -874,7 +874,7 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
     static_result = result;
 
     console_populate_braincode(ptr,watch_line_braincode);
-    
+
     static_result = 0L;
     result[watch_string_length++]='\n';
 
@@ -884,21 +884,21 @@ static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_s
 {
     n_int loop;
     n_byte * external_bc = GET_BRAINCODE_EXTERNAL((noble_simulation*)ptr, local);
-	for (loop = 0; loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION; loop++)
+    for (loop = 0; loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION; loop++)
     {
         n_string_block sentence;
-        
+
         brain_sentence((n_string)sentence, &external_bc[loop*3]);
-        
+
         io_string_write(result, sentence, &watch_string_length);
         if ((loop &3) == 3)
         {
             result[watch_string_length++]='.';
         }
-		if (loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION-1)
-		{
-			result[watch_string_length++]=' ';
-		}
+        if (loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION-1)
+        {
+            result[watch_string_length++]=' ';
+        }
     }
     result[watch_string_length++]='.';
     result[watch_string_length++]='\n';
@@ -1067,9 +1067,9 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
 
     sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
-			(n_uint)local_being->generation[GENERATION_MATERNAL],
-			(n_uint)local_being->generation[GENERATION_PATERNAL],
-			(int)heart_rate, (int)breathing_rate,
+            (n_uint)local_being->generation[GENERATION_MATERNAL],
+            (n_uint)local_being->generation[GENERATION_PATERNAL],
+            (int)heart_rate, (int)breathing_rate,
             being_energy(local_being),
             being_location_x(local_being), being_location_y(local_being),
             local_being->honor,
@@ -1342,12 +1342,13 @@ static void watch_being(void * ptr, n_console_output output_function)
     n_int  j;
     n_byte2 state;
 
-    
+
     if (being_remove_internal)
-        do{}while(being_remove_internal);
-    
+        do {}
+        while(being_remove_internal);
+
     being_remove_external = 1;
-    
+
     if (watch_type == WATCH_STATES)
     {
         n_uint histogram[16];
@@ -1470,26 +1471,26 @@ static void watch_being(void * ptr, n_console_output output_function)
 static n_int console_on_off(n_string response)
 {
     n_uint length;
-    
+
     if (response == 0) return -1;
-    
+
     length = io_length(response,STRING_BLOCK_SIZE);
     if ((io_find(response,0,length,"off",3)>-1) ||
-        (io_find(response,0,length,"0",1)>-1) ||
-        (io_find(response,0,length,"false",5)>-1) ||
-        (io_find(response,0,length,"no",2)>-1))
+            (io_find(response,0,length,"0",1)>-1) ||
+            (io_find(response,0,length,"false",5)>-1) ||
+            (io_find(response,0,length,"no",2)>-1))
     {
         return 0;
     }
-    
+
     if ((io_find(response,0,length,"on",2)>-1) ||
-        (io_find(response,0,length,"1",1)>-1) ||
-        (io_find(response,0,length,"true",4)>-1) ||
-        (io_find(response,0,length,"yes",3)>-1))
+            (io_find(response,0,length,"1",1)>-1) ||
+            (io_find(response,0,length,"true",4)>-1) ||
+            (io_find(response,0,length,"yes",3)>-1))
     {
         return 1;
     }
-    
+
     return -1;
 }
 
@@ -1506,7 +1507,7 @@ n_int console_event(void * ptr, n_string response, n_console_output output_funct
         }
         return 0;
     }
-    
+
     if (return_response == 0)
     {
         episodic_logging(0L, 0);
@@ -1532,7 +1533,7 @@ n_int console_event(void * ptr, n_string response, n_console_output output_funct
 n_int console_logging(void * ptr, n_string response, n_console_output output_function)
 {
     n_int return_response = console_on_off(response);
-    
+
     if (return_response == -1)
     {
         return 0;
@@ -1563,7 +1564,7 @@ n_int console_logging(void * ptr, n_string response, n_console_output output_fun
  */
 static n_int console_compare_brain(n_byte * braincode0, n_byte * braincode1, n_int block_size)
 {
-	n_int block_size_bytes = block_size*BRAINCODE_BYTES_PER_INSTRUCTION;
+    n_int block_size_bytes = block_size*BRAINCODE_BYTES_PER_INSTRUCTION;
     n_int loop = 0;
     while (loop < (BRAINCODE_SIZE - block_size_bytes))
     {
@@ -1574,14 +1575,14 @@ static n_int console_compare_brain(n_byte * braincode0, n_byte * braincode1, n_i
             while (block_step < block_size)
             {
                 if (braincode0[loop + block_step*BRAINCODE_BYTES_PER_INSTRUCTION] ==
-					braincode1[loop2 + block_step*BRAINCODE_BYTES_PER_INSTRUCTION])
+                        braincode1[loop2 + block_step*BRAINCODE_BYTES_PER_INSTRUCTION])
                 {
-					block_step++;
-					if (block_step == block_size)
-					{
-						return loop;
-					}
-				}
+                    block_step++;
+                    if (block_step == block_size)
+                    {
+                        return loop;
+                    }
+                }
                 else
                 {
                     break;
@@ -1591,7 +1592,7 @@ static n_int console_compare_brain(n_byte * braincode0, n_byte * braincode1, n_i
         }
         loop += BRAINCODE_BYTES_PER_INSTRUCTION;
     }
-        
+
     return -1;
 }
 
@@ -1609,17 +1610,17 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
 #define CONSOLE_IDEA_MIN_BLOCK_SIZE 3
 #define CONSOLE_IDEA_MAX_BLOCK_SIZE 8
 #endif
-	const n_int min_block_size = 3;
-	const n_int max_block_size = 8;
-	n_uint i, total_matches=0, total_tests=0;
-	n_uint histogram[CONSOLE_IDEA_MIN_BLOCK_SIZE - CONSOLE_IDEA_MIN_BLOCK_SIZE + 1];
+    const n_int min_block_size = 3;
+    const n_int max_block_size = 8;
+    n_uint i, total_matches=0, total_tests=0;
+    n_uint histogram[CONSOLE_IDEA_MIN_BLOCK_SIZE - CONSOLE_IDEA_MIN_BLOCK_SIZE + 1];
     noble_simulation * local_sim = (noble_simulation *) ptr;
 
-	/* clear the histogram */
-	for (i = 0; i <= max_block_size - min_block_size; i++)
-	{
-		histogram[i]=0;
-	}
+    /* clear the histogram */
+    for (i = 0; i <= max_block_size - min_block_size; i++)
+    {
+        histogram[i]=0;
+    }
 
     if (local_sim->select != NO_BEINGS_FOUND)
     {
@@ -1630,68 +1631,68 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
             n_byte * bc_external = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
             if (bc_external)
             {
-            
+
                 n_uint loop2 = loop+1;
                 while (loop2 < local_sim->num)
                 {
-					noble_being * local_being2 = &(local_sim->beings[loop2]);
-					n_byte * bc_external2 = GET_BRAINCODE_EXTERNAL(local_sim, local_being2);
+                    noble_being * local_being2 = &(local_sim->beings[loop2]);
+                    n_byte * bc_external2 = GET_BRAINCODE_EXTERNAL(local_sim, local_being2);
 
-					if (bc_external2)
+                    if (bc_external2)
                     {
-						n_int   location = 0;
-						n_int   block_size = min_block_size;
-                            
-						while (block_size <= max_block_size)
+                        n_int   location = 0;
+                        n_int   block_size = min_block_size;
+
+                        while (block_size <= max_block_size)
                         {
-							location = console_compare_brain(bc_external,
-															 bc_external2,
-															 block_size);
-                                
-							if (location != -1)
+                            location = console_compare_brain(bc_external,
+                                                             bc_external2,
+                                                             block_size);
+
+                            if (location != -1)
                             {
-								histogram[block_size-min_block_size]++;
-								total_matches++;
-								/* n_string_block output;
-								sprintf(output, "%ld %ld, %ld",loop, loop2, block_size);
-								output_function(output); */
-							}
-							total_tests++;
-							block_size++;
-						}
-					}
-					loop2++;
-				}
+                                histogram[block_size-min_block_size]++;
+                                total_matches++;
+                                /* n_string_block output;
+                                sprintf(output, "%ld %ld, %ld",loop, loop2, block_size);
+                                output_function(output); */
+                            }
+                            total_tests++;
+                            block_size++;
+                        }
+                    }
+                    loop2++;
+                }
 
             }
             loop++;
         }
     }
 
-	if (total_tests > 0)
-	{
-		n_string_block output;
-		sprintf(output, "Matches %03u.%04u percent\n",
-				(n_c_int)(total_matches*100/total_tests),
-				(n_c_int)(total_matches*1000000/total_tests)%10000);
-		output_function(output);
+    if (total_tests > 0)
+    {
+        n_string_block output;
+        sprintf(output, "Matches %03u.%04u percent\n",
+                (n_c_int)(total_matches*100/total_tests),
+                (n_c_int)(total_matches*1000000/total_tests)%10000);
+        output_function(output);
 
-		sprintf(output, "%s", "Block Percent   Instances");
-		output_function(output);
+        sprintf(output, "%s", "Block Percent   Instances");
+        output_function(output);
 
-		sprintf(output, "%s", "-------------------------");
-		output_function(output);
+        sprintf(output, "%s", "-------------------------");
+        output_function(output);
 
-		for (i = 0; i <= max_block_size - min_block_size; i++)
-		{
-			sprintf(output, "%02u    %03u.%04u  %04u",
-					(n_c_int)(i+min_block_size),
-					(n_c_int)(histogram[i]*100/total_tests),
-					(n_c_int)((histogram[i]*1000000/total_tests)%10000),
-					(n_c_int)histogram[i]);
-			output_function(output);
-		}
-	}
+        for (i = 0; i <= max_block_size - min_block_size; i++)
+        {
+            sprintf(output, "%02u    %03u.%04u  %04u",
+                    (n_c_int)(i+min_block_size),
+                    (n_c_int)(histogram[i]*100/total_tests),
+                    (n_c_int)((histogram[i]*1000000/total_tests)%10000),
+                    (n_c_int)histogram[i]);
+            output_function(output);
+        }
+    }
 
 #endif
     return 0;
@@ -1772,13 +1773,13 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 return 0;
             }
             if ((io_find(response,0,length,"episodic",8)>-1) ||
-                (io_find(response,0,length,"episodic memory",15)>-1) ||
-                (io_find(response,0,length,"memory",6)>-1))
+                    (io_find(response,0,length,"episodic memory",15)>-1) ||
+                    (io_find(response,0,length,"memory",6)>-1))
             {
                 watch_type = WATCH_EPISODIC;
                 sprintf(output,"Watching episodic memory for %s\n", being_get_select_name(local_sim));
                 output_function(output);
-                
+
                 return 0;
             }
             if (io_find(response,0,length,"speech",6)>-1)
@@ -1786,7 +1787,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_SPEECH;
                 sprintf(output,"Watching speech for %s\n", being_get_select_name(local_sim));
                 output_function(output);
-                
+
                 return 0;
             }
             if ((length<5) && (io_find(response,0,length,"all",3)>-1))
@@ -1925,7 +1926,7 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_uint loop = 0;
-    
+
     if (response != RUN_STEP_CONST)
     {
         if (simulation_executing == 1)
@@ -1933,18 +1934,18 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
             output_function("Simulation already running");
             return 0;
         }
-        
+
         if (console_file_interaction)
         {
 
             output_function("File interaction in use");
             return 0;
         }
-        
+
         simulation_executing = 1;
     }
     simulation_running = 1;
-    
+
     while ((loop < save_interval_steps) && simulation_running)
     {
         sim_cycle();
@@ -1955,12 +1956,12 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
         }
         loop++;
     }
-    
+
     if (response != RUN_STEP_CONST)
     {
         simulation_executing = 0;
     }
-    
+
     return 0;
 }
 
@@ -1982,22 +1983,22 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
         output_function("Simulation already running");
         return 0;
     }
-    
+
     if (console_file_interaction)
     {
         output_function("File interaction in use");
         return 0;
     }
-    
+
     simulation_executing = 1;
-    
+
     simulation_running = 1;
-    
+
     if (response != 0L)
     {
         n_int length = io_length(response,STRING_BLOCK_SIZE);
         if (length > 0)
-        {            
+        {
             if ((io_find(response,0,length,"forever",7)>-1))
             {
                 forever = 1;
@@ -2007,7 +2008,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
             {
                 number = -1;
             }
-            
+
             if (number > 0)
             {
                 n_uint i = 0;
@@ -2015,7 +2016,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 n_uint end_point = (number * interval_steps[interval]);
                 n_uint temp_save_interval_steps = save_interval_steps;
                 save_interval_steps = 1;
-                
+
                 if (forever)
                 {
                     sprintf(output, "Running forever (type \"stop\" to end)");
@@ -2024,7 +2025,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 {
                     sprintf(output, "Running for %d %s", (int)number, interval_description[interval]);
                 }
-                
+
                 output_function(output);
 
                 while ((i < end_point) && simulation_running)
@@ -2035,12 +2036,12 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 save_interval_steps = temp_save_interval_steps;
                 run = 1;
             }
-            
+
         }
     }
-    
+
     simulation_executing = 0;
-    
+
     if (run == 0)
     {
         (void)SHOW_ERROR("Time not specified, examples: run 2 days, run 6 hours");
@@ -2130,7 +2131,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     n_string_block output_string;
 
     if (response==0) return 0;
-    
+
     if (console_file_interaction)
     {
         if (output_function)
@@ -2139,17 +2140,17 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
         }
         return 0;
     }
-    
+
     console_stop(ptr,"",output_function);
-    
+
     file_opened = file_out();
     if (file_opened == 0L)
     {
         return -1;
     }
-    
+
     console_file_interaction = 1;
-    
+
     io_disk_write(file_opened, response);
     io_file_free(file_opened);
 
@@ -2158,16 +2159,16 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
         console_file_interaction = 0;
         return -1;
     }
-    
+
     if (output_function)
     {
         sprintf(console_file_name,"%s",response);
         sprintf(output_string, "Simulation file %s saved\n",response);
         output_function(output_string);
     }
-    
+
     console_file_interaction = 0;
-    
+
     return 0;
 }
 
@@ -2175,7 +2176,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
 static n_int console_base_open(void * ptr, n_string response, n_console_output output_function, n_byte script)
 {
     if (response==0) return 0;
-    
+
     if (console_file_interaction)
     {
         if (output_function)
@@ -2184,21 +2185,21 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
         }
         return 0;
     }
-    
+
     console_stop(ptr,"",output_function);
     console_file_interaction = 1;
-    
+
     if (io_disk_check(response)!=0)
     {
         n_file * file_opened = io_file_new();
         n_string_block output_string;
-        
+
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
             io_file_free(file_opened);
             return -1;
         }
-        
+
         if (script)
         {
             if (file_interpret(file_opened) != 0)
@@ -2291,26 +2292,26 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
                     passed=0;
                     switch(mode)
                     {
-                        case 0:
-                        {
-                            passed=1;
-                            break;
-                        }
-                        case 1:
-                        {
-                            if (FIND_SEX(GET_I(b)) == SEX_FEMALE) passed=1;
-                            break;
-                        }
-                        case 2:
-                        {
-                            if (FIND_SEX(GET_I(b)) != SEX_FEMALE) passed=1;
-                            break;
-                        }
-                        case 3:
-                        {
-                            if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
-                            break;
-                        }
+                    case 0:
+                    {
+                        passed=1;
+                        break;
+                    }
+                    case 1:
+                    {
+                        if (FIND_SEX(GET_I(b)) == SEX_FEMALE) passed=1;
+                        break;
+                    }
+                    case 2:
+                    {
+                        if (FIND_SEX(GET_I(b)) != SEX_FEMALE) passed=1;
+                        break;
+                    }
+                    case 3:
+                    {
+                        if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
+                        break;
+                    }
                     }
 
                     if (passed!=0)

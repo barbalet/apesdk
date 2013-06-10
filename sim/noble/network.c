@@ -56,14 +56,14 @@
 
 n_int network_open(n_string ip, n_byte2 port, n_c_int * network_connection)
 {
-    struct sockaddr_in addr; /* Local address */    
+    struct sockaddr_in addr; /* Local address */
     /* Create socket for incoming connections */
     if ((*network_connection = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
         return SHOW_ERROR("Failed to set up socket");
     }
     /* Construct local address structure */
-    io_erase((n_byte *)&addr, sizeof(addr));    
+    io_erase((n_byte *)&addr, sizeof(addr));
     addr.sin_family = AF_INET;                /* Internet address family */
     if (ip)
     {
@@ -74,7 +74,7 @@ n_int network_open(n_string ip, n_byte2 port, n_c_int * network_connection)
         addr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     }
     addr.sin_port = htons(port);      /* Local port */
-    
+
     /* Bind to the local address */
     if (bind(*network_connection, (struct sockaddr *) &addr, sizeof(addr)) < 0)
     {
@@ -95,18 +95,18 @@ void HandleTCPClient(n_c_int clntSocket)
 {
     n_string_block  echoBuffer;        /* Buffer for echo string */
     n_int           recvMsgSize;       /* Size of received message */
-    
+
     /* Receive message from client */
     if ((recvMsgSize = recv(clntSocket, echoBuffer, sizeof(n_constant_string), 0)) < 0)
         DieWithError("recv() failed");
-    
+
     /* Send received string and receive again until end of transmission */
     while (recvMsgSize > 0)      /* zero indicates end of transmission */
     {
         /* Echo message back to client */
         if (send(clntSocket, echoBuffer, recvMsgSize, 0) != recvMsgSize)
             DieWithError("send() failed");
-        
+
         /* See if there is more data to receive */
         if ((recvMsgSize = recv(clntSocket, echoBuffer, sizeof(n_constant_string), 0)) < 0)
             DieWithError("recv() failed");
@@ -126,47 +126,47 @@ int main(int argc, char *argv[])
     struct sockaddr_in echoClntAddr; /* Client address */
     unsigned short echoServPort;     /* Server port */
     unsigned int clntLen;            /* Length of client address data structure */
-    
+
     if (argc != 2)     /* Test for correct number of arguments */
     {
         fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
         exit(1);
     }
-    
+
     echoServPort = atoi(argv[1]);  /* First arg:  local port */
-    
+
     /* Create socket for incoming connections */
     if ((servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         DieWithError("socket() failed");
-    
+
     /* Construct local address structure */
     memset(&echoServAddr, 0, sizeof(echoServAddr));   /* Zero out structure */
     echoServAddr.sin_family = AF_INET;                /* Internet address family */
     echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface */
     echoServAddr.sin_port = htons(echoServPort);      /* Local port */
-    
+
     /* Bind to the local address */
     if (bind(servSock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         DieWithError("bind() failed");
-    
+
     /* Mark the socket so it will listen for incoming connections */
     if (listen(servSock, MAXPENDING) < 0)
         DieWithError("listen() failed");
-    
+
     for (;;) /* Run forever */
     {
         /* Set the size of the in-out parameter */
         clntLen = sizeof(echoClntAddr);
-        
+
         /* Wait for a client to connect */
         if ((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr,
                                &clntLen)) < 0)
             DieWithError("accept() failed");
-        
+
         /* clntSock is connected to a client! */
-        
+
         printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
-        
+
         HandleTCPClient(clntSock);
     }
     /* NOT REACHED */
@@ -185,42 +185,42 @@ int main(int argc, char *argv[])
     unsigned int echoStringLen;      /* Length of string to echo */
     int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
                                       and total bytes read */
-    
+
     if ((argc < 3) || (argc > 4))    /* Test for correct number of arguments */
     {
         fprintf(stderr, "Usage: %s <Server IP> <Echo Word> [<Echo Port>]\n",
                 argv[0]);
         exit(1);
     }
-    
+
     servIP = argv[1];             /* First arg: server IP address (dotted quad) */
     echoString = argv[2];         /* Second arg: string to echo */
-    
+
     if (argc == 4)
         echoServPort = atoi(argv[3]); /* Use given port, if any */
     else
         echoServPort = 7;  /* 7 is the well-known port for the echo service */
-    
+
     /* Create a reliable, stream socket using TCP */
     if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         DieWithError("socket() failed");
-    
+
     /* Construct the server address structure */
     memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
     echoServAddr.sin_family      = AF_INET;             /* Internet address family */
     echoServAddr.sin_addr.s_addr = inet_addr(servIP);   /* Server IP address */
     echoServAddr.sin_port        = htons(echoServPort); /* Server port */
-    
+
     /* Establish the connection to the echo server */
     if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         DieWithError("connect() failed");
-    
+
     echoStringLen = strlen(echoString);          /* Determine input length */
-    
+
     /* Send the string to the server */
     if (send(sock, echoString, echoStringLen, 0) != echoStringLen)
         DieWithError("send() sent a different number of bytes than expected");
-    
+
     /* Receive the same string back from the server */
     totalBytesRcvd = 0;
     printf("Received: ");                /* Setup to print the echoed string */
@@ -234,9 +234,9 @@ int main(int argc, char *argv[])
         echoBuffer[bytesRcvd] = '\0';  /* Terminate the string! */
         printf("%s", echoBuffer);      /* Print the echo buffer */
     }
-    
+
     printf("\n");    /* Print a final linefeed */
-    
+
     close(sock);
     exit(0);
 }

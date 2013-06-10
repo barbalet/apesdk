@@ -54,7 +54,8 @@ static n_uint	audio_reverse_bits (n_uint index, n_uint power_sample)
 {
     n_uint i = 0;
     n_uint rev = 0;
-    while(i < power_sample){
+    while(i < power_sample)
+    {
         rev = (rev << 1) | (index & 1);
         index >>= 1;
         i++;
@@ -67,18 +68,18 @@ void audio_fft(n_byte inverse, n_uint power_sample)
     n_uint		NumSamples = 1 << power_sample;    /* Number of bits needed to store indices */
     n_uint		i;
     n_uint		BlockSize, BlockEnd;
-    
+
     n_double   *d_in, *d_ini, *d_out, *d_outi;
-    
+
     n_double angle_numerator = TWO_PI;
-    
+
     if ( inverse )
     {
         angle_numerator = -angle_numerator;
-        
+
         d_in  = frequency;
         d_ini = frequencyi;
-        
+
         d_out  = timedomain;
         d_outi = timedomaini;
     }
@@ -86,27 +87,28 @@ void audio_fft(n_byte inverse, n_uint power_sample)
     {
         d_in  = timedomain;
         d_ini = timedomaini;
-        
+
         d_out  = frequency;
         d_outi = frequencyi;
     }
-    
+
     /*
      **   Do simultaneous data copy and bit-reversal ordering into outputs...
      */
-    
-	i=0;
-	while(i < NumSamples){
-		n_uint j = audio_reverse_bits (i, power_sample);
+
+    i=0;
+    while(i < NumSamples)
+    {
+        n_uint j = audio_reverse_bits (i, power_sample);
         d_outi[j] = d_in[i];
         d_out[j]  = d_ini[i];
         i++;
     }
-    
+
     /*
      **   Do the FFT itself...
      */
-    
+
     BlockEnd = 1;
     BlockSize = 2;
     while (BlockSize <= NumSamples)
@@ -117,58 +119,58 @@ void audio_fft(n_byte inverse, n_uint power_sample)
         n_double cm2 = cos ( -2 * delta_angle );
         n_double cm1 = cos ( -delta_angle );
         n_double w = 2 * cm1;
-        
-		i=0;
-		
+
+        i=0;
+
         while(  i < NumSamples )
         {
             n_uint j=i;
-			n_uint n=0;
-            
+            n_uint n=0;
+
             n_double ar2 = cm2;
             n_double ar1 = cm1;
-            
+
             n_double ai2 = sm2;
             n_double ai1 = sm1;
-			
+
             while(n < BlockEnd)
             {
                 n_double ar0 = w*ar1 - ar2;
                 n_double ai0 = w*ai1 - ai2;
-                
+
                 ar2 = ar1;
                 ar1 = ar0;
-                
+
                 ai2 = ai1;
                 ai1 = ai0;
-                
+
                 {
                     n_uint   k = j + BlockEnd;
-                    
+
                     n_double tr = ar0*d_outi[k] - ai0*d_out[k];
                     n_double ti = ar0*d_out[k] + ai0*d_outi[k];
-                    
+
                     d_outi[k] = d_outi[j] - tr;
                     d_out[k] = d_out[j] - ti;
-                    
+
                     d_outi[j] += tr;
                     d_out[j] += ti;
                 }
                 j++;
                 n++;
             }
-       		i += BlockSize;
-       	}
-        
+            i += BlockSize;
+        }
+
         BlockEnd = BlockSize;
         BlockSize <<= 1;
-        
+
     }
-    
+
     /*
      **   Need to normalize if inverse transform...
      */
-    
+
     if ( inverse )
     {
         n_double denom = (n_double) NumSamples;
@@ -239,7 +241,7 @@ n_uint audio_power(n_audio * audio, n_uint length)
 {
     n_uint   loop = 0;
     n_uint   output = 0;
-    
+
     if (length == 0)
     {
         return 0;
@@ -267,21 +269,21 @@ n_uint audio_max(n_audio * audio, n_uint length)
         {
             min = audio_value;
         }
-        
+
         if (audio_value > output)
         {
             output = audio_value;
         }
         loop++;
     }
-    
+
     min = 0 - min;
-    
+
     if (min > output)
     {
         output = min;
     }
-    
+
     return output;
 }
 
@@ -305,7 +307,7 @@ void audio_noise_reduction(n_uint point_squared, n_uint length)
         n_int freq  = frequency[loop];
         n_int freqi = frequencyi[loop];
         n_uint root = 0;
-        
+
         n_uint value = (freq*freq) + (freqi*freqi);
         if (value > point_squared)
         {

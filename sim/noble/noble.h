@@ -358,7 +358,7 @@ enum window_num
 enum graph_commands
 {
     GC_CLEAR_BRAINCODE = -1,
-    
+
     GC_IDEOSPHERE = 0,
     GC_BRAINCODE,
     GC_GENEPOOL,
@@ -375,7 +375,7 @@ enum window_information
     TERRAIN_WINDOW_WIDTH		= (2048),
     TERRAIN_WINDOW_HEIGHT       = (1536),
     TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT),
-    
+
     GRAPH_WINDOW_WIDTH		    = (512),
     GRAPH_WINDOW_HEIGHT         = (512),
     GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3)
@@ -571,7 +571,7 @@ n_int      io_file_xml_int(n_file * file, n_string name, n_int number);
 n_int      io_number(n_string number_string, n_int * actual_value, n_int * decimal_divisor);
 
 /*
- 
+
  read:
     io_disk_check
     file_chain_new
@@ -580,7 +580,7 @@ n_int      io_number(n_string number_string, n_int * actual_value, n_int * decim
     file_chain_read_validate
     file_chain_read
     file_chain_free
- 
+
  write:
     file_chain_new
     add pointers to "to be written"
@@ -730,7 +730,7 @@ void       io_console_quit(void);
   Dawn  352 - 383
   Day   384 - 1151
   Dusk  1152 - 1183
- 
+
  */
 
 /*! @struct

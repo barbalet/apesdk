@@ -637,14 +637,14 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_SEN,
     BRAINCODE_SEN2,
     BRAINCODE_SEN3,
-    
+
     /* actuators */
     BRAINCODE_ACT,
     BRAINCODE_ACT2,
     BRAINCODE_ACT3,
     BRAINCODE_ANE,
 
-    
+
     BRAINCODE_INSTRUCTIONS
 };
 
@@ -956,9 +956,9 @@ enum energy_types
 #define MAX_GENERATION              4294967294
 enum GENERATION_NUM
 {
-	GENERATION_MATERNAL = 0,
-	GENERATION_PATERNAL,
-	GENERATION_FATHER,
+    GENERATION_MATERNAL = 0,
+    GENERATION_PATERNAL,
+    GENERATION_FATHER,
     GENERATION_TOTAL
 };
 
@@ -1345,7 +1345,7 @@ enum indicator_type
     IT_AVERAGE_NEGATIVE_AFFECT,
     IT_AVERAGE_ANTIGENS,
     IT_AVERAGE_ANTIBODIES,
-        
+
     IT_AVERAGE_CHAT,
     IT_AVERAGE_SHOUTS,
     IT_AVERAGE_LISTENS,
@@ -1358,13 +1358,13 @@ enum indicator_type
     IT_IDEOLOGY_SD,
     IT_GENETICS_SD,
     IT_FAMILY_NAME_SD,
-    
+
     IT_DRIVES,
     IT_DRIVES_END = IT_DRIVES + DRIVES,
-    
+
     IT_FOOD,
     IT_FOOD_END = IT_FOOD + FOOD_TYPES,
-    
+
     IT_AVERAGE_FIRST_PERSON,
     IT_AVERAGE_INTENTIONS,
     IT_AVERAGE_SENSORS,
@@ -1372,10 +1372,10 @@ enum indicator_type
     IT_AVERAGE_OPERATORS,
     IT_AVERAGE_CONDITIONALS,
     IT_AVERAGE_DATA,
-    
+
     IT_NUMBER_ENTRIES
 };
-    
+
 typedef struct
 {
     n_byte2	location[2];
@@ -1392,7 +1392,7 @@ typedef struct
     /* The basic brain formula is;
      b(t+1) = a*l + b(t)*m + (b(t)-b(t-1))*n;
      the first three values are l, m, n for awake, then l, m, n for asleep */
-    
+
     n_byte2	brain_state[6];  /* constant for now */
 
     /* height in arbitrary units
@@ -1420,7 +1420,7 @@ typedef struct
 #ifdef PARASITES_ON
     n_byte parasites;
 #endif
-	/* social status value */
+    /* social status value */
     n_byte honor;
 
     n_byte2	date_of_conception[2]; /* constant */
@@ -1447,11 +1447,11 @@ typedef struct
     n_byte drives[DRIVES];
     n_byte2 goal[4];
     n_byte learned_preference[PREFERENCES];
-                                                        /* around here the previous file system breaks */
-	/* generation number from the mother and father */
-	n_uint generation[GENERATION_TOTAL];            /* constant */
-	/* temporary father generation value used during gestation */
-	n_uint father_generation;                       /* seems to be unused */
+    /* around here the previous file system breaks */
+    /* generation number from the mother and father */
+    n_uint generation[GENERATION_TOTAL];            /* constant */
+    /* temporary father generation value used during gestation */
+    n_uint father_generation;                       /* seems to be unused */
 
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
@@ -1523,10 +1523,10 @@ typedef struct
 
     n_uint          indicator_index;
     n_uint          indicators_logging;
-    
+
     n_uint          indicators_base[IT_NUMBER_ENTRIES * INDICATORS_BUFFER_SIZE];
     n_string        indicators_name[IT_NUMBER_ENTRIES];
-    
+
     being_birth_event * ext_birth;
     being_death_event * ext_death;
 
@@ -1739,7 +1739,7 @@ const static noble_console_command control_commands[] =
     {&cle_reset,             "reset",          "",                     "Reset the simulation"},
     {&cle_reset,             "clear"           "",                     ""},
 #endif
-    
+
     {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 
     {&console_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
@@ -1783,7 +1783,7 @@ const static noble_console_command control_commands[] =
     {&console_list,          "list",           "",                     "List all ape names"},
     {&console_list,          "ls",             "",                     ""},
     {&console_list,          "dir",            "",                     ""},
-    
+
     {0L, 0L},
 };
 

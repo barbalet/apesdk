@@ -187,18 +187,18 @@ static void audit_compart_offset()
     audit_print_offset(start,(n_byte *)&(local.crowding),"crowding");
     audit_print_offset(start,(n_byte *)&(local.parasites),"parasites");
     audit_print_offset(start,(n_byte *)&(local.honor),"honor");
-    
+
     audit_print_offset(start,(n_byte *)&(local.date_of_conception[0]),"date_of_conception[0]");
     audit_print_offset(start,(n_byte *)&(local.mother_new_genetics[0]),"mother_new_genetics[0]");
     audit_print_offset(start,(n_byte *)&(local.father_new_genetics[0]),"father_new_genetics[0]");
-    
+
     audit_print_offset(start,(n_byte *)&(local.father_honor),"father_honor");
     audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
-    
+
     audit_print_offset(start,(n_byte *)&(local.new_genetics[0]),"new_genetics[0]");
-    
+
     audit_print_offset(start,(n_byte *)&(local.social_x),"social_x");
-    
+
     audit_print_offset(start,(n_byte *)&(local.drives[0]),"drives[0]");
     audit_print_offset(start,(n_byte *)&(local.goal[0]),"goal[0]");
     audit_print_offset(start,(n_byte *)&(local.learned_preference[0]),"learned_preference[0]");
@@ -209,13 +209,13 @@ static void audit_compart_offset()
 
 static void audit(void)
 {
-    
+
     printf("sizeof(n_byte) %d\n",(int)sizeof(n_byte));
     printf("sizeof(n_byte2) %d\n",(int)sizeof(n_byte2));
     printf("sizeof(n_uint) %d\n",(int)sizeof(n_uint));
-    
+
     printf("NON_PTR_BEING %d\n",(int)NON_PTR_BEING);
-    
+
     printf("sizeof(n_byte	*)) %d \n", (int)sizeof(n_byte	*));
 
     io_audit_file(noble_file_format, FIL_VER);
@@ -693,10 +693,10 @@ int main(int argc, n_string argv[])
 #ifdef AUDIT_FILE
     audit();
 #endif
-    
+
     local_sim = sim_sim();
     io_command_line_execution_set();
-    
+
     srand((unsigned int) time(NULL) );
     sim_init(2,rand(),MAP_AREA,0);
 
@@ -709,13 +709,15 @@ int main(int argc, n_string argv[])
 #endif
     }
     local_sim->indicators_logging=indicator_index;
-    
+
     cle_load(local_sim, (n_string)simulation_filename, io_console_out);
 
 #ifndef	_WIN32
-    do{
+    do
+    {
         sim_thread_console();
-    }while (sim_thread_console_quit() == 0);
+    }
+    while (sim_thread_console_quit() == 0);
 #else
     {
         n_int return_value = 0;
@@ -729,7 +731,7 @@ int main(int argc, n_string argv[])
         while (return_value == 0);
     }
 #endif
-    
+
     sim_close();
 
     return(1);

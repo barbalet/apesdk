@@ -55,9 +55,9 @@
 /*NOBLEMAKE END=""*/
 
 /*
- 
+
  Resources
- 
+
  Wood
  Meat - Fish
  Meat - Animals
@@ -68,20 +68,20 @@
  Copper
  Stone
  Limestone
- 
+
  Landscape Changes
- 
+
  Path
  Road
  Hut
  Smelter/Blacksmith
  Boat Building
  Boat
- 
+
  Posessions
- 
+
  ?
- 
+
  */
 
 #undef WEATHER_DEBUG
@@ -156,16 +156,16 @@ void weather_cycle(n_land * local_land, n_weather * local_weather)
         {
             n_int	ly_val = WEATHER_MEM(0,ly,0);
             n_int	local_atm =
-            atmosphere[ lx_val | ly_val | CONST_BACK ]
-            - atmosphere[ lx_plu | ly_val ]
-            + atmosphere[ lx_min| ly_val ]
-            - atmosphere[ lx_val| WEATHER_MEM(0, ( ly + 1 ) & ((MAP_DIMENSION/2)-1), 0 ) ]
-            + atmosphere[ lx_val| WEATHER_MEM(0, ( ly + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0 ) ];
-            
+                atmosphere[ lx_val | ly_val | CONST_BACK ]
+                - atmosphere[ lx_plu | ly_val ]
+                + atmosphere[ lx_min| ly_val ]
+                - atmosphere[ lx_val| WEATHER_MEM(0, ( ly + 1 ) & ((MAP_DIMENSION/2)-1), 0 ) ]
+                + atmosphere[ lx_val| WEATHER_MEM(0, ( ly + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0 ) ];
+
             atmosphere[ WEATHER_MEM(ly,lx,0) ] += (local_atm - local_delta) >> (MAP_BITS-1);
             ly++;
         }
-        
+
         lx++;
     }
 #ifdef WEATHER_DEBUG

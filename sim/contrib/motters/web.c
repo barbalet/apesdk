@@ -942,7 +942,7 @@ void create_web_ape_profile(
         episode_description(sim, local_being, i, str);
         if (io_length(str, STRING_BLOCK_SIZE)>0)
         {
-			io_write(fil, str,0);
+            io_write(fil, str,0);
             io_write(fil, "<br>",1);
         }
     }

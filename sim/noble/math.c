@@ -446,16 +446,16 @@ n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
     n_int loop = turn;
 
     vect2_direction(&vector_facing, best_f, 1);
-    
+
     best_p = vect2_dot(p, &vector_facing, 1, 1);
 
-    
+
     while (loop < NUMBER_TURN_TOWARDS_POINTS)
     {
         n_int loc_track = track[loop];
         n_int loc_f = (best_f + loc_track) & 255;
         n_int project1;
-        
+
         vect2_direction(&vector_facing, loc_f, 1);
         project1 = vect2_dot(p, &vector_facing, 1, 1);
 
@@ -468,10 +468,10 @@ n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
         {
             n_int loc_f2 = (best_f + 256 - loc_track) & 255;
             n_int project2;
-            
+
             vect2_direction(&vector_facing, loc_f, 1);
             project2 = vect2_dot(p, &vector_facing, 1, 1);
-            
+
             if (project2 > best_p)
             {
                 best_f = loc_f2;

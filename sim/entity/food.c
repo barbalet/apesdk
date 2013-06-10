@@ -71,35 +71,35 @@
 n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
 {
     n_genetics * genetics = being_genetics(local);
-    
+
     n_int   vegetable = GENE_ENERGY_FROM_VEGETABLES(genetics);
     n_int   fruit = GENE_ENERGY_FROM_FRUITS(genetics);
     n_int   shellfish = GENE_ENERGY_FROM_SHELLFISH(genetics);
     n_int   seawood = GENE_ENERGY_FROM_SEAWEED(genetics);
-    
+
     n_int        return_value = 0;
     /** note that the absorbition for different foods is normalised */
     n_int absorb_denom = 1 + vegetable + fruit + seawood;
     switch (food_type)
     {
-        case FOOD_VEGETABLE:
-            return_value = (vegetable << 4) / absorb_denom;
-            break;
-        case FOOD_FRUIT:
-            return_value = (fruit << 4) / absorb_denom;
-            break;
-        case FOOD_SHELLFISH:
-            return_value = (shellfish << 4) / absorb_denom;
-            break;
-        case FOOD_SEAWEED:
-            return_value = (seawood << 4) / absorb_denom;
-            break;
-        default:
-            return 0;
+    case FOOD_VEGETABLE:
+        return_value = (vegetable << 4) / absorb_denom;
+        break;
+    case FOOD_FRUIT:
+        return_value = (fruit << 4) / absorb_denom;
+        break;
+    case FOOD_SHELLFISH:
+        return_value = (shellfish << 4) / absorb_denom;
+        break;
+    case FOOD_SEAWEED:
+        return_value = (seawood << 4) / absorb_denom;
+        break;
+    default:
+        return 0;
     }
-    
+
     return_value = (max_energy * (1 + return_value) >> 3);
-    
+
     if (return_value > 320)
     {
         return_value = 320; /**< can only eat so much in one go */
@@ -267,9 +267,9 @@ n_int food_eat(
     noble_being * local_being)
 {
     n_int max_energy = BEING_DEAD;
-    
+
     *food_type = FOOD_VEGETABLE;
-    
+
     if (az > TIDE_MAX)
     {
         /** above the high water mark */
@@ -280,12 +280,12 @@ n_int food_eat(
         /** in the intertidal zone */
         *food_type = food_intertidal(local_land, local_weather, loc_x, loc_y, &max_energy);
     }
-    
+
     /** update metabolism */
     metabolism_eat(local_being, *food_type);
-    
+
     /** ingest pathogens from certain foods */
     being_ingest_pathogen(local_being, *food_type);
-    
+
     return food_absorption(local_being, max_energy, *food_type);
 }

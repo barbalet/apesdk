@@ -62,7 +62,7 @@ static n_int control_toggle_pause(n_byte actual_toggle)
     {
         console_stop(0L,"",io_console_out);
     }
-    
+
     if (actual_toggle)
     {
         toggle_pause ^= 1;
@@ -71,7 +71,7 @@ static n_int control_toggle_pause(n_byte actual_toggle)
     {
         toggle_pause = 1;
     }
-    
+
     return toggle_pause;
 }
 
@@ -86,28 +86,28 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     noble_simulation * local_sim = sim_sim();
     if (local_sim == 0L)
         return;
-    
+
     if(wwind == NUM_VIEW && check_about == 1)
     {
         check_about = 0;
         return;
     }
-    
+
     if (local_sim->select == NO_BEINGS_FOUND)
     {
         return;
     }
-    
+
     local = &(local_sim->beings[local_sim->select]);
     if (wwind == NUM_VIEW)
     {
         if (option)
         {
             n_byte2    location[2];
-            
+
             location[0] = APESPACE_CONFINED(MAPSPACE_TO_APESPACE(px));
             location[1] = APESPACE_CONFINED(MAPSPACE_TO_APESPACE(py));
-            
+
             being_set_location(local, location);
         }
         else
@@ -115,7 +115,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
             n_uint	desired_ape = local_sim->select;
             n_uint  high_squ = 31;
             n_uint	loop = 0;
-            
+
             while (loop < local_sim->num)
             {
                 noble_being	* current_ape = &(local_sim->beings[loop]);
@@ -195,14 +195,14 @@ static void control_key(n_byte wwind, n_byte2 num)
     noble_simulation * local_sim = sim_sim();
     if (local_sim == 0L)
         return;
-    
+
     if (local_sim->select == NO_BEINGS_FOUND)
     {
         return;
     }
-    
+
     local = &(local_sim->beings[local_sim->select]);
-    
+
     if ((num > 27) && (num < 32))
     {
         if (wwind != NUM_VIEW)
@@ -225,12 +225,12 @@ static void control_key(n_byte wwind, n_byte2 num)
     {
         n_uint local_select = local_sim->select;
         n_uint local_number = local_sim->num;
-        
+
         if (num == 2078)
             local_select = ((local_select + 1) % local_number);
         else
             local_select = ((local_select + (local_number - 1)) % local_number);
-        
+
         sim_set_select(local_select);
     }
 }
@@ -238,12 +238,12 @@ static void control_key(n_byte wwind, n_byte2 num)
 static void control_sim_simulate(n_uint local_time)
 {
     sim_realtime(local_time);
-    
+
     if (io_command_line_execution())
     {
         return;
     }
-    
+
     if (toggle_pause == 0)
     {
         sim_cycle();
@@ -281,10 +281,10 @@ void shared_cycle(n_uint ticks, n_int fIdentification)
             control_key(key_identification, key_value);
         }
     }
-    
+
     ticks = ticks & 67108863; /* 71 58 27 88 */
     ticks *= 60;
-    
+
     if(fIdentification == NUM_TERRAIN)
     {
         control_sim_simulate(ticks);
@@ -437,7 +437,7 @@ void shared_brainDisplay(n_byte value)
 n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 {
     (void)control_toggle_pause(0);
-    
+
     if (isScript)
     {
         return (console_script(0L, cStringFileName, 0L) == 0);
@@ -447,7 +447,7 @@ n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 
 void shared_saveFileName(n_string cStringFileName)
 {
-    (void)control_toggle_pause(0);    
+    (void)control_toggle_pause(0);
     (void)console_save(0L, cStringFileName, 0L);
 }
 
