@@ -264,6 +264,8 @@ void math_patch(n_byte * local_map, n_byte * scratch,
                                             /** include the wrap around for the 45 degree rotation cases in particular */
                                             n_uint newloc = POSITIVE_TILE_COORD(pointx + (tile_x<<8)) + ((POSITIVE_TILE_COORD(pointy + (tile_y<<8))) << patch_bits);
                                             n_int	local_map_point = local_map[newloc] + val3;
+                                            if (local_map_point < 0) local_map_point = 0;
+                                            if (local_map_point > 255) local_map_point = 255;
                                             local_map[newloc] = (n_byte)local_map_point;
                                         }
                                         mx++;

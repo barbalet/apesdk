@@ -96,6 +96,9 @@ void weather_debug(n_weather * local_weather)
     n_c_int  value_max = -2147483648;
     n_c_int  value_min = 2147483647;
     n_c_int    line_average = 0;
+    
+    NA_ASSERT(local_weather, "local_weather NULL");
+
     while (lx < (MAP_DIMENSION/2))
     {
         n_int ly = 0;
@@ -126,7 +129,8 @@ void weather_debug(n_weather * local_weather)
 static n_int weather_delta(n_weather * local_weather)
 {
     n_int    lx = 0;
-    n_int  average = 0;
+    n_int    average = 0;
+    NA_ASSERT(local_weather, "local_weather NULL");
     while (lx < (MAP_DIMENSION/2))
     {
         n_int ly = 0;
@@ -143,9 +147,18 @@ static n_int weather_delta(n_weather * local_weather)
 
 void weather_cycle(n_land * local_land, n_weather * local_weather)
 {
-    n_int         local_delta = weather_delta(local_weather);
-    n_c_int       * atmosphere  = local_weather->atmosphere;
+    n_int         local_delta;
+    n_c_int       * atmosphere;
     n_int         lx = 0;
+    
+    NA_ASSERT(local_land, "local_land NULL");
+    NA_ASSERT(local_weather, "local_weather NULL");
+
+    local_delta = weather_delta(local_weather);
+    atmosphere  = local_weather->atmosphere;
+    
+    NA_ASSERT(atmosphere, "atmosphere NULL");
+    
     while ( lx < (MAP_DIMENSION/2) )
     {
         n_int	lx_min = WEATHER_MEM((lx + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0, 0);
@@ -179,9 +192,18 @@ void weather_cycle(n_land * local_land, n_weather * local_weather)
 
 void weather_init(n_weather * local_weather, n_land * local_land)
 {
-    n_byte    *land		= local_land->map;
-    n_c_int	*atmosphere = local_weather->atmosphere;
-    n_int	 ly = 0;
+    n_byte    *land;
+    n_c_int	  *atmosphere;
+    n_int	   ly = 0;
+
+    NA_ASSERT(local_land, "local_land NULL");
+    NA_ASSERT(local_weather, "local_weather NULL");
+    
+    land		= local_land->map;
+    atmosphere = local_weather->atmosphere;
+ 
+    NA_ASSERT(land, "land NULL");
+    NA_ASSERT(atmosphere, "atmosphere NULL");
 
     io_erase((n_byte *)local_weather, sizeof(n_weather));
 
@@ -234,6 +256,7 @@ void weather_init(n_weather * local_weather, n_land * local_land)
 
 n_int	weather_pressure(n_weather * wea, n_int px, n_int py)
 {
+    NA_ASSERT(wea, "wea NULL");
     return  wea->atmosphere[WEATHER_MEM(px, py, 0)];
 }
 
@@ -251,11 +274,16 @@ n_int	weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int 
     const n_int annual_average = 18000;
     const n_int annual_temperature_variance = 3000;
     n_int daily_temperature_variance, daily_offset, annual_offset;
-    n_int annual_idx, daily_idx, time_of_day = local_land->time;
-    n_uint annual_time, current_time = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
+    n_int annual_idx, daily_idx, time_of_day;
+    n_uint annual_time, current_time;
 
-    annual_time =
-        current_time - ((current_time/(TIME_YEAR_DAYS*TIME_DAY_MINUTES))*(TIME_YEAR_DAYS*TIME_DAY_MINUTES));
+    NA_ASSERT(local_land, "local_land NULL");
+    NA_ASSERT(wea, "wea NULL");
+    
+    time_of_day = local_land->time;
+    current_time = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
+    
+    annual_time = current_time - ((current_time/(TIME_YEAR_DAYS*TIME_DAY_MINUTES))*(TIME_YEAR_DAYS*TIME_DAY_MINUTES));
     annual_idx = (annual_time*255/(TIME_YEAR_DAYS*TIME_DAY_MINUTES)) - 64;
     if (annual_idx<0) annual_idx += 256;
     annual_offset = new_sd[annual_idx]*annual_temperature_variance/NEW_SD_MULTIPLE;
@@ -270,7 +298,12 @@ n_int	weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int 
 
 void weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy)
 {
-    n_int	local_pressure = weather_pressure(wea, px, py);
+    n_int	local_pressure;
+    NA_ASSERT(wea, "wea NULL");
+    NA_ASSERT(wind_dx, "wind_dx NULL");
+    NA_ASSERT(wind_dy, "wind_dy NULL");
+
+    local_pressure = weather_pressure(wea, px, py);
     *wind_dx = local_pressure - weather_pressure(wea, px - 1, py);
     *wind_dy = local_pressure - weather_pressure(wea, px, py - 1);
 }
@@ -279,7 +312,13 @@ n_int	weather_seven_values(n_land * local_land, n_weather * local_weather, n_int
 {
     n_byte	ret_val;
     n_int	val;
-    n_int   local_time = local_land->time;
+    n_int   local_time;
+    
+    NA_ASSERT(local_land, "local_land NULL");
+    NA_ASSERT(local_weather, "local_weather NULL");
+    
+    local_time = local_land->time;
+    
     if(IS_DAWNDUSK(local_time))
     {
         return 6;
@@ -337,20 +376,33 @@ static n_int time_actual_to_perceived(n_int actual_time)
 
 static void land_tide(n_land * local_land)
 {
-    n_int time_of_day     = local_land->time;
-    n_int current_time    = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
-    n_int lunar_mins      = current_time % LUNAR_ORBIT_MINS;
-    n_int lunar_angle_256 = (((time_of_day * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
-    n_int solar_mins      =  current_time    % (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
-    n_int solar_angle_256 = (solar_mins * 255) / (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
-    n_int lunar = (new_sd[lunar_angle_256 & 255]*TIDE_AMPLITUDE_LUNAR)/NEW_SD_MULTIPLE;
-    n_int solar = (new_sd[solar_angle_256]      *TIDE_AMPLITUDE_SOLAR)/NEW_SD_MULTIPLE;
+    n_int time_of_day;
+    n_int current_time;;
+    
+    NA_ASSERT(local_land, "local_land NULL");
+    
+    time_of_day     = local_land->time;
+    current_time    = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
+    
+    {
+        n_int lunar_mins      = current_time % LUNAR_ORBIT_MINS;
+        n_int lunar_angle_256 = (((time_of_day * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
+        n_int solar_mins      =  current_time    % (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
+        n_int solar_angle_256 = (solar_mins * 255) / (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
+        
+        n_int lunar = (new_sd[lunar_angle_256 & 255]*TIDE_AMPLITUDE_LUNAR)/NEW_SD_MULTIPLE;
+        n_int solar = (new_sd[solar_angle_256]      *TIDE_AMPLITUDE_SOLAR)/NEW_SD_MULTIPLE;
 
-    local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
+        NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
+        
+        local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
+    }
 }
 
 void land_cycle(n_land * local_land)
 {
+    NA_ASSERT(local_land, "local_land NULL");
+
     local_land->time++;
     if (local_land->time == TIME_DAY_MINUTES)
     {
@@ -380,13 +432,21 @@ void land_cycle(n_land * local_land)
 
 static n_int land_operator(n_land * local_land, n_weather * local_weather, n_int locx, n_int locy, n_byte *specific_kind)
 {
-    n_int	fg  = QUICK_LAND(local_land, locx, locy);
-    n_int	dfg = QUICK_LAND(local_land, locx + 1, locy);
-    n_int	fdg = QUICK_LAND(local_land, locx, locy + 1);
-
     n_int	temp = 0, temp_add;
     n_int	number_sum = 0;
-
+    
+    n_int	fg;
+    n_int	dfg;
+    n_int	fdg;
+    
+    NA_ASSERT(local_land, "local_land NULL");
+    NA_ASSERT(local_weather, "local_weather NULL");
+    NA_ASSERT(specific_kind, "specific_kind NULL");
+    
+    fg  = QUICK_LAND(local_land, locx, locy);
+    dfg = QUICK_LAND(local_land, locx + 1, locy);
+    fdg = QUICK_LAND(local_land, locx, locy + 1);
+    
     dfg = (dfg - fg) * 8;
     fdg = (fdg - fg) * 8;
 
@@ -463,6 +523,7 @@ static n_int land_operator(n_land * local_land, n_weather * local_weather, n_int
                 temp += OPERATOR_SALT(fg, dfg, fdg, fs); /* S */
         }
     }
+    NA_ASSERT(number_sum, "number_sum is ZERO");
     if(number_sum != 0)
     {
         temp = temp / number_sum;
@@ -472,36 +533,46 @@ static n_int land_operator(n_land * local_land, n_weather * local_weather, n_int
 
 n_int land_operator_interpolated(n_land * local_land, n_weather * local_weather, n_int locx, n_int locy, n_byte * kind)
 {
-    n_int map_x = APESPACE_TO_MAPSPACE(locx);
-    n_int map_y = APESPACE_TO_MAPSPACE(locy);
+    NA_ASSERT(local_land, "local_land NULL");
+    NA_ASSERT(local_weather, "local_weather NULL");
+    NA_ASSERT(kind, "kind NULL");
 
-    /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
-    n_int interpolated;
-    interpolated = APESPACE_TO_MAPSPACE(
-                       land_operator(local_land, local_weather, (map_x+1)&(MAP_DIMENSION-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
-    interpolated += APESPACE_TO_MAPSPACE(
-                        land_operator(local_land, local_weather, (map_x-1)&(MAP_DIMENSION-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
-    interpolated += APESPACE_TO_MAPSPACE(
-                        land_operator(local_land, local_weather, map_x, (map_y+1)&(MAP_DIMENSION-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
-    interpolated += APESPACE_TO_MAPSPACE(
-                        land_operator(local_land, local_weather, map_x, (map_y-1)&(MAP_DIMENSION-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
-    return interpolated >> 1;
+    {
+        n_int map_x = APESPACE_TO_MAPSPACE(locx);
+        n_int map_y = APESPACE_TO_MAPSPACE(locy);
+
+        /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
+        n_int interpolated;
+        interpolated = APESPACE_TO_MAPSPACE(
+                           land_operator(local_land, local_weather, (map_x+1)&(MAP_DIMENSION-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
+        interpolated += APESPACE_TO_MAPSPACE(
+                            land_operator(local_land, local_weather, (map_x-1)&(MAP_DIMENSION-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
+        interpolated += APESPACE_TO_MAPSPACE(
+                            land_operator(local_land, local_weather, map_x, (map_y+1)&(MAP_DIMENSION-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
+        interpolated += APESPACE_TO_MAPSPACE(
+                            land_operator(local_land, local_weather, map_x, (map_y-1)&(MAP_DIMENSION-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
+        return interpolated >> 1;
+    }
 }
 
 void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
 {
-    n_byte *local_map = local->map;
-    n_uint	loop      = 0;
-    while (loop < (MAP_AREA))
+    NA_ASSERT(local, "local NULL");
     {
-        local_map[loop] = 128;
-        loop++;
-    }
-    if (kind != KIND_LOAD_FILE)
-    {
-        local->time = 0;
-        local->date[0] = start;
-        local->date[1] = 0;
+        n_byte *local_map = local->map;
+        n_uint	loop      = 0;
+        NA_ASSERT(local_map, "local_map NULL");
+        while (loop < (MAP_AREA))
+        {
+            local_map[loop] = 128;
+            loop++;
+        }
+        if (kind != KIND_LOAD_FILE)
+        {
+            local->time = 0;
+            local->date[0] = start;
+            local->date[1] = 0;
+        }
     }
 }
 
@@ -509,6 +580,9 @@ void land_init(n_land * local, n_byte * scratch)
 {
     n_byte2	local_random[2];
 
+    NA_ASSERT(local, "local NULL");
+    NA_ASSERT(scratch, "scratch NULL");
+    
     local_random[0] = local->genetics[0];
     local_random[1] = local->genetics[1];
 
@@ -519,9 +593,18 @@ void land_init(n_land * local, n_byte * scratch)
 
 void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location)
 {
-    n_int loc_x = location->x;
-    n_int loc_y = location->y;
-    n_int	z = QUICK_LAND(local, APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
+    n_int loc_x;
+    n_int loc_y;
+    n_int z;
+
+    NA_ASSERT(output, "output NULL");
+    NA_ASSERT(actual_z, "actual_z NULL");
+    NA_ASSERT(local, "local NULL");
+    NA_ASSERT(location, "location NULL");
+
+    loc_x = location->x;
+    loc_y = location->y;
+    z = QUICK_LAND(local, APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
 
     if (actual_z != 0L)
     {

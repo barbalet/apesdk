@@ -45,7 +45,12 @@
 /*NOBLEMAKE END=""*/
 static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
 {
-    n_int		local_b_count = code->braces_count;
+    n_int		local_b_count;
+    
+    NA_ASSERT(code, "code NULL");
+    NA_ASSERT(eval, "eval NULL");
+    
+    local_b_count = code->braces_count;
     if(location == -1)
     {
         if(local_b_count == 0)
@@ -81,6 +86,11 @@ static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
 static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * number, n_byte end_char)
 {
     n_int	val_a, val_b, val_c;
+    
+    NA_ASSERT(code, "code NULL");
+    NA_ASSERT(evaluate, "evaluate NULL");
+    NA_ASSERT(number, "number NULL");
+    
     if(code->sc_output(code,evaluate,&val_a) == -1)
     {
         return io_apescript_error(AE_FIRST_VALUE_FAILED);
@@ -189,9 +199,15 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
 
 static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location)
 {
-    n_byte	first_value = value[0];
-    n_byte	second_value = value[1];
+    n_byte	first_value;
+    n_byte	second_value;
     n_int	output_number = 0;
+    
+    NA_ASSERT(code, "code NULL");
+    NA_ASSERT(evaluate, "evaluate NULL");
+    
+    first_value = value[0];
+    second_value = value[1];
 
     if(first_value == '}')  /* what do you do with the tailing brace? */
     {
