@@ -309,7 +309,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
         }
     }
 
-    sprintf(beingstr,"Map dimension: %d\n", MAP_DIMENSION);
+    sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension(local_sim->land));
     sprintf(beingstr,"%sLand seed: %d %d\n",beingstr, (int)local_sim->land->genetics[0],(int)local_sim->land->genetics[1]);
     sprintf(beingstr,"%sPopulation: %d   ", beingstr, (int)local_sim->num);
     sprintf(beingstr,"%sAdults: %d   Juveniles: %d\n", beingstr, (int)(local_sim->num - juveniles),(int)juveniles);

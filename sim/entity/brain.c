@@ -934,9 +934,9 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return meeter_social_graph[actor_index].attraction;
         /** Location */
     case 15:
-        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(meeter_being)) * 255 / MAP_DIMENSION);
+        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(meeter_being)) * 255 / land_map_dimension(sim->land));
     case 16:
-        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / MAP_DIMENSION);
+        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension(sim->land));
         /** Being state (lower)*/
     case 17:
         return (n_byte)meeter_being->state&255;
@@ -1319,10 +1319,10 @@ void brain_dialogue(
                 addr1[0] = episodic[episode_index].arg&255;
                 break;
             case 13:
-                addr1[0] = (n_byte)(episodic[episode_index].location[0] * 255 / MAP_DIMENSION);
+                addr1[0] = (n_byte)(episodic[episode_index].location[0] * 255 / land_map_dimension(sim->land));
                 break;
             case 14:
-                addr1[0] = (n_byte)(episodic[episode_index].location[1] * 255 / MAP_DIMENSION);
+                addr1[0] = (n_byte)(episodic[episode_index].location[1] * 255 / land_map_dimension(sim->land));
                 break;
             case 15:
             {

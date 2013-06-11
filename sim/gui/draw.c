@@ -1155,17 +1155,19 @@ static void draw_weather(noble_simulation * local_sim)
     n_pixel			*local_draw = &pixel_color8;
     void			  *local_info = &local_col;
     n_int       py = 0;
+    n_int       map_dimensions = land_map_dimension(local_sim->land);
+    
     local_col.color = COLOUR_GREY;
     local_col.screen = draw_pointer(NUM_VIEW);
     if (local_col.screen == 0L)
     {
         return;
     }
-    while(py < (MAP_DIMENSION/2))
+    while(py < (map_dimensions/2))
     {
         n_int	px = 0;
         n_int	scr_y = py << 1;
-        while(px < (MAP_DIMENSION/2))
+        while(px < (map_dimensions/2))
         {
             n_int	scr_x = px << 1;
             n_int	tmp = weather_pressure(wea, px, py);

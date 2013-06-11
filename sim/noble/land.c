@@ -126,15 +126,20 @@ void weather_debug(n_weather * local_weather)
 #endif
 
 
-static n_int weather_delta(n_weather * local_weather)
+static n_int weather_delta(n_land * local_land, n_weather * local_weather)
 {
     n_int    lx = 0;
     n_int    average = 0;
+    n_int    map_dimensions2;
+    NA_ASSERT(local_land, "local_weather NULL");
     NA_ASSERT(local_weather, "local_weather NULL");
-    while (lx < (MAP_DIMENSION/2))
+    
+    map_dimensions2 = land_map_dimension(local_land) / 2;
+    
+    while (lx < map_dimensions2)
     {
         n_int ly = 0;
-        while (ly < (MAP_DIMENSION/2))
+        while (ly < map_dimensions2)
         {
             average += local_weather->atmosphere[ WEATHER_MEM(ly,lx,0) ];
             ly++;
@@ -150,30 +155,33 @@ void weather_cycle(n_land * local_land, n_weather * local_weather)
     n_int         local_delta;
     n_c_int       * atmosphere;
     n_int         lx = 0;
+    n_int         map_dimensions2;
     
     NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(local_weather, "local_weather NULL");
 
-    local_delta = weather_delta(local_weather);
+    map_dimensions2 = land_map_dimension(local_land)/ 2;
+    
+    local_delta = weather_delta(local_land, local_weather);
     atmosphere  = local_weather->atmosphere;
     
     NA_ASSERT(atmosphere, "atmosphere NULL");
     
-    while ( lx < (MAP_DIMENSION/2) )
+    while ( lx < map_dimensions2 )
     {
-        n_int	lx_min = WEATHER_MEM((lx + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0, 0);
-        n_int	lx_plu = WEATHER_MEM((lx + 1 ) & ((MAP_DIMENSION/2)-1), 0, 0);
+        n_int	lx_min = WEATHER_MEM((lx + (map_dimensions2-1) ) & ((map_dimensions2)-1), 0, 0);
+        n_int	lx_plu = WEATHER_MEM((lx + 1 ) & (map_dimensions2-1), 0, 0);
         n_int	lx_val = WEATHER_MEM(lx,0,0);
         n_int	ly = 0;
-        while ( ly < (MAP_DIMENSION/2) )
+        while ( ly < map_dimensions2 )
         {
             n_int	ly_val = WEATHER_MEM(0,ly,0);
             n_int	local_atm =
                 atmosphere[ lx_val | ly_val | CONST_BACK ]
                 - atmosphere[ lx_plu | ly_val ]
                 + atmosphere[ lx_min| ly_val ]
-                - atmosphere[ lx_val| WEATHER_MEM(0, ( ly + 1 ) & ((MAP_DIMENSION/2)-1), 0 ) ]
-                + atmosphere[ lx_val| WEATHER_MEM(0, ( ly + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), 0 ) ];
+                - atmosphere[ lx_val| WEATHER_MEM(0, ( ly + 1 ) & (map_dimensions2-1), 0 ) ]
+                + atmosphere[ lx_val| WEATHER_MEM(0, ( ly + (map_dimensions2-1) ) & (map_dimensions2-1), 0 ) ];
 
             atmosphere[ WEATHER_MEM(ly,lx,0) ] += (local_atm - local_delta) >> (MAP_BITS-1);
             ly++;
@@ -195,44 +203,46 @@ void weather_init(n_weather * local_weather, n_land * local_land)
     n_byte    *land;
     n_c_int	  *atmosphere;
     n_int	   ly = 0;
-
+    n_int      map_dimension;
     NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(local_weather, "local_weather NULL");
     
     land		= local_land->map;
     atmosphere = local_weather->atmosphere;
- 
+    map_dimension = land_map_dimension(local_land);
+    
+    
     NA_ASSERT(land, "land NULL");
     NA_ASSERT(atmosphere, "atmosphere NULL");
 
     io_erase((n_byte *)local_weather, sizeof(n_weather));
 
-    while ( ly < (MAP_DIMENSION/2) )
+    while ( ly < (map_dimension/2) )
     {
         n_int	lx = 0;
-        while ( lx < (MAP_DIMENSION/2) )
+        while ( lx < (map_dimension/2) )
         {
             n_uint		offset = ( lx << 1 ) + ( ly << (1+MAP_BITS) );
             n_c_int		total_land = land[ offset ]
                                      + land[ 1 + offset ]
-                                     + land[ MAP_DIMENSION + offset ]
-                                     + land[ MAP_DIMENSION + 1 + offset ];
+                                     + land[ map_dimension + offset ]
+                                     + land[ map_dimension + 1 + offset ];
             atmosphere[ WEATHER_MEM(lx, ly, 0) ] = (total_land - 512) * 256;
             lx++;
         }
         ly++;
     }
     ly=0;
-    while ( ly < (MAP_DIMENSION/2) )
+    while ( ly < (map_dimension/2) )
     {
         n_int		lx = 0;
-        n_uint		ly_plu = ( ly + 1 ) & ((MAP_DIMENSION/2)-1) ;
-        n_uint		ly_min = ( ly + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1) ;
-        while ( lx < (MAP_DIMENSION/2) )
+        n_uint		ly_plu = ( ly + 1 ) & ((map_dimension/2)-1) ;
+        n_uint		ly_min = ( ly + ((map_dimension/2)-1) ) & ((map_dimension/2)-1) ;
+        while ( lx < (map_dimension/2) )
         {
             atmosphere[ WEATHER_MEM(lx, ly, 1) ]
-                = atmosphere[ WEATHER_MEM(( lx + 1 ) & ((MAP_DIMENSION/2)-1), ly, 0) ]
-                  - atmosphere[ WEATHER_MEM(( lx + ((MAP_DIMENSION/2)-1) ) & ((MAP_DIMENSION/2)-1), ly, 0) ]
+                = atmosphere[ WEATHER_MEM(( lx + 1 ) & ((map_dimension/2)-1), ly, 0) ]
+                  - atmosphere[ WEATHER_MEM(( lx + ((map_dimension/2)-1) ) & ((map_dimension/2)-1), ly, 0) ]
                   + atmosphere[ WEATHER_MEM(lx, ly_plu, 0) ]
                   - atmosphere[ WEATHER_MEM(lx, ly_min, 0) ];
             lx++;
@@ -240,13 +250,13 @@ void weather_init(n_weather * local_weather, n_land * local_land)
         ly++;
     }
     ly = 0;
-    while( ly < ((MAP_DIMENSION/2)*(MAP_DIMENSION/2)) )
+    while( ly < ((map_dimension/2)*(map_dimension/2)) )
     {
-        atmosphere[ WEATHER_MEM((ly&((MAP_DIMENSION/2)-1)), (ly>>(MAP_BITS-1)), 0) ] = 0;
+        atmosphere[ WEATHER_MEM((ly&((map_dimension/2)-1)), (ly>>(MAP_BITS-1)), 0) ] = 0;
         ly++;
     }
     ly = 0;
-    while( ly < MAP_DIMENSION )
+    while( ly < map_dimension )
     {
         weather_cycle(local_land, local_weather);
         ly++;
@@ -372,6 +382,12 @@ static n_int time_actual_to_perceived(n_int actual_time)
         n_int relative_time = actual_time;
         return NIGHT_TIME_DIVISION(relative_time);
     }
+}
+
+n_int land_map_dimension(n_land * land)
+{
+    (void)land;
+    return MAP_DIMENSION;
 }
 
 static void land_tide(n_land * local_land)

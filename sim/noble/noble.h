@@ -801,6 +801,8 @@ void  land_cycle(n_land * local_land);
 void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);
 n_int land_operator_interpolated(n_land * local_land, n_weather * local_weather, n_int locx, n_int locy, n_byte * kind);
 
+n_int land_map_dimension(n_land * land);
+
 
 /*0*/
 
