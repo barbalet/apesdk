@@ -349,9 +349,9 @@ void draw_about(n_constant_string platform)
 
     while (loop < 214)
     {
-        n_int  py = (MAP_DIMENSION/2) - 128 + loop;
-        const n_int px = (MAP_DIMENSION/2) - 200;
-        n_byte * from_point = &buffer[(py*MAP_DIMENSION) + px];
+        n_int  py = (GRAPH_WINDOW_HEIGHT/2) - 128 + loop;
+        const n_int px = (GRAPH_WINDOW_WIDTH/2) - 200;
+        n_byte * from_point = &buffer[(py*GRAPH_WINDOW_WIDTH) + px];
         io_erase(from_point, 400);
         loop++;
     }
@@ -1118,13 +1118,13 @@ static void draw_region(noble_being * local)
     local_draw.information = draw;
     local_draw.pixel_draw  = &pixel_map;
 
-    while (ly < MAP_DIMENSION)
+    while (ly < GRAPH_WINDOW_HEIGHT)
     {
         n_int   lx = 63;
-        while (lx < MAP_DIMENSION)
+        while (lx < GRAPH_WINDOW_WIDTH)
         {
-            draw[ lx | ((ly) << MAP_BITS) ] = COLOUR_YELLOW;
-            draw[ ly | ((lx) << MAP_BITS) ] = COLOUR_YELLOW;
+            draw[ lx | ((ly) << GRAPH_WINDOW_WIDTH_BITS) ] = COLOUR_YELLOW;
+            draw[ ly | ((lx) << GRAPH_WINDOW_WIDTH_BITS) ] = COLOUR_YELLOW;
             lx += 64;
         }
         ly += 2;
@@ -1150,12 +1150,13 @@ static void draw_region(noble_being * local)
 
 static void draw_weather(noble_simulation * local_sim)
 {
+    n_int map_dimensions2 = land_map_dimension(local_sim->land)/2;
+
     n_weather *wea = local_sim->weather;
     n_color8		local_col;
     n_pixel			*local_draw = &pixel_color8;
     void			  *local_info = &local_col;
     n_int       py = 0;
-    n_int       map_dimensions = land_map_dimension(local_sim->land);
     
     local_col.color = COLOUR_GREY;
     local_col.screen = draw_pointer(NUM_VIEW);
@@ -1163,14 +1164,14 @@ static void draw_weather(noble_simulation * local_sim)
     {
         return;
     }
-    while(py < (map_dimensions/2))
+    while(py < (map_dimensions2))
     {
         n_int	px = 0;
         n_int	scr_y = py << 1;
-        while(px < (map_dimensions/2))
+        while(px < (map_dimensions2))
         {
             n_int	scr_x = px << 1;
-            n_int	tmp = weather_pressure(wea, px, py);
+            n_int	tmp = weather_pressure(wea, px, py, map_dimensions2);
             if(tmp > WEATHER_CLOUD)
             {
                 (*local_draw)(scr_x+1, scr_y+1, local_info);

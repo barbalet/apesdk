@@ -398,7 +398,8 @@ enum window_information
     TERRAIN_WINDOW_HEIGHT       = (1536),
     TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT),
 
-    GRAPH_WINDOW_WIDTH		    = (512),
+    GRAPH_WINDOW_WIDTH_BITS     = 9,
+    GRAPH_WINDOW_WIDTH		    = (1<<GRAPH_WINDOW_WIDTH_BITS),
     GRAPH_WINDOW_HEIGHT         = (512),
     GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3)
 };
@@ -660,22 +661,13 @@ void       io_console_quit(void);
 
 /*	Land - Screen conversion */
 
-#ifdef SMALL_LAND
-
-#define MAP_BITS                      (8)
-
-#else
 
 #define MAP_BITS                      (9)
-
-#endif
 
 #define MAP_DIMENSION                 (1<<(MAP_BITS))
 #define MAP_AREA                      (1<<(2*MAP_BITS))
 
 #define APESPACE_TO_MAPSPACE(num)     ((num)>>6)
-
-#ifndef SMALL_LAND
 
 #define HI_RES_MAP_BITS               (12)
 
@@ -683,8 +675,6 @@ void       io_console_quit(void);
 #define HI_RES_MAP_AREA               (1<<(2*HI_RES_MAP_BITS))
 
 #define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
-
-#endif
 
 #define MAPSPACE_TO_APESPACE(num)     ((num)<<6)
 
@@ -788,10 +778,9 @@ n_land;
 
 
 void  weather_init(n_weather * local_weather, n_land * local_land);
-void  weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
-n_int weather_pressure(n_weather * wea, n_int px, n_int py);
+void  weather_wind_vector(n_land * local_land, n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
+n_int weather_pressure(n_weather * wea, n_int px, n_int py, n_int dimension2);
 n_int weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int py);
-void  weather_wind_vector(n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
 void weather_cycle(n_land * local_land, n_weather * local_weather);
 n_int weather_seven_values(n_land * local_land, n_weather * local_weather, n_int px, n_int py);
 

@@ -44,8 +44,6 @@
 
 #undef  THREADED
 
-#undef  SMALL_LAND
-
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 #define PARASITES_ON  /* entity */
 #define TERRITORY_ON  /* entity */
@@ -1530,10 +1528,8 @@ typedef struct
     being_birth_event * ext_birth;
     being_death_event * ext_death;
 
-#ifndef SMALL_LAND
     n_byte   *highres;
     n_c_uint *highres_tide;
-#endif
 }
 noble_simulation;
 
@@ -1687,11 +1683,7 @@ void  sim_thread_console(void);
 
 #endif
 
-#ifndef SMALL_LAND
-
 void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block);
-
-#endif
 
 #ifdef THREADED
 void sim_draw_thread_on(void);

@@ -705,12 +705,14 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  * @param core_temp Core temperature
  */ static void metabolism_respiration(noble_simulation * local_sim, noble_being * local_being, n_uint core_temp)
 {
-    n_int pressure;
-    n_uint lung_surface_area = (n_uint)GET_MT(local_being,METABOLISM_LUNG_CAPACITY)*5; /** approximation from a sphere */
-
+    n_int   pressure;
+    n_uint  lung_surface_area = (n_uint)GET_MT(local_being,METABOLISM_LUNG_CAPACITY)*5; /** approximation from a sphere */
+    n_int   map_dimensions2 = land_map_dimension(local_sim->land) / 2;
+    
+    
     pressure = 16384-(weather_pressure(local_sim->weather,
                                        APESPACE_TO_MAPSPACE(being_location_x(local_being)),
-                                       APESPACE_TO_MAPSPACE(being_location_y(local_being)))>>4);
+                                       APESPACE_TO_MAPSPACE(being_location_y(local_being)), map_dimensions2)>>4);
 
     /** convert breathing rate into oxygen uptake */
     if (metabolism_below_capacity(local_being, METABOLISM_OXYGEN))

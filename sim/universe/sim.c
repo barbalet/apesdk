@@ -1079,12 +1079,6 @@ void sim_cycle(void)
 
 #define MAXIMUM_ALLOCATION  ( 60 * 1024 * 1024 )
 
-#ifdef SMALL_LAND
-
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2)+(INDICATORS_BUFFER_SIZE*sizeof(noble_indicators)))
-
-#else
-
 #ifdef BRAIN_ON
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
@@ -1092,8 +1086,6 @@ void sim_cycle(void)
 #else
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
-
-#endif
 
 #endif
 
@@ -1115,8 +1107,6 @@ static void sim_memory(n_uint offscreen_size)
 
     current_location += (MAP_AREA);
 
-#ifndef SMALL_LAND
-
     sim.highres = &offbuffer[ current_location ];
 
     current_location += (2 * HI_RES_MAP_AREA);
@@ -1124,8 +1114,6 @@ static void sim_memory(n_uint offscreen_size)
     sim.highres_tide = (n_c_uint *) &offbuffer[ current_location ];
 
     current_location += (HI_RES_MAP_AREA/8);
-
-#endif
 
     sim.weather = (n_weather *) &offbuffer[ current_location ];
 
@@ -1225,8 +1213,6 @@ static void sim_memory(n_uint offscreen_size)
     INDICATOR_INIT_NAME(sim, IT_AVERAGE_DATA,"Average Braincode Data (x10)");
 }
 
-#ifndef SMALL_LAND
-
 void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
 {
     n_uint  lp = 0;
@@ -1247,8 +1233,6 @@ void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
         lp++;
     }
 }
-
-#endif
 
 void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size)
 {
@@ -1281,9 +1265,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         land_clear(sim.land, kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
         land_init(sim.land , &offbuffer[landbuffer_size]);
-#ifndef SMALL_LAND
         sim_tide_block(sim.land->map, sim.highres, sim.highres_tide);
-#endif
 #endif
         if (kind != KIND_LOAD_FILE)
         {
