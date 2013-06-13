@@ -204,7 +204,7 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
     n_int	output_number = 0;
     
     NA_ASSERT(code, "code NULL");
-    NA_ASSERT(evaluate, "evaluate NULL");
+    NA_ASSERT(value, "value NULL");
     
     first_value = value[0];
     second_value = value[1];

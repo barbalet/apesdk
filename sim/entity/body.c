@@ -330,6 +330,10 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
     n_int knuckle_x = 0;
     n_int knuckle_y = 0;
 
+    NA_ASSERT(being, "being NULL");
+    NA_ASSERT(keypoints, "keypoints NULL");
+    NA_ASSERT(points, "points NULL");
+
     /** position of the bottom of the neck */
     keypoints[SKELETON_NECK*2] = 0;
     keypoints[SKELETON_NECK*2+1] = 0;

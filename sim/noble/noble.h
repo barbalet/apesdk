@@ -58,7 +58,7 @@
 
 #else
 
-#undef   NOBLE_APE_ASSERT
+#undef  NOBLE_APE_ASSERT
 
 #endif
 

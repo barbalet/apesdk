@@ -1585,6 +1585,8 @@ void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         {
             /** set this to a non-zero value to show key points on the skeleton
                 which may be useful for debugging */
+            
+            /* doesn't work with Ofast optimization */
             n_byte show_skeleton_keypoints = 0;
             graph_vascular(&local_sim->beings[local_sim->select], graph,
                            dim_x, dim_y,
@@ -1593,6 +1595,7 @@ void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
                            1, 1,
                            30, 0, 20, 20, 0,
                            show_skeleton_keypoints);
+             
         }
         break;
     }
@@ -1938,26 +1941,31 @@ static void draw_skeleton(noble_being * being,
         if (y > max_y) max_y = y;
     }
 
-    /** rescale the skeleton keypoints into the bounding box */
-    for (i = 0; i < SKELETON_POINTS; i++)
+    if ((max_x - min_x) && (max_y - min_y))
     {
-        if (keypoints[i*2] != 9999)
+        /** rescale the skeleton keypoints into the bounding box */
+        for (i = 0; i < SKELETON_POINTS; i++)
         {
-            keypoints[i*2] = tx + ((keypoints[i*2] - min_x)*(bx - tx)/(max_x - min_x));
-            keypoints[i*2+1] = ty + ((keypoints[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+            if (keypoints[i*2] != 9999)
+            {
+                keypoints[i*2] = tx + ((keypoints[i*2] - min_x)*(bx - tx)/(max_x - min_x));
+                keypoints[i*2+1] = ty + ((keypoints[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+            }
         }
     }
-
-    /** rescale the drawing points into the bounding box */
-    for (i = 0; i < no_of_points; i++)
+    
+    if ((max_x - min_x) && (max_y - min_y))
     {
-        if (skeleton_points[i*2] != 9999)
+        /** rescale the drawing points into the bounding box */
+        for (i = 0; i < no_of_points; i++)
         {
-            skeleton_points[i*2] = tx + ((skeleton_points[i*2] - min_x)*(bx - tx)/(max_x - min_x));
-            skeleton_points[i*2+1] = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+            if (skeleton_points[i*2] != 9999)
+            {
+                skeleton_points[i*2] = tx + ((skeleton_points[i*2] - min_x)*(bx - tx)/(max_x - min_x));
+                skeleton_points[i*2+1] = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+            }
         }
     }
-
     /** do the drawing */
     for (i = 0; i < no_of_points; i++)
     {
@@ -2129,9 +2137,10 @@ void graph_vascular(noble_being * being,
                     n_byte show_skeleton_keypoints)
 {
     n_int keypoints[SKELETON_POINTS*2];
+#ifdef VASCULAR_DRAWING_READY
     n_int i,x[3],y[3],vascular_model_index,previous_index;
     n_uint start_thickness=4, end_thickness=4;
-
+#endif
     /** clear the image if necessary */
     if (clear != 0)
     {
@@ -2144,6 +2153,7 @@ void graph_vascular(noble_being * being,
                   shoulder_angle, elbow_angle, wrist_angle,
                   hip_angle, knee_angle, show_skeleton_keypoints);
 
+#ifdef VASCULAR_DRAWING_READY
     for (i = 0; i < no_of_vascular_diagram_points; i++)
     {
         /** index of the previous segment */
@@ -2195,6 +2205,7 @@ void graph_vascular(noble_being * being,
                        255,0,0, end_thickness);
         }
     }
+#endif
 }
 
 /**
