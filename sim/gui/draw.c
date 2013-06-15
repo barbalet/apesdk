@@ -43,6 +43,8 @@
 
 /*NOBLEMAKE VAR=""*/
 
+#define MAX_SKELETON_DIAGRAM_POINTS 4000
+
 /* the weather/time of day icons hard coded */
 
 static const n_byte	icns[896] =
@@ -1918,7 +1920,7 @@ static void draw_skeleton(noble_being * being,
                           n_int hip_angle, n_int knee_angle,
                           n_byte show_keypoints)
 {
-    n_int skeleton_points[8000];
+    n_int skeleton_points[MAX_SKELETON_DIAGRAM_POINTS*2];
     n_int min_x = 99999, min_y = 99999;
     n_int max_x = -99999, max_y = -99999;
     n_int x,y,prev_x=0,prev_y=0,i,no_of_points,first_point=0,ctr=0;
@@ -1926,6 +1928,7 @@ static void draw_skeleton(noble_being * being,
 
     /** get points on the skeleton */
     no_of_points = body_skeleton_points(being, keypoints, skeleton_points,
+                                        MAX_SKELETON_DIAGRAM_POINTS,
                                         shoulder_angle, elbow_angle, wrist_angle,
                                         hip_angle, knee_angle);
 

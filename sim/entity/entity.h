@@ -165,7 +165,7 @@ n_int episodic_first_person_memories_percent(
 
 void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, n_byte transmission_type);
 void body_genome(n_byte maternal, n_genetics * genome, n_byte * genome_str);
-n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points,
+n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points, n_int max_points,
                            n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
                            n_int hip_angle, n_int knee_angle);
 

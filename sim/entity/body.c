@@ -213,6 +213,7 @@ const n_int bone_ribs[] =
  * @param extra_y4
  * @param points Returned 2D points
  * @param no_of_points Number of returned 2D points
+ * @param max_points The maximum number of points which may be returned
  */
 static void outline_points(const n_int * source_points,
                            n_int no_of_source_points, n_int extra_points,
@@ -225,7 +226,8 @@ static void outline_points(const n_int * source_points,
                            n_int *extra_x2, n_int *extra_y2,
                            n_int *extra_x3, n_int *extra_y3,
                            n_int *extra_x4, n_int *extra_y4,
-                           n_int * points, n_int * no_of_points)
+                           n_int * points, n_int * no_of_points,
+                           n_int max_points)
 {
     n_int i, px=0,py=0,dx,dy,axis_length,point_length;
     n_int pivot_x = source_points[0];
@@ -277,11 +279,18 @@ static void outline_points(const n_int * source_points,
         py = y + (n_int)(point_length*cos(ang+point_angle-axis_angle));
         
         /** store the calculated point positions in an array */
-        if (i < no_of_source_points + 2)
+        if (*no_of_points < max_points)
         {
-            points[(*no_of_points)*2] = px;
-            points[(*no_of_points)*2+1] = py;
-            *no_of_points = *no_of_points + 1;
+            if (i < no_of_source_points + 2)
+            {
+                points[(*no_of_points)*2] = px;
+                points[(*no_of_points)*2+1] = py;
+                *no_of_points = *no_of_points + 1;
+            }
+        }
+        else
+        {
+            printf("Maximum number of skeleton points reached\n");
         }
         
         /** This is a crude way of keeping track of the last few points
@@ -336,7 +345,7 @@ void body_skeleton_gene(noble_being * being, n_byte keypoint, n_int * scale_widt
  * @param knee_angle Angle of the knees in degrees
  * @return Number of 2D points within the skeleton diagram
  */
-n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points,
+n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points, n_int max_points,
                            n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
                            n_int hip_angle, n_int knee_angle)
 {
@@ -366,7 +375,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2], &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
                    &keypoints[SKELETON_LEFT_SHOULDER*2], &keypoints[SKELETON_LEFT_SHOULDER*2+1],
                    &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
-                   points, &i);
+                   points, &i, max_points);
 
     /** left scapula */
     body_skeleton_gene(being, BONE_SCAPULA, &scale_width, &scale_length);
@@ -380,7 +389,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right scapula */
     outline_points(bone_scapula, bone_points[BONE_SCAPULA],0,
@@ -393,7 +402,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** ribs */
     body_skeleton_gene(being, BONE_RIBS, &scale_width, &scale_length);
@@ -407,7 +416,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2], &keypoints[SKELETON_RIGHT_SHOULDER_SOCKET*2+1],
                    &keypoints[SKELETON_LEFT_SHOULDER*2], &keypoints[SKELETON_LEFT_SHOULDER*2+1],
                    &keypoints[SKELETON_RIGHT_SHOULDER*2], &keypoints[SKELETON_RIGHT_SHOULDER*2+1],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** position of the top of the pelvis */
     keypoints[SKELETON_PELVIS*2] = keypoints[SKELETON_LUMBAR*2];
@@ -426,7 +435,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &keypoints[SKELETON_LEFT_HIP*2], &keypoints[SKELETON_LEFT_HIP*2+1],
                    &keypoints[SKELETON_RIGHT_HIP*2], &keypoints[SKELETON_RIGHT_HIP*2+1],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left upper leg */
     body_skeleton_gene(being, BONE_LEG_UPPER, &scale_width, &scale_length);
@@ -440,7 +449,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left lower leg 1 */
     body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
@@ -454,7 +463,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left lower leg 2 */
     body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
@@ -468,7 +477,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right upper leg */
     body_skeleton_gene(being, BONE_LEG_UPPER, &scale_width, &scale_length);
@@ -482,7 +491,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right lower leg 1 */
     body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
@@ -496,7 +505,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right lower leg 2 */
     body_skeleton_gene(being, BONE_LEG_LOWER1, &scale_width, &scale_length);
@@ -510,7 +519,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left upper arm */
     body_skeleton_gene(being, BONE_ARM_UPPER, &scale_width, &scale_length);
@@ -525,7 +534,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left lower arm 1 */
     body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
@@ -540,7 +549,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left lower arm 2 */
     body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
@@ -555,7 +564,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right upper arm */
     body_skeleton_gene(being, BONE_ARM_UPPER, &scale_width, &scale_length);
@@ -570,7 +579,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right lower arm 1 */
     body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
@@ -585,7 +594,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left lower arm 2 */
     body_skeleton_gene(being, BONE_ARM_LOWER1, &scale_width, &scale_length);
@@ -600,7 +609,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** left clavical */
     body_skeleton_gene(being, BONE_CLAVICAL, &scale_width, &scale_length);
@@ -615,7 +624,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right clavical */
     outline_points(bone_clavical, bone_points[BONE_CLAVICAL],0,
@@ -629,7 +638,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     vertical = keypoints[SKELETON_NECK*2+1];
     for (i = 0; i < SKELETON_VERTIBRA_RIBS; i++)
@@ -647,7 +656,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[1], &extra_y[1],
                        &extra_x[2], &extra_y[2],
                        &extra_x[3], &extra_y[3],
-                       points, &no_of_points);
+                       points, &no_of_points, max_points);
         vertical = vertibra_y;
     }
 
@@ -664,7 +673,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[1], &extra_y[1],
                        &extra_x[2], &extra_y[2],
                        &extra_x[3], &extra_y[3],
-                       points, &no_of_points);
+                       points, &no_of_points, max_points);
         vertical = vertibra_y;
     }
     for (i = 0; i < SKELETON_LUMBAR_VERTIBRA2; i++)
@@ -680,7 +689,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[1], &extra_y[1],
                        &extra_x[2], &extra_y[2],
                        &extra_x[3], &extra_y[3],
-                       points, &no_of_points);
+                       points, &no_of_points, max_points);
         vertical = vertibra_y;
     }
 
@@ -698,7 +707,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[1], &extra_y[1],
                        &extra_x[2], &extra_y[2],
                        &extra_x[3], &extra_y[3],
-                       points, &no_of_points);
+                       points, &no_of_points, max_points);
 
         /** left finger */
         body_skeleton_gene(being, BONE_FINGER, &scale_width, &scale_length);
@@ -711,7 +720,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[1], &extra_y[1],
                        &extra_x[2], &extra_y[2],
                        &extra_x[3], &extra_y[3],
-                       points, &no_of_points);
+                       points, &no_of_points, max_points);
 
         /** right hand */
         body_skeleton_gene(being, BONE_HAND, &scale_width, &scale_length);
@@ -725,7 +734,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[1], &extra_y[1],
                        &extra_x[2], &extra_y[2],
                        &extra_x[3], &extra_y[3],
-                       points, &no_of_points);
+                       points, &no_of_points, max_points);
 
         /** right finger */
         body_skeleton_gene(being, BONE_FINGER, &scale_width, &scale_length);
@@ -738,7 +747,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                        &extra_x[1], &extra_y[1],
                        &extra_x[2], &extra_y[2],
                        &extra_x[3], &extra_y[3],
-                       points, &no_of_points);
+                       points, &no_of_points, max_points);
     }
 
     /** left thumb */
@@ -753,7 +762,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     /** right thumb */
     outline_points(bone_finger, bone_points[BONE_FINGER],0,
@@ -766,7 +775,7 @@ n_int body_skeleton_points(noble_being * being, n_int * keypoints, n_int *points
                    &extra_x[1], &extra_y[1],
                    &extra_x[2], &extra_y[2],
                    &extra_x[3], &extra_y[3],
-                   points, &no_of_points);
+                   points, &no_of_points, max_points);
 
     return no_of_points;
 }
