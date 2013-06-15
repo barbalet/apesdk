@@ -194,7 +194,7 @@ const n_int bone_ribs[] =
  * @brief Returns an array of 2D points used for drawing diagrams
  * @param source_points Array of 2D points which is the template
  * @param no_of_source_points Number of 2D points in the template
- * @param extra_points
+ * @param extra_points The number of points to be returned via the extra parameters
  * @param x The starting x coordinate
  * @param y The starting y coordinate
  * @param mirror Flip in the vertical axis
@@ -232,44 +232,60 @@ static void outline_points(const n_int * source_points,
     n_int pivot_y = source_points[1];
     float axis_angle, point_angle;
     float ang = angle*3.1415927f/3600;
-
+    
+    /** length of the object */
     dx = (source_points[2] - pivot_x)*scale_width/1000;
     dy = (source_points[3] - pivot_y)*scale_length/1000;
     axis_length = (n_int)sqrt(dx*dx + dy*dy);
     if (axis_length < 1) axis_length=1;
+
+    /** invert around the vertical axis if needed */
     if (mirror != 0)
     {
         dx = -dx;
     }
+
+    /** find the orientation angle of the axis */
     axis_angle = (float)acos(dx/(float)axis_length);
     if (dy < 0) axis_angle = (2*3.1415927f)-axis_angle;
-
+    
+    /** calculate the position of the end point of the axis */
     *axis_x = x + (n_int)(axis_length*sin(ang+(3.1415927f/2)-axis_angle));
     *axis_y = y + (n_int)(axis_length*cos(ang+(3.1415927f/2)-axis_angle));
-
+    
+    /** draw lines between each point */
     for (i = 2; i < no_of_source_points + 2 + extra_points; i++)
     {
+        /** length of the line */
         dx = (source_points[i*2]-pivot_x)*scale_width/1000;
         dy = (source_points[i*2+1]-pivot_y)*scale_length/1000;
         point_length = (n_int)sqrt(dx*dx + dy*dy);
         if (point_length < 1) point_length=1;
+
+        /** invert the line around the vertical axis if necessary */
         if (mirror != 0)
         {
             dx = -dx;
         }
+
+        /** angle of the line */
         point_angle = (float)acos(dx/(float)point_length);
         if (dy < 0) point_angle = (2*3.1415927f)-point_angle;
 
+        /** position of the end of the line */
         px = x + (n_int)(point_length*sin(ang+point_angle-axis_angle));
         py = y + (n_int)(point_length*cos(ang+point_angle-axis_angle));
-
+        
+        /** store the calculated point positions in an array */
         if (i < no_of_source_points + 2)
         {
             points[(*no_of_points)*2] = px;
             points[(*no_of_points)*2+1] = py;
             *no_of_points = *no_of_points + 1;
         }
-
+        
+        /** This is a crude way of keeping track of the last few points
+            so that they can be returned by the function */
         *extra_x1 = *extra_x2;
         *extra_y1 = *extra_y2;
         *extra_x2 = *extra_x3;
@@ -279,7 +295,7 @@ static void outline_points(const n_int * source_points,
         *extra_x4 = px;
         *extra_y4 = py;
     }
-
+    
     points[(*no_of_points)*2] = 9999;
     points[(*no_of_points)*2+1] = 9999;
     *no_of_points = *no_of_points + 1;
