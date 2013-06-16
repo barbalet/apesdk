@@ -540,6 +540,8 @@ void  vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor);
 void  vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
 void  vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 void  vect2_copy(n_vect2 * to, n_vect2 * from);
+void  vect2_populate(n_vect2 * value, n_int x, n_int y);
+
 
 n_uint  math_hash(n_byte * values, n_uint length);
 void    math_bilinear_512_4096(n_byte * side512, n_byte * data);

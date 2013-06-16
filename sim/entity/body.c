@@ -229,62 +229,78 @@ static void outline_points(const n_vect2 * source_points,
                            n_vect2 * points, n_int * no_of_points,
                            n_int max_points)
 {
-    n_int i, px=0,py=0,dx,dy,axis_length,point_length;
-    n_int pivot_x = source_points->x;
-    n_int pivot_y = source_points->y;
+    n_vect2  ds, scale, location, vector;
+    n_int    i, axis_length,point_length;
     float axis_angle, point_angle;
-    float ang = angle*3.1415927f/3600;
+    float ang = angle*TWO_PI/7200;
+    
+    vect2_populate(&location, x, y);
+    vect2_populate(&scale, scale_width, scale_length);
+    vect2_subtract(&ds, (n_vect2 *)&source_points[1], (n_vect2 *)source_points);
+    vect2_multiplier(&ds, &ds, &scale, 1, 1000);
     
     /** length of the object */
-    dx = (source_points[1].x - pivot_x)*scale_width/1000;
-    dy = (source_points[1].y - pivot_y)*scale_length/1000;
-    axis_length = (n_int)math_root(dx*dx + dy*dy);
+    axis_length = (n_int)math_root(vect2_dot(&ds, &ds, 1, 1));
     if (axis_length < 1) axis_length=1;
 
     /** invert around the vertical axis if needed */
     if (mirror != 0)
     {
-        dx = -dx;
+        ds.x = -ds.x;
     }
 
     /** find the orientation angle of the axis */
-    axis_angle = (float)acos(dx/(float)axis_length);
-    if (dy < 0) axis_angle = (2*3.1415927f)-axis_angle;
+    axis_angle = (float)acos(ds.x/(float)axis_length);
+    
+    if (ds.y < 0)
+    {
+        axis_angle = TWO_PI-axis_angle;
+    }
+    
+    vect2_populate(&vector, (n_int)(axis_length*sin(ang+(TWO_PI/4)-axis_angle)),
+                            (n_int)(axis_length*cos(ang+(TWO_PI/4)-axis_angle)));
     
     /** calculate the position of the end point of the axis */
-    axis->x = x + (n_int)(axis_length*sin(ang+(3.1415927f/2)-axis_angle));
-    axis->y = y + (n_int)(axis_length*cos(ang+(3.1415927f/2)-axis_angle));
+    
+    vect2_add(axis, &location, &vector);
     
     /** draw lines between each point */
     for (i = 2; i < no_of_source_points + 2 + extra_points; i++)
     {
-        /** length of the line */
-        dx = (source_points[i].x-pivot_x)*scale_width/1000;
-        dy = (source_points[i].y-pivot_y)*scale_length/1000;
-        point_length = (n_int)math_root(dx*dx + dy*dy);
-        if (point_length < 1) point_length=1;
+        n_vect2 point;
+        vect2_subtract(&ds, (n_vect2 *)&source_points[i], (n_vect2 *)source_points);
+        vect2_multiplier(&ds, &ds, &scale, 1, 1000);
+        point_length = (n_int)math_root(vect2_dot(&ds, &ds, 1, 1));
+        if (point_length < 1)
+        {
+            point_length = 1;
+        }
 
         /** invert the line around the vertical axis if necessary */
         if (mirror != 0)
         {
-            dx = -dx;
+            ds.x = -ds.x;
         }
 
         /** angle of the line */
-        point_angle = (float)acos(dx/(float)point_length);
-        if (dy < 0) point_angle = (2*3.1415927f)-point_angle;
+        point_angle = (float)acos(ds.x/(float)point_length);
+        if (ds.y < 0)
+        {
+            point_angle = (TWO_PI)-point_angle;
+        }
 
         /** position of the end of the line */
-        px = x + (n_int)(point_length*sin(ang+point_angle-axis_angle));
-        py = y + (n_int)(point_length*cos(ang+point_angle-axis_angle));
+        vect2_populate(&vector, (n_int)(point_length*sin(ang+point_angle-axis_angle)),
+                       (n_int)(point_length*cos(ang+point_angle-axis_angle)));
+        
+        vect2_add(&point, &location, &vector);
         
         /** store the calculated point positions in an array */
         if (*no_of_points < max_points)
         {
             if (i < no_of_source_points + 2)
             {
-                points[*no_of_points].x = px;
-                points[*no_of_points].y = py;
+                vect2_copy(&points[*no_of_points], &point);
                 *no_of_points = *no_of_points + 1;
             }
         }
@@ -295,14 +311,10 @@ static void outline_points(const n_vect2 * source_points,
         
         /** This is a crude way of keeping track of the last few points
             so that they can be returned by the function */
-        
         vect2_copy(extra_1, extra_2);
         vect2_copy(extra_2, extra_3);
         vect2_copy(extra_3, extra_4);
-        
-        extra_4->x = px;
-        extra_4->y = py;
-
+        vect2_copy(extra_4, &point);
     }
     
     points[*no_of_points].x = 9999;

@@ -161,6 +161,12 @@ void  vect2_copy(n_vect2 * to, n_vect2 * from)
     to->y = from->y;
 }
 
+void  vect2_populate(n_vect2 * value, n_int x, n_int y)
+{
+    value->x = x;
+    value->y = y;
+}
+
 /*n_patch*/
 
 
