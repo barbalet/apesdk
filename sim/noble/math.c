@@ -155,6 +155,12 @@ void vect2_back_byte2(n_vect2 * converter, n_byte2 * output)
     output[1] = (n_byte2) converter->y;
 }
 
+void  vect2_copy(n_vect2 * to, n_vect2 * from)
+{
+    to->x = from->x;
+    to->y = from->y;
+}
+
 /*n_patch*/
 
 

@@ -1749,10 +1749,13 @@ static void graph_curve(n_byte * buffer,
     /** turn three points into four using the curve radius */
     pts[0] = x0;
     pts[1] = y1;
+    
     pts[2] = x1 + ((x0 - x1)*radius_percent/100);
     pts[3] = y1 + ((y0 - y1)*radius_percent/100);
+    
     pts[4] = x1 + ((x2 - x1)*radius_percent/100);
     pts[5] = y1 + ((y2 - y1)*radius_percent/100);
+    
     pts[6] = x2;
     pts[7] = y2;
 
@@ -1760,6 +1763,7 @@ static void graph_curve(n_byte * buffer,
     c[1] = (3 * pts[0*2] - 6 * pts[1*2] + 3 * pts[2*2]) / 6.0;
     c[2] = (-3 * pts[0*2] + 3 * pts[2*2]) / 6.0;
     c[3] = (pts[0*2] + 4 * pts[1*2] + pts[2*2]) / 6.0;
+    
     d[0] = (-pts[(0*2)+1] + 3 * pts[(1*2)+1] - 3 * pts[(2*2)+1] + pts[(3*2)+1]) / 6.0;
     d[1] = (3 * pts[(0*2)+1] - 6 * pts[(1*2)+1] + 3 * pts[(2*2)+1]) / 6.0;
     d[2] = (-3 * pts[(0*2)+1] + 3 * pts[(2*2)+1]) / 6.0;
@@ -1799,7 +1803,7 @@ static void graph_curve(n_byte * buffer,
  * @param img_width Image width
  * @param img_height Image height
  */
-static void graph_fill_polygon(n_int * points, n_int no_of_points,
+static void graph_fill_polygon(n_vect2 * points, n_int no_of_points,
                                n_byte r, n_byte g, n_byte b, n_byte transparency,
                                n_byte * buffer, n_int img_width, n_int img_height)
 {
@@ -1809,8 +1813,8 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
 
     for (i = 0; i < no_of_points; i++)
     {
-        x = points[i*2];
-        y = points[i*2+1];
+        x = points[i].x;
+        y = points[i].y;
         if ((x==9999) || (y==9999)) continue;
         if (x < min_x) min_x = x;
         if (y < min_y) min_y = y;
@@ -1830,13 +1834,13 @@ static void graph_fill_polygon(n_int * points, n_int no_of_points,
         j = no_of_points-1;
         for (i = 0; i < no_of_points; i++)
         {
-            if (((points[i*2+1] < y) && (points[j*2+1] >= y)) ||
-                    ((points[j*2+1] < y) && (points[i*2+1] >= y)))
+            if (((points[i].y < y) && (points[j].y >= y)) ||
+                    ((points[j].y < y) && (points[i].y >= y)))
             {
                 nodeX[nodes++] =
-                    points[i*2] + (y - points[i*2+1]) *
-                    (points[j*2] - points[i*2]) /
-                    (points[j*2+1] - points[i*2+1]);
+                    points[i].x + (y - points[i].y) *
+                    (points[j].x - points[i].x) /
+                    (points[j].y - points[i].y);
             }
             j = i;
             if (nodes == MAX_POLYGON_CORNERS) break;
@@ -1915,12 +1919,12 @@ static void draw_skeleton(noble_being * being,
                           n_int img_width, n_int img_height,
                           n_int tx, n_int ty, n_int bx, n_int by,
                           n_byte thickness,
-                          n_int * keypoints,
+                          n_vect2 * keypoints,
                           n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
                           n_int hip_angle, n_int knee_angle,
                           n_byte show_keypoints)
 {
-    n_int skeleton_points[MAX_SKELETON_DIAGRAM_POINTS*2];
+    n_vect2 skeleton_points[MAX_SKELETON_DIAGRAM_POINTS];
     n_int min_x = 99999, min_y = 99999;
     n_int max_x = -99999, max_y = -99999;
     n_int x,y,prev_x=0,prev_y=0,i,no_of_points,first_point=0,ctr=0;
@@ -1935,8 +1939,8 @@ static void draw_skeleton(noble_being * being,
     /** get the bounding box for the points */
     for (i = 0; i < no_of_points; i++)
     {
-        x = skeleton_points[i*2];
-        y = skeleton_points[i*2+1];
+        x = skeleton_points[i].x;
+        y = skeleton_points[i].y;
         if ((x==9999) || (y==9999)) continue;
         if (x < min_x) min_x = x;
         if (y < min_y) min_y = y;
@@ -1949,10 +1953,10 @@ static void draw_skeleton(noble_being * being,
         /** rescale the skeleton keypoints into the bounding box */
         for (i = 0; i < SKELETON_POINTS; i++)
         {
-            if (keypoints[i*2] != 9999)
+            if (keypoints[i].x != 9999)
             {
-                keypoints[i*2] = tx + ((keypoints[i*2] - min_x)*(bx - tx)/(max_x - min_x));
-                keypoints[i*2+1] = ty + ((keypoints[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+                keypoints[i].x = tx + ((keypoints[i].x - min_x)  *(bx - tx)/(max_x - min_x));
+                keypoints[i].y = ty + ((keypoints[i].y - min_y)*(by - ty)/(max_y - min_y));
             }
         }
     }
@@ -1962,18 +1966,18 @@ static void draw_skeleton(noble_being * being,
         /** rescale the drawing points into the bounding box */
         for (i = 0; i < no_of_points; i++)
         {
-            if (skeleton_points[i*2] != 9999)
+            if (skeleton_points[i].x != 9999)
             {
-                skeleton_points[i*2] = tx + ((skeleton_points[i*2] - min_x)*(bx - tx)/(max_x - min_x));
-                skeleton_points[i*2+1] = ty + ((skeleton_points[i*2+1] - min_y)*(by - ty)/(max_y - min_y));
+                skeleton_points[i].x = tx + ((skeleton_points[i].x - min_x)*(bx - tx)/(max_x - min_x));
+                skeleton_points[i].y = ty + ((skeleton_points[i].y - min_y)*(by - ty)/(max_y - min_y));
             }
         }
     }
     /** do the drawing */
     for (i = 0; i < no_of_points; i++)
     {
-        x = skeleton_points[i*2];
-        y = skeleton_points[i*2+1];
+        x = skeleton_points[i].x;
+        y = skeleton_points[i].y;
         if (i > 0)
         {
             if ((x!=9999) && (prev_x!=9999))
@@ -1990,7 +1994,7 @@ static void draw_skeleton(noble_being * being,
             {
                 if ((first_point > -1) && (i - first_point > 2))
                 {
-                    graph_fill_polygon(&skeleton_points[first_point*2], i - first_point,
+                    graph_fill_polygon(&skeleton_points[first_point], i - first_point,
                                        bone_shade, bone_shade, bone_shade, 127,
                                        buffer, img_width, img_height);
                     ctr++;
@@ -2006,13 +2010,13 @@ static void draw_skeleton(noble_being * being,
     {
         for (i = 0; i < SKELETON_POINTS; i++)
         {
-            if (keypoints[i*2] != 9999)
+            if (keypoints[i].x != 9999)
             {
                 graph_line(buffer, img_width, img_height,
-                           keypoints[i*2]-10, keypoints[i*2+1], keypoints[i*2]+10, keypoints[i*2+1],
+                           keypoints[i].x-10, keypoints[i].y, keypoints[i].x+10, keypoints[i].y,
                            0, 255, 0, 1);
                 graph_line(buffer, img_width, img_height,
-                           keypoints[i*2], keypoints[i*2+1]-10, keypoints[i*2], keypoints[i*2+1]+10,
+                           keypoints[i].x, keypoints[i].y-10, keypoints[i].x, keypoints[i].y+10,
                            0, 255, 0, 1);
             }
         }
@@ -2139,7 +2143,7 @@ void graph_vascular(noble_being * being,
                     n_int hip_angle, n_int knee_angle,
                     n_byte show_skeleton_keypoints)
 {
-    n_int keypoints[SKELETON_POINTS*2];
+    n_vect2 keypoints[SKELETON_POINTS];
 #ifdef VASCULAR_DRAWING_READY
     n_int i,x[3],y[3],vascular_model_index,previous_index;
     n_uint start_thickness=4, end_thickness=4;
