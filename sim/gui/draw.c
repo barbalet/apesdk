@@ -2663,7 +2663,7 @@ void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_i
     for (j = 0; j < sim->num; j++)
     {
         noble_being * local_being = &(sim->beings[j]);
-        idx = GET_H(local_being)/divisor;
+        idx = being_height(local_being)/divisor;
         height_group[idx]++;
         if (height_group[idx] > max) max = height_group[idx];
     }

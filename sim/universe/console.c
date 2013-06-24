@@ -601,7 +601,7 @@ static void watch_appearance(void *ptr, n_string beingname, noble_being * local_
     sprintf(str,"Height: %.3f m\n", (int)GET_BEING_HEIGHT(local_being)/1000.0f);
     io_string_write(result, str, &watch_string_length);
 
-    sprintf(str,"Mass: %.2f Kg\n", (float)GET_M(local_being)/100.0f);
+    sprintf(str,"Mass: %.2f Kg\n", (float)being_mass(local_being)/100.0f);
     io_string_write(result, str, &watch_string_length);
 
     sprintf(str,"Body fat: %.2f Kg\n", (float)GET_BODY_FAT(local_being)/100.0f);
@@ -1065,7 +1065,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     being_state_description(local_being->state, status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
-    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
+    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %ld\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
             (n_uint)local_being->generation[GENERATION_MATERNAL],
             (n_uint)local_being->generation[GENERATION_PATERNAL],

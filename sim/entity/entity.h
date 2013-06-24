@@ -123,7 +123,17 @@ void    being_dec_drive(noble_being * value, enum drives_definition drive);
 void    being_reset_drive(noble_being * value, enum drives_definition drive);
 
 n_int   being_height(noble_being * value);
+void    being_set_height(noble_being * value, n_int height);
+
 n_int   being_mass(noble_being * value);
+void    being_set_mass(noble_being * value, n_int mass);
+
+void    being_set_dob(noble_being * value, n_byte2 * date);
+n_int   being_dob(noble_being * value);
+
+void    being_set_conception(noble_being * value, n_byte2 * date);
+n_int   being_conception(noble_being * value);
+
 
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);

@@ -137,9 +137,26 @@ void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta
     delta->y = primary->location[1] - secondary->location[1];
 }
 
+void being_set_dob(noble_being * value, n_byte2 * date)
+{
+    value->date_of_birth[0] = date[0];
+    value->date_of_birth[1] = date[1];
+}
+
 n_int being_dob(noble_being * value)
 {
     return TIME_IN_DAYS(value->date_of_birth);
+}
+
+void being_set_conception(noble_being * value, n_byte2 * date)
+{
+    value->date_of_conception[0] = date[0];
+    value->date_of_conception[1] = date[1];
+}
+
+n_int being_conception(noble_being * value)
+{
+    return TIME_IN_DAYS(value->date_of_conception);
 }
 
 void being_facing_towards(noble_being * value, n_vect2 * vector)
@@ -151,7 +168,6 @@ void being_wander(noble_being * value, n_int wander)
 {
     value->direction_facing = (n_byte)((value->direction_facing + 256 + wander) & 255);
 }
-
 
 static void being_facing_init(noble_being * value)
 {
@@ -219,10 +235,21 @@ n_int   being_height(noble_being * value)
     return value->height;
 }
 
+void   being_set_height(noble_being * value, n_int height)
+{
+    value->height = height;
+}
+
 n_int   being_mass(noble_being * value)
 {
-    return value->mass;
+    return value->weight;
 }
+
+void   being_set_mass(noble_being * value, n_int mass)
+{
+    value->weight = mass;
+}
+
 
 static void being_turn_away_from_water(noble_being * value, n_land * land)
 {
@@ -2058,9 +2085,12 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     n_int	      loc_s              = being_speed(local);
     n_int	      loc_e              = being_energy(local);
-    n_int	      loc_h              = GET_H(local);
+    n_int	      loc_h              = being_height(local);
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
+    
+    n_int         loc_conception     = being_conception(local);
+    
     n_int         fat_mass, child_mass = 0;
     n_int         awake = being_awake(sim, local);
 
@@ -2311,21 +2341,23 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     }
 
     /** a certain time after giving birth females become receptive again */
-    if ((TIME_IN_DAYS(local->date_of_conception) != 0) &&
-            ((TIME_IN_DAYS(local->date_of_conception) + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
+    
+
+    if ((loc_conception != 0) &&
+        ((loc_conception + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
     {
+        n_byte2    zero[2] = {0 , 0};
         /** zero value indicates ready to conceive */
-        local->date_of_conception[0] = 0;
-        local->date_of_conception[1] = 0;
+            
+        being_set_conception(local, zero);
+        loc_conception = 0;
     }
 
     if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING)) == BEING_STATE_AWAKE)
     {
-        n_uint conception_days = TIME_IN_DAYS(local->date_of_conception) ;
-
-        if (conception_days > 0)
+        if (loc_conception > 0)
         {
-            n_uint gestation_days = conception_days + GESTATION_DAYS;
+            n_uint gestation_days = loc_conception + GESTATION_DAYS;
             if (today_days > gestation_days)
             {
                 /** A mother could have multiple children, so only find the youngest */
@@ -2343,7 +2375,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 else
                 {
                     /** mother carries the child */
-                    n_uint carrying_days = conception_days + GESTATION_DAYS + CARRYING_DAYS;
+                    n_uint carrying_days = loc_conception + GESTATION_DAYS + CARRYING_DAYS;
                     if (today_days < carrying_days)
                     {
                         if (!((local->inventory[BODY_FRONT] & INVENTORY_CHILD) ||
@@ -2356,7 +2388,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
                         being_set_location(being_child, being_location(local));
 
-                        child_mass = GET_M(being_child);
+                        child_mass = being_mass(being_child);
                         episodic_close(sim, local, being_child, EVENT_CARRIED, AFFECT_CARRYING, 0);
                         episodic_close(sim, being_child, local, EVENT_CARRIED_BY, AFFECT_CARRIED, 0);
                     }
@@ -2366,7 +2398,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             {
                 /** Compute the mass of the unborn child.
                    This will be added to the mass of the mother */
-                child_mass = (today_days - conception_days) * BIRTH_MASS / GESTATION_DAYS;
+                child_mass = (today_days - loc_conception) * BIRTH_MASS / GESTATION_DAYS;
             }
         }
 
@@ -2468,8 +2500,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     being_set_energy(local, loc_e);
     being_set_speed(local, loc_s);
-    GET_H(local) = (n_byte2) loc_h;
-    GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
+    being_set_height(local, loc_h);
+    being_set_mass(local, (BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     local->state = loc_state;
 
     INDICATOR_ADD(sim, IT_AVERAGE_MOBILITY, loc_s);
@@ -2926,22 +2958,22 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         }
 
         being_set_energy(local, BEING_FULL + 15);
-
-        local->date_of_birth[0] = land->date[0];
-        local->date_of_birth[1] = land->date[1];
+        
+        being_set_dob(local, land->date);
+        
         if (first_generation == 0)
         {
-            GET_H(local) = BIRTH_HEIGHT;
-            GET_M(local) = BIRTH_MASS;
+            being_set_height(local, BIRTH_HEIGHT);
+            being_set_mass(local, BIRTH_MASS);
         }
         else
         {
             /** produce an initial distribution of heights and masses*/
             math_random3(local->seed);
-            GET_H(local) = BIRTH_HEIGHT +
-                           (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
-            GET_M(local) = BIRTH_MASS +
-                           (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
+            being_set_height(local, BIRTH_HEIGHT +
+                           (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT)));
+            being_set_mass(local, BIRTH_MASS +
+                           (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS)));
         }
         local->crowding = MIN_CROWDING;
 
@@ -3075,7 +3107,7 @@ void being_tidy(noble_simulation * local_sim)
                     delta_energy = ((delta_energy * delta_energy) >> 9);
 
                     /* the more massive the more energy consumed when moving */
-                    bulk = GET_M(local_being)*5/BEING_MAX_MASS_G;
+                    bulk = being_mass(local_being)*5/BEING_MAX_MASS_G;
                     delta_e += (delta_energy + 4 + bulk) >> 2;
                 }
             }
