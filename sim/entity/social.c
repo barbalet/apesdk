@@ -1006,12 +1006,11 @@ n_uint social_respect_mean(
 static void social_conception(
     noble_being * female,
     noble_being * male,
-    n_byte2 * today,
     noble_simulation * sim)
 {
     /** store the date of conception */
-    female->date_of_conception[0] = today[0];
-    female->date_of_conception[1] = today[1];
+    female->date_of_conception[0] = sim->land->date[0];
+    female->date_of_conception[1] = sim->land->date[1];
 
     /** store the father's genetics */
     /** store the family name, ID and honor of the father */
@@ -1061,7 +1060,6 @@ static void social_conception(
 n_int social_mate(
     noble_being * meeter_being,
     noble_being * met_being,
-    n_byte2 * today,
     n_int being_index,
     n_int distance,
     noble_simulation * sim)
@@ -1115,7 +1113,7 @@ n_int social_mate(
                     {
                         if (TIME_IN_DAYS(meeter_being->date_of_conception) == 0)
                         {
-                            social_conception(meeter_being,met_being,today,sim);
+                            social_conception(meeter_being, met_being, sim);
                         }
                     }
                     loc_state |= BEING_STATE_REPRODUCING;

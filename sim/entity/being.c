@@ -1976,8 +1976,7 @@ static void being_interact(noble_simulation * sim,
         noble_being * being_buffer = sim->beings;
         noble_being * local        = &being_buffer[being_index];
         n_land      * land         = sim->land;
-        n_byte2     * today        = land->date;
-        n_int         today_days   = TIME_IN_DAYS(today);
+        n_int         today_days   = TIME_IN_DAYS(land->date);
         n_int         birth_days   = being_dob(local);
         n_uint        local_is_female = FIND_SEX(GET_I(local));
 
@@ -2038,7 +2037,7 @@ static void being_interact(noble_simulation * sim,
             /* attraction and mating */
             if (opposite_sex != 0)
             {
-                *state |= social_mate(local, other_being, today, being_index, other_being_distance, sim);
+                *state |= social_mate(local, other_being, being_index, other_being_distance, sim);
             }
 
             /* chat */
@@ -2051,10 +2050,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 {
     n_uint	      loop;
     n_land      * land               = sim->land;
-    n_byte2     * today              = land->date;
     noble_being * local              = &(sim->beings[current_being_index]);
     n_uint        local_is_female    = FIND_SEX(GET_I(local));
-    n_int         today_days         = TIME_IN_DAYS(today);
+    n_int         today_days         = TIME_IN_DAYS(land->date);
     n_int         birth_days         = being_dob(local);
     n_byte        beings_in_vicinity = 0;
 
