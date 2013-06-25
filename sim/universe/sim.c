@@ -582,7 +582,7 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
 
     if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
     {
-        n_byte			*local_brain = GET_B(local_sim, local_being);
+        n_byte			*local_brain = being_brain(local_sim, local_being);
         if (local_brain != 0L)
         {
             brain_cycle(local_brain, local_brain_state);
@@ -624,7 +624,7 @@ static void sim_brain_hash(noble_simulation * local_sim)
     brain_hash_count++;
     if((brain_hash_count & 63) == 0)
     {
-        n_byte * hash_brain = GET_B(local_sim, &(sim.beings[sim.select]));
+        n_byte * hash_brain = being_brain(local_sim, &(sim.beings[sim.select]));
 
         brain_hash_count = 0;
 
@@ -789,7 +789,7 @@ static void sim_indicators(noble_simulation * sim)
         negative_affect += being_affect(sim,local_being,0);
 
         /* social graph indicators */
-        local_social_graph = GET_SOC(sim, local_being);
+        local_social_graph = being_social(sim, local_being);
         for (i=0; i<SOCIAL_SIZE; i++)
         {
             if (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph,i))
@@ -1079,15 +1079,9 @@ void sim_cycle(void)
 
 #define MAXIMUM_ALLOCATION  ( 60 * 1024 * 1024 )
 
-#ifdef BRAIN_ON
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
 
-#else
-
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being)) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
-
-#endif
 
 static void sim_memory(n_uint offscreen_size)
 {
@@ -1123,22 +1117,16 @@ static void sim_memory(n_uint offscreen_size)
 #ifdef LARGE_SIM
     sim.max = LARGE_SIM;
 #else
-#ifdef BRAIN_ON
     sim.max = memory_allocated / (sizeof(noble_being) + DOUBLE_BRAIN + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory)));
-#else
-    sim.max = memory_allocated / (sizeof(noble_being) + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory));
-#endif
 #endif
     sim.beings = (noble_being *) & offbuffer[ current_location ];
     current_location += sizeof(noble_being) * sim.max ;
-
-#ifdef BRAIN_ON
 
     sim.brain_base = &offbuffer[ current_location  ];
     io_erase(sim.brain_base, sim.max * DOUBLE_BRAIN);
 
     current_location += (sim.max * DOUBLE_BRAIN);
-#endif
+
     sim.social_base = (social_link *) &offbuffer[current_location];
     io_erase((n_byte *)sim.social_base, sim.max * (SOCIAL_SIZE * sizeof(social_link)));
     current_location += (sizeof(n_uint)*2) + (sim.max * (SOCIAL_SIZE * sizeof(social_link)));
@@ -1148,11 +1136,7 @@ static void sim_memory(n_uint offscreen_size)
     while (lpx < sim.max)
     {
         noble_being * local = &(sim.beings[ lpx ]);
-#ifdef BRAIN_ON
         local->brain_memory_location = (n_byte2)lpx;
-#else
-        local->brain_memory_location = NO_BRAIN_MEMORY_LOCATION;
-#endif
         lpx ++;
     }
     io_erase((n_byte *)sim.indicators_base, INDICATORS_BUFFER_SIZE * IT_NUMBER_ENTRIES);

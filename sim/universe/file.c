@@ -528,7 +528,7 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
             return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
         }
         {
-            n_byte *local_brain = GET_B(local_sim, &(local_sim->beings[((n_interpret *)code)->specific]));
+            n_byte *local_brain = being_brain(local_sim, &(local_sim->beings[((n_interpret *)code)->specific]));
             if (local_brain != 0L)
             {
                 TRACK_BRAIN(local_brain, current_x, current_y, current_z) = (n_byte) value;
@@ -784,7 +784,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
                 }
                 {
-                    n_byte *local_brain = GET_B(local_sim, &(local_sim->beings[code->specific]));
+                    n_byte *local_brain = being_brain(local_sim, &(local_sim->beings[code->specific]));
                     if (local_brain != 0L)
                     {
                         local_number = TRACK_BRAIN(local_brain, current_x, current_y, current_z);
@@ -816,13 +816,13 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     local_being = &(local_sim->beings[local_select]);
                     if (local_being!=0L)
                     {
-                        local_social_graph = GET_SOC(local_sim, local_being);
+                        local_social_graph = being_social(local_sim, local_being);
                         if (local_social_graph!=0L)
                         {
                             social_graph = local_social_graph[GET_A(local_being,ATTENTION_ACTOR)];
                         }
 #ifdef EPISODIC_ON
-                        local_episodic = GET_EPI(local_sim, local_being);
+                        local_episodic = being_episodic(local_sim, local_being);
                         if (local_episodic != 0L)
                         {
                             episodic = local_episodic[GET_A(local_being,ATTENTION_EPISODE)];

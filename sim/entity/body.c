@@ -841,7 +841,7 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
             index = get_social_link(other,local,sim);
             if (index>-1)
             {
-                graph = GET_SOC(sim, other);
+                graph = being_social(sim, other);
                 if (!graph) return;
                 if (graph[index].friend_foe>1) graph[index].friend_foe-=2;
             }
@@ -909,7 +909,7 @@ static void body_action_interactive_change(noble_simulation * sim, noble_being *
     index = get_social_link(other,local,sim);
     if (index>-1)
     {
-        social_link * graph = GET_SOC(sim, other);
+        social_link * graph = being_social(sim, other);
         if (!graph) return;
         if (positive)
         {

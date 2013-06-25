@@ -51,7 +51,6 @@
 #endif
 
 #define	LAND_ON
-#define	BRAIN_ON /* currently has to be included episodic doesn't work without it */
 #define	WEATHER_ON
 
 #undef	FIXED_RANDOM_SIM
@@ -91,6 +90,10 @@ enum GENEALOGY_FORMAT
     GENEALOGY_GEDCOM,
     GENEALOGY_FORMATS
 };
+
+n_byte * being_brain(noble_simulation * local_sim, noble_being * value);
+episodic_memory * being_episodic(noble_simulation * local_sim, noble_being * value);
+social_link * being_social(noble_simulation * local_sim, noble_being * value);
 
 n_int being_location_x(noble_being * value);
 

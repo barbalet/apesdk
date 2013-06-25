@@ -123,7 +123,7 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
     if (local_being == 0) return;
 
     /** Get the social graph for the being */
-    local_social_graph = GET_SOC(local_sim, local_being);
+    local_social_graph = being_social(local_sim, local_being);
     if (local_social_graph == 0L) return;
 
     /** For each entry in the social graph */
@@ -2406,7 +2406,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
         local_being = &local_sim->beings[i];
 
         /** get the episodic memories for the being */
-        local_episodic = GET_EPI(local_sim, local_being);
+        local_episodic = being_episodic(local_sim, local_being);
 
         /** skip is no memories were retrieved */
         if (local_episodic == 0L) continue;

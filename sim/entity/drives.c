@@ -117,11 +117,11 @@ static void drives_sex(
     noble_simulation * local_sim)
 {
     n_int i,max;
-    social_link * local_social_graph = GET_SOC(local_sim, local);
+    social_link * local_social_graph = being_social(local_sim, local);
     n_int age_in_days = AGE_IN_DAYS(local_sim,local);
 
 #ifdef EPISODIC_ON
-    episodic_memory * local_episodic = GET_EPI(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local_sim, local);
 #endif
 
     /** is the being mature */

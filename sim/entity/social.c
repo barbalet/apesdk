@@ -106,7 +106,7 @@ void social_graph_link_name(
     social_link * local_social_graph;
 
     /** Get the social graph for the being */
-    local_social_graph = GET_SOC(local_sim, local_being);
+    local_social_graph = being_social(local_sim, local_being);
 
     if (local_social_graph==0) return;
 
@@ -157,7 +157,7 @@ static void social_group_align_preferences(
     if ((meeter_being==met_being) || (social_graph_index < 1)) return;
 
     /** get the social graph */
-    social_graph = GET_SOC(local_sim, meeter_being);
+    social_graph = being_social(local_sim, meeter_being);
 
     if (social_graph == 0L) return;
 
@@ -380,7 +380,7 @@ n_int get_social_link(
 {
     n_byte2 name = GET_NAME_GENDER(sim,met_being);
     n_byte2 i,family_name = GET_NAME_FAMILY2(sim,met_being);
-    social_link * graph = GET_SOC(sim, meeter_being);
+    social_link * graph = being_social(sim, meeter_being);
 
     if (!graph) return -1;
 
@@ -419,7 +419,7 @@ static n_int get_stranger_link(
     n_int stranger_index=-1;
     n_byte2 stranger=65535, familiarity=0;
     n_int time_since_met;
-    social_link * graph = GET_SOC(sim, meeter_being);
+    social_link * graph = being_social(sim, meeter_being);
     if (!graph) return 0;
 
     for (i=1; i<SOCIAL_SIZE; i++)
@@ -472,7 +472,7 @@ static n_int social_meet(
     n_int friend_or_foe,index=-1;
 
     n_byte2 familiarity=0;
-    social_link * graph = GET_SOC(sim, meeter_being);
+    social_link * graph = being_social(sim, meeter_being);
     n_byte2 met=0;
 
     if (!graph) return -1;
@@ -592,7 +592,7 @@ n_int social_get_relationship(
     social_link * meeter_social_graph;
 
     /** get the social graph */
-    meeter_social_graph = GET_SOC(sim, meeter_being);
+    meeter_social_graph = being_social(sim, meeter_being);
 
     if (meeter_social_graph == 0L)
     {
@@ -635,7 +635,7 @@ n_int social_set_relationship(noble_being * meeter_being,
     if (index > -1)
     {
         /** get the social graph */
-        meeter_social_graph = GET_SOC(sim, meeter_being);
+        meeter_social_graph = being_social(sim, meeter_being);
 
         if (meeter_social_graph == 0L)
         {
@@ -781,7 +781,7 @@ n_byte social_groom(
                 met_index = social_meet(met_being, meeter_being, sim);
                 if (met_index > -1)
                 {
-                    social_link * graph = GET_SOC(sim, meeter_being);
+                    social_link * graph = being_social(sim, meeter_being);
                     if (!graph) return 0;
 
                     if ((graph[meeter_index].friend_foe)<255)
@@ -876,8 +876,8 @@ n_byte2 social_squabble(
                 victor_index = social_meet(vanquished, victor, sim);
                 if (victor_index > -1)
                 {
-                    social_link * victor_social_graph = GET_SOC(sim, victor);
-                    social_link * vanquished_social_graph = GET_SOC(sim, vanquished);
+                    social_link * victor_social_graph = being_social(sim, victor);
+                    social_link * vanquished_social_graph = being_social(sim, vanquished);
 
                     if ((!victor_social_graph) || (!vanquished_social_graph)) return 0;
 
@@ -976,7 +976,7 @@ n_uint social_respect_mean(
     social_link * local_social_graph;
     n_int i;
 
-    local_social_graph = GET_SOC(sim, local_being);
+    local_social_graph = being_social(sim, local_being);
     if (!local_social_graph) return 0;
 
     /** note that this includes the self */
@@ -1070,7 +1070,7 @@ n_int social_mate(
     n_int attract;
     n_byte2 matingprob;
 #endif
-    social_link * meeter_social_graph = GET_SOC(sim, meeter_being);
+    social_link * meeter_social_graph = being_social(sim, meeter_being);
 
     if (!meeter_social_graph) return -1;
 
@@ -1245,9 +1245,9 @@ n_int social_chat(
     n_int replace;
 #endif
     n_int speaking = 0;
-    social_link * meeter_graph = GET_SOC(sim, meeter_being);
+    social_link * meeter_graph = being_social(sim, meeter_being);
 #ifdef PARASITES_ON
-    social_link * met_graph = GET_SOC(sim, met_being);
+    social_link * met_graph = being_social(sim, met_being);
 #endif
     n_uint respect_mean = social_respect_mean(sim,meeter_being);
 
@@ -1474,12 +1474,12 @@ static void sim_social_initial_no_return(noble_simulation * local, noble_being *
     vect2_byte2(&location,(n_byte2 *)&(local_being->social_x));
     while ( social_loop < SOCIAL_SIZE )
     {
-        social_link * specific_individual = &(GET_SOC(local,local_being)[social_loop]);
+        social_link * specific_individual = &(being_social(local,local_being)[social_loop]);
         noble_being  * specific_being;
 
         if (!specific_individual) return;
 
-        if (!SOCIAL_GRAPH_ENTRY_EMPTY(GET_SOC(local,local_being),social_loop))
+        if (!SOCIAL_GRAPH_ENTRY_EMPTY(being_social(local,local_being),social_loop))
         {
 
             specific_being = being_find_name(local, specific_individual->first_name[BEING_MET], specific_individual->family_name[BEING_MET]);

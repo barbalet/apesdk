@@ -1561,19 +1561,12 @@ noble_simulation;
 
 #define NO_BRAIN_MEMORY_LOCATION 0xffff
 
-#define	GET_B(sim, bei)   ((((bei)->brain_memory_location) == NO_BRAIN_MEMORY_LOCATION) ? 0L \
-                            : &((sim)->brain_base[(bei)->brain_memory_location * DOUBLE_BRAIN]))
 
-#define	GET_SOC(sim, bei) ((((bei)->brain_memory_location) == NO_BRAIN_MEMORY_LOCATION) ? 0L \
-			   : &((sim)->social_base[(bei)->brain_memory_location * SOCIAL_SIZE]))
 
-#define	GET_SELF(sim, bei) (GET_SOC(sim,bei)[0])
+#define	GET_SELF(sim, bei) (being_social(sim,bei)[0])
 
-#define	GET_EPI(sim, bei) ((((bei)->brain_memory_location) == NO_BRAIN_MEMORY_LOCATION) ? 0L \
-			   : &((sim)->episodic_base[((bei)->brain_memory_location * EPISODIC_SIZE) + SOCIAL_SIZE]))
-
-#define GET_BRAINCODE_INTERNAL(sim,bei) ((&GET_SOC(sim,bei)[0])->braincode)
-#define GET_BRAINCODE_EXTERNAL(sim,bei) ((&GET_SOC(sim,bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
+#define GET_BRAINCODE_INTERNAL(sim,bei) ((&being_social(sim,bei)[0])->braincode)
+#define GET_BRAINCODE_EXTERNAL(sim,bei) ((&being_social(sim,bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
 
 #define	BRAIN_OFFSET(num)	(num)
 

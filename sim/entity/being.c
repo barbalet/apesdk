@@ -100,6 +100,39 @@ typedef	struct
 }
 being_draw;
 
+n_byte * being_brain(noble_simulation * local_sim, noble_being * value)
+{
+    n_int   local_location = value->brain_memory_location;
+    
+    if (local_location == NO_BRAIN_MEMORY_LOCATION)
+    {
+        return 0L;
+    }
+    return &(local_sim->brain_base[local_location * DOUBLE_BRAIN]);
+}
+
+episodic_memory * being_episodic(noble_simulation * local_sim, noble_being * value)
+{
+    n_int   local_location = value->brain_memory_location;
+    
+    if (local_location == NO_BRAIN_MEMORY_LOCATION)
+    {
+        return 0L;
+    }
+    return &(local_sim->episodic_base[local_location * EPISODIC_SIZE]);
+}
+
+social_link * being_social(noble_simulation * local_sim, noble_being * value)
+{
+    n_int   local_location = value->brain_memory_location;
+    
+    if (local_location == NO_BRAIN_MEMORY_LOCATION)
+    {
+        return 0L;
+    }
+    return &(local_sim->social_base[local_location * SOCIAL_SIZE]);
+}
+
 n_int being_location_x(noble_being * value)
 {
     return value->location[0];
@@ -885,7 +918,7 @@ n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is
     n_uint affect = 0;
 #ifdef EPISODIC_ON
     n_uint i;
-    episodic_memory * local_episodic = (episodic_memory*)GET_EPI(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local_sim, local);
     if (!local_episodic) return affect;
 
     for (i=0; i<EPISODIC_SIZE; i++)
@@ -1110,7 +1143,7 @@ n_int episode_description(
     n_uint current_date;
 
     current_date = TIME_IN_DAYS(sim->land->date);
-    local_episodic = GET_EPI(sim, local_being);
+    local_episodic = being_episodic(sim, local_being);
 
     if(local_episodic == 0L)
     {
@@ -1504,7 +1537,7 @@ n_int brain_probe_to_location(n_int position)
 
 static void update_brain_probes(noble_simulation * sim, noble_being * local)
 {
-    n_byte * brain_point = GET_B(sim, local);
+    n_byte * brain_point = being_brain(sim, local);
     n_int    i, inputs = 0, outputs = 0;
     /** count the inputs and outputs */
     for (i=0; i<BRAINCODE_PROBES; i++)
@@ -1573,7 +1606,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
 
 #ifdef BRAINCODE_ON
     /** may need to add external probe linking too */
-    if (GET_B(sim,local))
+    if (being_brain(sim,local))
     {
         update_brain_probes(sim, local);
     }
@@ -1628,7 +1661,7 @@ static void being_create_family_links(noble_being * mother,
         if (parent[j])
         {
             /** social graph for mother or father */
-            parent_social_graph = GET_SOC(sim, parent[j]);
+            parent_social_graph = being_social(sim, parent[j]);
             if (parent_social_graph)
             {
                 for (i = 0; i < 2; i++) /** grandmother or grandfather */
@@ -1661,7 +1694,7 @@ static void being_create_family_links(noble_being * mother,
         /** social graph for mother or father */
         if (parent[j])
         {
-            parent_social_graph = GET_SOC(sim, parent[j]);
+            parent_social_graph = being_social(sim, parent[j]);
             if (parent_social_graph)
             {
                 for (i=1; i<SOCIAL_SIZE; i++)
@@ -1773,7 +1806,7 @@ static int being_follow(noble_simulation * sim,
         }
     }
 
-    local_social_graph = GET_SOC(sim, local);
+    local_social_graph = being_social(sim, local);
     if (local_social_graph == 0L) return 0;
 
     /** which entry in the social graph are we paying attention to? */
@@ -1992,7 +2025,7 @@ static void being_interact(noble_simulation * sim,
 
         if (being_index > -1)
         {
-            social_link * local_social_graph = GET_SOC(sim, local);
+            social_link * local_social_graph = being_social(sim, local);
             if (local_social_graph)
             {
                 familiarity = local_social_graph[being_index].familiarity;
@@ -2293,7 +2326,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             (beings_in_vicinity==0) &&
             (math_random(local->seed) < 1000 + 3600*GENE_STAGGER(genetics)))
     {
-        n_byte * local_brain = GET_B(sim, local);
+        n_byte * local_brain = being_brain(sim, local);
         n_int	 wander = 0;
 
         if (local_brain != 0L)
@@ -2518,7 +2551,7 @@ void being_init_braincode(noble_simulation * sim,
     else
     {
         /** initialise based upon a similar being */
-        graph = GET_SOC(sim, local);
+        graph = being_social(sim, local);
 
         if (graph == 0L)
         {
@@ -2675,8 +2708,8 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             local->brain_memory_location;
         n_byte      * brain_memory;
 #ifdef EPISODIC_ON
-        social_link * local_social_graph = GET_SOC(sim, local);
-        episodic_memory * local_episodic = GET_EPI(sim, local);
+        social_link * local_social_graph = being_social(sim, local);
+        episodic_memory * local_episodic = being_episodic(sim, local);
 #endif
         n_genetics * mother_genetics = 0L;
 
@@ -2689,7 +2722,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
         local->brain_memory_location = numerical_brain_location;
 
-        brain_memory = GET_B(sim, local);
+        brain_memory = being_brain(sim, local);
 
         if (brain_memory != 0L)
         {
@@ -2945,7 +2978,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         }
         local->crowding = MIN_CROWDING;
 
-        if (GET_B(sim,local))
+        if (being_brain(sim,local))
         {
             /** These magic numbers were found in March 2001 -
             	feel free to change them! */
@@ -3192,7 +3225,7 @@ void being_remove(noble_simulation * local_sim)
                 if (being_energy(&(local[i])) != BEING_DEAD)
                 {
                     noble_being * b2 = &local[i];
-                    social_link * b2_social_graph = GET_SOC(local_sim, b2);
+                    social_link * b2_social_graph = being_social(local_sim, b2);
                     if (b2_social_graph)
                     {
                         n_uint j = 1;
@@ -3232,10 +3265,15 @@ void being_remove(noble_simulation * local_sim)
             {
                 /** the logic associated with copying th brsin memory location doesn't make sense */
                 n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
-                n_byte       * new_brain = GET_B(local_sim, &local[ count ]);
-                n_byte       * old_brain = GET_B(local_sim, &local[ loop ]);
-                social_link * new_event = GET_SOC(local_sim, &local[ count ]);
-                social_link * old_event = GET_SOC(local_sim, &local[ loop ]);
+                
+                n_byte       * new_brain = being_brain(local_sim, &local[ count ]);
+                n_byte       * old_brain = being_brain(local_sim, &local[ loop ]);
+                
+                social_link * new_event = being_social(local_sim, &local[ count ]);
+                social_link * old_event = being_social(local_sim, &local[ loop ]);
+                
+                episodic_memory * new_episodic = being_episodic(local_sim, &local[ count ]);
+                episodic_memory * old_episodic = being_episodic(local_sim, &local[ loop ]);
 
                 io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
 
@@ -3246,6 +3284,9 @@ void being_remove(noble_simulation * local_sim)
 
                     io_copy((n_byte *)old_event, (n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
                     io_erase((n_byte *)old_event, (SOCIAL_SIZE * sizeof(social_link)));
+                    
+                    io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
+                    io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(social_link)));
 
                     local[ count ].brain_memory_location = new_brain_memory_location;
                 }
