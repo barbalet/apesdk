@@ -91,6 +91,8 @@ enum GENEALOGY_FORMAT
     GENEALOGY_FORMATS
 };
 
+void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
+
 n_byte * being_brain(noble_simulation * local_sim, noble_being * value);
 episodic_memory * being_episodic(noble_simulation * local_sim, noble_being * value);
 social_link * being_social(noble_simulation * local_sim, noble_being * value);

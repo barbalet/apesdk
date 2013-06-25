@@ -418,7 +418,7 @@ n_int file_bin_read(n_string name)
     start[1].data           = local->weather;
 
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
-    start[2].data           = local->brain_base;
+    start[2].data           = being_brain(local, local->beings);
 
     if (file_chain_read_header(bin_name, start, total_ptrs) != 0)
     {
@@ -471,7 +471,7 @@ n_int file_bin_write(n_string name)
     start[1].data           = local->weather;
 
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
-    start[2].data           = local->brain_base;
+    start[2].data           = being_brain(local, local->beings);
 
     if (file_chain_write_generate_header(start) != 0)
     {

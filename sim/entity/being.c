@@ -100,6 +100,37 @@ typedef	struct
 }
 being_draw;
 
+void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
+{
+    n_int  lpx = 0;
+    
+#ifdef LARGE_SIM
+    local->max = LARGE_SIM;
+#else
+    local->max = (memory_available / (sizeof(noble_being) + DOUBLE_BRAIN + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory)))) - 1;
+#endif
+    local->beings = (noble_being *) & buffer[  * location ];
+    * location += sizeof(noble_being) * local->max ;
+    
+    local->brain_base = &buffer[  * location  ];
+    io_erase(local->brain_base, local->max * DOUBLE_BRAIN);
+    * location += (local->max * DOUBLE_BRAIN);
+    
+    local->social_base = (social_link *) &buffer[ * location];
+    io_erase((n_byte *)local->social_base, local->max * (SOCIAL_SIZE * sizeof(social_link)));
+    * location += (local->max * (SOCIAL_SIZE * sizeof(social_link)));
+    
+    local->episodic_base = (episodic_memory *) &buffer[ * location];
+    io_erase((n_byte *)local->episodic_base, local->max * (EPISODIC_SIZE * sizeof(episodic_memory)));
+    
+    while (lpx < local->max)
+    {
+        noble_being * local_being = &(local->beings[ lpx ]);
+        local_being->brain_memory_location = (n_byte2)lpx;
+        lpx ++;
+    }
+}
+
 n_byte * being_brain(noble_simulation * local_sim, noble_being * value)
 {
     n_int   local_location = value->brain_memory_location;
@@ -2704,8 +2735,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         noble_being * local = &(sim->beings[sim->num]);
         n_land  * land  = sim->land;
         n_byte        ch;
-        n_byte2		  numerical_brain_location =
-            local->brain_memory_location;
+        n_byte2		  numerical_brain_location = local->brain_memory_location;
         n_byte      * brain_memory;
 #ifdef EPISODIC_ON
         social_link * local_social_graph = being_social(sim, local);
@@ -3263,7 +3293,6 @@ void being_remove(noble_simulation * local_sim)
         {
             if ( count != loop )
             {
-                /** the logic associated with copying th brsin memory location doesn't make sense */
                 n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
                 
                 n_byte       * new_brain = being_brain(local_sim, &local[ count ]);

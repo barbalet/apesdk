@@ -1083,62 +1083,40 @@ void sim_cycle(void)
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
 
 
+static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * location)
+{
+    local->land = (n_land *) & buffer[ *location ];
+    *location += sizeof(n_land);
+    
+    local->land -> map = &buffer[ *location ];
+    *location += (MAP_AREA);
+    
+    local->highres = &buffer[ *location ];
+    *location += (2 * HI_RES_MAP_AREA);
+    
+    local->highres_tide = (n_c_uint *) &buffer[ *location ];
+    *location += (HI_RES_MAP_AREA/8);
+    
+    local->weather = (n_weather *) &buffer[ *location ];
+    *location += sizeof(n_weather);
+}
+
+
 static void sim_memory(n_uint offscreen_size)
 {
     n_uint	current_location = 0;
     n_uint  memory_allocated = MAXIMUM_ALLOCATION;
-    n_uint  lpx = 0;
 
     offbuffer = io_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
 
     current_location = offscreen_size;
 
-    sim.land = (n_land *) & offbuffer[ current_location ];
-
-    current_location += sizeof(n_land);
-
-    sim.land -> map = &offbuffer[ current_location ];
-
-    current_location += (MAP_AREA);
-
-    sim.highres = &offbuffer[ current_location ];
-
-    current_location += (2 * HI_RES_MAP_AREA);
-
-    sim.highres_tide = (n_c_uint *) &offbuffer[ current_location ];
-
-    current_location += (HI_RES_MAP_AREA/8);
-
-    sim.weather = (n_weather *) &offbuffer[ current_location ];
-
-    current_location += sizeof(n_weather);
-
-    memory_allocated -= (offscreen_size + current_location);
-#ifdef LARGE_SIM
-    sim.max = LARGE_SIM;
-#else
-    sim.max = memory_allocated / (sizeof(noble_being) + DOUBLE_BRAIN + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory)));
-#endif
-    sim.beings = (noble_being *) & offbuffer[ current_location ];
-    current_location += sizeof(noble_being) * sim.max ;
-
-    sim.brain_base = &offbuffer[ current_location  ];
-    io_erase(sim.brain_base, sim.max * DOUBLE_BRAIN);
-
-    current_location += (sim.max * DOUBLE_BRAIN);
-
-    sim.social_base = (social_link *) &offbuffer[current_location];
-    io_erase((n_byte *)sim.social_base, sim.max * (SOCIAL_SIZE * sizeof(social_link)));
-    current_location += (sizeof(n_uint)*2) + (sim.max * (SOCIAL_SIZE * sizeof(social_link)));
-    sim.episodic_base = (episodic_memory *) &offbuffer[current_location];
-    io_erase((n_byte *)sim.episodic_base, sim.max * (EPISODIC_SIZE * sizeof(episodic_memory)));
-    /*current_location += (sizeof(n_uint)*2) + (sim.max * (EPISODIC_SIZE * sizeof(episodic_memory))); current_location never read */
-    while (lpx < sim.max)
-    {
-        noble_being * local = &(sim.beings[ lpx ]);
-        local->brain_memory_location = (n_byte2)lpx;
-        lpx ++;
-    }
+    sim_memory_land(&sim, offbuffer, &current_location);
+    
+    memory_allocated = memory_allocated - offscreen_size - current_location;
+    
+    being_memory(&sim, offbuffer, &current_location, memory_allocated);
+    
     io_erase((n_byte *)sim.indicators_base, INDICATORS_BUFFER_SIZE * IT_NUMBER_ENTRIES);
     sim.indicator_index = 0;
     sim.indicators_logging=0;
