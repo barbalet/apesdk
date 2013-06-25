@@ -89,7 +89,7 @@ static const n_byte	operators[17][7] =
     /*AHWOUS*/
 };
 
-#define AGE_IN_DAYS(sim,bei)        (TIME_IN_DAYS(sim->land->date) - being_dob(bei))
+#define AGE_IN_DAYS(sim,bei)        (TIME_IN_DAYS(sim->land->date) - TIME_IN_DAYS(GET_D(bei)))
 #define AGE_IN_YEARS(sim,bei)       (AGE_IN_DAYS(sim,bei)/TIME_YEAR_DAYS)
 
 
@@ -735,7 +735,7 @@ enum being_interaction_social
 #define BEING_MAX_HEIGHT    65535
 
 /* returns height in real units (mm) */
-#define GET_BEING_HEIGHT(bei) (being_height(bei)*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
+#define GET_BEING_HEIGHT(bei) (GET_H(bei)*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
 
 /* Minimum lung capacity in cubic centimetres */
 #define MIN_LUNG_CAPACITY(bei) (GET_BEING_HEIGHT(bei)*4000/BEING_MAX_HEIGHT_MM)
@@ -1398,7 +1398,7 @@ typedef struct
     n_byte2 height;
 
     /* body mass in kg */
-    n_byte2 weight;
+    n_byte2 mass;
 
     /* flags indicating apescript overrides */
     n_byte2 script_overrides;
@@ -1540,7 +1540,11 @@ noble_simulation;
 #define	GET_MT(bei,index) ((bei)->metabolism[index])
 #endif
 #define GET_A(bei,index) ((bei)->attention[index])
+#define GET_H(bei)      ((bei)->height)
+#define GET_M(bei)      ((bei)->mass)
 #define GET_FR(bei)     (GENE_FRAME(being_genetics(bei)))
+
+#define	GET_D(bei)	((bei)->date_of_birth)
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
 #define	GET_MI(bei)	((bei)->mother_genetics[0])

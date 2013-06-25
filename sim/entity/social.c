@@ -278,17 +278,14 @@ static n_int social_attraction_height(
     8-11 prefer shorter*/
     if (ppref >= 8)
     {
-        n_int met_height = being_height(met_being);
-        n_int meeter_height = being_height(meeter_being);
-        
-        if ((ppref>=12) && (met_height > meeter_height))
+        if ((ppref>=12) && (GET_H(met_being) > GET_H(meeter_being)))
         {
             /** prefer taller */
             return 1;
         }
         else
         {
-            if ((ppref<12) && (met_height < meeter_height))
+            if ((ppref<12) && (GET_H(met_being) < GET_H(meeter_being)))
             {
                 /** prefer shorter */
                 return 1;
@@ -1012,7 +1009,8 @@ static void social_conception(
     noble_simulation * sim)
 {
     /** store the date of conception */
-    being_set_conception(female, sim->land->date);
+    female->date_of_conception[0] = sim->land->date[0];
+    female->date_of_conception[1] = sim->land->date[1];
 
     /** store the father's genetics */
     /** store the family name, ID and honor of the father */
@@ -1113,7 +1111,7 @@ n_int social_mate(
                     if ((FIND_SEX(GET_I(meeter_being)) == SEX_FEMALE) &&
                             (FIND_SEX(GET_I(met_being)) != SEX_FEMALE))
                     {
-                        if (being_conception(meeter_being) == 0)
+                        if (TIME_IN_DAYS(meeter_being->date_of_conception) == 0)
                         {
                             social_conception(meeter_being, met_being, sim);
                         }

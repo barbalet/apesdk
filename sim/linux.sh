@@ -32,13 +32,6 @@
 
 SOURCEDIR=.  
 
-if [ $# -ge 1 -a "$1" == "--mac" ]
-then
-    COMPILER=gcc
-else
-    COMPILER=gcc
-fi
-
 if [ $# -ge 1 -a "$1" == "--debug" ]
 then
     CFLAGS=-g
@@ -48,35 +41,35 @@ fi
 
 if [ $# -ge 1 -a "$1" == "--additional" ]
 then
-    COMMANDLINEE=-DNOTHING_NEEDED_HERE
+COMMANDLINEE=-DNOTHING_NEEDED_HERE
 else
-    COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
+COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/io.c -o io.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/math.c -o math.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/parse.c -o parse.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/interpret.c -o interpret.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/land.c -o land.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/audio.c -o audio.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/io.c -o io.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/math.c -o math.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/parse.c -o parse.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/interpret.c -o interpret.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/land.c -o land.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/audio.c -o audio.o
 
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/being.c -o being.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/body.c -o body.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/metabolism.c -o metabolism.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/brain.c -o brain.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/social.c -o social.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/episodic.c -o episodic.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/food.c -o food.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/drives.c -o drives.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/speak.c -o speak.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/being.c -o being.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/body.c -o body.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/metabolism.c -o metabolism.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/brain.c -o brain.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/social.c -o social.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/episodic.c -o episodic.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/food.c -o food.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/drives.c -o drives.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/speak.c -o speak.o
 
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/file.c -o file.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/console.c -o console.o
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/sim.c -o sim.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/file.c -o file.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/console.c -o console.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/sim.c -o sim.o
 
 #gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/cle.c -o cle.o
 
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/longterm.c -o longterm.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/longterm.c -o longterm.o
 
 #gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nacle *.o -lm -lpthread
 
@@ -85,11 +78,11 @@ ${COMPILER} ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/longterm.c -o longterm.o
 if [ $# -ge 1 -a "$1" == "--additional" ]
 then
 
-${COMPILER} ${CFLAGS} -c $SOURCEDIR/gui/draw.c -o draw.o
+gcc ${CFLAGS} -c $SOURCEDIR/gui/draw.c -o draw.o
 
 else
 
-${COMPILER} ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../../nalongterm *.o -lz -lm -lpthread
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../../nalongterm *.o -lz -lm -lpthread
 
 rm *.o
 
