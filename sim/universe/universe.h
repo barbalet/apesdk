@@ -1385,8 +1385,6 @@ typedef struct
     n_byte2 seed[2];
     n_byte2	state;
 
-    n_byte2   brain_memory_location; /* not constant but should be */
-
     /* The basic brain formula is;
      b(t+1) = a*l + b(t)*m + (b(t)-b(t-1))*n;
      the first three values are l, m, n for awake, then l, m, n for asleep */
@@ -1465,6 +1463,9 @@ typedef struct
     n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
     noble_brain_probe brainprobe[BRAINCODE_PROBES];
 #endif
+    n_byte          * brain;
+    social_link     * social;
+    episodic_memory * episodic;
 }
 noble_being;
 
@@ -1515,10 +1516,6 @@ typedef struct
     n_uint          delta_cycles;
     n_uint          count_cycles;
 
-    n_byte        * brain_base;
-    social_link   * social_base;
-    episodic_memory * episodic_base;
-
     n_uint          indicator_index;
     n_uint          indicators_logging;
 
@@ -1558,10 +1555,6 @@ noble_simulation;
 
 #define	FIND_SEX(array)		(array&3)
 #define	SEX_FEMALE			3
-
-#define NO_BRAIN_MEMORY_LOCATION 0xffff
-
-
 
 #define	GET_SELF(sim, bei) (being_social(sim,bei)[0])
 

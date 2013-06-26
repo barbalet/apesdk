@@ -112,21 +112,22 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
     local->beings = (noble_being *) & buffer[  * location ];
     * location += sizeof(noble_being) * local->max ;
     
-    local->brain_base = &buffer[  * location  ];
-    io_erase(local->brain_base, local->max * DOUBLE_BRAIN);
-    * location += (local->max * DOUBLE_BRAIN);
-    
-    local->social_base = (social_link *) &buffer[ * location];
-    io_erase((n_byte *)local->social_base, local->max * (SOCIAL_SIZE * sizeof(social_link)));
-    * location += (local->max * (SOCIAL_SIZE * sizeof(social_link)));
-    
-    local->episodic_base = (episodic_memory *) &buffer[ * location];
-    io_erase((n_byte *)local->episodic_base, local->max * (EPISODIC_SIZE * sizeof(episodic_memory)));
-    
     while (lpx < local->max)
     {
         noble_being * local_being = &(local->beings[ lpx ]);
-        local_being->brain_memory_location = (n_byte2)lpx;
+
+        local_being->brain = &buffer[ * location  ];
+        io_erase(local_being->brain, DOUBLE_BRAIN);
+        * location += (DOUBLE_BRAIN);
+        
+        local_being->social = (social_link *)&buffer[ * location  ];
+        io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(social_link)));
+        * location += (SOCIAL_SIZE * sizeof(social_link));
+
+        local_being->episodic = (episodic_memory *) &buffer[ * location];
+        io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
+        * location += (EPISODIC_SIZE * sizeof(episodic_memory));
+
         lpx ++;
     }
 }
@@ -134,19 +135,21 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
 static void being_replace(noble_simulation * local_sim, noble_being * local, n_uint count, n_uint loop)
 {
     if ( count != loop )
-    {
-        n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
+    {        
+        n_byte       * new_brain = local[ count ].brain;
+        n_byte       * old_brain = local[ loop ].brain;
         
-        n_byte       * new_brain = being_brain(local_sim, &local[ count ]);
-        n_byte       * old_brain = being_brain(local_sim, &local[ loop ]);
+        social_link * new_event = local[ count ].social;
+        social_link * old_event = local[ loop ].social;
         
-        social_link * new_event = being_social(local_sim, &local[ count ]);
-        social_link * old_event = being_social(local_sim, &local[ loop ]);
-        
-        episodic_memory * new_episodic = being_episodic(local_sim, &local[ count ]);
-        episodic_memory * old_episodic = being_episodic(local_sim, &local[ loop ]);
+        episodic_memory * new_episodic = local[ count ].episodic;
+        episodic_memory * old_episodic = local[ loop ].episodic;
         
         io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
+        
+        local[count].brain = new_brain;
+        local[count].social = new_event;
+        local[count].episodic = new_episodic;
         
         if ((new_brain != 0L) && (old_brain != 0L))
         {
@@ -159,48 +162,40 @@ static void being_replace(noble_simulation * local_sim, noble_being * local, n_u
             io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
             io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(social_link)));
         }
-        local[ count ].brain_memory_location = new_brain_memory_location;
     }
 }
 
 static void being_erase(noble_being * value)
 {
-    n_byte2 local_brain_memory_location = value->brain_memory_location;
+    n_byte       * new_brain = value->brain;
+    social_link * new_event = value->social;
+    episodic_memory * new_episodic = value->episodic;
+    
     io_erase((n_byte*)value, sizeof(noble_being));
-    value->brain_memory_location = local_brain_memory_location;
+    
+    value->brain = new_brain;
+    value->social = new_event;
+    value->episodic = new_episodic;
+    
+    io_erase(new_brain, DOUBLE_BRAIN);
+    io_erase((n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
+    io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
 }
 
 n_byte * being_brain(noble_simulation * local_sim, noble_being * value)
 {
-    n_int   local_location = value->brain_memory_location;
-    
-    if (local_location == NO_BRAIN_MEMORY_LOCATION)
-    {
-        return 0L;
-    }
-    return &(local_sim->brain_base[local_location * DOUBLE_BRAIN]);
+    return value->brain;
 }
 
 episodic_memory * being_episodic(noble_simulation * local_sim, noble_being * value)
 {
-    n_int   local_location = value->brain_memory_location;
-    
-    if (local_location == NO_BRAIN_MEMORY_LOCATION)
-    {
-        return 0L;
-    }
-    return &(local_sim->episodic_base[local_location * EPISODIC_SIZE]);
+    return value->episodic;
+
 }
 
 social_link * being_social(noble_simulation * local_sim, noble_being * value)
 {
-    n_int   local_location = value->brain_memory_location;
-    
-    if (local_location == NO_BRAIN_MEMORY_LOCATION)
-    {
-        return 0L;
-    }
-    return &(local_sim->social_base[local_location * SOCIAL_SIZE]);
+    return value->social;
 }
 
 n_int being_location_x(noble_being * value)

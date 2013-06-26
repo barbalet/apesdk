@@ -82,14 +82,14 @@ static void fileout_being(n_file * file_out, noble_simulation * value, n_int bei
 #ifdef USE_FIL_SOE
     while (loop < loop_end)
     {
-        io_write_buff(file_out, &(value->social_base[loop]), format, FIL_SOE, &brain_three_byte_command);
+        io_write_buff(file_out, being_social(value, &(value->beings[being])), format, FIL_SOE, &brain_three_byte_command);
         loop++;
     }
 #endif
 #ifdef USE_FIL_EPI
     while (loop_episodic < loop_episodic_end)
     {
-        io_write_buff(file_out, &(value->episodic_base[loop_episodic]), format, FIL_EPI, 0L);
+        io_write_buff(file_out, being_episodic(value, &(value->beings[being])), format, FIL_EPI, 0L);
         loop_episodic++;
     }
 #endif
@@ -211,13 +211,19 @@ n_int	file_in(n_file * input_file)
                 temp = (n_byte*) &(local_sim->beings[ape_count]);
                 loop_end = sizeof(noble_being);
                 break;
-            case FIL_SOE:
-                temp = (n_byte*) &(local_sim->social_base[social_count]);
-                loop_end = sizeof(social_link);
+                case FIL_SOE:
+                {
+                    social_link * local_social = being_social(local_sim, &(local_sim->beings[ape_count]));
+                    temp = (n_byte*)(&local_social[social_count]);
+                    loop_end = sizeof(social_link);
+                }
                 break;
-            case FIL_EPI:
-                temp = (n_byte*) &(local_sim->episodic_base[social_count]);
-                loop_end = sizeof(social_link);
+                case FIL_EPI:
+                {
+                    episodic_memory * local_episodic = being_episodic(local_sim, &(local_sim->beings[ape_count]));
+                    temp = (n_byte*)(&local_episodic[episodic_count]);
+                    loop_end = sizeof(episodic_memory);
+                }
                 break;
             default:
                 return SHOW_ERROR("Unknown kind in file"); /*unkown kind*/
@@ -326,12 +332,18 @@ n_int	sim_filein(n_byte * buff, n_uint len)
                 loop_end = sizeof(noble_being);
                 break;
             case FIL_SOE:
-                temp = (n_byte*) &(local_sim->social_base[social_count]);
-                loop_end = sizeof(social_link);
+                {
+                    social_link * local_social = being_social(local_sim, &(local_sim->beings[ape_count]));
+                    temp = (n_byte*)(&local_social[social_count]);
+                    loop_end = sizeof(social_link);
+                }
                 break;
             case FIL_EPI:
-                temp = (n_byte*) &(local_sim->episodic_base[social_count]);
-                loop_end = sizeof(social_link);
+                {
+                    episodic_memory * local_episodic = being_episodic(local_sim, &(local_sim->beings[ape_count]));
+                    temp = (n_byte*)(&local_episodic[episodic_count]);
+                    loop_end = sizeof(episodic_memory);
+                }
                 break;
             default:
                 return SHOW_ERROR("Unknown kind in file"); /*unkown kind*/
