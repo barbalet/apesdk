@@ -131,6 +131,45 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
     }
 }
 
+static void being_replace(noble_simulation * local_sim, noble_being * local, n_uint count, n_uint loop)
+{
+    if ( count != loop )
+    {
+        n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
+        
+        n_byte       * new_brain = being_brain(local_sim, &local[ count ]);
+        n_byte       * old_brain = being_brain(local_sim, &local[ loop ]);
+        
+        social_link * new_event = being_social(local_sim, &local[ count ]);
+        social_link * old_event = being_social(local_sim, &local[ loop ]);
+        
+        episodic_memory * new_episodic = being_episodic(local_sim, &local[ count ]);
+        episodic_memory * old_episodic = being_episodic(local_sim, &local[ loop ]);
+        
+        io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
+        
+        if ((new_brain != 0L) && (old_brain != 0L))
+        {
+            io_copy(old_brain, new_brain, DOUBLE_BRAIN);
+            io_erase(old_brain, DOUBLE_BRAIN);
+            
+            io_copy((n_byte *)old_event, (n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
+            io_erase((n_byte *)old_event, (SOCIAL_SIZE * sizeof(social_link)));
+            
+            io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
+            io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(social_link)));
+        }
+        local[ count ].brain_memory_location = new_brain_memory_location;
+    }
+}
+
+static void being_erase(noble_being * value)
+{
+    n_byte2 local_brain_memory_location = value->brain_memory_location;
+    io_erase((n_byte*)value, sizeof(noble_being));
+    value->brain_memory_location = local_brain_memory_location;
+}
+
 n_byte * being_brain(noble_simulation * local_sim, noble_being * value)
 {
     n_int   local_location = value->brain_memory_location;
@@ -2735,7 +2774,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         noble_being * local = &(sim->beings[sim->num]);
         n_land  * land  = sim->land;
         n_byte        ch;
-        n_byte2		  numerical_brain_location = local->brain_memory_location;
         n_byte      * brain_memory;
 #ifdef EPISODIC_ON
         social_link * local_social_graph = being_social(sim, local);
@@ -2743,14 +2781,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 #endif
         n_genetics * mother_genetics = 0L;
 
-
-        /***********************************************
-         Please note: This clears the being structure to
-                      0. No further zeroing is required.
-         ***********************************************/
-        io_erase((n_byte *) local, sizeof(noble_being));
-
-        local->brain_memory_location = numerical_brain_location;
+        being_erase(local);
 
         brain_memory = being_brain(sim, local);
 
@@ -3202,9 +3233,9 @@ void being_remove(noble_simulation * local_sim)
     n_uint	reference = local_sim->select;
     n_uint  end_loop =  local_sim->num;
     n_uint  last_reference = reference;
-    n_uint	count = 0;
     n_uint	possible = NO_BEINGS_FOUND;
-    n_uint  loop=0;
+    n_uint	count = 0;
+    n_uint   loop=0;
     n_int   selected_died = 0;
 
     if (being_remove_external)
@@ -3291,36 +3322,7 @@ void being_remove(noble_simulation * local_sim)
 
         if (being_energy(&(local[loop])) != BEING_DEAD)
         {
-            if ( count != loop )
-            {
-                n_byte2        new_brain_memory_location = local[ count ].brain_memory_location;
-                
-                n_byte       * new_brain = being_brain(local_sim, &local[ count ]);
-                n_byte       * old_brain = being_brain(local_sim, &local[ loop ]);
-                
-                social_link * new_event = being_social(local_sim, &local[ count ]);
-                social_link * old_event = being_social(local_sim, &local[ loop ]);
-                
-                episodic_memory * new_episodic = being_episodic(local_sim, &local[ count ]);
-                episodic_memory * old_episodic = being_episodic(local_sim, &local[ loop ]);
-
-                io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
-
-                if ((new_brain != 0L) && (old_brain != 0L))
-                {
-                    io_copy(old_brain, new_brain, DOUBLE_BRAIN);
-                    io_erase(old_brain, DOUBLE_BRAIN);
-
-                    io_copy((n_byte *)old_event, (n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
-                    io_erase((n_byte *)old_event, (SOCIAL_SIZE * sizeof(social_link)));
-                    
-                    io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
-                    io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(social_link)));
-
-                    local[ count ].brain_memory_location = new_brain_memory_location;
-                }
-            }
-
+            being_replace(local_sim, local, count, loop);
             count++;
         }
         else
