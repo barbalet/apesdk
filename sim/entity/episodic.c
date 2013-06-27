@@ -71,7 +71,7 @@ void episodic_logging(n_console_output * output_function, n_int social)
  */
 static void episodic_intention_update(noble_simulation * local_sim, noble_being * local, n_int episode_index)
 {
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local);
     n_byte event;
     n_int learned_preference_index=-1;
     if (local_episodic == 0L)
@@ -139,7 +139,7 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
 void episodic_cycle(noble_simulation * local_sim, noble_being * local)
 {
     n_int i;
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local);
     n_genetics * genetics = being_genetics(local);
 
     if (!local_episodic) return;
@@ -221,7 +221,7 @@ n_int episodic_met_being_celebrity(
     noble_being * met_being)
 {
     n_int i,j,celebrity=0,ctr,aff;
-    episodic_memory * meeter_episodic = being_episodic(local_sim, meeter_being);
+    episodic_memory * meeter_episodic = being_episodic(meeter_being);
     n_byte2 first_name = GET_NAME_GENDER(local_sim,met_being);
     n_byte2 family_name = GET_NAME_FAMILY2(local_sim,met_being);
 
@@ -279,7 +279,7 @@ n_int episodic_first_person_memories_percent(
     n_byte intention)
 {
     n_int i,hits=0,memories=0;
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local);
     n_byte2 name = GET_NAME_GENDER(local_sim,local);
     n_byte2 family = GET_NAME_FAMILY2(local_sim,local);
 
@@ -354,7 +354,7 @@ static n_int episodic_memory_replace_index(
     n_int min;
     n_byte event_exists=0;
 
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local);
 
     if (!local_episodic) return -1;
 
@@ -436,7 +436,7 @@ static void episodic_store_full(
     n_byte2 arg,
     n_byte food)
 {
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local);
     n_int replace;
     n_byte  old_event;
     n_byte2 old_time;
@@ -627,7 +627,7 @@ n_byte episodic_intention(
 {
     n_int replace;
     n_byte2 time, date0,date1;
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local);
     n_byte event;
 
     if (local_episodic == 0L)
@@ -705,8 +705,8 @@ n_byte episodic_anecdote(
     noble_being * local,
     noble_being * other)
 {
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
-    episodic_memory * other_episodic = being_episodic(local_sim, other);
+    episodic_memory * local_episodic = being_episodic(local);
+    episodic_memory * other_episodic = being_episodic(other);
     n_int affect;
     n_byte event;
     n_int replace,mult=1;

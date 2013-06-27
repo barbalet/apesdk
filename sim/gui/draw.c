@@ -1229,7 +1229,7 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
 
     {
         noble_being * local_being = &(local_sim->beings[local_sim->select]);
-        n_byte      * local       = being_brain(local_sim, local_being);
+        n_byte      * local       = being_brain(local_being);
         n_join	      local_mono;
         n_uint        turn_y = tilt_z;
         n_uint        turn_z = tilt_y;
@@ -2444,7 +2444,7 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
     for (i = 0; i < sim->num; i++)
     {
         noble_being * local_being = &(sim->beings[index[i]]);
-        social_link * graph = being_social(sim, local_being);
+        social_link * graph = being_social(local_being);
         n_uint respect_threshold = social_respect_mean(sim, local_being);
         n_int tx = i*(img_width-1)/sim->num;
         n_int bx = (i+1)*(img_width-1)/sim->num;

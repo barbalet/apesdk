@@ -132,7 +132,7 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
     }
 }
 
-static void being_replace(noble_simulation * local_sim, noble_being * local, n_uint count, n_uint loop)
+static void being_replace(noble_being * local, n_uint count, n_uint loop)
 {
     if ( count != loop )
     {        
@@ -182,18 +182,18 @@ static void being_erase(noble_being * value)
     io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
 }
 
-n_byte * being_brain(noble_simulation * local_sim, noble_being * value)
+n_byte * being_brain(noble_being * value)
 {
     return value->brain;
 }
 
-episodic_memory * being_episodic(noble_simulation * local_sim, noble_being * value)
+episodic_memory * being_episodic(noble_being * value)
 {
     return value->episodic;
 
 }
 
-social_link * being_social(noble_simulation * local_sim, noble_being * value)
+social_link * being_social(noble_being * value)
 {
     return value->social;
 }
@@ -983,7 +983,7 @@ n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is
     n_uint affect = 0;
 #ifdef EPISODIC_ON
     n_uint i;
-    episodic_memory * local_episodic = being_episodic(local_sim, local);
+    episodic_memory * local_episodic = being_episodic(local);
     if (!local_episodic) return affect;
 
     for (i=0; i<EPISODIC_SIZE; i++)
@@ -1208,7 +1208,7 @@ n_int episode_description(
     n_uint current_date;
 
     current_date = TIME_IN_DAYS(sim->land->date);
-    local_episodic = being_episodic(sim, local_being);
+    local_episodic = being_episodic(local_being);
 
     if(local_episodic == 0L)
     {
@@ -1602,7 +1602,7 @@ n_int brain_probe_to_location(n_int position)
 
 static void update_brain_probes(noble_simulation * sim, noble_being * local)
 {
-    n_byte * brain_point = being_brain(sim, local);
+    n_byte * brain_point = being_brain(local);
     n_int    i, inputs = 0, outputs = 0;
     /** count the inputs and outputs */
     for (i=0; i<BRAINCODE_PROBES; i++)
@@ -1671,7 +1671,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
 
 #ifdef BRAINCODE_ON
     /** may need to add external probe linking too */
-    if (being_brain(sim,local))
+    if (being_brain(local))
     {
         update_brain_probes(sim, local);
     }
@@ -1726,7 +1726,7 @@ static void being_create_family_links(noble_being * mother,
         if (parent[j])
         {
             /** social graph for mother or father */
-            parent_social_graph = being_social(sim, parent[j]);
+            parent_social_graph = being_social(parent[j]);
             if (parent_social_graph)
             {
                 for (i = 0; i < 2; i++) /** grandmother or grandfather */
@@ -1759,7 +1759,7 @@ static void being_create_family_links(noble_being * mother,
         /** social graph for mother or father */
         if (parent[j])
         {
-            parent_social_graph = being_social(sim, parent[j]);
+            parent_social_graph = being_social(parent[j]);
             if (parent_social_graph)
             {
                 for (i=1; i<SOCIAL_SIZE; i++)
@@ -1871,7 +1871,7 @@ static int being_follow(noble_simulation * sim,
         }
     }
 
-    local_social_graph = being_social(sim, local);
+    local_social_graph = being_social(local);
     if (local_social_graph == 0L) return 0;
 
     /** which entry in the social graph are we paying attention to? */
@@ -2090,7 +2090,7 @@ static void being_interact(noble_simulation * sim,
 
         if (being_index > -1)
         {
-            social_link * local_social_graph = being_social(sim, local);
+            social_link * local_social_graph = being_social(local);
             if (local_social_graph)
             {
                 familiarity = local_social_graph[being_index].familiarity;
@@ -2391,7 +2391,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             (beings_in_vicinity==0) &&
             (math_random(local->seed) < 1000 + 3600*GENE_STAGGER(genetics)))
     {
-        n_byte * local_brain = being_brain(sim, local);
+        n_byte * local_brain = being_brain(local);
         n_int	 wander = 0;
 
         if (local_brain != 0L)
@@ -2616,7 +2616,7 @@ void being_init_braincode(noble_simulation * sim,
     else
     {
         /** initialise based upon a similar being */
-        graph = being_social(sim, local);
+        graph = being_social(local);
 
         if (graph == 0L)
         {
@@ -2771,14 +2771,14 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         n_byte        ch;
         n_byte      * brain_memory;
 #ifdef EPISODIC_ON
-        social_link * local_social_graph = being_social(sim, local);
-        episodic_memory * local_episodic = being_episodic(sim, local);
+        social_link * local_social_graph = being_social(local);
+        episodic_memory * local_episodic = being_episodic(local);
 #endif
         n_genetics * mother_genetics = 0L;
 
         being_erase(local);
 
-        brain_memory = being_brain(sim, local);
+        brain_memory = being_brain(local);
 
         if (brain_memory != 0L)
         {
@@ -3034,7 +3034,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         }
         local->crowding = MIN_CROWDING;
 
-        if (being_brain(sim,local))
+        if (being_brain(local))
         {
             /** These magic numbers were found in March 2001 -
             	feel free to change them! */
@@ -3281,7 +3281,7 @@ void being_remove(noble_simulation * local_sim)
                 if (being_energy(&(local[i])) != BEING_DEAD)
                 {
                     noble_being * b2 = &local[i];
-                    social_link * b2_social_graph = being_social(local_sim, b2);
+                    social_link * b2_social_graph = being_social(b2);
                     if (b2_social_graph)
                     {
                         n_uint j = 1;
@@ -3317,7 +3317,7 @@ void being_remove(noble_simulation * local_sim)
 
         if (being_energy(&(local[loop])) != BEING_DEAD)
         {
-            being_replace(local_sim, local, count, loop);
+            being_replace(local, count, loop);
             count++;
         }
         else

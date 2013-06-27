@@ -1556,10 +1556,10 @@ noble_simulation;
 #define	FIND_SEX(array)		(array&3)
 #define	SEX_FEMALE			3
 
-#define	GET_SELF(sim, bei) (being_social(sim,bei)[0])
+#define	GET_SELF(sim, bei) (being_social(bei)[0])
 
-#define GET_BRAINCODE_INTERNAL(sim,bei) ((&being_social(sim,bei)[0])->braincode)
-#define GET_BRAINCODE_EXTERNAL(sim,bei) ((&being_social(sim,bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
+#define GET_BRAINCODE_INTERNAL(sim,bei) ((&being_social(bei)[0])->braincode)
+#define GET_BRAINCODE_EXTERNAL(sim,bei) ((&being_social(bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
 
 #define	BRAIN_OFFSET(num)	(num)
 

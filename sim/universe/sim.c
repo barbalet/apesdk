@@ -582,7 +582,7 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
 
     if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
     {
-        n_byte			*local_brain = being_brain(local_sim, local_being);
+        n_byte			*local_brain = being_brain(local_being);
         if (local_brain != 0L)
         {
             brain_cycle(local_brain, local_brain_state);
@@ -624,7 +624,7 @@ static void sim_brain_hash(noble_simulation * local_sim)
     brain_hash_count++;
     if((brain_hash_count & 63) == 0)
     {
-        n_byte * hash_brain = being_brain(local_sim, &(sim.beings[sim.select]));
+        n_byte * hash_brain = being_brain(&(sim.beings[sim.select]));
 
         brain_hash_count = 0;
 
@@ -789,7 +789,7 @@ static void sim_indicators(noble_simulation * sim)
         negative_affect += being_affect(sim,local_being,0);
 
         /* social graph indicators */
-        local_social_graph = being_social(sim, local_being);
+        local_social_graph = being_social(local_being);
         for (i=0; i<SOCIAL_SIZE; i++)
         {
             if (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph,i))

@@ -82,14 +82,14 @@ static void fileout_being(n_file * file_out, noble_simulation * value, n_int bei
 #ifdef USE_FIL_SOE
     while (loop < loop_end)
     {
-        io_write_buff(file_out, being_social(value, &(value->beings[being])), format, FIL_SOE, &brain_three_byte_command);
+        io_write_buff(file_out, being_social(&(value->beings[being])), format, FIL_SOE, &brain_three_byte_command);
         loop++;
     }
 #endif
 #ifdef USE_FIL_EPI
     while (loop_episodic < loop_episodic_end)
     {
-        io_write_buff(file_out, being_episodic(value, &(value->beings[being])), format, FIL_EPI, 0L);
+        io_write_buff(file_out, being_episodic(&(value->beings[being])), format, FIL_EPI, 0L);
         loop_episodic++;
     }
 #endif
@@ -213,14 +213,14 @@ n_int	file_in(n_file * input_file)
                 break;
                 case FIL_SOE:
                 {
-                    social_link * local_social = being_social(local_sim, &(local_sim->beings[ape_count]));
+                    social_link * local_social = being_social(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_social[social_count]);
                     loop_end = sizeof(social_link);
                 }
                 break;
                 case FIL_EPI:
                 {
-                    episodic_memory * local_episodic = being_episodic(local_sim, &(local_sim->beings[ape_count]));
+                    episodic_memory * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_episodic[episodic_count]);
                     loop_end = sizeof(episodic_memory);
                 }
@@ -333,14 +333,14 @@ n_int	sim_filein(n_byte * buff, n_uint len)
                 break;
             case FIL_SOE:
                 {
-                    social_link * local_social = being_social(local_sim, &(local_sim->beings[ape_count]));
+                    social_link * local_social = being_social(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_social[social_count]);
                     loop_end = sizeof(social_link);
                 }
                 break;
             case FIL_EPI:
                 {
-                    episodic_memory * local_episodic = being_episodic(local_sim, &(local_sim->beings[ape_count]));
+                    episodic_memory * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_episodic[episodic_count]);
                     loop_end = sizeof(episodic_memory);
                 }
@@ -430,7 +430,7 @@ n_int file_bin_read(n_string name)
     start[1].data           = local->weather;
 
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
-    start[2].data           = being_brain(local, local->beings);
+    start[2].data           = being_brain(local->beings);
 
     if (file_chain_read_header(bin_name, start, total_ptrs) != 0)
     {
@@ -483,7 +483,7 @@ n_int file_bin_write(n_string name)
     start[1].data           = local->weather;
 
     start[2].expected_bytes = local->num * DOUBLE_BRAIN;
-    start[2].data           = being_brain(local, local->beings);
+    start[2].data           = being_brain(local->beings);
 
     if (file_chain_write_generate_header(start) != 0)
     {
@@ -540,7 +540,7 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
             return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
         }
         {
-            n_byte *local_brain = being_brain(local_sim, &(local_sim->beings[((n_interpret *)code)->specific]));
+            n_byte *local_brain = being_brain(&(local_sim->beings[((n_interpret *)code)->specific]));
             if (local_brain != 0L)
             {
                 TRACK_BRAIN(local_brain, current_x, current_y, current_z) = (n_byte) value;
@@ -796,7 +796,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
                 }
                 {
-                    n_byte *local_brain = being_brain(local_sim, &(local_sim->beings[code->specific]));
+                    n_byte *local_brain = being_brain(&(local_sim->beings[code->specific]));
                     if (local_brain != 0L)
                     {
                         local_number = TRACK_BRAIN(local_brain, current_x, current_y, current_z);
@@ -828,13 +828,13 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     local_being = &(local_sim->beings[local_select]);
                     if (local_being!=0L)
                     {
-                        local_social_graph = being_social(local_sim, local_being);
+                        local_social_graph = being_social(local_being);
                         if (local_social_graph!=0L)
                         {
                             social_graph = local_social_graph[GET_A(local_being,ATTENTION_ACTOR)];
                         }
 #ifdef EPISODIC_ON
-                        local_episodic = being_episodic(local_sim, local_being);
+                        local_episodic = being_episodic(local_being);
                         if (local_episodic != 0L)
                         {
                             episodic = local_episodic[GET_A(local_being,ATTENTION_EPISODE)];
@@ -1077,7 +1077,6 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
 
 void sim_start_conditions(void * code, void * structure, n_int identifier)
 {
-    noble_simulation * local_sim = sim_sim();
     n_interpret * interp = (n_interpret *)code;
     n_int       * variables = interp->variable_references;
     noble_being * local_being = &(((noble_being*)structure)[identifier]);
@@ -1108,8 +1107,6 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
 
 void sim_end_conditions(void * code, void * structure, n_int identifier)
 {
-    noble_simulation * local_sim = sim_sim();
-
     n_interpret * interp = (n_interpret *)code;
     n_int       * variables = interp->variable_references;
     noble_being * local_being = &(((noble_being*)structure)[identifier]);

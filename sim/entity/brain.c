@@ -1189,8 +1189,8 @@ void brain_dialogue(
     n_int intention_episode_index=-1;
     n_int memory_visited[EPISODIC_SIZE];
 
-    social_link * meeter_social_graph = being_social(sim,meeter_being);
-    episodic_memory * episodic = being_episodic(sim,meeter_being);
+    social_link * meeter_social_graph = being_social(meeter_being);
+    episodic_memory * episodic = being_episodic(meeter_being);
     n_int max_itterations;
     n_byte * pspace = (n_byte*)meeter_being->braincode_register;
 
