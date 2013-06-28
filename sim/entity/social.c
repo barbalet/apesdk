@@ -1018,8 +1018,7 @@ static void social_conception(
 
     female->father_honor     = male->honor;
     female->father_name[0]   = GET_NAME_GENDER(sim,male);
-    female->father_name[1]   =
-        GET_SELF(sim,male).family_name[BEING_MET];
+    female->father_name[1]   = GET_NAME(sim,male);
 
     /** generation number of the child's father */
     if (male->generation[GENERATION_MATERNAL] >
