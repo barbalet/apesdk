@@ -2462,7 +2462,7 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
                     {
                         noble_being * local_being2 = &(sim->beings[index[k]]);
                         if ((GET_NAME_FAMILY2(sim, local_being2) == graph[j].family_name[BEING_MET]) &&
-                                (GET_NAME(sim,local_being2) == UNPACK_FAMILY_FIRST_NAME(graph[j].first_name[BEING_MET])))
+                                (being_first_name(local_being2) == UNPACK_FAMILY_FIRST_NAME(graph[j].first_name[BEING_MET])))
                         {
                             break;
                         }

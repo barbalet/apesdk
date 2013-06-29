@@ -182,6 +182,24 @@ static void being_erase(noble_being * value)
     io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
 }
 
+n_int being_first_name(noble_being * value)
+{
+    social_link * local_social = being_social(value);
+    return local_social->first_name[BEING_MET]&255;
+}
+
+static void being_set_first_name(noble_being * value, n_byte name)
+{
+    social_link * local_social = being_social(value);
+    local_social->first_name[BEING_MET] = name;
+}
+
+void being_set_family_name(noble_being * value, n_byte first, n_byte last)
+{
+    social_link * local_social = being_social(value);
+    local_social->family_name[BEING_MET] = GET_NAME_FAMILY(first,last);
+}
+
 n_byte * being_brain(noble_being * value)
 {
     return value->brain;
@@ -504,7 +522,7 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
     {
         n_string_block str;
         b = &sim->beings[i];
-        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(sim,b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), str);
+        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), being_first_name(b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), str);
 
         io_lower(str, io_length(str,STRING_BLOCK_SIZE));
 
@@ -540,7 +558,7 @@ n_string being_get_select_name(noble_simulation * sim)
     else
     {
         b = &sim->beings[sim->select];
-        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(sim,b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), name);
+        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), being_first_name(b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), name);
     }
     return (n_string)name;
 }
@@ -967,7 +985,7 @@ noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_by
     {
         noble_being * local = &(sim->beings[loop]);
 
-        if ( (GET_NAME_GENDER(sim,local) == first_gender) &&
+        if ( (GET_NAME_GENDER(local) == first_gender) &&
                 (GET_NAME_FAMILY2(sim,local) == family) )
         {
             return local;
@@ -1216,7 +1234,7 @@ n_int episode_description(
     }
 
     if ((local_episodic[index].event>0) &&
-            (local_episodic[index].first_name[0]==GET_NAME_GENDER(sim,local_being)) &&
+            (local_episodic[index].first_name[0]==GET_NAME_GENDER(local_being)) &&
             (local_episodic[index].family_name[0]==GET_NAME_FAMILY2(sim,local_being)))
     {
         being_name(((local_episodic[index].first_name[BEING_MET]>>8) == SEX_FEMALE),
@@ -1850,7 +1868,7 @@ static int being_follow(noble_simulation * sim,
             {
                 /** get the name of the other being */
                 noble_being * other = &being_buffer[i];
-                n_byte2 other_first_name = GET_NAME_GENDER(sim,other);
+                n_byte2 other_first_name = GET_NAME_GENDER(other);
                 n_byte2 other_family_name = GET_NAME_FAMILY2(sim,other);
                 /** is this the same as the name of the being to which we are paying attention? */
                 if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(local))) &&
@@ -1888,7 +1906,7 @@ static int being_follow(noble_simulation * sim,
             {
                 /** get the name of the other being */
                 noble_being * other = &being_buffer[i];
-                n_byte2 other_first_name = GET_NAME_GENDER(sim,other);
+                n_byte2 other_first_name = GET_NAME_GENDER(other);
                 n_byte2 other_family_name = GET_NAME_FAMILY2(sim,other);
                 /** is this the same as the name of the being to which we are paying attention? */
                 if ((local_social_graph[social_graph_index].first_name[BEING_MET]==other_first_name) &&
@@ -2730,7 +2748,7 @@ static n_int being_set_unique_name(noble_simulation * sim,
         {
             noble_being * other_being = &sim->beings[i];
             if (other_being == local_being) continue;
-            if ((GET_NAME_GENDER(sim,other_being) == possible_first_name) &&
+            if ((GET_NAME_GENDER(other_being) == possible_first_name) &&
                     (GET_NAME_FAMILY2(sim,other_being) == possible_family_name))
             {
                 found = 0;
@@ -2739,8 +2757,8 @@ static n_int being_set_unique_name(noble_simulation * sim,
         }
         if (found == 1)
         {
-            SET_FIRST_NAME(sim,local_being,possible_first_name);
-            SET_FAMILY_NAME(sim,local_being,
+            being_set_first_name(local_being,possible_first_name);
+            being_set_family_name(local_being,
                             UNPACK_FAMILY_FIRST_NAME(possible_family_name),
                             UNPACK_FAMILY_SECOND_NAME(possible_family_name));
         }
@@ -3274,7 +3292,7 @@ void being_remove(noble_simulation * local_sim)
                 while (child != 0L);
             }
             /** set familiarity to zero so that the entry for the removed being will eventually be overwritten */
-            name = GET_NAME_GENDER(local_sim,b);
+            name = GET_NAME_GENDER(b);
             family_name = GET_NAME_FAMILY2(local_sim,b);
             while (i < end_loop)
             {
@@ -3509,7 +3527,7 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             io_file_xml_open(fp, "personalname");
 
 
-            being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), GET_NAME(sim,child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
+            being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), being_first_name(child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
 
             for (i=0; i<strlen((char*)str); i++)
             {
@@ -3766,7 +3784,7 @@ static void genealogy_birth_gedcom(noble_being * child, noble_being * mother, no
         if (fp != 0L)
         {
 
-            being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), GET_NAME(sim,child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
+            being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), being_first_name(child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
 
             for (i=0; i<strlen((char*)str); i++)
             {

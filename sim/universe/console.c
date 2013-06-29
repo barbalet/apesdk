@@ -371,7 +371,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
 
         /** get the name of the being */
         being_name((FIND_SEX(GET_I(local_being)) == SEX_FEMALE),
-                   GET_NAME(local_sim,local_being), GET_FAMILY_FIRST_NAME(local_sim,local_being),
+                   being_first_name(local_being), GET_FAMILY_FIRST_NAME(local_sim,local_being),
                    GET_FAMILY_SECOND_NAME(local_sim,local_being), name);
 
         j=0;
@@ -446,7 +446,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
 
                 /** get the name of the being */
                 being_name((FIND_SEX(GET_I(local_being)) == SEX_FEMALE),
-                           GET_NAME(local_sim,local_being), GET_FAMILY_FIRST_NAME(local_sim,local_being),
+                           being_first_name(local_being), GET_FAMILY_FIRST_NAME(local_sim,local_being),
                            GET_FAMILY_SECOND_NAME(local_sim,local_being), name);
                 sprintf(beingstr, "%s%s",beingstr ,(n_string)name);
 
@@ -2330,7 +2330,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 
         sprintf(output_value, "%03d   ", (int)(b->honor));
 
-        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(local_sim,b), GET_FAMILY_FIRST_NAME(local_sim,b), GET_FAMILY_SECOND_NAME(local_sim,b), str);
+        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), being_first_name(b), GET_FAMILY_FIRST_NAME(local_sim,b), GET_FAMILY_SECOND_NAME(local_sim,b), str);
         sprintf(output_value, "%s%s", output_value,str);
 
         for (k=0; k<25-io_length(str,STRING_BLOCK_SIZE); k++) sprintf(output_value, "%s ", output_value);
@@ -2464,7 +2464,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                         {
                             /** Avoid memories about yourself, since we're interested
                                in gossip about other beings */
-                            if ((local_episodic[e].first_name[j]!=GET_NAME_GENDER(local_sim,local_being)) ||
+                            if ((local_episodic[e].first_name[j]!=GET_NAME_GENDER(local_being)) ||
                                     (local_episodic[e].family_name[j]!=GET_NAME_FAMILY2(local_sim,local_being)))
                             {
                                 if (((j == BEING_MET) &&

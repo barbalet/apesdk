@@ -562,12 +562,12 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
         GET_H(local_being) = (n_byte2) value;
         break;
     case VARIABLE_FAMILY_NAME_ONE:
-        SET_FAMILY_NAME(local_sim, local_being,
+        being_set_family_name(local_being,
                         UNPACK_FAMILY_FIRST_NAME((n_byte2) value),
                         UNPACK_FAMILY_SECOND_NAME(GET_NAME_FAMILY2(local_sim,local_being)));
         break;
     case VARIABLE_FAMILY_NAME_TWO:
-        SET_FAMILY_NAME(local_sim,local_being,
+        being_set_family_name(local_being,
                         UNPACK_FAMILY_FIRST_NAME(GET_NAME_FAMILY2(local_sim,local_being)),
                         UNPACK_FAMILY_SECOND_NAME((n_byte2) value));
         break;
@@ -859,7 +859,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         local_number = GET_H(local_being);
                         break;
                     case VARIABLE_FIRST_NAME:
-                        local_number = GET_NAME_GENDER(local_sim,local_being);
+                        local_number = GET_NAME_GENDER(local_being);
                         break;
                     case VARIABLE_FAMILY_NAME_ONE:
                         local_number = UNPACK_FAMILY_FIRST_NAME(GET_NAME_FAMILY2(local_sim,local_being));
@@ -1182,7 +1182,7 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     {
         local_being->drives[DRIVE_SEX]  = (n_byte)local_drive_sex;
     }
-    SET_FAMILY_NAME(local_sim,local_being,(n_byte)local_family_name1,(n_byte)local_family_name2);
+    being_set_family_name(local_being,(n_byte)local_family_name1,(n_byte)local_family_name2);
 #ifdef PARASITES_ON
     local_being->honor = (n_byte)local_honor;
     local_being->parasites = (n_byte)local_parasites;

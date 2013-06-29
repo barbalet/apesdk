@@ -97,6 +97,10 @@ n_byte * being_brain(noble_being * value);
 episodic_memory * being_episodic(noble_being * value);
 social_link * being_social(noble_being * value);
 
+n_int being_first_name(noble_being * value);
+
+void being_set_family_name(noble_being * value, n_byte first, n_byte last);
+
 n_int being_location_x(noble_being * value);
 
 n_int being_location_y(noble_being * value);

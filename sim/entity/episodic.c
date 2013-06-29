@@ -152,7 +152,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
         if (local_episodic[i].event >= EVENT_INTENTION)
         {
             /** is this my intention, or someone else's? */
-            if ((local_episodic[i].first_name[BEING_MEETER]==GET_NAME_GENDER(local_sim,local)) &&
+            if ((local_episodic[i].first_name[BEING_MEETER]==GET_NAME_GENDER(local)) &&
                     (local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(local_sim,local)))
             {
 
@@ -222,7 +222,7 @@ n_int episodic_met_being_celebrity(
 {
     n_int i,j,celebrity=0,ctr,aff;
     episodic_memory * meeter_episodic = being_episodic(meeter_being);
-    n_byte2 first_name = GET_NAME_GENDER(local_sim,met_being);
+    n_byte2 first_name = GET_NAME_GENDER(met_being);
     n_byte2 family_name = GET_NAME_FAMILY2(local_sim,met_being);
 
     if (!meeter_episodic) return 0;
@@ -280,7 +280,7 @@ n_int episodic_first_person_memories_percent(
 {
     n_int i,hits=0,memories=0;
     episodic_memory * local_episodic = being_episodic(local);
-    n_byte2 name = GET_NAME_GENDER(local_sim,local);
+    n_byte2 name = GET_NAME_GENDER(local);
     n_byte2 family = GET_NAME_FAMILY2(local_sim,local);
 
     if (local_episodic == 0L)
@@ -487,7 +487,7 @@ static void episodic_store_full(
             n_string_block combination = {0};
             n_int social_event;
 
-            being_name((FIND_SEX(GET_I(local)) == SEX_FEMALE), GET_NAME(local_sim, local), GET_FAMILY_FIRST_NAME(local_sim, local), GET_FAMILY_SECOND_NAME(local_sim, local), str);
+            being_name((FIND_SEX(GET_I(local)) == SEX_FEMALE), being_first_name(local), GET_FAMILY_FIRST_NAME(local_sim, local), GET_FAMILY_SECOND_NAME(local_sim, local), str);
 
             social_event = episode_description(local_sim, local, replace, description);
 
@@ -514,7 +514,7 @@ static void episodic_store_full(
 void episodic_food(noble_simulation * local_sim, noble_being * local, n_int energy, n_byte food_type)
 {
     episodic_store_full(local, EVENT_EAT, energy, local_sim,
-                        GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
+                        GET_NAME_GENDER(local),GET_NAME_FAMILY2(local_sim,local),
                         0, 0, 0, food_type);
 }
 
@@ -557,7 +557,7 @@ void episodic_self(
     n_byte2 arg)
 {
     episodic_store_memory(local, event, affect, local_sim,
-                          GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
+                          GET_NAME_GENDER(local),GET_NAME_FAMILY2(local_sim,local),
                           0, 0, arg);
 }
 /**
@@ -579,7 +579,7 @@ void episodic_close(
 {
     episodic_store_memory(
         local, event, affect, local_sim,
-        GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other),
+        GET_NAME_GENDER(other),GET_NAME_FAMILY2(local_sim,other),
         0,0, arg);
 }
 /**
@@ -601,8 +601,8 @@ void episodic_interaction(
 {
     episodic_store_memory(
         local, event, affect, local_sim,
-        GET_NAME_GENDER(local_sim,local),GET_NAME_FAMILY2(local_sim,local),
-        GET_NAME_GENDER(local_sim,other),GET_NAME_FAMILY2(local_sim,other), arg);
+        GET_NAME_GENDER(local),GET_NAME_FAMILY2(local_sim,local),
+        GET_NAME_GENDER(other),GET_NAME_FAMILY2(local_sim,other), arg);
 }
 
 
@@ -657,7 +657,7 @@ n_byte episodic_intention(
         local_episodic[episode_index].date[1] = date1;
         local_episodic[episode_index].arg = args;
         /** if this was someone else's intention it now becomes yours */
-        local_episodic[episode_index].first_name[BEING_MEETER] = GET_NAME_GENDER(local_sim,local);
+        local_episodic[episode_index].first_name[BEING_MEETER] = GET_NAME_GENDER(local);
         local_episodic[episode_index].family_name[BEING_MEETER] = GET_NAME_FAMILY2(local_sim,local);
         return 1;
     }
@@ -673,7 +673,7 @@ n_byte episodic_intention(
     replace = episodic_memory_replace_index(
                   EVENT_INTENTION + event,
                   (n_int)(local_episodic[episode_index].affect)-EPISODIC_AFFECT_ZERO,
-                  GET_NAME_GENDER(local_sim,local),
+                  GET_NAME_GENDER(local),
                   GET_NAME_FAMILY2(local_sim,local),
                   local_episodic[episode_index].first_name[BEING_MET],
                   local_episodic[episode_index].family_name[BEING_MET],
@@ -686,7 +686,7 @@ n_byte episodic_intention(
     local_episodic[replace].time = time;
     local_episodic[replace].date[0] = date0;
     local_episodic[replace].date[1] = date1;
-    local_episodic[replace].first_name[BEING_MEETER] = GET_NAME_GENDER(local_sim,local);
+    local_episodic[replace].first_name[BEING_MEETER] = GET_NAME_GENDER(local);
     local_episodic[replace].family_name[BEING_MEETER] = GET_NAME_FAMILY2(local_sim,local);
     local_episodic[replace].arg = args;
 
