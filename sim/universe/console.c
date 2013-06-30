@@ -370,9 +370,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
         local_being = &local_sim->beings[i];
 
         /** get the name of the being */
-        being_name((FIND_SEX(GET_I(local_being)) == SEX_FEMALE),
-                   being_first_name(local_being), GET_FAMILY_FIRST_NAME(local_sim,local_being),
-                   GET_FAMILY_SECOND_NAME(local_sim,local_being), name);
+        being_name_simple(local_being, name);
 
         j=0;
         while (name[j++]!=' ');
@@ -445,9 +443,8 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
                 local_being = &local_sim->beings[index[(i+j)*2+1]];
 
                 /** get the name of the being */
-                being_name((FIND_SEX(GET_I(local_being)) == SEX_FEMALE),
-                           being_first_name(local_being), GET_FAMILY_FIRST_NAME(local_sim,local_being),
-                           GET_FAMILY_SECOND_NAME(local_sim,local_being), name);
+                being_name_simple(local_being, name);
+                
                 sprintf(beingstr, "%s%s",beingstr ,(n_string)name);
 
                 if (j < columns-1)
@@ -2330,7 +2327,8 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 
         sprintf(output_value, "%03d   ", (int)(b->honor));
 
-        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), being_first_name(b), GET_FAMILY_FIRST_NAME(local_sim,b), GET_FAMILY_SECOND_NAME(local_sim,b), str);
+        being_name_simple(b, str);
+        
         sprintf(output_value, "%s%s", output_value,str);
 
         for (k=0; k<25-io_length(str,STRING_BLOCK_SIZE); k++) sprintf(output_value, "%s ", output_value);

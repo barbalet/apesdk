@@ -487,7 +487,7 @@ static void episodic_store_full(
             n_string_block combination = {0};
             n_int social_event;
 
-            being_name((FIND_SEX(GET_I(local)) == SEX_FEMALE), being_first_name(local), GET_FAMILY_FIRST_NAME(local_sim, local), GET_FAMILY_SECOND_NAME(local_sim, local), str);
+            being_name_simple(local, str);
 
             social_event = episode_description(local_sim, local, replace, description);
 

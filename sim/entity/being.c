@@ -200,6 +200,24 @@ void being_set_family_name(noble_being * value, n_byte first, n_byte last)
     local_social->family_name[BEING_MET] = GET_NAME_FAMILY(first,last);
 }
 
+n_int being_family_first_name(noble_being * value)
+{
+    social_link * local_social = being_social(value);
+    return UNPACK_FAMILY_FIRST_NAME(local_social->family_name[BEING_MET]);
+}
+
+n_int being_family_second_name(noble_being * value)
+{
+    social_link * local_social = being_social(value);
+    return UNPACK_FAMILY_SECOND_NAME(local_social->family_name[BEING_MET]);
+}
+
+void being_name_simple(noble_being * value, n_string str)
+{
+    being_name((FIND_SEX(GET_I(value)) == SEX_FEMALE), being_first_name(value), being_family_first_name(value), being_family_second_name(value), str);
+}
+
+
 n_byte * being_brain(noble_being * value)
 {
     return value->brain;
@@ -522,7 +540,8 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
     {
         n_string_block str;
         b = &sim->beings[i];
-        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), being_first_name(b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), str);
+        
+        being_name_simple(b, str);
 
         io_lower(str, io_length(str,STRING_BLOCK_SIZE));
 
@@ -558,7 +577,7 @@ n_string being_get_select_name(noble_simulation * sim)
     else
     {
         b = &sim->beings[sim->select];
-        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), being_first_name(b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), name);
+        being_name_simple(b, name);
     }
     return (n_string)name;
 }
@@ -1974,8 +1993,8 @@ static void being_listen(noble_simulation * sim,
             {
                 max_shout_volume = other->shout[SHOUT_VOLUME];
                 local->shout[SHOUT_HEARD] = other->shout[SHOUT_CONTENT];
-                local->shout[SHOUT_FAMILY0] = GET_FAMILY_FIRST_NAME(sim,other);
-                local->shout[SHOUT_FAMILY1] = GET_FAMILY_SECOND_NAME(sim,other);
+                local->shout[SHOUT_FAMILY0] = being_family_first_name(other);
+                local->shout[SHOUT_FAMILY1] = being_family_second_name(other);
             }
         }
     }
@@ -3526,8 +3545,7 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
 
             io_file_xml_open(fp, "personalname");
 
-
-            being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), being_first_name(child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
+            being_name_simple(child, (n_string)str);
 
             for (i=0; i<strlen((char*)str); i++)
             {
@@ -3783,8 +3801,7 @@ static void genealogy_birth_gedcom(noble_being * child, noble_being * mother, no
 
         if (fp != 0L)
         {
-
-            being_name((FIND_SEX(GET_I(child)) == SEX_FEMALE), being_first_name(child), GET_FAMILY_FIRST_NAME(sim,child), GET_FAMILY_SECOND_NAME(sim,child), (n_string)str);
+            being_name_simple(child, (n_string)str);
 
             for (i=0; i<strlen((char*)str); i++)
             {

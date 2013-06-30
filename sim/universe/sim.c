@@ -769,8 +769,8 @@ static void sim_indicators(noble_simulation * sim)
 #endif
 
         /* family */
-        family[0]+=GET_FAMILY_FIRST_NAME(sim,local_being);
-        family[1]+=GET_FAMILY_SECOND_NAME(sim,local_being);
+        family[0]+=being_family_first_name(local_being);
+        family[1]+=being_family_second_name(local_being);
 
         /* drives */
         for (dd=DRIVE_HUNGER; dd<DRIVES; dd++)
@@ -908,9 +908,9 @@ static void sim_indicators(noble_simulation * sim)
     {
         local_being = &(sim->beings[b]);
 
-        diff = (n_int)ABS(GET_FAMILY_FIRST_NAME(sim,local_being) - (n_int)family[0]);
+        diff = (n_int)ABS(being_family_first_name(local_being) - (n_int)family[0]);
         sd += (n_uint)diff;
-        diff = (n_int)ABS(GET_FAMILY_SECOND_NAME(sim,local_being) - (n_int)family[1]);
+        diff = (n_int)ABS(being_family_second_name(local_being) - (n_int)family[1]);
         sd += (n_uint)diff;
     }
 

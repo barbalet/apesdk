@@ -1096,8 +1096,8 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
     variables[VARIABLE_DRIVE_SOCIAL - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_SOCIAL];
     variables[VARIABLE_DRIVE_FATIGUE - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_FATIGUE];
     variables[VARIABLE_DRIVE_SEX - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_SEX];
-    variables[VARIABLE_FAMILY_NAME_ONE - VARIABLE_VECT_ANGLE] = GET_FAMILY_FIRST_NAME(local_sim,local_being);
-    variables[VARIABLE_FAMILY_NAME_TWO - VARIABLE_VECT_ANGLE] = GET_FAMILY_SECOND_NAME(local_sim,local_being);
+    variables[VARIABLE_FAMILY_NAME_ONE - VARIABLE_VECT_ANGLE] = being_family_first_name(local_being);
+    variables[VARIABLE_FAMILY_NAME_TWO - VARIABLE_VECT_ANGLE] = being_family_second_name(local_being);
 #ifdef PARASITES_ON
     variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE] = local_being->honor;
     variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE] = local_being->parasites;

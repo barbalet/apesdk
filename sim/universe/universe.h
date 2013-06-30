@@ -1572,10 +1572,7 @@ noble_simulation;
 #define GET_NAME_FAMILY(f0,f1) (f0|(f1<<6))
 
 #define GET_NAME_GENDER(bei) (being_first_name(bei) | (FIND_SEX(GET_I(bei))<<8))
-#define GET_NAME_FAMILY2(sim,bei) (GET_NAME_FAMILY(GET_FAMILY_FIRST_NAME(sim,bei),GET_FAMILY_SECOND_NAME(sim,bei)))
-
-#define GET_FAMILY_FIRST_NAME(sim,bei) (UNPACK_FAMILY_FIRST_NAME(GET_SELF(sim,bei).family_name[BEING_MET]))
-#define GET_FAMILY_SECOND_NAME(sim,bei) (UNPACK_FAMILY_SECOND_NAME(GET_SELF(sim,bei).family_name[BEING_MET]))
+#define GET_NAME_FAMILY2(sim,bei) (GET_NAME_FAMILY(being_family_first_name(bei),being_family_second_name(bei)))
 
 typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local_being, n_string result);
 

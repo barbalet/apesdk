@@ -846,8 +846,8 @@ n_byte2 social_squabble(
 
 
     /** battle with rival families */
-    if ((GET_FAMILY_FIRST_NAME(sim,meeter_being) != GET_FAMILY_FIRST_NAME(sim,met_being)) &&
-            (GET_FAMILY_SECOND_NAME(sim,meeter_being) != GET_FAMILY_SECOND_NAME(sim,met_being)))
+    if ((being_family_first_name(meeter_being) != being_family_first_name(met_being)) &&
+            (being_family_second_name(meeter_being) != being_family_second_name(met_being)))
     {
         being_facing_towards(meeter_being, &delta);
 

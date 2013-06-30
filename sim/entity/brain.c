@@ -913,13 +913,13 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 4:
         return meeter_being->crowding;
     case 5:
-        return GET_FAMILY_FIRST_NAME(sim,meeter_being);
+        return being_family_first_name(meeter_being);
     case 6:
-        return GET_FAMILY_SECOND_NAME(sim,meeter_being);
+        return being_family_second_name(meeter_being);
     case 7:
-        return GET_FAMILY_FIRST_NAME(sim,met_being);
+        return being_family_first_name(met_being);
     case 8:
-        return GET_FAMILY_SECOND_NAME(sim,met_being);
+        return being_family_second_name(met_being);
     case 9:
         return being_facing(meeter_being);
     case 10:

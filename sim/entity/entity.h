@@ -101,6 +101,12 @@ n_int being_first_name(noble_being * value);
 
 void being_set_family_name(noble_being * value, n_byte first, n_byte last);
 
+n_int being_family_first_name(noble_being * value);
+
+n_int being_family_second_name(noble_being * value);
+
+void being_name_simple(noble_being * value, n_string str);
+
 n_int being_location_x(noble_being * value);
 
 n_int being_location_y(noble_being * value);
