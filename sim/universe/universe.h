@@ -1571,9 +1571,6 @@ noble_simulation;
 #define UNPACK_FAMILY_SECOND_NAME(packed_family_name) (packed_family_name>>6)
 #define GET_NAME_FAMILY(f0,f1) (f0|(f1<<6))
 
-#define GET_NAME_GENDER(bei) (being_first_name(bei) | (FIND_SEX(GET_I(bei))<<8))
-#define GET_NAME_FAMILY2(sim,bei) (GET_NAME_FAMILY(being_family_first_name(bei),being_family_second_name(bei)))
-
 typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local_being, n_string result);
 
 typedef void (line_braincode)(n_string pointer, n_int line);

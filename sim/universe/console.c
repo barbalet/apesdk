@@ -2462,8 +2462,8 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                         {
                             /** Avoid memories about yourself, since we're interested
                                in gossip about other beings */
-                            if ((local_episodic[e].first_name[j]!=GET_NAME_GENDER(local_being)) ||
-                                    (local_episodic[e].family_name[j]!=GET_NAME_FAMILY2(local_sim,local_being)))
+                            if ((local_episodic[e].first_name[j] != being_gender_name(local_being)) ||
+                                    (local_episodic[e].family_name[j] != being_family_name(local_being)))
                             {
                                 if (((j == BEING_MET) &&
                                         (local_episodic[e].event != EVENT_SEEK_MATE) &&

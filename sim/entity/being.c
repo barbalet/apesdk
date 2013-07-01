@@ -167,8 +167,8 @@ static void being_replace(noble_being * local, n_uint count, n_uint loop)
 
 static void being_erase(noble_being * value)
 {
-    n_byte       * new_brain = value->brain;
-    social_link * new_event = value->social;
+    n_byte          * new_brain = value->brain;
+    social_link     * new_event = value->social;
     episodic_memory * new_episodic = value->episodic;
     
     io_erase((n_byte*)value, sizeof(noble_being));
@@ -198,6 +198,16 @@ void being_set_family_name(noble_being * value, n_byte first, n_byte last)
 {
     social_link * local_social = being_social(value);
     local_social->family_name[BEING_MET] = GET_NAME_FAMILY(first,last);
+}
+
+n_int being_gender_name(noble_being * value)
+{
+    return (being_first_name(value) | (FIND_SEX(GET_I(value))<<8));
+}
+
+n_int being_family_name(noble_being * value)
+{
+    return (GET_NAME_FAMILY(being_family_first_name(value),being_family_second_name(value)));
 }
 
 n_int being_family_first_name(noble_being * value)
@@ -1004,8 +1014,8 @@ noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_by
     {
         noble_being * local = &(sim->beings[loop]);
 
-        if ( (GET_NAME_GENDER(local) == first_gender) &&
-                (GET_NAME_FAMILY2(sim,local) == family) )
+        if ( (being_gender_name(local) == first_gender) &&
+                (being_family_name(local) == family) )
         {
             return local;
         }
@@ -1253,8 +1263,8 @@ n_int episode_description(
     }
 
     if ((local_episodic[index].event>0) &&
-            (local_episodic[index].first_name[0]==GET_NAME_GENDER(local_being)) &&
-            (local_episodic[index].family_name[0]==GET_NAME_FAMILY2(sim,local_being)))
+            (local_episodic[index].first_name[0] == being_gender_name(local_being)) &&
+            (local_episodic[index].family_name[0] == being_family_name(local_being)))
     {
         being_name(((local_episodic[index].first_name[BEING_MET]>>8) == SEX_FEMALE),
                    local_episodic[index].first_name[BEING_MET]&255,
@@ -1887,8 +1897,8 @@ static int being_follow(noble_simulation * sim,
             {
                 /** get the name of the other being */
                 noble_being * other = &being_buffer[i];
-                n_byte2 other_first_name = GET_NAME_GENDER(other);
-                n_byte2 other_family_name = GET_NAME_FAMILY2(sim,other);
+                n_byte2 other_first_name = being_gender_name(other);
+                n_byte2 other_family_name = being_family_name(other);
                 /** is this the same as the name of the being to which we are paying attention? */
                 if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(local))) &&
                         (local->goal[1]==other_first_name) &&
@@ -1925,8 +1935,8 @@ static int being_follow(noble_simulation * sim,
             {
                 /** get the name of the other being */
                 noble_being * other = &being_buffer[i];
-                n_byte2 other_first_name = GET_NAME_GENDER(other);
-                n_byte2 other_family_name = GET_NAME_FAMILY2(sim,other);
+                n_byte2 other_first_name = being_gender_name(other);
+                n_byte2 other_family_name = being_family_name(other);
                 /** is this the same as the name of the being to which we are paying attention? */
                 if ((local_social_graph[social_graph_index].first_name[BEING_MET]==other_first_name) &&
                         (local_social_graph[social_graph_index].family_name[BEING_MET]==other_family_name))
@@ -2767,8 +2777,8 @@ static n_int being_set_unique_name(noble_simulation * sim,
         {
             noble_being * other_being = &sim->beings[i];
             if (other_being == local_being) continue;
-            if ((GET_NAME_GENDER(other_being) == possible_first_name) &&
-                    (GET_NAME_FAMILY2(sim,other_being) == possible_family_name))
+            if ((being_gender_name(other_being) == possible_first_name) &&
+                    (being_family_name(other_being) == possible_family_name))
             {
                 found = 0;
                 break;
@@ -2804,7 +2814,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
     {
         /** this is the being to be born */
         noble_being * local = &(sim->beings[sim->num]);
-        n_land  * land  = sim->land;
+        n_land      * land  = sim->land;
         n_byte        ch;
         n_byte      * brain_memory;
 #ifdef EPISODIC_ON
@@ -2848,29 +2858,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
 #ifdef BRAINCODE_ON
 
-#undef BARBALET_VERSION
-
-#ifdef BARBALET_VERSION
-        for (ch = 0; ch < BRAINCODE_SIZE; ch+=3)
-        {
-            math_random3(local_random);
-            GET_BRAINCODE_INTERNAL(sim,local)[ch] =
-                (math_random(local_random) & 192) |
-                (math_random(local_random) % (BRAINCODE_DAT+1));
-            GET_BRAINCODE_INTERNAL(sim,local)[ch+1] =
-                math_random(local_random) & 255;
-            GET_BRAINCODE_INTERNAL(sim,local)[ch+2] =
-                math_random(local_random) & 255;
-            math_random3(local_random);
-            GET_BRAINCODE_EXTERNAL(sim,local)[ch] =
-                (math_random(local_random) & 192) |
-                (math_random(local_random) % (BRAINCODE_DAT+1));
-            GET_BRAINCODE_EXTERNAL(sim,local)[ch+1] =
-                math_random(local_random) & 255;
-            GET_BRAINCODE_EXTERNAL(sim,local)[ch+2] =
-                math_random(local_random) & 255;
-        }
-#else
         /** initially seed the brain with instructions which
         	are genetically biased */
 
@@ -2905,8 +2892,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
                              BRAINCODE_INTERNAL);
         being_init_braincode(sim,local,0L,local->seed,0,
                              BRAINCODE_EXTERNAL);
-
-#endif
 
         /** randomly initialize registers */
         for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
@@ -3020,7 +3005,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
                          mother->father_genetics);
 
             being_set_unique_name(sim,local,random_factor,
-                                  GET_NAME_FAMILY2(sim,mother),
+                                  being_family_name(mother),
                                   mother->father_name[1]);
 
             /** set the maternal generation number */
@@ -3311,8 +3296,8 @@ void being_remove(noble_simulation * local_sim)
                 while (child != 0L);
             }
             /** set familiarity to zero so that the entry for the removed being will eventually be overwritten */
-            name = GET_NAME_GENDER(b);
-            family_name = GET_NAME_FAMILY2(local_sim,b);
+            name = being_gender_name(b);
+            family_name = being_family_name(b);
             while (i < end_loop)
             {
                 if (being_energy(&(local[i])) != BEING_DEAD)

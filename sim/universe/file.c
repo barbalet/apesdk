@@ -564,11 +564,11 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
     case VARIABLE_FAMILY_NAME_ONE:
         being_set_family_name(local_being,
                         UNPACK_FAMILY_FIRST_NAME((n_byte2) value),
-                        UNPACK_FAMILY_SECOND_NAME(GET_NAME_FAMILY2(local_sim,local_being)));
+                        UNPACK_FAMILY_SECOND_NAME(being_family_name(local_being)));
         break;
     case VARIABLE_FAMILY_NAME_TWO:
         being_set_family_name(local_being,
-                        UNPACK_FAMILY_FIRST_NAME(GET_NAME_FAMILY2(local_sim,local_being)),
+                        UNPACK_FAMILY_FIRST_NAME(being_family_name(local_being)),
                         UNPACK_FAMILY_SECOND_NAME((n_byte2) value));
         break;
     case VARIABLE_GOAL_TYPE:
@@ -859,13 +859,13 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         local_number = GET_H(local_being);
                         break;
                     case VARIABLE_FIRST_NAME:
-                        local_number = GET_NAME_GENDER(local_being);
+                        local_number = being_gender_name(local_being);
                         break;
                     case VARIABLE_FAMILY_NAME_ONE:
-                        local_number = UNPACK_FAMILY_FIRST_NAME(GET_NAME_FAMILY2(local_sim,local_being));
+                        local_number = UNPACK_FAMILY_FIRST_NAME(being_family_name(local_being));
                         break;
                     case VARIABLE_FAMILY_NAME_TWO:
-                        local_number = UNPACK_FAMILY_SECOND_NAME(GET_NAME_FAMILY2(local_sim,local_being));
+                        local_number = UNPACK_FAMILY_SECOND_NAME(being_family_name(local_being));
                         break;
                     case VARIABLE_GOAL_TYPE:
                         local_number = local_being->goal[0];

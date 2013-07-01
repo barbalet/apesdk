@@ -151,8 +151,8 @@ static void drives_sex(
                         if (local_episodic[i].event == EVENT_MATE)
                         {
                             /** not someone else's mate */
-                            if ((local_episodic[i].first_name[BEING_MEETER]==GET_NAME_GENDER(local)) &&
-                                    (local_episodic[i].family_name[BEING_MEETER]==GET_NAME_FAMILY2(local_sim,local)))
+                            if ((local_episodic[i].first_name[BEING_MEETER] == being_gender_name(local)) &&
+                                    (local_episodic[i].family_name[BEING_MEETER] == being_family_name(local)))
                             {
                                 /** set a goal to seek the remembered mate */
                                 local->goal[0]=GOAL_MATE;
@@ -163,7 +163,7 @@ static void drives_sex(
                                 episodic_store_memory(
                                     local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                     local_sim,
-                                    GET_NAME_GENDER(local),GET_NAME_FAMILY2(local_sim,local),
+                                    being_gender_name(local), being_family_name(local),
                                     local->goal[1], local->goal[2],0);
                                 break;
                             }
@@ -200,7 +200,7 @@ static void drives_sex(
                             episodic_store_memory(
                                 local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                 local_sim,
-                                GET_NAME_GENDER(local),GET_NAME_FAMILY2(local_sim,local),
+                                being_gender_name(local), being_family_name(local),
                                 local->goal[1], local->goal[2],0);
                         }
                     }

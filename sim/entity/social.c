@@ -378,8 +378,8 @@ n_int get_social_link(
     noble_being * met_being,
     noble_simulation * sim)
 {
-    n_byte2 name = GET_NAME_GENDER(met_being);
-    n_byte2 i,family_name = GET_NAME_FAMILY2(sim,met_being);
+    n_byte2 name = being_gender_name(met_being);
+    n_byte2 i,family_name = being_family_name(met_being);
     social_link * graph = being_social(meeter_being);
 
     if (!graph) return -1;
@@ -517,11 +517,11 @@ static n_int social_meet(
             graph[index].entity_type = ENTITY_BEING;
 
             /** who did the meeting */
-            graph[index].first_name[BEING_MEETER] = GET_NAME_GENDER(meeter_being);
-            graph[index].family_name[BEING_MEETER] = GET_NAME_FAMILY2(sim,meeter_being);
+            graph[index].first_name[BEING_MEETER] = being_gender_name(meeter_being);
+            graph[index].family_name[BEING_MEETER] = being_family_name(meeter_being);
             /** who was met */
-            graph[index].first_name[BEING_MET] = GET_NAME_GENDER(met_being);
-            graph[index].family_name[BEING_MET] = GET_NAME_FAMILY2(sim,met_being);
+            graph[index].first_name[BEING_MET] = being_gender_name(met_being);
+            graph[index].family_name[BEING_MET] = being_family_name(met_being);
 
             /** initially no attraction */
             graph[index].attraction = 0;
@@ -1017,7 +1017,7 @@ static void social_conception(
     genetics_set(female->father_genetics, being_genetics(male));
 
     female->father_honor     = male->honor;
-    female->father_name[0]   = GET_NAME_GENDER(male);
+    female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
 
     /** generation number of the child's father */
