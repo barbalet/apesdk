@@ -1238,8 +1238,8 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
             sim.num = 0;
             while (sim.num < count_to)
             {
-                (void)math_random(local_random);
-                (void)being_init(&sim, 0L, local_random[0], 1);
+                math_random3(local_random);
+                being_init(&sim, 0L, local_random);
             }
         }
     }

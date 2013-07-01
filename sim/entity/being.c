@@ -2478,8 +2478,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
                 /** Birth */
                 if (being_child == 0L)
-                {
-                    (void)being_init(sim, local, -1, 0);
+                {                    
+                    being_init(sim, local, 0L);
                     loc_state |= BEING_STATE_REPRODUCING;
                     being_child = &(sim->beings[sim->num-1]);
                     episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
@@ -2708,9 +2708,9 @@ void being_init_braincode(noble_simulation * sim,
 
 static n_int being_set_unique_name(noble_simulation * sim,
                                    noble_being * local_being,
-                                   n_int random_factor,
-                                   n_byte2 mother_family_name,
-                                   n_byte2 father_family_name)
+                                   n_byte2 * random_factor,
+                                   n_byte2   mother_family_name,
+                                   n_byte2   father_family_name)
 {
     n_uint i;
     n_int samples=0,found=0;
@@ -2718,9 +2718,10 @@ static n_int being_set_unique_name(noble_simulation * sim,
     n_byte2 possible_first_name;
     n_byte2 local_random[2];
 
+    local_random[0] = random_factor[0];
+    local_random[1] = random_factor[1];
+    
     /** random number initialization */
-    local_random[0] = (n_byte2)(random_factor & 0xffff);
-    local_random[1] = (n_byte2)(random_factor & 0xffff);
     math_random3(local_random);
 
     /** if no mother and father are specified then randomly create names */
@@ -2801,15 +2802,14 @@ static n_int being_set_unique_name(noble_simulation * sim,
  * @param sim Pointer to the simulation object
  * @param mother Pointer to the mother
  * @param random_factor Random seed
- * @param first_generation If non zero this is the first generation
  * @return 0
  */
-n_int being_init(noble_simulation * sim, noble_being * mother,
-                 n_int random_factor, n_byte first_generation)
+void being_init(noble_simulation * sim, noble_being * mother,
+                 n_byte2* random_factor)
 {
 
     if((sim->num + 1) >= sim->max)
-        return 0;
+        return;
 
     {
         /** this is the being to be born */
@@ -2862,12 +2862,12 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         	are genetically biased */
 
 
-        if (random_factor > -1)
+        if (random_factor)
         {
-            local->seed[0] = (n_byte2)(random_factor & 0xffff);
-            local->seed[1] = (n_byte2)(random_factor & 0xffff);
+            local->seed[0] = random_factor[0];
+            local->seed[1] = random_factor[1];
         }
-        else
+        else if (mother)
         {
             mother_genetics = being_genetics(mother);
             local->seed[0] = mother->seed[1];
@@ -2883,7 +2883,12 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             local->seed[1] = sim->land->time;
 
             math_random3(local->seed);
-
+        }
+        else
+        {
+            NA_ASSERT(random_factor, "Random factor not set");
+            NA_ASSERT(mother, "Mother not set");
+            return;
         }
 
         math_random3(local->seed);
@@ -2897,7 +2902,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
         for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
         {
             math_random3(local->seed);
-            local->braincode_register[ch]=(n_byte)local->seed[0];
+            local->braincode_register[ch]=(n_byte)(local->seed[0] & 255);
         }
 
         /** initialize brainprobes */
@@ -2955,8 +2960,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
         being_facing_init(local);
 
-        being_set_unique_name(sim,local,random_factor,0,0);
-        if(random_factor > -1)
+        if (random_factor)
         {
             n_byte2  location[2];
 
@@ -2974,6 +2978,8 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
             being_set_location(local, location);
 
+            being_set_unique_name(sim, local, local->seed, 0, 0);
+            
             body_genome_random(sim, local, local->seed);
 
             local->social_x = local->social_nx =
@@ -3004,7 +3010,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
             genetics_set(local->father_genetics,
                          mother->father_genetics);
 
-            being_set_unique_name(sim,local,random_factor,
+            being_set_unique_name(sim, local, local->seed,
                                   being_family_name(mother),
                                   mother->father_name[1]);
 
@@ -3040,7 +3046,7 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 
         local->date_of_birth[0] = land->date[0];
         local->date_of_birth[1] = land->date[1];
-        if (first_generation == 0)
+        if (random_factor)
         {
             GET_H(local) = BIRTH_HEIGHT;
             GET_M(local) = BIRTH_MASS;
@@ -3086,8 +3092,6 @@ n_int being_init(noble_simulation * sim, noble_being * mother,
 #endif
     }
     sim->num++;
-
-    return 0;
 }
 
 
