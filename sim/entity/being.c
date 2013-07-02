@@ -2479,7 +2479,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 /** Birth */
                 if (being_child == 0L)
                 {                    
-                    being_init(sim, local, 0L);
+                    (void)being_init(sim, local, 0L);
                     loc_state |= BEING_STATE_REPRODUCING;
                     being_child = &(sim->beings[sim->num-1]);
                     episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
@@ -2804,12 +2804,12 @@ static n_int being_set_unique_name(noble_simulation * sim,
  * @param random_factor Random seed
  * @return 0
  */
-void being_init(noble_simulation * sim, noble_being * mother,
+n_int being_init(noble_simulation * sim, noble_being * mother,
                  n_byte2* random_factor)
 {
 
     if((sim->num + 1) >= sim->max)
-        return;
+        return SHOW_ERROR("Maximum number of beings reached");
 
     {
         /** this is the being to be born */
@@ -2888,7 +2888,7 @@ void being_init(noble_simulation * sim, noble_being * mother,
         {
             NA_ASSERT(random_factor, "Random factor not set");
             NA_ASSERT(mother, "Mother not set");
-            return;
+            return SHOW_ERROR("No correct being initial interface provided");
         }
 
         math_random3(local->seed);
@@ -3092,6 +3092,8 @@ void being_init(noble_simulation * sim, noble_being * mother,
 #endif
     }
     sim->num++;
+    
+    return 0;
 }
 
 
