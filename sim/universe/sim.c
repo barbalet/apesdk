@@ -600,8 +600,8 @@ static void sim_brain(noble_simulation * local_sim)
 static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_being * local_being)
 {
     n_byte     awake = 1;
-    n_byte    *local_internal = GET_BRAINCODE_INTERNAL(local_sim,local_being);
-    n_byte    *local_external = GET_BRAINCODE_EXTERNAL(local_sim,local_being);
+    n_byte    *local_internal = GET_BRAINCODE_INTERNAL(local_being);
+    n_byte    *local_external = GET_BRAINCODE_EXTERNAL(local_being);
     if(being_awake(&sim, local_being) == 0)
     {
         awake=0;
@@ -811,8 +811,8 @@ static void sim_indicators(noble_simulation * sim)
         /* average braincode */
         for (n=0; n<BRAINCODE_SIZE; n++)
         {
-            mean_braincode[n] += (n_uint)GET_BRAINCODE_INTERNAL(sim,local_being)[n];
-            mean_braincode[n+BRAINCODE_SIZE] += (n_uint)GET_BRAINCODE_EXTERNAL(sim,local_being)[n];
+            mean_braincode[n] += (n_uint)GET_BRAINCODE_INTERNAL(local_being)[n];
+            mean_braincode[n+BRAINCODE_SIZE] += (n_uint)GET_BRAINCODE_EXTERNAL(local_being)[n];
         }
 #endif
 
@@ -961,10 +961,10 @@ static void sim_indicators(noble_simulation * sim)
         local_being = &(sim->beings[b]);
         for (n=0; n<BRAINCODE_SIZE; n++)
         {
-            diff = ABS((n_int)(GET_BRAINCODE_INTERNAL(sim,local_being)[n]) - (n_int)mean_braincode[n]);
+            diff = ABS((n_int)(GET_BRAINCODE_INTERNAL(local_being)[n]) - (n_int)mean_braincode[n]);
             sd += (n_uint)diff;
 
-            diff = ABS((n_int)(GET_BRAINCODE_EXTERNAL(sim,local_being)[n]) - (n_int)mean_braincode[n+BRAINCODE_SIZE]);
+            diff = ABS((n_int)(GET_BRAINCODE_EXTERNAL(local_being)[n]) - (n_int)mean_braincode[n+BRAINCODE_SIZE]);
             sd += (n_uint)diff;
         }
     }
@@ -1239,7 +1239,18 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
             while (sim.num < count_to)
             {
                 math_random3(local_random);
-                (void)being_init(&sim, 0L, local_random);
+                if((sim.num + 1) < sim.max)
+                {
+                    if (being_init(sim.land, sim.beings, sim.num, &sim.beings[sim.num], 0L, local_random) != 0)
+                    {
+                        being_erase(&sim.beings[sim.num]);
+                        break;
+                    }
+                    else
+                    {
+                        sim.num++;
+                    }
+                }
             }
         }
     }

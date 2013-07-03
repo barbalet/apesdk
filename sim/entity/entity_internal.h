@@ -53,8 +53,7 @@ enum sleep_state
 #define OFFSET_GRASS    40
 #define OFFSET_BUSH     14
 
-void body_genome_random(noble_simulation * sim, noble_being * local, n_byte2 * local_random);
-void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mother, n_byte2 * local_random);
+void body_genetics(noble_being * beings, n_int number, noble_being * local, noble_being * mother, n_byte2 * local_random);
 
 n_int food_eat(
     n_land * local_land,
@@ -149,8 +148,7 @@ n_byte episodic_anecdote(
     noble_being * local,
     noble_being * other);
 
-void being_init_braincode(noble_simulation * sim,
-                          noble_being * local,
+void being_init_braincode(noble_being * local,
                           noble_being * other,
                           n_byte2* local_random,
                           n_byte friend_foe,

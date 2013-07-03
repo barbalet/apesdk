@@ -165,7 +165,7 @@ static void being_replace(noble_being * local, n_uint count, n_uint loop)
     }
 }
 
-static void being_erase(noble_being * value)
+void being_erase(noble_being * value)
 {
     n_byte          * new_brain = value->brain;
     social_link     * new_event = value->social;
@@ -1688,7 +1688,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 
             if (local->brainprobe[i].type == INPUT_SENSOR)
             {
-                n_byte * local_braincode = GET_BRAINCODE_INTERNAL(sim,local);
+                n_byte * local_braincode = GET_BRAINCODE_INTERNAL(local);
                 /** address within braincode */
                 n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
                 n_int n3 = (brain_point[n1] + local->brainprobe[i].offset)&255;
@@ -2478,12 +2478,23 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
                 /** Birth */
                 if (being_child == 0L)
-                {                    
-                    (void)being_init(sim, local, 0L);
-                    loc_state |= BEING_STATE_REPRODUCING;
-                    being_child = &(sim->beings[sim->num-1]);
-                    episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
-                    being_create_family_links(local,being_child,sim);
+                {
+                    if((sim->num + 1) < sim->max)
+                    {
+                        being_child = &(sim->beings[sim->num]);
+
+                        if (being_init(sim->land, sim->beings, sim->num, being_child, local, 0L) == 0)
+                        {
+                            loc_state |= BEING_STATE_REPRODUCING;
+                            episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
+                            being_create_family_links(local,being_child,sim);
+                            if (sim->ext_birth != 0)
+                            {
+                                sim->ext_birth(being_child,local,sim);
+                            }
+                            sim->num++;
+                        }
+                    }
                 }
                 else
                 {
@@ -2622,8 +2633,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
 
 /** initialise inner or outer braincode */
-void being_init_braincode(noble_simulation * sim,
-                          noble_being * local,
+void being_init_braincode(noble_being * local,
                           noble_being * other,
                           n_byte2* local_random,
                           n_byte friend_foe,
@@ -2641,22 +2651,22 @@ void being_init_braincode(noble_simulation * sim,
             if (internal!=0)
             {
 #ifdef RANDOM_INITIAL_BRAINCODE
-                GET_BRAINCODE_INTERNAL(sim,local)[ch] = math_random(local_random) & 255;
+                GET_BRAINCODE_INTERNAL(local)[ch] = math_random(local_random) & 255;
 #else
-                GET_BRAINCODE_INTERNAL(sim,local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+                GET_BRAINCODE_INTERNAL(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
-                GET_BRAINCODE_INTERNAL(sim,local)[ch+1] = math_random(local_random) & 255;
-                GET_BRAINCODE_INTERNAL(sim,local)[ch+2] = math_random(local_random) & 255;
+                GET_BRAINCODE_INTERNAL(local)[ch+1] = math_random(local_random) & 255;
+                GET_BRAINCODE_INTERNAL(local)[ch+2] = math_random(local_random) & 255;
             }
             else
             {
 #ifdef RANDOM_INITIAL_BRAINCODE
-                GET_BRAINCODE_INTERNAL(sim,local)[ch] = math_random(local_random) & 255;
+                GET_BRAINCODE_INTERNAL(local)[ch] = math_random(local_random) & 255;
 #else
-                GET_BRAINCODE_EXTERNAL(sim,local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+                GET_BRAINCODE_EXTERNAL(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
-                GET_BRAINCODE_EXTERNAL(sim,local)[ch+1] = math_random(local_random) & 255;
-                GET_BRAINCODE_EXTERNAL(sim,local)[ch+2] = math_random(local_random) & 255;
+                GET_BRAINCODE_EXTERNAL(local)[ch+1] = math_random(local_random) & 255;
+                GET_BRAINCODE_EXTERNAL(local)[ch+2] = math_random(local_random) & 255;
             }
         }
     }
@@ -2706,7 +2716,8 @@ void being_init_braincode(noble_simulation * sim,
 
 /** Assign a unique name to the given being, based upon the given family names */
 
-static n_int being_set_unique_name(noble_simulation * sim,
+static n_int being_set_unique_name(noble_being * beings,
+                                   n_int number,
                                    noble_being * local_being,
                                    n_byte2 * random_factor,
                                    n_byte2   mother_family_name,
@@ -2774,9 +2785,9 @@ static n_int being_set_unique_name(noble_simulation * sim,
 
         /** does the name already exist in the population */
         found = 1;
-        for (i = 0; i < sim->num; i++)
+        for (i = 0; i < number; i++)
         {
-            noble_being * other_being = &sim->beings[i];
+            noble_being * other_being = &beings[i];
             if (other_being == local_being) continue;
             if ((being_gender_name(other_being) == possible_first_name) &&
                     (being_family_name(other_being) == possible_family_name))
@@ -2804,295 +2815,297 @@ static n_int being_set_unique_name(noble_simulation * sim,
  * @param random_factor Random seed
  * @return 0
  */
-n_int being_init(noble_simulation * sim, noble_being * mother,
+n_int being_init(n_land * land, noble_being * beings, n_int number,
+                 noble_being * local, noble_being * mother,
                  n_byte2* random_factor)
 {
-
-    if((sim->num + 1) >= sim->max)
-        return SHOW_ERROR("Maximum number of beings reached");
-
-    {
-        /** this is the being to be born */
-        noble_being * local = &(sim->beings[sim->num]);
-        n_land      * land  = sim->land;
-        n_byte        ch;
-        n_byte      * brain_memory;
+    /** this is the being to be born */
+    n_byte        ch;
+    n_byte      * brain_memory;
 #ifdef EPISODIC_ON
-        social_link * local_social_graph = being_social(local);
-        episodic_memory * local_episodic = being_episodic(local);
+    social_link * local_social_graph = being_social(local);
+    episodic_memory * local_episodic = being_episodic(local);
 #endif
-        n_genetics * mother_genetics = 0L;
+    n_genetics * mother_genetics = 0L;
 
-        being_erase(local);
+    if (local_social_graph == 0L)
+    {
+        return SHOW_ERROR("Social memory not available");
+    }
+    if (local_episodic == 0L)
+    {
+        return SHOW_ERROR("Episodic memory not available");
+    }
+    
+    being_erase(local);
 
-        brain_memory = being_brain(local);
+    brain_memory = being_brain(local);
 
-        if (brain_memory != 0L)
-        {
-            io_erase(brain_memory, DOUBLE_BRAIN);
-        }
+    if (brain_memory != 0L)
+    {
+        io_erase(brain_memory, DOUBLE_BRAIN);
+    }
+    else
+    {
+        return SHOW_ERROR("Brain memory not available");
+    }
+    
 
-        local->goal[0]=GOAL_NONE;
+    local->goal[0]=GOAL_NONE;
 
-        /** Set learned preferences to 0.5 (no preference in
-        	either direction.
-        	This may seem like tabla rasa, but there are genetic
-        	biases */
-        for (ch = 0; ch < PREFERENCES; ch++)
-        {
-            local->learned_preference[ch]=127;
-        }
+    /** Set learned preferences to 0.5 (no preference in
+        either direction.
+        This may seem like tabla rasa, but there are genetic
+        biases */
+    for (ch = 0; ch < PREFERENCES; ch++)
+    {
+        local->learned_preference[ch]=127;
+    }
 
-        being_immune_init(local);
+    being_immune_init(local);
 
-        for (ch = 0; ch < ATTENTION_SIZE; ch++)
-        {
-            local->attention[ch]=0;
-        }
+    for (ch = 0; ch < ATTENTION_SIZE; ch++)
+    {
+        local->attention[ch]=0;
+    }
 
-        /** clear the generation numbers for mother and father */
-        for (ch = 0; ch < 3; ch++)
-        {
-            local->generation[ch] = 0;
-        }
+    /** clear the generation numbers for mother and father */
+    for (ch = 0; ch < 3; ch++)
+    {
+        local->generation[ch] = 0;
+    }
 
 #ifdef BRAINCODE_ON
 
-        /** initially seed the brain with instructions which
-        	are genetically biased */
+    /** initially seed the brain with instructions which
+        are genetically biased */
 
 
-        if (random_factor)
-        {
-            local->seed[0] = random_factor[0];
-            local->seed[1] = random_factor[1];
-        }
-        else if (mother)
-        {
-            mother_genetics = being_genetics(mother);
-            local->seed[0] = mother->seed[1];
-            local->seed[1] = mother->seed[0];
-            math_random(mother->seed);
-
-            math_random3(local->seed);
-
-            local->seed[1] = mother_genetics[0];
-
-            math_random3(local->seed);
-
-            local->seed[1] = sim->land->time;
-
-            math_random3(local->seed);
-        }
-        else
-        {
-            NA_ASSERT(random_factor, "Random factor not set");
-            NA_ASSERT(mother, "Mother not set");
-            return SHOW_ERROR("No correct being initial interface provided");
-        }
+    if (random_factor)
+    {
+        local->seed[0] = random_factor[0];
+        local->seed[1] = random_factor[1];
+    }
+    else if (mother)
+    {
+        mother_genetics = being_genetics(mother);
+        local->seed[0] = mother->seed[1];
+        local->seed[1] = mother->seed[0];
+        math_random(mother->seed);
 
         math_random3(local->seed);
 
-        being_init_braincode(sim,local,0L,local->seed,0,
-                             BRAINCODE_INTERNAL);
-        being_init_braincode(sim,local,0L,local->seed,0,
-                             BRAINCODE_EXTERNAL);
+        local->seed[1] = mother_genetics[0];
 
-        /** randomly initialize registers */
-        for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
-        {
-            math_random3(local->seed);
-            local->braincode_register[ch]=(n_byte)(local->seed[0] & 255);
-        }
+        math_random3(local->seed);
 
-        /** initialize brainprobes */
-        for (ch = 0; ch < BRAINCODE_PROBES; ch++)
+        local->seed[1] = land->time;
+
+        math_random3(local->seed);
+    }
+    else
+    {
+        NA_ASSERT(random_factor, "Random factor not set");
+        NA_ASSERT(mother, "Mother not set");
+        return SHOW_ERROR("No correct being interface provided");
+    }
+
+    math_random3(local->seed);
+
+    being_init_braincode(local,0L,local->seed,0,
+                         BRAINCODE_INTERNAL);
+    being_init_braincode(local,0L,local->seed,0,
+                         BRAINCODE_EXTERNAL);
+
+    /** randomly initialize registers */
+    for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
+    {
+        math_random3(local->seed);
+        local->braincode_register[ch]=(n_byte)(local->seed[0] & 255);
+    }
+
+    /** initialize brainprobes */
+    for (ch = 0; ch < BRAINCODE_PROBES; ch++)
+    {
+        math_random3(local->seed);
+        if ((n_byte)local->seed[0]&1)
         {
-            math_random3(local->seed);
-            if ((n_byte)local->seed[0]&1)
-            {
-                local->brainprobe[ch].type = INPUT_SENSOR;
-            }
-            else
-            {
-                local->brainprobe[ch].type = OUTPUT_ACTUATOR;
-            }
-            local->brainprobe[ch].frequency =
-                (n_byte)1 + (local->seed[1]%BRAINCODE_MAX_FREQUENCY);
-            math_random3(local->seed);
-            local->brainprobe[ch].address = (n_byte)local->seed[0];
-            local->brainprobe[ch].position = (n_byte)local->seed[1];
-            math_random3(local->seed);
-            local->brainprobe[ch].offset = (n_byte)local->seed[0];
+            local->brainprobe[ch].type = INPUT_SENSOR;
         }
+        else
+        {
+            local->brainprobe[ch].type = OUTPUT_ACTUATOR;
+        }
+        local->brainprobe[ch].frequency =
+            (n_byte)1 + (local->seed[1]%BRAINCODE_MAX_FREQUENCY);
+        math_random3(local->seed);
+        local->brainprobe[ch].address = (n_byte)local->seed[0];
+        local->brainprobe[ch].position = (n_byte)local->seed[1];
+        math_random3(local->seed);
+        local->brainprobe[ch].offset = (n_byte)local->seed[0];
+    }
 
 
 #endif
 #ifdef EPISODIC_ON
-        for (ch=0; ch<EPISODIC_SIZE; ch++)
+    for (ch=0; ch<EPISODIC_SIZE; ch++)
+    {
+        local_episodic[ch].affect=EPISODIC_AFFECT_ZERO;
+    }
+
+    /** has no social connections initially */
+    for (ch=0; ch<SOCIAL_SIZE; ch++)
+    {
+        /** default type of entity */
+        local_social_graph[ch].entity_type = ENTITY_BEING;
+        /** friend_or_foe can be positive or negative,
+            with SOCIAL_RESPECT_NORMAL as the zero point */
+        local_social_graph[ch].friend_foe = SOCIAL_RESPECT_NORMAL;
+        /** clear names */
+        local_social_graph[ch].first_name[BEING_MEETER]=0;
+        local_social_graph[ch].first_name[BEING_MET]=0;
+        local_social_graph[ch].family_name[BEING_MEETER]=0;
+        local_social_graph[ch].family_name[BEING_MET]=0;
+        if (ch > 0)
         {
-            local_episodic[ch].affect=EPISODIC_AFFECT_ZERO;
-        }
-
-        /** has no social connections initially */
-        for (ch=0; ch<SOCIAL_SIZE; ch++)
-        {
-            /** default type of entity */
-            local_social_graph[ch].entity_type = ENTITY_BEING;
-            /** friend_or_foe can be positive or negative,
-            	with SOCIAL_RESPECT_NORMAL as the zero point */
-            local_social_graph[ch].friend_foe = SOCIAL_RESPECT_NORMAL;
-            /** clear names */
-            local_social_graph[ch].first_name[BEING_MEETER]=0;
-            local_social_graph[ch].first_name[BEING_MET]=0;
-            local_social_graph[ch].family_name[BEING_MEETER]=0;
-            local_social_graph[ch].family_name[BEING_MET]=0;
-            if (ch > 0)
-            {
-                local_social_graph[ch].relationship=0;
-            }
-            else
-            {
-                local_social_graph[ch].relationship=RELATIONSHIP_SELF;
-            }
-        }
-#endif
-
-        being_facing_init(local);
-
-        if (random_factor)
-        {
-            n_byte2  location[2];
-
-            n_int loop = 0;
-
-            math_random3(local->seed);
-
-            do
-            {
-                location[0] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
-                location[1] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
-                loop ++;
-            }
-            while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1]))));
-
-            being_set_location(local, location);
-
-            being_set_unique_name(sim, local, local->seed, 0, 0);
-            
-            body_genome_random(sim, local, local->seed);
-
-            local->social_x = local->social_nx =
-                                  (math_random(local->seed) & 32767)+16384;
-            local->social_y = local->social_ny =
-                                  (math_random(local->seed) & 32767)+16384;
+            local_social_graph[ch].relationship=0;
         }
         else
         {
+            local_social_graph[ch].relationship=RELATIONSHIP_SELF;
+        }
+    }
+#endif
+
+    being_facing_init(local);
+
+    if (random_factor)
+    {
+        n_byte2  location[2];
+
+        n_int loop = 0;
+
+        math_random3(local->seed);
+
+        do
+        {
+            location[0] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
+            location[1] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
+            loop ++;
+        }
+        while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1]))));
+
+        being_set_location(local, location);
+
+        being_set_unique_name(beings, number, local, local->seed, 0, 0);
+        
+        body_genetics(beings, number, local, 0L, local->seed);
+
+        local->social_x = local->social_nx =
+                              (math_random(local->seed) & 32767)+16384;
+        local->social_y = local->social_ny =
+                              (math_random(local->seed) & 32767)+16384;
+    }
+    else
+    {
 
 
-            being_set_location(local, being_location(mother));
+        being_set_location(local, being_location(mother));
 
-            /** this is the same as equals */
-            being_wander(local, being_facing(mother) - being_facing(local));
+        /** this is the same as equals */
+        being_wander(local, being_facing(mother) - being_facing(local));
 
-            (void) math_random(local->seed);
-            local->social_x = local->social_nx = mother->social_x;
-            local->social_y = local->social_ny = mother->social_y;
-            body_genetics(sim,local,mother,local->seed);
-
+        (void) math_random(local->seed);
+        local->social_x = local->social_nx = mother->social_x;
+        local->social_y = local->social_ny = mother->social_y;
+        body_genetics(beings, number, local, mother, local->seed);
+ 
 #ifdef PARASITES_ON
-            /** ascribed social status */
-            local->honor = (mother->honor + mother->father_honor) >> 2;
+        /** ascribed social status */
+        local->honor = (mother->honor + mother->father_honor) >> 2;
 #endif
 
-            genetics_set(local->mother_genetics, mother_genetics);
-            genetics_set(local->father_genetics,
-                         mother->father_genetics);
+        genetics_set(local->mother_genetics, mother_genetics);
+        genetics_set(local->father_genetics,
+                     mother->father_genetics);
 
-            being_set_unique_name(sim, local, local->seed,
-                                  being_family_name(mother),
-                                  mother->father_name[1]);
+        being_set_unique_name(beings, number, local, local->seed,
+                              being_family_name(mother),
+                              mother->father_name[1]);
 
-            /** set the maternal generation number */
-            if (mother->generation[GENERATION_MATERNAL] >
-                    mother->generation[GENERATION_PATERNAL])
-            {
-                if (mother->generation[GENERATION_MATERNAL] <
-                        MAX_GENERATION)
-                {
-                    local->generation[GENERATION_MATERNAL] =
-                        mother->generation[GENERATION_MATERNAL]+1;
-                }
-            }
-            else
-            {
-                if (mother->generation[GENERATION_PATERNAL] <
-                        MAX_GENERATION)
-                {
-                    local->generation[GENERATION_MATERNAL] =
-                        mother->generation[GENERATION_PATERNAL]+1;
-                }
-            }
-            /** set the paternal generation number */
-            if (mother->generation[GENERATION_FATHER] < MAX_GENERATION)
-            {
-                local->generation[GENERATION_PATERNAL] =
-                    mother->generation[GENERATION_FATHER]+1;
-            }
-        }
-
-        being_set_energy(local, BEING_FULL + 15);
-
-        local->date_of_birth[0] = land->date[0];
-        local->date_of_birth[1] = land->date[1];
-        if (random_factor)
+        /** set the maternal generation number */
+        if (mother->generation[GENERATION_MATERNAL] >
+                mother->generation[GENERATION_PATERNAL])
         {
-            GET_H(local) = BIRTH_HEIGHT;
-            GET_M(local) = BIRTH_MASS;
+            if (mother->generation[GENERATION_MATERNAL] <
+                    MAX_GENERATION)
+            {
+                local->generation[GENERATION_MATERNAL] =
+                    mother->generation[GENERATION_MATERNAL]+1;
+            }
         }
         else
         {
-            /** produce an initial distribution of heights and masses*/
-            math_random3(local->seed);
-            GET_H(local) = BIRTH_HEIGHT +
-                           (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
-            GET_M(local) = BIRTH_MASS +
-                           (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
+            if (mother->generation[GENERATION_PATERNAL] <
+                    MAX_GENERATION)
+            {
+                local->generation[GENERATION_MATERNAL] =
+                    mother->generation[GENERATION_PATERNAL]+1;
+            }
         }
-        local->crowding = MIN_CROWDING;
-
-        if (being_brain(local))
+        /** set the paternal generation number */
+        if (mother->generation[GENERATION_FATHER] < MAX_GENERATION)
         {
-            /** These magic numbers were found in March 2001 -
-            	feel free to change them! */
+            local->generation[GENERATION_PATERNAL] =
+                mother->generation[GENERATION_FATHER]+1;
+        }
+    }
+
+    being_set_energy(local, BEING_FULL + 15);
+
+    local->date_of_birth[0] = land->date[0];
+    local->date_of_birth[1] = land->date[1];
+    if (random_factor)
+    {
+        GET_H(local) = BIRTH_HEIGHT;
+        GET_M(local) = BIRTH_MASS;
+    }
+    else
+    {
+        /** produce an initial distribution of heights and masses*/
+        math_random3(local->seed);
+        GET_H(local) = BIRTH_HEIGHT +
+                       (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
+        GET_M(local) = BIRTH_MASS +
+                       (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
+    }
+    local->crowding = MIN_CROWDING;
+
+    if (being_brain(local))
+    {
+        /** These magic numbers were found in March 2001 -
+            feel free to change them! */
 
 #ifdef SOFT_BRAIN_ON
-            GET_BS(local, 0) = 171;
-            GET_BS(local, 1) = 0;
-            GET_BS(local, 2) = 146;
-            GET_BS(local, 3) = 86;
-            GET_BS(local, 4) = 501;
-            GET_BS(local, 5) = 73;
+        GET_BS(local, 0) = 171;
+        GET_BS(local, 1) = 0;
+        GET_BS(local, 2) = 146;
+        GET_BS(local, 3) = 86;
+        GET_BS(local, 4) = 501;
+        GET_BS(local, 5) = 73;
 #else
-            GET_BS(local, 0) = 0;
-            GET_BS(local, 1) = 1024;
-            GET_BS(local, 2) = 0;
-            GET_BS(local, 3) = 0;
-            GET_BS(local, 4) = 1024;
-            GET_BS(local, 5) = 0;
-#endif
-        }
-        if (sim->ext_birth != 0)
-        {
-            sim->ext_birth(local,mother,sim);
-        }
-#ifdef METABOLISM_ON
-        metabolism_init(local);
+        GET_BS(local, 0) = 0;
+        GET_BS(local, 1) = 1024;
+        GET_BS(local, 2) = 0;
+        GET_BS(local, 3) = 0;
+        GET_BS(local, 4) = 1024;
+        GET_BS(local, 5) = 0;
 #endif
     }
-    sim->num++;
-    
+
+#ifdef METABOLISM_ON
+    metabolism_init(local);
+#endif
     return 0;
 }
 

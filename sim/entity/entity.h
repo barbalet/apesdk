@@ -160,7 +160,10 @@ n_string metabolism_description(n_int index);
 n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index);
 
 void   being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name);
-n_int  being_init(noble_simulation * sim, noble_being * mother, n_byte2 * random_factor);
+n_int being_init(n_land * land, noble_being * beings, n_int number, noble_being * local, noble_being * mother,
+                 n_byte2* random_factor);
+void being_erase(noble_being * value);
+
 void   being_cycle_awake(noble_simulation * sim, n_uint current_being_index);
 void   being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake);
 void   being_state_description(n_byte2 state, n_string result);

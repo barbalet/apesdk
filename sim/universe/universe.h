@@ -1558,8 +1558,8 @@ noble_simulation;
 
 #define	GET_SELF(sim, bei) (being_social(bei)[0])
 
-#define GET_BRAINCODE_INTERNAL(sim,bei) ((&being_social(bei)[0])->braincode)
-#define GET_BRAINCODE_EXTERNAL(sim,bei) ((&being_social(bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
+#define GET_BRAINCODE_INTERNAL(bei) ((&being_social(bei)[0])->braincode)
+#define GET_BRAINCODE_EXTERNAL(bei) ((&being_social(bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
 
 #define	BRAIN_OFFSET(num)	(num)
 

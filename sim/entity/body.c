@@ -1382,17 +1382,17 @@ void genetics_zero(n_genetics * genetics_a)
  * @param genetics The new genetics to be compared
  * @return 1 if the given genetics are unique in the population
  */
-static n_int genetics_unique(noble_simulation * local, n_genetics * genetics)
+static n_int genetics_unique(noble_being * local, n_int number, n_genetics * genetics)
 {
-    n_uint         loop = 0;
-    if (local->num == 0)
+    n_int         loop = 0;
+    if (number == 0)
     {
         return 1;
     }
 
-    while (loop < local->num)
+    while (loop < number)
     {
-        noble_being	* local_being = &(local->beings[loop]);
+        noble_being	* local_being = &(local[loop]);
         if (genetics_compare(being_genetics(local_being), genetics))
         {
             return 0;
@@ -1637,79 +1637,76 @@ static void genetics_transpose(noble_being * local, n_byte2 * local_random)
  * @param mother The mother of the being
  * @param local_random Random number generator seed
  */
-void body_genetics(noble_simulation * sim, noble_being * local, noble_being * mother, n_byte2 * local_random)
+void body_genetics(noble_being * beings, n_int number, noble_being * local, noble_being * mother, n_byte2 * local_random)
 {
     n_c_uint ch;
     n_byte sex = 2;
-
     n_genetics * genetics = being_genetics(local);
-    n_genetics * mother_genetics = being_genetics(mother);
-    n_genetics * father_genetics = mother->father_genetics;
+    n_genetics * mother_genetics;
+    n_genetics * father_genetics;
 
-    /** determine the sex */
-    math_random3(local_random);
-    sex |= (local_random[0]&1);
-
+    if (mother)
+    {
+        mother_genetics = being_genetics(mother);
+        father_genetics = mother->father_genetics;
+        
+        /** determine the sex */
+        math_random3(local_random);
+        sex |= (local_random[0]&1);
+    }
     do
     {
         /** crossover and mutation */
         for (ch = 0; ch < CHROMOSOMES; ch++)
         {
-            if (ch != CHROMOSOME_Y)
+            if (mother)
             {
-                genetics[ch] = genetics_crossover(mother_genetics[ch], father_genetics[ch], local_random);
+                if (ch != CHROMOSOME_Y)
+                {
+                    genetics[ch] = genetics_crossover(mother_genetics[ch], father_genetics[ch], local_random);
+                }
+            }
+            else
+            {
+                n_int loop;
+
+                /** for each 2 bit gene in the chromosome.
+                 Each chromosome is 16 bits long with the full
+                 32 bit value containing the chromosome pair */
+                genetics[ch] = 0;
+                for (loop=0; loop<16; loop+=2)
+                {
+                    n_int gene;
+                    math_random3(local_random);
+                    gene = DIPLOID((local_random[0] & 3), (local_random[1] & 3));
+                    genetics[ch] |= ( gene << loop );
+                }
             }
         }
-        /** Y chromosome does not undergo crossover and passes from father to son */
-        if (sex != SEX_FEMALE)
+        
+        if (mother)
         {
-            GET_I(local) = genetics_mutate(father_genetics[CHROMOSOME_Y], local_random);
+            /** Y chromosome does not undergo crossover and passes from father to son */
+            if (sex != SEX_FEMALE)
+            {
+                GET_I(local) = genetics_mutate(father_genetics[CHROMOSOME_Y], local_random);
+            }
+            else
+            {
+                GET_I(local) = genetics_mutate(mother_genetics[CHROMOSOME_Y], local_random);
+            }
+            /** transpose genes between chromosomes */
+            genetics_transpose(local, local_random);
+            /** align the sex genetics */
+            GET_I(local) &= ~1;
+            GET_I(local) |= sex;
         }
         else
         {
-            GET_I(local) = genetics_mutate(mother_genetics[CHROMOSOME_Y], local_random);
+            genetics[CHROMOSOME_Y] |= 2;
         }
-        /** transpose genes between chromosomes */
-        genetics_transpose(local, local_random);
-        /** align the sex genetics */
-        GET_I(local) &= ~1;
-        GET_I(local) |= sex;
     }
-    while (genetics_unique(sim, genetics) == 0);
-}
-
-/**
- * @brief Assigns a random genome to a being
- * @param sim Pointer to the simulation object
- * @param local Pointer to the being
- * @param local_random Random number generator seed
- */
-void body_genome_random(noble_simulation * sim, noble_being * local, n_byte2 * local_random)
-{
-    n_genetics * genetics = being_genetics(local);
-
-    do
-    {
-        n_int ch,loop,gene;
-
-        /** for every chromosome */
-        for (ch = 0; ch < CHROMOSOMES; ch++)
-        {
-            /** for each 2 bit gene in the chromosome.
-                Each chromosome is 16 bits long with the full
-                32 bit value containing the chromosome pair */
-            genetics[ch] = 0;
-            for (loop=0; loop<16; loop+=2)
-            {
-                math_random3(local_random);
-                gene = DIPLOID((local_random[0] & 3), (local_random[1] & 3));
-                genetics[ch] |= ( gene << loop );
-            }
-        }
-        /* align the sex genetics */
-        genetics[CHROMOSOME_Y] |= 2;
-    }
-    while (genetics_unique(sim, genetics) == 0);
+    while (genetics_unique(beings, number, genetics) == 0);
 }
 
 /**

@@ -482,8 +482,8 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
     {
 
         noble_being * local_being = &(local_sim->beings[local_sim->select]);
-        n_byte *internal_bc = GET_BRAINCODE_INTERNAL(local_sim, local_being);
-        n_byte *external_bc = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
+        n_byte *internal_bc = GET_BRAINCODE_INTERNAL(local_being);
+        n_byte *external_bc = GET_BRAINCODE_EXTERNAL(local_being);
         n_int           loop = 0;
 
         n_string_block  initial_information;
@@ -543,11 +543,11 @@ static void show_braincode(void * ptr, noble_being * local_being, n_string resul
 
     if (outer==0)
     {
-        code = GET_BRAINCODE_INTERNAL(local_sim, local_being);
+        code = GET_BRAINCODE_INTERNAL(local_being);
     }
     else
     {
-        code = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
+        code = GET_BRAINCODE_EXTERNAL(local_being);
     }
 
     for (i = 0; i < instructions_per_column; i++)
@@ -878,7 +878,7 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
 static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
 {
     n_int loop;
-    n_byte * external_bc = GET_BRAINCODE_EXTERNAL((noble_simulation*)ptr, local);
+    n_byte * external_bc = GET_BRAINCODE_EXTERNAL(local);
     for (loop = 0; loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION; loop++)
     {
         n_string_block sentence;
@@ -1623,7 +1623,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
         while (loop < local_sim->num)
         {
             noble_being * local_being = &(local_sim->beings[loop]);
-            n_byte * bc_external = GET_BRAINCODE_EXTERNAL(local_sim, local_being);
+            n_byte * bc_external = GET_BRAINCODE_EXTERNAL(local_being);
             if (bc_external)
             {
 
@@ -1631,7 +1631,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
                 while (loop2 < local_sim->num)
                 {
                     noble_being * local_being2 = &(local_sim->beings[loop2]);
-                    n_byte * bc_external2 = GET_BRAINCODE_EXTERNAL(local_sim, local_being2);
+                    n_byte * bc_external2 = GET_BRAINCODE_EXTERNAL(local_being2);
 
                     if (bc_external2)
                     {

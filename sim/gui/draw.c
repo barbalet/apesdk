@@ -2269,7 +2269,7 @@ static n_int graph_being_score(noble_simulation * sim, noble_being * local_being
     case 0:
         for (i = 0; i < BRAINCODE_SIZE; i++)
         {
-            score += GET_BRAINCODE_EXTERNAL(sim,local_being)[i] + GET_BRAINCODE_INTERNAL(sim,local_being)[i];
+            score += GET_BRAINCODE_EXTERNAL(local_being)[i] + GET_BRAINCODE_INTERNAL(local_being)[i];
         }
         break;
     case 1:
@@ -2361,12 +2361,12 @@ void graph_ideosphere(noble_simulation * sim, n_byte * buffer, n_int img_width, 
                 if (x<half_width)
                 {
                     i = (x * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                    code = GET_BRAINCODE_INTERNAL(sim,local_being);
+                    code = GET_BRAINCODE_INTERNAL(local_being);
                 }
                 else
                 {
                     i = ((x-half_width) * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                    code = GET_BRAINCODE_EXTERNAL(sim,local_being);
+                    code = GET_BRAINCODE_EXTERNAL(local_being);
                 }
                 buffer[n] = code[i];
                 buffer[n+1] = code[i+1];
@@ -2690,17 +2690,17 @@ static n_uint braincode_standard_deviation(noble_simulation * sim, noble_being *
 
     for (i=0; i<BRAINCODE_SIZE; i++)
     {
-        av += GET_BRAINCODE_INTERNAL(sim,local_being)[i];
-        av += GET_BRAINCODE_EXTERNAL(sim,local_being)[i];
+        av += GET_BRAINCODE_INTERNAL(local_being)[i];
+        av += GET_BRAINCODE_EXTERNAL(local_being)[i];
     }
     av /= (BRAINCODE_SIZE*2);
 
     for (i=0; i<BRAINCODE_SIZE; i++)
     {
-        diff = (n_int)(GET_BRAINCODE_INTERNAL(sim,local_being)[i]) - av;
+        diff = (n_int)(GET_BRAINCODE_INTERNAL(local_being)[i]) - av;
         if (diff<0) diff=-diff;
         sd += (n_uint)(diff);
-        diff = (n_int)(GET_BRAINCODE_EXTERNAL(sim,local_being)[i]) - av;
+        diff = (n_int)(GET_BRAINCODE_EXTERNAL(local_being)[i]) - av;
         if (diff<0) diff=-diff;
         sd += (n_uint)(diff);
     }
@@ -2735,11 +2735,11 @@ static void braincode_number_of_instructions(
         {
             if (j==0)
             {
-                instruction = GET_BRAINCODE_INTERNAL(sim,local_being)[i] & 63;
+                instruction = GET_BRAINCODE_INTERNAL(local_being)[i] & 63;
             }
             else
             {
-                instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[i] & 63;
+                instruction = GET_BRAINCODE_EXTERNAL(local_being)[i] & 63;
             }
             if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
             {
@@ -2774,8 +2774,8 @@ static void graph_braincode_coords(noble_simulation * sim, noble_being * local_b
     *y=0;
     for (i=0; i<BRAINCODE_SIZE; i++)
     {
-        *x = *x + GET_BRAINCODE_INTERNAL(sim,local_being)[i];
-        *y = *y + GET_BRAINCODE_EXTERNAL(sim,local_being)[i];
+        *x = *x + GET_BRAINCODE_INTERNAL(local_being)[i];
+        *y = *y + GET_BRAINCODE_EXTERNAL(local_being)[i];
     }
 }
 
@@ -2942,12 +2942,12 @@ void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte *
             if (x<half_width)
             {
                 i = (x * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                code = GET_BRAINCODE_INTERNAL(sim,local_being);
+                code = GET_BRAINCODE_INTERNAL(local_being);
             }
             else
             {
                 i = ((x-half_width) * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                code = GET_BRAINCODE_EXTERNAL(sim,local_being);
+                code = GET_BRAINCODE_EXTERNAL(local_being);
             }
             buffer[n] = code[i];
             buffer[n+1] = code[i+1];

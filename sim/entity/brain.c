@@ -504,11 +504,11 @@ void braincode_statistics(noble_simulation * sim)
             {
                 if (k==0)
                 {
-                    instruction = GET_BRAINCODE_INTERNAL(sim,local_being)[j] % BRAINCODE_INSTRUCTIONS;
+                    instruction = GET_BRAINCODE_INTERNAL(local_being)[j] % BRAINCODE_INSTRUCTIONS;
                 }
                 else
                 {
-                    instruction = GET_BRAINCODE_EXTERNAL(sim,local_being)[j] % BRAINCODE_INSTRUCTIONS;
+                    instruction = GET_BRAINCODE_EXTERNAL(local_being)[j] % BRAINCODE_INSTRUCTIONS;
                 }
 
                 if (instruction < BRAINCODE_OPERATORS_START)
