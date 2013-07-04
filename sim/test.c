@@ -40,13 +40,23 @@
 //  Copyright (c) 2013 Thomas Barbalet. All rights reserved.
 //
 
-#include "noble.h"
-#include "entity.h"
-#include "universe.h"
+#include "noble/noble.h"
+#include "entity/entity.h"
+#include "universe/universe.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 n_land      * environment;
 noble_being * test;
+
+n_int draw_error(n_constant_string error_text)
+{
+    printf("ERROR: %s\n", error_text);
+    return -1;
+}
 
 void setUp(void)
 {    
@@ -98,7 +108,6 @@ void initialTest(void)
     NA_ASSERT(environment->map, "map is not created");
     
     NA_ASSERT(environment, "land is not created");
-    
 }
 
 int main(void)

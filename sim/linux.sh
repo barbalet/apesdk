@@ -67,13 +67,23 @@ gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/file.c -o file.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/console.c -o console.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/universe/sim.c -o sim.o
 
-#gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/cle.c -o cle.o
+if [ $# -ge 1 -a "$1" == "--test" ]
+then
+
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/test.c -o test.o
+
+
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../../natest *.o -lz -lm -lpthread
+
+rm *.o
+
+cd ../../
+./natest
+cd nobleape/sim/
+
+else
 
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/longterm.c -o longterm.o
-
-#gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../nacle *.o -lm -lpthread
-
-# gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/contrib/motters/pnglite.c -o pnglite.o
 
 if [ $# -ge 1 -a "$1" == "--additional" ]
 then
@@ -85,5 +95,7 @@ else
 gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/../../nalongterm *.o -lz -lm -lpthread
 
 rm *.o
+
+fi
 
 fi
