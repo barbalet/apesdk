@@ -37,7 +37,20 @@
 		4A360077171240F1004DAFBA /* nobleape.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4A360076171240F1004DAFBA /* nobleape.icns */; };
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
 		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
+		5A4805E2178676EB007220D7 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A4805E1178676EB007220D7 /* XCTest.framework */; };
+		5A4805E8178676EB007220D7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A4805E6178676EB007220D7 /* InfoPlist.strings */; };
+		5A4805EA178676EB007220D7 /* MacSimulation_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5A4805EC178676EB007220D7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4A36000C17124025004DAFBA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4A36001317124025004DAFBA;
+			remoteInfo = MacSimulation;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		4A36001417124025004DAFBA /* MacSimulation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSimulation.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,6 +98,12 @@
 		4A360076171240F1004DAFBA /* nobleape.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = nobleape.icns; sourceTree = "<group>"; };
 		4A360078171240FE004DAFBA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		4A7DC3E31749CD710013F2E9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
+		5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */ = {isa = PBXFileReference; explicitFileType = folder; includeInIndex = 0; path = "MacSimulation Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A4805E1178676EB007220D7 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		5A4805E5178676EB007220D7 /* MacSimulation Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MacSimulation Tests-Info.plist"; sourceTree = "<group>"; };
+		5A4805E7178676EB007220D7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MacSimulation_Tests.m; sourceTree = "<group>"; };
+		5A4805EB178676EB007220D7 /* MacSimulation Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MacSimulation Tests-Prefix.pch"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +113,14 @@
 			files = (
 				4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */,
 				4A36001817124025004DAFBA /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A4805DD178676EB007220D7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A4805E2178676EB007220D7 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +137,7 @@
 				4A36004D1712409A004DAFBA /* noble */,
 				4A3600561712409A004DAFBA /* universe */,
 				4A36001D17124025004DAFBA /* MacSimulation */,
+				5A4805E3178676EB007220D7 /* MacSimulation Tests */,
 				4A36001617124025004DAFBA /* Frameworks */,
 				4A36001517124025004DAFBA /* Products */,
 			);
@@ -119,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				4A36001417124025004DAFBA /* MacSimulation.app */,
+				5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -128,6 +157,7 @@
 			children = (
 				4A360078171240FE004DAFBA /* OpenGL.framework */,
 				4A36001717124025004DAFBA /* Cocoa.framework */,
+				5A4805E1178676EB007220D7 /* XCTest.framework */,
 				4A36001917124025004DAFBA /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -236,6 +266,25 @@
 			path = sim/universe;
 			sourceTree = "<group>";
 		};
+		5A4805E3178676EB007220D7 /* MacSimulation Tests */ = {
+			isa = PBXGroup;
+			children = (
+				5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */,
+				5A4805E4178676EB007220D7 /* Supporting Files */,
+			);
+			path = "MacSimulation Tests";
+			sourceTree = "<group>";
+		};
+		5A4805E4178676EB007220D7 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5A4805E5178676EB007220D7 /* MacSimulation Tests-Info.plist */,
+				5A4805E6178676EB007220D7 /* InfoPlist.strings */,
+				5A4805EB178676EB007220D7 /* MacSimulation Tests-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -256,6 +305,24 @@
 			productReference = 4A36001417124025004DAFBA /* MacSimulation.app */;
 			productType = "com.apple.product-type.application";
 		};
+		5A4805DF178676EB007220D7 /* MacSimulation Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A4805F0178676EB007220D7 /* Build configuration list for PBXNativeTarget "MacSimulation Tests" */;
+			buildPhases = (
+				5A4805DC178676EB007220D7 /* Sources */,
+				5A4805DD178676EB007220D7 /* Frameworks */,
+				5A4805DE178676EB007220D7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5A4805ED178676EB007220D7 /* PBXTargetDependency */,
+			);
+			name = "MacSimulation Tests";
+			productName = "MacSimulation Tests";
+			productReference = 5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -264,6 +331,11 @@
 			attributes = {
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Thomas Barbalet";
+				TargetAttributes = {
+					5A4805DF178676EB007220D7 = {
+						TestTargetID = 4A36001317124025004DAFBA;
+					};
+				};
 			};
 			buildConfigurationList = 4A36000F17124025004DAFBA /* Build configuration list for PBXProject "MacSimulation_XCode5" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -278,6 +350,7 @@
 			projectRoot = "";
 			targets = (
 				4A36001317124025004DAFBA /* MacSimulation */,
+				5A4805DF178676EB007220D7 /* MacSimulation Tests */,
 			);
 		};
 /* End PBXProject section */
@@ -290,6 +363,14 @@
 				4A36002217124025004DAFBA /* InfoPlist.strings in Resources */,
 				4A36006A1712409A004DAFBA /* nobleape512.xib in Resources */,
 				4A360077171240F1004DAFBA /* nobleape.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A4805DE178676EB007220D7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A4805E8178676EB007220D7 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,13 +409,37 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A4805DC178676EB007220D7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A4805EA178676EB007220D7 /* MacSimulation_Tests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5A4805ED178676EB007220D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4A36001317124025004DAFBA /* MacSimulation */;
+			targetProxy = 5A4805EC178676EB007220D7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		4A36002017124025004DAFBA /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				4A36002117124025004DAFBA /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		5A4805E6178676EB007220D7 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5A4805E7178676EB007220D7 /* en */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -449,6 +554,59 @@
 			};
 			name = Release;
 		};
+		5A4805EE178676EB007220D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/MacSimulation.app/Contents/MacOS/MacSimulation";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MacSimulation Tests/MacSimulation Tests-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "MacSimulation Tests/MacSimulation Tests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		5A4805EF178676EB007220D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/MacSimulation.app/Contents/MacOS/MacSimulation";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				ENABLE_NS_ASSERTIONS = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MacSimulation Tests/MacSimulation Tests-Prefix.pch";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "MacSimulation Tests/MacSimulation Tests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -469,6 +627,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		5A4805F0178676EB007220D7 /* Build configuration list for PBXNativeTarget "MacSimulation Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A4805EE178676EB007220D7 /* Debug */,
+				5A4805EF178676EB007220D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

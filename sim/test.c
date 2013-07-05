@@ -32,13 +32,6 @@
  of this software.
 
  ****************************************************************/
-//
-//  MacSimulation_Tests.m
-//  MacSimulation Tests
-//
-//  Created by Thomas Barbalet on 7/3/13.
-//  Copyright (c) 2013 Thomas Barbalet. All rights reserved.
-//
 
 #include "noble/noble.h"
 #include "entity/entity.h"

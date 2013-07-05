@@ -417,15 +417,10 @@ void shared_clearErrors(void)
 void shared_new(n_uint seed)
 {
     static  n_int NewBlock = 0;
-    static  n_int generator = 1;
     if (NewBlock) return;
-    generator++;
-    if (generator == 0xFF)
-    {
-        generator = 1;
-    }
+
     NewBlock = 1;
-    control_init(KIND_NEW_SIMULATION, (n_uint) ( seed * generator ));
+    control_init(KIND_NEW_SIMULATION, seed);
     NewBlock = 0;
 }
 
