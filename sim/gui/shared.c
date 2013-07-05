@@ -235,7 +235,7 @@ static void control_key(n_byte wwind, n_byte2 num)
     }
 }
 
-static void control_sim_simulate(n_uint local_time)
+void shared_simulate(n_uint local_time)
 {
     sim_realtime(local_time);
 
@@ -287,7 +287,7 @@ void shared_cycle(n_uint ticks, n_int fIdentification)
 
     if(fIdentification == NUM_TERRAIN)
     {
-        control_sim_simulate(ticks);
+        shared_simulate(ticks);
     }
 }
 
