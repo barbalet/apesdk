@@ -77,15 +77,15 @@ char	list_of_files[NUMBER_OF_FILES][FILE_STRING_SIZE]=
     "start"
 };
 
-n_int draw_error(n_string error_text)
+n_int draw_error(n_constant_string error_text)
 {
     return -1;
 }
 
 void audit_file_apescripterror(FILE * html_write)
 {
-    n_string    local_error_string = apescript_errors[0].error_string;
-    n_string    local_help_string  = apescript_errors[0].help_string;
+    n_constant_string  local_error_string = apescript_errors[0].error_string;
+    n_constant_string  local_help_string  = apescript_errors[0].help_string;
 
     n_int   loop = 0;
 

@@ -33,7 +33,6 @@
 
 rm longterm.o
 rm draw.o
-rm control.o
 
 gcc ${CFLAGS} -c ./documentation/documentation.c -o documentation.o
 
