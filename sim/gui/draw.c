@@ -2224,39 +2224,45 @@ void graph_vascular(noble_being * being,
  */
 void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
 {
-    n_uint i,j;
+    n_uint i,j,temp;
     n_int prev_x = -1, prev_y=-1;
     n_int x,y;
+    n_int * honor_value;
 
     graph_erase(buffer, img_height, img_width);
 
+    honor_value = (n_int*)io_new(sim->num*sizeof(n_int));
+
+    /** get the honor values */
     for (i = 0; i < sim->num; i++)
     {
         noble_being * local_being = &(sim->beings[i]);
-        n_uint idx = i;
-        n_int max = local_being->honor;
+        honor_value[i] = local_being->honor;
+    }
+
+    /** sort the honor values */
+    for (i = 0; i < sim->num; i++)
+    {
         for (j = i+1; j < sim->num; j++)
         {
-            noble_being * local_being2 = &(sim->beings[j]);
-            if (local_being2->honor > max)
-            {
-                idx = j;
-                max = local_being2->honor;
+            if (honor_value[i]<honor_value[j]) {
+                temp = honor_value[i];
+                honor_value[i] = honor_value[j];
+                honor_value[j] = temp;
             }
         }
-        if (idx != i)
-        {
-            noble_being * temp = &(sim->beings[idx]);
-            sim->beings[idx] = *local_being;
-            sim->beings[i] = *temp;
-        }
+    }
 
+    for (i = 0; i < sim->num; i++)
+    {
         x = i*img_width/sim->num;
-        y = img_height-1-(max*img_height/255);
+        y = img_height-1-(honor_value[i]*img_height/255);
         if (prev_x > -1) graph_line(buffer,img_width,img_height,prev_x,prev_y,x,y,0,0,0,1);
         prev_x = x;
         prev_y = y;
     }
+
+    io_free(honor_value);
 }
 
 static n_int graph_being_score(noble_simulation * sim, noble_being * local_being, n_byte score_type)
