@@ -48,7 +48,7 @@ noble_being      * being = 0L;
 
 - (void)testCheckInitialDate
 {
-    XCTAssertTrue(value->land->date[0] == AGE_OF_MATURITY, @"Days is not initially AGE_OF_MATURITY (%ld)", AGE_OF_MATURITY);
+    XCTAssertTrue(value->land->date[0] == AGE_OF_MATURITY, @"Days is not initially AGE_OF_MATURITY (%ld)", (n_int)AGE_OF_MATURITY);
     XCTAssertTrue(value->land->date[1] == 0, @"Centuries is not initially 0");
 }
 
@@ -111,8 +111,8 @@ noble_being      * being = 0L;
 
 - (void)testMouseDrag
 {
-    XCTAssertTrue(being->location[0] == 10915, @"X value is wrong (%ld)", being->location[0]);
-    XCTAssertTrue(being->location[1] == 20105, @"Y value is wrong (%ld)", being->location[1]);
+    XCTAssertTrue(being->location[0] == 10915, @"X value is wrong (%d)", being->location[0]);
+    XCTAssertTrue(being->location[1] == 20105, @"Y value is wrong (%d)", being->location[1]);
     
     [self actionMouseClick];
     
@@ -133,8 +133,8 @@ noble_being      * being = 0L;
     
     NSLog(@"Location %d %d", being->location[0], being->location[1]);
     
-    XCTAssertTrue(being->location[0] == 6396, @"X value is wrong (%ld)", being->location[0]);
-    XCTAssertTrue(being->location[1] == 6394, @"Y value is wrong (%ld)", being->location[1]);
+    XCTAssertTrue(being->location[0] == 6396, @"X value is wrong (%d)", being->location[0]);
+    XCTAssertTrue(being->location[1] == 6394, @"Y value is wrong (%d)", being->location[1]);
 }
 
 - (void)testLongtermSimulation
