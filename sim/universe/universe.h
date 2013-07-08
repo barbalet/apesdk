@@ -346,10 +346,7 @@ enum BODY_BONES
 #define PATHOGEN_MUTATION_PROB                100
 #define ANTIBODY_DEPLETION_PROB               100
 #define ANTIBODY_GENERATION_PROB(bei)         (being_energy(bei))
-#define IMMUNE_STRENGTH_ALPHA                 2
-#define ALPHA_RANK                            250
-#define RANK_STRESS(bei)                      (255 - (bei)->honor)
-#define IMMUNE_STRENGTH(bei)                  ((bei)->honor<ALPHA_RANK?(1+((255-RANK_STRESS(bei))>>6)):IMMUNE_STRENGTH_ALPHA)
+
 #define RANDOM_PATHOGEN(seed,pathogen_type)   (((seed&31)*8)+pathogen_type)
 #define PATHOGEN_SEVERITY(pathogen)           (((pathogen)*(pathogen))>>11)
 #define PATHOGEN_TRANSMISSION(pathogen)       ((pathogen)&7)

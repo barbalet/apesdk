@@ -1060,14 +1060,14 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     being_state_description(local_being->state, status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
-    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
+    sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %ld\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
             (n_uint)local_being->generation[GENERATION_MATERNAL],
             (n_uint)local_being->generation[GENERATION_PATERNAL],
             (int)heart_rate, (int)breathing_rate,
             being_energy(local_being),
             being_location_x(local_being), being_location_y(local_being),
-            local_being->honor,
+            being_honor(local_being),
             GET_BEING_HEIGHT(local_being),
             being_facing(local_being),
             ((FIND_SEX(GET_I(local_being)) == SEX_FEMALE) ? 'F' : 'M'),
@@ -2271,7 +2271,8 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
     for (i = 0; i < max; i++)
     {
         n_int winner = -1;
-        n_byte max_honor = 0,passed;
+        n_int max_honor = 0;
+        n_byte passed;
         n_string_block output_value;
 
 
@@ -2279,9 +2280,12 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
         {
             if (eliminated[j] == 0)
             {
+                n_int honor;
                 b = &local_sim->beings[j];
 
-                if (b->honor >= max_honor)
+                honor = being_honor(b);
+                
+                if (honor >= max_honor)
                 {
 
                     passed=0;
@@ -2312,7 +2316,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
                     if (passed!=0)
                     {
                         winner = j;
-                        max_honor = b->honor;
+                        max_honor = honor;
                     }
 
                 }
@@ -2325,7 +2329,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
         eliminated[winner] = 1;
         b = &local_sim->beings[winner];
 
-        sprintf(output_value, "%03d   ", (int)(b->honor));
+        sprintf(output_value, "%03d   ", (int)(being_honor(b)));
 
         being_name_simple(b, str);
         

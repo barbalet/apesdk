@@ -796,8 +796,8 @@ n_byte social_groom(
             }
             /** Alter social status relations.
             The groomer gains status, since they are providing a service */
-            if (meeter_being->honor < 255) meeter_being->honor++;
-            if (met_being->honor > 0) met_being->honor--;
+            being_honor_inc_dec(meeter_being, met_being);
+            
             /** Decrement parasites */
             if (met_being->parasites >= PARASITES_REMOVED)
             {
@@ -834,7 +834,6 @@ n_byte2 social_squabble(
 {
 #ifdef PARASITES_ON
     n_byte2 agro;
-    n_byte temp_hon;
 #endif
     n_byte2 ret_val = 0;
     noble_being * victor, * vanquished;
@@ -922,13 +921,7 @@ n_byte2 social_squabble(
                 INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_ATTACK*2);
 
 #ifdef PARASITES_ON
-                if (victor->honor < vanquished->honor)
-                {
-                    /** swap social status */
-                    temp_hon = victor->honor;
-                    victor->honor = vanquished->honor;
-                    vanquished->honor = temp_hon;
-                }
+                being_honor_swap(victor, vanquished);
 #endif
                 ret_val |= BEING_STATE_ATTACK;
             }
@@ -1202,7 +1195,7 @@ static void social_chat_territory(
     /** take advice from more honorable friends */
     if (meeter_graph[being_index].friend_foe >= respect_mean)
     {
-        if (met_being->honor > meeter_being->honor)
+        if (being_honor_compare(met_being, meeter_being) == 1)
         {
             if (met_being->territory[idx].name > 0)
             {
@@ -1212,7 +1205,7 @@ static void social_chat_territory(
         }
         else
         {
-            if ((met_being->honor < meeter_being->honor) &&
+            if ((being_honor_compare(met_being, meeter_being) == -1) &&
                     (meeter_being->territory[idx].name > 0))
             {
                 met_being->territory[idx].name =
@@ -1325,11 +1318,11 @@ n_int social_chat(
                 if (i<SOCIAL_SIZE)
                 {
                     /** was already met */
-                    if (met_being->honor > meeter_being->honor)
+                    if (being_honor_compare(met_being, meeter_being) == 1)
                     {
                         meeter_graph[i].friend_foe++;
                     }
-                    if (met_being->honor < meeter_being->honor)
+                    if (being_honor_compare(met_being, meeter_being) == -1)
                     {
                         meeter_graph[i].friend_foe--;
                     }

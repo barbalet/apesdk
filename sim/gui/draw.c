@@ -2237,7 +2237,7 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
     for (i = 0; i < sim->num; i++)
     {
         noble_being * local_being = &(sim->beings[i]);
-        honor_value[i] = local_being->honor;
+        honor_value[i] = being_honor(local_being);
     }
 
     /** sort the honor values */

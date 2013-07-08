@@ -97,6 +97,14 @@ n_byte * being_brain(noble_being * value);
 episodic_memory * being_episodic(noble_being * value);
 social_link * being_social(noble_being * value);
 
+n_int being_honor(noble_being * value);
+
+void being_honor_inc_dec(noble_being * inc, noble_being * dec);
+
+void being_honor_swap(noble_being * victor, noble_being * vanquished);
+
+n_int being_honor_compare(noble_being * first, noble_being * second);
+
 n_int being_first_name(noble_being * value);
 
 void being_set_family_name(noble_being * value, n_byte first, n_byte last);

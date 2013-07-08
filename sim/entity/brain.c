@@ -903,9 +903,9 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     switch (switcher % 32)
     {
     case 0:
-        return meeter_being->honor;
+        return being_honor(meeter_being);
     case 1:
-        return met_being->honor;
+        return being_honor(met_being);
     case 2:
         return meeter_being->parasites;
     case 3:

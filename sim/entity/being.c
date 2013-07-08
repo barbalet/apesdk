@@ -182,6 +182,63 @@ void being_erase(noble_being * value)
     io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
 }
 
+n_int being_honor(noble_being * value)
+{
+    return value->honor;
+}
+
+void being_honor_inc_dec(noble_being * inc, noble_being * dec)
+{
+    if (inc->honor < 255) inc->honor++;
+    if (dec->honor > 0) dec->honor--;
+}
+
+void being_honor_swap(noble_being * victor, noble_being * vanquished)
+{
+    if (victor->honor < vanquished->honor)
+    {
+        /** swap social status */
+        n_byte temp_hon = victor->honor;
+        victor->honor = vanquished->honor;
+        vanquished->honor = temp_hon;
+    }
+}
+
+n_int being_honor_compare(noble_being * first, noble_being * second)
+{
+    if (first->honor > second->honor)
+    {
+        return 1;
+    }
+    
+    if (first->honor < second->honor)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+static n_int being_honor_immune(noble_being * value)
+{
+    n_int local_honor = being_honor(value);
+    if (local_honor < 250) /* ALPHA_RANK */
+    {
+        return 1+(local_honor>>6);
+    }
+    return 2; /* IMMUNE_STRENGTH_ALPHA */
+}
+
+static void  being_ascribe_honor(noble_being * value, noble_being * mother)
+{
+    value->honor = (mother->honor + mother->father_honor) >> 2;
+}
+
+static void  being_recalibrate_honor(noble_being * value)
+{
+    value->honor = (n_byte)(((n_int)value->honor*220)/255);
+}
+
 n_int being_first_name(noble_being * value)
 {
     social_link * local_social = being_social(value);
@@ -891,9 +948,9 @@ static void being_immune_response(noble_being * local)
                 }
             }
             /** antigens are depleted according to the immune system strength */
-            if (immune->antigens[i]>IMMUNE_STRENGTH(local))
+            if (immune->antigens[i]>being_honor_immune(local))
             {
-                immune->antigens[i]-=IMMUNE_STRENGTH(local);
+                immune->antigens[i]-=being_honor_immune(local);
             }
             else
             {
@@ -3022,7 +3079,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
  
 #ifdef PARASITES_ON
         /** ascribed social status */
-        local->honor = (mother->honor + mother->father_honor) >> 2;
+        being_ascribe_honor(local, mother);
 #endif
 
         genetics_set(local->mother_genetics, mother_genetics);
@@ -3126,12 +3183,13 @@ void being_tidy(noble_simulation * local_sim)
         noble_being *local_being = &local[loop];
         n_int	     local_e = being_energy(local_being);
         n_genetics  *genetics = being_genetics(local_being);
+        n_int        local_honor = being_honor(local_being);
         delta_e = 0;
         conductance = 5;
 #ifdef PARASITES_ON
-        if (local_being->honor > max_honor)
+        if (local_honor > max_honor)
         {
-            max_honor = local_being->honor;
+            max_honor = local_honor;
         }
 #endif
         if(being_awake(local_sim, local_being))
@@ -3254,7 +3312,7 @@ void being_tidy(noble_simulation * local_sim)
     {
         for(loop=0; loop < number ; loop++)
         {
-            local[loop].honor = (n_byte)((n_int)local[loop].honor*220/255);
+            being_recalibrate_honor(&local[loop]);
         }
     }
 #endif
