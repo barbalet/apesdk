@@ -1560,8 +1560,6 @@ noble_simulation;
 
 #define	BRAIN_OFFSET(num)	(num)
 
-#define	GET_BS(bei,num) ((bei)->brain_state[(num)])
-
 #define FAMILY_NAME_AND_MOD (63)
 
 #define UNPACK_FAMILY_FIRST_NAME(packed_family_name) (packed_family_name&FAMILY_NAME_AND_MOD)
@@ -1605,8 +1603,6 @@ void sim_realtime(n_uint time);
 void sim_set_select(n_uint number);
 
 void sim_debug_csv(n_file * fil, n_byte initial);
-
-void sim_braindisplay(n_byte newval);
 
 n_int get_time_interval(n_string str, n_int * number, n_int * interval);
 

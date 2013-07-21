@@ -62,8 +62,6 @@
 
 /*NOBLEMAKE VAR=""*/
 
-static n_byte  braindisplay = 3;
-
 static variable_string	apescript_variable_codes[VARIABLE_MAX]=
 {
     /* 0 */ /* special "variables" */
@@ -553,34 +551,7 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
 {
     n_byte2 local_brain_state[3];
 
-    if(being_awake(&sim, local_being) == 0)
-    {
-        local_brain_state[0] = GET_BS(local_being, 3);
-        local_brain_state[1] = GET_BS(local_being, 4);
-        local_brain_state[2] = GET_BS(local_being, 5);
-    }
-    else
-    {
-        local_brain_state[0] = GET_BS(local_being, 0);
-        local_brain_state[1] = GET_BS(local_being, 1);
-        local_brain_state[2] = GET_BS(local_being, 2);
-    }
-
-    if(braindisplay == 1)
-    {
-        local_brain_state[0] = 0;
-        local_brain_state[1] = 500;
-        local_brain_state[2] = (5*local_brain_state[2])>>3;
-    }
-
-    if(braindisplay == 2)
-    {
-        local_brain_state[0] = (9*local_brain_state[0])>>3;
-        local_brain_state[1] = 82;
-        local_brain_state[2] = 0;
-    }
-
-    if((local_brain_state[0] != 0) || (local_brain_state[1] != 1024) || (local_brain_state[2] != 0))
+    if(being_brainstates(local_being, (being_awake(&sim, local_being) == 0), local_brain_state))
     {
         n_byte			*local_brain = being_brain(local_being);
         if (local_brain != 0L)
@@ -635,13 +606,6 @@ static void sim_brain_hash(noble_simulation * local_sim)
     }
 }
 #endif
-
-
-void sim_braindisplay(n_byte newval)
-{
-    braindisplay = newval;
-}
-
 
 static void sim_being(noble_simulation * local_sim)
 {

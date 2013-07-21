@@ -92,8 +92,6 @@ void shared_clearErrors(void);
 
 void shared_new(n_uint seed);
 
-void shared_brainDisplay(n_byte value);
-
 n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
 
 void shared_saveFileName(n_string cStringFileName);

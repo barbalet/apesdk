@@ -290,21 +290,6 @@ n_int   count_switch = 0;
     shared_notBrainCode();
 }
 
--(IBAction) menuControlNormalBrain:(id) sender
-{
-    shared_brainDisplay(3);
-}
-
--(IBAction) menuControlJustFear:(id) sender
-{
-    shared_brainDisplay(1);
-}
-
--(IBAction) menuControlJustDesire:(id) sender
-{
-    shared_brainDisplay(2);
-}
-
 -(IBAction) menuControlFlood:(id) sender
 {
     shared_flood();

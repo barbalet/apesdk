@@ -1266,11 +1266,7 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
         {
             return;
         }
-        if ((GET_BS(local_being,0) == 0) || (GET_BS(local_being,1) == 1024) || (GET_BS(local_being,2) == 0) ||
-                (GET_BS(local_being,3) == 0) || (GET_BS(local_being,4) == 1024) || (GET_BS(local_being,5) == 0))
-        {
-            return;
-        }
+
         a12 = (a12 * draw_brain_size) >> 8;
         a32 = (a32 * draw_brain_size) >> 8;
         act_x2a = -((a21 + a23) << 4);

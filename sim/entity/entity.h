@@ -97,6 +97,8 @@ n_byte * being_brain(noble_being * value);
 episodic_memory * being_episodic(noble_being * value);
 social_link * being_social(noble_being * value);
 
+n_int being_brainstates(noble_being * value, n_int awake, n_byte2 * states);
+
 n_int being_honor(noble_being * value);
 
 void being_honor_inc_dec(noble_being * inc, noble_being * dec);

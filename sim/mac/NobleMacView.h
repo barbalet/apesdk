@@ -77,10 +77,6 @@
 -(IBAction) menuControlNoBrain:(id) sender;
 -(IBAction) menuControlNoBrainCode:(id) sender;
 
--(IBAction) menuControlNormalBrain:(id) sender;
--(IBAction) menuControlJustFear:(id) sender;
--(IBAction) menuControlJustDesire:(id) sender;
-
 -(IBAction) menuControlFlood:(id) sender;
 -(IBAction) menuControlHealthyCarrier:(id) sender;
 

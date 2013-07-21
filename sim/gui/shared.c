@@ -424,11 +424,6 @@ void shared_new(n_uint seed)
     NewBlock = 0;
 }
 
-void shared_brainDisplay(n_byte value)
-{
-    sim_braindisplay(value);
-}
-
 n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
 {
     (void)control_toggle_pause(0);

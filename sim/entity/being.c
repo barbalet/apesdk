@@ -165,6 +165,26 @@ static void being_replace(noble_being * local, n_uint count, n_uint loop)
     }
 }
 
+static void being_set_brainatates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3)
+{
+    n_int three_offset = (asleep ? 0 : 3);
+
+    value->brain_state[three_offset + 0] = val1;
+    value->brain_state[three_offset + 1] = val2;
+    value->brain_state[three_offset + 2] = val3;
+}
+
+n_int being_brainstates(noble_being * value, n_int asleep, n_byte2 * states)
+{
+    n_int three_offset = (asleep ? 0 : 3);
+    
+    states[0] = value->brain_state[three_offset + 0];
+    states[1] = value->brain_state[three_offset + 1];
+    states[2] = value->brain_state[three_offset + 2];
+    
+    return ((states[0] != 0) || (states[1] != 1024) || (states[2] != 0));
+}
+
 void being_erase(noble_being * value)
 {
     n_byte          * new_brain = value->brain;
@@ -3144,19 +3164,11 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
             feel free to change them! */
 
 #ifdef SOFT_BRAIN_ON
-        GET_BS(local, 0) = 171;
-        GET_BS(local, 1) = 0;
-        GET_BS(local, 2) = 146;
-        GET_BS(local, 3) = 86;
-        GET_BS(local, 4) = 501;
-        GET_BS(local, 5) = 73;
+        being_set_brainatates(local, 0, 171, 0, 146);
+        being_set_brainatates(local, 1, 86, 501, 73);
 #else
-        GET_BS(local, 0) = 0;
-        GET_BS(local, 1) = 1024;
-        GET_BS(local, 2) = 0;
-        GET_BS(local, 3) = 0;
-        GET_BS(local, 4) = 1024;
-        GET_BS(local, 5) = 0;
+        being_set_brainatates(local, 0, 0, 1024, 0);
+        being_set_brainatates(local, 1, 0, 1024, 0);
 #endif
     }
 
