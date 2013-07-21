@@ -37,7 +37,6 @@
 		4A360077171240F1004DAFBA /* nobleape.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4A360076171240F1004DAFBA /* nobleape.icns */; };
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
 		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
-		4A97650D17935F540099BDC1 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A97650C17935F540099BDC1 /* QuartzCore.framework */; };
 		5A4805E2178676EB007220D7 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A4805E1178676EB007220D7 /* XCTest.framework */; };
 		5A4805E8178676EB007220D7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A4805E6178676EB007220D7 /* InfoPlist.strings */; };
 		5A4805EA178676EB007220D7 /* MacSimulation_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */; };
@@ -99,7 +98,6 @@
 		4A360076171240F1004DAFBA /* nobleape.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = nobleape.icns; sourceTree = "<group>"; };
 		4A360078171240FE004DAFBA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		4A7DC3E31749CD710013F2E9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
-		4A97650C17935F540099BDC1 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */ = {isa = PBXFileReference; explicitFileType = folder; includeInIndex = 0; path = "MacSimulation Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A4805E1178676EB007220D7 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		5A4805E5178676EB007220D7 /* MacSimulation Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MacSimulation Tests-Info.plist"; sourceTree = "<group>"; };
@@ -115,7 +113,6 @@
 			files = (
 				4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */,
 				4A36001817124025004DAFBA /* Cocoa.framework in Frameworks */,
-				4A97650D17935F540099BDC1 /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,7 +155,6 @@
 		4A36001617124025004DAFBA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4A97650C17935F540099BDC1 /* QuartzCore.framework */,
 				4A360078171240FE004DAFBA /* OpenGL.framework */,
 				4A36001717124025004DAFBA /* Cocoa.framework */,
 				5A4805E1178676EB007220D7 /* XCTest.framework */,
@@ -639,7 +635,6 @@
 				5A4805EF178676EB007220D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

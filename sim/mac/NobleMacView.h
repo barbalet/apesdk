@@ -42,14 +42,16 @@
 
 @interface NobleMacView : NSOpenGLView
 {
+    NSTimer*       timerAnimation;
     GLubyte        colorTable[256][3];
     GLubyte        outputBuffer[2048*1536*3];
+    
     n_int          fIdentification;
-    CVDisplayLinkRef displayLink;
 }
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;
 
+- (void) animationTimer:(NSTimer *)localTimer;
 - (void) drawRect:(NSRect)rect;
 
 - (BOOL) acceptsFirstResponder;

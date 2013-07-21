@@ -93,6 +93,27 @@
      }];
 }
 
+
+/* per-window timer function, basic time based animation preformed here */
+- (void) animationTimer:(NSTimer *)localTimer
+{
+#ifndef NEW_OPENGL_ENVIRONMENT
+    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
+#endif
+
+    if (shared_script_debug_ready())
+    {
+        [self debugOutput];
+    }
+    
+	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
+    
+    if (sim_thread_console_quit())
+    {
+        [self quitProcedure];
+    }
+}
+
 n_int   count_switch = 0;
 
 - (void) drawRect:(NSRect)rect
@@ -167,8 +188,6 @@ n_int   count_switch = 0;
     polygonal_close();
 #endif
     shared_close();
-    
-    CVDisplayLinkRelease(displayLink);
     exit(0);
 }
 
@@ -194,33 +213,6 @@ n_int   count_switch = 0;
     return YES;
 }
 
-- (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
-{
-#ifndef NEW_OPENGL_ENVIRONMENT
-    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
-#endif
-    
-    if (shared_script_debug_ready())
-    {
-        [self debugOutput];
-    }
-    
-	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
-    
-    if (sim_thread_console_quit())
-    {
-        [self quitProcedure];
-    }
-    return kCVReturnSuccess;
-}
-
-
-static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
-{
-    NobleMacView* localView = (__bridge NobleMacView *)(displayLinkContext);
-    return [localView getFrameForTime:outputTime];
-}
-
 - (void) awakeFromNib
 {
     NSSize increments;
@@ -244,21 +236,11 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     [[self window] setContentResizeIncrements:increments];
     
     [[self window] orderFrontRegardless];
-
-    {
-        GLint swapInt = 1;
-        [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
-    }
-    CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
     
-    CVDisplayLinkSetOutputCallback(displayLink, &displayLinkCallback, (__bridge void*)self);
+    /* start animation timer */
+	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
-    {
-        CGLContextObj cglContext = [[self openGLContext] CGLContextObj];
-        CGLPixelFormatObj cglPixelFormat = [[self pixelFormat] CGLPixelFormatObj];
-        CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
-    }
-    CVDisplayLinkStart(displayLink);
+    [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
 }
 
 #pragma mark ---- IB Actions ----
