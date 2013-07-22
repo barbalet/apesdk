@@ -113,9 +113,6 @@ protected slots:
     void menuControlWeather();
     void menuControlShowBrain();
     void menuControlShowBraincode();
-    void menuControlShowBrainNormal();
-    void menuControlShowBrainFear();
-    void menuControlShowBrainDesire();
     void menuControlFlood();
     void menuControlHealthyCarrier();
 

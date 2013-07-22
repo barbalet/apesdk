@@ -70,7 +70,7 @@ static unsigned char    firecontrol = 0;
 static unsigned char	dialog_up = 0;
 static HMENU  hMenu, hMenuPopup[4];
 static HANDLE current_file = NULL;
-static TCHAR current_file_name[MAX_PATH];
+static n_string_block current_file_name[MAX_PATH];
 
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -78,7 +78,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 static void plat_update();
 static n_int plat_ourwind(HWND hwnd);
-static unsigned char plat_file_open();
+static void plat_file_open(n_byte script);
 static unsigned char plat_file_save();
 static unsigned char plat_file_save_as();
 
@@ -408,16 +408,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case FILE_OPEN_HANDLE:
 
             dialog_up = 1;
-            if (plat_file_open(&sim_filein))
-            {
-                control_init(0, 0);
-            }
+            plat_file_open(0);
             dialog_up = 0;
             return 0;
 
         case FILE_OPEN_SCRIPT_HANDLE:
             dialog_up = 1;
-            (void)plat_file_open(&sim_interpret);
+            plat_file_open(1);
 
             dialog_up = 0;
             return 0;
@@ -498,12 +495,8 @@ static n_int plat_ourwind(HWND hwnd)
     return -1;
 }
 
-static unsigned char plat_file_open(control_file_handle cfh)
+static void plat_file_open(n_byte script)
 {
-    unsigned char * buff;
-    unsigned long	buff_len;
-    n_int			format_ok = -1;
-
     char actual_file_name[MAX_PATH] = { 0 };
     long file_return ;
     DWORD seek_result;
@@ -529,53 +522,15 @@ static unsigned char plat_file_open(control_file_handle cfh)
 
     if (file_return )
     {
-        if ((current_file = CreateFile((LPCWSTR)current_file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
-        {
-            MessageBox(global_hwnd[WINDOW_ONE], TEXT("Invalid file handle"), TEXT("Noble Ape File Error"), MB_OK);
-            return 0;
-        }
 
-        if ((buff_len = GetFileSize(current_file, NULL)) == INVALID_FILE_SIZE)
-        {
-            MessageBox(global_hwnd[0], TEXT("Unable to get file size"), TEXT("Noble Ape File Error"), MB_OK);
-            CloseHandle(current_file);
-            return 0;
-        }
-
-        buff = (unsigned char*) io_new ( buff_len * sizeof(unsigned char));
-
-        if ((seek_result = SetFilePointer(current_file, 0, NULL, FILE_BEGIN)) == INVALID_SET_FILE_POINTER)
-        {
-            MessageBox(global_hwnd[0], TEXT("Unable to set file pointer"), TEXT("Noble Ape File Error"), MB_OK);
-            io_free(buff);
-            CloseHandle(current_file);
-            return 0;
-        }
-
-        read_result = ReadFile(current_file, buff, buff_len, &read_len, NULL);
-
-        /* I think there is still a problem read_len should be tested against buff_len surely - TSB 050620 */
-        if ((read_result != 1) || (read_len != buff_len))
-        {
-            MessageBox(global_hwnd[0], TEXT("Unable to read from file"), TEXT("Noble Ape File Error"), MB_OK);
-            io_free(buff);
-            CloseHandle(current_file);
-            return 0;
-        }
-
-        format_ok = (*cfh)(buff, buff_len);
-
-        if(format_ok == -1)
+        if(shared_openFileName(current_file_name, script) == 0)
         {
             MessageBox(global_hwnd[0], TEXT("File processing failed"), TEXT("Noble Ape File Error"), MB_OK);
-            io_free(buff);
             CloseHandle(current_file);
         }
 
-        io_free(buff);
         CloseHandle(current_file);
     }
-    return (unsigned char)(format_ok == 0);
 }
 
 static unsigned char plat_file_save(n_file_out cfo)

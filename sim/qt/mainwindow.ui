@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>512</width>
-    <height>512</height>
+    <width>536</width>
+    <height>592</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,7 +50,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>512</width>
+     <width>536</width>
      <height>22</height>
     </rect>
    </property>
@@ -103,9 +103,6 @@
     <addaction name="actionShowBrain"/>
     <addaction name="actionShowBraincode"/>
     <addaction name="separator"/>
-    <addaction name="actionBrainNormal"/>
-    <addaction name="actionBrainFear"/>
-    <addaction name="actionBrainDesire"/>
     <addaction name="separator"/>
     <addaction name="actionFlood"/>
     <addaction name="actionHealthyCarrier"/>
@@ -230,33 +227,6 @@
    </property>
    <property name="text">
     <string>Braincode</string>
-   </property>
-  </action>
-  <action name="actionBrainNormal">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Normal Brain</string>
-   </property>
-  </action>
-  <action name="actionBrainFear">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Fear Brain</string>
-   </property>
-  </action>
-  <action name="actionBrainDesire">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Desire Brain</string>
    </property>
   </action>
   <action name="actionFlood">

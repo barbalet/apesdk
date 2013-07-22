@@ -54,9 +54,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionWeather,SIGNAL(triggered()),this,SLOT(menuControlWeather()));
     connect(ui->actionShowBrain,SIGNAL(triggered()),this,SLOT(menuControlShowBrain()));
     connect(ui->actionShowBraincode,SIGNAL(triggered()),this,SLOT(menuControlShowBraincode()));
-    connect(ui->actionBrainNormal,SIGNAL(triggered()),this,SLOT(menuControlShowBrainNormal()));
-    connect(ui->actionBrainFear,SIGNAL(triggered()),this,SLOT(menuControlShowBrainFear()));
-    connect(ui->actionBrainDesire,SIGNAL(triggered()),this,SLOT(menuControlShowBrainDesire()));
     connect(ui->actionFlood,SIGNAL(triggered()),this,SLOT(menuControlFlood()));
     connect(ui->actionHealthyCarrier,SIGNAL(triggered()),this,SLOT(menuControlHealthyCarrier()));
 
@@ -145,30 +142,6 @@ void MainWindow::menuControlShowBraincode()
 {
     shared_notBrainCode();
     ui->actionShowBraincode->setChecked(ui->actionShowBraincode->isChecked());
-}
-
-void MainWindow::menuControlShowBrainNormal()
-{
-    shared_brainDisplay(3);
-    ui->actionBrainDesire->setChecked(false);
-    ui->actionBrainNormal->setChecked(true);
-    ui->actionBrainFear->setChecked(false);
-}
-
-void MainWindow::menuControlShowBrainFear()
-{
-    shared_brainDisplay(1);
-    ui->actionBrainDesire->setChecked(false);
-    ui->actionBrainFear->setChecked(true);
-    ui->actionBrainNormal->setChecked(false);
-}
-
-void MainWindow::menuControlShowBrainDesire()
-{
-    shared_brainDisplay(2);
-    ui->actionBrainDesire->setChecked(true);
-    ui->actionBrainFear->setChecked(false);
-    ui->actionBrainNormal->setChecked(false);
 }
 
 void MainWindow::menuControlFlood()
