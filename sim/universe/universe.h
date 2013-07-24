@@ -505,8 +505,11 @@ enum inventory_type
 
 #define VALUABLE_OBJECT    (INVENTORY_NUT & INVENTORY_SHELL)
 
-#define POSTURE_CROUCHING  100
-#define POSTURE_UPRIGHT    200
+enum posture_type
+{
+    POSTURE_CROUCHING = 100,
+    POSTURE_UPRIGHT = 200
+};
 
 enum attention_type
 {
@@ -1542,8 +1545,6 @@ noble_simulation;
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
 #define	GET_MI(bei)	((bei)->mother_genetics[0])
-
-#define GET_PS(bei)     ((bei)->posture)
 
 #define NO_BEINGS_FOUND	(0xffffffff)
 

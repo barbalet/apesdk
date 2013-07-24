@@ -66,8 +66,12 @@ noble_being      * being = 0L;
 
 - (void)testBeingCheckSum
 {
-    n_uint hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
-    XCTAssertTrue(hash == 0x9a224c0789da96d5, @"Hash doesn't comply with prior being hashes (%lx)", hash);
+
+    n_int length = sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *);
+    n_uint hash = math_hash((n_byte *)being, length);
+    XCTAssertTrue(length == 2704, @"Length doesn't comply with prior length (%ld)", length);
+    
+    XCTAssertTrue(hash == 0xcf57c761d1f3db58, @"Hash doesn't comply with prior being hashes (%lx)", hash);
 }
 
 - (void)testBrainCheckSum
@@ -141,15 +145,15 @@ noble_being      * being = 0L;
 {
     n_uint  time = 3;
     n_uint hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
-    XCTAssertTrue(hash == 0x9a224c0789da96d5, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xcf57c761d1f3db58, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
     
     shared_flood();
 
     shared_simulate(1);
     shared_simulate(2);
-    
+
     hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
-    XCTAssertTrue(hash == 0xc005d358b89bcef5, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xf07db769957bb69a, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
 
     
     while (time < ((TIME_DAY_MINUTES * 3)/2))
@@ -157,9 +161,9 @@ noble_being      * being = 0L;
         shared_simulate(time);
         time++;
     }
-
+    
     hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
-    XCTAssertTrue(hash == 0x95d7f4f68377dc51, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x35778969417fdafb, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
 
     hash = math_hash(being->brain, DOUBLE_BRAIN);
     XCTAssertTrue(hash == 0x9c989f8a6fc18160, @"Longterm hash doesn't comply with prior brain hashes (%lx)", hash);

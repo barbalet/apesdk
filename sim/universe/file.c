@@ -581,7 +581,7 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
         local_being->goal[2] = (n_byte2) value;
         break;
     case VARIABLE_POSTURE:
-        GET_PS(local_being) = (n_byte) value;
+        being_set_posture(local_being, (n_byte) value);
         break;
 
     case VARIABLE_DRIVE_HUNGER:
@@ -877,7 +877,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         local_number = local_being->goal[2];
                         break;
                     case VARIABLE_POSTURE:
-                        local_number = GET_PS(local_being);
+                        local_number = being_posture(local_being);
                         break;
 
                     case VARIABLE_DRIVE_HUNGER:

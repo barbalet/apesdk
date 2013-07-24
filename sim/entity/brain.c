@@ -1029,10 +1029,10 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
 
     /** Posture */
     case 30:
-        return GET_PS(meeter_being);
+        return being_posture(meeter_being);
     }
     /** case 31: */
-    return GET_PS(met_being);
+    return being_posture(met_being);
 
 }
 
@@ -1653,7 +1653,7 @@ void brain_dialogue(
             case 5: /** posture */
                 if (awake != 0)
                 {
-                    GET_PS(meeter_being)=addr1[0];
+                    being_set_posture(meeter_being, addr1[0]);
                 }
                 break;
             }

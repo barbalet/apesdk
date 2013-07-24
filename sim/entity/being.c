@@ -304,6 +304,20 @@ void being_name_simple(noble_being * value, n_string str)
     being_name((FIND_SEX(GET_I(value)) == SEX_FEMALE), being_first_name(value), being_family_first_name(value), being_family_second_name(value), str);
 }
 
+n_int being_posture(noble_being * value)
+{
+    return value->posture;
+}
+
+void being_set_posture(noble_being * value, n_byte post)
+{
+    value->posture = post;
+}
+
+n_int being_posture_under(noble_being * value, enum posture_type post)
+{
+    return (value->posture < post);
+}
 
 n_byte * being_brain(noble_being * value)
 {
@@ -2375,7 +2389,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         being_turn_away_from_water(local, land);
 
         /** horizontally oriented posture */
-        GET_PS(local) = 0;
+        being_set_posture(local, 0);
+        
         /** When swimming drop everything except what's on your head or back.
            Note that the groomed flag is also cleared */
 

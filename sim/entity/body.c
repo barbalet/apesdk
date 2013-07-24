@@ -1174,7 +1174,7 @@ static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte
  */
 static void body_action_pickup(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
-    if ((carrying != 0) && (GET_PS(local)>=POSTURE_CROUCHING))
+    if ((carrying != 0) && (!being_posture_under(local,POSTURE_CROUCHING)))
     {
         hand = BODY_LEFT_HAND;
         carrying = OBJECTS_CARRIED(local,hand);
@@ -1201,7 +1201,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                 }
                 if ((trees>grass) && (trees>bush))
                 {
-                    if (GET_PS(local) < POSTURE_UPRIGHT)
+                    if (being_posture_under(local, POSTURE_UPRIGHT))
                     {
                         OBJECT_TAKE(local,hand, INVENTORY_BRANCH);
                         episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_BRANCH);
