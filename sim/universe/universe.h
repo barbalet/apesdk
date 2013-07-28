@@ -89,7 +89,7 @@ static const n_byte	operators[17][7] =
     /*AHWOUS*/
 };
 
-#define AGE_IN_DAYS(sim,bei)        (TIME_IN_DAYS(sim->land->date) - TIME_IN_DAYS(GET_D(bei)))
+#define AGE_IN_DAYS(sim,bei)        (TIME_IN_DAYS(sim->land->date) - being_dob(bei))
 #define AGE_IN_YEARS(sim,bei)       (AGE_IN_DAYS(sim,bei)/TIME_YEAR_DAYS)
 
 
@@ -520,10 +520,6 @@ enum attention_type
     ATTENTION_TERRITORY,
     ATTENTION_SIZE
 };
-
-#define OBJECTS_CARRIED(being,body_locn)       (((being)->inventory[body_locn]>>3)<<3)
-#define OBJECTS_DROP(being,body_locn)          ((being)->inventory[body_locn] &= 7); (GET_A(being,ATTENTION_BODY)=body_locn)
-#define OBJECT_TAKE(being,body_locn,obj_type)  ((being)->inventory[body_locn] |= obj_type); (GET_A(being,ATTENTION_BODY)=body_locn)
 
 enum individual_action_type
 {
@@ -1540,8 +1536,6 @@ noble_simulation;
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
 #define GET_FR(bei)     (GENE_FRAME(being_genetics(bei)))
-
-#define	GET_D(bei)	((bei)->date_of_birth)
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
 #define	GET_MI(bei)	((bei)->mother_genetics[0])

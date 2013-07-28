@@ -1369,10 +1369,10 @@ void brain_dialogue(
             case 22:
             {
                 /** carrying object */
-                n_byte2 carrying = OBJECTS_CARRIED(meeter_being,BODY_RIGHT_HAND);
+                n_byte2 carrying = being_carried(meeter_being,BODY_RIGHT_HAND);
                 n_byte2 obj_type=0;
 
-                if (carrying==0) carrying = OBJECTS_CARRIED(meeter_being,BODY_LEFT_HAND);
+                if (carrying==0) carrying = being_carried(meeter_being,BODY_LEFT_HAND);
                 if (carrying!=0)
                 {
                     switch(addr0[0]%9)

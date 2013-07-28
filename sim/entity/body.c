@@ -790,11 +790,11 @@ static void body_action_give(noble_simulation * sim, noble_being * local, noble_
     if (carrying == 0)
     {
         hand = BODY_LEFT_HAND;
-        carrying = OBJECTS_CARRIED(local,hand);
+        carrying = being_carried(local,hand);
     }
     if ((carrying != 0) &&
-            ((OBJECTS_CARRIED(other,BODY_LEFT_HAND)==0) ||
-             (OBJECTS_CARRIED(other,BODY_RIGHT_HAND)==0)))
+            ((being_carried(other,BODY_LEFT_HAND)==0) ||
+             (being_carried(other,BODY_RIGHT_HAND)==0)))
     {
         GET_A(local,ATTENTION_BODY) = BODY_RIGHT_HAND;
         GET_A(other,ATTENTION_BODY) = BODY_RIGHT_HAND;
@@ -802,14 +802,14 @@ static void body_action_give(noble_simulation * sim, noble_being * local, noble_
         episodic_interaction(sim, local, other, EVENT_GIVEN, EPISODIC_AFFECT_ZERO, carrying);
         episodic_interaction(sim, other, local, EVENT_GIVEN_BY, AFFECT_RECEIVE, carrying);
 
-        OBJECTS_DROP(local,hand);
-        if (OBJECTS_CARRIED(other,BODY_RIGHT_HAND)==0)
+        being_drop(local,hand);
+        if (being_carried(other,BODY_RIGHT_HAND)==0)
         {
-            OBJECT_TAKE(other,BODY_RIGHT_HAND,carrying);
+            being_take(other,BODY_RIGHT_HAND,carrying);
         }
         else
         {
-            OBJECT_TAKE(other,BODY_LEFT_HAND,carrying);
+            being_take(other,BODY_LEFT_HAND,carrying);
         }
     }
 }
@@ -830,7 +830,7 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
     if (carrying == 0)
     {
         hand = BODY_LEFT_HAND;
-        carrying = OBJECTS_CARRIED(local,hand);
+        carrying = being_carried(local,hand);
     }
     if (carrying!=0)
     {
@@ -938,7 +938,7 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
     if (carrying == 0)
     {
         hand = BODY_LEFT_HAND;
-        carrying = OBJECTS_CARRIED(local,hand);
+        carrying = being_carried(local,hand);
     }
     if (carrying!=0)
     {
@@ -972,7 +972,7 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
  */
 static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
-    n_byte carrying2 = OBJECTS_CARRIED(local,BODY_LEFT_HAND);
+    n_byte carrying2 = being_carried(local,BODY_LEFT_HAND);
     if ((carrying & INVENTORY_SPEAR) ||
             (carrying2 & INVENTORY_SPEAR))
     {
@@ -991,11 +991,11 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
                 /* carry fish */
                 if (carrying & INVENTORY_SPEAR)
                 {
-                    OBJECT_TAKE(local,BODY_LEFT_HAND,INVENTORY_FISH);
+                    being_take(local,BODY_LEFT_HAND,INVENTORY_FISH);
                 }
                 else
                 {
-                    OBJECT_TAKE(local,hand,INVENTORY_FISH);
+                    being_take(local,hand,INVENTORY_FISH);
                 }
                 episodic_self(sim, local, EVENT_FISH, AFFECT_FISH, 0);
             }
@@ -1012,12 +1012,12 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
  */
 static void body_action_bash_objects(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
-    n_byte carrying2 = OBJECTS_CARRIED(local,BODY_LEFT_HAND);
+    n_byte carrying2 = being_carried(local,BODY_LEFT_HAND);
     if ((carrying & INVENTORY_ROCK) && (carrying2 & INVENTORY_ROCK))
     {
         /** bash two rocks to make a scraper */
-        OBJECTS_DROP(local,hand);
-        OBJECT_TAKE(local,hand,INVENTORY_SCRAPER);
+        being_drop(local,hand);
+        being_take(local,hand,INVENTORY_SCRAPER);
     }
     if (((carrying & INVENTORY_ROCK) && (carrying2 & INVENTORY_NUT)) ||
             ((carrying & INVENTORY_NUT) && (carrying2 & INVENTORY_ROCK)))
@@ -1025,13 +1025,13 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
         /** bash nut with a rock */
         if (carrying & INVENTORY_NUT)
         {
-            OBJECTS_DROP(local,hand);
-            OBJECT_TAKE(local,hand,INVENTORY_NUT_CRACKED);
+            being_drop(local,hand);
+            being_take(local,hand,INVENTORY_NUT_CRACKED);
         }
         else
         {
-            OBJECTS_DROP(local,BODY_LEFT_HAND);
-            OBJECT_TAKE(local,BODY_LEFT_HAND,INVENTORY_NUT_CRACKED);
+            being_drop(local,BODY_LEFT_HAND);
+            being_take(local,BODY_LEFT_HAND,INVENTORY_NUT_CRACKED);
         }
     }
     if (((carrying & INVENTORY_BRANCH) && (carrying2 & INVENTORY_SCRAPER)) ||
@@ -1040,13 +1040,13 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
         /** use a scraper to make a spear */
         if (carrying & INVENTORY_BRANCH)
         {
-            OBJECTS_DROP(local,hand);
-            OBJECT_TAKE(local,hand,INVENTORY_SPEAR);
+            being_drop(local,hand);
+            being_take(local,hand,INVENTORY_SPEAR);
         }
         else
         {
-            OBJECTS_DROP(local,BODY_LEFT_HAND);
-            OBJECT_TAKE(local,BODY_LEFT_HAND,INVENTORY_SPEAR);
+            being_drop(local,BODY_LEFT_HAND);
+            being_take(local,BODY_LEFT_HAND,INVENTORY_SPEAR);
         }
     }
     if (((carrying & INVENTORY_BRANCH) && (carrying2 & INVENTORY_NUT)) ||
@@ -1055,13 +1055,13 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
         /** whack nut with a branch */
         if (carrying & INVENTORY_NUT)
         {
-            OBJECTS_DROP(local,hand);
-            OBJECT_TAKE(local,hand,INVENTORY_NUT_CRACKED);
+            being_drop(local,hand);
+            being_take(local,hand,INVENTORY_NUT_CRACKED);
         }
         else
         {
-            OBJECTS_DROP(local,BODY_LEFT_HAND);
-            OBJECT_TAKE(local,BODY_LEFT_HAND,INVENTORY_NUT_CRACKED);
+            being_drop(local,BODY_LEFT_HAND);
+            being_take(local,BODY_LEFT_HAND,INVENTORY_NUT_CRACKED);
         }
     }
 }
@@ -1081,7 +1081,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
             (carrying & INVENTORY_NUT_CRACKED)))
     {
         hand = BODY_LEFT_HAND;
-        carrying = OBJECTS_CARRIED(local,hand);
+        carrying = being_carried(local,hand);
     }
     if ((carrying & INVENTORY_GRASS) ||
             (carrying & INVENTORY_TWIG) ||
@@ -1098,7 +1098,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
     {
         /** consume grass */
         being_energy_delta(local, food_absorption(local, ENERGY_GRASS, FOOD_VEGETABLE));
-        OBJECTS_DROP(local,hand);
+        being_drop(local,hand);
     }
     else
     {
@@ -1106,7 +1106,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
         {
             /** consume fish */
             being_energy_delta(local, food_absorption(local, ENERGY_FISH, FOOD_SHELLFISH));
-            OBJECTS_DROP(local,hand);
+            being_drop(local,hand);
         }
         else
         {
@@ -1114,7 +1114,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
             {
                 /** consume nut */
                 being_energy_delta(local, food_absorption(local, ENERGY_NUT, FOOD_VEGETABLE));
-                OBJECTS_DROP(local,hand);
+                being_drop(local,hand);
             }
         }
     }
@@ -1128,18 +1128,18 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
  */
 static void body_action_swap_hands(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
-    if ((carrying != 0) && (OBJECTS_CARRIED(local,BODY_LEFT_HAND)==0))
+    if ((carrying != 0) && (being_carried(local,BODY_LEFT_HAND)==0))
     {
-        OBJECTS_DROP(local,hand);
-        OBJECT_TAKE(local,BODY_LEFT_HAND,carrying);
+        being_drop(local,hand);
+        being_take(local,BODY_LEFT_HAND,carrying);
     }
     else
     {
-        if ((carrying == 0) && (OBJECTS_CARRIED(local,BODY_LEFT_HAND)!=0))
+        if ((carrying == 0) && (being_carried(local,BODY_LEFT_HAND)!=0))
         {
-            carrying = OBJECTS_CARRIED(local,BODY_LEFT_HAND);
-            OBJECTS_DROP(local,BODY_LEFT_HAND);
-            OBJECT_TAKE(local,hand,carrying);
+            carrying = being_carried(local,BODY_LEFT_HAND);
+            being_drop(local,BODY_LEFT_HAND);
+            being_take(local,hand,carrying);
         }
     }
 }
@@ -1156,11 +1156,11 @@ static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte
     if (carrying == 0)
     {
         hand = BODY_LEFT_HAND;
-        carrying = OBJECTS_CARRIED(local,hand);
+        carrying = being_carried(local,hand);
     }
     if (carrying != 0)
     {
-        OBJECTS_DROP(local,hand);
+        being_drop(local,hand);
         episodic_self(sim, local, EVENT_DROP, EPISODIC_AFFECT_ZERO, carrying);
     }
 }
@@ -1177,7 +1177,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
     if ((carrying != 0) && (!being_posture_under(local,POSTURE_CROUCHING)))
     {
         hand = BODY_LEFT_HAND;
-        carrying = OBJECTS_CARRIED(local,hand);
+        carrying = being_carried(local,hand);
     }
     if (carrying == 0)
     {
@@ -1196,31 +1196,31 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
 
                 if ((grass>bush) && (grass>trees))
                 {
-                    OBJECT_TAKE(local,hand, INVENTORY_GRASS);
+                    being_take(local,hand, INVENTORY_GRASS);
                     episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_GRASS);
                 }
                 if ((trees>grass) && (trees>bush))
                 {
                     if (being_posture_under(local, POSTURE_UPRIGHT))
                     {
-                        OBJECT_TAKE(local,hand, INVENTORY_BRANCH);
+                        being_take(local,hand, INVENTORY_BRANCH);
                         episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_BRANCH);
                     }
                     else
                     {
-                        OBJECT_TAKE(local,hand, INVENTORY_NUT);
+                        being_take(local,hand, INVENTORY_NUT);
                         episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_NUT);
                     }
                 }
                 if ((bush>grass) && (bush>trees))
                 {
-                    OBJECT_TAKE(local,hand, INVENTORY_TWIG);
+                    being_take(local,hand, INVENTORY_TWIG);
                     episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_TWIG);
                 }
             }
             else
             {
-                OBJECT_TAKE(local,hand, INVENTORY_ROCK);
+                being_take(local,hand, INVENTORY_ROCK);
                 episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_ROCK);
             }
         }
@@ -1248,7 +1248,7 @@ void social_action(
         return;
     }
 
-    carrying = OBJECTS_CARRIED(local,hand);
+    carrying = being_carried(local,hand);
     if (other == 0L)
     {
         /** individual action */

@@ -162,6 +162,10 @@ void    being_reset_drive(noble_being * value, enum drives_definition drive);
 n_int   being_height(noble_being * value);
 n_int   being_mass(noble_being * value);
 
+enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location);
+void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location);
+void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
+
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
 void genealogy_birth(noble_being * child, noble_being * mother, void * sim);

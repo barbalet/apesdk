@@ -503,6 +503,24 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
     }
 }
 
+enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location)
+{
+    return ((value)->inventory[location]>>3)<<3;
+}
+
+void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location)
+{
+    (value)->inventory[location] &= 7;
+    GET_A(value,ATTENTION_BODY) = location;
+}
+
+void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object)
+{
+    (value)->inventory[location] |= object;
+    GET_A(value,ATTENTION_BODY) = location;
+}
+
+
 /**
  * @brief Applies a function to each being in the simulation
  * @param sim Pointer to the simulation object
