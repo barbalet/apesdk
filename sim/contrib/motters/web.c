@@ -53,7 +53,6 @@
 #include "../../entity/entity.h"
 #include "../../universe/universe_internal.h"
 #include "../../entity/entity_internal.h"
-#include "../../command/command.h"
 
 #endif
 
@@ -192,12 +191,7 @@ void create_alphas(n_file * fil, noble_simulation * sim)
         {
             local_being = &sim->beings[alpha_male];
             io_write(fil, "Alpha Male: ", 0);
-            being_name(
-                (FIND_SEX(GET_I(local_being)) == SEX_FEMALE),
-                GET_NAME(sim,local_being),
-                GET_FAMILY_FIRST_NAME(sim,local_being),
-                GET_FAMILY_SECOND_NAME(sim,local_being),
-                str);
+			being_name_simple(local_being, str);
             io_write(fil, str, 0);
             io_write(fil, "<br>", 1);
         }
@@ -205,12 +199,7 @@ void create_alphas(n_file * fil, noble_simulation * sim)
         {
             local_being = &sim->beings[alpha_female];
             io_write(fil, "Alpha Female: ", 0);
-            being_name(
-                (FIND_SEX(GET_I(local_being)) == SEX_FEMALE),
-                GET_NAME(sim,local_being),
-                GET_FAMILY_FIRST_NAME(sim,local_being),
-                GET_FAMILY_SECOND_NAME(sim,local_being),
-                str);
+			being_name_simple(local_being, str);
             io_write(fil, str, 0);
             io_write(fil, "<br>", 1);
         }
@@ -230,7 +219,7 @@ void create_births(
     for (i = 0; i < sim->num; i++)
     {
         noble_being * local_being = &sim->beings[i];
-        n_uint local_dob = TIME_IN_DAYS(GET_D(local_being));
+        n_int local_dob = being_dob(local_being);
         n_int age_days = current_date - local_dob;
         if (age_days < 2)
         {
@@ -266,7 +255,7 @@ void create_births(
         for (i = 0; i < sim->num; i++)
         {
             noble_being * local_being = &sim->beings[i];
-            n_uint local_dob = TIME_IN_DAYS(GET_D(local_being));
+            n_int local_dob = being_dob(local_being);
             n_int age_days = current_date - local_dob;
             if (age_days < 2)
             {
@@ -283,7 +272,7 @@ void create_births(
                 io_write(fil, "                    <a href=\"ape_birth_", 0);
                 io_writenumber(fil, ctr, 1, 0);
                 io_write(fil, ".htm\">", 1);
-                being_name((FIND_SEX(GET_I(local_being)) == SEX_FEMALE), GET_NAME(sim,local_being), GET_FAMILY_FIRST_NAME(sim,local_being), GET_FAMILY_SECOND_NAME(sim,local_being), str);
+				being_name_simple(local_being,str);
                 io_write(fil, str, 1);
                 io_write(fil, " ", 1);
                 io_write(fil, "                    </a></td>", 1);
@@ -317,7 +306,7 @@ void create_web_ape_friends(
     n_byte eliminated[SOCIAL_SIZE];
     int i,j;
     n_int f=0,attr,resp;
-    social_link * local_social_graph = GET_SOC(sim, local_being);
+    social_link * local_social_graph = being_social(local_being);
     for (i = 0; i < SOCIAL_SIZE; i++) eliminated[i] = 0;
 
     for (i = 1; i < SOCIAL_SIZE; i++)
@@ -375,9 +364,9 @@ void create_web_ape_friends(
             for (j=0; j<sim->num; j++)
             {
                 b = &sim->beings[j];
-                if (GET_NAME(sim,b) == name)
+                if (being_first_name(b) == name)
                 {
-                    if ((GET_FAMILY_FIRST_NAME(sim,b)==family0) && (GET_FAMILY_SECOND_NAME(sim,b)==family1))
+                    if ((being_family_first_name(b)==family0) && (being_family_second_name(b)==family1))
                     {
                         if (FIND_SEX(GET_I(b)) == gender)
                         {
@@ -392,7 +381,7 @@ void create_web_ape_friends(
             {
                 being_name(
                     gender == SEX_FEMALE,
-                    GET_NAME(sim,b2), GET_FAMILY_FIRST_NAME(sim,b2), GET_FAMILY_SECOND_NAME(sim,b2), str);
+                    being_first_name(b2), being_family_first_name(b2), being_family_second_name(b2), str);
                 io_write(fil, str, 0);
                 io_write(fil, "<br>", 1);
             }
@@ -470,13 +459,13 @@ void create_web_top_apes(
         io_write(fil, "                    <a href=\"ape_profile_", 0);
         io_writenumber(fil, i, 1, 0);
         io_write(fil, ".htm\">", 1);
-        being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(sim,b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), str);
+		being_name_simple(b,str);
         io_write(fil, str, 1);
         io_write(fil, " ", 1);
         io_write(fil, "                    </a></td>", 1);
 
         current_date = TIME_IN_DAYS(sim->land->date);
-        local_dob = TIME_IN_DAYS(GET_D(b));
+        local_dob = being_dob(b);
         age_in_years = AGE_IN_YEARS(sim,b);
         age_in_months = ((current_date - local_dob) - (age_in_years * TIME_YEAR_DAYS)) / (TIME_YEAR_DAYS/12);
         age_in_days = (current_date - local_dob) - ((TIME_YEAR_DAYS/12) * age_in_months) - (age_in_years * TIME_YEAR_DAYS);
@@ -536,7 +525,7 @@ void create_web_ape_profile(
     local_being = &(sim->beings[index]);
 
     current_date = TIME_IN_DAYS(sim->land->date);
-    local_dob = TIME_IN_DAYS(GET_D(local_being));
+    local_dob = being_dob(local_being);
     birth_year = local_dob / TIME_YEAR_DAYS;
     birth_month =
         (local_dob - (birth_year * TIME_YEAR_DAYS)) / (TIME_YEAR_DAYS/12);
@@ -565,10 +554,7 @@ void create_web_ape_profile(
 
     io_write(fil, "                    ", 0);
 
-    being_name(
-        (FIND_SEX(GET_I(local_being)) == SEX_FEMALE),
-        GET_NAME(sim,local_being), GET_FAMILY_FIRST_NAME(sim,local_being),
-        GET_FAMILY_SECOND_NAME(sim,local_being), str);
+	being_name_simple(local_being,str);
     io_write(fil, str, 1);
 
     io_write(fil, "        <table style=\"text-align: center; width: 100%;\" border=\"0\" cellpadding=\"2\" cellspacing=\"2\">", 1);
@@ -642,7 +628,7 @@ void create_web_ape_profile(
 
     for (i=0; i<2; i++)
     {
-        body_genome((n_byte)i, GET_G(local_being), genome);
+        body_genome((n_byte)i, being_genetics(local_being), genome);
         for (j = 0; j < CHROMOSOMES*8; j++)
         {
             if ((j>0) && (j%8==0))
@@ -696,7 +682,7 @@ void create_web_ape_profile(
         b = being_find_female(sim,(n_byte2*)&local_being->mother_new_genetics);
         if (b != 0L)
         {
-            being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), (n_byte*)str);
+			being_name_simple(b, str);
             io_write(fil, str, 1);
         }
         io_write(fil, "                                    </td>", 1);
@@ -718,7 +704,7 @@ void create_web_ape_profile(
             {
                 if (GET_MI(b)-1 == GET_I(local_being))
                 {
-                    being_name((FIND_SEX(GET_I(b)) == SEX_FEMALE), GET_NAME(b), GET_FAMILY_FIRST_NAME(sim,b), GET_FAMILY_SECOND_NAME(sim,b), (n_byte*)str);
+					being_name_simple(b, str);
                     io_write(fil, str, 0);
                     io_write(fil, "<br>", 0);
                 }
@@ -792,7 +778,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
 
-    sprintf(str,"%d", (int)(GENE_HAIR(GET_G(local_being))*100/16));
+    sprintf(str,"%d", (int)(GENE_HAIR(being_genetics(local_being))*100/16));
 
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
@@ -815,7 +801,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    Energy: ", 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
-    sprintf(str,"%d", (int)GET_E(local_being));
+    sprintf(str,"%d", (int)being_energy(local_being));
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                </tr>", 1);
@@ -856,7 +842,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    Speed: ", 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
-    sprintf(str,"%d metres per min", (int)(GET_S(local_being))*10/15);
+    sprintf(str,"%d metres per min", (int)(being_speed(local_being))*10/15);
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                </tr>", 1);
@@ -868,7 +854,7 @@ void create_web_ape_profile(
     io_write(fil, "                                    <td style=\"vertical-align: top; text-align: left;\">", 1);
     sprintf(
         str,"%d degrees",
-        (((int)(GET_F(local_being))*360/256) + 90) % 360);
+        (((int)(being_facing(local_being))*360/256) + 90) % 360);
     io_write(fil, str, 1);
     io_write(fil, "                                    </td>", 1);
     io_write(fil, "                                </tr>", 1);
@@ -904,7 +890,7 @@ void create_web_ape_profile(
     }
 
 #ifdef EPISODIC_ON
-    local_episodic = GET_EPI(sim, local_being);
+    local_episodic = being_episodic(local_being);
     for (i=0; i<EPISODIC_SIZE; i++)
     {
         if (local_episodic[i].event==EVENT_MATE) break;
@@ -1006,7 +992,7 @@ void export_social_graph(char * filename, noble_simulation * sim, n_int graph_ty
         b0 = (GET_NAME_GENDER(local_being))|(GET_NAME_FAMILY(GET_FAMILY_FIRST_NAME(sim,local_being),GET_FAMILY_SECOND_NAME(sim,local_being))<<16);
         sprintf(str,"B%d [label=\"", b0);
         io_write(fil, str, 0);
-        being_name((FIND_SEX(GET_I(local_being)) == SEX_FEMALE), GET_NAME(local_being), GET_FAMILY_FIRST_NAME(sim,local_being), GET_FAMILY_SECOND_NAME(sim,local_being), (n_byte*)str);
+		being_name_simple(local_being,str);
         io_write(fil, str, 0);
         io_write(fil, "\"];\n", 1);
         if (graph_type<3)
@@ -1568,7 +1554,7 @@ void draw_brain(char * filename, noble_simulation * sim, int index, n_int img_wi
     int x, y, n=0;
 
     noble_being * b = &(sim->beings[index]);
-    n_byte * brain = GET_B(sim, b);
+    n_byte * brain = being_brain(b);
 
     if (brain != 0L)
     {
@@ -1675,8 +1661,8 @@ void draw_beings(unsigned char* buffer, n_int img_width, n_int num, noble_being 
     for (i=0; i <num; i++)
     {
         noble_being * local_being = (noble_being *)(&(beings[i]));
-        px = (n_int)(APESPACE_TO_MAPSPACE(GET_X(local_being)))*img_width/MAP_DIMENSION;
-        py = (n_int)(APESPACE_TO_MAPSPACE(GET_Y(local_being)))*img_width/MAP_DIMENSION;
+        px = (n_int)(APESPACE_TO_MAPSPACE(being_location_x(local_being)))*img_width/MAP_DIMENSION;
+        py = (n_int)(APESPACE_TO_MAPSPACE(being_location_y(local_being)))*img_width/MAP_DIMENSION;
         if ((px >= 0) && (px < img_width) &&
                 (py >= 0) && (py < img_width))
         {
@@ -1848,8 +1834,12 @@ void draw_vegetation(char * filename, n_int img_width, n_land * local_land, n_we
     free(buffer);
 }
 
-void draw_weather(unsigned char * buffer, n_int img_width, n_weather * local_weather, n_int weather_dimension, n_int symbol_grid_dimension, n_byte show_wind, n_byte show_cloud, n_byte show_symbols)
+void draw_weather(unsigned char * buffer, n_int img_width,
+				  n_land * land, n_weather * local_weather,
+				  n_int weather_dimension, n_int symbol_grid_dimension,
+				  n_byte show_wind, n_byte show_cloud, n_byte show_symbols)
 {
+	const n_int dimension = 0;
     n_int step,px,py,px2,py2,map_x,map_y,x,y,p,n,i;
     step = weather_dimension/symbol_grid_dimension;
     if (step < 1) step = 1;
@@ -1865,7 +1855,7 @@ void draw_weather(unsigned char * buffer, n_int img_width, n_weather * local_wea
             {
                 px = (map_x*2+1)*img_width / (weather_dimension*2);
 
-                weather_wind_vector(local_weather, map_x, map_y, &w_dx, &w_dy);
+                weather_wind_vector(land, local_weather, map_x, map_y, &w_dx, &w_dy);
                 mag = 0;
                 if (w_dx > 0)
                     mag += w_dx;
@@ -1907,7 +1897,7 @@ void draw_weather(unsigned char * buffer, n_int img_width, n_weather * local_wea
                 for (map_x = 0; map_x < weather_dimension-1; map_x++)
                 {
                     px = map_x*img_width / weather_dimension;
-                    p = weather_pressure(local_weather, map_x, map_y);
+                    p = weather_pressure(local_weather, map_x, map_y, dimension);
 
                     px2 = (map_x+1)*img_width / weather_dimension;
                     py2 = (map_y+1)*img_width / weather_dimension;
@@ -1942,7 +1932,7 @@ void draw_weather(unsigned char * buffer, n_int img_width, n_weather * local_wea
             for (map_x = 0; map_x < weather_dimension; map_x+=step)
             {
                 px = (map_x*2+1)*img_width / (weather_dimension*2);
-                p = weather_pressure(local_weather, map_x, map_y);
+                p = weather_pressure(local_weather, map_x, map_y, dimension);
 
                 if (p > WEATHER_RAIN)
                 {
@@ -2155,7 +2145,9 @@ void landscape_png(
 
     if (show_beings != 0) draw_beings(buffer, img_width, num, beings, local_land);
 
-    draw_weather(buffer, img_width, local_weather, weather_dimension, weather_symbol_grid_dimension, show_wind, show_cloud, show_weather_symbols);
+    draw_weather(buffer, img_width, local_land, local_weather,
+				 weather_dimension, weather_symbol_grid_dimension,
+				 show_wind, show_cloud, show_weather_symbols);
 
     if (!((map_tx == 0) && (map_ty == 0) && (map_bx == img_width) && (map_by == img_width)))
     {
@@ -2210,7 +2202,7 @@ void update_log(char * filename, noble_simulation * sim)
         for (i = 0; i < sim->num; i++)
         {
             noble_being * local_being = &(sim->beings[i]);
-            n_uint local_dob = TIME_IN_DAYS(GET_D(local_being));
+            n_uint local_dob = being_dob(local_being);
             n_int age_days = current_date - local_dob;
             av_age += age_days;
             if (FIND_SEX(GET_I(local_being)) == SEX_FEMALE)
@@ -2221,7 +2213,7 @@ void update_log(char * filename, noble_simulation * sim)
             {
                 males++;
             }
-            animal_biomass += GET_E(local_being);
+            animal_biomass += being_energy(local_being);
 
 #ifdef PARASITES_ON
             parasites += local_being->parasites;
@@ -2816,9 +2808,9 @@ void update_microblog(char * log_filename, noble_simulation * sim)
                     for (i=0; i<sim->num; i++)
                     {
                         noble_being * local_being = &(sim->beings[i]);
-                        if ((GET_FAMILY_FIRST_NAME(sim,local_being) == alpha_female[1]) &&
-                                (GET_FAMILY_SECOND_NAME(sim,local_being) == alpha_female[2]) &&
-                                (GET_NAME(sim,local_being) == alpha_female[0]))
+                        if ((being_family_first_name(local_being) == alpha_female[1]) &&
+							(being_family_second_name(local_being) == alpha_female[2]) &&
+							(being_first_name(local_being) == alpha_female[0]))
                         {
                             n_int conception_date = TIME_IN_DAYS(local_being->date_of_conception);
                             if (conception_date != 0)

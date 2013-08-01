@@ -739,7 +739,7 @@ static void sim_indicators(noble_simulation * sim)
         /* drives */
         for (dd=DRIVE_HUNGER; dd<DRIVES; dd++)
         {
-            drives[i] += being_drive(local_being, dd);
+            drives[dd] += being_drive(local_being, dd);
         }
 
         /* population density */

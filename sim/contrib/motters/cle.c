@@ -53,7 +53,7 @@
 #include "../../universe/universe.h"
 #include "../../universe/universe_internal.h"
 #include "../../entity/entity_internal.h"
-#include "../../command/command.h"
+#include "../../entity/entity.h"
 #include "web.h"
 
 #define NOBLE_WEB
@@ -86,13 +86,6 @@ void plat_copy(n_byte * from, n_byte * to, n_uint number);
 void plat_cycle();
 
 /*NOBLEMAKE END=""*/
-
-
-n_int draw_error(n_string error_text)
-{
-    printf("ERROR: %s\n",(const char *) error_text);
-    return -1;
-}
 
 
 void * plat_new(unsigned long bytes, unsigned char critical)
@@ -222,31 +215,31 @@ void plat_debug_being(noble_being * test, n_byte initial)
         if(append_write != 0L)
         {
 
-            if(check_delta.x != test->x)
-                fprintf(append_write, "new x = %d;\n",test->x);
-            if(check_delta.y != test->y)
-                fprintf(append_write, "new y = %d;\n",test->y);
-            if(check_delta.facing != test->facing)
-                fprintf(append_write, "new facing = %d;\n",test->facing);
+            if (being_location_x(&check_delta) != being_location_x(test))
+                fprintf(append_write, "new x = %d;\n",(int)being_location_x(test));
+            if (being_location_y(&check_delta) != being_location_y(test))
+                fprintf(append_write, "new y = %d;\n",(int)being_location_y(test));
+            if (being_facing(&check_delta) != being_facing(test))
+                fprintf(append_write, "new facing = %d;\n",(int)being_facing(test));
 
-            if(check_delta.speed != test->speed)
-                fprintf(append_write, "new speed = %d;\n",test->speed);
-            if(check_delta.energy != test->energy)
-                fprintf(append_write, "new energy = %d;\n",test->energy);
+            if(being_speed(&check_delta) != being_speed(test))
+                fprintf(append_write, "new speed = %d;\n",(int)being_speed(test));
+            if(being_energy(&check_delta) != being_energy(test))
+                fprintf(append_write, "new energy = %d;\n",(int)being_energy(test));
 
-            if (genetics_compare(check_delta.new_genetics, test->new_genetics) != 0)
+            if (genetics_compare(being_genetics(&check_delta), being_genetics(test)) != 0)
             {
                 n_int i;
                 fprintf(append_write, "new new_genetics = ");
                 for (i = 0; i < CHROMOSOMES; i++)
                 {
-                    fprintf(append_write, "%d ",(int)test->new_genetics[i]);
+                    fprintf(append_write, "%d ",(int)being_genetics(test)[i]);
                 }
                 fprintf(append_write, "\n");
             }
 
-            if(TIME_IN_DAYS(check_delta.date_of_birth) != TIME_IN_DAYS(test->date_of_birth))
-                fprintf(append_write, "new date_of_birth = %d;\n",(int)TIME_IN_DAYS(test->date_of_birth));
+            if(being_dob(&check_delta) != being_dob(test))
+                fprintf(append_write, "new date_of_birth = %d;\n",(int)being_dob(test));
 
             if(check_delta.state != test->state)
                 fprintf(append_write, "new state = %d;\n",test->state);
@@ -279,9 +272,9 @@ void sim_fileoutImageApe(
     n_int img_width_small = 320;
     n_int px,py;
 
-    px = (n_int)(APESPACE_TO_MAPSPACE(local_being->x))*
+    px = (n_int)(APESPACE_TO_MAPSPACE(being_location_x(local_being)))*
          img_width/MAP_DIMENSION;
-    py = (n_int)(APESPACE_TO_MAPSPACE(local_being->y))*
+    py = (n_int)(APESPACE_TO_MAPSPACE(being_location_x(local_being)))*
          img_width/MAP_DIMENSION;
 
     tx = px - img_width * width_percent / 200;
@@ -659,7 +652,7 @@ int main(int argc, char* argv[])
             noble_simulation *local_sim = sim_sim();
 
             sim_populations(&total_val, &female_val, &male_val);
-            weather_wind_vector(local_sim->weather, 0, 0, &w_dx, &w_dy);
+            weather_wind_vector(local_sim->land, local_sim->weather, 0, 0, &w_dx, &w_dy);
 
             printf("%d to %d...t: %d f:%d m: %d  wind vector at (0,0) ( %d , %d )\n",(int)ticker,(int)TIME_SLICE, (int)total_val, (int)female_val, (int)male_val, (int)w_dx, (int)w_dy);
         }

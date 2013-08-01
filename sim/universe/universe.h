@@ -1561,6 +1561,14 @@ noble_simulation;
 #define UNPACK_FAMILY_SECOND_NAME(packed_family_name) (packed_family_name>>6)
 #define GET_NAME_FAMILY(f0,f1) (f0|(f1<<6))
 
+n_int being_location_x(noble_being * value);
+n_int being_location_y(noble_being * value);
+n_int being_facing(noble_being * value);
+n_int being_energy(noble_being * value);
+n_int being_speed(noble_being * value);
+n_genetics * being_genetics(noble_being * value);
+n_int being_dob(noble_being * value);
+
 typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local_being, n_string result);
 
 typedef void (line_braincode)(n_string pointer, n_int line);
