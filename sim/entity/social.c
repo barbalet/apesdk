@@ -1382,8 +1382,8 @@ n_int social_chat(
 #ifdef BRAINCODE_ON
     brain_dialogue(
         sim,1,meeter_being,met_being,
-        GET_BRAINCODE_EXTERNAL(meeter_being),
-        GET_BRAINCODE_EXTERNAL(met_being),
+        being_braincode_external(meeter_being),
+        being_braincode_external(met_being),
         being_index);
 
 #endif

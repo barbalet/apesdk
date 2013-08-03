@@ -568,103 +568,6 @@ enum shout_elements
     SHOUT_BYTES
 };
 
-/* maximum bytes in a braincode program */
-#define BRAINCODE_SIZE                    128
-/* number of bytes per instruction */
-#define BRAINCODE_BYTES_PER_INSTRUCTION     3
-/* number of probes which can be applied to the brain */
-#define BRAINCODE_PROBES                  (BRAINCODE_SIZE>>3)
-/* maximum frequency of a brain probe */
-#define BRAINCODE_MAX_FREQUENCY            16
-/* number of instructions which a MVB copies */
-#define BRAINCODE_BLOCK_COPY               16
-/* typical minimum spacing between MVB instructions */
-#define BRAINCODE_MIN_MVB_SPACING          2
-
-#define BRAINCODE_CONSTANT0_BIT		  (64)
-#define BRAINCODE_CONSTANT1_BIT		  (128)
-
-
-enum braincode_locations
-{
-    BRAINCODE_EXTERNAL = 0,
-    BRAINCODE_INTERNAL
-};
-
-/* Number of columns to display when showing the braincode on the console */
-#define BRAINCODE_DISPLAY_COLUMNS         3
-
-/* instruction codes */
-
-enum BRAINCODE_COMMANDS
-{
-    /* data */
-    BRAINCODE_DAT0 = 0,
-    BRAINCODE_DAT1,
-
-    /* operators */
-    BRAINCODE_ADD,
-    BRAINCODE_SUB,
-    BRAINCODE_MUL,
-    BRAINCODE_DIV,
-    BRAINCODE_MOD,
-    BRAINCODE_MVB,
-    BRAINCODE_MOV,
-    BRAINCODE_JMP,
-    BRAINCODE_CTR,
-    BRAINCODE_SWP,
-    BRAINCODE_INV,
-    BRAINCODE_STP,
-    BRAINCODE_LTP,
-
-    /* conditionals */
-    BRAINCODE_JMZ,
-    BRAINCODE_JMN,
-    BRAINCODE_DJN,
-    BRAINCODE_AND,
-    BRAINCODE_OR,
-    BRAINCODE_SEQ,
-    BRAINCODE_SNE,
-    BRAINCODE_SLT,
-
-    /* sensors */
-    BRAINCODE_SEN,
-    BRAINCODE_SEN2,
-    BRAINCODE_SEN3,
-
-    /* actuators */
-    BRAINCODE_ACT,
-    BRAINCODE_ACT2,
-    BRAINCODE_ACT3,
-    BRAINCODE_ANE,
-
-
-    BRAINCODE_INSTRUCTIONS
-};
-
-#define BRAINCODE_DATA_START          BRAINCODE_DAT0
-#define BRAINCODE_DATA_NUMBER         (1 + BRAINCODE_DAT1 - BRAINCODE_DATA_START)
-
-#define BRAINCODE_OPERATORS_START     BRAINCODE_ADD
-#define BRAINCODE_OPERATORS_NUMBER    (1 + BRAINCODE_LTP - BRAINCODE_OPERATORS_START)
-
-#define BRAINCODE_CONDITIONALS_START  BRAINCODE_JMZ
-#define BRAINCODE_CONDITIONALS_NUMBER (1 + BRAINCODE_SLT - BRAINCODE_CONDITIONALS_START)
-
-#define BRAINCODE_SENSORS_START       BRAINCODE_SEN
-#define BRAINCODE_SENSORS_NUMBER      (1 + BRAINCODE_SEN3 - BRAINCODE_SENSORS_START)
-
-#define BRAINCODE_ACTUATORS_START     BRAINCODE_ACT
-#define BRAINCODE_ACTUATORS_NUMBER    (1 + BRAINCODE_ANE - BRAINCODE_ACTUATORS_START)
-
-#define BRAINCODE_INSTRUCTION(braincode,i) ((braincode[i] & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS)
-#define BRAINCODE_CONSTANT0(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT0_BIT)
-#define BRAINCODE_CONSTANT1(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT1_BIT)
-#define BRAINCODE_VALUE(braincode,i,n)     (braincode[i+1+n])
-#define BRAINCODE_MAX_ADDRESS              (BRAINCODE_SIZE*2)
-#define BRAINCODE_ADDRESS(i)               ((i) % BRAINCODE_MAX_ADDRESS)
-#define BRAINCODE_PSPACE_REGISTERS         3
-
 /* threshold for the sex drive, beyond which the being seeks a preferred mate */
 #define THRESHOLD_SEEK_MATE     100
 
@@ -1547,11 +1450,6 @@ noble_simulation;
 
 #define	FIND_SEX(array)		(array&3)
 #define	SEX_FEMALE			3
-
-#define	GET_SELF(sim, bei) (being_social(bei)[0])
-
-#define GET_BRAINCODE_INTERNAL(bei) ((&being_social(bei)[0])->braincode)
-#define GET_BRAINCODE_EXTERNAL(bei) ((&being_social(bei)[bei->attention[ATTENTION_ACTOR]])->braincode)
 
 #define	BRAIN_OFFSET(num)	(num)
 

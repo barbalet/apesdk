@@ -46,6 +46,86 @@
 /*NOBLEMAKE VAR=""*/
 
 
+/* number of instructions which a MVB copies */
+#define BRAINCODE_BLOCK_COPY               16
+/* typical minimum spacing between MVB instructions */
+#define BRAINCODE_MIN_MVB_SPACING          2
+
+#define BRAINCODE_CONSTANT0_BIT		  (64)
+#define BRAINCODE_CONSTANT1_BIT		  (128)
+
+
+/* instruction codes */
+
+enum BRAINCODE_COMMANDS
+{
+    /* data */
+    BRAINCODE_DAT0 = 0,
+    BRAINCODE_DAT1,
+    
+    /* operators */
+    BRAINCODE_ADD,
+    BRAINCODE_SUB,
+    BRAINCODE_MUL,
+    BRAINCODE_DIV,
+    BRAINCODE_MOD,
+    BRAINCODE_MVB,
+    BRAINCODE_MOV,
+    BRAINCODE_JMP,
+    BRAINCODE_CTR,
+    BRAINCODE_SWP,
+    BRAINCODE_INV,
+    BRAINCODE_STP,
+    BRAINCODE_LTP,
+    
+    /* conditionals */
+    BRAINCODE_JMZ,
+    BRAINCODE_JMN,
+    BRAINCODE_DJN,
+    BRAINCODE_AND,
+    BRAINCODE_OR,
+    BRAINCODE_SEQ,
+    BRAINCODE_SNE,
+    BRAINCODE_SLT,
+    
+    /* sensors */
+    BRAINCODE_SEN,
+    BRAINCODE_SEN2,
+    BRAINCODE_SEN3,
+    
+    /* actuators */
+    BRAINCODE_ACT,
+    BRAINCODE_ACT2,
+    BRAINCODE_ACT3,
+    BRAINCODE_ANE,
+    
+    
+    BRAINCODE_INSTRUCTIONS
+};
+
+#define BRAINCODE_DATA_START          BRAINCODE_DAT0
+#define BRAINCODE_DATA_NUMBER         (1 + BRAINCODE_DAT1 - BRAINCODE_DATA_START)
+
+#define BRAINCODE_OPERATORS_START     BRAINCODE_ADD
+#define BRAINCODE_OPERATORS_NUMBER    (1 + BRAINCODE_LTP - BRAINCODE_OPERATORS_START)
+
+#define BRAINCODE_CONDITIONALS_START  BRAINCODE_JMZ
+#define BRAINCODE_CONDITIONALS_NUMBER (1 + BRAINCODE_SLT - BRAINCODE_CONDITIONALS_START)
+
+#define BRAINCODE_SENSORS_START       BRAINCODE_SEN
+#define BRAINCODE_SENSORS_NUMBER      (1 + BRAINCODE_SEN3 - BRAINCODE_SENSORS_START)
+
+#define BRAINCODE_ACTUATORS_START     BRAINCODE_ACT
+#define BRAINCODE_ACTUATORS_NUMBER    (1 + BRAINCODE_ANE - BRAINCODE_ACTUATORS_START)
+
+#define BRAINCODE_INSTRUCTION(braincode,i) ((braincode[i] & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS)
+#define BRAINCODE_CONSTANT0(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT0_BIT)
+#define BRAINCODE_CONSTANT1(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT1_BIT)
+#define BRAINCODE_VALUE(braincode,i,n)     (braincode[i+1+n])
+#define BRAINCODE_MAX_ADDRESS              (BRAINCODE_SIZE*2)
+#define BRAINCODE_ADDRESS(i)               ((i) % BRAINCODE_MAX_ADDRESS)
+
+
 /*	Brain definitions */
 
 #define B_SIZE		(32768)
@@ -504,11 +584,11 @@ void braincode_statistics(noble_simulation * sim)
             {
                 if (k==0)
                 {
-                    instruction = GET_BRAINCODE_INTERNAL(local_being)[j] % BRAINCODE_INSTRUCTIONS;
+                    instruction = being_braincode_internal(local_being)[j] % BRAINCODE_INSTRUCTIONS;
                 }
                 else
                 {
-                    instruction = GET_BRAINCODE_EXTERNAL(local_being)[j] % BRAINCODE_INSTRUCTIONS;
+                    instruction = being_braincode_external(local_being)[j] % BRAINCODE_INSTRUCTIONS;
                 }
 
                 if (instruction < BRAINCODE_OPERATORS_START)
@@ -582,6 +662,64 @@ static n_byte get_braincode_instruction_type(n_byte instruction_type)
 
     return BRAINCODE_DATA_START;
 }
+
+/* return the number of instruction_types in the braincode */
+
+void braincode_number_of_instructions(
+                                             noble_simulation * sim,
+                                             noble_being * local_being,
+                                             n_int * no_of_sensors,
+                                             n_int * no_of_actuators,
+                                             n_int * no_of_operators,
+                                             n_int * no_of_conditionals,
+                                             n_int * no_of_data)
+{
+#ifdef BRAINCODE_ON
+    n_int i,j,instruction;
+    
+    *no_of_sensors = 0;
+    *no_of_actuators = 0;
+    *no_of_operators = 0;
+    *no_of_conditionals = 0;
+    *no_of_data = 0;
+    
+    for (i=0; i<BRAINCODE_SIZE; i+=3)
+    {
+        for (j=0; j<2; j++)
+        {
+            if (j==0)
+            {
+                instruction = being_braincode_internal(local_being)[i] & 63;
+            }
+            else
+            {
+                instruction = being_braincode_external(local_being)[i] & 63;
+            }
+            if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
+            {
+                *no_of_sensors = *no_of_sensors + 1;
+            }
+            if ((instruction >= BRAINCODE_ACTUATORS_START) && (instruction < BRAINCODE_OPERATORS_START))
+            {
+                *no_of_actuators = *no_of_actuators + 1;
+            }
+            if ((instruction >= BRAINCODE_OPERATORS_START) && (instruction < BRAINCODE_CONDITIONALS_START))
+            {
+                *no_of_operators = *no_of_operators + 1;
+            }
+            if ((instruction >= BRAINCODE_CONDITIONALS_START) && (instruction < BRAINCODE_DATA_START))
+            {
+                *no_of_conditionals = *no_of_conditionals + 1;
+            }
+            if ((instruction >= BRAINCODE_DATA_START) && (instruction < BRAINCODE_INSTRUCTIONS))
+            {
+                *no_of_data = *no_of_data + 1;
+            }
+        }
+    }
+#endif
+}
+
 
 /**
  * @brief returns a random braincode instruction

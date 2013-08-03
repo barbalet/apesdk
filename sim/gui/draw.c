@@ -2271,7 +2271,7 @@ static n_int graph_being_score(noble_simulation * sim, noble_being * local_being
     case 0:
         for (i = 0; i < BRAINCODE_SIZE; i++)
         {
-            score += GET_BRAINCODE_EXTERNAL(local_being)[i] + GET_BRAINCODE_INTERNAL(local_being)[i];
+            score += being_braincode_external(local_being)[i] + being_braincode_internal(local_being)[i];
         }
         break;
     case 1:
@@ -2363,12 +2363,12 @@ void graph_ideosphere(noble_simulation * sim, n_byte * buffer, n_int img_width, 
                 if (x<half_width)
                 {
                     i = (x * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                    code = GET_BRAINCODE_INTERNAL(local_being);
+                    code = being_braincode_internal(local_being);
                 }
                 else
                 {
                     i = ((x-half_width) * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                    code = GET_BRAINCODE_EXTERNAL(local_being);
+                    code = being_braincode_external(local_being);
                 }
                 buffer[n] = code[i];
                 buffer[n+1] = code[i+1];
@@ -2692,17 +2692,17 @@ static n_uint braincode_standard_deviation(noble_simulation * sim, noble_being *
 
     for (i=0; i<BRAINCODE_SIZE; i++)
     {
-        av += GET_BRAINCODE_INTERNAL(local_being)[i];
-        av += GET_BRAINCODE_EXTERNAL(local_being)[i];
+        av += being_braincode_internal(local_being)[i];
+        av += being_braincode_external(local_being)[i];
     }
     av /= (BRAINCODE_SIZE*2);
 
     for (i=0; i<BRAINCODE_SIZE; i++)
     {
-        diff = (n_int)(GET_BRAINCODE_INTERNAL(local_being)[i]) - av;
+        diff = (n_int)(being_braincode_internal(local_being)[i]) - av;
         if (diff<0) diff=-diff;
         sd += (n_uint)(diff);
-        diff = (n_int)(GET_BRAINCODE_EXTERNAL(local_being)[i]) - av;
+        diff = (n_int)(being_braincode_external(local_being)[i]) - av;
         if (diff<0) diff=-diff;
         sd += (n_uint)(diff);
     }
@@ -2710,63 +2710,6 @@ static n_uint braincode_standard_deviation(noble_simulation * sim, noble_being *
     return sd;
 }
 
-
-/* return the number of instruction_types in the braincode */
-
-static void braincode_number_of_instructions(
-    noble_simulation * sim,
-    noble_being * local_being,
-    n_int * no_of_sensors,
-    n_int * no_of_actuators,
-    n_int * no_of_operators,
-    n_int * no_of_conditionals,
-    n_int * no_of_data)
-{
-#ifdef BRAINCODE_ON
-    n_int i,j,instruction;
-
-    *no_of_sensors = 0;
-    *no_of_actuators = 0;
-    *no_of_operators = 0;
-    *no_of_conditionals = 0;
-    *no_of_data = 0;
-
-    for (i=0; i<BRAINCODE_SIZE; i+=3)
-    {
-        for (j=0; j<2; j++)
-        {
-            if (j==0)
-            {
-                instruction = GET_BRAINCODE_INTERNAL(local_being)[i] & 63;
-            }
-            else
-            {
-                instruction = GET_BRAINCODE_EXTERNAL(local_being)[i] & 63;
-            }
-            if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
-            {
-                *no_of_sensors = *no_of_sensors + 1;
-            }
-            if ((instruction >= BRAINCODE_ACTUATORS_START) && (instruction < BRAINCODE_OPERATORS_START))
-            {
-                *no_of_actuators = *no_of_actuators + 1;
-            }
-            if ((instruction >= BRAINCODE_OPERATORS_START) && (instruction < BRAINCODE_CONDITIONALS_START))
-            {
-                *no_of_operators = *no_of_operators + 1;
-            }
-            if ((instruction >= BRAINCODE_CONDITIONALS_START) && (instruction < BRAINCODE_DATA_START))
-            {
-                *no_of_conditionals = *no_of_conditionals + 1;
-            }
-            if ((instruction >= BRAINCODE_DATA_START) && (instruction < BRAINCODE_INSTRUCTIONS))
-            {
-                *no_of_data = *no_of_data + 1;
-            }
-        }
-    }
-#endif
-}
 
 /* return coordinates of the braincode system for phase space plot */
 static void graph_braincode_coords(noble_simulation * sim, noble_being * local_being, n_uint * x, n_uint * y)
@@ -2776,8 +2719,8 @@ static void graph_braincode_coords(noble_simulation * sim, noble_being * local_b
     *y=0;
     for (i=0; i<BRAINCODE_SIZE; i++)
     {
-        *x = *x + GET_BRAINCODE_INTERNAL(local_being)[i];
-        *y = *y + GET_BRAINCODE_EXTERNAL(local_being)[i];
+        *x = *x + being_braincode_internal(local_being)[i];
+        *y = *y + being_braincode_external(local_being)[i];
     }
 }
 
@@ -2944,12 +2887,12 @@ void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte *
             if (x<half_width)
             {
                 i = (x * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                code = GET_BRAINCODE_INTERNAL(local_being);
+                code = being_braincode_internal(local_being);
             }
             else
             {
                 i = ((x-half_width) * ((BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)-1) / half_width)*BRAINCODE_BYTES_PER_INSTRUCTION;
-                code = GET_BRAINCODE_EXTERNAL(local_being);
+                code = being_braincode_external(local_being);
             }
             buffer[n] = code[i];
             buffer[n+1] = code[i+1];

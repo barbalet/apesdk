@@ -376,6 +376,24 @@ enum window_num
     NUM_GRAPH   = (2)
 };
 
+/* maximum bytes in a braincode program */
+#define BRAINCODE_SIZE                    128
+
+/* number of probes which can be applied to the brain */
+#define BRAINCODE_PROBES                  (BRAINCODE_SIZE>>3)
+
+#define BRAINCODE_PSPACE_REGISTERS         3
+/* maximum frequency of a brain probe */
+#define BRAINCODE_MAX_FREQUENCY            16
+
+/* number of bytes per instruction */
+#define BRAINCODE_BYTES_PER_INSTRUCTION     3
+
+enum braincode_locations
+{
+    BRAINCODE_EXTERNAL = 0,
+    BRAINCODE_INTERNAL
+};
 
 enum graph_commands
 {

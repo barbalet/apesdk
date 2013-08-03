@@ -571,8 +571,8 @@ static void sim_brain(noble_simulation * local_sim)
 static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_being * local_being)
 {
     n_byte     awake = 1;
-    n_byte    *local_internal = GET_BRAINCODE_INTERNAL(local_being);
-    n_byte    *local_external = GET_BRAINCODE_EXTERNAL(local_being);
+    n_byte    *local_internal = being_braincode_internal(local_being);
+    n_byte    *local_external = being_braincode_external(local_being);
     if(being_awake(&sim, local_being) == 0)
     {
         awake=0;
@@ -775,8 +775,8 @@ static void sim_indicators(noble_simulation * sim)
         /* average braincode */
         for (n=0; n<BRAINCODE_SIZE; n++)
         {
-            mean_braincode[n] += (n_uint)GET_BRAINCODE_INTERNAL(local_being)[n];
-            mean_braincode[n+BRAINCODE_SIZE] += (n_uint)GET_BRAINCODE_EXTERNAL(local_being)[n];
+            mean_braincode[n] += (n_uint)being_braincode_internal(local_being)[n];
+            mean_braincode[n+BRAINCODE_SIZE] += (n_uint)being_braincode_external(local_being)[n];
         }
 #endif
 
@@ -925,10 +925,10 @@ static void sim_indicators(noble_simulation * sim)
         local_being = &(sim->beings[b]);
         for (n=0; n<BRAINCODE_SIZE; n++)
         {
-            diff = ABS((n_int)(GET_BRAINCODE_INTERNAL(local_being)[n]) - (n_int)mean_braincode[n]);
+            diff = ABS((n_int)(being_braincode_internal(local_being)[n]) - (n_int)mean_braincode[n]);
             sd += (n_uint)diff;
 
-            diff = ABS((n_int)(GET_BRAINCODE_EXTERNAL(local_being)[n]) - (n_int)mean_braincode[n+BRAINCODE_SIZE]);
+            diff = ABS((n_int)(being_braincode_external(local_being)[n]) - (n_int)mean_braincode[n+BRAINCODE_SIZE]);
             sd += (n_uint)diff;
         }
     }

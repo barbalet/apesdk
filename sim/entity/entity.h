@@ -91,6 +91,16 @@ enum GENEALOGY_FORMAT
     GENEALOGY_FORMATS
 };
 
+
+void braincode_number_of_instructions(
+                                      noble_simulation * sim,
+                                      noble_being * local_being,
+                                      n_int * no_of_sensors,
+                                      n_int * no_of_actuators,
+                                      n_int * no_of_operators,
+                                      n_int * no_of_conditionals,
+                                      n_int * no_of_data);
+
 void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
 n_byte * being_brain(noble_being * value);
@@ -165,6 +175,9 @@ n_int   being_mass(noble_being * value);
 enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location);
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location);
 void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
+
+n_byte * being_braincode_external(noble_being * value);
+n_byte * being_braincode_internal(noble_being * value);
 
 void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);

@@ -100,6 +100,19 @@ typedef	struct
 }
 being_draw;
 
+n_byte * being_braincode_external(noble_being * value)
+{
+    social_link * social_value = being_social(value);
+    
+    return social_value[0].braincode;
+}
+
+n_byte * being_braincode_internal(noble_being * value)
+{
+    social_link * social_value = being_social(value);
+    return social_value[value->attention[ATTENTION_ACTOR]].braincode;
+}
+
 void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
 {
     n_int  lpx = 0;
@@ -1797,7 +1810,7 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 
             if (local->brainprobe[i].type == INPUT_SENSOR)
             {
-                n_byte * local_braincode = GET_BRAINCODE_INTERNAL(local);
+                n_byte * local_braincode = being_braincode_internal(local);
                 /** address within braincode */
                 n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
                 n_int n3 = (brain_point[n1] + local->brainprobe[i].offset)&255;
@@ -2761,22 +2774,22 @@ void being_init_braincode(noble_being * local,
             if (internal!=0)
             {
 #ifdef RANDOM_INITIAL_BRAINCODE
-                GET_BRAINCODE_INTERNAL(local)[ch] = math_random(local_random) & 255;
+                being_braincode_internal(local)[ch] = math_random(local_random) & 255;
 #else
-                GET_BRAINCODE_INTERNAL(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+                being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
-                GET_BRAINCODE_INTERNAL(local)[ch+1] = math_random(local_random) & 255;
-                GET_BRAINCODE_INTERNAL(local)[ch+2] = math_random(local_random) & 255;
+                being_braincode_internal(local)[ch+1] = math_random(local_random) & 255;
+                being_braincode_internal(local)[ch+2] = math_random(local_random) & 255;
             }
             else
             {
 #ifdef RANDOM_INITIAL_BRAINCODE
-                GET_BRAINCODE_INTERNAL(local)[ch] = math_random(local_random) & 255;
+                being_braincode_internal(local)[ch] = math_random(local_random) & 255;
 #else
-                GET_BRAINCODE_EXTERNAL(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+                being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
-                GET_BRAINCODE_EXTERNAL(local)[ch+1] = math_random(local_random) & 255;
-                GET_BRAINCODE_EXTERNAL(local)[ch+2] = math_random(local_random) & 255;
+                being_braincode_internal(local)[ch+1] = math_random(local_random) & 255;
+                being_braincode_internal(local)[ch+2] = math_random(local_random) & 255;
             }
         }
     }
