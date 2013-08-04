@@ -688,3 +688,366 @@ n_uint	math_newton_root(n_uint squ)
     return attempt;
 }
 
+n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i)
+{
+    if (BRAINCODE_ADDRESS(i) < BRAINCODE_SIZE)
+    {
+        /** address within this being */
+         return &bc0[BRAINCODE_ADDRESS(i)];
+    }
+
+        /** Address within the other being */
+    return &bc1[BRAINCODE_ADDRESS(i) - BRAINCODE_SIZE];
+}
+
+void math_general_execution(n_int instruction, n_int is_constant0, n_int is_constant1,
+                            n_byte * addr0, n_byte * addr1, n_int value0, n_int * i,
+                            n_int is_const0, n_int is_const1,
+                            n_byte * pspace,
+                            n_byte **maddr0, n_byte **maddr1,
+                            n_byte *bc0, n_byte *bc1,
+                            n_int braincode_min_loop)
+{
+    /** Logical and */
+    switch( instruction )
+    {
+        case BRAINCODE_AND:
+            if (is_constant0)
+            {
+                addr0[0] &= addr1[0];
+            }
+            else
+            {
+                if ((addr0[0]>127) && (addr1[0]>127)) *i += BRAINCODE_BYTES_PER_INSTRUCTION;
+            }
+            break;
+            /** Logical or */
+        case BRAINCODE_OR:
+            if (is_constant0)
+            {
+                addr0[0] |= addr1[0];
+            }
+            else
+            {
+                if ((addr0[0]>127) || (addr1[0]>127)) *i += BRAINCODE_BYTES_PER_INSTRUCTION;
+            }
+            break;
+            /** Move a byte, with no particular alignment */
+        case BRAINCODE_MOV:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                addr1[0] = addr0[0];
+            }
+            else
+            {
+                addr1[0] = value0;
+            }
+            break;
+            /** Move a block of instructions */
+        case BRAINCODE_MVB:
+        {
+            n_int ptr0, ptr1, n, instructions_to_copy, dat = 0;
+            
+            
+            if (!is_constant0)
+            {
+                ptr0 = BRAINCODE_ADDRESS(*i + ((n_int)addr0[0]*BRAINCODE_BYTES_PER_INSTRUCTION));
+            }
+            else
+            {
+                ptr0 = BRAINCODE_ADDRESS(*i + ((n_int)value0*BRAINCODE_BYTES_PER_INSTRUCTION));
+            }
+            
+            ptr1 = BRAINCODE_ADDRESS(*i + ((n_int)is_const0 * BRAINCODE_BYTES_PER_INSTRUCTION));
+            
+            instructions_to_copy = 1 + (pspace[1]%BRAINCODE_BLOCK_COPY);
+            
+            while (dat < instructions_to_copy)
+            {
+                if (ptr0 < BRAINCODE_SIZE)
+                {
+                    addr0 = &bc0[ptr0];
+                }
+                else
+                {
+                    addr0 = &bc1[ptr0 - BRAINCODE_SIZE];
+                }
+                
+                if (ptr1 < BRAINCODE_SIZE)
+                {
+                    addr1 = &bc0[ptr1];
+                }
+                else
+                {
+                    addr1 = &bc1[ptr1 - BRAINCODE_SIZE];
+                }
+                
+                for (n = 0; n < BRAINCODE_BYTES_PER_INSTRUCTION; n++)
+                {
+                    addr1[n] = addr0[n];
+                }
+                dat++;
+                ptr0 = BRAINCODE_ADDRESS(ptr0 + BRAINCODE_BYTES_PER_INSTRUCTION);
+                ptr1 = BRAINCODE_ADDRESS(ptr1 + BRAINCODE_BYTES_PER_INSTRUCTION);
+            }
+            
+            *maddr0 = addr0;
+            *maddr0 = addr1;
+        }
+            break;
+            
+            /** Add */
+        case BRAINCODE_ADD:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                addr1[0] += addr0[0];
+            }
+            else
+            {
+                addr1[0] += value0;
+            }
+            break;
+            /** Subtract */
+        case BRAINCODE_SUB:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                addr1[0] -= addr0[0];
+            }
+            else
+            {
+                addr1[0] -= value0;
+            }
+            break;
+            /** Multiply */
+        case BRAINCODE_MUL:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                addr1[0] *= addr0[0];
+            }
+            else
+            {
+                addr1[0] *= value0;
+            }
+            break;
+            /** Divide */
+        case BRAINCODE_DIV:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                addr1[0] >>= (addr0[0]%4);
+            }
+            else
+            {
+                addr1[0] >>= (value0%4);
+            }
+            break;
+            /** Modulus */
+        case BRAINCODE_MOD:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                if (addr0[0] != 0)
+                {
+                    addr1[0] %= addr0[0];
+                }
+            }
+            else
+            {
+                if (value0 != 0)
+                {
+                    addr1[0] %= value0;
+                }
+            }
+            break;
+            /** Count up or down */
+        case BRAINCODE_CTR:
+            if (addr0[0] > 127)
+            {
+                if (addr1[0] < 255)
+                {
+                    addr1[0]++;
+                }
+                else
+                {
+                    addr1[0]=0;
+                }
+            }
+            else
+            {
+                if (addr1[0] > 0)
+                {
+                    addr1[0]--;
+                }
+                else
+                {
+                    addr1[0]=255;
+                }
+            }
+            break;
+            /** Goto */
+        case BRAINCODE_JMP:
+        {
+            n_int v0 = is_const0;
+            n_int v1 = is_const1;
+            n_int i2 = (*i + (((v0*256) + v1)*BRAINCODE_BYTES_PER_INSTRUCTION)) % BRAINCODE_SIZE;
+            if (i2 <= *i)
+            {
+                if ((*i-i2) < braincode_min_loop)
+                {
+                    i2 = *i - braincode_min_loop;
+                    if (i2 < 0) i2 += BRAINCODE_SIZE;
+                }
+            }
+            *i = i2-BRAINCODE_BYTES_PER_INSTRUCTION;
+            break;
+        }
+            /** Goto if zero */
+        case BRAINCODE_JMZ:
+        {
+            n_int v0 = is_const0;
+            
+            if (v0 == 0)
+            {
+                
+                n_int i2 = (*i + ((n_int) is_const1 *BRAINCODE_BYTES_PER_INSTRUCTION)) % BRAINCODE_SIZE;
+                
+                if (i2 <= *i)
+                {
+                    if ((*i-i2) < braincode_min_loop)
+                    {
+                        i2 = *i - braincode_min_loop;
+                        if (i2 < 0) i2 += BRAINCODE_SIZE;
+                    }
+                }
+                *i = i2-BRAINCODE_BYTES_PER_INSTRUCTION;
+            }
+            break;
+        }
+            /** Goto if not zero */
+        case BRAINCODE_JMN:
+        {
+            n_int v0 = is_const0;
+            if (v0 != 0)
+            {
+                n_int i2 = (*i + ((n_int) is_const1 *BRAINCODE_BYTES_PER_INSTRUCTION)) % BRAINCODE_SIZE;
+                if (i2 <= *i)
+                {
+                    if ((*i-i2) < braincode_min_loop)
+                    {
+                        i2 = *i - braincode_min_loop;
+                        if (i2 < 0) i2 += BRAINCODE_SIZE;
+                    }
+                }
+                *i = i2-BRAINCODE_BYTES_PER_INSTRUCTION;
+            }
+            break;
+        }
+            /** Goto and decrement if not zero */
+        case BRAINCODE_DJN:
+            if (addr0[0]-1 != 0)
+            {
+                n_int i2 = (*i + ((n_int) is_const1 *BRAINCODE_BYTES_PER_INSTRUCTION)) % BRAINCODE_SIZE;
+                addr0[0]--;
+                
+                if (i2 <= *i)
+                {
+                    if ((*i-i2) < braincode_min_loop)
+                    {
+                        i2 = *i - braincode_min_loop;
+                        if (i2 < 0) i2 += BRAINCODE_SIZE;
+                    }
+                }
+                *i = i2-BRAINCODE_BYTES_PER_INSTRUCTION;
+            }
+            break;
+            /** If two values are equal then skip the next n instructions */
+        case BRAINCODE_SEQ:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                if (addr1[0] == addr0[0])
+                {
+                    *i = (*i + (BRAINCODE_BYTES_PER_INSTRUCTION * (1 + (n_int)pspace[0]))) % BRAINCODE_SIZE;
+                }
+            }
+            else
+            {
+                if (addr1[0] == value0)
+                {
+                    *i = (*i + (BRAINCODE_BYTES_PER_INSTRUCTION * (1 + (n_int)pspace[0]))) % BRAINCODE_SIZE;
+                }
+            }
+            break;
+            /** If two values are not equal then skip the next n instructions */
+        case BRAINCODE_SNE:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                if (addr1[0] != addr0[0])
+                {
+                    *i = (*i + (BRAINCODE_BYTES_PER_INSTRUCTION * (1 + (n_int)pspace[0]))) % BRAINCODE_SIZE;
+                }
+            }
+            else
+            {
+                if (addr1[0] != value0)
+                {
+                    *i = (*i + (BRAINCODE_BYTES_PER_INSTRUCTION * (1 + (n_int)pspace[0]))) % BRAINCODE_SIZE;
+                }
+            }
+            break;
+            /** Skip the next n instructions if less than */
+        case BRAINCODE_SLT:
+            if ((!is_constant0) && (!is_constant1))
+            {
+                if (addr1[0] < addr0[0])
+                {
+                    *i = (*i + (BRAINCODE_BYTES_PER_INSTRUCTION * (1 + (n_int)pspace[0]))) % BRAINCODE_SIZE;
+                }
+            }
+            else
+            {
+                if (addr1[0] < value0)
+                {
+                    *i = (*i + (BRAINCODE_BYTES_PER_INSTRUCTION * (1 + (n_int)pspace[0]))) % BRAINCODE_SIZE;
+                }
+            }
+            break;
+            /** No operation (data only) */
+        case BRAINCODE_DAT0:
+        case BRAINCODE_DAT1:
+            break;
+            /** swap */
+        case BRAINCODE_SWP:
+        {
+            n_byte tmp = addr0[0];
+            addr0[0] = addr1[0];
+            addr1[0] = tmp;
+            break;
+        }
+            /** invert */
+        case BRAINCODE_INV:
+            if (is_constant0)
+            {
+                addr0[0] = 255 - addr0[0];
+            }
+            else
+            {
+                addr1[0] = 255 - addr1[0];
+            }
+            break;
+            /** Save to Pspace */
+        case BRAINCODE_STP:
+        {
+            n_byte v0 = is_const0;
+            n_byte v1 = is_const1;
+            pspace[v0 % BRAINCODE_PSPACE_REGISTERS] = v1;
+            break;
+        }
+            /** Load from Pspace */
+        case BRAINCODE_LTP:
+        {
+            n_byte v0 = is_const0;
+            addr1[0] = pspace[v0 % BRAINCODE_PSPACE_REGISTERS];
+            break;
+        }
+    }
+}
+
+

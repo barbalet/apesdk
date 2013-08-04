@@ -389,11 +389,65 @@ enum window_num
 /* number of bytes per instruction */
 #define BRAINCODE_BYTES_PER_INSTRUCTION     3
 
+/* number of instructions which a MVB copies */
+#define BRAINCODE_BLOCK_COPY               16
+
+#define BRAINCODE_MAX_ADDRESS              (BRAINCODE_SIZE*2)
+#define BRAINCODE_ADDRESS(i)               ((i) % BRAINCODE_MAX_ADDRESS)
+
 enum braincode_locations
 {
     BRAINCODE_EXTERNAL = 0,
     BRAINCODE_INTERNAL
 };
+
+/* instruction codes */
+
+enum BRAINCODE_COMMANDS
+{
+    /* data */
+    BRAINCODE_DAT0 = 0,
+    BRAINCODE_DAT1,
+    
+    /* operators */
+    BRAINCODE_ADD,
+    BRAINCODE_SUB,
+    BRAINCODE_MUL,
+    BRAINCODE_DIV,
+    BRAINCODE_MOD,
+    BRAINCODE_MVB,
+    BRAINCODE_MOV,
+    BRAINCODE_JMP,
+    BRAINCODE_CTR,
+    BRAINCODE_SWP,
+    BRAINCODE_INV,
+    BRAINCODE_STP,
+    BRAINCODE_LTP,
+    
+    /* conditionals */
+    BRAINCODE_JMZ,
+    BRAINCODE_JMN,
+    BRAINCODE_DJN,
+    BRAINCODE_AND,
+    BRAINCODE_OR,
+    BRAINCODE_SEQ,
+    BRAINCODE_SNE,
+    BRAINCODE_SLT,
+    
+    /* sensors */
+    BRAINCODE_SEN,
+    BRAINCODE_SEN2,
+    BRAINCODE_SEN3,
+    
+    /* actuators */
+    BRAINCODE_ACT,
+    BRAINCODE_ACT2,
+    BRAINCODE_ACT3,
+    BRAINCODE_ANE,
+    
+    BRAINCODE_INSTRUCTIONS
+};
+
 
 enum graph_commands
 {
@@ -560,6 +614,15 @@ void  vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 void  vect2_copy(n_vect2 * to, n_vect2 * from);
 void  vect2_populate(n_vect2 * value, n_int x, n_int y);
 
+n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i);
+
+void math_general_execution(n_int instruction, n_int is_constant0, n_int is_constant1,
+                            n_byte * addr0, n_byte * addr1, n_int value0, n_int * i,
+                            n_int is_const0, n_int is_const1,
+                            n_byte * pspace,
+                            n_byte **maddr0, n_byte **maddr1,
+                            n_byte *bc0, n_byte *bc1,
+                            n_int braincode_min_loop);
 
 n_uint  math_hash(n_byte * values, n_uint length);
 void    math_bilinear_512_4096(n_byte * side512, n_byte * data);
