@@ -2223,7 +2223,6 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
 {
     n_uint i,j,temp;
     n_int * honor_value;
-
     scope s;
     unsigned int channel = 0;
     unsigned int intensity_percent = 100;
@@ -2254,10 +2253,11 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
 
     s = create_scope((unsigned int)1);
     s.time_ms = (unsigned int)(sim->num);
+    s.noise = 1;
 
     for (i = 0; i < sim->num; i++)
     {
-        scope_update(&s, channel, (double)honor_value[i], 0.0, 256.0, (unsigned int)1);
+        scope_update(&s, channel, (double)honor_value[i], 0.0, 256.0, (unsigned int)i);
     }
 
     io_free(honor_value);
@@ -2530,6 +2530,10 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
     n_uint max_val=1;
     n_int max,x,y;
     noble_immune_system * immune;
+    scope s;
+    unsigned int intensity_percent = 100;
+    unsigned int grid_horizontal = 10;
+    unsigned int grid_vertical = 8;
 #endif
 
     antibodies = (n_c_uint*)io_new(256*sizeof(n_c_uint));
@@ -2544,6 +2548,11 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
     }
 
 #ifdef IMMUNE_ON
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)256;
+    s.no_of_traces = 2;
+    s.noise = 200;
+
     if (sim->num>0)
     {
         /* update histograms */
@@ -2564,6 +2573,7 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
             }
         }
 
+        /* find the maximum value */
         for (p=0; p<256; p++)
         {
             if (antibodies[p]>max_val)
@@ -2578,23 +2588,14 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
 
         for (p=0; p<256; p++)
         {
-            x = p*img_width/256;
-            max = antibodies[p]*img_height/max_val;
-            for (y=0; y<max; y++)
-            {
-                n = (((img_height-1-y)*img_width)+x)*3;
-                buffer[n]=0;
-                buffer[n+2]=0;
-            }
-            max = antigens[p]*img_height/max_val;
-            for (y=0; y<max; y++)
-            {
-                n = (((img_height-1-y)*img_width)+x)*3;
-                buffer[n+1]=0;
-                buffer[n+2]=0;
-            }
+            scope_update(&s, 0, (double)antibodies[p], 0.0, (double)max_val, (unsigned int)p);
+            scope_update(&s, 1, (double)antigens[p], 0.0, (double)max_val, (unsigned int)p);
         }
     }
+
+    scope_draw(&s, intensity_percent,
+               grid_horizontal, grid_vertical,
+               (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 #endif
 
     io_free((void*)antibodies);

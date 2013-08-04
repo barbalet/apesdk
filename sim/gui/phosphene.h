@@ -57,6 +57,7 @@ struct scope_struct {
     unsigned char markings_colour[3];
     unsigned char trace_colour[3];
     unsigned char trace_surround_colour[3];
+    double noise;
 };
 typedef struct scope_struct scope;
 

@@ -25,6 +25,7 @@ HEADERS  += mainwindow.h \
     ../gui/shared.h \
     ../entity/entity_internal.h \
     ../entity/entity.h \
-    ../universe/universe.h
+    ../universe/universe.h \
+    ../gui/phosphene.h
 
 FORMS    += mainwindow.ui

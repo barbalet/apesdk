@@ -79,6 +79,8 @@ scope create_scope(unsigned int step_ms)
 	s.offset_ms = 0;
 	s.trigger_voltage = 0;
 
+    s.noise = 0.03;
+
 	return s;
 }
 
@@ -384,7 +386,7 @@ static void scope_trace(scope * s,
 {
 	int x,y,prev_x=-99999,prev_y=-99999, screen_by, screen_ty,n;
 	unsigned int t_ms=0, border_x, border_y, t;
-	double value, min, max, vertical_percent;
+    double value, min, max, vertical_percent;
 
 	border_x = width * s->border_percent / 100;
 	border_y = height * s->border_percent / 100;
@@ -394,13 +396,13 @@ static void scope_trace(scope * s,
 		if (n < 0) n += (int)s->time_ms;
 		t = (((unsigned int)n)%s->time_ms) / s->step_ms;
 		if (trace_index == 0) {
-			value = s->trace1[t];
+            value = s->trace1[t] + (((rand()%10000)-5000)/5000.0*s->noise);
 			min = s->trace1_min;
 			max = s->trace1_max;
 			vertical_percent = s->vertical_percent[0];
 		}
 		else {
-			value = s->trace2[t];
+            value = s->trace2[t] + (((rand()%10000)-5000)/5000.0*s->noise);
 			min = s->trace2_min;
 			max = s->trace2_max;
 			vertical_percent = s->vertical_percent[1];
