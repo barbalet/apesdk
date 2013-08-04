@@ -36,6 +36,7 @@
 /*NOBLEMAKE DEL=""*/
 
 #include "gui.h"
+#include "phosphene.h"
 
 #include <stdio.h>
 
@@ -2221,11 +2222,13 @@ void graph_vascular(noble_being * being,
 void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
 {
     n_uint i,j,temp;
-    n_int prev_x = -1, prev_y=-1;
-    n_int x,y;
     n_int * honor_value;
 
-    graph_erase(buffer, img_height, img_width);
+    scope s;
+    unsigned int channel = 0;
+    unsigned int intensity_percent = 100;
+    unsigned int grid_horizontal = 10;
+    unsigned int grid_vertical = 8;
 
     honor_value = (n_int*)io_new(sim->num*sizeof(n_int));
 
@@ -2249,16 +2252,19 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
         }
     }
 
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)(sim->num);
+
     for (i = 0; i < sim->num; i++)
     {
-        x = i*img_width/sim->num;
-        y = img_height-1-(honor_value[i]*img_height/255);
-        if (prev_x > -1) graph_line(buffer,img_width,img_height,prev_x,prev_y,x,y,0,0,0,1);
-        prev_x = x;
-        prev_y = y;
+        scope_update(&s, channel, (double)honor_value[i], 0.0, 256.0, (unsigned int)1);
     }
 
     io_free(honor_value);
+
+    scope_draw(&s, intensity_percent,
+               grid_horizontal, grid_vertical,
+               (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 }
 
 static n_int graph_being_score(noble_simulation * sim, noble_being * local_being, n_byte score_type)

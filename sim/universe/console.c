@@ -530,6 +530,7 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
  * @param outer if 1 then show the outer braincode, otherwise show the inner
  * @param columns The number of columns to use for displaying the code
  */
+/*
 static void show_braincode(void * ptr, noble_being * local_being, n_string result, n_int outer, n_int columns)
 {
     n_int i, j, col, offset, program_pointer, instructions_per_column;
@@ -580,6 +581,7 @@ static void show_braincode(void * ptr, noble_being * local_being, n_string resul
     }
     result[watch_string_length++] = '\n';
 }
+*/
 
 /**
  * Show the appearance parameters for a being
