@@ -2724,10 +2724,15 @@ static void graph_braincode_coords(noble_simulation * sim, noble_being * local_b
     n_int i;
     *x=0;
     *y=0;
-    for (i=0; i<BRAINCODE_SIZE; i++)
+    for (i=0; i<BRAINCODE_SIZE/2; i++)
     {
-        *x = *x + being_braincode_internal(local_being)[i];
-        *y = *y + being_braincode_external(local_being)[i];
+        *x = *x + being_braincode_internal(local_being)[i] +
+            being_braincode_external(local_being)[i];
+    }
+    while (i < BRAINCODE_SIZE) {
+        *y = *y + being_braincode_internal(local_being)[i] +
+            being_braincode_external(local_being)[i];
+        i++;
     }
 }
 
@@ -2751,10 +2756,26 @@ static void graph_genespace_coords(noble_being * local_being, n_uint * x, n_uint
 static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type)
 {
 #ifdef PARASITES_ON
-    n_uint i,x=0,y=0,n;
+    n_uint i,x=0,y=0;
+    n_int min_x,max_x,min_y,max_y;
+    n_int dx,dy;
+    n_int av_x=0, av_y=0, av_dx=0, av_dy=0;
+    const n_int min_variance = 8;
+    scope s;
+    unsigned int intensity_percent = 100;
+    unsigned int grid_horizontal = 10;
+    unsigned int grid_vertical = 8;
 
-    /* clear the image */
-    graph_erase(buffer, img_height, img_width);
+    if (sim->num == 0) {
+        /* clear the image */
+        graph_erase(buffer, img_height, img_width);
+        return;
+    }
+
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)(sim->num);
+    s.noise = 0.1;
+    s.mode = PHOSPHENE_MODE_POINTS;
 
     for (i=0; i<sim->num; i++)
     {
@@ -2762,27 +2783,68 @@ static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int
         {
         case 0:
             graph_braincode_coords(sim, &(sim->beings[i]), &x, &y);
-            x = x * (img_width-1) / (256*BRAINCODE_SIZE);
-            y = (img_height-1) - (y * (img_height-1) / (255*BRAINCODE_SIZE));
             break;
         case 1:
             graph_genespace_coords(&(sim->beings[i]), &x, &y);
-            x = x * img_width / (4*8*CHROMOSOMES);
-            y = img_height - 1 - (y * img_height / (4*8*CHROMOSOMES));
+            break;
+        }
+        av_x += (n_int)x;
+        av_y += (n_int)y;
+    }
+    av_x /= (n_int)sim->num;
+    av_y /= (n_int)sim->num;
+
+    for (i=0; i<sim->num; i++)
+    {
+        switch(graph_type)
+        {
+        case 0:
+            graph_braincode_coords(sim, &(sim->beings[i]), &x, &y);
+            break;
+        case 1:
+            graph_genespace_coords(&(sim->beings[i]), &x, &y);
             break;
         }
 
-        n = ((y*img_width)+x)*3;
-        buffer[n] = 0;
-        buffer[n+1] = 0;
-        buffer[n+2] = 0;
-        if (x>0)
-        {
-            buffer[n-3] = 0;
-            buffer[n-2] = 0;
-            buffer[n-1] = 0;
-        }
+        dx = (n_int)x - av_x;
+        if (dx < 0) dx = -dx;
+
+        dy = (n_int)y - av_y;
+        if (dy < 0) dy = -dy;
+
+        av_dx += dx;
+        av_dy += dy;
     }
+    av_dx /= (n_int)sim->num;
+    av_dy /= (n_int)sim->num;
+
+    if (av_dx < min_variance) av_dx = min_variance;
+    if (av_dy < min_variance) av_dy = min_variance;
+
+    min_x = av_x - av_dx;
+    max_x = av_x + av_dx;
+    min_y = av_y - av_dy;
+    max_y = av_y + av_dy;
+
+    for (i=0; i<sim->num; i++)
+    {
+        switch(graph_type)
+        {
+        case 0:
+            graph_braincode_coords(sim, &(sim->beings[i]), &x, &y);
+            break;
+        case 1:
+            graph_genespace_coords(&(sim->beings[i]), &x, &y);
+            break;
+        }
+
+        scope_update(&s, 0, x, min_x, max_x, (unsigned int)i);
+        scope_update(&s, 1, y, min_y, max_y, (unsigned int)i);
+    }
+
+    scope_draw(&s, intensity_percent,
+               grid_horizontal, grid_vertical,
+               (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 #endif
 }
 
