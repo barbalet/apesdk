@@ -2253,7 +2253,7 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
 
     s = create_scope((unsigned int)1);
     s.time_ms = (unsigned int)(sim->num);
-    s.noise = 1;
+    s.noise = 0.5;
 
     for (i = 0; i < sim->num; i++)
     {
@@ -2917,48 +2917,108 @@ void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte *
 void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
 {
     n_uint i;
-    n_int p,x=0,y=0,n,half=PREFERENCES/2;
+    n_int p,x=0,y=0,half=PREFERENCES/2;
+    n_int min_x=0, max_x=0, min_y=0, max_y=0;
+    n_int av_x=0, av_y=0, av_dx=0, av_dy=0,dx,dy;
+    const n_int dimension = 10000;
+    const n_int min_variance = 20;
     noble_being * local_being;
+    scope s;
+    unsigned int intensity_percent = 100;
+    unsigned int grid_horizontal = 10;
+    unsigned int grid_vertical = 8;
 
-    /* clear the image */
-    graph_erase(buffer, img_height, img_width);
+    if (sim->num == 0) {
+        /* clear the image */
+        graph_erase(buffer, img_height, img_width);
+        return;
+    }
+
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)(sim->num);
+    s.noise = 0.1;
+    s.mode = PHOSPHENE_MODE_POINTS;
 
     for (i = 0; i < sim->num; i++)
     {
         local_being = &(sim->beings[i]);
+        x = 0;
         for (p = 0; p < half; p++)
         {
             x += local_being->learned_preference[p];
         }
-        x = x * img_width / (half*255);
-        if (x >= img_width-2) x = img_width-2;
+        av_x += x * dimension / (half*255);
 
+        y = 0;
         while (p < PREFERENCES)
         {
             y += local_being->learned_preference[p];
             p++;
         }
-        y = y * img_height / ((PREFERENCES-half)*255);
-        if (y >= img_height-2) y = img_height-2;
-
-        n = (y*img_width+x)*3;
-
-        buffer[n] = 0;
-        buffer[n+1] = 0;
-        buffer[n+2] = 0;
-        buffer[n+3] = 0;
-        buffer[n+4] = 0;
-        buffer[n+5] = 0;
-
-        n += img_width*3;
-
-        buffer[n] = 0;
-        buffer[n+1] = 0;
-        buffer[n+2] = 0;
-        buffer[n+3] = 0;
-        buffer[n+4] = 0;
-        buffer[n+5] = 0;
+        av_y += y * dimension / ((PREFERENCES-half)*255);
     }
+    av_x /= (n_int)sim->num;
+    av_y /= (n_int)sim->num;
+
+    for (i = 0; i < sim->num; i++)
+    {
+        local_being = &(sim->beings[i]);
+        x = 0;
+        for (p = 0; p < half; p++)
+        {
+            x += local_being->learned_preference[p];
+        }
+        dx = (x * dimension / (half*255)) - av_x;
+        if (dx < 0) dx = -dx;
+        av_dx += dx;
+
+        y = 0;
+        while (p < PREFERENCES)
+        {
+            y += local_being->learned_preference[p];
+            p++;
+        }
+        dy = (y * dimension / ((PREFERENCES-half)*255))-av_y;
+        if (dy < 0) dy = -dy;
+        av_dy += dy;
+    }
+    av_dx /= (n_int)sim->num;
+    av_dy /= (n_int)sim->num;
+    if (av_dx < min_variance) av_dx = min_variance;
+    if (av_dy < min_variance) av_dy = min_variance;
+
+    min_x = av_x - av_dx*2 - 1;
+    max_x = av_x + av_dx*2 + 1;
+    min_y = av_y - av_dy*2 - 1;
+    max_y = av_y + av_dy*2 + 1;
+
+    if ((max_x <= min_x) || (max_y <= min_y)) return;
+
+    for (i = 0; i < sim->num; i++)
+    {
+        local_being = &(sim->beings[i]);
+        x = 0;
+        for (p = 0; p < half; p++)
+        {
+            x += local_being->learned_preference[p];
+        }
+        x = x * dimension / (half*255);
+        scope_update(&s, 0, x, min_x, max_x, (unsigned int)i);
+
+        y = 0;
+        while (p < PREFERENCES)
+        {
+            y += local_being->learned_preference[p];
+            p++;
+        }
+        y = y * dimension / ((PREFERENCES-half)*255);
+        scope_update(&s, 1, y, min_y, max_y, (unsigned int)i);
+    }
+
+    scope_draw(&s, intensity_percent,
+               grid_horizontal, grid_vertical,
+               (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+
 }
 
 

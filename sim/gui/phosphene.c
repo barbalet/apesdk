@@ -111,6 +111,7 @@ void scope_update(scope * s,
 			s->trace1_scan_ms = t_ms;
 		}
 		else {
+            s->no_of_traces = 2;
 			s->trace2[t] = value;
 			s->trace2_min = min;
 			s->trace2_max = max;
@@ -390,6 +391,7 @@ static void scope_trace_line(scope * s,
 
 /* returns various vertical parameters */
 static void scope_verticals(scope * s, unsigned int trace_index,
+                            unsigned int no_of_traces,
                             double * min, double * max,
                             int * screen_by, int * screen_ty,
                             unsigned int height)
@@ -408,7 +410,7 @@ static void scope_verticals(scope * s, unsigned int trace_index,
         vertical_percent = s->vertical_percent[1];
     }
 
-    if (s->no_of_traces == 1) {
+    if (no_of_traces == 1) {
         *screen_by = height - border_y -
             (int)((height-(border_y*2))*(20+vertical_percent)/100);
         *screen_ty = height - border_y -
@@ -445,7 +447,7 @@ static void scope_trace(scope * s,
 
 	border_x = width * s->border_percent / 100;
 
-    scope_verticals(s, trace_index,
+    scope_verticals(s, trace_index, s->no_of_traces,
                     &min, &max,
                     &screen_by, &screen_ty,
                     height);
@@ -501,7 +503,7 @@ static void scope_marker(scope * s, unsigned char * img,
         }
     }
     else {
-        scope_verticals(s, trace_index,
+        scope_verticals(s, trace_index, s->no_of_traces,
                         &min, &max,
                         &screen_by, &screen_ty,
                         height);
@@ -547,6 +549,64 @@ static void scope_background(scope * s, unsigned char * img,
 	}
 }
 
+/* plots traces 0 and 1 together */
+static void scope_xy(scope * s,
+                     unsigned int radius, double intensity_percent,
+                     unsigned char draw_lines,
+                     unsigned char * img,
+                     unsigned int width, unsigned int height)
+{
+    int x, y, prev_x = -9999, prev_y = -9999;
+    int screen_bx, screen_tx, screen_by, screen_ty, n;
+    unsigned int t_ms=0, t;
+    double value_x, value_y, min_x, max_x, min_y, max_y;
+
+    /* limits of trace 0 */
+    scope_verticals(s, 0, 1,
+                    &min_x, &max_x,
+                    &screen_bx, &screen_tx,
+                    width);
+
+    /* limits of trace 1 */
+    scope_verticals(s, 1, 1,
+                    &min_y, &max_y,
+                    &screen_by, &screen_ty,
+                    height);
+
+    if ((max_x <= min_x) || (max_y <= min_y)) return;
+
+    while (t_ms < s->time_ms) {
+        n = (int)t_ms - s->offset_ms;
+        if (n < 0) n += (int)s->time_ms;
+        t = (((unsigned int)n)%s->time_ms) / s->step_ms;
+        value_x = s->trace1[t] + (((rand()%10000)-5000)/5000.0*s->noise);
+        value_y = s->trace2[t] + (((rand()%10000)-5000)/5000.0*s->noise);
+        if ((value_x == PHOSPHENE_NO_TRACE) ||
+            (value_y == PHOSPHENE_NO_TRACE)) {
+            t_ms += s->step_ms;
+            continue;
+        }
+
+        x = screen_bx - (int)((screen_bx - screen_tx)*(value_x-min_x)/(max_x - min_x));
+        y = screen_by - (int)((screen_by - screen_ty)*(value_y-min_y)/(max_y - min_y));
+
+        if (draw_lines == 0) {
+            scope_point(s, x, y,
+                        radius, intensity_percent,
+                        img, width, height);
+        }
+        else {
+            scope_trace_line(s, prev_x, prev_y, x, y,
+                             radius, intensity_percent,
+                             img, width, height);
+        }
+
+        prev_x = x;
+        prev_y = y;
+        t_ms += s->step_ms;
+    }
+}
+
 /* the main drawing function */
 void scope_draw(scope * s,
                 double intensity_percent,
@@ -583,8 +643,23 @@ void scope_draw(scope * s,
     scope_marker(s, img, width, height);
 
 	/* draw traces */
-	for (i = 0; i < s->no_of_traces; i++) {
-		scope_trace(s, i, radius, intensity_percent,
-					img, width, height);
-	}
+    switch(s->mode) {
+    case PHOSPHENE_MODE_DEFAULT: {
+        for (i = 0; i < s->no_of_traces; i++) {
+            scope_trace(s, i, radius, intensity_percent,
+                        img, width, height);
+        }
+        break;
+    }
+    case PHOSPHENE_MODE_XY: {
+        scope_xy(s, radius, intensity_percent, 1,
+                 img, width, height);
+        break;
+    }
+    case PHOSPHENE_MODE_POINTS: {
+        scope_xy(s, radius, intensity_percent, 0,
+                 img, width, height);
+        break;
+    }
+    }
 }
