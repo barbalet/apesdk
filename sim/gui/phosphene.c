@@ -35,6 +35,8 @@ scope create_scope(unsigned int step_ms)
 {
 	scope s;
 
+    s.mode = PHOSPHENE_MODE_DEFAULT;
+
 	s.no_of_traces = 1;
 	s.border_percent = 2;
 
@@ -73,8 +75,8 @@ scope create_scope(unsigned int step_ms)
 	s.trace2_scan_ms = 0;
 	s.time_ms = 2000;
 
-	s.trace1[0] = NO_TRACE;
-	s.trace2[0] = NO_TRACE;
+    s.trace1[0] = PHOSPHENE_NO_TRACE;
+    s.trace2[0] = PHOSPHENE_NO_TRACE;
 
 	s.offset_ms = 0;
 	s.trigger_voltage = 0;
@@ -86,8 +88,8 @@ scope create_scope(unsigned int step_ms)
 
 void scope_clear(scope * s)
 {
-	s->trace1[0] = NO_TRACE;
-	s->trace2[0] = NO_TRACE;
+    s->trace1[0] = PHOSPHENE_NO_TRACE;
+    s->trace2[0] = PHOSPHENE_NO_TRACE;
 }
 
 void scope_update(scope * s,
@@ -97,7 +99,7 @@ void scope_update(scope * s,
 {
 	unsigned int t = t_ms/s->step_ms;
 
-	if (t >= MAX_TIME_STEPS) return;
+    if (t >= PHOSPHENE_MAX_TIME_STEPS) return;
 
 	if (t_ms < s->time_ms) {
 		if (trace_index == 0) {		
@@ -133,21 +135,21 @@ static void scope_point(scope * s,
 
 	if (tx < 0) tx = 0;
 	if (ty < 0) ty = 0;
-	if (bx >= width) bx = width-1;
-	if (by >= height) by = height-1;
+    if (bx >= (int)width) bx = (int)width-1;
+    if (by >= (int)height) by = (int)height-1;
 
 	intensity_percent /= 100.0;
 
 	for (xx = tx; xx <= bx; xx++) {
-		if ((xx < border_x) || (xx > width-border_x)) continue;
+        if ((xx < (int)border_x) || (xx > (int)(width-border_x))) continue;
 
 		dx = xx - x;
 		for (yy = ty; yy <= by; yy++) {
-			if ((yy < border_y) || (yy > height-border_y)) continue;
+            if ((yy < (int)border_y) || (yy > (int)(height-border_y))) continue;
 
 			dy = yy - y;
 			dist = (int)sqrt(dx*dx + dy*dy);
-			if (dist < radius) {
+            if (dist < (int)radius) {
 				n = (yy*width + xx)*3;
 				if (dist > 1) {
 					fraction = (radius - dist) / (double)radius;
@@ -188,15 +190,15 @@ static void scope_marking_point(scope * s,
 
 	if (tx < 0) tx = 0;
 	if (ty < 0) ty = 0;
-	if (bx >= width) bx = width-1;
-	if (by >= height) by = height-1;
+    if (bx >= (int)width) bx = width-1;
+    if (by >= (int)height) by = height-1;
 
 	for (xx = tx; xx <= bx; xx++) {
 		dx = xx - x;
 		for (yy = ty; yy <= by; yy++) {
 			dy = yy - y;
 			dist = (int)sqrt(dx*dx + dy*dy);
-			if (dist < radius) {
+            if (dist < (int)radius) {
 				n = (yy*width + xx)*3;
 				for (c = 0; c < 3; c++) {
 					diff = s->background_colour[c] - s->markings_colour[c];
@@ -209,6 +211,7 @@ static void scope_marking_point(scope * s,
 	}
 }
 
+/* draws a dotted screen marking */
 static void scope_dotted_line(scope * s,
                               int x0, int y0,
                               int x1, int y1,
@@ -229,11 +232,12 @@ static void scope_dotted_line(scope * s,
 	}
 }
 
+/* draws a solid screen marking */
 static void scope_marking_line(scope * s,
                                int x0, int y0,
                                int x1, int y1,
                                unsigned char * img,
-                               unsigned int width, unsigned int height)
+                               unsigned int width)
 {
 	int dx = (int)x1 - (int)x0;
 	int dy = (int)y1 - (int)y0;
@@ -254,12 +258,13 @@ static void scope_marking_line(scope * s,
 	}
 }
 
+/* draws a solid screen marking */
 static void scope_marking(scope * s,
                           int x0, int y0,
                           int x1, int y1,
                           int thickness,
                           unsigned char * img,
-                          unsigned int width, unsigned int height)
+                          unsigned int width)
 {
 	int dx = (int)x1 - (int)x0;
 	int dy = (int)y1 - (int)y0;
@@ -271,17 +276,18 @@ static void scope_marking(scope * s,
 	if (dx > dy) {
 		for (y = -thickness; y < 0; y++) {
 			scope_marking_line(s, x0,  y0+y+offset, x1, y1+y+offset,
-							   img, width, height);
+                               img, width);
 		}
 	}
 	else {
 		for (x = -thickness; x < 0; x++) {
 			scope_marking_line(s, x0+x+offset,  y0, x1+x+offset, y1,
-							   img, width, height);
+                               img, width);
 		}
 	}
 }
 
+/* draws the increment screen markings */
 static void scope_increments(scope * s,
                              int x0, int y0,
                              int x1, int y1,
@@ -289,7 +295,7 @@ static void scope_increments(scope * s,
                              unsigned int radius,
                              unsigned int thickness,
                              unsigned char * img,
-                             unsigned int width, unsigned int height)
+                             unsigned int width)
 {
 	int i, x, y;
 	int dx = x1 - x0;
@@ -301,15 +307,16 @@ static void scope_increments(scope * s,
 
 		if (abs(dx) > abs(dy)) {
 			scope_marking(s, x, y-radius, x, y+radius-1,
-						  thickness, img, width, height);
+                          thickness, img, width);
 		}
 		else {
 			scope_marking(s, x-radius, y, x+radius-1, y,
-						  thickness, img, width, height);
+                          thickness, img, width);
 		}
 	}
 }
 
+/* draws the screen marking grid */
 static void scope_grid(scope * s,
                        unsigned int cells_x, unsigned int cells_y,
                        int radius,
@@ -324,13 +331,13 @@ static void scope_grid(scope * s,
 	for (y = 0; y <= cells_y; y++) {
 		yy = border_y + ((height-(border_y*2))*y/cells_y);
 		scope_marking(s, border_x, yy, width-border_x, yy, thickness,
-					  img, width, height);
+                      img, width);
 	}
 
 	for (x = 0; x <= cells_x; x++) {
 		xx = border_x + ((width-(border_x*2))*x/cells_x);
 		scope_marking(s, xx, border_y, xx, height-border_y, thickness,
-					  img, width, height);
+                      img, width);
 	}
 
 	h = border_y + ((height-(border_y*2))*20/100);
@@ -346,14 +353,15 @@ static void scope_grid(scope * s,
 	h = border_x + ((width-(border_x*2))*50/100);
 	scope_increments(s, h, border_y, h, height-border_y,
 					 cells_y*5, radius/2, thickness,
-					 img, width, height);
+                     img, width);
 
 	h = border_y + ((height-(border_y*2))*50/100);
 	scope_increments(s, border_x, h, width-border_x, h,
 					 cells_x*5, radius/2, thickness,
-					 img, width, height);
+                     img, width);
 }
 
+/* traces a beam line on the screen with the given intensity and radius */
 static void scope_trace_line(scope * s,
                              int x0, int y0,
                              int x1, int y1,
@@ -378,6 +386,7 @@ static void scope_trace_line(scope * s,
 	}
 }
 
+/* traces a beam on the screen with the given intensity and radius */
 static void scope_trace(scope * s,
                         unsigned int trace_index,
                         unsigned int radius, double intensity_percent,
@@ -407,7 +416,7 @@ static void scope_trace(scope * s,
 			max = s->trace2_max;
 			vertical_percent = s->vertical_percent[1];
 		}
-        if ((value == NO_TRACE) || (max <= min)) {
+        if ((value == PHOSPHENE_NO_TRACE) || (max <= min)) {
             t_ms += s->step_ms;
             continue;
         }
@@ -417,7 +426,7 @@ static void scope_trace(scope * s,
 				(int)((height-(border_y*2))*(20+vertical_percent)/100);
 			screen_ty = height - border_y - 
 				(int)((height-(border_y*2))*(80+vertical_percent)/100);
-			if (screen_ty < border_y) screen_ty = border_y;
+            if (screen_ty < (int)border_y) screen_ty = border_y;
 		}
 		else {
 			if (trace_index == 0) {
@@ -425,7 +434,7 @@ static void scope_trace(scope * s,
 					(int)((height-(border_y*2))*(60+vertical_percent)/100);
 				screen_ty = height - border_y - 
 					(int)((height-(border_y*2))*(85+vertical_percent)/100);
-				if (screen_ty < border_y) screen_ty = border_y;
+                if (screen_ty < (int)border_y) screen_ty = border_y;
 			}
 			else {
 				screen_by = height - border_y -
@@ -449,6 +458,7 @@ static void scope_trace(scope * s,
 	}
 }
 
+/* draws a vertical or horizontal alignment marker on the screen */
 static void scope_marker(scope * s, unsigned char * img,
                          unsigned int width, unsigned int height)
 {
@@ -473,11 +483,11 @@ static void scope_background(scope * s, unsigned char * img,
 	int cy = height/2;
 	double fraction_x, fraction_y, fraction;
 
-	for (y = 0; y < height; y++) {
+    for (y = 0; y < (int)height; y++) {
 		dy = y - cy;
 		if (dy < 0) dy = -dy;
 		fraction_y = cos(dy * 0.5 * 3.1415927 / (double)cy);
-		for (x = 0; x < width; x++, n+=3) {
+        for (x = 0; x < (int)width; x++, n+=3) {
 			dx = x - cx;
 			if (dx < 0) dx = -dx;
 			fraction_x = cos(dx * 0.5 * 3.1415927 / (double)cx);
@@ -496,7 +506,7 @@ static void scope_background(scope * s, unsigned char * img,
 	}
 }
 
-
+/* the main drawing function */
 void scope_draw(scope * s,
                 double intensity_percent,
                 int grid_x, int grid_y,
@@ -507,8 +517,8 @@ void scope_draw(scope * s,
 	unsigned int radius = width/(320/5);
 	int thickness = width/320;
 
-	if (s->time_ms/s->step_ms >= MAX_TIME_STEPS) {
-		s->time_ms = (MAX_TIME_STEPS-1) * s->step_ms;
+    if (s->time_ms/s->step_ms >= PHOSPHENE_MAX_TIME_STEPS) {
+        s->time_ms = (PHOSPHENE_MAX_TIME_STEPS-1) * s->step_ms;
 	}
 
 	if (s->trigger_voltage > 0) {

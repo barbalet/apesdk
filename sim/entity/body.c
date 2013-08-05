@@ -317,6 +317,7 @@ static void outline_points(const n_vect2 * source_points,
         vect2_copy(extra_4, &point);
     }
     
+    printf("test points %d\n", *no_of_points);
     points[*no_of_points].x = 9999;
     points[*no_of_points].y = 9999;
     *no_of_points = *no_of_points + 1;

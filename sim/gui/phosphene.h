@@ -32,21 +32,28 @@
 #ifndef PHOSPHENE_H
 #define PHOSPHENE_H
 
-#define MAX_TIME_STEPS 60000
-#define NO_TRACE -999
+#define PHOSPHENE_MAX_TIME_STEPS 60000
+#define PHOSPHENE_NO_TRACE -999
+
+enum {
+    PHOSPHENE_MODE_DEFAULT = 0,
+    PHOSPHENE_MODE_XY,
+    PHOSPHENE_MODE_POINTS
+};
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 struct scope_struct {
+    unsigned char mode;
     unsigned int no_of_traces;
     unsigned int border_percent;
     double vertical_percent[2];
     double trace1_min, trace1_max;
     double trace2_min, trace2_max;
-    double trace1[MAX_TIME_STEPS];
-    double trace2[MAX_TIME_STEPS];
+    double trace1[PHOSPHENE_MAX_TIME_STEPS];
+    double trace2[PHOSPHENE_MAX_TIME_STEPS];
     int offset_ms;
     unsigned int time_ms, step_ms;
     unsigned int trace1_scan_ms, trace2_scan_ms;
