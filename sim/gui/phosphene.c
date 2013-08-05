@@ -36,6 +36,7 @@ scope create_scope(unsigned int step_ms)
 	scope s;
 
     s.mode = PHOSPHENE_MODE_DEFAULT;
+    s.marker_orientation = PHOSPHENE_MARKER_VERTICAL;
 
 	s.no_of_traces = 1;
 	s.border_percent = 2;
@@ -70,7 +71,8 @@ scope create_scope(unsigned int step_ms)
 	s.vertical_percent[0] = 0;
 	s.vertical_percent[1] = 0;
 
-	s.marker_ms = 0;
+	s.marker_position = 0;
+    s.marker_thickness = 2;
 	s.trace1_scan_ms = 0;
 	s.trace2_scan_ms = 0;
 	s.time_ms = 2000;
@@ -117,7 +119,7 @@ void scope_update(scope * s,
 	}
 }
 
-/* draws a single point */
+/* draws a single point with the beam using a given intensity and radius */
 static void scope_point(scope * s,
                         int x, int y,
                         unsigned int radius, double intensity_percent,
@@ -386,6 +388,50 @@ static void scope_trace_line(scope * s,
 	}
 }
 
+/* returns various vertical parameters */
+static void scope_verticals(scope * s, unsigned int trace_index,
+                            double * min, double * max,
+                            int * screen_by, int * screen_ty,
+                            unsigned int height)
+{
+    unsigned int border_y = height * s->border_percent / 100;
+    double vertical_percent;
+
+    if (trace_index == 0) {
+        *min = s->trace1_min;
+        *max = s->trace1_max;
+        vertical_percent = s->vertical_percent[0];
+    }
+    else {
+        *min = s->trace2_min;
+        *max = s->trace2_max;
+        vertical_percent = s->vertical_percent[1];
+    }
+
+    if (s->no_of_traces == 1) {
+        *screen_by = height - border_y -
+            (int)((height-(border_y*2))*(20+vertical_percent)/100);
+        *screen_ty = height - border_y -
+            (int)((height-(border_y*2))*(80+vertical_percent)/100);
+        if (*screen_ty < (int)border_y) *screen_ty = border_y;
+    }
+    else {
+        if (trace_index == 0) {
+            *screen_by = height - border_y -
+                (int)((height-(border_y*2))*(60+vertical_percent)/100);
+            *screen_ty = height - border_y -
+                (int)((height-(border_y*2))*(85+vertical_percent)/100);
+            if (*screen_ty < (int)border_y) *screen_ty = border_y;
+        }
+        else {
+            *screen_by = height - border_y -
+                (int)((height-(border_y*2))*(20+vertical_percent)/100);
+            *screen_ty = height - border_y -
+                (int)((height-(border_y*2))*(45+vertical_percent)/100);
+        }
+    }
+}
+
 /* traces a beam on the screen with the given intensity and radius */
 static void scope_trace(scope * s,
                         unsigned int trace_index,
@@ -394,11 +440,15 @@ static void scope_trace(scope * s,
                         unsigned int width, unsigned int height)
 {
 	int x,y,prev_x=-99999,prev_y=-99999, screen_by, screen_ty,n;
-	unsigned int t_ms=0, border_x, border_y, t;
-    double value, min, max, vertical_percent;
+    unsigned int t_ms=0, border_x, t;
+    double value, min, max;
 
 	border_x = width * s->border_percent / 100;
-	border_y = height * s->border_percent / 100;
+
+    scope_verticals(s, trace_index,
+                    &min, &max,
+                    &screen_by, &screen_ty,
+                    height);
 
 	while (t_ms < s->time_ms) {
 		n = (int)t_ms - s->offset_ms;
@@ -406,43 +456,14 @@ static void scope_trace(scope * s,
 		t = (((unsigned int)n)%s->time_ms) / s->step_ms;
 		if (trace_index == 0) {
             value = s->trace1[t] + (((rand()%10000)-5000)/5000.0*s->noise);
-			min = s->trace1_min;
-			max = s->trace1_max;
-			vertical_percent = s->vertical_percent[0];
 		}
 		else {
             value = s->trace2[t] + (((rand()%10000)-5000)/5000.0*s->noise);
-			min = s->trace2_min;
-			max = s->trace2_max;
-			vertical_percent = s->vertical_percent[1];
 		}
         if ((value == PHOSPHENE_NO_TRACE) || (max <= min)) {
             t_ms += s->step_ms;
             continue;
         }
-
-		if (s->no_of_traces == 1) {
-			screen_by = height - border_y -
-				(int)((height-(border_y*2))*(20+vertical_percent)/100);
-			screen_ty = height - border_y - 
-				(int)((height-(border_y*2))*(80+vertical_percent)/100);
-            if (screen_ty < (int)border_y) screen_ty = border_y;
-		}
-		else {
-			if (trace_index == 0) {
-				screen_by = height - border_y -
-					(int)((height-(border_y*2))*(60+vertical_percent)/100);
-				screen_ty = height - border_y - 
-					(int)((height-(border_y*2))*(85+vertical_percent)/100);
-                if (screen_ty < (int)border_y) screen_ty = border_y;
-			}
-			else {
-				screen_by = height - border_y -
-					(int)((height-(border_y*2))*(20+vertical_percent)/100);
-				screen_ty = height - border_y -
-					(int)((height-(border_y*2))*(45+vertical_percent)/100);
-			}
-		}
 
 		x = border_x + (t_ms * (width-(border_x*2)) / s->time_ms);
 		y = screen_by - (int)((screen_by - screen_ty)*(value-min)/(max - min));
@@ -459,19 +480,39 @@ static void scope_trace(scope * s,
 }
 
 /* draws a vertical or horizontal alignment marker on the screen */
-static void scope_marker(scope * s, unsigned char * img,
+static void scope_marker(scope * s, unsigned char * img,                         
                          unsigned int width, unsigned int height)
 {
-	unsigned int border_x, border_y, x;
+    unsigned int border_x, border_y, x, y;
+    unsigned int i, trace_index = 0;
+    double min=0, max=1;
+    int screen_by, screen_ty;
 
-	if (s->marker_ms == 0) return;
+	if (s->marker_position == 0) return;
 
 	border_x = width * s->border_percent / 100;
 	border_y = height * s->border_percent / 100;
 
-	x = border_x + (s->marker_ms * (width-(border_x*2)) / s->time_ms);
-	scope_trace_line(s, x, border_y, x, height - border_y,
-					 1, 50, img, width, height);
+    if (s->marker_orientation == PHOSPHENE_MARKER_VERTICAL) {
+        x = border_x + (s->marker_position * (width-(border_x*2)) / s->time_ms);
+        for (i = 0; i < s->marker_thickness; i++) {
+            scope_trace_line(s, x+i, border_y, x+i, height - border_y,
+                             1, 50, img, width, height);
+        }
+    }
+    else {
+        scope_verticals(s, trace_index,
+                        &min, &max,
+                        &screen_by, &screen_ty,
+                        height);
+
+        y = screen_by - (int)((screen_by - screen_ty)*
+            (s->marker_position-min)/(max - min));
+        for (i = 0; i < s->marker_thickness; i++) {
+            scope_trace_line(s, border_x, y+i, width-border_x, y+i,
+                             1, 50, img, width, height);
+        }
+    }
 
 }
 
@@ -527,7 +568,7 @@ void scope_draw(scope * s,
 				(s->trace1[i] > s->trigger_voltage)) {
 				s->offset_ms = -(i*s->step_ms) +
 					(int)(s->time_ms*0.05);
-				s->marker_ms = s->time_ms*0.05;
+				s->marker_position = s->time_ms*0.05;
 				break;
 			}
 		}
@@ -539,7 +580,7 @@ void scope_draw(scope * s,
 	scope_grid(s, grid_x, grid_y, radius, thickness, img, width, height);
 
 	/* show marker */
-	scope_marker(s, img, width, height);
+    scope_marker(s, img, width, height);
 
 	/* draw traces */
 	for (i = 0; i < s->no_of_traces; i++) {

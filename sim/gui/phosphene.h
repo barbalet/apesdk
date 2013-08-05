@@ -41,6 +41,11 @@ enum {
     PHOSPHENE_MODE_POINTS
 };
 
+enum {
+    PHOSPHENE_MARKER_VERTICAL = 0,
+    PHOSPHENE_MARKER_HORIZONTAL
+};
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,7 +62,9 @@ struct scope_struct {
     int offset_ms;
     unsigned int time_ms, step_ms;
     unsigned int trace1_scan_ms, trace2_scan_ms;
-    double marker_ms;
+    double marker_position;
+    unsigned char marker_orientation;
+    unsigned int marker_thickness;
     double trigger_voltage;
     unsigned char background_colour[3];
     unsigned char background_border_colour[3];
