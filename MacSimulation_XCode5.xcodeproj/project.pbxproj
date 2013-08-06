@@ -36,6 +36,7 @@
 		4A3600751712409A004DAFBA /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600591712409A004DAFBA /* sim.c */; };
 		4A360077171240F1004DAFBA /* nobleape.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4A360076171240F1004DAFBA /* nobleape.icns */; };
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
+		4A57691F17B0C00400FFA4E4 /* phosphene.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A57691D17B0C00400FFA4E4 /* phosphene.c */; };
 		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
 		5A4805E2178676EB007220D7 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A4805E1178676EB007220D7 /* XCTest.framework */; };
 		5A4805E8178676EB007220D7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A4805E6178676EB007220D7 /* InfoPlist.strings */; };
@@ -97,6 +98,8 @@
 		4A36005B1712409A004DAFBA /* universe_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe_internal.h; sourceTree = "<group>"; };
 		4A360076171240F1004DAFBA /* nobleape.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = nobleape.icns; sourceTree = "<group>"; };
 		4A360078171240FE004DAFBA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		4A57691D17B0C00400FFA4E4 /* phosphene.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = phosphene.c; sourceTree = "<group>"; };
+		4A57691E17B0C00400FFA4E4 /* phosphene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phosphene.h; sourceTree = "<group>"; };
 		4A7DC3E31749CD710013F2E9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
 		5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */ = {isa = PBXFileReference; explicitFileType = folder; includeInIndex = 0; path = "MacSimulation Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A4805E1178676EB007220D7 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -217,6 +220,8 @@
 			children = (
 				4A3600421712409A004DAFBA /* draw.c */,
 				4A3600431712409A004DAFBA /* gui.h */,
+				4A57691D17B0C00400FFA4E4 /* phosphene.c */,
+				4A57691E17B0C00400FFA4E4 /* phosphene.h */,
 				4A3600451712409A004DAFBA /* shared.c */,
 				4A3600461712409A004DAFBA /* shared.h */,
 			);
@@ -403,6 +408,7 @@
 				4A3600711712409A004DAFBA /* parse.c in Sources */,
 				4A3600721712409A004DAFBA /* skim.c in Sources */,
 				4A3600731712409A004DAFBA /* console.c in Sources */,
+				4A57691F17B0C00400FFA4E4 /* phosphene.c in Sources */,
 				4A3600741712409A004DAFBA /* file.c in Sources */,
 				4A3600751712409A004DAFBA /* sim.c in Sources */,
 				4A7DC3E41749CD710013F2E9 /* network.c in Sources */,
@@ -635,6 +641,7 @@
 				5A4805EF178676EB007220D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
