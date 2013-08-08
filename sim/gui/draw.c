@@ -2526,9 +2526,8 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
     n_c_uint * antigens;
 #ifdef IMMUNE_ON
     noble_being * local_being;
-    n_int j,n,p;
+    n_int j,p;
     n_uint max_val=1;
-    n_int max,x,y;
     noble_immune_system * immune;
     scope s;
     unsigned int intensity_percent = 100;
