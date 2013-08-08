@@ -1561,10 +1561,10 @@ void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         }
         break;
     case GC_HONOR:
-        graph_honor_distribution(local_sim, graph, dim_x, dim_y);
+        graph_honor_distribution(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y);
         break;
     case GC_PATHOGENS:
-        graph_pathogens(local_sim, graph, dim_x, dim_y);
+        graph_pathogens(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y);
         break;
     case GC_RELATIONSHIPS:
         graph_relationship_matrix(local_sim, graph, dim_x, dim_y);
@@ -1573,10 +1573,10 @@ void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         graph_genepool(local_sim, graph, dim_x, dim_y);
         break;
     case GC_PREFERENCES:
-        graph_preferences(local_sim, graph, dim_x, dim_y);
+        graph_preferences(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y);
         break;
     case GC_PHASESPACE:
-        graph_phasespace(local_sim, graph, dim_x, dim_y, 0, 0);
+        graph_phasespace(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y, 0, 0);
         break;
     case GC_VASCULAR:
     default:
@@ -2215,11 +2215,12 @@ void graph_vascular(noble_being * being,
 /**
  * @brief Shows distribution of honor.  Note that beings are sorted in order of honor
  * @param sim Pointer to the simulation object
+ * @param update type Whether to draw the background or foreground
  * @param buffer Image buffer (3 bytes per pixel)
  * @param img_width Image width
  * @param img_height Image height
  */
-void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
+void graph_honor_distribution(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height)
 {
     n_uint i,j,temp;
     n_int * honor_value;
@@ -2228,6 +2229,17 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
     unsigned int intensity_percent = 100;
     unsigned int grid_horizontal = 10;
     unsigned int grid_vertical = 8;
+
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)(sim->num);
+    s.noise = 0.5;
+
+    if (update_type == PHOSPHENE_DRAW_BACKGROUND) {
+        scope_draw(&s, update_type, intensity_percent,
+                   grid_horizontal, grid_vertical,
+                   (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+        return;
+    }
 
     honor_value = (n_int*)io_new(sim->num*sizeof(n_int));
 
@@ -2251,9 +2263,6 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
         }
     }
 
-    s = create_scope((unsigned int)1);
-    s.time_ms = (unsigned int)(sim->num);
-    s.noise = 0.5;
 
     for (i = 0; i < sim->num; i++)
     {
@@ -2262,7 +2271,7 @@ void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img
 
     io_free(honor_value);
 
-    scope_draw(&s, intensity_percent,
+    scope_draw(&s, update_type, intensity_percent,
                grid_horizontal, grid_vertical,
                (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 }
@@ -2519,7 +2528,7 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
  There are 256 possible antigens/antibodies which are along the horizontal axis.
  Antigens are shown in red and antibodies in green.
  */
-void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
+void graph_pathogens(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height)
 {
     n_c_uint i;
     n_c_uint * antibodies;
@@ -2535,10 +2544,20 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
     unsigned int grid_vertical = 8;
 #endif
 
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)256;
+    s.no_of_traces = 2;
+    s.noise = 200;
+
+    if (update_type == PHOSPHENE_DRAW_BACKGROUND) {
+        scope_draw(&s, update_type, intensity_percent,
+                   grid_horizontal, grid_vertical,
+                   (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+        return;
+    }
+
     antibodies = (n_c_uint*)io_new(256*sizeof(n_c_uint));
     antigens = (n_c_uint*)io_new(256*sizeof(n_c_uint));
-
-    graph_erase(buffer, img_height, img_width);
 
     for (i=0; i<256; i++)
     {
@@ -2547,10 +2566,6 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
     }
 
 #ifdef IMMUNE_ON
-    s = create_scope((unsigned int)1);
-    s.time_ms = (unsigned int)256;
-    s.no_of_traces = 2;
-    s.noise = 200;
 
     if (sim->num>0)
     {
@@ -2592,7 +2607,7 @@ void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n
         }
     }
 
-    scope_draw(&s, intensity_percent,
+    scope_draw(&s, update_type, intensity_percent,
                grid_horizontal, grid_vertical,
                (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 #endif
@@ -2752,7 +2767,7 @@ static void graph_genespace_coords(noble_being * local_being, n_uint * x, n_uint
     }
 }
 
-static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type)
+static void graph_phasespace_dots(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type)
 {
 #ifdef PARASITES_ON
     n_uint i,x=0,y=0;
@@ -2775,6 +2790,14 @@ static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int
     s.time_ms = (unsigned int)(sim->num);
     s.noise = 0.1;
     s.mode = PHOSPHENE_MODE_POINTS;
+
+    if (update_type == PHOSPHENE_DRAW_BACKGROUND) {
+        scope_draw(&s, update_type, intensity_percent,
+                   grid_horizontal, grid_vertical,
+                   (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+        return;
+    }
+
 
     for (i=0; i<sim->num; i++)
     {
@@ -2841,7 +2864,7 @@ static void graph_phasespace_dots(noble_simulation * sim, n_byte * buffer, n_int
         scope_update(&s, 1, y, min_y, max_y, (unsigned int)i);
     }
 
-    scope_draw(&s, intensity_percent,
+    scope_draw(&s, update_type, intensity_percent,
                grid_horizontal, grid_vertical,
                (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 #endif
@@ -2920,11 +2943,11 @@ static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_
 #endif
 }
 
-void graph_phasespace(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type, n_byte data_type)
+void graph_phasespace(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type, n_byte data_type)
 {
     if (graph_type==0)
     {
-        graph_phasespace_dots(sim, buffer, img_width, img_height,data_type);
+        graph_phasespace_dots(sim, update_type, buffer, img_width, img_height,data_type);
     }
     else
     {
@@ -2975,7 +2998,7 @@ void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte *
 /*
  Displays the preferences of the population
  */
-void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height)
+void graph_preferences(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height)
 {
     n_uint i;
     n_int p,x=0,y=0,half=PREFERENCES/2;
@@ -2999,6 +3022,13 @@ void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width,
     s.time_ms = (unsigned int)(sim->num);
     s.noise = 0.1;
     s.mode = PHOSPHENE_MODE_POINTS;
+
+    if (update_type == PHOSPHENE_DRAW_BACKGROUND) {
+        scope_draw(&s, update_type, intensity_percent,
+                   grid_horizontal, grid_vertical,
+                   (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+        return;
+    }
 
     for (i = 0; i < sim->num; i++)
     {
@@ -3076,7 +3106,7 @@ void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width,
         scope_update(&s, 1, y, min_y, max_y, (unsigned int)i);
     }
 
-    scope_draw(&s, intensity_percent,
+    scope_draw(&s, update_type, intensity_percent,
                grid_horizontal, grid_vertical,
                (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 

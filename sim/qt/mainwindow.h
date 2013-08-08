@@ -26,6 +26,7 @@ extern "C" {
 #include "../universe/universe.h"
 #include "../gui/gui.h"
 #include "../gui/shared.h"
+#include "../gui/phosphene.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -68,11 +69,11 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 protected:
-    int current_display, next_display;
+    int current_display, next_display, prev_display;
 
     unsigned char check;
     unsigned char* local_buffer;
-    unsigned char * img_graph;
+    unsigned char * img_graph, * img_graph_background;
     QVector<QRgb> palette;
     unsigned char window_updated;
     int clear_graph;

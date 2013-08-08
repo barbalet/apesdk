@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     firedown = 0;
     firecontrol = 0;
     current_display = WND_MAP;
+    prev_display = -1;
     next_display = -1;
     current_filename="";
     clear_graph = 1;
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     img_graph = NULL;
+    img_graph_background = NULL;
 
     ui->setupUi(this);
 
@@ -73,6 +75,7 @@ MainWindow::~MainWindow()
         if (image[i] != NULL) delete image[i];
     }
     free(img_graph);
+    free(img_graph_background);
 
     delete ui;
 }
@@ -91,6 +94,7 @@ void MainWindow::init()
 
     /* RGB image used for additional graphs */
     img_graph = (unsigned char *)malloc(WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
+    img_graph_background = (unsigned char *)malloc(WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
 
     refresh();
 
@@ -335,7 +339,13 @@ bool MainWindow::refresh()
     }
     case WND_HONOR:
     {
-        graph_honor_distribution(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        if (prev_display != current_display) {
+            /* drawing for the first time */
+            graph_honor_distribution(sim_sim(), PHOSPHENE_DRAW_BACKGROUND, img_graph_background, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        }
+        memcpy((void*)img_graph,(void*)img_graph_background,WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
+        graph_honor_distribution(sim_sim(), PHOSPHENE_DRAW_FOREGROUND, img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+
         img = img_graph;
         format = QImage::Format_RGB888;
         img_width = WND_WIDTH_MAP;
@@ -344,7 +354,12 @@ bool MainWindow::refresh()
     }
     case WND_PATHOGENS:
     {
-        graph_pathogens(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        if (prev_display != current_display) {
+            /* drawing for the first time */
+            graph_pathogens(sim_sim(), PHOSPHENE_DRAW_BACKGROUND, img_graph_background, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        }
+        memcpy((void*)img_graph,(void*)img_graph_background,WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
+        graph_pathogens(sim_sim(), PHOSPHENE_DRAW_FOREGROUND, img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
         img = img_graph;
         format = QImage::Format_RGB888;
         img_width = WND_WIDTH_MAP;
@@ -362,7 +377,12 @@ bool MainWindow::refresh()
     }
     case WND_PREFERENCES:
     {
-        graph_preferences(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        if (prev_display != current_display) {
+            /* drawing for the first time */
+            graph_preferences(sim_sim(), PHOSPHENE_DRAW_BACKGROUND, img_graph_background, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        }
+        memcpy((void*)img_graph,(void*)img_graph_background,WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
+        graph_preferences(sim_sim(), PHOSPHENE_DRAW_FOREGROUND, img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
         img = img_graph;
         format = QImage::Format_RGB888;
         img_width = WND_WIDTH_MAP;
@@ -371,7 +391,13 @@ bool MainWindow::refresh()
     }
     case WND_PHASESPACE:
     {
-        graph_phasespace(sim_sim(), img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP,0,0);
+        if (prev_display != current_display) {
+            /* drawing for the first time */
+            graph_phasespace(sim_sim(), PHOSPHENE_DRAW_BACKGROUND, img_graph_background, WND_WIDTH_MAP, WND_HEIGHT_MAP,0,0);
+        }
+        memcpy((void*)img_graph,(void*)img_graph_background,WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
+        graph_phasespace(sim_sim(), PHOSPHENE_DRAW_FOREGROUND, img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP,0,0);
+
         img = img_graph;
         format = QImage::Format_RGB888;
         img_width = WND_WIDTH_MAP;
@@ -447,6 +473,7 @@ bool MainWindow::refresh()
 
     g->fitInView(image[current_display]->rect(), Qt::KeepAspectRatio);
     g->show();
+    prev_display = current_display;
 
     return true;
 }

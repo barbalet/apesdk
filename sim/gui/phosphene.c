@@ -607,8 +607,27 @@ static void scope_xy(scope * s,
     }
 }
 
+/* draws the background */
+static void scope_draw_background(scope * s,
+                                  int grid_x, int grid_y,
+                                  unsigned int radius,
+                                  unsigned char * img,
+                                  unsigned int width, unsigned int height)
+{
+    int thickness = width/320;
+
+    if (thickness < 1) thickness = 1;
+
+    /* background */
+    scope_background(s, img, width, height);
+
+    scope_grid(s, grid_x, grid_y, radius, thickness, img, width, height);
+}
+
+
 /* the main drawing function */
 void scope_draw(scope * s,
+                unsigned char draw_type,
                 double intensity_percent,
                 int grid_x, int grid_y,
                 unsigned char * img,
@@ -616,50 +635,59 @@ void scope_draw(scope * s,
 {
 	unsigned int i;
 	unsigned int radius = width/(320/5);
-	int thickness = width/320;
 
-    if (s->time_ms/s->step_ms >= PHOSPHENE_MAX_TIME_STEPS) {
-        s->time_ms = (PHOSPHENE_MAX_TIME_STEPS-1) * s->step_ms;
-	}
+    if (radius < 1) radius = 1;
 
-	if (s->trigger_voltage > 0) {
-		for (i = 1; i < s->time_ms/s->step_ms; i++) {
-			if ((s->trace1[i-1] < s->trigger_voltage) &&
-				(s->trace1[i] > s->trigger_voltage)) {
-				s->offset_ms = -(i*s->step_ms) +
-					(int)(s->time_ms*0.05);
-				s->marker_position = s->time_ms*0.05;
-				break;
-			}
-		}
-	}
+    /* draw the background */
+    if ((draw_type == PHOSPHENE_DRAW_ALL) ||
+        (draw_type == PHOSPHENE_DRAW_BACKGROUND)) {
+        scope_draw_background(s, grid_x, grid_y, radius,
+                              img, width, height);
+    }
 
-	/* background */
-	scope_background(s, img, width, height);
-
-	scope_grid(s, grid_x, grid_y, radius, thickness, img, width, height);
-
-	/* show marker */
-    scope_marker(s, img, width, height);
-
-	/* draw traces */
-    switch(s->mode) {
-    case PHOSPHENE_MODE_DEFAULT: {
-        for (i = 0; i < s->no_of_traces; i++) {
-            scope_trace(s, i, radius, intensity_percent,
-                        img, width, height);
+    if ((draw_type == PHOSPHENE_DRAW_ALL) ||
+        (draw_type == PHOSPHENE_DRAW_FOREGROUND)) {
+        /* check that the time base doesn't exceed the maximum */
+        if (s->time_ms/s->step_ms >= PHOSPHENE_MAX_TIME_STEPS) {
+            s->time_ms = (PHOSPHENE_MAX_TIME_STEPS-1) * s->step_ms;
         }
-        break;
-    }
-    case PHOSPHENE_MODE_XY: {
-        scope_xy(s, radius, intensity_percent, 1,
-                 img, width, height);
-        break;
-    }
-    case PHOSPHENE_MODE_POINTS: {
-        scope_xy(s, radius, intensity_percent, 0,
-                 img, width, height);
-        break;
-    }
+
+        /* if a trigger voltage is set then check for it
+           and adjust the marker position accordingly */
+        if (s->trigger_voltage > 0) {
+            for (i = 1; i < s->time_ms/s->step_ms; i++) {
+                if ((s->trace1[i-1] < s->trigger_voltage) &&
+                    (s->trace1[i] > s->trigger_voltage)) {
+                    s->offset_ms = -(i*s->step_ms) +
+                        (int)(s->time_ms*0.05);
+                    s->marker_position = s->time_ms*0.05;
+                    break;
+                }
+            }
+        }
+
+        /* show marker */
+        scope_marker(s, img, width, height);
+
+        /* draw traces */
+        switch(s->mode) {
+        case PHOSPHENE_MODE_DEFAULT: {
+            for (i = 0; i < s->no_of_traces; i++) {
+                scope_trace(s, i, radius, intensity_percent,
+                            img, width, height);
+            }
+            break;
+        }
+        case PHOSPHENE_MODE_XY: {
+            scope_xy(s, radius, intensity_percent, 1,
+                     img, width, height);
+            break;
+        }
+        case PHOSPHENE_MODE_POINTS: {
+            scope_xy(s, radius, intensity_percent, 0,
+                     img, width, height);
+            break;
+        }
+        }
     }
 }

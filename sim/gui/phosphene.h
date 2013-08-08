@@ -36,6 +36,12 @@
 #define PHOSPHENE_NO_TRACE -999
 
 enum {
+    PHOSPHENE_DRAW_ALL = 0,
+    PHOSPHENE_DRAW_BACKGROUND,
+    PHOSPHENE_DRAW_FOREGROUND
+};
+
+enum {
     PHOSPHENE_MODE_DEFAULT = 0,
     PHOSPHENE_MODE_XY,
     PHOSPHENE_MODE_POINTS
@@ -82,6 +88,7 @@ void scope_update(scope * s,
                   double value, double min, double max,
                   unsigned int t_ms);
 void scope_draw(scope * s,
+                unsigned char draw_type,
                 double intensity_percent,
                 int grid_x, int grid_y,
                 unsigned char * img,

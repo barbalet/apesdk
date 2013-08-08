@@ -110,17 +110,17 @@ typedef void  (*control_mp_define)(n_byte * data);
  */
 /* graph functions */
 /*void graph_line(n_byte * buffer, n_int img_width, n_int img_height, n_int prev_x, n_int prev_y, n_int x, n_int y, n_byte r,n_byte g,n_byte b,n_byte thickness);*/
-void graph_honor_distribution(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_honor_distribution(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
 void graph_ideosphere(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
 void graph_genepool(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
 void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_pathogens(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_pathogens(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
 void graph_age_demographic(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
 void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_phasespace(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type, n_byte data_type);
+void graph_phasespace(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type, n_byte data_type);
 void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte * buffer, n_int img_width, n_int img_height, n_byte clear);
 
-void graph_preferences(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_preferences(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
 void graph_vascular(noble_being * being,
                     n_byte * buffer,
                     n_int img_width, n_int img_height,
