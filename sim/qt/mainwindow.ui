@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>536</width>
-     <height>22</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -88,6 +88,7 @@
     <addaction name="actionViewPreferences"/>
     <addaction name="actionViewPhasespace"/>
     <addaction name="actionViewVascular"/>
+    <addaction name="actionViewSocialsim"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -282,6 +283,11 @@
   <action name="actionViewVascular">
    <property name="text">
     <string>Vascular</string>
+   </property>
+  </action>
+  <action name="actionViewSocialsim">
+   <property name="text">
+    <string>Socialsim</string>
    </property>
   </action>
  </widget>

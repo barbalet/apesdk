@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionViewRelationships,SIGNAL(triggered()),this,SLOT(menuViewRelationships()));
     connect(ui->actionViewPreferences,SIGNAL(triggered()),this,SLOT(menuViewPreferences()));
     connect(ui->actionViewPhasespace,SIGNAL(triggered()),this,SLOT(menuViewPhasespace()));
+    connect(ui->actionViewSocialsim,SIGNAL(triggered()),this,SLOT(menuViewSocialsim()));
     connect(ui->actionViewVascular,SIGNAL(triggered()),this,SLOT(menuViewVascular()));
     connect(ui->actionSave,SIGNAL(triggered()),this,SLOT(menuSave()));
     connect(ui->actionSaveAs,SIGNAL(triggered()),this,SLOT(menuSaveAs()));
@@ -404,6 +405,20 @@ bool MainWindow::refresh()
         img_height = WND_HEIGHT_MAP;
         break;
     }
+    case WND_SOCIALSIM:
+    {
+        if (prev_display != current_display) {
+            /* drawing for the first time */
+            graph_socialsim(sim_sim(), PHOSPHENE_DRAW_BACKGROUND, img_graph_background, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        }
+        memcpy((void*)img_graph,(void*)img_graph_background,WND_WIDTH_MAP*WND_HEIGHT_MAP*3);
+        graph_socialsim(sim_sim(), PHOSPHENE_DRAW_FOREGROUND, img_graph, WND_WIDTH_MAP, WND_HEIGHT_MAP);
+        img = img_graph;
+        format = QImage::Format_RGB888;
+        img_width = WND_WIDTH_MAP;
+        img_height = WND_HEIGHT_MAP;
+        break;
+    }
     case WND_VASCULAR:
     {
         /** set this to a non-zero value to show key points on the skeleton
@@ -557,6 +572,11 @@ void MainWindow::menuViewPreferences()
 void MainWindow::menuViewPhasespace()
 {
     menuView(WND_PHASESPACE,0);
+}
+
+void MainWindow::menuViewSocialsim()
+{
+    menuView(WND_SOCIALSIM,0);
 }
 
 void MainWindow::menuViewVascular()
