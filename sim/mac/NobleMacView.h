@@ -99,6 +99,7 @@
 -(IBAction) graphRelationships:(id)sender;
 -(IBAction) graphPreferences:(id)sender;
 -(IBAction) graphPhasespace:(id)sender;
+-(IBAction) graphSocial:(id)sender;
 -(IBAction) graphVascular:(id)sender;
 
 -(void)keyUp:(NSEvent *)theEvent;

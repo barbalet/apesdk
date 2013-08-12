@@ -429,6 +429,11 @@ n_int   count_switch = 0;
     shared_graph_command(GC_PHASESPACE);
 }
 
+-(IBAction) graphSocial:(id)sender
+{
+    shared_graph_command(GC_SOCIALSIM);
+}
+
 -(IBAction) graphVascular:(id)sender
 {
     shared_graph_command(GC_VASCULAR);

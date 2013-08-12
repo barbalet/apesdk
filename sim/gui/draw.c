@@ -1575,6 +1575,9 @@ void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
     case GC_PREFERENCES:
         graph_preferences(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y);
         break;
+    case GC_SOCIALSIM:
+        graph_socialsim(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y);
+        break;
     case GC_PHASESPACE:
         graph_phasespace(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y, 0, 0);
         break;
@@ -2767,6 +2770,7 @@ static void graph_genespace_coords(noble_being * local_being, n_uint * x, n_uint
     }
 }
 
+
 static void graph_phasespace_dots(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type)
 {
 #ifdef PARASITES_ON
@@ -2941,6 +2945,82 @@ static void graph_phasespace_density(noble_simulation * sim, n_byte * buffer, n_
         }
     }
 #endif
+}
+
+void graph_socialsim(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height)
+{
+    n_uint i;
+    n_int min_x=65536, max_x=-1, min_y=65536, max_y=-1;
+    
+    noble_being * local_being;
+    scope s;
+    unsigned int intensity_percent = 100;
+    unsigned int grid_horizontal = 10;
+    unsigned int grid_vertical = 10;
+    
+    if (sim->num == 0) {
+        /* clear the image */
+        graph_erase(buffer, img_height, img_width);
+        return;
+    }
+    
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)(sim->num);
+    s.noise = 0.1;
+    s.mode = PHOSPHENE_MODE_POINTS;
+    
+    if (update_type == PHOSPHENE_DRAW_BACKGROUND) {
+        scope_draw(&s, update_type, intensity_percent,
+                   grid_horizontal, grid_vertical,
+                   (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+        return;
+    }
+    
+    for (i = 0; i < sim->num; i++)
+    {
+        n_int coord_x, coord_y;
+        
+        local_being = &(sim->beings[i]);
+
+        coord_x = local_being->social_x;
+        coord_y = local_being->social_y;
+        
+        if (coord_x < min_x)
+        {
+            min_x = coord_x;
+        }
+        else if (coord_x > max_x)
+        {
+            max_x = coord_x;
+        }
+        if (coord_y < min_y)
+        {
+            min_y = coord_y;
+        }
+        else if (coord_y > max_y)
+        {
+            max_y = coord_y;
+        }
+    }
+    
+    if ((max_x <= min_x) || (max_y <= min_y)) return;
+
+    for (i = 0; i < sim->num; i++)
+    {
+        int x, y;
+        
+        local_being = &(sim->beings[i]);
+
+        x = local_being->social_x;
+        y = local_being->social_y;
+        
+        scope_update(&s, 0, x, min_x, max_x, (unsigned int)i);
+        scope_update(&s, 1, y, min_y, max_y, (unsigned int)i);
+    }
+
+    scope_draw(&s, update_type, intensity_percent,
+               grid_horizontal, grid_vertical,
+               (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
 }
 
 void graph_phasespace(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type, n_byte data_type)
