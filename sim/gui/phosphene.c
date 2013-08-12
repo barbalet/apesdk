@@ -31,6 +31,8 @@
 
 #include "phosphene.h"
 
+#define PHOSPHENE_LITE
+
 scope create_scope(unsigned int step_ms)
 {
 	scope s;
@@ -127,11 +129,52 @@ static void scope_point(scope * s,
                         unsigned char * img,
                         unsigned int width, unsigned int height)
 {
-	int xx,yy,dx,dy,dist,c,target,n,noise;
-	int tx = x - radius;
+    int tx = x - radius;
 	int ty = y - radius;
 	int bx = x + radius;
 	int by = y + radius;
+#ifdef PHOSPHENE_LITE
+    int radius_squared = radius * radius;
+    int dy = ty;
+    while (dy <= by)
+    {
+        if ((dy > -1) && (dy < height))
+        {
+            int dy_contribution = dy * width * 3;
+            int yy = dy - y;
+            int dx = tx;
+            
+            yy *= yy;
+            
+            while (dx <= bx)
+            {
+                if ((dx > -1) && (dx < width))
+                {
+                    int dx_contribution = dx * 3;
+                    int xx = dx - x;
+                    xx *= xx;
+                    if ((xx + yy) < (radius_squared/2))
+                    {
+                        img[dy_contribution + dx_contribution + 0] = s->trace_colour[0];
+                        img[dy_contribution + dx_contribution + 1] = s->trace_colour[1];
+                        img[dy_contribution + dx_contribution + 2] = s->trace_colour[2];
+                    }
+                    else if ((xx + yy) < radius_squared)
+                    {
+                        img[dy_contribution + dx_contribution + 0] = s->trace_surround_colour[0];
+                        img[dy_contribution + dx_contribution + 1] = s->trace_surround_colour[1];
+                        img[dy_contribution + dx_contribution + 2] = s->trace_surround_colour[2]; 
+                    }
+                }
+                dx++;
+            }
+        }
+        dy++;
+    }
+    
+#else
+	int xx,yy,dx,dy,dist,c,target,n,noise;
+
 	double fraction, diff;
 	unsigned int border_y = height*s->border_percent/100;
 	unsigned int border_x = width*s->border_percent/100;	
@@ -177,6 +220,7 @@ static void scope_point(scope * s,
 			}
 		}
 	}
+#endif
 }
 
 static void scope_marking_point(scope * s,
@@ -521,16 +565,21 @@ static void scope_marker(scope * s, unsigned char * img,
 static void scope_background(scope * s, unsigned char * img,
                              unsigned int width, unsigned int height)
 {
-	int x, y, dx, dy, n=0,c,diff;
+	int x, y, n=0;
+#ifndef PHOSPHENE_LITE
+    int dx, dy, diff, c;
 	int cx = width/2;
 	int cy = height/2;
 	double fraction_x, fraction_y, fraction;
-
+#endif
     for (y = 0; y < (int)height; y++) {
+#ifndef PHOSPHENE_LITE
 		dy = y - cy;
 		if (dy < 0) dy = -dy;
 		fraction_y = cos(dy * 0.5 * 3.1415927 / (double)cy);
+#endif
         for (x = 0; x < (int)width; x++, n+=3) {
+#ifndef PHOSPHENE_LITE
 			dx = x - cx;
 			if (dx < 0) dx = -dx;
 			fraction_x = cos(dx * 0.5 * 3.1415927 / (double)cx);
@@ -545,6 +594,11 @@ static void scope_background(scope * s, unsigned char * img,
 				diff = s->background_colour[c] - s->background_border_colour[c];
 				img[n+c] = s->background_border_colour[c] + (int)(diff*fraction);
 			}
+#else
+            img[n+0] = s->background_colour[0];
+            img[n+1] = s->background_colour[1];
+            img[n+2] = s->background_colour[2];            
+#endif
 		}
 	}
 }
