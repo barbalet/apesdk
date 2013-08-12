@@ -172,8 +172,8 @@ static void being_replace(noble_being * local, n_uint count, n_uint loop)
             io_copy((n_byte *)old_event, (n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
             io_erase((n_byte *)old_event, (SOCIAL_SIZE * sizeof(social_link)));
             
-            io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
-            io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(social_link)));
+            io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
+            io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
         }
     }
 }
@@ -212,7 +212,7 @@ void being_erase(noble_being * value)
     
     io_erase(new_brain, DOUBLE_BRAIN);
     io_erase((n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
-    io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(social_link)));
+    io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
 }
 
 n_int being_honor(noble_being * value)
