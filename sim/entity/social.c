@@ -549,8 +549,8 @@ static n_int social_meet(
         }
 #endif
         /** this being was seen somewhere in my vicinity */
-        graph[index].location[0] = being_location_x(meeter_being);
-        graph[index].location[1] = being_location_y(meeter_being);
+        graph[index].location[0] = (n_byte2)being_location_x(met_being);
+        graph[index].location[1] = (n_byte2)being_location_y(met_being);
 
         /** record the state of the met beting */
         graph[index].belief = met_being->state;

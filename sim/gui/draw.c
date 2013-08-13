@@ -1578,6 +1578,9 @@ void  draw_graph(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
     case GC_SOCIALSIM:
         graph_socialsim(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y);
         break;
+    case GC_MEET_PLACES:
+        graph_meet_places(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y);
+        break;
     case GC_PHASESPACE:
         graph_phasespace(local_sim, PHOSPHENE_DRAW_ALL, graph, dim_x, dim_y, 0, 0);
         break;
@@ -3016,6 +3019,80 @@ void graph_socialsim(noble_simulation * sim, n_byte update_type, n_byte * buffer
         
         scope_update(&s, 0, x, min_x, max_x, (unsigned int)i);
         scope_update(&s, 1, y, min_y, max_y, (unsigned int)i);
+    }
+
+    scope_draw(&s, update_type, intensity_percent,
+               grid_horizontal, grid_vertical,
+               (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+}
+
+/* plot the places where beings met */
+void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height)
+{
+    n_uint i,index,ctr=0;
+    /** dimensions of APESPACE */
+    n_byte2 min_x=0, max_x=65535, min_y=0, max_y=65535;
+    scope s;
+    unsigned int intensity_percent = 100;
+    unsigned int grid_horizontal = 10;
+    unsigned int grid_vertical = 10;
+
+    if (sim->num == 0) {
+        /* clear the image */
+        graph_erase(buffer, img_height, img_width);
+        return;
+    }
+
+    s = create_scope((unsigned int)1);
+    s.time_ms = (unsigned int)(sim->num);
+    s.noise = 0.1;
+    s.mode = PHOSPHENE_MODE_POINTS;
+
+    if (update_type == PHOSPHENE_DRAW_BACKGROUND) {
+        scope_draw(&s, update_type, intensity_percent,
+                   grid_horizontal, grid_vertical,
+                   (unsigned char*)buffer, (unsigned int)img_width, (unsigned int)img_height);
+        return;
+    }
+
+    /** count the number of locations */
+    for (i = 0; i < sim->num; i++)
+    {
+		social_link * graph = being_social(&(sim->beings[i]));
+
+        /** for each non-self social graph entry */
+		for (index=1; index<SOCIAL_SIZE; index++)
+		{
+			if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,index))
+			{
+                ctr++;
+			}
+		}
+    }
+
+    if (ctr > 0) {
+        s.time_ms = (unsigned int)ctr;
+    }
+
+    if ((max_x <= min_x) || (max_y <= min_y)) return;
+
+    ctr = 0;
+    for (i = 0; i < sim->num; i++)
+    {
+		social_link * graph = being_social(&(sim->beings[i]));
+
+        /** for each non-self social graph entry */
+		for (index=1; index<SOCIAL_SIZE; index++)
+		{
+			if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,index))
+			{
+                scope_update(&s, 0, (int)graph[index].location[0],
+                             (int)min_x, (int)max_x, (unsigned int)ctr);
+                scope_update(&s, 1, (int)graph[index].location[1],
+                             (int)min_y, (int)max_y, (unsigned int)ctr);
+                ctr++;
+            }
+		}
     }
 
     scope_draw(&s, update_type, intensity_percent,

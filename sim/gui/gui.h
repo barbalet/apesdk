@@ -131,6 +131,7 @@ void graph_vascular(noble_being * being,
                     n_int hip_angle, n_int knee_angle,
                     n_byte show_skeleton_keypoints);
 void graph_socialsim(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
+void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
 
 n_int draw_toggle_weather(void);
 

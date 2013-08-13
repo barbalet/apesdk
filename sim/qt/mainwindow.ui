@@ -89,6 +89,7 @@
     <addaction name="actionViewPhasespace"/>
     <addaction name="actionViewVascular"/>
     <addaction name="actionViewSocialsim"/>
+    <addaction name="actionViewMeetPlaces"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -288,6 +289,11 @@
   <action name="actionViewSocialsim">
    <property name="text">
     <string>Socialsim</string>
+   </property>
+  </action>
+  <action name="actionViewMeetPlaces">
+   <property name="text">
+    <string>Meeting Places</string>
    </property>
   </action>
  </widget>

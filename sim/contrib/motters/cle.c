@@ -274,7 +274,7 @@ void sim_fileoutImageApe(
 
     px = (n_int)(APESPACE_TO_MAPSPACE(being_location_x(local_being)))*
          img_width/MAP_DIMENSION;
-    py = (n_int)(APESPACE_TO_MAPSPACE(being_location_x(local_being)))*
+    py = (n_int)(APESPACE_TO_MAPSPACE(being_location_y(local_being)))*
          img_width/MAP_DIMENSION;
 
     tx = px - img_width * width_percent / 200;

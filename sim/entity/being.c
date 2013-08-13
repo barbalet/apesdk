@@ -350,12 +350,12 @@ social_link * being_social(noble_being * value)
 
 n_int being_location_x(noble_being * value)
 {
-    return value->location[0];
+    return (n_int)value->location[0];
 }
 
 n_int being_location_y(noble_being * value)
 {
-    return value->location[1];
+    return (n_int)value->location[1];
 }
 
 n_byte2 * being_location(noble_being * value)

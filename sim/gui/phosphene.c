@@ -31,7 +31,7 @@
 
 #include "phosphene.h"
 
-#define PHOSPHENE_LITE
+#undef PHOSPHENE_LITE
 
 scope create_scope(unsigned int step_ms)
 {

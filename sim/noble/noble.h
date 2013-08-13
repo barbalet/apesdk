@@ -462,6 +462,7 @@ enum graph_commands
     GC_PREFERENCES,
     GC_PHASESPACE,
     GC_SOCIALSIM,
+    GC_MEET_PLACES,
     GC_VASCULAR
 };
 

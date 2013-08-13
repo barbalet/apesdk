@@ -56,6 +56,7 @@ enum {
     WND_PREFERENCES,
     WND_PHASESPACE,
     WND_SOCIALSIM,
+    WND_MEET_PLACES,
     WND_VASCULAR,
     NUM_WINDOWS
 };
@@ -133,6 +134,7 @@ protected slots:
     void menuViewPreferences();
     void menuViewPhasespace();
     void menuViewSocialsim();
+    void menuViewMeetPlaces();
     void menuViewVascular();
 
     void slotTimeout();
