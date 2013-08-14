@@ -654,6 +654,9 @@ enum being_interaction_social
 /* is the given index within a social graph empty? */
 #define SOCIAL_GRAPH_ENTRY_EMPTY(graph,index) ((graph[index].first_name[BEING_MET]==0) && (graph[index].family_name[BEING_MET]==0) && (graph[index].relationship<=RELATIONSHIP_SELF))
 
+/* is there a known location for the given social graph entry? */
+#define SOCIAL_GRAPH_ENTRY_LOCATION_EXISTS(graph,index) (graph[index].location[0] + graph[index].location[1] > 0)
+
 /* is the given social graph entry a family member? */
 #define IS_FAMILY_MEMBER(graph,index) ((graph[index].relationship > RELATIONSHIP_SELF) && (graph[index].relationship < OTHER_MOTHER))
 
@@ -1046,6 +1049,13 @@ enum mutation_type
 
 /* A social drive threshold value above which beings interact */
 #define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->learned_preference[PREFERENCE_SOCIAL]))>>1)
+
+/** used with social_meet function to specify whether
+    the location should be included within the social graph entry */
+enum being_meet_location_type {
+    LOCATION_KNOWN = 0,
+    LOCATION_UNKNOWN
+};
 
 /* Types of entities which it's possible to have a disposition towards */
 enum

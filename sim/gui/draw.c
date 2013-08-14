@@ -3031,7 +3031,7 @@ void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buff
 {
     n_uint i,index,ctr=0;
     /** dimensions of APESPACE */
-    n_byte2 min_x=0, max_x=65535, min_y=0, max_y=65535;
+    n_int min_x=0, max_x=65535, min_y=0, max_y=65535;
     scope s;
     unsigned int intensity_percent = 100;
     unsigned int grid_horizontal = 10;
@@ -3061,11 +3061,14 @@ void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buff
 		social_link * graph = being_social(&(sim->beings[i]));
 
         /** for each non-self social graph entry */
-		for (index=1; index<SOCIAL_SIZE; index++)
+        for (index = 1; index < SOCIAL_SIZE; index++)
 		{
 			if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,index))
 			{
-                ctr++;
+                if (SOCIAL_GRAPH_ENTRY_LOCATION_EXISTS(graph,index))
+                {
+                    ctr++;
+                }
 			}
 		}
     }
@@ -3074,23 +3077,24 @@ void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buff
         s.time_ms = (unsigned int)ctr;
     }
 
-    if ((max_x <= min_x) || (max_y <= min_y)) return;
-
     ctr = 0;
     for (i = 0; i < sim->num; i++)
     {
 		social_link * graph = being_social(&(sim->beings[i]));
 
         /** for each non-self social graph entry */
-		for (index=1; index<SOCIAL_SIZE; index++)
+        for (index = 1; index < SOCIAL_SIZE; index++)
 		{
 			if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,index))
 			{
-                scope_update(&s, 0, (int)graph[index].location[0],
-                             (int)min_x, (int)max_x, (unsigned int)ctr);
-                scope_update(&s, 1, (int)graph[index].location[1],
-                             (int)min_y, (int)max_y, (unsigned int)ctr);
-                ctr++;
+                if (SOCIAL_GRAPH_ENTRY_LOCATION_EXISTS(graph,index))
+                {
+                    scope_update(&s, 0, (int)graph[index].location[0],
+                                 (int)min_x, (int)max_x, (unsigned int)ctr);
+                    scope_update(&s, 1, (int)graph[index].location[1],
+                                 (int)min_y, (int)max_y, (unsigned int)ctr);
+                    ctr++;
+                }
             }
 		}
     }

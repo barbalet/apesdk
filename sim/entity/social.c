@@ -467,7 +467,8 @@ static n_int get_stranger_link(
 static n_int social_meet(
     noble_being * meeter_being,
     noble_being * met_being,
-    noble_simulation * sim)
+    noble_simulation * sim,
+    n_byte location_type)
 {
     n_int friend_or_foe,index=-1;
 
@@ -548,9 +549,17 @@ static n_int social_meet(
             metabolism_vascular_response(sim, meeter_being, VASCULAR_SYMPATHETIC*10);
         }
 #endif
-        /** this being was seen somewhere in my vicinity */
-        graph[index].location[0] = (n_byte2)being_location_x(met_being);
-        graph[index].location[1] = (n_byte2)being_location_y(met_being);
+        if (location_type == LOCATION_KNOWN)
+        {
+            /** this being was seen somewhere in my vicinity */
+            graph[index].location[0] = (n_byte2)being_location_x(meeter_being);
+            graph[index].location[1] = (n_byte2)being_location_y(meeter_being);
+        }
+        else {
+            /** location unknown */
+            graph[index].location[0] = 0;
+            graph[index].location[1] = 0;
+        }
 
         /** record the state of the met beting */
         graph[index].belief = met_being->state;
@@ -631,7 +640,7 @@ n_int social_set_relationship(noble_being * meeter_being,
     if (relationship == 0) return -1;
 
     /** create the social graph entry if necessary and return its array index */
-    index = social_meet(meeter_being,met_being,sim);
+    index = social_meet(meeter_being,met_being,sim, LOCATION_UNKNOWN);
     if (index > -1)
     {
         /** get the social graph */
@@ -666,7 +675,7 @@ n_int social_network(
     n_int being_index = -1;
     if (distance < SOCIAL_RANGE)
     {
-        being_index = social_meet(meeter_being, met_being, sim);
+        being_index = social_meet(meeter_being, met_being, sim, LOCATION_KNOWN);
     }
     return being_index;
 }
@@ -775,10 +784,10 @@ n_byte social_groom(
             episodic_interaction(sim, met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);
 
             /** the two beings meet and become more friendly */
-            meeter_index = social_meet(meeter_being, met_being, sim);
+            meeter_index = social_meet(meeter_being, met_being, sim, LOCATION_KNOWN);
             if (meeter_index > -1)
             {
-                met_index = social_meet(met_being, meeter_being, sim);
+                met_index = social_meet(met_being, meeter_being, sim, LOCATION_KNOWN);
                 if (met_index > -1)
                 {
                     social_link * graph = being_social(meeter_being);
@@ -869,10 +878,10 @@ n_byte2 social_squabble(
                 vanquished = meeter_being;
             }
 
-            vanquished_index = social_meet(victor, vanquished, sim);
+            vanquished_index = social_meet(victor, vanquished, sim, LOCATION_KNOWN);
             if (vanquished_index > -1)
             {
-                victor_index = social_meet(vanquished, victor, sim);
+                victor_index = social_meet(vanquished, victor, sim, LOCATION_KNOWN);
                 if (victor_index > -1)
                 {
                     social_link * victor_social_graph = being_social(victor);
