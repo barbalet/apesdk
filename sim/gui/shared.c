@@ -45,6 +45,9 @@ static n_int   mouse_x, mouse_y;
 static n_byte  mouse_option, mouse_identification;
 static n_byte  mouse_down;
 
+static n_byte  mouse_drag;
+static n_int   mouse_drag_x , mouse_drag_y;
+
 static n_byte  key_identification;
 static n_byte2 key_value;
 static n_byte  key_down;
@@ -101,6 +104,12 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     local = &(local_sim->beings[local_sim->select]);
     if (wwind == NUM_VIEW)
     {
+        if (mouse_drag == 1)
+        {
+            draw_update_drag(1, px, mouse_drag_x, py, mouse_drag_y);
+            return;
+        }
+        
         if (option)
         {
             n_byte2    location[2];
@@ -132,6 +141,15 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
             if (local_sim->select != desired_ape)
             {
                 sim_set_select(desired_ape);
+            }
+            else
+            {
+                if (mouse_drag == 0)
+                {
+                    mouse_drag_x = px;
+                    mouse_drag_y = py;
+                    mouse_drag = 1;
+                }
             }
         }
     }
@@ -302,6 +320,7 @@ n_int shared_init(n_byte view, n_uint random)
 
     key_down = 0;
     mouse_down = 0;
+    mouse_drag = 0;
 
     if (view == NUM_TERRAIN)
     {
@@ -380,6 +399,8 @@ void shared_mouseReceived(n_int valX, n_int valY, n_byte fIdentification)
 void shared_mouseUp(void)
 {
     mouse_down = 0;
+    mouse_drag = 0;
+    draw_update_drag(0, 0, 0, 0, 0);
 }
 
 void shared_about(n_constant_string value)

@@ -168,6 +168,63 @@ static n_int toggle_territory = 0;
 static n_int  graph_state = GC_VASCULAR;
 static n_byte graph_clear = 1;
 
+static n_int draw_drag_x1, draw_drag_x2, draw_drag_y1, draw_drag_y2;
+static n_byte draw_drag_on = 0;
+
+static n_int drag_time = 0;
+
+void draw_update_drag(n_byte drag_on, n_int x1, n_int x2, n_int y1, n_int y2)
+{
+    
+    draw_drag_on = drag_on;
+
+    if (drag_on == 0)
+    {
+        return;
+    }
+    
+    if (x2 >= x1)
+    {
+        draw_drag_x1 = x1;
+        draw_drag_x2 = x2;
+    }
+    else
+    {
+        draw_drag_x1 = x2;
+        draw_drag_x2 = x1;
+    }
+
+    if (y2 >= y1)
+    {
+        draw_drag_y1 = y1;
+        draw_drag_y2 = y2;
+    }
+    else
+    {
+        draw_drag_y1 = y2;
+        draw_drag_y2 = y1;
+    }
+    
+    if (draw_drag_x1 < 0)
+    {
+        draw_drag_x1 = 0;
+    }
+    if (draw_drag_y1 < 0)
+    {
+        draw_drag_y1 = 0;
+    }
+
+    if (draw_drag_x2 > 511)
+    {
+        draw_drag_x2 = 511;
+    }
+    if (draw_drag_y2 > 511)
+    {
+        draw_drag_y2 = 511;
+    }
+}
+
+
 void draw_graph_command(n_int gc_val)
 {
     if (gc_val == GC_CLEAR_BRAINCODE)
@@ -305,7 +362,6 @@ static n_byte pixel_grey(n_int px, n_int py, void * information)
     return 0;
 }
 
-
 n_byte * draw_pointer(n_byte which_one)
 {
     n_byte *local_buffer = local_offscreen;
@@ -328,6 +384,54 @@ n_byte * draw_pointer(n_byte which_one)
         break;
     }
     return 0L;
+}
+
+
+
+static void draw_drag(void)
+{
+    n_int loop = draw_drag_x1;
+    n_color8    dotted_line;
+    
+    dotted_line.color = COLOUR_RED;
+    dotted_line.screen = VIEWWINDOW(local_offscreen);
+    
+    drag_time ++;
+    
+    if (drag_time == 16)
+    {
+        drag_time = 0;
+    }
+    
+    while (loop <= draw_drag_x2)
+    {
+        if (((loop + draw_drag_y1 + drag_time) >> 2) & 1)
+        {
+            pixel_color8(loop, draw_drag_y1, &dotted_line);
+        }
+        if (((loop + draw_drag_y2 - drag_time) >> 2) & 1)
+        {
+            pixel_color8(loop, draw_drag_y2, &dotted_line);
+        }
+        loop++;
+    }
+    
+    loop = draw_drag_y1;
+    
+    while (loop <= draw_drag_y2)
+    {
+        if (((loop + draw_drag_x1 - drag_time) >> 2) & 1)
+        {
+            pixel_color8(draw_drag_x1, loop, &dotted_line);
+        }
+        
+        if (((loop + draw_drag_x2 + drag_time) >> 2) & 1)
+        {
+            pixel_color8(draw_drag_x2, loop, &dotted_line);
+        }
+        loop++;
+    }
+
 }
 
 /*	shows the about information */
@@ -1658,6 +1762,11 @@ void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
             draw_weather(local_sim); /* 10 */
         }
 #endif
+        if (draw_drag_on == 1)
+        {
+            draw_drag();
+        }
+        
     }
     if (window == NUM_GRAPH)
     {

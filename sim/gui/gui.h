@@ -166,6 +166,8 @@ n_byte * draw_offscreen(n_byte * value);
 
 void draw_graph_command(n_int gc_val);
 
+void draw_update_drag(n_byte drag_on, n_int x1, n_int x2, n_int y1, n_int y2);
+
 #endif /* NOBLEAPE_GUI_H */
 
 /*NOBLEMAKE END=""*/
