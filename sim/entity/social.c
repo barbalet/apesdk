@@ -248,7 +248,7 @@ static n_int featureset_match_threshold(n_byte feature_type)
 }
 
 /**
- * @brief Returns the social graph array index of the closes matching
+ * @brief Returns the social graph array index of the closest matching
  *        stereotype to the met being
  * @param meeter_being Pointer to the being doing the meeting
  * @param social_graph_index Social graph index of the being which was met
@@ -260,6 +260,7 @@ static n_int social_get_stereotype(
     n_int social_graph_index)
 {
     n_int i,j,diff,dv,index,hits,min=0,result=-1;
+    n_byte normalise_features;
     social_link * meeter_social_graph;
     noble_featureset * s1, * s2;
 
@@ -280,6 +281,7 @@ static n_int social_get_stereotype(
         {
             /** get the feature set for the stereotype */
             s1 = &meeter_social_graph[i].classification;
+            normalise_features = 0;
             diff = 0;
             hits = 0;
             /** for every feature within the stereotype */
@@ -306,18 +308,27 @@ static n_int social_get_stereotype(
                     if (dv < featureset_match_threshold(s1->feature_type[j]))
                     {
                         /** increment the frequency of stereotype features */
-                        if (s1->feature_frequency[j] < 65535)
+                        s1->feature_frequency[j]++;
+                        if (s1->feature_frequency[j] > MAX_FEATURE_FREQUENCY)
                         {
-                            s1->feature_frequency[j]++;
+                            normalise_features = 1;
                         }
                     }
                 }
             }
+            /** if all stereotype features were matched
+                and the match was better than the best found */
             if ((hits == s1->no_of_features) &&
                 ((result == -1) || (diff < min)))
             {
                 min = diff;
                 result  = i;
+            }
+
+            /** normalise the stereo type feature frequencies if necessary */
+            if (normalise_features == 1)
+            {
+                noble_featureset_normalise_feature_frequencies(s1);
             }
         }
     }
