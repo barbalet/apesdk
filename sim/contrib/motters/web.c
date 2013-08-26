@@ -303,17 +303,17 @@ void create_web_ape_friends(
     n_int friend_type)
 {
     char str[100];
-    n_byte eliminated[SOCIAL_SIZE];
+    n_byte eliminated[SOCIAL_SIZE_BEINGS];
     int i,j;
     n_int f=0,attr,resp;
     social_link * local_social_graph = being_social(local_being);
-    for (i = 0; i < SOCIAL_SIZE; i++) eliminated[i] = 0;
+    for (i = 0; i < SOCIAL_SIZE_BEINGS; i++) eliminated[i] = 0;
 
-    for (i = 1; i < SOCIAL_SIZE; i++)
+    for (i = 1; i < SOCIAL_SIZE_BEINGS; i++)
     {
         n_int winner = -1;
         n_int max_familiarity = 0;
-        for (j = 1; j < SOCIAL_SIZE; j++)
+        for (j = 1; j < SOCIAL_SIZE_BEINGS; j++)
         {
             if ((eliminated[j] == 0) &&
                     (!((local_social_graph[j].first_name[BEING_MET]==0)&&(local_social_graph[j].family_name[BEING_MET]==0))))
@@ -1001,7 +1001,7 @@ void export_social_graph(char * filename, noble_simulation * sim, n_int graph_ty
         }
         else
         {
-            for (i=1; i<SOCIAL_SIZE; i++)
+            for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
             {
                 if ((local_social_graph[i].attraction)>max)
                 {
@@ -1015,7 +1015,7 @@ void export_social_graph(char * filename, noble_simulation * sim, n_int graph_ty
         local_being = &(sim->beings[index]);
         local_social_graph = GET_SOC(sim, local_being);
         b0 = (GET_NAME_GENDER(local_being))|(GET_NAME_FAMILY(GET_FAMILY_FIRST_NAME(sim,local_being),GET_FAMILY_SECOND_NAME(sim,local_being))<<16);
-        for (i=1; i<SOCIAL_SIZE; i++)
+        for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
         {
             if (!((local_social_graph[i].family_name[BEING_MET] == 0) &&
                     (local_social_graph[i].first_name[BEING_MET] == 0)))

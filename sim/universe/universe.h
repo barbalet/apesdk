@@ -431,7 +431,7 @@ enum
 
 static const n_int interval_steps[] =
 { 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
-const static n_constant_string interval_description[] = { "mins","hours","days","months","years" };
+static const n_constant_string interval_description[] = { "mins","hours","days","months","years" };
 
 
 #define METABOLISM_HUNGER_THRESHOLD 1
@@ -715,8 +715,13 @@ enum EPISODIC_EVENTS
 
 #define PAIR_BOND_THRESHOLD 2  /* minimum level of attraction for mating */
 
+#define MAX_FEATURESET_SIZE 16  /* max size of a set of features associated with a social graph entry */
 #define SOCIAL_SIZE         12  /* maximum size of the social network */
+#define SOCIAL_SIZE_BEINGS  (SOCIAL_SIZE>>1) /* max number of specific beings within the social graph */
 #define EPISODIC_SIZE       12  /* maximum number of episodic memories */
+
+/* The maximum hit counter value for each feature within a set */
+#define MAX_FEATURE_FREQUENCY 2048
 
 /* ApeScript overrides */
 #define OVERRIDE_GOAL		1
@@ -1066,6 +1071,33 @@ enum
     ENTITY_TERRITORY
 };
 
+enum featureset_members {
+    FEATURESET_PIGMENTATION,
+    FEATURESET_HAIR,
+    FEATURESET_HEIGHT,
+    FEATURESET_FAT,
+    FEATURESET_EYE_SHAPE,
+    FEATURESET_EYE_COLOR,
+    FEATURESET_EYE_SEPARATION,
+    FEATURESET_NOSE_SHAPE,
+    FEATURESET_EAR_SHAPE,
+    FEATURESET_EYEBROW_SHAPE,
+    FEATURESET_MOUTH_SHAPE,
+    FEATURESET_TERRITORY,
+
+    FEATURESET_FEATURE_SET,
+    FEATURESET_SIZE
+};
+
+typedef struct
+{
+    n_byte2  id;
+    n_byte2  no_of_features;
+    n_byte   feature_type[MAX_FEATURESET_SIZE];
+    n_byte2  feature_value[MAX_FEATURESET_SIZE];
+    n_byte2  feature_frequency[MAX_FEATURESET_SIZE];
+} noble_featureset;
+
 /*! @struct
  @discussion This describes a disposition towards other beings or things
  (an edge in the social graph)
@@ -1080,6 +1112,8 @@ enum
  @field belief Current belief about the state of this entity
  @field familiarity How many times has this entity been encountered
  @field relationship The type of relationship with the entity
+ @field classification set of features which belong to this entity
+ @field braincode the language machinery associated with this entity
  */
 typedef struct
 {
@@ -1098,6 +1132,8 @@ typedef struct
     n_byte2  familiarity;
 
     n_byte   relationship;
+
+    noble_featureset classification;
 
 #ifdef BRAINCODE_ON
     n_byte   braincode[BRAINCODE_SIZE];

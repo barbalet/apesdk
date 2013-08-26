@@ -2580,7 +2580,7 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
         n_uint respect_threshold = social_respect_mean(sim, local_being);
         n_int tx = i*(img_width-1)/sim->num;
         n_int bx = (i+1)*(img_width-1)/sim->num;
-        for (j = 0; j < SOCIAL_SIZE; j++)
+        for (j = 0; j < SOCIAL_SIZE_BEINGS; j++)
         {
             if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph, j))
             {
@@ -3170,7 +3170,7 @@ void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buff
 		social_link * graph = being_social(&(sim->beings[i]));
 
         /** for each non-self social graph entry */
-        for (index = 1; index < SOCIAL_SIZE; index++)
+        for (index = 1; index < SOCIAL_SIZE_BEINGS; index++)
 		{
 			if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,index))
 			{
@@ -3192,7 +3192,7 @@ void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buff
 		social_link * graph = being_social(&(sim->beings[i]));
 
         /** for each non-self social graph entry */
-        for (index = 1; index < SOCIAL_SIZE; index++)
+        for (index = 1; index < SOCIAL_SIZE_BEINGS; index++)
 		{
 			if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,index))
 			{

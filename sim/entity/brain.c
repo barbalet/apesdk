@@ -742,7 +742,7 @@ static n_int get_actor_index_from_episode(
 {
     n_int i,actor_index=-1;
 
-    for (i=1; i<SOCIAL_SIZE; i++)
+    for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
     {
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(social_graph,i))
         {

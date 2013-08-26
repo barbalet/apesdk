@@ -177,7 +177,7 @@ static void drives_sex(
                         max = 0;
                         if (!local_social_graph) return;
 
-                        for(i=1; i<SOCIAL_SIZE; i++)
+                        for(i=1; i<SOCIAL_SIZE_BEINGS; i++)
                         {
                             if (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph,i))
                             {

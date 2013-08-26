@@ -42,6 +42,7 @@
 
 #include "entity.h"
 #include "entity_internal.h"
+#include <stdio.h>
 
 /*NOBLEMAKE END=""*/
 
@@ -87,6 +88,320 @@
 
 #define GENE_LATENT_ENERGY_USE(gene)        GENE_VAL_REG(gene, 14, 3, 6, 10)
 
+/**
+ * @brief Returns the array index of a given feature type within a set
+ * @param s A set of features
+ * @param feature_type
+ * @return array index of a given feature type within a set
+ */
+static n_int noble_featureset_feature_index(noble_featureset * s,
+                                            n_byte feature_type)
+{
+    n_int i=0;
+
+    while (i < s->no_of_features)
+    {
+        if (s->feature_type[i] >= feature_type)
+        {
+            break;
+        }
+        i++;
+    }
+    if (i == s->no_of_features)
+    {
+        return -1;
+    }
+    return i;
+}
+
+/**
+ * @brief Normalises the feature frequencies within a set
+ * @param s a set of features
+ */
+static void noble_featureset_normalise_feature_frequencies(noble_featureset *s)
+{
+    n_uint i, tot=0;
+    n_uint max = MAX_FEATURE_FREQUENCY>>1;
+
+    /** get the total frequency count */
+    for (i = 0; i < s->no_of_features; i++)
+    {
+        tot += (n_uint)s->feature_frequency[i];
+    }
+    for (i = 0; i < s->no_of_features; i++)
+    {
+        s->feature_frequency[i] =
+            (n_byte2)((n_uint)s->feature_frequency[i] * max / tot);
+    }
+}
+
+/**
+ * @brief Adds a feature to the given set
+ * @param s Pointer to the feature set
+ * @param feature_type the type of feature
+ * @param feature_value value of the feature
+ * @return 0 on success, -1 otherwise
+ */
+static n_int noble_featureset_update(noble_featureset * s,
+                                     n_byte feature_type,
+                                     n_byte2 feature_value)
+{
+    /** get the index of the feature within the array */
+    n_int feature_index = noble_featureset_feature_index(s, feature_type);
+    n_byte2 min;
+    n_int i,j;
+
+    if (s->feature_type[feature_index] == (n_byte)feature_type)
+    {
+        /** alter the value associated with an existing feature type */
+        s->feature_value[feature_index] = feature_value;
+        s->feature_frequency[feature_index]++;
+        /** normalise the feature frequencies to prevent them
+            from going out of bounds */
+        if (s->feature_frequency[feature_index] > MAX_FEATURE_FREQUENCY)
+        {
+            noble_featureset_normalise_feature_frequencies(s);
+        }
+        return 0;
+    }
+    else
+    {
+        if (s->no_of_features < MAX_FEATURESET_SIZE)
+        {
+            /** add a new feature type to the array */
+            i = 0;
+            if (s->no_of_features > 1)
+            {
+                for (i = (n_int)s->no_of_features-1; i >= (n_int)feature_index; i--)
+                {
+                    s->feature_type[i+1] = s->feature_type[i];
+                    s->feature_value[i+1] = s->feature_value[i];
+                    s->feature_frequency[i+1] = s->feature_frequency[i];
+                }
+            }
+
+            i = feature_index;
+            s->no_of_features++;
+            s->feature_type[i] = (n_byte)feature_type;
+            s->feature_value[i] = (n_byte2)feature_value;
+            s->feature_frequency[i] = (n_byte2)1;
+            return 0;
+        }
+        else
+        {
+            /** pick the least frequent feature and replace it */
+            min = s->feature_frequency[0];
+            feature_index = 0;
+            for (i = 1; i < (n_int)s->no_of_features; i++)
+            {
+                if (s->feature_frequency[i] < min)
+                {
+                    min = s->feature_frequency[i];
+                    feature_index = i;
+                }
+            }
+            /** re-sort */
+            j = 0;
+            for (i = 0; i < (n_int)s->no_of_features; i++)
+            {
+                if (s->feature_type[i] >= (n_byte)feature_type)
+                {
+                    j = i;
+                    break;
+                }
+            }
+            for (i = (n_int)feature_index; i > j; i--)
+            {
+                s->feature_type[i] = s->feature_type[i-1];
+                s->feature_value[i] = s->feature_value[i-1];
+                s->feature_frequency[i] = s->feature_frequency[i-1];
+            }
+            s->feature_type[j] =  (n_byte)feature_type;
+            s->feature_value[j] =  (n_byte2)feature_value;
+            s->feature_frequency[j] = (n_byte2)1;
+            for (i = 0; i < (n_int)s->no_of_features; i++)
+            {
+                for (j = i+1; j < (n_int)s->no_of_features; j++)
+                {
+                    if (s->feature_type[j] < s->feature_type[i])
+                    {
+                        feature_type = s->feature_type[i];
+                        s->feature_type[i] = s->feature_type[j];
+                        s->feature_type[j] = (n_byte)feature_type;
+                    }
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+/**
+ * @brief returns a threshold which is used to determine
+ *        whether two features of the same type have a matching value
+ * @param feature_type
+ * @return
+ */
+static n_int featureset_match_threshold(n_byte feature_type)
+{
+    if (feature_type == FEATURESET_TERRITORY) return 1;
+    return 2;
+}
+
+/**
+ * @brief Returns the social graph array index of the closes matching
+ *        stereotype to the met being
+ * @param meeter_being Pointer to the being doing the meeting
+ * @param social_graph_index Social graph index of the being which was met
+ * @return Social graph array index of the closest stereotype
+ *         or -1 of there are no stereotypes
+ */
+static n_int social_get_stereotype(
+    noble_being * meeter_being,
+    n_int social_graph_index)
+{
+    n_int i,j,diff,dv,index,hits,min=0,result=-1;
+    social_link * meeter_social_graph;
+    noble_featureset * s1, * s2;
+
+    /** Get the social graph for the being doing the meeting */
+    meeter_social_graph = being_social(meeter_being);
+
+    if (meeter_social_graph==0) return -1;
+
+    /** get the observed feature set for the met being */
+    s2 = &meeter_social_graph[social_graph_index].classification;
+
+    /** the upper range of social graph entries between
+        SOCIAL_SIZE_BEINGS and SOCIAL_SIZE contains
+        abstract beings or stereotypes */
+    for (i = SOCIAL_SIZE_BEINGS; i < SOCIAL_SIZE; i++)
+    {
+        if (!SOCIAL_GRAPH_ENTRY_EMPTY(meeter_social_graph,i))
+        {
+            /** get the feature set for the stereotype */
+            s1 = &meeter_social_graph[i].classification;
+            diff = 0;
+            hits = 0;
+            /** for every feature within the stereotype */
+            for (j = 0; j < s1->no_of_features; j++)
+            {
+                /** does this feature exist for the met being? */
+                index =
+                    noble_featureset_feature_index(s2,
+                                                   s1->feature_type[j]);
+                if (index > -1)
+                {
+                    hits++;
+                    /** difference between the feature values */
+                    dv = (n_int)s1->feature_value[j] -
+                         (n_int)s2->feature_value[index];
+                    if (dv < 0) dv = -dv;
+
+                    /** update the total difference between the stereotype
+                        and the met being */
+                    diff += dv;
+
+                    /** does the stereotype feature match the met being feature?
+                        if so then increment the observation frequency */
+                    if (dv < featureset_match_threshold(s1->feature_type[j]))
+                    {
+                        /** increment the frequency of stereotype features */
+                        if (s1->feature_frequency[j] < 65535)
+                        {
+                            s1->feature_frequency[j]++;
+                        }
+                    }
+                }
+            }
+            if ((hits == s1->no_of_features) &&
+                ((result == -1) || (diff < min)))
+            {
+                min = diff;
+                result  = i;
+            }
+        }
+    }
+    return result;
+}
+
+/**
+ * @brief When one being meets another remember the observable features
+ * @param meeter_being the being foing the meeting
+ * @param met_being the being which was met
+ * @param social_graph_index index within the meeters social graph of the met being
+ */
+static void social_meet_update_features(
+    noble_being * meeter_being,
+    noble_being * met_being,
+    n_int social_graph_index)
+{
+    social_link * meeter_social_graph;
+    n_uint idx;
+
+    /** Get the social graph for the being doing the meeting */
+    meeter_social_graph = being_social(meeter_being);
+
+    if (meeter_social_graph==0) return;
+
+    /** Note: perhaps not all features should be observed at once.
+        This should maybe be under attentional control.
+        Also observations should perhaps include learned biases
+        from existing stereotypes */
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_PIGMENTATION,
+                            GENE_PIGMENTATION(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_HAIR,
+                            GENE_HAIR(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_HEIGHT,
+                            GET_H(met_being));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_FAT,
+                            GET_BODY_FAT(met_being));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_EYE_SHAPE,
+                            GENE_EYE_SHAPE(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_EYE_COLOR,
+                            GENE_EYE_COLOR(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_EYE_SEPARATION,
+                            GENE_EYE_SEPARATION(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_NOSE_SHAPE,
+                            GENE_NOSE_SHAPE(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_EAR_SHAPE,
+                            GENE_EAR_SHAPE(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_EYEBROW_SHAPE,
+                            GENE_EYEBROW_SHAPE(being_genetics(met_being)));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_MOUTH_SHAPE,
+                            GENE_MOUTH_SHAPE(being_genetics(met_being)));
+
+#ifdef TERRITORY_ON
+    idx = APESPACE_TO_TERRITORY(being_location_y(meeter_being))*TERRITORY_DIMENSION +
+          APESPACE_TO_TERRITORY(being_location_x(meeter_being));
+
+    noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
+                            FEATURESET_TERRITORY,
+                            meeter_being->territory[idx].name);
+#endif
+}
 
 /**
  * @brief Returns a string for the name of the ape in the given social graph array index.
@@ -384,7 +699,7 @@ n_int get_social_link(
 
     if (!graph) return -1;
 
-    for (i=1; i<SOCIAL_SIZE; i++)
+    for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
     {
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,i))
         {
@@ -422,7 +737,7 @@ static n_int get_stranger_link(
     social_link * graph = being_social(meeter_being);
     if (!graph) return 0;
 
-    for (i=1; i<SOCIAL_SIZE; i++)
+    for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
     {
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,i))
         {
@@ -470,14 +785,15 @@ static n_int social_meet(
     noble_simulation * sim,
     n_byte location_type)
 {
-    n_int friend_or_foe,index=-1;
+    n_int friend_or_foe, index = -1, stereotype_index = -1;
 
-    n_byte2 familiarity=0;
+    n_byte2 familiarity = 0;
     social_link * graph = being_social(meeter_being);
-    n_byte2 met=0;
+    n_byte2 met = 0;
 
     if (!graph) return -1;
 
+    /** transmit any pathogens between the meeting beings */
     being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_AIR);
 
     /** get the social graph index which will be used to represent this relation */
@@ -496,24 +812,44 @@ static n_int social_meet(
 
     if ((met == 1) || ((met == 0) && (index > 0)))
     {
+        /** record the observable features of the being which was met */
+        social_meet_update_features(
+            meeter_being, met_being, index);
+
+        /** get the social graph index of the corresponding stereotype */
+        stereotype_index = social_get_stereotype(
+            meeter_being, index);
+
         /** set the focus of attention to this being */
         GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)index;
 
         /** if we havn't met previously */
-        if (met==0)
+        if (met == 0)
         {
-            /** the prejudice function */
-            friend_or_foe =
-                SOCIAL_RESPECT_NORMAL -
-                social_attraction_pheromone(meeter_being,met_being) +
-                social_attraction_pigmentation(meeter_being,met_being) +
-                social_attraction_height(meeter_being,met_being) +
-                social_attraction_frame(meeter_being,met_being) +
-                social_attraction_hair(meeter_being,met_being)
+            if (stereotype_index > -1)
+            {
+                /** get the predisposition towards this stereotype */
+                friend_or_foe =
+                    graph[stereotype_index].friend_foe;
+            }
+            else
+            {
+                /** the prejudice function */
+                friend_or_foe =
+                    SOCIAL_RESPECT_NORMAL -
+                    social_attraction_pheromone(meeter_being,met_being) +
+                    social_attraction_pigmentation(meeter_being,met_being) +
+                    social_attraction_height(meeter_being,met_being) +
+                    social_attraction_frame(meeter_being,met_being) +
+                    social_attraction_hair(meeter_being,met_being)
 #ifdef EPISODIC_ON
-                + episodic_met_being_celebrity(sim,meeter_being,met_being)
+                    + episodic_met_being_celebrity(sim,meeter_being,met_being)
 #endif
-                ;
+                    ;
+
+                /** TODO create new stereotype based upon the met being features */
+
+            }
             /** Met another being */
             graph[index].entity_type = ENTITY_BEING;
 
@@ -609,7 +945,7 @@ n_int social_get_relationship(
     }
 
     /** Search the social graph */
-    for (index = 1; index < SOCIAL_SIZE; index++)
+    for (index = 1; index < SOCIAL_SIZE_BEINGS; index++)
     {
         /** Is this the desired relationship type? */
         if (meeter_social_graph[index].relationship == relationship)
@@ -1277,7 +1613,7 @@ n_int social_chat(
         if (meeter_being->goal[0]==GOAL_MATE)
         {
             /** ask about an individual we're searching for */
-            for (i=1; i<SOCIAL_SIZE; i++)
+            for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
             {
                 if (!SOCIAL_GRAPH_ENTRY_EMPTY(met_graph,i))
                 {
@@ -1301,7 +1637,7 @@ n_int social_chat(
             else
             {
                 /** choose randomly */
-                idx = 1+(math_random(meeter_being->seed)%(SOCIAL_SIZE-1));
+                idx = 1+(math_random(meeter_being->seed)%(SOCIAL_SIZE_BEINGS-1));
             }
         }
 
@@ -1312,7 +1648,7 @@ n_int social_chat(
             family = met_graph[idx].family_name[BEING_MET];
             if (!((name==0) && (family==0)))
             {
-                for (i=1; i<SOCIAL_SIZE; i++)
+                for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
                 {
                     if (!SOCIAL_GRAPH_ENTRY_EMPTY(meeter_graph,i))
                     {
@@ -1324,7 +1660,7 @@ n_int social_chat(
                     }
                 }
 
-                if (i<SOCIAL_SIZE)
+                if (i<SOCIAL_SIZE_BEINGS)
                 {
                     /** was already met */
                     if (being_honor_compare(met_being, meeter_being) == 1)
@@ -1473,7 +1809,7 @@ static void sim_social_initial_no_return(noble_simulation * local, noble_being *
     n_vect2 location, sum_delta = {0,0};
     n_int   familiar_being_count = 0;
     vect2_byte2(&location,(n_byte2 *)&(local_being->social_x));
-    while ( social_loop < SOCIAL_SIZE )
+    while ( social_loop < SOCIAL_SIZE_BEINGS )
     {
         social_link * specific_individual = &(being_social(local_being)[social_loop]);
         noble_being  * specific_being;

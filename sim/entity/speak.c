@@ -88,7 +88,7 @@ static n_uint speak_length_total(n_string paragraph)
     return length;
 }
 
-const static n_int set_frequencies[24] =
+static const n_int set_frequencies[24] =
 {
     175,178,180,183,
     185,188,191,193,
@@ -99,18 +99,18 @@ const static n_int set_frequencies[24] =
 };
 
 
-const static n_int vowel_reorder[8] =
+static const n_int vowel_reorder[8] =
 {
     4, 7, 0, 2, 1, 6, 3, 5
 };
 
-const static n_int consonant_reorder[16] =
+static const n_int consonant_reorder[16] =
 {
     6, 13, 3, 7,   0, 14, 1, 12,
     9, 11, 2, 15,  4, 10, 5, 8
 };
 
-const static n_int low_freq[13]=
+static const n_int low_freq[13]=
 {
     60000, 45000, 30000, 55000,
     30000, 40000, 35000, 60000,

@@ -127,7 +127,7 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
     if (local_social_graph == 0L) return;
 
     /** For each entry in the social graph */
-    for (i = 1; i < SOCIAL_SIZE; i++)
+    for (i = 1; i < SOCIAL_SIZE_BEINGS; i++)
     {
         /** Skip empty entries */
         if (SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, i)) continue;
@@ -1614,7 +1614,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
     noble_simulation * local_sim = (noble_simulation *) ptr;
 
     /* clear the histogram */
-    for (i = 0; i <= max_block_size - min_block_size; i++)
+    for (i = 0; i <= (n_uint)(max_block_size - min_block_size); i++)
     {
         histogram[i]=0;
     }
@@ -1680,7 +1680,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
         sprintf(output, "%s", "-------------------------");
         output_function(output);
 
-        for (i = 0; i <= max_block_size - min_block_size; i++)
+        for (i = 0; i <= (n_uint)(max_block_size - min_block_size); i++)
         {
             sprintf(output, "%02u    %03u.%04u  %04u",
                     (n_c_int)(i+min_block_size),

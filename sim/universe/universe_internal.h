@@ -152,7 +152,7 @@ enum file_section_type
     FIL_END = (0x80)
 };
 
-const static noble_file_entry noble_file_format[]=
+static const noble_file_entry noble_file_format[]=
 {
 #ifdef USE_FIL_VER
     {{'s', 'i', 'm', 'u', 'l', '{'}, FIL_VER,  0, 0,                  "Simulation Version Definition"},

@@ -1931,7 +1931,7 @@ static void being_create_family_links(noble_being * mother,
             parent_social_graph = being_social(parent[j]);
             if (parent_social_graph)
             {
-                for (i=1; i<SOCIAL_SIZE; i++)
+                for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
                 {
                     if ((parent_social_graph[i].relationship==RELATIONSHIP_SON) ||
                             (parent_social_graph[i].relationship==RELATIONSHIP_DAUGHTER))
@@ -1992,10 +1992,10 @@ static void being_create_family_links(noble_being * mother,
  * @param same_sex_distance Returned distance to the closest being of the same sex
  * @return 1 if the attended to being is seen, 0 otherwise
  */
-static int being_follow(noble_simulation * sim,
-                        n_uint current_being_index,
-                        n_uint * opposite_sex, n_uint * same_sex,
-                        n_uint * opposite_sex_distance, n_uint * same_sex_distance)
+static n_uint being_follow(noble_simulation * sim,
+                           n_uint current_being_index,
+                           n_uint * opposite_sex, n_uint * same_sex,
+                           n_uint * opposite_sex_distance, n_uint * same_sex_distance)
 {
     noble_being * being_buffer = sim->beings;
     noble_being * local        = &being_buffer[current_being_index];
@@ -2142,17 +2142,17 @@ static void being_listen(noble_simulation * sim,
  * @param same_sex_distance Returned distance to the closest being of the same sex
  * @return The number of beings in the vicinity
  */
-static int being_closest(noble_simulation * sim,
-                         n_uint current_being_index,
-                         n_uint	* opposite_sex, n_uint * same_sex,
-                         n_uint * opposite_sex_distance, n_uint * same_sex_distance)
+static n_uint being_closest(noble_simulation * sim,
+                            n_uint current_being_index,
+                            n_uint * opposite_sex, n_uint * same_sex,
+                            n_uint * opposite_sex_distance, n_uint * same_sex_distance)
 {
     n_byte        opposite_sex_seen = 0;
     n_uint	      loop = 0;
     noble_being * being_buffer = sim->beings;
     n_uint        number       = sim->num;
     noble_being * local        = &being_buffer[current_being_index];
-    n_byte        beings_in_vicinity = 0;
+    n_uint        beings_in_vicinity = 0;
     n_uint        local_is_female = FIND_SEX(GET_I(local));
 
     *opposite_sex_distance = 0xffffffff;
@@ -2204,7 +2204,7 @@ static int being_closest(noble_simulation * sim,
                         result_los = being_los(sim->land, local, (n_byte2)difference_vector.x,  (n_byte2)difference_vector.y);
                     }
                     if (result_los)
-                    {
+                    {                        
                         *same_sex_distance = compare_distance;
                         *same_sex = loop;
                     }
@@ -2321,7 +2321,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     n_uint        local_is_female    = FIND_SEX(GET_I(local));
     n_int         today_days         = TIME_IN_DAYS(land->date);
     n_int         birth_days         = being_dob(local);
-    n_byte        beings_in_vicinity = 0;
+    n_uint        beings_in_vicinity = 0;
 
     n_int	      loc_s              = being_speed(local);
     n_int	      loc_e              = being_energy(local);
@@ -3077,6 +3077,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
 
     /** has no social connections initially */
+    io_erase((n_byte*)local_social_graph,sizeof(social_link)*SOCIAL_SIZE);
+    local_social_graph[0].relationship=RELATIONSHIP_SELF;
     for (ch=0; ch<SOCIAL_SIZE; ch++)
     {
         /** default type of entity */
@@ -3084,19 +3086,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         /** friend_or_foe can be positive or negative,
             with SOCIAL_RESPECT_NORMAL as the zero point */
         local_social_graph[ch].friend_foe = SOCIAL_RESPECT_NORMAL;
-        /** clear names */
-        local_social_graph[ch].first_name[BEING_MEETER]=0;
-        local_social_graph[ch].first_name[BEING_MET]=0;
-        local_social_graph[ch].family_name[BEING_MEETER]=0;
-        local_social_graph[ch].family_name[BEING_MET]=0;
-        if (ch > 0)
-        {
-            local_social_graph[ch].relationship=0;
-        }
-        else
-        {
-            local_social_graph[ch].relationship=RELATIONSHIP_SELF;
-        }
     }
 #endif
 
@@ -3442,7 +3431,7 @@ void being_remove(noble_simulation * local_sim)
                     if (b2_social_graph)
                     {
                         n_uint j = 1;
-                        while (j < SOCIAL_SIZE)
+                        while (j < SOCIAL_SIZE_BEINGS)
                         {
                             met_name = b2_social_graph[j].first_name[BEING_MET];
                             if (met_name==name)
