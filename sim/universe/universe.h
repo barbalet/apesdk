@@ -723,6 +723,9 @@ enum EPISODIC_EVENTS
 /* The maximum hit counter value for each feature within a set */
 #define MAX_FEATURE_FREQUENCY 2048
 
+/* the maximum number of matches of a stereotype */
+#define MAX_FEATURESET_OBSERVATIONS 2048
+
 /* ApeScript overrides */
 #define OVERRIDE_GOAL		1
 
@@ -1096,6 +1099,7 @@ typedef struct
     n_byte   feature_type[MAX_FEATURESET_SIZE];
     n_byte2  feature_value[MAX_FEATURESET_SIZE];
     n_byte2  feature_frequency[MAX_FEATURESET_SIZE];
+    n_byte2  observations;
 } noble_featureset;
 
 /*! @struct

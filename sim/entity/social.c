@@ -248,6 +248,45 @@ static n_int featureset_match_threshold(n_byte feature_type)
 }
 
 /**
+ * @brief Normalises the number of observations for each stereotype
+ * @param local_being Pointer to the being
+ */
+static void social_normalise_stereotype_observations(
+    noble_being * local_being)
+{
+    social_link * graph;
+    n_uint i, tot=0;
+    noble_featureset * s;
+    n_uint max = MAX_FEATURESET_OBSERVATIONS>>1;
+
+    /** Get the social graph */
+    graph = being_social(local_being);
+
+    if (graph==0) return;
+
+    for (i = SOCIAL_SIZE_BEINGS; i < SOCIAL_SIZE; i++)
+    {
+        if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,i))
+        {
+            s = &graph[i].classification;
+            tot += (n_uint)s->observations;
+        }
+    }
+
+    if (tot == 0) return;
+
+    for (i = SOCIAL_SIZE_BEINGS; i < SOCIAL_SIZE; i++)
+    {
+        if (!SOCIAL_GRAPH_ENTRY_EMPTY(graph,i))
+        {
+            s = &graph[i].classification;
+            s->observations =
+                (n_byte2)((n_uint)s->observations * max / tot);
+        }
+    }
+}
+
+/**
  * @brief Returns the social graph array index of the closest matching
  *        stereotype to the met being
  * @param meeter_being Pointer to the being doing the meeting
@@ -318,14 +357,23 @@ static n_int social_get_stereotype(
             }
             /** if all stereotype features were matched
                 and the match was better than the best found */
-            if ((hits == s1->no_of_features) &&
-                ((result == -1) || (diff < min)))
+            if (hits == s1->no_of_features)
             {
-                min = diff;
-                result  = i;
+                if ((result == -1) || (diff < min))
+                {
+                    min = diff;
+                    result  = i;
+                }
+                /** increment the number of times when this
+                    stereotype was fully matched */
+                s1->observations++;
+                if (s1->observations > MAX_FEATURESET_OBSERVATIONS)
+                {
+                    social_normalise_stereotype_observations(meeter_being);
+                }
             }
 
-            /** normalise the stereo type feature frequencies if necessary */
+            /** normalise the stereotype feature frequencies if necessary */
             if (normalise_features == 1)
             {
                 noble_featureset_normalise_feature_frequencies(s1);
