@@ -42,7 +42,6 @@
 
 #include "entity.h"
 #include "entity_internal.h"
-#include <stdio.h>
 
 /*NOBLEMAKE END=""*/
 
