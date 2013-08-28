@@ -26,7 +26,8 @@ extern "C" {
 #include "../universe/universe.h"
 #include "../gui/gui.h"
 #include "../gui/shared.h"
-#include "../gui/phosphene.h"
+#include "../graph/phosphene.h"
+#include "../graph/graph.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

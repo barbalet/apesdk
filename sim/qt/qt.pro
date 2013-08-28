@@ -11,13 +11,15 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ../../qtna
 TEMPLATE = app
 
-
-SOURCES += main.cpp\
-        mainwindow.cpp\
+SOURCES += \
+        ../entity/*.c\
+        ../graph/*.c\
         ../gui/*.c\
         ../universe/*.c\
         ../noble/*.c\
-        ../entity/*.c
+        mainwindow.cpp \
+        main.cpp
+
 
 HEADERS  += mainwindow.h \
     ../noble/noble.h \
@@ -26,6 +28,7 @@ HEADERS  += mainwindow.h \
     ../entity/entity_internal.h \
     ../entity/entity.h \
     ../universe/universe.h \
-    ../gui/phosphene.h
+    ../graph/phosphene.h \
+    ../graph/graph.h
 
 FORMS    += mainwindow.ui
