@@ -317,25 +317,6 @@ enum PREFERENCES_MATE
     PREFERENCES
 };
 
-
-enum BODY_BONES
-{
-    BONE_ARM_UPPER = 0,
-    BONE_ARM_LOWER1,
-    BONE_ARM_LOWER2,
-    BONE_CLAVICAL,
-    BONE_LEG_UPPER,
-    BONE_LEG_LOWER1,
-    BONE_LEG_LOWER2,
-    BONE_PELVIS,
-    BONE_HAND,
-    BONE_FINGER,
-    BONE_VERTIBRA,
-    BONE_SCAPULA,
-    BONE_RIBS,
-    BONES
-};
-
 #define IMMUNE_FIT                            5
 #define MIN_ANTIBODIES                        16
 #define MIN_ANTIGENS                          8

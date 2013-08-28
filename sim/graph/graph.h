@@ -1,6 +1,6 @@
 /****************************************************************
 
- shared.h
+ graph.h
 
  =============================================================
 
@@ -35,78 +35,12 @@
 
 /*NOBLEMAKE VAR=""*/
 
-#ifndef NOBLEAPE_SHARED_H
-#define NOBLEAPE_SHARED_H
+#ifndef NOBLEAPE_GRAPH_H
+#define NOBLEAPE_GRAPH_H
 
-#ifndef	_WIN32
+void graph_command(n_int gc_val);
 
-#include "../noble/noble.h"
-
-#else
-
-#include "..\noble\noble.h"
-
-#endif
-
-void shared_cycle(n_uint ticks, n_int fIdentification);
-
-void shared_cycle_draw(n_int fIdentification, n_int dim_x, n_int dim_y);
-
-void shared_simulate(n_uint local_time);
-
-n_int shared_init(n_byte view, n_uint random);
-
-void shared_close(void);
-
-n_int shared_notPause(void);
-
-void shared_notWeather(void);
-void shared_notBrain(void);
-void shared_notBrainCode(void);
-void shared_notTerritory(void);
-
-void shared_flood(void);
-void shared_healthy_carrier(void);
-
-void shared_keyReceived(n_byte2 value, n_byte fIdentification);
-
-void shared_keyUp(void);
-
-void shared_mouseOption(n_byte option);
-
-void shared_mouseReceived(n_int valX, n_int valY, n_byte fIdentification);
-
-void shared_mouseUp(void);
-
-void shared_about(n_constant_string value);
-
-n_byte * shared_draw(n_byte fIdentification);
-
-void shared_timeForColor(n_byte2 * fit, n_int fIdentification);
-
-void shared_previousApe(void);
-
-void shared_nextApe(void);
-
-void shared_clearErrors(void);
-
-void shared_new(n_uint seed);
-
-n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
-
-void shared_saveFileName(n_string cStringFileName);
-
-n_int shared_script_debug_ready(void);
-
-void shared_script_debug_handle(n_string cStringFileName);
-
-#ifndef	_WIN32
-
-n_int sim_thread_console_quit(void);
-
-#endif
-
-#endif /* NOBLEAPE_SHARED_H */
+#endif /* NOBLEAPE_GRAPH_H */
 
 /*NOBLEMAKE END=""*/
 

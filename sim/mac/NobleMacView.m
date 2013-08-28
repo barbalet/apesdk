@@ -34,6 +34,8 @@
  ****************************************************************/
 
 #include "../gui/shared.h"
+#include "../graph/graph.h"
+
 #import "NobleMacView.h"
 
 #include <stdio.h>
@@ -386,57 +388,57 @@ n_int   count_switch = 0;
 
 -(IBAction) graphClearBraincode:(id)sender
 {
-    shared_graph_command(GC_CLEAR_BRAINCODE);
+    graph_command(GC_CLEAR_BRAINCODE);
 }
 
 -(IBAction) graphIdeosphere:(id)sender
 {
-    shared_graph_command(GC_IDEOSPHERE);
+    graph_command(GC_IDEOSPHERE);
 }
 
 -(IBAction) graphBraincode:(id)sender
 {
-    shared_graph_command(GC_BRAINCODE);
+    graph_command(GC_BRAINCODE);
 }
 
 -(IBAction) graphGenepool:(id)sender
 {
-    shared_graph_command(GC_GENEPOOL);
+    graph_command(GC_GENEPOOL);
 }
 
 -(IBAction) graphHonor:(id)sender
 {
-    shared_graph_command(GC_HONOR);
+    graph_command(GC_HONOR);
 }
 
 -(IBAction) graphPathogens:(id)sender
 {
-    shared_graph_command(GC_PATHOGENS);
+    graph_command(GC_PATHOGENS);
 }
 
 -(IBAction) graphRelationships:(id)sender
 {
-    shared_graph_command(GC_RELATIONSHIPS);
+    graph_command(GC_RELATIONSHIPS);
 }
 
 -(IBAction) graphPreferences:(id)sender
 {
-    shared_graph_command(GC_PREFERENCES);
+    graph_command(GC_PREFERENCES);
 }
 
 -(IBAction) graphPhasespace:(id)sender
 {
-    shared_graph_command(GC_PHASESPACE);
+    graph_command(GC_PHASESPACE);
 }
 
 -(IBAction) graphSocial:(id)sender
 {
-    shared_graph_command(GC_SOCIALSIM);
+    graph_command(GC_SOCIALSIM);
 }
 
 -(IBAction) graphVascular:(id)sender
 {
-    shared_graph_command(GC_VASCULAR);
+    graph_command(GC_VASCULAR);
 }
 
 #pragma mark ---- Method Overrides ----

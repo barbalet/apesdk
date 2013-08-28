@@ -222,9 +222,6 @@ n_int episodic_first_person_memories_percent(
 
 void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, n_byte transmission_type);
 void body_genome(n_byte maternal, n_genetics * genome, n_byte * genome_str);
-n_int body_skeleton_points(noble_being * being, n_vect2 * keypoints, n_vect2 *points, n_int max_points,
-                           n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
-                           n_int hip_angle, n_int knee_angle);
 
 void being_relationship_description(n_int index, n_string description);
 n_string being_body_inventory_description(n_int index);
@@ -267,33 +264,5 @@ n_byte        being_awake(noble_simulation * sim, noble_being * local);
 n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly);
 
 void          speak_out(n_string filename, n_string paragraph);
-
-enum
-{
-    SKELETON_NECK = 0,
-    SKELETON_LUMBAR,
-    SKELETON_PELVIS,
-    SKELETON_LEFT_HIP,
-    SKELETON_RIGHT_HIP,
-    SKELETON_LEFT_KNEE,
-    SKELETON_RIGHT_KNEE,
-    SKELETON_LEFT_ANKLE,
-    SKELETON_RIGHT_ANKLE,
-    SKELETON_LEFT_SHOULDER,
-    SKELETON_RIGHT_SHOULDER,
-    SKELETON_LEFT_SHOULDER_SOCKET,
-    SKELETON_RIGHT_SHOULDER_SOCKET,
-    SKELETON_LEFT_ELBOW,
-    SKELETON_RIGHT_ELBOW,
-    SKELETON_LEFT_WRIST,
-    SKELETON_RIGHT_WRIST,
-    SKELETON_LEFT_COLLAR,
-    SKELETON_RIGHT_COLLAR,
-    SKELETON_POINTS
-};
-
-#define SKELETON_LUMBAR_VERTIBRA  4
-#define SKELETON_LUMBAR_VERTIBRA2 8
-#define SKELETON_VERTIBRA_RIBS    10
 
 #endif /* NOBLEAPE_ENTITY_H */
