@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4457.6" systemVersion="12E55" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+    <dependencies>
+        <deployment version="1050" defaultVersion="1080" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4457.6"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
+            <connections>
+                <action selector="hide:" destination="134" id="152"/>
+                <action selector="hideOtherApplications:" destination="145" id="146"/>
+                <action selector="unhideAllApplications:" destination="150" id="153"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder">
+            <connections>
+                <action selector="copy:" destination="157" id="181"/>
+                <action selector="cut:" destination="160" id="175"/>
+                <action selector="delete:" destination="164" id="195"/>
+                <action selector="paste:" destination="171" id="176"/>
+                <action selector="pasteAsPlainText:" destination="204" id="205"/>
+                <action selector="redo:" destination="173" id="178"/>
+                <action selector="selectAll:" destination="172" id="179"/>
+                <action selector="undo:" destination="158" id="180"/>
+            </connections>
+        </customObject>
+        <customObject id="-3" userLabel="Application"/>
+        <menu title="MainMenu" systemMenu="main" id="29" userLabel="MainMenu">
+            <items>
+                <menuItem title="Noble Ape" id="56">
+                    <menu key="submenu" title="Noble Ape" systemMenu="apple" id="57">
+                        <items>
+                            <menuItem title="About Noble Ape…" keyEquivalent="a" id="58"/>
+                            <menuItem isSeparatorItem="YES" id="196">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Preferences…" keyEquivalent="," id="129"/>
+                            <menuItem isSeparatorItem="YES" id="143">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Services" id="131">
+                                <menu key="submenu" title="Services" systemMenu="services" id="130"/>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="144">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Hide Noble Ape" keyEquivalent="h" id="134"/>
+                            <menuItem title="Hide Others" keyEquivalent="h" id="145">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Show All" id="150"/>
+                            <menuItem isSeparatorItem="YES" id="149">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Quit Noble Ape" keyEquivalent="q" id="136"/>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem title="File" id="83">
+                    <menu key="submenu" title="File" id="81">
+                        <items>
+                            <menuItem title="New" keyEquivalent="n" id="82"/>
+                            <menuItem title="Open..." keyEquivalent="o" id="72"/>
+                            <menuItem title="Open Script..." keyEquivalent="r" id="311"/>
+                            <menuItem isSeparatorItem="YES" id="79">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Save As…" keyEquivalent="s" id="75"/>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem title="Edit" id="163">
+                    <menu key="submenu" title="Edit" id="169">
+                        <items>
+                            <menuItem title="Undo" keyEquivalent="z" id="158"/>
+                            <menuItem title="Redo" keyEquivalent="Z" id="173"/>
+                            <menuItem isSeparatorItem="YES" id="156">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Cut" keyEquivalent="x" id="160"/>
+                            <menuItem title="Copy" keyEquivalent="c" id="157"/>
+                            <menuItem title="Paste" keyEquivalent="v" id="171"/>
+                            <menuItem title="Paste and Match Style" keyEquivalent="V" id="204">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Delete" id="164"/>
+                            <menuItem title="Select All" keyEquivalent="a" id="172"/>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem title="Control" id="246">
+                    <menu key="submenu" title="Control" id="247">
+                        <items>
+                            <menuItem title="Paused" keyEquivalent="p" id="248"/>
+                            <menuItem isSeparatorItem="YES" id="267">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Clear Errors" keyEquivalent="e" id="318"/>
+                            <menuItem isSeparatorItem="YES" id="324">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Previous" keyEquivalent="[" id="251"/>
+                            <menuItem title="Next" keyEquivalent="]" id="252"/>
+                            <menuItem isSeparatorItem="YES" id="268">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Draw Weather" id="259">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Draw Brain" id="332">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Draw Brain Code" id="344">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Draw Territory" id="355">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="270">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
+                            <menuItem title="Flood" keyEquivalent="F" id="349"/>
+                            <menuItem title="Healthy Carrier" keyEquivalent="H" id="351"/>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem title="Online" id="363">
+                    <menu key="submenu" title="Online" id="364">
+                        <items>
+                            <menuItem title="Documentation" id="400">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Simulation Page" id="404">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
+            </items>
+        </menu>
+        <window title="View" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" showsToolbarButton="NO" wantsToBeColor="NO" animationBehavior="default" id="239" userLabel="ViewWindow">
+            <windowStyleMask key="styleMask" titled="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" topStrut="YES"/>
+            <rect key="contentRect" x="10" y="235" width="512" height="512"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="778"/>
+            <view key="contentView" id="240">
+                <rect key="frame" x="0.0" y="0.0" width="512" height="512"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <customView id="241" customClass="NobleMacView">
+                        <rect key="frame" x="0.0" y="0.0" width="512" height="512"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <connections>
+                            <action selector="aboutDialog:" destination="58" id="340"/>
+                            <action selector="loadManual:" destination="400" id="406"/>
+                            <action selector="loadSimulationPage:" destination="404" id="407"/>
+                            <action selector="menuControlClearErrors:" destination="318" id="326"/>
+                            <action selector="menuControlFlood:" destination="349" id="353"/>
+                            <action selector="menuControlHealthyCarrier:" destination="351" id="354"/>
+                            <action selector="menuControlNext:" destination="252" id="298"/>
+                            <action selector="menuControlNoBrain:" destination="332" id="346"/>
+                            <action selector="menuControlNoBrainCode:" destination="344" id="347"/>
+                            <action selector="menuControlNoTerritory:" destination="355" id="357"/>
+                            <action selector="menuControlNoWeather:" destination="259" id="335"/>
+                            <action selector="menuControlPause:" destination="248" id="336"/>
+                            <action selector="menuControlPrevious:" destination="251" id="297"/>
+                            <action selector="menuFileNew:" destination="82" id="300"/>
+                            <action selector="menuFileOpen:" destination="72" id="341"/>
+                            <action selector="menuFileOpenScript:" destination="311" id="342"/>
+                            <action selector="menuFileSaveAs:" destination="75" id="343"/>
+                            <action selector="menuQuit:" destination="136" id="328"/>
+                        </connections>
+                    </customView>
+                </subviews>
+            </view>
+        </window>
+        <window title="Terrain" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" showsToolbarButton="NO" wantsToBeColor="NO" animationBehavior="default" id="242" userLabel="TerrainWindow">
+            <windowStyleMask key="styleMask" titled="YES" resizable="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" topStrut="YES"/>
+            <rect key="contentRect" x="530" y="235" width="512" height="512"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="778"/>
+            <value key="minSize" type="size" width="512" height="512"/>
+            <value key="maxSize" type="size" width="2048" height="1536"/>
+            <view key="contentView" id="243">
+                <rect key="frame" x="0.0" y="0.0" width="512" height="512"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <customView id="244" customClass="NobleMacView">
+                        <rect key="frame" x="0.0" y="0.0" width="512" height="512"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    </customView>
+                </subviews>
+            </view>
+        </window>
+    </objects>
+    <classes>
+        <class className="NobleMacView" superclassName="NSOpenGLView">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/NobleMacView.h"/>
+            <relationships>
+                <relationship kind="action" name="aboutDialog:"/>
+                <relationship kind="action" name="graphBraincode:"/>
+                <relationship kind="action" name="graphClearBraincode:"/>
+                <relationship kind="action" name="graphGenepool:"/>
+                <relationship kind="action" name="graphHonor:"/>
+                <relationship kind="action" name="graphIdeosphere:"/>
+                <relationship kind="action" name="graphPathogens:"/>
+                <relationship kind="action" name="graphPhasespace:"/>
+                <relationship kind="action" name="graphPreferences:"/>
+                <relationship kind="action" name="graphRelationships:"/>
+                <relationship kind="action" name="graphSocial:"/>
+                <relationship kind="action" name="graphVascular:"/>
+                <relationship kind="action" name="loadManual:"/>
+                <relationship kind="action" name="loadSimulationPage:"/>
+                <relationship kind="action" name="menuControlClearErrors:"/>
+                <relationship kind="action" name="menuControlFlood:"/>
+                <relationship kind="action" name="menuControlHealthyCarrier:"/>
+                <relationship kind="action" name="menuControlNext:"/>
+                <relationship kind="action" name="menuControlNoBrain:"/>
+                <relationship kind="action" name="menuControlNoBrainCode:"/>
+                <relationship kind="action" name="menuControlNoTerritory:"/>
+                <relationship kind="action" name="menuControlNoWeather:"/>
+                <relationship kind="action" name="menuControlPause:"/>
+                <relationship kind="action" name="menuControlPrevious:"/>
+                <relationship kind="action" name="menuFileNew:"/>
+                <relationship kind="action" name="menuFileOpen:"/>
+                <relationship kind="action" name="menuFileOpenScript:"/>
+                <relationship kind="action" name="menuFileSaveAs:"/>
+                <relationship kind="action" name="menuQuit:"/>
+            </relationships>
+        </class>
+    </classes>
+</document>

@@ -133,8 +133,9 @@ n_int   count_switch = 0;
 #endif
                 
     shared_cycle_draw(fIdentification, dimensionX, dimensionY);
-    
+#ifndef GRAPHLESS_GUI
     if (fIdentification != NUM_GRAPH)
+#endif
     {
         n_int           ly = 0;
         n_int           loop = 0;
@@ -166,6 +167,7 @@ n_int   count_switch = 0;
         }
 
     }
+#ifndef GRAPHLESS_GUI
     else
     {        
         n_int loop = 0;
@@ -180,6 +182,7 @@ n_int   count_switch = 0;
             loop++;
         }
     }
+#endif
     glDrawPixels(dimensionX,dimensionY,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
     [[self openGLContext] flushBuffer];
 }
@@ -227,12 +230,12 @@ n_int   count_switch = 0;
     {
         window_value = NUM_VIEW;
     }
-    
+#ifndef GRAPHLESS_GUI
     if ([[[self window] title] isEqualToString:@"Graph"])
     {
         window_value = NUM_GRAPH;
     }
-    
+#endif
 	fIdentification = shared_init(window_value, CFAbsoluteTimeGetCurrent());
         
     [[self window] setContentResizeIncrements:increments];
@@ -386,6 +389,8 @@ n_int   count_switch = 0;
     [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/sim/"]];
 }
 
+#ifndef GRAPHLESS_GUI
+
 -(IBAction) graphClearBraincode:(id)sender
 {
     graph_command(GC_CLEAR_BRAINCODE);
@@ -440,6 +445,7 @@ n_int   count_switch = 0;
 {
     graph_command(GC_VASCULAR);
 }
+#endif
 
 #pragma mark ---- Method Overrides ----
 

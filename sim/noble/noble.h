@@ -372,8 +372,10 @@ static const n_int	new_sd[256] =
 enum window_num
 {
     NUM_TERRAIN = (0),
-    NUM_VIEW	= (1),
-    NUM_GRAPH   = (2)
+    NUM_VIEW	= (1)
+#ifndef GRAPHLESS_GUI
+   ,NUM_GRAPH   = (2)
+#endif
 };
 
 /* maximum bytes in a braincode program */
@@ -448,6 +450,7 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_INSTRUCTIONS
 };
 
+#ifndef GRAPHLESS_GUI
 
 enum graph_commands
 {
@@ -466,16 +469,19 @@ enum graph_commands
     GC_VASCULAR
 };
 
+#endif
+
 enum window_information
 {
     TERRAIN_WINDOW_WIDTH		= (2048),
     TERRAIN_WINDOW_HEIGHT       = (1536),
-    TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT),
-
-    GRAPH_WINDOW_WIDTH_BITS     = 9,
+    TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
+#ifndef GRAPHLESS_GUI
+   ,GRAPH_WINDOW_WIDTH_BITS     = 9,
     GRAPH_WINDOW_WIDTH		    = (1<<GRAPH_WINDOW_WIDTH_BITS),
     GRAPH_WINDOW_HEIGHT         = (512),
     GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3)
+#endif
 };
 
 typedef enum
@@ -778,7 +784,11 @@ void       io_console_quit(void);
 
 #define LAND_DITHER(x,y,z)             (((x+y+z)&15)-(((x&y)|z)&7)-((x|(y&z))&7))
 
+#ifdef GRAPHLESS_GUI
+#define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA)
+#else
 #define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA + GRAPH_WINDOW_AREA)
+#endif
 
 #define SECONDS_PER_SIMULATION_STEP (60)
 
