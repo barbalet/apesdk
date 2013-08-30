@@ -168,7 +168,6 @@ static n_int noble_featureset_update(noble_featureset * s,
         if (s->no_of_features < MAX_FEATURESET_SIZE)
         {
             /** add a new feature type to the array */
-            i = 0;
             if (s->no_of_features > 1)
             {
                 for (i = (n_int)s->no_of_features-1; i >= (n_int)feature_index; i--)

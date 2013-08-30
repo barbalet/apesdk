@@ -34,6 +34,7 @@
 		4A360077171240F1004DAFBA /* nobleape.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4A360076171240F1004DAFBA /* nobleape.icns */; };
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
 		4A72682E17CF0CF60044BE3C /* nobleape.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A72682D17CF0CF60044BE3C /* nobleape.xib */; };
+		4A72683017D06A260044BE3C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A72682F17D06A260044BE3C /* QuartzCore.framework */; };
 		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
 		4A94505317CDC33C00D5893C /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504D17CDC33C00D5893C /* draw.c */; };
 		4A94505417CDC33C00D5893C /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504F17CDC33C00D5893C /* shared.c */; };
@@ -93,6 +94,7 @@
 		4A360076171240F1004DAFBA /* nobleape.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = nobleape.icns; sourceTree = "<group>"; };
 		4A360078171240FE004DAFBA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		4A72682D17CF0CF60044BE3C /* nobleape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = nobleape.xib; sourceTree = "<group>"; };
+		4A72682F17D06A260044BE3C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		4A7DC3E31749CD710013F2E9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
 		4A94504D17CDC33C00D5893C /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw.c; sourceTree = "<group>"; };
 		4A94504E17CDC33C00D5893C /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A72683017D06A260044BE3C /* QuartzCore.framework in Frameworks */,
 				4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */,
 				4A36001817124025004DAFBA /* Cocoa.framework in Frameworks */,
 			);
@@ -155,6 +158,7 @@
 		4A36001617124025004DAFBA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4A72682F17D06A260044BE3C /* QuartzCore.framework */,
 				4A360078171240FE004DAFBA /* OpenGL.framework */,
 				4A36001717124025004DAFBA /* Cocoa.framework */,
 				5A4805E1178676EB007220D7 /* XCTest.framework */,
