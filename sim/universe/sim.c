@@ -490,8 +490,8 @@ n_int	sim_interpret(n_byte * buff, n_uint len)
 {
     n_file	local;
 
-    local . size = len;
-    local . location = 0;
+    local . max_units = len;
+    local . last_index = 0;
     local . data = buff;
 
     interpret = parse_convert(&local, VARIABLE_BEING, (variable_string *)apescript_variable_codes);
@@ -520,8 +520,8 @@ n_int	sim_interpret(n_byte * buff, n_uint len)
 
 n_int     file_interpret(n_file * input_file)
 {
-    input_file->size = input_file->location;
-    input_file->location = 0;
+    input_file->max_units = input_file->last_index;
+    input_file->last_index = 0;
 
     interpret = parse_convert(input_file, VARIABLE_BEING, (variable_string *)apescript_variable_codes);
 

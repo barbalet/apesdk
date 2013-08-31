@@ -472,7 +472,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         return 0L;
     }
 
-    final_prog->binary_code->location = SIZEOF_NUMBER_WRITE;
+    final_prog->binary_code->last_index = SIZEOF_NUMBER_WRITE;
 
     if((final_prog->variable_references = (n_int *)io_new(VARIABLE_MAX * sizeof(n_int))) == 0L)
     {
@@ -498,7 +498,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     io_erase(buffer, VARIABLE_WIDTH);
 
     local_data = input->data;
-    end_loop = input->size;
+    end_loop = input->max_units;
 
     while(loop < end_loop)
     {
@@ -538,7 +538,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         n_byte	local_numbers[SIZEOF_NUMBER_WRITE];
         n_uint   loop_sizeof_number;
         /* this is the one special case for direct writing as the original stamp size was allowed */
-        io_int_to_bytes(final_prog->binary_code->location,final_prog->binary_code->data); /* write the basic size header */
+        io_int_to_bytes(final_prog->binary_code->last_index,final_prog->binary_code->data); /* write the basic size header */
         end_loop = number_num;
         loop = 1;
         io_int_to_bytes(number_num,local_numbers); /* write the number of numbers */
