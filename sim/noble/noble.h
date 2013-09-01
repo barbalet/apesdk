@@ -315,14 +315,11 @@ platform independent layers of Noble Ape.
 */
 typedef struct
 {
-    n_uint  unit_size;
-    n_uint	last_index;
-    n_uint	max_units;
+    n_uint	size;
+    n_uint	location;
     n_byte	*data;
 }
-n_dynamic;
-
-typedef n_dynamic n_file;
+n_file;
 
 typedef void (n_file_specific)(n_string string, n_byte * reference);
 

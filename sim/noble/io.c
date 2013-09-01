@@ -599,93 +599,26 @@ void io_lower(n_string value, n_int length)
     }
 }
 
-n_dynamic * io_dynamic_new(n_uint unit_size)
-{
-    n_file * output = 0L;
-    if (unit_size == 0)
-    {
-        return 0L;
-    }
-    output = io_new(sizeof(n_file));
-    if (output == 0L)
-    {
-        return 0L;
-    }
-    output->unit_size = unit_size;
-    output->max_units = 4096;
-    output->data = io_new(4096 * unit_size);
-    if (output->data == 0L)
-    {
-        io_free(output);
-        return 0L;
-    }
-    output->last_index = 0;
-    return output;
-}
-
-void io_dynamic_free(n_dynamic * dynamic)
-{
-    if (dynamic != 0L)
-    {
-        io_free(dynamic->data);
-    }
-    io_free(dynamic);
-}
-
-n_int io_dynamic_add(n_dynamic * dynamic, void *add_data)
-{
-    n_uint local_max_units = dynamic->max_units;
-    n_uint local_total_sise = local_max_units * dynamic->unit_size;
-    
-    if((dynamic->last_index + 1) == local_max_units)
-    {
-        /* This logic had to be changed for large file handling.*/
-        n_uint	temp_max_units;
-        n_byte *temp_data;
-        if (local_total_sise <= (256*1024))
-        {
-            temp_max_units = local_max_units * 4;
-        }
-        else
-        {
-            if (local_total_sise <= (512*1024*1024))
-            {
-                temp_max_units = local_max_units * 2;
-            }
-            else
-            {
-                temp_max_units = (local_max_units * 3) >> 1;
-            }
-        }
-        temp_data = io_new(temp_max_units * dynamic->unit_size);
-        if (temp_data == 0L)
-        {
-            return(SHOW_ERROR("Attempted overwrite"));
-        }
-        io_copy(dynamic->data, temp_data, local_max_units);
-        io_free(dynamic->data);
-        dynamic->data = temp_data;
-        dynamic->max_units = temp_max_units;
-    }
-    io_copy(&(dynamic->data[dynamic->last_index * dynamic->unit_size]), add_data, dynamic->unit_size);
-    dynamic->last_index++;
-    return (FILE_OKAY);
-}
-
-/* Memory saving */
-void io_dynamic_reused(n_dynamic * dynamic)
-{
-    io_erase(dynamic->data, dynamic->max_units * dynamic->unit_size);
-    dynamic->last_index = 0;
-}
-
 /**
  * Allocates a new file.
  * @return a 4k worth of data file pointer.
  */
 n_file * io_file_new(void)
 {
-    return io_dynamic_new(1);
+    n_file * output = io_new(sizeof(n_file));
+    if (output == 0L)
+    {
+        return 0L;
+    }
+    output->size = 4096;
+    output->data = io_new(4096);
+    if (output->data == 0L)
+    {
+        io_free(output);
+        return 0L;
+    }
+    output->location = 0;
+    return output;
 }
 
 
@@ -695,26 +628,11 @@ n_file * io_file_new(void)
  */
 void io_file_free(n_file * file)
 {
-    io_dynamic_free(file);
-}
-
-/**
- This is a dynamic write to file function which will increase the file size and
- allocated a larger data buffer if the original end of the file is reached. It
- is very useful for a number of dynamic file applications through the simulation.
- @param fil The file data to be written to.
- @param byte The byte/character to be written.
- @return Whether the parsing was successful or -1 on failure.
- */
-n_int io_file_write(n_file * fil, n_byte byte)
-{
-    return io_dynamic_add(fil, &byte);
-}
-
-/* Memory saving */
-void io_file_reused(n_file * fil)
-{
-    io_dynamic_reused(fil);
+    if (file != 0L)
+    {
+        io_free(file->data);
+    }
+    io_free(file);
 }
 
 void io_int_to_bytes(n_int value, n_byte * bytes)
@@ -822,14 +740,14 @@ n_int io_disk_write(n_file * local_file, n_string file_name)
         return SHOW_ERROR("No data in file to be written");
     }
 
-    written_length = fwrite(local_file->data,1,local_file->last_index, out_file);
+    written_length = fwrite(local_file->data,1,local_file->location, out_file);
 
     if (fclose(out_file) != 0)
     {
         return SHOW_ERROR("File could not be closed");
     }
 
-    if (written_length != local_file->last_index)
+    if (written_length != local_file->location)
     {
         return SHOW_ERROR("File did not complete write");
     }
@@ -853,14 +771,14 @@ n_int io_disk_append(n_file * local_file, n_string file_name)
     fopen_s(&out_file,file_name,"a");
 #endif
 
-    written_length = fwrite(local_file->data,1,local_file->last_index, out_file);
+    written_length = fwrite(local_file->data,1,local_file->location, out_file);
 
     if (fclose(out_file) != 0)
     {
         return SHOW_ERROR("File could not be closed");
     }
 
-    if (written_length != local_file->last_index)
+    if (written_length != local_file->location)
     {
         return SHOW_ERROR("File did not complete write");
     }
@@ -960,14 +878,14 @@ n_int io_file_xml_int(n_file * file, n_string name, n_int number)
  */
 n_int io_read_bin(n_file * fil, n_byte * local_byte)
 {
-    n_uint	file_location = fil -> last_index;
-    if (file_location >= (fil -> max_units))
+    n_uint	file_location = fil -> location;
+    if (file_location >= (fil -> size))
     {
         return -1;
     }
 
     *local_byte = fil -> data[file_location];
-    fil->last_index = (file_location + 1);
+    fil->location = (file_location + 1);
     return 0;
 }
 
@@ -1002,9 +920,9 @@ n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value,
     n_int              local_row_value = 0;
     n_byte             resultant_value;
 
-    if (tab_file->last_index != 0)
+    if (tab_file->location != 0)
     {
-        while (loop < tab_file->last_index)
+        while (loop < tab_file->location)
         {
             resultant_value = tab_file->data[loop];
             if (IS_TAB(resultant_value) || IS_RETURN(resultant_value))
@@ -1038,7 +956,7 @@ n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value,
         *row_value = local_row_value;
     }
 
-    if (tab_file->last_index == 0)
+    if (tab_file->location == 0)
     {
         return 0L;
     }
@@ -1053,7 +971,7 @@ n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value,
     loop = 0;
 
     string_point[string_point_location++] = (n_string)&(tab_file->data[0]);
-    while (loop < tab_file->last_index)
+    while (loop < tab_file->location)
     {
         resultant_value = tab_file->data[loop];
         if ((first_value) && (resultant_value != 0))
@@ -1213,7 +1131,7 @@ n_int io_number(n_string number_string, n_int * actual_value, n_int * decimal_di
 void io_whitespace(n_file * input)
 {
     n_uint	loop = 0, out_loop = 0;
-    n_uint	end_loop = input->max_units;
+    n_uint	end_loop = input->size;
     n_byte	*local_data = input->data;
     while(loop<end_loop)
     {
@@ -1253,7 +1171,59 @@ void io_whitespace(n_file * input)
     {
         local_data[loop++] = 0;
     }
-    input->max_units = out_loop;
+    input->size = out_loop;
+}
+
+/**
+ This is a dynamic write to file function which will increase the file size and
+ allocated a larger data buffer if the original end of the file is reached. It
+ is very useful for a number of dynamic file applications through the simulation.
+ @param fil The file data to be written to.
+ @param byte The byte/character to be written.
+ @return Whether the parsing was successful or -1 on failure.
+ */
+n_int io_file_write(n_file * fil, n_byte byte)
+{
+    n_uint local_size = fil->size;
+    if((fil->location + 1) == local_size)
+    {
+        /* This logic had to be changed for large file handling.*/
+        n_uint	temp_size;
+        n_byte *temp_data;
+        if (local_size <= (256*1024))
+        {
+            temp_size = local_size * 4;
+        }
+        else
+        {
+            if (local_size <= (512*1024*1024))
+            {
+                temp_size = local_size * 2;
+            }
+            else
+            {
+                temp_size = (local_size * 3) >> 1;
+            }
+        }
+        temp_data = io_new(temp_size);
+        if (temp_data == 0L)
+        {
+            return(SHOW_ERROR("Attempted file overwrite"));
+        }
+        io_copy(fil->data, temp_data, local_size);
+        io_free(fil->data);
+        fil->data = temp_data;
+        fil->size = temp_size;
+    }
+    fil->data[fil->location++] = byte;
+    return (FILE_OKAY);
+}
+
+/* Memory saving */
+void io_file_reused(n_file * fil)
+{
+    io_erase(fil->data, fil->size);
+    fil->location = 0;
 }
 
 /*
