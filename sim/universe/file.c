@@ -136,8 +136,8 @@ n_byte * sim_fileout(n_uint * len)
 
     n_string fluff[5] = {SHORT_VERSION_NAME, FULL_DATE, COPYRIGHT_DATE, COPYRIGHT_NAME, COPYRIGHT_FOLLOW };
 
-    file_pass . max_units = 2048;
-    file_pass . last_index = 0;
+    file_pass . size = 2048;
+    file_pass . location = 0;
     file_pass . data = io_new(2048);
     if(file_pass . data == 0L)
         return 0L;
@@ -154,7 +154,7 @@ n_byte * sim_fileout(n_uint * len)
 
     /* TODO: Brain block */
 
-    * len = file_pass.last_index;
+    * len = file_pass.location;
     return file_pass.data;
 }
 
@@ -168,8 +168,8 @@ n_int	file_in(n_file * input_file)
 
     noble_simulation * local_sim = sim_sim();
 
-    input_file->max_units = input_file->last_index;
-    input_file->last_index = 0;
+    input_file->size = input_file->location;
+    input_file->location = 0;
 
     io_whitespace(input_file);
 
@@ -286,8 +286,8 @@ n_int	sim_filein(n_byte * buff, n_uint len)
 
     noble_simulation * local_sim = sim_sim();
 
-    local . max_units = len;
-    local . last_index = 0;
+    local . size = len;
+    local . location = 0;
     local . data = buff;
 
     io_whitespace(&local);

@@ -40,15 +40,9 @@
 #import <OpenGL/glu.h>
 #import <OpenGL/OpenGL.h>
 
-#define ON_DISPLAY_UPDATE
-
 @interface NobleMacView : NSOpenGLView
 {
-#ifdef ON_DISPLAY_UPDATE
-    CVDisplayLinkRef displayLink;
-#else
     NSTimer*       timerAnimation;
-#endif
     GLubyte        colorTable[256][3];
     GLubyte        outputBuffer[2048*1536*3];
     
@@ -57,10 +51,7 @@
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;
 
-#ifndef ON_DISPLAY_UPDATE
 - (void) animationTimer:(NSTimer *)localTimer;
-#endif
-
 - (void) drawRect:(NSRect)rect;
 
 - (BOOL) acceptsFirstResponder;
@@ -98,7 +89,7 @@
 
 -(IBAction) loadManual:(id) sender;
 -(IBAction) loadSimulationPage:(id) sender;
-#ifndef GRAPHLESS_GUI
+
 -(IBAction) graphClearBraincode:(id)sender;
 -(IBAction) graphIdeosphere:(id)sender;
 -(IBAction) graphBraincode:(id)sender;
@@ -110,7 +101,7 @@
 -(IBAction) graphPhasespace:(id)sender;
 -(IBAction) graphSocial:(id)sender;
 -(IBAction) graphVascular:(id)sender;
-#endif
+
 -(void)keyUp:(NSEvent *)theEvent;
 -(void)keyDown:(NSEvent *)theEvent;
 

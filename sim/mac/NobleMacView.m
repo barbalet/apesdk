@@ -68,7 +68,9 @@
 		NSOpenGLPFAAccelerated,
 		0
 	};
+    
 #endif
+    
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
@@ -93,7 +95,7 @@
      }];
 }
 
-#ifndef ON_DISPLAY_UPDATE
+
 /* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
@@ -113,7 +115,8 @@
         [self quitProcedure];
     }
 }
-#endif
+
+n_int   count_switch = 0;
 
 - (void) drawRect:(NSRect)rect
 {
@@ -130,9 +133,8 @@
 #endif
                 
     shared_cycle_draw(fIdentification, dimensionX, dimensionY);
-#ifndef GRAPHLESS_GUI
+    
     if (fIdentification != NUM_GRAPH)
-#endif
     {
         n_int           ly = 0;
         n_int           loop = 0;
@@ -164,7 +166,6 @@
         }
 
     }
-#ifndef GRAPHLESS_GUI
     else
     {        
         n_int loop = 0;
@@ -179,7 +180,6 @@
             loop++;
         }
     }
-#endif
     glDrawPixels(dimensionX,dimensionY,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
     [[self openGLContext] flushBuffer];
 }
@@ -190,39 +190,8 @@
     polygonal_close();
 #endif
     shared_close();
-#ifdef ON_DISPLAY_UPDATE
-    CVDisplayLinkRelease(displayLink);
-#endif
     exit(0);
 }
-
-#ifdef ON_DISPLAY_UPDATE
-- (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
-{
-#ifndef NEW_OPENGL_ENVIRONMENT
-    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
-#endif
-
-    if (shared_script_debug_ready())
-    {
-            [self debugOutput];
-    }
-    [self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
-
-    if (sim_thread_console_quit())
-    {
-            [self quitProcedure];
-    }
-    return kCVReturnSuccess;
-}
-
-
-static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
-{
-    NobleMacView* localView = (__bridge NobleMacView *)(displayLinkContext);
-    return [localView getFrameForTime:outputTime];
-}
-#endif
 
 -(id) initWithFrame:(NSRect) frameRect
 {
@@ -258,38 +227,22 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     {
         window_value = NUM_VIEW;
     }
-#ifndef GRAPHLESS_GUI
+    
     if ([[[self window] title] isEqualToString:@"Graph"])
     {
         window_value = NUM_GRAPH;
     }
-#endif
+    
 	fIdentification = shared_init(window_value, CFAbsoluteTimeGetCurrent());
         
     [[self window] setContentResizeIncrements:increments];
     
     [[self window] orderFrontRegardless];
     
-#ifdef ON_DISPLAY_UPDATE
-    {
-        GLint swapInt = 1;
-        [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
-    }
-    CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
-    CVDisplayLinkSetOutputCallback(displayLink, &displayLinkCallback, (__bridge void*)self);
-    {
-        CGLContextObj cglContext = [[self openGLContext] CGLContextObj];
-        CGLPixelFormatObj cglPixelFormat = [[self pixelFormat] CGLPixelFormatObj];
-        CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
-    }
-    CVDisplayLinkStart(displayLink);
-#else
-    
     /* start animation timer */
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
-#endif
 }
 
 #pragma mark ---- IB Actions ----
@@ -433,8 +386,6 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/sim/"]];
 }
 
-#ifndef GRAPHLESS_GUI
-
 -(IBAction) graphClearBraincode:(id)sender
 {
     graph_command(GC_CLEAR_BRAINCODE);
@@ -489,7 +440,6 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 {
     graph_command(GC_VASCULAR);
 }
-#endif
 
 #pragma mark ---- Method Overrides ----
 

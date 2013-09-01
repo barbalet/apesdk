@@ -350,7 +350,7 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
         {
             n_int	loop = return_value + 4;
             n_int	braces_open = 1;
-            n_int remaining_bytes = code->binary_code->last_index;
+            n_int remaining_bytes = code->binary_code->location;
             do
             {
                 n_byte	actual_value = value[loop++];

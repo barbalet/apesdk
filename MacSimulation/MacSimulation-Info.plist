@@ -27,7 +27,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2013 Thomas Barbalet. All rights reserved.</string>
 	<key>NSMainNibFile</key>
-	<string>nobleape</string>
+	<string>nobleape512</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
