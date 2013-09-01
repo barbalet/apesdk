@@ -269,6 +269,10 @@ typedef n_byte2 (n_patch)(n_byte2 * local);
 
 typedef n_int (n_console)(void * ptr, n_string response, n_console_output output_function);
 
+typedef n_int (n_file_in)(n_byte * buff, n_uint len);
+
+typedef n_byte * (n_file_out)(n_uint * len);
+
 typedef struct
 {
     n_console * function;

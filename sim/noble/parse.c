@@ -450,7 +450,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     n_byte	      buffer[ VARIABLE_WIDTH ];
     n_int	      buffer_size = 0;
     n_byte	      previous = 0;
-    
+
     io_whitespace(input);
 
     if((final_prog = io_new(sizeof(n_interpret))) == 0L)

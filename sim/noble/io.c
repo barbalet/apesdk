@@ -175,6 +175,181 @@ static n_int io_uniform_handle_fclose(FILE * file_ptr)
     return 0;
 }
 
+static n_int io_uniform_handle_fclose_double_error(FILE * file_ptr, n_string error)
+{
+    if (fclose(file_ptr) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    return SHOW_ERROR(error);
+}
+
+n_int file_chain_write(n_string name, n_file_chain * initial)
+{
+    FILE         * write_file = 0L;
+    n_file_chain * local = initial;
+
+    write_file = fopen(name, "wb");
+
+    if (write_file == 0L)
+    {
+        return SHOW_ERROR("File could not be created");
+    }
+
+    do
+    {
+        fwrite(local->data,1,local->expected_bytes, write_file);
+        local = (n_file_chain*)local->next;
+    }
+    while (local != 0L);
+
+    return io_uniform_handle_fclose(write_file);
+}
+
+n_int file_chain_read(n_string name, n_file_chain * initial)
+{
+    FILE         * read_file = 0L;
+    n_file_chain * local = initial;
+
+    read_file = fopen(name, "rb");
+
+    if (read_file == 0L)
+    {
+        return SHOW_ERROR("File could not be read");
+    }
+
+    do
+    {
+        if (fread(local->data,1,local->expected_bytes, read_file) != local->expected_bytes)
+        {
+            (void) io_uniform_handle_fclose(read_file);
+            return SHOW_ERROR("Could not read all expected");
+        }
+        local = (n_file_chain*)local->next;
+    }
+    while (local != 0L);
+
+    return io_uniform_handle_fclose(read_file);
+}
+
+
+n_int file_chain_read_header(n_string name, n_file_chain * header, n_uint expected_additional_entries)
+{
+    FILE         * read_file = 0L;
+    n_uint       * hash_data = 0L;
+    n_uint         expected_size;
+    n_uint         actual_size;
+    n_uint         loop = 0;
+    read_file = fopen(name,"rb");
+    if (read_file == 0L)
+    {
+        return SHOW_ERROR("File does not exist");
+    }
+
+    if (header == 0L)
+    {
+        return io_uniform_handle_fclose_double_error(read_file, "No header presented");
+    }
+
+    expected_size = expected_additional_entries * sizeof(n_uint);
+    header->data = 0L;
+    header->data = io_new(expected_size);
+    if (header->data == 0L)
+    {
+        return io_uniform_handle_fclose_double_error(read_file, "No hash allocated");
+
+    }
+    header->expected_bytes = expected_size;
+
+    hash_data = (n_uint*)header->data;
+    actual_size = fread(hash_data, 1, expected_additional_entries*sizeof(n_uint), read_file);
+    if (expected_size != actual_size)
+    {
+        io_free(hash_data);
+        return io_uniform_handle_fclose_double_error(read_file, "File too short");
+    }
+    while (loop < expected_additional_entries)
+    {
+        header[loop+1].hash = hash_data[loop];
+        loop++;
+    }
+    return io_uniform_handle_fclose(read_file);
+}
+
+n_int file_chain_read_validate(n_string name, n_file_chain *initial)
+{
+    n_file_chain * local = initial;
+    n_uint         largest_bytes = 0;
+    n_byte       * general_buffer = 0L;
+    FILE         * read_file = 0L;
+    n_int          count = 0;
+    do
+    {
+        if (local->expected_bytes > largest_bytes)
+        {
+            largest_bytes = local->expected_bytes;
+        }
+        local = (n_file_chain*)local->next;
+    }
+    while (local != 0L);
+
+    read_file = fopen(name,"rb");
+    if (read_file == 0L)
+    {
+        return SHOW_ERROR("File does not exist");
+    }
+
+    general_buffer = io_new(largest_bytes);
+    if (general_buffer == 0L)
+    {
+        return io_uniform_handle_fclose_double_error(read_file, "Validation buffer not created");
+    }
+
+    /* get past header */
+    local = initial;
+
+    if (local == 0L)
+    {
+        return io_uniform_handle_fclose_double_error(read_file, "File chain invalid");
+    }
+
+    do
+    {
+        n_uint actual_read = fread(general_buffer, 1, local->expected_bytes, read_file);
+        n_uint actual_hash;
+        if (actual_read != local->expected_bytes)
+        {
+            io_free(general_buffer);
+            return io_uniform_handle_fclose_double_error(read_file, "File too short");
+        }
+
+        actual_hash = math_hash(general_buffer, local->expected_bytes);
+
+        if (local != initial)
+        {
+            if (actual_hash != local->hash)
+            {
+                n_string_block  combination;
+                io_free(general_buffer);
+                sprintf(combination, "Hash failed (# %ld, actual %ld, expected %ld, bytes %ld, sizeof %ld)",count, actual_hash, local->hash, local->expected_bytes, sizeof(n_int));
+                return io_uniform_handle_fclose_double_error(read_file, combination);
+            }
+        }
+        local = (n_file_chain*)local->next;
+        count++;
+    }
+    while (local != 0L);
+
+    io_free(general_buffer);
+
+    return io_uniform_handle_fclose(read_file);
+}
+
+void file_chain_bin_name(n_string original, n_string bin_file)
+{
+    sprintf(bin_file, "%s.bin",original);
+}
+
 void io_file_aiff_header(void * fptr, n_uint total_samples)
 {
     n_byte header[54] = {0};
@@ -431,14 +606,14 @@ n_dynamic * io_dynamic_new(n_uint unit_size)
     {
         return 0L;
     }
-    output = io_new(sizeof(n_dynamic));
+    output = io_new(sizeof(n_file));
     if (output == 0L)
     {
         return 0L;
     }
     output->unit_size = unit_size;
     output->max_units = 4096;
-    output->data = io_new(output->max_units * unit_size);
+    output->data = io_new(4096 * unit_size);
     if (output->data == 0L)
     {
         io_free(output);
@@ -460,20 +635,20 @@ void io_dynamic_free(n_dynamic * dynamic)
 n_int io_dynamic_add(n_dynamic * dynamic, void *add_data)
 {
     n_uint local_max_units = dynamic->max_units;
-    n_uint local_total_size = local_max_units * dynamic->unit_size;
+    n_uint local_total_sise = local_max_units * dynamic->unit_size;
     
     if((dynamic->last_index + 1) == local_max_units)
     {
         /* This logic had to be changed for large file handling.*/
         n_uint	temp_max_units;
         n_byte *temp_data;
-        if (local_total_size <= (256*1024))
+        if (local_total_sise <= (256*1024))
         {
             temp_max_units = local_max_units * 4;
         }
         else
         {
-            if (local_total_size <= (512*1024*1024))
+            if (local_total_sise <= (512*1024*1024))
             {
                 temp_max_units = local_max_units * 2;
             }
@@ -492,21 +667,7 @@ n_int io_dynamic_add(n_dynamic * dynamic, void *add_data)
         dynamic->data = temp_data;
         dynamic->max_units = temp_max_units;
     }
-    
-    if (dynamic->unit_size == 1)
-    {
-        n_byte * byte_value = add_data;
-        dynamic->data[dynamic->last_index] = byte_value[0];
-    }
-    else
-    {
-        if (dynamic->unit_size == 0)
-        {
-            return(SHOW_ERROR("Zero unit size"));
-
-        }        
-        io_copy(&(dynamic->data[dynamic->last_index * dynamic->unit_size]), add_data, dynamic->unit_size);
-    }
+    io_copy(&(dynamic->data[dynamic->last_index * dynamic->unit_size]), add_data, dynamic->unit_size);
     dynamic->last_index++;
     return (FILE_OKAY);
 }
@@ -1052,11 +1213,8 @@ n_int io_number(n_string number_string, n_int * actual_value, n_int * decimal_di
 void io_whitespace(n_file * input)
 {
     n_uint	loop = 0, out_loop = 0;
-    n_uint	end_loop = input->last_index;
+    n_uint	end_loop = input->max_units;
     n_byte	*local_data = input->data;
-    
-    input->last_index = 0;
-    
     while(loop<end_loop)
     {
         n_byte	temp = local_data[loop++];

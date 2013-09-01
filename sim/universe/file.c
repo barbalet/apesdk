@@ -127,6 +127,37 @@ n_file * file_out(void)
     return returnFile;
 }
 
+n_byte * sim_fileout(n_uint * len)
+{
+    noble_simulation *local_sim = sim_sim();
+
+    n_uint	loop = 0;
+    n_file	file_pass;
+
+    n_string fluff[5] = {SHORT_VERSION_NAME, FULL_DATE, COPYRIGHT_DATE, COPYRIGHT_NAME, COPYRIGHT_FOLLOW };
+
+    file_pass . max_units = 2048;
+    file_pass . last_index = 0;
+    file_pass . data = io_new(2048);
+    if(file_pass . data == 0L)
+        return 0L;
+
+    io_write_buff(&file_pass, fluff, 0L, FILE_COPYRIGHT, 0L);
+
+    fileout_land(&file_pass, local_sim, (noble_file_entry *)noble_file_format);
+
+    while (loop < local_sim->num)
+    {
+        fileout_being(&file_pass, local_sim, loop, (noble_file_entry *)noble_file_format);
+        loop++;
+    }
+
+    /* TODO: Brain block */
+
+    * len = file_pass.last_index;
+    return file_pass.data;
+}
+
 n_int	file_in(n_file * input_file)
 {
     n_int  ret_val;
@@ -136,6 +167,9 @@ n_int	file_in(n_file * input_file)
     n_uint episodic_count = 0;
 
     noble_simulation * local_sim = sim_sim();
+
+    input_file->max_units = input_file->last_index;
+    input_file->last_index = 0;
 
     io_whitespace(input_file);
 
@@ -239,6 +273,233 @@ n_int	file_in(n_file * input_file)
     }
     return SHOW_ERROR("Process file failed");
 }
+
+/* takes a file buffer and decodes the file into the global being and land variables */
+n_int	sim_filein(n_byte * buff, n_uint len)
+{
+    n_int  ret_val;
+    n_byte temp_store[LARGEST_INIT_PTR];
+    n_uint ape_count = 0;
+    n_uint social_count = 0;
+    n_uint episodic_count = 0;
+    n_file local;
+
+    noble_simulation * local_sim = sim_sim();
+
+    local . max_units = len;
+    local . last_index = 0;
+    local . data = buff;
+
+    io_whitespace(&local);
+
+
+    ret_val = io_read_buff(&local, temp_store, noble_file_format);
+
+    if(ret_val != FIL_VER) /* signature must be first */
+        return SHOW_ERROR("Signature not first in file");
+
+    {
+        n_byte2	*signature = (n_byte2 *)temp_store;
+
+        if(signature[0] != NOBLE_APE_SIGNATURE) /* not a Noble Ape file */
+            return SHOW_ERROR("Not a Noble Ape File");
+
+        if(signature[1] > VERSION_NUMBER) /* file version greater than this version */
+            return SHOW_ERROR("File newer than Simulation");
+    }
+
+    do
+    {
+        n_byte *temp = 0L;
+        ret_val = io_read_buff(&local, temp_store, noble_file_format);
+        if (ret_val == -1)
+            SHOW_ERROR("Failure in file load");
+        if (ret_val < FILE_EOF)
+        {
+            n_uint	loop_end = 0;
+            switch (ret_val)
+            {
+            case FIL_LAN:
+                temp = (n_byte*)(local_sim->land);
+                loop_end = NON_PTR_LAND;
+                break;
+            case FIL_WEA:
+                temp = (n_byte*)(local_sim->weather);
+                loop_end = sizeof(n_int);
+                break;
+            case FIL_BEI:
+                temp = (n_byte*) &(local_sim->beings[ape_count]);
+                loop_end = sizeof(noble_being);
+                break;
+            case FIL_SOE:
+                {
+                    social_link * local_social = being_social(&(local_sim->beings[ape_count]));
+                    temp = (n_byte*)(&local_social[social_count]);
+                    loop_end = sizeof(social_link);
+                }
+                break;
+            case FIL_EPI:
+                {
+                    episodic_memory * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
+                    temp = (n_byte*)(&local_episodic[episodic_count]);
+                    loop_end = sizeof(episodic_memory);
+                }
+                break;
+            default:
+                return SHOW_ERROR("Unknown kind in file"); /*unkown kind*/
+                break;
+            }
+            if(temp != 0L)
+            {
+                io_copy(temp_store, temp, loop_end);
+            }
+            if (ret_val == FIL_BEI)
+            {
+                ape_count ++;
+                if (ape_count == local_sim->max)
+                {
+                    local_sim->num = ape_count;
+                    return SHOW_ERROR("Too many apes for memory");
+                }
+            }
+            if (ret_val == FIL_SOE)
+            {
+                social_count ++;
+                if (social_count == (local_sim->max * SOCIAL_SIZE))
+                {
+                    local_sim->num = ape_count;
+                    return SHOW_ERROR("Too many social graph events for memory");
+                }
+            }
+            if (ret_val == FIL_EPI)
+            {
+                episodic_count ++;
+                if (episodic_count == (local_sim->max * EPISODIC_SIZE))
+                {
+                    local_sim->num = ape_count;
+                    return SHOW_ERROR("Too many episodic events for memory");
+                }
+            }
+
+        }
+
+    }
+    while (ret_val < FILE_EOF);
+
+    if (ret_val == FILE_EOF)
+    {
+        local_sim->num = ape_count;
+        return 0;
+    }
+    return SHOW_ERROR("Process file failed");
+}
+
+/*
+ read:
+ io_disk_check
+ file_chain_new
+ add pointers to "to be read"
+ file_chain_read_header
+ file_chain_read_validate
+ file_chain_read
+ file_chain_free
+ */
+n_int file_bin_read(n_string name)
+{
+    noble_simulation * local = sim_sim();
+    n_file_chain     * start = 0L;
+    /* weather, brain, social, episodic */
+    const n_uint       total_ptrs = 2;
+    n_string_block     bin_name;
+
+    file_chain_bin_name(name, bin_name);
+
+    if (io_disk_check(name) != 1)
+    {
+        return -1; /* This is legit for no output error */
+    }
+
+    start = file_chain_new(total_ptrs);
+
+    if (start == 0L)
+    {
+        return SHOW_ERROR("Header not allocated");
+    }
+
+    start[1].expected_bytes = sizeof(n_weather);
+    start[1].data           = local->weather;
+
+    start[2].expected_bytes = local->num * DOUBLE_BRAIN;
+    start[2].data           = being_brain(local->beings);
+
+    if (file_chain_read_header(bin_name, start, total_ptrs) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+
+    if (file_chain_read_validate(bin_name, start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+    if (file_chain_read(bin_name, start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+
+    file_chain_free(start);
+    return 0;
+}
+
+/*
+ write:
+ file_chain_new
+ add pointers to "to be written"
+ file_chain_write_generate_header
+ file_chain_write
+ file_chain_free
+ */
+
+n_int file_bin_write(n_string name)
+{
+    noble_simulation * local = sim_sim();
+    n_file_chain     * start = 0L;
+    /* weather, brain, social, episodic */
+    const n_uint       total_ptrs = 2;
+    n_string_block     bin_name;
+
+    file_chain_bin_name(name, bin_name);
+
+    start = file_chain_new(total_ptrs);
+
+    if (start == 0L)
+    {
+        return SHOW_ERROR("Header not allocated");
+    }
+
+    start[1].expected_bytes = sizeof(n_weather);
+    start[1].data           = local->weather;
+
+    start[2].expected_bytes = local->num * DOUBLE_BRAIN;
+    start[2].data           = being_brain(local->beings);
+
+    if (file_chain_write_generate_header(start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+
+    if (file_chain_write(bin_name, start) != 0)
+    {
+        file_chain_free(start);
+        return -1; /* Error already out */
+    }
+    file_chain_free(start);
+    return 0;
+}
+
 
 n_int sketch_input(void *code, n_byte kind, n_int value)
 {
