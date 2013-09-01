@@ -2151,12 +2151,6 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     io_disk_write(file_opened, response);
     io_file_free(file_opened);
 
-    if (file_bin_write(response) == -1)
-    {
-        console_file_interaction = 0;
-        return -1;
-    }
-
     if (output_function)
     {
         sprintf(console_file_name,"%s",response);
@@ -2214,10 +2208,6 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
             }
             sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
             io_file_free(file_opened);
-            if (file_bin_read(response) == -1)
-            {
-                return -1;
-            }
         }
         console_file_interaction = 0;
         if (output_function)
