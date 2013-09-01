@@ -1507,16 +1507,10 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
 void *    sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size);
 void      sim_cycle(void);
 
-/* This is the old way. Soon to be removed. */
-n_int     sim_interpret(n_byte * buff, n_uint len);
-n_int     sim_filein(n_byte * buff, n_uint len);
-n_byte *  sim_fileout(n_uint * len);
-
 /* This is the new way. Please continue forwards. */
 n_file *  file_out(void);
 n_int     file_in(n_file * input_file);
 n_int     file_interpret(n_file * input_file);
-
 
 void	  sim_close(void);
 void	  sim_populations(n_uint	*total, n_uint * female, n_uint * male);
@@ -1605,7 +1599,6 @@ extern n_uint	brain_hash_count;
 const static noble_console_command control_commands[] =
 {
     {&io_help,               "help",           "[(command)]",          "Displays a list of all the commands"},
-#ifdef CONSOLE_ONLY
 #ifdef COMMAND_LINE_EXPLICIT
     {&console_reset,         "reset",          "",                     "Reset the simulation"},
     {&console_reset,         "clear"           "",                     ""},
@@ -1619,19 +1612,6 @@ const static noble_console_command control_commands[] =
     {&console_quit,               "quit",           "",                     "Quits the console"},
     {&console_quit,               "exit",           "",                     ""},
     {&console_quit,               "close",          "",                     ""},
-#else
-    {&cle_load,              "load",           "[file]",               "Load a simulation file"},
-    {&cle_script,            "script",         "[file]",               "Load apescript file"},
-    {&cle_script,            "apescript",      "",                     ""},
-    {&cle_video,             "video",          "ideosphere|genepool <filename>", "Create a video"},
-    {&cle_video,             "movie",          "genespace|preferences<filename>","Create a video"},
-    {&cle_video,             "film",           "relations <filename>",           "Create a video"},
-    {&longterm_quit,         "quit",           "",                     "Quits the console"},
-    {&longterm_quit,         "exit",           "",                     ""},
-    {&longterm_quit,         "close",          "",                     ""},
-    {&cle_reset,             "reset",          "",                     "Reset the simulation"},
-    {&cle_reset,             "clear"           "",                     ""},
-#endif
 
     {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 

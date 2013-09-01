@@ -606,14 +606,14 @@ n_dynamic * io_dynamic_new(n_uint unit_size)
     {
         return 0L;
     }
-    output = io_new(sizeof(n_file));
+    output = io_new(sizeof(n_dynamic));
     if (output == 0L)
     {
         return 0L;
     }
     output->unit_size = unit_size;
     output->max_units = 4096;
-    output->data = io_new(4096 * unit_size);
+    output->data = io_new(output->max_units * unit_size);
     if (output->data == 0L)
     {
         io_free(output);
@@ -1213,8 +1213,11 @@ n_int io_number(n_string number_string, n_int * actual_value, n_int * decimal_di
 void io_whitespace(n_file * input)
 {
     n_uint	loop = 0, out_loop = 0;
-    n_uint	end_loop = input->max_units;
+    n_uint	end_loop = input->last_index;
     n_byte	*local_data = input->data;
+    
+    input->last_index = 0;
+    
     while(loop<end_loop)
     {
         n_byte	temp = local_data[loop++];
