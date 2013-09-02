@@ -37,7 +37,7 @@
 #define CONSOLE_ONLY /* Please maintain this define until after ALIFE XIII July 22nd */
 #undef SAVE_IMAGES
 #define CONSOLE_REQUIRED
-#undef AUDIT_FILE
+#define AUDIT_FILE
 
 #include <stdio.h>
 #include <string.h>
@@ -189,13 +189,9 @@ static void audit_compart_offset()
     audit_print_offset(start,(n_byte *)&(local.honor),"honor");
 
     audit_print_offset(start,(n_byte *)&(local.date_of_conception[0]),"date_of_conception[0]");
-    audit_print_offset(start,(n_byte *)&(local.mother_new_genetics[0]),"mother_new_genetics[0]");
-    audit_print_offset(start,(n_byte *)&(local.father_new_genetics[0]),"father_new_genetics[0]");
 
     audit_print_offset(start,(n_byte *)&(local.father_honor),"father_honor");
     audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
-
-    audit_print_offset(start,(n_byte *)&(local.new_genetics[0]),"new_genetics[0]");
 
     audit_print_offset(start,(n_byte *)&(local.social_x),"social_x");
 

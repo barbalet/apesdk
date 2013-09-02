@@ -120,7 +120,7 @@
 #define INVENTORY_BYTES  (INVENTORY_SIZE*sizeof(n_byte2))
 
 /* offsets within the file */
-#define INITIAL_BLOCK_BYTES	(42+INVENTORY_BYTES)
+#define INITIAL_BLOCK_BYTES	(40+INVENTORY_BYTES)
 #define OFFSET_PARASITES	(INITIAL_BLOCK_BYTES+SHOUT_BYTES)
 
 #define OFFSET_PARENTING	(OFFSET_PARASITES+PARA_BYTES)
@@ -189,16 +189,15 @@ static const noble_file_entry noble_file_format[]=
     {{'r', 'a', 'n', 'd', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, 14,"Random within"},    /*n_byte2 seed[2];*/
     {{'s', 't', 'a', 't', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 18,"State description"},    /*n_byte2	state;*/
 
-    {{'b', 'r', 'l', 'o', 'c', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 20,"Location of brain storage"},    /*n_byte2 brain_memory_location */
-    {{'b', 'r', 'a', 'i', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2, 6, 22,"Brain state values"},    /*n_byte2	brain_state[6];*/
+    {{'b', 'r', 'a', 'i', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2, 6, 20,"Brain state values"},    /*n_byte2	brain_state[6];*/
 
-    {{'h', 'e', 'i', 'g', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 34, "Height"},    /*n_byte2	height;*/
-    {{'m', 'a', 's', 's', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 36, "Mass"},    /*n_byte2	mass;*/
-    {{'o', 'v', 'e', 'r', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 38, "ApeScript overrides"},    /*n_byte2  script_overrides;*/
-    {{'s', 'h', 'o', 'u', 't', '='}, FIL_BEI | FILE_TYPE_BYTE,  SHOUT_BYTES, 40, "Shouting values"},    /*n_byte  shout[SHOUT_BYTES];*/
-    {{'c', 'r', 'o', 'w', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 40+SHOUT_BYTES, "Crowding"},     /*n_byte	crowding;*/
-    {{'p', 'o', 's', 't', 'u', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 41+SHOUT_BYTES, "Posture"},     /*n_byte	posture;*/
-    {{'i', 'n', 'v', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2,  INVENTORY_SIZE, 42+SHOUT_BYTES, "Inventory"},     /*n_byte2	inventory[INVENTORY_SIZE];*/
+    {{'h', 'e', 'i', 'g', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 32, "Height"},    /*n_byte2	height;*/
+    {{'m', 'a', 's', 's', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 34, "Mass"},    /*n_byte2	mass;*/
+    {{'o', 'v', 'e', 'r', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 36, "ApeScript overrides"},    /*n_byte2  script_overrides;*/
+    {{'s', 'h', 'o', 'u', 't', '='}, FIL_BEI | FILE_TYPE_BYTE,  SHOUT_BYTES, 38, "Shouting values"},    /*n_byte  shout[SHOUT_BYTES];*/
+    {{'c', 'r', 'o', 'w', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 38+SHOUT_BYTES, "Crowding"},     /*n_byte	crowding;*/
+    {{'p', 'o', 's', 't', 'u', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 39+SHOUT_BYTES, "Posture"},     /*n_byte	posture;*/
+    {{'i', 'n', 'v', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2,  INVENTORY_SIZE, 40+SHOUT_BYTES, "Inventory"},     /*n_byte2	inventory[INVENTORY_SIZE];*/
 
 #ifdef PARASITES_ON
     {{'p', 'a', 'r', 'a', 's', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, OFFSET_PARASITES, "Number of parasites"},     /*n_byte  parasites;*/
@@ -206,10 +205,9 @@ static const noble_file_entry noble_file_format[]=
 #endif
     {{'c', 'o', 'n', 'c', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, OFFSET_PARENTING, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
 
-    {{'a', 'c', 't', 'i', 'x', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, OFFSET_PARENTING+4, "Attention actor index"}, /*n_byte attention_actor_index;*/
-    {{'e', 'p', 'i', 'i', 'x', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, OFFSET_PARENTING+5, "Attention episode index"}, /*n_byte attention_episode_index;*/
+    {{'a', 't', 't', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, OFFSET_PARENTING+4, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/
 
-    {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+6), "Mother genetics"}, /*n_byte2 mother_genetics[CHROMOSOMES];*/
+    {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+4+ATTENTION_SIZE), "Mother genetics"}, /*n_genetics mother_genetics[CHROMOSOMES];*/
 
     {{'f', 'a', 'm', 'i', 'l', '='}, FIL_BEI | FILE_TYPE_BYTE,  2, (OFFSET_PARENTING+6+GENETICS_BYTES), "Family names"}, /*n_byte  family[2];*/
 
