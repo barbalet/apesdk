@@ -784,8 +784,16 @@ void       io_console_quit(void);
 
 #define LAND_DITHER(x,y,z)             (((x+y+z)&15)-(((x&y)|z)&7)-((x|(y&z))&7))
 
+
+#ifdef GRAPHLESS_GUI
+
+#define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA)
+
+#else
+
 #define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA + GRAPH_WINDOW_AREA)
 
+#endif
 #define SECONDS_PER_SIMULATION_STEP (60)
 
 #define	WEATHER_CLOUD		(32768)

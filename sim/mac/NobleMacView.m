@@ -1,11 +1,11 @@
 /****************************************************************
-
+ 
  NobleMacView.m
-
+ 
  =============================================================
-
+ 
  Copyright 1996-2013 Tom Barbalet. All rights reserved.
-
+ 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
@@ -14,10 +14,10 @@
  sell copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
  conditions:
-
+ 
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
-
+ 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,11 +26,11 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
+ 
  This software and Noble Ape are a continuing work of Tom Barbalet,
  begun on 13 June 1996. No apes or cats were harmed in the writing
  of this software.
-
+ 
  ****************************************************************/
 
 #include "../gui/shared.h"
@@ -49,7 +49,7 @@
 + (NSOpenGLPixelFormat*) basicPixelFormat
 {
     
-#ifndef NEW_OPENGL_ENVIRONMENT    
+#ifndef NEW_OPENGL_ENVIRONMENT
     NSOpenGLPixelFormatAttribute attributes [] = {
         NSOpenGLPFAWindow,
         NSOpenGLPFADoubleBuffer,	/* double buffered */
@@ -68,9 +68,7 @@
 		NSOpenGLPFAAccelerated,
 		0
 	};
-    
 #endif
-    
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
@@ -95,14 +93,14 @@
      }];
 }
 
-
+#ifndef ON_DISPLAY_UPDATE
 /* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
 #ifndef NEW_OPENGL_ENVIRONMENT
     shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
 #endif
-
+    
     if (shared_script_debug_ready())
     {
         [self debugOutput];
@@ -115,15 +113,14 @@
         [self quitProcedure];
     }
 }
-
-n_int   count_switch = 0;
+#endif
 
 - (void) drawRect:(NSRect)rect
 {
     n_c_int         dimensionX = rect.size.width;
     n_c_int         dimensionY = rect.size.height;
     n_byte        * index = shared_draw(fIdentification);
-
+    
     if (index == 0L) return;
     
     [[self openGLContext] makeCurrentContext];
@@ -131,9 +128,8 @@ n_int   count_switch = 0;
 #ifdef NEW_OPENGL_ENVIRONMENT
     This is currently broken
 #endif
-                
+    
     shared_cycle_draw(fIdentification, dimensionX, dimensionY);
-
 #ifndef GRAPHLESS_GUI
     if (fIdentification != NUM_GRAPH)
 #endif
@@ -144,7 +140,7 @@ n_int   count_switch = 0;
         n_byte2         fit[256*3];
         
         shared_timeForColor(fit, fIdentification);
-
+        
         while(loopColors < 256)
         {
             colorTable[loopColors][0] = fit[loop++] >> 8;
@@ -166,11 +162,11 @@ n_int   count_switch = 0;
             }
             ly++;
         }
-
+        
     }
 #ifndef GRAPHLESS_GUI
     else
-    {        
+    {
         n_int loop = 0;
         n_int loop_end = dimensionX*dimensionY;
         while (loop < loop_end)
@@ -194,8 +190,39 @@ n_int   count_switch = 0;
     polygonal_close();
 #endif
     shared_close();
+#ifdef ON_DISPLAY_UPDATE
+    CVDisplayLinkRelease(displayLink);
+#endif
     exit(0);
 }
+
+#ifdef ON_DISPLAY_UPDATE
+- (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
+{
+#ifndef NEW_OPENGL_ENVIRONMENT
+    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
+#endif
+    
+    if (shared_script_debug_ready())
+    {
+        [self debugOutput];
+    }
+    [self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
+    
+    if (sim_thread_console_quit())
+    {
+        [self quitProcedure];
+    }
+    return kCVReturnSuccess;
+}
+
+
+static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
+{
+    NobleMacView* localView = (__bridge NobleMacView *)(displayLinkContext);
+    return [localView getFrameForTime:outputTime];
+}
+#endif
 
 -(id) initWithFrame:(NSRect) frameRect
 {
@@ -231,31 +258,45 @@ n_int   count_switch = 0;
     {
         window_value = NUM_VIEW;
     }
-    
 #ifndef GRAPHLESS_GUI
     if ([[[self window] title] isEqualToString:@"Graph"])
     {
         window_value = NUM_GRAPH;
     }
 #endif
-    
 	fIdentification = shared_init(window_value, CFAbsoluteTimeGetCurrent());
-        
+    
     [[self window] setContentResizeIncrements:increments];
     
     [[self window] orderFrontRegardless];
+    
+#ifdef ON_DISPLAY_UPDATE
+    {
+        GLint swapInt = 1;
+        [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
+    }
+    CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
+    CVDisplayLinkSetOutputCallback(displayLink, &displayLinkCallback, (__bridge void*)self);
+    {
+        CGLContextObj cglContext = [[self openGLContext] CGLContextObj];
+        CGLPixelFormatObj cglPixelFormat = [[self pixelFormat] CGLPixelFormatObj];
+        CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
+    }
+    CVDisplayLinkStart(displayLink);
+#else
     
     /* start animation timer */
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
+#endif
 }
 
 #pragma mark ---- IB Actions ----
 
 -(IBAction) aboutDialog:(id) sender
 {
-    shared_about("Macintosh Cocoa");
+    shared_about("Macintosh INTEL Cocoa");
 }
 
 -(IBAction) menuControlPause:(id) sender
@@ -448,7 +489,6 @@ n_int   count_switch = 0;
 {
     graph_command(GC_VASCULAR);
 }
-
 #endif
 
 #pragma mark ---- Method Overrides ----
@@ -557,7 +597,7 @@ n_int   count_switch = 0;
 
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-
+    
 }
 
 @end

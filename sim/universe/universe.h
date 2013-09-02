@@ -1520,6 +1520,8 @@ n_int     file_interpret(n_file * input_file);
 void	  sim_close(void);
 void	  sim_populations(n_uint	*total, n_uint * female, n_uint * male);
 
+n_int sim_new(void);
+
 noble_simulation * sim_sim(void);
 
 void sim_flood(void);
@@ -1612,9 +1614,9 @@ const static noble_console_command control_commands[] =
     {&console_script,        "script",         "[file]",               "Load an ApeScript simulation file"},
     {&console_save,          "save",           "[file]",               "Save a simulation file"},
 
-    {&console_quit,               "quit",           "",                     "Quits the console"},
-    {&console_quit,               "exit",           "",                     ""},
-    {&console_quit,               "close",          "",                     ""},
+    {&console_quit,           "quit",           "",                     "Quits the console"},
+    {&console_quit,           "exit",           "",                     ""},
+    {&console_quit,           "close",          "",                     ""},
 #else
     {&cle_load,              "load",           "[file]",               "Load a simulation file"},
     {&cle_script,            "script",         "[file]",               "Load apescript file"},

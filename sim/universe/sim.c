@@ -242,6 +242,14 @@ n_uint	brain_hash_count;
 
 #endif
 
+static n_int            sim_new_progress = 0;
+
+n_int sim_new(void)
+{
+    return sim_new_progress;
+}
+
+
 #ifdef THREADED
 
 static void sim_indicators(noble_simulation * sim);
@@ -1163,6 +1171,9 @@ void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
 void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size)
 {
     n_byte2	local_random[2];
+    
+    sim_new_progress = 1;
+    
     sim.delta_cycles = 0;
     sim.count_cycles = 0;
     sim.real_time = randomise;
@@ -1229,6 +1240,8 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
     sim_set_select(0);
 
+    sim_new_progress = 0;
+    
     return ((void *) offbuffer);
 }
 

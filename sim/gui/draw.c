@@ -1647,6 +1647,8 @@ void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
 {
     noble_simulation * local_sim = sim_sim();
 
+    if (sim_new()) return;
+    
     if (window == NUM_TERRAIN)
     {
         terrain_dim_x = dim_x;
