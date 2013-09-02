@@ -20,7 +20,6 @@
 		4A3600631712409A004DAFBA /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003E1712409A004DAFBA /* social.c */; };
 		4A3600641712409A004DAFBA /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003F1712409A004DAFBA /* speak.c */; };
 		4A3600681712409A004DAFBA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600481712409A004DAFBA /* main.m */; };
-		4A36006A1712409A004DAFBA /* nobleape512.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A36004A1712409A004DAFBA /* nobleape512.xib */; };
 		4A36006B1712409A004DAFBA /* NobleMacView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A36004C1712409A004DAFBA /* NobleMacView.m */; };
 		4A36006C1712409A004DAFBA /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36004E1712409A004DAFBA /* audio.c */; };
 		4A36006D1712409A004DAFBA /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36004F1712409A004DAFBA /* interpret.c */; };
@@ -35,8 +34,7 @@
 		4A360077171240F1004DAFBA /* nobleape.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4A360076171240F1004DAFBA /* nobleape.icns */; };
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
 		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
-		4A94505117CDC33C00D5893C /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504817CDC33C00D5893C /* graph.c */; };
-		4A94505217CDC33C00D5893C /* phosphene.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504A17CDC33C00D5893C /* phosphene.c */; };
+		4A8ABB2317D44D4000D68884 /* nobleape.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A8ABB2217D44D4000D68884 /* nobleape.xib */; };
 		4A94505317CDC33C00D5893C /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504D17CDC33C00D5893C /* draw.c */; };
 		4A94505417CDC33C00D5893C /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504F17CDC33C00D5893C /* shared.c */; };
 		5A4805E2178676EB007220D7 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A4805E1178676EB007220D7 /* XCTest.framework */; };
@@ -77,7 +75,6 @@
 		4A36003E1712409A004DAFBA /* social.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = social.c; sourceTree = "<group>"; };
 		4A36003F1712409A004DAFBA /* speak.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = speak.c; sourceTree = "<group>"; };
 		4A3600481712409A004DAFBA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		4A36004A1712409A004DAFBA /* nobleape512.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = nobleape512.xib; sourceTree = "<group>"; };
 		4A36004B1712409A004DAFBA /* NobleMacView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NobleMacView.h; sourceTree = "<group>"; };
 		4A36004C1712409A004DAFBA /* NobleMacView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NobleMacView.m; sourceTree = "<group>"; };
 		4A36004E1712409A004DAFBA /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio.c; sourceTree = "<group>"; };
@@ -96,10 +93,7 @@
 		4A360076171240F1004DAFBA /* nobleape.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = nobleape.icns; sourceTree = "<group>"; };
 		4A360078171240FE004DAFBA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		4A7DC3E31749CD710013F2E9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
-		4A94504817CDC33C00D5893C /* graph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = graph.c; sourceTree = "<group>"; };
-		4A94504917CDC33C00D5893C /* graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = graph.h; sourceTree = "<group>"; };
-		4A94504A17CDC33C00D5893C /* phosphene.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = phosphene.c; sourceTree = "<group>"; };
-		4A94504B17CDC33C00D5893C /* phosphene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phosphene.h; sourceTree = "<group>"; };
+		4A8ABB2217D44D4000D68884 /* nobleape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = nobleape.xib; sourceTree = "<group>"; };
 		4A94504D17CDC33C00D5893C /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw.c; sourceTree = "<group>"; };
 		4A94504E17CDC33C00D5893C /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
 		4A94504F17CDC33C00D5893C /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shared.c; sourceTree = "<group>"; };
@@ -137,7 +131,6 @@
 			isa = PBXGroup;
 			children = (
 				4A360076171240F1004DAFBA /* nobleape.icns */,
-				4A94504717CDC33C00D5893C /* graph */,
 				4A94504C17CDC33C00D5893C /* gui */,
 				4A3600341712409A004DAFBA /* entity */,
 				4A3600471712409A004DAFBA /* mac */,
@@ -223,7 +216,7 @@
 			isa = PBXGroup;
 			children = (
 				4A3600481712409A004DAFBA /* main.m */,
-				4A36004A1712409A004DAFBA /* nobleape512.xib */,
+				4A8ABB2217D44D4000D68884 /* nobleape.xib */,
 				4A36004B1712409A004DAFBA /* NobleMacView.h */,
 				4A36004C1712409A004DAFBA /* NobleMacView.m */,
 			);
@@ -259,18 +252,6 @@
 			);
 			name = universe;
 			path = sim/universe;
-			sourceTree = "<group>";
-		};
-		4A94504717CDC33C00D5893C /* graph */ = {
-			isa = PBXGroup;
-			children = (
-				4A94504817CDC33C00D5893C /* graph.c */,
-				4A94504917CDC33C00D5893C /* graph.h */,
-				4A94504A17CDC33C00D5893C /* phosphene.c */,
-				4A94504B17CDC33C00D5893C /* phosphene.h */,
-			);
-			name = graph;
-			path = sim/graph;
 			sourceTree = "<group>";
 		};
 		4A94504C17CDC33C00D5893C /* gui */ = {
@@ -379,8 +360,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A8ABB2317D44D4000D68884 /* nobleape.xib in Resources */,
 				4A36002217124025004DAFBA /* InfoPlist.strings in Resources */,
-				4A36006A1712409A004DAFBA /* nobleape512.xib in Resources */,
 				4A360077171240F1004DAFBA /* nobleape.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -405,7 +386,6 @@
 				4A36005D1712409A004DAFBA /* body.c in Sources */,
 				4A36005E1712409A004DAFBA /* brain.c in Sources */,
 				4A36005F1712409A004DAFBA /* drives.c in Sources */,
-				4A94505217CDC33C00D5893C /* phosphene.c in Sources */,
 				4A3600601712409A004DAFBA /* episodic.c in Sources */,
 				4A3600611712409A004DAFBA /* food.c in Sources */,
 				4A3600621712409A004DAFBA /* metabolism.c in Sources */,
@@ -421,7 +401,6 @@
 				4A94505417CDC33C00D5893C /* shared.c in Sources */,
 				4A3600701712409A004DAFBA /* math.c in Sources */,
 				4A3600711712409A004DAFBA /* parse.c in Sources */,
-				4A94505117CDC33C00D5893C /* graph.c in Sources */,
 				4A3600721712409A004DAFBA /* skim.c in Sources */,
 				4A3600731712409A004DAFBA /* console.c in Sources */,
 				4A3600741712409A004DAFBA /* file.c in Sources */,
@@ -544,6 +523,7 @@
 				LLVM_LTO = NO;
 				LLVM_VECTORIZE_LOOPS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_CFLAGS = "-DGRAPHLESS_GUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
@@ -569,6 +549,7 @@
 				LLVM_LTO = NO;
 				LLVM_VECTORIZE_LOOPS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_CFLAGS = "-DGRAPHLESS_GUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;

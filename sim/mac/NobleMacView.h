@@ -90,6 +90,7 @@
 -(IBAction) loadManual:(id) sender;
 -(IBAction) loadSimulationPage:(id) sender;
 
+#ifndef GRAPHLESS_GUI
 -(IBAction) graphClearBraincode:(id)sender;
 -(IBAction) graphIdeosphere:(id)sender;
 -(IBAction) graphBraincode:(id)sender;
@@ -101,6 +102,7 @@
 -(IBAction) graphPhasespace:(id)sender;
 -(IBAction) graphSocial:(id)sender;
 -(IBAction) graphVascular:(id)sender;
+#endif
 
 -(void)keyUp:(NSEvent *)theEvent;
 -(void)keyDown:(NSEvent *)theEvent;

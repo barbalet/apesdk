@@ -54,7 +54,10 @@
 
 #define	TERRAINWINDOW(alpha)   (alpha)
 #define	VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA)
+
+#ifndef GRAPHLESS_GUI
 #define GRAPHWINDOW(alpha)     (alpha + (MAP_AREA + TERRAIN_WINDOW_AREA))
+#endif
 
 #define IS_WINDOW_KIND(x,y)			(((x)>>(y))&1)
 

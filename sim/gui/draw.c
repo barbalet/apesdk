@@ -366,9 +366,11 @@ n_byte * draw_pointer(n_byte which_one)
     case NUM_VIEW:
         return VIEWWINDOW(local_buffer);
         break;
+#ifndef GRAPHLESS_GUI
     case NUM_GRAPH:
         return GRAPHWINDOW(local_buffer);
         break;
+#endif
     }
     return 0L;
 }
@@ -443,9 +445,9 @@ void draw_about(n_constant_string platform)
 
     while (loop < 214)
     {
-        n_int  py = (GRAPH_WINDOW_HEIGHT/2) - 128 + loop;
-        const n_int px = (GRAPH_WINDOW_WIDTH/2) - 200;
-        n_byte * from_point = &buffer[(py*GRAPH_WINDOW_WIDTH) + px];
+        n_int  py = (MAP_DIMENSION/2) - 128 + loop;
+        const n_int px = (MAP_DIMENSION/2) - 200;
+        n_byte * from_point = &buffer[(py*MAP_DIMENSION) + px];
         io_erase(from_point, 400);
         loop++;
     }
@@ -1212,13 +1214,13 @@ static void draw_region(noble_being * local)
     local_draw.information = draw;
     local_draw.pixel_draw  = &pixel_map;
 
-    while (ly < GRAPH_WINDOW_HEIGHT)
+    while (ly < MAP_DIMENSION)
     {
         n_int   lx = 63;
-        while (lx < GRAPH_WINDOW_WIDTH)
+        while (lx < MAP_DIMENSION)
         {
-            draw[ lx | ((ly) << GRAPH_WINDOW_WIDTH_BITS) ] = COLOUR_YELLOW;
-            draw[ ly | ((lx) << GRAPH_WINDOW_WIDTH_BITS) ] = COLOUR_YELLOW;
+            draw[ lx | ((ly) << MAP_BITS) ] = COLOUR_YELLOW;
+            draw[ ly | ((lx) << MAP_BITS) ] = COLOUR_YELLOW;
             lx += 64;
         }
         ly += 2;
@@ -1657,11 +1659,13 @@ void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
     sim_draw_thread_start();
 #endif
 
+#ifndef GRAPHLESS_GUI
     if (window != NUM_GRAPH)
+#endif
     {
         draw_apes(local_sim, window);    /* 8 */
     }
-
+    
     if (window == NUM_TERRAIN)
     {
 
@@ -1693,10 +1697,13 @@ void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
         }
         
     }
+#ifndef GRAPHLESS_GUI
     if (window == NUM_GRAPH)
     {
         graph_draw(local_sim, draw_pointer(NUM_GRAPH), dim_x, dim_y);
     }
+#endif
+    
 #ifdef THREADED
     sim_draw_thread_end();
 #endif
