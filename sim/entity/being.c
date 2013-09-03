@@ -3113,15 +3113,11 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         
         body_genetics(beings, number, local, 0L, local->seed);
 
-        local->social_x = local->social_nx =
-                              (math_random(local->seed) & 32767)+16384;
-        local->social_y = local->social_ny =
-                              (math_random(local->seed) & 32767)+16384;
+        local->social_x = local->social_nx = (math_random(local->seed) & 32767)+16384;
+        local->social_y = local->social_ny = (math_random(local->seed) & 32767)+16384;
     }
     else
     {
-
-
         being_set_location(local, being_location(mother));
 
         /** this is the same as equals */
