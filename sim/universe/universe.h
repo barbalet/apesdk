@@ -1355,7 +1355,13 @@ typedef struct
     n_byte attention[ATTENTION_SIZE];
 
     n_genetics mother_genetics[CHROMOSOMES]; /* constant */
-    n_genetics father_genetics[CHROMOSOMES]; /* not constant */
+
+    n_byte2 unused1;                             /* constant */
+
+    n_genetics father_genetics[CHROMOSOMES]; /* constant */
+
+    n_byte  father_honor;                       /* constant */
+    n_byte2 father_name[2];                     /* constant */
 
     n_genetics genes[CHROMOSOMES];       /* constant */
 
@@ -1370,9 +1376,8 @@ typedef struct
     /* around here the previous file system breaks */
     /* generation number from the mother and father */
     n_uint generation[GENERATION_TOTAL];            /* constant */
-
-    n_byte2 father_name[2];                     /* constant */
-    n_byte  father_honor;                       /* constant */
+    /* temporary father generation value used during gestation */
+    n_uint father_generation;                       /* seems to be unused */
 
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];

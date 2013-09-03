@@ -202,7 +202,7 @@ typedef struct
  */
 typedef	struct
 {
-    n_byte  characters[7];
+    n_byte  characters[6];
     n_byte  incl_kind;
     n_byte  number;
     n_byte2 location;
