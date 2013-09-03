@@ -1376,8 +1376,6 @@ typedef struct
     /* around here the previous file system breaks */
     /* generation number from the mother and father */
     n_uint generation[GENERATION_TOTAL];            /* constant */
-    /* temporary father generation value used during gestation */
-    n_uint father_generation;                       /* seems to be unused */
 
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];

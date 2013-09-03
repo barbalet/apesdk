@@ -210,9 +210,9 @@ void being_erase(noble_being * value)
     value->social = new_event;
     value->episodic = new_episodic;
     
-    io_erase(new_brain, DOUBLE_BRAIN);
-    io_erase((n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
-    io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
+    if (new_brain) io_erase(new_brain, DOUBLE_BRAIN);
+    if (new_event) io_erase((n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
+    if (new_episodic) io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
 }
 
 n_int being_honor(noble_being * value)
