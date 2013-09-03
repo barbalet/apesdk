@@ -134,12 +134,18 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
         * location += (DOUBLE_BRAIN);
         
         local_being->social = (social_link *)&buffer[ * location  ];
-        io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(social_link)));
         * location += (SOCIAL_SIZE * sizeof(social_link));
 
+        io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(social_link)));
+
         local_being->episodic = (episodic_memory *) &buffer[ * location];
-        io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
         * location += (EPISODIC_SIZE * sizeof(episodic_memory));
+
+        io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
+        
+        if (local_being->brain == 0L) (void)SHOW_ERROR("brain is zero");
+        if (local_being->social == 0L) (void)SHOW_ERROR("social is zero");
+        if (local_being->episodic == 0L) (void)SHOW_ERROR("episodic is zero");
 
         lpx ++;
     }
