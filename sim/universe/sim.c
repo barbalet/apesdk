@@ -1174,6 +1174,11 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     
     sim_new_progress = 1;
     
+    if ((kind == KIND_NEW_SIMULATION) && (interpret))
+    {
+        interpret_cleanup(interpret);
+        interpret = 0L;
+    }
     sim.delta_cycles = 0;
     sim.count_cycles = 0;
     sim.real_time = randomise;
