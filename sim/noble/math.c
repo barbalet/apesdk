@@ -136,6 +136,9 @@ void vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor)
 void vect2_offset(n_vect2 * initial, n_int dx, n_int dy)
 {
     NA_ASSERT(initial, "initial NULL");
+    
+    if (initial == 0L) return;
+    
     initial->x += dx;
     initial->y += dy;
 }
@@ -145,6 +148,9 @@ void vect2_back_byte2(n_vect2 * converter, n_byte2 * output)
     NA_ASSERT(converter, "converter NULL");
     NA_ASSERT(output, "output NULL");
 
+    if (converter == 0L) return;
+    if (output == 0L) return;
+    
     if (converter->x > 65535) converter->x = 65535;
     if (converter->y > 65535) converter->y = 65535;
     if (converter->x < 0) converter->x = 0;
@@ -363,6 +369,9 @@ n_byte math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw)
     
     NA_ASSERT(draw, "draw NULL");
     
+    if (draw == 0L) return 1;
+    if (draw->pixel_draw == 0L) return 1;
+    
     local_draw = draw->pixel_draw;
     local_info = draw->information;
     
@@ -562,6 +571,8 @@ n_byte2 math_random(n_byte2 * local)
     
     NA_ASSERT(local, "local NULL");
 
+    if (local == 0L) return 0;
+    
     tmp0 = local[0];
     tmp1 = local[1];
     
@@ -597,10 +608,14 @@ void math_random3(n_byte2 * local)
 void math_bilinear_512_4096(n_byte * side512, n_byte * data)
 {
     n_int loop_y = 0;
-    
+        
     NA_ASSERT(side512, "side512 NULL");
     NA_ASSERT(data, "data NULL");
 
+    if (side512 == 0L) return;
+    if (data == 0L) return;
+
+    
     while (loop_y < 4096)
     {
 

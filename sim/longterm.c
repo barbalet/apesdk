@@ -60,21 +60,6 @@
 #include "universe/universe_internal.h"
 #endif
 
-/* this was added to avoid a CPU fan */
-
-#undef AUTO_LOAD_SCRIPT
-
-enum
-{
-    PLOT_IDEOSPHERE = 0,
-    PLOT_GENEPOOL,
-    PLOT_BRAINCODE,
-    PLOT_GENESPACE,
-    PLOT_PREFERENCES,
-    PLOT_RELATIONSHIPS,
-    PLOTS
-};
-
 extern n_int nolog;
 extern n_int indicator_index;
 extern n_uint save_interval_steps;
@@ -152,38 +137,6 @@ n_int draw_error(n_constant_string error_text)
     return -1;
 }
 
-static void plat_file_save_as(n_file * outfile)
-{
-    static n_byte	file_name_string[81]= {0};
-    FILE * file_debug_out = 0L;
-
-    time_t now;
-    struct tm *date;
-    now = time( NULL );
-    date = localtime( &now );
-    strftime( (n_string)file_name_string, 80, "as_run_%y%m%d%H%M%S.txt", date );
-    file_debug_out = fopen((n_string)file_name_string,"w");
-    if(file_debug_out != 0L)
-    {
-        fwrite(outfile->data,1,outfile->location, file_debug_out);
-        fclose(file_debug_out);
-    }
-}
-
-static int	plat_file_out(n_string file_name, n_byte * data, n_uint length)
-{
-    FILE  * outfile = 0L;
-    int	    error_value = -1;
-
-    outfile = fopen(file_name,"wb");
-    if(outfile == 0L)
-        return -1;
-    if(fwrite(data,1,length,outfile) == length)
-        error_value = 0;
-    fclose(outfile);
-    return error_value;
-}
-
 static int plat_file_in(n_string file_name, n_byte * data, n_uint * length)
 {
     FILE	* infile = 0L;
@@ -220,107 +173,6 @@ static int plat_file_in(n_string file_name, n_byte * data, n_uint * length)
     return error_value;
 }
 
-
-/* moved to console.c with major modifications */
-
-static n_int cle_step(void * ptr, n_string response, n_console_output output_function)
-{
-    unsigned long length = 0;
-    unsigned char *data = 0L;
-    n_int done = 0;
-
-    while (done == 0)
-    {
-        sim_cycle();
-        watch_ape(local_sim, output_function);
-
-        if (itt%(save_interval_steps)==0)
-        {
-            if (simulation_file_exists!=0)
-            {
-                simulation_file_exists = 0;
-            }
-            else
-            {
-                if (nolog==0)
-                {
-#ifndef CONSOLE_ONLY
-#ifdef GENEALOGY_ON
-                    sprintf((n_string)filename, "%s", "genealogy.ged");
-                    genealogy_save(local_sim, (n_string)filename);
-#endif
-#endif
-
-                    /* save the simulation state */
-                    data = sim_fileout(&length);
-                    (void) plat_file_out(simulation_filename, data, length);
-                    io_free(data);
-
-                }
-                done = 1;
-            }
-        }
-        if (local_sim->num == 0)
-        {
-            printf("*** %d %d %d \n", local_sim->land->date[1], local_sim->land->date[0], local_sim->land->time);
-
-            sim_init(1, rand(), MAP_AREA, 0);
-#ifndef CONSOLE_ONLY
-#ifdef GENEALOGY_ON
-            genealogy_log(local_sim, log_genealogy);
-#endif
-#endif
-            indicator_index++;
-            local_sim->indicators_logging = indicator_index;
-            itt=0;
-        }
-        itt++;
-    }
-    return 0;
-}
-
-
-/* moved to console.c with minor modifications */
-
-static n_int cle_run(void * ptr, n_string response, n_console_output output_function)
-{
-    n_uint i,run=0;
-    n_int number=0, interval=INTERVAL_DAYS;
-
-    if (response != 0)
-    {
-        if (io_length(response, STRING_BLOCK_SIZE) > 0)
-        {
-            if (get_time_interval(response, &number, &interval) > -1)
-            {
-                if (number > 0)
-                {
-                    printf("Running for %d %s", (int)number, interval_description[interval]);
-                    fflush(stdout);
-
-                    for (i = 0; i < (number * interval_steps[interval]) / save_interval_steps; i++)
-                    {
-                        cle_step(ptr, 0, output_function);
-                        printf(".");
-                        fflush(stdout);
-                    }
-                    printf("\n");
-
-                    run = 1;
-                }
-            }
-        }
-    }
-
-    if (run == 0)
-    {
-        (void)SHOW_ERROR("Time not specified, examples: run 2 days, run 6 hours");
-        return 0;
-    }
-
-    return 0;
-}
-
 /* moved to console.c with minor modifications */
 
 /* load simulation data */
@@ -328,7 +180,6 @@ static n_int cle_load(void * ptr, n_string response, n_console_output output_fun
 {
     n_uint length = 0;
     unsigned char *data = 0L;
-    FILE * fp;
 
     if (response==0) return 0;
 
@@ -346,129 +197,6 @@ static n_int cle_load(void * ptr, n_string response, n_console_output output_fun
         printf("Simulation file %s loaded\n",response);
     }
     return 0;
-}
-
-/* load apescript file */
-static n_int cle_script(void * ptr, n_string response, n_console_output output_function)
-{
-    unsigned long length = 0;
-    unsigned char *data = 0L;
-
-    if (response==0) return 0;
-
-    if (io_disk_check(response)!=0)
-    {
-        (void)plat_file_in(response,0,&length);
-        data = io_new(length);
-        (void)plat_file_in(response,data,&length);
-        (void)sim_interpret(data, length);
-        io_free(data);
-        printf("Apescript file %s loaded\n",response);
-    }
-    return 0;
-}
-
-static n_int cle_reset(void * ptr, n_string response, n_console_output output_function)
-{
-    itt = 0;
-    indicator_index = 1;
-    (void)console_reset(ptr, response, output_function);
-    if (nolog==0)
-    {
-#ifndef CONSOLE_ONLY
-#ifdef GENEALOGY_ON
-        genealogy_log(local_sim,log_genealogy);
-#endif
-#endif
-    }
-    local_sim->indicators_logging=indicator_index;
-    return 0;
-}
-
-static n_int cle_video(void * ptr, n_string response, n_console_output output_function)
-{
-    n_int i=0,j=0;
-    n_string_block video_type_str;
-    n_string_block picture_filename;
-    n_string_block video_filename;
-    n_string_block command_str;
-
-    /* get the video type */
-    while (i < io_length(response, STRING_BLOCK_SIZE))
-    {
-        if (response[i] != ' ')
-        {
-            video_type_str[i] = response[i];
-        }
-        else
-        {
-            if (i > 1) break;
-        }
-        i++;
-    }
-    video_type_str[i++] = '\0';
-
-    /* get the picture name */
-    picture_filename[0]='\0';
-    if (io_find(video_type_str,0,io_length(video_type_str,STRING_BLOCK_SIZE),"ideosphere",10)>-1)
-    {
-        sprintf(picture_filename,"%s","ideosphere%06d");
-    }
-    if (io_find(video_type_str,0,io_length(video_type_str,STRING_BLOCK_SIZE),"genepool",8)>-1)
-    {
-        sprintf(picture_filename,"%s","genepool%06d");
-    }
-    if (io_find(video_type_str,0,io_length(video_type_str,STRING_BLOCK_SIZE),"genespace",9)>-1)
-    {
-        sprintf(picture_filename,"%s","genespace%06d");
-    }
-    if (io_find(video_type_str,0,io_length(video_type_str,STRING_BLOCK_SIZE),"pref",4)>-1)
-    {
-        sprintf(picture_filename,"%s","preferences%06d");
-    }
-    if (io_find(video_type_str,0,io_length(video_type_str,STRING_BLOCK_SIZE),"relation",8)>-1)
-    {
-        sprintf(picture_filename,"%s","relationships%06d");
-    }
-
-    if (picture_filename[0]=='\0')
-    {
-        output_function("No video type specified");
-        return 0;
-    }
-
-    /* get the video filename */
-    while (i < io_length(response, STRING_BLOCK_SIZE))
-    {
-        if ((response[i]!=10) && (response[i]!=13))
-        {
-            video_filename[j++] = response[i];
-        }
-        i++;
-    }
-    video_filename[j] = '\0';
-
-    if (io_length(video_filename,STRING_BLOCK_SIZE)<2)
-    {
-        output_function("No video filename specified");
-        return 0;
-    }
-
-    /* run the command */
-    sprintf(command_str,"ffmpeg -r 5 -i %s.png %s",
-            picture_filename, video_filename);
-
-    if (system(command_str)==0)
-    {
-        printf("%s\n", command_str);
-    }
-
-    return 0;
-}
-
-static n_int longterm_quit(void * ptr, n_string response, n_console_output output_function)
-{
-    return io_quit(ptr, response, output_function);
 }
 
 int main(int argc, n_string argv[])

@@ -1601,7 +1601,6 @@ extern n_uint	brain_hash_count;
 const static noble_console_command control_commands[] =
 {
     {&io_help,               "help",           "[(command)]",          "Displays a list of all the commands"},
-#ifdef CONSOLE_ONLY
 #ifdef COMMAND_LINE_EXPLICIT
     {&console_reset,         "reset",          "",                     "Reset the simulation"},
     {&console_reset,         "clear"           "",                     ""},
@@ -1615,19 +1614,6 @@ const static noble_console_command control_commands[] =
     {&console_quit,           "quit",           "",                     "Quits the console"},
     {&console_quit,           "exit",           "",                     ""},
     {&console_quit,           "close",          "",                     ""},
-#else
-    {&cle_load,              "load",           "[file]",               "Load a simulation file"},
-    {&cle_script,            "script",         "[file]",               "Load apescript file"},
-    {&cle_script,            "apescript",      "",                     ""},
-    {&cle_video,             "video",          "ideosphere|genepool <filename>", "Create a video"},
-    {&cle_video,             "movie",          "genespace|preferences<filename>","Create a video"},
-    {&cle_video,             "film",           "relations <filename>",           "Create a video"},
-    {&longterm_quit,         "quit",           "",                     "Quits the console"},
-    {&longterm_quit,         "exit",           "",                     ""},
-    {&longterm_quit,         "close",          "",                     ""},
-    {&cle_reset,             "reset",          "",                     "Reset the simulation"},
-    {&cle_reset,             "clear"           "",                     ""},
-#endif
 
     {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 

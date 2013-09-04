@@ -1622,7 +1622,7 @@ n_int io_write_csv(n_file * fil, n_byte * data, const noble_file_entry * command
 
 void io_erase(n_byte * buf_offscr, n_uint nestop)
 {
-    buf_offscr = memset(buf_offscr, 0, nestop);
+    memset(buf_offscr, 0, nestop);
 }
 
 void io_search_file_format(const noble_file_entry * format, n_string compare)
