@@ -91,6 +91,11 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
     NA_ASSERT(evaluate, "evaluate NULL");
     NA_ASSERT(number, "number NULL");
     
+    if (code == 0L) return SHOW_ERROR("No code provided");
+    if (evaluate == 0L) return SHOW_ERROR("Nothing to evaluate");
+    if (number == 0L) return SHOW_ERROR("No numbers provided");
+    
+    
     if(code->sc_output(code,evaluate,&val_a) == -1)
     {
         return io_apescript_error(AE_FIRST_VALUE_FAILED);
@@ -205,6 +210,9 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
     
     NA_ASSERT(code, "code NULL");
     NA_ASSERT(value, "value NULL");
+    
+    if (code == 0L) return SHOW_ERROR("No code provided");
+    if (value == 0L) return SHOW_ERROR("No values provided");
     
     first_value = value[0];
     second_value = value[1];

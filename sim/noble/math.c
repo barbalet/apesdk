@@ -53,6 +53,10 @@ void vect2_byte2(n_vect2 * converter, n_byte2 * input)
 {
     NA_ASSERT(converter, "converter NULL");
     NA_ASSERT(input, "input NULL");
+    
+    if (converter == 0L) return;
+    if (input == 0L) return;
+    
     converter->x = input[0];
     converter->y = input[1];
 }
@@ -68,6 +72,11 @@ void vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
     NA_ASSERT(equals, "equals NULL");
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
+    
+    if (equals == 0L) return;
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    
     equals->x = initial->x + second->x;
     equals->y = initial->y + second->y;
 }
@@ -83,6 +92,11 @@ void vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
     NA_ASSERT(equals, "equals NULL");
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
+    
+    if (equals == 0L) return;
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    
     equals->x = initial->x - second->x;
     equals->y = initial->y - second->y;
 }
@@ -95,6 +109,12 @@ void vect2_multiplier(n_vect2 * equals, n_vect2 * initial, n_vect2 * second,
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
     NA_ASSERT(divisor, "divisor ZERO");
+    
+    if (equals == 0L) return;
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    if (divisor == 0L) return;
+
     equals->x = (multiplier * initial->x * second->x) / divisor;
     equals->y = (multiplier * initial->y * second->y) / divisor;
 }
@@ -104,6 +124,11 @@ void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int diviso
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
     NA_ASSERT(divisor, "divisor ZERO");
+    
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    if (divisor == 0L) return;
+    
     initial->x += ( (multiplier * second->x) / divisor);
     initial->y += ( (multiplier * second->y) / divisor);
 }
@@ -122,6 +147,10 @@ n_int vect2_dot(n_vect2 * initial, n_vect2 * second,
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
     NA_ASSERT(divisor, "divisor ZERO");
+    
+    if (initial == 0L) return 0;
+    if (second == 0L) return 0;
+    
     return (multiplier * ((initial->x * second->x) + (initial->y * second->y))) / divisor;
 }
 
@@ -172,9 +201,6 @@ void  vect2_populate(n_vect2 * value, n_int x, n_int y)
     value->x = x;
     value->y = y;
 }
-
-/*n_patch*/
-
 
 /**
  * This function creates the fractal landscapes and the genetic fur patterns

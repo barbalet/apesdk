@@ -125,6 +125,8 @@ void weather_cycle(n_land * local_land, n_weather * local_weather)
     
     NA_ASSERT(atmosphere, "atmosphere NULL");
     
+    if (atmosphere == 0L) return;
+    
     while ( lx < map_dimensions2 )
     {
         n_int	lx_min = WEATHER_MEM(map_dimensions2, (lx + (map_dimensions2-1) ) & ((map_dimensions2)-1), 0, 0);
@@ -159,7 +161,13 @@ void weather_init(n_weather * local_weather, n_land * local_land)
     NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(local_weather, "local_weather NULL");
     
+    if (local_weather == 0L) return;
+    if (local_land == 0L) return;
+    
     land		= local_land->map;
+    
+    if (land == 0L) return;
+
     atmosphere = local_weather->atmosphere;
     map_dimension2 = land_map_dimension(local_land)/2;
     
@@ -242,6 +250,9 @@ n_int	weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int 
     NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(wea, "wea NULL");
     
+    if (local_land == 0L) return SHOW_ERROR("No land provided");
+    if (wea == 0L) return SHOW_ERROR("No weather provided");
+    
     time_of_day = local_land->time;
     current_time = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
     
@@ -266,6 +277,10 @@ void  weather_wind_vector(n_land * local_land, n_weather * wea, n_int px, n_int 
     NA_ASSERT(wind_dx, "wind_dx NULL");
     NA_ASSERT(wind_dy, "wind_dy NULL");
 
+    if (wea == 0L) return;
+    if (wind_dx == 0L) return;
+    if (wind_dy == 0L) return;
+    
     local_pressure = weather_pressure(wea, (px>>1), (py>>1), map_dimensions2);
     *wind_dx = local_pressure - weather_pressure(wea, (px>>1) - 1, (py>>1), map_dimensions2);
     *wind_dy = local_pressure - weather_pressure(wea, (px>>1), (py>>1) - 1, map_dimensions2);
@@ -373,6 +388,8 @@ void land_cycle(n_land * local_land)
 {
     NA_ASSERT(local_land, "local_land NULL");
 
+    if (local_land == 0L) return;
+    
     local_land->time++;
     if (local_land->time == TIME_DAY_MINUTES)
     {
@@ -529,10 +546,16 @@ n_int land_operator_interpolated(n_land * local_land, n_weather * local_weather,
 void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
 {
     NA_ASSERT(local, "local NULL");
+    
+    if (local == 0L) return;
+    
     {
         n_byte *local_map = local->map;
         n_uint	loop      = 0;
         NA_ASSERT(local_map, "local_map NULL");
+        
+        if (local_map == 0L) return;
+        
         while (loop < (MAP_AREA))
         {
             local_map[loop] = 128;
@@ -554,6 +577,10 @@ void land_init(n_land * local, n_byte * scratch)
     NA_ASSERT(local, "local NULL");
     NA_ASSERT(scratch, "scratch NULL");
     
+    if (local == 0L) return;
+    if (scratch == 0L) return;
+    
+    
     local_random[0] = local->genetics[0];
     local_random[1] = local->genetics[1];
 
@@ -573,6 +600,10 @@ void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * lo
     NA_ASSERT(local, "local NULL");
     NA_ASSERT(location, "location NULL");
 
+    if (output == 0L) return;
+    if (local == 0L) return;
+    if (location == 0L) return;
+    
     loc_x = location->x;
     loc_y = location->y;
     z = QUICK_LAND(local, APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
