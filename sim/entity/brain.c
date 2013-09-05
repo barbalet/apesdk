@@ -560,26 +560,6 @@ void braincode_statistics(noble_simulation * sim)
             }
         }
     }
-    if (sim->num>0)
-    {
-        INDICATOR_SET(sim, IT_AVERAGE_SENSORS, sensors);
-        INDICATOR_SET(sim, IT_AVERAGE_ACTUATORS, actuators);
-        INDICATOR_SET(sim, IT_AVERAGE_OPERATORS, operators);
-        INDICATOR_SET(sim, IT_AVERAGE_CONDITIONALS, conditionals);
-        INDICATOR_SET(sim, IT_AVERAGE_DATA, data);
-
-        INDICATOR_MULTIPLY(sim, IT_AVERAGE_SENSORS, 10);
-        INDICATOR_MULTIPLY(sim, IT_AVERAGE_ACTUATORS, 10);
-        INDICATOR_MULTIPLY(sim, IT_AVERAGE_OPERATORS, 10);
-        INDICATOR_MULTIPLY(sim, IT_AVERAGE_CONDITIONALS, 10);
-        INDICATOR_MULTIPLY(sim, IT_AVERAGE_DATA, 10);
-
-        INDICATOR_NORMALIZE(sim, IT_AVERAGE_SENSORS);
-        INDICATOR_NORMALIZE(sim, IT_AVERAGE_ACTUATORS);
-        INDICATOR_NORMALIZE(sim, IT_AVERAGE_OPERATORS);
-        INDICATOR_NORMALIZE(sim, IT_AVERAGE_CONDITIONALS);
-        INDICATOR_NORMALIZE(sim, IT_AVERAGE_DATA);
-    }
 }
 
 /**
@@ -1177,10 +1157,6 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
                 (!(meeter_being->state&BEING_STATE_SPEAKING)) &&
                 (meeter_being->shout[SHOUT_HEARD]>0))
         {
-
-            INDICATOR_INC(sim, IT_AVERAGE_LISTENS);
-
-
             return meeter_being->shout[SHOUT_HEARD];
         }
         break;
@@ -1626,10 +1602,6 @@ void brain_dialogue(
                     n_int  n = pspace[0] % BRAINCODE_PROBES;
                     n_byte f = 1 + (IS_CONST1 % BRAINCODE_MAX_FREQUENCY);
 
-                    if (meeter_being->brainprobe[n].frequency != f)
-                    {
-                        INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
-                    }
                     meeter_being->brainprobe[n].frequency = f;
                     break;
                 }
@@ -1644,10 +1616,7 @@ void brain_dialogue(
                 {
                     n_int  n = pspace[0] % BRAINCODE_PROBES;
                     n_byte typ = IS_CONST1 & 1;
-                    if (meeter_being->brainprobe[n].type != typ)
-                    {
-                        INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
-                    }
+
                     meeter_being->brainprobe[n].type = typ;
                     break;
                 }
@@ -1655,11 +1624,7 @@ void brain_dialogue(
                 {
                     n_int n = pspace[0] % BRAINCODE_PROBES;
                     n_byte adr = IS_CONST1;
-
-                    if (meeter_being->brainprobe[n].address != adr)
-                    {
-                        INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
-                    }
+                    
                     meeter_being->brainprobe[n].address = adr;
                     break;
                 }
@@ -1684,8 +1649,6 @@ void brain_dialogue(
                         meeter_being->shout[SHOUT_VOLUME] = pspace[0];
                         /** type of message */
                         meeter_being->shout[SHOUT_CONTENT] = msg;
-                        INDICATOR_INC(sim, IT_AVERAGE_SHOUTS);
-
                     }
                     break;
                 }
@@ -1706,10 +1669,6 @@ void brain_dialogue(
                 {
                     n_int n = pspace[0] % BRAINCODE_PROBES;
                     n_byte offset = IS_CONST1;
-                    if (meeter_being->brainprobe[n].offset != offset)
-                    {
-                        INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
-                    }
 
                     meeter_being->brainprobe[n].offset = offset;
                     break;
@@ -1731,12 +1690,6 @@ void brain_dialogue(
                 {
                     n_int  n = pspace[0] % BRAINCODE_PROBES;
                     n_byte p = IS_CONST1;
-
-                    if (meeter_being->brainprobe[n].position != p)
-                    {
-                        INDICATOR_INC(sim, IT_AVERAGE_BRAINPROBE_ACTIVITY);
-                    }
-
                     meeter_being->brainprobe[n].position = p;
                     break;
                 }

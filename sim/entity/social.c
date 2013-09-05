@@ -1114,8 +1114,6 @@ n_byte social_groom(
     /** parasites sap energy */
     being_energy_delta(meeter_being, 0 - (PARASITE_ENERGY_COST*meeter_being->parasites));
 
-    INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, PARASITE_ENERGY_COST*meeter_being->parasites);
-
     if (distance < PARASITE_HOP_MAX_DISTANCE)
     {
         /** hairy beings can carry more parasites */
@@ -1126,7 +1124,6 @@ n_byte social_groom(
         {
             met_being->parasites++;
             meeter_being->parasites--;
-            INDICATOR_INC(sim, IT_AVERAGE_PARASITE_MOBILITY);
         }
     }
 
@@ -1172,7 +1169,6 @@ n_byte social_groom(
             /** grooming location becomes the new focus of attention */
             GET_A(meeter_being, ATTENTION_BODY) = groomloc;
 
-            INDICATOR_INC(sim, IT_AVERAGE_GROOMING);
             episodic_interaction(sim, meeter_being, met_being, EVENT_GROOM, AFFECT_GROOM, groomloc);
             episodic_interaction(sim, met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);
 
@@ -1310,8 +1306,6 @@ n_byte2 social_squabble(
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_SHOWFORCE);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_SHOWFORCE);
 
-                INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_SHOWFORCE*2);
-
                 ret_val |= BEING_STATE_SHOWFORCE;
             }
             else
@@ -1320,8 +1314,6 @@ n_byte2 social_squabble(
                 vanquished->inventory[punchloc] = INVENTORY_WOUND;
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_ATTACK);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_ATTACK);
-                INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_OUTPUT, SQUABBLE_ENERGY_ATTACK*2);
-
 #ifdef PARASITES_ON
                 being_honor_swap(victor, vanquished);
 #endif
@@ -1653,9 +1645,6 @@ n_int social_chat(
 
 
     meeter_being->speak = 0;
-
-    /** Record the chat event */
-    INDICATOR_INC(sim, IT_AVERAGE_CHAT);
 
     /** agree upon terrirory */
     social_chat_territory(meeter_being, met_being,being_index,meeter_graph,respect_mean);

@@ -443,9 +443,6 @@ static const n_constant_string interval_description[] = { "mins","hours","days",
 #define BREATHING_RATE_MAX          300
 #define CO2_PANT                    1400
 
-#define INDICATORS_FREQUENCY                  60
-#define INDICATORS_BUFFER_SIZE                24
-
 /* nature in the range 0-15 from the genetics
    nurture in the range 0-255 from learned preferences.
    Resulting value is in the range 0-15 */
@@ -1253,57 +1250,6 @@ noble_immune_system;
 
 #endif
 
-
-enum indicator_type
-{
-    IT_POPULATION = 0,
-    IT_PARASITES,
-    IT_POPULATION_DENSITY,
-    IT_POPULATION_DENSITY_END = IT_POPULATION_DENSITY + (8*8),
-    IT_AVERAGE_AGE_DAYS,
-    IT_AVERAGE_MOBILITY,
-    IT_AVERAGE_ENERGY,
-    IT_AVERAGE_ENERGY_INPUT,
-    IT_AVERAGE_ENERGY_OUTPUT,
-    IT_AVERAGE_AMOROUSNESS,
-    IT_AVERAGE_COHESION,
-    IT_AVERAGE_FAMILIARITY,
-    IT_AVERAGE_SOCIAL_LINKS,
-    IT_AVERAGE_POSITIVE_AFFECT,
-    IT_AVERAGE_NEGATIVE_AFFECT,
-    IT_AVERAGE_ANTIGENS,
-    IT_AVERAGE_ANTIBODIES,
-
-    IT_AVERAGE_CHAT,
-    IT_AVERAGE_SHOUTS,
-    IT_AVERAGE_LISTENS,
-    IT_AVERAGE_GROOMING,
-
-    IT_AVERAGE_PARASITE_MOBILITY,
-    IT_AVERAGE_BRAINPROBE_ACTIVITY,
-
-    IT_DROWNINGS,
-    IT_IDEOLOGY_SD,
-    IT_GENETICS_SD,
-    IT_FAMILY_NAME_SD,
-
-    IT_DRIVES,
-    IT_DRIVES_END = IT_DRIVES + DRIVES,
-
-    IT_FOOD,
-    IT_FOOD_END = IT_FOOD + FOOD_TYPES,
-
-    IT_AVERAGE_FIRST_PERSON,
-    IT_AVERAGE_INTENTIONS,
-    IT_AVERAGE_SENSORS,
-    IT_AVERAGE_ACTUATORS,
-    IT_AVERAGE_OPERATORS,
-    IT_AVERAGE_CONDITIONALS,
-    IT_AVERAGE_DATA,
-
-    IT_NUMBER_ENTRIES
-};
-
 typedef struct
 {
     n_byte2	location[2];
@@ -1400,21 +1346,6 @@ noble_being;
 typedef void (being_birth_event)(noble_being * born, noble_being * mother, void * sim);
 typedef void (being_death_event)(noble_being * deceased, void * sim);
 
-
-#define INDICATOR_ACCESS(sim, index)            sim->indicators_base[(sim->indicator_index * IT_NUMBER_ENTRIES) + (index)]
-
-#define INDICATOR_SET(sim, index, val)          INDICATOR_ACCESS(sim, index) = (val)
-#define INDICATOR_ADD(sim, index, val)          INDICATOR_ACCESS(sim, index) += (val)
-#define INDICATOR_INC(sim, index)               INDICATOR_ACCESS(sim, index) ++
-
-#define INDICATOR_DIVIDE(sim, index, value)     INDICATOR_ACCESS(sim, index) /= (value)
-#define INDICATOR_NORMALIZE(sim, index)         INDICATOR_DIVIDE(sim, index, sim->num)
-#define INDICATOR_MULTIPLY(sim, index, value)   INDICATOR_ACCESS(sim, index) *= value
-
-#define INDICATOR_NAME(sim, index)              sim->indicators_name[(index)]
-#define INDICATOR_INIT_NAME(sim, index, string) sim.indicators_name[(index)] = string
-
-
 /*! @struct
  @field land The n_land pointer.
  @field weather The n_weather pointer.
@@ -1443,12 +1374,6 @@ typedef struct
     n_uint          last_time;
     n_uint          delta_cycles;
     n_uint          count_cycles;
-
-    n_uint          indicator_index;
-    n_uint          indicators_logging;
-
-    n_uint          indicators_base[IT_NUMBER_ENTRIES * INDICATORS_BUFFER_SIZE];
-    n_string        indicators_name[IT_NUMBER_ENTRIES];
 
     being_birth_event * ext_birth;
     being_death_event * ext_death;

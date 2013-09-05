@@ -2498,9 +2498,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 /** eating when stopped */
                 n_byte  food_type;
                 n_int energy = food_eat(sim->land, sim->weather, location_vector.x, location_vector.y, az, &food_type, local);
-
-                INDICATOR_INC(sim, IT_FOOD+food_type);
-
+                
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
 
@@ -2512,8 +2510,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                     loc_e += energy;
 
                     being_reset_drive(local, DRIVE_HUNGER);
-
-                    INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, energy);
 
                     loc_state |= BEING_STATE_EATING;
                     /** grow */
@@ -2698,9 +2694,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                             being_energy_delta(mother, 0 - SUCKLING_ENERGY);
                             /** child gains energy */
                             loc_e += SUCKLING_ENERGY;
-                            /** update indicators */
-
-                            INDICATOR_ADD(sim, IT_AVERAGE_ENERGY_INPUT, SUCKLING_ENERGY);
 
                             /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
@@ -2756,8 +2749,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     local->state = loc_state;
-
-    INDICATOR_ADD(sim, IT_AVERAGE_MOBILITY, loc_s);
 }
 
 
@@ -3336,8 +3327,6 @@ void being_tidy(noble_simulation * local_sim)
 
         local_e -= delta_e;
 
-        INDICATOR_ADD(local_sim, IT_AVERAGE_ENERGY_OUTPUT, delta_e);
-
         if (land->time == 0)
         {
             n_int age_in_years = AGE_IN_YEARS(local_sim,local_being);
@@ -3404,12 +3393,6 @@ void being_remove(noble_simulation * local_sim)
             if (local_sim->ext_death != 0L)
             {
                 local_sim->ext_death(b,local_sim);
-            }
-
-            /** Did the being drown? */
-            if (b->state & BEING_STATE_SWIMMING)
-            {
-                INDICATOR_INC(local_sim, IT_DROWNINGS);
             }
 
             /** remove all children's maternal links if the mother dies */

@@ -60,17 +60,10 @@
 #include "universe/universe_internal.h"
 #endif
 
-extern n_int nolog;
-extern n_int indicator_index;
-extern n_uint save_interval_steps;
 n_string_block simulation_filename;
 
 noble_simulation *local_sim;
-n_uint itt = 0;
 
-#ifndef CONSOLE_ONLY
-const n_uint log_genealogy=GENEALOGY_GEDCOM;
-#endif
 n_int simulation_file_exists = 0;
 
 #ifdef AUDIT_FILE
@@ -216,16 +209,6 @@ int main(int argc, n_string argv[])
 
     srand((unsigned int) time(NULL) );
     sim_init(2,rand(),MAP_AREA,0);
-
-    if (nolog==0)
-    {
-#ifndef CONSOLE_ONLY
-#ifdef GENEALOGY_ON
-        genealogy_log(local_sim,log_genealogy);
-#endif
-#endif
-    }
-    local_sim->indicators_logging=indicator_index;
 
     cle_load(local_sim, (n_string)simulation_filename, io_console_out);
 
