@@ -1359,10 +1359,9 @@ typedef void (being_death_event)(noble_being * deceased, void * sim);
  */
 typedef struct
 {
-    n_land    * land;
-    n_weather * weather;
+    n_land        * land;
+    n_weather     * weather;
     noble_being   * beings;
-
 
     n_uint	        num;
     n_uint	        max;

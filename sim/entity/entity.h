@@ -179,11 +179,6 @@ void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum in
 n_byte * being_braincode_external(noble_being * value);
 n_byte * being_braincode_internal(noble_being * value);
 
-void genealogy_log(noble_simulation * sim,n_byte value);
-n_int genealogy_save(noble_simulation * sim, n_string filename);
-void genealogy_birth(noble_being * child, noble_being * mother, void * sim);
-void genealogy_death(noble_being * local_being, void * sim);
-
 typedef void (being_no_return)(noble_simulation * sim, noble_being * actual);
 
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func);

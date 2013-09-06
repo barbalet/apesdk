@@ -33,6 +33,7 @@
 		4A3600751712409A004DAFBA /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600591712409A004DAFBA /* sim.c */; };
 		4A360077171240F1004DAFBA /* nobleape.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4A360076171240F1004DAFBA /* nobleape.icns */; };
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
+		4A79776517D9A4AF0000A255 /* genealogy.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A79776417D9A4AF0000A255 /* genealogy.c */; };
 		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
 		4A8ABB2317D44D4000D68884 /* nobleape.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A8ABB2217D44D4000D68884 /* nobleape.xib */; };
 		4A8ABB2517D452DC00D68884 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A8ABB2417D452DC00D68884 /* QuartzCore.framework */; };
@@ -93,6 +94,7 @@
 		4A36005B1712409A004DAFBA /* universe_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe_internal.h; sourceTree = "<group>"; };
 		4A360076171240F1004DAFBA /* nobleape.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = nobleape.icns; sourceTree = "<group>"; };
 		4A360078171240FE004DAFBA /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		4A79776417D9A4AF0000A255 /* genealogy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = genealogy.c; sourceTree = "<group>"; };
 		4A7DC3E31749CD710013F2E9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
 		4A8ABB2217D44D4000D68884 /* nobleape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = nobleape.xib; sourceTree = "<group>"; };
 		4A8ABB2417D452DC00D68884 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -200,6 +202,7 @@
 		4A3600341712409A004DAFBA /* entity */ = {
 			isa = PBXGroup;
 			children = (
+				4A79776417D9A4AF0000A255 /* genealogy.c */,
 				4A3600351712409A004DAFBA /* being.c */,
 				4A3600361712409A004DAFBA /* body.c */,
 				4A3600371712409A004DAFBA /* brain.c */,
@@ -400,6 +403,7 @@
 				4A94505317CDC33C00D5893C /* draw.c in Sources */,
 				4A36006C1712409A004DAFBA /* audio.c in Sources */,
 				4A36006D1712409A004DAFBA /* interpret.c in Sources */,
+				4A79776517D9A4AF0000A255 /* genealogy.c in Sources */,
 				4A36006E1712409A004DAFBA /* io.c in Sources */,
 				4A36006F1712409A004DAFBA /* land.c in Sources */,
 				4A94505417CDC33C00D5893C /* shared.c in Sources */,
