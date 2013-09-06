@@ -314,6 +314,7 @@
 		4A4E397B17D756B700780335 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				LLVM_VECTORIZE_LOOPS = YES;
 				OTHER_CFLAGS = "-DCOMMAND_LINE_EXPLICIT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -322,6 +323,8 @@
 		4A4E397C17D756B700780335 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = fast;
+				LLVM_VECTORIZE_LOOPS = YES;
 				OTHER_CFLAGS = "-DCOMMAND_LINE_EXPLICIT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
