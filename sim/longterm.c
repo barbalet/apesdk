@@ -102,7 +102,43 @@ static void audit_compart_offset()
 
     audit_print_offset(start,(n_byte *)&(local.territory[0]),"territory[0]");
     audit_print_offset(start,(n_byte *)&(local.immune_system),"immune_system[0]");
+
+    audit_print_offset(start,(n_byte *)&(local.vessel[0]),"vessel[0]");
+    audit_print_offset(start,(n_byte *)&(local.metabolism[0]),"metabolism[0]");
+    
+    audit_print_offset(start,(n_byte *)&(local.braincode_register[0]),"braincode_register[0]");
     audit_print_offset(start,(n_byte *)&(local.brainprobe[0]),"brainprobe[0]");
+    
+    audit_print_offset(start,(n_byte *)&(local.vessel[0]),"vessel[0]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[1]),"vessel[1]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[2]),"vessel[2]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[3]),"vessel[3]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[4]),"vessel[4]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[5]),"vessel[5]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[6]),"vessel[6]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[7]),"vessel[7]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[8]),"vessel[8]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[9]),"vessel[9]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[10]),"vessel[10]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[11]),"vessel[11]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[12]),"vessel[12]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[13]),"vessel[13]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[14]),"vessel[14]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[15]),"vessel[15]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[16]),"vessel[16]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[17]),"vessel[17]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[18]),"vessel[18]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[19]),"vessel[19]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[20]),"vessel[20]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[21]),"vessel[21]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[22]),"vessel[22]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[23]),"vessel[23]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[24]),"vessel[24]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[25]),"vessel[25]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[26]),"vessel[26]");
+    audit_print_offset(start,(n_byte *)&(local.vessel[27]),"vessel[27]");
+    
+    audit_print_offset(start,(n_byte *)&(local.brain),"brain");
 }
 
 static void audit(void)

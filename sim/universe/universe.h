@@ -1200,7 +1200,7 @@ noble_brain_probe;
  */
 typedef	struct
 {
-    n_byte2 parent;
+    n_byte2 parent;      
     n_byte  constriction;
     n_byte  hardening;
     n_byte2 length;
@@ -1287,26 +1287,23 @@ typedef struct
 
     /* indexes to current focus of attention*/
     n_byte attention[ATTENTION_SIZE];
-
-    n_byte unused_a[3];
     
     n_genetics mother_genetics[CHROMOSOMES]; /* constant */
     n_genetics father_genetics[CHROMOSOMES]; /* constant */
     n_genetics genes[CHROMOSOMES];           /* constant */
 
     n_byte  father_honor;                       /* constant */
-    
-    n_byte  unused_b;
-    
+        
     n_byte2 father_name[2];                     /* constant */
-
+    
     n_byte2     social_x;
     n_byte2     social_y;
     n_byte2     social_nx;
     n_byte2     social_ny;
-
+    
     n_byte      drives[DRIVES];
     n_byte2     goal[4];
+    
     n_byte      learned_preference[PREFERENCES];
     n_byte2     generation_min;
     n_byte2     generation_max;
@@ -1319,13 +1316,18 @@ typedef struct
 #ifdef IMMUNE_ON
     noble_immune_system immune_system;
 #endif
-#ifdef METABOLISM_ON
-    noble_vessel vessel[VASCULAR_SIZE];
-    n_byte2 metabolism[METABOLISM_SIZE];
-#endif
+
 #ifdef BRAINCODE_ON
     n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
     noble_brain_probe brainprobe[BRAINCODE_PROBES];
+#endif
+    
+#ifdef METABOLISM_ON
+    n_byte2 metabolism[METABOLISM_SIZE];
+#endif
+    
+#ifdef METABOLISM_ON
+    noble_vessel vessel[VASCULAR_SIZE];
 #endif
     n_byte          * brain;
     social_link     * social;

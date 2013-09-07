@@ -135,7 +135,7 @@
 
 #define OFFSET_BRAINCODE	(OFFSET_METABOLISM+METABOLISM_BYTES)
 
-#define	NON_PTR_BEING		(sizeof(noble_being))
+#define	NON_PTR_BEING		(648)
 #define	NON_PTR_LAND		(11)
 
 #define	LARGEST_INIT_PTR	((NON_PTR_BEING > NON_PTR_LAND) ? NON_PTR_BEING : NON_PTR_LAND)
@@ -206,8 +206,6 @@ static const noble_file_entry noble_file_format[]=
     {{'c', 'o', 'n', 'c', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, 64, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
 
     {{'a', 't', 't', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, 68, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/
-
-    {{'u', 'n', 'u', 's', 'a', '='}, FIL_BEI | FILE_TYPE_BYTE, 3, 73, "Unused Block A"}, 
     
     {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, 76, "Mother genetics"}, /*n_genetics mother_genetics[CHROMOSOMES];*/
 
@@ -218,15 +216,12 @@ static const noble_file_entry noble_file_format[]=
     
     {{'f', 'a', 't', 'h', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE , 1, 124, "Father honor"}, /*n_byte  father_honor; */
     
-    {{'u', 'n', 'u', 's', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, 125, "Unused Block B"},
-
     
     {{'f', 'a', 't', 'h', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE , 2, 126, "Father family names"}, /*n_byte  father_name[2];*/
 
-
+    
     {{'s', 'o', 's', 'i', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 130, "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
-
-
+    
     {{'d', 'r', 'i', 'v', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, DRIVES, 138, "Drives"}, /*n_byte   drives[DRIVES];*/
     {{'g', 'o', 'a', 'l', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 142, "Goals"},
 
@@ -238,9 +233,17 @@ static const noble_file_entry noble_file_format[]=
 #ifdef IMMUNE_ON
     {{'i', 'm', 'm', 'u', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, IMMUNE_BYTES, 428, "Immune system information"},
 #endif
-#ifdef METABOLISM_ON
-    /* fixed to here */
+
+#ifdef BRAINCODE_ON
+    {{'b', 'r', 'r', 'e', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, 476, "Brain code register"},
+    {{'b', 'r', 'p', 'r', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE, (sizeof(noble_brain_probe)*BRAINCODE_PROBES), 479, "Brain code probe"},
+#endif
     
+#ifdef METABOLISM_ON
+    {{'m', 'e', 't', 'a', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, 576, "Metabolism"},
+
+    /* fixed to here */
+/*
     {{'v', 'a', 's', 'c', 'a', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR, "Vascular system 1"},
     {{'v', 'a', 's', 'c', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*2), "Vascular system 2"},
     {{'v', 'a', 's', 'c', 'c', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*4), "Vascular system 3"},
@@ -255,12 +258,9 @@ static const noble_file_entry noble_file_format[]=
     {{'v', 'a', 's', 'c', 'l', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*22), "Vascular system 12"},
     {{'v', 'a', 's', 'c', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*24), "Vascular system 13"},
     {{'v', 'a', 's', 'c', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*26), "Vascular system 14"},
-    {{'m', 'e', 't', 'a', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, OFFSET_METABOLISM, "Metabolism"},
+*/
 #endif
-#ifdef BRAINCODE_ON
-    {{'b', 'r', 'r', 'e', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, OFFSET_BRAINCODE, "Brain code register"},
-    {{'b', 'r', 'p', 'r', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE, (sizeof(noble_brain_probe)*BRAINCODE_PROBES), (OFFSET_BRAINCODE+BRAINCODE_PSPACE_REGISTERS), "Brain code probe"},
-#endif
+    
 #endif
 
 #ifdef USE_FIL_SOE

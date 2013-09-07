@@ -1934,8 +1934,7 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
 
         if (console_file_interaction)
         {
-
-            output_function("File interaction in use");
+            output_function("File interaction in use: step");
             return 0;
         }
 
@@ -1983,7 +1982,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
 
     if (console_file_interaction)
     {
-        output_function("File interaction in use");
+        output_function("File interaction in use: run");
         return 0;
     }
 
@@ -2133,7 +2132,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     {
         if (output_function)
         {
-            output_function("File interaction in use");
+            output_function("File interaction in use: save");
         }
         return 0;
     }
@@ -2172,7 +2171,7 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
     {
         if (output_function)
         {
-            output_function("File interaction in use");
+            output_function("File interaction in use: open");
         }
         return 0;
     }
