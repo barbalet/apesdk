@@ -2981,8 +2981,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     /** clear the generation numbers for mother and father */
     if (mother)
     {
-        local->generation_max = mother->child_generation_max;
-        local->generation_min = mother->child_generation_min;
+        local->generation_max = mother->child_generation_max + 1;
+        local->generation_min = mother->child_generation_min + 1;
     }
     else
     {
