@@ -1421,11 +1421,6 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
 void *    sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size);
 void      sim_cycle(void);
 
-/* This is the old way. Soon to be removed. */
-n_int     sim_interpret(n_byte * buff, n_uint len);
-n_int     sim_filein(n_byte * buff, n_uint len);
-n_byte *  sim_fileout(n_uint * len);
-
 /* This is the new way. Please continue forwards. */
 n_file *  file_out(void);
 n_int     file_in(n_file * input_file);

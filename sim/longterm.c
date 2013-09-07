@@ -64,8 +64,6 @@ n_string_block simulation_filename;
 
 noble_simulation *local_sim;
 
-n_int simulation_file_exists = 0;
-
 #ifdef AUDIT_FILE
 
 static void audit_print_offset(n_byte * start, n_byte * point, char * text)
@@ -174,62 +172,14 @@ n_int draw_error(n_constant_string error_text)
     return -1;
 }
 
-static int plat_file_in(n_string file_name, n_byte * data, n_uint * length)
-{
-    FILE	* infile = 0L;
-    n_uint	  found_length = 0;
-    int		  error_value = 0;
-
-    infile = fopen(file_name, "rb");
-
-    if(infile == 0L)
-        return -1;
-
-    if(data == 0L)
-    {
-        do
-        {
-            n_byte	value;
-            if (fread(&value,1,1,infile) > 0)
-            {
-                found_length ++;
-            }
-        }
-        while(!feof(infile));
-        *length = found_length;
-    }
-    else
-    {
-        n_uint	local_length = *length;
-        if( fread(data,1,local_length,infile) != local_length)
-            error_value = -1;
-    }
-
-    fclose(infile);
-
-    return error_value;
-}
-
 /* moved to console.c with minor modifications */
 
 /* load simulation data */
 static n_int cle_load(void * ptr, n_string response, n_console_output output_function)
 {
-    n_uint length = 0;
-    unsigned char *data = 0L;
-
-    if (response==0) return 0;
-
-    simulation_file_exists = 0;
-
     if (io_disk_check(response)!=0)
     {
-        (void)plat_file_in(response,0,&length);
-        data = io_new(length);
-        (void)plat_file_in(response,data,&length);
-        (void)sim_filein(data, length);
-        io_free(data);
-        simulation_file_exists = 1;
+        console_open(ptr, response, output_function);
         sprintf(simulation_filename,"%s",response);
         printf("Simulation file %s loaded\n",response);
     }

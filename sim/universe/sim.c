@@ -494,38 +494,6 @@ void sim_realtime(n_uint time)
     sim.real_time = time;
 }
 
-n_int	sim_interpret(n_byte * buff, n_uint len)
-{
-    n_file	local;
-
-    local . size = len;
-    local . location = 0;
-    local . data = buff;
-
-    interpret = parse_convert(&local, VARIABLE_BEING, (variable_string *)apescript_variable_codes);
-
-    if(interpret == 0L)
-    {
-        return -1;
-    }
-    else
-    {
-        SC_DEBUG_ON; /* turn on debugging after script loading */
-    }
-
-    interpret->sc_input  = &sketch_input;
-    interpret->sc_output = &sketch_output;
-
-    interpret->input_greater   = VARIABLE_WEATHER;
-    interpret->special_less    = VARIABLE_VECT_X;
-
-    interpret->location = 0;
-    interpret->leave = 0;
-    interpret->localized_leave = 0;
-
-    return 0;
-}
-
 n_int     file_interpret(n_file * input_file)
 {
     input_file->size = input_file->location;
