@@ -36,7 +36,7 @@
 
 #define CONSOLE_ONLY /* Please maintain this define until after ALIFE XIII July 22nd */
 #define CONSOLE_REQUIRED
-#undef AUDIT_FILE
+#define AUDIT_FILE
 
 #include <stdio.h>
 #include <string.h>
@@ -84,6 +84,11 @@ static void audit_compart_offset()
 
     audit_print_offset(start,(n_byte *)&(local.date_of_conception[0]),"date_of_conception[0]");
 
+    audit_print_offset(start,(n_byte *)&(local.mother_genetics[0]),"mother_genetics[0]");
+    audit_print_offset(start,(n_byte *)&(local.father_genetics[0]),"father_genetics[0]");
+    audit_print_offset(start,(n_byte *)&(local.genes[0]),"genes[0]");
+
+    
     audit_print_offset(start,(n_byte *)&(local.father_honor),"father_honor");
     audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
 
@@ -92,6 +97,9 @@ static void audit_compart_offset()
     audit_print_offset(start,(n_byte *)&(local.drives[0]),"drives[0]");
     audit_print_offset(start,(n_byte *)&(local.goal[0]),"goal[0]");
     audit_print_offset(start,(n_byte *)&(local.learned_preference[0]),"learned_preference[0]");
+    
+    audit_print_offset(start,(n_byte *)&(local.generation_min),"generation_min");
+
     audit_print_offset(start,(n_byte *)&(local.territory[0]),"territory[0]");
     audit_print_offset(start,(n_byte *)&(local.immune_system),"immune_system[0]");
     audit_print_offset(start,(n_byte *)&(local.brainprobe[0]),"brainprobe[0]");
@@ -107,12 +115,12 @@ static void audit(void)
     printf("NON_PTR_BEING %d\n",(int)NON_PTR_BEING);
 
     printf("sizeof(n_byte	*)) %d \n", (int)sizeof(n_byte	*));
-
+    /*
     io_audit_file(noble_file_format, FIL_VER);
-    io_audit_file(noble_file_format, FIL_LAN);
-    io_audit_file(noble_file_format, FIL_BEI);
+    io_audit_file(noble_file_format, FIL_LAN); */
+    io_audit_file(noble_file_format, FIL_BEI); /*
     io_audit_file(noble_file_format, FIL_SOE);
-    io_audit_file(noble_file_format, FIL_EPI);
+    io_audit_file(noble_file_format, FIL_EPI); */
     audit_compart_offset();
 }
 

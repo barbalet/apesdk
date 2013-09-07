@@ -195,64 +195,67 @@ static const noble_file_entry noble_file_format[]=
     {{'m', 'a', 's', 's', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 34, "Mass"},    /*n_byte2	mass;*/
     {{'o', 'v', 'e', 'r', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 36, "ApeScript overrides"},    /*n_byte2  script_overrides;*/
     {{'s', 'h', 'o', 'u', 't', '='}, FIL_BEI | FILE_TYPE_BYTE,  SHOUT_BYTES, 38, "Shouting values"},    /*n_byte  shout[SHOUT_BYTES];*/
-    {{'c', 'r', 'o', 'w', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 38+SHOUT_BYTES, "Crowding"},     /*n_byte	crowding;*/
-    {{'p', 'o', 's', 't', 'u', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 39+SHOUT_BYTES, "Posture"},     /*n_byte	posture;*/
-    {{'i', 'n', 'v', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2,  INVENTORY_SIZE, 40+SHOUT_BYTES, "Inventory"},     /*n_byte2	inventory[INVENTORY_SIZE];*/
+    {{'c', 'r', 'o', 'w', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 44, "Crowding"},     /*n_byte	crowding;*/
+    {{'p', 'o', 's', 't', 'u', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 45, "Posture"},     /*n_byte	posture;*/
+    {{'i', 'n', 'v', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2,  INVENTORY_SIZE, 46, "Inventory"},     /*n_byte2	inventory[INVENTORY_SIZE];*/
 
 #ifdef PARASITES_ON
-    {{'p', 'a', 'r', 'a', 's', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, OFFSET_PARASITES, "Number of parasites"},     /*n_byte  parasites;*/
-    {{'h', 'o', 'n', 'o', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, (OFFSET_PARASITES+1), "Honor"},     /*n_byte  honor;*/
+    {{'p', 'a', 'r', 'a', 's', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, 62, "Number of parasites"},     /*n_byte  parasites;*/
+    {{'h', 'o', 'n', 'o', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, 63, "Honor"},     /*n_byte  honor;*/
 #endif
-    {{'c', 'o', 'n', 'c', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, OFFSET_PARENTING, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
+    {{'c', 'o', 'n', 'c', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, 64, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
 
-    {{'a', 't', 't', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, OFFSET_PARENTING+4, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/
+    {{'a', 't', 't', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, 68, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/
 
-    {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+4+ATTENTION_SIZE), "Mother genetics"}, /*n_genetics mother_genetics[CHROMOSOMES];*/
+    {{'u', 'n', 'u', 's', 'a', '='}, FIL_BEI | FILE_TYPE_BYTE, 3, 73, "Unused Block A"}, 
+    
+    {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, 76, "Mother genetics"}, /*n_genetics mother_genetics[CHROMOSOMES];*/
 
-    {{'f', 'a', 'm', 'i', 'l', '='}, FIL_BEI | FILE_TYPE_BYTE,  2, (OFFSET_PARENTING+6+GENETICS_BYTES), "Family names"}, /*n_byte  family[2];*/
+    {{'f', 'a', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, 92, "Father genetics"}, /*n_genetics father_genetics[CHROMOSOMES];*/
 
-    {{'u', 'n', 'u', 's', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, (OFFSET_PARENTING+8+GENETICS_BYTES), "Unused"}, /* unused */
+    {{'g', 'e', 'n', 'e', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, 108, "Genetics"}, /*n_genetics   genetics[CHROMOSOMES];*/
 
+    
+    {{'f', 'a', 't', 'h', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE , 1, 124, "Father honor"}, /*n_byte  father_honor; */
+    
+    {{'u', 'n', 'u', 's', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, 125, "Unused Block B"},
 
-    {{'f', 'a', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, (OFFSET_PARENTING+10+GENETICS_BYTES), "Father genetics"}, /*n_byte2 father_genetics[CHROMOSOMES];*/
-
-    {{'f', 'a', 't', 'h', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE , 1, (OFFSET_PARENTING+10+GENETICS_BYTES+(CHROMOSOMES*4)), "Father honor"}, /*n_byte  father_honor; */
-    {{'f', 'a', 't', 'h', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE , 2, (OFFSET_PARENTING+11+GENETICS_BYTES+(CHROMOSOMES*4)), "Father family names"}, /*n_byte  father_name[2];*/
-
-    {{'u', 'n', 'u', 's', 'c', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, (OFFSET_PARENTING+13+GENETICS_BYTES+(CHROMOSOMES*4)), "Unused"}, /*unused*/
-
-    {{'g', 'e', 'n', 'e', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, OFFSET_GENETICS, "Genetics"}, /*n_int   genetics[CHROMOSOMES];*/
-
-    {{'s', 'o', 's', 'i', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, (OFFSET_GENETICS+GENETICS_BYTES), "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
+    
+    {{'f', 'a', 't', 'h', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE , 2, 126, "Father family names"}, /*n_byte  father_name[2];*/
 
 
-    {{'d', 'r', 'i', 'v', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, DRIVES, (OFFSET_GENETICS+GENETICS_BYTES+8), "Drives"}, /*n_byte   drives[DRIVES];*/
-    {{'g', 'o', 'a', 'l', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 3, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+8), "Goals"},
+    {{'s', 'o', 's', 'i', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 130, "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
 
-    {{'p', 'r', 'e', 'f', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, PREFERENCES, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+8), "Preferences"},
-    {{'g', 'e', 'n', 'e', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE, GENERATIONS_BYTES, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+8+PREFERENCES), "Generations"},
+
+    {{'d', 'r', 'i', 'v', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, DRIVES, 138, "Drives"}, /*n_byte   drives[DRIVES];*/
+    {{'g', 'o', 'a', 'l', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 142, "Goals"},
+
+    {{'p', 'r', 'e', 'f', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, PREFERENCES, 150, "Preferences"},
+    {{'g', 'e', 'n', 'e', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 164, "Generations"},
 #ifdef TERRITORY_ON
-    {{'t', 'e', 'r', 'i', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES/2, (OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+PREFERENCES+GENERATIONS_BYTES+8), "Territory information"},
+    {{'t', 'e', 'r', 'i', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES/2, 172, "Territory information"},
 #endif
 #ifdef IMMUNE_ON
-    {{'i', 'm', 'm', 'u', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, IMMUNE_BYTES, OFFSET_IMMUNE, "Immune system information"},
+    {{'i', 'm', 'm', 'u', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, IMMUNE_BYTES, 428, "Immune system information"},
 #endif
 #ifdef METABOLISM_ON
-    {{'v', 'a', 's', '0', '1', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR, "Vascular system 1"},
-    {{'v', 'a', 's', '0', '2', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*2), "Vascular system 2"},
-    {{'v', 'a', 's', '0', '3', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*4), "Vascular system 3"},
-    {{'v', 'a', 's', '0', '4', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*6), "Vascular system 4"},
-    {{'v', 'a', 's', '0', '5', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*8), "Vascular system 5"},
-    {{'v', 'a', 's', '0', '6', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*10), "Vascular system 6"},
-    {{'v', 'a', 's', '0', '7', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*12), "Vascular system 7"},
-    {{'v', 'a', 's', '0', '8', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*14), "Vascular system 8"},
-    {{'v', 'a', 's', '0', '9', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*16), "Vascular system 9"},
-    {{'v', 'a', 's', '1', '0', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*18), "Vascular system 10"},
-    {{'v', 'a', 's', '1', '1', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*20), "Vascular system 11"},
-    {{'v', 'a', 's', '1', '2', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*22), "Vascular system 12"},
-    {{'v', 'a', 's', '1', '3', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*24), "Vascular system 13"},
-    {{'v', 'a', 's', '1', '4', '='}, FIL_BEI | FILE_TYPE_BYTE, VASCULAR_BYTES*2, OFFSET_VASCULAR+(VASCULAR_BYTES*26), "Vascular system 14"},
-    {{'m', 'e', 't', 'a', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, OFFSET_METABOLISM, "Metabolism"},
+    /* fixed to here */
+    
+    {{'v', 'a', 's', 'c', 'a', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR, "Vascular system 1"},
+    {{'v', 'a', 's', 'c', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*2), "Vascular system 2"},
+    {{'v', 'a', 's', 'c', 'c', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*4), "Vascular system 3"},
+    {{'v', 'a', 's', 'c', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*6), "Vascular system 4"},
+    {{'v', 'a', 's', 'c', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*8), "Vascular system 5"},
+    {{'v', 'a', 's', 'c', 'f', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*10), "Vascular system 6"},
+    {{'v', 'a', 's', 'c', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*12), "Vascular system 7"},
+    {{'v', 'a', 's', 'c', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*14), "Vascular system 8"},
+    {{'v', 'a', 's', 'c', 'i', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*16), "Vascular system 9"},
+    {{'v', 'a', 's', 'c', 'j', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*18), "Vascular system 10"},
+    {{'v', 'a', 's', 'c', 'k', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*20), "Vascular system 11"},
+    {{'v', 'a', 's', 'c', 'l', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*22), "Vascular system 12"},
+    {{'v', 'a', 's', 'c', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*24), "Vascular system 13"},
+    {{'v', 'a', 's', 'c', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*26), "Vascular system 14"},
+    {{'m', 'e', 't', 'a', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, OFFSET_METABOLISM, "Metabolism"},
 #endif
 #ifdef BRAINCODE_ON
     {{'b', 'r', 'r', 'e', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, OFFSET_BRAINCODE, "Brain code register"},

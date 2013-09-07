@@ -718,7 +718,8 @@ enum goal_types
 {
     GOAL_NONE           = 0,
     GOAL_LOCATION       = 1,
-    GOAL_MATE           = 2
+    GOAL_MATE           = 2,
+    GOAL_UNKNOWN        = 3 /* add a new goal here when needed */
 };
 
 #define DRIVES_MAX          255  /* maximum value of each drive */
@@ -1250,15 +1251,12 @@ typedef struct
     n_byte2	speak;
     n_byte2 seed[2];
     n_byte2	state;
-
     /* The basic brain formula is;
      b(t+1) = a*l + b(t)*m + (b(t)-b(t-1))*n;
      the first three values are l, m, n for awake, then l, m, n for asleep */
-
     n_byte2	brain_state[6];  /* constant for now */
 
-    /* height in arbitrary units
-           can be converted to real units with GET_BEING_HEIGHT */
+    /* height in arbitrary units can be converted to real units with GET_BEING_HEIGHT */
     n_byte2 height;
 
     /* body mass in kg */
@@ -1290,16 +1288,17 @@ typedef struct
     /* indexes to current focus of attention*/
     n_byte attention[ATTENTION_SIZE];
 
+    n_byte unused_a[3];
+    
     n_genetics mother_genetics[CHROMOSOMES]; /* constant */
-
-    n_byte2 unused1;                             /* constant */
-
     n_genetics father_genetics[CHROMOSOMES]; /* constant */
+    n_genetics genes[CHROMOSOMES];           /* constant */
 
     n_byte  father_honor;                       /* constant */
+    
+    n_byte  unused_b;
+    
     n_byte2 father_name[2];                     /* constant */
-
-    n_genetics genes[CHROMOSOMES];       /* constant */
 
     n_byte2     social_x;
     n_byte2     social_y;
