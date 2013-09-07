@@ -55,7 +55,7 @@
 
 /* Time definitions */
 
-#define GENERATIONS_BYTES (sizeof(n_uint)*GENERATION_TOTAL)
+#define GENERATIONS_BYTES (sizeof(n_byte)*4)
 #define DRIVES_BYTES    (DRIVES)
 #define GOALS_BYTES	(sizeof(n_byte2)*3)
 

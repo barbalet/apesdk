@@ -2979,10 +2979,18 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
 
     /** clear the generation numbers for mother and father */
-    for (ch = 0; ch < 3; ch++)
+    if (mother)
     {
-        local->generation[ch] = 0;
+        local->generation_max = mother->child_generation_max;
+        local->generation_min = mother->child_generation_min;
     }
+    else
+    {
+        local->generation_max = 0;
+        local->generation_min = 0;
+    }
+    local->child_generation_max = 0;
+    local->child_generation_min = 0;
 
 #ifdef BRAINCODE_ON
 
@@ -3131,32 +3139,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
                               being_family_name(mother),
                               mother->father_name[1]);
 
-        /** set the maternal generation number */
-        if (mother->generation[GENERATION_MATERNAL] >
-                mother->generation[GENERATION_PATERNAL])
-        {
-            if (mother->generation[GENERATION_MATERNAL] <
-                    MAX_GENERATION)
-            {
-                local->generation[GENERATION_MATERNAL] =
-                    mother->generation[GENERATION_MATERNAL]+1;
-            }
-        }
-        else
-        {
-            if (mother->generation[GENERATION_PATERNAL] <
-                    MAX_GENERATION)
-            {
-                local->generation[GENERATION_MATERNAL] =
-                    mother->generation[GENERATION_PATERNAL]+1;
-            }
-        }
-        /** set the paternal generation number */
-        if (mother->generation[GENERATION_FATHER] < MAX_GENERATION)
-        {
-            local->generation[GENERATION_PATERNAL] =
-                mother->generation[GENERATION_FATHER]+1;
-        }
+
     }
 
     being_set_energy(local, BEING_FULL + 15);

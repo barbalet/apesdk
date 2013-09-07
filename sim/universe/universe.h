@@ -838,16 +838,6 @@ enum energy_types
     ENERGY_FISH                = 600
 };
 
-/* a maximum generation number to prevent overflows */
-#define MAX_GENERATION              4294967294
-enum GENERATION_NUM
-{
-    GENERATION_MATERNAL = 0,
-    GENERATION_PATERNAL,
-    GENERATION_FATHER,
-    GENERATION_TOTAL
-};
-
 /* speed of running away */
 #define SQUABBLE_FLEE_SPEED         20
 
@@ -1316,13 +1306,14 @@ typedef struct
     n_byte2     social_nx;
     n_byte2     social_ny;
 
-    n_byte drives[DRIVES];
-    n_byte2 goal[4];
-    n_byte learned_preference[PREFERENCES];
-    /* around here the previous file system breaks */
-    /* generation number from the mother and father */
-    n_uint generation[GENERATION_TOTAL];            /* constant */
-
+    n_byte      drives[DRIVES];
+    n_byte2     goal[4];
+    n_byte      learned_preference[PREFERENCES];
+    n_byte2     generation_min;
+    n_byte2     generation_max;
+    n_byte2     child_generation_min;
+    n_byte2     child_generation_max;
+    
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
 #endif

@@ -1407,19 +1407,24 @@ static void social_conception(
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
 
-    /** generation number of the child's father */
-    if (male->generation[GENERATION_MATERNAL] >
-            male->generation[GENERATION_PATERNAL])
+
+    if (male->generation_min < female->generation_min)
     {
-        female->generation[GENERATION_FATHER] =
-            male->generation[GENERATION_MATERNAL];
+        female->child_generation_min = male->generation_min;
     }
     else
     {
-        female->generation[GENERATION_FATHER] =
-            male->generation[GENERATION_PATERNAL];
+        female->child_generation_min = female->generation_min;
     }
 
+    if (male->generation_max > female->generation_max)
+    {
+        female->child_generation_max = male->generation_max;
+    }
+    else
+    {
+        female->child_generation_max = female->generation_max;
+    }
 
     /** reset sex drive and goal */
     being_reset_drive(female, DRIVE_SEX);
