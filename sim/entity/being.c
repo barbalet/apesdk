@@ -2955,8 +2955,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         return SHOW_ERROR("Episodic memory not available");
     }
     
-#ifdef MAXIMIZE_ERASING
-    
+#ifdef MAXIMIZE_ERASING 
     being_erase(local);
 
     brain_memory = being_brain(local);
@@ -2970,7 +2969,9 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         return SHOW_ERROR("Brain memory not available");
     }
     
+#endif
 
+#ifdef MAXIMIZE_ERASING
     local->goal[0]=GOAL_NONE;
 
     /** Set learned preferences to 0.5 (no preference in
