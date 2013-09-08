@@ -1827,12 +1827,20 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
     /* By default return towards a resting state */
+#ifdef MAXIMIZE_ERASING
+
+    
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);
 #endif
 
     being_immune_response(local);
 
+#endif
+    
+    
+#ifdef BRAIN_PROBES_WORKING
+    
 #ifdef BRAINCODE_ON
     /** may need to add external probe linking too */
     if (being_brain(local))
@@ -1841,6 +1849,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     }
 #endif
 
+#endif
     if (awake == 0)
     {
         local->state = BEING_STATE_ASLEEP;
@@ -2946,6 +2955,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         return SHOW_ERROR("Episodic memory not available");
     }
     
+#ifdef MAXIMIZE_ERASING
+    
     being_erase(local);
 
     brain_memory = being_brain(local);
@@ -2992,6 +3003,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     local->child_generation_max = 0;
     local->child_generation_min = 0;
 
+#endif
+    
 #ifdef BRAINCODE_ON
 
     /** initially seed the brain with instructions which
@@ -3027,6 +3040,9 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         return SHOW_ERROR("No correct being interface provided");
     }
 
+#ifdef MAXIMIZE_ERASING
+
+    
     math_random3(local->seed);
 
     being_init_braincode(local,0L,local->seed,0,
@@ -3083,6 +3099,9 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
 #endif
 
+    
+#endif
+    
     being_facing_init(local);
 
     if (random_factor)
@@ -3162,6 +3181,9 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
     local->crowding = MIN_CROWDING;
 
+#ifdef MAXIMIZE_ERASING
+
+    
     if (being_brain(local))
     {
         /** These magic numbers were found in March 2001 -
@@ -3179,6 +3201,9 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 #ifdef METABOLISM_ON
     metabolism_init(local);
 #endif
+    
+#endif
+    
     return 0;
 }
 

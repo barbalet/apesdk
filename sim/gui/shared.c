@@ -104,12 +104,13 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     local = &(local_sim->beings[local_sim->select]);
     if (wwind == NUM_VIEW)
     {
+#ifdef MOUSE_DRAG_LOGIC
         if (mouse_drag == 1)
         {
             draw_update_drag(1, px, mouse_drag_x, py, mouse_drag_y);
             return;
         }
-        
+#endif
         if (option)
         {
             n_byte2    location[2];
@@ -124,7 +125,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
             n_uint	desired_ape = local_sim->select;
             n_uint  high_squ = 31;
             n_uint	loop = 0;
-
+            
             while (loop < local_sim->num)
             {
                 noble_being	* current_ape = &(local_sim->beings[loop]);
@@ -139,7 +140,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 loop++;
             }
             if (local_sim->select != desired_ape)
-            {
+            {                
                 sim_set_select(desired_ape);
             }
             else

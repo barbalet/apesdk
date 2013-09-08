@@ -40,7 +40,7 @@
 #import <OpenGL/glu.h>
 #import <OpenGL/OpenGL.h>
 
-#define ON_DISPLAY_UPDATE
+#undef ON_DISPLAY_UPDATE
 
 @interface NobleMacView : NSOpenGLView
 {

@@ -763,7 +763,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
             n_uint count_to = sim.max >> 2;
 #ifdef WEATHER_ON
             weather_init(sim.weather, sim.land);
-#endif
+#endif            
             sim.num = 0;
             while (sim.num < count_to)
             {
@@ -771,7 +771,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
                 if((sim.num + 1) < sim.max)
                 {
                     if (being_init(sim.land, sim.beings, sim.num, &sim.beings[sim.num], 0L, local_random) != 0)
-                    {
+                    {                        
                         being_erase(&sim.beings[sim.num]);
                         break;
                     }
