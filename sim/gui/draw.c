@@ -1225,6 +1225,7 @@ static void draw_region(noble_being * local)
         }
         ly += 2;
     }
+#ifdef TERRITORY_ON
     ly = 0;
     while (ly < TERRITORY_DIMENSION)
     {
@@ -1242,6 +1243,7 @@ static void draw_region(noble_being * local)
         }
         ly++;
     }
+#endif
 }
 
 static void draw_weather(noble_simulation * local_sim)
@@ -1679,10 +1681,12 @@ void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
         {
             draw_brain(local_sim,dim_x, dim_y);
         }
+#ifdef BRAINCODE_ON
         if (toggle_braincode)
         {
             console_populate_braincode(local_sim, draw_line_braincode);
         }
+#endif
     }
     if (window == NUM_VIEW)
     {

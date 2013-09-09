@@ -475,7 +475,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     io_free(index);
     return 0;
 }
-
+#ifdef BRAINCODE_ON
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function)
 {
     if (local_sim->select != NO_BEINGS_FOUND)
@@ -521,6 +521,7 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
     }
 
 }
+#endif
 
 /**
  * Displays a text representation of the braincode programs
@@ -859,6 +860,8 @@ static void watch_line_braincode(n_string string, n_int line)
  */
 static void watch_braincode(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
+    
+#ifdef BRAINCODE_ON
     n_int i;
     io_string_write(result, "\nRegisters:\n", &watch_string_length);
     for (i=0; i<BRAINCODE_PSPACE_REGISTERS; i++)
@@ -874,11 +877,12 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
 
     static_result = 0L;
     result[watch_string_length++]='\n';
-
+#endif
 }
 
 static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_string result)
 {
+#ifdef BRAINCODE_ON
     n_int loop;
     n_byte * external_bc = being_braincode_external(local);
     for (loop = 0; loop < BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION; loop++)
@@ -899,6 +903,7 @@ static void watch_speech(void *ptr, n_string beingname, noble_being * local, n_s
     }
     result[watch_string_length++]='.';
     result[watch_string_length++]='\n';
+#endif
 }
 
 
@@ -987,10 +992,10 @@ static void watch_genome(void *ptr, n_string beingname, noble_being * local_bein
  */
 static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
+#ifdef BRAINCODE_ON
     n_int i;
     n_string_block str2;
     char type_str[8];
-
     io_string_write(result, "\n  Type    Posn  Freq Offset Addr State\n  ", &watch_string_length);
     for (i = 0; i < 36; i++)
     {
@@ -1031,6 +1036,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
             io_string_write(result, (n_string)str2, &watch_string_length);
         }
     }
+#endif
 }
 
 /**

@@ -46,10 +46,10 @@
 
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 #define PARASITES_ON  /* entity */
-#define TERRITORY_ON  /* entity */
-#define BRAINCODE_ON  /* entity */
-#define IMMUNE_ON     /* entity */
-#define METABOLISM_ON /* entity */
+#undef TERRITORY_ON  /* entity */
+#undef BRAINCODE_ON  /* entity */
+#undef IMMUNE_ON     /* entity */
+#undef METABOLISM_ON /* entity */
 
 /* dimension of the territory map */
 #define TERRITORY_DIMENSION           (MAP_DIMENSION>>6)
@@ -1416,7 +1416,10 @@ typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local
 
 typedef void (line_braincode)(n_string pointer, n_int line);
 
+
+#ifdef BRAINCODE_ON
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function);
+#endif
 
 void *    sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size);
 void      sim_cycle(void);

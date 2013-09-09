@@ -280,10 +280,10 @@ n_int food_eat(
         /** in the intertidal zone */
         *food_type = food_intertidal(local_land, local_weather, loc_x, loc_y, &max_energy);
     }
-
+#ifdef METABOLISM_ON
     /** update metabolism */
     metabolism_eat(local_being, *food_type);
-
+#endif
     /** ingest pathogens from certain foods */
     being_ingest_pathogen(local_being, *food_type);
 

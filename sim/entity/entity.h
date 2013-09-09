@@ -176,8 +176,10 @@ enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location);
 void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
 
+#ifdef BRAINCODE_ON
 n_byte * being_braincode_external(noble_being * value);
 n_byte * being_braincode_internal(noble_being * value);
+#endif
 
 typedef void (being_no_return)(noble_simulation * sim, noble_being * actual);
 

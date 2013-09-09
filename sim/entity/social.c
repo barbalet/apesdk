@@ -924,11 +924,12 @@ static n_int social_meet(
             if (friend_or_foe < 0) friend_or_foe = 0;
             if (friend_or_foe > 255) friend_or_foe = 255;
             graph[index].friend_foe = (n_byte)friend_or_foe;
-
+#ifdef BRAINCODE_ON
             /** initialise the braincode associated with this individual */
             being_init_braincode(meeter_being,met_being,
                                  meeter_being->seed,
                                  graph[index].friend_foe,BRAINCODE_EXTERNAL);
+#endif
         }
 
 #ifdef METABOLISM_ON
@@ -1758,13 +1759,14 @@ n_int social_chat(
                             meeter_graph[replace].relationship =
                                 meeter_graph[replace].relationship+(OTHER_MOTHER-RELATIONSHIP_MOTHER);
                         }
-
+#ifdef BRAINCODE_ON
                         /** initialise the braincode */
                         being_init_braincode(
                             meeter_being,met_being,
                             meeter_being->seed,
                             met_graph[idx].friend_foe,
                             BRAINCODE_EXTERNAL);
+#endif
                     }
                 }
             }

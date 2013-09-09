@@ -89,6 +89,8 @@ typedef	struct
 }
 being_draw;
 
+#ifdef BRAINCODE_ON
+
 n_byte * being_braincode_external(noble_being * value)
 {
     social_link * social_value = being_social(value);
@@ -101,6 +103,8 @@ n_byte * being_braincode_internal(noble_being * value)
     social_link * social_value = being_social(value);
     return social_value[value->attention[ATTENTION_ACTOR]].braincode;
 }
+
+#endif
 
 void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
 {
@@ -1823,6 +1827,8 @@ static void update_brain_probes(noble_simulation * sim, noble_being * local)
 
 #endif
 
+#define MAXIMIZE_ERASING
+
 /** stuff still goes on during sleep */
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
@@ -2749,7 +2755,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     local->state = loc_state;
 }
 
-
+#ifdef BRAINCODE_ON
 /** initialise inner or outer braincode */
 void being_init_braincode(noble_being * local,
                           noble_being * other,
@@ -2826,11 +2832,13 @@ void being_init_braincode(noble_being * local,
                 }
             }
         }
-
         /** Copy braincode for the most similar individual */
         io_copy(graph[most_similar_index].braincode, graph[actor_index].braincode, BRAINCODE_SIZE);
     }
 }
+#endif
+
+
 
 /** Assign a unique name to the given being, based upon the given family names */
 
@@ -3006,7 +3014,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
 #endif
     
-#ifdef BRAINCODE_ON
 
     /** initially seed the brain with instructions which
         are genetically biased */
@@ -3040,11 +3047,11 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         NA_ASSERT(mother, "Mother not set");
         return SHOW_ERROR("No correct being interface provided");
     }
+#ifdef BRAINCODE_ON
+
+    math_random3(local->seed);
 
 #ifdef MAXIMIZE_ERASING
-
-    
-    math_random3(local->seed);
 
     being_init_braincode(local,0L,local->seed,0,
                          BRAINCODE_INTERNAL);
