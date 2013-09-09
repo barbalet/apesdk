@@ -51,7 +51,7 @@
 
 static n_interpret *interpret = 0L;
 
-n_int draw_error(n_string error_text)
+n_int draw_error(n_constant_string error_text)
 {
     printf("ERROR: %s\n",error_text);
     return -1;
