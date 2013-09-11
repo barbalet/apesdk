@@ -46,15 +46,18 @@
 
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 #define PARASITES_ON  /* entity */
-#undef TERRITORY_ON  /* entity */
-#undef BRAINCODE_ON  /* entity */
-#undef IMMUNE_ON     /* entity */
-#undef METABOLISM_ON /* entity */
+#define TERRITORY_ON  /* entity */
+#define BRAINCODE_ON  /* entity */
+#define IMMUNE_ON     /* entity */
+#define METABOLISM_ON /* entity */
 
 /* dimension of the territory map */
 #define TERRITORY_DIMENSION           (MAP_DIMENSION>>6)
 #define TERRITORY_AREA                (TERRITORY_DIMENSION*TERRITORY_DIMENSION)
 #define APESPACE_TO_TERRITORY(num)    (APESPACE_TO_MAPSPACE(num)>>6)
+
+#define SINGLE_BRAIN			(32768)
+#define DOUBLE_BRAIN			(SINGLE_BRAIN*2)
 
 /*
  This table represents the operator calculation that is used to create the density
@@ -1329,9 +1332,9 @@ typedef struct
 #ifdef METABOLISM_ON
     noble_vessel vessel[VASCULAR_SIZE];
 #endif
-    n_byte          * brain;
-    social_link     * social;
-    episodic_memory * episodic;
+    n_byte            brain[DOUBLE_BRAIN];
+    social_link       social[SOCIAL_SIZE];
+    episodic_memory   episodic[EPISODIC_SIZE];
 }
 noble_being;
 
@@ -1389,9 +1392,6 @@ noble_simulation;
 #define	GET_MI(bei)	((bei)->mother_genetics[0])
 
 #define NO_BEINGS_FOUND	(0xffffffff)
-
-#define SINGLE_BRAIN			(32768)
-#define DOUBLE_BRAIN			(SINGLE_BRAIN*2)
 
 #define	FIND_SEX(array)		(array&3)
 #define	SEX_FEMALE			3

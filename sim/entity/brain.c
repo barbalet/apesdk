@@ -567,7 +567,7 @@ void braincode_statistics(noble_simulation * sim)
  * @param instruction_type Number indicating the type of instruction
  * @return braincode instruction
  */
-static n_byte get_braincode_instruction_type(n_byte instruction_type)
+n_byte get_braincode_instruction_type(n_byte instruction_type)
 {
     n_byte2 local_random[2];
 

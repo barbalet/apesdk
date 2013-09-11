@@ -113,7 +113,7 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
 #ifdef LARGE_SIM
     local->max = LARGE_SIM;
 #else
-    local->max = (memory_available / (sizeof(noble_being) + DOUBLE_BRAIN + (SOCIAL_SIZE * sizeof(social_link)) + (EPISODIC_SIZE * sizeof(episodic_memory)))) - 1;
+    local->max = (memory_available / sizeof(noble_being)) - 1;
 #endif
     local->beings = (noble_being *) & buffer[  * location ];
     * location += sizeof(noble_being) * local->max ;
@@ -121,25 +121,9 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
     while (lpx < local->max)
     {
         noble_being * local_being = &(local->beings[ lpx ]);
-
-        local_being->brain = &buffer[ * location  ];
         io_erase(local_being->brain, DOUBLE_BRAIN);
-        * location += (DOUBLE_BRAIN);
-        
-        local_being->social = (social_link *)&buffer[ * location  ];
-        * location += (SOCIAL_SIZE * sizeof(social_link));
-
         io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(social_link)));
-
-        local_being->episodic = (episodic_memory *) &buffer[ * location];
-        * location += (EPISODIC_SIZE * sizeof(episodic_memory));
-
         io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
-        
-        if (local_being->brain == 0L) (void)SHOW_ERROR("brain is zero");
-        if (local_being->social == 0L) (void)SHOW_ERROR("social is zero");
-        if (local_being->episodic == 0L) (void)SHOW_ERROR("episodic is zero");
-
         lpx ++;
     }
 }
@@ -158,10 +142,6 @@ static void being_replace(noble_being * local, n_uint count, n_uint loop)
         episodic_memory * old_episodic = local[ loop ].episodic;
         
         io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
-        
-        local[count].brain = new_brain;
-        local[count].social = new_event;
-        local[count].episodic = new_episodic;
         
         if ((new_brain != 0L) && (old_brain != 0L))
         {
@@ -199,19 +179,7 @@ n_int being_brainstates(noble_being * value, n_int asleep, n_byte2 * states)
 
 void being_erase(noble_being * value)
 {
-    n_byte          * new_brain = value->brain;
-    social_link     * new_event = value->social;
-    episodic_memory * new_episodic = value->episodic;
-    
     io_erase((n_byte*)value, sizeof(noble_being));
-    
-    value->brain = new_brain;
-    value->social = new_event;
-    value->episodic = new_episodic;
-    
-    if (new_brain) io_erase(new_brain, DOUBLE_BRAIN);
-    if (new_event) io_erase((n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
-    if (new_episodic) io_erase((n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
 }
 
 n_int being_honor(noble_being * value)
@@ -1834,7 +1802,6 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
 {
     /* By default return towards a resting state */
 #ifdef MAXIMIZE_ERASING
-
     
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);
@@ -1843,7 +1810,6 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     being_immune_response(local);
 
 #endif
-    
     
 #ifdef BRAIN_PROBES_WORKING
     
