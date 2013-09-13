@@ -1368,12 +1368,9 @@ typedef struct
     n_uint          last_time;
     n_uint          delta_cycles;
     n_uint          count_cycles;
-
+    
     being_birth_event * ext_birth;
     being_death_event * ext_death;
-
-    n_byte   *highres;
-    n_c_uint *highres_tide;
 }
 noble_simulation;
 

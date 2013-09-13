@@ -725,7 +725,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
     }
     {
         const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
-        n_byte2      * combined = (n_byte2 *)local_sim->highres;
+        n_byte2      * combined = (n_byte2 *)local_sim->land->highres;
         noble_being * loc_being = &(local_sim->beings[local_sim->select]);
         const n_int turn = being_facing(loc_being);
         const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
@@ -1548,8 +1548,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
     if (lores == 0) /* set up drawing environ */
     {
         draw_undraw();
-
-        local_col.screen = local_sim->highres;
+        local_col.screen = local_sim->land->highres;
     }
     else
     {
@@ -1563,7 +1562,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         if (local_tide != local_sim->land->tide_level)
         {
             local_tide = local_sim->land->tide_level;
-            draw_tides_hi_res(local_sim->highres, local_sim->highres_tide, local_tide);
+            draw_tides_hi_res(local_sim->land->highres, local_sim->land->highres_tide, local_tide);
         }
     }
     else

@@ -665,16 +665,6 @@ static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * 
 {
     local->land = (n_land *) & buffer[ *location ];
     *location += sizeof(n_land);
-    
-    local->land -> map = &buffer[ *location ];
-    *location += (MAP_AREA);
-    
-    local->highres = &buffer[ *location ];
-    *location += (2 * HI_RES_MAP_AREA);
-    
-    local->highres_tide = (n_c_uint *) &buffer[ *location ];
-    *location += (HI_RES_MAP_AREA/8);
-    
     local->weather = (n_weather *) &buffer[ *location ];
     *location += sizeof(n_weather);
 }
@@ -756,7 +746,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         land_clear(sim.land, kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
         land_init(sim.land , &offbuffer[landbuffer_size]);
-        sim_tide_block(sim.land->map, sim.highres, sim.highres_tide);
+        sim_tide_block(sim.land->map, sim.land->highres, sim.land->highres_tide);
 #endif
         if (kind != KIND_LOAD_FILE)
         {

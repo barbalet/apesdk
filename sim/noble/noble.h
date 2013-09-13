@@ -872,7 +872,9 @@ typedef	struct
     n_byte2     date[2];
     n_byte2     genetics[2];
     n_byte      tide_level;
-    n_byte     *map;
+    n_byte      map[MAP_AREA];
+    n_byte      highres[HI_RES_MAP_AREA * 2];
+    n_c_uint    highres_tide[HI_RES_MAP_AREA/32];
 }
 n_land;
 
