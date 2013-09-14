@@ -634,7 +634,7 @@ void sim_cycle(void)
     land_cycle(sim.land);
     sim_being(&sim);    /* 2 */
 #ifdef WEATHER_ON
-    weather_cycle(sim.land, sim.weather);
+    weather_cycle(sim.land);
 #endif
     sim_brain(&sim);    /* 4 */
 
@@ -665,8 +665,6 @@ static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * 
 {
     local->land = (n_land *) & buffer[ *location ];
     *location += sizeof(n_land);
-    local->weather = (n_weather *) &buffer[ *location ];
-    *location += sizeof(n_weather);
 }
 
 
@@ -752,7 +750,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         {
             n_uint count_to = sim.max >> 2;
 #ifdef WEATHER_ON
-            weather_init(sim.weather, sim.land);
+            weather_init(sim.land);
 #endif            
             sim.num = 0;
             while (sim.num < count_to)

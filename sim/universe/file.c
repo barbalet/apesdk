@@ -168,14 +168,14 @@ n_int	file_in(n_file * input_file)
             n_uint	loop_end = 0;
             switch (ret_val)
             {
-            case FIL_LAN:
+          /*  case FIL_LAN:
                 temp = (n_byte*)(local_sim->land);
                 loop_end = NON_PTR_LAND;
                 break;
             case FIL_WEA:
-                temp = (n_byte*)(local_sim->weather);
+                temp = (n_byte*)(local_sim->land->weather);
                 loop_end = sizeof(n_int);
-                break;
+                break;*/
             case FIL_BEI:
                 temp = (n_byte*) &(local_sim->beings[ape_count]);
                 loop_end = sizeof(noble_being);
@@ -486,7 +486,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         {
                             return io_apescript_error(AE_VALUE_OUT_OF_RANGE);
                         }
-                        local_number = land_operator_interpolated(local_sim->land, local_sim->weather,
+                        local_number = land_operator_interpolated(local_sim->land,
                                        (n_byte)quick_x, (n_byte)quick_y, (n_byte*)&operators[int_qu_op-VARIABLE_BIOLOGY_AREA]);
                     }
                     else
@@ -523,7 +523,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
                 }
 
-                local_number = weather_seven_values(local_sim->land, local_sim->weather, quick_x, quick_y);
+                local_number = weather_seven_values(local_sim->land, quick_x, quick_y);
             }
             break;
             case VARIABLE_BRAIN_VALUE:

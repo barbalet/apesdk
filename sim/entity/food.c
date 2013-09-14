@@ -116,12 +116,12 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
  * @param kind The type of food
  * @return The amount of food of the given type at this location
  */
-static n_int food_location(n_land * local_land, n_weather * local_weather,
+static n_int food_location(n_land * local_land,
                            n_int loc_x,
                            n_int loc_y,
                            n_int kind)
 {
-    return land_operator_interpolated(local_land, local_weather, loc_x, loc_y,
+    return land_operator_interpolated(local_land, loc_x, loc_y,
                                       (n_byte*)&operators[kind - VARIABLE_BIOLOGY_AREA]);
 }
 
@@ -135,22 +135,22 @@ static n_int food_location(n_land * local_land, n_weather * local_weather,
  * @param trees Returned value for trees
  * @param bush Returned value for bushes
  */
-void food_values(n_land * local_land, n_weather * local_weather,
+void food_values(n_land * local_land,
                  n_int loc_x,
                  n_int loc_y,
                  n_int *grass, n_int *trees, n_int *bush)
 {
     /** grass at this location */
     *grass =
-        food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_GRASS)+OFFSET_GRASS;
+        food_location(local_land, loc_x, loc_y, VARIABLE_BIOLOGY_GRASS)+OFFSET_GRASS;
 
     /** trees at this location */
     *trees =
-        food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_TREE);
+        food_location(local_land, loc_x, loc_y, VARIABLE_BIOLOGY_TREE);
 
     /** bushes at this location */
     *bush =
-        food_location(local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_BUSH)+OFFSET_BUSH;
+        food_location(local_land, loc_x, loc_y, VARIABLE_BIOLOGY_BUSH)+OFFSET_BUSH;
 
     *grass += LAND_DITHER(*grass, *trees, *bush);
 }
@@ -166,7 +166,6 @@ void food_values(n_land * local_land, n_weather * local_weather,
  */
 static n_byte food_eat_land(
     n_land * local_land,
-    n_weather * local_weather,
     n_int loc_x,
     n_int loc_y,
     n_int * energy)
@@ -174,7 +173,7 @@ static n_byte food_eat_land(
     n_byte food_type = FOOD_VEGETABLE;
     n_int grass, trees, bush;
 
-    food_values(local_land, local_weather,loc_x,loc_y,&grass, &trees, &bush);
+    food_values(local_land, loc_x,loc_y,&grass, &trees, &bush);
 
     /** which is the dominant form of vegetation in this area? */
     if ((grass > bush) && (grass > trees))
@@ -206,7 +205,6 @@ static n_byte food_eat_land(
  */
 static n_byte food_intertidal(
     n_land * local_land,
-    n_weather * local_weather,
     n_int loc_x,
     n_int loc_y,
     n_int * energy)
@@ -217,17 +215,17 @@ static n_byte food_intertidal(
     /** seaweed at this location */
     seaweed =
         food_location(
-            local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_SEAWEED);
+            local_land, loc_x, loc_y, VARIABLE_BIOLOGY_SEAWEED);
 
     /** rockpools at this location */
     rockpool =
         food_location(
-            local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_ROCKPOOL);
+            local_land, loc_x, loc_y, VARIABLE_BIOLOGY_ROCKPOOL);
 
     /** beach at this location */
     beach =
         food_location(
-            local_land, local_weather, loc_x, loc_y, VARIABLE_BIOLOGY_BEACH);
+            local_land, loc_x, loc_y, VARIABLE_BIOLOGY_BEACH);
 
     beach += LAND_DITHER(seaweed, rockpool, beach);
 
@@ -259,7 +257,6 @@ static n_byte food_intertidal(
  */
 n_int food_eat(
     n_land * local_land,
-    n_weather * local_weather,
     n_int loc_x,
     n_int loc_y,
     n_int az,
@@ -273,12 +270,12 @@ n_int food_eat(
     if (az > TIDE_MAX)
     {
         /** above the high water mark */
-        *food_type = food_eat_land(local_land, local_weather, loc_x, loc_y, &max_energy);
+        *food_type = food_eat_land(local_land, loc_x, loc_y, &max_energy);
     }
     else
     {
         /** in the intertidal zone */
-        *food_type = food_intertidal(local_land, local_weather, loc_x, loc_y, &max_energy);
+        *food_type = food_intertidal(local_land, loc_x, loc_y, &max_energy);
     }
 #ifdef METABOLISM_ON
     /** update metabolism */

@@ -2467,7 +2467,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             {
                 /** eating when stopped */
                 n_byte  food_type;
-                n_int energy = food_eat(sim->land, sim->weather, location_vector.x, location_vector.y, az, &food_type, local);
+                n_int energy = food_eat(sim->land, location_vector.x, location_vector.y, az, &food_type, local);
                 
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);

@@ -985,14 +985,14 @@ static void	draw_meters(noble_simulation * local_sim)
                 (void)math_join(106 + 18 + SP_EN_OFFSIDE, FH_SCREEN(45-(local_energy >> 7)), 6, 0, &local_kind);
 
             }
-            local_icon = &icns[weather_seven_values(local_sim->land, local_sim->weather, local_x, local_y) << 7];
+            local_icon = &icns[weather_seven_values(local_sim->land, local_x, local_y) << 7];
         }
 
     }
     else
     {
         /* still give weather even with no Noble Apes */
-        local_icon = &icns[weather_seven_values(local_sim->land, local_sim->weather, 0, 0) << 7];
+        local_icon = &icns[weather_seven_values(local_sim->land, 0, 0) << 7];
     }
 
     ha1 = ((((loc_land->date[0]) << 6) / mndivmonth) & 255);
@@ -1246,11 +1246,10 @@ static void draw_region(noble_being * local)
 #endif
 }
 
-static void draw_weather(noble_simulation * local_sim)
+static void draw_weather(n_land * local_land)
 {
-    n_int map_dimensions2 = land_map_dimension(local_sim->land)/2;
+    n_int map_dimensions2 = land_map_dimension(local_land)/2;
 
-    n_weather *wea = local_sim->weather;
     n_color8		local_col;
     n_pixel			*local_draw = &pixel_color8;
     void			  *local_info = &local_col;
@@ -1269,7 +1268,7 @@ static void draw_weather(noble_simulation * local_sim)
         while(px < (map_dimensions2))
         {
             n_int	scr_x = px << 1;
-            n_int	tmp = weather_pressure(wea, px, py, map_dimensions2);
+            n_int	tmp = weather_pressure(local_land, px, py, map_dimensions2);
             if(tmp > WEATHER_CLOUD)
             {
                 (*local_draw)(scr_x+1, scr_y+1, local_info);
@@ -1693,7 +1692,7 @@ void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
 #ifdef WEATHER_ON
         if (toggle_weather)
         {
-            draw_weather(local_sim); /* 10 */
+            draw_weather(local_sim->land); /* 10 */
         }
 #endif
         if (draw_drag_on == 1)

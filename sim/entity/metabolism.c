@@ -710,7 +710,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
     n_int   map_dimensions2 = land_map_dimension(local_sim->land) / 2;
     
     
-    pressure = 16384-(weather_pressure(local_sim->weather,
+    pressure = 16384-(weather_pressure(local_sim->land,
                                        APESPACE_TO_MAPSPACE(being_location_x(local_being)),
                                        APESPACE_TO_MAPSPACE(being_location_y(local_being)), map_dimensions2)>>4);
 
@@ -812,7 +812,6 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
     n_int local_z;
     n_vect2 slope_vector, location_vector;
     n_int ambient_temperature = weather_temperature(local_sim->land,
-                                local_sim->weather,
                                 APESPACE_TO_MAPSPACE(being_location_x(local_being)),
                                 APESPACE_TO_MAPSPACE(being_location_y(local_being)));
 

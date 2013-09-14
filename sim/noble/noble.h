@@ -846,19 +846,6 @@ void       io_console_quit(void);
  */
 
 /*! @struct
- @field atmosphere The atmosphere is represented by two 128 x 128 integer.
- buffers, one containing the static flow map and one containing the dynamic
- buffer showing the actual pressure map.
- @discussion As with a majority of the Noble Ape Simulation, the weather
- method is completely self-rolled.
- */
-typedef struct
-{
-    n_c_int			atmosphere[ MAP_AREA / 2];
-}
-n_weather;
-
-/*! @struct
  @field time          Time in minutes from midnight.
  @field date          Date including days and centuries.
  @field genetics      Generator seed used to create the landscape.
@@ -875,22 +862,23 @@ typedef	struct
     n_byte      map[MAP_AREA];
     n_byte      highres[HI_RES_MAP_AREA * 2];
     n_c_uint    highres_tide[HI_RES_MAP_AREA/32];
+    n_c_int		atmosphere[ MAP_AREA / 2];
 }
 n_land;
 
 
-void  weather_init(n_weather * local_weather, n_land * local_land);
-void  weather_wind_vector(n_land * local_land, n_weather * wea, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
-n_int weather_pressure(n_weather * wea, n_int px, n_int py, n_int dimension2);
-n_int weather_temperature(n_land * local_land, n_weather * wea, n_int px, n_int py);
-void weather_cycle(n_land * local_land, n_weather * local_weather);
-n_int weather_seven_values(n_land * local_land, n_weather * local_weather, n_int px, n_int py);
+void  weather_init(n_land * local_land);
+void  weather_wind_vector(n_land * local_land, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
+n_int weather_pressure(n_land * local_land, n_int px, n_int py, n_int dimension2);
+n_int weather_temperature(n_land * local_land, n_int px, n_int py);
+void  weather_cycle(n_land * local_land);
+n_int weather_seven_values(n_land * local_land, n_int px, n_int py);
 
 void  land_init(n_land * local, n_byte * scratch);
 void  land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start);
 void  land_cycle(n_land * local_land);
 void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);
-n_int land_operator_interpolated(n_land * local_land, n_weather * local_weather, n_int locx, n_int locy, n_byte * kind);
+n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_byte * kind);
 
 n_int land_map_dimension(n_land * land);
 
