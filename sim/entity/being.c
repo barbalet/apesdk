@@ -1810,9 +1810,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     being_immune_response(local);
 
 #endif
-    
-#ifdef BRAIN_PROBES_WORKING
-    
+        
 #ifdef BRAINCODE_ON
     /** may need to add external probe linking too */
     if (being_brain(local))
@@ -1821,7 +1819,6 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     }
 #endif
 
-#endif
     if (awake == 0)
     {
         local->state = BEING_STATE_ASLEEP;
