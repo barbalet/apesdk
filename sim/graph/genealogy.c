@@ -45,6 +45,7 @@
 #include "entity.h"
 #include "entity_internal.h"
 
+#include <stdio.h>
 #include <string.h>
 
 static n_byte log_genealogy = 0;
@@ -64,6 +65,97 @@ void genealogy_log(noble_simulation * sim,n_byte value);
 n_int genealogy_save(noble_simulation * sim, n_string filename);
 void genealogy_birth(noble_being * child, noble_being * mother, void * sim);
 void genealogy_death(noble_being * local_being, void * sim);
+
+/**
+ * Adds XML open to the named string.
+ * @param file the pointer to the n_file data that is written.
+ * @param name the string that is wrapped.
+ * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
+ */
+n_int xml_open(n_file * file, n_string name)
+{
+    if (io_write(file,"<", 0) == -1) return -1;
+    if (io_write(file,name, 0) == -1) return -1;
+    if (io_write(file,">", 1) == -1) return -1;
+    return 0;
+}
+
+/**
+ * Adds XML close to the named string.
+ * @param file the pointer to the n_file data that is written.
+ * @param name the string that is wrapped.
+ * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
+ */
+n_int xml_close(n_file * file, n_string name)
+{
+    if (io_write(file,"</", 0) == -1) return -1;
+    if (io_write(file,name, 0) == -1) return -1;
+    if (io_write(file,">", 1) == -1) return -1;
+    return 0;
+}
+
+/**
+ * Wraps a string with XML open and close
+ * @param file the pointer to the n_file data that is written.
+ * @param name the string that is the wrapper.
+ * @param string the string that is wrapped.
+ * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
+ */
+n_int xml_string(n_file * file, n_string name, n_string string)
+{
+    if (xml_open(file,name) == -1) return -1;
+    if (io_write(file,string, 0) == -1) return -1;
+    if (xml_close(file,name) == -1) return -1;
+    return 0;
+}
+
+/**
+ * Wraps an integer with XML open and close
+ * @param file the pointer to the n_file data that is written.
+ * @param name the string that is the wrapper.
+ * @param number the integer that is wrapped.
+ * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
+ */
+n_int xml_int(n_file * file, n_string name, n_int number)
+{
+    if (xml_open(file,name) == -1) return -1;
+    if (io_writenumber(file, number, 1, 0) == -1) return -1;
+    if (xml_close(file,name) == -1) return -1;
+    return 0;
+    
+}
+
+/**
+ * Appends a file to disk.
+ * @param local_file the pointer to the n_file data that is written to disk.
+ * @param file_name the name of the file to be appended.
+ * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
+ */
+n_int io_disk_append(n_file * local_file, n_string file_name)
+{
+    n_uint written_length;
+#ifndef _WIN32
+    FILE * out_file = fopen(file_name,"a");
+#else
+    FILE * out_file = 0L;
+    
+    fopen_s(&out_file,file_name,"a");
+#endif
+    
+    written_length = fwrite(local_file->data,1,local_file->location, out_file);
+    
+    if (fclose(out_file) != 0)
+    {
+        return SHOW_ERROR("File could not be closed");
+    }
+    
+    if (written_length != local_file->location)
+    {
+        return SHOW_ERROR("File did not complete write");
+    }
+    return FILE_OKAY;
+}
+
 
 void genealogy_log(noble_simulation * sim,n_byte value)
 {
@@ -149,39 +241,39 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             
             if (fp == 0L) return;
             
-            io_file_xml_open(fp, "?xml version='1.0' encoding='ISO-8859-1'?");
-            io_file_xml_open(fp, "genxml");
+            xml_open(fp, "?xml version='1.0' encoding='ISO-8859-1'?");
+            xml_open(fp, "genxml");
             
-            io_file_xml_open(fp, "file");
-            io_file_xml_int(fp, "version", 200);
-            io_file_xml_int(fp, "level", 2);
-            io_file_xml_close(fp, "file");
+            xml_open(fp, "file");
+            xml_int(fp, "version", 200);
+            xml_int(fp, "level", 2);
+            xml_close(fp, "file");
             
-            io_file_xml_open(fp, "header");
-            io_file_xml_string(fp, "exportingsystem", "Noble Ape");
-            io_file_xml_string(fp, "version", "0.0");
-            io_file_xml_close(fp, "header");
+            xml_open(fp, "header");
+            xml_string(fp, "exportingsystem", "Noble Ape");
+            xml_string(fp, "version", "0.0");
+            xml_close(fp, "header");
             
             io_write(fp,"<eventtype id=\"",0);
             io_write(fp,GENEALOGY_EVENT_BIRTH,0);
             io_write(fp,"\" class=\"birth\">",1);
             
             
-            io_file_xml_string(fp, "description", "born");
-            io_file_xml_string(fp, "gedcomtag", "BIRT");
+            xml_string(fp, "description", "born");
+            xml_string(fp, "gedcomtag", "BIRT");
             
-            io_file_xml_int(fp, "roles", 1);
-            io_file_xml_close(fp,  "eventtype");
+            xml_int(fp, "roles", 1);
+            xml_close(fp,  "eventtype");
             
             io_write(fp, "<eventtype id=\"",0);
             io_write(fp, GENEALOGY_EVENT_BIRTH,0);
             io_write(fp, "\" class=\"death\">",1);
             
-            io_file_xml_string(fp, "description", "died");
-            io_file_xml_string(fp, "gedcomtag", "DEAT");
+            xml_string(fp, "description", "died");
+            xml_string(fp, "gedcomtag", "DEAT");
             
-            io_file_xml_int(fp, "roles", 1);
-            io_file_xml_close(fp,  "eventtype");
+            xml_int(fp, "roles", 1);
+            xml_close(fp,  "eventtype");
             
             io_disk_write(fp,GENEALOGY_XML_FILENAME);
             
@@ -207,7 +299,7 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             }
             io_write(fp, "\">", 1);
             
-            io_file_xml_open(fp, "personalname");
+            xml_open(fp, "personalname");
             
             being_name_simple(child, (n_string)str);
             
@@ -234,8 +326,8 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             io_write(fp,(n_string)surnames,0);
             io_write(fp,"</np>",1);
             
-            io_file_xml_close(fp, "personalname");
-            io_file_xml_close(fp, "person");
+            xml_close(fp, "personalname");
+            xml_close(fp, "person");
             
             
             io_write(fp, "<assertion id=\"BIRTH",0);
@@ -254,18 +346,18 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             
             io_write(fp, "<principal>",0);
             genealogy_being_id(child,fp,0);
-            io_file_xml_close(fp, "principal");
+            xml_close(fp, "principal");
             
             
             
-            io_file_xml_open(fp, "date");
+            xml_open(fp, "date");
             io_write(fp, "<exact>",0);
             genealogy_today(sim,fp);
-            io_file_xml_close(fp, "exact");
-            io_file_xml_close(fp, "date");
+            xml_close(fp, "exact");
+            xml_close(fp, "date");
             
             
-            io_file_xml_open(fp, "place");
+            xml_open(fp, "place");
             io_write(fp, "<pnp>",0);
             
             
@@ -273,12 +365,12 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             io_file_write(fp, ' ');
             io_writenumber(fp, being_location_y(child), 1, 0);
             
-            io_file_xml_close(fp, "pnp");
-            io_file_xml_close(fp, "place");
+            xml_close(fp, "pnp");
+            xml_close(fp, "place");
             
             
-            io_file_xml_close(fp, "event");
-            io_file_xml_close(fp, "assertion");
+            xml_close(fp, "event");
+            xml_close(fp, "assertion");
             
             
             
@@ -286,23 +378,23 @@ static void genealogy_birth_genxml(noble_being * child, noble_being * mother, no
             genealogy_being_id(child,fp,0);
             io_write(fp, "\">",1);
             
-            io_file_xml_open(fp, "relationship");
+            xml_open(fp, "relationship");
             
-            io_file_xml_string(fp, "relation", "biological");
+            xml_string(fp, "relation", "biological");
             
             io_write(fp, "<child>",0);
             genealogy_being_id(child,fp,0);
-            io_file_xml_close(fp, "child");
+            xml_close(fp, "child");
             io_write(fp, "<mother>",0);
             genealogy_being_id(child,fp,1);
-            io_file_xml_close(fp, "mother");
+            xml_close(fp, "mother");
             io_write(fp, "<father>",0);
             genealogy_being_id(child,fp,2);
             
             
-            io_file_xml_close(fp, "father");
-            io_file_xml_close(fp, "relationship");
-            io_file_xml_close(fp, "assertion");
+            xml_close(fp, "father");
+            xml_close(fp, "relationship");
+            xml_close(fp, "assertion");
             
             io_disk_append(fp,GENEALOGY_XML_FILENAME);
             
@@ -336,32 +428,32 @@ static void genealogy_death_genxml(noble_being * local_being, noble_simulation *
             
             genealogy_being_id(local_being,fp,0);
             
-            io_file_xml_close(fp, "principal");
+            xml_close(fp, "principal");
             
-            io_file_xml_open(fp, "date");
+            xml_open(fp, "date");
             io_write(fp, "<exact>",0);
             
             genealogy_today(sim,fp);
             
-            io_file_xml_close(fp, "exact");
-            io_file_xml_close(fp, "date");
+            xml_close(fp, "exact");
+            xml_close(fp, "date");
             
-            io_file_xml_close(fp, "event");
-            io_file_xml_close(fp, "assertion");
+            xml_close(fp, "event");
+            xml_close(fp, "assertion");
             
             
-            io_file_xml_open(fp, "place");
+            xml_open(fp, "place");
             io_write(fp, "<pnp>",0);
             
             io_writenumber(fp, being_location_x(local_being), 1, 0);
             io_file_write(fp, ' ');
             io_writenumber(fp, being_location_y(local_being), 1, 0);
             
-            io_file_xml_close(fp, "pnp");
-            io_file_xml_close(fp, "place");
+            xml_close(fp, "pnp");
+            xml_close(fp, "place");
             
-            io_file_xml_close(fp, "event");
-            io_file_xml_close(fp, "assertion");
+            xml_close(fp, "event");
+            xml_close(fp, "assertion");
             
             io_disk_append(fp,GENEALOGY_XML_FILENAME);
             io_file_free(fp);
@@ -381,7 +473,7 @@ static n_int genealogy_save_genxml(noble_simulation * sim, n_string filename)
             io_disk_read(fp, GENEALOGY_XML_FILENAME);
         }
         
-        io_file_xml_close(fp, "genxml");
+        xml_close(fp, "genxml");
         io_disk_write(fp, filename);
         io_file_free(fp);
         return 1;

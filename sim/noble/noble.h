@@ -672,41 +672,8 @@ void       io_free(void * ptr);
 void *     io_new_range(n_uint memory_min, n_uint *memory_allocated);
 n_file *   io_file_new(void);
 void       io_file_free(n_file * file);
-n_int      io_file_xml_open(n_file * file, n_string name);
-n_int      io_file_xml_close(n_file * file, n_string name);
-n_int      io_file_xml_string(n_file * file, n_string name, n_string string);
-n_int      io_file_xml_int(n_file * file, n_string name, n_int number);
+
 n_int      io_number(n_string number_string, n_int * actual_value, n_int * decimal_divisor);
-
-/*
-
- read:
-    io_disk_check
-    file_chain_new
-    add pointers to "to be read"
-    file_chain_read_header
-    file_chain_read_validate
-    file_chain_read
-    file_chain_free
-
- write:
-    file_chain_new
-    add pointers to "to be written"
-    file_chain_write_generate_header
-    file_chain_write
-    file_chain_free
- */
-
-n_file_chain * file_chain_new(n_uint size);
-void           file_chain_free(n_file_chain * value);
-
-n_int          file_chain_write_generate_header(n_file_chain *initial);
-n_int          file_chain_write(n_string name, n_file_chain * initial);
-n_int          file_chain_read(n_string name, n_file_chain * initial);
-n_int          file_chain_read_header(n_string name, n_file_chain * header, n_uint expected_additional_entries);
-n_int          file_chain_read_validate(n_string name, n_file_chain *initial);
-
-void           file_chain_bin_name(n_string original, n_string bin_file);
 
 void       io_file_aiff_header(void * fptr, n_uint total_samples);
 

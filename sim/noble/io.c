@@ -403,65 +403,6 @@ n_int io_disk_check(n_constant_string file_name)
 }
 
 /**
- * Adds XML open to the named string.
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
-n_int io_file_xml_open(n_file * file, n_string name)
-{
-    if (io_write(file,"<", 0) == -1) return -1;
-    if (io_write(file,name, 0) == -1) return -1;
-    if (io_write(file,">", 1) == -1) return -1;
-    return 0;
-}
-
-/**
- * Adds XML close to the named string.
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
-n_int io_file_xml_close(n_file * file, n_string name)
-{
-    if (io_write(file,"</", 0) == -1) return -1;
-    if (io_write(file,name, 0) == -1) return -1;
-    if (io_write(file,">", 1) == -1) return -1;
-    return 0;
-}
-
-/**
- * Wraps a string with XML open and close
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is the wrapper.
- * @param string the string that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
-n_int io_file_xml_string(n_file * file, n_string name, n_string string)
-{
-    if (io_file_xml_open(file,name) == -1) return -1;
-    if (io_write(file,string, 0) == -1) return -1;
-    if (io_file_xml_close(file,name) == -1) return -1;
-    return 0;
-}
-
-/**
- * Wraps an integer with XML open and close
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is the wrapper.
- * @param number the integer that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
-n_int io_file_xml_int(n_file * file, n_string name, n_int number)
-{
-    if (io_file_xml_open(file,name) == -1) return -1;
-    if (io_writenumber(file, number, 1, 0) == -1) return -1;
-    if (io_file_xml_close(file,name) == -1) return -1;
-    return 0;
-
-}
-
-/**
  * Reads binary data from the file pointer.
  * @param fil the pointer to the n_file data that is read from.
  * @param local_byte the single byte.
