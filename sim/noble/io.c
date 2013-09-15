@@ -77,14 +77,12 @@ void io_entry_execution(n_int argc, n_string * argv)
     }
 }
 
-void io_file_aiff_header(void * fptr, n_uint total_samples)
+static void io_aiff_uint(n_byte * buffer, n_uint value)
 {
-    n_byte header[54] = {0};
-    io_aiff_header(header);
-    io_aiff_uint(&header[4],  io_aiff_total_size(total_samples));
-    io_aiff_uint(&header[22], total_samples);
-    io_aiff_uint(&header[42], io_aiff_sound_size(total_samples));
-    fwrite(header, 54, 1, (FILE*)fptr);
+    buffer[0] = (value & 0xff000000) >> 24;
+    buffer[1] = (value & 0x00ff0000) >> 16;
+    buffer[2] = (value & 0x0000ff00) >> 8;
+    buffer[3] = (value & 0x000000ff) >> 0;
 }
 
 void io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples)
@@ -92,7 +90,7 @@ void io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples)
     fwrite(samples,number_samples,sizeof(n_audio),(FILE*)fptr);
 }
 
-void io_aiff_header(n_byte * header)
+static void io_aiff_header(n_byte * header)
 {
     header[0] =  'F';
     header[1] =  'O';
@@ -126,128 +124,24 @@ void io_aiff_header(n_byte * header)
     header[41] = 'D';
 }
 
-void io_aiff_uint(n_byte * buffer, n_uint value)
-{
-    buffer[0] = (value & 0xff000000) >> 24;
-    buffer[1] = (value & 0x00ff0000) >> 16;
-    buffer[2] = (value & 0x0000ff00) >> 8;
-    buffer[3] = (value & 0x000000ff) >> 0;
-}
-
-n_uint io_aiff_uint_out(n_byte * buffer)
-{
-    return (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
-}
-
-n_uint io_aiff_total_size(n_uint total_samples)
+static n_uint io_aiff_total_size(n_uint total_samples)
 {
     return 4 + 8 + 18 + 8 + (sizeof(n_audio) * total_samples) + 8;
 }
 
-n_uint io_aiff_sound_size(n_uint total_samples)
+static n_uint io_aiff_sound_size(n_uint total_samples)
 {
     return (2 * total_samples) + 8;
 }
 
-n_int io_aiff_sample_size(n_uint total_size)
+void io_file_aiff_header(void * fptr, n_uint total_samples)
 {
-    n_int total_samples2 = ((n_int)total_size) - 4 - 8 - 18 - 8 - 8;
-    if (total_samples2 < 0)
-    {
-        return SHOW_ERROR("Total AIFF samples less than zero");
-    }
-    if (total_samples2 % sizeof(n_audio))
-    {
-        return SHOW_ERROR("Non multiple of 2 in AIFF file size");
-    }
-    return total_samples2 / sizeof(n_audio);
-}
-
-static n_int io_scan(n_byte * v1, n_byte * v2, n_uint start, n_uint stop)
-{
-    n_uint   loop = start;
-    while (loop < stop)
-    {
-        if (v1[loop] != v2[loop])
-        {
-            n_uint loop2 = start;
-            while (loop2 < stop)
-            {
-                printf("Diff %ld %2x %c  %2x %c\n",loop2, v1[loop2], v1[loop2], v2[loop2], v2[loop2]);
-                loop2++;
-            }
-            return 1;
-        }
-        loop++;
-    }
-    return 0;
-}
-
-n_int io_file_aiff_header_check_length(void * fptr)
-{
-    n_byte  comparison[54] = {0};
-    n_byte  actual[54] = {0};
-    n_uint  total_samples, sound_size;
-    n_int   not_found = 1;
-
-    io_aiff_header(comparison);
-
-    if (fread(actual,1,38,(FILE *)fptr) != 38)
-    {
-        return SHOW_ERROR("Could not read all of AIFF header");
-    }
-
-    if (io_scan(comparison, actual, 0, 4))
-    {
-        return SHOW_ERROR("AIFF fails first section");
-    }
-    if (io_scan(comparison, actual, 8, 16))
-    {
-        return SHOW_ERROR("AIFF fails second section");
-    }
-    if (io_scan(comparison, actual, 21, 22))
-    {
-        return SHOW_ERROR("AIFF fails third section");
-    }
-    total_samples = io_aiff_uint_out(&actual[22]);
-    if (io_scan(comparison, actual, 27, 32))
-    {
-        return SHOW_ERROR("AIFF fails fourth section");
-    }
-
-    actual[0] = actual[1] = actual[2] = actual[3] = actual[4] = 0;
-
-    do
-    {
-        actual[3] = actual[2];
-        actual[2] = actual[1];
-        actual[1] = actual[0];
-        if (fread(actual,1,1, (FILE *)fptr) != 1)
-        {
-            return SHOW_ERROR("Could not read all of AIFF header");
-        }
-        if ((actual[0] == 'D') && (actual[1] == 'N') && (actual[2] == 'S') && (actual[3] == 'S'))
-        {
-            not_found = 0;
-        }
-    }
-    while ((!feof((FILE *)fptr)) && not_found);
-    if (feof((FILE *)fptr))
-    {
-        return SHOW_ERROR("AIFF sound marker not found");
-    }
-    if (fread(actual,1,6,(FILE *)fptr) != 6)
-    {
-        return SHOW_ERROR("Could not read section of AIFF header");
-    }
-    sound_size = io_aiff_uint_out(actual);
-    /* if (total_size != io_aiff_total_size(total_samples)) - this is not a valid comparison */
-    if (sound_size != io_aiff_sound_size(total_samples))
-    {
-        return SHOW_ERROR("AIFF fails sound size compare");
-    }
-
-    return total_samples;
+    n_byte header[54] = {0};
+    io_aiff_header(header);
+    io_aiff_uint(&header[4],  io_aiff_total_size(total_samples));
+    io_aiff_uint(&header[22], total_samples);
+    io_aiff_uint(&header[42], io_aiff_sound_size(total_samples));
+    fwrite(header, 54, 1, (FILE*)fptr);
 }
 
 /**
@@ -467,37 +361,6 @@ n_int io_disk_write(n_file * local_file, n_string file_name)
     {
         return SHOW_ERROR("No data in file to be written");
     }
-
-    written_length = fwrite(local_file->data,1,local_file->location, out_file);
-
-    if (fclose(out_file) != 0)
-    {
-        return SHOW_ERROR("File could not be closed");
-    }
-
-    if (written_length != local_file->location)
-    {
-        return SHOW_ERROR("File did not complete write");
-    }
-    return FILE_OKAY;
-}
-
-/**
- * Appends a file to disk.
- * @param local_file the pointer to the n_file data that is written to disk.
- * @param file_name the name of the file to be appended.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
-n_int io_disk_append(n_file * local_file, n_string file_name)
-{
-    n_uint written_length;
-#ifndef _WIN32
-    FILE * out_file = fopen(file_name,"a");
-#else
-    FILE * out_file = 0L;
-
-    fopen_s(&out_file,file_name,"a");
-#endif
 
     written_length = fwrite(local_file->data,1,local_file->location, out_file);
 

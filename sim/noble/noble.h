@@ -647,13 +647,6 @@ void    math_patch(n_byte * local_map, n_byte * scratch,
                    n_byte refined_start, n_byte refined_end,
                    n_byte rotate);
 
-void       io_aiff_header(n_byte * header);
-void       io_aiff_uint(n_byte * buffer, n_uint value);
-n_uint     io_aiff_uint_out(n_byte * buffer);
-n_uint     io_aiff_total_size(n_uint total_samples);
-n_uint     io_aiff_sound_size(n_uint total_samples);
-n_int      io_aiff_sample_size(n_uint total_size);
-
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);
 n_int      io_command_line_execution(void);
@@ -719,8 +712,6 @@ void       io_file_aiff_header(void * fptr, n_uint total_samples);
 
 void       io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples);
 
-n_int      io_file_aiff_header_check_length(void * fptr);
-
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);
 n_string   io_console_entry_clean(n_string string, n_int length);
@@ -730,7 +721,6 @@ n_int      io_console(void * ptr, noble_console_command * commands, n_console_in
 void       io_erase(n_byte * buf_offscr, n_uint nestop);
 n_int      io_disk_read(n_file * local_file, n_string file_name);
 n_int      io_disk_write(n_file * local_file, n_string file_name);
-n_int      io_disk_append(n_file * local_file, n_string file_name);
 n_int      io_disk_check(n_constant_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
 

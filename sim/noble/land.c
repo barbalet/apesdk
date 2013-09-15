@@ -90,7 +90,6 @@ static n_int weather_delta(n_land * local_land)
     n_int    average = 0;
     n_int    map_dimensions2;
     NA_ASSERT(local_land, "local_weather NULL");
-    NA_ASSERT(local_weather, "local_weather NULL");
     
     map_dimensions2 = land_map_dimension(local_land) / 2;
     
@@ -116,7 +115,6 @@ void weather_cycle(n_land * local_land)
     n_int         map_dimensions2;
     
     NA_ASSERT(local_land, "local_land NULL");
-    NA_ASSERT(local_weather, "local_weather NULL");
 
     map_dimensions2 = land_map_dimension(local_land)/ 2;
     
@@ -222,7 +220,6 @@ void weather_init(n_land * local_land)
 
 n_int weather_pressure(n_land * land, n_int px, n_int py, n_int dimension2)
 {
-    NA_ASSERT(wea, "wea NULL");
     return  land->atmosphere[WEATHER_MEM(dimension2, px, py, 0)];
 }
 
@@ -245,7 +242,6 @@ n_int	weather_temperature(n_land * local_land, n_int px, n_int py)
     n_uint annual_time, current_time;
 
     NA_ASSERT(local_land, "local_land NULL");
-    NA_ASSERT(wea, "wea NULL");
     
     if (local_land == 0L) return SHOW_ERROR("No land provided");
     
@@ -288,7 +284,6 @@ n_int	weather_seven_values(n_land * local_land, n_int px, n_int py)
     n_int   local_time;
     n_int   map_dimension2 = land_map_dimension(local_land);
     NA_ASSERT(local_land, "local_land NULL");
-    NA_ASSERT(local_weather, "local_weather NULL");
     
     local_time = local_land->time;
     
