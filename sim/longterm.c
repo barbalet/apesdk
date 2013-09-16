@@ -36,7 +36,7 @@
 
 #define CONSOLE_ONLY /* Please maintain this define until after ALIFE XIII July 22nd */
 #define CONSOLE_REQUIRED
-#define AUDIT_FILE
+#undef  AUDIT_FILE
 
 #include <stdio.h>
 #include <string.h>

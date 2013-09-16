@@ -207,16 +207,6 @@ void audio_clear_output(n_audio * audio, n_uint length)
     }
 }
 
-void audio_equal_input(n_audio * audio, n_uint length)
-{
-    n_uint     loop = 0;
-    while (loop < length)
-    {
-        timedomain[loop] = audio[loop];
-        loop++;
-    }
-}
-
 void audio_equal_output(n_audio * audio, n_uint length)
 {
     n_uint     loop = 0;
@@ -233,87 +223,6 @@ void audio_multiply_output(n_audio * audio, n_uint length)
     while (loop < length)
     {
         audio[loop] *= timedomain[loop];
-        loop++;
-    }
-}
-
-n_uint audio_power(n_audio * audio, n_uint length)
-{
-    n_uint   loop = 0;
-    n_uint   output = 0;
-
-    if (length == 0)
-    {
-        return 0;
-    }
-    while  (loop < length)
-    {
-        n_int  audio_value = audio[loop];
-        output += (audio_value * audio_value);
-        loop++;
-    }
-    return output/length;
-}
-
-
-n_uint audio_max(n_audio * audio, n_uint length)
-{
-    n_uint   loop = 0;
-    n_uint   output = 0;
-    n_int    min = 0;
-    while  (loop < length)
-    {
-        n_int  audio_value = audio[loop];
-
-        if (audio_value < min)
-        {
-            min = audio_value;
-        }
-
-        if (audio_value > output)
-        {
-            output = audio_value;
-        }
-        loop++;
-    }
-
-    min = 0 - min;
-
-    if (min > output)
-    {
-        output = min;
-    }
-
-    return output;
-}
-
-void audio_combine(n_audio * master, n_audio * secondary, n_uint length)
-{
-    n_uint loop = 0;
-    while (loop < length)
-    {
-        n_int duplicate = (master[loop] + secondary[loop])/2;
-        n_audio value = duplicate / 2;
-        master[loop] = value;
-        loop++;
-    }
-}
-
-void audio_noise_reduction(n_uint point_squared, n_uint length)
-{
-    n_uint  loop = 0;
-    while (loop < length)
-    {
-        n_int freq  = frequency[loop];
-        n_int freqi = frequencyi[loop];
-        n_uint root = 0;
-
-        n_uint value = (freq*freq) + (freqi*freqi);
-        if (value > point_squared)
-        {
-            root = (math_root(value));
-        }
-        audio_set_frequency(loop, root);
         loop++;
     }
 }
