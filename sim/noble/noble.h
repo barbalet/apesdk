@@ -48,7 +48,6 @@
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
 /*#undef   COMMAND_LINE_DEBUG        Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
-#undef   SKIM_TO_BRIANCODE        /* Skims the interpret stream to braincode printf output currently - only with lance */
 
 #undef   DEBUG_NON_FILE_HANDLE    /* Stops there being a file handle for debug output */
 
@@ -1025,10 +1024,6 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
 
 void  interpret_cleanup(n_interpret * to_clean);
 n_int interpret_cycle(n_interpret * code, n_int exit_offset, void * structure, n_int identifier, script_external * start, script_external * end);
-
-#ifdef SKIM_TO_BRIANCODE
-void skim_show(n_file * binary_code);
-#endif
 
 #ifdef	SCRIPT_DEBUG
 

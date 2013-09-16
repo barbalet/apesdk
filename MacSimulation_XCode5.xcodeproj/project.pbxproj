@@ -27,7 +27,6 @@
 		4A36006F1712409A004DAFBA /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600511712409A004DAFBA /* land.c */; };
 		4A3600701712409A004DAFBA /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600521712409A004DAFBA /* math.c */; };
 		4A3600711712409A004DAFBA /* parse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600541712409A004DAFBA /* parse.c */; };
-		4A3600721712409A004DAFBA /* skim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600551712409A004DAFBA /* skim.c */; };
 		4A3600731712409A004DAFBA /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600571712409A004DAFBA /* console.c */; };
 		4A3600741712409A004DAFBA /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600581712409A004DAFBA /* file.c */; };
 		4A3600751712409A004DAFBA /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600591712409A004DAFBA /* sim.c */; };
@@ -85,7 +84,6 @@
 		4A3600521712409A004DAFBA /* math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = math.c; sourceTree = "<group>"; };
 		4A3600531712409A004DAFBA /* noble.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = noble.h; sourceTree = "<group>"; };
 		4A3600541712409A004DAFBA /* parse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = parse.c; sourceTree = "<group>"; };
-		4A3600551712409A004DAFBA /* skim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = skim.c; sourceTree = "<group>"; };
 		4A3600571712409A004DAFBA /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = console.c; sourceTree = "<group>"; };
 		4A3600581712409A004DAFBA /* file.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = file.c; sourceTree = "<group>"; };
 		4A3600591712409A004DAFBA /* sim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sim.c; sourceTree = "<group>"; };
@@ -239,7 +237,6 @@
 				4A7DC3E31749CD710013F2E9 /* network.c */,
 				4A3600531712409A004DAFBA /* noble.h */,
 				4A3600541712409A004DAFBA /* parse.c */,
-				4A3600551712409A004DAFBA /* skim.c */,
 			);
 			name = noble;
 			path = sim/noble;
@@ -405,7 +402,6 @@
 				4A94505417CDC33C00D5893C /* shared.c in Sources */,
 				4A3600701712409A004DAFBA /* math.c in Sources */,
 				4A3600711712409A004DAFBA /* parse.c in Sources */,
-				4A3600721712409A004DAFBA /* skim.c in Sources */,
 				4A3600731712409A004DAFBA /* console.c in Sources */,
 				4A3600741712409A004DAFBA /* file.c in Sources */,
 				4A3600751712409A004DAFBA /* sim.c in Sources */,
