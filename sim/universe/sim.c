@@ -554,8 +554,8 @@ static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_bei
         awake=0;
     }
     /* This should be independent of the brainstate/cognitive simulation code */
-    brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, math_random(local_being->seed)%SOCIAL_SIZE);
-    brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, math_random(local_being->seed)%SOCIAL_SIZE);
+    brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, being_random(local_being)%SOCIAL_SIZE);
+    brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, being_random(local_being)%SOCIAL_SIZE);
 }
 
 static void sim_brain_dialogue(noble_simulation * local_sim)

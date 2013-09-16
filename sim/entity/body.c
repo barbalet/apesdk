@@ -105,12 +105,12 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
                 if (!graph) return;
                 if (graph[index].friend_foe>1) graph[index].friend_foe-=2;
             }
-            if ((carrying & INVENTORY_ROCK) && (math_random(other->seed)>THROW_ACCURACY))
+            if ((carrying & INVENTORY_ROCK) && (being_random(other)>THROW_ACCURACY))
             {
                 hit=1;
                 being_energy_delta(other, 0 - SQUABBLE_ENERGY_ROCK_HURL);
             }
-            if ((carrying & INVENTORY_BRANCH) && (math_random(other->seed)>WHACK_ACCURACY))
+            if ((carrying & INVENTORY_BRANCH) && (being_random(other)>WHACK_ACCURACY))
             {
                 hit=1;
                 being_energy_delta(other, 0 - SQUABBLE_ENERGY_BRANCH_WHACK);
@@ -242,7 +242,7 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
         if ((az > WATER_MAP) && (az < TIDE_MAX))
         {
             /* some probability of spearing a fish */
-            if (math_random(local->seed)<FISHING_PROB)
+            if (being_random(local)<FISHING_PROB)
             {
                 /* carry fish */
                 if (carrying & INVENTORY_SPEAR)
@@ -667,28 +667,30 @@ static n_int genetics_unique(noble_being * local, n_int number, n_genetics * gen
  * @param random Random number generator seed
  * @return 2 bit gene value
  */
-static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mutation_prob, n_byte2 * random)
+static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mutation_prob, noble_being * local)
 {
     n_byte2 mutation_type;
     n_int child_gene = 0;
 
-    math_random3(random);
-    if (random[0] < mutation_prob)
+    (void)being_random(local);
+    (void)being_random(local);
+    (void)being_random(local);
+    if (being_random(local) < mutation_prob)
     {
-        mutation_type = (random[1] & 7);
+        mutation_type = (being_random(local) & 7);
         switch(mutation_type)
         {
             /** mutation on the maternal chromosome */
         case MUTATION_MATERNAL:
             child_gene = DIPLOID(
-                             (math_random(random) & 3),
+                             (being_random(local) & 3),
                              ((CHROMOSOME_FROM_FATHER(chromosome) >> point ) & 3));
             break;
             /** mutation on the paternal chromosome */
         case MUTATION_PATERNAL:
             child_gene = DIPLOID(
                              ((CHROMOSOME_FROM_MOTHER(chromosome) >> point ) & 3),
-                             (math_random(random) & 3));
+                             (being_random(local) & 3));
             break;
             /** duplicate of the maternal gene on both sides */
         case MUTATION_MATERNAL_DUPLICATE:
@@ -703,15 +705,17 @@ static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mut
                              ((CHROMOSOME_FROM_FATHER(chromosome) >> point ) & 3));
             break;
         default:
-            math_random3(random);
-            child_gene = DIPLOID(
-                             (random[0] & 3), (random[1] & 3));
+                (void)being_random(local);
+                (void)being_random(local);
+                (void)being_random(local);
+                child_gene = DIPLOID(
+                             (being_random(local) & 3), (being_random(local) & 3));
         }
     }
     else
     {
         /** normal gene.  What grandparent genes get into the current generation is randomly chosen */
-        if ((math_random(random) & 1)!=0)
+        if ((being_random(local) & 1)!=0)
         {
             child_gene = DIPLOID(
                              ((CHROMOSOME_FROM_MOTHER(chromosome) >> point ) & 3),
@@ -734,7 +738,7 @@ static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mut
  * @param random Random number generator seed
  * @return Child chromosome
  */
-static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byte2 * random)
+static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, noble_being * local)
 {
     n_int loop = 0;
     n_genetics result = 0;
@@ -744,12 +748,12 @@ static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byt
     n_genetics parent;
 
     /** randomly select a crossover point */
-    n_int crossover_point = (math_random(random) >> 13) << 1;
+    n_int crossover_point = (being_random(local) >> 13) << 1;
 
     /** gene insertion/deletion */
-    if (math_random(random) < MUTATION_DELETION_PROB)
+    if (being_random(local) < MUTATION_DELETION_PROB)
     {
-        deletion_point = (math_random(random) >> 13) << 1;
+        deletion_point = (being_random(local) >> 13) << 1;
     }
 
     point = point2 = crossover_point - 8;
@@ -780,7 +784,7 @@ static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byt
             prob = MUTATION_CROSSOVER_PROB;
         }
 
-        result |= ( genetics_child_gene(parent, point2, prob, random) << point );
+        result |= ( genetics_child_gene(parent, point2, prob, local) << point );
         loop += 2;
         point += 2;
         point2 += 2;
@@ -794,7 +798,7 @@ static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byt
  * @param random Random number generator seed
  * @return The mutated chromosome
  */
-static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
+static n_genetics	genetics_mutate(n_genetics chromosome, noble_being * local)
 {
     n_genetics result = 0;
     n_int point = 0;
@@ -802,9 +806,9 @@ static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
     n_int deletion_point = 16;
 
     /** gene insertion/deletion */
-    if (math_random(random) < MUTATION_DELETION_PROB)
+    if (being_random(local) < MUTATION_DELETION_PROB)
     {
-        deletion_point = (math_random(random) >> 13) << 1;
+        deletion_point = (being_random(local) >> 13) << 1;
     }
 
     /** for every 2 bit gene in the 16 bit chromosome */
@@ -821,7 +825,7 @@ static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
         }
         if (point > 15) point -= 16;
 
-        result |= ( genetics_child_gene(chromosome, point, MUTATION_CROSSOVER_PROB, random) << point );
+        result |= ( genetics_child_gene(chromosome, point, MUTATION_CROSSOVER_PROB, local) << point );
         loop += 2;
         point += 2;
     }
@@ -834,26 +838,33 @@ static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * random)
  * @param local Pointer to the being
  * @param local_random Random number generator seed
  */
-static void genetics_transpose(noble_being * local, n_byte2 * local_random)
+static void genetics_transpose(noble_being * local)
 {
-    math_random3(local_random);
+    (void)being_random(local);
+    (void)being_random(local);
+    (void)being_random(local);
 
-    if (local_random[0] < MUTATION_TRANSPOSE_PROB)
+    if (being_random(local) < MUTATION_TRANSPOSE_PROB)
     {
         /** number of bits to transpose */
         /** chromosome numbers */
         /** locations within the chromosomes */
-        n_byte source_offset = (local_random[0]>>8)&31;
-        n_byte dest_offset   = local_random[1]&31;
+        n_byte2 local_random0 = being_random(local);
+        n_byte2 local_random1 = being_random(local);
+        
+        n_byte source_offset = (local_random0>>8)&31;
+        n_byte dest_offset   = local_random1&31;
         /** whether to invert the sequence */
-        n_byte inversion     = (local_random[0]>>13) & 1;
-        n_byte source_ch     = (local_random[1]>>5) % CHROMOSOMES;
-        n_byte dest_ch       = (local_random[1]>>7) % CHROMOSOMES;
+        n_byte inversion     = (local_random0>>13) & 1;
+        n_byte source_ch     = (local_random1>>5) % CHROMOSOMES;
+        n_byte dest_ch       = (local_random1>>7) % CHROMOSOMES;
         n_int  ctr1          = source_offset;
         n_byte p             = 0;
         n_genetics * genetics = being_genetics(local);
-        math_random3(local_random);
-        while (p < (local_random[1]&15))
+        (void)being_random(local);
+        (void)being_random(local);
+        (void)being_random(local);
+        while (p < (being_random(local)&15))
         {
             n_int ctr2;
             ctr1 = (ctr1 & 31);
@@ -893,7 +904,7 @@ static void genetics_transpose(noble_being * local, n_byte2 * local_random)
  * @param mother The mother of the being
  * @param local_random Random number generator seed
  */
-void body_genetics(noble_being * beings, n_int number, noble_being * local, noble_being * mother, n_byte2 * local_random)
+void body_genetics(noble_being * beings, n_int number, noble_being * local, noble_being * mother)
 {
     n_c_uint ch;
     n_byte sex = 2;
@@ -907,8 +918,11 @@ void body_genetics(noble_being * beings, n_int number, noble_being * local, nobl
         father_genetics = mother->father_genetics;
         
         /** determine the sex */
-        math_random3(local_random);
-        sex |= (local_random[0]&1);
+        (void)being_random(local);
+        (void)being_random(local);
+        (void)being_random(local);
+        
+        sex |= (being_random(local)&1);
     }
     do
     {
@@ -919,7 +933,7 @@ void body_genetics(noble_being * beings, n_int number, noble_being * local, nobl
             {
                 if (ch != CHROMOSOME_Y)
                 {
-                    genetics[ch] = genetics_crossover(mother_genetics[ch], father_genetics[ch], local_random);
+                    genetics[ch] = genetics_crossover(mother_genetics[ch], father_genetics[ch], local);
                 }
             }
             else
@@ -932,9 +946,15 @@ void body_genetics(noble_being * beings, n_int number, noble_being * local, nobl
                 genetics[ch] = 0;
                 for (loop=0; loop<16; loop+=2)
                 {
-                    n_int gene;
-                    math_random3(local_random);
-                    gene = DIPLOID((local_random[0] & 3), (local_random[1] & 3));
+                    n_int    gene;
+                    n_byte2  local_random;
+                    (void)being_random(local);
+                    (void)being_random(local);
+                    (void)being_random(local);
+                    
+                    local_random = being_random(local);
+                    
+                    gene = DIPLOID((local_random & 3), ((local_random >> 2) & 3));
                     genetics[ch] |= ( gene << loop );
                 }
             }
@@ -945,14 +965,14 @@ void body_genetics(noble_being * beings, n_int number, noble_being * local, nobl
             /** Y chromosome does not undergo crossover and passes from father to son */
             if (sex != SEX_FEMALE)
             {
-                GET_I(local) = genetics_mutate(father_genetics[CHROMOSOME_Y], local_random);
+                GET_I(local) = genetics_mutate(father_genetics[CHROMOSOME_Y], local);
             }
             else
             {
-                GET_I(local) = genetics_mutate(mother_genetics[CHROMOSOME_Y], local_random);
+                GET_I(local) = genetics_mutate(mother_genetics[CHROMOSOME_Y], local);
             }
             /** transpose genes between chromosomes */
-            genetics_transpose(local, local_random);
+            genetics_transpose(local);
             /** align the sex genetics */
             GET_I(local) &= ~1;
             GET_I(local) |= sex;

@@ -927,7 +927,6 @@ static n_int social_meet(
 #ifdef BRAINCODE_ON
             /** initialise the braincode associated with this individual */
             being_init_braincode(meeter_being,met_being,
-                                 meeter_being->seed,
                                  graph[index].friend_foe,BRAINCODE_EXTERNAL);
 #endif
         }
@@ -1104,7 +1103,7 @@ n_byte social_groom(
     and existing parasites multiply */
     if (meeter_being->parasites < max)
     {
-        paraprob = math_random(meeter_being->seed);
+        paraprob = being_random(meeter_being);
         if (paraprob < PARASITE_ENVIRONMENT +
                 (PARASITE_BREED*meeter_being->parasites))
         {
@@ -1134,7 +1133,7 @@ n_byte social_groom(
             (distance < GROOMING_MAX_SEPARATION) &&
             (being_speed(meeter_being) < MAX_SPEED_WHILST_GROOMING))
     {
-        n_int  groomprob = math_random(meeter_being->seed) & 16383;
+        n_int  groomprob = being_random(meeter_being) & 16383;
         if (familiarity > 16) familiarity=16;
 
         /** is the groomee female? */
@@ -1159,7 +1158,7 @@ n_byte social_groom(
             while ((met_being->inventory[groomloc] & INVENTORY_GROOMED) && (groom_decisions<4))
             {
                 met_being->inventory[groomloc] |= INVENTORY_GROOMED;
-                groomloc = (n_byte)(math_random(meeter_being->seed) % INVENTORY_SIZE);
+                groomloc = (n_byte)(being_random(meeter_being) % INVENTORY_SIZE);
                 groom_decisions++;
             }
             /** groomed wounds disappear */
@@ -1254,15 +1253,15 @@ n_byte2 social_squabble(
         agro = GENE_AGGRESSION(being_genetics(meeter_being));
         /** females are less agressive (less testosterone) */
         if (is_female) agro >>= 3;
-        if (math_random(meeter_being->seed) < agro*4096 + agro*meeter_being->honor*10)
+        if (being_random(meeter_being) < agro*4096 + agro*meeter_being->honor*10)
         {
 #endif
             /** who is the strongest ? */
             victor = meeter_being;
             vanquished = met_being;
 
-            if (((math_random(meeter_being->seed)&7)*being_energy(meeter_being)) <
-                    ((math_random(meeter_being->seed)&7)*being_energy(met_being)))
+            if (((being_random(meeter_being)&7)*being_energy(meeter_being)) <
+                    ((being_random(meeter_being)&7)*being_energy(met_being)))
             {
                 victor = met_being;
                 vanquished = meeter_being;
@@ -1299,7 +1298,7 @@ n_byte2 social_squabble(
             if (vanquished->honor > SQUABBLE_HONOR_ADJUST) vanquished->honor -= SQUABBLE_HONOR_ADJUST;
 #endif
 
-            punchloc = math_random(victor->seed) % INVENTORY_SIZE;
+            punchloc = being_random(victor) % INVENTORY_SIZE;
             if (distance > SQUABBLE_SHOW_FORCE_DISTANCE)
             {
                 /** show of force */
@@ -1472,7 +1471,7 @@ n_int social_mate(
 #ifdef PARASITES_ON
         /** mating is probabilistic, with a bias towards
             higher status individuals */
-        matingprob = math_random(meeter_being->seed);
+        matingprob = being_random(meeter_being);
         if (matingprob <
                 (32000 + (n_byte2)(met_being->honor)*
                  GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB))
@@ -1587,7 +1586,7 @@ static void social_chat_territory(
         /** give the current place a name at random */
         if (i == 0)
         {
-            i = 1 + (n_byte)math_random(meeter_being->seed);
+            i = 1 + (n_byte)(being_random(meeter_being) & 255);
         }
         meeter_being->territory[idx].name = (n_byte)i;
     }
@@ -1689,7 +1688,7 @@ n_int social_chat(
             else
             {
                 /** choose randomly */
-                idx = 1+(math_random(meeter_being->seed)%(SOCIAL_SIZE_BEINGS-1));
+                idx = 1+(being_random(meeter_being)%(SOCIAL_SIZE_BEINGS-1));
             }
         }
 
@@ -1763,7 +1762,6 @@ n_int social_chat(
                         /** initialise the braincode */
                         being_init_braincode(
                             meeter_being,met_being,
-                            meeter_being->seed,
                             met_graph[idx].friend_foe,
                             BRAINCODE_EXTERNAL);
 #endif

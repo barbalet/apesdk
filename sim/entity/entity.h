@@ -201,6 +201,8 @@ void   being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte
 void   being_state_description(n_byte2 state, n_string result);
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
 
+n_byte2 being_random(noble_being * value);
+
 void being_set_select_name(noble_simulation * sim, n_string name);
 n_string being_get_select_name(noble_simulation * sim);
 

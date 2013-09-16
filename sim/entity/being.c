@@ -106,6 +106,32 @@ n_byte * being_braincode_internal(noble_being * value)
 
 #endif
 
+static void being_random3(noble_being * value)
+{
+    math_random3(value->seed);
+}
+
+n_byte2 being_random(noble_being * value)
+{
+    return math_random(value->seed);
+}
+
+static void being_set_random(noble_being * value, n_byte2 * seed)
+{
+    value->seed[0] = seed[0];
+    value->seed[1] = seed[1];
+}
+
+static void being_set_random1(noble_being * value, n_byte2 seed1)
+{
+    value->seed[1] = seed1;
+}
+
+static n_byte2 * being_get_random(noble_being * value)
+{
+    return value->seed;
+}
+
 void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
 {
     n_int  lpx = 0;
@@ -370,7 +396,7 @@ void being_wander(noble_being * value, n_int wander)
 
 static void being_facing_init(noble_being * value)
 {
-    value->direction_facing = (n_byte)(math_random(value->seed) & 255);
+    value->direction_facing = (n_byte)(being_random(value) & 255);
 }
 
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
@@ -499,7 +525,6 @@ void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum in
     (value)->inventory[location] |= object;
     GET_A(value,ATTENTION_BODY) = location;
 }
-
 
 /**
  * @brief Applies a function to each being in the simulation
@@ -777,7 +802,7 @@ static void being_immune_init(noble_being * local)
 {
 #ifdef IMMUNE_ON
     n_byte i;
-    n_byte2 * local_random = local->seed;
+    n_byte2 * local_random = being_get_random(local);
     noble_immune_system * immune = &(local->immune_system);
 
     for (i = 0; i < IMMUNE_ANTIGENS; i += 2)
@@ -820,7 +845,7 @@ static void being_acquire_pathogen(noble_being * local, n_byte transmission_type
 #ifdef IMMUNE_ON
     n_byte i;
     noble_immune_system * immune = &(local->immune_system);
-    n_byte2 * local_random = local->seed;
+    n_byte2 * local_random = being_get_random(local);
 
     math_random3(local_random);
     if (local_random[0] < PATHOGEN_ENVIRONMENT_PROB)
@@ -846,7 +871,7 @@ void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, 
 {
 #ifdef IMMUNE_ON
     n_byte i,j;
-    n_byte2 * local_random = meeter_being->seed;
+    n_byte2 * local_random = being_get_random(meeter_being);
     noble_immune_system * immune0 = &(meeter_being->immune_system);
     noble_immune_system * immune1 = &(met_being->immune_system);
 
@@ -892,7 +917,7 @@ static void being_immune_response(noble_being * local)
     n_int max_bits_matched;
     n_byte2 total_antigens,max_severity;
     n_byte i,j,k,match,best_match,bits_matched,bit;
-    n_byte2 * local_random = local->seed;
+    n_byte2 * local_random = being_get_random(local);
     noble_immune_system * immune = &(local->immune_system);
 
     /** antibodies die at some fixed rate */
@@ -1819,7 +1844,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     }
 #endif
 
-    if (awake == 0)
+    if ((awake == 0) && local)
     {
         local->state = BEING_STATE_ASLEEP;
 
@@ -2528,7 +2553,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     /** Create a wander based on the brain value */
     if ((local->goal[0]==GOAL_NONE) &&
             (beings_in_vicinity==0) &&
-            (math_random(local->seed) < 1000 + 3600*GENE_STAGGER(genetics)))
+            (being_random(local) < 1000 + 3600*GENE_STAGGER(genetics)))
     {
         n_byte * local_brain = being_brain(local);
         n_int	 wander = 0;
@@ -2541,7 +2566,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         }
         else
         {
-            wander = math_spread_byte(math_random(local->seed) & 7);
+            wander = math_spread_byte(being_random(local) & 7);
         }
 
         being_wander(local, wander);
@@ -2722,10 +2747,10 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 /** initialise inner or outer braincode */
 void being_init_braincode(noble_being * local,
                           noble_being * other,
-                          n_byte2* local_random,
                           n_byte friend_foe,
                           n_byte internal)
 {
+    n_byte2 * local_random = being_get_random(local);
     n_uint ch,i,most_similar_index,diff,min,actor_index;
     social_link * graph;
 
@@ -2740,6 +2765,8 @@ void being_init_braincode(noble_being * local,
 #ifdef RANDOM_INITIAL_BRAINCODE
                 being_braincode_internal(local)[ch] = math_random(local_random) & 255;
 #else
+                
+                being_random3(local);
                 being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
                 being_braincode_internal(local)[ch+1] = math_random(local_random) & 255;
@@ -2750,6 +2777,7 @@ void being_init_braincode(noble_being * local,
 #ifdef RANDOM_INITIAL_BRAINCODE
                 being_braincode_internal(local)[ch] = math_random(local_random) & 255;
 #else
+                being_random3(local);
                 being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
                 being_braincode_internal(local)[ch+1] = math_random(local_random) & 255;
@@ -2808,15 +2836,15 @@ void being_init_braincode(noble_being * local,
 static n_int being_set_unique_name(noble_being * beings,
                                    n_int number,
                                    noble_being * local_being,
-                                   n_byte2 * random_factor,
                                    n_byte2   mother_family_name,
                                    n_byte2   father_family_name)
 {
-    n_uint i;
-    n_int samples=0,found=0;
-    n_byte2 possible_family_name;
-    n_byte2 possible_first_name;
-    n_byte2 local_random[2];
+    n_uint    i;
+    n_int     samples=0,found=0;
+    n_byte2   possible_family_name;
+    n_byte2   possible_first_name;
+    n_byte2 * random_factor = being_get_random(local_being);
+    n_byte2   local_random[2];
 
     local_random[0] = random_factor[0];
     local_random[1] = random_factor[1];
@@ -2984,25 +3012,26 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
     if (random_factor)
     {
-        local->seed[0] = random_factor[0];
-        local->seed[1] = random_factor[1];
+        being_set_random(local, random_factor);
     }
     else if (mother)
     {
         mother_genetics = being_genetics(mother);
-        local->seed[0] = mother->seed[1];
-        local->seed[1] = mother->seed[0];
-        math_random(mother->seed);
+        
+        being_set_random(local, being_get_random(mother));
 
-        math_random3(local->seed);
+        
+        (void)being_random(mother);
 
-        local->seed[1] = mother_genetics[0];
+        being_random3(local);
+        
+        being_set_random1(local, being_get_random(mother)[0]);
 
-        math_random3(local->seed);
+        being_random3(local);
 
-        local->seed[1] = land->time;
+        being_set_random1(local, land->time);
 
-        math_random3(local->seed);
+        being_random3(local);
     }
     else
     {
@@ -3012,19 +3041,19 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
 #ifdef BRAINCODE_ON
 
-    math_random3(local->seed);
+    being_random3(local);
 
 #ifdef MAXIMIZE_ERASING
 
-    being_init_braincode(local,0L,local->seed,0,
+    being_init_braincode(local,0L,0,
                          BRAINCODE_INTERNAL);
-    being_init_braincode(local,0L,local->seed,0,
+    being_init_braincode(local,0L,0,
                          BRAINCODE_EXTERNAL);
 
     /** randomly initialize registers */
     for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
     {
-        math_random3(local->seed);
+        being_random3(local);
         local->braincode_register[ch]=(n_byte)(local->seed[0] & 255);
     }
 
@@ -3042,10 +3071,10 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         }
         local->brainprobe[ch].frequency =
             (n_byte)1 + (local->seed[1]%BRAINCODE_MAX_FREQUENCY);
-        math_random3(local->seed);
+        being_random3(local);
         local->brainprobe[ch].address = (n_byte)local->seed[0];
         local->brainprobe[ch].position = (n_byte)local->seed[1];
-        math_random3(local->seed);
+        being_random3(local);
         local->brainprobe[ch].offset = (n_byte)local->seed[0];
     }
 
@@ -3081,21 +3110,21 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
         n_int loop = 0;
 
-        math_random3(local->seed);
+        being_random3(local);
 
         do
         {
-            location[0] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
-            location[1] = (n_byte2)(math_random(local->seed) & APESPACE_BOUNDS);
+            location[0] = (n_byte2)(being_random(local) & APESPACE_BOUNDS);
+            location[1] = (n_byte2)(being_random(local) & APESPACE_BOUNDS);
             loop ++;
         }
         while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1]))));
 
         being_set_location(local, location);
 
-        being_set_unique_name(beings, number, local, local->seed, 0, 0);
+        being_set_unique_name(beings, number, local, 0, 0);
         
-        body_genetics(beings, number, local, 0L, local->seed);
+        body_genetics(beings, number, local, 0L);
 
         local->social_x = local->social_nx =
                               (math_random(local->seed) & 32767)+16384;
@@ -3111,10 +3140,10 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         /** this is the same as equals */
         being_wander(local, being_facing(mother) - being_facing(local));
 
-        (void) math_random(local->seed);
+        (void) being_random(local);
         local->social_x = local->social_nx = mother->social_x;
         local->social_y = local->social_ny = mother->social_y;
-        body_genetics(beings, number, local, mother, local->seed);
+        body_genetics(beings, number, local, mother);
  
 #ifdef PARASITES_ON
         /** ascribed social status */
@@ -3125,7 +3154,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         genetics_set(local->father_genetics,
                      mother->father_genetics);
 
-        being_set_unique_name(beings, number, local, local->seed,
+        being_set_unique_name(beings, number, local,
                               being_family_name(mother),
                               mother->father_name[1]);
 
@@ -3144,7 +3173,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     else
     {
         /** produce an initial distribution of heights and masses*/
-        math_random3(local->seed);
+        being_random3(local);
         GET_H(local) = BIRTH_HEIGHT +
                        (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
         GET_M(local) = BIRTH_MASS +
@@ -3301,7 +3330,7 @@ void being_tidy(noble_simulation * local_sim)
             /** this simulates natural death or at least some trauma the ape may or may not be able to recover from */
             if (age_in_years > 29)
             {
-                if(math_random(local_being->seed) < (age_in_years - 29))
+                if(being_random(local_being) < (age_in_years - 29))
                 {
                     local_e -= BEING_HUNGRY;
                 }

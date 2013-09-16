@@ -667,14 +667,13 @@ n_byte get_braincode_instruction(noble_being * local_being)
 
     total = prob[0] + prob[1] + prob[2] + prob[3] + prob[4];
 
-    math_random3(local_being->seed);
     if (total == 0)
     {
         index = 0;
     }
     else
     {
-        index = (local_being->seed[0])%total;
+        index = being_random(local_being);
     }
     total = 0;
     for (i=0; i<5; i++,total+=prob[i])

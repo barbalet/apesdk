@@ -440,7 +440,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                 local_number = VECT_Y(local_vr[0]);
                 break;
             case VARIABLE_RANDOM:
-                local_number = math_random(local_current->seed);
+                local_number = being_random(local_current);
                 break;
             case VARIABLE_WATER_LEVEL:
                 local_number = WATER_MAP;
