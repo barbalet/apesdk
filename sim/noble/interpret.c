@@ -582,12 +582,16 @@ void interpret_cleanup(n_interpret * to_clean)
     io_free(to_clean);
 }
 
-/* returns:
-      -1 in error case
-       0 in leave and don't cycle back
-       1 in leave and continue to cycle back
+/**
+ * This processes a single cycle of the ApeScript interpreter.
+ * @param code the ApeScript code to be executed.
+ * @param exit_offset if greater than minus one, the value entry to indicate exiting interpreter.
+ * @param structure the structure to be passed into the start and end functions.
+ * @param identifier a unique identifier also to be passed into the start and end functions
+ * @param start the function to be run at the start of the ApeScript cycle.
+ * @param end the function to be run at the end of the ApeScript cycle.
+ * @return -1 in error case, 0 in leave and don't cycle back, 1 in leave and continue to cycle back.
  */
-
 n_int interpret_cycle(n_interpret * code, n_int exit_offset,
                       void * structure, n_int identifier,
                       script_external * start, script_external * end)

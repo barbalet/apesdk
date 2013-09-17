@@ -61,11 +61,6 @@ n_int io_command_line_execution(void)
     return command_line_execution;
 }
 
-/**
- * This is a single value store used to identify if the console execution is used with the GUI version.
- * @param value entering value.
- * @return previously held value.
- */
 void io_entry_execution(n_int argc, n_string * argv)
 {
     if (argv)

@@ -34,7 +34,7 @@
  ****************************************************************/
 
 /*! \file   audio.c
- *  \brief  Handles audio input and output for the Noble Toolkit
+ *  \brief  Handles audio output for the Noble Toolkit
 
  */
 
@@ -50,6 +50,13 @@ static n_double timedomain[AUDIO_FFT_MAX_BUFFER];
 static n_double frequencyi[AUDIO_FFT_MAX_BUFFER];
 static n_double timedomaini[AUDIO_FFT_MAX_BUFFER];
 
+
+/**
+ * Creates a bit reversed value of a particular index value.
+ * @param index value to be bit reversed.
+ * @param power_sample the size in bits of the value to be reversed.
+ * @return reversed bit value.
+ */
 static n_uint	audio_reverse_bits (n_uint index, n_uint power_sample)
 {
     n_uint i = 0;
@@ -63,6 +70,11 @@ static n_uint	audio_reverse_bits (n_uint index, n_uint power_sample)
     return rev;
 }
 
+/**
+ * Perform a fast fourier transform.
+ * @param inverse if this is an inverse FFT.
+ * @param power_sample the number of bits of the FFT cell size.
+ */
 void audio_fft(n_byte inverse, n_uint power_sample)
 {
     n_uint		NumSamples = 1 << power_sample;    /* Number of bits needed to store indices */
@@ -184,6 +196,10 @@ void audio_fft(n_byte inverse, n_uint power_sample)
     }
 }
 
+/**
+ * Clears all the buffers associated with the FFT.
+ * @param length the length of the buffer to be cleared.
+ */
 void audio_clear_buffers(n_uint length)
 {
     n_uint     loop = 0;
@@ -197,6 +213,11 @@ void audio_clear_buffers(n_uint length)
     }
 }
 
+/**
+ * Clears an audio output buffer
+ * @param audio the audio buffer to be cleared.
+ * @param length the length of the buffer to be cleared.
+ */
 void audio_clear_output(n_audio * audio, n_uint length)
 {
     n_uint     loop = 0;
@@ -207,6 +228,11 @@ void audio_clear_output(n_audio * audio, n_uint length)
     }
 }
 
+/**
+* Sets an audio ouput buffer to the FFT time-domain buffer.
+* @param audio the audio buffer to be set.
+* @param length the length of the buffer to be set.
+*/
 void audio_equal_output(n_audio * audio, n_uint length)
 {
     n_uint     loop = 0;
@@ -217,6 +243,11 @@ void audio_equal_output(n_audio * audio, n_uint length)
     }
 }
 
+/**
+ * Multiplies an audio ouput buffer to the FFT time-domain buffer.
+ * @param audio the audio buffer to be multiplied.
+ * @param length the length of the buffer to be multiplied.
+ */
 void audio_multiply_output(n_audio * audio, n_uint length)
 {
     n_uint     loop = 0;
@@ -227,6 +258,11 @@ void audio_multiply_output(n_audio * audio, n_uint length)
     }
 }
 
+/**
+ * Sets frequency values in the frequency FFT buffer.
+ * @param entry the frequency entry point.
+ * @param value the specific value to set in the frequency entry.
+ */
 void audio_set_frequency(n_uint entry, n_uint value)
 {
     frequency[entry] = value/1E+00;

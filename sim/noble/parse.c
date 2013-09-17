@@ -142,13 +142,6 @@ void scdebug_writeon(n_byte value)
         if(file_debug != 0L)
         {
             single_entry = 0;
-            /*
-                        now handled through scdebug_file_ready
-            #ifndef DEBUG_NON_FILE_HANDLE
-                        io_disk_write(file_debug, "./apescript_debug.txt");
-                        scdebug_file_cleanup();
-            #endif
-             */
         }
     }
 #endif
