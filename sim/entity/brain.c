@@ -693,7 +693,7 @@ n_byte get_braincode_instruction(noble_being * local_being)
  * @param value
  * @return
  */
-static n_int get_actor_index(social_link * social_graph, n_int value)
+static n_int get_actor_index(noble_social * social_graph, n_int value)
 {
     n_int i;
 
@@ -715,8 +715,8 @@ static n_int get_actor_index(social_link * social_graph, n_int value)
  * @return Social graph index
  */
 static n_int get_actor_index_from_episode(
-    social_link * social_graph,
-    episodic_memory * episodic_event,
+    noble_social * social_graph,
+    noble_episodic * episodic_event,
     n_int episode_index)
 {
     n_int i,actor_index=-1;
@@ -739,7 +739,7 @@ static n_int get_actor_index_from_episode(
     return actor_index;
 }
 
-typedef n_int (n_similar)(episodic_memory * episodic, n_int * carry_through);
+typedef n_int (n_similar)(noble_episodic * episodic, n_int * carry_through);
 
 /**
  * @brief Returns the index of the most similar episodic memory
@@ -751,7 +751,7 @@ typedef n_int (n_similar)(episodic_memory * episodic, n_int * carry_through);
  * @return Episodic memory index of the most similar event
  */
 static n_int attention_similar(n_int episode_index,
-                               episodic_memory * episodic,
+                               noble_episodic * episodic,
                                n_int * memory_visited,
                                n_int * carry_through,
                                n_similar function)
@@ -797,7 +797,7 @@ static n_int attention_similar(n_int episode_index,
  * @param carry_through Time to be compared against
  * @return Absolute temporal proximity
  */
-static n_int similar_time(episodic_memory * episodic, n_int * carry_through)
+static n_int similar_time(noble_episodic * episodic, n_int * carry_through)
 {
     n_int dt = episodic->time - carry_through[0];
     if (dt < 0)
@@ -815,7 +815,7 @@ static n_int similar_time(episodic_memory * episodic, n_int * carry_through)
  * @return Absolute temporal proximity
  */
 static n_int attention_similar_time(n_int episode_index,
-                                    episodic_memory * episodic,
+                                    noble_episodic * episodic,
                                     n_int * memory_visited)
 {
     n_int time = episodic[episode_index].time;
@@ -828,7 +828,7 @@ static n_int attention_similar_time(n_int episode_index,
  * @param carry_through Affect value to be compared against
  * @return Absolute difference in affect value
  */
-static n_int similar_affect(episodic_memory * episodic, n_int * carry_through)
+static n_int similar_affect(noble_episodic * episodic, n_int * carry_through)
 {
     n_int da = episodic->affect - carry_through[0];
     if (da < 0)
@@ -845,7 +845,7 @@ static n_int similar_affect(episodic_memory * episodic, n_int * carry_through)
  * @return Absolute difference in affect value
  */
 static n_int attention_similar_affect(n_int episode_index,
-                                      episodic_memory * episodic,
+                                      noble_episodic * episodic,
                                       n_int * memory_visited)
 {
     n_int affect = episodic[episode_index].affect;
@@ -858,7 +858,7 @@ static n_int attention_similar_affect(n_int episode_index,
  * @param carry_through Family name to be compared against
  * @return Similarity value in the range 0-3
  */
-static n_int similar_name(episodic_memory * episodic, n_int * carry_through)
+static n_int similar_name(noble_episodic * episodic, n_int * carry_through)
 {
     n_int similarity = 3;
 
@@ -876,7 +876,7 @@ static n_int similar_name(episodic_memory * episodic, n_int * carry_through)
  * @return Similarity value
  */
 static n_int attention_similar_name(n_int episode_index,
-                                    episodic_memory * episodic,
+                                    noble_episodic * episodic,
                                     n_int * memory_visited)
 {
     n_int name[3];
@@ -894,7 +894,7 @@ static n_int attention_similar_name(n_int episode_index,
  * @param carry_through Date to be compared against
  * @return Absolute difference in date value
  */
-static n_int similar_date(episodic_memory * episodic, n_int * carry_through)
+static n_int similar_date(noble_episodic * episodic, n_int * carry_through)
 {
     n_int dd = TIME_IN_DAYS(episodic->date) - carry_through[0];
     if (dd < 0)
@@ -912,7 +912,7 @@ static n_int similar_date(episodic_memory * episodic, n_int * carry_through)
  * @return Similarity value
  */
 static n_int attention_similar_date(n_int episode_index,
-                                    episodic_memory * episodic,
+                                    noble_episodic * episodic,
                                     n_int * memory_visited)
 {
     n_int time = TIME_IN_DAYS(&episodic[episode_index].date[0]);
@@ -925,7 +925,7 @@ static n_int attention_similar_date(n_int episode_index,
  * @param carry_through 2D coordinate of the place to be compared against
  * @return Similarity value (2D distance squared)
  */
-static n_int similar_place(episodic_memory * episodic, n_int * carry_through)
+static n_int similar_place(noble_episodic * episodic, n_int * carry_through)
 {
     n_int dx = episodic->location[0] - carry_through[0];
     n_int dy = episodic->location[1] - carry_through[1];
@@ -942,7 +942,7 @@ static n_int similar_place(episodic_memory * episodic, n_int * carry_through)
  * @return Similarity value (2D distance squared)
  */
 static n_int attention_similar_place(n_int episode_index,
-                                     episodic_memory * episodic,
+                                     noble_episodic * episodic,
                                      n_int * memory_visited)
 {
     n_int location[2];
@@ -961,7 +961,7 @@ static n_int attention_similar_place(n_int episode_index,
  * @param switcher The type of sensor
  * @return Sensor value
  */
-static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, social_link * meeter_social_graph, n_int actor_index, n_byte switcher)
+static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, noble_social * meeter_social_graph, n_int actor_index, n_byte switcher)
 {
     switch (switcher % 32)
     {
@@ -1249,8 +1249,8 @@ void brain_dialogue(
     n_int intention_episode_index=-1;
     n_int memory_visited[EPISODIC_SIZE];
 
-    social_link * meeter_social_graph = being_social(meeter_being);
-    episodic_memory * episodic = being_episodic(meeter_being);
+    noble_social * meeter_social_graph = being_social(meeter_being);
+    noble_episodic * episodic = being_episodic(meeter_being);
     n_int max_itterations;
     n_byte * pspace = (n_byte*)meeter_being->braincode_register;
 

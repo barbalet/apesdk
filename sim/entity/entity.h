@@ -104,8 +104,8 @@ void braincode_number_of_instructions(
 void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
 n_byte * being_brain(noble_being * value);
-episodic_memory * being_episodic(noble_being * value);
-social_link * being_social(noble_being * value);
+noble_episodic * being_episodic(noble_being * value);
+noble_social * being_social(noble_being * value);
 
 n_int being_brainstates(noble_being * value, n_int awake, n_byte2 * states);
 

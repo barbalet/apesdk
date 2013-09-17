@@ -116,7 +116,7 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
     noble_simulation * local_sim = (noble_simulation *) ptr;
     noble_being * local_being;
     n_int i,found;
-    social_link * local_social_graph;
+    noble_social * local_social_graph;
 
     /** Get the being object from its name */
     local_being = being_from_name(local_sim, beingname);
@@ -2380,7 +2380,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_uint i, j, k, e;
     noble_being * local_being;
-    episodic_memory * local_episodic;
+    noble_episodic * local_episodic;
     const n_uint max = 1024;
     n_byte2 * first_name = (n_byte2*)io_new(max*sizeof(n_byte2));
     n_byte2 * family_name = (n_byte2*)io_new(max*sizeof(n_byte2));

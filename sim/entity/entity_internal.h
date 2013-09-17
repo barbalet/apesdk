@@ -97,7 +97,7 @@ n_byte2 social_squabble(noble_being * meeter_being, noble_being * met_being, n_u
 n_int social_mate(noble_being * meeter_being, noble_being * met_being, n_int being_index, n_int distance, noble_simulation * sim);
 n_int social_chat(noble_being * meeter_being, noble_being * met_being, n_int being_index, noble_simulation * sim);
 void social_goals(noble_being * local);
-n_int get_social_link(noble_being * meeter_being, noble_being * met_being, noble_simulation * sim);
+n_int get_noble_social(noble_being * meeter_being, noble_being * met_being, noble_simulation * sim);
 
 n_int episodic_met_being_celebrity(
     noble_simulation * local_sim,

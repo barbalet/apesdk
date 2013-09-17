@@ -182,16 +182,16 @@ n_int	file_in(n_file * input_file)
                 break;
                 case FIL_SOE:
                 {
-                    social_link * local_social = being_social(&(local_sim->beings[ape_count]));
+                    noble_social * local_social = being_social(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_social[social_count]);
-                    loop_end = sizeof(social_link);
+                    loop_end = sizeof(noble_social);
                 }
                 break;
                 case FIL_EPI:
                 {
-                    episodic_memory * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
+                    noble_episodic * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_episodic[episodic_count]);
-                    loop_end = sizeof(episodic_memory);
+                    loop_end = sizeof(noble_episodic);
                 }
                 break;
             default:
@@ -550,11 +550,11 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
             {
                 n_int		 temp_select = local_vr[ VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE ];
                 noble_being	*local_being = 0L;
-                social_link    *local_social_graph = 0L;
-                social_link     social_graph;
+                noble_social    *local_social_graph = 0L;
+                noble_social     social_graph;
 #ifdef EPISODIC_ON
-                episodic_memory    *local_episodic = 0L;
-                episodic_memory    episodic;
+                noble_episodic    *local_episodic = 0L;
+                noble_episodic    episodic;
 #endif
 
                 if( temp_select < 0 )

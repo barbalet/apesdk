@@ -71,7 +71,7 @@ void episodic_logging(n_console_output * output_function, n_int social)
  */
 static void episodic_intention_update(noble_simulation * local_sim, noble_being * local, n_int episode_index)
 {
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_episodic * local_episodic = being_episodic(local);
     n_byte event;
     n_int learned_preference_index=-1;
     if (local_episodic == 0L)
@@ -139,7 +139,7 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
 void episodic_cycle(noble_simulation * local_sim, noble_being * local)
 {
     n_int i;
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_episodic * local_episodic = being_episodic(local);
     n_genetics * genetics = being_genetics(local);
 
     if (!local_episodic) return;
@@ -221,7 +221,7 @@ n_int episodic_met_being_celebrity(
     noble_being * met_being)
 {
     n_int i,j,celebrity=0,ctr,aff;
-    episodic_memory * meeter_episodic = being_episodic(meeter_being);
+    noble_episodic * meeter_episodic = being_episodic(meeter_being);
     n_byte2 first_name = being_gender_name(met_being);
     n_byte2 family_name = being_family_name(met_being);
 
@@ -279,7 +279,7 @@ n_int episodic_first_person_memories_percent(
     n_byte intention)
 {
     n_int i,hits=0,memories=0;
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_episodic * local_episodic = being_episodic(local);
     n_byte2 name = being_gender_name(local);
     n_byte2 family = being_family_name(local);
 
@@ -339,7 +339,7 @@ n_int episodic_first_person_memories_percent(
  * @param local_sim Pointer to the simulation
  * @return array index of the episodic memory which can be replaced.
  */
-static n_int episodic_memory_replace_index(
+static n_int noble_episodic_replace_index(
     n_byte event,
     n_int affect,
     n_byte2 name1, n_byte2 family1,
@@ -354,7 +354,7 @@ static n_int episodic_memory_replace_index(
     n_int min;
     n_byte event_exists=0;
 
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_episodic * local_episodic = being_episodic(local);
 
     if (!local_episodic) return -1;
 
@@ -436,7 +436,7 @@ static void episodic_store_full(
     n_byte2 arg,
     n_byte food)
 {
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_episodic * local_episodic = being_episodic(local);
     n_int replace;
     n_byte  old_event;
     n_byte2 old_time;
@@ -449,7 +449,7 @@ static void episodic_store_full(
 
     if (being_awake(local_sim, local)==FULLY_ASLEEP) return;
 
-    replace = episodic_memory_replace_index(event,affect,name1,family1,name2,family2,local,local_sim);
+    replace = noble_episodic_replace_index(event,affect,name1,family1,name2,family2,local,local_sim);
 
     if (replace == -1) return;
 
@@ -627,7 +627,7 @@ n_byte episodic_intention(
 {
     n_int replace;
     n_byte2 time, date0,date1;
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_episodic * local_episodic = being_episodic(local);
     n_byte event;
 
     if (local_episodic == 0L)
@@ -670,7 +670,7 @@ n_byte episodic_intention(
     }
 
     /** find a memory index to replace */
-    replace = episodic_memory_replace_index(
+    replace = noble_episodic_replace_index(
                   EVENT_INTENTION + event,
                   (n_int)(local_episodic[episode_index].affect)-EPISODIC_AFFECT_ZERO,
                   being_gender_name(local),
@@ -705,8 +705,8 @@ n_byte episodic_anecdote(
     noble_being * local,
     noble_being * other)
 {
-    episodic_memory * local_episodic = being_episodic(local);
-    episodic_memory * other_episodic = being_episodic(other);
+    noble_episodic * local_episodic = being_episodic(local);
+    noble_episodic * other_episodic = being_episodic(other);
     n_int affect;
     n_byte event;
     n_int replace,mult=1;
@@ -752,7 +752,7 @@ n_byte episodic_anecdote(
     }
 
     /** find an index within the other episodic memory in which to insert */
-    replace = episodic_memory_replace_index(
+    replace = noble_episodic_replace_index(
                   event,affect,
                   local_episodic[GET_A(local,ATTENTION_EPISODE)].first_name[BEING_MEETER],
                   local_episodic[GET_A(local,ATTENTION_EPISODE)].family_name[BEING_MEETER],

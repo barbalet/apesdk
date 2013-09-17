@@ -59,10 +59,10 @@
 #define DRIVES_BYTES    (DRIVES)
 #define GOALS_BYTES	(sizeof(n_byte2)*3)
 
-#define SOCIAL_BYTES    ((SOCIAL_SIZE*sizeof(social_link))+(2*4))
+#define SOCIAL_BYTES    ((SOCIAL_SIZE*sizeof(noble_social))+(2*4))
 
 #ifdef EPISODIC_ON
-#define EPISODIC_BYTES  (EPISODIC_SIZE*sizeof(episodic_memory))
+#define EPISODIC_BYTES  (EPISODIC_SIZE*sizeof(noble_episodic))
 #else
 #define EPISODIC_BYTES  0
 #endif

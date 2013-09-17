@@ -1114,7 +1114,7 @@ typedef struct
 #ifdef BRAINCODE_ON
     n_byte   braincode[BRAINCODE_SIZE];
 #endif
-} social_link;
+} noble_social;
 
 
 /*! @struct
@@ -1143,7 +1143,7 @@ typedef struct
     n_byte   food;
     n_byte2  affect;
     n_byte2  arg;
-} episodic_memory;
+} noble_episodic;
 
 
 /*! @struct
@@ -1333,8 +1333,8 @@ typedef struct
     noble_vessel vessel[VASCULAR_SIZE];
 #endif
     n_byte            brain[DOUBLE_BRAIN];
-    social_link       social[SOCIAL_SIZE];
-    episodic_memory   episodic[EPISODIC_SIZE];
+    noble_social       social[SOCIAL_SIZE];
+    noble_episodic   episodic[EPISODIC_SIZE];
 }
 noble_being;
 

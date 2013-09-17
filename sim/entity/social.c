@@ -253,7 +253,7 @@ static n_int featureset_match_threshold(n_byte feature_type)
 static void social_normalise_stereotype_observations(
     noble_being * local_being)
 {
-    social_link * graph;
+    noble_social * graph;
     n_uint i, tot=0;
     noble_featureset * s;
     n_uint max = MAX_FEATURESET_OBSERVATIONS>>1;
@@ -299,7 +299,7 @@ static n_int social_get_stereotype(
 {
     n_int i,j,diff,dv,index,hits,min=0,result=-1;
     n_byte normalise_features;
-    social_link * meeter_social_graph;
+    noble_social * meeter_social_graph;
     noble_featureset * s1, * s2;
 
     /** Get the social graph for the being doing the meeting */
@@ -393,7 +393,7 @@ static void social_meet_update_features(
     noble_being * met_being,
     n_int social_graph_index)
 {
-    social_link * meeter_social_graph;
+    noble_social * meeter_social_graph;
     n_uint idx;
 
     /** Get the social graph for the being doing the meeting */
@@ -475,7 +475,7 @@ void social_graph_link_name(
     n_byte met,
     n_string name)
 {
-    social_link * local_social_graph;
+    noble_social * local_social_graph;
 
     /** Get the social graph for the being */
     local_social_graph = being_social(local_being);
@@ -523,7 +523,7 @@ static void social_group_align_preferences(
     n_int social_graph_index)
 {
     n_int i, incr = -1;
-    social_link * social_graph;
+    noble_social * social_graph;
 
     /** don't align with yourself */
     if ((meeter_being==met_being) || (social_graph_index < 1)) return;
@@ -745,14 +745,14 @@ static n_int social_attraction_pheromone(
  * @param sim Pointer to the simulation
  * @return Array index within the social graph of the meeter, -1 if not found
  */
-n_int get_social_link(
+n_int get_noble_social(
     noble_being * meeter_being,
     noble_being * met_being,
     noble_simulation * sim)
 {
     n_byte2 name = being_gender_name(met_being);
     n_byte2 i,family_name = being_family_name(met_being);
-    social_link * graph = being_social(meeter_being);
+    noble_social * graph = being_social(meeter_being);
 
     if (!graph) return -1;
 
@@ -791,7 +791,7 @@ static n_int get_stranger_link(
     n_int stranger_index=-1;
     n_byte2 stranger=65535, familiarity=0;
     n_int time_since_met;
-    social_link * graph = being_social(meeter_being);
+    noble_social * graph = being_social(meeter_being);
     if (!graph) return 0;
 
     for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
@@ -845,7 +845,7 @@ static n_int social_meet(
     n_int friend_or_foe, index = -1, stereotype_index = -1;
 
     n_byte2 familiarity = 0;
-    social_link * graph = being_social(meeter_being);
+    noble_social * graph = being_social(meeter_being);
     n_byte2 met = 0;
 
     if (!graph) return -1;
@@ -854,7 +854,7 @@ static n_int social_meet(
     being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_AIR);
 
     /** get the social graph index which will be used to represent this relation */
-    index = get_social_link(meeter_being,met_being,sim);
+    index = get_noble_social(meeter_being,met_being,sim);
     if (index > 0)
     {
         familiarity = graph[index].familiarity;
@@ -991,7 +991,7 @@ n_int social_get_relationship(
     noble_simulation * sim)
 {
     n_int index;
-    social_link * meeter_social_graph;
+    noble_social * meeter_social_graph;
 
     /** get the social graph */
     meeter_social_graph = being_social(meeter_being);
@@ -1027,7 +1027,7 @@ n_int social_set_relationship(noble_being * meeter_being,
                               noble_simulation * sim)
 {
     n_int index;
-    social_link * meeter_social_graph;
+    noble_social * meeter_social_graph;
 
     /** no relationship specified */
     if (relationship == 0) return -1;
@@ -1179,7 +1179,7 @@ n_byte social_groom(
                 met_index = social_meet(met_being, meeter_being, sim, LOCATION_KNOWN);
                 if (met_index > -1)
                 {
-                    social_link * graph = being_social(meeter_being);
+                    noble_social * graph = being_social(meeter_being);
                     if (!graph) return 0;
 
                     if ((graph[meeter_index].friend_foe)<255)
@@ -1273,8 +1273,8 @@ n_byte2 social_squabble(
                 victor_index = social_meet(vanquished, victor, sim, LOCATION_KNOWN);
                 if (victor_index > -1)
                 {
-                    social_link * victor_social_graph = being_social(victor);
-                    social_link * vanquished_social_graph = being_social(vanquished);
+                    noble_social * victor_social_graph = being_social(victor);
+                    noble_social * vanquished_social_graph = being_social(vanquished);
 
                     if ((!victor_social_graph) || (!vanquished_social_graph)) return 0;
 
@@ -1359,8 +1359,8 @@ n_uint social_respect_mean(
     noble_simulation * sim,
     noble_being *local_being)
 {
-    n_uint social_links=0,average=0;
-    social_link * local_social_graph;
+    n_uint noble_socials=0,average=0;
+    noble_social * local_social_graph;
     n_int i;
 
     local_social_graph = being_social(local_being);
@@ -1371,13 +1371,13 @@ n_uint social_respect_mean(
     {
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph,i))
         {
-            social_links++;
+            noble_socials++;
             average += (n_uint)(local_social_graph[i].friend_foe);
         }
     }
-    if (social_links>0)
+    if (noble_socials>0)
     {
-        return average/social_links;
+        return average/noble_socials;
     }
     return SOCIAL_RESPECT_NORMAL;
 }
@@ -1461,7 +1461,7 @@ n_int social_mate(
     n_int attract;
     n_byte2 matingprob;
 #endif
-    social_link * meeter_social_graph = being_social(meeter_being);
+    noble_social * meeter_social_graph = being_social(meeter_being);
 
     if (!meeter_social_graph) return -1;
 
@@ -1554,7 +1554,7 @@ static void social_chat_territory(
     noble_being * meeter_being,
     noble_being * met_being,
     n_int being_index,
-    social_link * meeter_graph,
+    noble_social * meeter_graph,
     n_uint respect_mean)
 {
 #ifdef TERRITORY_ON
@@ -1636,9 +1636,9 @@ n_int social_chat(
     n_int replace;
 #endif
     n_int speaking = 0;
-    social_link * meeter_graph = being_social(meeter_being);
+    noble_social * meeter_graph = being_social(meeter_being);
 #ifdef PARASITES_ON
-    social_link * met_graph = being_social(met_being);
+    noble_social * met_graph = being_social(met_being);
 #endif
     n_uint respect_mean = social_respect_mean(sim,meeter_being);
 
@@ -1746,7 +1746,7 @@ n_int social_chat(
                     replace = get_stranger_link(meeter_being,met_being,sim);
                     if (replace > -1)
                     {
-                        io_copy((n_byte *)&met_graph[idx], (n_byte *)&meeter_graph[replace], sizeof(social_link));
+                        io_copy((n_byte *)&met_graph[idx], (n_byte *)&meeter_graph[replace], sizeof(noble_social));
                         meeter_graph[replace].attraction = 0;
                         speaking |= BEING_STATE_SPEAKING;
 
@@ -1862,7 +1862,7 @@ static void sim_social_initial_no_return(noble_simulation * local, noble_being *
     vect2_byte2(&location,(n_byte2 *)&(local_being->social_x));
     while ( social_loop < SOCIAL_SIZE_BEINGS )
     {
-        social_link * specific_individual = &(being_social(local_being)[social_loop]);
+        noble_social * specific_individual = &(being_social(local_being)[social_loop]);
         noble_being  * specific_being;
 
         if (!specific_individual) return;

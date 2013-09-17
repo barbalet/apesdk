@@ -93,14 +93,14 @@ being_draw;
 
 n_byte * being_braincode_external(noble_being * value)
 {
-    social_link * social_value = being_social(value);
+    noble_social * social_value = being_social(value);
     
     return social_value[0].braincode;
 }
 
 n_byte * being_braincode_internal(noble_being * value)
 {
-    social_link * social_value = being_social(value);
+    noble_social * social_value = being_social(value);
     return social_value[value->attention[ATTENTION_ACTOR]].braincode;
 }
 
@@ -148,8 +148,8 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
     {
         noble_being * local_being = &(local->beings[ lpx ]);
         io_erase(local_being->brain, DOUBLE_BRAIN);
-        io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(social_link)));
-        io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
+        io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(noble_social)));
+        io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
         lpx ++;
     }
 }
@@ -161,11 +161,11 @@ static void being_replace(noble_being * local, n_uint count, n_uint loop)
         n_byte       * new_brain = local[ count ].brain;
         n_byte       * old_brain = local[ loop ].brain;
         
-        social_link * new_event = local[ count ].social;
-        social_link * old_event = local[ loop ].social;
+        noble_social * new_event = local[ count ].social;
+        noble_social * old_event = local[ loop ].social;
         
-        episodic_memory * new_episodic = local[ count ].episodic;
-        episodic_memory * old_episodic = local[ loop ].episodic;
+        noble_episodic * new_episodic = local[ count ].episodic;
+        noble_episodic * old_episodic = local[ loop ].episodic;
         
         io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
         
@@ -174,11 +174,11 @@ static void being_replace(noble_being * local, n_uint count, n_uint loop)
             io_copy(old_brain, new_brain, DOUBLE_BRAIN);
             io_erase(old_brain, DOUBLE_BRAIN);
             
-            io_copy((n_byte *)old_event, (n_byte *)new_event, (SOCIAL_SIZE * sizeof(social_link)));
-            io_erase((n_byte *)old_event, (SOCIAL_SIZE * sizeof(social_link)));
+            io_copy((n_byte *)old_event, (n_byte *)new_event, (SOCIAL_SIZE * sizeof(noble_social)));
+            io_erase((n_byte *)old_event, (SOCIAL_SIZE * sizeof(noble_social)));
             
-            io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
-            io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(episodic_memory)));
+            io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
+            io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
         }
     }
 }
@@ -267,19 +267,19 @@ static void  being_recalibrate_honor(noble_being * value)
 
 n_int being_first_name(noble_being * value)
 {
-    social_link * local_social = being_social(value);
+    noble_social * local_social = being_social(value);
     return local_social->first_name[BEING_MET]&255;
 }
 
 static void being_set_first_name(noble_being * value, n_byte name)
 {
-    social_link * local_social = being_social(value);
+    noble_social * local_social = being_social(value);
     local_social->first_name[BEING_MET] = name;
 }
 
 void being_set_family_name(noble_being * value, n_byte first, n_byte last)
 {
-    social_link * local_social = being_social(value);
+    noble_social * local_social = being_social(value);
     local_social->family_name[BEING_MET] = GET_NAME_FAMILY(first,last);
 }
 
@@ -295,13 +295,13 @@ n_int being_family_name(noble_being * value)
 
 n_int being_family_first_name(noble_being * value)
 {
-    social_link * local_social = being_social(value);
+    noble_social * local_social = being_social(value);
     return UNPACK_FAMILY_FIRST_NAME(local_social->family_name[BEING_MET]);
 }
 
 n_int being_family_second_name(noble_being * value)
 {
-    social_link * local_social = being_social(value);
+    noble_social * local_social = being_social(value);
     return UNPACK_FAMILY_SECOND_NAME(local_social->family_name[BEING_MET]);
 }
 
@@ -330,13 +330,13 @@ n_byte * being_brain(noble_being * value)
     return value->brain;
 }
 
-episodic_memory * being_episodic(noble_being * value)
+noble_episodic * being_episodic(noble_being * value)
 {
     return value->episodic;
 
 }
 
-social_link * being_social(noble_being * value)
+noble_social * being_social(noble_being * value)
 {
     return value->social;
 }
@@ -1144,7 +1144,7 @@ n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is
     n_uint affect = 0;
 #ifdef EPISODIC_ON
     n_uint i;
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_episodic * local_episodic = being_episodic(local);
     if (!local_episodic) return affect;
 
     for (i=0; i<EPISODIC_SIZE; i++)
@@ -1364,7 +1364,7 @@ n_int episode_description(
     n_int social = 0;
 #ifdef EPISODIC_ON
     n_string_block str2, name_str;
-    episodic_memory * local_episodic;
+    noble_episodic * local_episodic;
     n_uint days_elapsed,time_elapsed;
     n_uint current_date;
 
@@ -1863,7 +1863,7 @@ static void being_create_family_links(noble_being * mother,
     n_byte parent_relation[6];
     n_byte child_relation[6];
     n_byte sibling_relation;
-    social_link * parent_social_graph;
+    noble_social * parent_social_graph;
 
     if (mother==0L) return;
 
@@ -1998,7 +1998,7 @@ static n_uint being_follow(noble_simulation * sim,
     noble_being * being_buffer = sim->beings;
     noble_being * local        = &being_buffer[current_being_index];
     n_vect2       difference_vector;
-    social_link * local_social_graph;
+    noble_social * local_social_graph;
     n_int social_graph_index;
     n_uint i;
     n_int result_los;
@@ -2257,7 +2257,7 @@ static void being_interact(noble_simulation * sim,
 
         if (being_index > -1)
         {
-            social_link * local_social_graph = being_social(local);
+            noble_social * local_social_graph = being_social(local);
             if (local_social_graph)
             {
                 familiarity = local_social_graph[being_index].familiarity;
@@ -2752,7 +2752,7 @@ void being_init_braincode(noble_being * local,
 {
     n_byte2 * local_random = being_get_random(local);
     n_uint ch,i,most_similar_index,diff,min,actor_index;
-    social_link * graph;
+    noble_social * graph;
 
     if (other==0L)
     {
@@ -2940,8 +2940,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     n_byte        ch;
     n_byte      * brain_memory;
 #ifdef EPISODIC_ON
-    social_link * local_social_graph = being_social(local);
-    episodic_memory * local_episodic = being_episodic(local);
+    noble_social * local_social_graph = being_social(local);
+    noble_episodic * local_episodic = being_episodic(local);
 #endif
     n_genetics * mother_genetics = 0L;
 
@@ -3087,7 +3087,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
 
     /** has no social connections initially */
-    io_erase((n_byte*)local_social_graph,sizeof(social_link)*SOCIAL_SIZE);
+    io_erase((n_byte*)local_social_graph,sizeof(noble_social)*SOCIAL_SIZE);
     local_social_graph[0].relationship=RELATIONSHIP_SELF;
     for (ch=0; ch<SOCIAL_SIZE; ch++)
     {
@@ -3413,7 +3413,7 @@ void being_remove(noble_simulation * local_sim)
                 if (being_energy(&(local[i])) != BEING_DEAD)
                 {
                     noble_being * b2 = &local[i];
-                    social_link * b2_social_graph = being_social(b2);
+                    noble_social * b2_social_graph = being_social(b2);
                     if (b2_social_graph)
                     {
                         n_uint j = 1;

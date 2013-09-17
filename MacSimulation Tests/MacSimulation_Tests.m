@@ -60,14 +60,14 @@ noble_being      * being = 0L;
 
 - (void)testWeatherCheckSum
 {
-    n_uint hash = math_hash((n_byte *)value->weather->atmosphere, (MAP_AREA*sizeof(n_c_int)/2));    
+    n_uint hash = math_hash((n_byte *)value->land->atmosphere, (MAP_AREA*sizeof(n_c_int)/2));
     XCTAssertTrue(hash == 0x8232846f8b53c59d, @"Hash doesn't comply with prior weather hashes (%lx)", hash);
 }
 
 - (void)testBeingCheckSum
 {
 
-    n_int length = sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *);
+    n_int length = sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *);
     n_uint hash = math_hash((n_byte *)being, length);
     XCTAssertTrue(length == 2704, @"Length doesn't comply with prior length (%ld)", length);
     
@@ -82,13 +82,13 @@ noble_being      * being = 0L;
 
 - (void)testSocialCheckSum
 {
-    n_uint hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(social_link));
+    n_uint hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
     XCTAssertTrue(hash == 0x9641d9201ee7241, @"Hash doesn't comply with prior social hashes (%lx)", hash);
 }
 
 - (void)testEpisodicCheckSum
 {
-    n_uint hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(episodic_memory));
+    n_uint hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(noble_episodic));
     XCTAssertTrue(hash == 0xcc7da6d33d1f14ed, @"Hash doesn't comply with prior episodic hashes (%lx)", hash);
 }
 
@@ -152,7 +152,7 @@ static n_uint hash_comparison[4] =
 - (void)testLongtermSimulation
 {
     n_uint  time = 3;
-    n_uint hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
+    n_uint hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == 0xcf57c761d1f3db58, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
     
     shared_flood();
@@ -160,7 +160,7 @@ static n_uint hash_comparison[4] =
     shared_simulate(1);
     shared_simulate(2);
 
-    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
+    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == 0xf07db769957bb69a, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
  
     while (time < ((TIME_DAY_MINUTES * 1)/2))
@@ -172,16 +172,16 @@ static n_uint hash_comparison[4] =
     XCTAssertTrue(sizeof(noble_being) == 2728, @"noble_being (%ld)", sizeof(noble_being));
 
     
-    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
+    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == hash_comparison[0], @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
     
     hash = math_hash(being->brain, DOUBLE_BRAIN);
     XCTAssertTrue(hash == hash_comparison[1], @"Longterm hash doesn't comply with prior brain hashes (%lx)", hash);
     
-    hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(social_link));
+    hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
     XCTAssertTrue(hash == hash_comparison[2], @"Longterm hash doesn't comply with prior social hashes (%lx)", hash);
     
-    hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(episodic_memory));
+    hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(noble_episodic));
     XCTAssertTrue(hash == hash_comparison[3], @"Longterm hash doesn't comply with prior episodic hashes (%lx)", hash);
         
     while (time < ((TIME_DAY_MINUTES * 3)/2))
@@ -190,21 +190,21 @@ static n_uint hash_comparison[4] =
         time++;
     }
 
-    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
+    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == 0xc25ddddb92cddd5d, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
 
     hash = math_hash(being->brain, DOUBLE_BRAIN);
     XCTAssertTrue(hash == 0xebfe99c1165b8dc7, @"Longterm hash doesn't comply with prior brain hashes (%lx)", hash);
     
-    hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(social_link));
+    hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
     XCTAssertTrue(hash == 0xd4d67c210fedfb9b, @"Longterm hash doesn't comply with prior social hashes (%lx)", hash);
 
-    hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(episodic_memory));
+    hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(noble_episodic));
     XCTAssertTrue(hash == 0x7f8bdd2b1269b13b, @"Longterm hash doesn't comply with prior episodic hashes (%lx)", hash);
     
     XCTAssertTrue(value->num == 21, @"Longterm number apes doesn't comply with prior numbers (%ld)", value->num);
     
-    hash = math_hash((n_byte *)value->weather->atmosphere, (MAP_AREA*sizeof(n_c_int)/2));
+    hash = math_hash((n_byte *)value->land->atmosphere, (MAP_AREA*sizeof(n_c_int)/2));
     XCTAssertTrue(hash == 0x891f251be1b8af8, @"Longterm hash doesn't comply with prior weather hashes (%lx)", hash);
     
     hash = math_hash((n_byte *)value->land->map, MAP_AREA);
@@ -214,7 +214,7 @@ static n_uint hash_comparison[4] =
 - (void)testLongtermSimulationCompare
 {
     n_uint  time = 3;
-    n_uint hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
+    n_uint hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == 0xcf57c761d1f3db58, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
     
     shared_flood();
@@ -222,7 +222,7 @@ static n_uint hash_comparison[4] =
     shared_simulate(1);
     shared_simulate(2);
     
-    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
+    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == 0xf07db769957bb69a, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
     
     while (time < ((TIME_DAY_MINUTES * 1)/2))
@@ -231,16 +231,16 @@ static n_uint hash_comparison[4] =
         time++;
     }
     
-    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(social_link *) - sizeof(episodic_memory *));
+    hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == hash_comparison[0], @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
     
     hash = math_hash(being->brain, DOUBLE_BRAIN);
     XCTAssertTrue(hash == hash_comparison[1], @"Longterm hash doesn't comply with prior brain hashes (%lx)", hash);
     
-    hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(social_link));
+    hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
     XCTAssertTrue(hash == hash_comparison[2], @"Longterm hash doesn't comply with prior social hashes (%lx)", hash);
     
-    hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(episodic_memory));
+    hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(noble_episodic));
     XCTAssertTrue(hash == hash_comparison[3], @"Longterm hash doesn't comply with prior episodic hashes (%lx)", hash);
 }
 

@@ -85,7 +85,7 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
 {
     n_byte hand = BODY_RIGHT_HAND;
     n_int  index, hit = 0;
-    social_link * graph;
+    noble_social * graph;
 
     if (carrying == 0)
     {
@@ -98,7 +98,7 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
         {
             GET_A(local,ATTENTION_BODY) = BODY_RIGHT_HAND;
             GET_A(other,ATTENTION_BODY) = BODY_BACK;
-            index = get_social_link(other,local,sim);
+            index = get_noble_social(other,local,sim);
             if (index>-1)
             {
                 graph = being_social(other);
@@ -162,10 +162,10 @@ static void body_action_interactive_change(noble_simulation * sim, noble_being *
     n_int index;
     GET_A(local,ATTENTION_BODY) = local_attention;
     GET_A(other,ATTENTION_BODY) = other_attention;
-    index = get_social_link(other,local,sim);
+    index = get_noble_social(other,local,sim);
     if (index>-1)
     {
-        social_link * graph = being_social(other);
+        noble_social * graph = being_social(other);
         if (!graph) return;
         if (positive)
         {
