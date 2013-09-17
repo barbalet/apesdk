@@ -101,7 +101,14 @@ void vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
     equals->y = initial->y - second->y;
 }
 
-
+/**
+ * Multiplies one 2d vector with another 2d vector times a multiplier divided by a divisor.
+ * @param equals the vector that holds the result.
+ * @param initial the first vector.
+ * @param second the second vector to be multiplied.
+ * @param multiplier the scalar multiplier.
+ * @param divisor the the scalar divisor.
+ */
 void vect2_multiplier(n_vect2 * equals, n_vect2 * initial, n_vect2 * second,
                       n_int multiplier, n_int divisor)
 {
@@ -119,6 +126,14 @@ void vect2_multiplier(n_vect2 * equals, n_vect2 * initial, n_vect2 * second,
     equals->y = (multiplier * initial->y * second->y) / divisor;
 }
 
+/**
+ * Adds one 2d vector with another 2d vector times a multiplier divided by a divisor.
+ * @param equals the vector that holds the result.
+ * @param initial the first vector that takes the summation of the second vector.
+ * @param second the second vector to be multiplied.
+ * @param multiplier the scalar multiplier.
+ * @param divisor the the scalar divisor.
+ */
 void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int divisor)
 {
     NA_ASSERT(initial, "initial NULL");
@@ -708,25 +723,6 @@ n_uint math_root(n_uint input)
         one >>= 2;
     }
     return res;
-}
-
-/* achieve a newton square root */
-n_uint	math_newton_root(n_uint squ)
-{
-    n_uint attempt = 1;
-    n_uint second_attempt = 0;
-    n_int count = 0;
-    while ((attempt != second_attempt) && (count ++ < 256))
-    {
-        second_attempt = attempt;
-        if (attempt == 0)
-            return 0;
-        attempt = (n_byte2)((attempt + (squ / attempt)) >> 1);
-    }
-    /* 255 is probably too big, 31 should work just as well */
-    if (count > 255)
-        return math_newton_root(squ + 1);
-    return attempt;
 }
 
 n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i)

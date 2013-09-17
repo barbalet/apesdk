@@ -627,7 +627,7 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
 
 n_uint  math_hash(n_byte * values, n_uint length);
 void    math_bilinear_512_4096(n_byte * side512, n_byte * data);
-n_uint  math_newton_root(n_uint squ);
+
 n_uint  math_root(n_uint squ);
 n_byte  math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn);
 n_byte2 math_random(n_byte2 * local);
