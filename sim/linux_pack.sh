@@ -54,19 +54,21 @@ if [[ $OS == "ubuntu" || $OS == "debian" || $OS == "solusos" ]]; then
 	cp ../na ~/natemp/deb/usr/bin
 	cp ../nalongterm ~/natemp/deb/usr/bin
 
-	mkdir ~/natemp/deb/bin
-	mkdir ~/natemp/deb/var
-	mkdir ~/natemp/deb/var/www
-	mkdir ~/natemp/deb/var/www/nobleape
-	mkdir ~/natemp/deb/var/www/nobleape/images
-	mkdir ~/natemp/deb/etc
-	mkdir ~/natemp/deb/etc/cron.hourly
-	cp ../naweb ~/natemp/deb/usr/bin
-	cp contrib/motters/nobleapecron ~/natemp/deb/etc/cron.hourly
-	cp -r contrib/motters/images ~/natemp/deb/var/www/nobleape
+    # Now na-legacy
 
-	cp debian/control ~/natemp/deb/DEBIAN
-	cp debian/copyright ~/natemp/deb/DEBIAN
+	# mkdir ~/natemp/deb/bin
+	# mkdir ~/natemp/deb/var
+	# mkdir ~/natemp/deb/var/www
+	# mkdir ~/natemp/deb/var/www/nobleape
+	# mkdir ~/natemp/deb/var/www/nobleape/images
+	# mkdir ~/natemp/deb/etc
+	# mkdir ~/natemp/deb/etc/cron.hourly
+	# cp ../naweb ~/natemp/deb/usr/bin
+	# cp contrib/motters/nobleapecron ~/natemp/deb/etc/cron.hourly
+	# cp -r contrib/motters/images ~/natemp/deb/var/www/nobleape
+
+	# cp debian/control ~/natemp/deb/DEBIAN
+	# cp debian/copyright ~/natemp/deb/DEBIAN
 
     # desktop/menu/icon settings
 	mkdir ~/natemp/deb/usr
