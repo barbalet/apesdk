@@ -43,6 +43,15 @@
 /*NOBLEMAKE DEL=""*/
 #include "noble.h"
 /*NOBLEMAKE END=""*/
+
+
+/**
+ * Makes sure all the data associated with the interpreter is freed etc.
+ * @param code pointer to the interpreter structure that is being executed.
+ * @param eval pointer execution points being executed.
+ * @param location the location in the execution points.
+ * @return minus one on failure, zero on success.
+ */
 static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
 {
     n_int		local_b_count;
@@ -83,6 +92,14 @@ static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
     return 0;
 }
 
+/**
+ * Makes sure all the data associated with the interpreter is freed etc.
+ * @param code pointer to the interpreter structure that is being executed.
+ * @param evaluate pointer execution points being executed.
+ * @param number the pointer to the result of the execution block.
+ * @param end_char the end character expected.
+ * @return minus one on failure, otherwise the number of execution points to advance.
+ */
 static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * number, n_byte end_char)
 {
     n_int	val_a, val_b, val_c;
@@ -202,6 +219,14 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
     return io_apescript_error(AE_WRONG_END);
 }
 
+
+/**
+ * Makes sure all the data associated with the interpreter is freed etc.
+ * @param code pointer to the interpreter structure that is being executed.
+ * @param value pointer execution points being executed.
+ * @param location the location in the execution points.
+ * @return minus one on failure, otherwise the number of execution points to advance.
+ */
 static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location)
 {
     n_byte	first_value;
@@ -426,6 +451,10 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
     return io_apescript_error(AE_UNKNOWN_SYNTAX_FROM_INTERPRET);
 }
 
+/**
+ * The start of the interpreter cycle.
+ * @param interp pointer to the interpreter structure that is being executed.
+ */
 static void interpret_start(n_interpret * interp)
 {
     n_byte	*local_data     = interp->binary_code->data;
@@ -456,6 +485,11 @@ static void interpret_start(n_interpret * interp)
     }
 }
 
+/**
+ * Makes sure all the data associated with the interpreter is freed etc.
+ * @param interp pointer to the interpreter structure that is being executed.
+ * @return zero on success, minus one on failure.
+ */
 static n_int	interpret_code(n_interpret * interp)
 {
     n_byte	*local_data  = interp->binary_code->data;
@@ -558,6 +592,7 @@ static n_int	interpret_code(n_interpret * interp)
 
     return 0;
 }
+
 /**
  Makes sure all the data associated with the interpreter is freed etc.
  @param to_clean The pointer to the n_interpret struct that is being expunged.
