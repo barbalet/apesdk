@@ -1755,10 +1755,10 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 
 #ifdef BRAINCODE_ON
 
-n_int brain_probe_to_location(n_int position)
+static n_int brain_probe_to_location(n_int position)
 {
     /** could have a more interesting translation */
-    return ((position * (SINGLE_BRAIN>>8))) % SINGLE_BRAIN;
+    return ((position * (SINGLE_BRAIN>>8))) & (SINGLE_BRAIN-1);
 }
 
 static void update_brain_probes(noble_simulation * sim, noble_being * local)
@@ -3054,14 +3054,14 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
     {
         being_random3(local);
-        local->braincode_register[ch]=(n_byte)(local->seed[0] & 255);
+        local->braincode_register[ch] = (n_byte)being_random(local)&255;
     }
 
     /** initialize brainprobes */
     for (ch = 0; ch < BRAINCODE_PROBES; ch++)
     {
-        math_random3(local->seed);
-        if ((n_byte)local->seed[0]&1)
+        being_random3(local);
+        if (being_random(local)&1)
         {
             local->brainprobe[ch].type = INPUT_SENSOR;
         }
@@ -3069,13 +3069,12 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         {
             local->brainprobe[ch].type = OUTPUT_ACTUATOR;
         }
-        local->brainprobe[ch].frequency =
-            (n_byte)1 + (local->seed[1]%BRAINCODE_MAX_FREQUENCY);
+        local->brainprobe[ch].frequency = (n_byte)1 + (being_random(local)%BRAINCODE_MAX_FREQUENCY);
         being_random3(local);
-        local->brainprobe[ch].address = (n_byte)local->seed[0];
-        local->brainprobe[ch].position = (n_byte)local->seed[1];
+        local->brainprobe[ch].address = (n_byte)being_random(local)&255;
+        local->brainprobe[ch].position = (n_byte)being_random(local)&255;
         being_random3(local);
-        local->brainprobe[ch].offset = (n_byte)local->seed[0];
+        local->brainprobe[ch].offset = (n_byte)being_random(local)&255;
     }
 
 

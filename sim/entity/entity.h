@@ -185,8 +185,6 @@ typedef void (being_no_return)(noble_simulation * sim, noble_being * actual);
 
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func);
 
-n_int  brain_probe_to_location(n_int position);
-
 void   metabolism_vascular_description(n_int index, n_string description);
 n_string metabolism_description(n_int index);
 n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index);
