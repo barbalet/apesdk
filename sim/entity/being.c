@@ -1755,66 +1755,62 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 
 #ifdef BRAINCODE_ON
 
-static n_int brain_probe_to_location(n_int position)
-{
-    /** could have a more interesting translation */
-    return ((position * (SINGLE_BRAIN>>8))) & (SINGLE_BRAIN-1);
-}
 
-static void update_brain_probes(noble_simulation * sim, noble_being * local)
+static void being_brain_probe(noble_being * local)
 {
-    n_byte * brain_point = being_brain(local);
-    n_int    i, inputs = 0, outputs = 0;
-    /** count the inputs and outputs */
-    for (i=0; i<BRAINCODE_PROBES; i++)
+    n_byte * local_brain = being_brain(local);
+
+    n_int    i = 0;
+    n_int    count[NUMBER_BRAINPROBE_TYPES] = {0};
+    
+    if (local_brain == 0L) return;
+    
+    while (i < BRAINCODE_PROBES)
     {
-        if (local->brainprobe[i].type == INPUT_SENSOR)
-        {
-            inputs++;
-        }
-        else
-        {
-            outputs++;
-        }
+        count[local->brainprobe[i++].type]++;
     }
+    
     /** check to ensure that there are a minimum number of sensors and actuators */
-    if (inputs < (BRAINCODE_PROBES>>2))
+    if (count[INPUT_SENSOR] < (BRAINCODE_PROBES>>2))
     {
         local->brainprobe[0].type = INPUT_SENSOR;
     }
-    else
+    else if (count[OUTPUT_ACTUATOR] < (BRAINCODE_PROBES>>2))
     {
-        if (outputs < (BRAINCODE_PROBES>>2))
-        {
-            local->brainprobe[0].type = OUTPUT_ACTUATOR;
-        }
+        local->brainprobe[0].type = OUTPUT_ACTUATOR;
     }
+    
     /** update each probe */
-    for (i=0; i<BRAINCODE_PROBES; i++)
+    i = 0;
+    
+    while (i < BRAINCODE_PROBES)
     {
         local->brainprobe[i].state++;
         if (local->brainprobe[i].state >= local->brainprobe[i].frequency)
         {
+            n_byte * local_braincode = being_braincode_internal(local);
             /** position within the brain */
-            n_int n1 = brain_probe_to_location(local->brainprobe[i].position);
+            n_int position_in_brain = ((local->brainprobe[i].position * (SINGLE_BRAIN>>8))) & (SINGLE_BRAIN-1);
+            n_int position_in_braincode = local->brainprobe[i].address % BRAINCODE_SIZE;
 
             local->brainprobe[i].state = 0;
 
             if (local->brainprobe[i].type == INPUT_SENSOR)
             {
-                n_byte * local_braincode = being_braincode_internal(local);
                 /** address within braincode */
-                n_int n2 = local->brainprobe[i].address % BRAINCODE_SIZE;
-                n_int n3 = (brain_point[n1] + local->brainprobe[i].offset)&255;
+                n_int set_value = (local_brain[position_in_brain] + local->brainprobe[i].offset)&255;
                 /** read from brain */
-                local_braincode[n2] = (n_byte)n3;
+                local_braincode[position_in_braincode] = (n_byte)set_value;
             }
             else
             {
+                /** address within braincode */
+                n_int set_value = (local_braincode[position_in_braincode] + local->brainprobe[i].offset)&255;
                 /** write to brain */
-                brain_point[n1] = 255;
+                local_brain[position_in_brain] = (n_byte)set_value;
             }
         }
+        i++;
     }
 }
 
@@ -1838,10 +1834,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
         
 #ifdef BRAINCODE_ON
     /** may need to add external probe linking too */
-    if (being_brain(local))
-    {
-        update_brain_probes(sim, local);
-    }
+    being_brain_probe(local);
 #endif
 
     if ((awake == 0) && local)

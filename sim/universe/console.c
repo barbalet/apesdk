@@ -1007,7 +1007,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
 
     for (i = 0; i < BRAINCODE_PROBES; i++)
     {
-        if (local_being->brainprobe[i].type == 0)
+        if (local_being->brainprobe[i].type == INPUT_SENSOR)
         {
             sprintf((n_string)str2,"  %s  %03d   %02d   %03d    %03d  %d\n",
                     type_str,
@@ -1024,7 +1024,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
 
     for (i = 0; i < BRAINCODE_PROBES; i++)
     {
-        if (local_being->brainprobe[i].type == 1)
+        if (local_being->brainprobe[i].type == OUTPUT_ACTUATOR)
         {
             sprintf((n_string)str2,"  %s  %03d   %02d   %03d    %03d  %d\n",
                     type_str,

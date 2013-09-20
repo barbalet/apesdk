@@ -78,7 +78,8 @@ enum being_energy
 enum BRAINPROBE_TYPE
 {
     INPUT_SENSOR = 0,
-    OUTPUT_ACTUATOR
+    OUTPUT_ACTUATOR,
+    NUMBER_BRAINPROBE_TYPES
 };
 
 #define GENEALOGY_ON
