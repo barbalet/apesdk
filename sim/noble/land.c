@@ -465,8 +465,8 @@ static n_int land_operator(n_land * local_land, n_int locx, n_int locy, n_byte *
             n_int weather = weather_seven_values(local_land, MAPSPACE_TO_APESPACE(locx), MAPSPACE_TO_APESPACE(locy));
 
             n_int weather_divide = (105 + ((weather % 3) * 30));
-            n_int ct = (840 + OLD_SD_NEW_SD(hr+64)) / weather_divide;
-            n_int st = (840 + OLD_SD_NEW_SD(hr)) / weather_divide;
+            n_int ct = (840 + VECT_X(hr)) / weather_divide;
+            n_int st = (840 + VECT_Y(hr)) / weather_divide;
 
             number_sum ++;
             temp_add = OPERATOR_SUN(fg, dfg, fdg, ct, st); /* O */
