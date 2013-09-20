@@ -173,8 +173,8 @@ void vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor)
 {
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(divisor, "divisor ZERO");
-    initial->x = VECT_X(direction) / divisor;
-    initial->y = VECT_Y(direction) / divisor;
+    initial->x = ((new_sd[((direction)+64)&255]) / (divisor));
+    initial->y = ((new_sd[(direction)&255]) / (divisor));
 }
 
 void vect2_offset(n_vect2 * initial, n_int dx, n_int dy)
@@ -549,7 +549,7 @@ n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
 
     NA_ASSERT(p, "p NULL");
     
-    vect2_direction(&vector_facing, best_f, 1);
+    vect2_direction(&vector_facing, best_f, 32);
 
     best_p = vect2_dot(p, &vector_facing, 1, 1);
 
@@ -560,7 +560,7 @@ n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
         n_int loc_f = (best_f + loc_track) & 255;
         n_int project1;
 
-        vect2_direction(&vector_facing, loc_f, 1);
+        vect2_direction(&vector_facing, loc_f, 32);
         project1 = vect2_dot(p, &vector_facing, 1, 1);
 
         if (project1 > best_p)
@@ -573,7 +573,7 @@ n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
             n_int loc_f2 = (best_f + 256 - loc_track) & 255;
             n_int project2;
 
-            vect2_direction(&vector_facing, loc_f, 1);
+            vect2_direction(&vector_facing, loc_f, 32);
             project2 = vect2_dot(p, &vector_facing, 1, 1);
 
             if (project2 > best_p)

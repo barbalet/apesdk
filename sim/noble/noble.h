@@ -358,8 +358,6 @@ static const n_int	new_sd[256] =
 
 /** \brief sine and cosine conversation */
 #define	NEW_SD_MULTIPLE			26880
-#define	VECT_X(f)		        ((new_sd[((f)+64)&255])>>5)
-#define	VECT_Y(f)		        ((new_sd[(f)&255])>>5)
 
 enum window_num
 {

@@ -401,7 +401,7 @@ static void being_facing_init(noble_being * value)
 
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
 {
-    vect2_direction(vect, value->direction_facing, divisor);
+    vect2_direction(vect, value->direction_facing, divisor * 32);
 }
 
 n_int being_facing(noble_being * value)
@@ -487,12 +487,12 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
         n_int  z_plus;
         n_int  z_minus;
 
-        vect2_direction(&temp_vector, turn_plus, 4);
+        vect2_direction(&temp_vector, turn_plus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
         z_plus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
 
-        vect2_direction(&temp_vector, turn_minus, 4);
+        vect2_direction(&temp_vector, turn_minus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
         z_minus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));

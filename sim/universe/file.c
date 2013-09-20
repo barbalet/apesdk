@@ -429,15 +429,17 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
         {
             noble_being * local_current = &(local_sim->beings[code->specific]);
             n_int		  local_number = 0;
+            n_vect2       local_vr0;
+            vect2_direction(&local_vr0, local_vr[0], 32);
             switch(second_value)
             {
 
             case VARIABLE_VECT_X:
-                local_number = VECT_X(local_vr[0]);
+                local_number = local_vr0.x;
                 break;
 
             case VARIABLE_VECT_Y:
-                local_number = VECT_Y(local_vr[0]);
+                local_number = local_vr0.y;
                 break;
             case VARIABLE_RANDOM:
                 local_number = being_random(local_current);
