@@ -820,8 +820,6 @@ static void	draw_meters(noble_simulation * local_sim)
     n_int		   ha1 = 6;
     n_int		   ha2 = 0;
     n_int		   hr = 0;
-    n_int		   pntx = 0;
-    n_int		   pnty;
     n_join		   local_kind;
     n_genetics    *genetics = being_genetics(loc_being);
 
@@ -833,22 +831,22 @@ static void	draw_meters(noble_simulation * local_sim)
     local_kind.pixel_draw = local_draw;
     local_kind.information = local_info;
 
-    while (pntx < 41)
+    while (hr < 41)
     {
-        (*local_draw)(5 , 5 + pntx, local_info);
-        (*local_draw)(45, 5 + pntx, local_info);
-        (*local_draw)(5 + pntx, 45, local_info);
-        (*local_draw)(5 + pntx, 5, local_info);
-        pntx += 2;
+        (*local_draw)(5 , 5 + hr, local_info);
+        (*local_draw)(45, 5 + hr, local_info);
+        (*local_draw)(5 + hr, 45, local_info);
+        (*local_draw)(5 + hr, 5, local_info);
+        hr += 2;
     }
 
-    hr =0;
+    hr = 0;
 
     while (hr < 12)
     {
         n_int	phr = (((hr << 8) / 12) & 255);
         n_int	pnty = new_sd[(64 + phr) & 255] / 320;
-        pntx = new_sd[phr & 255] / 320;
+        n_int   pntx = new_sd[phr & 255] / 320;
         (void)math_join((25 + (pntx / 5)), (25 + (pnty / 5)), (pntx / 17), (pnty / 17), &local_kind);
         hr++;
     }
@@ -863,28 +861,28 @@ static void	draw_meters(noble_simulation * local_sim)
 
     if (local_sim->select != NO_BEINGS_FOUND)
     {
-        pntx = 0;
-        while (pntx < 41)
+        hr = 0;
+        while (hr < 41)
         {
-            (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + pntx, local_info);
-            (*local_draw)(50 + 45+ FACING_OFFSIDE, 5 + pntx, local_info);
-            (*local_draw)(50 + 5 + pntx+ FACING_OFFSIDE, 45, local_info);
-            (*local_draw)(50 + 5 + pntx+ FACING_OFFSIDE, 5, local_info);
+            (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + hr, local_info);
+            (*local_draw)(50 + 45+ FACING_OFFSIDE, 5 + hr, local_info);
+            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 45, local_info);
+            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 5, local_info);
 
-            (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + pntx, local_info);
-            (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + pntx, local_info);
-            (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + pntx, local_info);
-            (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + pntx, local_info);
-            pntx += 2;
+            (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, local_info);
+            (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, local_info);
+            (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, local_info);
+            (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, local_info);
+            hr += 2;
         }
-        pntx = 0;
-        while (pntx < 9)
+        hr = 0;
+        while (hr < 9)
         {
-            (*local_draw)(50 + 55 + pntx+ SP_EN_OFFSIDE, 5, local_info);
-            (*local_draw)(50 + 55 + pntx+ SP_EN_OFFSIDE, 45, local_info);
-            (*local_draw)(50 + 55 + 18 + pntx+ SP_EN_OFFSIDE, 5, local_info);
-            (*local_draw)(50 + 55 + 18 + pntx+ SP_EN_OFFSIDE, 45, local_info);
-            pntx += 2;
+            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 5, local_info);
+            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 45, local_info);
+            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 5, local_info);
+            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 45, local_info);
+            hr += 2;
         }
 
         hr = 0;
@@ -893,7 +891,7 @@ static void	draw_meters(noble_simulation * local_sim)
         {
             n_int	phr = (hr << 5) & 255;
             n_int	pnty = new_sd[(64 + phr) & 255] / 320;
-            pntx = new_sd[phr & 255] / 320;
+            n_int	pntx = new_sd[phr & 255] / 320;
             (void)math_join((25 + 50 + (pntx / 5))+ FACING_OFFSIDE, (25 + (pnty / 5)),
                             (pntx / 17), (pnty / 17), &local_kind);
             hr++;
@@ -995,44 +993,50 @@ static void	draw_meters(noble_simulation * local_sim)
         local_icon = &icns[weather_seven_values(local_sim->land, 0, 0) << 7];
     }
 
-    ha1 = ((((loc_land->date[0]) << 6) / mndivmonth) & 255);
-    ha2 = ((((loc_land->date[0]) << 6) / mndivyear) & 255);
-    /* draw month meter */
-    pntx = (new_sd[(ha1) & 255] / 5440);
-    pnty = ( - new_sd[(ha1 + 64) & 255] / 5440);
-    (void)math_join(33, 25, pntx, FH_DELTA(pnty), &local_kind);
-
-    /* draw year meter */
-    pntx = (new_sd[(ha2) & 255] / 5440);
-    pnty = ( - new_sd[(ha2 + 64) & 255] / 5440);
-    (void)math_join(17, 25, pntx, FH_DELTA(pnty), &local_kind);
-
-    /* draw clock (ie hours and minutes */
-    ha1 = ((((loc_land->time) << 6) / mndivhr) & 255);
-    ha2 = ((((loc_land->time) << 6) / mndivmin) & 255);
-    pntx = (new_sd[(ha1) & 255] / 2688);
-    pnty = ( - new_sd[(ha1 + 64) & 255] / 2688);
-    (void)math_join(25, 25, pntx, FH_DELTA(pnty), &local_kind);
-
-    pntx = (new_sd[(ha2) & 255] / 2016);
-    pnty = ( - new_sd[(ha2 + 64) & 255] / 2016);
-    (void)math_join(25, 25, pntx, FH_DELTA(pnty), &local_kind);
-
-    pnty = 0;
-    while (pnty < 32)
     {
-        n_uint icon_stripe = (local_icon[(pnty<<2)|3] << 0) | (local_icon[(pnty<<2)|2] << 8)
-                             | (local_icon[(pnty<<2)|1] << 16) | (local_icon[(pnty<<2)|0] << 24);
-        pntx = 0;
-        while ( pntx < 32 )
+        n_int pntx, pnty;
+        ha1 = ((((loc_land->date[0]) << 6) / mndivmonth) & 255);
+        ha2 = ((((loc_land->date[0]) << 6) / mndivyear) & 255);
+        /* draw month meter */
+        pntx = (new_sd[(ha1) & 255] / 5440);
+        pnty = ( - new_sd[(ha1 + 64) & 255] / 5440);
+        (void)math_join(33, 25, pntx, FH_DELTA(pnty), &local_kind);
+    }
+    {
+        /* draw year meter */
+        n_int pntx = (new_sd[(ha2) & 255] / 5440);
+        n_int pnty = ( - new_sd[(ha2 + 64) & 255] / 5440);
+        (void)math_join(17, 25, pntx, FH_DELTA(pnty), &local_kind);
+    }
+    {
+        n_int pntx, pnty;
+
+        /* draw clock (ie hours and minutes */
+        ha1 = ((((loc_land->time) << 6) / mndivhr) & 255);
+        ha2 = ((((loc_land->time) << 6) / mndivmin) & 255);
+        pntx = (new_sd[(ha1) & 255] / 2688);
+        pnty = ( - new_sd[(ha1 + 64) & 255] / 2688);
+        (void)math_join(25, 25, pntx, FH_DELTA(pnty), &local_kind);
+
+        pntx = (new_sd[(ha2) & 255] / 2016);
+        pnty = ( - new_sd[(ha2 + 64) & 255] / 2016);
+        (void)math_join(25, 25, pntx, FH_DELTA(pnty), &local_kind);
+    }
+    ha1 = 0;
+    while (ha1 < 32)
+    {
+        n_uint icon_stripe = (local_icon[(ha1<<2)|3] << 0) | (local_icon[(ha1<<2)|2] << 8)
+                             | (local_icon[(ha1<<2)|1] << 16) | (local_icon[(ha1<<2)|0] << 24);
+        ha2 = 0;
+        while ( ha2 < 32 )
         {
-            if ((icon_stripe >> (31-pntx)) & 1)
+            if ((icon_stripe >> (31-ha2)) & 1)
             {
-                (*local_draw)(5 + pntx, 55 + pnty, local_info);
+                (*local_draw)(5 + ha2, 55 + ha1, local_info);
             }
-            pntx++;
+            ha2++;
         }
-        pnty++;
+        ha1++;
     }
 
 }
