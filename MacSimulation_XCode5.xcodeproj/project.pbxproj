@@ -98,7 +98,7 @@
 		4A94504E17CDC33C00D5893C /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
 		4A94504F17CDC33C00D5893C /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shared.c; sourceTree = "<group>"; };
 		4A94505017CDC33C00D5893C /* shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
-		5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */ = {isa = PBXFileReference; explicitFileType = folder; includeInIndex = 0; path = "MacSimulation Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MacSimulation Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A4805E1178676EB007220D7 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		5A4805E5178676EB007220D7 /* MacSimulation Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MacSimulation Tests-Info.plist"; sourceTree = "<group>"; };
 		5A4805E7178676EB007220D7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };

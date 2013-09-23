@@ -711,8 +711,8 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
 
 static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 {
-    n_byte * buf_offscr = draw_pointer(NUM_TERRAIN);
-
+    n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
+    
     if (buf_offscr == 0L)
     {
         return;
@@ -844,10 +844,10 @@ static void	draw_meters(noble_simulation * local_sim)
 
     while (hr < 12)
     {
-        n_int	phr = (((hr << 8) / 12) & 255);
-        n_int	pnty = new_sd[(64 + phr) & 255] / 320;
-        n_int   pntx = new_sd[phr & 255] / 320;
-        (void)math_join((25 + (pntx / 5)), (25 + (pnty / 5)), (pntx / 17), (pnty / 17), &local_kind);
+        n_vect2 hour_clock;
+        vect2_direction(&hour_clock, ((hr << 8) / 12), 320);
+        
+        (void)math_join((25 + (hour_clock.x / 5)), (25 + (hour_clock.y / 5)), (hour_clock.x / 17), (hour_clock.y / 17), &local_kind);
         hr++;
     }
 
@@ -889,11 +889,10 @@ static void	draw_meters(noble_simulation * local_sim)
 
         while (hr < 8)
         {
-            n_int	phr = (hr << 5) & 255;
-            n_int	pnty = new_sd[(64 + phr) & 255] / 320;
-            n_int	pntx = new_sd[phr & 255] / 320;
-            (void)math_join((25 + 50 + (pntx / 5))+ FACING_OFFSIDE, (25 + (pnty / 5)),
-                            (pntx / 17), (pnty / 17), &local_kind);
+            n_vect2 facing_clock;
+            vect2_direction(&facing_clock, (hr << 5), 320);
+            (void)math_join((25 + 50 + (facing_clock.x / 5))+ FACING_OFFSIDE, (25 + (facing_clock.y / 5)),
+                            (facing_clock.x / 17), (facing_clock.y / 17), &local_kind);
             hr++;
         }
 
@@ -1004,6 +1003,9 @@ static void	draw_meters(noble_simulation * local_sim)
     }
     {
         /* draw year meter */
+        
+        
+        
         n_int pntx = (new_sd[(ha2) & 255] / 5440);
         n_int pnty = ( - new_sd[(ha2 + 64) & 255] / 5440);
         (void)math_join(17, 25, pntx, FH_DELTA(pnty), &local_kind);
