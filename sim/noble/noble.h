@@ -637,6 +637,8 @@ void    math_patch(n_byte * local_map, n_byte * scratch,
                    n_byte refined_start, n_byte refined_end,
                    n_byte rotate);
 
+n_int       math_sine(n_int direction, n_int divisor);
+
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);
 n_int      io_command_line_execution(void);

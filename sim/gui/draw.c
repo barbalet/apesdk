@@ -683,7 +683,7 @@ void draw_fit(n_byte * points, n_byte2 * color_fit)
 
 void draw_color_time(n_byte2 * color_fit, n_byte2 time)
 {
-    n_int	darken = ((400 * new_sd[(((time*255)/(60*24))+64+128)&255])/NEW_SD_MULTIPLE);
+    n_int   darken =  math_sine((((time*255)/(60*24))+64+128),NEW_SD_MULTIPLE/400);
     n_int	loop = 0;
     n_int	sign = 1;
 
@@ -731,25 +731,29 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         const n_int co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
 
-        /* get the local cos value for the turn angle */
-        const n_int valc = (new_sd[((turn) + 128) & 255] / 105);
-        /* get the local sin value for the turn angle */
-        const n_int vals = (new_sd[((turn) + 128 + 64) & 255] / 105);
-
-        const n_int valc2 = (valc << 1);
-        const n_int vals2 = (vals << 1);
         n_byte * loc_offscr = buf_offscr;
-
+        
         /* start at the left-most row */
         n_int scrx = (0 - (dim_x >> 1));
-
-        const n_int   lowest_s = ((vals * (((lowest_y)) - dim_y)));
-        const n_int   lowest_c = ((valc * (((lowest_y)) - dim_y)));
-
         /* find the central map point */
         n_int flatval = combined[CONVERT_X(2048, co_x) | CONVERT_Y(2048, co_y)] & 255;
-
+        
         n_int const_lowdiv2;
+        
+        /* get the local cos value for the turn angle */
+        /* get the local sin value for the turn angle */
+
+        n_vect2 value_vector;
+        n_int   valc2, vals2;
+        n_int   lowest_s, lowest_c;
+        
+        vect2_direction(&value_vector, turn + 128, 105);
+
+        valc2 = (value_vector.y << 1);
+        vals2 = (value_vector.x << 1);
+
+        lowest_s = ((value_vector.x * (((lowest_y)) - dim_y)));
+        lowest_c = ((value_vector.y * (((lowest_y)) - dim_y)));
 
         if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {
@@ -768,9 +772,9 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
             /* start with a map point which is below/off the screen */
             n_int scry = const_lowdiv2;
             /* rotated and add offset (which will be &ed off) */
-            n_int big_x = lowest_s + (scrx * valc);
+            n_int big_x = lowest_s + (scrx * value_vector.y);
             /* rotated and sub offset (subtracted further down) */
-            n_int big_y = lowest_c - (scrx * vals);
+            n_int big_y = lowest_c - (scrx * value_vector.x);
 
             while(actual > -1)
             {
@@ -804,7 +808,6 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 
 
 #define FH_SCREEN(x)  (x)
-#define FH_DELTA(x)   (x)
 
 /*
  * kind = 0, erase
@@ -925,38 +928,38 @@ static void	draw_meters(noble_simulation * local_sim)
         }
 
         /* draw sex */
-        (void)math_join(125+GENDER_X, FH_SCREEN(20)+GENETICS_Y, 5, FH_DELTA(11), &local_kind);
-        (void)math_join(130+GENDER_X, FH_SCREEN(31)+GENETICS_Y, 5, FH_DELTA(-11), &local_kind);
+        (void)math_join(125+GENDER_X, FH_SCREEN(20)+GENETICS_Y, 5, (11), &local_kind);
+        (void)math_join(130+GENDER_X, FH_SCREEN(31)+GENETICS_Y, 5, (-11), &local_kind);
         (void)math_join(135+GENDER_X, FH_SCREEN(20)+GENETICS_Y, -10, 0, &local_kind);
         if (FIND_SEX(GET_I(loc_being)) == SEX_FEMALE)
         {
-            (void)math_join(130+GENDER_X, FH_SCREEN(30)+GENETICS_Y, 0, FH_DELTA(6), &local_kind);
+            (void)math_join(130+GENDER_X, FH_SCREEN(30)+GENETICS_Y, 0, (6), &local_kind);
             (void)math_join(128+GENDER_X, FH_SCREEN(33)+GENETICS_Y, 4, 0, &local_kind);
         }
         else
         {
-            (void)math_join(135+GENDER_X, FH_SCREEN(20)+GENETICS_Y, 4, FH_DELTA(-4), &local_kind);
+            (void)math_join(135+GENDER_X, FH_SCREEN(20)+GENETICS_Y, 4, (-4), &local_kind);
             (void)math_join(139+GENDER_X, FH_SCREEN(16)+GENETICS_Y, -2, 0, &local_kind);
-            (void)math_join(139+GENDER_X, FH_SCREEN(16)+GENETICS_Y, 0, FH_DELTA(2), &local_kind);
+            (void)math_join(139+GENDER_X, FH_SCREEN(16)+GENETICS_Y, 0, (2), &local_kind);
         }
 
 
 #ifdef FELINE
 
-        (void)math_join(159+GENDER_X, FH_SCREEN(25)+GENETICS_Y, -9, FH_DELTA(0), &local_kind);
-        (void)math_join(181+GENDER_X, FH_SCREEN(25)+GENETICS_Y, 9, FH_DELTA(0), &local_kind);
+        (void)math_join(159+GENDER_X, FH_SCREEN(25)+GENETICS_Y, -9, (0), &local_kind);
+        (void)math_join(181+GENDER_X, FH_SCREEN(25)+GENETICS_Y, 9, (0), &local_kind);
 
-        (void)math_join(159+GENDER_X, FH_SCREEN(22)+GENETICS_Y, -7, FH_DELTA(-2), &local_kind);
-        (void)math_join(181+GENDER_X, FH_SCREEN(28)+GENETICS_Y, 7, FH_DELTA(2), &local_kind);
+        (void)math_join(159+GENDER_X, FH_SCREEN(22)+GENETICS_Y, -7, (-2), &local_kind);
+        (void)math_join(181+GENDER_X, FH_SCREEN(28)+GENETICS_Y, 7, (2), &local_kind);
 
-        (void)math_join(159+GENDER_X, FH_SCREEN(28)+GENETICS_Y, -7, FH_DELTA(2), &local_kind);
-        (void)math_join(181+GENDER_X, FH_SCREEN(22)+GENETICS_Y, 7, FH_DELTA(-2), &local_kind);
+        (void)math_join(159+GENDER_X, FH_SCREEN(28)+GENETICS_Y, -7, (2), &local_kind);
+        (void)math_join(181+GENDER_X, FH_SCREEN(22)+GENETICS_Y, 7, (-2), &local_kind);
 
-        (void)math_join(150+GENDER_X, FH_SCREEN(5)+GENETICS_Y, 2, FH_DELTA(8), &local_kind);
-        (void)math_join(150+GENDER_X, FH_SCREEN(5)+GENETICS_Y, 8, FH_DELTA(2), &local_kind);
+        (void)math_join(150+GENDER_X, FH_SCREEN(5)+GENETICS_Y, 2, (8), &local_kind);
+        (void)math_join(150+GENDER_X, FH_SCREEN(5)+GENETICS_Y, 8, (2), &local_kind);
 
-        (void)math_join(190+GENDER_X, FH_SCREEN(5)+GENETICS_Y, -2, FH_DELTA(8), &local_kind);
-        (void)math_join(190+GENDER_X, FH_SCREEN(5)+GENETICS_Y, -8, FH_DELTA(2), &local_kind);
+        (void)math_join(190+GENDER_X, FH_SCREEN(5)+GENETICS_Y, -2, (8), &local_kind);
+        (void)math_join(190+GENDER_X, FH_SCREEN(5)+GENETICS_Y, -8, (2), &local_kind);
 
 #endif
 
@@ -964,7 +967,7 @@ static void	draw_meters(noble_simulation * local_sim)
         {
             n_vect2 direction_facing;
             being_facing_vector(loc_being, &direction_facing, 63);
-            (void)math_join(75+ FACING_OFFSIDE, 25, direction_facing.x, FH_DELTA(direction_facing.y), &local_kind);
+            (void)math_join(75+ FACING_OFFSIDE, 25, direction_facing.x, (direction_facing.y), &local_kind);
         }
 
         {
@@ -993,36 +996,21 @@ static void	draw_meters(noble_simulation * local_sim)
     }
 
     {
-        n_int pntx, pnty;
-        ha1 = ((((loc_land->date[0]) << 6) / mndivmonth) & 255);
-        ha2 = ((((loc_land->date[0]) << 6) / mndivyear) & 255);
-        /* draw month meter */
-        pntx = (new_sd[(ha1) & 255] / 5440);
-        pnty = ( - new_sd[(ha1 + 64) & 255] / 5440);
-        (void)math_join(33, 25, pntx, FH_DELTA(pnty), &local_kind);
-    }
-    {
-        /* draw year meter */
+        n_vect2 year_hand;
+        n_vect2 month_hand;
+        n_vect2 hour_hand;
+        n_vect2 minute_hand;
         
+        vect2_direction(&year_hand, ((loc_land->date[0]) << 6) / mndivyear, 5440);
+        vect2_direction(&month_hand, ((loc_land->date[0]) << 6) / mndivmonth, 5440);
+        vect2_direction(&hour_hand, ((loc_land->time) << 6) / mndivhr, 2688);
+        vect2_direction(&minute_hand, ((loc_land->time) << 6) / mndivmin, 2016);
         
+        (void)math_join(17, 25, year_hand.y, -year_hand.x, &local_kind);
+        (void)math_join(33, 25, month_hand.y, -month_hand.x, &local_kind);
         
-        n_int pntx = (new_sd[(ha2) & 255] / 5440);
-        n_int pnty = ( - new_sd[(ha2 + 64) & 255] / 5440);
-        (void)math_join(17, 25, pntx, FH_DELTA(pnty), &local_kind);
-    }
-    {
-        n_int pntx, pnty;
-
-        /* draw clock (ie hours and minutes */
-        ha1 = ((((loc_land->time) << 6) / mndivhr) & 255);
-        ha2 = ((((loc_land->time) << 6) / mndivmin) & 255);
-        pntx = (new_sd[(ha1) & 255] / 2688);
-        pnty = ( - new_sd[(ha1 + 64) & 255] / 2688);
-        (void)math_join(25, 25, pntx, FH_DELTA(pnty), &local_kind);
-
-        pntx = (new_sd[(ha2) & 255] / 2016);
-        pnty = ( - new_sd[(ha2 + 64) & 255] / 2016);
-        (void)math_join(25, 25, pntx, FH_DELTA(pnty), &local_kind);
+        (void)math_join(25, 25, hour_hand.y, -hour_hand.x, &local_kind);
+        (void)math_join(25, 25, minute_hand.y, -minute_hand.x, &local_kind);
     }
     ha1 = 0;
     while (ha1 < 32)
@@ -1338,25 +1326,30 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
         void	    * local_info_brain = draw_pointer(NUM_TERRAIN);
         n_int	      lpx  = 0;
         n_int	      loop = 0;
-        n_int         draw_brain_size = (draw_big ? (BRAIN_MAGI) : (BRAIN_MAGI/2));
-
-
-        n_int	      a32 =  (new_sd[(turn_y + 64) & 255] / 105);
-        n_int	      a12 =  (new_sd[(turn_y) & 255] / 105);
-        n_int	      a21 = ((new_sd[(turn_z + 64) & 255] * draw_brain_size) / NEW_SD_MULTIPLE);
-        n_int	      a23 = ((new_sd[(turn_z) & 255] * draw_brain_size) / NEW_SD_MULTIPLE);
-
-        n_int	      a11 = -((a32 * a23) >> 8);
-        n_int	      a13 =  ((a32 * a21) >> 8);
-        n_int	      a31 =  ((a12 * a23) >> 8);
-        n_int	      a33 = -((a12 * a21) >> 8);
+        n_int         center_x = dim_x >> 1;
+        n_int         center_y = dim_y >> 1;
         n_int	      act_x2a, term_1a, term_2a;
 
         n_byte	    * brainptr = local;
         n_byte	    * obrainptr = &local[ BRAIN_OFFSET(32 * 32 * 32) ];
+        
+        n_int         a11, a12, a13, a21, a23, a31, a32, a33;
+        
+        n_vect2       vect_y, vect_z;
+        
+        vect2_direction(&vect_y, turn_y, 105);
+        
+        vect2_direction(&vect_z, turn_z, NEW_SD_MULTIPLE/1152);
+        
+        a32 =  vect_y.x;
+        a12 =  vect_y.y;
+        a21 =  vect_z.x;
+        a23 =  vect_z.y;
 
-        n_int         center_x = dim_x >> 1;
-        n_int         center_y = dim_y >> 1;
+        a11 = -((a32 * a23) >> 8);
+        a13 =  ((a32 * a21) >> 8);
+        a31 =  ((a12 * a23) >> 8);
+        a33 = -((a12 * a21) >> 8);
 
         local_mono.pixel_draw  = &pixel_overlay;
         local_mono.information = draw_pointer(NUM_TERRAIN);
@@ -1368,8 +1361,8 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
             return;
         }
 
-        a12 = (a12 * draw_brain_size) >> 8;
-        a32 = (a32 * draw_brain_size) >> 8;
+        a12 = (a12 * 1152) >> 8;
+        a32 = (a32 * 1152) >> 8;
         act_x2a = -((a21 + a23) << 4);
         term_1a = -((a11 + a12 + a13) << 4);
         term_2a = -((a31 + a32 + a33) << 4);

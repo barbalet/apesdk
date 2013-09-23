@@ -76,9 +76,6 @@ enum colour_type
 
 /*	Graphics Metrics */
 
-#define BRAIN_MAGI					1152
-
-
 /*	Icon Offset */
 #define	ICONOFFSET					27
 

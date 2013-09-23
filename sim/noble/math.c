@@ -169,6 +169,12 @@ n_int vect2_dot(n_vect2 * initial, n_vect2 * second,
     return (multiplier * ((initial->x * second->x) + (initial->y * second->y))) / divisor;
 }
 
+n_int math_sine(n_int direction, n_int divisor)
+{
+    NA_ASSERT(divisor, "divisor ZERO");
+    return new_sd[(direction)&255] / (divisor);
+}
+
 void vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor)
 {
     NA_ASSERT(initial, "initial NULL");

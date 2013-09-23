@@ -948,10 +948,17 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
 
         /** Vessel compliance (capacitance)
         	How much of the flow can be stored */
-        local_being->vessel[i].compliance =
-            3*length*3142*
-            radius*radius*radius /
-            (2000000000*elasticity*(n_uint)local_being->vessel[i].thickness);
+        {
+            n_int heart_attack_on_zero = 2000000000*elasticity*local_being->vessel[i].thickness;
+        
+            if (heart_attack_on_zero)
+            {
+                local_being->vessel[i].compliance =
+                    3*length*3142*
+                    radius*radius*radius / heart_attack_on_zero;
+            }
+            
+        }
     }
 
     /** Convert heart rate to blood flow rate in ml per minute.
