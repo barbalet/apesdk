@@ -251,13 +251,16 @@ n_int	weather_temperature(n_land * local_land, n_int px, n_int py)
     annual_time = current_time - ((current_time/(TIME_YEAR_DAYS*TIME_DAY_MINUTES))*(TIME_YEAR_DAYS*TIME_DAY_MINUTES));
     annual_idx = (annual_time*255/(TIME_YEAR_DAYS*TIME_DAY_MINUTES)) - 64;
     if (annual_idx<0) annual_idx += 256;
-    annual_offset = new_sd[annual_idx]*annual_temperature_variance/NEW_SD_MULTIPLE;
-
-    daily_temperature_variance = 2000 + (new_sd[annual_idx]*1000/NEW_SD_MULTIPLE);
+    
+    annual_offset = math_sine(annual_idx, NEW_SD_MULTIPLE / annual_temperature_variance);
+    
+    daily_temperature_variance = 2000 + math_sine(annual_idx, NEW_SD_MULTIPLE / 1000);
+    
     daily_idx = (time_of_day*255/TIME_DAY_MINUTES) - 64;
     if (daily_idx<0) daily_idx += 256;
-    daily_offset = new_sd[daily_idx]*daily_temperature_variance/NEW_SD_MULTIPLE;
-
+    
+    daily_offset = math_sine(daily_idx, NEW_SD_MULTIPLE/daily_temperature_variance);
+    
     return annual_average + annual_offset + daily_offset - (local_land->atmosphere[WEATHER_MEM(map_dimensions2, px, py, 0)]/32);
 }
 
@@ -364,10 +367,10 @@ static void land_tide(n_land * local_land)
         n_int lunar_angle_256 = (((time_of_day * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
         n_int solar_mins      =  current_time    % (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
         n_int solar_angle_256 = (solar_mins * 255) / (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
-        
-        n_int lunar = (new_sd[lunar_angle_256 & 255]*TIDE_AMPLITUDE_LUNAR)/NEW_SD_MULTIPLE;
-        n_int solar = (new_sd[solar_angle_256]      *TIDE_AMPLITUDE_SOLAR)/NEW_SD_MULTIPLE;
 
+        n_int lunar = math_sine(lunar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_LUNAR);
+        n_int solar = math_sine(solar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_SOLAR);
+        
         NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
         
         local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
