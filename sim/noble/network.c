@@ -37,6 +37,8 @@
  *  \brief  Covers network handling
  */
 
+#if 0
+
 /*NOBLEMAKE DEL=""*/
 #include "noble.h"
 /*NOBLEMAKE END=""*/
@@ -51,8 +53,6 @@
 /*NOBLEMAKE END=""*/
 
 /* this initially is stubbed and will be expended as developed */
-
-#if 0
 
 n_int network_open(n_string ip, n_byte2 port, n_c_int * network_connection)
 {

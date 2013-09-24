@@ -485,14 +485,8 @@ void brain_sentence(n_string string, n_byte * response)
     switch(format)
     {
     case BC_FORMAT_A:
-        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
-        break;
     case BC_FORMAT_C:
-        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
-        break;
     case BC_FORMAT_E:
-        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
-        break;
     case BC_FORMAT_F:
         sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
         break;
