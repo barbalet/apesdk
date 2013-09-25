@@ -1417,8 +1417,20 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
 
 n_int draw_error(n_constant_string error_text)
 {
-    n_int	loop = 0;
-    n_byte	error_char_copy;
+    n_int	           loop = 0;
+    n_byte	           error_char_copy;
+    n_string_block     simulation_date_time = {0};
+    n_string_block     simulation_date_time_error = {0};
+    noble_simulation * local_sim = sim_sim();
+    n_land           * local_land = local_sim->land;
+    n_int              position = 0;
+    
+    io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
+
+    
+    io_string_write(simulation_date_time_error, simulation_date_time, &position);
+    io_string_write(simulation_date_time_error, " ", &position);
+    io_string_write(simulation_date_time_error, (n_string)error_text, &position);
 
     if(error_text == 0L)
     {
@@ -1427,14 +1439,14 @@ n_int draw_error(n_constant_string error_text)
     }
 
     SC_DEBUG_STRING(" [ ERROR : ");
-    SC_DEBUG_STRING( error_text );
+    SC_DEBUG_STRING( simulation_date_time_error );
     SC_DEBUG_STRING(" ]");
     SC_DEBUG_NEWLINE;
     SC_DEBUG_OFF;
 
     if (io_command_line_execution())
     {
-        io_console_out(error_text);
+        io_console_out(simulation_date_time_error);
         return -1;
     }
 
@@ -1444,10 +1456,10 @@ n_int draw_error(n_constant_string error_text)
     }
     do
     {
-        error_char_copy = error_array[number_errors][loop] = error_text[loop];
+        error_char_copy = error_array[number_errors][loop] = simulation_date_time_error[loop];
         loop++;
     }
-    while((loop< STRING_BLOCK_SIZE) && (error_char_copy != 0));
+    while((loop < STRING_BLOCK_SIZE) && (error_char_copy != 0));
 
     error_array[number_errors][loop] = 0;
 
