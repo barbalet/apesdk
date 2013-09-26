@@ -1425,14 +1425,17 @@ n_int draw_error(n_constant_string error_text)
     n_land           * local_land = local_sim->land;
     n_int              position = 0;
     
-    io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
+    if (error_text)
+    {
+        
+        io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
 
-    
-    io_string_write(simulation_date_time_error, simulation_date_time, &position);
-    io_string_write(simulation_date_time_error, " ", &position);
-    io_string_write(simulation_date_time_error, (n_string)error_text, &position);
-
-    if(error_text == 0L)
+        
+        io_string_write(simulation_date_time_error, simulation_date_time, &position);
+        io_string_write(simulation_date_time_error, " ", &position);
+        io_string_write(simulation_date_time_error, (n_string)error_text, &position);
+    }
+    else
     {
         number_errors = 0;
         return 0;

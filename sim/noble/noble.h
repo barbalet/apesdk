@@ -780,7 +780,7 @@ typedef	struct
     n_byte      map[MAP_AREA];
     n_byte      highres[HI_RES_MAP_AREA * 2];
     n_c_uint    highres_tide[HI_RES_MAP_AREA/32];
-    n_c_int     delta_pressure[ MAP_AREA / 4];
+    n_byte2     delta_pressure[ MAP_AREA / 4];
     n_c_int		atmosphere[ MAP_AREA / 4];
 }
 n_land;
