@@ -190,7 +190,7 @@ void   metabolism_vascular_description(n_int index, n_string description);
 n_string metabolism_description(n_int index);
 n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index);
 
-void   being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name);
+void  being_name_byte2(n_byte2 first, n_byte2 family, n_string name);
 n_int being_init(n_land * land, noble_being * beings, n_int number, noble_being * local, noble_being * mother,
                  n_byte2* random_factor);
 void being_erase(noble_being * value);

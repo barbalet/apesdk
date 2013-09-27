@@ -2448,11 +2448,9 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                         {
                             noble_being * b=0L;
                             n_string_block name;
-                            being_name((n_byte)((local_episodic[e].first_name[j]>>8)==SEX_FEMALE),
-                                       (n_int)(local_episodic[e].first_name[j]&255),
-                                       (n_byte)UNPACK_FAMILY_FIRST_NAME(local_episodic[e].family_name[j]),
-                                       (n_byte)UNPACK_FAMILY_SECOND_NAME(local_episodic[e].family_name[j]),
-                                       name);
+                            
+                            being_name_byte2(local_episodic[e].first_name[j], local_episodic[e].family_name[j], name);
+                            
                             b = being_from_name(local_sim, name);
                             if (b!=0L)
                             {
@@ -2533,11 +2531,9 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
         {
             n_string_block output_value;
             /** get the name of the being */
-            being_name((n_byte)((first_name[i]>>8)==SEX_FEMALE),
-                       (n_int)(first_name[i]&255),
-                       (n_byte)UNPACK_FAMILY_FIRST_NAME(family_name[i]),
-                       (n_byte)UNPACK_FAMILY_SECOND_NAME(family_name[i]),
-                       name);
+            
+            being_name_byte2(first_name[i], family_name[i], name);
+            
             sprintf(output_value, "%06d %s", (int)hits[i], name);
             output_function(output_value);
         }

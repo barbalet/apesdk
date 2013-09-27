@@ -486,14 +486,8 @@ void social_graph_link_name(
     {
     case ENTITY_BEING:
     {
-        n_byte2 first_name_gender = local_social_graph[social_graph_index].first_name[met];
-        n_byte2 family_name = local_social_graph[social_graph_index].family_name[met];
+        being_name_byte2(local_social_graph[social_graph_index].first_name[met], local_social_graph[social_graph_index].family_name[met], name);
 
-        being_name(((first_name_gender>>8)==SEX_FEMALE),
-                   (first_name_gender&255),
-                   UNPACK_FAMILY_FIRST_NAME(family_name),
-                   UNPACK_FAMILY_SECOND_NAME(family_name),
-                   name);
         break;
     }
     case ENTITY_BEING_GROUP:

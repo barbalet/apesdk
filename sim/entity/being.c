@@ -305,11 +305,6 @@ n_int being_family_second_name(noble_being * value)
     return UNPACK_FAMILY_SECOND_NAME(local_social->family_name[BEING_MET]);
 }
 
-void being_name_simple(noble_being * value, n_string str)
-{
-    being_name((FIND_SEX(GET_I(value)) == SEX_FEMALE), being_first_name(value), being_family_first_name(value), being_family_second_name(value), str);
-}
-
 n_int being_posture(noble_being * value)
 {
     return value->posture;
@@ -1380,11 +1375,7 @@ n_int episode_description(
             (local_episodic[index].first_name[0] == being_gender_name(local_being)) &&
             (local_episodic[index].family_name[0] == being_family_name(local_being)))
     {
-        being_name(((local_episodic[index].first_name[BEING_MET]>>8) == SEX_FEMALE),
-                   local_episodic[index].first_name[BEING_MET]&255,
-                   UNPACK_FAMILY_FIRST_NAME(local_episodic[index].family_name[BEING_MET]),
-                   UNPACK_FAMILY_SECOND_NAME(local_episodic[index].family_name[BEING_MET]),
-                   name_str);
+        being_name_byte2(local_episodic[index].first_name[BEING_MET], local_episodic[index].family_name[BEING_MET], name_str);
 
         switch(local_episodic[index].event)
         {
@@ -1610,7 +1601,7 @@ const n_string EnglishNames[576] =
     "Willis","Wyatt","Wylie"
 };
 
-void  being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name)
+static void  being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name)
 {
     n_int  position = 0;
     if (first != -1)
@@ -1632,6 +1623,20 @@ void  being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_s
     {
         io_string_write(name, "Unknown", &position);
     }
+}
+
+void being_name_simple(noble_being * value, n_string str)
+{
+    being_name((FIND_SEX(GET_I(value)) == SEX_FEMALE), being_first_name(value), being_family_first_name(value), being_family_second_name(value), str);
+}
+
+void being_name_byte2(n_byte2 first, n_byte2 family, n_string name)
+{
+    being_name((n_byte)((first>>8)==SEX_FEMALE),
+               (n_int)(first&255),
+               (n_byte)UNPACK_FAMILY_FIRST_NAME(family),
+               (n_byte)UNPACK_FAMILY_SECOND_NAME(family),
+               name);
 }
 
 void being_state_description(n_byte2 state, n_string result)
