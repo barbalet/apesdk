@@ -124,6 +124,7 @@ void weather_cycle(n_land * local_land)
     NA_ASSERT(delta_pressure, "delta_pressure NULL");
     
     if (atmosphere == 0L) return;
+    if (delta_pressure == 0L) return;
     
     while ( ly < map_dimensions2 )
     {

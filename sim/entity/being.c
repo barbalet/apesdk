@@ -1612,20 +1612,26 @@ const n_string EnglishNames[576] =
 
 void  being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name)
 {
+    n_int  position = 0;
     if (first != -1)
     {
         if (female)
         {
-            sprintf(name,"%s %s-%s",EnglishNames[ NAMES_SURNAMES + first ], EnglishNames[ family0 ], EnglishNames[ family1 ]);
-            return;
+            io_string_write(name, EnglishNames[ NAMES_SURNAMES + first ], &position);
         }
         else
         {
-            sprintf(name,"%s %s-%s",EnglishNames[ NAMES_SURNAMES + 256 + first ], EnglishNames[ family0 ], EnglishNames[ family1 ]);
-            return;
+            io_string_write(name, EnglishNames[ NAMES_SURNAMES + 256 + first ], &position);
         }
+        io_string_write(name, " ", &position);
+        io_string_write(name, EnglishNames[ family0 ], &position);
+        io_string_write(name, "-", &position);
+        io_string_write(name, EnglishNames[ family1 ], &position);
     }
-    sprintf(name,"%s","Unknown");
+    else
+    {
+        io_string_write(name, "Unknown", &position);
+    }
 }
 
 void being_state_description(n_byte2 state, n_string result)
