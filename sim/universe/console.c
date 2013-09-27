@@ -164,10 +164,11 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
         if (found==1)
         {
             n_int relationship_index;
-            char relationship_str1[64],relationship_str2[64];
-            char met_being_name[64];
-            char result_str[64];
-
+            n_string_block relationship_str1;
+            n_string_block relationship_str2;
+            n_string_block met_being_name;
+            n_string_block result_str;
+            
             /** Print the name and familiarity */
             social_graph_link_name(local_sim, local_being, i, BEING_MET, met_being_name);
 
@@ -186,7 +187,8 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
                 }
                 else
                 {
-                    char meeter_being_name[64];
+                    n_string_block meeter_being_name;
+                    
                     sprintf(meeter_being_name," ");
                     social_graph_link_name(local_sim, local_being, i, BEING_MEETER, meeter_being_name);
                     sprintf(relationship_str2," (%s of %s)",relationship_str1,meeter_being_name);
@@ -995,7 +997,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
 #ifdef BRAINCODE_ON
     n_int i;
     n_string_block str2;
-    char type_str[8];
+    n_string_block type_str;
     io_string_write(result, "\n  Type    Posn  Freq Offset Addr State\n  ", &watch_string_length);
     for (i = 0; i < 36; i++)
     {
@@ -1049,10 +1051,11 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
 static void watch_stats(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
     noble_simulation  *local_sim = (noble_simulation *)ptr;
-    char str[512],relationship_str[30];
-    n_string_block status;
-    n_int heart_rate = 0;
-    n_int breathing_rate = 0;
+    n_string_block     str;
+    n_string_block     relationship_str;
+    n_string_block     status;
+    n_int              heart_rate = 0;
+    n_int              breathing_rate = 0;
 
     if (local_being == 0L)
     {
@@ -2444,7 +2447,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                         case 3:
                         {
                             noble_being * b=0L;
-                            char name[32];
+                            n_string_block name;
                             being_name((n_byte)((local_episodic[e].first_name[j]>>8)==SEX_FEMALE),
                                        (n_int)(local_episodic[e].first_name[j]&255),
                                        (n_byte)UNPACK_FAMILY_FIRST_NAME(local_episodic[e].family_name[j]),
