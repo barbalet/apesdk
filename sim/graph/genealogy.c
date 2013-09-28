@@ -42,8 +42,8 @@
 
 /*NOBLEMAKE DEL=""*/
 
-#include "entity.h"
-#include "entity_internal.h"
+#include "../entity/entity.h"
+#include "../entity/entity_internal.h"
 
 #include <stdio.h>
 #include <string.h>

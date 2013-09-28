@@ -45,7 +45,6 @@
 #include "..\universe.h\universe.h"
 #include "..\entity\entity.h"
 
-
 #endif
 
 #include <math.h>
@@ -1642,7 +1641,7 @@ void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int im
     for (i = 0; i < sim->num; i++)
     {
         noble_being * local_being = &(sim->beings[index[i]]);
-        social_link * graph = being_social(local_being);
+        noble_social * graph = being_social(local_being);
         n_uint respect_threshold = social_respect_mean(sim, local_being);
         n_int tx = i*(img_width-1)/sim->num;
         n_int bx = (i+1)*(img_width-1)/sim->num;
@@ -2233,7 +2232,7 @@ void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buff
     /** count the number of locations */
     for (i = 0; i < sim->num; i++)
     {
-		social_link * graph = being_social(&(sim->beings[i]));
+		noble_social * graph = being_social(&(sim->beings[i]));
         
         /** for each non-self social graph entry */
         for (index = 1; index < SOCIAL_SIZE_BEINGS; index++)
@@ -2255,7 +2254,7 @@ void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buff
     ctr = 0;
     for (i = 0; i < sim->num; i++)
     {
-		social_link * graph = being_social(&(sim->beings[i]));
+		noble_social * graph = being_social(&(sim->beings[i]));
         
         /** for each non-self social graph entry */
         for (index = 1; index < SOCIAL_SIZE_BEINGS; index++)
