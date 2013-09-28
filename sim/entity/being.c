@@ -1623,6 +1623,7 @@ static void  being_name(n_byte female, n_int first, n_byte family0, n_byte famil
     {
         io_string_write(name, "Unknown", &position);
     }
+    name[position] = 0;
 }
 
 void being_name_simple(noble_being * value, n_string str)
