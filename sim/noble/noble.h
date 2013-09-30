@@ -773,15 +773,15 @@ void       io_console_quit(void);
  */
 typedef	struct
 {
-    n_byte2     time;
-    n_byte2     date[2];
-    n_byte2     genetics[2];
-    n_byte      tide_level;
-    n_byte      map[MAP_AREA];
-    n_byte      highres[HI_RES_MAP_AREA * 2];
-    n_c_uint    highres_tide[HI_RES_MAP_AREA/32];
-    n_byte2     delta_pressure[ MAP_AREA / 4];
-    n_c_int		atmosphere[ MAP_AREA / 4];
+    n_byte2     time;                             /* save-able */
+    n_byte2     date[2];                          /* save-able */
+    n_byte2     genetics[2];                      /* save-able */
+    n_byte      tide_level;                       /* generated */
+    n_byte      map[MAP_AREA];                    /* generated */
+    n_byte      highres[HI_RES_MAP_AREA * 2];     /* generated */
+    n_c_uint    highres_tide[HI_RES_MAP_AREA/32]; /* generated */
+    n_byte2     delta_pressure[ MAP_AREA / 4];    /* generated */
+    n_c_int		atmosphere[ MAP_AREA / 4];        /* save-able and generate-able */
 }
 n_land;
 

@@ -1250,7 +1250,7 @@ typedef struct
     n_byte	direction_facing;
     n_byte	velocity;
     n_byte2	stored_energy;
-    n_byte2	date_of_birth[2]; /* constant */
+    n_byte2	date_of_birth[2];               /* constant */
     n_byte2	speak;
     n_byte2 seed[2];
     n_byte2	state;
