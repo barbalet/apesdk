@@ -1735,8 +1735,9 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
 n_int console_watch(void * ptr, n_string response, n_console_output output_function)
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
-    n_int length;
+    n_int          length;
     n_string_block output;
+    n_int          position = 0;
 
     if (response == 0L)
     {
@@ -1767,8 +1768,11 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
     if (being_from_name(local_sim, response) != 0)
     {
         being_set_select_name(local_sim, response);
-        sprintf(output,"Watching %s\n", being_get_select_name(local_sim));
+        io_string_write(output, "Watching ", &position);
+        io_string_write(output, being_get_select_name(local_sim), &position);
+        output[position] = 0;
         output_function(output);
+        position = 0;
         watch_type = WATCH_ALL;
     }
     else
@@ -1778,7 +1782,9 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
             if (io_find(response,0,length,"braincode",9)>-1)
             {
                 watch_type = WATCH_BRAINCODE;
-                sprintf(output,"Watching braincode for %s\n", being_get_select_name(local_sim));
+                io_string_write(output, "Watching braincode for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1787,7 +1793,9 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                     (io_find(response,0,length,"probes",6)>-1))
             {
                 watch_type = WATCH_BRAINPROBES;
-                sprintf(output,"Watching brain probes for %s\n", being_get_select_name(local_sim));
+                io_string_write(output, "Watching brain probes for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1795,7 +1803,10 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                     (io_find(response,0,length,"friend",6)>-1))
             {
                 watch_type = WATCH_SOCIAL_GRAPH;
-                sprintf(output,"Watching social graph for %s\n", being_get_select_name(local_sim));
+                
+                io_string_write(output, "Watching social graph for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1804,60 +1815,73 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                     (io_find(response,0,length,"memory",6)>-1))
             {
                 watch_type = WATCH_EPISODIC;
-                sprintf(output,"Watching episodic memory for %s\n", being_get_select_name(local_sim));
+                
+                io_string_write(output, "Watching episodic memory for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
-
                 return 0;
             }
             if (io_find(response,0,length,"speech",6)>-1)
             {
                 watch_type = WATCH_SPEECH;
-                sprintf(output,"Watching speech for %s\n", being_get_select_name(local_sim));
+                
+                io_string_write(output, "Watching speech for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
-
                 return 0;
             }
             if ((length<5) && (io_find(response,0,length,"all",3)>-1))
             {
                 watch_type = WATCH_ALL;
-                sprintf(output,"Watching %s\n", being_get_select_name(local_sim));
-                output_function(output);
 
+                io_string_write(output, "Watching ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
+                output_function(output);
                 return 0;
             }
             if ((io_find(response,0,length,"cardi",5)>-1) ||
                     (io_find(response,0,length,"vasc",4)>-1))
             {
                 watch_type = WATCH_VASCULAR;
-                sprintf(output,"Watching vascular system for %s\n", being_get_select_name(local_sim));
+                
+                io_string_write(output, "Watching vascular system for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
-
                 return 0;
             }
             if ((io_find(response,0,length,"breath",6)>-1) ||
                     (io_find(response,0,length,"respir",6)>-1))
             {
                 watch_type = WATCH_RESPIRATION;
-                sprintf(output,"Watching respiration system for %s\n", being_get_select_name(local_sim));
+                
+                io_string_write(output, "Watching respiration system for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
-
                 return 0;
             }
             if ((io_find(response,0,length,"metab",5)>-1) ||
                     (io_find(response,0,length,"chem",4)>-1))
             {
                 watch_type = WATCH_METABOLISM;
-                sprintf(output,"Watching metabolism for %s\n", being_get_select_name(local_sim));
+                
+                io_string_write(output, "Watching metabolism for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
-
                 return 0;
             }
             if (io_find(response,0,length,"appear",6)>-1)
             {
                 watch_type = WATCH_APPEARANCE;
-                sprintf(output,"Watching appearance for %s\n", being_get_select_name(local_sim));
+                io_string_write(output, "Watching appearance for ", &position);
+                io_string_write(output, being_get_select_name(local_sim), &position);
+                output[position] = 0;
                 output_function(output);
-
                 return 0;
             }
         }
