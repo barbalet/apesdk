@@ -478,7 +478,8 @@ void brain_sentence(n_string string, n_byte * response)
     n_byte instruction  = (command & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS;
     n_int  format       = brain_format(instruction, command, value0, value1);
     n_string_block      first_word, second_word;
-
+    n_int  position     = 0;
+    
     brain_longword(first_word, value0);
     brain_longword(second_word, value1);
 
@@ -488,15 +489,23 @@ void brain_sentence(n_string string, n_byte * response)
     case BC_FORMAT_C:
     case BC_FORMAT_E:
     case BC_FORMAT_F:
-        sprintf(string,"%s %s%s", braincode_spoken_dictionary[instruction], first_word, second_word);
+        io_string_write(string, braincode_spoken_dictionary[instruction], &position);
+        io_string_write(string, " ", &position);
+        io_string_write(string, first_word, &position);
+        io_string_write(string, second_word, &position);
         break;
     case BC_FORMAT_G:
-        sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], first_word);
+        io_string_write(string, braincode_spoken_dictionary[instruction], &position);
+        io_string_write(string, " ", &position);
+        io_string_write(string, first_word, &position);
         break;
     default:
-        sprintf(string,"%s %s", braincode_spoken_dictionary[instruction], second_word);
+        io_string_write(string, braincode_spoken_dictionary[instruction], &position);
+        io_string_write(string, " ", &position);
+        io_string_write(string, second_word, &position);
         break;
     }
+    string[position] = 0;
 }
 
 #ifdef BRAINCODE_ON

@@ -83,7 +83,10 @@ void console_external_watch(void)
     if (io_command_line_execution())
     {
         n_string_block output;
-        sprintf(output,"External Action -> Watching %s\n", being_get_select_name(sim_sim()));
+        n_int          position = 0;
+        io_string_write(output, "External Action -> Watching ", &position);
+        io_string_write(output, being_get_select_name(sim_sim()), &position);
+        output[position] = 0;
         io_console_out(output);
     }
 }
@@ -489,23 +492,32 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
         n_int           loop = 0;
 
         n_string_block  initial_information;
+        n_int           position = 0;
 
-        sprintf(initial_information, "EXT                                                         INT");
-
+        io_string_write(initial_information, "EXT                                                         INT", &position);
+        
+        initial_information[position] = 0;
+    
         (*function)(initial_information, -1);
 
         while(loop < 22)
         {
             n_string_block command_information;
+            
             n_string_block first_internal;
             n_string_block first_external;
-
+            
+            
+            position = 0;
+            
             brain_three_byte_command((n_string)first_internal, &internal_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
             brain_three_byte_command((n_string)first_external, &external_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
 
             if (loop == 21)
             {
-                sprintf(command_information, "%s                   %s", first_external, first_internal);
+                io_string_write(command_information, first_external, &position);
+                io_string_write(command_information, "                   ", &position);
+                io_string_write(command_information, first_internal, &position);
             }
             else
             {
@@ -514,9 +526,18 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
 
                 brain_three_byte_command((n_string)second_internal, &internal_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
                 brain_three_byte_command((n_string)second_external, &external_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
-                sprintf(command_information, "%s  %s   %s  %s",first_external, second_external,first_internal,second_internal);
+                
+                io_string_write(command_information, first_external, &position);
+                io_string_write(command_information, "  ", &position);
+                io_string_write(command_information, second_external, &position);
+                io_string_write(command_information, "   ", &position);
+                io_string_write(command_information, first_internal, &position);
+                io_string_write(command_information, "  ", &position);
+                io_string_write(command_information, second_internal, &position);
             }
 
+            command_information[position] = 0;
+            
             (*function)(command_information, loop);
             loop++;
         }

@@ -687,11 +687,13 @@ void being_set_select_name(noble_simulation * sim, n_string name)
 n_string being_get_select_name(noble_simulation * sim)
 {
     static n_string_block name;
+    n_int  position = 0;
     noble_being *b;
 
     if (sim->select == NO_BEINGS_FOUND)
     {
-        sprintf(name,"*** ALL APES DEAD ***");
+        io_string_write(name,"*** ALL APES DEAD ***", &position);
+        name[position] = 0;
     }
     else
     {

@@ -1557,14 +1557,20 @@ void io_three_string_combination(n_string output, n_string first, n_string secon
     n_int addition_length = io_length(second, STRING_BLOCK_SIZE);
     n_int total = count - (command_length + addition_length + 1);
     n_int loop2 = 0;
-    sprintf(output," %s %s",first, second);
+    n_int position = 0;
+    
+    io_string_write(output, " ", &position);
+    io_string_write(output, first, &position);
+    io_string_write(output, " ", &position);
+    io_string_write(output, second, &position);
     while (loop2 < total)
     {
-        sprintf(output, "%s ", output);
+        io_string_write(output, " ", &position);
         loop2++;
 
     }
-    sprintf(output, "%s%s", output, third);
+    io_string_write(output, third, &position);
+    output[position] = 0;
 }
 
 void io_time_to_string(n_string value, n_int minutes, n_int days, n_int centuries)
