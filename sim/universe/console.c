@@ -958,23 +958,28 @@ static void watch_episodic(void *ptr, n_string beingname, noble_being * local_be
     noble_simulation * local_sim = (noble_simulation *) ptr;
 
     n_uint i;
-    n_string_block description,str;
-
     for (i = 0; i < EPISODIC_SIZE; i++)
     {
-        str[0]='\0';
+        n_string_block str = {0};
+        n_string_block description = {0};
+        n_int          position = 0;
         (void)episode_description(local_sim, local_being, i, str);
-        if (io_length(str, STRING_BLOCK_SIZE)>0)
+        if (io_length(str, STRING_BLOCK_SIZE) > 0)
         {
             if (GET_A(local_being,ATTENTION_EPISODE) != i)
             {
-                sprintf(description,"  %s\n", str);
+                io_string_write(description, "  ", &position);
+                io_string_write(description, str, &position);
+                io_string_write(description, "\n", &position);
             }
             else
             {
-                sprintf(description," [%s]\n", str);
+                io_string_write(description, " [", &position);
+                io_string_write(description, str, &position);
+                io_string_write(description, "]\n", &position);
             }
-            io_string_write(result,description,&watch_string_length);
+            description[position] = 0;
+            io_string_write(result, description, &watch_string_length);
         }
     }
 }
