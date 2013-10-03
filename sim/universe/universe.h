@@ -1066,7 +1066,6 @@ enum featureset_members {
 
 typedef struct
 {
-    n_byte2  identification;
     n_byte2  no_of_features;
     n_byte   feature_type[MAX_FEATURESET_SIZE];
     n_byte2  feature_value[MAX_FEATURESET_SIZE];
