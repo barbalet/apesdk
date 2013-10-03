@@ -86,7 +86,7 @@ void metabolism_vascular_description(n_int index, n_string description)
     };
     n_int location = 0;
     io_string_write(description, str[index], &location);
-    description[location]='\0';
+    description[location] = 0;
 }
 
 

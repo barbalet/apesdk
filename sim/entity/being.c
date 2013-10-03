@@ -1551,7 +1551,7 @@ n_int episode_description(
         }
     }
 #endif
-    str[string_index]='\0';
+    str[string_index] = 0;
     sprintf(description,"%s",str);
     return social;
 }

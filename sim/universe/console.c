@@ -238,7 +238,7 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval)
 
         if ((str[i] == ' ') || (i==(length-1)))
         {
-            buf[ctr]='\0';
+            buf[ctr]=0;
 
             switch(index)
             {
