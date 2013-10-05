@@ -198,12 +198,24 @@ n_int vect2_dot(n_vect2 * initial, n_vect2 * second,
     return (multiplier * ((initial->x * second->x) + (initial->y * second->y))) / divisor;
 }
 
+/**
+ This produces a sine value
+ @param direction 256 units per rotation
+ @param divisor The divisor for the output value
+ @return The sine value
+ */
 n_int math_sine(n_int direction, n_int divisor)
 {
     NA_ASSERT(divisor, "divisor ZERO");
     return new_sd[(direction)&255] / (divisor);
 }
 
+/**
+ This produces a direction vector
+ @param initial The vector output
+ @param direction 256 units per rotation
+ @param divisor The divisor for the output value
+ */
 void vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor)
 {
     NA_ASSERT(initial, "initial NULL");
