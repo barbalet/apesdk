@@ -297,7 +297,6 @@ static const noble_file_entry noble_file_format[]=
     {{'e', 'p', 'f', 'o', 'o', '='}, FIL_EPI | FILE_TYPE_BYTE,  1, 15, "Food"},/* n_byte   food;*/
     {{'e', 'p', 'b', 'e', 'l', '='}, FIL_EPI | FILE_TYPE_BYTE2, 1, 16, "Belief"},/* n_byte2  affect;*/
     {{'e', 'p', 'a', 'r', 'g', '='}, FIL_EPI | FILE_TYPE_BYTE2, 1, 18, "Arg"},/* n_byte2  arg;*/
-
 #endif
 
 #ifndef REDUCE_FILE  /* FILE_TYPE_PACKED has a different form - no offset and the number is the size of the PACKED_DATA_BLOCK units */

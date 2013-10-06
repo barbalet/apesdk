@@ -394,7 +394,9 @@ static void social_meet_update_features(
     n_int social_graph_index)
 {
     noble_social * meeter_social_graph;
+#ifdef TERRITORY_ON
     n_uint idx;
+#endif
 
     /** Get the social graph for the being doing the meeting */
     meeter_social_graph = being_social(meeter_being);

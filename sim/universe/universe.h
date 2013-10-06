@@ -46,10 +46,10 @@
 
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 #define PARASITES_ON  /* entity */
-#define TERRITORY_ON  /* entity */
-#define BRAINCODE_ON  /* entity */
-#define IMMUNE_ON     /* entity */
-#define METABOLISM_ON /* entity */
+#undef TERRITORY_ON  /* entity */
+#undef BRAINCODE_ON  /* entity */
+#undef IMMUNE_ON     /* entity */
+#undef METABOLISM_ON /* entity */
 
 /* dimension of the territory map */
 #define TERRITORY_DIMENSION           (MAP_DIMENSION>>6)

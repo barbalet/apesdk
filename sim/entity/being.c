@@ -2365,7 +2365,9 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     n_vect2 facing_vector;
     n_vect2 slope_vector;
     n_vect2 looking_vector;
+#ifdef TERRITORY_ON
     n_uint territory_index;
+#endif
 
     /** Listen for any shouts */
     being_listen(sim,current_being_index);
