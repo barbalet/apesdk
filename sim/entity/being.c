@@ -3173,8 +3173,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 #endif
 
         genetics_set(local->mother_genetics, mother_genetics);
-        genetics_set(local->father_genetics,
-                     mother->father_genetics);
+        genetics_set(local->father_genetics, mother->father_genetics);
 
         being_set_unique_name(beings, number, local,
                               being_family_name(mother),
