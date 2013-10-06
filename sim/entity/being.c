@@ -106,6 +106,21 @@ n_byte * being_braincode_internal(noble_being * value)
 
 #endif
 
+void    being_set_state(noble_being * value, being_state_type state)
+{
+    value->macro_state = state;
+}
+
+void    being_add_state(noble_being * value, being_state_type state)
+{
+    value->macro_state |= state;
+
+}
+n_byte2 being_state(noble_being * value)
+{
+    return value->macro_state;
+}
+
 static void being_random3(noble_being * value)
 {
     math_random3(value->seed);
@@ -1853,7 +1868,7 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
 
     if ((awake == 0) && local)
     {
-        local->state = BEING_STATE_ASLEEP;
+        being_set_state(local, BEING_STATE_ASLEEP);
 
         being_reset_drive(local, DRIVE_FATIGUE);
     }
@@ -2124,7 +2139,7 @@ static void being_listen(noble_simulation * sim,
             being_delta(local, other, &difference_vector);
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             /** listen for the nearest shout out */
-            if ((other->state&BEING_STATE_SHOUTING) &&
+            if ((being_state(other)&BEING_STATE_SHOUTING) &&
                     (compare_distance < SHOUT_RANGE) &&
                     (other->shout[SHOUT_VOLUME] > max_shout_volume))
             {
@@ -2747,7 +2762,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     being_set_speed(local, loc_s);
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
-    local->state = loc_state;
+    being_set_state(local, loc_state);
 }
 
 #ifdef BRAINCODE_ON

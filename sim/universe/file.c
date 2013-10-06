@@ -653,7 +653,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         local_number = being_dob(local_being);
                         break;
                     case	VARIABLE_STATE:
-                        local_number = local_being->state;
+                        local_number = being_state(local_being);
                         break;
 
                     case	VARIABLE_LISTEN:

@@ -1005,10 +1005,10 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension(sim->land));
         /** Being state (lower)*/
     case 17:
-        return (n_byte)meeter_being->state&255;
+        return (n_byte)(being_state(meeter_being)&255);
         /** Being state (upper)*/
     case 18:
-        return (n_byte)(meeter_being->state>>8)&255;
+        return (n_byte)((being_state(meeter_being)>>8)&255);
         /** Drives */
     case 19:
         return (n_byte)being_drive(meeter_being, DRIVE_HUNGER);
@@ -1155,8 +1155,8 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
     /** the 8 case is covered in the default: */
     case 9: /** listen for shouts */
         if ((internal!=0) &&
-                (!(meeter_being->state&BEING_STATE_SHOUTING)) &&
-                (!(meeter_being->state&BEING_STATE_SPEAKING)) &&
+                (!(being_state(meeter_being)&BEING_STATE_SHOUTING)) &&
+                (!(being_state(meeter_being)&BEING_STATE_SPEAKING)) &&
                 (meeter_being->shout[SHOUT_HEARD]>0))
         {
             return meeter_being->shout[SHOUT_HEARD];
@@ -1638,15 +1638,15 @@ void brain_dialogue(
                         msg = value1;
                     }
                     if ((internal!=0) && (awake!=0) &&
-                            (!(meeter_being->state&BEING_STATE_SHOUTING)) &&
-                            (!(meeter_being->state&BEING_STATE_SPEAKING)) &&
+                            (!(being_state(meeter_being)&BEING_STATE_SHOUTING)) &&
+                            (!(being_state(meeter_being)&BEING_STATE_SPEAKING)) &&
                             (meeter_being->shout[SHOUT_CONTENT]==0) &&
                             (meeter_being->shout[SHOUT_HEARD]==0) &&
                             (meeter_being->shout[SHOUT_CTR]==0) &&
                             (msg>0))
                     {
                         meeter_being->shout[SHOUT_CTR] = SHOUT_REFRACTORY;
-                        meeter_being->state |= BEING_STATE_SHOUTING;
+                        being_add_state(meeter_being, BEING_STATE_SHOUTING);
                         /** volume of message */
                         meeter_being->shout[SHOUT_VOLUME] = pspace[0];
                         /** type of message */

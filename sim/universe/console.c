@@ -1094,7 +1094,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     breathing_rate = GET_MT(local_being,METABOLISM_BREATHING_RATE)*60/1000;
 #endif
 
-    being_state_description(local_being->state, status);
+    being_state_description(being_state(local_being), status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
     sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %ld\t\tHeight: %d\nFacing: %ld\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
@@ -1329,7 +1329,7 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
     for (i = 0; i < local_sim->num; i++)
     {
         noble_being * local_being = &local_sim->beings[i];
-        if (local_being->state == BEING_STATE_ASLEEP)
+        if (being_state(local_being) == BEING_STATE_ASLEEP)
         {
             histogram[0]++;
         }
@@ -1337,7 +1337,7 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
         {
             while (n < BEING_STATES)
             {
-                if (local_being->state & (1<<(n-1)))
+                if (being_state(local_being) & (1<<(n-1)))
                 {
                     histogram[n]++;
                 }

@@ -282,24 +282,6 @@ enum
     RELATIONSHIPS
 };
 
-enum
-{
-    BEING_STATE_ASLEEP = 0,
-    BEING_STATE_AWAKE = 1,
-    BEING_STATE_HUNGRY = 2,
-    BEING_STATE_SWIMMING = 4,
-    BEING_STATE_EATING = 8,
-    BEING_STATE_MOVING = 16,
-    BEING_STATE_SPEAKING = 32,
-    BEING_STATE_SHOUTING = 64,
-    BEING_STATE_REPRODUCING = 128,
-    BEING_STATE_GROOMING = 256,
-    BEING_STATE_SUCKLING = 512,
-    BEING_STATE_SHOWFORCE = 1024,
-    BEING_STATE_ATTACK = 2048,
-    BEING_STATES = 13
-};
-
 
 enum PREFERENCES_MATE
 {
@@ -1252,7 +1234,7 @@ typedef struct
     n_byte2	date_of_birth[2];               /* constant */
     n_byte2	speak;
     n_byte2 seed[2];
-    n_byte2	state;
+    n_byte2	macro_state;
     /* The basic brain formula is;
      b(t+1) = a*l + b(t)*m + (b(t)-b(t-1))*n;
      the first three values are l, m, n for awake, then l, m, n for asleep */

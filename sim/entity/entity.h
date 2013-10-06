@@ -92,6 +92,23 @@ enum GENEALOGY_FORMAT
     GENEALOGY_FORMATS
 };
 
+typedef enum being_state_type
+{
+    BEING_STATE_ASLEEP = 0,
+    BEING_STATE_AWAKE = 1,
+    BEING_STATE_HUNGRY = 2,
+    BEING_STATE_SWIMMING = 4,
+    BEING_STATE_EATING = 8,
+    BEING_STATE_MOVING = 16,
+    BEING_STATE_SPEAKING = 32,
+    BEING_STATE_SHOUTING = 64,
+    BEING_STATE_REPRODUCING = 128,
+    BEING_STATE_GROOMING = 256,
+    BEING_STATE_SUCKLING = 512,
+    BEING_STATE_SHOWFORCE = 1024,
+    BEING_STATE_ATTACK = 2048,
+    BEING_STATES = 13
+}being_state_type;
 
 void braincode_number_of_instructions(
                                       noble_simulation * sim,
@@ -195,10 +212,16 @@ n_int being_init(n_land * land, noble_being * beings, n_int number, noble_being 
                  n_byte2* random_factor);
 void being_erase(noble_being * value);
 
+n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
+
 void   being_cycle_awake(noble_simulation * sim, n_uint current_being_index);
 void   being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake);
-void   being_state_description(n_byte2 state, n_string result);
-n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
+
+void    being_state_description(n_byte2 state, n_string result);
+
+void    being_set_state(noble_being * value, being_state_type state);
+void    being_add_state(noble_being * value, being_state_type state);
+n_byte2 being_state(noble_being * value);
 
 n_byte2 being_random(noble_being * value);
 

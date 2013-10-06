@@ -949,7 +949,7 @@ static n_int social_meet(
         }
 
         /** record the state of the met beting */
-        graph[index].belief = met_being->state;
+        graph[index].belief = being_state(met_being);
 
         /** date of the meeting */
         graph[index].date[0] = sim->land->date[0];
@@ -1808,7 +1808,7 @@ void social_goals(
         /** move towards a location */
     case GOAL_LOCATION:
     {
-        if ((local->state & BEING_STATE_SWIMMING) == 0)
+        if ((being_state(local) & BEING_STATE_SWIMMING) == 0)
         {
             vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
             vect2_byte2(&location_vector, being_location(local));
@@ -1824,7 +1824,7 @@ void social_goals(
     {
         distsqr = delta_x*delta_x + delta_y*delta_y;
         if ((distsqr < GOAL_RADIUS) ||
-                ((local->state & BEING_STATE_SWIMMING) != 0))
+                ((being_state(local) & BEING_STATE_SWIMMING) != 0))
         {
             /** destination reached - goal cancelled */
             local->goal[0] = GOAL_NONE;

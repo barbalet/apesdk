@@ -243,7 +243,7 @@ static void drives_fatigue(
     {
         being_inc_drive(local, DRIVE_FATIGUE);
         /** Add extra fatigue when swimming */
-        if (local->state&BEING_STATE_SWIMMING)
+        if (being_state(local)&BEING_STATE_SWIMMING)
         {
             being_inc_drive(local, DRIVE_FATIGUE);
         }
