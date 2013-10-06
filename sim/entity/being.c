@@ -2420,7 +2420,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
             loc_state |= BEING_STATE_HUNGRY;
         }
     }
-    local->speak = 0;
 
     /** amount of body fat in kg */
     fat_mass = GET_BODY_FAT(local);

@@ -655,10 +655,6 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     case	VARIABLE_STATE:
                         local_number = being_state(local_being);
                         break;
-
-                    case	VARIABLE_LISTEN:
-                        local_number = local_being->speak;
-                        break;
                     case	VARIABLE_PREFERENCE_MATE_HEIGHT_MALE:
                         local_number = local_being->learned_preference[PREFERENCE_MATE_HEIGHT_MALE];
                         break;
@@ -831,7 +827,6 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
     variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = being_energy(local_being);
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
-    variables[VARIABLE_SPEAK - VARIABLE_VECT_ANGLE] = local_being->speak;
     variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = GET_H(local_being);
     variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->goal[0];
     variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->goal[1];
@@ -872,7 +867,6 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     n_int	local_honor = variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE];
     n_int	local_parasites = variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE];
 #endif
-    n_int	local_speak  = variables[VARIABLE_SPEAK  - VARIABLE_VECT_ANGLE];
 
     interp->specific = identifier;
 
@@ -891,15 +885,11 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     if (local_energy < BEING_DEAD) local_energy = BEING_DEAD;
     if (local_energy > BEING_FULL) local_energy = BEING_FULL;
 
-    if (local_speak < 0)      local_speak = 0;
-    if (local_speak > 0xffff) local_speak = 0xffff;
-
     being_wander(local_being, local_facing - being_facing(local_being));
 
     being_set_speed(local_being, (n_byte) local_speed);
     being_set_energy(local_being, local_energy);
 
-    local_being->speak  = (n_byte2)local_speak;
     GET_H(local_being)  = (n_byte2)local_height;
     if (local_goal_type!=GOAL_NONE)
     {

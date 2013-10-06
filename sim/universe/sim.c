@@ -64,18 +64,17 @@
 
 static variable_string	apescript_variable_codes[VARIABLE_MAX]=
 {
-    /* 0 */ /* special "variables" */
+    /* special "variables" */
     "function",
     "run",
 
-    /* 2 */
     "while",
     "if",
 
     /* output only */
     "vector_x",
     "vector_y",
-    /* 6 */
+
     "random",
     "water_level",
 
@@ -107,13 +106,13 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
 
     "hungry",
     "location_z",
-    /* 10 */
+
     "test_z",
     "is_visible",
 
     "time",
     "date",
-    /* 14 */
+
     "current_being",
     "number_beings",
 
@@ -130,7 +129,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "weather",
     "brain_value",		/* special input/output */
     /* actual variables start here */
-    /* 22 */
+
     "vector_angle",
     "facing",
 
@@ -154,15 +153,12 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "drive_fatigue",
     "drive_sex",
 
-    "speak", /* new ! */
-
-    /* 26 */
     "brain_x",
     "brain_y",
 
     "brain_z",
     "select_being",
-    /* 30 */
+\
     "test_x",
     "test_y",
 

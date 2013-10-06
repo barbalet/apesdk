@@ -150,7 +150,6 @@ enum SECONDARY_APESCRIPT
     VARIABLE_LOCATION_Y,
 
     VARIABLE_STATE,
-    VARIABLE_LISTEN,
 
     VARIABLE_ID_NUMBER,
     VARIABLE_DATE_OF_BIRTH,
@@ -180,8 +179,6 @@ enum SECONDARY_APESCRIPT
     VARIABLE_DRIVE_SOCIAL,
     VARIABLE_DRIVE_FATIGUE,
     VARIABLE_DRIVE_SEX,
-
-    VARIABLE_SPEAK,
 
     VARIABLE_BRAIN_X,
     VARIABLE_BRAIN_Y,
@@ -1232,7 +1229,6 @@ typedef struct
     n_byte	velocity;
     n_byte2	stored_energy;
     n_byte2	date_of_birth[2];               /* constant */
-    n_byte2	speak;
     n_byte2 seed[2];
     n_byte2	macro_state;
     /* The basic brain formula is;

@@ -1644,9 +1644,6 @@ n_int social_chat(
     if (!met_graph) return 0;
 #endif
 
-
-    meeter_being->speak = 0;
-
     /** agree upon terrirory */
     social_chat_territory(meeter_being, met_being,being_index,meeter_graph,respect_mean);
 
@@ -1785,8 +1782,8 @@ n_int social_chat(
 #endif
     if (speaking != 0)
     {
-        meeter_being->speak = 1;
-        met_being->speak = 1;
+        being_add_state(meeter_being, BEING_STATE_SPEAKING);
+        being_add_state(met_being, BEING_STATE_SPEAKING);
         sim->someone_speaking = 1;
     }
     return speaking;
