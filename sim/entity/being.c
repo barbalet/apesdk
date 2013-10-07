@@ -2231,6 +2231,44 @@ static n_uint being_closest(noble_simulation * sim,
     return beings_in_vicinity;
 }
 
+static n_uint being_genetic_count_zeros(n_genetics count)
+{
+    n_int loop = 0;
+    n_uint addition = 0;
+    while (loop < sizeof(n_genetics)*8)
+    {
+        if (((count>>loop) & 1) == 0)
+        {
+            addition++;
+        }
+        loop++;
+    }
+    return addition;
+}
+
+n_uint being_genetic_comparison(noble_being * primary, noble_being * secondary, n_int parse_requirements)
+{
+    n_int   loop = 0;
+    n_uint  addition = 0;
+
+    if (FIND_SEX(GET_I(secondary)) != SEX_FEMALE)
+    {
+        if (parse_requirements == 1) return 0;
+    }
+    else
+    {
+        if (parse_requirements == 0) return 0;
+    }
+    
+    while (loop < CHROMOSOMES)
+    {
+        n_genetics comparison = primary->genes[loop] ^ secondary->genes[loop];
+        addition += being_genetic_count_zeros(comparison);
+        loop++;
+    }
+    return addition;
+}
+
 /**
  * One being interacts with another
  * @param sim Pointer to the simulation
