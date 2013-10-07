@@ -1399,10 +1399,8 @@ static void social_conception(
     /** store the family name, ID and honor of the father */
     genetics_set(female->father_genetics, being_genetics(male));
 
-    female->father_honor     = male->honor;
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
-
 
     if (male->generation_min < female->generation_min)
     {

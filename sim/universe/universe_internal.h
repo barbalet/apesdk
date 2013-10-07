@@ -212,10 +212,6 @@ static const noble_file_entry noble_file_format[]=
     {{'f', 'a', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, 92, "Father genetics"}, /*n_genetics father_genetics[CHROMOSOMES];*/
 
     {{'g', 'e', 'n', 'e', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, 108, "Genetics"}, /*n_genetics   genetics[CHROMOSOMES];*/
-
-    
-    {{'f', 'a', 't', 'h', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE , 1, 124, "Father honor"}, /*n_byte  father_honor; */
-    
     
     {{'f', 'a', 't', 'h', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE , 2, 126, "Father family names"}, /*n_byte  father_name[2];*/
 

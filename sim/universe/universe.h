@@ -585,7 +585,7 @@ enum being_interaction_social
 #define FAT_MASS(frame,energy) (MIN( ((BEING_MAX_MASS_FAT_G*energy*frame)>>(4+12)),BEING_MAX_MASS_FAT_G))
 
 /* returns the amount of body fat in 10g increments */
-#define GET_BODY_FAT(bei) (FAT_MASS(GET_FR(bei),being_energy(bei)))
+#define GET_BODY_FAT(bei) (FAT_MASS(GENE_FRAME(being_genetics(bei)),being_energy(bei)))
 
 /* maximum height of the being (in millimetres) */
 #define BEING_MAX_HEIGHT_MM 2000
@@ -1259,10 +1259,11 @@ typedef struct
 
 #ifdef PARASITES_ON
     n_byte parasites;
-#endif
+
     /* social status value */
     n_byte honor;
-
+#endif
+    
     n_byte2	date_of_conception[2]; /* constant */
 
     /* indexes to current focus of attention*/
@@ -1271,10 +1272,8 @@ typedef struct
     n_genetics mother_genetics[CHROMOSOMES]; /* constant */
     n_genetics father_genetics[CHROMOSOMES]; /* constant */
     n_genetics genes[CHROMOSOMES];           /* constant */
-
-    n_byte  father_honor;                       /* constant */
-        
-    n_byte2 father_name[2];                     /* constant */
+    
+    n_byte2     father_name[2];                     /* constant */
     
     n_byte2     social_x;
     n_byte2     social_y;
@@ -1285,6 +1284,7 @@ typedef struct
     n_byte2     goal[4];
     
     n_byte      learned_preference[PREFERENCES];
+    
     n_byte2     generation_min;
     n_byte2     generation_max;
     n_byte2     child_generation_min;
@@ -1359,10 +1359,8 @@ noble_simulation;
 #define GET_A(bei,index) ((bei)->attention[index])
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
-#define GET_FR(bei)     (GENE_FRAME(being_genetics(bei)))
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
-#define	GET_MI(bei)	((bei)->mother_genetics[0])
 
 #define NO_BEINGS_FOUND	(0xffffffff)
 

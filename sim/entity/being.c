@@ -270,11 +270,6 @@ static n_int being_honor_immune(noble_being * value)
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }
 
-static void  being_ascribe_honor(noble_being * value, noble_being * mother)
-{
-    value->honor = (mother->honor + mother->father_honor) >> 2;
-}
-
 static void  being_recalibrate_honor(noble_being * value)
 {
     value->honor = (n_byte)(((n_int)value->honor*220)/255);
@@ -3169,7 +3164,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
  
 #ifdef PARASITES_ON
         /** ascribed social status */
-        being_ascribe_honor(local, mother);
+        local->honor = being_honor(mother);
 #endif
 
         genetics_set(local->mother_genetics, mother_genetics);
@@ -3178,8 +3173,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         being_set_unique_name(beings, number, local,
                               being_family_name(mother),
                               mother->father_name[1]);
-
-
     }
 
     being_set_energy(local, BEING_FULL + 15);
