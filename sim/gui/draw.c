@@ -683,22 +683,24 @@ void draw_fit(n_byte * points, n_byte2 * color_fit)
 
 void draw_color_time(n_byte2 * color_fit, n_byte2 time)
 {
-    n_int   darken =  math_sine((((time*255)/(60*24))+64+128),NEW_SD_MULTIPLE/400);
+    n_int   day_rotation =((time*255)/TIME_DAY_MINUTES);
+    n_int   darken =  math_sine(day_rotation + 64 + 128, NEW_SD_MULTIPLE/400);
     n_int	loop = 0;
     n_int	sign = 1;
 
     if (darken < 1)
         sign = -1;
 
-    darken = (darken * darken) / 400;
+    darken = (darken * darken) / 402;
     darken = (sign * darken) + 624;
-
+    
     while(loop < (COLOUR_GREY * 3))
     {
         n_int cg_val = color_group[loop];
         n_int response = (cg_val * darken) >> 10;
 
         color_fit[loop] = (n_byte2)response;
+        
         loop++;
     }
 
