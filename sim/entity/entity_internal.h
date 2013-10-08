@@ -53,7 +53,7 @@ enum sleep_state
 #define OFFSET_GRASS    40
 #define OFFSET_BUSH     14
 
-void body_genetics(noble_being * beings, n_int number, noble_being * local, noble_being * mother);
+void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);
 
 n_int food_eat(
     n_land * local_land,

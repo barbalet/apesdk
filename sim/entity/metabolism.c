@@ -433,7 +433,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
     if (FIND_SEX(GET_I(local_being))==SEX_FEMALE)
     {
         n_uint today = TIME_IN_DAYS(local_sim->land->date);
-        n_uint conception_date = TIME_IN_DAYS(local_being->date_of_conception);
+        n_uint conception_date = being_pregnant(local_being);
         if ((conception_date > 0) &&
                 (today >= conception_date) &&
                 (TIME_IN_DAYS(local_sim->land->date) <=

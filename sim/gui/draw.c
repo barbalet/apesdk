@@ -1454,11 +1454,12 @@ n_int draw_error(n_constant_string error_text)
         io_console_out(simulation_date_time_error);
         return -1;
     }
-
+    /* NEED TO FIX !!! */
+/*
     if(number_errors == MAX_NUMBER_ERRORS)
     {
-        error_text = " ** Maximum errors reached **";
-    }
+        simulation_date_time_error = " ** Maximum errors reached **";
+    } */
     do
     {
         error_char_copy = error_array[number_errors][loop] = simulation_date_time_error[loop];

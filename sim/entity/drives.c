@@ -207,7 +207,7 @@ static void drives_sex(
                 }
             }
             /** during gestation reduce the sex drive */
-            if (TIME_IN_DAYS(local->date_of_conception) != 0)
+            if (being_pregnant(local) != 0)
             {
                 if (being_drive(local, DRIVE_SEX) >= GESTATION_SEX_DRIVE_DECREMENT)
                 {

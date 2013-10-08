@@ -419,6 +419,20 @@ n_genetics * being_genetics(noble_being * value)
     return value->genes;
 }
 
+n_int being_pregnant(noble_being * value)
+{
+    return TIME_IN_DAYS(value->date_of_conception);
+}
+
+n_genetics * being_fetal_genetics(noble_being * value)
+{
+    if (being_pregnant(value))
+    {
+        return value->fetal_genes;
+    }
+    return 0;
+}
+
 n_int   being_energy(noble_being * value)
 {
     return value->stored_energy;
@@ -2629,8 +2643,8 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     }
 
     /** a certain time after giving birth females become receptive again */
-    if ((TIME_IN_DAYS(local->date_of_conception) != 0) &&
-            ((TIME_IN_DAYS(local->date_of_conception) + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
+    if ((being_pregnant(local) != 0) &&
+            ((being_pregnant(local) + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
     {
         /** zero value indicates ready to conceive */
         local->date_of_conception[0] = 0;
@@ -2639,7 +2653,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
     if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING)) == BEING_STATE_AWAKE)
     {
-        n_uint conception_days = TIME_IN_DAYS(local->date_of_conception) ;
+        n_uint conception_days = being_pregnant(local) ;
 
         if (conception_days > 0)
         {
@@ -3178,8 +3192,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         being_set_location(local, location);
 
         being_set_unique_name(beings, number, local, 0, 0);
-        
-        body_genetics(beings, number, local, 0L);
+        /* NEED TO FIX !!! */
+        /* body_genetics(beings, number, local, 0L); */
 
         local->social_x = local->social_nx =
                               (math_random(local->seed) & 32767)+16384;
@@ -3198,7 +3212,9 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         (void) being_random(local);
         local->social_x = local->social_nx = mother->social_x;
         local->social_y = local->social_ny = mother->social_y;
-        body_genetics(beings, number, local, mother);
+        
+        /* NEED TO FIX !!! */
+        /* body_genetics(beings, number, local, mother); */
  
 #ifdef PARASITES_ON
         /** ascribed social status */

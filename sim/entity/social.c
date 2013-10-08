@@ -1496,12 +1496,12 @@ n_int social_mate(
                     if ((FIND_SEX(GET_I(meeter_being)) == SEX_FEMALE) &&
                             (FIND_SEX(GET_I(met_being)) != SEX_FEMALE))
                     {
-                        if (TIME_IN_DAYS(meeter_being->date_of_conception) == 0)
+                        if (being_pregnant(meeter_being) == 0)
                         {
                             social_conception(meeter_being, met_being, sim);
+                            loc_state |= BEING_STATE_REPRODUCING;
                         }
                     }
-                    loc_state |= BEING_STATE_REPRODUCING;
                 }
             }
             else

@@ -177,6 +177,10 @@ void being_wander(noble_being * value, n_int wander);
 
 n_genetics * being_genetics(noble_being * value);
 
+n_int being_pregnant(noble_being * value);
+
+n_genetics * being_fetal_genetics(noble_being * value);
+
 n_int being_energy(noble_being * value);
 void   being_set_energy(noble_being * value, n_int energy);
 

@@ -1272,6 +1272,7 @@ typedef struct
     n_genetics mother_genetics[CHROMOSOMES]; /* constant */
     n_genetics father_genetics[CHROMOSOMES]; /* constant */
     n_genetics genes[CHROMOSOMES];           /* constant */
+    n_genetics fetal_genes[CHROMOSOMES];           /* constant */
     
     n_byte2     father_name[2];                     /* constant */
     
