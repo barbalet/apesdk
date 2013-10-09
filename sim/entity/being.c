@@ -1099,50 +1099,87 @@ static void being_immune_response(noble_being * local)
 #endif
 }
 
-static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_uint max_age)
+
+static n_uint being_genetic_count_zeros(n_genetics count)
 {
-/* TO-DO: Must fix */
-/*
-    n_int today = TIME_IN_DAYS(sim->land->date);
-    n_uint loop = 0;
-    while ( loop < sim->num )
+    n_int loop = 0;
+    n_uint addition = 0;
+    while (loop < sizeof(n_genetics)*8)
     {
-        noble_being * local = &(sim->beings[loop]);
-        if (genetics_compare(local->mother_genetics, genetics))
+        if (((count>>loop) & 1) == 0)
         {
-            if (max_age == 0)
-            {
-                return local;
-            }
-            else
-            {
-                if ((today - being_dob(local)) < max_age)
-                    return local;
-            }
+            addition++;
         }
         loop++;
     }
- */
-    return 0L;
+    return addition;
 }
 
-noble_being * being_find_female(noble_simulation * sim, n_genetics * genetics)
+n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_int parse_requirements)
+{
+    n_int   loop = 0;
+    n_uint  addition = 0;
+    
+    if (FIND_SEX(secondary[CHROMOSOME_Y]) != SEX_FEMALE)
+    {
+        if (parse_requirements == 1) return 0;
+    }
+    else
+    {
+        if (parse_requirements == 0) return 0;
+    }
+    
+    while (loop < CHROMOSOMES)
+    {
+        n_genetics comparison = primary[loop] ^ secondary[loop];
+        addition += being_genetic_count_zeros(comparison);
+        loop++;
+    }
+    return addition;
+}
+
+static noble_being * being_find_closest(noble_simulation * sim, n_genetics * genetics, n_int parse_requirements)
 {
     n_uint loop = 0;
+    n_uint comparison_best = 0;
+    noble_being * return_value = 0L;
+    
+    
     while ( loop < sim->num )
     {
         noble_being * local = &(sim->beings[loop]);
-
-        if (genetics_compare(being_genetics(local), genetics))
+        n_uint        comparison = being_genetic_comparison(genetics, being_genetics(local), parse_requirements);
+        if (comparison > comparison_best)
         {
-            if (FIND_SEX(GET_I(local)) == SEX_FEMALE)
-            {
-                return local;
-            }
+            comparison_best = comparison;
+            return_value = local;
         }
         loop++;
     }
-    return 0L;
+    return return_value;
+}
+
+static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_uint max_age)
+{
+    n_int today = TIME_IN_DAYS(sim->land->date);
+    n_uint loop = 0;
+    n_uint comparison_best = 0;
+    noble_being * return_value = 0L;
+    
+    
+    while ( loop < sim->num )
+    {
+        noble_being * local = &(sim->beings[loop]);
+        n_uint        comparison = being_genetic_comparison(genetics, being_genetics(local), -1);
+        if ((comparison > comparison_best) &&  ((today - being_dob(local)) < max_age))
+
+        {
+            comparison_best = comparison;
+            return_value = local;
+        }
+        loop++;
+    }
+    return return_value;
 }
 
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family)
@@ -2248,44 +2285,6 @@ static n_uint being_closest(noble_simulation * sim,
     return beings_in_vicinity;
 }
 
-static n_uint being_genetic_count_zeros(n_genetics count)
-{
-    n_int loop = 0;
-    n_uint addition = 0;
-    while (loop < sizeof(n_genetics)*8)
-    {
-        if (((count>>loop) & 1) == 0)
-        {
-            addition++;
-        }
-        loop++;
-    }
-    return addition;
-}
-
-n_uint being_genetic_comparison(noble_being * primary, noble_being * secondary, n_int parse_requirements)
-{
-    n_int   loop = 0;
-    n_uint  addition = 0;
-
-    if (FIND_SEX(GET_I(secondary)) != SEX_FEMALE)
-    {
-        if (parse_requirements == 1) return 0;
-    }
-    else
-    {
-        if (parse_requirements == 0) return 0;
-    }
-    
-    while (loop < CHROMOSOMES)
-    {
-        n_genetics comparison = primary->genes[loop] ^ secondary->genes[loop];
-        addition += being_genetic_count_zeros(comparison);
-        loop++;
-    }
-    return addition;
-}
-
 /**
  * One being interacts with another
  * @param sim Pointer to the simulation
@@ -2312,13 +2311,12 @@ static void being_interact(noble_simulation * sim,
     {
         noble_being * being_buffer = sim->beings;
         noble_being * local        = &being_buffer[being_index];
-/* TO-DO: Must fix */
-/*
+
         n_land      * land         = sim->land;
         n_int         today_days   = TIME_IN_DAYS(land->date);
         n_int         birth_days   = being_dob(local);
         n_uint        local_is_female = FIND_SEX(GET_I(local));
-*/
+
         noble_being	* other_being = &being_buffer[other_being_index];
 
         n_vect2 delta_vector;
@@ -2339,9 +2337,8 @@ static void being_interact(noble_simulation * sim,
         }
 
         being_facing_towards(local, &delta_vector);
-#if 0 /* TO-DO: Must fix */
 
-        if ((genetics_compare(local->mother_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
+        if ((birth_days+AGE_OF_MATURITY)<today_days)
         {
 #ifdef PARASITES_ON
             if (social_groom(local, other_being, other_being_distance, *awake, familiarity, sim))
@@ -2372,7 +2369,6 @@ static void being_interact(noble_simulation * sim,
             }
 
         }
-#endif
         if ((other_being_distance < SOCIAL_RANGE) && (being_index>-1))
         {
             /* attraction and mating */
@@ -2719,13 +2715,11 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 child_mass = (today_days - conception_days) * BIRTH_MASS / GESTATION_DAYS;
             }
         }
-#if 0 /* TO-DO: Must fix */
 
         /** child follows the mother */
-        if ((genetics_compare(local->mother_genetics, 0L)) &&
-                ((birth_days + WEANING_DAYS) > today_days))
+        if ((birth_days + WEANING_DAYS) > today_days)
         {
-            noble_being * mother = being_find_female(sim,local->mother_genetics);
+            noble_being * mother = being_find_closest(sim, being_genetics(local), 1);
             if (mother != 0L)
             {
                 /** orient towards the mother */
@@ -2777,7 +2771,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 }
             }
         }
-#endif
     }
 
     /** no longer carrying the child */
