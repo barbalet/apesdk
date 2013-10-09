@@ -1394,10 +1394,8 @@ static void social_conception(
     /** store the date of conception */
     female->date_of_conception[0] = sim->land->date[0];
     female->date_of_conception[1] = sim->land->date[1];
-
-    /** store the father's genetics */
-    /** store the family name, ID and honor of the father */
-    genetics_set(female->father_genetics, being_genetics(male));
+    
+    body_genetics(sim->beings, sim->num, female->fetal_genes, female->genes, male->genes, female->seed);
 
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);

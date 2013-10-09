@@ -1269,11 +1269,9 @@ typedef struct
     /* indexes to current focus of attention*/
     n_byte attention[ATTENTION_SIZE];
     
-    n_genetics mother_genetics[CHROMOSOMES]; /* constant */
-    n_genetics father_genetics[CHROMOSOMES]; /* constant */
     n_genetics genes[CHROMOSOMES];           /* constant */
     n_genetics fetal_genes[CHROMOSOMES];           /* constant */
-    
+
     n_byte2     father_name[2];                     /* constant */
     
     n_byte2     social_x;

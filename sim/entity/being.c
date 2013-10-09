@@ -1101,6 +1101,8 @@ static void being_immune_response(noble_being * local)
 
 static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_uint max_age)
 {
+/* TO-DO: Must fix */
+/*
     n_int today = TIME_IN_DAYS(sim->land->date);
     n_uint loop = 0;
     while ( loop < sim->num )
@@ -1120,6 +1122,7 @@ static noble_being * being_find_child(noble_simulation * sim, n_genetics * genet
         }
         loop++;
     }
+ */
     return 0L;
 }
 
@@ -2309,11 +2312,13 @@ static void being_interact(noble_simulation * sim,
     {
         noble_being * being_buffer = sim->beings;
         noble_being * local        = &being_buffer[being_index];
+/* TO-DO: Must fix */
+/*
         n_land      * land         = sim->land;
         n_int         today_days   = TIME_IN_DAYS(land->date);
         n_int         birth_days   = being_dob(local);
         n_uint        local_is_female = FIND_SEX(GET_I(local));
-
+*/
         noble_being	* other_being = &being_buffer[other_being_index];
 
         n_vect2 delta_vector;
@@ -2334,6 +2339,7 @@ static void being_interact(noble_simulation * sim,
         }
 
         being_facing_towards(local, &delta_vector);
+#if 0 /* TO-DO: Must fix */
 
         if ((genetics_compare(local->mother_genetics, 0L)) || ((birth_days+AGE_OF_MATURITY)<today_days))
         {
@@ -2366,6 +2372,7 @@ static void being_interact(noble_simulation * sim,
             }
 
         }
+#endif
         if ((other_being_distance < SOCIAL_RANGE) && (being_index>-1))
         {
             /* attraction and mating */
@@ -2712,6 +2719,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 child_mass = (today_days - conception_days) * BIRTH_MASS / GESTATION_DAYS;
             }
         }
+#if 0 /* TO-DO: Must fix */
 
         /** child follows the mother */
         if ((genetics_compare(local->mother_genetics, 0L)) &&
@@ -2769,6 +2777,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 }
             }
         }
+#endif
     }
 
     /** no longer carrying the child */
@@ -2995,6 +3004,31 @@ static n_int being_set_unique_name(noble_being * beings,
     return found;
 }
 
+static void being_random_genetics(n_genetics * value, n_byte2 * random, n_int male)
+{
+    n_int loop = 0;
+    math_random3(random);
+    while (loop < CHROMOSOMES)
+    {
+        n_int loop2 = 0;
+        
+        value[loop] = 0;
+        
+        while (loop2 < (sizeof(n_genetics)*8))
+        {
+            if (math_random(random)&1)
+            {
+                value[loop] |= 1 << loop2;
+            }
+            loop2++;
+        }
+        loop++;
+    }
+    value[CHROMOSOME_Y] &= ~1;
+    value[CHROMOSOME_Y] |= (male ? 2 : 3);
+}
+
+
 /**
  * Initialise the ape's variables and clear its brain
  * @param sim Pointer to the simulation object
@@ -3192,9 +3226,37 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         being_set_location(local, location);
 
         being_set_unique_name(beings, number, local, 0, 0);
-        /* NEED TO FIX !!! */
-        /* body_genetics(beings, number, local, 0L); */
+        /* body_genetics(beings, number, being->gebetilocal, 0L); */
+        {
+            n_genetics mother_genetics[CHROMOSOMES];
+            n_genetics father_genetics[CHROMOSOMES];
+            n_byte2    gene_random[2];
+            
+            being_random3(local);
+            
+            gene_random[0] = being_random(local);
+            being_random3(local);
+            being_random3(local);
 
+            gene_random[1] = being_random(local);
+            
+            
+            being_random_genetics(mother_genetics, gene_random, 0);
+            
+            being_random3(local);
+            
+            gene_random[0] = being_random(local);
+            being_random3(local);
+            being_random3(local);
+            being_random3(local);
+            
+            gene_random[1] = being_random(local);
+            
+            being_random_genetics(father_genetics, gene_random, 1);
+            being_random3(local);
+            
+            body_genetics(beings, number, local->genes, mother_genetics, father_genetics, gene_random);
+        }
         local->social_x = local->social_nx =
                               (math_random(local->seed) & 32767)+16384;
         local->social_y = local->social_ny =
@@ -3216,13 +3278,12 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         /* NEED TO FIX !!! */
         /* body_genetics(beings, number, local, mother); */
  
+        genetics_set(local->genes, mother->fetal_genes);
+        
 #ifdef PARASITES_ON
         /** ascribed social status */
         local->honor = being_honor(mother);
 #endif
-
-        genetics_set(local->mother_genetics, mother_genetics);
-        genetics_set(local->father_genetics, mother->father_genetics);
 
         being_set_unique_name(beings, number, local,
                               being_family_name(mother),
@@ -3450,8 +3511,6 @@ void being_remove(noble_simulation * local_sim)
         if (being_energy(&(local[loop])) == BEING_DEAD)
         {
             noble_being * b = &local[loop];
-            noble_being * child;
-            n_genetics  * genetics = being_genetics(b);
             n_uint i = 0;
             n_byte2 name, family_name, met_name, met_family_name;
 
@@ -3460,19 +3519,6 @@ void being_remove(noble_simulation * local_sim)
                 local_sim->ext_death(b,local_sim);
             }
 
-            /** remove all children's maternal links if the mother dies */
-            if (GET_I(b) > 0)
-            {
-                do
-                {
-                    child = being_find_child(local_sim, genetics, 0);
-                    if (child != 0L)
-                    {
-                        genetics_zero(child->mother_genetics);
-                    }
-                }
-                while (child != 0L);
-            }
             /** set familiarity to zero so that the entry for the removed being will eventually be overwritten */
             name = being_gender_name(b);
             family_name = being_family_name(b);

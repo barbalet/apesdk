@@ -1431,11 +1431,19 @@ n_int draw_error(n_constant_string error_text)
     {
         
         io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
-
         
         io_string_write(simulation_date_time_error, simulation_date_time, &position);
         io_string_write(simulation_date_time_error, " ", &position);
-        io_string_write(simulation_date_time_error, (n_string)error_text, &position);
+        
+        if(number_errors == MAX_NUMBER_ERRORS)
+        {
+            io_string_write(simulation_date_time_error, " ** Maximum errors reached **" , &position);
+        }
+        else
+        {
+            io_string_write(simulation_date_time_error, (n_string)error_text, &position);
+        }
+        simulation_date_time_error[position] = 0;
     }
     else
     {
@@ -1454,12 +1462,6 @@ n_int draw_error(n_constant_string error_text)
         io_console_out(simulation_date_time_error);
         return -1;
     }
-    /* NEED TO FIX !!! */
-/*
-    if(number_errors == MAX_NUMBER_ERRORS)
-    {
-        simulation_date_time_error = " ** Maximum errors reached **";
-    } */
     do
     {
         error_char_copy = error_array[number_errors][loop] = simulation_date_time_error[loop];

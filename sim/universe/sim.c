@@ -747,7 +747,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
             n_uint count_to = sim.max >> 2;
 #ifdef WEATHER_ON
             weather_init(sim.land);
-#endif            
+#endif       
             sim.num = 0;
             while (sim.num < count_to)
             {
