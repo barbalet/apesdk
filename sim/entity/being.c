@@ -422,7 +422,7 @@ n_int being_facing(noble_being * value)
 
 n_genetics * being_genetics(noble_being * value)
 {
-    return value->genes;
+    return value->genetics;
 }
 
 n_int being_pregnant(noble_being * value)
@@ -434,7 +434,7 @@ n_genetics * being_fetal_genetics(noble_being * value)
 {
     if (being_pregnant(value))
     {
-        return value->fetal_genes;
+        return value->fetal_genetics;
     }
     return 0;
 }
@@ -3292,7 +3292,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
             being_random_genetics(father_genetics, gene_random, 1);
             being_random3(local);
             
-            body_genetics(beings, number, local->genes, mother_genetics, father_genetics, gene_random);
+            body_genetics(beings, number, being_genetics(local), mother_genetics, father_genetics, gene_random);
         }
         local->social_x = local->social_nx =
                               (math_random(local->seed) & 32767)+16384;
@@ -3315,7 +3315,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         /* NEED TO FIX !!! */
         /* body_genetics(beings, number, local, mother); */
  
-        genetics_set(local->genes, mother->fetal_genes);
+        genetics_set(being_genetics(local), being_fetal_genetics(mother));
         
 #ifdef PARASITES_ON
         /** ascribed social status */

@@ -1395,7 +1395,7 @@ static void social_conception(
     female->date_of_conception[0] = sim->land->date[0];
     female->date_of_conception[1] = sim->land->date[1];
     
-    body_genetics(sim->beings, sim->num, female->fetal_genes, female->genes, male->genes, female->seed);
+    body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
 
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
