@@ -2675,7 +2675,6 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
                         if (being_init(sim->land, sim->beings, sim->num, being_child, local, 0L) == 0)
                         {
-                            loc_state |= BEING_STATE_REPRODUCING;
                             episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
                             being_create_family_links(local,being_child,sim);
                             if (sim->ext_birth != 0)

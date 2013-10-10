@@ -1497,7 +1497,6 @@ n_int social_mate(
                         if (being_pregnant(meeter_being) == 0)
                         {
                             social_conception(meeter_being, met_being, sim);
-                            loc_state |= BEING_STATE_REPRODUCING;
                         }
                     }
                 }
