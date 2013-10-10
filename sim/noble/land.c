@@ -290,7 +290,7 @@ void  weather_wind_vector(n_land * local_land, n_int px, n_int py, n_int * wind_
     *wind_dy = local_pressure - weather_pressure(local_land, (px>>1), (py>>1) - 1, map_dimensions2);
 }
 
-n_int	weather_seven_values(n_land * local_land, n_int px, n_int py)
+weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
 {
     n_byte	ret_val;
     n_int	val;
@@ -302,27 +302,32 @@ n_int	weather_seven_values(n_land * local_land, n_int px, n_int py)
     
     if(IS_DAWNDUSK(local_time))
     {
-        return 6;
+        return WEATHER_SEVEN_DAWN_DUSK;
     }
     if(IS_NIGHT(local_time))
     {
-        ret_val = 3;
+        ret_val = WEATHER_SEVEN_CLEAR_NIGHT;
     }
     else
     {
-        ret_val = 0;
+        ret_val = WEATHER_SEVEN_SUNNY_DAY;
     }
 
     val = weather_pressure(local_land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(px)) >> 1, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(py)) >> 1, map_dimension2);
 
     if ( val == -1)
     {
-        return -1; /* Error has already been shown */
+        return WEATHER_SEVEN_ERROR; /* Error has already been shown */
     }
+    
     if(val > WEATHER_RAIN)
+    {
         return ret_val+2;
+    }
     if(val > WEATHER_CLOUD)
+    {
         return ret_val+1;
+    }
     return ret_val;
 }
 

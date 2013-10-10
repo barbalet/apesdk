@@ -54,6 +54,10 @@
 
 /*NOBLEMAKE END=""*/
 
+/* worst case 1500 + 180 per step */
+
+#define VISIBILITY_MAXIMUM      (2000)
+
 #define	WALK_ON_WATER(pz,w)	(((pz)<w) ? w : (pz))
 
 /** Swim - better or worse at swimming both speed and energy use */
@@ -85,6 +89,8 @@ typedef	struct
     n_int 		start_z;
     n_int 		offset_x;
     n_int 		offset_y;
+    n_int       visibility_delta;
+    n_int       visibility_total;
     n_land *land;
 }
 being_draw;
@@ -573,7 +579,39 @@ static n_byte	being_ground(n_int px, n_int py, void * params)
 {
     being_draw * being_pixel = (being_draw *) params;
     n_int	local_z = ((px*(being_pixel->offset_x)) + (py*(being_pixel->offset_y))) >> 9;
+    weather_values   seven_values = weather_seven_values(being_pixel->land, MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
+    
+    switch (seven_values)
+    {
+        case WEATHER_SEVEN_SUNNY_DAY:
+        case WEATHER_SEVEN_CLOUDY_DAY:
+            being_pixel->visibility_total += being_pixel->visibility_delta;
+            break;
+        case WEATHER_SEVEN_RAINY_DAY:
+        case WEATHER_SEVEN_DAWN_DUSK:
+            being_pixel->visibility_total += (2*being_pixel->visibility_delta);
+            break;
+        case WEATHER_SEVEN_CLEAR_NIGHT:
+            being_pixel->visibility_total += (5*being_pixel->visibility_delta);
+        case WEATHER_SEVEN_CLOUDY_NIGHT:
+            being_pixel->visibility_total += (8*being_pixel->visibility_delta);
+        case WEATHER_SEVEN_RAINY_NIGHT:
+            being_pixel->visibility_total += (12*being_pixel->visibility_delta);
+            break;
+            
+        case WEATHER_SEVEN_ERROR:
+        default:
+            return 1;
+    }
+    
+    
+    if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
+        return 1;
+    
     local_z += being_pixel->start_z;
+    
+    
+    
     if (local_z < WALK_ON_WATER(QUICK_LAND(being_pixel->land, px, py),being_pixel->land->tide_level))
     {
         return 1;
@@ -585,6 +623,9 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
 {
     n_vect2    start, delta, vector_facing;
 
+    
+    /* TODO: Check for being awake - need a land and being based awake check */
+    
     vect2_byte2(&start, being_location(local));
 
     delta.x = lx;
@@ -592,13 +633,13 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
 
     vect2_subtract(&delta, &delta, &start);
 
+#if 0
     {
         n_int distance_squared = vect2_dot(&delta, &delta, 1, 1);
-        /* TODO: This should also include weather conditions (eg seeing through the rain) */
         if (distance_squared > VISUAL_DISTANCE_SQUARED)
             return 0;
     }
-
+#endif
     /** check trivial case first - self aware */
 
     if ((delta.x == 0) && (delta.y == 0))
@@ -647,6 +688,10 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
             translate.start_z = start_z;
             translate.offset_x = offset.x;
             translate.offset_y = offset.y;
+            
+            translate.visibility_total = 100 * GENE_VISION_INITIAL(being_genetics(local));
+            
+            translate.visibility_delta = GENE_VISION_DELTA(being_genetics(local));
         }
 
         translate.land = land;

@@ -430,6 +430,18 @@ enum graph_commands
 
 #endif
 
+typedef enum
+{
+    WEATHER_SEVEN_ERROR = -1,
+    WEATHER_SEVEN_SUNNY_DAY = 0,
+    WEATHER_SEVEN_CLOUDY_DAY = 1,
+    WEATHER_SEVEN_RAINY_DAY = 2,
+    WEATHER_SEVEN_CLEAR_NIGHT = 3,
+    WEATHER_SEVEN_CLOUDY_NIGHT = 4,
+    WEATHER_SEVEN_RAINY_NIGHT = 5,
+    WEATHER_SEVEN_DAWN_DUSK = 6
+} weather_values;
+
 enum window_information
 {
     TERRAIN_WINDOW_WIDTH		= (2048),
@@ -791,7 +803,7 @@ void  weather_wind_vector(n_land * local_land, n_int px, n_int py, n_int * wind_
 n_int weather_pressure(n_land * local_land, n_int px, n_int py, n_int dimension2);
 n_int weather_temperature(n_land * local_land, n_int px, n_int py);
 void  weather_cycle(n_land * local_land);
-n_int weather_seven_values(n_land * local_land, n_int px, n_int py);
+weather_values weather_seven_values(n_land * local_land, n_int px, n_int py);
 
 void  land_init(n_land * local, n_byte * scratch);
 void  land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start);

@@ -933,6 +933,11 @@ enum mutation_type
 
 #define GENE_HAIR(gene)                     GENE_VAL_REG(gene, 12, 5, 12, 11)
 
+/* Vision */
+
+#define GENE_VISION_INITIAL(gene)           GENE_VAL_REG(gene, 2, 12, 3, 9)
+#define GENE_VISION_DELTA(gene)             GENE_VAL_REG(gene, 11, 7, 2, 9)
+
 /* Eye shape */
 
 #define GENE_EYE_SHAPE(gene)                GENE_VAL_REG(gene, 9, 12, 1, 5)

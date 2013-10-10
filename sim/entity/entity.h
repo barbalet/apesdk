@@ -92,7 +92,7 @@ enum GENEALOGY_FORMAT
     GENEALOGY_FORMATS
 };
 
-typedef enum being_state_type
+typedef enum
 {
     BEING_STATE_ASLEEP = 0,
     BEING_STATE_AWAKE = 1,
