@@ -93,11 +93,6 @@ typedef struct
 }
 n_color8;
 
-
-typedef n_int (*control_file_handle)(n_byte * buff, n_uint len);
-
-typedef void  (*control_mp_define)(n_byte * data);
-
 /*
  n_uint braincode_standard_deviation(noble_being * local_being);
  void braincode_number_of_instructions(
