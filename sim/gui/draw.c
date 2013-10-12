@@ -119,11 +119,9 @@ static const n_byte	icns[896] =
     0x00, 0xC0, 0x18, 0x00, 0x1F, 0x80, 0x0F, 0xC0, 0x00, 0x80, 0x08, 0x00, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-
 /* from ASCII 32 - 127, corresponding to the seg14 results */
 
 /* n_byte segment = seg14[ conv[ character_value ]]; */
-
 static const n_byte	conv[ 96 ] =
 {
     0, 40, 41, 0, 0, 0, 0, 42, 43, 44, 38, 39, 45, 11, 46, 47, 1, 2, 3, 4, 5, 6, 7,
@@ -134,7 +132,6 @@ static const n_byte	conv[ 96 ] =
 };
 
 /* one bit per segment */
-
 static const n_byte2 seg14[ 60 ] =
 {
     0x0000, 0x3F00, 0x1800, 0x36C0, 0x3CC0, 0x19C0, 0x2DC0, 0x2FC0, 0x3800, 0x3FC0,
@@ -154,7 +151,6 @@ static n_byte           number_errors;
 static n_string_block	error_array[MAX_NUMBER_ERRORS + 1];
 
 n_int control_error(n_byte * error_text);
-
 
 static n_uint	tilt_y = 0;
 

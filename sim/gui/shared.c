@@ -283,7 +283,6 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
     return draw_offscreen(sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0)));
 }
 
-
 void shared_cycle(n_uint ticks, n_int fIdentification)
 {
 #ifndef	_WIN32
