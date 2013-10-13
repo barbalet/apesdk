@@ -1010,15 +1010,16 @@ void     scdebug_int(n_int number);
 void     scdebug_newline(void);
 void     scdebug_tabstep(n_int steps);
 n_string scdebug_variable(n_int variable);
-void     scdebug_writeon(n_byte value);
+void     scdebug_writeon(void);
+void     scdebug_writeoff(void);
 
 #define	SC_DEBUG_STRING(string)	scdebug_string(string)
 #define SC_DEBUG_NUMBER(number) scdebug_int(number)
 #define	SC_DEBUG_NEWLINE		scdebug_newline()
 #define	SC_DEBUG_UP				scdebug_tabstep(1)
 #define	SC_DEBUG_DOWN			scdebug_tabstep(-1)
-#define	SC_DEBUG_ON				scdebug_writeon(1)
-#define SC_DEBUG_OFF			scdebug_writeon(0)
+#define	SC_DEBUG_ON				scdebug_writeon()
+#define SC_DEBUG_OFF			scdebug_writeoff()
 
 #else
 

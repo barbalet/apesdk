@@ -88,6 +88,7 @@ static n_int	number_num;
 
 static n_int	          tab_step = 0;
 static variable_string	* local_var_codes;
+
 n_file                  * file_debug = 0L;
 static n_int              single_entry = 1;
 
@@ -113,36 +114,36 @@ void scdebug_file_cleanup(void)
     file_debug = 0L;
 }
 
-void scdebug_writeon(n_byte value)
+void scdebug_writeon(void)
 {
     if (single_entry == 0) return;
-
 #ifndef COMMAND_LINE_DEBUG
-    if(value == 1)
+    if (file_debug == 0L) /* io_file_reused */
     {
-        if (file_debug == 0L) /* io_file_reused */
-        {
-            file_debug = io_file_new();
-        }
-
-        if(file_debug == 0L)
-        {
-            return;
-        }
-
-        if(file_debug->data== 0L)
-        {
-            scdebug_file_cleanup();
-            return;
-        }
-        single_entry = 1;
+        file_debug = io_file_new();
     }
-    else
+
+    if(file_debug == 0L)
     {
-        if(file_debug != 0L)
-        {
-            single_entry = 0;
-        }
+        return;
+    }
+
+    if(file_debug->data== 0L)
+    {
+        scdebug_file_cleanup();
+        return;
+    }
+    single_entry = 1;
+#endif
+}
+
+void scdebug_writeoff(void)
+{
+    if (single_entry == 0) return;
+#ifndef COMMAND_LINE_DEBUG
+    if(file_debug != 0L)
+    {
+        single_entry = 0;
     }
 #endif
 }
