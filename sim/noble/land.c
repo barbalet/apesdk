@@ -80,7 +80,6 @@
  ?
 
  */
-
 static n_int weather_delta(n_land * local_land)
 {
     n_int    lx = 0;
@@ -360,7 +359,6 @@ static n_int time_actual_to_perceived(n_int actual_time)
     }
 }
 */
-
 n_int land_map_dimension(n_land * land)
 {
     (void)land; /* land is not used here */

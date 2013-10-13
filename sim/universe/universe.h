@@ -1277,12 +1277,12 @@ typedef struct
     n_genetics  genetics[CHROMOSOMES];           /* constant */
     n_genetics  fetal_genetics[CHROMOSOMES];           /* constant */
 
-    n_byte2     father_name[2];                     /* constant */
+    n_byte2     father_name[2];                  /* why is this needed? */
     
     n_byte2     social_x;
     n_byte2     social_y;
-    n_byte2     social_nx;
-    n_byte2     social_ny;
+    n_byte2     social_nx; /* why is this needed? */
+    n_byte2     social_ny; /* why is this needed? */
     
     n_byte      drives[DRIVES];
     n_byte2     goal[4];
