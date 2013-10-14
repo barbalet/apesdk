@@ -1782,3 +1782,80 @@ void io_assert(n_string message, n_string file_loc, n_int line)
 }
 
 #endif
+
+n_file * io_file_ready(n_int entry, n_file * file)
+{
+    if (entry)
+    {
+        return 0L;
+    }
+    return file;
+}
+
+void io_file_cleanup(n_int * entry, n_file ** file)
+{
+    /* This setting to zero may be duplicated in at least one place
+     but provides additional protection - it may not be needed following
+     a case-by-case review */
+    
+    *entry = 0;
+    
+    if (*file)
+    {
+        io_file_free(file);
+    }
+}
+
+void io_file_writeon(n_int * entry, n_file ** file)
+{
+    if (*entry == 0) return;
+#ifndef COMMAND_LINE_DEBUG
+    if (*file == 0L) /* io_file_reused */
+    {
+        *file = io_file_new();
+    }
+    
+    if(*file == 0L)
+    {
+        return;
+    }
+    
+    if((*file)->data == 0L)
+    {
+        io_file_cleanup(entry, file);
+        return;
+    }
+    *entry = 1;
+#endif
+}
+
+void io_file_writeoff(n_int * entry, n_file * file)
+{
+    if (*entry == 0) return;
+#ifndef COMMAND_LINE_DEBUG
+    if(file != 0L)
+    {
+        *entry = 0;
+    }
+#endif
+}
+
+void io_file_string(n_int entry, n_file * file, n_constant_string string)
+{
+    if (entry == 0) return;
+    
+    if((string != 0L)
+#ifndef COMMAND_LINE_DEBUG
+       && (file  != 0L)
+#endif
+       )
+    {
+#ifndef COMMAND_LINE_DEBUG
+        io_write(file, string, 0);
+#else
+        printf("%s",string);
+#endif
+    }
+}
+
+

@@ -94,60 +94,28 @@ static n_int              single_entry = 1;
 
 n_file * scdebug_file_ready(void)
 {
-    if (single_entry)
-    {
-        return 0L;
-    }
-    return file_debug;
+    return io_file_ready(single_entry, file_debug);
 }
 
 void scdebug_file_cleanup(void)
 {
-    /* This setting to zero may be duplicated in at least one place
-     but provides additional protection - it may not be needed following
-     a case-by-case review */
-    
-    single_entry = 0;
-    
-    if (file_debug)
-    {
-        io_file_free(&file_debug);
-    }
-    file_debug = 0L;
+    io_file_cleanup(&single_entry, &file_debug);
 }
 
 void scdebug_writeon(void)
 {
-    if (single_entry == 0) return;
-#ifndef COMMAND_LINE_DEBUG
-    if (file_debug == 0L) /* io_file_reused */
-    {
-        file_debug = io_file_new();
-    }
-
-    if(file_debug == 0L)
-    {
-        return;
-    }
-
-    if(file_debug->data == 0L)
-    {
-        scdebug_file_cleanup();
-        return;
-    }
-    single_entry = 1;
-#endif
+    io_file_writeon(&single_entry, &file_debug);
 }
 
 void scdebug_writeoff(void)
 {
-    if (single_entry == 0) return;
-#ifndef COMMAND_LINE_DEBUG
-    if(file_debug != 0L)
-    {
-        single_entry = 0;
-    }
-#endif
+    io_file_writeoff(&single_entry, file_debug);
+}
+
+void scdebug_string(n_constant_string string)
+{
+    
+    io_file_string(single_entry, file_debug, string);
 }
 
 n_string scdebug_variable(n_int variable)
@@ -155,31 +123,13 @@ n_string scdebug_variable(n_int variable)
     n_string return_value = 0L;
     if((variable < VARIABLE_MAX)
 #ifndef COMMAND_LINE_DEBUG
-            && (file_debug  != 0L)
+       && (file_debug  != 0L)
 #endif
-      )
+       )
     {
         return_value = (n_string) local_var_codes[variable];
     }
     return return_value;
-}
-
-void scdebug_string(n_constant_string string)
-{
-    if (single_entry == 0) return;
-
-    if((string != 0L)
-#ifndef COMMAND_LINE_DEBUG
-            && (file_debug  != 0L)
-#endif
-      )
-    {
-#ifndef COMMAND_LINE_DEBUG
-        io_write(file_debug, string, 0);
-#else
-        printf("%s",string);
-#endif
-    }
 }
 
 void scdebug_int(n_int number)

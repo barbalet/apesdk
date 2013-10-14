@@ -675,6 +675,16 @@ void       io_help_line(noble_console_command * specific, n_console_output outpu
 
 void       io_console_quit(void);
 
+n_file * io_file_ready(n_int entry, n_file * file);
+
+void io_file_cleanup(n_int * entry, n_file ** file);
+
+void io_file_writeon(n_int * entry, n_file ** file);
+
+void io_file_writeoff(n_int * entry, n_file * file);
+
+void io_file_string(n_int entry, n_file * file, n_constant_string string);
+
 /*
  This provides the land interface into entity but not the universe.
 
