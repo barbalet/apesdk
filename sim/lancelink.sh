@@ -36,20 +36,21 @@ else
     CFLAGS=-O2 
 fi
 
-clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/io.c -o io.o
-clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/math.c -o math.o
-clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/parse.c -o parse.o
-clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/interpret.c -o interpret.o
+gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/io.c -o io.o
+gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/math.c -o math.o
+gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/parse.c -o parse.o
+gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/interpret.c -o interpret.o
 
-clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c lance/commands.c -o commands.o
-clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c lance/lance.c -o lance.o
+gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c lance/commands.c -o commands.o
+gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c lance/lance.c -o lance.o
 
-clang ${CFLAGS} -m64 -I/usr/include -o ../lance io.o math.o parse.o interpret.o lance.o commands.o
+gcc ${CFLAGS} -I/usr/include -o ../../lance io.o math.o parse.o interpret.o lance.o commands.o
 
-cd ..
+cd ../..
 
-./lance ./sim/lance/basic_check.txt
+./lance ./nobleape/sim/lance/basic_check.txt
 
+cd nobleape
 cd sim
 
 rm *.o

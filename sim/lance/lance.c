@@ -101,42 +101,27 @@ static n_int lance_init(n_string interpret_string)
     }
     if (io_disk_read(source_file, interpret_string) == FILE_ERROR)
     {
-        io_file_free(source_file);
+        io_file_free(&source_file);
         return -1;
     }
     if (lance_interpret(source_file->data,source_file->location) == -1)
     {
-        io_file_free(source_file);
+        io_file_free(&source_file);
         return -1;
     }
-    io_file_free(source_file);
+    io_file_free(&source_file);
     return 0;
 }
 
 static void lance_close()
 {
-#ifdef SKIM_TO_BRIANCODE
-    skim_show(interpret->binary_code);
-#endif
-    interpret_cleanup(interpret);
+    interpret_cleanup(&interpret);
 }
-
-#undef EXPLICIT_LOAD
 
 int main(int argc, char *argv[])
 {
     n_int   return_value = 0;
-
-#ifdef EXPLICIT_LOAD
-
-    if (lance_init("basic_check.txt") == -1)
-    {
-        printf("ERROR: Load Script %s failed\n",argv[1]);
-        return 0;
-    }
-
-#else
-
+    
     if (argc != 2)
     {
         printf("ERROR: Single script file string expected\n");
@@ -148,8 +133,7 @@ int main(int argc, char *argv[])
         printf("ERROR: Load Script %s failed\n",argv[1]);
         return 0;
     }
-#endif
-
+    
     do
     {
         return_value = interpret_cycle(interpret, VARIABLE_EXIT - VARIABLE_FIRST_REAL_ONE, 0L,0,0L,0L);
