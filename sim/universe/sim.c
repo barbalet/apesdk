@@ -215,7 +215,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "memory_family_last_one",
     "memory_event",
     "memory_affect",
-
+        
     "being"
 };
 
@@ -597,6 +597,7 @@ static void sim_being(noble_simulation * local_sim)
             if(interpret_cycle(interpret, -1, local_sim->beings, loop, &sim_start_conditions, &sim_end_conditions) == -1)
             {
                 interpret_cleanup(interpret);
+                interpret = 0L;
             }
             if(interpret == 0L)
             {
