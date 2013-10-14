@@ -179,7 +179,7 @@ static void speak_freq(n_int * high, n_int * low, n_byte value)
 
 }
 
-static void speak_make(n_string filename, n_string paragraph)
+void speak_out(n_string filename, n_string paragraph)
 {
     FILE     *out_file = 0L;
 
@@ -246,7 +246,6 @@ static void speak_make(n_string filename, n_string paragraph)
     }
     while (found_character != '\n' && found_character != 0);
 
-
     if (fclose(out_file) != 0)
     {
         (void)SHOW_ERROR("Failed to close speak file");
@@ -254,7 +253,3 @@ static void speak_make(n_string filename, n_string paragraph)
     return;
 }
 
-void speak_out(n_string filename, n_string paragraph)
-{
-    speak_make(filename, paragraph);
-}

@@ -104,9 +104,11 @@ n_file * scdebug_file_ready(void)
 void scdebug_file_cleanup(void)
 {
     /* This setting to zero may be duplicated in at least one place
-       but provides additional protection - it may not be needed following
-       a case-by-case review */
+     but provides additional protection - it may not be needed following
+     a case-by-case review */
+    
     single_entry = 0;
+    
     if (file_debug)
     {
         io_file_free(file_debug);
@@ -128,7 +130,7 @@ void scdebug_writeon(void)
         return;
     }
 
-    if(file_debug->data== 0L)
+    if(file_debug->data == 0L)
     {
         scdebug_file_cleanup();
         return;

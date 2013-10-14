@@ -2603,6 +2603,8 @@ n_int console_quit(void * ptr, n_string response, n_console_output output_functi
     return io_quit(ptr, response, output_function);
 }
 
+
+
 void console_capture_death(noble_being * deceased, void * sim)
 {
     
