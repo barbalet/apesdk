@@ -36,15 +36,15 @@ else
     CFLAGS=-O2 
 fi
 
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -c noble/io.c -o io.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -c noble/math.c -o math.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -c noble/parse.c -o parse.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -c noble/interpret.c -o interpret.o
+clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/io.c -o io.o
+clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/math.c -o math.o
+clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/parse.c -o parse.o
+clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c noble/interpret.c -o interpret.o
 
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -c lance/commands.c -o commands.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -c lance/lance.c -o lance.o
+clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c lance/commands.c -o commands.o
+clang ${CFLAGS} -DCOMMAND_LINE_DEBUG -m64 -c lance/lance.c -o lance.o
 
-gcc ${CFLAGS} -I/usr/include -o ../lance io.o math.o parse.o interpret.o lance.o commands.o
+clang ${CFLAGS} -m64 -I/usr/include -o ../lance io.o math.o parse.o interpret.o lance.o commands.o
 
 cd ..
 

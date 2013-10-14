@@ -2100,7 +2100,6 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
     if (run == 0)
     {
         (void)SHOW_ERROR("Time not specified, examples: run 2 days, run 6 hours");
-        return 0;
     }
 
     return 0;
@@ -2201,7 +2200,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     file_opened = file_out();
     if (file_opened == 0L)
     {
-        return -1;
+        return SHOW_ERROR("Failed to generate output contents");
     }
 
     console_file_interaction = 1;
@@ -2246,7 +2245,8 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
             io_file_free(file_opened);
-            return -1;
+            console_file_interaction = 0;
+            return SHOW_ERROR("Failed to open file");
         }
 
         if (script)
@@ -2254,7 +2254,8 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
             if (file_interpret(file_opened) != 0)
             {
                 io_file_free(file_opened);
-                return -1;
+                console_file_interaction = 0;
+                return SHOW_ERROR("Failed to interpret file");
             }
         }
         else
@@ -2262,7 +2263,8 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
             if (file_in(file_opened) != 0)
             {
                 io_file_free(file_opened);
-                return -1;
+                console_file_interaction = 0;
+                return SHOW_ERROR("Failed to read in file");
             }
             sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
             io_file_free(file_opened);

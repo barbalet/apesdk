@@ -150,8 +150,6 @@ static const n_byte2 seg14[ 60 ] =
 static n_byte           number_errors;
 static n_string_block	error_array[MAX_NUMBER_ERRORS + 1];
 
-n_int control_error(n_byte * error_text);
-
 static n_uint	tilt_y = 0;
 
 
@@ -1425,7 +1423,9 @@ n_int draw_error(n_constant_string error_text)
     
     if (error_text)
     {
-        
+#ifdef NOBLE_APE_ASSERT
+        printf("ERROR: %s\n", error_text);
+#endif
         io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
         
         io_string_write(simulation_date_time_error, simulation_date_time, &position);

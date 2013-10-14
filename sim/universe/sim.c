@@ -120,7 +120,6 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "location_y",
 
     "state",  /* new ! */
-    "listen", /* new ! */
 
     /* 18 */
     "id_number",
