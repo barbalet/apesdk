@@ -470,14 +470,14 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
             if ((max3 < columns) && (j == max3))
             {
                 output_function(beingstr);
-                io_free(index);
+                io_free((void**)&index);
                 return 0;
             }
         }
     }
 
 
-    io_free(index);
+    io_free((void**)&index);
     return 0;
 }
 #ifdef BRAINCODE_ON
@@ -2206,7 +2206,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     console_file_interaction = 1;
 
     io_disk_write(file_opened, response);
-    io_file_free(file_opened);
+    io_file_free(&file_opened);
 
     if (output_function)
     {
@@ -2244,7 +2244,7 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
 
         if(io_disk_read(file_opened, response) != FILE_OKAY)
         {
-            io_file_free(file_opened);
+            io_file_free(&file_opened);
             console_file_interaction = 0;
             return SHOW_ERROR("Failed to open file");
         }
@@ -2253,7 +2253,7 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
         {
             if (file_interpret(file_opened) != 0)
             {
-                io_file_free(file_opened);
+                io_file_free(&file_opened);
                 console_file_interaction = 0;
                 return SHOW_ERROR("Failed to interpret file");
             }
@@ -2262,12 +2262,12 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
         {
             if (file_in(file_opened) != 0)
             {
-                io_file_free(file_opened);
+                io_file_free(&file_opened);
                 console_file_interaction = 0;
                 return SHOW_ERROR("Failed to read in file");
             }
             sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
-            io_file_free(file_opened);
+            io_file_free(&file_opened);
         }
         console_file_interaction = 0;
         if (output_function)
@@ -2418,7 +2418,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 
     }
 
-    io_free(eliminated);
+    io_free((void**)&eliminated);
 #endif
     return 0;
 }
@@ -2592,9 +2592,9 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
     }
 
     /** free list memory */
-    io_free(first_name);
-    io_free(family_name);
-    io_free(hits);
+    io_free((void**)&first_name);
+    io_free((void**)&family_name);
+    io_free((void**)&hits);
 
     return 0;
 }

@@ -169,12 +169,12 @@ void *	io_new(n_uint bytes)
  * This is a historical legacy function as all platforms now use free. Although in the future this may change.
  * @param ptr the void * pointer to be freed. Should really be a void ** to catch the 0L-ing.
  */
-void io_free(void * ptr)
+void io_free(void ** ptr)
 {
-    if (ptr != 0L)
+    if (*ptr != 0L)
     {
-        free(ptr);
-        ptr = 0L;
+        free(*ptr);
+        *ptr = 0L;
     }
 }
 
@@ -230,7 +230,7 @@ n_file * io_file_new(void)
     output->data = io_new(4096);
     if (output->data == 0L)
     {
-        io_free(output);
+        io_free((void **)&output);
         return 0L;
     }
     output->location = 0;
@@ -242,13 +242,13 @@ n_file * io_file_new(void)
  * Frees the file pointer
  * @param file the pointer to be freed.
  */
-void io_file_free(n_file * file)
+void io_file_free(n_file ** file)
 {
     if (file != 0L)
     {
-        io_free(file->data);
+        io_free((void **)&((*file)->data));
     }
-    io_free(file);
+    io_free((void **)file);
 }
 
 void io_int_to_bytes(n_int value, n_byte * bytes)
@@ -745,7 +745,7 @@ n_int io_file_write(n_file * fil, n_byte byte)
             return(SHOW_ERROR("Attempted file overwrite"));
         }
         io_copy(fil->data, temp_data, local_size);
-        io_free(fil->data);
+        io_free((void **)&(fil->data));
         fil->data = temp_data;
         fil->size = temp_size;
     }

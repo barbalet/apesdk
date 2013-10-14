@@ -641,10 +641,10 @@ n_int      io_write_buff(n_file * fil, void * data, const noble_file_entry * com
 n_int      io_write_csv(n_file * fil, n_byte * data, const noble_file_entry * commands, n_byte command_num, n_byte initial) ;
 void       io_copy(n_byte * from, n_byte * to, n_uint number);
 void *     io_new(n_uint bytes);
-void       io_free(void * ptr);
+void       io_free(void ** ptr);
 void *     io_new_range(n_uint memory_min, n_uint *memory_allocated);
 n_file *   io_file_new(void);
-void       io_file_free(n_file * file);
+void       io_file_free(n_file ** file);
 
 n_int      io_number(n_string number_string, n_int * actual_value, n_int * decimal_divisor);
 
@@ -997,7 +997,7 @@ n_int io_apescript_error(AE_ENUM value);
 
 n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * variables);
 
-void  interpret_cleanup(n_interpret * to_clean);
+void  interpret_cleanup(n_interpret ** to_clean);
 n_int interpret_cycle(n_interpret * code, n_int exit_offset, void * structure, n_int identifier, script_external * start, script_external * end);
 
 #ifdef	SCRIPT_DEBUG

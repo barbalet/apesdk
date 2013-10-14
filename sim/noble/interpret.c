@@ -597,24 +597,24 @@ static n_int	interpret_code(n_interpret * interp)
  Makes sure all the data associated with the interpreter is freed etc.
  @param to_clean The pointer to the n_interpret struct that is being expunged.
  */
-void interpret_cleanup(n_interpret * to_clean)
+void interpret_cleanup(n_interpret ** to_clean)
 {
 #ifdef SCRIPT_DEBUG
     scdebug_file_cleanup();
 #endif
-    if (to_clean == 0L)
+    if (*to_clean == 0L)
     {
         return;
     }
-    if (to_clean->binary_code != 0L)
+    if ((*to_clean)->binary_code != 0L)
     {
-        io_file_free(to_clean->binary_code);
+        io_file_free(&((*to_clean)->binary_code));
     }
-    if (to_clean->variable_references == 0L)
+    if ((*to_clean)->variable_references == 0L)
     {
-        io_free(to_clean->variable_references);
+        io_free((void**)&((*to_clean)->variable_references));
     }
-    io_free(to_clean);
+    io_free((void**)to_clean);
 }
 
 /**

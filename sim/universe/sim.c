@@ -215,7 +215,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "memory_family_last_one",
     "memory_event",
     "memory_affect",
-        
+            
     "being"
 };
 
@@ -596,8 +596,7 @@ static void sim_being(noble_simulation * local_sim)
         {
             if(interpret_cycle(interpret, -1, local_sim->beings, loop, &sim_start_conditions, &sim_end_conditions) == -1)
             {
-                interpret_cleanup(interpret);
-                interpret = 0L;
+                interpret_cleanup(&interpret);
             }
             if(interpret == 0L)
             {
@@ -709,7 +708,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     
     if ((kind == KIND_NEW_SIMULATION) && (interpret))
     {
-        interpret_cleanup(interpret);
+        interpret_cleanup(&interpret);
         interpret = 0L;
     }
     sim.delta_cycles = 0;
@@ -792,8 +791,8 @@ void sim_close(void)
 #ifdef THREADED
     sim_thread_close();
 #endif
-    io_free((void *) offbuffer);
-    interpret_cleanup(interpret);
+    io_free((void **) &offbuffer);
+    interpret_cleanup(&interpret);
 }
 
 void sim_set_select(n_uint number)

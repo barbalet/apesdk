@@ -109,7 +109,7 @@ n_file * file_out(void)
     }
     if(returnFile->data == 0L)
     {
-        io_free(returnFile);
+        io_free((void**)&returnFile);
         return 0L;
     }
 

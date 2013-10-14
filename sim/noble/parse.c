@@ -111,7 +111,7 @@ void scdebug_file_cleanup(void)
     
     if (file_debug)
     {
-        io_file_free(file_debug);
+        io_file_free(&file_debug);
     }
     file_debug = 0L;
 }
@@ -458,13 +458,13 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
 
     if((final_prog->binary_code = io_file_new())== 0L)
     {
-        io_free(final_prog);
+        io_free((void **)&final_prog);
         return 0L;
     }
 
     if(final_prog->binary_code->data == 0L)
     {
-        interpret_cleanup(final_prog);
+        interpret_cleanup(&final_prog);
         return 0L;
     }
 
@@ -472,7 +472,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
 
     if((final_prog->variable_references = (n_int *)io_new(VARIABLE_MAX * sizeof(n_int))) == 0L)
     {
-        interpret_cleanup(final_prog);
+        interpret_cleanup(&final_prog);
         return 0L;
     }
 
@@ -502,7 +502,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         n_byte	convert = parse_character(temp);
         if(convert == 'F')
         {
-            interpret_cleanup(final_prog);
+            interpret_cleanup(&final_prog);
             (void)io_apescript_error(AE_UNKNOWN_SYNTAX_PARSER_CONVERT);
             return 0L;
         }
@@ -510,7 +510,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         {
             if(parse_buffer(final_prog, previous, buffer) == -1)
             {
-                interpret_cleanup(final_prog);
+                interpret_cleanup(&final_prog);
                 return 0L;
             }
             buffer_size = 0;
@@ -519,7 +519,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         buffer[buffer_size++] = temp;
         if(buffer_size == (VARIABLE_WIDTH -  1))
         {
-            interpret_cleanup(final_prog);
+            interpret_cleanup(&final_prog);
             (void)io_apescript_error(AE_MAXIMUM_SCRIPT_SIZE_REACHED);
             return 0L;
         }
@@ -527,7 +527,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     }
     if(parse_buffer(final_prog, previous, buffer) == -1)
     {
-        interpret_cleanup(final_prog);
+        interpret_cleanup(&final_prog);
         return 0L;
     }
     {
@@ -543,7 +543,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         {
             if(io_file_write(final_prog->binary_code, local_numbers[loop_sizeof_number]) == -1)
             {
-                interpret_cleanup(final_prog);
+                interpret_cleanup(&final_prog);
                 return 0L;
             }
             loop_sizeof_number++;
@@ -556,7 +556,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
             {
                 if(io_file_write(final_prog->binary_code, local_numbers[loop_sizeof_number]) == -1)
                 {
-                    interpret_cleanup(final_prog);
+                    interpret_cleanup(&final_prog);
                     return 0L;
                 }
                 loop_sizeof_number++;
