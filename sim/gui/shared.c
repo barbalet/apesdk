@@ -464,20 +464,20 @@ void shared_saveFileName(n_string cStringFileName)
 
 #ifdef SCRIPT_DEBUG
 
-static n_int single_entry = 1;
+static n_int script_entry = 1;
 
 n_int shared_script_debug_ready(void)
 {
     n_int result = (scdebug_file_ready() != 0L);
 
-    if (single_entry == 0)
+    if (script_entry == 0)
     {
         return 0;
     }
 
     if (result)
     {
-        single_entry = 0;
+        script_entry = 0;
     }
     return result;
 }
@@ -490,7 +490,7 @@ void shared_script_debug_handle(n_string cStringFileName)
         io_disk_write(outputfile, cStringFileName);
     }
     scdebug_file_cleanup();
-    single_entry = 1;
+    script_entry = 1;
 }
 
 #else

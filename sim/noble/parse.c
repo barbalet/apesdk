@@ -114,7 +114,6 @@ void scdebug_writeoff(void)
 
 void scdebug_string(n_constant_string string)
 {
-    
     io_file_string(single_entry, file_debug, string);
 }
 

@@ -1157,7 +1157,7 @@ static n_int console_duplicate(void * ptr, n_string response, n_console_output o
         }
     }
 
-    if (response != 0)
+    if (response != 0L)
     {
         local_being = being_from_name(local_sim, response);
         if (local_being == 0L)
@@ -2605,9 +2605,34 @@ n_int console_quit(void * ptr, n_string response, n_console_output output_functi
     return io_quit(ptr, response, output_function);
 }
 
+n_file                  * file_death_record = 0L;
+static n_int              death_record_single_entry = 1;
 
+n_file * death_record_file_ready(void)
+{
+    return io_file_ready(death_record_single_entry, file_death_record);
+}
+
+void death_record_file_cleanup(void)
+{
+    io_file_cleanup(&death_record_single_entry, &file_death_record);
+}
+
+void death_record_writeoff(void)
+{
+    io_file_writeoff(&death_record_single_entry, file_death_record);
+}
 
 void console_capture_death(noble_being * deceased, void * sim)
 {
+    n_string_block output_string;
+    n_string_block being_name;
     
+    
+    being_name_simple(deceased, being_name);
+    
+    watch_stats(sim, being_name, deceased, output_string);
+    
+    io_file_writeon(&death_record_single_entry, &file_death_record);
+    io_file_string(death_record_single_entry, file_death_record, output_string);
 }

@@ -1814,15 +1814,9 @@ void io_file_writeon(n_int * entry, n_file ** file)
     {
         *file = io_file_new();
     }
-    
     if(*file == 0L)
     {
-        return;
-    }
-    
-    if((*file)->data == 0L)
-    {
-        io_file_cleanup(entry, file);
+        (void)SHOW_ERROR("Could not set up special use file");
         return;
     }
     *entry = 1;
