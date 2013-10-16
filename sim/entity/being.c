@@ -266,6 +266,7 @@ n_int being_honor_compare(noble_being * first, noble_being * second)
     return 0;
 }
 
+#if 0
 static n_int being_honor_immune(noble_being * value)
 {
     n_int local_honor = being_honor(value);
@@ -275,6 +276,7 @@ static n_int being_honor_immune(noble_being * value)
     }
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }
+#endif
 
 static void  being_recalibrate_honor(noble_being * value)
 {

@@ -2646,18 +2646,19 @@ n_int console_death(void * ptr, n_string response, n_console_output output_funct
 
     if (file_death_record == 0L)
     {
-        return SHOW_ERROR("No output contents");
+        (void)SHOW_ERROR("No output contents");
+        return 0;
     }
     
-    io_disk_write(file_death_record, response);
-    
-    if (output_function)
+    if (io_disk_write(file_death_record, response) != FILE_ERROR)
     {
-        n_string_block output_string;
-        sprintf(console_file_name,"%s",response);
-        sprintf(output_string, "Death record file %s saved\n",response);
-        output_function(output_string);
+        if (output_function)
+        {
+            n_string_block output_string;
+            sprintf(console_file_name,"%s",response);
+            sprintf(output_string, "Death record file %s saved\n",response);
+            output_function(output_string);
+        }
     }
-    
     return 0;
 }

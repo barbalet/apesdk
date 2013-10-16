@@ -235,11 +235,11 @@ enum file_element_type
 #define IS_SPACE(val)             ((val) == CHAR_SPACE)
 #define	IS_WHITE_HORIZON(val)	  (IS_TAB(val)  || IS_SPACE(val))
 #define	IS_WHITE_SPACE(val)		  (IS_WHITE_HORIZON((val))||IS_RETURN((val)))
-#define FILE_OKAY				        0x0000
-#define FILE_END_INCLUSION      0x0101
-#define	FILE_TYPE(num)			    ((num)&0x07)
-#define	FILE_CONTINUATION		    0x80
-#define	FILE_ERROR				      (-1)
+#define FILE_OKAY				  0x0000
+#define FILE_END_INCLUSION        0x0101
+#define	FILE_TYPE(num)			  ((num)&0x07)
+#define	FILE_CONTINUATION		  0x80
+#define	FILE_ERROR				  (-1)
 
 typedef n_string (n_console_input)(n_string value, n_int length);
 

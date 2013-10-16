@@ -254,30 +254,6 @@ void io_file_free(n_file ** file)
 void io_int_to_bytes(n_int value, n_byte * bytes)
 {
     io_copy((n_byte *)&value, bytes, sizeof(n_int));
-/*
-     n_uint unsigned_value;
-
-    if (SIZEOF_NUMBER_WRITE == 8)
-    {
-        unsigned_value = value + 0x80000000;
-        bytes[0] = (unsigned_value >> 0) & 255;
-        bytes[1] = (unsigned_value >> 8) & 255;
-        bytes[2] = (unsigned_value >> 16) & 255;
-        bytes[3] = (unsigned_value >> 24) & 255;
-        bytes[4] = (unsigned_value >> 32) & 255;
-        bytes[5] = (unsigned_value >> 40) & 255;
-        bytes[6] = (unsigned_value >> 48) & 255;
-        bytes[7] = (unsigned_value >> 56) & 255;
-    }
-    else
-    {
-        unsigned_value = value + 0x8000;
-        bytes[0] = (unsigned_value >> 0) & 255;
-        bytes[1] = (unsigned_value >> 8) & 255;
-        bytes[2] = (unsigned_value >> 16) & 255;
-        bytes[3] = (unsigned_value >> 24) & 255;
-    }
- */
 }
 
 n_int io_bytes_to_int(n_byte * bytes)
@@ -286,19 +262,6 @@ n_int io_bytes_to_int(n_byte * bytes)
     n_int return_value;
     
     io_copy(bytes, (n_byte *)&return_value, sizeof(n_int));
-
-/*
-    unsigned_value  = ((n_uint)bytes[0] << 0)  | ((n_uint)bytes[1] << 8)  | ((n_uint)bytes[2] << 16) | ((n_uint)bytes[3] << 24);
-
-    if (SIZEOF_NUMBER_WRITE == 8)
-    {
-        unsigned_value |= ((n_uint)bytes[4] << 32) | ((n_uint)bytes[5] << 40) | ((n_uint)bytes[6] << 48) | ((n_uint)bytes[7] << 56);
-        return_value = unsigned_value - 0x80000000;
-    }
-    else
-    {
-        return_value = unsigned_value - 0x8000;
-    }*/
     return return_value;
 }
 

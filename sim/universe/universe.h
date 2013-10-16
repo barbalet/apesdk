@@ -1460,6 +1460,8 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
 n_int console_file(void * ptr, n_string response, n_console_output output_function);
 n_int console_event(void * ptr, n_string response, n_console_output output_function);
 
+n_int console_death(void * ptr, n_string response, n_console_output output_function);
+
 
 n_int console_save(void * ptr, n_string response, n_console_output output_function);
 n_int console_open(void * ptr, n_string response, n_console_output output_function);
