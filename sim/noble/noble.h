@@ -679,7 +679,7 @@ n_file * io_file_ready(n_int entry, n_file * file);
 
 void io_file_cleanup(n_int * entry, n_file ** file);
 
-void io_file_writeon(n_int * entry, n_file ** file);
+void io_file_writeon(n_int * entry, n_file ** file, n_byte blocked_write);
 
 void io_file_writeoff(n_int * entry, n_file * file);
 

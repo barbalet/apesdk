@@ -1396,6 +1396,11 @@ typedef void (line_braincode)(n_string pointer, n_int line);
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function);
 #endif
 
+n_file * death_record_file_ready(void);
+void death_record_file_cleanup(void);
+void console_capture_death(noble_being * deceased, void * sim);
+
+
 void *    sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size);
 void      sim_cycle(void);
 
@@ -1506,6 +1511,9 @@ const static noble_console_command control_commands[] =
 
     {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 
+    {&console_death,         "death",          "[file]",               "Create a death record file"},
+
+    
     {&console_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
     {&console_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Noble Ape alphabet"},
     {&console_file,          "file",           "[(component)]",        "Information on the file format"},

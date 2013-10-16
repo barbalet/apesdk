@@ -2137,7 +2137,7 @@ n_int console_reset(void * ptr, n_string response, n_console_output output_funct
 static n_byte get_response_mode(n_string response)
 {
     n_int length;
-    if (response==0L) return 0;
+    if (response == 0L) return 0;
     length = io_length(response,STRING_BLOCK_SIZE);
     if (response != 0)
     {
@@ -2184,7 +2184,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     n_file * file_opened;
     n_string_block output_string;
 
-    if (response==0) return 0;
+    if (response == 0L) return 0;
 
     if (console_file_interaction)
     {
@@ -2223,7 +2223,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
 /* load simulation-data/script */
 static n_int console_base_open(void * ptr, n_string response, n_console_output output_function, n_byte script)
 {
-    if (response==0) return 0;
+    if (response == 0L) return 0;
 
     if (console_file_interaction)
     {
@@ -2618,21 +2618,46 @@ void death_record_file_cleanup(void)
     io_file_cleanup(&death_record_single_entry, &file_death_record);
 }
 
+/*
 void death_record_writeoff(void)
 {
     io_file_writeoff(&death_record_single_entry, file_death_record);
 }
-
+*/
+ 
 void console_capture_death(noble_being * deceased, void * sim)
 {
     n_string_block output_string;
     n_string_block being_name;
     
-    
     being_name_simple(deceased, being_name);
     
     watch_stats(sim, being_name, deceased, output_string);
     
-    io_file_writeon(&death_record_single_entry, &file_death_record);
+    io_file_writeon(&death_record_single_entry, &file_death_record, 0);
     io_file_string(death_record_single_entry, file_death_record, output_string);
+}
+
+n_int console_death(void * ptr, n_string response, n_console_output output_function)
+{
+    if (response == 0L) return 0;
+    
+    console_stop(ptr,"",output_function);
+
+    if (file_death_record == 0L)
+    {
+        return SHOW_ERROR("No output contents");
+    }
+    
+    io_disk_write(file_death_record, response);
+    
+    if (output_function)
+    {
+        n_string_block output_string;
+        sprintf(console_file_name,"%s",response);
+        sprintf(output_string, "Death record file %s saved\n",response);
+        output_function(output_string);
+    }
+    
+    return 0;
 }

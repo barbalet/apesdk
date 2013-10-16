@@ -1785,7 +1785,7 @@ void io_assert(n_string message, n_string file_loc, n_int line)
 
 n_file * io_file_ready(n_int entry, n_file * file)
 {
-    if (entry)
+    if (entry == 1)
     {
         return 0L;
     }
@@ -1806,7 +1806,7 @@ void io_file_cleanup(n_int * entry, n_file ** file)
     }
 }
 
-void io_file_writeon(n_int * entry, n_file ** file)
+void io_file_writeon(n_int * entry, n_file ** file, n_byte blocked_write)
 {
     if (*entry == 0) return;
 #ifndef COMMAND_LINE_DEBUG
@@ -1819,7 +1819,14 @@ void io_file_writeon(n_int * entry, n_file ** file)
         (void)SHOW_ERROR("Could not set up special use file");
         return;
     }
-    *entry = 1;
+    if (blocked_write)
+    {
+        *entry = 1;
+    }
+    else
+    {
+        *entry = 2;
+    }
 #endif
 }
 

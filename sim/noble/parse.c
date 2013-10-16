@@ -104,7 +104,7 @@ void scdebug_file_cleanup(void)
 
 void scdebug_writeon(void)
 {
-    io_file_writeon(&single_entry, &file_debug);
+    io_file_writeon(&single_entry, &file_debug, 1);
 }
 
 void scdebug_writeoff(void)
