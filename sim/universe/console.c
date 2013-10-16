@@ -2640,6 +2640,7 @@ void console_capture_death(noble_being * deceased, void * sim)
 
 n_int console_death(void * ptr, n_string response, n_console_output output_function)
 {
+    
     if (response == 0L) return 0;
     
     console_stop(ptr,"",output_function);
@@ -2649,14 +2650,19 @@ n_int console_death(void * ptr, n_string response, n_console_output output_funct
         (void)SHOW_ERROR("No output contents");
         return 0;
     }
-    
+
     if (io_disk_write(file_death_record, response) != FILE_ERROR)
     {
         if (output_function)
         {
             n_string_block output_string;
-            sprintf(console_file_name,"%s",response);
-            sprintf(output_string, "Death record file %s saved\n",response);
+            n_int          location = 0;
+            
+            io_string_write(output_string, "Death record file ", &location);
+            io_string_write(output_string, response, &location);
+            io_string_write(output_string, " saved\n", &location);
+            output_string[location] = 0;
+            
             output_function(output_string);
         }
     }

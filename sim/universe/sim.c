@@ -445,7 +445,7 @@ static void sim_console_clean_up(void)
 static void *sim_thread(void *threadid)
 {
     n_byte *local = (n_byte *)threadid;
-    if (io_console(sim_sim(), (noble_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
+    if (io_console(&sim, (noble_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
     {
         sim_console_clean_up();
     }
