@@ -1755,11 +1755,12 @@ void being_name_byte2(n_byte2 first, n_byte2 family, n_string name)
 
 void being_state_description(n_byte2 state, n_string result)
 {
+    /* if you change this you need to change the corresponding definitions in entity.h */
     const n_string state_description[] =
     {
-        "Sleeping","Awake","Foraging","Swimming","Eating","Moving",
-        "Chatting","Calling","Reproducing","Grooming","Suckling",
-        "Displaying","Fighting"
+        "Sleeping", "Awake", "Hungry", "Swimming", "Eating", "Moving",
+        "Speaking", "Shouting", "Grooming", "Suckling",
+        "Showing Force", "Attacking"
     };
     n_int string_length=0;
     n_int n=2;

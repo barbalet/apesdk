@@ -92,6 +92,8 @@ enum GENEALOGY_FORMAT
     GENEALOGY_FORMATS
 };
 
+
+/* if you change this you need to change the corresponding definitions in being_state_description */
 typedef enum
 {
     BEING_STATE_ASLEEP = 0,
