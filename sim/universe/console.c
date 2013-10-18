@@ -321,7 +321,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     if (local_sim->num > 0)
     {
         sprintf(beingstr,"%sFemales: %d (%.1f%%)   Males: %d (%.1f%%)\n", beingstr,
-                (int)count,count*100.0f/local_sim->num,
+                (int)count, count*100.0f/local_sim->num,
                 (int)(local_sim->num - count),(local_sim->num - count)*100.0f/local_sim->num);
     }
     sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)local_sim->land->tide_level);

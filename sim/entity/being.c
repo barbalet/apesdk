@@ -175,35 +175,6 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
     }
 }
 
-static void being_replace(noble_being * local, n_uint count, n_uint loop)
-{
-    if ( count != loop )
-    {        
-        n_byte       * new_brain = local[ count ].brain;
-        n_byte       * old_brain = local[ loop ].brain;
-        
-        noble_social * new_event = local[ count ].social;
-        noble_social * old_event = local[ loop ].social;
-        
-        noble_episodic * new_episodic = local[ count ].episodic;
-        noble_episodic * old_episodic = local[ loop ].episodic;
-        
-        io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
-        
-        if ((new_brain != 0L) && (old_brain != 0L))
-        {
-            io_copy(old_brain, new_brain, DOUBLE_BRAIN);
-            io_erase(old_brain, DOUBLE_BRAIN);
-            
-            io_copy((n_byte *)old_event, (n_byte *)new_event, (SOCIAL_SIZE * sizeof(noble_social)));
-            io_erase((n_byte *)old_event, (SOCIAL_SIZE * sizeof(noble_social)));
-            
-            io_copy((n_byte *)old_episodic, (n_byte *)new_episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
-            io_erase((n_byte *)old_episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
-        }
-    }
-}
-
 static void being_set_brainatates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3)
 {
     n_int three_offset = (asleep ? 0 : 3);
@@ -3537,7 +3508,7 @@ void being_remove(noble_simulation * local_sim)
     n_uint  last_reference = reference;
     n_uint	possible = NO_BEINGS_FOUND;
     n_uint	count = 0;
-    n_uint   loop=0;
+    n_uint  loop=0;
     n_int   selected_died = 0;
 
     if (being_remove_external)
@@ -3551,49 +3522,16 @@ void being_remove(noble_simulation * local_sim)
         if (being_energy(&(local[loop])) == BEING_DEAD)
         {
             noble_being * b = &local[loop];
-            n_uint i = 0;
-            n_byte2 name, family_name, met_name, met_family_name;
-
             if (local_sim->ext_death != 0L)
             {
                 local_sim->ext_death(b,local_sim);
-            }
-
-            /** set familiarity to zero so that the entry for the removed being will eventually be overwritten */
-            name = being_gender_name(b);
-            family_name = being_family_name(b);
-            while (i < end_loop)
-            {
-                if (being_energy(&(local[i])) != BEING_DEAD)
-                {
-                    noble_being * b2 = &local[i];
-                    noble_social * b2_social_graph = being_social(b2);
-                    if (b2_social_graph)
-                    {
-                        n_uint j = 1;
-                        while (j < SOCIAL_SIZE_BEINGS)
-                        {
-                            met_name = b2_social_graph[j].first_name[BEING_MET];
-                            if (met_name==name)
-                            {
-                                met_family_name = b2_social_graph[j].family_name[BEING_MET];
-                                if (met_family_name==family_name)
-                                {
-                                    b2_social_graph[j].familiarity=0;
-                                    break;
-                                }
-                            }
-                            j++;
-                        }
-                    }
-                }
-                i++;
             }
         }
         loop++;
     }
 
     loop=0;
+    
     while (loop < end_loop)
     {
         if ( loop == reference )
@@ -3603,7 +3541,10 @@ void being_remove(noble_simulation * local_sim)
 
         if (being_energy(&(local[loop])) != BEING_DEAD)
         {
-            being_replace(local, count, loop);
+            if ( count != loop )
+            {
+                io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
+            }
             count++;
         }
         else
