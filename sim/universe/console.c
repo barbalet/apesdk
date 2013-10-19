@@ -2636,6 +2636,8 @@ void console_capture_death(noble_being * deceased, void * sim)
     
     io_file_writeon(&death_record_single_entry, &file_death_record, 0);
     io_file_string(death_record_single_entry, file_death_record, output_string);
+    
+    console_list(sim, 0L, io_console_out);
 }
 
 n_int console_death(void * ptr, n_string response, n_console_output output_function)
