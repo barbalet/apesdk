@@ -298,17 +298,15 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_string_block beingstr, time;
     n_int count=0,juveniles=0;
-    n_int current_date = TIME_IN_DAYS(local_sim->land->date);
     n_uint i;
     for (i = 0; i < local_sim->num; i++)
     {
         noble_being * local_being = &local_sim->beings[i];
-        n_int local_dob = being_dob(local_being);
         if (FIND_SEX(GET_I(local_being)) == SEX_FEMALE)
         {
             count++;
         }
-        if (current_date - local_dob < AGE_OF_MATURITY)
+        if ((TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being)) < AGE_OF_MATURITY)
         {
             juveniles++;
         }
@@ -354,130 +352,48 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
 n_int console_list(void * ptr, n_string response, n_console_output output_function)
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
-    n_int i,j,max2;
-    n_int max3 = 0;
     noble_being * local_being;
-    const n_int max = STRING_BLOCK_SIZE;
-    const n_int columns = 3;
-    n_uint mult, temp, *index = (n_uint*)io_new(max*2*sizeof(n_uint));
-    n_string_block name;
-
-    /** create an index */
-    max2 = local_sim->num;
-    if (max2 > max) max2 = max;
-
-    for (i = 0; i < max2; i++)
+    n_string_block line_text;
+    n_int          location = 0;
+    n_int          loop = 0;
+    
+    /** show names in index order */
+    while (loop < local_sim->num)
     {
-        n_int length;
-        n_int find_value = 1;
-
+        n_string_block name;
+        n_int          length;
         /** get the being */
-        local_being = &local_sim->beings[i];
+        local_being = &local_sim->beings[loop];
 
         /** get the name of the being */
         being_name_simple(local_being, name);
-
-        j=0;
-        while (name[j++]!=' ');
-
+        
+        io_string_write(line_text, name, &location);
+        
         length = io_length(name, STRING_BLOCK_SIZE);
 
-        io_lower(name, length);
-
-        if (response != 0)
+        while (length < 24)
         {
-            n_int response_length = io_length(response, STRING_BLOCK_SIZE);
-
-            io_lower(response, response_length);
-
-            if (io_find(name, 0, length, response, response_length) == -1)
-            {
-                find_value = 0;
-            }
+            io_string_write(line_text, " ", &location);
+            length++;
         }
-
-
-        if (find_value == 1)
+        
+        if ((loop % 3) == 2)
         {
-            index[ max3 * 2 ] = 0;
-            index[(max3 * 2)+1] = i;
-
-            max3++;
-
-            mult = 16777216;
-            while (j<length)
-            {
-                if (name[j]!='-')
-                {
-                    index[(max3-1)*2] += ((name[j])-'a')*mult;
-                    mult/=26;
-                    if (mult<1) break;
-                }
-                j++;
-            }
+            line_text[location] = 0;
+            output_function(line_text);
+            location = 0;
         }
+        
+        loop++;
     }
 
-    /** sort the index */
-    for (i = 0; i < max3; i++)
+    if (location != 0)
     {
-        for (j = i+1; j < max3; j++)
-        {
-            if (index[i*2] > index[j*2])
-            {
-                /** swap */
-                temp = index[i*2];
-                index[i*2] = index[j*2];
-                index[j*2] = temp;
-
-                temp = index[i*2+1];
-                index[i*2+1] = index[j*2+1];
-                index[j*2+1] = temp;
-            }
-        }
+        line_text[location] = 0;
+        output_function(line_text);
     }
-    /** show names in index order */
-    for (i = 0; i < max3; i+=columns)
-    {
-        n_string_block beingstr = {0};
-        for (j=0; j<columns; j++)
-        {
-            if (i+j < max3)
-            {
-                /** get the being */
-                local_being = &local_sim->beings[index[(i+j)*2+1]];
-
-                /** get the name of the being */
-                being_name_simple(local_being, name);
-                
-                sprintf(beingstr, "%s%s",beingstr ,(n_string)name);
-
-                if (j < columns-1)
-                {
-                    n_int length = io_length(name, STRING_BLOCK_SIZE);
-                    n_int loop = 0;
-                    while (loop < (24 - length))
-                    {
-                        sprintf(beingstr, "%s " , beingstr);
-                        loop++;
-                    }
-                }
-                else
-                {
-                    output_function(beingstr);
-                }
-            }
-            if ((max3 < columns) && (j == max3))
-            {
-                output_function(beingstr);
-                io_free((void**)&index);
-                return 0;
-            }
-        }
-    }
-
-
-    io_free((void**)&index);
+    
     return 0;
 }
 #ifdef BRAINCODE_ON
@@ -2627,8 +2543,8 @@ void death_record_writeoff(void)
  
 void console_capture_death(noble_being * deceased, void * sim)
 {
-    n_string_block output_string;
-    n_string_block being_name;
+    n_string_block output_string = {0};
+    n_string_block being_name = {0};
     
     being_name_simple(deceased, being_name);
     
@@ -2636,8 +2552,6 @@ void console_capture_death(noble_being * deceased, void * sim)
     
     io_file_writeon(&death_record_single_entry, &file_death_record, 0);
     io_file_string(death_record_single_entry, file_death_record, output_string);
-    
-    console_list(sim, 0L, io_console_out);
 }
 
 n_int console_death(void * ptr, n_string response, n_console_output output_function)

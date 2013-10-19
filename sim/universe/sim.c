@@ -717,7 +717,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     sim.last_time = randomise;
 
     sim.ext_birth = 0L;
-    sim.ext_death = &console_capture_death;
+    sim.ext_death = 0L; /*&console_capture_death; */
 #ifdef FIXED_RANDOM_SIM
     randomise = FIXED_RANDOM_SIM;
 #endif
