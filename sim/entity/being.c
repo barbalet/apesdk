@@ -2941,6 +2941,7 @@ static n_int being_set_unique_name(noble_being * beings,
     
     /** random number initialization */
     math_random3(local_random);
+    math_random3(local_random);
 
     /** if no mother and father are specified then randomly create names */
     if ((mother_family_name==0) && (father_family_name==0))
@@ -2958,64 +2959,60 @@ static n_int being_set_unique_name(noble_being * beings,
         GET_NAME_FAMILY(UNPACK_FAMILY_FIRST_NAME(mother_family_name),
                         UNPACK_FAMILY_SECOND_NAME(father_family_name));
 
-    /** avoid the same two family names */
-    if (UNPACK_FAMILY_FIRST_NAME(mother_family_name) ==
-            UNPACK_FAMILY_SECOND_NAME(father_family_name))
-    {
-        possible_family_name =
-            GET_NAME_FAMILY(UNPACK_FAMILY_FIRST_NAME(mother_family_name),
-                            (math_random(local_random) & FAMILY_NAME_AND_MOD));
-    }
+
 
     while ((found == 0) && (samples < 2048))
     {
         /** choose a first_name at random */
         possible_first_name = (math_random(local_random) & 255) | (FIND_SEX(GET_I(local_being))<<8);
 
+        /** avoid the same two family names */
+        if (UNPACK_FAMILY_FIRST_NAME(mother_family_name) ==
+            UNPACK_FAMILY_SECOND_NAME(father_family_name))
+        {
+            possible_family_name =
+            GET_NAME_FAMILY(UNPACK_FAMILY_FIRST_NAME(mother_family_name),
+                            (math_random(local_random) & FAMILY_NAME_AND_MOD));
+        }
+        
         if (samples == 1024)
         {
             /** switch naming order */
             possible_family_name =
                 GET_NAME_FAMILY(UNPACK_FAMILY_SECOND_NAME(mother_family_name),
                                 UNPACK_FAMILY_FIRST_NAME(father_family_name));
-
-            /** avoid the same two family names */
-            if (UNPACK_FAMILY_SECOND_NAME(mother_family_name) ==
-                    UNPACK_FAMILY_FIRST_NAME(father_family_name))
-            {
-                possible_family_name =
-                    GET_NAME_FAMILY(UNPACK_FAMILY_SECOND_NAME(mother_family_name),
-                                    (math_random(local_random) & FAMILY_NAME_AND_MOD));
-            }
+        }
+        
+        /** avoid the same two family names */
+        if (UNPACK_FAMILY_SECOND_NAME(mother_family_name) ==
+            UNPACK_FAMILY_FIRST_NAME(father_family_name))
+        {
+            possible_family_name =
+            GET_NAME_FAMILY(UNPACK_FAMILY_SECOND_NAME(mother_family_name),
+                            (math_random(local_random) & FAMILY_NAME_AND_MOD));
         }
 
+        
+        being_set_first_name(local_being,possible_first_name);
+        being_set_family_name(local_being,
+                              UNPACK_FAMILY_FIRST_NAME(possible_family_name),
+                              UNPACK_FAMILY_SECOND_NAME(possible_family_name));
+        
         /** does the name already exist in the population */
         found = 1;
         for (i = 0; i < number; i++)
         {
             noble_being * other_being = &beings[i];
-            if (other_being == local_being) continue;
-            if ((being_gender_name(other_being) == possible_first_name) && (being_family_name(other_being) == possible_family_name))
+            if ((being_gender_name(local_being) == being_gender_name(other_being))
+             && (being_family_name(local_being) == being_family_name(other_being)))
             {
                 found = 0;
                 break;
             }
         }
-        if (found == 1)
-        {
-            being_set_first_name(local_being,possible_first_name);
-            being_set_family_name(local_being,
-                            UNPACK_FAMILY_FIRST_NAME(possible_family_name),
-                            UNPACK_FAMILY_SECOND_NAME(possible_family_name));
-        }
         samples++;
     }
-    
-    {
-        n_string_block being_name;
-        being_name_simple(local_being, being_name);
-        printf("VALUE %ld %s\n", samples, being_name);
-    }
+
     return found;
 }
 
@@ -3062,8 +3059,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     noble_social * local_social_graph = being_social(local);
     noble_episodic * local_episodic = being_episodic(local);
 #endif
-    n_genetics * mother_genetics = 0L;
-
     if (local_social_graph == 0L)
     {
         return SHOW_ERROR("Social memory not available");
@@ -3132,15 +3127,15 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     if (random_factor)
     {
         being_set_random(local, random_factor);
+        being_random3(local);
+        being_random3(local);
+        
     }
     else if (mother)
     {
-        mother_genetics = being_genetics(mother);
+        (void)being_random(mother);
         
         being_set_random(local, being_get_random(mother));
-
-        
-        (void)being_random(mother);
 
         being_random3(local);
         
@@ -3240,8 +3235,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
         being_set_location(local, location);
 
-        being_set_unique_name(beings, number, local, 0, 0);
-        /* body_genetics(beings, number, being->gebetilocal, 0L); */
         {
             n_genetics mother_genetics[CHROMOSOMES];
             n_genetics father_genetics[CHROMOSOMES];
@@ -3271,6 +3264,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
             being_random3(local);
             
             body_genetics(beings, number, being_genetics(local), mother_genetics, father_genetics, gene_random);
+            
+            being_set_unique_name(beings, number, local, 0L, 0L);
         }
         local->social_x = local->social_nx =
                               (math_random(local->seed) & 32767)+16384;
@@ -3289,9 +3284,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         (void) being_random(local);
         local->social_x = local->social_nx = mother->social_x;
         local->social_y = local->social_ny = mother->social_y;
-        
-        /* NEED TO FIX !!! */
-        /* body_genetics(beings, number, local, mother); */
  
         genetics_set(being_genetics(local), being_fetal_genetics(mother));
         
