@@ -2943,8 +2943,7 @@ static n_int being_set_unique_name(noble_being * beings,
     math_random3(local_random);
 
     /** if no mother and father are specified then randomly create names */
-    if ((mother_family_name==0) &&
-            (father_family_name==0))
+    if ((mother_family_name==0) && (father_family_name==0))
     {
         mother_family_name =
             GET_NAME_FAMILY((math_random(local_random) & FAMILY_NAME_AND_MOD),
@@ -2996,8 +2995,7 @@ static n_int being_set_unique_name(noble_being * beings,
         {
             noble_being * other_being = &beings[i];
             if (other_being == local_being) continue;
-            if ((being_gender_name(other_being) == possible_first_name) &&
-                    (being_family_name(other_being) == possible_family_name))
+            if ((being_gender_name(other_being) == possible_first_name) && (being_family_name(other_being) == possible_family_name))
             {
                 found = 0;
                 break;
@@ -3011,6 +3009,12 @@ static n_int being_set_unique_name(noble_being * beings,
                             UNPACK_FAMILY_SECOND_NAME(possible_family_name));
         }
         samples++;
+    }
+    
+    {
+        n_string_block being_name;
+        being_name_simple(local_being, being_name);
+        printf("VALUE %ld %s\n", samples, being_name);
     }
     return found;
 }
