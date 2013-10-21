@@ -355,7 +355,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     noble_being * local_being;
     n_string_block line_text;
     n_int          location = 0;
-    n_int          loop = 0;
+    n_uint          loop = 0;
     
     /** show names in index order */
     while (loop < local_sim->num)

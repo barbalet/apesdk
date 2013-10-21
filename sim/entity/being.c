@@ -155,7 +155,7 @@ static n_byte2 * being_get_random(noble_being * value)
 
 void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
 {
-    n_int  lpx = 0;
+    n_uint  lpx = 0;
     
 #ifdef LARGE_SIM
     local->max = LARGE_SIM;
@@ -1120,7 +1120,7 @@ static void being_immune_response(noble_being * local)
 
 static n_uint being_genetic_count_zeros(n_genetics count)
 {
-    n_int loop = 0;
+    n_uint loop = 0;
     n_uint addition = 0;
     while (loop < sizeof(n_genetics)*8)
     {
@@ -1177,7 +1177,7 @@ static noble_being * being_find_closest(noble_simulation * sim, n_genetics * gen
     return return_value;
 }
 
-static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_uint max_age)
+static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_int max_age)
 {
     n_int today = TIME_IN_DAYS(sim->land->date);
     n_uint loop = 0;
@@ -2679,7 +2679,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 
         if (conception_days > 0)
         {
-            n_uint gestation_days = conception_days + GESTATION_DAYS;
+            n_int gestation_days = conception_days + GESTATION_DAYS;
             if (today_days > gestation_days)
             {
                 /** A mother could have multiple children, so only find the youngest */
@@ -2707,7 +2707,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
                 else
                 {
                     /** mother carries the child */
-                    n_uint carrying_days = conception_days + GESTATION_DAYS + CARRYING_DAYS;
+                    n_int carrying_days = conception_days + GESTATION_DAYS + CARRYING_DAYS;
                     if (today_days < carrying_days)
                     {
                         if (!((local->inventory[BODY_FRONT] & INVENTORY_CHILD) ||
@@ -2929,7 +2929,7 @@ static n_int being_set_unique_name(noble_being * beings,
                                    n_byte2   mother_family_name,
                                    n_byte2   father_family_name)
 {
-    n_uint    i;
+    n_int    i;
     n_int     samples=0,found=0;
     n_byte2   possible_family_name;
     n_byte2   possible_first_name;
@@ -3022,7 +3022,7 @@ static void being_random_genetics(n_genetics * value, n_byte2 * random, n_int ma
     math_random3(random);
     while (loop < CHROMOSOMES)
     {
-        n_int loop2 = 0;
+        n_uint loop2 = 0;
         
         value[loop] = 0;
         

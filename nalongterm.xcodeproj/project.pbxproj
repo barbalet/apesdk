@@ -310,6 +310,7 @@
 		4A4E397B17D756B700780335 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_WARN_SIGN_COMPARE = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
 				OTHER_CFLAGS = "-DCOMMAND_LINE_EXPLICIT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -320,6 +321,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_WARN_SIGN_COMPARE = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
 				OTHER_CFLAGS = "-DCOMMAND_LINE_EXPLICIT";
 				PRODUCT_NAME = "$(TARGET_NAME)";

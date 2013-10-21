@@ -519,6 +519,7 @@
 				GCC_PREFIX_HEADER = "MacSimulation/MacSimulation-Prefix.pch";
 				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
 				INFOPLIST_FILE = "MacSimulation/MacSimulation-Info.plist";
 				LLVM_LTO = NO;
 				LLVM_VECTORIZE_LOOPS = YES;
@@ -548,6 +549,7 @@
 				GCC_PREFIX_HEADER = "MacSimulation/MacSimulation-Prefix.pch";
 				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
 				INFOPLIST_FILE = "MacSimulation/MacSimulation-Info.plist";
 				LLVM_LTO = NO;
 				LLVM_VECTORIZE_LOOPS = YES;
