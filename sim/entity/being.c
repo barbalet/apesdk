@@ -1270,12 +1270,14 @@ const n_string relationship_description[RELATIONSHIPS] =
 
 void being_relationship_description(n_int index, n_string description)
 {
+    n_int position = 0;
     if (index >= RELATIONSHIPS)
     {
         sprintf(description,"ERROR: relationship out of range %d\n",(int)index);
         return;
     }
-    sprintf(description,"%s",relationship_description[index]);
+    io_string_write(description, relationship_description[index], &position);
+    description[position] = 0;
 }
 
 static void being_inventory_string(n_string string, n_int * location, n_int item)
@@ -1634,7 +1636,13 @@ n_int episode_description(
     }
 #endif
     str[string_index] = 0;
-    sprintf(description,"%s",str);
+    
+    string_index = 0;
+    
+    io_string_write(description, str, &string_index);
+        
+    str[string_index] = 0;
+
     return social;
 }
 

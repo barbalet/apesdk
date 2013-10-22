@@ -620,53 +620,6 @@ enum being_interaction_social
 /* is the given social graph entry a family member? */
 #define IS_FAMILY_MEMBER(graph,index) ((graph[index].relationship > RELATIONSHIP_SELF) && (graph[index].relationship < OTHER_MOTHER))
 
-enum EPISODIC_EVENTS
-{
-    EVENT_EAT = 1,
-    EVENT_MATE,
-    EVENT_HIT,
-    EVENT_HIT_BY,
-    EVENT_SWIM,
-    EVENT_GROOM,
-    EVENT_GROOMED,
-    EVENT_CHAT,
-    EVENT_SHOUT,
-    EVENT_BIRTH,
-    EVENT_CARRIED,
-    EVENT_CARRIED_BY,
-    EVENT_SUCKLED,
-    EVENT_SUCKLED_BY,
-    EVENT_SEEK_MATE,
-    EVENT_WHACKED,
-    EVENT_WHACKED_BY,
-    EVENT_HURLED,
-    EVENT_HURLED_BY,
-    EVENT_HUGGED,
-    EVENT_HUGGED_BY,
-    EVENT_PRODDED,
-    EVENT_PRODDED_BY,
-    EVENT_DRAG,
-    EVENT_BRANDISH,
-    EVENT_DROP,
-    EVENT_PICKUP,
-    EVENT_GIVEN,
-    EVENT_GIVEN_BY,
-    EVENT_CHEW,
-    EVENT_BASH_OBJECTS,
-    EVENT_FISH,
-    EVENT_SMILED,
-    EVENT_SMILED_BY,
-    EVENT_GLOWERED,
-    EVENT_GLOWERED_BY,
-    EVENT_PATTED,
-    EVENT_PATTED_BY,
-    EVENT_POINT,
-    EVENT_POINTED,
-    EVENT_TICKLED,
-    EVENT_TICKLED_BY,
-    EVENTS
-};
-
 #define EVENT_INTENTION     (128)
 
 /* this possible could be genetic */

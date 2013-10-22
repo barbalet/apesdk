@@ -1620,16 +1620,16 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
     if (total_tests > 0)
     {
         n_string_block output;
+        n_int          position = 0;
+        
         sprintf(output, "Matches %03u.%04u percent\n",
                 (n_c_int)(total_matches*100/total_tests),
                 (n_c_int)(total_matches*1000000/total_tests)%10000);
         output_function(output);
 
-        sprintf(output, "%s", "Block Percent   Instances");
-        output_function(output);
-
-        sprintf(output, "%s", "-------------------------");
-        output_function(output);
+    
+        output_function("Block Percent   Instances");
+        output_function("-------------------------");
 
         for (i = 0; i <= (n_uint)(max_block_size - min_block_size); i++)
         {
@@ -2126,8 +2126,19 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
 
     if (output_function)
     {
-        sprintf(console_file_name,"%s",response);
-        sprintf(output_string, "Simulation file %s saved\n",response);
+        n_int position = 0;
+        io_string_write(console_file_name, response, &position);
+        
+        console_file_name[position] = 0;
+        
+        position = 0;
+        
+        io_string_write(output_string, "Simulation file ", &position);
+        io_string_write(output_string, response, &position);
+        io_string_write(output_string, " saved\n", &position);
+        
+        console_file_name[position] = 0;
+        
         output_function(output_string);
     }
 
@@ -2188,8 +2199,19 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
         console_file_interaction = 0;
         if (output_function)
         {
-            sprintf(console_file_name,"%s",response);
-            sprintf(output_string, "Simulation file %s open\n",response);
+            n_int position = 0;
+            io_string_write(console_file_name, response, &position);
+            
+            console_file_name[position] = 0;
+            
+            position = 0;
+            
+            io_string_write(output_string, "Simulation file ", &position);
+            io_string_write(output_string, response, &position);
+            io_string_write(output_string, " open\n", &position);
+            
+            console_file_name[position] = 0;
+            
             output_function(output_string);
         }
     }
