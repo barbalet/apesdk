@@ -84,7 +84,7 @@
 
 typedef	double	n_double;
 
-#define TWO_PI (6.2831853071795864769252867665590057683943L)
+#define TWO_PI ((n_double)(6.2831853071795864769252867665590057683943))
 
 /*! @typedef n_string
  @discussion This is the string format for the Noble Ape development */
@@ -587,7 +587,7 @@ void  vect2_d(
 n_int vect2_dot(
     n_vect2 * initial, n_vect2 * second,
     n_int multiplier, n_int divisor);
-void  vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor);
+void  vect2_direction(n_vect2 * initial, n_int direction, n_int divisor);
 void  vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
 void  vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 void  vect2_copy(n_vect2 * to, n_vect2 * from);

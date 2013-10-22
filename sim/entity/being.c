@@ -254,13 +254,13 @@ static void  being_recalibrate_honor(noble_being * value)
     value->honor = (n_byte)(((n_int)value->honor*220)/255);
 }
 
-n_int being_first_name(noble_being * value)
+n_byte being_first_name(noble_being * value)
 {
     noble_social * local_social = being_social(value);
     return local_social->first_name[BEING_MET]&255;
 }
 
-static void being_set_first_name(noble_being * value, n_byte name)
+static void being_set_first_name(noble_being * value, n_byte2 name)
 {
     noble_social * local_social = being_social(value);
     local_social->first_name[BEING_MET] = name;
@@ -272,23 +272,23 @@ void being_set_family_name(noble_being * value, n_byte first, n_byte last)
     local_social->family_name[BEING_MET] = GET_NAME_FAMILY(first,last);
 }
 
-n_int being_gender_name(noble_being * value)
+n_byte2 being_gender_name(noble_being * value)
 {
-    return (being_first_name(value) | (FIND_SEX(GET_I(value))<<8));
+    return (n_byte2)((being_first_name(value) | (FIND_SEX(GET_I(value))<<8)));
 }
 
-n_int being_family_name(noble_being * value)
+n_byte2 being_family_name(noble_being * value)
 {
     return (GET_NAME_FAMILY(being_family_first_name(value),being_family_second_name(value)));
 }
 
-n_int being_family_first_name(noble_being * value)
+n_byte being_family_first_name(noble_being * value)
 {
     noble_social * local_social = being_social(value);
     return UNPACK_FAMILY_FIRST_NAME(local_social->family_name[BEING_MET]);
 }
 
-n_int being_family_second_name(noble_being * value)
+n_byte being_family_second_name(noble_being * value)
 {
     noble_social * local_social = being_social(value);
     return UNPACK_FAMILY_SECOND_NAME(local_social->family_name[BEING_MET]);
@@ -419,7 +419,7 @@ n_int   being_energy(noble_being * value)
 
 void   being_set_energy(noble_being * value, n_int energy)
 {
-    value->stored_energy = energy;
+    value->stored_energy = (n_byte2)energy;
 }
 
 void   being_energy_delta(noble_being * value, n_int delta)
@@ -1990,7 +1990,7 @@ static void being_create_family_links(noble_being * mother,
                 {
                     parent[2+(j*2)+i] = 0L;
                     /** graph index for parent's mother or father */
-                    index = social_get_relationship(parent[j],RELATIONSHIP_MOTHER+i,sim);
+                    index = social_get_relationship(parent[j], (n_byte)(RELATIONSHIP_MOTHER+i),sim);
                     if ((index > -1) && (parent_social_graph != 0L))
                     {
                         /** store the grandparent reference if still living */
@@ -2376,7 +2376,7 @@ static void being_interact(noble_simulation * sim,
                 {
                     n_byte2 squabble_val;
                     being_set_energy(local, *energy);
-                    being_set_speed(local, *speed);
+                    being_set_speed(local, (n_byte)*speed);
                     squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, sim);
                     if (squabble_val != 0)
                     {
@@ -2827,7 +2827,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
     drives_cycle(local, beings_in_vicinity, awake, sim);
 
     being_set_energy(local, loc_e);
-    being_set_speed(local, loc_s);
+    being_set_speed(local, (n_byte)loc_s);
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     being_set_state(local, loc_state);
@@ -2964,7 +2964,7 @@ static n_int being_set_unique_name(noble_being * beings,
     while ((found == 0) && (samples < 2048))
     {
         /** choose a first_name at random */
-        possible_first_name = (math_random(local_random) & 255) | (FIND_SEX(GET_I(local_being))<<8);
+        possible_first_name = (n_byte2)((math_random(local_random) & 255) | (FIND_SEX(GET_I(local_being))<<8));
 
         /** avoid the same two family names */
         if (UNPACK_FAMILY_FIRST_NAME(mother_family_name) ==
@@ -3289,7 +3289,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         
 #ifdef PARASITES_ON
         /** ascribed social status */
-        local->honor = being_honor(mother);
+        local->honor = (n_byte)being_honor(mother);
 #endif
 
         being_set_unique_name(beings, number, local,
@@ -3353,7 +3353,7 @@ void being_tidy(noble_simulation * local_sim)
     n_uint	     loop   = 0;
     n_int	     fat_mass, insulation=0, bulk, conductance, delta_e;
 #ifdef PARASITES_ON
-    n_byte       max_honor = 1;
+    n_int       max_honor = 1;
 #endif
     while (loop < number)
     {

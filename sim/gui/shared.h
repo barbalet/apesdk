@@ -50,11 +50,11 @@
 
 void shared_cycle(n_uint ticks, n_int fIdentification);
 
-void shared_cycle_draw(n_int fIdentification, n_int dim_x, n_int dim_y);
+void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y);
 
 void shared_simulate(n_uint local_time);
 
-n_int shared_init(n_byte view, n_uint random);
+n_byte shared_init(n_byte view, n_uint random);
 
 void shared_close(void);
 

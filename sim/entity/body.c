@@ -228,7 +228,7 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
  */
 static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
-    n_byte carrying2 = being_carried(local,BODY_LEFT_HAND);
+    enum inventory_type carrying2 = being_carried(local,BODY_LEFT_HAND);
     if ((carrying & INVENTORY_SPEAR) ||
             (carrying2 & INVENTORY_SPEAR))
     {
@@ -268,7 +268,7 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
  */
 static void body_action_bash_objects(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
-    n_byte carrying2 = being_carried(local,BODY_LEFT_HAND);
+    enum inventory_type carrying2 = being_carried(local,BODY_LEFT_HAND);
     if ((carrying & INVENTORY_ROCK) && (carrying2 & INVENTORY_ROCK))
     {
         /** bash two rocks to make a scraper */

@@ -52,7 +52,7 @@
     GLubyte        colorTable[256][3];
     GLubyte        outputBuffer[2048*1536*3];
     
-    n_int          fIdentification;
+    n_byte          fIdentification;
 }
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;

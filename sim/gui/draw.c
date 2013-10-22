@@ -906,10 +906,10 @@ static void	draw_meters(noble_simulation * local_sim)
         /* draw genetics */
         while (ha2 < CHROMOSOMES)
         {
-            n_int	ha3 = 0;
-            n_byte2	genetic_block = genetics[ha2];
+            n_uint	ha3 = 0;
+            n_genetics	genetic_block = genetics[ha2];
             ha1 = 6;
-            while (ha3 < 8)
+            while (ha3 < (sizeof(n_genetics)*4))
             {
                 n_int four = ( genetic_block >> (ha3 * 2) ) & 3 ;
                 if ( four != 0 )
@@ -1299,7 +1299,7 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
     }
     cycles_per_sec[5] = ('0' + ((count / 10) % 10));
     cycles_per_sec[7] = ('0' + ((count / 1) % 10));
-    draw_string(cycles_per_sec, terrain_dim_x - 112, 100, local_mono);
+    draw_string(cycles_per_sec, terrain_dim_x - 110, 142, local_mono);
 }
 
 /* draws the rotating brain, this is always draw and never erase */
@@ -1606,7 +1606,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         while (loop < local_sim->num)
         {
             noble_being *bei = &(local_sim->beings[loop]);
-            if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), being_location_x(bei), being_location_y(bei)) == 1)
+            if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
             {
                 local_col.color = COLOUR_RED;
             }
@@ -1658,7 +1658,7 @@ void  draw_terrain_coord(n_int * co_x, n_int * co_y)
     *co_y = terrain_dim_y;
 }
 
-void  draw_cycle(n_int window, n_int dim_x, n_int dim_y)
+void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
 {
     noble_simulation * local_sim = sim_sim();
 

@@ -136,17 +136,17 @@ void being_honor_swap(noble_being * victor, noble_being * vanquished);
 
 n_int being_honor_compare(noble_being * first, noble_being * second);
 
-n_int being_first_name(noble_being * value);
+n_byte being_first_name(noble_being * value);
 
 void being_set_family_name(noble_being * value, n_byte first, n_byte last);
 
-n_int being_family_first_name(noble_being * value);
+n_byte being_family_first_name(noble_being * value);
 
-n_int being_family_second_name(noble_being * value);
+n_byte being_family_second_name(noble_being * value);
 
-n_int being_gender_name(noble_being * value);
+n_byte2 being_gender_name(noble_being * value);
 
-n_int being_family_name(noble_being * value);
+n_byte2 being_family_name(noble_being * value);
 
 void being_name_simple(noble_being * value, n_string str);
 

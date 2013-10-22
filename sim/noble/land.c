@@ -203,11 +203,11 @@ void weather_init(n_land * local_land)
         while ( lx < (map_dimension2) )
         {
             delta_pressure[ ly_neu + lx ]
-                  = atmosphere[ (( lx + 1 ) & ((map_dimension2)-1)) + ly_neu]
+                  = (n_byte2)(atmosphere[ (( lx + 1 ) & ((map_dimension2)-1)) + ly_neu]
                   - atmosphere[(( lx + ((map_dimension2)-1) ) & ((map_dimension2)-1)) + ly_neu]
                   + atmosphere[ lx + ly_plu ]
                   - atmosphere[ lx + ly_min ]
-                  + 512;
+                  + 512);
             lx++;
         }
         ly++;

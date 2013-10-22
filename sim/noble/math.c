@@ -216,7 +216,7 @@ n_int math_sine(n_int direction, n_int divisor)
  @param direction 256 units per rotation
  @param divisor The divisor for the output value
  */
-void vect2_direction(n_vect2 * initial, n_byte direction, n_int divisor)
+void vect2_direction(n_vect2 * initial, n_int direction, n_int divisor)
 {
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(divisor, "divisor ZERO");
@@ -824,7 +824,7 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
             }
             else
             {
-                addr1[0] = value0;
+                addr1[0] = (n_byte)value0;
             }
             break;
             /** Move a block of instructions */
@@ -1119,15 +1119,15 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
             /** Save to Pspace */
         case BRAINCODE_STP:
         {
-            n_byte v0 = is_const0;
-            n_byte v1 = is_const1;
+            n_byte v0 = (n_byte)is_const0;
+            n_byte v1 = (n_byte)is_const1;
             pspace[v0 % BRAINCODE_PSPACE_REGISTERS] = v1;
             break;
         }
             /** Load from Pspace */
         case BRAINCODE_LTP:
         {
-            n_byte v0 = is_const0;
+            n_byte v0 = (n_byte)is_const0;
             addr1[0] = pspace[v0 % BRAINCODE_PSPACE_REGISTERS];
             break;
         }

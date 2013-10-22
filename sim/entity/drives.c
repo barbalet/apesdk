@@ -80,7 +80,7 @@ static void drives_hunger(noble_being * local)
  */
 static void drives_sociability(
     noble_being * local,
-    n_byte beings_in_vicinity)
+    n_int beings_in_vicinity)
 {
     /** if the being is not overcrowded and its social drive is not saturated */
     if (beings_in_vicinity < local->crowding + SOCIAL_TOLLERANCE)
@@ -266,7 +266,7 @@ static void drives_fatigue(
  */
 void drives_cycle(
     noble_being * local,
-    n_byte beings_in_vicinity,
+    n_int beings_in_vicinity,
     n_int awake,
     noble_simulation * sim)
 {

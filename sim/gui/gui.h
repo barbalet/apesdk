@@ -155,7 +155,7 @@ void draw_about(n_constant_string platform);
 
 void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw);
 
-void  draw_cycle(n_int mod, n_int dim_x, n_int dim_y);
+void  draw_cycle(n_byte mod, n_int dim_x, n_int dim_y);
 
 n_byte * draw_offscreen(n_byte * value);
 

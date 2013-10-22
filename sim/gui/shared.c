@@ -309,12 +309,12 @@ void shared_cycle(n_uint ticks, n_int fIdentification)
     }
 }
 
-void shared_cycle_draw(n_int fIdentification, n_int dim_x, n_int dim_y)
+void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
     draw_cycle(fIdentification, dim_x, dim_y);
 }
 
-n_int shared_init(n_byte view, n_uint random)
+n_byte shared_init(n_byte view, n_uint random)
 {
     n_byte2 fit[256 * 3];
 
@@ -328,7 +328,7 @@ n_int shared_init(n_byte view, n_uint random)
     }
 
     draw_fit(land_points, fit);
-    return (n_int)view;
+    return view;
 }
 
 void shared_close(void)

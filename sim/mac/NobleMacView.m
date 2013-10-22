@@ -98,7 +98,7 @@
 - (void) animationTimer:(NSTimer *)localTimer
 {
 #ifndef NEW_OPENGL_ENVIRONMENT
-    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
+    shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification);
 #endif
     
     if (shared_script_debug_ready())
@@ -117,8 +117,8 @@
 
 - (void) drawRect:(NSRect)rect
 {
-    n_c_int         dimensionX = rect.size.width;
-    n_c_int         dimensionY = rect.size.height;
+    n_c_int         dimensionX = (n_c_int)rect.size.width;
+    n_c_int         dimensionY = (n_c_int)rect.size.height;
     n_byte        * index = shared_draw(fIdentification);
     
     if (index == 0L) return;
@@ -264,7 +264,7 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
         window_value = NUM_GRAPH;
     }
 #endif
-	fIdentification = shared_init(window_value, CFAbsoluteTimeGetCurrent());
+	fIdentification = shared_init(window_value, (n_uint)CFAbsoluteTimeGetCurrent());
     
     [[self window] setContentResizeIncrements:increments];
     
@@ -356,7 +356,7 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 
 -(IBAction) menuFileNew:(id) sender
 {
-	shared_new(CFAbsoluteTimeGetCurrent());
+	shared_new((n_uint)CFAbsoluteTimeGetCurrent());
 }
 
 -(IBAction) menuFileOpen:(id) sender
@@ -541,8 +541,8 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 - (void)mouseDown:(NSEvent *)theEvent
 {
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    n_int location_x = location.x;
-    n_int location_y = location.y;
+    n_int location_x = (n_int)location.x;
+    n_int location_y = (n_int)location.y;
     if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
     {
         shared_mouseOption(1);
@@ -551,7 +551,7 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     {
         shared_mouseOption(0);
     }
-	shared_mouseReceived(location_x, [self bounds].size.height - location_y, fIdentification);
+	shared_mouseReceived(location_x, (n_int)([self bounds].size.height) - location_y, fIdentification);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent

@@ -1377,7 +1377,7 @@ noble_simulation;
 
 #define UNPACK_FAMILY_FIRST_NAME(packed_family_name) (packed_family_name&FAMILY_NAME_AND_MOD)
 #define UNPACK_FAMILY_SECOND_NAME(packed_family_name) ((packed_family_name>>6)&FAMILY_NAME_AND_MOD)
-#define GET_NAME_FAMILY(f0,f1) (f0|(f1<<6))
+#define GET_NAME_FAMILY(f0,f1) ((n_byte2)(f0|(f1<<6)))
 
 n_int being_location_x(noble_being * value);
 n_int being_location_y(noble_being * value);

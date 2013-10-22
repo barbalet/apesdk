@@ -1319,7 +1319,7 @@ static void watch_being(void * ptr, n_console_output output_function)
             }
             else
             {
-                state = 1<<(i-1);
+                state = (n_byte2)(1 << (i-1));
             }
 
             being_state_description(state, (n_string)str);

@@ -143,7 +143,7 @@ static void noble_featureset_normalise_feature_frequencies(noble_featureset *s)
  */
 static n_int noble_featureset_update(noble_featureset * s,
                                      n_byte feature_type,
-                                     n_byte2 feature_value)
+                                     n_int feature_value)
 {
     /** get the index of the feature within the array */
     n_int feature_index = noble_featureset_feature_index(s, feature_type);
@@ -153,7 +153,7 @@ static n_int noble_featureset_update(noble_featureset * s,
     if (s->feature_type[feature_index] == (n_byte)feature_type)
     {
         /** alter the value associated with an existing feature type */
-        s->feature_value[feature_index] = feature_value;
+        s->feature_value[feature_index] = (n_byte2)feature_value;
         s->feature_frequency[feature_index]++;
         /** normalise the feature frequencies to prevent them
             from going out of bounds */
@@ -1090,7 +1090,8 @@ n_byte social_groom(
     noble_simulation * sim)
 {
     n_int meeter_index, met_index;
-    n_byte max = 0, grooming = 0, groom_decisions, groomloc, gpref, fem;
+    n_byte max = 0, grooming = 0, groom_decisions, groomloc, fem;
+    n_int gpref;
     n_int paraprob;
 
     /** hairy beings can carry more parasites */
@@ -1227,11 +1228,12 @@ n_byte2 social_squabble(
     noble_simulation * sim)
 {
 #ifdef PARASITES_ON
-    n_byte2 agro;
+    n_uint agro;
 #endif
     n_byte2 ret_val = 0;
     noble_being * victor, * vanquished;
-    n_int victor_index, vanquished_index, punchloc;
+    n_int victor_index, vanquished_index;
+    n_byte2 punchloc;
     n_vect2 delta;
 
     /** distance between beings */
@@ -1621,7 +1623,7 @@ n_int social_chat(
     noble_simulation * sim)
 {
     n_int idx,i=0;
-    n_byte2 relationship_index;
+    n_byte relationship_index;
 #ifdef PARASITES_ON
     n_byte2 name, family;
     n_int replace;
@@ -1843,7 +1845,7 @@ void social_goals(
 
 static void sim_social_initial_no_return(noble_simulation * local, noble_being * local_being)
 {
-    n_byte2 respect_mean = social_respect_mean(local,local_being);
+    n_uint respect_mean = social_respect_mean(local,local_being);
     n_uint social_loop = 0;
     n_vect2 location, sum_delta = {0,0};
     n_int   familiar_being_count = 0;

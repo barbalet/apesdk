@@ -238,7 +238,7 @@ void audio_equal_output(n_audio * audio, n_uint length)
     n_uint     loop = 0;
     while (loop < length)
     {
-        audio[loop] = timedomain[loop];
+        audio[loop] = (n_audio)timedomain[loop];
         loop++;
     }
 }
