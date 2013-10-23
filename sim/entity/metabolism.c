@@ -581,7 +581,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
         index = i * stride;
 
         /** skip inactive pathways */
-        mstate = metabolic_pathway[index + 1 +
+        mstate = (n_byte2)metabolic_pathway[index + 1 +
                                    (METABOLISM_MAX_PRODUCTS*2) +
                                    (METABOLISM_MAX_REACTANTS*2)];
         if ((mstate != METABOLISM_STATE_ANY) &&
@@ -594,13 +594,13 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
         /** products of the reaction */
         for (p = 0; p < METABOLISM_MAX_PRODUCTS; p++)
         {
-            product[p] = metabolic_pathway[index+1+p];
+            product[p] = (n_byte2)metabolic_pathway[index+1+p];
         }
 
         /** are all the reactants present? */
         for (j = 0; j < METABOLISM_MAX_REACTANTS; j++)
         {
-            reactant = metabolic_pathway[index+1+METABOLISM_MAX_PRODUCTS+j];
+            reactant = (n_byte2)metabolic_pathway[index+1+METABOLISM_MAX_PRODUCTS+j];
             if (reactant > 0)
             {
                 if (GET_MT(local_being,reactant) <
@@ -616,7 +616,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
             /** reduce reactant quantities */
             for (j = 0; j < METABOLISM_MAX_REACTANTS; j++)
             {
-                reactant = metabolic_pathway[index+1+METABOLISM_MAX_PRODUCTS+j];
+                reactant = (n_byte2)metabolic_pathway[index+1+METABOLISM_MAX_PRODUCTS+j];
                 if (reactant > 0)
                 {
                     GET_MT(local_being,reactant) -=
@@ -872,12 +872,12 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
                     {
                         conduction = 2 - water_conduction;
                     }
-                    if (ambient_temperature < local_being->vessel[i].temperature)
+                    if (ambient_temperature < (n_int)local_being->vessel[i].temperature)
                     {
                         diff = local_being->vessel[i].temperature - ambient_temperature;
                         local_being->vessel[i].temperature -= 1 + (diff>>conduction);
                     }
-                    if (ambient_temperature > local_being->vessel[i].temperature)
+                    if (ambient_temperature > (n_int)local_being->vessel[i].temperature)
                     {
                         diff = ambient_temperature - local_being->vessel[i].temperature;
                         local_being->vessel[i].temperature += 1 + (diff>>conduction);
@@ -1118,7 +1118,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  * @param mother Pointer to the mother being
  */ void metabolism_suckle(noble_simulation * sim, noble_being * child, noble_being * mother)
 {
-    n_byte2 suckling_rate = 1 + GENE_SUCKLING_RATE(being_genetics(child));
+    n_byte2 suckling_rate = (n_byte2)(1 + GENE_SUCKLING_RATE(being_genetics(child)));
 
     metabolism_vascular_response(sim, mother, VASCULAR_PARASYMPATHETIC);
     metabolism_vascular_response(sim, child, VASCULAR_PARASYMPATHETIC);
@@ -1136,7 +1136,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  */ void metabolism_eat(noble_being * local_being,
                         n_byte food_type)
 {
-    n_int i;
+    n_byte2 i;
     n_byte2 qty[6];
 
     for (i=0; i<6; i++)

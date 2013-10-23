@@ -200,7 +200,7 @@ void being_erase(noble_being * value)
     io_erase((n_byte*)value, sizeof(noble_being));
 }
 
-n_int being_honor(noble_being * value)
+n_byte being_honor(noble_being * value)
 {
     return value->honor;
 }
@@ -237,7 +237,6 @@ n_int being_honor_compare(noble_being * first, noble_being * second)
     return 0;
 }
 
-#if 0
 static n_int being_honor_immune(noble_being * value)
 {
     n_int local_honor = being_honor(value);
@@ -247,7 +246,6 @@ static n_int being_honor_immune(noble_being * value)
     }
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }
-#endif
 
 static void  being_recalibrate_honor(noble_being * value)
 {
@@ -294,7 +292,7 @@ n_byte being_family_second_name(noble_being * value)
     return UNPACK_FAMILY_SECOND_NAME(local_social->family_name[BEING_MET]);
 }
 
-n_int being_posture(noble_being * value)
+n_byte being_posture(noble_being * value)
 {
     return value->posture;
 }
@@ -346,7 +344,7 @@ void being_set_location(noble_being * value, n_byte2 * from)
     value->location[1] = from[1];
 }
 
-n_int being_speed(noble_being * value)
+n_byte being_speed(noble_being * value)
 {
     return value->velocity;
 }
@@ -388,7 +386,7 @@ void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
     vect2_direction(vect, value->direction_facing, divisor * 32);
 }
 
-n_int being_facing(noble_being * value)
+n_byte being_facing(noble_being * value)
 {
     return value->direction_facing;
 }

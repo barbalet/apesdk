@@ -662,11 +662,11 @@ n_byte get_braincode_instruction(noble_being * local_being)
     n_byte  i;
     const n_byte2 min=2;
 
-    prob[0] = min + GENE_BRAINCODE_SENSORS(genetics);
-    prob[1] = min + GENE_BRAINCODE_ACTUATORS(genetics);
-    prob[2] = min + GENE_BRAINCODE_CONDITIONALS(genetics);
-    prob[3] = min + GENE_BRAINCODE_OPERATORS(genetics);
-    prob[4] = min + GENE_BRAINCODE_DATA(genetics);
+    prob[0] = (n_byte2)(min + GENE_BRAINCODE_SENSORS(genetics));
+    prob[1] = (n_byte2)(min + GENE_BRAINCODE_ACTUATORS(genetics));
+    prob[2] = (n_byte2)(min + GENE_BRAINCODE_CONDITIONALS(genetics));
+    prob[3] = (n_byte2)(min + GENE_BRAINCODE_OPERATORS(genetics));
+    prob[4] = (n_byte2)(min + GENE_BRAINCODE_DATA(genetics));
 
     total = prob[0] + prob[1] + prob[2] + prob[3] + prob[4];
 
@@ -1122,19 +1122,19 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
         /** Facial characteristics.
               Here we shift the 0-15 gene values into a 0-255 range */
     case 0:
-        return GENE_EYE_SHAPE(genetics) << 4;
+        return (n_byte)(GENE_EYE_SHAPE(genetics) << 4);
     case 1:
-        return GENE_EYE_COLOR(genetics) << 4;
+        return (n_byte)(GENE_EYE_COLOR(genetics) << 4);
     case 2:
-        return GENE_EYE_SEPARATION(genetics) << 4;
+        return (n_byte)(GENE_EYE_SEPARATION(genetics) << 4);
     case 3:
-        return GENE_NOSE_SHAPE(genetics) << 4;
+        return (n_byte)(GENE_NOSE_SHAPE(genetics) << 4);
     case 4:
-        return GENE_EAR_SHAPE(genetics) << 4;
+        return (n_byte)(GENE_EAR_SHAPE(genetics) << 4);
     case 5:
-        return GENE_EYEBROW_SHAPE(genetics) << 4;
+        return (n_byte)(GENE_EYEBROW_SHAPE(genetics) << 4);
     case 6:
-        return GENE_MOUTH_SHAPE(genetics) << 4;
+        return (n_byte)(GENE_MOUTH_SHAPE(genetics) << 4);
     case 7:/* healthyness */
     {
         n_byte return_value = 0;
@@ -1327,7 +1327,7 @@ void brain_dialogue(
                     /** Shift attention to a different territory */
                 case 2:
                     territory_index = IS_CONST1;
-                    GET_A(meeter_being,ATTENTION_TERRITORY) = territory_index;
+                    GET_A(meeter_being,ATTENTION_TERRITORY) = (n_byte)territory_index;
                     break;
                     /** Shift attention to a body region */
                 case 3:
@@ -1402,11 +1402,11 @@ void brain_dialogue(
                     break;
                 case 20:
                     /** territory familiarity */
-                    addr1[0] = territory_familiarity(meeter_being,territory_index);
+                    addr1[0] = territory_familiarity(meeter_being,(n_byte2)territory_index);
                     break;
                 case 21:
                     /** territory familiarity */
-                    addr1[0] = territory_familiarity(met_being,territory_index);
+                    addr1[0] = territory_familiarity(met_being,(n_byte2)territory_index);
                     break;
                 case 22:
                 {
@@ -1462,7 +1462,7 @@ void brain_dialogue(
                 case 23:
                 {
                     /** shift attention to a given social graph entry based on relationship */
-                    n_int idx = social_get_relationship(meeter_being,relationship_index,sim);
+                    n_int idx = social_get_relationship(meeter_being,(n_byte)relationship_index,sim);
                     if (idx > -1)
                     {
                         actor_index = idx;

@@ -46,10 +46,10 @@
 
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 #define PARASITES_ON  /* entity */
-#undef TERRITORY_ON  /* entity */
-#undef BRAINCODE_ON  /* entity */
-#undef IMMUNE_ON     /* entity */
-#undef METABOLISM_ON /* entity */
+#define TERRITORY_ON  /* entity */
+#define BRAINCODE_ON  /* entity */
+#define IMMUNE_ON     /* entity */
+#define METABOLISM_ON /* entity */
 
 /* dimension of the territory map */
 #define TERRITORY_DIMENSION           (MAP_DIMENSION>>6)
@@ -1334,9 +1334,7 @@ noble_simulation;
 
 n_int being_location_x(noble_being * value);
 n_int being_location_y(noble_being * value);
-n_int being_facing(noble_being * value);
 n_int being_energy(noble_being * value);
-n_int being_speed(noble_being * value);
 n_genetics * being_genetics(noble_being * value);
 n_int being_dob(noble_being * value);
 

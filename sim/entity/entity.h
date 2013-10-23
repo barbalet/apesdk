@@ -175,7 +175,7 @@ noble_social * being_social(noble_being * value);
 
 n_int being_brainstates(noble_being * value, n_int awake, n_byte2 * states);
 
-n_int being_honor(noble_being * value);
+n_byte being_honor(noble_being * value);
 
 void being_honor_inc_dec(noble_being * inc, noble_being * dec);
 
@@ -197,7 +197,7 @@ n_byte2 being_family_name(noble_being * value);
 
 void being_name_simple(noble_being * value, n_string str);
 
-n_int being_posture(noble_being * value);
+n_byte being_posture(noble_being * value);
 
 void being_set_posture(noble_being * value, n_byte post);
 
@@ -214,13 +214,13 @@ void being_set_location(noble_being * value, n_byte2 * from);
 
 n_int being_dob(noble_being * value);
 
-n_int being_speed(noble_being * value);
+n_byte being_speed(noble_being * value);
 void being_set_speed(noble_being * value, n_byte sp);
 
 void being_facing_towards(noble_being * value, n_vect2 * vector);
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor);
 
-n_int being_facing(noble_being * value);
+n_byte being_facing(noble_being * value);
 void being_wander(noble_being * value, n_int wander);
 
 n_genetics * being_genetics(noble_being * value);
