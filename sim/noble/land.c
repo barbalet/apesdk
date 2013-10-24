@@ -294,7 +294,12 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
     n_byte	ret_val;
     n_int	val;
     n_int   local_time;
-    n_int   map_dimension2 = land_map_dimension(local_land);
+    n_int   map_dimension2 = land_map_dimension(local_land)/2;
+    n_int   map_x = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(px));
+    n_int   weather_x = map_x>>1;
+    n_int   map_y = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(py));
+    n_int   weather_y = map_y>>1;
+    
     NA_ASSERT(local_land, "local_land NULL");
     
     local_time = local_land->time;
@@ -312,7 +317,7 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
         ret_val = WEATHER_SEVEN_SUNNY_DAY;
     }
 
-    val = weather_pressure(local_land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(px)) >> 1, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(py)) >> 1, map_dimension2);
+    val = weather_pressure(local_land, weather_x, weather_y, map_dimension2);
 
     if ( val == -1)
     {
@@ -327,6 +332,7 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
     {
         return ret_val+1;
     }
+
     return ret_val;
 }
 
