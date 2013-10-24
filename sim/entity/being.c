@@ -1154,21 +1154,35 @@ n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_
     return addition;
 }
 
-static noble_being * being_find_closest(noble_simulation * sim, n_genetics * genetics, n_int parse_requirements)
+static noble_being * being_find_closest(noble_simulation * sim, noble_being * actual, n_int parse_requirements, n_int older)
 {
     n_uint loop = 0;
     n_uint comparison_best = 0;
     noble_being * return_value = 0L;
-    
+    n_genetics * genetics = being_genetics(actual);
+    n_int actual_age = being_dob(actual);
     
     while ( loop < sim->num )
     {
         noble_being * local = &(sim->beings[loop]);
-        n_uint        comparison = being_genetic_comparison(genetics, being_genetics(local), parse_requirements);
-        if (comparison > comparison_best)
+        if (actual != local)
         {
-            comparison_best = comparison;
-            return_value = local;
+            if ((older == 1) && (being_dob(local) <= actual_age))
+            {
+                break;
+            }
+            else if ((older == -1) && (being_dob(local) >= actual_age))
+            {
+                break;
+            }
+            {
+                n_uint        comparison = being_genetic_comparison(genetics, being_genetics(local), parse_requirements);
+                if (comparison > comparison_best)
+                {
+                    comparison_best = comparison;
+                    return_value = local;
+                }
+            }
         }
         loop++;
     }
@@ -2743,7 +2757,7 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         /** child follows the mother */
         if ((birth_days + WEANING_DAYS) > today_days)
         {
-            noble_being * mother = being_find_closest(sim, being_genetics(local), 1);
+            noble_being * mother = being_find_closest(sim, local, 1, 1);
             if (mother != 0L)
             {
                 /** orient towards the mother */
