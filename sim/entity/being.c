@@ -1157,7 +1157,8 @@ n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_
 static noble_being * being_find_closest(noble_simulation * sim, noble_being * actual, n_int parse_requirements, n_int older)
 {
     n_uint loop = 0;
-    n_uint comparison_best = 0;
+    /** comparison must be better than average */
+    n_uint comparison_best = 3 * sizeof(n_genetics) * CHROMOSOMES;
     noble_being * return_value = 0L;
     n_genetics * genetics = being_genetics(actual);
     n_int actual_age = being_dob(actual);
@@ -1167,16 +1168,24 @@ static noble_being * being_find_closest(noble_simulation * sim, noble_being * ac
         noble_being * local = &(sim->beings[loop]);
         if (actual != local)
         {
-            if ((older == 1) && (being_dob(local) <= actual_age))
+            n_byte success = 0;
+            n_int  local_dob = being_dob(local);
+            
+            if (older == 0) success = 1;
+            
+            if ((older == 1) && ((local_dob - AGE_OF_MATURITY) > actual_age))
             {
-                break;
+                success = 1;
             }
-            else if ((older == -1) && (being_dob(local) >= actual_age))
+            
+            if ((older == -1) && ((actual_age - AGE_OF_MATURITY) > local_dob))
             {
-                break;
+                success = 1;
             }
+            
+            if (success)
             {
-                n_uint        comparison = being_genetic_comparison(genetics, being_genetics(local), parse_requirements);
+                n_uint comparison = being_genetic_comparison(genetics, being_genetics(local), parse_requirements);
                 if (comparison > comparison_best)
                 {
                     comparison_best = comparison;
