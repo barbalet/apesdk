@@ -493,11 +493,14 @@ void social_graph_link_name(
         break;
     }
     case ENTITY_BEING_GROUP:
-        /** TODO*/
+        (void)SHOW_ERROR("Unimplemented being group entity type");
+        break;
     case ENTITY_OBJECT:
-        /** TODO */
+        (void)SHOW_ERROR("Unimplemented object entity type");
+        break;
     case ENTITY_TERRITORY:
-        /** TODO */
+        (void)SHOW_ERROR("Unimplemented territory entity type");
+        break;
     default:
         (void)SHOW_ERROR("Unimplemented entity type");
         break;
