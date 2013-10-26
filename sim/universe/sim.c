@@ -791,9 +791,9 @@ void sim_close(void)
 #ifdef THREADED
     sim_thread_close();
 #endif
-    io_free((void **) &offbuffer);
     interpret_cleanup(&interpret);
-    death_record_file_cleanup();
+    io_free((void **) &offbuffer);
+    /*death_record_file_cleanup();*/
 }
 
 void sim_set_select(n_uint number)

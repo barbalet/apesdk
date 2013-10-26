@@ -468,10 +468,10 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
 
     vect2_byte2(&location_vector, being_location(value));
 
-    while (it_water_turn < 4)
+    while (it_water_turn < 7)
     {
         /* find higher land first */
-        n_int    iturn = 5 - it_water_turn;
+        n_int    iturn = 8 - it_water_turn;
         n_int    loc_f = being_facing(value);
         n_int    iturn_plus  = loc_f + iturn;
         n_int    iturn_minus = loc_f + (256-iturn);
@@ -3300,6 +3300,9 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
                               (math_random(local->seed) & 32767)+16384;
         local->social_y = local->social_ny =
                               (math_random(local->seed) & 32767)+16384;
+        
+        local->date_of_birth[0] = 0;
+        local->date_of_birth[1] = 0;
     }
     else
     {
@@ -3324,12 +3327,13 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         being_set_unique_name(beings, number, local,
                               being_family_name(mother),
                               mother->father_name[1]);
+        
+        local->date_of_birth[0] = land->date[0];
+        local->date_of_birth[1] = land->date[1];
     }
 
     being_set_energy(local, BEING_FULL + 15);
 
-    local->date_of_birth[0] = land->date[0];
-    local->date_of_birth[1] = land->date[1];
     if (random_factor)
     {
         GET_H(local) = BIRTH_HEIGHT;
