@@ -1390,11 +1390,16 @@ n_uint social_respect_mean(
  * @param today The current date
  * @param sim Pointer to the simulation
  */
-static void social_conception(
+/*static*/ void social_conception(
     noble_being * female,
     noble_being * male,
     noble_simulation * sim)
 {
+    if ((male == 0L) || (female == 0L))
+    {
+        return;
+    }
+    
     body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
 
     /** store the date of conception */

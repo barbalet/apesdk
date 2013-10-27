@@ -402,11 +402,7 @@ n_int being_pregnant(noble_being * value)
 
 n_genetics * being_fetal_genetics(noble_being * value)
 {
-    if (being_pregnant(value))
-    {
-        return value->fetal_genetics;
-    }
-    return 0L;
+    return value->fetal_genetics;
 }
 
 n_int   being_energy(noble_being * value)

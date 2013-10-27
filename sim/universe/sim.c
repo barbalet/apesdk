@@ -617,7 +617,7 @@ void sim_cycle(void)
 }
 
 
-#define MAXIMUM_ALLOCATION  ( 60 * 1024 * 1024 )
+#define MAXIMUM_ALLOCATION  ( 80 * 1024 * 1024 )
 
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2))

@@ -585,16 +585,10 @@ void social_action(
 n_int genetics_compare(n_genetics * genetics_a, n_genetics * genetics_b)
 {
     n_int loop = 0;
+    
     while (loop < CHROMOSOMES)
     {
-        if (genetics_b == 0L)
-        {
-            if (genetics_a[loop] != 0)
-            {
-                return 0;
-            }
-        }
-        else if (genetics_a[loop] != genetics_b[loop])
+        if (genetics_a[loop] != genetics_b[loop])
         {
             return 0;
         }
@@ -645,25 +639,13 @@ static n_int genetics_unique(noble_being * local, n_int number, n_genetics * gen
     {
         return 1;
     }
-
     while (loop < number)
     {
         noble_being	* local_being = &(local[loop]);
-        n_genetics * fetal = being_fetal_genetics(local_being);
-        
-        if (fetal)
-        {
-            if (genetics_compare(fetal, genetics))
-            {
-                return 0;
-            }
-        }
-        
         if (genetics_compare(being_genetics(local_being), genetics))
         {
             return 0;
         }
-        
         loop++;
     }
     return 1;
@@ -908,6 +890,8 @@ void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_
     sex |= (math_random(local)&1);
     do
     {
+        math_random3(local);
+
         /** crossover and mutation */
         for (ch = 0; ch < CHROMOSOMES; ch++)
         {
@@ -917,7 +901,6 @@ void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_
             }
         }
         
-
         /** Y chromosome does not undergo crossover and passes from father to son */
         if (sex != SEX_FEMALE)
         {
@@ -932,7 +915,6 @@ void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_
         /** align the sex genetics */
         genetics[CHROMOSOME_Y] &= ~1;
         genetics[CHROMOSOME_Y] |= sex;
-
     }
     while (genetics_unique(beings, number, genetics) == 0);
 }

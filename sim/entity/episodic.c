@@ -481,9 +481,9 @@ static void episodic_store_full(
     {
         if ((old_event != event) || ((old_time+10) < (new_time))) /**< TODO this may need to be changed */
         {
-            n_string_block description;
-            n_string_block str;
-            n_string_block time;
+            n_string_block description = {0};
+            n_string_block str = {0};
+            n_string_block time = {0};
             n_string_block combination = {0};
             n_int social_event;
 

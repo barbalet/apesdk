@@ -331,4 +331,8 @@ n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 
 
 void          speak_out(n_string filename, n_string paragraph);
 
+void social_conception(noble_being * female,
+                       noble_being * male,
+                       noble_simulation * sim);
+
 #endif /* NOBLEAPE_ENTITY_H */

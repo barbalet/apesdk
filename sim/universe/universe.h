@@ -1410,6 +1410,9 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 n_int console_epic(void * ptr, n_string response, n_console_output output_function);
 n_int console_file(void * ptr, n_string response, n_console_output output_function);
 n_int console_event(void * ptr, n_string response, n_console_output output_function);
+n_int console_epic(void * ptr, n_string response, n_console_output output_function);
+
+n_int console_debug(void * ptr, n_string response, n_console_output output_function);
 
 n_int console_death(void * ptr, n_string response, n_console_output output_function);
 
@@ -1500,6 +1503,8 @@ const static noble_console_command control_commands[] =
     {&console_list,          "list",           "",                     "List all ape names"},
     {&console_list,          "ls",             "",                     ""},
     {&console_list,          "dir",            "",                     ""},
+
+    {&console_debug,         "debug",           "",                    "Run debug check"},
 
     {0L, 0L},
 };

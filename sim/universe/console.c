@@ -1669,10 +1669,9 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
 
     if ((length<5) && (io_find(response,0,length,"off",3)>-1))
     {
-        if (watch_type == WATCH_STATES)
-        {
-            output_function("Stopped watching being states");
-        }
+
+        output_function("Stopped watching");
+        
         watch_type=WATCH_NONE;
         return 0;
     }
@@ -2356,6 +2355,33 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 
     io_free((void**)&eliminated);
 #endif
+    return 0;
+}
+
+n_int console_debug(void * ptr, n_string response, n_console_output output_function)
+{
+    noble_being * local_female = 0L;
+    noble_being * local_male = 0L;
+    noble_simulation * local_sim = ptr;
+    n_uint  loop = 0;
+    do{
+        noble_being * value = &(local_sim->beings[loop++]);
+        
+        if (FIND_SEX(GET_I(value)) == SEX_FEMALE)
+        {
+            local_female = value;
+        }
+        else
+        {
+            local_male = value;
+        }
+        
+    }while((local_female == 0L) || (local_male == 0L));
+    
+    social_conception(local_female,
+                      local_male,
+                      local_sim);
+    
     return 0;
 }
 
