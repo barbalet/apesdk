@@ -230,13 +230,6 @@ static n_interpret *interpret = 0L;
 
 /*NOBLEMAKE END=""*/
 
-#ifdef BRAIN_HASH
-
-n_byte	brain_hash_out[12] = {0};
-n_uint	brain_hash_count;
-
-#endif
-
 static n_int            sim_new_progress = 0;
 
 n_int sim_new(void)
@@ -361,10 +354,6 @@ static void * sim_thread_brain(void * id)
 
 #ifdef BRAINCODE_ON
         sim_brain_dialogue(&sim);
-#endif
-
-#ifdef BRAIN_HASH
-        sim_brain_hash(&sim)
 #endif
         pthread_mutex_lock(&draw_mtx);
         sim_done++;
@@ -559,25 +548,6 @@ static void sim_brain_dialogue(noble_simulation * local_sim)
 }
 #endif
 
-
-#ifdef BRAIN_HASH
-static void sim_brain_hash(noble_simulation * local_sim)
-{
-    brain_hash_count++;
-    if((brain_hash_count & 63) == 0)
-    {
-        n_byte * hash_brain = being_brain(&(sim.beings[sim.select]));
-
-        brain_hash_count = 0;
-
-        if ((sim.select != NO_BEINGS_FOUND) && (hash_brain != 0L))
-        {
-            brain_hash(hash_brain, brain_hash_out);
-        }
-    }
-}
-#endif
-
 static void sim_being(noble_simulation * local_sim)
 {
     n_uint loop = 0;
@@ -636,10 +606,7 @@ void sim_cycle(void)
 #ifdef BRAINCODE_ON
     sim_brain_dialogue(&sim);
 #endif
-
-#ifdef BRAIN_HASH
-    sim_brain_hash(&sim)
-#endif
+    
     being_tidy(&sim);
     being_remove(&sim); /* 6 */
     sim_social(&sim);

@@ -1435,14 +1435,6 @@ void sim_draw_thread_start(void);
 void sim_draw_thread_end(void);
 #endif
 
-#ifdef BRAIN_HASH
-
-extern n_byte	brain_hash_out[12];
-extern n_uint	brain_hash_count;
-
-#endif
-
-
 #ifdef CONSOLE_REQUIRED
 
 const static noble_console_command control_commands[] =

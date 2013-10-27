@@ -664,8 +664,6 @@ static n_int genetics_unique(noble_being * local, n_int number, n_genetics * gen
             return 0;
         }
         
-        
-        
         loop++;
     }
     return 1;

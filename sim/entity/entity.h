@@ -52,16 +52,11 @@
 
 #define	LAND_ON
 #define	WEATHER_ON
+#undef RANDOM_INITIAL_BRAINCODE
 
 #undef	FIXED_RANDOM_SIM
-
 #undef	LARGE_SIM
-
-#undef	BRAIN_HASH
-
 #define SOFT_BRAIN_ON
-
-#undef  RANDOM_INITIAL_BRAINCODE
 
 
 #define EPISODIC_AFFECT_ZERO (16384)
@@ -308,7 +303,6 @@ void brain_dialogue(
     n_byte		* bc1,
     n_int being_index);
 
-void brain_hash(n_byte *local_brain, n_byte * local_brain_hash);
 void brain_cycle(n_byte * local, n_byte2 * constants);
 noble_being * being_from_name(noble_simulation * sim, n_string name);
 

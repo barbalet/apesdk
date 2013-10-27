@@ -273,10 +273,6 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
     (void)draw_error(0L);
     draw_undraw_clear();
-#ifdef BRAIN_HASH
-    brain_hash_count = 0;
-    brain_hash_out[0] = 0;
-#endif
 #ifdef THREADED
     sim_draw_thread_on();
 #endif

@@ -489,7 +489,6 @@ void social_graph_link_name(
     case ENTITY_BEING:
     {
         being_name_byte2(local_social_graph[social_graph_index].first_name[met], local_social_graph[social_graph_index].family_name[met], name);
-
         break;
     }
     case ENTITY_BEING_GROUP:
@@ -1396,12 +1395,12 @@ static void social_conception(
     noble_being * male,
     noble_simulation * sim)
 {
+    body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
+
     /** store the date of conception */
     female->date_of_conception[0] = sim->land->date[0];
     female->date_of_conception[1] = sim->land->date[1];
     
-    body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
-
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
 

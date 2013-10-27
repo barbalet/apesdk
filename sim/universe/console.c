@@ -191,7 +191,6 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
                 else
                 {
                     n_string_block meeter_being_name;
-                    
                     sprintf(meeter_being_name," ");
                     social_graph_link_name(local_sim, local_being, i, BEING_MEETER, meeter_being_name);
                     sprintf(relationship_str2," (%s of %s)",relationship_str1,meeter_being_name);

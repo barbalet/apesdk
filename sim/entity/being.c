@@ -100,7 +100,6 @@ being_draw;
 n_byte * being_braincode_external(noble_being * value)
 {
     noble_social * social_value = being_social(value);
-    
     return social_value[0].braincode;
 }
 
@@ -407,7 +406,7 @@ n_genetics * being_fetal_genetics(noble_being * value)
     {
         return value->fetal_genetics;
     }
-    return 0;
+    return 0L;
 }
 
 n_int   being_energy(noble_being * value)
@@ -2871,15 +2870,14 @@ void being_init_braincode(noble_being * local,
 {
     n_byte2 * local_random = being_get_random(local);
     n_uint ch,i,most_similar_index,diff,min,actor_index;
-    noble_social * graph;
-
+    noble_social * graph;    
     if (other==0L)
     {
         /** initially seed the brain with instructions which are random but genetically biased */
         for (ch = 0; ch < BRAINCODE_SIZE; ch+=3)
         {
             math_random3(local_random);
-            if (internal!=0)
+            if (internal != 0)
             {
 #ifdef RANDOM_INITIAL_BRAINCODE
                 being_braincode_internal(local)[ch] = math_random(local_random) & 255;
@@ -2894,13 +2892,13 @@ void being_init_braincode(noble_being * local,
             else
             {
 #ifdef RANDOM_INITIAL_BRAINCODE
-                being_braincode_internal(local)[ch] = math_random(local_random) & 255;
+                being_braincode_external(local)[ch] = math_random(local_random) & 255;
 #else
                 being_random3(local);
-                being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+                being_braincode_external(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
-                being_braincode_internal(local)[ch+1] = math_random(local_random) & 255;
-                being_braincode_internal(local)[ch+2] = math_random(local_random) & 255;
+                being_braincode_external(local)[ch+1] = math_random(local_random) & 255;
+                being_braincode_external(local)[ch+2] = math_random(local_random) & 255;
             }
         }
     }
@@ -3188,6 +3186,27 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
 #ifdef MAXIMIZE_ERASING
 
+    
+#ifdef EPISODIC_ON
+    /** has no social connections initially */
+    io_erase((n_byte*)local_social_graph,sizeof(noble_social)*SOCIAL_SIZE);
+    
+    for (ch=0; ch<EPISODIC_SIZE; ch++)
+    {
+        local_episodic[ch].affect=EPISODIC_AFFECT_ZERO;
+    }
+    
+    local_social_graph[0].relationship=RELATIONSHIP_SELF;
+    for (ch=0; ch<SOCIAL_SIZE; ch++)
+    {
+        /** default type of entity */
+        local_social_graph[ch].entity_type = ENTITY_BEING;
+        /** friend_or_foe can be positive or negative,
+         with SOCIAL_RESPECT_NORMAL as the zero point */
+        local_social_graph[ch].friend_foe = SOCIAL_RESPECT_NORMAL;
+    }
+#endif
+    
     being_init_braincode(local,0L,0,
                          BRAINCODE_INTERNAL);
     being_init_braincode(local,0L,0,
@@ -3221,24 +3240,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
 
 
-#endif
-#ifdef EPISODIC_ON
-    for (ch=0; ch<EPISODIC_SIZE; ch++)
-    {
-        local_episodic[ch].affect=EPISODIC_AFFECT_ZERO;
-    }
-
-    /** has no social connections initially */
-    io_erase((n_byte*)local_social_graph,sizeof(noble_social)*SOCIAL_SIZE);
-    local_social_graph[0].relationship=RELATIONSHIP_SELF;
-    for (ch=0; ch<SOCIAL_SIZE; ch++)
-    {
-        /** default type of entity */
-        local_social_graph[ch].entity_type = ENTITY_BEING;
-        /** friend_or_foe can be positive or negative,
-            with SOCIAL_RESPECT_NORMAL as the zero point */
-        local_social_graph[ch].friend_foe = SOCIAL_RESPECT_NORMAL;
-    }
 #endif
 
     
@@ -3276,7 +3277,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
             being_random3(local);
 
             gene_random[1] = being_random(local);
-            
             
             being_random_genetics(mother_genetics, gene_random, 0);
             
