@@ -36,7 +36,7 @@
 
 #define CONSOLE_ONLY /* Please maintain this define until after ALIFE XIII July 22nd */
 #define CONSOLE_REQUIRED
-#undef  AUDIT_FILE
+#define AUDIT_FILE
 
 #include <stdio.h>
 #include <string.h>
@@ -75,20 +75,17 @@ static void audit_compart_offset()
 {
     noble_being local;
     n_byte * start = (n_byte *)&local;
-    audit_print_offset(start,(n_byte *)&(local.state),"state");
+    audit_print_offset(start,(n_byte *)&(local.macro_state),"macro_state");
     audit_print_offset(start,(n_byte *)&(local.crowding),"crowding");
     audit_print_offset(start,(n_byte *)&(local.parasites),"parasites");
     audit_print_offset(start,(n_byte *)&(local.honor),"honor");
 
     audit_print_offset(start,(n_byte *)&(local.date_of_conception[0]),"date_of_conception[0]");
 
-    audit_print_offset(start,(n_byte *)&(local.mother_genetics[0]),"mother_genetics[0]");
-    audit_print_offset(start,(n_byte *)&(local.father_genetics[0]),"father_genetics[0]");
-    audit_print_offset(start,(n_byte *)&(local.genes[0]),"genes[0]");
+    audit_print_offset(start,(n_byte *)&(local.fetal_genetics[0]),"fetal_genetics[0]");
+    audit_print_offset(start,(n_byte *)&(local.genetics[0]),"genetics[0]");
 
-    
-    audit_print_offset(start,(n_byte *)&(local.father_honor),"father_honor");
-    audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
+        audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
 
     audit_print_offset(start,(n_byte *)&(local.social_x),"social_x");
 
