@@ -110,8 +110,6 @@
 #define METABOLISM_BYTES      0
 #endif
 
-
-
 #define GENETICS_BYTES    (sizeof(n_genetics)*CHROMOSOMES)
 #define GENETICS_ENTRIES  1
 

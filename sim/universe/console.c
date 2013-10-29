@@ -1669,9 +1669,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
 
     if ((length<5) && (io_find(response,0,length,"off",3)>-1))
     {
-
         output_function("Stopped watching");
-        
         watch_type=WATCH_NONE;
         return 0;
     }
