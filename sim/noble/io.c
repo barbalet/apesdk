@@ -1706,20 +1706,6 @@ n_int io_console(void * ptr, noble_console_command * commands, n_console_input i
     return SHOW_ERROR("Console failure");
 }
 
-#if 0
-
-void io_string_write(n_string dest, n_string insert, n_int * pos)
-{
-    n_int i,j=0;
-    for (i=*pos; i<*pos+io_length(insert,STRING_BLOCK_SIZE); i++,j++)
-    {
-        dest[i] = insert[j];
-    }
-    *pos = i;
-}
-
-#else
-
 void io_string_write(n_string dest, n_string insert, n_int * pos)
 {
     n_int  loop = 0;
@@ -1728,16 +1714,12 @@ void io_string_write(n_string dest, n_string insert, n_int * pos)
         character = insert [loop++];
         if (character)
         {
-            n_int  new_position = *pos;
-            dest[new_position] = character;
+            dest[*pos] = character;
             *(pos) += 1;
         }
     } while (character);
     dest[*pos] = 0;
 }
-
-
-#endif
 
 n_int io_apescript_error(AE_ENUM value)
 {
