@@ -317,6 +317,8 @@ void console_external_watch(void);
 
 n_int console_executing(void);
 
+void file_audit(void);
+
 
 #endif /* NOBLEAPE_UNIVERSE_INTERNAL_H */
 

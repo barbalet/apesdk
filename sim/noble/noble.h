@@ -685,6 +685,9 @@ void io_file_writeoff(n_int * entry, n_file * file);
 
 void io_file_string(n_int entry, n_file * file, n_constant_string string);
 
+void io_offset(n_byte * start, n_byte * point, n_string text);
+
+
 /*
  This provides the land interface into entity but not the universe.
 

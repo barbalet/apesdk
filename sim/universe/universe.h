@@ -1182,87 +1182,54 @@ noble_immune_system;
 
 typedef struct
 {
-    n_byte2	location[2];
-    n_byte	direction_facing;
-    n_byte	velocity;
-    n_byte2	stored_energy;
-    n_byte2	date_of_birth[2];               /* constant */
-    n_byte2 seed[2];
-    n_byte2	macro_state;
-    /* The basic brain formula is;
-     b(t+1) = a*l + b(t)*m + (b(t)-b(t-1))*n;
-     the first three values are l, m, n for awake, then l, m, n for asleep */
-    n_byte2	brain_state[6];  /* constant for now */
-
-    /* height in arbitrary units can be converted to real units with GET_BEING_HEIGHT */
-    n_byte2 height;
-
-    /* body mass in kg */
-    n_byte2 mass;
-
-    /* flags indicating apescript overrides */
-    n_byte2 script_overrides;
-
-    /* shouting */
-    n_byte  shout[SHOUT_BYTES];
-
-    /* running average number of conspecifics in the vicinity */
-    n_byte crowding;
-
-    /* posture ranging from quadrupedal to bipedal */
-    n_byte posture;
-
-    /* inventory for various parts of the body */
-    n_byte2 inventory[INVENTORY_SIZE];
-
+    n_byte2     location[2];
+    n_byte      direction_facing;
+    n_byte      velocity;
+    n_byte2     stored_energy;
+    n_byte2     date_of_birth[2];
+    n_byte2     seed[2];
+    n_byte2     macro_state;
+    n_byte2     brain_state[6];
+    n_byte2     height;
+    n_byte2     mass;
+    n_byte2     script_overrides;
+    n_byte      shout[SHOUT_BYTES];
+    n_byte      crowding;
+    n_byte      posture;
+    n_byte2     inventory[INVENTORY_SIZE];
 #ifdef PARASITES_ON
-    n_byte parasites;
-
-    /* social status value */
-    n_byte honor;
+    n_byte      parasites;
+    n_byte      honor;
 #endif
-    
-    n_byte2	date_of_conception[2]; /* constant */
-
-    /* indexes to current focus of attention*/
-    n_byte attention[ATTENTION_SIZE];
-    
+    n_byte2     date_of_conception[2]; /* constant */
+    n_byte      attention[ATTENTION_SIZE];
     n_genetics  genetics[CHROMOSOMES];           /* constant */
     n_genetics  fetal_genetics[CHROMOSOMES];           /* constant */
-
     n_byte2     father_name[2];                  /* why is this needed? */
-    
     n_byte2     social_x;
     n_byte2     social_y;
     n_byte2     social_nx; /* why is this needed? */
     n_byte2     social_ny; /* why is this needed? */
-    
     n_byte      drives[DRIVES];
     n_byte2     goal[4];
-    
     n_byte      learned_preference[PREFERENCES];
-    
     n_byte2     generation_min;
     n_byte2     generation_max;
     n_byte2     child_generation_min;
     n_byte2     child_generation_max;
-    
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
 #endif
 #ifdef IMMUNE_ON
     noble_immune_system immune_system;
 #endif
-
 #ifdef BRAINCODE_ON
     n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
     noble_brain_probe brainprobe[BRAINCODE_PROBES];
 #endif
-    
 #ifdef METABOLISM_ON
     n_byte2 metabolism[METABOLISM_SIZE];
 #endif
-    
 #ifdef METABOLISM_ON
     noble_vessel vessel[VASCULAR_SIZE];
 #endif

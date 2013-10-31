@@ -85,7 +85,7 @@ static void audit_compart_offset()
     audit_print_offset(start,(n_byte *)&(local.fetal_genetics[0]),"fetal_genetics[0]");
     audit_print_offset(start,(n_byte *)&(local.genetics[0]),"genetics[0]");
 
-        audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
+    audit_print_offset(start,(n_byte *)&(local.father_name[0]),"father_name[0]");
 
     audit_print_offset(start,(n_byte *)&(local.social_x),"social_x");
 

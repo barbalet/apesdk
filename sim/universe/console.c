@@ -2358,27 +2358,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 
 n_int console_debug(void * ptr, n_string response, n_console_output output_function)
 {
-    noble_being * local_female = 0L;
-    noble_being * local_male = 0L;
-    noble_simulation * local_sim = ptr;
-    n_uint  loop = 0;
-    do{
-        noble_being * value = &(local_sim->beings[loop++]);
-        
-        if (FIND_SEX(GET_I(value)) == SEX_FEMALE)
-        {
-            local_female = value;
-        }
-        else
-        {
-            local_male = value;
-        }
-        
-    }while((local_female == 0L) || (local_male == 0L));
-    
-    social_conception(local_female,
-                      local_male,
-                      local_sim);
+    file_audit();
     
     return 0;
 }

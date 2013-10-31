@@ -922,3 +922,65 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     local_being->parasites = (n_byte)local_parasites;
 #endif
 }
+
+#define FILE_CHECK(value) io_offset((n_byte*)&here, (n_byte*)value, #value)
+
+void file_audit(void)
+{
+    noble_being    here;    
+    
+    FILE_CHECK(&here.location[0]);
+    FILE_CHECK(&here.direction_facing);
+    FILE_CHECK(&here.velocity);
+    FILE_CHECK(&here.stored_energy);
+    FILE_CHECK(&here.date_of_birth[0]);
+    FILE_CHECK(&here.seed[0]);
+    FILE_CHECK(&here.macro_state);
+    FILE_CHECK(&here.brain_state[0]);
+    FILE_CHECK(&here.height);
+    FILE_CHECK(&here.mass);
+    FILE_CHECK(&here.script_overrides);
+    FILE_CHECK(&here.shout[0]);
+    FILE_CHECK(&here.crowding);
+    FILE_CHECK(&here.posture);
+    FILE_CHECK(&here.inventory[0]);
+#ifdef PARASITES_ON
+    FILE_CHECK(&here.parasites);
+    FILE_CHECK(&here.honor);
+#endif
+    FILE_CHECK(&here.date_of_conception[0]); /* constant */
+    FILE_CHECK(&here.attention[0]);
+    FILE_CHECK(&here.genetics[0]);           /* constant */
+    FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
+    FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */
+    FILE_CHECK(&here.social_x);
+    FILE_CHECK(&here.social_y);
+    FILE_CHECK(&here.social_nx); /* why is this needed? */
+    FILE_CHECK(&here.social_ny); /* why is this needed? */
+    FILE_CHECK(&here.drives[0]);
+    FILE_CHECK(&here.goal[0]);
+    FILE_CHECK(&here.learned_preference[0]);
+    FILE_CHECK(&here.generation_min);
+    FILE_CHECK(&here.generation_max);
+    FILE_CHECK(&here.child_generation_min);
+    FILE_CHECK(&here.child_generation_max);
+#ifdef TERRITORY_ON
+    FILE_CHECK(&here.territory[0]);
+#endif
+#ifdef IMMUNE_ON
+    FILE_CHECK(&here.immune_system);
+#endif
+#ifdef BRAINCODE_ON
+    FILE_CHECK(&here.braincode_register[0]);
+    FILE_CHECK(&here.brainprobe[0]);
+#endif
+#ifdef METABOLISM_ON
+    FILE_CHECK(&here.metabolism[0]);
+#endif
+#ifdef METABOLISM_ON
+    FILE_CHECK(&here.vessel[0]);
+#endif
+    FILE_CHECK(&here.brain[0]);
+    FILE_CHECK(&here.social[0]);
+    FILE_CHECK(&here.episodic[0]);
+}

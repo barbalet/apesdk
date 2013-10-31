@@ -1551,6 +1551,11 @@ void io_time_to_string(n_string value, n_int minutes, n_int days, n_int centurie
     sprintf(value,"%4ld:%ld/%ld",military_time,days,centuries);
 }
 
+void io_offset(n_byte * start, n_byte * point, n_string text)
+{
+    printf("%s %ld\n", text, (n_int)(point - start));
+}
+
 void io_help_line(noble_console_command * specific, n_console_output output_function)
 {
     n_string_block  string_line = {0};
