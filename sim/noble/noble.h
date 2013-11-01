@@ -77,7 +77,7 @@
 #define	NOBLE_APE_SIGNATURE		    (('N'<< 8) | 'A')
 #define	NOBLE_WARFARE_SIGNATURE		(('N'<< 8) | 'W')
 
-#define  COPYRIGHT_NAME		    "Tom Barbalet"
+#define  COPYRIGHT_NAME		    "Tom Barbalet. "
 #define  COPYRIGHT_FOLLOW		"All rights reserved."
 
 #define PACKED_DATA_BLOCK   (32*32*32*2)
@@ -195,7 +195,7 @@ typedef struct
  */
 typedef	struct
 {
-    n_byte  characters[6];
+    n_byte  characters[7];
     n_byte  incl_kind;
     n_byte  number;
     n_byte2 location;

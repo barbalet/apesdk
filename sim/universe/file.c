@@ -71,11 +71,15 @@ static void fileout_land(n_file * file_out, noble_simulation * value, noble_file
 
 static void fileout_being(n_file * file_out, noble_simulation * value, n_int being, noble_file_entry * format)
 {
+#ifdef USE_FIL_SOE
     n_int loop = (SOCIAL_SIZE * being);
     n_int loop_end = loop + SOCIAL_SIZE;
+#endif
+#ifdef USE_FIL_EPI
     n_int loop_episodic = (EPISODIC_SIZE * being);
     n_int loop_episodic_end = loop + EPISODIC_SIZE;
-
+#endif
+    
 #ifdef USE_FIL_BEI
     io_write_buff(file_out, &(value->beings[being]), format, FIL_BEI, 0L);
 #endif
@@ -927,60 +931,69 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
 
 void file_audit(void)
 {
-    noble_being    here;    
-    
-    FILE_CHECK(&here.location[0]);
-    FILE_CHECK(&here.direction_facing);
-    FILE_CHECK(&here.velocity);
-    FILE_CHECK(&here.stored_energy);
-    FILE_CHECK(&here.date_of_birth[0]);
-    FILE_CHECK(&here.seed[0]);
-    FILE_CHECK(&here.macro_state);
-    FILE_CHECK(&here.brain_state[0]);
-    FILE_CHECK(&here.height);
-    FILE_CHECK(&here.mass);
-    FILE_CHECK(&here.script_overrides);
-    FILE_CHECK(&here.shout[0]);
-    FILE_CHECK(&here.crowding);
-    FILE_CHECK(&here.posture);
-    FILE_CHECK(&here.inventory[0]);
+    {
+        noble_being    here;
+
+        FILE_CHECK(&here.location[0]);
+        FILE_CHECK(&here.direction_facing);
+        FILE_CHECK(&here.velocity);
+        FILE_CHECK(&here.stored_energy);
+        FILE_CHECK(&here.date_of_birth[0]);
+        FILE_CHECK(&here.seed[0]);
+        FILE_CHECK(&here.macro_state);
+        FILE_CHECK(&here.brain_state[0]);
+        FILE_CHECK(&here.height);
+        FILE_CHECK(&here.mass);
+        FILE_CHECK(&here.script_overrides);
+        FILE_CHECK(&here.shout[0]);
+        FILE_CHECK(&here.crowding);
+        FILE_CHECK(&here.posture);
+        FILE_CHECK(&here.inventory[0]);
 #ifdef PARASITES_ON
-    FILE_CHECK(&here.parasites);
-    FILE_CHECK(&here.honor);
+        FILE_CHECK(&here.parasites);
+        FILE_CHECK(&here.honor);
 #endif
-    FILE_CHECK(&here.date_of_conception[0]); /* constant */
-    FILE_CHECK(&here.attention[0]);
-    FILE_CHECK(&here.genetics[0]);           /* constant */
-    FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
-    FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */
-    FILE_CHECK(&here.social_x);
-    FILE_CHECK(&here.social_y);
-    FILE_CHECK(&here.social_nx); /* why is this needed? */
-    FILE_CHECK(&here.social_ny); /* why is this needed? */
-    FILE_CHECK(&here.drives[0]);
-    FILE_CHECK(&here.goal[0]);
-    FILE_CHECK(&here.learned_preference[0]);
-    FILE_CHECK(&here.generation_min);
-    FILE_CHECK(&here.generation_max);
-    FILE_CHECK(&here.child_generation_min);
-    FILE_CHECK(&here.child_generation_max);
+        FILE_CHECK(&here.date_of_conception[0]); /* constant */
+        FILE_CHECK(&here.attention[0]);
+        FILE_CHECK(&here.genetics[0]);           /* constant */
+        FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
+        FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */
+        FILE_CHECK(&here.social_x);
+        FILE_CHECK(&here.social_y);
+        FILE_CHECK(&here.social_nx); /* why is this needed? */
+        FILE_CHECK(&here.social_ny); /* why is this needed? */
+        FILE_CHECK(&here.drives[0]);
+        FILE_CHECK(&here.goal[0]);
+        FILE_CHECK(&here.learned_preference[0]);
+        FILE_CHECK(&here.generation_min);
+        FILE_CHECK(&here.generation_max);
+        FILE_CHECK(&here.child_generation_min);
+        FILE_CHECK(&here.child_generation_max);
 #ifdef TERRITORY_ON
-    FILE_CHECK(&here.territory[0]);
+        FILE_CHECK(&here.territory[0]);
 #endif
 #ifdef IMMUNE_ON
-    FILE_CHECK(&here.immune_system);
+        FILE_CHECK(&here.immune_system);
 #endif
 #ifdef BRAINCODE_ON
-    FILE_CHECK(&here.braincode_register[0]);
-    FILE_CHECK(&here.brainprobe[0]);
+        FILE_CHECK(&here.braincode_register[0]);
+        FILE_CHECK(&here.brainprobe[0]);
 #endif
 #ifdef METABOLISM_ON
-    FILE_CHECK(&here.metabolism[0]);
+        FILE_CHECK(&here.metabolism[0]);
 #endif
 #ifdef METABOLISM_ON
-    FILE_CHECK(&here.vessel[0]);
+        FILE_CHECK(&here.vessel[0]);
 #endif
-    FILE_CHECK(&here.brain[0]);
-    FILE_CHECK(&here.social[0]);
-    FILE_CHECK(&here.episodic[0]);
+        FILE_CHECK(&here.brain[0]);
+        FILE_CHECK(&here.social[0]);
+        FILE_CHECK(&here.episodic[0]);
+    }
+    {
+        n_land         here;
+        
+        FILE_CHECK(&here.time);
+        FILE_CHECK(&here.date[0]);
+        FILE_CHECK(&here.genetics[0]);
+    }
 }

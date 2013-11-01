@@ -43,8 +43,8 @@
 #define USE_FIL_VER
 #define USE_FIL_LAN
 #define USE_FIL_BEI
-#define USE_FIL_SOE
-#define USE_FIL_EPI
+#undef USE_FIL_SOE
+#undef USE_FIL_EPI
 #undef USE_FIL_WEA
 #undef USE_FIL_BRA
 
@@ -153,152 +153,151 @@ enum file_section_type
 static const noble_file_entry noble_file_format[]=
 {
 #ifdef USE_FIL_VER
-    {{'s', 'i', 'm', 'u', 'l', '{'}, FIL_VER,  0, 0,                  "Simulation Version Definition"},
-    {{'s', 'i', 'g', 'n', 'a', '='}, FIL_VER | FILE_TYPE_BYTE2, 1, 0, "Simulation signature"},
-    {{'v', 'e', 'r', 'i', 'o', '='}, FIL_VER | FILE_TYPE_BYTE2, 1, 2, "Simulation version number"},
+    {"simul{", FIL_VER,  0, 0,                  "Simulation Version Definition"},
+    {"signa=", FIL_VER | FILE_TYPE_BYTE2, 1, 0, "Simulation signature"},
+    {"verio=", FIL_VER | FILE_TYPE_BYTE2, 1, 2, "Simulation version number"},
 #endif
 #ifdef USE_FIL_LAN
-    {{'l', 'a', 'n', 'd', 'd', '{'}, FIL_LAN,  0, 0, "land definition"},
-    {{'t', 'i', 'm', 'e', 'd', '='}, FIL_LAN | FILE_TYPE_BYTE2, 1, 0,  "Time in minutes"},
-    {{'d', 'a', 't', 'e', 'd', '='}, FIL_LAN | FILE_TYPE_BYTE2, 2, 2,  "Date in days and millenia"},
-    {{'l', 'a', 'n', 'd', 'g', '='}, FIL_LAN | FILE_TYPE_BYTE2, 2, 6,  "Seed that created the land"},
-    {{'t', 'i', 'd', 'e', 's', '='}, FIL_LAN | FILE_TYPE_BYTE,  1, 10, "Tide height value"},
+    {"landd{", FIL_LAN,  0, 0, "land definition"},
+    {"timed=", FIL_LAN | FILE_TYPE_BYTE2, 1, 0,  "Time in minutes"},
+    {"dated=", FIL_LAN | FILE_TYPE_BYTE2, 2, 2,  "Date in days and millenia"},
+    {"landg=", FIL_LAN | FILE_TYPE_BYTE2, 2, 6,  "Seed that created the land"},
 #endif
     /* the line above is a substantial limit to the simulation space. The weather will limit the map area to;
      ((sizeof(n_int)/2) * (MAP_AREA)/(256*256)) <= 255
      */
 #ifdef USE_FIL_WEA
-    {{'w', 'e', 'a', 't', 'h', '{'}, FIL_WEA,  0, 0},
-    {{'p', 'r', 'e', 's', 's', '='}, FIL_WEA | FILE_TYPE_BYTE,    sizeof(n_c_int),    0},
+    {"weath{", FIL_WEA,  0, 0},
+    {"press=", FIL_WEA | FILE_TYPE_BYTE,    sizeof(n_c_int),    0},
 #endif
-
+    
 #ifndef REDUCE_FILE /* FILE_TYPE_PACKED has a different form - no offset and the number is the size of the PACKED_DATA_BLOCK units */
-    /*	{{'a', 't', 'm', 'o', 's', '='}, FIL_WEA | DONTFILE_TYPE_PACKED, ((sizeof(n_c_int) * MAP_AREA) / (PACKED_DATA_BLOCK*2)), 1},*/
+    /*	{"atmos=", FIL_WEA | DONTFILE_TYPE_PACKED, ((sizeof(n_c_int) * MAP_AREA) / (PACKED_DATA_BLOCK*2)), 1},*/
 #endif
-
+    
 #ifdef USE_FIL_BEI
-    {{'b', 'e', 'i', 'n', 'g', '{'}, FIL_BEI,  0, 0,                  "Being Definition"},
-    {{'l', 'o', 'c', 'a', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, 	/*n_byte2	x;n_byte2	y;*/
-    {{'f', 'a', 'c', 'i', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 4, "Direction facing"},    /*n_byte	facing;*/
-    {{'s', 'p', 'e', 'e', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 5, "Speed traveling"},    /*n_byte	speed;*/
-    {{'e', 'n', 'e', 'r', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 6, "Energy within"},   /*n_byte2	energy;*/
-    {{'d', 'a', 't', 'o', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, 8, "Date of birth in days and millenia"},    /*n_byte2	date_of_birth[2];*/
-    {{'s', 'p', 'e', 'a', 'k', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 12,"Speaking"},    /*n_byte2	speak;*/
-    {{'r', 'a', 'n', 'd', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, 14,"Random within"},    /*n_byte2 seed[2];*/
-    {{'s', 't', 'a', 't', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 18,"State description"},    /*n_byte2	state;*/
-
-    {{'b', 'r', 'a', 'i', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2, 6, 20,"Brain state values"},    /*n_byte2	brain_state[6];*/
-
-    {{'h', 'e', 'i', 'g', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 32, "Height"},    /*n_byte2	height;*/
-    {{'m', 'a', 's', 's', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 34, "Mass"},    /*n_byte2	mass;*/
-    {{'o', 'v', 'e', 'r', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE2, 1, 36, "ApeScript overrides"},    /*n_byte2  script_overrides;*/
-    {{'s', 'h', 'o', 'u', 't', '='}, FIL_BEI | FILE_TYPE_BYTE,  SHOUT_BYTES, 38, "Shouting values"},    /*n_byte  shout[SHOUT_BYTES];*/
-    {{'c', 'r', 'o', 'w', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 44, "Crowding"},     /*n_byte	crowding;*/
-    {{'p', 'o', 's', 't', 'u', '='}, FIL_BEI | FILE_TYPE_BYTE,  1, 45, "Posture"},     /*n_byte	posture;*/
-    {{'i', 'n', 'v', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2,  INVENTORY_SIZE, 46, "Inventory"},     /*n_byte2	inventory[INVENTORY_SIZE];*/
-
+    {"being{", FIL_BEI,  0, 0,                  "Being Definition"},
+    {"locat=", FIL_BEI | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, 	/*n_byte2	x;n_byte2	y;*/
+    {"facin=", FIL_BEI | FILE_TYPE_BYTE,  1, 4, "Direction facing"},    /*n_byte	facing;*/
+    {"speed=", FIL_BEI | FILE_TYPE_BYTE,  1, 5, "Speed traveling"},    /*n_byte	speed;*/
+    {"energ=", FIL_BEI | FILE_TYPE_BYTE2, 1, 6, "Energy within"},   /*n_byte2	energy;*/
+    {"datob=", FIL_BEI | FILE_TYPE_BYTE2, 2, 8, "Date of birth in days and millenia"},    /*n_byte2	date_of_birth[2];*/
+    {"rando=", FIL_BEI | FILE_TYPE_BYTE2, 2, 12,"Random within"},    /*n_byte2 seed[2];*/
+    {"state=", FIL_BEI | FILE_TYPE_BYTE2, 1, 16,"State description"},    /*n_byte2	state;*/
+    
+    {"brast=", FIL_BEI | FILE_TYPE_BYTE2, 6, 18,"Brain state values"},    /*n_byte2	brain_state[6];*/
+    
+    {"heigt=", FIL_BEI | FILE_TYPE_BYTE2, 1, 30, "Height"},    /*n_byte2	height;*/
+    {"masss=", FIL_BEI | FILE_TYPE_BYTE2, 1, 32, "Mass"},    /*n_byte2	mass;*/
+    {"overr=", FIL_BEI | FILE_TYPE_BYTE2, 1, 34, "ApeScript overrides"},    /*n_byte2  script_overrides;*/
+    {"shout=", FIL_BEI | FILE_TYPE_BYTE,  SHOUT_BYTES, 36, "Shouting values"},    /*n_byte  shout[SHOUT_BYTES];*/
+    {"crowd=", FIL_BEI | FILE_TYPE_BYTE,  1, 42, "Crowding"},     /*n_byte	crowding;*/
+    {"postu=", FIL_BEI | FILE_TYPE_BYTE,  1, 43, "Posture"},     /*n_byte	posture;*/
+    {"inven=", FIL_BEI | FILE_TYPE_BYTE2,  INVENTORY_SIZE, 44, "Inventory"},     /*n_byte2	inventory[INVENTORY_SIZE];*/
+    
 #ifdef PARASITES_ON
-    {{'p', 'a', 'r', 'a', 's', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, 62, "Number of parasites"},     /*n_byte  parasites;*/
-    {{'h', 'o', 'n', 'o', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE, 1, 63, "Honor"},     /*n_byte  honor;*/
+    {"paras=", FIL_BEI | FILE_TYPE_BYTE, 1, 60, "Number of parasites"},     /*n_byte  parasites;*/
+    {"honor=", FIL_BEI | FILE_TYPE_BYTE, 1, 61, "Honor"},     /*n_byte  honor;*/
 #endif
-    {{'c', 'o', 'n', 'c', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, 2, 64, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
-
-    {{'a', 't', 't', 'e', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, 68, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/
+    {"conce=", FIL_BEI | FILE_TYPE_BYTE2, 2, 62, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
     
-    {{'m', 'o', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, 76, "Mother genetics"}, /*n_genetics mother_genetics[CHROMOSOMES];*/
-
-    {{'f', 'a', 't', 'h', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES*2, 92, "Father genetics"}, /*n_genetics father_genetics[CHROMOSOMES];*/
-
-    {{'g', 'e', 'n', 'e', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, 108, "Genetics"}, /*n_genetics   genetics[CHROMOSOMES];*/
+    {"atten=", FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, 66, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/
     
-    {{'f', 'a', 't', 'h', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE , 2, 126, "Father family names"}, /*n_byte  father_name[2];*/
-
+    {"genet=", FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, 72, "Genetics"}, /*n_genetics   genetics[CHROMOSOMES];*/
     
-    {{'s', 'o', 's', 'i', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 130, "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
+    {"fetag=", FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, 88, "Father genetics"}, /*n_genetics fetal_genetics[CHROMOSOMES];*/
     
-    {{'d', 'r', 'i', 'v', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, DRIVES, 138, "Drives"}, /*n_byte   drives[DRIVES];*/
-    {{'g', 'o', 'a', 'l', 's', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 142, "Goals"},
-
-    {{'p', 'r', 'e', 'f', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE, PREFERENCES, 150, "Preferences"},
-    {{'g', 'e', 'n', 'e', 'r', '='}, FIL_BEI | FILE_TYPE_BYTE2, 4, 164, "Generations"},
+    {"fathn=", FIL_BEI | FILE_TYPE_BYTE , 2, 104, "Father family names"}, /*n_byte  father_name[2];*/
+    
+    
+    {"sosim=", FIL_BEI | FILE_TYPE_BYTE2, 4, 108, "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
+    
+    {"drive=", FIL_BEI | FILE_TYPE_BYTE, DRIVES, 116, "Drives"}, /*n_byte   drives[DRIVES];*/
+    {"goals=", FIL_BEI | FILE_TYPE_BYTE2, 4, 120, "Goals"},
+    
+    {"prefe=", FIL_BEI | FILE_TYPE_BYTE, PREFERENCES, 128, "Preferences"},
+    {"genex=", FIL_BEI | FILE_TYPE_BYTE2, 1, 142, "Generation Max"},
+    {"genen=", FIL_BEI | FILE_TYPE_BYTE2, 1, 144, "Generation Min"},
+    {"chigx=", FIL_BEI | FILE_TYPE_BYTE2, 1, 146, "Child Generation Max"},
+    {"chign=", FIL_BEI | FILE_TYPE_BYTE2, 1, 148, "Child Generation Min"},
 #ifdef TERRITORY_ON
-    {{'t', 'e', 'r', 'i', 't', '='}, FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES/2, 172, "Territory information"},
+    {"terit=", FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES/2, 150, "Territory information"},
 #endif
 #ifdef IMMUNE_ON
-    {{'i', 'm', 'm', 'u', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE, IMMUNE_BYTES, 428, "Immune system information"},
+    {"immun=", FIL_BEI | FILE_TYPE_BYTE, IMMUNE_BYTES, 406, "Immune system information"},
 #endif
-
+    
 #ifdef BRAINCODE_ON
-    {{'b', 'r', 'r', 'e', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, 476, "Brain code register"},
-    {{'b', 'r', 'p', 'r', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE, (sizeof(noble_brain_probe)*BRAINCODE_PROBES), 479, "Brain code probe"},
+    {"brreg=", FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, 454, "Brain code register"},
+    {"brpro=", FIL_BEI | FILE_TYPE_BYTE, (sizeof(noble_brain_probe)*BRAINCODE_PROBES), 457, "Brain code probe"},
 #endif
     
 #ifdef METABOLISM_ON
-    {{'m', 'e', 't', 'a', 'o', '='}, FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, 576, "Metabolism"},
-
+    {"metao=", FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, 554, "Metabolism"},
+    
     /* fixed to here */
-/*
-    {{'v', 'a', 's', 'c', 'a', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR, "Vascular system 1"},
-    {{'v', 'a', 's', 'c', 'b', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*2), "Vascular system 2"},
-    {{'v', 'a', 's', 'c', 'c', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*4), "Vascular system 3"},
-    {{'v', 'a', 's', 'c', 'd', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*6), "Vascular system 4"},
-    {{'v', 'a', 's', 'c', 'e', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*8), "Vascular system 5"},
-    {{'v', 'a', 's', 'c', 'f', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*10), "Vascular system 6"},
-    {{'v', 'a', 's', 'c', 'g', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*12), "Vascular system 7"},
-    {{'v', 'a', 's', 'c', 'h', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*14), "Vascular system 8"},
-    {{'v', 'a', 's', 'c', 'i', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*16), "Vascular system 9"},
-    {{'v', 'a', 's', 'c', 'j', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*18), "Vascular system 10"},
-    {{'v', 'a', 's', 'c', 'k', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*20), "Vascular system 11"},
-    {{'v', 'a', 's', 'c', 'l', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*22), "Vascular system 12"},
-    {{'v', 'a', 's', 'c', 'm', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*24), "Vascular system 13"},
-    {{'v', 'a', 's', 'c', 'n', '='}, FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*26), "Vascular system 14"},
-*/
+    /*
+     {"vasca=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR, "Vascular system 1"},
+     {"vascb=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*2), "Vascular system 2"},
+     {"vascc=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*4), "Vascular system 3"},
+     {"vascd=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*6), "Vascular system 4"},
+     {"vasce=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*8), "Vascular system 5"},
+     {"vascf=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*10), "Vascular system 6"},
+     {"vascg=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*12), "Vascular system 7"},
+     {"vasch=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*14), "Vascular system 8"},
+     {"vasci=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*16), "Vascular system 9"},
+     {"vascj=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*18), "Vascular system 10"},
+     {"vasck=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*20), "Vascular system 11"},
+     {"vascl=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*22), "Vascular system 12"},
+     {"vascm=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*24), "Vascular system 13"},
+     {"vascn=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*26), "Vascular system 14"},
+     */
 #endif
     
 #endif
-
+    
 #ifdef USE_FIL_SOE
-    {{'s', 'g', 'c', 'i', 'a', '{'}, FIL_SOE,  0, 0, "Social graph definition"},
-    {{'s', 'g', 'l', 'o', 'c', '='}, FIL_SOE | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, /* n_byte2 location[2];*/
-    {{'s', 'g', 't', 'i', 'm', '='}, FIL_SOE | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
-    {{'s', 'g', 'd', 'a', 't', '='}, FIL_SOE | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
-    {{'s', 'g', 'f', 'i', 'n', '='}, FIL_SOE | FILE_TYPE_BYTE2, 1, 10, "First name"},/* n_byte2 first_name;*/
-    {{'s', 'g', 'f', 'a', 'n', '='}, FIL_SOE | FILE_TYPE_BYTE2, 1, 12, "Family name"},/* n_byte2 family_name;*/
-
-    {{'s', 'g', 'a', 't', 't', '='}, FIL_SOE | FILE_TYPE_BYTE,  1, 14, "Attraction"},/* n_byte   attraction;*/
-    {{'s', 'g', 'f', 'o', 'f', '='}, FIL_SOE | FILE_TYPE_BYTE,  1, 15, "Friend or foe"},/* n_byte   friend_foe;*/
-    {{'s', 'g', 'b', 'e', 'l', '='}, FIL_SOE | FILE_TYPE_BYTE2, 1, 16, "Belief"},/* n_byte2  belief;*/
-    {{'s', 'g', 'f', 'a', 'm', '='}, FIL_SOE | FILE_TYPE_BYTE2, 1, 18, "Familiarity"},/* n_byte2  familiarity;*/
-
-    {{'s', 'g', 'r', 'e', 'l', '='}, FIL_SOE | FILE_TYPE_BYTE,  1, 20, "Relationship"},/* n_byte   relationship;*/
-    {{'s', 'g', 'u', 'n', 'u', '='}, FIL_SOE | FILE_TYPE_BYTE,  1, 21, "Unused"},/* n_byte   relationship;*/
-
+    {"sgcia{", FIL_SOE,  0, 0, "Social graph definition"},
+    {"sgloc=", FIL_SOE | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, /* n_byte2 location[2];*/
+    {"sgtim=", FIL_SOE | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
+    {"sgdat=", FIL_SOE | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
+    {"sgfin=", FIL_SOE | FILE_TYPE_BYTE2, 1, 10, "First name"},/* n_byte2 first_name;*/
+    {"sgfan=", FIL_SOE | FILE_TYPE_BYTE2, 1, 12, "Family name"},/* n_byte2 family_name;*/
+    
+    {"sgatt=", FIL_SOE | FILE_TYPE_BYTE,  1, 14, "Attraction"},/* n_byte   attraction;*/
+    {"sgfof=", FIL_SOE | FILE_TYPE_BYTE,  1, 15, "Friend or foe"},/* n_byte   friend_foe;*/
+    {"sgbel=", FIL_SOE | FILE_TYPE_BYTE2, 1, 16, "Belief"},/* n_byte2  belief;*/
+    {"sgfam=", FIL_SOE | FILE_TYPE_BYTE2, 1, 18, "Familiarity"},/* n_byte2  familiarity;*/
+    
+    {"sgrel=", FIL_SOE | FILE_TYPE_BYTE,  1, 20, "Relationship"},/* n_byte   relationship;*/
+    {"sgunu=", FIL_SOE | FILE_TYPE_BYTE,  1, 21, "Unused"},/* n_byte   relationship;*/
+    
 #ifdef BRAINCODE_ON
-    {{'s', 'g', 'b', 'r', 'c', '='}, FIL_SOE | FILE_TYPE_BYTE_EXT, BRAINCODE_SIZE, 22, "Local braincode"}, /*n_byte   braincode[BRAINCODE_SIZE];*/
+    {"sgbrc=", FIL_SOE | FILE_TYPE_BYTE_EXT, BRAINCODE_SIZE, 22, "Local braincode"}, /*n_byte   braincode[BRAINCODE_SIZE];*/
 #endif
-
+    
 #endif
-
+    
 #ifdef USE_FIL_EPI
-    {{'e', 'p', 'i', 's', 'o', '{'}, FIL_EPI,  0, 0, "Episodic memory definition"},
-    {{'e', 'p', 'l', 'o', 'c', '='}, FIL_EPI | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, /* n_byte2 location[2];*/
-    {{'e', 'p', 't', 'i', 'm', '='}, FIL_EPI | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
-    {{'e', 'p', 'd', 'a', 't', '='}, FIL_EPI | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
-    {{'e', 'p', 'f', 'i', 'n', '='}, FIL_EPI | FILE_TYPE_BYTE2, 1, 10, "First name"},/* n_byte2 first_name;*/
-    {{'e', 'p', 'f', 'a', 'n', '='}, FIL_EPI | FILE_TYPE_BYTE2, 1, 12, "Family name"},/* n_byte2 family_name;*/
-
-    {{'e', 'p', 'e', 'v', 'e', '='}, FIL_EPI | FILE_TYPE_BYTE,  1, 14, "Event"},/* n_byte   event;*/
-    {{'e', 'p', 'f', 'o', 'o', '='}, FIL_EPI | FILE_TYPE_BYTE,  1, 15, "Food"},/* n_byte   food;*/
-    {{'e', 'p', 'b', 'e', 'l', '='}, FIL_EPI | FILE_TYPE_BYTE2, 1, 16, "Belief"},/* n_byte2  affect;*/
-    {{'e', 'p', 'a', 'r', 'g', '='}, FIL_EPI | FILE_TYPE_BYTE2, 1, 18, "Arg"},/* n_byte2  arg;*/
+    {"episo{", FIL_EPI,  0, 0, "Episodic memory definition"},
+    {"eploc=", FIL_EPI | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, /* n_byte2 location[2];*/
+    {"eptim=", FIL_EPI | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
+    {"epdat=", FIL_EPI | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
+    {"epfin=", FIL_EPI | FILE_TYPE_BYTE2, 1, 10, "First name"},/* n_byte2 first_name;*/
+    {"epfan=", FIL_EPI | FILE_TYPE_BYTE2, 1, 12, "Family name"},/* n_byte2 family_name;*/
+    
+    {"epeve=", FIL_EPI | FILE_TYPE_BYTE,  1, 14, "Event"},/* n_byte   event;*/
+    {"epfoo=", FIL_EPI | FILE_TYPE_BYTE,  1, 15, "Food"},/* n_byte   food;*/
+    {"epbel=", FIL_EPI | FILE_TYPE_BYTE2, 1, 16, "Belief"},/* n_byte2  affect;*/
+    {"eparg=", FIL_EPI | FILE_TYPE_BYTE2, 1, 18, "Arg"},/* n_byte2  arg;*/
 #endif
-
+    
 #ifndef REDUCE_FILE  /* FILE_TYPE_PACKED has a different form - no offset and the number is the size of the PACKED_DATA_BLOCK units */
-    /*    {{'b', 'r', 'd', 'a', 't', '='}, FIL_BRA | DONTFILE_TYPE_PACKED, DOUBLE_BRAIN/PACKED_DATA_BLOCK, 1 },*/
+    /*    {"brdat=", FIL_BRA | DONTFILE_TYPE_PACKED, DOUBLE_BRAIN/PACKED_DATA_BLOCK, 1 },*/
 #endif
-
-    {{0, 0, 0, 0, 0, 0},0, 0, 0, 0L}
-
+    
+    {{0, 0, 0, 0, 0, 0, 0},0, 0, 0, 0L}
+    
 };
 
 #define	BRAIN_LOCATION(lx, ly, lz)	(BRAIN_OFFSET((lx)|((ly)<<5)|((lz)<<10)))
