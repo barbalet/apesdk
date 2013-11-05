@@ -1003,11 +1003,16 @@ enum featureset_members {
 
 typedef struct
 {
-    n_byte2  no_of_features;
-    n_byte   feature_type[MAX_FEATURESET_SIZE];
-    n_byte2  feature_value[MAX_FEATURESET_SIZE];
-    n_byte2  feature_frequency[MAX_FEATURESET_SIZE];
-    n_byte2  observations;
+    n_byte2  value;
+    n_byte2  frequency;
+    n_byte   type;
+} noble_feature;
+
+typedef struct
+{
+    n_byte2         feature_number;
+    noble_feature   features[MAX_FEATURESET_SIZE];
+    n_byte2         observations;
 } noble_featureset;
 
 /*! @struct
@@ -1029,8 +1034,6 @@ typedef struct
  */
 typedef struct
 {
-    n_byte   entity_type;
-
     n_byte2  location[2];
     n_byte2  time;
     n_byte2  date[2];
@@ -1044,6 +1047,8 @@ typedef struct
     n_byte2  familiarity;
 
     n_byte   relationship;
+
+    n_byte   entity_type;
 
     noble_featureset classification;
 

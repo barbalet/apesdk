@@ -98,15 +98,15 @@ static n_int noble_featureset_feature_index(noble_featureset * s,
 {
     n_int i=0;
 
-    while (i < s->no_of_features)
+    while (i < s->feature_number)
     {
-        if (s->feature_type[i] >= feature_type)
+        if (s->features[i].type >= feature_type)
         {
             break;
         }
         i++;
     }
-    if (i == s->no_of_features)
+    if (i == s->feature_number)
     {
         return -1;
     }
@@ -123,14 +123,14 @@ static void noble_featureset_normalise_feature_frequencies(noble_featureset *s)
     n_uint max = MAX_FEATURE_FREQUENCY>>1;
 
     /** get the total frequency count */
-    for (i = 0; i < s->no_of_features; i++)
+    for (i = 0; i < s->feature_number; i++)
     {
-        tot += (n_uint)s->feature_frequency[i];
+        tot += (n_uint)s->features[i].frequency;
     }
-    for (i = 0; i < s->no_of_features; i++)
+    for (i = 0; i < s->feature_number; i++)
     {
-        s->feature_frequency[i] =
-            (n_byte2)((n_uint)s->feature_frequency[i] * max / tot);
+        s->features[i].frequency =
+            (n_byte2)((n_uint)s->features[i].frequency * max / tot);
     }
 }
 
@@ -150,14 +150,14 @@ static n_int noble_featureset_update(noble_featureset * s,
     n_byte2 min;
     n_int i,j;
 
-    if (s->feature_type[feature_index] == (n_byte)feature_type)
+    if (s->features[feature_index].type == (n_byte)feature_type)
     {
         /** alter the value associated with an existing feature type */
-        s->feature_value[feature_index] = (n_byte2)feature_value;
-        s->feature_frequency[feature_index]++;
+        s->features[feature_index].value = (n_byte2)feature_value;
+        s->features[feature_index].frequency++;
         /** normalise the feature frequencies to prevent them
             from going out of bounds */
-        if (s->feature_frequency[feature_index] > MAX_FEATURE_FREQUENCY)
+        if (s->features[feature_index].frequency > MAX_FEATURE_FREQUENCY)
         {
             noble_featureset_normalise_feature_frequencies(s);
         }
@@ -165,44 +165,44 @@ static n_int noble_featureset_update(noble_featureset * s,
     }
     else
     {
-        if (s->no_of_features < MAX_FEATURESET_SIZE)
+        if (s->feature_number < MAX_FEATURESET_SIZE)
         {
             /** add a new feature type to the array */
-            if (s->no_of_features > 1)
+            if (s->feature_number > 1)
             {
-                for (i = (n_int)s->no_of_features-1; i >= (n_int)feature_index; i--)
+                for (i = (n_int)s->feature_number-1; i >= (n_int)feature_index; i--)
                 {
-                    s->feature_type[i+1] = s->feature_type[i];
-                    s->feature_value[i+1] = s->feature_value[i];
-                    s->feature_frequency[i+1] = s->feature_frequency[i];
+                    s->features[i+1].type = s->features[i].type;
+                    s->features[i+1].value = s->features[i].value;
+                    s->features[i+1].frequency = s->features[i].frequency;
                 }
             }
 
             i = feature_index;
-            s->no_of_features++;
-            s->feature_type[i] = (n_byte)feature_type;
-            s->feature_value[i] = (n_byte2)feature_value;
-            s->feature_frequency[i] = (n_byte2)1;
+            s->feature_number++;
+            s->features[i].type = (n_byte)feature_type;
+            s->features[i].value = (n_byte2)feature_value;
+            s->features[i].frequency = (n_byte2)1;
             return 0;
         }
         else
         {
             /** pick the least frequent feature and replace it */
-            min = s->feature_frequency[0];
+            min = s->features[0].frequency;
             feature_index = 0;
-            for (i = 1; i < (n_int)s->no_of_features; i++)
+            for (i = 1; i < (n_int)s->feature_number; i++)
             {
-                if (s->feature_frequency[i] < min)
+                if (s->features[i].frequency < min)
                 {
-                    min = s->feature_frequency[i];
+                    min = s->features[i].frequency;
                     feature_index = i;
                 }
             }
             /** re-sort */
             j = 0;
-            for (i = 0; i < (n_int)s->no_of_features; i++)
+            for (i = 0; i < (n_int)s->feature_number; i++)
             {
-                if (s->feature_type[i] >= (n_byte)feature_type)
+                if (s->features[i].type >= (n_byte)feature_type)
                 {
                     j = i;
                     break;
@@ -210,22 +210,22 @@ static n_int noble_featureset_update(noble_featureset * s,
             }
             for (i = (n_int)feature_index; i > j; i--)
             {
-                s->feature_type[i] = s->feature_type[i-1];
-                s->feature_value[i] = s->feature_value[i-1];
-                s->feature_frequency[i] = s->feature_frequency[i-1];
+                s->features[i].type = s->features[i-1].type;
+                s->features[i].value = s->features[i-1].value;
+                s->features[i].frequency = s->features[i-1].frequency;
             }
-            s->feature_type[j] =  (n_byte)feature_type;
-            s->feature_value[j] =  (n_byte2)feature_value;
-            s->feature_frequency[j] = (n_byte2)1;
-            for (i = 0; i < (n_int)s->no_of_features; i++)
+            s->features[j].type =  (n_byte)feature_type;
+            s->features[j].value =  (n_byte2)feature_value;
+            s->features[j].frequency = (n_byte2)1;
+            for (i = 0; i < (n_int)s->feature_number; i++)
             {
-                for (j = i+1; j < (n_int)s->no_of_features; j++)
+                for (j = i+1; j < (n_int)s->feature_number; j++)
                 {
-                    if (s->feature_type[j] < s->feature_type[i])
+                    if (s->features[j].type < s->features[i].type)
                     {
-                        feature_type = s->feature_type[i];
-                        s->feature_type[i] = s->feature_type[j];
-                        s->feature_type[j] = (n_byte)feature_type;
+                        feature_type = s->features[i].type;
+                        s->features[i].type = s->features[j].type;
+                        s->features[j].type = (n_byte)feature_type;
                     }
                 }
             }
@@ -323,18 +323,18 @@ static n_int social_get_stereotype(
             diff = 0;
             hits = 0;
             /** for every feature within the stereotype */
-            for (j = 0; j < s1->no_of_features; j++)
+            for (j = 0; j < s1->feature_number; j++)
             {
                 /** does this feature exist for the met being? */
                 index =
                     noble_featureset_feature_index(s2,
-                                                   s1->feature_type[j]);
+                                                   s1->features[j].type);
                 if (index > -1)
                 {
                     hits++;
                     /** difference between the feature values */
-                    dv = (n_int)s1->feature_value[j] -
-                         (n_int)s2->feature_value[index];
+                    dv = (n_int)s1->features[j].value -
+                         (n_int)s2->features[index].value;
                     if (dv < 0) dv = -dv;
 
                     /** update the total difference between the stereotype
@@ -343,11 +343,11 @@ static n_int social_get_stereotype(
 
                     /** does the stereotype feature match the met being feature?
                         if so then increment the observation frequency */
-                    if (dv < featureset_match_threshold(s1->feature_type[j]))
+                    if (dv < featureset_match_threshold(s1->features[j].type))
                     {
                         /** increment the frequency of stereotype features */
-                        s1->feature_frequency[j]++;
-                        if (s1->feature_frequency[j] > MAX_FEATURE_FREQUENCY)
+                        s1->features[j].frequency++;
+                        if (s1->features[j].frequency > MAX_FEATURE_FREQUENCY)
                         {
                             normalise_features = 1;
                         }
@@ -356,7 +356,7 @@ static n_int social_get_stereotype(
             }
             /** if all stereotype features were matched
                 and the match was better than the best found */
-            if (hits == s1->no_of_features)
+            if (hits == s1->feature_number)
             {
                 if ((result == -1) || (diff < min))
                 {
