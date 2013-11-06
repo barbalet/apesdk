@@ -87,6 +87,21 @@
 
 #define GENE_LATENT_ENERGY_USE(gene)        GENE_VAL_REG(gene, 14, 3, 6, 10)
 
+
+static void noble_feature_copy(noble_feature * to, noble_feature * from)
+{
+    to->type = from->type;
+    to->value = from->value;
+    to->frequency = from->frequency;
+}
+
+static void noble_feature_set(noble_feature * to, n_byte feature_type, n_byte2 feature_value)
+{
+    to->type =  (n_byte)feature_type;
+    to->value =  (n_byte2)feature_value;
+    to->frequency = (n_byte2)1;
+}
+
 /**
  * @brief Returns the array index of a given feature type within a set
  * @param s A set of features
@@ -127,10 +142,12 @@ static void noble_featureset_normalise_feature_frequencies(noble_featureset *s)
     {
         tot += (n_uint)s->features[i].frequency;
     }
+    
+    if (tot == 0) tot = 1;
+    
     for (i = 0; i < s->feature_number; i++)
     {
-        s->features[i].frequency =
-            (n_byte2)((n_uint)s->features[i].frequency * max / tot);
+        s->features[i].frequency = (n_byte2)((n_uint)s->features[i].frequency * max / tot);
     }
 }
 
@@ -172,17 +189,13 @@ static n_int noble_featureset_update(noble_featureset * s,
             {
                 for (i = (n_int)s->feature_number-1; i >= (n_int)feature_index; i--)
                 {
-                    s->features[i+1].type = s->features[i].type;
-                    s->features[i+1].value = s->features[i].value;
-                    s->features[i+1].frequency = s->features[i].frequency;
+                    noble_feature_copy(&(s->features[i+1]), &(s->features[i]));
                 }
             }
 
             i = feature_index;
             s->feature_number++;
-            s->features[i].type = (n_byte)feature_type;
-            s->features[i].value = (n_byte2)feature_value;
-            s->features[i].frequency = (n_byte2)1;
+            noble_feature_set(&(s->features[i]), (n_byte)feature_type, (n_byte2)feature_value);
             return 0;
         }
         else
@@ -210,13 +223,12 @@ static n_int noble_featureset_update(noble_featureset * s,
             }
             for (i = (n_int)feature_index; i > j; i--)
             {
-                s->features[i].type = s->features[i-1].type;
-                s->features[i].value = s->features[i-1].value;
-                s->features[i].frequency = s->features[i-1].frequency;
+                noble_feature_copy(&(s->features[i]), &(s->features[i-1]));
             }
-            s->features[j].type =  (n_byte)feature_type;
-            s->features[j].value =  (n_byte2)feature_value;
-            s->features[j].frequency = (n_byte2)1;
+            
+            
+            noble_feature_set(&(s->features[j]), (n_byte)feature_type, (n_byte2)feature_value);
+            
             for (i = 0; i < (n_int)s->feature_number; i++)
             {
                 for (j = i+1; j < (n_int)s->feature_number; j++)
@@ -326,9 +338,7 @@ static n_int social_get_stereotype(
             for (j = 0; j < s1->feature_number; j++)
             {
                 /** does this feature exist for the met being? */
-                index =
-                    noble_featureset_feature_index(s2,
-                                                   s1->features[j].type);
+                index = noble_featureset_feature_index(s2, s1->features[j].type);
                 if (index > -1)
                 {
                     hits++;
