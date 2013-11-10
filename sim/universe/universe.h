@@ -51,6 +51,8 @@
 #define IMMUNE_ON     /* entity */
 #define METABOLISM_ON /* entity */
 
+#undef  FEATURE_SET
+
 /* dimension of the territory map */
 #define TERRITORY_DIMENSION           (MAP_DIMENSION>>6)
 #define TERRITORY_AREA                (TERRITORY_DIMENSION*TERRITORY_DIMENSION)
@@ -628,16 +630,23 @@ enum being_interaction_social
 
 #define PAIR_BOND_THRESHOLD 2  /* minimum level of attraction for mating */
 
+#ifdef FEATURE_SET
+
 #define MAX_FEATURESET_SIZE 16  /* max size of a set of features associated with a social graph entry */
-#define SOCIAL_SIZE         12  /* maximum size of the social network */
-#define SOCIAL_SIZE_BEINGS  (SOCIAL_SIZE>>1) /* max number of specific beings within the social graph */
-#define EPISODIC_SIZE       12  /* maximum number of episodic memories */
 
 /* The maximum hit counter value for each feature within a set */
 #define MAX_FEATURE_FREQUENCY 2048
 
 /* the maximum number of matches of a stereotype */
 #define MAX_FEATURESET_OBSERVATIONS 2048
+
+#endif
+
+#define SOCIAL_SIZE         12  /* maximum size of the social network */
+#define SOCIAL_SIZE_BEINGS  (SOCIAL_SIZE>>1) /* max number of specific beings within the social graph */
+#define EPISODIC_SIZE       12  /* maximum number of episodic memories */
+
+
 
 /* ApeScript overrides */
 #define OVERRIDE_GOAL		1
@@ -1008,12 +1017,16 @@ typedef struct
     n_byte   type;
 } noble_feature;
 
+#ifdef FEATURE_SET
+
 typedef struct
 {
     n_byte2         feature_number;
     noble_feature   features[MAX_FEATURESET_SIZE];
     n_byte2         observations;
 } noble_featureset;
+
+#endif
 
 /*! @struct
  @discussion This describes a disposition towards other beings or things
@@ -1049,9 +1062,11 @@ typedef struct
     n_byte   relationship;
 
     n_byte   entity_type;
-
+    
+#ifdef FEATURE_SET
     noble_featureset classification;
-
+#endif
+    
 #ifdef BRAINCODE_ON
     n_byte   braincode[BRAINCODE_SIZE];
 #endif

@@ -102,6 +102,8 @@ static void noble_feature_set(noble_feature * to, n_byte feature_type, n_byte2 f
     to->frequency = (n_byte2)1;
 }
 
+#ifdef FEATURE_SET
+
 /**
  * @brief Returns the array index of a given feature type within a set
  * @param s A set of features
@@ -471,6 +473,8 @@ static void social_meet_update_features(
                             meeter_being->territory[idx].name);
 #endif
 }
+
+#endif
 
 /**
  * @brief Returns a string for the name of the ape in the given social graph array index.
@@ -877,6 +881,7 @@ static n_int social_meet(
 
     if ((met == 1) || ((met == 0) && (index > 0)))
     {
+#ifdef FEATURE_SET
         /** record the observable features of the being which was met */
         social_meet_update_features(
             meeter_being, met_being, index);
@@ -884,7 +889,7 @@ static n_int social_meet(
         /** get the social graph index of the corresponding stereotype */
         stereotype_index = social_get_stereotype(
             meeter_being, index);
-
+#endif
         /** set the focus of attention to this being */
         GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)index;
 
