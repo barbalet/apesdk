@@ -43,8 +43,8 @@
 #define USE_FIL_VER
 #define USE_FIL_LAN
 #define USE_FIL_BEI
-#undef USE_FIL_SOE
-#undef USE_FIL_EPI
+#define USE_FIL_SOE
+#define USE_FIL_EPI
 #undef USE_FIL_WEA
 #undef USE_FIL_BRA
 
@@ -262,18 +262,18 @@ static const noble_file_entry noble_file_format[]=
     {"sgtim=", FIL_SOE | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
     {"sgdat=", FIL_SOE | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
     {"sgfin=", FIL_SOE | FILE_TYPE_BYTE2, 1, 10, "First name"},/* n_byte2 first_name;*/
-    {"sgfan=", FIL_SOE | FILE_TYPE_BYTE2, 1, 12, "Family name"},/* n_byte2 family_name;*/
+    {"sgfan=", FIL_SOE | FILE_TYPE_BYTE2, 1, 14, "Family name"},/* n_byte2 family_name;*/
     
-    {"sgatt=", FIL_SOE | FILE_TYPE_BYTE,  1, 14, "Attraction"},/* n_byte   attraction;*/
-    {"sgfof=", FIL_SOE | FILE_TYPE_BYTE,  1, 15, "Friend or foe"},/* n_byte   friend_foe;*/
-    {"sgbel=", FIL_SOE | FILE_TYPE_BYTE2, 1, 16, "Belief"},/* n_byte2  belief;*/
-    {"sgfam=", FIL_SOE | FILE_TYPE_BYTE2, 1, 18, "Familiarity"},/* n_byte2  familiarity;*/
+    {"sgatt=", FIL_SOE | FILE_TYPE_BYTE,  1, 18, "Attraction"},/* n_byte   attraction;*/
+    {"sgfof=", FIL_SOE | FILE_TYPE_BYTE,  1, 19, "Friend or foe"},/* n_byte   friend_foe;*/
+    {"sgbel=", FIL_SOE | FILE_TYPE_BYTE2, 1, 20, "Belief"},/* n_byte2  belief;*/
+    {"sgfam=", FIL_SOE | FILE_TYPE_BYTE2, 1, 22, "Familiarity"},/* n_byte2  familiarity;*/
     
-    {"sgrel=", FIL_SOE | FILE_TYPE_BYTE,  1, 20, "Relationship"},/* n_byte   relationship;*/
-    {"sgunu=", FIL_SOE | FILE_TYPE_BYTE,  1, 21, "Unused"},/* n_byte   relationship;*/
+    {"sgrel=", FIL_SOE | FILE_TYPE_BYTE,  1, 24, "Relationship"},/* n_byte   relationship;*/
+    {"sgtyp=", FIL_SOE | FILE_TYPE_BYTE,  1, 25, "Entity type"},/* n_byte   relationship;*/
     
 #ifdef BRAINCODE_ON
-    {"sgbrc=", FIL_SOE | FILE_TYPE_BYTE_EXT, BRAINCODE_SIZE, 22, "Local braincode"}, /*n_byte   braincode[BRAINCODE_SIZE];*/
+    {"sgbrc=", FIL_SOE | FILE_TYPE_BYTE_EXT, BRAINCODE_SIZE, 26, "Local braincode"}, /*n_byte   braincode[BRAINCODE_SIZE];*/
 #endif
     
 #endif
@@ -283,13 +283,13 @@ static const noble_file_entry noble_file_format[]=
     {"eploc=", FIL_EPI | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, /* n_byte2 location[2];*/
     {"eptim=", FIL_EPI | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
     {"epdat=", FIL_EPI | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
-    {"epfin=", FIL_EPI | FILE_TYPE_BYTE2, 1, 10, "First name"},/* n_byte2 first_name;*/
-    {"epfan=", FIL_EPI | FILE_TYPE_BYTE2, 1, 12, "Family name"},/* n_byte2 family_name;*/
+    {"epfin=", FIL_EPI | FILE_TYPE_BYTE2, 2, 10, "First name"},/* n_byte2 first_name;*/
+    {"epfan=", FIL_EPI | FILE_TYPE_BYTE2, 2, 14, "Family name"},/* n_byte2 family_name;*/
     
-    {"epeve=", FIL_EPI | FILE_TYPE_BYTE,  1, 14, "Event"},/* n_byte   event;*/
-    {"epfoo=", FIL_EPI | FILE_TYPE_BYTE,  1, 15, "Food"},/* n_byte   food;*/
-    {"epbel=", FIL_EPI | FILE_TYPE_BYTE2, 1, 16, "Belief"},/* n_byte2  affect;*/
-    {"eparg=", FIL_EPI | FILE_TYPE_BYTE2, 1, 18, "Arg"},/* n_byte2  arg;*/
+    {"epeve=", FIL_EPI | FILE_TYPE_BYTE,  1, 18, "Event"},/* n_byte   event;*/
+    {"epfoo=", FIL_EPI | FILE_TYPE_BYTE,  1, 19, "Food"},/* n_byte   food;*/
+    {"epafe=", FIL_EPI | FILE_TYPE_BYTE2, 1, 20, "Affect"},/* n_byte2  affect;*/
+    {"eparg=", FIL_EPI | FILE_TYPE_BYTE2, 1, 22, "Arg"},/* n_byte2  arg;*/
 #endif
     
 #ifndef REDUCE_FILE  /* FILE_TYPE_PACKED has a different form - no offset and the number is the size of the PACKED_DATA_BLOCK units */

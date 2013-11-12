@@ -184,14 +184,14 @@ n_int	file_in(n_file * input_file)
                 temp = (n_byte*) &(local_sim->beings[ape_count]);
                 loop_end = sizeof(noble_being);
                 break;
-                case FIL_SOE:
+            case FIL_SOE:
                 {
                     noble_social * local_social = being_social(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_social[social_count]);
                     loop_end = sizeof(noble_social);
                 }
                 break;
-                case FIL_EPI:
+            case FIL_EPI:
                 {
                     noble_episodic * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
                     temp = (n_byte*)(&local_episodic[episodic_count]);
@@ -199,7 +199,13 @@ n_int	file_in(n_file * input_file)
                 }
                 break;
             default:
-                return SHOW_ERROR("Unknown kind in file"); /*unkown kind*/
+                {
+                    n_string_block information;
+                    
+                    sprintf(information, "Unknown kind in file %d",(int)ret_val);
+                    
+                    return SHOW_ERROR(information); /*unkown kind*/
+                }
                 break;
             }
             if(temp != 0L)
@@ -995,5 +1001,44 @@ void file_audit(void)
         FILE_CHECK(&here.time);
         FILE_CHECK(&here.date[0]);
         FILE_CHECK(&here.genetics[0]);
+    }
+    {
+        
+        noble_social here;
+
+        FILE_CHECK(&here.location[0]);
+        FILE_CHECK(&here.time);
+        FILE_CHECK(&here.date[0]);
+        FILE_CHECK(&here.first_name[0]);
+        FILE_CHECK(&here.family_name[0]);
+
+        FILE_CHECK(&here.attraction);
+        FILE_CHECK(&here.friend_foe);
+        FILE_CHECK(&here.belief);
+        FILE_CHECK(&here.familiarity);
+        FILE_CHECK(&here.relationship);
+        FILE_CHECK(&here.entity_type);
+
+#ifdef FEATURE_SET
+        FILE_CHECK(&here.classification);
+#endif
+            
+#ifdef BRAINCODE_ON
+        FILE_CHECK(&here.braincode[0]);
+#endif
+        
+    }
+    {
+        noble_episodic here;
+        
+        FILE_CHECK(&here.location[0]);
+        FILE_CHECK(&here.time);
+        FILE_CHECK(&here.date[0]);
+        FILE_CHECK(&here.first_name[0]);
+        FILE_CHECK(&here.family_name[0]);
+        FILE_CHECK(&here.event);
+        FILE_CHECK(&here.food);
+        FILE_CHECK(&here.affect);
+        FILE_CHECK(&here.arg);
     }
 }
