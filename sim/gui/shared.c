@@ -271,12 +271,21 @@ void shared_simulate(n_uint local_time)
 
 static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
+    void * sim_return = 0L;
+    
     (void)draw_error(0L);
     draw_undraw_clear();
 #ifdef THREADED
     sim_draw_thread_on();
 #endif
-    return draw_offscreen(sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0)));
+    
+    sim_return = sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0));
+    
+    if (sim_return)
+    {
+        return draw_offscreen(sim_return);
+    }
+    return 0;
 }
 
 void shared_cycle(n_uint ticks, n_int fIdentification)
@@ -310,7 +319,7 @@ void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
     draw_cycle(fIdentification, dim_x, dim_y);
 }
 
-n_byte shared_init(n_byte view, n_uint random)
+n_int shared_init(n_byte view, n_uint random)
 {
     n_byte2 fit[256 * 3];
 
@@ -320,7 +329,10 @@ n_byte shared_init(n_byte view, n_uint random)
 
     if (view == NUM_TERRAIN)
     {
-        (void)control_init(KIND_START_UP, random);
+        if (control_init(KIND_START_UP, random) == 0L)
+        {
+            return SHOW_ERROR("Initialization failed lack of memory");
+        }
     }
 
     draw_fit(land_points, fit);
@@ -431,14 +443,21 @@ void shared_clearErrors(void)
     (void)draw_error(0L);
 }
 
-void shared_new(n_uint seed)
+n_int shared_new(n_uint seed)
 {
     static  n_int NewBlock = 0;
-    if (NewBlock) return;
+    if (NewBlock) return 0;
 
     NewBlock = 1;
-    control_init(KIND_NEW_SIMULATION, seed);
+    if (control_init(KIND_NEW_SIMULATION, seed))
+    {
+        NewBlock = 0;
+        return SHOW_ERROR("Failed through lack of memory");
+    }
+
     NewBlock = 0;
+    
+    return 0;
 }
 
 n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)

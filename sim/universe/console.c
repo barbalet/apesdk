@@ -2033,11 +2033,13 @@ n_int console_reset(void * ptr, n_string response, n_console_output output_funct
 
     math_random3(seed);
 
-    sim_init(KIND_NEW_SIMULATION, (seed[0]<<16)|seed[1], MAP_AREA, 0);
-
-
-    output_function("Simulation reset");
-    return 0;
+    if (sim_init(KIND_NEW_SIMULATION, (seed[0]<<16)|seed[1], MAP_AREA, 0))
+    {
+        output_function("Simulation reset");
+        return 0;
+    }
+    output_function("Simulation has not enough memory");
+    return 1;
 }
 
 /**
@@ -2188,7 +2190,10 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
                 console_file_interaction = 0;
                 return SHOW_ERROR("Failed to read in file");
             }
-            sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0);
+            if (sim_init(KIND_LOAD_FILE, 0, MAP_AREA, 0) == 0L)
+            {
+                return SHOW_ERROR("Not enough memory to load file");
+            }
             io_file_free(&file_opened);
         }
         console_file_interaction = 0;

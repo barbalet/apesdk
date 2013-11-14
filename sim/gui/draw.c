@@ -1426,10 +1426,13 @@ n_int draw_error(n_constant_string error_text)
 #ifdef NOBLE_APE_ASSERT
         printf("ERROR: %s\n", error_text);
 #endif
-        io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
+        if (local_land)
+        {
+            io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
         
-        io_string_write(simulation_date_time_error, simulation_date_time, &position);
-        io_string_write(simulation_date_time_error, " ", &position);
+            io_string_write(simulation_date_time_error, simulation_date_time, &position);
+            io_string_write(simulation_date_time_error, " ", &position);
+        }
         
         if(number_errors == MAX_NUMBER_ERRORS)
         {

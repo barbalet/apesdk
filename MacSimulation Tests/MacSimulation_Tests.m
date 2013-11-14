@@ -27,7 +27,7 @@ noble_being      * being = 0L;
 {
     [super setUp];
     
-    shared_new(0x1382);
+    (void)shared_new(0x1382);
 
     value = sim_sim();
     

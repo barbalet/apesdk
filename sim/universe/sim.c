@@ -617,7 +617,7 @@ void sim_cycle(void)
 }
 
 
-#define MAXIMUM_ALLOCATION  ( 80 * 1024 * 1024 )
+#define MAXIMUM_ALLOCATION  ( 50 * 1024 * 1024 )
 
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
@@ -630,7 +630,7 @@ static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * 
 }
 
 
-static void sim_memory(n_uint offscreen_size)
+static n_int sim_memory(n_uint offscreen_size)
 {
     n_uint	current_location = 0;
     n_uint  memory_allocated = MAXIMUM_ALLOCATION;
@@ -643,7 +643,7 @@ static void sim_memory(n_uint offscreen_size)
     
     memory_allocated = memory_allocated - offscreen_size - current_location;
     
-    being_memory(&sim, offbuffer, &current_location, memory_allocated);
+    return being_memory(&sim, offbuffer, &current_location, memory_allocated);
 }
 
 void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
@@ -690,7 +690,10 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 #endif
     if ((kind == KIND_START_UP) || (kind == KIND_MEMORY_SETUP))
     {
-        sim_memory(offscreen_size);
+        if (sim_memory(offscreen_size) != 0)
+        {
+            return 0L;
+        }
     }
     if ((kind != KIND_LOAD_FILE) && (kind != KIND_MEMORY_SETUP))
     {

@@ -152,9 +152,22 @@ static n_byte2 * being_get_random(noble_being * value)
     return value->seed;
 }
 
-void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
+n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
 {
     n_uint  lpx = 0;
+    n_uint  number_apes = 0;
+    
+    if (memory_available < 1)
+    {
+        return SHOW_ERROR("Memory not available");
+    }
+    
+    number_apes = (memory_available / sizeof(noble_being)) - 1;
+    
+    if (number_apes < 1)
+    {
+        return SHOW_ERROR("Not enough memory for an ape");
+    }
     
 #ifdef LARGE_SIM
     local->max = LARGE_SIM;
@@ -172,6 +185,7 @@ void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, 
         io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
         lpx ++;
     }
+    return 0;
 }
 
 static void being_set_brainatates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3)

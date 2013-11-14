@@ -162,7 +162,7 @@ void braincode_number_of_instructions(
                                       n_int * no_of_conditionals,
                                       n_int * no_of_data);
 
-void being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
+n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
 n_byte * being_brain(noble_being * value);
 noble_episodic * being_episodic(noble_being * value);

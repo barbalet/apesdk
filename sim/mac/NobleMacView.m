@@ -264,7 +264,19 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
         window_value = NUM_GRAPH;
     }
 #endif
-	fIdentification = shared_init(window_value, (n_uint)CFAbsoluteTimeGetCurrent());
+    {
+        n_int shared_response = shared_init(window_value, (n_uint)CFAbsoluteTimeGetCurrent());
+        
+        if (shared_response == -1)
+        {
+            [self quitProcedure];
+            return;
+        }
+        else
+        {
+            fIdentification = (n_byte)shared_response;
+        }
+    }
     
     [[self window] setContentResizeIncrements:increments];
     
@@ -356,7 +368,10 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 
 -(IBAction) menuFileNew:(id) sender
 {
-	shared_new((n_uint)CFAbsoluteTimeGetCurrent());
+	if (shared_new((n_uint)CFAbsoluteTimeGetCurrent()) != 0)
+    {
+        [self quitProcedure];
+    }
 }
 
 -(IBAction) menuFileOpen:(id) sender

@@ -54,7 +54,7 @@ void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y);
 
 void shared_simulate(n_uint local_time);
 
-n_byte shared_init(n_byte view, n_uint random);
+n_int shared_init(n_byte view, n_uint random);
 
 void shared_close(void);
 
@@ -90,7 +90,7 @@ void shared_nextApe(void);
 
 void shared_clearErrors(void);
 
-void shared_new(n_uint seed);
+n_int shared_new(n_uint seed);
 
 n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
 
