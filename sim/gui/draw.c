@@ -264,7 +264,7 @@ n_int draw_toggle_territory(void)
 
 /* this needs to be grouped eventually, it is here as a test */
 
-#define UNDRAW_MAX          4000
+#define UNDRAW_MAX          100000
 
 static n_byte * undraw_location[UNDRAW_MAX];
 static n_byte   undraw_color[UNDRAW_MAX];

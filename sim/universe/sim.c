@@ -222,7 +222,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
 n_byte	* offbuffer = 0L;
 
 /* Twice the minimum number of apes the Simulation will allow to run */
-#define MIN_BEINGS		40
+#define MIN_BEINGS		4
 
 static noble_simulation	sim;
 
@@ -617,10 +617,10 @@ void sim_cycle(void)
 }
 
 
-#define MAXIMUM_ALLOCATION  ( 50 * 1024 * 1024 )
+#define MAXIMUM_ALLOCATION  ( 200 * 1024 * 1024 )
 
 
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+((sizeof(noble_being) + DOUBLE_BRAIN) * MIN_BEINGS)+1+(sizeof(n_uint)*2))
+#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
 
 
 static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * location)
@@ -634,7 +634,12 @@ static n_int sim_memory(n_uint offscreen_size)
 {
     n_uint	current_location = 0;
     n_uint  memory_allocated = MAXIMUM_ALLOCATION;
-
+    
+    if (memory_allocated < MINIMAL_ALLOCATION)
+    {
+        return SHOW_ERROR("Not enough memory to run");
+    }
+    
     offbuffer = io_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
 
     current_location = offscreen_size;
