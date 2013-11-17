@@ -558,6 +558,7 @@ void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
 static n_byte	being_ground(n_int px, n_int py, void * params)
 {
     being_draw * being_pixel = (being_draw *) params;
+    n_int        d_vis = being_pixel->visibility_delta;
     n_int	local_z = ((px*(being_pixel->offset_x)) + (py*(being_pixel->offset_y))) >> 9;
     weather_values   seven_values = weather_seven_values(being_pixel->land, MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
     
@@ -565,18 +566,18 @@ static n_byte	being_ground(n_int px, n_int py, void * params)
     {
         case WEATHER_SEVEN_SUNNY_DAY:
         case WEATHER_SEVEN_CLOUDY_DAY:
-            being_pixel->visibility_total += being_pixel->visibility_delta;
+            being_pixel->visibility_total += (d_vis + 16) >> 1;
             break;
         case WEATHER_SEVEN_RAINY_DAY:
         case WEATHER_SEVEN_DAWN_DUSK:
-            being_pixel->visibility_total += (2*being_pixel->visibility_delta);
+            being_pixel->visibility_total += ((2 * d_vis) + 25) >> 1;
             break;
         case WEATHER_SEVEN_CLEAR_NIGHT:
-            being_pixel->visibility_total += (5*being_pixel->visibility_delta);
+            being_pixel->visibility_total += ((5 * d_vis) + 65) >> 1;
         case WEATHER_SEVEN_CLOUDY_NIGHT:
-            being_pixel->visibility_total += (8*being_pixel->visibility_delta);
+            being_pixel->visibility_total += ((8 * d_vis) + 93) >> 1;
         case WEATHER_SEVEN_RAINY_NIGHT:
-            being_pixel->visibility_total += (12*being_pixel->visibility_delta);
+            being_pixel->visibility_total += ((12 * d_vis) + 145) >> 1;
             break;
             
         case WEATHER_SEVEN_ERROR:
@@ -660,7 +661,7 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
 
         {
             n_vect2 offset = {0};
-
+            
             vect2_d(&offset, &delta, 512 * delta_z, common_divisor);
 
             start_z -= vect2_dot(&start, &offset, 1, 512);
