@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define MAX_EXECUTION_THREAD_SIZE 5
+#define MAX_EXECUTION_THREAD_SIZE 7
 #define EXECUTION_QUEUE_SIZE 512
 
 typedef int (execution_function)(void * read_data, void * write_data);
@@ -45,18 +45,33 @@ static execute_object    queue[EXECUTION_QUEUE_SIZE] = {0L};
 static int               written = 0, read = 0;
 static int               written_actual = 0, read_actual = 0;
 
+static int               conclude_count = 0;
+static int               print_count = 0;
 
-
+static int               greatest_delta = 0;
 
 static void execute_add(execution_function * function, void * read_data, void * write_data)
 {
+    int delta = (written_actual - read_actual);
+    
     queue[written].function = function;
     queue[written].read_data = read_data;
     queue[written].write_data = write_data;
     
     written = (written + 1) & (EXECUTION_QUEUE_SIZE-1);
-    written_actual++;    
-    if ((written_actual - read_actual) >= EXECUTION_QUEUE_SIZE) printf("*\n");
+    written_actual++;
+    
+    if (delta > greatest_delta)
+    {
+        greatest_delta = delta;
+    }
+    
+    if ((print_count & 1023) == 0)
+    {
+        printf("delta %d\n", greatest_delta);
+        greatest_delta = 0;
+    }
+    print_count++;
 }
 
 static void * execute_thread(void * id)
@@ -110,8 +125,6 @@ int calculate_b(void * read_data, void * write_data)
 }
 
 
-static int conclude_count = 0;
-
 int calculate_a(void * read_data, void * write_data)
 {
     int * read_int = read_data;
@@ -143,7 +156,7 @@ static void start_cycle_again()
 {
     int     read_data[20] = {1,2,3,4,5,6,7,8,9,10,11,12}, write_data[20] = {0};
     
-    printf("cycle again\n");
+    //printf("cycle again\n");
     
     execute_add(calculate_a, read_data, write_data);
 }
