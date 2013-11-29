@@ -201,9 +201,6 @@ n_int	file_in(n_file * input_file)
             default:
                 {
                     n_string_block information;
-                    
-                    sprintf(information, "Unknown kind in file %d",(int)ret_val);
-                    
                     return SHOW_ERROR(information); /*unkown kind*/
                 }
                 break;
