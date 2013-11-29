@@ -237,162 +237,6 @@ n_int sim_new(void)
     return sim_new_progress;
 }
 
-
-#ifdef THREADED
-
-static void sim_indicators(noble_simulation * sim);
-static void sim_brain(noble_simulation * local_sim);
-static void sim_brain_dialogue(noble_simulation * local_sim);
-static void sim_being(noble_simulation * local_sim);
-static void sim_time(noble_simulation * local_sim);
-
-static n_int            thread_on = 0;
-
-static pthread_t        land_thread;
-static pthread_t        brain_thread;
-static pthread_t        being_thread;
-
-static n_int            sim_done = 3;
-
-static pthread_cond_t   sim_cond;
-static pthread_mutex_t  quit_mtx;
-static n_int            thread_quit;
-
-static pthread_mutex_t  draw_mtx;
-static pthread_cond_t   draw_cond;
-
-static n_int            sim_draw_thread = 0;
-
-void sim_draw_thread_on(void)
-{
-    sim_draw_thread = 1;
-}
-
-void sim_draw_thread_start(void)
-{
-    pthread_mutex_lock(&draw_mtx);
-    while(sim_done < 3)pthread_cond_wait(&draw_cond,&draw_mtx);
-    pthread_cond_broadcast(&sim_cond);
-    pthread_mutex_unlock(&draw_mtx);
-}
-
-void sim_draw_thread_end(void)
-{
-    n_int local_quit;
-    pthread_mutex_lock(&quit_mtx);
-    local_quit = thread_quit;
-    pthread_mutex_unlock(&quit_mtx);
-    if(local_quit==1) pthread_exit(NULL);
-}
-
-static void * sim_thread_land(void * id)
-{
-    n_int local_quit;
-    do
-    {
-        pthread_mutex_lock(&draw_mtx);
-        if(thread_on ==1 ) pthread_cond_wait(&sim_cond, &draw_mtx);
-        sim_done--;
-        pthread_mutex_unlock(&draw_mtx);
-
-        land_cycle(sim.land);
-#ifdef WEATHER_ON
-        weather_cycle(sim.land, sim.weather);
-#endif
-        pthread_mutex_lock(&draw_mtx);
-        sim_done++;
-        pthread_mutex_unlock(&draw_mtx);
-
-        pthread_mutex_lock(&quit_mtx);
-        local_quit = thread_quit;
-        pthread_mutex_unlock(&quit_mtx);
-    }
-    while (local_quit == 0);
-    pthread_exit(NULL);
-}
-
-static void * sim_thread_being(void * id)
-{
-    n_int local_quit;
-    do
-    {
-        pthread_mutex_lock(&draw_mtx);
-        if(thread_on ==1 ) pthread_cond_wait(&sim_cond, &draw_mtx);
-        sim_done--;
-        pthread_mutex_unlock(&draw_mtx);
-
-        sim_being(&sim);    /* 2 */
-        being_tidy(&sim);
-        being_remove(&sim); /* 6 */
-        sim_social(&sim);
-        sim_indicators(&sim);
-        sim_time(&sim);
-
-        pthread_mutex_lock(&draw_mtx);
-        sim_done++;
-        pthread_mutex_unlock(&draw_mtx);
-
-        pthread_mutex_lock(&quit_mtx);
-        local_quit = thread_quit;
-        pthread_mutex_unlock(&quit_mtx);
-    }
-    while (local_quit == 0);
-    pthread_exit(NULL);
-}
-
-static void * sim_thread_brain(void * id)
-{
-    n_int local_quit;
-    do
-    {
-        pthread_mutex_lock(&draw_mtx);
-        if(thread_on ==1 ) pthread_cond_wait(&sim_cond, &draw_mtx);
-        sim_done--;
-        pthread_mutex_unlock(&draw_mtx);
-
-        sim_brain(&sim);    /* 4 */
-
-#ifdef BRAINCODE_ON
-        sim_brain_dialogue(&sim);
-#endif
-        pthread_mutex_lock(&draw_mtx);
-        sim_done++;
-
-        if(sim_done == 3)
-        {
-            pthread_cond_signal(&draw_cond);
-        }
-        pthread_mutex_unlock(&draw_mtx);
-
-        pthread_mutex_lock(&quit_mtx);
-        local_quit = thread_quit;
-        pthread_mutex_unlock(&quit_mtx);
-    }
-    while (local_quit == 0);
-
-    pthread_exit(NULL);
-}
-static void sim_thread_init(void)
-{
-    pthread_mutex_init(&quit_mtx, NULL);
-    pthread_mutex_init(&draw_mtx, NULL);
-
-    pthread_cond_init(&draw_cond, NULL);
-    pthread_cond_init(&sim_cond, NULL);
-    pthread_create(&land_thread, NULL, sim_thread_land, NULL);
-    pthread_create(&being_thread, NULL, sim_thread_being, NULL);
-    pthread_create(&brain_thread, NULL, sim_thread_brain, NULL);
-}
-
-static void sim_thread_close(void)
-{
-    pthread_mutex_lock(&quit_mtx);
-    thread_quit = 1;
-    pthread_mutex_unlock(&quit_mtx);
-
-}
-#endif
-
 #ifndef	_WIN32
 
 #include <pthread.h>
@@ -594,8 +438,6 @@ static void sim_time(noble_simulation * local_sim)
 
 void sim_cycle(void)
 {
-#ifndef THREADED
-
     land_cycle(sim.land);
     sim_being(&sim);    /* 2 */
 #ifdef WEATHER_ON
@@ -612,8 +454,6 @@ void sim_cycle(void)
     sim_social(&sim);
     /*sim_indicators(&sim);*/
     sim_time(&sim);
-
-#endif
 }
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
@@ -740,14 +580,6 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         }
     }
 
-#ifdef THREADED
-    if (thread_on == 0)
-    {
-        thread_on = 1;
-        sim_thread_init();
-    }
-#endif
-
     sim_set_select(0);
 
     sim_new_progress = 0;
@@ -760,9 +592,6 @@ void sim_close(void)
     io_console_quit();
 #ifndef _WIN32
     sim_console_clean_up();
-#endif
-#ifdef THREADED
-    sim_thread_close();
 #endif
     interpret_cleanup(&interpret);
     io_free((void **) &offbuffer);

@@ -42,8 +42,6 @@
 
 /* displays and simulates ape's brain */
 
-#undef  THREADED
-
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 #define PARASITES_ON  /* entity */
 #define TERRITORY_ON  /* entity */
@@ -1411,19 +1409,11 @@ n_int console_script(void * ptr, n_string response, n_console_output output_func
 n_int console_quit(void * ptr, n_string response, n_console_output output_function);
 
 #ifndef	_WIN32
-
 n_int sim_thread_console_quit(void);
 void  sim_thread_console(void);
-
 #endif
 
 void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block);
-
-#ifdef THREADED
-void sim_draw_thread_on(void);
-void sim_draw_thread_start(void);
-void sim_draw_thread_end(void);
-#endif
 
 #ifdef CONSOLE_REQUIRED
 

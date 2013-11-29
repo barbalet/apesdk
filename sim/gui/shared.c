@@ -275,9 +275,6 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
     
     (void)draw_error(0L);
     draw_undraw_clear();
-#ifdef THREADED
-    sim_draw_thread_on();
-#endif
     
     sim_return = sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0));
     

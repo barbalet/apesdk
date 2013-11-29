@@ -1675,10 +1675,6 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
 
     if (check_about) return;
 
-#ifdef THREADED
-    sim_draw_thread_start();
-#endif
-
 #ifndef GRAPHLESS_GUI
     if (window != NUM_GRAPH)
 #endif
@@ -1725,8 +1721,5 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
         graph_draw(local_sim, draw_pointer(NUM_GRAPH), dim_x, dim_y);
     }
 #endif
-    
-#ifdef THREADED
-    sim_draw_thread_end();
-#endif
+
 }
