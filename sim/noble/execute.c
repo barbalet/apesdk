@@ -33,9 +33,6 @@
  
  ****************************************************************/
 
-
-#undef EXECUTE_DEBUG
-
 #include <pthread.h>
 
 #include "noble.h"
@@ -45,7 +42,7 @@
 #endif
 
 
-#define MAX_EXECUTION_THREAD_SIZE 7
+#define MAX_EXECUTION_THREAD_SIZE 3
 #define EXECUTION_QUEUE_SIZE      32
 
 typedef enum
@@ -59,9 +56,7 @@ typedef struct
 {
     execute_function * function;
     void             * read_data;
-    n_uint             size_read;
     void             * write_data;
-    n_uint             size_write;
 }execute_object;
 
 
@@ -93,14 +88,12 @@ void execute_set_periodic(execute_periodic * function)
     periodic_function = function;
 }
 
-void execute_add(execute_function * function, void * read_data, n_uint size_read, void * write_data, n_uint size_write)
+void execute_add(execute_function * function, void * read_data, void * write_data)
 {
     
     queue[written].function = function;
     queue[written].read_data = read_data;
-    queue[written].size_read = size_read;
     queue[written].write_data = write_data;
-    queue[written].size_write = size_write;
     
     written = (written + 1) & (EXECUTION_QUEUE_SIZE-1);
 #ifdef EXECUTE_DEBUG
@@ -112,7 +105,7 @@ void execute_add(execute_function * function, void * read_data, n_uint size_read
             greatest_delta = delta;
         }
     }
-    if ((print_count & 1023) == 0)
+    if ((print_count & 255) == 0)
     {
         printf("delta %d\n", greatest_delta);
         greatest_delta = 0;
@@ -135,7 +128,7 @@ static void * execute_thread(void * id)
         {
             execute_object * object = value->executed;
             value->state = ES_STARTED;
-            if (object->function(object->read_data, object->size_read, object->write_data, object->size_write) == -1)
+            if (object->function(object->read_data, object->write_data) == -1)
             {
                 execute_quit();
             }

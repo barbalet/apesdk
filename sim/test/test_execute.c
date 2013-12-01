@@ -38,29 +38,40 @@
 
 #include <stdio.h>
 
-#include "execute.h"
+#include "../noble/noble.h"
 
-static int               conclude_count = 0;
+static n_int               conclude_count = 0;
 
-int calculate_c(void * read_data, void * write_data)
+n_int draw_error(n_constant_string error_text)
 {
-    int * read_int = read_data;
-    int * write_int = write_data;
+    if (error_text)
+    {
+        printf("ERROR: %s\n", error_text);
+    }
+    return -1;
+}
+
+n_int calculate_c(void * read_data, void * write_data)
+{
+    n_int * read_int = read_data;
+    n_int * write_int = write_data;
     
     write_int[0] ^= read_int[0];
     return 0;
 }
 
 
-int calculate_b(void * read_data, void * write_data)
+n_int calculate_b(void * read_data, void * write_data)
 {
-    int * read_int = read_data;
-    int * write_int = write_data;
-    int loop = 0;
+    n_int * read_int = read_data;
+    n_int * write_int = write_data;
+    n_int loop = 0;
     
-    while (loop < 20500)
+    printf("Calculate B!\n");
+    
+    while (loop < 10500)
     {
-        int location = loop % 5;
+        n_int location = loop % 5;
         write_int[location] += read_int[location];
         loop++;
     }
@@ -73,15 +84,17 @@ int calculate_b(void * read_data, void * write_data)
 }
 
 
-int calculate_a(void * read_data, void * write_data)
+n_int calculate_a(void * read_data, void * write_data)
 {
-    int * read_int = read_data;
-    int * write_int = write_data;
-    int loop = 0;
+    n_int * read_int = read_data;
+    n_int * write_int = write_data;
+    n_int loop = 0;
     
-    while (loop < 20500)
+    printf("Calculate A!\n");
+
+    while (loop < 10500)
     {
-        int location = loop % 20;
+        n_int location = loop % 20;
         write_int[location] += read_int[location];
         loop++;
     }
@@ -94,15 +107,18 @@ int calculate_a(void * read_data, void * write_data)
     
     conclude_count++;
     
-    if (conclude_count == 4000)
+    if (conclude_count == 10)
         return -1;
         
     return 0;
 }
 
-static int start_cycle_again(void)
+static n_int start_cycle_again(void)
 {
-    int     read_data[20] = {1,2,3,4,5,6,7,8,9,10,11,12}, write_data[20] = {0};
+    n_int     read_data[20] = {1,2,3,4,5,6,7,8,9,10,11,12}, write_data[20] = {0};
+    
+    printf("Cycle again!\n");
+    
     execute_add(calculate_a, read_data, write_data);
     return 0;
 }
