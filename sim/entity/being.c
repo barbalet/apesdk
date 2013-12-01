@@ -548,6 +548,45 @@ void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
     }
 }
 
+void being_loop_feedback(noble_simulation * sim, being_feedback bf_func, void * check_data, void * result_data)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        (bf_func)(sim, output, check_data, result_data);
+        loop++;
+    }
+}
+
+void being_loop_feedback_not_being(noble_simulation * sim, noble_being * being_not, being_feedback bf_func, void * check_data, void * result_data)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        if (output != being_not)
+        {
+            (bf_func)(sim, output, check_data, result_data);
+        }
+        loop++;
+    }
+}
+
+void being_loop_feedback_not_number(noble_simulation * sim, n_uint being_not, being_feedback bf_func, void * check_data, void * result_data)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        if (loop != being_not)
+        {
+            noble_being * output = &(sim->beings[loop]);
+            (bf_func)(sim, output, check_data, result_data);
+        }
+        loop++;
+    }
+}
+
 /**
  * @brief Check if a being is on ground or in water
  * @param px x coordinate of the being location
@@ -1214,7 +1253,6 @@ static noble_being * being_find_child(noble_simulation * sim, n_genetics * genet
     n_uint loop = 0;
     n_uint comparison_best = 0;
     noble_being * return_value = 0L;
-    
     
     while ( loop < sim->num )
     {
@@ -1952,22 +1990,17 @@ static void being_brain_probe(noble_being * local)
 
 #endif
 
-#define MAXIMIZE_ERASING
 
 /** stuff still goes on during sleep */
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
     /* By default return towards a resting state */
-#ifdef MAXIMIZE_ERASING
-    
 #ifdef METABOLISM_ON
     metabolism_cycle(sim, local);
 #endif
 
     being_immune_response(local);
-
-#endif
-        
+    
 #ifdef BRAINCODE_ON
     /** may need to add external probe linking too */
     being_brain_probe(local);
@@ -3106,7 +3139,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         return SHOW_ERROR("Episodic memory not available");
     }
     
-#ifdef MAXIMIZE_ERASING 
     being_erase(local);
 
     brain_memory = being_brain(local);
@@ -3120,9 +3152,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         return SHOW_ERROR("Brain memory not available");
     }
     
-#endif
-
-#ifdef MAXIMIZE_ERASING
     local->goal[0]=GOAL_NONE;
 
     /** Set learned preferences to 0.5 (no preference in
@@ -3154,9 +3183,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
     local->child_generation_max = 0;
     local->child_generation_min = 0;
-
-#endif
-    
 
     /** initially seed the brain with instructions which
         are genetically biased */

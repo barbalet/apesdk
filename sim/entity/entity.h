@@ -250,6 +250,14 @@ typedef void (being_no_return)(noble_simulation * sim, noble_being * actual);
 
 void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func);
 
+typedef void (being_feedback)(noble_simulation * sim, noble_being * actual, void * check_data, void * result_data);
+
+void being_loop_feedback(noble_simulation * sim, being_feedback bf_func, void * check_data, void * result_data);
+
+void being_loop_feedback_not_being(noble_simulation * sim, noble_being * being_not, being_feedback bf_func, void * check_data, void * result_data);
+
+void being_loop_feedback_not_number(noble_simulation * sim, n_uint being_not, being_feedback bf_func, void * check_data, void * result_data);
+
 void   metabolism_vascular_description(n_int index, n_string description);
 n_string metabolism_description(n_int index);
 n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index);
