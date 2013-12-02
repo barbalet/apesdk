@@ -47,12 +47,16 @@ gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
 gcc ${CFLAGS} -DEXECUTE_DEBUG -c $SOURCEDIR/noble/execute.c -o execute.o
 
-gcc ${CFLAGS} -c test_execute.c -o test_execute.o
+#gcc ${CFLAGS} -c test_execute.c -o test_execute.o
+gcc ${CFLAGS} -c test_math.c -o test_math.o
 
-gcc ${CFLAGS} -I/usr/include -o test_execute *.o -lz -lm -lpthread
+#gcc ${CFLAGS} -I/usr/include -o test_execute *.o -lz -lm -lpthread
+gcc ${CFLAGS} -I/usr/include -o test_math *.o -lz -lm -lpthread
 
 #./test_execute
 
-rm test_execute
+./test_math
+
+rm test_math
 
 rm *.o
