@@ -321,8 +321,6 @@ void brain_three_byte_command(n_string string, n_byte * response);
 
 void brain_sentence(n_string string, n_byte * response);
 
-void braincode_statistics(noble_simulation * sim);
-
 n_int episode_description(noble_simulation * sim,
                           noble_being * local_being,
                           n_int index,

@@ -297,10 +297,10 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_string_block beingstr, time;
     n_int count=0,juveniles=0;
-    n_uint i;
-    for (i = 0; i < local_sim->num; i++)
+    n_uint loop = 0;
+    while (loop < local_sim->num)
     {
-        noble_being * local_being = &local_sim->beings[i];
+        noble_being * local_being = &local_sim->beings[loop];
         if (FIND_SEX(GET_I(local_being)) == SEX_FEMALE)
         {
             count++;
@@ -309,6 +309,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
         {
             juveniles++;
         }
+        loop++;
     }
 
     sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension(local_sim->land));
@@ -383,7 +384,6 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
             output_function(line_text);
             location = 0;
         }
-        
         loop++;
     }
 
@@ -1239,9 +1239,11 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
 {
     n_uint i, n=2, tot=0;
 
+    n_uint loop = 0;
+    
     for (i = 0; i < BEING_STATES; i++) histogram[i] = 0;
 
-    for (i = 0; i < local_sim->num; i++)
+    while (loop < local_sim->num)
     {
         noble_being * local_being = &local_sim->beings[i];
         if (being_state(local_being) == BEING_STATE_ASLEEP)
@@ -1259,6 +1261,7 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
                 n++;
             }
         }
+        loop++;
     }
 
     if (normalize)
@@ -1579,7 +1582,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
             if (bc_external)
             {
 
-                n_uint loop2 = loop+1;
+                n_uint loop2 = loop + 1;
                 while (loop2 < local_sim->num)
                 {
                     noble_being * local_being2 = &(local_sim->beings[loop2]);

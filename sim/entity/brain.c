@@ -511,61 +511,6 @@ void brain_sentence(n_string string, n_byte * response)
 #ifdef BRAINCODE_ON
 
 /**
- * @brief gathers statistics on braincode instructions
- * @param sim Pointer to the simulation object
- */
-void braincode_statistics(noble_simulation * sim)
-{
-    n_int i,j,k,instruction;
-    noble_being * local_being;
-    n_uint sensors = 0;
-    n_uint actuators = 0;
-    n_uint operators = 0;
-    n_uint conditionals = 0;
-    n_uint data = 0;
-
-    for (i=0; i<(n_int)(sim->num); i++)
-    {
-        local_being = &(sim->beings[i]);
-        for (j=0; j<BRAINCODE_SIZE; j+=BRAINCODE_BYTES_PER_INSTRUCTION)
-        {
-            for (k=0; k<2; k++)
-            {
-                if (k==0)
-                {
-                    instruction = being_braincode_internal(local_being)[j] % BRAINCODE_INSTRUCTIONS;
-                }
-                else
-                {
-                    instruction = being_braincode_external(local_being)[j] % BRAINCODE_INSTRUCTIONS;
-                }
-
-                if (instruction < BRAINCODE_OPERATORS_START)
-                {
-                    data++;
-                }
-                else if (instruction < BRAINCODE_CONDITIONALS_START)
-                {
-                    operators++;
-                }
-                else if (instruction < BRAINCODE_SENSORS_START)
-                {
-                    conditionals++;
-                }
-                else if (instruction < BRAINCODE_ACTUATORS_START)
-                {
-                    sensors++;
-                }
-                else
-                {
-                    actuators++;
-                }
-            }
-        }
-    }
-}
-
-/**
  * @brief returns a random braincode instruction of the given type
  * @param instruction_type Number indicating the type of instruction
  * @return braincode instruction
