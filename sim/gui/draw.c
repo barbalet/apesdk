@@ -1037,9 +1037,8 @@ static void	draw_meters(noble_simulation * local_sim)
  * kind = 2, erase normal ape
  * kind = 3, erase selected ape
  */
-static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
+static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw)
 {
-    noble_being  *bei   = &(sim->beings[reference]);
     n_int		  magx = APESPACE_TO_MAPSPACE(being_location_x(bei));
     n_int		  magy = APESPACE_TO_MAPSPACE(being_location_y(bei));
     n_pixel   *local_draw = draw->pixel_draw;
@@ -1061,7 +1060,7 @@ static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
         }
         ty++;
     }
-    if(reference == sim->select)
+    if (bei == &(sim->beings[sim->select]))
     {
         ty = -1;
         while (ty < 2)
@@ -1074,7 +1073,7 @@ static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
         }
         start_point++;
     }
-    if(being_awake(sim, bei) && (being_state(bei) & BEING_STATE_SPEAKING))
+    if (being_awake(sim, bei) && (being_state(bei) & BEING_STATE_SPEAKING))
     {
         n_int	local_facing = ((((being_facing(bei))>>2) + 4) & 63) >> 3;
         /* D  C
@@ -1118,9 +1117,8 @@ static void draw_apeloc(noble_simulation * sim, n_uint reference, n_join * draw)
  * kind = 2, erase normal ape
  * kind = 3, erase selected ape
  */
-static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join * draw)
+static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join * draw)
 {
-    noble_being  *bei   = &(sim->beings[reference]);
     n_int		  magx = APESPACE_TO_HR_MAPSPACE(being_location_x(bei));
     n_int		  magy = APESPACE_TO_HR_MAPSPACE(being_location_y(bei));
     n_pixel     *local_draw = draw->pixel_draw;
@@ -1143,7 +1141,7 @@ static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join *
         }
         ty++;
     }
-    if(reference == sim->select)
+    if (bei == &(sim->beings[sim->select]))
     {
         ty = -1;
         while (ty < 2)
@@ -1156,7 +1154,7 @@ static void draw_apeloc_hires(noble_simulation * sim, n_uint reference, n_join *
         }
         start_point++;
     }
-    if(being_awake(sim, bei) && (being_state(bei) & BEING_STATE_SPEAKING))
+    if (being_awake(sim, bei) && (being_state(bei) & BEING_STATE_SPEAKING))
     {
         n_int	local_facing = ((((being_facing(bei))>>2) + 4) & 63) >> 3;
         /* D  C
@@ -1558,6 +1556,44 @@ static void draw_tides_hi_res(n_byte * data, n_c_uint * block, n_byte tide)
     }
 }
 
+
+static void draw_apes_no_return(noble_simulation * local_sim, noble_being * bei, void * data)
+{
+    n_join			local_8bit;
+    n_color8		*local_col = (n_color8 *)data;
+
+    
+    if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
+    {
+        local_col->color = COLOUR_RED;
+    }
+    else
+    {
+        local_col->color = COLOUR_RED_DARK;
+    }
+    
+    if (local_col->screen == local_sim->land->highres)
+    {
+        local_8bit.pixel_draw = &pixel_color8_hires;
+    }
+    else
+    {
+        local_8bit.pixel_draw  = &pixel_color8;
+    }
+    
+    local_8bit.information = local_col;
+    
+    if (local_col->screen == local_sim->land->highres)
+    {
+        draw_apeloc_hires(local_sim, bei, &local_8bit);
+    }
+    else
+    {
+        draw_apeloc(local_sim, bei, &local_8bit);
+    }
+
+}
+
 static void draw_apes(noble_simulation * local_sim, n_byte lores)
 {
     n_color8		local_col;
@@ -1593,41 +1629,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
 
     if (local_sim->select != NO_BEINGS_FOUND)
     {
-        n_join			local_8bit;
-        n_uint			loop = 0;
-
-        if (lores == 0)
-        {
-            local_8bit.pixel_draw = &pixel_color8_hires;
-        }
-        else
-        {
-            local_8bit.pixel_draw  = &pixel_color8;
-        }
-        local_8bit.information = &local_col;
-
-        while (loop < local_sim->num)
-        {
-            noble_being *bei = &(local_sim->beings[loop]);
-            if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
-            {
-                local_col.color = COLOUR_RED;
-            }
-            else
-            {
-                local_col.color = COLOUR_RED_DARK;
-            }
-
-            if (lores == 0)
-            {
-                draw_apeloc_hires(local_sim, loop, &local_8bit);
-            }
-            else
-            {
-                draw_apeloc(local_sim, loop, &local_8bit);
-            }
-            loop++;
-        }
+        being_loop(local_sim, draw_apes_no_return, &local_col);
     }
 }
 

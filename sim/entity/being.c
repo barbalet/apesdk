@@ -3192,8 +3192,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
     being_random3(local);
 
-#ifdef MAXIMIZE_ERASING
-
     
 #ifdef EPISODIC_ON
     /** has no social connections initially */
@@ -3250,8 +3248,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
 #endif
 
-    
-#endif
     
     being_facing_init(local);
 
@@ -3358,8 +3354,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
     local->crowding = MIN_CROWDING;
 
-#ifdef MAXIMIZE_ERASING
-
     
     if (being_brain(local))
     {
@@ -3377,8 +3371,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
 #ifdef METABOLISM_ON
     metabolism_init(local);
-#endif
-    
 #endif
     
     return 0;
