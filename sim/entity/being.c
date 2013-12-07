@@ -260,7 +260,7 @@ static n_int being_honor_immune(noble_being * value)
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }
 
-static void  being_recalibrate_honor(noble_being * value)
+static void  being_recalibrate_honor_no_return(noble_simulation * local, noble_being * value, void * data)
 {
     value->honor = (n_byte)(((n_int)value->honor*220)/255);
 }
@@ -536,30 +536,18 @@ void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum in
  * @param sim Pointer to the simulation object
  * @param bnr_func The function to be applied
  */
-
-void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func)
+void being_loop(noble_simulation * sim, being_loop_fn bf_func, void * data)
 {
     n_uint loop = 0;
     while (loop < sim->num)
     {
         noble_being * output = &(sim->beings[loop]);
-        (bnr_func)(sim, output);
+        (bf_func)(sim, output, data);
         loop++;
     }
 }
 
-void being_loop_feedback(noble_simulation * sim, being_feedback bf_func, void * check_data, void * result_data)
-{
-    n_uint loop = 0;
-    while (loop < sim->num)
-    {
-        noble_being * output = &(sim->beings[loop]);
-        (bf_func)(sim, output, check_data, result_data);
-        loop++;
-    }
-}
-
-void being_loop_feedback_not_being(noble_simulation * sim, noble_being * being_not, being_feedback bf_func, void * check_data, void * result_data)
+void being_loop_not_being(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
 {
     n_uint loop = 0;
     while (loop < sim->num)
@@ -567,21 +555,7 @@ void being_loop_feedback_not_being(noble_simulation * sim, noble_being * being_n
         noble_being * output = &(sim->beings[loop]);
         if (output != being_not)
         {
-            (bf_func)(sim, output, check_data, result_data);
-        }
-        loop++;
-    }
-}
-
-void being_loop_feedback_not_number(noble_simulation * sim, n_uint being_not, being_feedback bf_func, void * check_data, void * result_data)
-{
-    n_uint loop = 0;
-    while (loop < sim->num)
-    {
-        if (loop != being_not)
-        {
-            noble_being * output = &(sim->beings[loop]);
-            (bf_func)(sim, output, check_data, result_data);
+            (bf_func)(sim, output, data);
         }
         loop++;
     }
@@ -2154,12 +2128,11 @@ static void being_create_family_links(noble_being * mother,
  * @return 1 if the attended to being is seen, 0 otherwise
  */
 static n_uint being_follow(noble_simulation * sim,
-                           n_uint current_being_index,
+                           noble_being * local,
                            n_uint * opposite_sex, n_uint * same_sex,
                            n_uint * opposite_sex_distance, n_uint * same_sex_distance)
 {
     noble_being * being_buffer = sim->beings;
-    noble_being * local        = &being_buffer[current_being_index];
     n_vect2       difference_vector;
     noble_social * local_social_graph;
     n_int  social_graph_index;
@@ -2176,10 +2149,10 @@ static n_uint being_follow(noble_simulation * sim,
         n_uint loop = 0;
         while (loop < sim->num)
         {
-            if (loop != current_being_index)
+            /** get the name of the other being */
+            noble_being * other = &being_buffer[loop];
+            if (local != other)
             {
-                /** get the name of the other being */
-                noble_being * other = &being_buffer[loop];
                 n_byte2 other_first_name = being_gender_name(other);
                 n_byte2 other_family_name = being_family_name(other);
                 /** is this the same as the name of the being to which we are paying attention? */
@@ -2216,10 +2189,10 @@ static n_uint being_follow(noble_simulation * sim,
         /** search for the other being */
         while (loop < sim->num)
         {
-            if (loop != current_being_index)
+            /** get the name of the other being */
+            noble_being * other = &being_buffer[loop];
+            if (local != other)
             {
-                /** get the name of the other being */
-                noble_being * other = &being_buffer[loop];
                 n_byte2 other_first_name = being_gender_name(other);
                 n_byte2 other_family_name = being_family_name(other);
                 /** is this the same as the name of the being to which we are paying attention? */
@@ -2257,11 +2230,9 @@ static n_uint being_follow(noble_simulation * sim,
  * @param sim Pointer to the simulation
  * @param current_being_index Array index of the current being
  */
-static void being_listen(noble_simulation * sim,
-                         n_uint current_being_index)
+static void being_listen(noble_simulation * sim, noble_being * local)
 {
     noble_being * being_buffer = sim->beings;
-    noble_being * local        = &being_buffer[current_being_index];
     n_int         max_shout_volume = 127;
     n_vect2       difference_vector;
     n_uint        compare_distance;
@@ -2276,10 +2247,9 @@ static void being_listen(noble_simulation * sim,
     }
     while (loop < sim->num)
     {
-        if (loop != current_being_index)
+        noble_being	* other = &being_buffer[loop];
+        if (local != other)
         {
-            noble_being	* other = &being_buffer[loop];
-
             being_delta(local, other, &difference_vector);
             compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             /** listen for the nearest shout out */
@@ -2308,13 +2278,12 @@ static void being_listen(noble_simulation * sim,
  * @return The number of beings in the vicinity
  */
 static n_uint being_closest(noble_simulation * sim,
-                            n_uint current_being_index,
+                            noble_being * local,
                             n_uint * opposite_sex, n_uint * same_sex,
                             n_uint * opposite_sex_distance, n_uint * same_sex_distance)
 {
     n_byte        opposite_sex_seen = 0;
     noble_being * being_buffer = sim->beings;
-    noble_being * local        = &being_buffer[current_being_index];
     n_uint        beings_in_vicinity = 0;
     n_uint        local_is_female = FIND_SEX(GET_I(local));
     n_uint	      loop = 0;
@@ -2326,9 +2295,10 @@ static n_uint being_closest(noble_simulation * sim,
 
     while (loop < sim->num)
     {
-        if (loop != current_being_index)
+        noble_being	* test_being = &being_buffer[loop];
+
+        if (local != test_being)
         {
-            noble_being	* test_being = &being_buffer[loop];
             n_int         los_previously_calculated = 0;
             n_int         result_los = 0;
             /** check distance before line of sight */
@@ -2393,7 +2363,7 @@ static n_uint being_closest(noble_simulation * sim,
  * @param opposite_sex Non zero if the other being is the opposite sex
  */
 static void being_interact(noble_simulation * sim,
-                           n_uint   being_index,
+                           noble_being * local,
                            n_uint   other_being_index,
                            n_uint   other_being_distance,
                            n_int  * awake,
@@ -2405,8 +2375,6 @@ static void being_interact(noble_simulation * sim,
     if (other_being_index != NO_BEINGS_FOUND)
     {
         noble_being * being_buffer = sim->beings;
-        noble_being * local        = &being_buffer[being_index];
-
         n_land      * land         = sim->land;
         n_int         today_days   = TIME_IN_DAYS(land->date);
         n_int         birth_days   = being_dob(local);
@@ -2478,11 +2446,10 @@ static void being_interact(noble_simulation * sim,
     }
 }
 
-void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
+void being_cycle_awake(noble_simulation * sim, noble_being * local)
 {
     n_uint	      loop;
     n_land      * land               = sim->land;
-    noble_being * local              = &(sim->beings[current_being_index]);
     n_uint        local_is_female    = FIND_SEX(GET_I(local));
     n_int         today_days         = TIME_IN_DAYS(land->date);
     n_int         birth_days         = being_dob(local);
@@ -2515,10 +2482,10 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
 #endif
 
     /** Listen for any shouts */
-    being_listen(sim,current_being_index);
+    being_listen(sim, local);
 
 #ifdef EPISODIC_ON
-    episodic_cycle(sim,local);
+    episodic_cycle(sim, local);
 #endif
 
     vect2_byte2(&location_vector, being_location(local));
@@ -2621,14 +2588,14 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         tmp_speed = (tmp_speed * (GENE_SPEED(genetics)+8)) >> 3;
 
         /** is the being to which we are paying attention within view? */
-        beings_in_vicinity = being_follow(sim,current_being_index,
+        beings_in_vicinity = being_follow(sim, local,
                                           &opposite_sex, &same_sex,
                                           &opposite_sex_distance, &same_sex_distance);
         if (beings_in_vicinity==0)
         {
             /** Find the closest beings */
             beings_in_vicinity =
-                being_closest(sim, current_being_index,
+                being_closest(sim, local,
                               &opposite_sex, &same_sex,
                               &opposite_sex_distance, &same_sex_distance);
         }
@@ -2636,13 +2603,13 @@ void being_cycle_awake(noble_simulation * sim, n_uint current_being_index)
         if (being_drive(local, DRIVE_SOCIAL) > SOCIAL_THRESHOLD(local))
         {
             being_interact(sim,
-                           current_being_index,
+                           local,
                            same_sex, same_sex_distance,
                            &awake, &loc_state,
                            &loc_s, &loc_e, 0);
 
             being_interact(sim,
-                           current_being_index,
+                           local,
                            opposite_sex, opposite_sex_distance,
                            &awake, &loc_state,
                            &loc_s, &loc_e, 1);
@@ -3418,152 +3385,145 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 }
 
 
-
-void being_tidy(noble_simulation * local_sim)
+static void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    noble_being *local  = local_sim->beings;
+    n_int	     local_e = being_energy(local_being);
+    n_genetics  *genetics = being_genetics(local_being);
+    n_int        local_honor = being_honor(local_being);
     n_land	    *land   = local_sim->land;
-    n_uint	     loop   = 0;
-    n_int	     fat_mass, insulation=0, bulk, conductance, delta_e;
+    n_int        delta_e = 0;
+    n_int        conductance = 5;
 #ifdef PARASITES_ON
-    n_int       max_honor = 1;
-#endif
-    while (loop < local_sim->num)
+    n_int       *honor = data;
+    if (local_honor > honor[0])
     {
-        noble_being *local_being = &local[loop];
-        n_int	     local_e = being_energy(local_being);
-        n_genetics  *genetics = being_genetics(local_being);
-        n_int        local_honor = being_honor(local_being);
-        delta_e = 0;
-        conductance = 5;
-#ifdef PARASITES_ON
-        if (local_honor > max_honor)
-        {
-            max_honor = local_honor;
-        }
+        honor[0] = local_honor;
+    }
 #endif
-        if(being_awake(local_sim, local_being))
+    if(being_awake(local_sim, local_being))
+    {
+        n_int	local_s  = being_speed(local_being);
+        
+        n_vect2	location_vector;
+        n_vect2	facing_vector;
+        
+        vect2_byte2(&location_vector, being_location(local_being));
+        
+        being_facing_vector(local_being, &facing_vector, 1);
+        
+        if (local_s > 0)
         {
-            n_int	local_s  = being_speed(local_being);
-
-            n_vect2	location_vector;
-            n_vect2	facing_vector;
-
-            vect2_byte2(&location_vector, being_location(local_being));
-
-            being_facing_vector(local_being, &facing_vector, 1);
-
-            if (local_s > 0)
+            n_byte2 location[2];
+            
+            vect2_d(&location_vector, &facing_vector, local_s, 512);
+            
+            /* vector to n_byte2 may do incorrect wrap around MUST be improved */
+            
+            location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
+            location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
+            
+            being_set_location(local_being, location);
+        }
+        
+        {
+            n_int delta_z;
+            n_int delta_energy;
+            n_int local_z;
+            n_vect2 slope_vector;
+            
+            land_vect2(&slope_vector, &local_z,land, &location_vector);
+            
+            delta_z = vect2_dot(&slope_vector,&facing_vector,1,96);
+            delta_energy = ((512 - delta_z) * local_s)/80;
+            
+            if (WATER_TEST(local_z,land->tide_level))
             {
-                n_byte2 location[2];
-
-                vect2_d(&location_vector, &facing_vector, local_s, 512);
-
-                /* vector to n_byte2 may do incorrect wrap around MUST be improved */
-
-                location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
-                location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
-
-                being_set_location(local_being, location);
-            }
-
-            {
-                n_int delta_z;
-                n_int delta_energy;
-                n_int local_z;
-                n_vect2 slope_vector;
-
-                land_vect2(&slope_vector, &local_z,land, &location_vector);
-
-                delta_z = vect2_dot(&slope_vector,&facing_vector,1,96);
-                delta_energy = ((512 - delta_z) * local_s)/80;
-
-                if (WATER_TEST(local_z,land->tide_level))
+                n_int insulation=0;
+                /** the more body fat, the less energy is lost whilst swimming */
+                n_int fat_mass = GET_BODY_FAT(local_being);
+                delta_energy = ((delta_energy * delta_energy) >> 9);
+                if (fat_mass > BEING_MAX_MASS_FAT_G)
                 {
-                    delta_energy = ((delta_energy * delta_energy) >> 9);
-                    /** the more body fat, the less energy is lost whilst swimming */
-                    fat_mass = GET_BODY_FAT(local_being);
-                    if (fat_mass > BEING_MAX_MASS_FAT_G)
-                    {
-                        fat_mass = BEING_MAX_MASS_FAT_G;
-                    }
-                    insulation = fat_mass * 5 / BEING_MAX_MASS_FAT_G;
-                    delta_e += (delta_energy + 10 - insulation) >> 3;
-                    conductance = 4;
+                    fat_mass = BEING_MAX_MASS_FAT_G;
+                }
+                insulation = fat_mass * 5 / BEING_MAX_MASS_FAT_G;
+                delta_e += (delta_energy + 10 - insulation) >> 3;
+                conductance = 4;
 #ifdef METABOLISM_ON
-                    metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(1+GENE_SWIM(genetics)));
+                metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(1+GENE_SWIM(genetics)));
+#endif
+            }
+            else
+            {
+                if (delta_z > 0)
+                {
+                    /** going uphill */
+                    delta_energy += GENE_HILL_CLIMB(genetics);
+#ifdef METABOLISM_ON
+                    metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(8+(GENE_HILL_CLIMB(genetics)>>1)));
 #endif
                 }
                 else
                 {
-                    if (delta_z > 0)
-                    {
-                        /** going uphill */
-                        delta_energy += GENE_HILL_CLIMB(genetics);
 #ifdef METABOLISM_ON
-                        metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(8+(GENE_HILL_CLIMB(genetics)>>1)));
+                    metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*8);
 #endif
-                    }
-                    else
-                    {
-#ifdef METABOLISM_ON
-                        metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*8);
-#endif
-                    }
-                    delta_energy = ((delta_energy * delta_energy) >> 9);
-
-                    /* the more massive the more energy consumed when moving */
-                    bulk = GET_M(local_being)*5/BEING_MAX_MASS_G;
-                    delta_e += (delta_energy + 4 + bulk) >> 2;
                 }
+                delta_energy = ((delta_energy * delta_energy) >> 9);
+                
+                /* the more massive the more energy consumed when moving */
+                delta_e += (delta_energy + 4 + (GET_M(local_being)*5/BEING_MAX_MASS_G)) >> 2;
             }
         }
-        else
-        {
-            being_set_speed(local_being, 0);
-            delta_e += (7) >> 2;
-        }
-
-        if (delta_e > 0)
-        {
-            /** hairy creatures are better insulated */
-            delta_e -= ((GENE_HAIR(genetics)*delta_e)>>conductance);
-            if (delta_e < 1) delta_e = 1;
-        }
-
-        local_e -= delta_e;
-
-        if (land->time == 0)
-        {
-            n_int age_in_years = AGE_IN_YEARS(local_sim,local_being);
-            /** this simulates natural death or at least some trauma the ape may or may not be able to recover from */
-            if (age_in_years > 29)
-            {
-                if(being_random(local_being) < (age_in_years - 29))
-                {
-                    local_e -= BEING_HUNGRY;
-                }
-            }
-        }
-
-        if (local_e < BEING_DEAD)
-        {
-            local_e = BEING_DEAD;
-        }
-
-        being_set_energy(local_being, local_e);
-        loop++;
     }
+    else
+    {
+        being_set_speed(local_being, 0);
+        delta_e += (7) >> 2;
+    }
+    
+    if (delta_e > 0)
+    {
+        /** hairy creatures are better insulated */
+        delta_e -= ((GENE_HAIR(genetics)*delta_e)>>conductance);
+        if (delta_e < 1) delta_e = 1;
+    }
+    
+    local_e -= delta_e;
+    
+    if (land->time == 0)
+    {
+        n_int age_in_years = AGE_IN_YEARS(local_sim,local_being);
+        /** this simulates natural death or at least some trauma the ape may or may not be able to recover from */
+        if (age_in_years > 29)
+        {
+            if(being_random(local_being) < (age_in_years - 29))
+            {
+                local_e -= BEING_HUNGRY;
+            }
+        }
+    }
+    
+    if (local_e < BEING_DEAD)
+    {
+        local_e = BEING_DEAD;
+    }
+    
+    being_set_energy(local_being, local_e);
+}
+
+
+void being_tidy(noble_simulation * local_sim)
+{
+#ifdef PARASITES_ON
+    n_int       max_honor = 1;
+#endif
+    being_loop(local_sim, being_tidy_loop, &max_honor);
 #ifdef PARASITES_ON
     /** normalize honor values */
     if (max_honor>=254)
     {
-        loop = 0;
-        while (loop < local_sim->num)
-        {
-            being_recalibrate_honor(&local[loop]);
-            loop++;
-        }
+        being_loop(local_sim, being_recalibrate_honor_no_return, 0L);
     }
 #endif
 }

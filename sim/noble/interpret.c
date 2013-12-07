@@ -622,19 +622,21 @@ void interpret_cleanup(n_interpret ** to_clean)
  * @param code the ApeScript code to be executed.
  * @param exit_offset if greater than minus one, the value entry to indicate exiting interpreter.
  * @param structure the structure to be passed into the start and end functions.
- * @param identifier a unique identifier also to be passed into the start and end functions
  * @param start the function to be run at the start of the ApeScript cycle.
  * @param end the function to be run at the end of the ApeScript cycle.
  * @return -1 in error case, 0 in leave and don't cycle back, 1 in leave and continue to cycle back.
  */
 n_int interpret_cycle(n_interpret * code, n_int exit_offset,
-                      void * structure, n_int identifier,
+                      void * structure, void * data,
                       script_external * start, script_external * end)
 {
     if (code == 0L)
     {
         return 0;
     }
+    
+    code->data = data;
+    
     if (code->localized_leave)
     {
         code->localized_leave--;
@@ -649,7 +651,7 @@ n_int interpret_cycle(n_interpret * code, n_int exit_offset,
         interpret_start(code);
         if (start != 0L)
         {
-            (*start)(code, structure, identifier);
+            (*start)(code, structure, data);
         }
     }
 
@@ -662,7 +664,7 @@ n_int interpret_cycle(n_interpret * code, n_int exit_offset,
     {
         if ((code != 0L) && (end != 0L))
         {
-            (*end)(code, structure, identifier);
+            (*end)(code, structure, data);
         }
     }
 

@@ -351,7 +351,7 @@ n_int     file_interpret(n_file * input_file)
     return 0;
 }
 
-static void sim_brain_no_return(noble_simulation * local_sim, noble_being * local_being)
+static void sim_brain_no_return(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_byte2 local_brain_state[3];
 
@@ -367,12 +367,12 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
 
 static void sim_brain(noble_simulation * local_sim)
 {
-    being_loop_no_return(local_sim, sim_brain_no_return);
+    being_loop(local_sim, sim_brain_no_return, 0L);
 }
 
 #ifdef BRAINCODE_ON
 
-static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_being * local_being)
+static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_byte     awake = 1;
     n_byte    *local_internal = being_braincode_internal(local_being);
@@ -388,38 +388,35 @@ static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_bei
 
 static void sim_brain_dialogue(noble_simulation * local_sim)
 {
-    being_loop_no_return(local_sim, sim_brain_dialogue_no_return);
+    being_loop(local_sim, sim_brain_dialogue_no_return, 0L);
 }
 #endif
 
+
+static void sim_being_no_return(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    n_byte awake = (being_awake(local_sim, local_being) != 0);
+    
+    being_cycle_universal(local_sim,local_being, awake);
+    
+    if (awake)
+    {
+        if(interpret_cycle(interpret, -1, local_sim->beings, local_being, &sim_start_conditions, &sim_end_conditions) == -1)
+        {
+            interpret_cleanup(&interpret);
+        }
+        if(interpret == 0L)
+        {
+            being_cycle_awake(local_sim, local_being);
+        }
+    }
+}
+
 static void sim_being(noble_simulation * local_sim)
 {
-    n_uint loop = 0;
-
     local_sim->someone_speaking = 0;
+    being_loop(local_sim, sim_being_no_return, 0L);
 
-    while (loop < local_sim->num)
-    {
-        noble_being * local_being = &(local_sim->beings[loop]);
-
-        n_byte awake = (being_awake(local_sim, local_being) != 0);
-
-        being_cycle_universal(local_sim,local_being, awake);
-
-        if (awake)
-        {
-            if(interpret_cycle(interpret, -1, local_sim->beings, loop, &sim_start_conditions, &sim_end_conditions) == -1)
-            {
-                interpret_cleanup(&interpret);
-            }
-            if(interpret == 0L)
-            {
-                being_cycle_awake(local_sim, loop);
-            }
-        }
-
-        loop++;
-    }
 }
 
 static void sim_time(noble_simulation * local_sim)

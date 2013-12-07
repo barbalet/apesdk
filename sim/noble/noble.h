@@ -944,7 +944,7 @@ setting of information. This function covers the getting of information.
 */
 typedef n_int (script_output)(void * code, n_byte * kind, n_int * number);
 
-typedef void (script_external)(void * code, void * structure, n_int identifier);
+typedef void (script_external)(void * code, void * structure, void * data);
 
 #define	VARIABLE_WIDTH		    32
 
@@ -1008,11 +1008,11 @@ typedef struct
     script_input    *sc_input;
     script_output   *sc_output;
 
-    n_int			specific;
-
     n_int           location;
     n_int           leave;
     n_int           localized_leave;
+    
+    void *          data;
 } n_interpret;
 
 /* used for stripping ApeScript errors for documentation */
@@ -1022,7 +1022,7 @@ n_int io_apescript_error(AE_ENUM value);
 n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * variables);
 
 void  interpret_cleanup(n_interpret ** to_clean);
-n_int interpret_cycle(n_interpret * code, n_int exit_offset, void * structure, n_int identifier, script_external * start, script_external * end);
+n_int interpret_cycle(n_interpret * code, n_int exit_offset, void * structure, void * data, script_external * start, script_external * end);
 
 #ifdef	SCRIPT_DEBUG
 

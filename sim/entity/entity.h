@@ -246,17 +246,11 @@ n_byte * being_braincode_external(noble_being * value);
 n_byte * being_braincode_internal(noble_being * value);
 #endif
 
-typedef void (being_no_return)(noble_simulation * sim, noble_being * actual);
+typedef void (being_loop_fn)(noble_simulation * sim, noble_being * actual, void * data);
 
-void being_loop_no_return(noble_simulation * sim, being_no_return bnr_func);
+void being_loop(noble_simulation * sim, being_loop_fn bl_func, void * data);
 
-typedef void (being_feedback)(noble_simulation * sim, noble_being * actual, void * check_data, void * result_data);
-
-void being_loop_feedback(noble_simulation * sim, being_feedback bf_func, void * check_data, void * result_data);
-
-void being_loop_feedback_not_being(noble_simulation * sim, noble_being * being_not, being_feedback bf_func, void * check_data, void * result_data);
-
-void being_loop_feedback_not_number(noble_simulation * sim, n_uint being_not, being_feedback bf_func, void * check_data, void * result_data);
+void being_loop_not_being(noble_simulation * sim, noble_being * being_not, being_loop_fn bl_func, void * data);
 
 void   metabolism_vascular_description(n_int index, n_string description);
 n_string metabolism_description(n_int index);
@@ -269,7 +263,7 @@ void being_erase(noble_being * value);
 
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
 
-void   being_cycle_awake(noble_simulation * sim, n_uint current_being_index);
+void   being_cycle_awake(noble_simulation * sim, noble_being * local);
 void   being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake);
 
 void    being_state_description(n_byte2 state, n_string result);

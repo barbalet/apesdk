@@ -253,6 +253,8 @@ n_int	file_in(n_file * input_file)
 n_int sketch_input(void *code, n_byte kind, n_int value)
 {
     noble_simulation * local_sim = sim_sim();
+    
+    
     n_int *local_vr = ((n_interpret *)code)->variable_references;
     noble_being	*local_being = 0L;
     n_int temp_select = local_vr[ VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE ];
@@ -289,7 +291,8 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
             return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
         }
         {
-            n_byte *local_brain = being_brain(&(local_sim->beings[((n_interpret *)code)->specific]));
+            noble_being * local_being = (noble_being *)((n_interpret *)code)->data;
+            n_byte *local_brain = being_brain(local_being);
             if (local_brain != 0L)
             {
                 TRACK_BRAIN(local_brain, current_x, current_y, current_z) = (n_byte) value;
@@ -401,7 +404,6 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
         local_vr[kind-VARIABLE_VECT_ANGLE] = value;
         return 0;
     }
-
     return -1; /* where this fails is more important than this failure */
 }
 
@@ -434,7 +436,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
         }
 
         {
-            noble_being * local_current = &(local_sim->beings[code->specific]);
+            noble_being * local_current = (noble_being *)code->data;
             n_int		  local_number = 0;
             n_vect2       local_vr0;
             vect2_direction(&local_vr0, local_vr[0], 32);
@@ -484,7 +486,8 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                 if ( second_value == VARIABLE_IS_VISIBLE )
                 {
                     /* range already checked */
-                    local_number = being_los(local_sim->land, &(local_sim->beings[code->specific]), (n_byte2)quick_x, (n_byte2)quick_y);
+                    noble_being * local_being = (noble_being *)code->data;
+                    local_number = being_los(local_sim->land, local_being, (n_byte2)quick_x, (n_byte2)quick_y);
                 }
                 else
                 {
@@ -513,7 +516,9 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                 local_number = (local_sim->land->date[0]) + (local_sim->land->date[1] * TIME_CENTURY_DAYS);
                 break;
             case VARIABLE_CURRENT_BEING:
+#ifdef NEED_TO_FIX
                 local_number = code->specific;
+#endif
                 break;
             case VARIABLE_NUMBER_BEINGS:
                 local_number = local_sim->num;
@@ -547,7 +552,8 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
                 }
                 {
-                    n_byte *local_brain = being_brain(&(local_sim->beings[code->specific]));
+                    noble_being * local_being = (noble_being *)code->data;
+                    n_byte *local_brain = being_brain(local_being);
                     if (local_brain != 0L)
                     {
                         local_number = TRACK_BRAIN(local_brain, current_x, current_y, current_z);
@@ -822,18 +828,18 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
 
 
 
-void sim_start_conditions(void * code, void * structure, n_int identifier)
+void sim_start_conditions(void * code, void * structure, void * data)
 {
     n_interpret * interp = (n_interpret *)code;
     n_int       * variables = interp->variable_references;
-    noble_being * local_being = &(((noble_being*)structure)[identifier]);
-
-    interp->specific = identifier;
+    noble_being * local_being = (noble_being*)data;
 
     variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = being_facing(local_being);
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
     variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = being_energy(local_being);
+#ifdef NEED_TO_FIX
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
+#endif
     variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = GET_H(local_being);
     variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->goal[0];
     variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->goal[1];
@@ -848,14 +854,14 @@ void sim_start_conditions(void * code, void * structure, n_int identifier)
     variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE] = local_being->honor;
     variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE] = local_being->parasites;
 #endif
-
+    
 }
 
-void sim_end_conditions(void * code, void * structure, n_int identifier)
+void sim_end_conditions(void * code, void * structure, void * data)
 {
     n_interpret * interp = (n_interpret *)code;
     n_int       * variables = interp->variable_references;
-    noble_being * local_being = &(((noble_being*)structure)[identifier]);
+    noble_being * local_being = (noble_being*)data;
 
     n_int	local_facing = variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE];
     n_int	local_speed  = variables[VARIABLE_SPEED  - VARIABLE_VECT_ANGLE];
@@ -874,8 +880,6 @@ void sim_end_conditions(void * code, void * structure, n_int identifier)
     n_int	local_honor = variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE];
     n_int	local_parasites = variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE];
 #endif
-
-    interp->specific = identifier;
 
     if(local_facing< 0)
     {

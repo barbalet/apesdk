@@ -1229,6 +1229,28 @@ n_int console_metabolism(void * ptr, n_string response, n_console_output output_
 #endif
 }
 
+
+static void histogram_being_state_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    n_uint * histogram = data;
+    n_uint n = 2;
+    if (being_state(local_being) == BEING_STATE_ASLEEP)
+    {
+        histogram[0]++;
+    }
+    else
+    {
+        while (n < BEING_STATES)
+        {
+            if (being_state(local_being) & (1<<(n-1)))
+            {
+                histogram[n]++;
+            }
+            n++;
+        }
+    }
+}
+
 /**
  * Update a histogram of being states
  * @param local_sim pointer to the simulation object
@@ -1237,35 +1259,15 @@ n_int console_metabolism(void * ptr, n_string response, n_console_output output_
  */
 static void histogram_being_state(noble_simulation * local_sim, n_uint * histogram, n_byte normalize)
 {
-    n_uint i, n=2, tot=0;
-
-    n_uint loop = 0;
+    n_uint i;
     
     for (i = 0; i < BEING_STATES; i++) histogram[i] = 0;
 
-    while (loop < local_sim->num)
-    {
-        noble_being * local_being = &local_sim->beings[i];
-        if (being_state(local_being) == BEING_STATE_ASLEEP)
-        {
-            histogram[0]++;
-        }
-        else
-        {
-            while (n < BEING_STATES)
-            {
-                if (being_state(local_being) & (1<<(n-1)))
-                {
-                    histogram[n]++;
-                }
-                n++;
-            }
-        }
-        loop++;
-    }
+    being_loop(local_sim, histogram_being_state_loop, histogram);
 
     if (normalize)
     {
+        n_uint tot=0;
         for (i = 0; i < BEING_STATES; i++) tot += histogram[i];
         if (tot > 0)
         {
