@@ -1560,19 +1560,21 @@ static void draw_tides_hi_res(n_byte * data, n_c_uint * block, n_byte tide)
 static void draw_apes_no_return(noble_simulation * local_sim, noble_being * bei, void * data)
 {
     n_join			local_8bit;
-    n_color8		*local_col = (n_color8 *)data;
-
+    n_color8        local_col;
+    
+    /* makes this use thread safe */
+    io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
     
     if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
     {
-        local_col->color = COLOUR_RED;
+        local_col.color = COLOUR_RED;
     }
     else
     {
-        local_col->color = COLOUR_RED_DARK;
+        local_col.color = COLOUR_RED_DARK;
     }
     
-    if (local_col->screen == local_sim->land->highres)
+    if (local_col.screen == local_sim->land->highres)
     {
         local_8bit.pixel_draw = &pixel_color8_hires;
     }
@@ -1581,9 +1583,9 @@ static void draw_apes_no_return(noble_simulation * local_sim, noble_being * bei,
         local_8bit.pixel_draw  = &pixel_color8;
     }
     
-    local_8bit.information = local_col;
+    local_8bit.information = &local_col;
     
-    if (local_col->screen == local_sim->land->highres)
+    if (local_col.screen == local_sim->land->highres)
     {
         draw_apeloc_hires(local_sim, bei, &local_8bit);
     }

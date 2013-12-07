@@ -277,6 +277,8 @@ n_byte2 being_random(noble_being * value);
 void being_set_select_name(noble_simulation * sim, n_string name);
 n_string being_get_select_name(noble_simulation * sim);
 
+n_int being_name_compartison(noble_being * value, n_byte2 gender_name, n_byte2 family_name);
+
 void social_graph_link_name(
     noble_simulation * local_sim,
     noble_being * local_being,

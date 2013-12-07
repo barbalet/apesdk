@@ -72,6 +72,23 @@ static void drives_hunger(noble_being * local)
     }
 }
 
+
+typedef struct{
+    n_int         beings_in_vacinity;
+    noble_being * being;
+}drives_sociability_data;
+
+static void drives_sociability_loop(noble_simulation * local_sim, noble_being * other, void * data)
+{
+    drives_sociability_data * dsd = (drives_sociability_data *)data;
+    n_vect2 difference_vector;
+    being_delta(dsd->being, other, &difference_vector);
+    if (being_los(local_sim->land, dsd->being, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+    {
+        dsd->beings_in_vacinity++;
+    }
+}
+
 /**
  * @brief Social drive governs how likely the being is to interact with others.
  * This affects behaviors such as grooming, chatting and mating
@@ -80,10 +97,15 @@ static void drives_hunger(noble_being * local)
  */
 static void drives_sociability(
     noble_being * local,
-    n_int beings_in_vicinity)
+    noble_simulation * sim)
 {
+    drives_sociability_data dsd;
+    dsd.beings_in_vacinity = 0;
+    dsd.being = local;
+    being_loop_not_being(sim, local, drives_sociability_loop, &dsd);
+    
     /** if the being is not overcrowded and its social drive is not saturated */
-    if (beings_in_vicinity < local->crowding + SOCIAL_TOLLERANCE)
+    if (dsd.beings_in_vacinity < local->crowding + SOCIAL_TOLLERANCE)
     {
         /** increase the social drive */
         being_inc_drive(local, DRIVE_SOCIAL);
@@ -95,8 +117,8 @@ static void drives_sociability(
     }
 
     /** Adjust crowding (typical expected number of neighbours). */
-    if (beings_in_vicinity < local->crowding) local->crowding--;
-    if (beings_in_vicinity > local->crowding) local->crowding++;
+    if (dsd.beings_in_vacinity < local->crowding) local->crowding--;
+    if (dsd.beings_in_vacinity > local->crowding) local->crowding++;
 
     /** Minimum expected neighbours */
     if (local->crowding < MIN_CROWDING) local->crowding = MIN_CROWDING;
@@ -151,8 +173,8 @@ static void drives_sex(
                         if (local_episodic[i].event == EVENT_MATE)
                         {
                             /** not someone else's mate */
-                            if ((local_episodic[i].first_name[BEING_MEETER] == being_gender_name(local)) &&
-                                    (local_episodic[i].family_name[BEING_MEETER] == being_family_name(local)))
+                            
+                            if (being_name_compartison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                             {
                                 /** set a goal to seek the remembered mate */
                                 local->goal[0]=GOAL_MATE;
@@ -266,12 +288,11 @@ static void drives_fatigue(
  */
 void drives_cycle(
     noble_being * local,
-    n_int beings_in_vicinity,
     n_int awake,
     noble_simulation * sim)
 {
     drives_hunger(local);
-    drives_sociability(local, beings_in_vicinity);
+    drives_sociability(local, sim);
     drives_sex(local, awake, sim);
     drives_fatigue(local);
 }

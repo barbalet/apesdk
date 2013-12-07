@@ -285,6 +285,20 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval)
     return retval;
 }
 
+
+static void console_simulation_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    n_int   *int_data = data;
+    if (FIND_SEX(GET_I(local_being)) == SEX_FEMALE)
+    {
+        int_data[0]++;
+    }
+    if ((TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being)) < AGE_OF_MATURITY)
+    {
+        int_data[1]++;
+    }
+}
+
 /**
  * Show details of the overall simulation
  * @param ptr pointer to a noble_simulation object
@@ -296,31 +310,19 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
 {
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_string_block beingstr, time;
-    n_int count=0,juveniles=0;
-    n_uint loop = 0;
-    while (loop < local_sim->num)
-    {
-        noble_being * local_being = &local_sim->beings[loop];
-        if (FIND_SEX(GET_I(local_being)) == SEX_FEMALE)
-        {
-            count++;
-        }
-        if ((TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being)) < AGE_OF_MATURITY)
-        {
-            juveniles++;
-        }
-        loop++;
-    }
+    n_int int_data[2];
+
+    being_loop(local_sim, console_simulation_loop, int_data);
 
     sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension(local_sim->land));
     sprintf(beingstr,"%sLand seed: %d %d\n",beingstr, (int)local_sim->land->genetics[0],(int)local_sim->land->genetics[1]);
     sprintf(beingstr,"%sPopulation: %d   ", beingstr, (int)local_sim->num);
-    sprintf(beingstr,"%sAdults: %d   Juveniles: %d\n", beingstr, (int)(local_sim->num - juveniles),(int)juveniles);
+    sprintf(beingstr,"%sAdults: %d   Juveniles: %d\n", beingstr, (int)(local_sim->num - int_data[1]),(int)int_data[1]);
     if (local_sim->num > 0)
     {
         sprintf(beingstr,"%sFemales: %d (%.1f%%)   Males: %d (%.1f%%)\n", beingstr,
-                (int)count, count*100.0f/local_sim->num,
-                (int)(local_sim->num - count),(local_sim->num - count)*100.0f/local_sim->num);
+                (int)int_data[0], int_data[0]*100.0f/local_sim->num,
+                (int)(local_sim->num - int_data[0]),(local_sim->num - int_data[0])*100.0f/local_sim->num);
     }
     sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)local_sim->land->tide_level);
 
@@ -2466,8 +2468,8 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                         {
                             /** Avoid memories about yourself, since we're interested
                                in gossip about other beings */
-                            if ((local_episodic[e].first_name[j] != being_gender_name(local_being)) ||
-                                    (local_episodic[e].family_name[j] != being_family_name(local_being)))
+                            
+                            if (being_name_compartison(local_being, local_episodic[e].first_name[j], local_episodic[e].family_name[j]))
                             {
                                 if (((j == BEING_MET) &&
                                         (local_episodic[e].event != EVENT_SEEK_MATE) &&

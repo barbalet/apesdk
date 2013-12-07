@@ -762,8 +762,7 @@ n_int get_noble_social(
     noble_being * met_being,
     noble_simulation * sim)
 {
-    n_byte2 name = being_gender_name(met_being);
-    n_byte2 i,family_name = being_family_name(met_being);
+    n_byte2 i;
     noble_social * graph = being_social(meeter_being);
 
     if (!graph) return -1;
@@ -774,12 +773,9 @@ n_int get_noble_social(
         {
             if (graph[i].entity_type==ENTITY_BEING)
             {
-                if (name==graph[i].first_name[BEING_MET])
+                if (being_name_compartison(met_being, graph[i].first_name[BEING_MET], graph[i].family_name[BEING_MET]))
                 {
-                    if (family_name==graph[i].family_name[BEING_MET])
-                    {
-                        return i;
-                    }
+                    return i;
                 }
             }
         }

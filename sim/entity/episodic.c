@@ -152,10 +152,8 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
         if (local_episodic[i].event >= EVENT_INTENTION)
         {
             /** is this my intention, or someone else's? */
-            if ((local_episodic[i].first_name[BEING_MEETER] == being_gender_name(local)) &&
-                    (local_episodic[i].family_name[BEING_MEETER] == being_family_name(local)))
+            if (being_name_compartison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
             {
-
                 if (local_episodic[i].date[0] < local_sim->land->date[0])
                 {
                     local_episodic[i].event = 0;
@@ -280,9 +278,6 @@ n_int episodic_first_person_memories_percent(
 {
     n_int i,hits=0,memories=0;
     noble_episodic * local_episodic = being_episodic(local);
-    n_byte2 name = being_gender_name(local);
-    n_byte2 family = being_family_name(local);
-
     if (local_episodic == 0L)
     {
         return 0;
@@ -304,8 +299,7 @@ n_int episodic_first_person_memories_percent(
             else
             {
                 /** ratio of first person memories to other memories */
-                if ((local_episodic[i].first_name[BEING_MEETER] == name) &&
-                        (local_episodic[i].family_name[BEING_MEETER] == family))
+                if (being_name_compartison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                 {
                     hits++;
                 }
@@ -561,7 +555,7 @@ void episodic_self(
                           0, 0, arg);
 }
 /**
- * @brief Remember an event which occurerd between being in close proximity
+ * @brief Remember an event which occurred between being in close proximity
  * @param local_sim Pointer to the simulation object
  * @param local Pointer to the first being
  * @param other Pointer to the second being

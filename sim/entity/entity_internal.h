@@ -53,6 +53,14 @@ enum sleep_state
 #define OFFSET_GRASS    40
 #define OFFSET_BUSH     14
 
+typedef struct{
+    n_uint opposite_sex_distance;
+    n_uint same_sex_distance;
+    n_uint opposite_sex;
+    n_uint same_sex;
+}being_find_nearest;
+
+
 void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);
 
 n_int food_eat(
@@ -152,7 +160,9 @@ void being_init_braincode(noble_being * local,
                           n_byte friend_foe,
                           n_byte internal);
 
-void drives_cycle(noble_being * local, n_int social, n_int awake, noble_simulation * sim);
+void drives_cycle(noble_being * local,
+                  n_int awake,
+                  noble_simulation * sim);
 
 n_byte get_braincode_instruction(noble_being * local_being);
 
