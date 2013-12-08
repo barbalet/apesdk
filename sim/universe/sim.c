@@ -367,7 +367,7 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
 
 static void sim_brain(noble_simulation * local_sim)
 {
-    being_loop(local_sim, sim_brain_no_return, 0L);
+    being_loop(local_sim, 0L, sim_brain_no_return, 0L);
 }
 
 #ifdef BRAINCODE_ON
@@ -388,8 +388,9 @@ static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_bei
 
 static void sim_brain_dialogue(noble_simulation * local_sim)
 {
-    being_loop(local_sim, sim_brain_dialogue_no_return, 0L);
+    being_loop(local_sim, 0L, sim_brain_dialogue_no_return, 0L);
 }
+
 #endif
 
 
@@ -415,7 +416,7 @@ static void sim_being_no_return(noble_simulation * local_sim, noble_being * loca
 static void sim_being(noble_simulation * local_sim)
 {
     local_sim->someone_speaking = 0;
-    being_loop(local_sim, sim_being_no_return, 0L);
+    being_loop(local_sim, 0L, sim_being_no_return, 0L);
 
 }
 

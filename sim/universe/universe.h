@@ -1109,8 +1109,7 @@ typedef	struct
 {
     n_byte name;
     n_byte2 familiarity;
-}
-noble_place;
+} noble_place;
 
 #ifdef BRAINCODE_ON
 
@@ -1254,8 +1253,7 @@ typedef struct
     n_byte            brain[DOUBLE_BRAIN];
     noble_social       social[SOCIAL_SIZE];
     noble_episodic   episodic[EPISODIC_SIZE];
-}
-noble_being;
+} noble_being;
 
 typedef void (being_birth_event)(noble_being * born, noble_being * mother, void * sim);
 typedef void (being_death_event)(noble_being * deceased, void * sim);
@@ -1289,9 +1287,7 @@ typedef struct
     
     being_birth_event * ext_birth;
     being_death_event * ext_death;
-}
-noble_simulation;
-
+} noble_simulation;
 
 /* macros defined to ease in the vectorised code */
 

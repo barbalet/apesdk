@@ -312,7 +312,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     n_string_block beingstr, time;
     n_int int_data[2];
 
-    being_loop(local_sim, console_simulation_loop, int_data);
+    being_loop(local_sim, 0L, console_simulation_loop, int_data);
 
     sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension(local_sim->land));
     sprintf(beingstr,"%sLand seed: %d %d\n",beingstr, (int)local_sim->land->genetics[0],(int)local_sim->land->genetics[1]);
@@ -1265,7 +1265,7 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
     
     for (i = 0; i < BEING_STATES; i++) histogram[i] = 0;
 
-    being_loop(local_sim, histogram_being_state_loop, histogram);
+    being_loop(local_sim, 0L, histogram_being_state_loop, histogram);
 
     if (normalize)
     {

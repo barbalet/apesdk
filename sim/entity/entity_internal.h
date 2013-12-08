@@ -53,12 +53,15 @@ enum sleep_state
 #define OFFSET_GRASS    40
 #define OFFSET_BUSH     14
 
-typedef struct{
-    n_uint opposite_sex_distance;
-    n_uint same_sex_distance;
-    n_uint opposite_sex;
-    n_uint same_sex;
-}being_find_nearest;
+typedef struct
+{
+    noble_being  * local;
+    noble_social * local_social;
+    n_uint         opposite_sex_distance;
+    n_uint         same_sex_distance;
+    noble_being  * opposite_sex;
+    noble_being  * same_sex;
+} being_nearest;
 
 
 void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);

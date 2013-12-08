@@ -556,23 +556,7 @@ void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum in
     GET_A(value,ATTENTION_BODY) = location;
 }
 
-/**
- * @brief Applies a function to each being in the simulation
- * @param sim Pointer to the simulation object
- * @param bnr_func The function to be applied
- */
-void being_loop(noble_simulation * sim, being_loop_fn bf_func, void * data)
-{
-    n_uint loop = 0;
-    while (loop < sim->num)
-    {
-        noble_being * output = &(sim->beings[loop]);
-        (bf_func)(sim, output, data);
-        loop++;
-    }
-}
-
-void being_loop_not_being(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
+void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
 {
     n_uint loop = 0;
     while (loop < sim->num)
@@ -1203,86 +1187,123 @@ n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_
     return addition;
 }
 
+typedef struct
+{
+    n_int         parse_requirements;
+    n_int         older;
+    n_uint        comparison_best;
+    n_int         actual_age;
+    n_genetics  * genetics;
+    noble_being * return_value;
+} being_find_closest_struct;
+
+static void being_find_closest_loop(noble_simulation * sim, noble_being * local, void * data)
+{
+    being_find_closest_struct * bfcs = (being_find_closest_struct *)data;
+
+    n_byte success = 0;
+    n_int  local_dob = being_dob(local);
+    
+    if (bfcs->older == 0) success = 1;
+    
+    if ((bfcs->older == 1) && ((local_dob - AGE_OF_MATURITY) > bfcs->actual_age))
+    {
+        success = 1;
+    }
+    
+    if ((bfcs->older == -1) && ((bfcs->actual_age - AGE_OF_MATURITY) > local_dob))
+    {
+        success = 1;
+    }
+    
+    if (success)
+    {
+        n_uint comparison = being_genetic_comparison(bfcs->genetics, being_genetics(local), bfcs->parse_requirements);
+        if (comparison > bfcs->comparison_best)
+        {
+            bfcs->comparison_best = comparison;
+            bfcs->return_value = local;
+        }
+    }
+
+}
+
 static noble_being * being_find_closest(noble_simulation * sim, noble_being * actual, n_int parse_requirements, n_int older)
 {
-    n_uint loop = 0;
+    being_find_closest_struct bfcs;
+    bfcs.parse_requirements = parse_requirements;
+    bfcs.older = older;
     /** comparison must be better than average */
-    n_uint comparison_best = 3 * sizeof(n_genetics) * CHROMOSOMES;
-    noble_being * return_value = 0L;
-    n_genetics * genetics = being_genetics(actual);
-    n_int actual_age = being_dob(actual);
+    bfcs.comparison_best = 3 * sizeof(n_genetics) * CHROMOSOMES;
+    bfcs.return_value = 0L;
+    bfcs.genetics = being_genetics(actual);
+    bfcs.actual_age = being_dob(actual);
     
-    while (loop < sim->num)
+    being_loop(sim, actual, being_find_closest_loop, &bfcs);
+    
+    return bfcs.return_value;
+}
+
+typedef struct
+{
+    n_int         today;
+    n_uint        comparison_best;
+    n_int         max_age;
+    n_genetics  * genetics;
+    noble_being * return_value;
+} being_find_child_struct;
+
+static void being_find_child_loop(noble_simulation * sim, noble_being * local, void * data)
+{
+    being_find_child_struct * bfcs = (being_find_child_struct *) data;
+    n_uint        comparison = being_genetic_comparison(bfcs->genetics, being_genetics(local), -1);
+    if ((comparison > bfcs->comparison_best) &&  ((bfcs->today - being_dob(local)) < bfcs->max_age))
     {
-        noble_being * local = &(sim->beings[loop]);
-        if (actual != local)
-        {
-            n_byte success = 0;
-            n_int  local_dob = being_dob(local);
-            
-            if (older == 0) success = 1;
-            
-            if ((older == 1) && ((local_dob - AGE_OF_MATURITY) > actual_age))
-            {
-                success = 1;
-            }
-            
-            if ((older == -1) && ((actual_age - AGE_OF_MATURITY) > local_dob))
-            {
-                success = 1;
-            }
-            
-            if (success)
-            {
-                n_uint comparison = being_genetic_comparison(genetics, being_genetics(local), parse_requirements);
-                if (comparison > comparison_best)
-                {
-                    comparison_best = comparison;
-                    return_value = local;
-                }
-            }
-        }
-        loop++;
+        bfcs->comparison_best = comparison;
+        bfcs->return_value = local;
     }
-    return return_value;
 }
 
 static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_int max_age)
 {
-    n_int today = TIME_IN_DAYS(sim->land->date);
-    n_uint loop = 0;
-    n_uint comparison_best = 0;
-    noble_being * return_value = 0L;
+    being_find_child_struct bfcs;
     
-    while (loop < sim->num)
-    {
-        noble_being * local = &(sim->beings[loop]);
-        n_uint        comparison = being_genetic_comparison(genetics, being_genetics(local), -1);
-        if ((comparison > comparison_best) &&  ((today - being_dob(local)) < max_age))
+    bfcs.today = TIME_IN_DAYS(sim->land->date);
+    bfcs.comparison_best = 0;
+    bfcs.max_age = max_age;
+    bfcs.genetics = genetics;
+    bfcs.return_value = 0L;
+    being_loop(sim, 0L, being_find_child_loop, &bfcs);
+    return bfcs.return_value;
+}
 
+typedef struct
+{
+    n_byte2 first_gender;
+    n_byte2 family;
+    noble_being * local;
+} being_find_name_struct;
+
+static void being_find_name_loop(noble_simulation * sim, noble_being * local, void * data)
+{
+    being_find_name_struct * bfns = (being_find_name_struct *)data;
+    if (bfns->local == 0L)
+    {
+        if (being_name_compartison(local, bfns->first_gender, bfns->family))
         {
-            comparison_best = comparison;
-            return_value = local;
+            bfns->local = local;
         }
-        loop++;
     }
-    return return_value;
 }
 
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family)
 {
-    n_uint loop = 0;
-    while (loop < sim->num)
-    {
-        noble_being * local = &(sim->beings[loop]);
-        
-        if (being_name_compartison(local, first_gender, family))
-        {
-            return local;
-        }
-        loop++;
-    }
-    return 0L;
+    being_find_name_struct bfns;
+    bfns.first_gender = first_gender;
+    bfns.family = family;
+    bfns.local = 0L;
+    being_loop(sim, 0L, being_find_name_loop, &bfns);
+    return bfns.local;
 }
 
 /** returns the total positive and negative affect within memory */
@@ -2140,6 +2161,64 @@ static void being_create_family_links(noble_being * mother,
 
 }
 
+static void being_follow_loop1(noble_simulation * sim, noble_being * other, void * data)
+{
+    being_nearest * nearest = (being_nearest *)data;
+    n_vect2        difference_vector;
+
+    /** is this the same as the name of the being to which we are paying attention? */
+    if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local))) &&
+        being_name_compartison(other, nearest->local->goal[1], nearest->local->goal[2]))
+    {
+        being_delta(nearest->local, other, &difference_vector);
+        if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+        {
+            n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+            if (compare_distance < nearest->opposite_sex_distance)
+            {
+                nearest->opposite_sex = other;
+                nearest->opposite_sex_distance = compare_distance;
+            }
+        }
+    }
+}
+
+static void being_follow_loop2(noble_simulation * sim, noble_being * other, void * data)
+{
+    being_nearest * nearest = (being_nearest *)data;
+    n_vect2        difference_vector;
+
+    /** is this the same as the name of the being to which we are paying attention? */
+    if (being_name_compartison(other,
+            nearest->local_social->first_name[BEING_MET],
+            nearest->local_social->family_name[BEING_MET]))
+    {
+        /** Is this being within sight? */
+        being_delta(nearest->local, other, &difference_vector);
+        if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+        {
+            n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+            if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local)))
+            {
+                if (compare_distance < nearest->opposite_sex_distance)
+                {
+                    nearest->opposite_sex = other;
+                    nearest->opposite_sex_distance = compare_distance;
+                }
+            }
+            else
+            {
+                if (compare_distance < nearest->same_sex_distance)
+                {
+                    nearest->same_sex = other;
+                    nearest->same_sex_distance = compare_distance;
+                }
+            }
+        }
+    }
+
+}
+
 /**
  * Follow a being to which we are paying attention
  * @param sim Pointer to the simulation
@@ -2148,118 +2227,72 @@ static void being_create_family_links(noble_being * mother,
  * @param same_sex Array index of the closest being of the same sex
  * @param opposite_sex_distance Returned distance to the closest being of the opposite sex
  * @param same_sex_distance Returned distance to the closest being of the same sex
- * @return 1 if the attended to being is seen, 0 otherwise
  */
-static n_uint being_follow(noble_simulation * sim,
+static void being_follow(noble_simulation * sim,
                            noble_being * local,
-                           being_find_nearest * nearest)
+                           being_nearest * nearest)
 {
-    noble_being * being_buffer = sim->beings;
-    n_vect2       difference_vector;
     noble_social * local_social_graph;
-    n_int  social_graph_index;
-    n_int  result_los;
+    n_int          social_graph_index;
 
+    nearest->local = local;
     nearest->opposite_sex_distance = 0xffffffff;
     nearest->same_sex_distance = 0xffffffff;
-    nearest->opposite_sex = NO_BEINGS_FOUND;
-    nearest->same_sex = NO_BEINGS_FOUND;
+    nearest->opposite_sex = 0L;
+    nearest->same_sex = 0L;
 
     /** is a mate in view? */
     if (local->goal[0]==GOAL_MATE)
     {
-        n_uint loop = 0;
-        while (loop < sim->num)
+        being_loop(sim, local, being_follow_loop1, nearest);
+        if (nearest->opposite_sex != 0L)
         {
-            /** get the name of the other being */
-            noble_being * other = &being_buffer[loop];
-            if (local != other)
-            {
-                /** is this the same as the name of the being to which we are paying attention? */
-                if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(local))) &&
-                    being_name_compartison(other, local->goal[1], local->goal[2]))
-                {
-                    being_delta(local, other, &difference_vector);
-                    result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
-                    if (result_los)
-                    {
-                        n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
-                        nearest->opposite_sex = loop;
-                        nearest->opposite_sex_distance = compare_distance;
-                        return 1;
-                    }
-                }
-            }
-            loop++;
+            return;
         }
     }
-
+    
     local_social_graph = being_social(local);
-    if (local_social_graph == 0L) return 0;
-
+    if (local_social_graph == 0L) return;
+    
     /** which entry in the social graph are we paying attention to? */
     social_graph_index = GET_A(local,ATTENTION_ACTOR);
+    
+    nearest->local_social = &local_social_graph[social_graph_index];
+    
     /** Does this entry correspond to another being? */
     if ((social_graph_index>0) &&
-            (local_social_graph[social_graph_index].entity_type==ENTITY_BEING) &&
-            (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, social_graph_index)))
+        (local_social_graph[social_graph_index].entity_type == ENTITY_BEING) &&
+        (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, social_graph_index)))
     {
-        n_uint loop = 0;
-        /** search for the other being */
-        while (loop < sim->num)
-        {
-            /** get the name of the other being */
-            noble_being * other = &being_buffer[loop];
-            if (local != other)
-            {
-                /** is this the same as the name of the being to which we are paying attention? */
-                if (being_name_compartison(other, local_social_graph[social_graph_index].first_name[BEING_MET], local_social_graph[social_graph_index].family_name[BEING_MET]))
-                {
-                    /** Is this being within sight? */
-                    being_delta(local, other, &difference_vector);
-                    result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
-                    if (result_los)
-                    {
-                        n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
-                        if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(local)))
-                        {
-                            nearest->opposite_sex = loop;
-                            nearest->opposite_sex_distance = compare_distance;
-                        }
-                        else
-                        {
-                            nearest->same_sex = loop;
-                            nearest->same_sex_distance = compare_distance;
-                        }
-                        return 1;
-                    }
-                }
-            }
-            loop++;
-        }
+        being_loop(sim, local, being_follow_loop2, nearest);
     }
-    return 0;
 }
 
-static n_int  max_shout_volume = 127;
+
+typedef struct
+{
+    n_int         max_shout_volume;
+    noble_being * local;
+} being_listen_struct;
+
 
 static void being_listen_loop(noble_simulation * sim, noble_being * other, void * data)
 {
-    noble_being * local = (noble_being *)data;
+    being_listen_struct * bls = (being_listen_struct *)data;
     n_vect2       difference_vector;
     n_uint        compare_distance;
     
-    being_delta(local, other, &difference_vector);
+    being_delta(bls->local, other, &difference_vector);
     compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
     /** listen for the nearest shout out */
     if ((being_state(other)&BEING_STATE_SHOUTING) &&
         (compare_distance < SHOUT_RANGE) &&
-        (other->shout[SHOUT_VOLUME] > max_shout_volume))
+        (other->shout[SHOUT_VOLUME] > bls->max_shout_volume))
     {
-        max_shout_volume = other->shout[SHOUT_VOLUME];
-        local->shout[SHOUT_HEARD] = other->shout[SHOUT_CONTENT];
-        local->shout[SHOUT_FAMILY0] = being_family_first_name(other);
-        local->shout[SHOUT_FAMILY1] = being_family_second_name(other);
+        bls->max_shout_volume = other->shout[SHOUT_VOLUME];
+        bls->local->shout[SHOUT_HEARD] = other->shout[SHOUT_CONTENT];
+        bls->local->shout[SHOUT_FAMILY0] = being_family_first_name(other);
+        bls->local->shout[SHOUT_FAMILY1] = being_family_second_name(other);
     }
 }
 
@@ -2270,17 +2303,52 @@ static void being_listen_loop(noble_simulation * sim, noble_being * other, void 
  */
 static void being_listen(noble_simulation * sim, noble_being * local)
 {
-    max_shout_volume = 127;
-
+    being_listen_struct bls;
+    bls.max_shout_volume = 127;
+    bls.local = local;
     /** clear shout values */
-    local->shout[SHOUT_CONTENT] = 0;
-    local->shout[SHOUT_HEARD] = 0;
     if (local->shout[SHOUT_CTR] > 0)
     {
         local->shout[SHOUT_CTR]--;
     }
-    being_loop_not_being(sim, local, being_listen_loop, local);
+    being_loop(sim, local, being_listen_loop, &bls);
     
+}
+
+
+static void being_closest_loop(noble_simulation * sim, noble_being * test_being, void * data)
+{
+    being_nearest * nearest = (being_nearest *)data;
+    n_vect2       difference_vector;
+    n_uint        compare_distance;
+    being_delta(nearest->local, test_being, &difference_vector);
+    compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+    if (FIND_SEX(GET_I(test_being)) != FIND_SEX(GET_I(nearest->local)))
+    {
+        if (compare_distance < nearest->opposite_sex_distance)
+        {
+            /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
+            if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+            {
+                nearest->opposite_sex_distance = compare_distance;
+                nearest->opposite_sex = test_being;
+            }
+        }
+    }
+    else
+    {
+        if ( compare_distance < nearest->same_sex_distance )
+        {
+            if (FIND_SEX(GET_I(test_being)) == FIND_SEX(GET_I(nearest->local)))
+            {
+                if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+                {
+                    nearest->same_sex_distance = compare_distance;
+                    nearest->same_sex = test_being;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -2295,67 +2363,14 @@ static void being_listen(noble_simulation * sim, noble_being * local)
  */
 static void being_closest(noble_simulation * sim,
                             noble_being * local,
-                            being_find_nearest * nearest)
+                            being_nearest * nearest)
 {
-    noble_being * being_buffer = sim->beings;
-    n_uint        local_is_female = FIND_SEX(GET_I(local));
-    n_uint	      loop = 0;
-
+    nearest->local = local;
     nearest->opposite_sex_distance = 0xffffffff;
     nearest->same_sex_distance = 0xffffffff;
-    nearest->opposite_sex = NO_BEINGS_FOUND;
-    nearest->same_sex = NO_BEINGS_FOUND;
-
-    while (loop < sim->num)
-    {
-        noble_being	* test_being = &being_buffer[loop];
-
-        if (local != test_being)
-        {
-            n_int         los_previously_calculated = 0;
-            n_int         result_los = 0;
-            /** check distance before line of sight */
-            n_vect2       difference_vector;
-            n_uint         compare_distance;
-
-            being_delta(local, test_being, &difference_vector);
-
-            compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
-
-            /* '<' : signed/unsigned mismatch */
-            if (compare_distance < nearest->opposite_sex_distance)
-            {
-                if (FIND_SEX(GET_I(test_being)) != local_is_female)
-                {
-                    /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
-                    los_previously_calculated = 1;
-                    result_los = being_los(sim->land, local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y);
-                    if (result_los)
-                    {
-                        nearest->opposite_sex_distance = compare_distance;
-                        nearest->opposite_sex = loop;
-                    }
-                }
-            }
-            /** '<' : signed/unsigned mismatch */
-            if ( compare_distance < nearest->same_sex_distance )
-            {
-                if (FIND_SEX(GET_I(test_being)) == local_is_female)
-                {
-                    if (los_previously_calculated == 0)
-                    {
-                        result_los = being_los(sim->land, local, (n_byte2)difference_vector.x,  (n_byte2)difference_vector.y);
-                    }
-                    if (result_los)
-                    {                        
-                        nearest->same_sex_distance = compare_distance;
-                        nearest->same_sex = loop;
-                    }
-                }
-            }
-        }
-        loop++;
-    }
+    nearest->opposite_sex = 0L;
+    nearest->same_sex = 0L;
+    being_loop(sim, local, being_closest_loop, &nearest);
 }
 
 /**
@@ -2372,7 +2387,7 @@ static void being_closest(noble_simulation * sim,
  */
 static void being_interact(noble_simulation * sim,
                            noble_being * local,
-                           n_uint   other_being_index,
+                           noble_being	* other_being,
                            n_uint   other_being_distance,
                            n_int  * awake,
                            n_byte * state,
@@ -2380,15 +2395,12 @@ static void being_interact(noble_simulation * sim,
                            n_int  * energy,
                            n_byte   opposite_sex)
 {
-    if (other_being_index != NO_BEINGS_FOUND)
+    if (other_being != 0L)
     {
-        noble_being * being_buffer = sim->beings;
         n_land      * land         = sim->land;
         n_int         today_days   = TIME_IN_DAYS(land->date);
         n_int         birth_days   = being_dob(local);
         n_uint        local_is_female = FIND_SEX(GET_I(local));
-
-        noble_being	* other_being = &being_buffer[other_being_index];
 
         n_vect2 delta_vector;
 
@@ -2456,7 +2468,6 @@ static void being_interact(noble_simulation * sim,
 
 void being_cycle_awake(noble_simulation * sim, noble_being * local)
 {
-    n_uint	      loop;
     n_land      * land               = sim->land;
     n_uint        local_is_female    = FIND_SEX(GET_I(local));
     n_int         today_days         = TIME_IN_DAYS(land->date);
@@ -2487,10 +2498,10 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 #ifdef TERRITORY_ON
     n_uint territory_index;
 #endif
-    being_find_nearest nearest;
+    being_nearest nearest;
 
-    nearest.opposite_sex = NO_BEINGS_FOUND;
-    nearest.same_sex = NO_BEINGS_FOUND;
+    nearest.opposite_sex = 0L;
+    nearest.same_sex = 0L;
 
     /** Listen for any shouts */
     being_listen(sim, local);
@@ -2561,6 +2572,8 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     if ((loc_state & BEING_STATE_SWIMMING) != 0)
 #endif
     {
+        n_uint	      loop;
+
         being_turn_away_from_water(local, land);
 
         /** horizontally oriented posture */
@@ -2594,7 +2607,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
         /** is the being to which we are paying attention within view? */
         being_follow(sim, local, &nearest);
-        if ((nearest.opposite_sex == NO_BEINGS_FOUND) && (nearest.same_sex == NO_BEINGS_FOUND))
+        if (nearest.opposite_sex == 0L)
         {
             /** Find the closest beings */
             being_closest(sim, local, &nearest);
@@ -2687,8 +2700,8 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
     /** Create a wander based on the brain value */
     if ((local->goal[0]==GOAL_NONE) &&
-        (nearest.opposite_sex == NO_BEINGS_FOUND) &&
-        (nearest.same_sex == NO_BEINGS_FOUND) &&
+        (nearest.opposite_sex == 0L) &&
+        (nearest.same_sex == 0L) &&
             (being_random(local) < 1000 + 3600*GENE_STAGGER(genetics)))
     {
         n_byte * local_brain = being_brain(local);
@@ -3510,12 +3523,12 @@ void being_tidy(noble_simulation * local_sim)
 #ifdef PARASITES_ON
     n_int       max_honor = 0;
 #endif
-    being_loop(local_sim, being_tidy_loop, &max_honor);
+    being_loop(local_sim, 0L, being_tidy_loop, &max_honor);
 #ifdef PARASITES_ON
     /** normalize honor values */
     if (max_honor)
     {
-        being_loop(local_sim, being_recalibrate_honor_no_return, 0L);
+        being_loop(local_sim, 0L, being_recalibrate_honor_no_return, 0L);
     }
 #endif
 }
@@ -3551,7 +3564,7 @@ void being_remove(noble_simulation * local_sim)
 
     being_remove_internal = 1;
 
-    being_loop(local_sim, being_remove_loop, 0L);
+    being_loop(local_sim, 0L, being_remove_loop, 0L);
 
     loop=0;
     

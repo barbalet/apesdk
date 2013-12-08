@@ -1931,8 +1931,7 @@ static void sim_social_secondary_no_return(noble_simulation * local, noble_being
  */
 void sim_social(noble_simulation * local)
 {
-    being_loop(local, sim_social_initial_no_return, 0L);
+    being_loop(local, 0L, sim_social_initial_no_return, 0L);
     /** implement social pulls after all calculations*/
-    being_loop(local, sim_social_secondary_no_return, 0L);
-
+    being_loop(local, 0L, sim_social_secondary_no_return, 0L);
 }

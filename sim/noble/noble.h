@@ -200,8 +200,7 @@ typedef	struct
     n_byte  number;
     n_byte2 location;
     const n_string what_is_it;
-}
-noble_file_entry;
+} noble_file_entry;
 
 /* include externally, if needed */
 
@@ -272,8 +271,7 @@ typedef struct
     n_string    command;
     n_string    addition;
     n_string    help_information;
-}
-noble_console_command;
+} noble_console_command;
 
 /*! @struct
 @field pixel_draw The n_pixel function used to draw pixels into
@@ -293,8 +291,7 @@ typedef struct
 {
     n_pixel * pixel_draw;
     void	* information;
-}
-n_join;
+} n_join;
 
 /*! @struct
 @field size The size of the file in bytes.
@@ -311,8 +308,7 @@ typedef struct
     n_uint	size;
     n_uint	location;
     n_byte	*data;
-}
-n_file;
+} n_file;
 
 typedef void (n_file_specific)(n_string string, n_byte * reference);
 
@@ -322,8 +318,7 @@ typedef struct
     n_uint expected_bytes;
     n_uint hash;
     void * next;
-}
-n_file_chain;
+} n_file_chain;
 
 /** \brief sine and cosine conversation */
 #define	NEW_SD_MULTIPLE			26880
@@ -517,8 +512,7 @@ typedef struct
     AE_ENUM  enum_value;
     n_constant_string error_string;
     n_constant_string help_string;
-}
-n_ae_error;
+} n_ae_error;
 
 /** \brief apescript_errors track the errors in ApeScript and additional text for user-manual level documentation */
 static const n_ae_error apescript_errors[]=

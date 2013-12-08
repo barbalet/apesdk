@@ -73,10 +73,11 @@ static void drives_hunger(noble_being * local)
 }
 
 
-typedef struct{
+typedef struct
+{
     n_int         beings_in_vacinity;
     noble_being * being;
-}drives_sociability_data;
+} drives_sociability_data;
 
 static void drives_sociability_loop(noble_simulation * local_sim, noble_being * other, void * data)
 {
@@ -102,7 +103,7 @@ static void drives_sociability(
     drives_sociability_data dsd;
     dsd.beings_in_vacinity = 0;
     dsd.being = local;
-    being_loop_not_being(sim, local, drives_sociability_loop, &dsd);
+    being_loop(sim, local, drives_sociability_loop, &dsd);
     
     /** if the being is not overcrowded and its social drive is not saturated */
     if (dsd.beings_in_vacinity < local->crowding + SOCIAL_TOLLERANCE)

@@ -57,14 +57,14 @@ typedef struct
     execute_function * function;
     void             * read_data;
     void             * write_data;
-}execute_object;
+} execute_object;
 
 
 typedef struct
 {
     execute_object * executed;
     execute_state  state;
-}execution_thread;
+} execution_thread;
 
 static int global_cycle = 1;
 static int execution_cycle = 1;
