@@ -437,23 +437,17 @@ static void sim_time(noble_simulation * local_sim)
 void sim_cycle(void)
 {
     land_cycle(sim.land);
-
-    sim_being(&sim);    /* 2 */
-
 #ifdef WEATHER_ON
     weather_cycle(sim.land);
 #endif
     
+    sim_being(&sim);    /* 2 */
     sim_brain(&sim);    /* 4 */
-
 #ifdef BRAINCODE_ON
     sim_brain_dialogue(&sim);
 #endif
-    
     being_tidy(&sim);
-    
     being_remove(&sim); /* 6 */
-    
     sim_social(&sim);
     
     sim_time(&sim);
