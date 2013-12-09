@@ -2370,7 +2370,7 @@ static void being_closest(noble_simulation * sim,
     nearest->same_sex_distance = 0xffffffff;
     nearest->opposite_sex = 0L;
     nearest->same_sex = 0L;
-    being_loop(sim, local, being_closest_loop, &nearest);
+    being_loop(sim, local, being_closest_loop, nearest);
 }
 
 /**
