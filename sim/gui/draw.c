@@ -296,7 +296,7 @@ n_byte * draw_offscreen(n_byte * value)
     return local_offscreen;
 }
 
-static n_byte pixel_color8_hires(n_int px, n_int py, void * information)
+static n_byte pixel_color8_hires(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_color8	*local_col = information;
     n_byte      *location = &local_col->screen[ (px<<1) | (py<<(HI_RES_MAP_BITS+1)) | 1 ];
@@ -312,7 +312,7 @@ static n_byte pixel_color8_hires(n_int px, n_int py, void * information)
     return 0;
 }
 
-static n_byte pixel_color8(n_int px, n_int py, void * information)
+static n_byte pixel_color8(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_color8	*local_col = information;
     local_col->screen[ px | (py<<MAP_BITS) ] = local_col->color;
@@ -322,21 +322,21 @@ static n_byte pixel_color8(n_int px, n_int py, void * information)
 static n_int terrain_dim_x = 512;
 static n_int terrain_dim_y = 511;
 
-static n_byte pixel_map(n_int px, n_int py, void * information)
+static n_byte pixel_map(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
     byte_info[ px | (py<<MAP_BITS) ] = COLOUR_YELLOW;
     return 0;
 }
 
-static n_byte pixel_overlay(n_int px, n_int py, void * information)
+static n_byte pixel_overlay(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
     byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
     return 0;
 }
 
-static n_byte pixel_grey(n_int px, n_int py, void * information)
+static n_byte pixel_grey(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
     byte_info[ px + (py * terrain_dim_x) ] = COLOUR_GREY;
@@ -390,11 +390,11 @@ static void draw_drag(void)
     {
         if (((loop + draw_drag_y1 + drag_time) >> 2) & 1)
         {
-            pixel_color8(loop, draw_drag_y1, &dotted_line);
+            pixel_color8(loop, draw_drag_y1, 0, 0, &dotted_line);
         }
         if (((loop + draw_drag_y2 - drag_time) >> 2) & 1)
         {
-            pixel_color8(loop, draw_drag_y2, &dotted_line);
+            pixel_color8(loop, draw_drag_y2, 0, 0, &dotted_line);
         }
         loop++;
     }
@@ -405,12 +405,12 @@ static void draw_drag(void)
     {
         if (((loop + draw_drag_x1 - drag_time) >> 2) & 1)
         {
-            pixel_color8(draw_drag_x1, loop, &dotted_line);
+            pixel_color8(draw_drag_x1, loop, 0, 0, &dotted_line);
         }
         
         if (((loop + draw_drag_x2 + drag_time) >> 2) & 1)
         {
-            pixel_color8(draw_drag_x2, loop, &dotted_line);
+            pixel_color8(draw_drag_x2, loop, 0, 0, &dotted_line);
         }
         loop++;
     }
@@ -485,7 +485,7 @@ void draw_about(n_constant_string platform)
 
 /* draws a string starting at point (off_x,off_y) */
 
-#define	ledfir(x,y,c)	if(((val>> c )&1)) (*local_draw)((x + off_x + offset),((y + off_y)),local_info)
+#define	ledfir(x,y,c)	if(((val>> c )&1)) (*local_draw)((x + off_x + offset),((y + off_y)), 0, 0, local_info)
 
 /**
  This is used to produce letter LED style letters through the generic
@@ -832,10 +832,10 @@ static void	draw_meters(noble_simulation * local_sim)
 
     while (hr < 41)
     {
-        (*local_draw)(5 , 5 + hr, local_info);
-        (*local_draw)(45, 5 + hr, local_info);
-        (*local_draw)(5 + hr, 45, local_info);
-        (*local_draw)(5 + hr, 5, local_info);
+        (*local_draw)(5 , 5 + hr, 0, 0, local_info);
+        (*local_draw)(45, 5 + hr, 0, 0, local_info);
+        (*local_draw)(5 + hr, 45, 0, 0, local_info);
+        (*local_draw)(5 + hr, 5,  0, 0, local_info);
         hr += 2;
     }
 
@@ -863,24 +863,24 @@ static void	draw_meters(noble_simulation * local_sim)
         hr = 0;
         while (hr < 41)
         {
-            (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + hr, local_info);
-            (*local_draw)(50 + 45+ FACING_OFFSIDE, 5 + hr, local_info);
-            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 45, local_info);
-            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 5, local_info);
+            (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
+            (*local_draw)(50 + 45+ FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
+            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 45, 0, 0, local_info);
+            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 5, 0, 0, local_info);
 
-            (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, local_info);
-            (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, local_info);
-            (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, local_info);
-            (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, local_info);
+            (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+            (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+            (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+            (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
             hr += 2;
         }
         hr = 0;
         while (hr < 9)
         {
-            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 5, local_info);
-            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 45, local_info);
-            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 5, local_info);
-            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 45, local_info);
+            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
+            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
+            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
+            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
             hr += 2;
         }
 
@@ -1018,7 +1018,7 @@ static void	draw_meters(noble_simulation * local_sim)
         {
             if ((icon_stripe >> (31-ha2)) & 1)
             {
-                (*local_draw)(5 + ha2, 55 + ha1, local_info);
+                (*local_draw)(5 + ha2, 55 + ha1, 0, 0, local_info);
             }
             ha2++;
         }
@@ -1039,9 +1039,9 @@ static void	draw_meters(noble_simulation * local_sim)
  */
 static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw)
 {
-    n_int		  magx = APESPACE_TO_MAPSPACE(being_location_x(bei));
-    n_int		  magy = APESPACE_TO_MAPSPACE(being_location_y(bei));
-    n_pixel   *local_draw = draw->pixel_draw;
+    n_int		 magx = APESPACE_TO_MAPSPACE(being_location_x(bei));
+    n_int		 magy = APESPACE_TO_MAPSPACE(being_location_y(bei));
+    n_pixel     *local_draw = draw->pixel_draw;
     void	    *local_info = draw->information;
     n_int		  ty;
     n_int		  start = -1, stop = 2;
@@ -1055,7 +1055,7 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
         {
             n_int	scrx = (magx + tx);
             n_int	scry = (magy + ty);
-            (*local_draw)(POSITIVE_LAND_COORD(scrx), POSITIVE_LAND_COORD(scry), local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(scrx), POSITIVE_LAND_COORD(scry), 0, 0, local_info);
             tx++;
         }
         ty++;
@@ -1065,10 +1065,10 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
         ty = -1;
         while (ty < 2)
         {
-            (*local_draw)(POSITIVE_LAND_COORD(magx + ty), POSITIVE_LAND_COORD(magy - 2 ), local_info);
-            (*local_draw)(POSITIVE_LAND_COORD(magx + ty), POSITIVE_LAND_COORD(magy + 2 ), local_info);
-            (*local_draw)(POSITIVE_LAND_COORD(magx - 2 ), POSITIVE_LAND_COORD(magy + ty), local_info);
-            (*local_draw)(POSITIVE_LAND_COORD(magx + 2 ), POSITIVE_LAND_COORD(magy + ty), local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(magx + ty), POSITIVE_LAND_COORD(magy - 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(magx + ty), POSITIVE_LAND_COORD(magy + 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(magx - 2 ), POSITIVE_LAND_COORD(magy + ty), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(magx + 2 ), POSITIVE_LAND_COORD(magy + ty), 0, 0, local_info);
             ty++;
         }
         start_point++;
@@ -1085,28 +1085,28 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
         local_col->color = COLOUR_GREY;
         if(local_facing == 0 || local_facing == 7)
             (*local_draw)(POSITIVE_LAND_COORD(magx + start_point ), POSITIVE_LAND_COORD(magy - 2 ),
-                          local_info); /* F */
+                          0, 0, local_info); /* F */
         if(local_facing == 1 || local_facing == 0)
             (*local_draw)(POSITIVE_LAND_COORD(magx + start_point ), POSITIVE_LAND_COORD(magy + 2 ),
-                          local_info); /* E */
+                          0, 0, local_info); /* E */
         if(local_facing == 2 || local_facing == 1)
             (*local_draw)(POSITIVE_LAND_COORD(magx + 2 ), POSITIVE_LAND_COORD(magy + start_point ),
-                          local_info); /* A */
+                          0, 0, local_info); /* A */
         if(local_facing == 3 || local_facing == 2)
             (*local_draw)(POSITIVE_LAND_COORD(magx - 2 ), POSITIVE_LAND_COORD(magy + start_point ),
-                          local_info); /* B */
+                          0, 0, local_info); /* B */
         if(local_facing == 4 || local_facing == 3)
             (*local_draw)(POSITIVE_LAND_COORD(magx - start_point ), POSITIVE_LAND_COORD(magy + 2 ),
-                          local_info); /* H */
+                          0, 0, local_info); /* H */
         if(local_facing == 5 || local_facing == 4)
             (*local_draw)(POSITIVE_LAND_COORD(magx - start_point ), POSITIVE_LAND_COORD(magy - 2 ),
-                          local_info); /* G */
+                          0, 0, local_info); /* G */
         if(local_facing == 6 || local_facing == 5)
             (*local_draw)(POSITIVE_LAND_COORD(magx - 2 ), POSITIVE_LAND_COORD(magy - start_point ),
-                          local_info); /* D */
+                          0, 0, local_info); /* D */
         if(local_facing == 7 || local_facing == 6)
             (*local_draw)(POSITIVE_LAND_COORD(magx + 2 ), POSITIVE_LAND_COORD(magy - start_point ),
-                          local_info); /* C */
+                          0, 0, local_info); /* C */
     }
 }
 
@@ -1136,7 +1136,7 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
         {
             n_int	scrx = (magx + tx);
             n_int	scry = (magy + ty);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(scrx), POSITIVE_LAND_COORD_HIRES(scry), local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(scrx), POSITIVE_LAND_COORD_HIRES(scry), 0, 0, local_info);
             tx++;
         }
         ty++;
@@ -1146,10 +1146,10 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
         ty = -1;
         while (ty < 2)
         {
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + ty), POSITIVE_LAND_COORD_HIRES(magy - 2 ), local_info);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + ty), POSITIVE_LAND_COORD_HIRES(magy + 2 ), local_info);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - 2 ), POSITIVE_LAND_COORD_HIRES(magy + ty), local_info);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + 2 ), POSITIVE_LAND_COORD_HIRES(magy + ty), local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + ty), POSITIVE_LAND_COORD_HIRES(magy - 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + ty), POSITIVE_LAND_COORD_HIRES(magy + 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - 2 ), POSITIVE_LAND_COORD_HIRES(magy + ty), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + 2 ), POSITIVE_LAND_COORD_HIRES(magy + ty), 0, 0, local_info);
             ty++;
         }
         start_point++;
@@ -1166,28 +1166,28 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
         local_col->color = COLOUR_GREY;
         if(local_facing == 0 || local_facing == 7)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + start_point ), POSITIVE_LAND_COORD_HIRES(magy - 2 ),
-                          local_info); /* F */
+                          0, 0, local_info); /* F */
         if(local_facing == 1 || local_facing == 0)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + start_point ), POSITIVE_LAND_COORD_HIRES(magy + 2 ),
-                          local_info); /* E */
+                          0, 0, local_info); /* E */
         if(local_facing == 2 || local_facing == 1)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + 2 ), POSITIVE_LAND_COORD_HIRES(magy + start_point ),
-                          local_info); /* A */
+                          0, 0, local_info); /* A */
         if(local_facing == 3 || local_facing == 2)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - 2 ), POSITIVE_LAND_COORD_HIRES(magy + start_point ),
-                          local_info); /* B */
+                          0, 0, local_info); /* B */
         if(local_facing == 4 || local_facing == 3)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - start_point ), POSITIVE_LAND_COORD_HIRES(magy + 2 ),
-                          local_info); /* H */
+                          0, 0, local_info); /* H */
         if(local_facing == 5 || local_facing == 4)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - start_point ), POSITIVE_LAND_COORD_HIRES(magy - 2 ),
-                          local_info); /* G */
+                          0, 0, local_info); /* G */
         if(local_facing == 6 || local_facing == 5)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - 2 ), POSITIVE_LAND_COORD_HIRES(magy - start_point ),
-                          local_info); /* D */
+                          0, 0, local_info); /* D */
         if(local_facing == 7 || local_facing == 6)
             (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + 2 ), POSITIVE_LAND_COORD_HIRES(magy - start_point ),
-                          local_info); /* C */
+                          0, 0, local_info); /* C */
     }
 }
 
@@ -1259,11 +1259,11 @@ static void draw_weather(n_land * local_land)
             n_int	tmp = weather_pressure(local_land, px, py, map_dimensions2);
             if(tmp > WEATHER_CLOUD)
             {
-                (*local_draw)(scr_x+1, scr_y+1, local_info);
+                (*local_draw)(scr_x+1, scr_y+1, 0, 0, local_info);
             }
             if(tmp > WEATHER_RAIN)
             {
-                (*local_draw)(scr_x, scr_y , local_info);
+                (*local_draw)(scr_x, scr_y , 0, 0, local_info);
             }
             px++;
         }
@@ -1378,13 +1378,13 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
                         n_int	scr_z = 256 + (act_x1 >> 11);
                         n_int	s_x = ((act_x2 * scr_z) >> 16) + center_x;
                         n_int	s_y = ((act_y1 * scr_z) >> 16) + center_y - 120;
-                        (*local_draw_brain)(s_x, s_y, local_info_brain);
+                        (*local_draw_brain)(s_x, s_y, 0, 0, local_info_brain);
                         if ((act_x1 > 0) && draw_big)
                         {
-                            (*local_draw_brain)(s_x - 1, s_y, local_info_brain);
-                            (*local_draw_brain)(s_x + 1, s_y, local_info_brain);
-                            (*local_draw_brain)(s_x, s_y - 1, local_info_brain);
-                            (*local_draw_brain)(s_x, s_y + 1, local_info_brain);
+                            (*local_draw_brain)(s_x - 1, s_y, 0, 0, local_info_brain);
+                            (*local_draw_brain)(s_x + 1, s_y, 0, 0, local_info_brain);
+                            (*local_draw_brain)(s_x, s_y - 1, 0, 0, local_info_brain);
+                            (*local_draw_brain)(s_x, s_y + 1, 0, 0, local_info_brain);
                         }
                     }
                     act_x1 += a13;

@@ -38,8 +38,6 @@
 #define NOBLEAPE_ENTITY_INTERNAL_H
 /*NOBLEMAKE END=""*/
 
-#define VISUAL_DISTANCE_SQUARED (4000*4000)
-
 enum sleep_state
 {
     FULLY_ASLEEP   =   0,

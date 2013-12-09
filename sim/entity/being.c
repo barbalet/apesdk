@@ -58,6 +58,8 @@
 
 #define VISIBILITY_MAXIMUM      (2000)
 
+#define VISIBILITY_SPAN    (VISIBILITY_MAXIMUM / ((15+16) >> 1))
+
 #define	WALK_ON_WATER(pz,w)	(((pz)<w) ? w : (pz))
 
 /** Swim - better or worse at swimming both speed and energy use */
@@ -577,47 +579,51 @@ void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn b
  * @param params
  * @return 1 if on ground, 0 otherwise
  */
-static n_byte	being_ground(n_int px, n_int py, void * params)
+static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params)
 {
+    n_int        abs_sum = ABS(dx) + ABS(dy);
     being_draw * being_pixel = (being_draw *) params;
     n_int        d_vis = being_pixel->visibility_delta;
-    n_int	local_z = ((px*(being_pixel->offset_x)) + (py*(being_pixel->offset_y))) >> 9;
-    weather_values   seven_values = weather_seven_values(being_pixel->land, MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
+    n_int	     local_z = ((px*(being_pixel->offset_x)) + (py*(being_pixel->offset_y))) >> 9;
     
-    switch (seven_values)
+    if (abs_sum)
     {
-        case WEATHER_SEVEN_SUNNY_DAY:
-        case WEATHER_SEVEN_CLOUDY_DAY:
-            being_pixel->visibility_total += (d_vis + 16) >> 1;
-            break;
-        case WEATHER_SEVEN_RAINY_DAY:
-        case WEATHER_SEVEN_DAWN_DUSK:
-            being_pixel->visibility_total += ((2 * d_vis) + 25) >> 1;
-            break;
-        case WEATHER_SEVEN_CLEAR_NIGHT:
-            being_pixel->visibility_total += ((5 * d_vis) + 65) >> 1;
-        case WEATHER_SEVEN_CLOUDY_NIGHT:
-            being_pixel->visibility_total += ((8 * d_vis) + 93) >> 1;
-        case WEATHER_SEVEN_RAINY_NIGHT:
-            being_pixel->visibility_total += ((12 * d_vis) + 145) >> 1;
-            break;
-            
-        case WEATHER_SEVEN_ERROR:
-        default:
+        weather_values   seven_values = weather_seven_values(being_pixel->land, MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
+        n_int  span10 = ((abs_sum - 1) ? 1448 : 1024);
+        
+        switch (seven_values)
+        {
+            case WEATHER_SEVEN_SUNNY_DAY:
+            case WEATHER_SEVEN_CLOUDY_DAY:
+                being_pixel->visibility_total += (span10 * (d_vis + 16)) >> 11;
+                break;
+            case WEATHER_SEVEN_RAINY_DAY:
+            case WEATHER_SEVEN_DAWN_DUSK:
+                being_pixel->visibility_total += (span10 * ((2 * d_vis) + 25)) >> 11;
+                break;
+            case WEATHER_SEVEN_CLEAR_NIGHT:
+                being_pixel->visibility_total += (span10 * ((5 * d_vis) + 65)) >> 11;
+            case WEATHER_SEVEN_CLOUDY_NIGHT:
+                being_pixel->visibility_total += (span10 * ((8 * d_vis) + 93)) >> 11;
+            case WEATHER_SEVEN_RAINY_NIGHT:
+                being_pixel->visibility_total += (span10 * ((12 * d_vis) + 145)) >> 11;
+                break;
+                
+            case WEATHER_SEVEN_ERROR:
+            default:
+                return 1;
+        }
+        if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
             return 1;
-    }
-    
-    
-    if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
-        return 1;
-    
-    local_z += being_pixel->start_z;
-    
-    
-    
-    if (local_z < WALK_ON_WATER(QUICK_LAND(being_pixel->land, px, py),being_pixel->land->tide_level))
-    {
-        return 1;
+        
+        local_z += being_pixel->start_z;
+        
+        
+        
+        if (local_z < WALK_ON_WATER(QUICK_LAND(being_pixel->land, px, py),being_pixel->land->tide_level))
+        {
+            return 1;
+        }
     }
     return 0;
 }
@@ -636,13 +642,11 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
 
     vect2_subtract(&delta, &delta, &start);
 
-#if 0
     {
         n_int distance_squared = vect2_dot(&delta, &delta, 1, 1);
-        if (distance_squared > VISUAL_DISTANCE_SQUARED)
+        if (distance_squared > (VISIBILITY_SPAN * VISIBILITY_SPAN))
             return 0;
     }
-#endif
     /** check trivial case first - self aware */
 
     if ((delta.x == 0) && (delta.y == 0))

@@ -255,7 +255,7 @@ typedef void (n_console_output)(n_constant_string value);
  allow drawing at a high-level without causing problems over the
  two primary window buffer formats used in Noble Ape currently.
  */
-typedef n_byte (n_pixel)(n_int px, n_int py, void * information);
+typedef n_byte (n_pixel)(n_int px, n_int py, n_int dx, n_int dy, void * information);
 
 typedef n_byte2 (n_patch)(n_byte2 * local);
 

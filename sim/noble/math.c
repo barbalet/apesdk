@@ -457,7 +457,7 @@ n_byte math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw)
     NA_ASSERT(local_draw, "local_draw NULL");
     NA_ASSERT(local_info, "local_info NULL");
 
-    if ((*local_draw)(px, py, local_info))
+    if ((*local_draw)(px, py, 0, 0, local_info))
     {
         return 1;
     }
@@ -494,7 +494,7 @@ n_byte math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw)
                     py += sdy;
                 }
                 px += sdx;
-                if ((*local_draw)(px, py, local_info))
+                if ((*local_draw)(px, py, sdx, sdy, local_info))
                     return 1;
             }
         }
@@ -511,7 +511,7 @@ n_byte math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw)
                     px += sdx;
                 }
                 py += sdy;
-                if ((*local_draw)(px, py, local_info))
+                if ((*local_draw)(px, py, sdx, sdy, local_info))
                     return 1;
             }
         }

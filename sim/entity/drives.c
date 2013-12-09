@@ -82,9 +82,14 @@ typedef struct
 static void drives_sociability_loop(noble_simulation * local_sim, noble_being * other, void * data)
 {
     drives_sociability_data * dsd = (drives_sociability_data *)data;
+    n_int   distance_squared;
     n_vect2 difference_vector;
+    /* this needs to be checked against simulation near sight and sound values */
+    const n_int apespace_span = APESPACE_TO_MAPSPACE(10);
     being_delta(dsd->being, other, &difference_vector);
-    if (being_los(local_sim->land, dsd->being, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+    /* los should not be used here, it's too expensive */
+    distance_squared = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+    if (distance_squared < (apespace_span * apespace_span))
     {
         dsd->beings_in_vacinity++;
     }
