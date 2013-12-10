@@ -351,7 +351,7 @@ n_int     file_interpret(n_file * input_file)
     return 0;
 }
 
-static void sim_brain_no_return(noble_simulation * local_sim, noble_being * local_being, void * data)
+static void sim_brain_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_byte2 local_brain_state[3];
 
@@ -367,12 +367,12 @@ static void sim_brain_no_return(noble_simulation * local_sim, noble_being * loca
 
 static void sim_brain(noble_simulation * local_sim)
 {
-    being_loop(local_sim, 0L, sim_brain_no_return, 0L);
+    being_loop(local_sim, 0L, sim_brain_loop, 0L);
 }
 
 #ifdef BRAINCODE_ON
 
-static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_being * local_being, void * data)
+static void sim_brain_dialogue_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_byte     awake = 1;
     n_byte    *local_internal = being_braincode_internal(local_being);
@@ -388,13 +388,13 @@ static void sim_brain_dialogue_no_return(noble_simulation * local_sim, noble_bei
 
 static void sim_brain_dialogue(noble_simulation * local_sim)
 {
-    being_loop(local_sim, 0L, sim_brain_dialogue_no_return, 0L);
+    being_loop(local_sim, 0L, sim_brain_dialogue_loop, 0L);
 }
 
 #endif
 
 
-static void sim_being_no_return(noble_simulation * local_sim, noble_being * local_being, void * data)
+static void sim_being_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_byte awake = (being_awake(local_sim, local_being) != 0);
     
@@ -416,8 +416,7 @@ static void sim_being_no_return(noble_simulation * local_sim, noble_being * loca
 static void sim_being(noble_simulation * local_sim)
 {
     local_sim->someone_speaking = 0;
-    being_loop(local_sim, 0L, sim_being_no_return, 0L);
-
+    being_loop(local_sim, 0L, sim_being_loop, 0L);
 }
 
 static void sim_time(noble_simulation * local_sim)

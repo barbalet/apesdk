@@ -262,11 +262,6 @@ static n_int being_honor_immune(noble_being * value)
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }
 
-static void  being_recalibrate_honor_no_return(noble_simulation * local, noble_being * value, void * data)
-{
-    value->honor = (n_byte)(((n_int)value->honor*220)/255);
-}
-
 n_byte being_first_name(noble_being * value)
 {
     if (value == 0L)
@@ -3521,6 +3516,10 @@ static void being_tidy_loop(noble_simulation * local_sim, noble_being * local_be
     being_set_energy(local_being, local_e);
 }
 
+static void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data)
+{
+    value->honor = (n_byte)(((n_int)value->honor*220)/255);
+}
 
 void being_tidy(noble_simulation * local_sim)
 {
@@ -3532,7 +3531,7 @@ void being_tidy(noble_simulation * local_sim)
     /** normalize honor values */
     if (max_honor)
     {
-        being_loop(local_sim, 0L, being_recalibrate_honor_no_return, 0L);
+        being_loop(local_sim, 0L, being_recalibrate_honor_loop, 0L);
     }
 #endif
 }

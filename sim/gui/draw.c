@@ -1557,7 +1557,7 @@ static void draw_tides_hi_res(n_byte * data, n_c_uint * block, n_byte tide)
 }
 
 
-static void draw_apes_no_return(noble_simulation * local_sim, noble_being * bei, void * data)
+static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void * data)
 {
     n_join			local_8bit;
     n_color8        local_col;
@@ -1631,7 +1631,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
 
     if (local_sim->select != NO_BEINGS_FOUND)
     {
-        being_loop(local_sim, 0L, draw_apes_no_return, &local_col);
+        being_loop(local_sim, 0L, draw_apes_loop, &local_col);
     }
 }
 

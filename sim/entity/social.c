@@ -1861,7 +1861,7 @@ void social_goals(
 
 
 
-static void sim_social_initial_no_return(noble_simulation * local, noble_being * local_being, void * data)
+static void sim_social_initial_loop(noble_simulation * local, noble_being * local_being, void * data)
 {
     n_uint respect_mean = social_respect_mean(local,local_being);
     n_uint social_loop = 0;
@@ -1919,7 +1919,7 @@ static void sim_social_initial_no_return(noble_simulation * local, noble_being *
  * @param local Pointer to the simulation object
  * @param local_being Pointer to the being
  */
-static void sim_social_secondary_no_return(noble_simulation * local, noble_being * local_being, void * data)
+static void sim_social_secondary_loop(noble_simulation * local, noble_being * local_being, void * data)
 {
     local_being->social_x = local_being->social_nx;
     local_being->social_y = local_being->social_ny;
@@ -1931,7 +1931,7 @@ static void sim_social_secondary_no_return(noble_simulation * local, noble_being
  */
 void sim_social(noble_simulation * local)
 {
-    being_loop(local, 0L, sim_social_initial_no_return, 0L);
+    being_loop(local, 0L, sim_social_initial_loop, 0L);
     /** implement social pulls after all calculations*/
-    being_loop(local, 0L, sim_social_secondary_no_return, 0L);
+    being_loop(local, 0L, sim_social_secondary_loop, 0L);
 }
