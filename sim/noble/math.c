@@ -727,12 +727,8 @@ void math_bilinear_512_4096(n_byte * side512, n_byte * data)
             z10 = z10 << 3;
 
             value = (n_byte)((z00 + (((z01 * mic_x) + (z10 * mic_y) + (z11 * mic_x * mic_y) ) >> 6)));
-
-#ifdef NEW_OPENGL_ENVIRONMENT
-            data[point] = value;
-#else
+            
             data[(point<<1)|1] = data[point<<1] = value;
-#endif
             loop_x++;
         }
         loop_y++;

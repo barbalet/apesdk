@@ -48,8 +48,6 @@
 /* pixel format definition */
 + (NSOpenGLPixelFormat*) basicPixelFormat
 {
-    
-#ifndef NEW_OPENGL_ENVIRONMENT
     NSOpenGLPixelFormatAttribute attributes [] = {
         NSOpenGLPFAWindow,
         NSOpenGLPFADoubleBuffer,	/* double buffered */
@@ -57,18 +55,6 @@
         (NSOpenGLPixelFormatAttribute)16, /* 16 bit depth buffer */
         (NSOpenGLPixelFormatAttribute)0 /*nil*/
     };
-#else
-	NSOpenGLPixelFormatAttribute attributes [] = {
-		NSOpenGLPFANoRecovery,
-		NSOpenGLPFAWindow,
-		NSOpenGLPFAColorSize, 32,
-		NSOpenGLPFADepthSize, 32,
-		NSOpenGLPFAMaximumPolicy,
-		NSOpenGLPFADoubleBuffer,
-		NSOpenGLPFAAccelerated,
-		0
-	};
-#endif
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
@@ -97,10 +83,7 @@
 /* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
-#ifndef NEW_OPENGL_ENVIRONMENT
     shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification);
-#endif
-    
     if (shared_script_debug_ready())
     {
         [self debugOutput];
@@ -124,11 +107,7 @@
     if (index == 0L) return;
     
     [[self openGLContext] makeCurrentContext];
-    
-#ifdef NEW_OPENGL_ENVIRONMENT
-    This is currently broken
-#endif
-    
+
     shared_cycle_draw(fIdentification, dimensionX, dimensionY);
 #ifndef GRAPHLESS_GUI
     if (fIdentification != NUM_GRAPH)
@@ -186,9 +165,7 @@
 
 - (void)quitProcedure
 {
-#ifdef NEW_OPENGL_ENVIRONMENT
-    polygonal_close();
-#endif
+
     shared_close();
 #ifdef ON_DISPLAY_UPDATE
     CVDisplayLinkRelease(displayLink);
@@ -199,9 +176,7 @@
 #ifdef ON_DISPLAY_UPDATE
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
 {
-#ifndef NEW_OPENGL_ENVIRONMENT
     shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
-#endif
     
     if (shared_script_debug_ready())
     {
