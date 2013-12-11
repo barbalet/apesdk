@@ -714,7 +714,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         return;
     }
 
-    if (local_sim->select == NO_BEINGS_FOUND)
+    if (local_sim->select == 0L)
     {
         io_erase(buf_offscr, dim_x * dim_y);
         return;
@@ -722,7 +722,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
     {
         const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
         n_byte2      * combined = (n_byte2 *)local_sim->land->highres;
-        noble_being * loc_being = &(local_sim->beings[local_sim->select]);
+        noble_being * loc_being = local_sim->select;
         const n_int turn = being_facing(loc_being);
         const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         const n_int co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
@@ -812,7 +812,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 static void	draw_meters(noble_simulation * local_sim)
 {
     n_land       * loc_land  =   local_sim->land;
-    noble_being  * loc_being = &(local_sim->beings[local_sim->select]);
+    noble_being  * loc_being =   local_sim->select;
     n_pixel 	 * local_draw = &pixel_overlay;
     n_byte		 * local_info = draw_pointer(NUM_TERRAIN);
     const n_byte * local_icon;
@@ -858,7 +858,7 @@ static void	draw_meters(noble_simulation * local_sim)
 
 #define GENDER_X        (terrain_dim_x-(512-312))
 
-    if (local_sim->select != NO_BEINGS_FOUND)
+    if (local_sim->select != 0L)
     {
         hr = 0;
         while (hr < 41)
@@ -1060,7 +1060,7 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
         }
         ty++;
     }
-    if (bei == &(sim->beings[sim->select]))
+    if (bei == sim->select)
     {
         ty = -1;
         while (ty < 2)
@@ -1141,7 +1141,7 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
         }
         ty++;
     }
-    if (bei == &(sim->beings[sim->select]))
+    if (bei == sim->select)
     {
         ty = -1;
         while (ty < 2)
@@ -1305,14 +1305,13 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
 static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
 {
     n_byte  draw_big = 1;
-    if ((local_sim->select == NO_BEINGS_FOUND) || (number_errors != 0))
+    if ((local_sim->select == 0L) || (number_errors != 0))
     {
         return;
     }
 
     {
-        noble_being * local_being = &(local_sim->beings[local_sim->select]);
-        n_byte      * local       = being_brain(local_being);
+        n_byte      * local       = being_brain(local_sim->select);
         n_join	      local_mono;
         n_uint        turn_y = tilt_z;
         n_uint        turn_z = tilt_y;
@@ -1565,7 +1564,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     /* makes this use thread safe */
     io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
     
-    if (being_los(local_sim->land, &(local_sim->beings[local_sim->select]), (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
+    if (being_los(local_sim->land, local_sim->select, (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
     {
         local_col.color = COLOUR_RED;
     }
@@ -1625,11 +1624,11 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         draw_tides(local_sim->land->map, local_col.screen, local_sim->land->tide_level);
         if (toggle_territory)
         {
-            draw_region(&(local_sim->beings[local_sim->select]));
+            draw_region(local_sim->select);
         }
     }
 
-    if (local_sim->select != NO_BEINGS_FOUND)
+    if (local_sim->select != 0L)
     {
         being_loop(local_sim, 0L, draw_apes_loop, &local_col);
     }

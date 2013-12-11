@@ -43,7 +43,7 @@
 /* displays and simulates ape's brain */
 
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
-#define PARASITES_ON  /* entity */
+
 #define TERRITORY_ON  /* entity */
 #define BRAINCODE_ON  /* entity */
 #define IMMUNE_ON     /* entity */
@@ -699,8 +699,6 @@ enum drives_definition
 /* maximum separation between mother and child when suckling */
 #define SUCKLING_MAX_SEPARATION     METRES_TO_APESPACE(2)
 
-#ifdef PARASITES_ON
-
 /* maximum number of parasites in the range 0-255 */
 #define MAX_PARASITES(bei)   ((GENE_HAIR(being_genetics(bei))*255)>>4)
 
@@ -732,8 +730,6 @@ enum drives_definition
 
 /* number of parasites removed at each grooming session */
 #define PARASITES_REMOVED          2
-
-#endif
 
 /* ape names */
 #define NAMES_SURNAMES              64
@@ -1214,10 +1210,10 @@ typedef struct
     n_byte      crowding;
     n_byte      posture;
     n_byte2     inventory[INVENTORY_SIZE];
-#ifdef PARASITES_ON
+
     n_byte      parasites;
     n_byte      honor;
-#endif
+
     n_byte2     date_of_conception[2]; /* constant */
     n_byte      attention[ATTENTION_SIZE];
     n_genetics  genetics[CHROMOSOMES];           /* constant */
@@ -1274,11 +1270,10 @@ typedef struct
     n_land        * land;
     noble_being   * beings;
 
+    noble_being   * select; /* used by gui */
+
     n_uint	        num;
     n_uint	        max;
-
-    n_uint          select;	 /* used by gui */
-    n_byte          someone_speaking;
 
     n_uint          real_time;
     n_uint          last_time;
@@ -1299,8 +1294,6 @@ typedef struct
 #define GET_M(bei)      ((bei)->mass)
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
-
-#define NO_BEINGS_FOUND	(0xffffffff)
 
 #define	FIND_SEX(array)		(array&3)
 #define	SEX_FEMALE			3
@@ -1354,7 +1347,7 @@ void sim_healthy_carrier(void);
 
 void sim_realtime(n_uint time);
 
-void sim_set_select(n_uint number);
+void sim_set_select(noble_being * select);
 
 void sim_debug_csv(n_file * fil, n_byte initial);
 

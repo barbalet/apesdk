@@ -82,13 +82,8 @@
 #define TERRITORY_BYTES        0
 #endif
 
-#ifdef PARASITES_ON
 #define PARA_BYTES      2
 #define PARA_ENTRIES    2
-#else
-#define PARA_BYTES      0
-#define PARA_ENTRIES    0
-#endif
 
 #ifdef IMMUNE_ON
 #define IMMUNE_BYTES    (sizeof(noble_immune_system))
@@ -195,10 +190,9 @@ static const noble_file_entry noble_file_format[]=
     {"postu=", FIL_BEI | FILE_TYPE_BYTE,  1, 43, "Posture"},     /*n_byte	posture;*/
     {"inven=", FIL_BEI | FILE_TYPE_BYTE2,  INVENTORY_SIZE, 44, "Inventory"},     /*n_byte2	inventory[INVENTORY_SIZE];*/
     
-#ifdef PARASITES_ON
     {"paras=", FIL_BEI | FILE_TYPE_BYTE, 1, 60, "Number of parasites"},     /*n_byte  parasites;*/
     {"honor=", FIL_BEI | FILE_TYPE_BYTE, 1, 61, "Honor"},     /*n_byte  honor;*/
-#endif
+
     {"conce=", FIL_BEI | FILE_TYPE_BYTE2, 2, 62, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
     
     {"atten=", FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, 66, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/

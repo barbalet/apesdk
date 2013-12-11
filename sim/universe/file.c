@@ -305,11 +305,9 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
     case VARIABLE_HONOR:
         local_being->honor = (n_byte) value;
         break;
-#ifdef PARASITES_ON
     case VARIABLE_PARASITES:
         local_being->parasites = (n_byte) value;
         break;
-#endif
     case VARIABLE_HEIGHT:
         GET_H(local_being) = (n_byte2) value;
         break;
@@ -607,11 +605,9 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     case VARIABLE_HONOR:
                         local_number = local_being->honor;
                         break;
-#ifdef PARASITES_ON
                     case VARIABLE_PARASITES:
                         local_number = local_being->parasites;
                         break;
-#endif
                     case VARIABLE_HEIGHT:
                         local_number = GET_H(local_being);
                         break;
@@ -850,11 +846,8 @@ void sim_start_conditions(void * code, void * structure, void * data)
     variables[VARIABLE_DRIVE_SEX - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_SEX];
     variables[VARIABLE_FAMILY_NAME_ONE - VARIABLE_VECT_ANGLE] = being_family_first_name(local_being);
     variables[VARIABLE_FAMILY_NAME_TWO - VARIABLE_VECT_ANGLE] = being_family_second_name(local_being);
-#ifdef PARASITES_ON
     variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE] = local_being->honor;
     variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE] = local_being->parasites;
-#endif
-    
 }
 
 void sim_end_conditions(void * code, void * structure, void * data)
@@ -876,10 +869,9 @@ void sim_end_conditions(void * code, void * structure, void * data)
     n_int	local_drive_sex = variables[VARIABLE_DRIVE_SEX - VARIABLE_VECT_ANGLE];
     n_int	local_family_name1 = variables[VARIABLE_FAMILY_NAME_ONE - VARIABLE_VECT_ANGLE];
     n_int	local_family_name2 = variables[VARIABLE_FAMILY_NAME_TWO - VARIABLE_VECT_ANGLE];
-#ifdef PARASITES_ON
+
     n_int	local_honor = variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE];
     n_int	local_parasites = variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE];
-#endif
 
     if(local_facing< 0)
     {
@@ -928,10 +920,9 @@ void sim_end_conditions(void * code, void * structure, void * data)
         local_being->drives[DRIVE_SEX]  = (n_byte)local_drive_sex;
     }
     being_set_family_name(local_being,(n_byte)local_family_name1,(n_byte)local_family_name2);
-#ifdef PARASITES_ON
+
     local_being->honor = (n_byte)local_honor;
     local_being->parasites = (n_byte)local_parasites;
-#endif
 }
 
 #define FILE_CHECK(value) io_offset((n_byte*)&here, (n_byte*)value, #value)
@@ -956,10 +947,10 @@ void file_audit(void)
         FILE_CHECK(&here.crowding);
         FILE_CHECK(&here.posture);
         FILE_CHECK(&here.inventory[0]);
-#ifdef PARASITES_ON
+
         FILE_CHECK(&here.parasites);
         FILE_CHECK(&here.honor);
-#endif
+
         FILE_CHECK(&here.date_of_conception[0]); /* constant */
         FILE_CHECK(&here.attention[0]);
         FILE_CHECK(&here.genetics[0]);           /* constant */

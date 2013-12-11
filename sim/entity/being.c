@@ -717,12 +717,12 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
  * @param name Name of the being
  * @return Array index of the being within the simulation object
  */
-static n_uint being_num_from_name(noble_simulation * sim, n_string name)
+noble_being * being_from_name(noble_simulation * sim, n_string name)
 {
     n_uint loop = 0;
     noble_being * b;
 
-    if (io_length(name,STRING_BLOCK_SIZE)<10) return NO_BEINGS_FOUND;
+    if (io_length(name,STRING_BLOCK_SIZE)<10) return 0L;
 
     io_lower(name, io_length(name,STRING_BLOCK_SIZE));
 
@@ -737,18 +737,18 @@ static n_uint being_num_from_name(noble_simulation * sim, n_string name)
 
         if (io_find(str,0,io_length(str,STRING_BLOCK_SIZE),name,io_length(name,STRING_BLOCK_SIZE))>-1)
         {
-            return loop;
+            return b;
         }
         loop++;
     }
-    return NO_BEINGS_FOUND;
+    return 0L;
 }
 
 
 void being_set_select_name(noble_simulation * sim, n_string name)
 {
-    n_uint response = being_num_from_name(sim, name);
-    if ((response == NO_BEINGS_FOUND) && sim->num)
+    noble_being * response = being_from_name(sim, name);
+    if ((response == 0L) && sim->num)
     {
         (void)SHOW_ERROR("Ape not found");
         return;
@@ -762,35 +762,19 @@ n_string being_get_select_name(noble_simulation * sim)
     n_int  position = 0;
     noble_being *b;
 
-    if (sim->select == NO_BEINGS_FOUND)
+    if (sim->select == 0L)
     {
         io_string_write(name,"*** ALL APES DEAD ***", &position);
         name[position] = 0;
     }
     else
     {
-        b = &sim->beings[sim->select];
+        b = sim->select;
         being_name_simple(b, name);
     }
     return (n_string)name;
 }
 
-/**
- * @brief return the being object with the given name
- * @param sim Pointer to the simulation object
- * @param name Name of the being
- * @return Pointer to the being, or NO_BEINGS_FOUND
- */
-noble_being * being_from_name(noble_simulation * sim, n_string name)
-{
-    n_uint response = being_num_from_name(sim, name);
-
-    if (response == NO_BEINGS_FOUND)
-    {
-        return 0L;
-    }
-    return &(sim->beings[sim->select]);
-}
 
 /**
  This checks to see if a Noble Ape can see a particular point
@@ -2422,7 +2406,6 @@ static void being_interact(noble_simulation * sim,
 
         if ((birth_days+AGE_OF_MATURITY)<today_days)
         {
-#ifdef PARASITES_ON
             if (social_groom(local, other_being, other_being_distance, *awake, familiarity, sim))
             {
                 *state |= BEING_STATE_GROOMING;
@@ -2433,7 +2416,6 @@ static void being_interact(noble_simulation * sim,
             }
             else
             {
-#endif
                 /* squabbling between adults */
                 if ((other_being_distance < SQUABBLE_RANGE) && ((being_dob(other_being)+AGE_OF_MATURITY) < today_days))
                 {
@@ -2593,10 +2575,8 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
         episodic_self(sim, local, EVENT_SWIM, being_energy(local), 0);
 
-#ifdef PARASITES_ON
         /** bathing removes parasites */
         if (local->parasites > 0) local->parasites--;
-#endif
 
     }
     else
@@ -3335,10 +3315,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
  
         genetics_set(being_genetics(local), being_fetal_genetics(mother));
         
-#ifdef PARASITES_ON
         /** ascribed social status */
         local->honor = (n_byte)being_honor(mother);
-#endif
 
         being_set_unique_name(beings, number, local,
                               being_family_name(mother),
@@ -3397,13 +3375,11 @@ static void being_tidy_loop(noble_simulation * local_sim, noble_being * local_be
     n_land	    *land   = local_sim->land;
     n_int        delta_e = 0;
     n_int        conductance = 5;
-#ifdef PARASITES_ON
     n_int       *max_honor = data;
     if (local_honor >= 254)
     {
         max_honor[0] = 1;
     }
-#endif
     if(being_awake(local_sim, local_being))
     {
         n_int	local_s  = being_speed(local_being);
@@ -3523,24 +3499,20 @@ static void  being_recalibrate_honor_loop(noble_simulation * local, noble_being 
 
 void being_tidy(noble_simulation * local_sim)
 {
-#ifdef PARASITES_ON
     n_int       max_honor = 0;
-#endif
     being_loop(local_sim, 0L, being_tidy_loop, &max_honor);
-#ifdef PARASITES_ON
     /** normalize honor values */
     if (max_honor)
     {
         being_loop(local_sim, 0L, being_recalibrate_honor_loop, 0L);
     }
-#endif
 }
 
 n_int being_remove_internal = 0;
 n_int being_remove_external = 0;
 
 
-static void being_remove_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+static void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     if (being_energy(local_being) == BEING_DEAD)
     {
@@ -3551,15 +3523,44 @@ static void being_remove_loop(noble_simulation * local_sim, noble_being * local_
     }
 }
 
+
+typedef struct{
+    noble_being * being_count;
+    noble_being * reference;
+    n_int         selected_died;
+    n_uint        count;
+}being_remove_loop2_struct;
+
+static void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data)
+{
+    being_remove_loop2_struct * brls = (being_remove_loop2_struct *)data;
+    if (being_energy(local) != BEING_DEAD)
+    {
+        if ( local != brls->being_count )
+        {
+            io_copy((n_byte *)local, (n_byte *)brls->being_count, sizeof(noble_being));
+        }
+        brls->being_count++;
+        brls->count++;
+    }
+    else
+    {
+        if (local == brls->reference)
+        {
+            brls->selected_died = 1;
+        }
+    }
+}
+
+
 void being_remove(noble_simulation * local_sim)
 {
-    noble_being * local = local_sim->beings;
-    n_uint	reference = local_sim->select;
-    n_uint  last_reference = reference;
-    n_uint	possible = NO_BEINGS_FOUND;
-    n_uint	count = 0;
-    n_uint  loop=0;
-    n_int   selected_died = 0;
+    being_remove_loop2_struct brls;
+    
+    brls.reference = local_sim->select;
+    brls.being_count = local_sim->beings;
+    brls.selected_died = 0;
+    brls.count = 0;
 
     if (being_remove_external)
         do {}
@@ -3567,63 +3568,27 @@ void being_remove(noble_simulation * local_sim)
 
     being_remove_internal = 1;
 
-    being_loop(local_sim, 0L, being_remove_loop, 0L);
-
-    loop=0;
+    being_loop(local_sim, 0L, being_remove_loop1, 0L);
+    being_loop(local_sim, 0L, being_remove_loop2, &brls);
     
-    while (loop < local_sim->num)
+    local_sim->num = brls.count;
+    if (brls.selected_died)
     {
-        if ( loop == reference )
+        if (brls.count)
         {
-            possible = count;
-        }
-
-        if (being_energy(&(local[loop])) != BEING_DEAD)
-        {
-            if ( count != loop )
-            {
-                io_copy((n_byte *)&local[ loop ], (n_byte *)&local[ count ], sizeof(noble_being));
-            }
-            count++;
+            sim_set_select(local_sim->beings);
         }
         else
         {
-            if (loop == last_reference)
-            {
-                selected_died = 1;
-            }
-        }
-        loop++;
-    }
-
-    if (count == 0)
-    {
-        possible = NO_BEINGS_FOUND;
-    }
-    else
-    {
-        if (possible == NO_BEINGS_FOUND)
-        {
-            possible = 0;
-        }
-        else if (count < possible)
-        {
-            possible = 0;
+            sim_set_select(0L);
         }
     }
-
-    local_sim->num = count;
-
-    if (selected_died)
-    {
-        sim_set_select(possible);
-    }
-
-    if ((possible == NO_BEINGS_FOUND) && (last_reference != NO_BEINGS_FOUND))
+    
+    if (brls.count == 0)
     {
         (void)SHOW_ERROR("No Apes remain start new run");
     }
-
+    
     being_remove_internal = 0;
 }
 

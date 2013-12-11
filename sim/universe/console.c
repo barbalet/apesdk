@@ -400,13 +400,13 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
 #ifdef BRAINCODE_ON
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function)
 {
-    if (local_sim->select != NO_BEINGS_FOUND)
+    if (local_sim->select != 0L)
     {
 
-        noble_being * local_being = &(local_sim->beings[local_sim->select]);
-        n_byte *internal_bc = being_braincode_internal(local_being);
-        n_byte *external_bc = being_braincode_external(local_being);
-        n_int           loop = 0;
+        noble_being * local_being = local_sim->select;
+        n_byte      * internal_bc = being_braincode_internal(local_being);
+        n_byte      * external_bc = being_braincode_external(local_being);
+        n_int         loop = 0;
 
         n_string_block  initial_information;
         n_int           position = 0;
@@ -1061,7 +1061,7 @@ static n_int console_duplicate(void * ptr, n_string response, n_console_output o
 
     watch_string_length=0;
 
-    if ((response == 0) && local_sim->select != NO_BEINGS_FOUND)
+    if ((response == 0) && (local_sim->select != 0L))
     {
         response = being_get_select_name(local_sim);
         if (title != 0L)
@@ -1352,9 +1352,9 @@ static void watch_being(void * ptr, n_console_output output_function)
         return;
     }
 
-    if (local_sim->select != NO_BEINGS_FOUND)
+    if (local_sim->select != 0L)
     {
-        local_being = &(local_sim->beings[local_sim->select]);
+        local_being = local_sim->select;
 
         watch_string_length = 0;
 
@@ -1576,7 +1576,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
         histogram[i]=0;
     }
 
-    if (local_sim->select != NO_BEINGS_FOUND)
+    if (local_sim->select != 0L)
     {
         n_uint loop = 0;
         while (loop < local_sim->num)
@@ -1700,7 +1700,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
     }
     else
     {
-        if (local_sim->select != NO_BEINGS_FOUND)
+        if (local_sim->select != 0L)
         {
             if (io_find(response,0,length,"braincode",9)>-1)
             {
@@ -2085,7 +2085,7 @@ n_int console_speak(void * ptr, n_string response, n_console_output output_funct
 {
     n_string_block paragraph = {0};
     noble_simulation * local_sim = (noble_simulation*) ptr;
-    noble_being * local = &(local_sim->beings[local_sim->select]);
+    noble_being * local = local_sim->select;
     watch_speech(ptr, 0L, local, paragraph);
     watch_string_length = 0;
     speak_out(response, paragraph);
@@ -2247,7 +2247,6 @@ n_int console_script(void * ptr, n_string response, n_console_output output_func
  */
 n_int console_top(void * ptr, n_string response, n_console_output output_function)
 {
-#ifdef PARASITES_ON
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_uint i,j;
     n_int  k;
@@ -2364,7 +2363,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
     }
 
     io_free((void**)&eliminated);
-#endif
+
     return 0;
 }
 

@@ -1185,7 +1185,6 @@ void brain_dialogue(
     n_int being_index)
 {
 #ifdef EPISODIC_ON
-#ifdef PARASITES_ON
     n_byte internal = (meeter_being == met_being);
     const n_int braincode_min_loop = 8*BRAINCODE_BYTES_PER_INSTRUCTION;
     n_int i = 0, itt = 0;
@@ -1704,7 +1703,6 @@ void brain_dialogue(
             i -= BRAINCODE_SIZE;
         }
     }
-#endif
 #endif
 }
 

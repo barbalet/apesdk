@@ -1082,8 +1082,6 @@ n_int social_network(
     return being_index;
 }
 
-#ifdef PARASITES_ON
-
 /**
  * @brief Grooming behavior
  * @param meeter_being Pointer to the ape doing the meeting
@@ -1222,7 +1220,6 @@ n_byte social_groom(
 
     return grooming;
 }
-#endif
 
 /**
  * @brief Squabbling and fighting
@@ -1240,9 +1237,7 @@ n_byte2 social_squabble(
     n_int is_female,
     noble_simulation * sim)
 {
-#ifdef PARASITES_ON
     n_uint agro;
-#endif
     n_byte2 ret_val = 0;
     noble_being * victor, * vanquished;
     n_int victor_index, vanquished_index;
@@ -1258,15 +1253,12 @@ n_byte2 social_squabble(
             (being_family_second_name(meeter_being) != being_family_second_name(met_being)))
     {
         being_facing_towards(meeter_being, &delta);
-
-#ifdef PARASITES_ON
         /** high ranking apes will more aggressively defend their honor */
         agro = GENE_AGGRESSION(being_genetics(meeter_being));
         /** females are less agressive (less testosterone) */
         if (is_female) agro >>= 3;
         if (being_random(meeter_being) < agro*4096 + agro*meeter_being->honor*10)
         {
-#endif
             /** who is the strongest ? */
             victor = meeter_being;
             vanquished = met_being;
@@ -1301,13 +1293,10 @@ n_byte2 social_squabble(
                     }
                 }
             }
-
-#ifdef PARASITES_ON
             /** victor increases in honor */
             if (victor->honor < 255-SQUABBLE_HONOR_ADJUST) victor->honor += SQUABBLE_HONOR_ADJUST;
             /** vanquished decreases in honor */
             if (vanquished->honor > SQUABBLE_HONOR_ADJUST) vanquished->honor -= SQUABBLE_HONOR_ADJUST;
-#endif
 
             punchloc = being_random(victor) % INVENTORY_SIZE;
             if (distance > SQUABBLE_SHOW_FORCE_DISTANCE)
@@ -1325,9 +1314,7 @@ n_byte2 social_squabble(
                 vanquished->inventory[punchloc] = INVENTORY_WOUND;
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_ATTACK);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_ATTACK);
-#ifdef PARASITES_ON
                 being_honor_swap(victor, vanquished);
-#endif
                 ret_val |= BEING_STATE_ATTACK;
             }
 
@@ -1352,9 +1339,7 @@ n_byte2 social_squabble(
 
             /** vanquished flees */
             being_set_speed(vanquished, SQUABBLE_FLEE_SPEED);
-#ifdef PARASITES_ON
         }
-#endif
         return ret_val;
     }
     return 0;
@@ -1469,10 +1454,8 @@ n_int social_mate(
 {
     n_int loc_state = 0;
     n_int attraction = 0;
-#ifdef PARASITES_ON
     n_int attract;
     n_byte2 matingprob;
-#endif
     noble_social * meeter_social_graph = being_social(meeter_being);
 
     if (!meeter_social_graph) return -1;
@@ -1480,7 +1463,6 @@ n_int social_mate(
     if ((being_drive(meeter_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
             (being_drive(met_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE))
     {
-#ifdef PARASITES_ON
         /** mating is probabilistic, with a bias towards
             higher status individuals */
         matingprob = being_random(meeter_being);
@@ -1488,7 +1470,6 @@ n_int social_mate(
                 (32000 + (n_byte2)(met_being->honor)*
                  GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB))
         {
-#endif
             /** attractiveness based upon various criteria */
             attraction = 1 +
                          social_attraction_pheromone(meeter_being,met_being) +
@@ -1525,7 +1506,6 @@ n_int social_mate(
             {
                 attraction--;
             }
-#ifdef PARASITES_ON
         }
 
         attract = meeter_social_graph[being_index].attraction;
@@ -1548,7 +1528,6 @@ n_int social_mate(
             }
         }
         meeter_social_graph[being_index].attraction=(n_byte)attract; /**< '=' : conversion from 'n_int' to 'n_byte', possible loss of data */
-#endif
     }
     return loc_state;
 }
@@ -1642,27 +1621,21 @@ n_int social_chat(
 {
     n_int idx,i=0;
     n_byte relationship_index;
-#ifdef PARASITES_ON
     n_byte2 name, family;
     n_int replace;
-#endif
     n_int speaking = 0;
     noble_social * meeter_graph = being_social(meeter_being);
-#ifdef PARASITES_ON
     noble_social * met_graph = being_social(met_being);
-#endif
     n_uint respect_mean = social_respect_mean(sim,meeter_being);
 
 
     if (!meeter_graph) return 0;
-#ifdef PARASITES_ON
+
     if (!met_graph) return 0;
-#endif
 
     /** agree upon terrirory */
     social_chat_territory(meeter_being, met_being,being_index,meeter_graph,respect_mean);
 
-#ifdef PARASITES_ON
     /** do I respect their views ? */
     if ((meeter_graph[being_index].friend_foe) >= respect_mean)
     {
@@ -1778,7 +1751,6 @@ n_int social_chat(
             }
         }
     }
-#endif
 
     being_reset_drive(met_being, DRIVE_SOCIAL);
     being_reset_drive(meeter_being, DRIVE_SOCIAL);
@@ -1799,7 +1771,6 @@ n_int social_chat(
     {
         being_add_state(meeter_being, BEING_STATE_SPEAKING);
         being_add_state(met_being, BEING_STATE_SPEAKING);
-        sim->someone_speaking = 1;
     }
     return speaking;
 }

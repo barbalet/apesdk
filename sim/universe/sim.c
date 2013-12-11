@@ -415,7 +415,6 @@ static void sim_being_loop(noble_simulation * local_sim, noble_being * local_bei
 
 static void sim_being(noble_simulation * local_sim)
 {
-    local_sim->someone_speaking = 0;
     being_loop(local_sim, 0L, sim_being_loop, 0L);
 }
 
@@ -576,7 +575,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         }
     }
 
-    sim_set_select(0);
+    sim_set_select(sim.beings);
 
     sim_new_progress = 0;
     
@@ -594,9 +593,9 @@ void sim_close(void)
     /*death_record_file_cleanup();*/
 }
 
-void sim_set_select(n_uint number)
+void sim_set_select(noble_being * select)
 {
-    sim.select = number;
+    sim.select = select;
     console_external_watch();
 }
 
@@ -623,24 +622,21 @@ void sim_populations(n_uint	*total, n_uint * female, n_uint * male)
     *male = local_male;
 }
 
+static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * data)
+{
+    n_int         local_x = APESPACE_TO_MAPSPACE(being_location_x(local));
+    n_int         local_y = APESPACE_TO_MAPSPACE(being_location_y(local));
+    n_int         local_z = QUICK_LAND(sim->land, local_x, local_y);
+    
+    if (local_z < 160)
+    {
+        being_set_energy(local, BEING_DEAD);
+    }
+}
+
 void sim_flood(void)
 {
-    n_uint  loop = 0;
-
-    while (loop < sim.num)
-    {
-        noble_being * local = &sim.beings[loop];
-        n_int         local_x = APESPACE_TO_MAPSPACE(being_location_x(local));
-        n_int         local_y = APESPACE_TO_MAPSPACE(being_location_y(local));
-        n_int         local_z = QUICK_LAND(sim.land, local_x, local_y);
-
-        if (local_z < 160)
-        {
-            being_set_energy(local, BEING_DEAD);
-        }
-
-        loop++;
-    }
+    being_loop(&sim, 0L, sim_flood_loop, 0L);
 }
 
 void sim_healthy_carrier(void)

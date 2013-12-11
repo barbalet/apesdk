@@ -96,12 +96,12 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
         return;
     }
 
-    if (local_sim->select == NO_BEINGS_FOUND)
+    if (local_sim->select == 0L)
     {
         return;
     }
 
-    local = &(local_sim->beings[local_sim->select]);
+    local = local_sim->select;
     if (wwind == NUM_VIEW)
     {
 #ifdef MOUSE_DRAG_LOGIC
@@ -122,7 +122,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
         }
         else
         {
-            n_uint	desired_ape = local_sim->select;
+            noble_being *	desired_ape = local_sim->select;
             n_uint  high_squ = 31;
             n_uint	loop = 0;
             
@@ -135,7 +135,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 if (high_squ > current_squ)
                 {
                     high_squ = current_squ;
-                    desired_ape = loop;
+                    desired_ape = current_ape;
                 }
                 loop++;
             }
@@ -215,12 +215,12 @@ static void control_key(n_byte wwind, n_byte2 num)
     if (local_sim == 0L)
         return;
 
-    if (local_sim->select == NO_BEINGS_FOUND)
+    if (local_sim->select == 0L)
     {
         return;
     }
 
-    local = &(local_sim->beings[local_sim->select]);
+    local = local_sim->select;
 
     if ((num > 27) && (num < 32))
     {
@@ -242,14 +242,32 @@ static void control_key(n_byte wwind, n_byte2 num)
     }
     if ((num > 2077) && (num < 2080))
     {
-        n_uint local_select = local_sim->select;
-        n_uint local_number = local_sim->num;
-
+        noble_being * first_being = &(local_sim->beings[0]);
+        noble_being * last_being = &(local_sim->beings[local_sim->num - 1]);
+        noble_being * local_select = local_sim->select;
         if (num == 2078)
-            local_select = ((local_select + 1) % local_number);
+        {
+            if (local_sim->select != last_being)
+            {
+                local_select++;
+            }
+            else
+            {
+                local_select = first_being;
+            }
+        }
         else
-            local_select = ((local_select + (local_number - 1)) % local_number);
-
+        {
+            if (local_sim->select != first_being)
+            {
+                local_select--;
+            }
+            else
+            {
+                local_select = last_being;
+            }
+        }
+        
         sim_set_select(local_select);
     }
 }
