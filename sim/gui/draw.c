@@ -705,6 +705,127 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
     }
 }
 
+typedef struct{
+    n_int     dim_x;
+    n_int     dim_y;
+    n_int     const_lowdiv2;
+    n_int     lowest_s;
+    n_int     lowest_c;
+    n_int     co_x;
+    n_int     co_y;
+    n_vect2 * value_vector;
+    n_byte2 * combined;
+} draw_terrain_scan_struct;
+
+static void draw_terrain_scan(void * screen, void * structure, void * x_location)
+{
+    draw_terrain_scan_struct * dtss = (draw_terrain_scan_struct *)structure;
+    n_byte  * buf_offscr = (n_byte *) screen;
+    n_int     scrx = ((n_int*)x_location)[0];
+    /* take the very bottom pixel */
+    n_int     dim_x = dtss->dim_x;
+    n_int     dim_y1 = dtss->dim_y - 1;
+    n_int     pixy = (scrx + (dim_x >> 1)) + (dim_y1 * dim_x );
+    n_int     actual = dim_y1;
+    /* start with a map point which is below/off the screen */
+    n_int     scry = dtss->const_lowdiv2;
+    /* rotated and add offset (which will be &ed off) */
+    n_int     big_x = dtss->lowest_s + (scrx * dtss->value_vector->y);
+    /* rotated and sub offset (subtracted further down) */
+    n_int     big_y = dtss->lowest_c - (scrx * dtss->value_vector->x);
+    n_byte2 * combined = dtss->combined;
+    n_int     co_x = dtss->co_x;
+    n_int     co_y = dtss->co_y;
+    n_int     valc2 = dtss->value_vector->y << 1;
+    n_int     vals2 = dtss->value_vector->x << 1;
+    while(actual > -1)
+    {
+        const n_uint   check_change = CONVERT_X((big_x >> 8), co_x) | CONVERT_Y((big_y >> 8), co_y);
+        const n_byte2  value        = combined[check_change];
+        const n_int    z00          = value & 255;
+        const n_byte   col00        = value >> 8;
+        n_int          aval         = (scry - z00);
+        if (aval < -1) aval = -1;
+        
+        while (actual > aval)
+        {
+            buf_offscr[pixy] = col00;
+            pixy -= dim_x;
+            actual--;
+        }
+        scry--;           /* next map point from screen value */
+        big_x -= vals2;
+        big_y -= valc2;
+    }
+}
+
+static void draw_terrain_threadable(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
+{
+    n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
+    
+    if (buf_offscr == 0L)
+    {
+        return;
+    }
+    
+    if (local_sim->select == 0L)
+    {
+        io_erase(buf_offscr, dim_x * dim_y);
+        return;
+    }
+    {
+        const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
+        noble_being * loc_being = local_sim->select;
+        const n_int turn = being_facing(loc_being);
+
+        
+        draw_terrain_scan_struct dtss;
+        
+        /* start at the left-most row */
+        n_int scrx = (0 - (dim_x >> 1));
+        /* find the central map point */
+        n_int flatval;
+        
+        /* get the local cos value for the turn angle */
+        /* get the local sin value for the turn angle */
+        
+        n_vect2 value_vector;
+        
+        vect2_direction(&value_vector, turn + 128, 105);
+        
+        dtss.value_vector = &value_vector;
+        
+        dtss.lowest_s = ((value_vector.x * (((lowest_y)) - dim_y)));
+        dtss.lowest_c = ((value_vector.y * (((lowest_y)) - dim_y)));
+        
+        dtss.co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
+        dtss.co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
+
+        dtss.combined = (n_byte2 *)local_sim->land->highres;
+        
+        flatval = dtss.combined[CONVERT_X(2048, dtss.co_x) | CONVERT_Y(2048, dtss.co_y)] & 255;
+        
+        if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
+        {
+            flatval = WATER_MAP;   /*    put it on water level */
+        }
+        
+        dtss.const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
+        
+        dtss.dim_x = dim_x;
+        dtss.dim_y = dim_y;
+
+        
+        
+        while (scrx < (dim_x - (dim_x >> 1)))   /* repeat until the right-most row is reached */
+        {
+            draw_terrain_scan(buf_offscr, &dtss, &scrx);
+            scrx++;               /* next column */
+        }
+    }
+}
+
+
 static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 {
     n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
@@ -774,12 +895,13 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 
             while(actual > -1)
             {
-                const n_uint check_change = CONVERT_X((big_x >> 8),co_x) | CONVERT_Y((big_y >> 8), co_y);
+                const n_uint   check_change = CONVERT_X((big_x >> 8),co_x) | CONVERT_Y((big_y >> 8), co_y);
                 const n_byte2  value = combined[check_change];
                 const n_int    z00 = value & 255;
                 const n_byte   col00   = value >> 8;
-                n_int aval = (scry - z00);
+                n_int          aval = (scry - z00);
                 if (aval < -1) aval = -1;
+                
                 while (actual > aval)
                 {
                     loc_offscr[pixy] = col00;
@@ -1686,8 +1808,7 @@ void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
     
     if (window == NUM_TERRAIN)
     {
-
-        draw_terrain(local_sim,dim_x, dim_y);
+        draw_terrain_threadable(local_sim,dim_x, dim_y);
         draw_meters(local_sim);
         draw_errors(local_sim); /* 12 */
 
