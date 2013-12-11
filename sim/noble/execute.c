@@ -55,6 +55,7 @@ typedef enum
 typedef struct
 {
     execute_function * function;
+    void             * general_data;
     void             * read_data;
     void             * write_data;
 } execute_object;
@@ -88,10 +89,11 @@ void execute_set_periodic(execute_periodic * function)
     periodic_function = function;
 }
 
-void execute_add(execute_function * function, void * read_data, void * write_data)
+void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
 {
     
     queue[written].function = function;
+    queue[written].general_data = general_data;
     queue[written].read_data = read_data;
     queue[written].write_data = write_data;
     
@@ -128,7 +130,7 @@ static void * execute_thread(void * id)
         {
             execute_object * object = value->executed;
             value->state = ES_STARTED;
-            if (object->function(object->read_data, object->write_data) == -1)
+            if (object->function(object->general_data, object->read_data, object->write_data) == -1)
             {
                 execute_quit();
             }
