@@ -505,7 +505,6 @@ void brain_sentence(n_string string, n_byte * response)
         io_string_write(string, second_word, &position);
         break;
     }
-    string[position] = 0;
 }
 
 #ifdef BRAINCODE_ON

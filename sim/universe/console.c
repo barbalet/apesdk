@@ -86,7 +86,6 @@ void console_external_watch(void)
         n_int          position = 0;
         io_string_write(output, "External Action -> Watching ", &position);
         io_string_write(output, being_get_select_name(sim_sim()), &position);
-        output[position] = 0;
         io_console_out(output);
     }
 }
@@ -382,7 +381,6 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
         
         if ((loop % 3) == 2)
         {
-            line_text[location] = 0;
             output_function(line_text);
             location = 0;
         }
@@ -391,7 +389,6 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
 
     if (location != 0)
     {
-        line_text[location] = 0;
         output_function(line_text);
     }
     
@@ -413,8 +410,6 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
 
         io_string_write(initial_information, "EXT                                                         INT", &position);
         
-        initial_information[position] = 0;
-    
         (*function)(initial_information, -1);
 
         while(loop < 22)
@@ -452,9 +447,6 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
                 io_string_write(command_information, "  ", &position);
                 io_string_write(command_information, second_internal, &position);
             }
-
-            command_information[position] = 0;
-            
             (*function)(command_information, loop);
             loop++;
         }
@@ -895,7 +887,6 @@ static void watch_episodic(void *ptr, n_string beingname, noble_being * local_be
                 io_string_write(description, str, &position);
                 io_string_write(description, "]\n", &position);
             }
-            description[position] = 0;
             io_string_write(result, description, &watch_string_length);
         }
     }
@@ -1346,8 +1337,6 @@ static void watch_being(void * ptr, n_console_output output_function)
                 io_string_write(beingstr,"----\n",&watch_string_length);
             }
         }
-        beingstr[watch_string_length] = 0;
-
         output_function(beingstr);
         return;
     }
@@ -1411,8 +1400,6 @@ static void watch_being(void * ptr, n_console_output output_function)
             break;
         }
         }
-
-        beingstr[watch_string_length] = 0;
 
         if (watch_type!=WATCH_NONE)
         {
@@ -1693,7 +1680,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
         being_set_select_name(local_sim, response);
         io_string_write(output, "Watching ", &position);
         io_string_write(output, being_get_select_name(local_sim), &position);
-        output[position] = 0;
         output_function(output);
         position = 0;
         watch_type = WATCH_ALL;
@@ -1707,7 +1693,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_BRAINCODE;
                 io_string_write(output, "Watching braincode for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1718,7 +1703,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_BRAINPROBES;
                 io_string_write(output, "Watching brain probes for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1729,7 +1713,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 
                 io_string_write(output, "Watching social graph for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1741,7 +1724,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 
                 io_string_write(output, "Watching episodic memory for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1751,7 +1733,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 
                 io_string_write(output, "Watching speech for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1761,7 +1742,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
 
                 io_string_write(output, "Watching ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1772,7 +1752,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 
                 io_string_write(output, "Watching vascular system for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1783,7 +1762,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 
                 io_string_write(output, "Watching respiration system for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1794,7 +1772,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 
                 io_string_write(output, "Watching metabolism for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -1803,7 +1780,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_APPEARANCE;
                 io_string_write(output, "Watching appearance for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
-                output[position] = 0;
                 output_function(output);
                 return 0;
             }
@@ -2132,17 +2108,11 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
     {
         n_int position = 0;
         io_string_write(console_file_name, response, &position);
-        
-        console_file_name[position] = 0;
-        
         position = 0;
         
         io_string_write(output_string, "Simulation file ", &position);
         io_string_write(output_string, response, &position);
         io_string_write(output_string, " saved\n", &position);
-        
-        console_file_name[position] = 0;
-        
         output_function(output_string);
     }
 
@@ -2209,16 +2179,12 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
             n_int position = 0;
             io_string_write(console_file_name, response, &position);
             
-            console_file_name[position] = 0;
-            
             position = 0;
             
             io_string_write(output_string, "Simulation file ", &position);
             io_string_write(output_string, response, &position);
             io_string_write(output_string, " open\n", &position);
-            
-            console_file_name[position] = 0;
-            
+
             output_function(output_string);
         }
     }
@@ -2612,7 +2578,6 @@ n_int console_death(void * ptr, n_string response, n_console_output output_funct
             io_string_write(output_string, "Death record file ", &location);
             io_string_write(output_string, response, &location);
             io_string_write(output_string, " saved\n", &location);
-            output_string[location] = 0;
             
             output_function(output_string);
         }

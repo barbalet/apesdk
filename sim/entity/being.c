@@ -711,6 +711,31 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     return 1;
 }
 
+typedef struct{
+    n_string name;
+    noble_being * being_from_name;
+}being_from_name_loop_struct;
+
+static void being_from_name_loop(noble_simulation * sim, noble_being * local, void * data)
+{
+    being_from_name_loop_struct * bfns = (being_from_name_loop_struct *)data;
+    n_string_block str;
+
+    if (bfns->being_from_name)
+    {
+        return;
+    }
+    
+    being_name_simple(local, str);
+    
+    io_lower(str, io_length(str,STRING_BLOCK_SIZE));
+    
+    if (io_find(str,0,io_length(str,STRING_BLOCK_SIZE),bfns->name,io_length(bfns->name,STRING_BLOCK_SIZE))>-1)
+    {
+        bfns->being_from_name = local;
+    }
+}
+
 /**
  * @brief return the being array index with the given name
  * @param sim Pointer to the simulation object
@@ -719,29 +744,12 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
  */
 noble_being * being_from_name(noble_simulation * sim, n_string name)
 {
-    n_uint loop = 0;
-    noble_being * b;
-
-    if (io_length(name,STRING_BLOCK_SIZE)<10) return 0L;
-
+    being_from_name_loop_struct bfns;
+    bfns.being_from_name = 0L;
     io_lower(name, io_length(name,STRING_BLOCK_SIZE));
-
-    while (loop < sim->num)
-    {
-        n_string_block str;
-        b = &sim->beings[loop];
-        
-        being_name_simple(b, str);
-
-        io_lower(str, io_length(str,STRING_BLOCK_SIZE));
-
-        if (io_find(str,0,io_length(str,STRING_BLOCK_SIZE),name,io_length(name,STRING_BLOCK_SIZE))>-1)
-        {
-            return b;
-        }
-        loop++;
-    }
-    return 0L;
+    bfns.name = name;
+    being_loop(sim, 0L, being_from_name_loop, &bfns);
+    return bfns.being_from_name;
 }
 
 
@@ -760,17 +768,13 @@ n_string being_get_select_name(noble_simulation * sim)
 {
     static n_string_block name;
     n_int  position = 0;
-    noble_being *b;
-
     if (sim->select == 0L)
     {
         io_string_write(name,"*** ALL APES DEAD ***", &position);
-        name[position] = 0;
     }
     else
     {
-        b = sim->select;
-        being_name_simple(b, name);
+        being_name_simple(sim->select, name);
     }
     return (n_string)name;
 }
@@ -1349,7 +1353,6 @@ void being_relationship_description(n_int index, n_string description)
         return;
     }
     io_string_write(description, relationship_description[index], &position);
-    description[position] = 0;
 }
 
 static void being_inventory_string(n_string string, n_int * location, n_int item)
@@ -1706,14 +1709,8 @@ n_int episode_description(
         }
     }
 #endif
-    str[string_index] = 0;
-    
     string_index = 0;
-    
     io_string_write(description, str, &string_index);
-        
-    str[string_index] = 0;
-
     return social;
 }
 
@@ -1786,7 +1783,6 @@ static void  being_name(n_byte female, n_int first, n_byte family0, n_byte famil
     {
         io_string_write(name, "Unknown", &position);
     }
-    name[position] = 0;
 }
 
 void being_name_simple(noble_being * value, n_string str)
@@ -1818,7 +1814,6 @@ void being_state_description(n_byte2 state, n_string result)
     if (state == BEING_STATE_ASLEEP)
     {
         io_string_write(result, state_description[0], &string_length);
-        result[string_length]=0;
         return;
     }
 
@@ -1834,7 +1829,6 @@ void being_state_description(n_byte2 state, n_string result)
         }
         n++;
     }
-    result[string_length]=0;
 }
 
 /**

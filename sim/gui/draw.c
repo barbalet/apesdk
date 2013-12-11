@@ -1439,7 +1439,6 @@ n_int draw_error(n_constant_string error_text)
         {
             io_string_write(simulation_date_time_error, (n_string)error_text, &position);
         }
-        simulation_date_time_error[position] = 0;
     }
     else
     {

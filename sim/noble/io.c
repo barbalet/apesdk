@@ -1540,7 +1540,6 @@ void io_three_string_combination(n_string output, n_string first, n_string secon
 
     }
     io_string_write(output, third, &position);
-    output[position] = 0;
 }
 
 void io_time_to_string(n_string value, n_int minutes, n_int days, n_int centuries)
