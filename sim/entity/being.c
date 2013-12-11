@@ -752,11 +752,10 @@ noble_being * being_from_name(noble_simulation * sim, n_string name)
     return bfns.being_from_name;
 }
 
-
 void being_set_select_name(noble_simulation * sim, n_string name)
 {
     noble_being * response = being_from_name(sim, name);
-    if ((response == 0L) && sim->num)
+    if (response == 0L)
     {
         (void)SHOW_ERROR("Ape not found");
         return;

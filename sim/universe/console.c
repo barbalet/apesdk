@@ -397,9 +397,8 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
 #ifdef BRAINCODE_ON
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function)
 {
-    if (local_sim->select != 0L)
+    if (local_sim->select)
     {
-
         noble_being * local_being = local_sim->select;
         n_byte      * internal_bc = being_braincode_internal(local_being);
         n_byte      * external_bc = being_braincode_external(local_being);
@@ -1052,7 +1051,7 @@ static n_int console_duplicate(void * ptr, n_string response, n_console_output o
 
     watch_string_length=0;
 
-    if ((response == 0) && (local_sim->select != 0L))
+    if ((response == 0) && (local_sim->select))
     {
         response = being_get_select_name(local_sim);
         if (title != 0L)
@@ -1341,7 +1340,7 @@ static void watch_being(void * ptr, n_console_output output_function)
         return;
     }
 
-    if (local_sim->select != 0L)
+    if (local_sim->select)
     {
         local_being = local_sim->select;
 
@@ -1563,7 +1562,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
         histogram[i]=0;
     }
 
-    if (local_sim->select != 0L)
+    if (local_sim->select)
     {
         n_uint loop = 0;
         while (loop < local_sim->num)
@@ -1686,7 +1685,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
     }
     else
     {
-        if (local_sim->select != 0L)
+        if (local_sim->select)
         {
             if (io_find(response,0,length,"braincode",9)>-1)
             {

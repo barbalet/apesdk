@@ -242,29 +242,27 @@ static void control_key(n_byte wwind, n_byte2 num)
     }
     if ((num > 2077) && (num < 2080))
     {
-        noble_being * first_being = &(local_sim->beings[0]);
-        noble_being * last_being = &(local_sim->beings[local_sim->num - 1]);
         noble_being * local_select = local_sim->select;
         if (num == 2078)
         {
-            if (local_sim->select != last_being)
+            if (local_sim->select != &(local_sim->beings[local_sim->num - 1]))
             {
                 local_select++;
             }
             else
             {
-                local_select = first_being;
+                local_select = local_sim->beings;
             }
         }
         else
         {
-            if (local_sim->select != first_being)
+            if (local_sim->select != local_sim->beings)
             {
                 local_select--;
             }
             else
             {
-                local_select = last_being;
+                local_select = &(local_sim->beings[local_sim->num - 1]);
             }
         }
         

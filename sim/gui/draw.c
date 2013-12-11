@@ -858,7 +858,7 @@ static void	draw_meters(noble_simulation * local_sim)
 
 #define GENDER_X        (terrain_dim_x-(512-312))
 
-    if (local_sim->select != 0L)
+    if (local_sim->select)
     {
         hr = 0;
         while (hr < 41)
@@ -1627,7 +1627,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         }
     }
 
-    if (local_sim->select != 0L)
+    if (local_sim->select)
     {
         being_loop(local_sim, 0L, draw_apes_loop, &local_col);
     }
