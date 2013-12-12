@@ -1785,64 +1785,44 @@ void  draw_terrain_coord(n_int * co_x, n_int * co_y)
     *co_y = terrain_dim_y;
 }
 
-void  draw_cycle(n_byte window, n_int dim_x, n_int dim_y)
+void  draw_cycle(n_int dim_x, n_int dim_y)
 {
     noble_simulation * local_sim = sim_sim();
 
     if (sim_new()) return;
     
-    if (window == NUM_TERRAIN)
-    {
-        terrain_dim_x = dim_x;
-        terrain_dim_y = dim_y;
-    }
+    terrain_dim_x = dim_x;
+    terrain_dim_y = dim_y;
 
     if (check_about) return;
 
-#ifndef GRAPHLESS_GUI
-    if (window != NUM_GRAPH)
-#endif
-    {
-        draw_apes(local_sim, window);    /* 8 */
-    }
+    draw_apes(local_sim, 0);    /* 8 */
+    draw_apes(local_sim, 1);    /* 8 */
     
-    if (window == NUM_TERRAIN)
-    {
-        draw_terrain_threadable(local_sim,dim_x, dim_y);
-        draw_meters(local_sim);
-        draw_errors(local_sim); /* 12 */
+    draw_terrain_threadable(local_sim,dim_x, dim_y);
+    draw_meters(local_sim);
+    draw_errors(local_sim); /* 12 */
 
-        if (toggle_brain)
-        {
-            draw_brain(local_sim,dim_x, dim_y);
-        }
-#ifdef BRAINCODE_ON
-        if (toggle_braincode)
-        {
-            console_populate_braincode(local_sim, draw_line_braincode);
-        }
-#endif
-    }
-    if (window == NUM_VIEW)
+    if (toggle_brain)
     {
+        draw_brain(local_sim,dim_x, dim_y);
+    }
+#ifdef BRAINCODE_ON
+    if (toggle_braincode)
+    {
+        console_populate_braincode(local_sim, draw_line_braincode);
+    }
+#endif
+
 
 #ifdef WEATHER_ON
-        if (toggle_weather)
-        {
-            draw_weather(local_sim->land); /* 10 */
-        }
-#endif
-        if (draw_drag_on == 1)
-        {
-            draw_drag();
-        }
-        
-    }
-#ifndef GRAPHLESS_GUI
-    if (window == NUM_GRAPH)
+    if (toggle_weather)
     {
-        graph_draw(local_sim, draw_pointer(NUM_GRAPH), dim_x, dim_y);
+        draw_weather(local_sim->land); /* 10 */
     }
 #endif
-
+    if (draw_drag_on == 1)
+    {
+        draw_drag();
+    }
 }

@@ -134,9 +134,9 @@ n_int draw_toggle_braincode(void);
 
 n_int draw_toggle_territory(void);
 
-void  draw_terrain_coord(n_int * co_x, n_int * co_y);
-
 void draw_fit(n_byte * points, n_byte2 * color_fit);
+
+void  draw_terrain_coord(n_int * co_x, n_int * co_y);
 
 extern n_byte land_points[];
 extern n_byte fur_points[];
@@ -153,7 +153,7 @@ void draw_about(n_constant_string platform);
 
 void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw);
 
-void  draw_cycle(n_byte mod, n_int dim_x, n_int dim_y);
+void  draw_cycle(n_int dim_x, n_int dim_y);
 
 n_byte * draw_offscreen(n_byte * value);
 

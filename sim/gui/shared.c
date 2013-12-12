@@ -158,6 +158,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     {
         n_int upper_x, upper_y;
         draw_terrain_coord(&upper_x, &upper_y);
+
         if (option != 0)
         {
             if ((px > (upper_x/4)) && (px < ((upper_x * 3)/4)))
@@ -301,8 +302,13 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
     return 0;
 }
 
-void shared_cycle(n_uint ticks, n_int fIdentification)
+shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
+    shared_cycle_state return_value = SHARED_CYCLE_OK;
+    
+    ticks = ticks & 67108863; /* 71 58 27 88 */
+    ticks *= 60;
+    
 #ifndef	_WIN32
     sim_thread_console();
 #endif
@@ -318,19 +324,31 @@ void shared_cycle(n_uint ticks, n_int fIdentification)
         }
     }
 
-    ticks = ticks & 67108863; /* 71 58 27 88 */
-    ticks *= 60;
-
     if(fIdentification == NUM_TERRAIN)
     {
         shared_simulate(ticks);
+    
+        if (shared_script_debug_ready())
+        {
+            return_value = SHARED_CYCLE_DEBUG_OUTPUT;
+        }
+        
+        draw_cycle(dim_x, dim_y);
+        
+        if (sim_thread_console_quit())
+        {
+            return_value = SHARED_CYCLE_QUIT;
+        }
     }
+    return return_value;
 }
 
+#ifdef NO_LONGER_SUPPORTED
 void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
     draw_cycle(fIdentification, dim_x, dim_y);
 }
+#endif
 
 n_int shared_init(n_byte view, n_uint random)
 {

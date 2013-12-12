@@ -83,32 +83,30 @@
 /* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
-    shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification);
-    if (shared_script_debug_ready())
-    {
-        [self debugOutput];
-    }
-    
 	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
-    
-    if (sim_thread_console_quit())
-    {
-        [self quitProcedure];
-    }
 }
 #endif
 
 - (void) drawRect:(NSRect)rect
 {
-    n_c_int         dimensionX = (n_c_int)rect.size.width;
-    n_c_int         dimensionY = (n_c_int)rect.size.height;
+    n_int         dimensionX = (n_int)rect.size.width;
+    n_int         dimensionY = (n_int)rect.size.height;
     n_byte        * index = shared_draw(fIdentification);
+    
+    shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dimensionX, dimensionY);
+    if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
+    {
+        [self debugOutput];
+    }
+    if (returned_value == SHARED_CYCLE_QUIT)
+    {
+        [self quitProcedure];
+    }
     
     if (index == 0L) return;
     
     [[self openGLContext] makeCurrentContext];
 
-    shared_cycle_draw(fIdentification, dimensionX, dimensionY);
 #ifndef GRAPHLESS_GUI
     if (fIdentification != NUM_GRAPH)
 #endif

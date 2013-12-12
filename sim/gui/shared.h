@@ -48,7 +48,13 @@
 
 #endif
 
-void shared_cycle(n_uint ticks, n_int fIdentification);
+typedef enum{
+    SHARED_CYCLE_OK = 0,
+    SHARED_CYCLE_QUIT,
+    SHARED_CYCLE_DEBUG_OUTPUT
+}shared_cycle_state;
+
+shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_x, n_int dim_y);
 
 void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y);
 
