@@ -58,8 +58,6 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
 
 void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y);
 
-void shared_simulate(n_uint local_time);
-
 n_int shared_init(n_byte view, n_uint random);
 
 void shared_close(void);
@@ -101,8 +99,6 @@ n_int shared_new(n_uint seed);
 n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
 
 void shared_saveFileName(n_string cStringFileName);
-
-n_int shared_script_debug_ready(void);
 
 void shared_script_debug_handle(n_string cStringFileName);
 

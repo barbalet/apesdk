@@ -271,7 +271,45 @@ static void control_key(n_byte wwind, n_byte2 num)
     }
 }
 
-void shared_simulate(n_uint local_time)
+#ifdef SCRIPT_DEBUG
+
+static n_int script_entry = 1;
+
+static n_int shared_script_debug_ready(void)
+{
+    if (script_entry == 0)
+    {
+        return 0;
+    }
+    if (scdebug_file_ready() != 0L)
+    {
+        script_entry = 0;
+        return 1;
+    }
+    return 0;
+}
+
+void shared_script_debug_handle(n_string cStringFileName)
+{
+    if (cStringFileName)
+    {
+        n_file          * outputfile = scdebug_file_ready();
+        io_disk_write(outputfile, cStringFileName);
+    }
+    scdebug_file_cleanup();
+    script_entry = 1;
+}
+
+#else
+
+void shared_script_debug_handle(n_string cStringFileName)
+{
+    
+}
+
+#endif
+
+static void shared_simulate(n_uint local_time)
 {
     sim_realtime(local_time);
 
@@ -327,14 +365,15 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     if(fIdentification == NUM_TERRAIN)
     {
         shared_simulate(ticks);
-    
+
+        draw_cycle(dim_x, dim_y);
+
+#ifdef SCRIPT_DEBUG
         if (shared_script_debug_ready())
         {
             return_value = SHARED_CYCLE_DEBUG_OUTPUT;
         }
-        
-        draw_cycle(dim_x, dim_y);
-        
+#endif
         if (sim_thread_console_quit())
         {
             return_value = SHARED_CYCLE_QUIT;
@@ -507,48 +546,3 @@ void shared_saveFileName(n_string cStringFileName)
     (void)control_toggle_pause(0);
     (void)console_save(0L, cStringFileName, 0L);
 }
-
-#ifdef SCRIPT_DEBUG
-
-static n_int script_entry = 1;
-
-n_int shared_script_debug_ready(void)
-{
-    n_int result = (scdebug_file_ready() != 0L);
-
-    if (script_entry == 0)
-    {
-        return 0;
-    }
-
-    if (result)
-    {
-        script_entry = 0;
-    }
-    return result;
-}
-
-void shared_script_debug_handle(n_string cStringFileName)
-{
-    if (cStringFileName)
-    {
-        n_file          * outputfile = scdebug_file_ready();
-        io_disk_write(outputfile, cStringFileName);
-    }
-    scdebug_file_cleanup();
-    script_entry = 1;
-}
-
-#else
-
-n_int shared_script_debug_ready(void)
-{
-    return 0;
-}
-
-void shared_script_debug_handle(n_string cStringFileName)
-{
-
-}
-
-#endif

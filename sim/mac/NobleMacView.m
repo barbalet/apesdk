@@ -174,18 +174,7 @@
 #ifdef ON_DISPLAY_UPDATE
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
 {
-    shared_cycle(CFAbsoluteTimeGetCurrent (), fIdentification);
-    
-    if (shared_script_debug_ready())
-    {
-        [self debugOutput];
-    }
     [self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
-    
-    if (sim_thread_console_quit())
-    {
-        [self quitProcedure];
-    }
     return kCVReturnSuccess;
 }
 
