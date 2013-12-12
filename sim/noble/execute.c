@@ -70,6 +70,8 @@ typedef struct
 static int global_cycle = 1;
 static int execution_cycle = 1;
 
+static int start_cycle = 0;
+
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execute_object    queue[EXECUTION_QUEUE_SIZE] = {0L};
@@ -116,6 +118,11 @@ void execute_add(execute_function * function, void * general_data, void * read_d
 #endif
 }
 
+void execute_start(void)
+{
+    start_cycle = 1;
+}
+
 void execute_quit(void)
 {
     global_cycle = 0;
@@ -124,7 +131,6 @@ void execute_quit(void)
 static void * execute_thread(void * id)
 {
     execution_thread * value = id;
-    
     do{
         if (value->state == ES_WAITING)
         {
@@ -140,14 +146,9 @@ static void * execute_thread(void * id)
     pthread_exit(NULL);
 }
 
-void execute_main_loop(execute_periodic * initialization, execute_periodic * regular_cycle)
+void execute_main_loop(execute_periodic * regular_cycle)
 {
     int loop = 0;
-    
-    if (initialization == 0L)
-    {
-        return;
-    }
     
     execute_set_periodic(regular_cycle);
     
@@ -157,43 +158,45 @@ void execute_main_loop(execute_periodic * initialization, execute_periodic * reg
         loop++;
     }
     
-    if (initialization() != -1)
-    {
-        do{
-            int idle_count = 0;
-            loop = 0;
-            while (loop < MAX_EXECUTION_THREAD_SIZE)
+    do{
+        int idle_count = 0;
+        loop = 0;
+        
+        if (start_cycle == 0) break;
+        
+        while (loop < MAX_EXECUTION_THREAD_SIZE)
+        {
+            if (execution[loop].state == ES_DONE)
             {
-                if (execution[loop].state == ES_DONE)
+                if (written == read)
                 {
-                    if (written == read)
-                    {
-                        idle_count++;
-                    }
-                    else
-                    {
-                        execution[loop].executed = &queue[read];
-                        execution[loop].state = ES_WAITING;
-                        read = (read + 1) & (EXECUTION_QUEUE_SIZE-1);
-#ifdef EXECUTE_DEBUG
-                        read_actual++;
-#endif
-                    }
+                    idle_count++;
                 }
-                
-                loop++;
+                else
+                {
+                    execution[loop].executed = &queue[read];
+                    execution[loop].state = ES_WAITING;
+                    read = (read + 1) & (EXECUTION_QUEUE_SIZE-1);
+#ifdef EXECUTE_DEBUG
+                    read_actual++;
+#endif
+                }
             }
             
-            if (idle_count == MAX_EXECUTION_THREAD_SIZE)
+            loop++;
+        }
+        
+        if (idle_count == MAX_EXECUTION_THREAD_SIZE)
+        {
+            if (periodic_function)
             {
-                if (periodic_function)
+                if (periodic_function() == -1)
                 {
-                    if (periodic_function() == -1)
-                    {
-                        execution_cycle = 0;
-                    }
+                    execution_cycle = 0;
                 }
             }
-        }while (global_cycle && execution_cycle);
-    }
+            start_cycle = 0;
+        }
+    }while (global_cycle && execution_cycle);
+    
 }

@@ -575,7 +575,7 @@ void  execute_set_periodic(execute_periodic * function);
 
 void  execute_add(execute_function function, void * general_data, void * read_data, void * write_data);
 
-void  execute_main_loop(execute_periodic * initialization, execute_periodic * regular_cycle);
+void  execute_main_loop(execute_periodic * regular_cycle);
 
 void  execute_quit(void);
 void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
