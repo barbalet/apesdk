@@ -163,62 +163,6 @@ static n_int toggle_brain = 1;
 static n_int toggle_braincode = 0;
 static n_int toggle_territory = 0;
 
-static n_int draw_drag_x1, draw_drag_x2, draw_drag_y1, draw_drag_y2;
-static n_byte draw_drag_on = 0;
-
-static n_int drag_time = 0;
-
-void draw_update_drag(n_byte drag_on, n_int x1, n_int x2, n_int y1, n_int y2)
-{
-    
-    draw_drag_on = drag_on;
-
-    if (drag_on == 0)
-    {
-        return;
-    }
-    
-    if (x2 >= x1)
-    {
-        draw_drag_x1 = x1;
-        draw_drag_x2 = x2;
-    }
-    else
-    {
-        draw_drag_x1 = x2;
-        draw_drag_x2 = x1;
-    }
-
-    if (y2 >= y1)
-    {
-        draw_drag_y1 = y1;
-        draw_drag_y2 = y2;
-    }
-    else
-    {
-        draw_drag_y1 = y2;
-        draw_drag_y2 = y1;
-    }
-    
-    if (draw_drag_x1 < 0)
-    {
-        draw_drag_x1 = 0;
-    }
-    if (draw_drag_y1 < 0)
-    {
-        draw_drag_y1 = 0;
-    }
-
-    if (draw_drag_x2 > 511)
-    {
-        draw_drag_x2 = 511;
-    }
-    if (draw_drag_y2 > 511)
-    {
-        draw_drag_y2 = 511;
-    }
-}
-
 n_int draw_toggle_weather(void)
 {
     toggle_weather ^= 1;
@@ -367,54 +311,6 @@ n_byte * draw_pointer(n_byte which_one)
 #endif
     }
     return 0L;
-}
-
-
-
-static void draw_drag(void)
-{
-    n_int loop = draw_drag_x1;
-    n_color8    dotted_line;
-    
-    dotted_line.color = COLOUR_RED;
-    dotted_line.screen = VIEWWINDOW(local_offscreen);
-    
-    drag_time ++;
-    
-    if (drag_time == 16)
-    {
-        drag_time = 0;
-    }
-    
-    while (loop <= draw_drag_x2)
-    {
-        if (((loop + draw_drag_y1 + drag_time) >> 2) & 1)
-        {
-            pixel_color8(loop, draw_drag_y1, 0, 0, &dotted_line);
-        }
-        if (((loop + draw_drag_y2 - drag_time) >> 2) & 1)
-        {
-            pixel_color8(loop, draw_drag_y2, 0, 0, &dotted_line);
-        }
-        loop++;
-    }
-    
-    loop = draw_drag_y1;
-    
-    while (loop <= draw_drag_y2)
-    {
-        if (((loop + draw_drag_x1 - drag_time) >> 2) & 1)
-        {
-            pixel_color8(draw_drag_x1, loop, 0, 0, &dotted_line);
-        }
-        
-        if (((loop + draw_drag_x2 + drag_time) >> 2) & 1)
-        {
-            pixel_color8(draw_drag_x2, loop, 0, 0, &dotted_line);
-        }
-        loop++;
-    }
-
 }
 
 /*	shows the about information */
@@ -706,13 +602,12 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
 }
 
 typedef struct{
-    n_int     dim_x;
-    n_int     dim_y;
     n_int     const_lowdiv2;
     n_int     lowest_s;
     n_int     lowest_c;
     n_int     co_x;
     n_int     co_y;
+    n_vect2 * dimensions;
     n_vect2 * value_vector;
     n_byte2 * combined;
 } draw_terrain_scan_struct;
@@ -723,8 +618,8 @@ static void draw_terrain_scan(void * screen, void * structure, void * x_location
     n_byte  * buf_offscr = (n_byte *) screen;
     n_int     scrx = ((n_int*)x_location)[0];
     /* take the very bottom pixel */
-    n_int     dim_x = dtss->dim_x;
-    n_int     dim_y1 = dtss->dim_y - 1;
+    n_int     dim_x = dtss->dimensions->x;
+    n_int     dim_y1 = dtss->dimensions->y - 1;
     n_int     pixy = (scrx + (dim_x >> 1)) + (dim_y1 * dim_x );
     n_int     actual = dim_y1;
     /* start with a map point which is below/off the screen */
@@ -759,7 +654,7 @@ static void draw_terrain_scan(void * screen, void * structure, void * x_location
     }
 }
 
-static void draw_terrain_threadable(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
+static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dimensions)
 {
     n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
     
@@ -770,11 +665,11 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_int dim_x, n
     
     if (local_sim->select == 0L)
     {
-        io_erase(buf_offscr, dim_x * dim_y);
+        io_erase(buf_offscr, dimensions->x * dimensions->y);
         return;
     }
     {
-        const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
+        const n_int    lowest_y = ((dimensions->y + 256) * dimensions->y)/256;
         noble_being * loc_being = local_sim->select;
         const n_int turn = being_facing(loc_being);
 
@@ -782,7 +677,7 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_int dim_x, n
         draw_terrain_scan_struct dtss;
         
         /* start at the left-most row */
-        n_int scrx = (0 - (dim_x >> 1));
+        n_int scrx = (0 - (dimensions->x >> 1));
         /* find the central map point */
         n_int flatval;
         
@@ -795,8 +690,8 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_int dim_x, n
         
         dtss.value_vector = &value_vector;
         
-        dtss.lowest_s = ((value_vector.x * (((lowest_y)) - dim_y)));
-        dtss.lowest_c = ((value_vector.y * (((lowest_y)) - dim_y)));
+        dtss.lowest_s = ((value_vector.x * (((lowest_y)) - dimensions->y)));
+        dtss.lowest_c = ((value_vector.y * (((lowest_y)) - dimensions->y)));
         
         dtss.co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         dtss.co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
@@ -812,12 +707,10 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_int dim_x, n
         
         dtss.const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
         
-        dtss.dim_x = dim_x;
-        dtss.dim_y = dim_y;
-
+        dtss.dimensions = dimensions;
         
-        
-        while (scrx < (dim_x - (dim_x >> 1)))   /* repeat until the right-most row is reached */
+        /* repeat until the right-most row is reached */
+        while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
             draw_terrain_scan(buf_offscr, &dtss, &scrx);
             scrx++;               /* next column */
@@ -1359,12 +1252,10 @@ static void draw_region(noble_being * local)
 static void draw_weather(n_land * local_land)
 {
     n_int map_dimensions2 = land_map_dimension(local_land)/2;
-
-    n_color8		local_col;
-    n_pixel			*local_draw = &pixel_color8;
-    void			  *local_info = &local_col;
-    n_int       py = 0;
-    
+    n_color8	 local_col;
+    n_pixel	   * local_draw = &pixel_color8;
+    void	   * local_info = &local_col;
+    n_int        py = 0;
     local_col.color = COLOUR_GREY;
     local_col.screen = draw_pointer(NUM_VIEW);
     if (local_col.screen == 0L)
@@ -1424,7 +1315,7 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
 
 /* draws the rotating brain, this is always draw and never erase */
 
-static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
+static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
 {
     n_byte  draw_big = 1;
     if ((local_sim->select == 0L) || (number_errors != 0))
@@ -1441,8 +1332,8 @@ static void draw_brain(noble_simulation *local_sim, n_int dim_x, n_int dim_y)
         void	    * local_info_brain = draw_pointer(NUM_TERRAIN);
         n_int	      lpx  = 0;
         n_int	      loop = 0;
-        n_int         center_x = dim_x >> 1;
-        n_int         center_y = dim_y >> 1;
+        n_int         center_x = dimensions->x >> 1;
+        n_int         center_y = dimensions->y >> 1;
         n_int	      act_x2a, term_1a, term_2a;
 
         n_byte	    * brainptr = local;
@@ -1788,25 +1679,26 @@ void  draw_terrain_coord(n_int * co_x, n_int * co_y)
 void  draw_cycle(n_int dim_x, n_int dim_y)
 {
     noble_simulation * local_sim = sim_sim();
-
+    n_vect2            local_vect;
     if (sim_new()) return;
     
-    terrain_dim_x = dim_x;
-    terrain_dim_y = dim_y;
+    local_vect.x = terrain_dim_x = dim_x;
+    local_vect.y = terrain_dim_y = dim_y;
 
     if (check_about) return;
 
-    draw_apes(local_sim, 0);    /* 8 */
-    draw_apes(local_sim, 1);    /* 8 */
+    draw_apes(local_sim, 0);    /* hi res */
+    draw_apes(local_sim, 1);    /* lo res */
     
-    draw_terrain_threadable(local_sim,dim_x, dim_y);
+    draw_terrain_threadable(local_sim, &local_vect);
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */
 
     if (toggle_brain)
     {
-        draw_brain(local_sim,dim_x, dim_y);
+        draw_brain(local_sim, &local_vect);
     }
+    
 #ifdef BRAINCODE_ON
     if (toggle_braincode)
     {
@@ -1821,8 +1713,4 @@ void  draw_cycle(n_int dim_x, n_int dim_y)
         draw_weather(local_sim->land); /* 10 */
     }
 #endif
-    if (draw_drag_on == 1)
-    {
-        draw_drag();
-    }
 }

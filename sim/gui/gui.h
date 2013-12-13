@@ -157,8 +157,6 @@ void  draw_cycle(n_int dim_x, n_int dim_y);
 
 n_byte * draw_offscreen(n_byte * value);
 
-void draw_update_drag(n_byte drag_on, n_int x1, n_int x2, n_int y1, n_int y2);
-
 #endif /* NOBLEAPE_GUI_H */
 
 /*NOBLEMAKE END=""*/

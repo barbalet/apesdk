@@ -104,13 +104,6 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     local = local_sim->select;
     if (wwind == NUM_VIEW)
     {
-#ifdef MOUSE_DRAG_LOGIC
-        if (mouse_drag == 1)
-        {
-            draw_update_drag(1, px, mouse_drag_x, py, mouse_drag_y);
-            return;
-        }
-#endif
         if (option)
         {
             n_byte2    location[2];
@@ -361,13 +354,10 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
             control_key(key_identification, key_value);
         }
     }
-
     if(fIdentification == NUM_TERRAIN)
     {
         shared_simulate(ticks);
-
         draw_cycle(dim_x, dim_y);
-
 #ifdef SCRIPT_DEBUG
         if (shared_script_debug_ready())
         {
@@ -478,7 +468,6 @@ void shared_mouseUp(void)
 {
     mouse_down = 0;
     mouse_drag = 0;
-    draw_update_drag(0, 0, 0, 0, 0);
 }
 
 void shared_about(n_constant_string value)
