@@ -561,7 +561,7 @@ void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn b
         noble_being * output = &(sim->beings[loop]);
         if (output != being_not)
         {
-            (bf_func)(sim, output, data);
+            ((execute_function*)bf_func)((void*)sim, (void*)output, data);
         }
         loop++;
     }

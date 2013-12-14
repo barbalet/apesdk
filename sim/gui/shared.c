@@ -302,21 +302,6 @@ void shared_script_debug_handle(n_string cStringFileName)
 
 #endif
 
-static void shared_simulate(n_uint local_time)
-{
-    sim_realtime(local_time);
-
-    if (io_command_line_execution())
-    {
-        return;
-    }
-
-    if (toggle_pause == 0)
-    {
-        sim_cycle();
-    }
-}
-
 static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
     void * sim_return = 0L;
@@ -356,8 +341,17 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     }
     if(fIdentification == NUM_TERRAIN)
     {
-        shared_simulate(ticks);
-        draw_cycle(dim_x, dim_y);
+        sim_realtime(ticks);
+        draw_window(dim_x, dim_y);
+        
+        if ((io_command_line_execution() != 1) || (toggle_pause))
+        {
+            /* THIS SECION CAN BE THREAD OPTIMIZED */
+            sim_cycle();
+        }
+        /* THIS SECION CAN BE THREAD OPTIMIZED */
+        draw_cycle();
+                
 #ifdef SCRIPT_DEBUG
         if (shared_script_debug_ready())
         {

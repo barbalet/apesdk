@@ -1676,16 +1676,23 @@ void  draw_terrain_coord(n_int * co_x, n_int * co_y)
     *co_y = terrain_dim_y;
 }
 
-void  draw_cycle(n_int dim_x, n_int dim_y)
+
+void  draw_window(n_int dim_x, n_int dim_y)
+{
+    terrain_dim_x = dim_x;
+    terrain_dim_y = dim_y;
+}
+
+void  draw_cycle(void)
 {
     noble_simulation * local_sim = sim_sim();
     n_vect2            local_vect;
-    if (sim_new()) return;
     
-    local_vect.x = terrain_dim_x = dim_x;
-    local_vect.y = terrain_dim_y = dim_y;
-
+    if (sim_new()) return;
     if (check_about) return;
+    
+    local_vect.x = terrain_dim_x;
+    local_vect.y = terrain_dim_y;
 
     draw_apes(local_sim, 0);    /* hi res */
     draw_apes(local_sim, 1);    /* lo res */

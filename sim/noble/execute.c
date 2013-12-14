@@ -146,11 +146,9 @@ static void * execute_thread(void * id)
     pthread_exit(NULL);
 }
 
-void execute_main_loop(execute_periodic * regular_cycle)
+void execute_main_loop(void)
 {
     int loop = 0;
-    
-    execute_set_periodic(regular_cycle);
     
     while (loop < MAX_EXECUTION_THREAD_SIZE)
     {
