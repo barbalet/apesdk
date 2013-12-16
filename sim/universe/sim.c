@@ -365,11 +365,6 @@ static void sim_brain_loop(noble_simulation * local_sim, noble_being * local_bei
     }
 }
 
-static void sim_brain(noble_simulation * local_sim)
-{
-    being_loop(local_sim, 0L, sim_brain_loop, 0L);
-}
-
 #ifdef BRAINCODE_ON
 
 static void sim_brain_dialogue_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
@@ -386,15 +381,10 @@ static void sim_brain_dialogue_loop(noble_simulation * local_sim, noble_being * 
     brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, being_random(local_being)%SOCIAL_SIZE);
 }
 
-static void sim_brain_dialogue(noble_simulation * local_sim)
-{
-    being_loop(local_sim, 0L, sim_brain_dialogue_loop, 0L);
-}
-
 #endif
 
 
-static void sim_being_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+void sim_being_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_byte awake = (being_awake(local_sim, local_being) != 0);
     
@@ -413,15 +403,17 @@ static void sim_being_loop(noble_simulation * local_sim, noble_being * local_bei
     }
 }
 
-static void sim_being(noble_simulation * local_sim)
+static execute_periodic * cycle_conclude = 0L;
+
+void sim_conclude_cyle(execute_periodic * link)
 {
-    being_loop(local_sim, 0L, sim_being_loop, 0L);
+    cycle_conclude = link;
 }
 
 static void sim_time(noble_simulation * local_sim)
 {
     local_sim->count_cycles += local_sim->num;
-
+    
     if ((local_sim->real_time - local_sim->last_time) > 600)
     {
         local_sim->last_time = local_sim->real_time;
@@ -430,7 +422,59 @@ static void sim_time(noble_simulation * local_sim)
     }
 }
 
-/* this is a protoype for the order of these functions it is not used here explicitly */
+static n_int  sim_social_delta()
+{
+    being_loop(&sim, 0L, social_secondary_loop, 0L);
+    sim_time(&sim);
+    
+    if (cycle_conclude)
+    {
+        execute_set_periodic(cycle_conclude);
+    }
+    return 0;
+}
+
+static n_int  sim_social(void)
+{
+    being_loop(&sim, 0L, social_initial_loop, 0L);
+    execute_set_periodic(&sim_social_delta);
+    return 0;
+}
+
+static n_int  sim_remove(void)
+{
+    being_remove_loop2_struct * brls = being_remove_initial(&sim);
+    
+    being_loop(&sim, 0L, being_remove_loop1, 0L);
+    being_loop(&sim, 0L, being_remove_loop2, brls);
+    
+    being_remove_final(&sim, &brls);
+    
+    execute_set_periodic(&sim_social);
+    return 0;
+}
+
+
+static n_int  sim_honor(void)
+{
+    n_int       max_honor = 0;
+    being_loop(&sim, 0L, being_tidy_loop, &max_honor);
+    
+    /** normalize honor values */
+    if (max_honor)
+    {
+        being_loop(&sim, 0L, being_recalibrate_honor_loop, 0L);
+    }
+    execute_set_periodic(&sim_remove);
+    return 0;
+}
+
+static n_int sim_dialogue(void)
+{
+    being_loop(&sim, 0L, sim_brain_dialogue_loop, 0L);
+    execute_set_periodic(&sim_honor);
+    return 0;
+}
 
 void sim_cycle(void)
 {
@@ -439,16 +483,14 @@ void sim_cycle(void)
     weather_cycle(sim.land);
 #endif
     
-    sim_being(&sim);    /* 2 */
-    sim_brain(&sim);    /* 4 */
-#ifdef BRAINCODE_ON
-    sim_brain_dialogue(&sim);
-#endif
-    being_tidy(&sim);
-    being_remove(&sim); /* 6 */
-    sim_social(&sim);
+    being_loop(&sim, 0L, sim_being_loop, 0L);
+    being_loop(&sim, 0L, sim_brain_loop, 0L);
     
-    sim_time(&sim);
+#ifdef BRAINCODE_ON
+    execute_set_periodic(&sim_dialogue);
+#else
+    execute_set_periodic(&sim_honor);
+#endif
 }
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
@@ -532,6 +574,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         {
             return 0L;
         }
+        execute_main_loop();
     }
     if ((kind != KIND_LOAD_FILE) && (kind != KIND_MEMORY_SETUP))
     {
@@ -585,6 +628,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 void sim_close(void)
 {
     io_console_quit();
+    execute_quit();
 #ifndef _WIN32
     sim_console_clean_up();
 #endif

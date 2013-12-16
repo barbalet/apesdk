@@ -155,7 +155,7 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 
 void  draw_window(n_int dim_x, n_int dim_y);
 
-void  draw_cycle(void);
+n_int  draw_cycle(void);
 
 n_byte * draw_offscreen(n_byte * value);
 

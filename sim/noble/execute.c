@@ -41,9 +41,10 @@
     #include <stdio.h>
 #endif
 
+#ifdef EXECUTE_THREADED
 
-#define MAX_EXECUTION_THREAD_SIZE 3
-#define EXECUTION_QUEUE_SIZE      32
+#define MAX_EXECUTION_THREAD_SIZE 8
+#define EXECUTION_QUEUE_SIZE      (32*1024)
 
 typedef enum
 {
@@ -86,14 +87,23 @@ static int               written = 0, read = 0;
     static int           greatest_delta = 0;
 #endif
 
+#endif
+
 void execute_set_periodic(execute_periodic * function)
 {
+#ifndef EXECUTE_THREADED
+    function();
+#else
     periodic_function = function;
+    start_cycle = 1;
+#endif
 }
 
 void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
 {
-    
+#ifndef EXECUTE_THREADED
+    function(general_data,read_data,write_data);
+#else
     queue[written].function = function;
     queue[written].general_data = general_data;
     queue[written].read_data = read_data;
@@ -116,17 +126,25 @@ void execute_add(execute_function * function, void * general_data, void * read_d
     }
     print_count++;
 #endif
+#endif
 }
 
 void execute_start(void)
 {
+#ifdef EXECUTE_THREADED
     start_cycle = 1;
+    printf("Cycle Start\n");
+#endif
 }
 
 void execute_quit(void)
 {
+#ifdef EXECUTE_THREADED
     global_cycle = 0;
+#endif
 }
+
+#ifdef EXECUTE_THREADED
 
 static void * execute_thread(void * id)
 {
@@ -145,9 +163,11 @@ static void * execute_thread(void * id)
     }while (global_cycle);
     pthread_exit(NULL);
 }
+#endif
 
 void execute_main_loop(void)
 {
+#ifdef    EXECUTE_THREADED
     int loop = 0;
     
     while (loop < MAX_EXECUTION_THREAD_SIZE)
@@ -196,5 +216,5 @@ void execute_main_loop(void)
             start_cycle = 0;
         }
     }while (global_cycle && execution_cycle);
-    
+#endif
 }

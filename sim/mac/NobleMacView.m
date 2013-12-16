@@ -105,6 +105,10 @@
     
     if (index == 0L) return;
     
+    do{
+    }while (shared_draw(fIdentification) == 0);
+    
+    
     [[self openGLContext] makeCurrentContext];
 
 #ifndef GRAPHLESS_GUI

@@ -1683,13 +1683,31 @@ void  draw_window(n_int dim_x, n_int dim_y)
     terrain_dim_y = dim_y;
 }
 
-void  draw_cycle(void)
+n_int   what_draw[2] = {1, 1};
+
+static void draw_all(void)
+{
+    what_draw[0] = 1;
+    what_draw[1] = 1;
+}
+
+n_int draw_ready(n_int identifier)
+{
+    if (what_draw[identifier])
+    {
+        what_draw[identifier] = 0;
+        return 1;
+    }
+    return 0;
+}
+
+n_int  draw_cycle(void)
 {
     noble_simulation * local_sim = sim_sim();
     n_vect2            local_vect;
     
-    if (sim_new()) return;
-    if (check_about) return;
+    if (sim_new()) return 0;
+    if (check_about) return 0;
     
     local_vect.x = terrain_dim_x;
     local_vect.y = terrain_dim_y;
@@ -1720,4 +1738,7 @@ void  draw_cycle(void)
         draw_weather(local_sim->land); /* 10 */
     }
 #endif
+    
+    draw_all();
+    return 0;
 }

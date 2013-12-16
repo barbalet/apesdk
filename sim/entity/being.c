@@ -560,8 +560,8 @@ void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn b
     {
         noble_being * output = &(sim->beings[loop]);
         if (output != being_not)
-        {
-            ((execute_function*)bf_func)((void*)sim, (void*)output, data);
+        {            
+            execute_add(((execute_function*)bf_func), (void*)sim, (void*)output, data);
         }
         loop++;
     }
@@ -2670,26 +2670,12 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     if (tmp_speed < loc_s) loc_s--;
     if (tmp_speed < loc_s) loc_s--;
 
-    /** Create a wander based on the brain value */
     if ((local->goal[0]==GOAL_NONE) &&
         (nearest.opposite_sex == 0L) &&
         (nearest.same_sex == 0L) &&
             (being_random(local) < 1000 + 3600*GENE_STAGGER(genetics)))
     {
-        n_byte * local_brain = being_brain(local);
-        n_int	 wander = 0;
-
-        if (local_brain != 0L)
-        {
-            wander =
-                (math_spread_byte(local_brain[BRAIN_OFFSET(22+(15*32)+(15*32*32))]>>4)) -
-                (math_spread_byte(local_brain[BRAIN_OFFSET(11+(15*32)+(15*32*32))]>>4));
-        }
-        else
-        {
-            wander = math_spread_byte(being_random(local) & 7);
-        }
-
+        n_int	 wander = math_spread_byte(being_random(local) & 7);
         being_wander(local, wander);
     }
 
@@ -3360,7 +3346,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 }
 
 
-static void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_int	     local_e = being_energy(local_being);
     n_genetics  *genetics = being_genetics(local_being);
@@ -3485,27 +3471,16 @@ static void being_tidy_loop(noble_simulation * local_sim, noble_being * local_be
     being_set_energy(local_being, local_e);
 }
 
-static void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data)
+void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data)
 {
     value->honor = (n_byte)(((n_int)value->honor*220)/255);
-}
-
-void being_tidy(noble_simulation * local_sim)
-{
-    n_int       max_honor = 0;
-    being_loop(local_sim, 0L, being_tidy_loop, &max_honor);
-    /** normalize honor values */
-    if (max_honor)
-    {
-        being_loop(local_sim, 0L, being_recalibrate_honor_loop, 0L);
-    }
 }
 
 n_int being_remove_internal = 0;
 n_int being_remove_external = 0;
 
 
-static void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data)
+void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     if (being_energy(local_being) == BEING_DEAD)
     {
@@ -3516,15 +3491,7 @@ static void being_remove_loop1(noble_simulation * local_sim, noble_being * local
     }
 }
 
-
-typedef struct{
-    noble_being * being_count;
-    noble_being * reference;
-    n_int         selected_died;
-    n_uint        count;
-}being_remove_loop2_struct;
-
-static void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data)
+void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data)
 {
     being_remove_loop2_struct * brls = (being_remove_loop2_struct *)data;
     if (being_energy(local) != BEING_DEAD)
@@ -3545,29 +3512,29 @@ static void being_remove_loop2(noble_simulation * local_sim, noble_being * local
     }
 }
 
-
-void being_remove(noble_simulation * local_sim)
+being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim)
 {
-    being_remove_loop2_struct brls;
+    being_remove_loop2_struct * brls = (being_remove_loop2_struct *)io_new(sizeof(being_remove_loop2_struct));
     
-    brls.reference = local_sim->select;
-    brls.being_count = local_sim->beings;
-    brls.selected_died = 0;
-    brls.count = 0;
-
+    brls->reference = local_sim->select;
+    brls->being_count = local_sim->beings;
+    brls->selected_died = 0;
+    brls->count = 0;
+    
     if (being_remove_external)
-        do {}
-        while(being_remove_external);
-
-    being_remove_internal = 1;
-
-    being_loop(local_sim, 0L, being_remove_loop1, 0L);
-    being_loop(local_sim, 0L, being_remove_loop2, &brls);
+    do {}
+    while(being_remove_external);
     
-    local_sim->num = brls.count;
-    if (brls.selected_died)
+    being_remove_internal = 1;
+    return brls;
+}
+
+void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct ** brls)
+{
+    local_sim->num = (*brls)->count;
+    if ((*brls)->selected_died)
     {
-        if (brls.count)
+        if ((*brls)->count)
         {
             sim_set_select(local_sim->beings);
         }
@@ -3577,12 +3544,14 @@ void being_remove(noble_simulation * local_sim)
         }
     }
     
-    if (brls.count == 0)
+    if ((*brls)->count == 0)
     {
         (void)SHOW_ERROR("No Apes remain start new run");
     }
     
     being_remove_internal = 0;
+    io_free((void **)brls);
 }
+
 
 

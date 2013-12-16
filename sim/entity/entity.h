@@ -282,8 +282,6 @@ void social_graph_link_name(
     noble_being * local_being,
     n_int social_graph_index,
     n_byte met, n_string name);
-void sim_social(noble_simulation * local);
-
 
 n_int episodic_first_person_memories_percent(
     noble_simulation * local_sim,
@@ -308,7 +306,6 @@ void brain_dialogue(
 void brain_cycle(n_byte * local, n_byte2 * constants);
 noble_being * being_from_name(noble_simulation * sim, n_string name);
 
-void being_tidy(noble_simulation * local_sim);
 void being_remove(noble_simulation * local_sim);
 
 void brain_three_byte_command(n_string string, n_byte * response);
@@ -334,5 +331,29 @@ void          speak_out(n_string filename, n_string paragraph);
 void social_conception(noble_being * female,
                        noble_being * male,
                        noble_simulation * sim);
+
+void social_initial_loop(noble_simulation * local, noble_being * local_being, void * data);
+
+void social_secondary_loop(noble_simulation * local, noble_being * local_being, void * data);
+
+void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data);
+
+void being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data);
+
+
+void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data);
+
+typedef struct{
+    noble_being * being_count;
+    noble_being * reference;
+    n_int         selected_died;
+    n_uint        count;
+}being_remove_loop2_struct;
+
+void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data);
+
+being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim);
+
+void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct ** brls);
 
 #endif /* NOBLEAPE_ENTITY_H */

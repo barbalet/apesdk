@@ -49,6 +49,9 @@
 
 #undef   DEBUG_NON_FILE_HANDLE    /* Stops there being a file handle for debug output */
 
+#undef  EXECUTE_THREADED
+#undef  EXECUTE_DEBUG
+
 #ifdef COMMAND_LINE_EXPLICIT
 
 #define  NOBLE_APE_ASSERT
