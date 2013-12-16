@@ -37,14 +37,9 @@
 
 #include "noble.h"
 
-#ifdef EXECUTE_DEBUG
-    #include <stdio.h>
-#endif
-
 #ifdef EXECUTE_THREADED
 
-#define MAX_EXECUTION_THREAD_SIZE 1
-#define EXECUTION_QUEUE_SIZE      (32*1024)
+#define MAX_EXECUTION_THREAD_SIZE 4
 
 typedef enum
 {
@@ -71,23 +66,11 @@ typedef struct
 static int global_cycle = 1;
 static int execution_cycle = 1;
 
-static int start_cycle = 0;
-
-static pthread_t         thread_execution = {0L};
-
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
-static execute_object    queue[EXECUTION_QUEUE_SIZE] = {0L};
 
 static execute_periodic * periodic_function = 0L;
 
-static int               written = 0, read = 0;
-
-#ifdef EXECUTE_DEBUG
-    static int           written_actual = 0, read_actual = 0;
-    static int           print_count = 0;
-    static int           greatest_delta = 0;
-#endif
 
 #endif
 
@@ -105,39 +88,28 @@ void execute_add(execute_function * function, void * general_data, void * read_d
 #ifndef EXECUTE_THREADED
     function(general_data,read_data,write_data);
 #else
-    queue[written].function = function;
-    queue[written].general_data = general_data;
-    queue[written].read_data = read_data;
-    queue[written].write_data = write_data;
     
-    written = (written + 1) & (EXECUTION_QUEUE_SIZE-1);
-    
-    start_cycle = 1;
-    
-#ifdef EXECUTE_DEBUG
-    written_actual++;
-    {
-        int delta = (written_actual - read_actual);
-        if (delta > greatest_delta)
+    do{
+        n_int loop = 0;
+        while (loop < MAX_EXECUTION_THREAD_SIZE)
         {
-            greatest_delta = delta;
+            if (execution[loop].state == ES_DONE)
+            {
+                execute_object * new_object = io_new(sizeof(execute_object));
+                new_object->function = function;
+                new_object->general_data = general_data;
+                new_object->read_data = read_data;
+                new_object->write_data = write_data;
+                    
+                execution[loop].executed = new_object;
+                execution[loop].state = ES_WAITING;
+                
+                return;
+            }
+            
+            loop++;
         }
-    }
-    if ((print_count & 255) == 0)
-    {
-        printf("delta %d\n", greatest_delta);
-        greatest_delta = 0;
-    }
-    print_count++;
-#endif
-#endif
-}
-
-void execute_start(void)
-{
-#ifdef EXECUTE_THREADED
-    start_cycle = 1;
-    printf("Cycle Start\n");
+    }while (global_cycle && execution_cycle);
 #endif
 }
 
@@ -150,6 +122,8 @@ void execute_quit(void)
 
 #ifdef EXECUTE_THREADED
 
+static n_int periodic_entry = 1;
+
 static void * execute_thread(void * id)
 {
     execution_thread * value = id;
@@ -157,78 +131,48 @@ static void * execute_thread(void * id)
         if (value->state == ES_WAITING)
         {
             execute_object * object = value->executed;
+            n_int            loop = 0;
+            n_int            count = 0;
             value->state = ES_STARTED;
+    
             if (object->function(object->general_data, object->read_data, object->write_data) == -1)
             {
                 execute_quit();
             }
             value->state = ES_DONE;
+            io_free((void **)&object);
+            
+            while (loop < MAX_EXECUTION_THREAD_SIZE)
+            {
+                if (execution[loop].state == ES_DONE)
+                {
+                    count ++;
+                }
+                loop++;
+            }
+            if (count == MAX_EXECUTION_THREAD_SIZE && periodic_entry && periodic_function)
+            {
+                periodic_entry = 0;
+                periodic_function();
+                execute_set_periodic(0L);
+                periodic_entry = 1;
+
+            }
         }
     }while (global_cycle);
     pthread_exit(NULL);
 }
 #endif
 
-#ifdef    EXECUTE_THREADED
 
-static void * execute_allocation_thread(void * id)
+void execute_main_loop(void)
 {
+#ifdef    EXECUTE_THREADED
     int loop = 0;
-    
     while (loop < MAX_EXECUTION_THREAD_SIZE)
     {
         pthread_create(&thread[loop], NULL, execute_thread, &execution[loop]);
         loop++;
     }
-    
-    do{
-        int idle_count = 0;
-        loop = 0;
-        if (start_cycle)
-        {
-            while (loop < MAX_EXECUTION_THREAD_SIZE)
-            {
-                if (execution[loop].state == ES_DONE)
-                {
-                    if (written == read)
-                    {
-                        idle_count++;
-                    }
-                    else
-                    {
-                        execution[loop].executed = &queue[read];
-                        execution[loop].state = ES_WAITING;
-                        read = (read + 1) & (EXECUTION_QUEUE_SIZE-1);
-#ifdef EXECUTE_DEBUG
-                        read_actual++;
-#endif
-                    }
-                }
-                
-                loop++;
-            }
-            
-            if (idle_count == MAX_EXECUTION_THREAD_SIZE)
-            {
-                if (periodic_function)
-                {
-                    if (periodic_function() == -1)
-                    {
-                        execution_cycle = 0;
-                    }
-                }
-                start_cycle = 0;
-            }
-        }
-    }while (global_cycle && execution_cycle);
-    pthread_exit(NULL);
-}
-
-#endif
-
-void execute_main_loop(void)
-{
-#ifdef    EXECUTE_THREADED
-    pthread_create(&thread_execution, NULL, execute_allocation_thread, 0L);
 #endif
 }
