@@ -43,7 +43,7 @@
 
 #ifdef EXECUTE_THREADED
 
-#define MAX_EXECUTION_THREAD_SIZE 8
+#define MAX_EXECUTION_THREAD_SIZE 1
 #define EXECUTION_QUEUE_SIZE      (32*1024)
 
 typedef enum
@@ -73,6 +73,8 @@ static int execution_cycle = 1;
 
 static int start_cycle = 0;
 
+static pthread_t         thread_execution = {0L};
+
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execute_object    queue[EXECUTION_QUEUE_SIZE] = {0L};
@@ -95,7 +97,6 @@ void execute_set_periodic(execute_periodic * function)
     function();
 #else
     periodic_function = function;
-    start_cycle = 1;
 #endif
 }
 
@@ -110,6 +111,9 @@ void execute_add(execute_function * function, void * general_data, void * read_d
     queue[written].write_data = write_data;
     
     written = (written + 1) & (EXECUTION_QUEUE_SIZE-1);
+    
+    start_cycle = 1;
+    
 #ifdef EXECUTE_DEBUG
     written_actual++;
     {
@@ -165,9 +169,10 @@ static void * execute_thread(void * id)
 }
 #endif
 
-void execute_main_loop(void)
-{
 #ifdef    EXECUTE_THREADED
+
+static void * execute_allocation_thread(void * id)
+{
     int loop = 0;
     
     while (loop < MAX_EXECUTION_THREAD_SIZE)
@@ -179,42 +184,51 @@ void execute_main_loop(void)
     do{
         int idle_count = 0;
         loop = 0;
-        
-        if (start_cycle == 0) break;
-        
-        while (loop < MAX_EXECUTION_THREAD_SIZE)
+        if (start_cycle)
         {
-            if (execution[loop].state == ES_DONE)
+            while (loop < MAX_EXECUTION_THREAD_SIZE)
             {
-                if (written == read)
+                if (execution[loop].state == ES_DONE)
                 {
-                    idle_count++;
-                }
-                else
-                {
-                    execution[loop].executed = &queue[read];
-                    execution[loop].state = ES_WAITING;
-                    read = (read + 1) & (EXECUTION_QUEUE_SIZE-1);
+                    if (written == read)
+                    {
+                        idle_count++;
+                    }
+                    else
+                    {
+                        execution[loop].executed = &queue[read];
+                        execution[loop].state = ES_WAITING;
+                        read = (read + 1) & (EXECUTION_QUEUE_SIZE-1);
 #ifdef EXECUTE_DEBUG
-                    read_actual++;
+                        read_actual++;
 #endif
+                    }
                 }
+                
+                loop++;
             }
             
-            loop++;
-        }
-        
-        if (idle_count == MAX_EXECUTION_THREAD_SIZE)
-        {
-            if (periodic_function)
+            if (idle_count == MAX_EXECUTION_THREAD_SIZE)
             {
-                if (periodic_function() == -1)
+                if (periodic_function)
                 {
-                    execution_cycle = 0;
+                    if (periodic_function() == -1)
+                    {
+                        execution_cycle = 0;
+                    }
                 }
+                start_cycle = 0;
             }
-            start_cycle = 0;
         }
     }while (global_cycle && execution_cycle);
+    pthread_exit(NULL);
+}
+
+#endif
+
+void execute_main_loop(void)
+{
+#ifdef    EXECUTE_THREADED
+    pthread_create(&thread_execution, NULL, execute_allocation_thread, 0L);
 #endif
 }
