@@ -34,12 +34,13 @@
  ****************************************************************/
 
 #include <pthread.h>
+#include <time.h>
 
 #include "noble.h"
 
 #ifdef EXECUTE_THREADED
 
-#define MAX_EXECUTION_THREAD_SIZE 4
+#define MAX_EXECUTION_THREAD_SIZE 8
 
 typedef enum
 {
@@ -64,31 +65,26 @@ typedef struct
 } execution_thread;
 
 static int global_cycle = 1;
-static int execution_cycle = 1;
-
+static int execution_cycle = 0;
+static int threads_started = 0;
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
 
-static execute_periodic * periodic_function = 0L;
 
 
 #endif
-
-void execute_set_periodic(execute_periodic * function)
-{
-#ifndef EXECUTE_THREADED
-    function();
-#else
-    periodic_function = function;
-#endif
-}
 
 void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
 {
 #ifndef EXECUTE_THREADED
     function(general_data,read_data,write_data);
 #else
+    if (threads_started == 0)
+    {
+        execute_main_loop();
+    }
     
+    execution_cycle = 1;
     do{
         n_int loop = 0;
         while (loop < MAX_EXECUTION_THREAD_SIZE)
@@ -109,8 +105,16 @@ void execute_add(execute_function * function, void * general_data, void * read_d
             
             loop++;
         }
-    }while (global_cycle && execution_cycle);
+    }while (global_cycle);
 #endif
+}
+
+n_int execute_done(void)
+{
+#ifdef EXECUTE_THREADED
+    return execution_cycle;
+#endif
+    return 1;
 }
 
 void execute_quit(void)
@@ -122,17 +126,23 @@ void execute_quit(void)
 
 #ifdef EXECUTE_THREADED
 
-static n_int periodic_entry = 1;
-
 static void * execute_thread(void * id)
 {
     execution_thread * value = id;
     do{
+        n_int            loop = 0;
+        n_int            all_idle = 1;
+        if (value->state != ES_WAITING)
+        {
+            struct timespec tim, tim2;
+            tim.tv_sec = 0;
+            tim.tv_nsec = 6;
+            (void)nanosleep(&tim , &tim2);
+        }
+        
         if (value->state == ES_WAITING)
         {
             execute_object * object = value->executed;
-            n_int            loop = 0;
-            n_int            count = 0;
             value->state = ES_STARTED;
     
             if (object->function(object->general_data, object->read_data, object->write_data) == -1)
@@ -141,22 +151,17 @@ static void * execute_thread(void * id)
             }
             value->state = ES_DONE;
             io_free((void **)&object);
-            
-            while (loop < MAX_EXECUTION_THREAD_SIZE)
+            while ((loop < MAX_EXECUTION_THREAD_SIZE) && all_idle)
             {
-                if (execution[loop].state == ES_DONE)
+                if (execution[loop].state != ES_DONE)
                 {
-                    count ++;
+                    all_idle = 0;
                 }
                 loop++;
             }
-            if (count == MAX_EXECUTION_THREAD_SIZE && periodic_entry && periodic_function)
+            if (all_idle)
             {
-                periodic_entry = 0;
-                periodic_function();
-                execute_set_periodic(0L);
-                periodic_entry = 1;
-
+                execution_cycle = 0;
             }
         }
     }while (global_cycle);
@@ -174,5 +179,6 @@ void execute_main_loop(void)
         pthread_create(&thread[loop], NULL, execute_thread, &execution[loop]);
         loop++;
     }
+    threads_started = 1;
 #endif
 }

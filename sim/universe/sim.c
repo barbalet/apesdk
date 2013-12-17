@@ -421,61 +421,6 @@ static void sim_time(noble_simulation * local_sim)
     }
 }
 
-static n_int  sim_social_delta()
-{
-    printf("sim_social_delta\n");
-
-    being_loop(&sim, 0L, social_secondary_loop, 0L);
-    sim_time(&sim);
-    
-    if (cycle_conclude)
-    {
-        execute_set_periodic(cycle_conclude);
-    }
-    return 0;
-}
-
-static n_int  sim_social(void)
-{
-    printf("sim_social\n");
-
-    being_loop(&sim, 0L, social_initial_loop, 0L);
-    execute_set_periodic(&sim_social_delta);
-    return 0;
-}
-
-static n_int  sim_remove(void)
-{
-    being_remove_loop2_struct * brls = being_remove_initial(&sim);
-    
-    printf("sim_remove\n");
-    
-    being_loop(&sim, 0L, being_remove_loop1, 0L);
-    being_loop(&sim, 0L, being_remove_loop2, brls);
-    
-    being_remove_final(&sim, &brls);
-    
-    execute_set_periodic(&sim_social);
-    return 0;
-}
-
-
-static n_int  sim_honor(void)
-{
-    n_int       max_honor = 0;
-    
-    printf("sim_honor\n");
-    
-    being_loop(&sim, 0L, being_tidy_loop, &max_honor);
-    
-    if (max_honor)
-    {
-        being_loop(&sim, 0L, being_recalibrate_honor_loop, 0L);
-    }
-    execute_set_periodic(&sim_remove);
-    return 0;
-}
-
 void sim_cycle(void)
 {
     land_cycle(sim.land);
@@ -484,16 +429,36 @@ void sim_cycle(void)
 #endif
     
     being_loop(&sim, 0L, sim_being_loop, 0L);
-    printf("sim_being_loop\n");
 
     being_loop(&sim, 0L, sim_brain_loop, 0L);
-    printf("sim_brain_loop\n");
     
 #ifdef BRAINCODE_ON
     
     being_loop(&sim, 0L, sim_brain_dialogue_loop, 0L);
 #endif
-    execute_set_periodic(&sim_honor);
+    {
+        n_int       max_honor = 0;
+        
+        
+        being_loop(&sim, 0L, being_tidy_loop, &max_honor);
+        
+        if (max_honor)
+        {
+            being_loop(&sim, 0L, being_recalibrate_honor_loop, 0L);
+        }
+    }
+    {
+        being_remove_loop2_struct * brls = being_remove_initial(&sim);
+        
+        being_loop(&sim, 0L, being_remove_loop1, 0L);
+        being_loop_no_thread(&sim, 0L, being_remove_loop2, brls);
+        
+        being_remove_final(&sim, &brls);
+    }
+    being_loop(&sim, 0L, social_initial_loop, 0L);
+    
+    being_loop(&sim, 0L, social_secondary_loop, 0L);
+    sim_time(&sim);
 }
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))

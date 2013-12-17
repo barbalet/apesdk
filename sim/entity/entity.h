@@ -248,6 +248,7 @@ n_byte * being_braincode_internal(noble_being * value);
 
 typedef void (being_loop_fn)(noble_simulation * sim, noble_being * actual, void * data);
 
+void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data);
 void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn bl_func, void * data);
 
 void   metabolism_vascular_description(n_int index, n_string description);

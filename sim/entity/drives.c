@@ -108,7 +108,7 @@ static void drives_sociability(
     drives_sociability_data dsd;
     dsd.beings_in_vacinity = 0;
     dsd.being = local;
-    being_loop(sim, local, drives_sociability_loop, &dsd);
+    being_loop_no_thread(sim, local, drives_sociability_loop, &dsd);
     
     /** if the being is not overcrowded and its social drive is not saturated */
     if (dsd.beings_in_vacinity < local->crowding + SOCIAL_TOLLERANCE)

@@ -573,13 +573,14 @@ extern n_int draw_error(n_constant_string error_text);
 typedef n_int (execute_function)(void * general_data, void * read_data, void * write_data);
 typedef n_int (execute_periodic)(void);
 
-void  execute_set_periodic(execute_periodic * function);
-
 void  execute_add(execute_function function, void * general_data, void * read_data, void * write_data);
 
 void  execute_main_loop(void);
 
 void  execute_quit(void);
+
+n_int execute_done(void);
+
 void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
 void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
 void  vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);

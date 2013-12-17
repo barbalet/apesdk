@@ -712,9 +712,15 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         /* repeat until the right-most row is reached */
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
+            /*execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)&dtss, (void*)&scrx);*/
             draw_terrain_scan(buf_offscr, &dtss, &scrx);
             scrx++;               /* next column */
         }
+        /*
+        do
+        {
+        }while (execute_done());
+        */
     }
 }
 
@@ -1642,7 +1648,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
 
     if (local_sim->select)
     {
-        being_loop(local_sim, 0L, draw_apes_loop, &local_col);
+        being_loop_no_thread(local_sim, 0L, draw_apes_loop, &local_col);
     }
 }
 
@@ -1683,24 +1689,6 @@ void  draw_window(n_int dim_x, n_int dim_y)
     terrain_dim_y = dim_y;
 }
 
-n_int   what_draw[2] = {1, 1};
-
-static void draw_all(void)
-{
-    what_draw[0] = 1;
-    what_draw[1] = 1;
-}
-
-n_int draw_ready(n_int identifier)
-{
-    if (what_draw[identifier])
-    {
-        what_draw[identifier] = 0;
-        return 1;
-    }
-    return 0;
-}
-
 n_int  draw_cycle(void)
 {
     noble_simulation * local_sim = sim_sim();
@@ -1738,7 +1726,5 @@ n_int  draw_cycle(void)
         draw_weather(local_sim->land); /* 10 */
     }
 #endif
-    
-    draw_all();
     return 0;
 }

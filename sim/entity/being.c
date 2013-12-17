@@ -553,8 +553,23 @@ void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum in
     GET_A(value,ATTENTION_BODY) = location;
 }
 
+void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
+{
+    n_uint loop = 0;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        if (output != being_not)
+        {
+            bf_func(sim, output, data);
+        }
+        loop++;
+    }
+}
+
 void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
 {
+#ifdef EXECUTE_THREADED
     n_uint loop = 0;
     while (loop < sim->num)
     {
@@ -565,6 +580,12 @@ void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn b
         }
         loop++;
     }
+    do
+    {
+    }while (execute_done());
+#else
+    being_loop_no_thread(sim, being_not, bf_func, data);
+#endif
 }
 
 /**
@@ -1288,7 +1309,7 @@ noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_by
     bfns.first_gender = first_gender;
     bfns.family = family;
     bfns.local = 0L;
-    being_loop(sim, 0L, being_find_name_loop, &bfns);
+    being_loop_no_thread(sim, 0L, being_find_name_loop, &bfns);
     return bfns.local;
 }
 
@@ -2220,7 +2241,7 @@ static void being_follow(noble_simulation * sim,
     /** is a mate in view? */
     if (local->goal[0]==GOAL_MATE)
     {
-        being_loop(sim, local, being_follow_loop1, nearest);
+        being_loop_no_thread(sim, local, being_follow_loop1, nearest);
         if (nearest->opposite_sex != 0L)
         {
             return;
@@ -2240,7 +2261,7 @@ static void being_follow(noble_simulation * sim,
         (local_social_graph[social_graph_index].entity_type == ENTITY_BEING) &&
         (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, social_graph_index)))
     {
-        being_loop(sim, local, being_follow_loop2, nearest);
+        being_loop_no_thread(sim, local, being_follow_loop2, nearest);
     }
 }
 
@@ -2287,7 +2308,7 @@ static void being_listen(noble_simulation * sim, noble_being * local)
     {
         local->shout[SHOUT_CTR]--;
     }
-    being_loop(sim, local, being_listen_loop, &bls);
+    being_loop_no_thread(sim, local, being_listen_loop, &bls);
     
 }
 
@@ -2346,7 +2367,7 @@ static void being_closest(noble_simulation * sim,
     nearest->same_sex_distance = 0xffffffff;
     nearest->opposite_sex = 0L;
     nearest->same_sex = 0L;
-    being_loop(sim, local, being_closest_loop, nearest);
+    being_loop_no_thread(sim, local, being_closest_loop, nearest);
 }
 
 /**
