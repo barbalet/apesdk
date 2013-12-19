@@ -45,6 +45,7 @@
 
 /* the weather/time of day icons hard coded */
 
+#undef NON_THREADED_DRAW
 
 #ifndef GRAPHLESS_GUI
 
@@ -652,6 +653,7 @@ static void draw_terrain_scan(void * screen, void * structure, void * x_location
         big_x -= vals2;
         big_y -= valc2;
     }
+    io_free(&x_location);
 }
 
 static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dimensions)
@@ -672,8 +674,6 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         const n_int    lowest_y = ((dimensions->y + 256) * dimensions->y)/256;
         noble_being * loc_being = local_sim->select;
         const n_int turn = being_facing(loc_being);
-
-        
         draw_terrain_scan_struct dtss;
         
         /* start at the left-most row */
@@ -712,15 +712,12 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         /* repeat until the right-most row is reached */
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
-            /*execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)&dtss, (void*)&scrx);*/
-            draw_terrain_scan(buf_offscr, &dtss, &scrx);
+            n_int * number = io_new(sizeof(n_int));
+            number[0] = scrx;
+            execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)&dtss, (void*)number);
             scrx++;               /* next column */
         }
-        /*
-        do
-        {
-        }while (execute_done());
-        */
+        execute_complete_added();
     }
 }
 
@@ -1701,8 +1698,11 @@ n_int  draw_cycle(void)
 
     draw_apes(local_sim, 0);    /* hi res */
     draw_apes(local_sim, 1);    /* lo res */
-    
+#ifdef NON_THREADED_DRAW
+    draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
+#else
     draw_terrain_threadable(local_sim, &local_vect);
+#endif
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */
 

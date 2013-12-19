@@ -580,9 +580,7 @@ void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn b
         }
         loop++;
     }
-    do
-    {
-    }while (execute_done());
+    execute_complete_added();
 #else
     being_loop_no_thread(sim, being_not, bf_func, data);
 #endif

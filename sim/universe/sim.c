@@ -402,13 +402,6 @@ void sim_being_loop(noble_simulation * local_sim, noble_being * local_being, voi
     }
 }
 
-static execute_periodic * cycle_conclude = 0L;
-
-void sim_conclude_cyle(execute_periodic * link)
-{
-    cycle_conclude = link;
-}
-
 static void sim_time(noble_simulation * local_sim)
 {
     local_sim->count_cycles += local_sim->num;
@@ -542,7 +535,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         {
             return 0L;
         }
-        execute_main_loop();
+        execute_init();
     }
     if ((kind != KIND_LOAD_FILE) && (kind != KIND_MEMORY_SETUP))
     {
@@ -596,7 +589,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 void sim_close(void)
 {
     io_console_quit();
-    execute_quit();
+    execute_close();
 #ifndef _WIN32
     sim_console_clean_up();
 #endif

@@ -70,8 +70,6 @@ static int threads_started = 0;
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
 
-
-
 #endif
 
 void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
@@ -81,7 +79,7 @@ void execute_add(execute_function * function, void * general_data, void * read_d
 #else
     if (threads_started == 0)
     {
-        execute_main_loop();
+        execute_init();
     }
     
     execution_cycle = 1;
@@ -109,15 +107,16 @@ void execute_add(execute_function * function, void * general_data, void * read_d
 #endif
 }
 
-n_int execute_done(void)
+void execute_complete_added(void)
 {
 #ifdef EXECUTE_THREADED
-    return execution_cycle;
+    do
+    {
+    }while (execution_cycle);
 #endif
-    return 1;
 }
 
-void execute_quit(void)
+void execute_close(void)
 {
 #ifdef EXECUTE_THREADED
     global_cycle = 0;
@@ -134,6 +133,9 @@ static void * execute_thread(void * id)
         n_int            all_idle = 1;
         if (value->state != ES_WAITING)
         {
+            /* In time cycle testing this may be seen to be wasted time
+               the problem however is the execution is not available
+             */
             struct timespec tim, tim2;
             tim.tv_sec = 0;
             tim.tv_nsec = 6;
@@ -147,7 +149,7 @@ static void * execute_thread(void * id)
     
             if (object->function(object->general_data, object->read_data, object->write_data) == -1)
             {
-                execute_quit();
+                execute_close();
             }
             value->state = ES_DONE;
             io_free((void **)&object);
@@ -170,7 +172,7 @@ static void * execute_thread(void * id)
 #endif
 
 
-void execute_main_loop(void)
+void execute_init(void)
 {
 #ifdef    EXECUTE_THREADED
     int loop = 0;

@@ -343,8 +343,8 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     {
         sim_realtime(ticks);
         draw_window(dim_x, dim_y);
-        
-        if ((io_command_line_execution() != 1) || (toggle_pause))
+                
+        if ((io_command_line_execution() != 1) && (!toggle_pause))
         {
             sim_cycle();
         }
