@@ -1293,7 +1293,7 @@ static void draw_weather(n_land * local_land)
 
 static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
 {
-    n_string_block  cycles_per_sec = {' ', ' ', ' ', ' ', ' ', 'X', '.', 'X', ' ',
+    n_string_block  cycles_per_sec = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
                                       'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
                                      };
     n_uint	lp = 0, division = 1000000;
@@ -1309,13 +1309,12 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
             {
                 cycles_per_sec[lp] = (n_byte)('0');
             }
-
         }
         division /= 10;
         lp++;
     }
     cycles_per_sec[5] = ('0' + ((count / 10) % 10));
-    cycles_per_sec[7] = ('0' + ((count / 1) % 10));
+    cycles_per_sec[6] = ('0' + ((count / 1) % 10));
     draw_string(cycles_per_sec, terrain_dim_x - 110, 142, local_mono);
 }
 

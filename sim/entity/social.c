@@ -87,6 +87,7 @@
 
 #define GENE_LATENT_ENERGY_USE(gene)        GENE_VAL_REG(gene, 14, 3, 6, 10)
 
+#ifdef FEATURE_SET
 
 static void noble_feature_copy(noble_feature * to, noble_feature * from)
 {
@@ -101,8 +102,6 @@ static void noble_feature_set(noble_feature * to, n_byte feature_type, n_byte2 f
     to->value =  (n_byte2)feature_value;
     to->frequency = (n_byte2)1;
 }
-
-#ifdef FEATURE_SET
 
 /**
  * @brief Returns the array index of a given feature type within a set

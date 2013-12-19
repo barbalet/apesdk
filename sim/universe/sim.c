@@ -413,7 +413,7 @@ static void sim_time(noble_simulation * local_sim)
 {
     local_sim->count_cycles += local_sim->num;
     
-    if ((local_sim->real_time - local_sim->last_time) > 600)
+    if ((local_sim->real_time - local_sim->last_time) > 60)
     {
         local_sim->last_time = local_sim->real_time;
         local_sim->delta_cycles = local_sim->count_cycles;

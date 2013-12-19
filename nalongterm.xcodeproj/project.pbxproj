@@ -28,6 +28,7 @@
 		4A4E39AC17D7573400780335 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E399517D7573400780335 /* console.c */; };
 		4A4E39AD17D7573400780335 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E399617D7573400780335 /* file.c */; };
 		4A4E39AE17D7573400780335 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E399717D7573400780335 /* sim.c */; };
+		5A7699731863747800EB57B0 /* execute.c in Sources */ = {isa = PBXBuildFile; fileRef = 5A7699721863747800EB57B0 /* execute.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -71,6 +72,7 @@
 		4A4E399717D7573400780335 /* sim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sim.c; sourceTree = "<group>"; };
 		4A4E399817D7573400780335 /* universe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe.h; sourceTree = "<group>"; };
 		4A4E399917D7573400780335 /* universe_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe_internal.h; sourceTree = "<group>"; };
+		5A7699721863747800EB57B0 /* execute.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = execute.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				4A4E398B17D7573400780335 /* audio.c */,
+				5A7699721863747800EB57B0 /* execute.c */,
 				4A4E398C17D7573400780335 /* interpret.c */,
 				4A4E398D17D7573400780335 /* io.c */,
 				4A4E398E17D7573400780335 /* land.c */,
@@ -224,6 +227,7 @@
 				4A4E39AC17D7573400780335 /* console.c in Sources */,
 				4A4E39A717D7573400780335 /* land.c in Sources */,
 				4A4E39AA17D7573400780335 /* parse.c in Sources */,
+				5A7699731863747800EB57B0 /* execute.c in Sources */,
 				4A4E39A217D7573400780335 /* speak.c in Sources */,
 				4A4E39A817D7573400780335 /* math.c in Sources */,
 				4A4E39AD17D7573400780335 /* file.c in Sources */,
