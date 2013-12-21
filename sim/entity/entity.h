@@ -58,7 +58,6 @@
 #undef	LARGE_SIM
 #define SOFT_BRAIN_ON
 
-
 #define EPISODIC_AFFECT_ZERO (16384)
 
 enum being_energy
@@ -86,7 +85,6 @@ enum GENEALOGY_FORMAT
     GENEALOGY_GEDCOM,
     GENEALOGY_FORMATS
 };
-
 
 /* if you change this you need to change the corresponding definitions in being_state_description */
 typedef enum

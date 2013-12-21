@@ -61,7 +61,6 @@ typedef struct
     noble_being  * same_sex;
 } being_nearest;
 
-
 void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);
 
 n_int food_eat(
@@ -83,13 +82,11 @@ n_int genetics_compare(n_genetics * genetics_a, n_genetics * genetics_b);
 void  genetics_set(n_genetics * genetics_a, n_genetics * n_genetics);
 void  genetics_zero(n_genetics * genetics_a);
 
-
 void metabolism_init(noble_being * local_being);
 void metabolism_cycle(noble_simulation * local_sim, noble_being * local_being);
 void metabolism_vascular_response(noble_simulation * local_sim, noble_being * local_being, n_int response);
 void metabolism_eat(noble_being * local_being, n_byte food_type);
 void metabolism_suckle(noble_simulation * sim,noble_being * child, noble_being * mother);
-
 
 void social_action(
     noble_simulation * sim,

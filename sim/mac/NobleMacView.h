@@ -47,12 +47,11 @@
 #ifdef ON_DISPLAY_UPDATE
     CVDisplayLinkRef displayLink;
 #else
-    NSTimer*       timerAnimation;
+    NSTimer*         timerAnimation;
 #endif
-    GLubyte        colorTable[256][3];
-    GLubyte        outputBuffer[2048*1536*3];
-    
-    n_byte          fIdentification;
+    GLubyte          colorTable[256][3];
+    GLubyte          outputBuffer[2048*1536*3];
+    n_byte           fIdentification;
 }
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;

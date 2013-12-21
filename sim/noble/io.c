@@ -277,7 +277,6 @@ n_int io_disk_read(n_file * local_file, n_string file_name)
     FILE * in_file = fopen(file_name,"rb");
 #else
     FILE * in_file = 0L;
-
     fopen_s(&in_file,file_name,"rb");
 #endif
     if (in_file == 0L)
@@ -768,7 +767,6 @@ n_int io_find(n_string s, n_string t)
 
  */
 
-
 n_int io_find(n_string check, n_int from, n_int max, n_string value_find, n_int value_find_length)
 {
     n_int  loop = from;
@@ -907,7 +905,6 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
             (commands_bytes[2] != 0) || (commands_bytes[3] != 0) ||
             (commands_bytes[4] != 0) || (commands_bytes[5] != 0))
     {
-
         commands_bytes = (n_byte *) commands[lp].characters;
 
         if (((commands_bytes[0] == found_text[0]) && (commands_bytes[1] == found_text[1])) &&
@@ -1044,7 +1041,6 @@ n_int	io_read_buff(n_file * fil, n_byte * data, const noble_file_entry * command
             }
             if (inclusion_number != com_inclusion)
                 return SHOW_ERROR("Wrong start in file");
-
 
             while (loop < com_number_of)
             {
@@ -1475,7 +1471,6 @@ void io_search_file_format(const noble_file_entry * format, n_string compare)
     while(print_file_format_exit == 0);
 }
 
-
 void io_audit_file(const noble_file_entry * format, n_byte section_to_audit)
 {
     n_uint      loop = 0;
@@ -1730,7 +1725,6 @@ n_int io_apescript_error(AE_ENUM value)
     n_int    loop = 0;
     AE_ENUM  local_enum;
     n_constant_string local_error;
-
     do
     {
         local_enum = apescript_errors[loop].enum_value;

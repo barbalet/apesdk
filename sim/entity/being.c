@@ -410,7 +410,6 @@ void being_wander(noble_being * value, n_int wander)
     value->direction_facing = (n_byte)((value->direction_facing + 256 + wander) & 255);
 }
 
-
 static void being_facing_init(noble_being * value)
 {
     value->direction_facing = (n_byte)(being_random(value) & 255);
@@ -632,8 +631,6 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
         
         local_z += being_pixel->start_z;
         
-        
-        
         if (local_z < WALK_ON_WATER(QUICK_LAND(being_pixel->land, px, py),being_pixel->land->tide_level))
         {
             return 1;
@@ -646,7 +643,6 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
 {
     n_vect2    start, delta, vector_facing;
 
-    
     /* TODO: Check for being awake - need a land and being based awake check */
     
     vect2_byte2(&start, being_location(local));
@@ -674,7 +670,6 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     {
         return 0;
     }
-
 
     /** move everything from being co-ordinates to map co-ordinates */
     start.x = APESPACE_TO_MAPSPACE(start.x);
@@ -814,7 +809,6 @@ n_byte being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly)
        The Noble Ape Simulation universe wraps around in all
        directions you need to calculate the line of site off the map too. */
     n_int	local_facing = ((being_facing(local))>>5);
-
 
     /*
            6
@@ -1153,7 +1147,6 @@ static void being_immune_response(noble_being * local)
 #endif
 }
 
-
 static n_uint being_genetic_count_zeros(n_genetics count)
 {
     n_uint loop = 0;
@@ -1350,7 +1343,6 @@ n_string being_body_inventory_description(n_int index)
 {
     return body_inventory_description[index];
 }
-
 
 const n_string relationship_description[RELATIONSHIPS] =
 {
@@ -1901,7 +1893,6 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
     n_land  * land  =   sim->land;
     n_int     local_energy = being_energy(local);
 
-
     if(local_energy == BEING_DEAD)
     {
         return FULLY_ASLEEP;
@@ -1947,7 +1938,6 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 static void being_brain_probe(noble_being * local)
 {
     n_byte * local_brain = being_brain(local);
-
     n_int    i = 0;
     n_int    count[NUMBER_BRAINPROBE_TYPES] = {0};
     
@@ -2003,7 +1993,6 @@ static void being_brain_probe(noble_being * local)
 }
 
 #endif
-
 
 /** stuff still goes on during sleep */
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
@@ -2061,7 +2050,6 @@ static void being_create_family_links(noble_being * mother,
     child_relation[3] = RELATIONSHIP_MATERNAL_GRANDMOTHER;
     child_relation[4] = RELATIONSHIP_PATERNAL_GRANDMOTHER;
     child_relation[5] = RELATIONSHIP_PATERNAL_GRANDMOTHER;
-
 
     /** grandparents */
     for (j = 0; j < 2; j++) /** maternal or paternal */
@@ -2263,13 +2251,11 @@ static void being_follow(noble_simulation * sim,
     }
 }
 
-
 typedef struct
 {
     n_int         max_shout_volume;
     noble_being * local;
 } being_listen_struct;
-
 
 static void being_listen_loop(noble_simulation * sim, noble_being * other, void * data)
 {
@@ -2309,7 +2295,6 @@ static void being_listen(noble_simulation * sim, noble_being * local)
     being_loop_no_thread(sim, local, being_listen_loop, &bls);
     
 }
-
 
 static void being_closest_loop(noble_simulation * sim, noble_being * test_being, void * data)
 {
@@ -2522,7 +2507,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 #endif
 
-
     if (awake != FULLY_ASLEEP)
     {
         loc_state |= BEING_STATE_AWAKE;
@@ -2534,7 +2518,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 
     {
-
         n_int   hungry = (loc_e < BEING_HUNGRY);
 
         if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING | BEING_STATE_MOVING)) == BEING_STATE_AWAKE)
@@ -2589,7 +2572,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
         /** bathing removes parasites */
         if (local->parasites > 0) local->parasites--;
-
     }
     else
     {
@@ -2710,7 +2692,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING)) == BEING_STATE_AWAKE)
     {
         n_uint conception_days = being_pregnant(local) ;
-
         if (conception_days > 0)
         {
             n_int gestation_days = conception_days + GESTATION_DAYS;
@@ -2888,7 +2869,6 @@ void being_init_braincode(noble_being * local,
 #ifdef RANDOM_INITIAL_BRAINCODE
                 being_braincode_internal(local)[ch] = math_random(local_random) & 255;
 #else
-                
                 being_random3(local);
                 being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
 #endif
@@ -2952,17 +2932,14 @@ void being_init_braincode(noble_being * local,
 }
 #endif
 
-
-
 /** Assign a unique name to the given being, based upon the given family names */
-
 static n_int being_set_unique_name(noble_being * beings,
                                    n_int number,
                                    noble_being * local_being,
                                    n_byte2   mother_family_name,
                                    n_byte2   father_family_name)
 {
-    n_int    i;
+    n_int     i;
     n_int     samples=0,found=0;
     n_byte2   possible_family_name;
     n_byte2   possible_first_name;
@@ -2991,8 +2968,6 @@ static n_int being_set_unique_name(noble_being * beings,
     possible_family_name =
         GET_NAME_FAMILY(UNPACK_FAMILY_FIRST_NAME(mother_family_name),
                         UNPACK_FAMILY_SECOND_NAME(father_family_name));
-
-
 
     while ((found == 0) && (samples < 2048))
     {
@@ -3025,7 +3000,6 @@ static n_int being_set_unique_name(noble_being * beings,
                             (math_random(local_random) & FAMILY_NAME_AND_MOD));
         }
 
-        
         being_set_first_name(local_being,possible_first_name);
         being_set_family_name(local_being,
                               UNPACK_FAMILY_FIRST_NAME(possible_family_name),
@@ -3071,7 +3045,6 @@ static void being_random_genetics(n_genetics * value, n_byte2 * random, n_int ma
     value[CHROMOSOME_Y] &= ~1;
     value[CHROMOSOME_Y] |= (male ? 2 : 3);
 }
-
 
 /**
  * Initialise the ape's variables and clear its brain
@@ -3181,7 +3154,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 #ifdef BRAINCODE_ON
 
     being_random3(local);
-
     
 #ifdef EPISODIC_ON
     /** has no social connections initially */
@@ -3234,10 +3206,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         being_random3(local);
         local->brainprobe[ch].offset = (n_byte)being_random(local)&255;
     }
-
-
 #endif
-
     
     being_facing_init(local);
 
@@ -3300,8 +3269,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
     else
     {
-
-
         being_set_location(local, being_location(mother));
 
         /** this is the same as equals */
@@ -3340,14 +3307,13 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         GET_M(local) = BIRTH_MASS +
                        (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
     }
+    
     local->crowding = MIN_CROWDING;
 
-    
     if (being_brain(local))
     {
         /** These magic numbers were found in March 2001 -
             feel free to change them! */
-
 #ifdef SOFT_BRAIN_ON
         being_set_brainatates(local, 0, 171, 0, 146);
         being_set_brainatates(local, 1, 86, 501, 73);
@@ -3360,10 +3326,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 #ifdef METABOLISM_ON
     metabolism_init(local);
 #endif
-    
     return 0;
 }
-
 
 void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
@@ -3392,11 +3356,9 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
         if (local_s > 0)
         {
             n_byte2 location[2];
-            
             vect2_d(&location_vector, &facing_vector, local_s, 512);
             
             /* vector to n_byte2 may do incorrect wrap around MUST be improved */
-            
             location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
             location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
             
@@ -3498,7 +3460,6 @@ void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value
 n_int being_remove_internal = 0;
 n_int being_remove_external = 0;
 
-
 void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     if (being_energy(local_being) == BEING_DEAD)
@@ -3571,6 +3532,5 @@ void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct 
     being_remove_internal = 0;
     io_free((void **)brls);
 }
-
 
 

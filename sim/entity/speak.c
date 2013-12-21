@@ -181,8 +181,7 @@ static void speak_freq(n_int * high, n_int * low, n_byte value)
 
 void speak_out(n_string filename, n_string paragraph)
 {
-    FILE     *out_file = 0L;
-
+    FILE    *out_file = 0L;
     n_uint   total_length = AUDIO_FFT_MAX_BUFFER * speak_length_total(paragraph) >> 2;
     n_int    loop         = 0;
     n_byte   found_character;
@@ -212,7 +211,6 @@ void speak_out(n_string filename, n_string paragraph)
 
         if (found_character != '\n' && found_character != 0)
         {
-
             if (found_character !=' ' && found_character != '.')
             {
                 n_int local_high[8], local_low[4];

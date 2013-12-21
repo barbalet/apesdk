@@ -114,8 +114,6 @@ void HandleTCPClient(n_c_int clntSocket)
     close(clntSocket);    /* Close client socket */
 }
 
-
-
 #ifdef EXAMPLE_SERVER
 
 int main(int argc, char *argv[])

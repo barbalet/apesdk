@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-
-
 /*NOBLEMAKE DEL=""*/
 
 #ifndef	_WIN32
@@ -44,7 +42,6 @@
 #endif
 
 #include "universe_internal.h"
-
 
 #include <stdio.h>
 
@@ -104,7 +101,6 @@ n_int console_being(void * ptr, n_string response, n_console_output output_funct
 
     return 0;
 }
-
 
 /**
  * Show the friends of the given being
@@ -284,7 +280,6 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval)
     return retval;
 }
 
-
 static void console_simulation_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_int   *int_data = data;
@@ -394,6 +389,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     
     return 0;
 }
+
 #ifdef BRAINCODE_ON
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function)
 {
@@ -417,7 +413,6 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
             
             n_string_block first_internal;
             n_string_block first_external;
-            
             
             position = 0;
             
@@ -791,7 +786,6 @@ static void watch_line_braincode(n_string string, n_int line)
  */
 static void watch_braincode(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
-    
 #ifdef BRAINCODE_ON
     n_int i;
     io_string_write(result, "\nRegisters:\n", &watch_string_length);
@@ -1221,7 +1215,6 @@ n_int console_metabolism(void * ptr, n_string response, n_console_output output_
 #endif
 }
 
-
 static void histogram_being_state_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_uint * histogram = data;
@@ -1532,7 +1525,6 @@ static n_int console_compare_brain(n_byte * braincode0, n_byte * braincode1, n_i
         }
         loop += BRAINCODE_BYTES_PER_INSTRUCTION;
     }
-
     return -1;
 }
 
@@ -2190,7 +2182,6 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
     return 0;
 }
 
-
 /* load simulation data */
 n_int console_open(void * ptr, n_string response, n_console_output output_function)
 {
@@ -2236,7 +2227,6 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
         n_byte passed;
         n_string_block output_value;
 
-
         for (j = 0; j < local_sim->num; j++)
         {
             if (eliminated[j] == 0)
@@ -2248,7 +2238,6 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
                 
                 if (honor >= max_honor)
                 {
-
                     passed=0;
                     switch(mode)
                     {
@@ -2279,9 +2268,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
                         winner = j;
                         max_honor = honor;
                     }
-
                 }
-
             }
         }
 
@@ -2393,7 +2380,6 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                     if (local_episodic[e].first_name[j] +
                             local_episodic[e].family_name[j] > 0)
                     {
-
                         passed=0;
                         switch(mode)
                         {
@@ -2556,7 +2542,6 @@ void console_capture_death(noble_being * deceased, void * sim)
 
 n_int console_death(void * ptr, n_string response, n_console_output output_function)
 {
-    
     if (response == 0L) return 0;
     
     console_stop(ptr,"",output_function);

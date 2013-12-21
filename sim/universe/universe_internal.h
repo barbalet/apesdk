@@ -33,12 +33,10 @@
 
  ****************************************************************/
 
-
 /*NOBLEMAKE VAR=""*/
 
 #ifndef NOBLEAPE_UNIVERSE_INTERNAL_H
 #define NOBLEAPE_UNIVERSE_INTERNAL_H
-
 
 #define USE_FIL_VER
 #define USE_FIL_LAN
@@ -47,7 +45,6 @@
 #define USE_FIL_EPI
 #undef USE_FIL_WEA
 #undef USE_FIL_BRA
-
 
 /*	Land - References */
 
@@ -66,7 +63,6 @@
 #else
 #define EPISODIC_BYTES  0
 #endif
-
 
 #ifdef BRAINCODE_ON
 #define BRAINCODE_BYTES        (BRAINCODE_SIZE)
@@ -311,7 +307,6 @@ void console_external_watch(void);
 n_int console_executing(void);
 
 void file_audit(void);
-
 
 #endif /* NOBLEAPE_UNIVERSE_INTERNAL_H */
 

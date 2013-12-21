@@ -145,7 +145,6 @@ static const n_byte2 seg14[ 60 ] =
 };
 
 
-
 #define	MAX_NUMBER_ERRORS	35
 
 static n_byte           number_errors;
@@ -153,10 +152,7 @@ static n_string_block	error_array[MAX_NUMBER_ERRORS + 1];
 
 static n_uint	tilt_y = 0;
 
-
 n_byte	check_about = 0;
-
-
 n_uint	tilt_z = 118;
 
 static n_int toggle_weather = 1;
@@ -378,7 +374,6 @@ void draw_about(n_constant_string platform)
 
     check_about = 1;
 }
-
 
 /* draws a string starting at point (off_x,off_y) */
 
@@ -680,10 +675,6 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         n_int scrx = (0 - (dimensions->x >> 1));
         /* find the central map point */
         n_int flatval;
-        
-        /* get the local cos value for the turn angle */
-        /* get the local sin value for the turn angle */
-        
         n_vect2 value_vector;
         
         vect2_direction(&value_vector, turn + 128, 105);
@@ -706,7 +697,6 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         }
         
         dtss.const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
-        
         dtss.dimensions = dimensions;
         
         /* repeat until the right-most row is reached */
@@ -779,9 +769,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         {
             /* take the very bottom pixel */
             n_int pixy = (scrx + (dim_x >> 1)) + ((dim_y - 1) * dim_x );
-
             n_int actual = (dim_y - 1);
-
             /* start with a map point which is below/off the screen */
             n_int scry = const_lowdiv2;
             /* rotated and add offset (which will be &ed off) */

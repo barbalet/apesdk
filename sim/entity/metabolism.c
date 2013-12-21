@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-
-
 /*NOBLEMAKE DEL=""*/
 
 #include "entity.h"
@@ -87,7 +85,6 @@ void metabolism_vascular_description(n_int index, n_string description)
     n_int location = 0;
     io_string_write(description, str[index], &location);
 }
-
 
 const n_string metabolism_text[] =
 {
@@ -195,7 +192,6 @@ static void metabolism_vascular_compartment(n_uint I, noble_vessel * vessel)
 void metabolism_vascular_response(noble_simulation * local_sim, noble_being * local_being, n_int response)
 {
     n_uint i;
-
     /** parasympathetic */
     if (response <= 0)
     {
@@ -707,7 +703,6 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
     n_int   pressure;
     n_uint  lung_surface_area = (n_uint)GET_MT(local_being,METABOLISM_LUNG_CAPACITY)*5; /** approximation from a sphere */
     n_int   map_dimensions2 = land_map_dimension(local_sim->land) / 2;
-    
     
     pressure = 16384-(weather_pressure(local_sim->land,
                                        APESPACE_TO_MAPSPACE(being_location_x(local_being)),

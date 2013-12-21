@@ -58,7 +58,6 @@
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
-
 - (void)debugOutput
 {
     NSSavePanel *panel = [NSSavePanel savePanel];
@@ -108,7 +107,6 @@
     do{
     }while (shared_draw(fIdentification) == 0);
     
-    
     [[self openGLContext] makeCurrentContext];
 
 #ifndef GRAPHLESS_GUI
@@ -143,7 +141,6 @@
             }
             ly++;
         }
-        
     }
 #ifndef GRAPHLESS_GUI
     else
@@ -167,7 +164,6 @@
 
 - (void)quitProcedure
 {
-
     shared_close();
 #ifdef ON_DISPLAY_UPDATE
     CVDisplayLinkRelease(displayLink);
@@ -262,7 +258,6 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     }
     CVDisplayLinkStart(displayLink);
 #else
-    
     /* start animation timer */
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/120.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     

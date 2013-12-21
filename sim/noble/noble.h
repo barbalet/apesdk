@@ -104,10 +104,8 @@ typedef	unsigned char	n_byte;
  expectations on the byte ordering. */
 typedef	unsigned short	n_byte2;
 
-
 typedef	unsigned int	n_c_uint;
 typedef	int				n_c_int;
-
 
 #ifndef _WIN64
 /*! @typedef n_uint
@@ -184,7 +182,6 @@ typedef struct
     n_int y;
 } n_vect2;
 
-
 /*! @struct
  @field characters Characters that represent these values in the file.
  @field incl_kind  Included type and the kind of value combined together.
@@ -203,7 +200,6 @@ typedef	struct
 } noble_file_entry;
 
 /* include externally, if needed */
-
 
 #define FILE_COPYRIGHT      0x00
 
@@ -692,7 +688,6 @@ void io_file_string(n_int entry, n_file * file, n_constant_string string);
 
 void io_offset(n_byte * start, n_byte * point, n_string text);
 
-
 /*
  This provides the land interface into entity but not the universe.
 
@@ -700,7 +695,6 @@ void io_offset(n_byte * start, n_byte * point, n_string text);
  */
 
 /*	Land - Screen conversion */
-
 
 #define MAP_BITS                      (9)
 
@@ -729,9 +723,7 @@ void io_offset(n_byte * start, n_byte * point, n_string text);
 #define	POSITIVE_LAND_COORD_HIRES(num) ((num+(3*HI_RES_MAP_DIMENSION))&(HI_RES_MAP_DIMENSION-1))
 #define NUMBER_LAND_TILES              (MAP_DIMENSION/LAND_TILE_EDGE)
 
-
 #define LAND_DITHER(x,y,z)             (((x+y+z)&15)-(((x&y)|z)&7)-((x|(y&z))&7))
-
 
 #ifdef GRAPHLESS_GUI
 
@@ -742,6 +734,7 @@ void io_offset(n_byte * start, n_byte * point, n_string text);
 #define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA + GRAPH_WINDOW_AREA)
 
 #endif
+
 #define SECONDS_PER_SIMULATION_STEP (60)
 
 #define	WEATHER_CLOUD		(32768)
@@ -772,7 +765,6 @@ void io_offset(n_byte * start, n_byte * point, n_string text);
 #define IS_NIGHT(num)		((((num)>>5) <  (11))||(((num)>>5) >  (36)))
 #define	IS_DAWNDUSK(num)	((((num)>>5) == (11))||(((num)>>5) == (36)))
 
-
 #define NIGHT_END_POINT     (256)
 #define DAWN_END_POINT      (384)
 #define DAY_END_POINT       (1152)
@@ -790,7 +782,6 @@ void io_offset(n_byte * start, n_byte * point, n_string text);
   Dawn  352 - 383
   Day   384 - 1151
   Dusk  1152 - 1183
-
  */
 
 /*! @struct
@@ -815,7 +806,6 @@ typedef	struct
 }
 n_land;
 
-
 void  weather_init(n_land * local_land);
 void  weather_wind_vector(n_land * local_land, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy);
 n_int weather_pressure(n_land * local_land, n_int px, n_int py, n_int dimension2);
@@ -830,7 +820,6 @@ void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * l
 n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_byte * kind);
 
 n_int land_map_dimension(n_land * land);
-
 
 /*0*/
 
@@ -943,7 +932,6 @@ typedef void (script_external)(void * code, void * structure, void * data);
 #define	VARIABLE_WIDTH		    32
 
 typedef	n_byte				    variable_string[VARIABLE_WIDTH];
-
 
 /*! @struct
 @field evaluate The length of the evaluated string.

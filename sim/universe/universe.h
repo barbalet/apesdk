@@ -279,7 +279,6 @@ enum
     RELATIONSHIPS
 };
 
-
 enum PREFERENCES_MATE
 {
     PREFERENCE_MATE_HEIGHT_MALE = 0,
@@ -390,12 +389,9 @@ enum
     INTERVALS
 };
 
-
-
 static const n_int interval_steps[] =
 { 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
 static const n_constant_string interval_description[] = { "mins","hours","days","months","years" };
-
 
 #define METABOLISM_HUNGER_THRESHOLD 1
 #define METABOLISM_MAX_PRODUCTS     4
@@ -644,8 +640,6 @@ enum being_interaction_social
 #define SOCIAL_SIZE_BEINGS  (SOCIAL_SIZE>>1) /* max number of specific beings within the social graph */
 #define EPISODIC_SIZE       12  /* maximum number of episodic memories */
 
-
-
 /* ApeScript overrides */
 #define OVERRIDE_GOAL		1
 
@@ -764,7 +758,6 @@ enum
 };
 
 /* maximum energy obtainable from different types of food */
-
 
 enum energy_types
 {
@@ -1316,7 +1309,6 @@ typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local
 
 typedef void (line_braincode)(n_string pointer, n_int line);
 
-
 #ifdef BRAINCODE_ON
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function);
 #endif
@@ -1390,7 +1382,6 @@ n_int console_debug(void * ptr, n_string response, n_console_output output_funct
 
 n_int console_death(void * ptr, n_string response, n_console_output output_function);
 
-
 n_int console_save(void * ptr, n_string response, n_console_output output_function);
 n_int console_open(void * ptr, n_string response, n_console_output output_function);
 n_int console_script(void * ptr, n_string response, n_console_output output_function);
@@ -1427,7 +1418,6 @@ const static noble_console_command control_commands[] =
 
     {&console_death,         "death",          "[file]",               "Create a death record file"},
 
-    
     {&console_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
     {&console_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Noble Ape alphabet"},
     {&console_file,          "file",           "[(component)]",        "Information on the file format"},

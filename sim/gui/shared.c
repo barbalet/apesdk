@@ -199,9 +199,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     }
 }
 
-
 /* do key down in which window */
-
 static void control_key(n_byte wwind, n_byte2 num)
 {
     noble_being * local;
@@ -259,7 +257,6 @@ static void control_key(n_byte wwind, n_byte2 num)
                 local_select = &(local_sim->beings[local_sim->num - 1]);
             }
         }
-        
         sim_set_select(local_select);
     }
 }
@@ -321,10 +318,8 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
 shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
     shared_cycle_state return_value = SHARED_CYCLE_OK;
-    
     ticks = ticks & 67108863; /* 71 58 27 88 */
     ticks *= 60;
-    
 #ifndef	_WIN32
     sim_thread_console();
 #endif
@@ -348,10 +343,7 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
         {
             sim_cycle();
         }
-
         draw_cycle();
-
-                
 #ifdef SCRIPT_DEBUG
         if (shared_script_debug_ready())
         {
@@ -376,11 +368,9 @@ void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
 n_int shared_init(n_byte view, n_uint random)
 {
     n_byte2 fit[256 * 3];
-
     key_down = 0;
     mouse_down = 0;
     mouse_drag = 0;
-
     if (view == NUM_TERRAIN)
     {
         if (control_init(KIND_START_UP, random) == 0L)
@@ -388,7 +378,6 @@ n_int shared_init(n_byte view, n_uint random)
             return SHOW_ERROR("Initialization failed lack of memory");
         }
     }
-
     draw_fit(land_points, fit);
     return view;
 }

@@ -591,7 +591,6 @@ n_byte math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn)
 
     best_p = vect2_dot(p, &vector_facing, 1, 1);
 
-
     while (loop < NUMBER_TURN_TOWARDS_POINTS)
     {
         n_int loc_track = track[loop];
@@ -693,11 +692,9 @@ void math_bilinear_512_4096(n_byte * side512, n_byte * data)
 
     if (side512 == 0L) return;
     if (data == 0L) return;
-
     
     while (loop_y < 4096)
     {
-
         n_int loop_x = 0;
         while (loop_x < 4096)
         {
@@ -766,7 +763,6 @@ n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i)
         /** address within this being */
          return &bc0[BRAINCODE_ADDRESS(i)];
     }
-
         /** Address within the other being */
     return &bc1[BRAINCODE_ADDRESS(i) - BRAINCODE_SIZE];
 }
@@ -818,7 +814,6 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
         case BRAINCODE_MVB:
         {
             n_int ptr0, ptr1, n, instructions_to_copy, dat = 0;
-            
             
             if (!is_constant0)
             {
@@ -977,7 +972,6 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
             
             if (v0 == 0)
             {
-                
                 n_int i2 = (*i + ((n_int) is_const1 *BRAINCODE_BYTES_PER_INSTRUCTION)) % BRAINCODE_SIZE;
                 
                 if (i2 <= *i)

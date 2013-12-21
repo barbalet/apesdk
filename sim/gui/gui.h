@@ -71,7 +71,6 @@ enum colour_type
 
 #define	NON_INTERPOLATED COLOUR_GREY
 
-
 #define	spot_colour(alpha,spx,spy,col)	alpha[((spx)|((spy)<<8))]=(col)
 
 /*	Graphics Metrics */

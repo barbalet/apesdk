@@ -37,7 +37,6 @@
  *  \brief  This handles social interactions and management of the social graph
  */
 
-
 /*NOBLEMAKE DEL=""*/
 
 #include "entity.h"
@@ -57,11 +56,9 @@
 
 #define GENE_HEIGHT_PREFERENCE(gene)        GENE_VAL_REG(gene, 9, 8, 14, 10)
 
-
 /** mating preference for frame */
 
 #define GENE_FRAME_PREFERENCE(gene)         GENE_VAL_REG(gene, 9, 0, 8, 2)
-
 
 /** mating preference for hair length */
 
@@ -1213,7 +1210,6 @@ n_byte social_groom(
                 met_being->parasites = 0;
             }
             grooming = 1;
-
         }
     }
 
@@ -1245,7 +1241,6 @@ n_byte2 social_squabble(
 
     /** distance between beings */
     being_delta(met_being, meeter_being, &delta);
-
 
     /** battle with rival families */
     if ((being_family_first_name(meeter_being) != being_family_first_name(met_being)) &&
@@ -1627,7 +1622,6 @@ n_int social_chat(
     noble_social * met_graph = being_social(met_being);
     n_uint respect_mean = social_respect_mean(sim,meeter_being);
 
-
     if (!meeter_graph) return 0;
 
     if (!met_graph) return 0;
@@ -1750,7 +1744,6 @@ n_int social_chat(
             }
         }
     }
-
     being_reset_drive(met_being, DRIVE_SOCIAL);
     being_reset_drive(meeter_being, DRIVE_SOCIAL);
 
@@ -1829,8 +1822,6 @@ void social_goals(
     }
 }
 
-
-
 void social_initial_loop(noble_simulation * local, noble_being * local_being, void * data)
 {
     n_uint respect_mean = social_respect_mean(local,local_being);
@@ -1847,7 +1838,6 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
 
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(being_social(local_being),social_loop))
         {
-
             specific_being = being_find_name(local, specific_individual->first_name[BEING_MET], specific_individual->family_name[BEING_MET]);
 
             if (specific_being != 0L)

@@ -50,7 +50,6 @@ static n_double timedomain[AUDIO_FFT_MAX_BUFFER];
 static n_double frequencyi[AUDIO_FFT_MAX_BUFFER];
 static n_double timedomaini[AUDIO_FFT_MAX_BUFFER];
 
-
 /**
  * Creates a bit reversed value of a particular index value.
  * @param index value to be bit reversed.
@@ -176,13 +175,10 @@ void audio_fft(n_byte inverse, n_uint power_sample)
 
         BlockEnd = BlockSize;
         BlockSize <<= 1;
-
     }
-
     /*
      **   Need to normalize if inverse transform...
      */
-
     if ( inverse )
     {
         n_double denom = (n_double) NumSamples;

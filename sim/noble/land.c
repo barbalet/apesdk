@@ -78,8 +78,8 @@
  Posessions
 
  ?
-
  */
+
 static n_int weather_delta(n_land * local_land)
 {
     n_int    lx = 0;
@@ -134,11 +134,8 @@ void weather_cycle(n_land * local_land)
         while ( lx < map_dimensions2 )
         {
             n_int	local_atm =
-            
                 ((n_int)delta_pressure[ lx | ly_neu ] << (MAP_BITS-1))
-            
                 - (512 << (MAP_BITS-1))
-            
                 - atmosphere[ ((lx + 1 ) & (map_dimensions2-1)) | ly_neu ]
                 + atmosphere[ ((lx + (map_dimensions2-1) ) & ((map_dimensions2)-1)) | ly_neu ]
                 - atmosphere[ lx | ly_plu ]
@@ -170,7 +167,6 @@ void weather_init(n_land * local_land)
     atmosphere = local_land->atmosphere;
     delta_pressure = local_land->delta_pressure;
     map_dimension2 = land_map_dimension(local_land)/2;
-    
     
     NA_ASSERT(land, "land NULL");
     NA_ASSERT(atmosphere, "atmosphere NULL");
@@ -365,6 +361,7 @@ static n_int time_actual_to_perceived(n_int actual_time)
     }
 }
 */
+
 n_int land_map_dimension(n_land * land)
 {
     (void)land; /* land is not used here */
@@ -558,9 +555,7 @@ n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_
 void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
 {
     NA_ASSERT(local, "local NULL");
-    
     if (local == 0L) return;
-    
     {
         n_byte *local_map = local->map;
         n_uint	loop      = 0;
@@ -591,7 +586,6 @@ void land_init(n_land * local, n_byte * scratch)
     
     if (local == 0L) return;
     if (scratch == 0L) return;
-    
     
     local_random[0] = local->genetics[0];
     local_random[1] = local->genetics[1];

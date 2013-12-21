@@ -57,7 +57,6 @@ typedef struct
     void             * write_data;
 } execute_object;
 
-
 typedef struct
 {
     execute_object * executed;
@@ -170,7 +169,6 @@ static void * execute_thread(void * id)
     pthread_exit(NULL);
 }
 #endif
-
 
 void execute_init(void)
 {

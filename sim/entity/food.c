@@ -37,7 +37,6 @@
  *  \brief  Functions related to eating
  */
 
-
 /*NOBLEMAKE DEL=""*/
 
 #include "entity.h"
@@ -154,7 +153,6 @@ void food_values(n_land * local_land,
 
     *grass += LAND_DITHER(*grass, *trees, *bush);
 }
-
 
 /**
  * @brief Returns the dominant food type on land and its associated maximum energy value

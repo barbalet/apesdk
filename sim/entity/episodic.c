@@ -37,7 +37,6 @@
  *  \brief  This handles episodic memory
  */
 
-
 /*NOBLEMAKE DEL=""*/
 
 #include "entity.h"
@@ -598,7 +597,6 @@ void episodic_interaction(
         being_gender_name(local),being_family_name(local),
         being_gender_name(other),being_family_name(other), arg);
 }
-
 
 /**
  * @brief Generate an intention.

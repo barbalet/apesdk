@@ -33,7 +33,6 @@
 
  ****************************************************************/
 
-
 /*NOBLEMAKE DEL=""*/
 
 #include "entity.h"
@@ -70,7 +69,6 @@
 #define BRAINCODE_CONSTANT0(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT0_BIT)
 #define BRAINCODE_CONSTANT1(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT1_BIT)
 #define BRAINCODE_VALUE(braincode,i,n)     (braincode[i+1+n])
-
 
 /*	Brain definitions */
 
@@ -208,8 +206,6 @@ void brain_hash(n_byte *local_brain, n_byte * local_brain_hash)   /**< TODO THIS
 
     local_brain_hash[11] = 0;
 }
-
-
 
 /**     "XXX_#NNN_#NNN"*/
 /**     "0123456789012"*/
@@ -593,7 +589,6 @@ void braincode_number_of_instructions(
 #endif
 }
 
-
 /**
  * @brief returns a random braincode instruction
  * @param local_being Pointer to the being
@@ -630,7 +625,6 @@ n_byte get_braincode_instruction(noble_being * local_being)
             return get_braincode_instruction_type(i);
         }
     }
-
     return get_braincode_instruction_type(4);
 }
 

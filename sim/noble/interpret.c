@@ -44,7 +44,6 @@
 #include "noble.h"
 /*NOBLEMAKE END=""*/
 
-
 /**
  * Makes sure all the data associated with the interpreter is freed etc.
  * @param code pointer to the interpreter structure that is being executed.
@@ -111,7 +110,6 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
     if (code == 0L) return SHOW_ERROR("No code provided");
     if (evaluate == 0L) return SHOW_ERROR("Nothing to evaluate");
     if (number == 0L) return SHOW_ERROR("No numbers provided");
-    
     
     if(code->sc_output(code,evaluate,&val_a) == -1)
     {
@@ -218,7 +216,6 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
     }
     return io_apescript_error(AE_WRONG_END);
 }
-
 
 /**
  * Makes sure all the data associated with the interpreter is freed etc.

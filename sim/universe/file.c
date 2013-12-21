@@ -52,8 +52,6 @@ void sim_debug_csv(n_file * fil, n_byte initial)
 }
 
 /* provide an output file buffer to be written */
-
-
 static void fileout_land(n_file * file_out, noble_simulation * value, noble_file_entry * format)
 {
     n_byte2	loc_signature[2] = {(n_byte2)NOBLE_APE_SIGNATURE, (n_byte2)VERSION_NUMBER};
@@ -98,7 +96,6 @@ static void fileout_being(n_file * file_out, noble_simulation * value, n_int bei
     }
 #endif
 }
-
 
 n_file * file_out(void)
 {
@@ -253,7 +250,6 @@ n_int	file_in(n_file * input_file)
 n_int sketch_input(void *code, n_byte kind, n_int value)
 {
     noble_simulation * local_sim = sim_sim();
-    
     
     n_int *local_vr = ((n_interpret *)code)->variable_references;
     noble_being	*local_being = 0L;
@@ -731,7 +727,6 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                         local_number = local_being->shout[SHOUT_FAMILY1];
                         break;
 
-
                     case VARIABLE_SOCIAL_GRAPH_LOCATION_X:
                         local_number = social_graph.location[0];
                         break;
@@ -995,7 +990,6 @@ void file_audit(void)
         FILE_CHECK(&here.genetics[0]);
     }
     {
-        
         noble_social here;
 
         FILE_CHECK(&here.location[0]);

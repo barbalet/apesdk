@@ -48,7 +48,6 @@
 
 #endif
 
-
 #define	SYNTAX_NUM				19
 #define	SYNTAX_WIDTH			4
 static const n_byte	syntax_codes[SYNTAX_NUM][SYNTAX_WIDTH]=

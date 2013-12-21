@@ -37,7 +37,6 @@
  *  \brief  Functions related to biological drives
  */
 
-
 /*NOBLEMAKE DEL=""*/
 
 #include "entity.h"
@@ -45,11 +44,9 @@
 
 /*NOBLEMAKE END=""*/
 
-
 /** Mate seeking */
 
 #define GENE_MATE_SEEK(gene)                GENE_VAL_REG(gene, 8, 9, 14, 2)
-
 
 /**
  * @brief Update the hunger drive
@@ -71,7 +68,6 @@ static void drives_hunger(noble_being * local)
         being_dec_drive(local, DRIVE_HUNGER);
     }
 }
-
 
 typedef struct
 {

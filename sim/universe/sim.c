@@ -38,9 +38,7 @@
 #define CONSOLE_REQUIRED
 #define CONSOLE_ONLY
 
-
 #include <stdio.h>
-
 
 #ifndef	_WIN32
 #include "../entity/entity.h"
@@ -49,7 +47,6 @@
 #endif
 
 #include "universe_internal.h"
-
 
 #ifndef	_WIN32
 
@@ -157,7 +154,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
 
     "brain_z",
     "select_being",
-\
+
     "test_x",
     "test_y",
 
@@ -311,7 +308,6 @@ void sim_thread_console(void)
 
 #endif
 
-
 noble_simulation * sim_sim(void)
 {
     return &sim;
@@ -432,7 +428,6 @@ void sim_cycle(void)
     {
         n_int       max_honor = 0;
         
-        
         being_loop(&sim, 0L, being_tidy_loop, &max_honor);
         
         if (max_honor)
@@ -458,13 +453,11 @@ void sim_cycle(void)
 
 #define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 40))
 
-
 static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * location)
 {
     local->land = (n_land *) & buffer[ *location ];
     *location += sizeof(n_land);
 }
-
 
 static n_int sim_memory(n_uint offscreen_size)
 {
