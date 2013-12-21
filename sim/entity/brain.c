@@ -33,16 +33,10 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
-
 #include "entity.h"
 #include "entity_internal.h"
 
 #include <stdio.h>
-
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE VAR=""*/
 
 /* typical minimum spacing between MVB instructions */
 #define BRAINCODE_MIN_MVB_SPACING          2
@@ -94,8 +88,6 @@
  */
 
 #define	B_FN(ave, bra, obra) ((ave+bra-obra)>>10)
-
-/*NOBLEMAKE END=""*/
 
 /** positive and negative, lower and upper halves */
 #define B_P_LH (br[loc+F_Z]+br[loc+F_Y]+br[loc+F_X])

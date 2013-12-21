@@ -38,12 +38,8 @@
 
  */
 
-/*NOBLEMAKE DEL=""*/
 #include "noble.h"
-/*NOBLEMAKE END=""*/
-/*NOBLEMAKE VAR=""*/
 #include <math.h>
-/*NOBLEMAKE END=""*/
 
 static n_double frequency[AUDIO_FFT_MAX_BUFFER];
 static n_double timedomain[AUDIO_FFT_MAX_BUFFER];

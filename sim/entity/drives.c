@@ -37,12 +37,8 @@
  *  \brief  Functions related to biological drives
  */
 
-/*NOBLEMAKE DEL=""*/
-
 #include "entity.h"
 #include "entity_internal.h"
-
-/*NOBLEMAKE END=""*/
 
 /** Mate seeking */
 

@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE VAR=""*/
-
 #ifndef NOBLEAPE_UNIVERSE_INTERNAL_H
 #define NOBLEAPE_UNIVERSE_INTERNAL_H
 
@@ -309,5 +307,3 @@ n_int console_executing(void);
 void file_audit(void);
 
 #endif /* NOBLEAPE_UNIVERSE_INTERNAL_H */
-
-/*NOBLEMAKE END=""*/

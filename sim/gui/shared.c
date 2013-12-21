@@ -55,8 +55,6 @@ static n_byte  key_down;
 #define	Y_DELTA	36
 #define	X_DELTA	20
 
-/*NOBLEMAKE END=""*/
-
 static n_int toggle_pause = 0;
 
 static n_int control_toggle_pause(n_byte actual_toggle)

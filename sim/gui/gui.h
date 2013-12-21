@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE VAR=""*/
-
 #ifndef NOBLEAPE_GUI_H
 #define NOBLEAPE_GUI_H
 
@@ -160,7 +158,3 @@ n_byte * draw_offscreen(n_byte * value);
 
 #endif /* NOBLEAPE_GUI_H */
 
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE SET="draw.c"*/
-/*NOBLEMAKE SET="control.c"*/

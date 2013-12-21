@@ -37,12 +37,8 @@
  *  \brief  This handles social interactions and management of the social graph
  */
 
-/*NOBLEMAKE DEL=""*/
-
 #include "entity.h"
 #include "entity_internal.h"
-
-/*NOBLEMAKE END=""*/
 
 /** Status preference */
 

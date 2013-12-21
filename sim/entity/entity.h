@@ -33,10 +33,8 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
 #ifndef NOBLEAPE_ENTITY_H
 #define NOBLEAPE_ENTITY_H
-/*NOBLEMAKE END=""*/
 
 #ifndef	_WIN32
 

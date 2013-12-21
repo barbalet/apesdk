@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
-
 #ifndef	_WIN32
 #include "../entity/entity.h"
 #else
@@ -44,8 +42,6 @@
 #include "universe_internal.h"
 
 #include <stdio.h>
-
-/*NOBLEMAKE END=""*/
 
 static n_int simulation_running = 1;
 static n_int simulation_executing = 0;

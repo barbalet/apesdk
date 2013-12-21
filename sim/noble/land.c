@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
-
 #ifndef	_WIN32
 
 #include "../noble/noble.h"
@@ -44,12 +42,6 @@
 #include "..\noble\noble.h"
 
 #endif
-
-/*NOBLEMAKE END=""*/
-/*NOBLEMAKE VAR=""*/
-
-
-/*NOBLEMAKE END=""*/
 
 /*
 

@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE VAR=""*/
-
 #ifndef NOBLEAPE_SHARED_H
 #define NOBLEAPE_SHARED_H
 
@@ -109,7 +107,3 @@ n_int sim_thread_console_quit(void);
 #endif
 
 #endif /* NOBLEAPE_SHARED_H */
-
-/*NOBLEMAKE END=""*/
-
-

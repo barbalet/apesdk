@@ -37,12 +37,8 @@
  *  \brief  Functions related to eating
  */
 
-/*NOBLEMAKE DEL=""*/
-
 #include "entity.h"
 #include "entity_internal.h"
-
-/*NOBLEMAKE END=""*/
 
 /** Various energy use and addition through eating characteristics */
 /** Energy from vegetables */

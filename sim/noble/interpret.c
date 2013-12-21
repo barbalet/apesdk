@@ -40,9 +40,7 @@
     more care must be taken in optimizing the interpret code.
  */
 
-/*NOBLEMAKE DEL=""*/
 #include "noble.h"
-/*NOBLEMAKE END=""*/
 
 /**
  * Makes sure all the data associated with the interpreter is freed etc.

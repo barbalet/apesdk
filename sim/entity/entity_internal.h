@@ -33,10 +33,8 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
 #ifndef NOBLEAPE_ENTITY_INTERNAL_H
 #define NOBLEAPE_ENTITY_INTERNAL_H
-/*NOBLEMAKE END=""*/
 
 enum sleep_state
 {

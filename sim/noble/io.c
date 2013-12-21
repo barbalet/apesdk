@@ -39,14 +39,10 @@
     for new functionality.
  */
 
-/*NOBLEMAKE DEL=""*/
 #include "noble.h"
-/*NOBLEMAKE END=""*/
-/*NOBLEMAKE VAR=""*/
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-/*NOBLEMAKE END=""*/
 
 static n_int command_line_execution;
 static n_int command_line_external_exit = 0;

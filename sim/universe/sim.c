@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
-
 #define CONSOLE_REQUIRED
 #define CONSOLE_ONLY
 
@@ -54,10 +52,6 @@
 #include <unistd.h>
 
 #endif
-
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE VAR=""*/
 
 static variable_string	apescript_variable_codes[VARIABLE_MAX]=
 {
@@ -224,8 +218,6 @@ n_byte	* offbuffer = 0L;
 static noble_simulation	sim;
 
 static n_interpret *interpret = 0L;
-
-/*NOBLEMAKE END=""*/
 
 static n_int            sim_new_progress = 0;
 

@@ -40,19 +40,11 @@
     simulations through to external simulations.
  */
 
-/*NOBLEMAKE DEL=""*/
-
 #include "entity.h"
 #include "entity_internal.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE VAR=""*/
-
-/*NOBLEMAKE END=""*/
 
 /* worst case 1500 + 180 per step */
 
@@ -864,8 +856,6 @@ n_byte being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly)
     }
     return 0;
 }
-
-/*NOBLEMAKE END=""*/
 
 static void being_immune_init(noble_being * local)
 {

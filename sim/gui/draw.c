@@ -33,15 +33,9 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
-
 #include "gui.h"
 
 #include <stdio.h>
-
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE VAR=""*/
 
 /* the weather/time of day icons hard coded */
 
@@ -184,8 +178,6 @@ n_int draw_toggle_territory(void)
     return toggle_territory;
 }
 
-/*NOBLEMAKE END=""*/
-
 /*
  sketch functions are used for low-level pixel drawing
  */
@@ -199,9 +191,6 @@ n_int draw_toggle_territory(void)
 #define	BIT_SPAN(spx)		(128>>((spx)&7))
 
 #endif
-
-
-/*NOBLEMAKE END=""*/
 
 /* this needs to be grouped eventually, it is here as a test */
 

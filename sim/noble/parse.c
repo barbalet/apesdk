@@ -37,10 +37,7 @@
  *  \brief  This parses ApeScript and produces the ApeScript byte-code.
  */
 
-/*NOBLEMAKE DEL=""*/
 #include "noble.h"
-/*NOBLEMAKE END=""*/
-/*NOBLEMAKE VAR=""*/
 
 #if defined(ROUGH_CODE_OUT) || defined(COMMAND_LINE_DEBUG)
 
@@ -80,10 +77,8 @@ static const n_byte	syntax_codes[SYNTAX_NUM][SYNTAX_WIDTH]=
 
 static n_int	variable_num;
 static n_int	number_num;
-/*NOBLEMAKE END=""*/
+
 #ifdef SCRIPT_DEBUG
-/*NOBLEMAKE DEL=""*/
-/*NOBLEMAKE END=""*/
 
 static n_int	          tab_step = 0;
 static variable_string	* local_var_codes;

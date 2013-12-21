@@ -33,8 +33,6 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
-
 #ifndef	_WIN32
 #include "../entity/entity.h"
 #else

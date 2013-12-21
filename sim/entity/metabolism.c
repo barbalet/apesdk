@@ -33,16 +33,10 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
-
 #include "entity.h"
 #include "entity_internal.h"
 
 #include <stdio.h>
-
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE VAR=""*/
 
 /**
  * @brief Returns a text description of the given vascular component

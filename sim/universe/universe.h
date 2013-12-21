@@ -33,12 +33,8 @@
 
  ****************************************************************/
 
-/*NOBLEMAKE DEL=""*/
 #ifndef NOBLEAPE_UNIVERSE_H
 #define NOBLEAPE_UNIVERSE_H
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE VAR=""*/
 
 /* displays and simulates ape's brain */
 
@@ -1467,20 +1463,4 @@ const static noble_console_command control_commands[] =
 
 #endif
 
-/*NOBLEMAKE END=""*/
-/*NOBLEMAKE DEL=""*/
-
-
 #endif /* NOBLEAPE_UNIVERSE_H */
-
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE SET="universe_internal.h"*/
-/*NOBLEMAKE SET="land.c"*/
-/*NOBLEMAKE SET="being.c"*/
-/*NOBLEMAKE SET="social.c"*/
-/*NOBLEMAKE SET="brain.c"*/
-/*NOBLEMAKE SET="sim.c"*/
-
-
-

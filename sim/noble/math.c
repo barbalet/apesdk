@@ -39,9 +39,7 @@
    interpolation and other abstract math that is used in Noble Ape.
  */
 
-/*NOBLEMAKE DEL=""*/
 #include "noble.h"
-/*NOBLEMAKE END=""*/
 
 /** \brief new_sd stands for new sine dump and hold the sine and cosine values for the simulation */
 static const n_int	new_sd[256] =

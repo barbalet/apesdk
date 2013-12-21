@@ -37,12 +37,8 @@
  *  \brief  This handles episodic memory
  */
 
-/*NOBLEMAKE DEL=""*/
-
 #include "entity.h"
 #include "entity_internal.h"
-
-/*NOBLEMAKE END=""*/
 
 /*! /file episodic.c
  * /brief Functions relating to updates of episodic memories and intentions.

@@ -38,7 +38,6 @@
     the Noble Toolkit.
  */
 
-/*NOBLEMAKE VAR=""*/
 #ifndef _NOBLEAPE_NOBLE_H_
 #define _NOBLEAPE_NOBLE_H_
 /*	Variable Definitions */
@@ -1038,14 +1037,6 @@ void     scdebug_writeoff(void);
 #define SC_DEBUG_OFF			/* */
 
 #endif
-
-/*NOBLEMAKE END=""*/
-
-/*NOBLEMAKE SET="io.c"*/
-/*NOBLEMAKE SET="nthreads.c"*/
-/*NOBLEMAKE SET="parse.c"*/
-/*NOBLEMAKE SET="interpret.c"*/
-/*NOBLEMAKE SET="math.c"*/
 
 #endif /* _NOBLEAPE_NOBLE_H_ */
 
