@@ -163,9 +163,9 @@ static void audit(void)
 
 /*NOBLEMAKE END=""*/
 
-n_int draw_error(n_constant_string error_text)
+n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
-    printf("ERROR: %s\n",(const n_string) error_text);
+    printf("ERROR: %s @ %s %ld\n",(const n_string) error_text, location, line_number);
     return -1;
 }
 

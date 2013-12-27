@@ -556,11 +556,11 @@ static const n_ae_error apescript_errors[]=
     {AE_NO_ERROR, 0L, 0L}
 };
 
-extern n_int draw_error(n_constant_string error_text);
+extern n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number);
 
 /* "---1---2---3---4---5---6---7--" */ /* length of the errors */
 
-#define	SHOW_ERROR(val)	(draw_error(val))
+#define	SHOW_ERROR(val)	(draw_error(val, __FILE__, __LINE__))
 
 #define IO_LOWER_CHAR(value)   if(ASCII_UPPERCASE(value)) (value) += 'a' - 'A'
 

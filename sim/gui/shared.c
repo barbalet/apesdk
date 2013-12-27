@@ -301,7 +301,7 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
     void * sim_return = 0L;
     
-    (void)draw_error(0L);
+    (void)draw_error(0L, 0L, 0);
     draw_undraw_clear();
     
     sim_return = sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0));
@@ -480,7 +480,7 @@ void shared_nextApe(void)
 
 void shared_clearErrors(void)
 {
-    (void)draw_error(0L);
+    (void)draw_error(0L, 0L, 0);
 }
 
 n_int shared_new(n_uint seed)
@@ -489,11 +489,7 @@ n_int shared_new(n_uint seed)
     if (NewBlock) return 0;
 
     NewBlock = 1;
-    if (control_init(KIND_NEW_SIMULATION, seed))
-    {
-        NewBlock = 0;
-        return SHOW_ERROR("Failed through lack of memory");
-    }
+    (void)control_init(KIND_NEW_SIMULATION, seed);
 
     NewBlock = 0;
     

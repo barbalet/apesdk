@@ -1400,7 +1400,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
     }
 }
 
-n_int draw_error(n_constant_string error_text)
+n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
     n_int	           loop = 0;
     n_byte	           error_char_copy;

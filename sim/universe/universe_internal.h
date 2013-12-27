@@ -39,8 +39,8 @@
 #define USE_FIL_VER
 #define USE_FIL_LAN
 #define USE_FIL_BEI
-#define USE_FIL_SOE
-#define USE_FIL_EPI
+#undef USE_FIL_SOE
+#undef USE_FIL_EPI
 #undef USE_FIL_WEA
 #undef USE_FIL_BRA
 

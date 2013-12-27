@@ -136,10 +136,9 @@ n_int	file_in(n_file * input_file)
 
     noble_simulation * local_sim = sim_sim();
 
-    input_file->size = input_file->location;
-    input_file->location = 0;
-
     io_whitespace(input_file);
+    
+    input_file->location = 0;
 
     ret_val = io_read_buff(input_file, temp_store, noble_file_format);
 
@@ -167,38 +166,33 @@ n_int	file_in(n_file * input_file)
             n_uint	loop_end = 0;
             switch (ret_val)
             {
-          /*  case FIL_LAN:
-                temp = (n_byte*)(local_sim->land);
-                loop_end = NON_PTR_LAND;
-                break;
-            case FIL_WEA:
-                temp = (n_byte*)(local_sim->land->weather);
-                loop_end = sizeof(n_int);
-                break;*/
-            case FIL_BEI:
-                temp = (n_byte*) &(local_sim->beings[ape_count]);
-                loop_end = sizeof(noble_being);
-                break;
-            case FIL_SOE:
-                {
-                    noble_social * local_social = being_social(&(local_sim->beings[ape_count]));
-                    temp = (n_byte*)(&local_social[social_count]);
-                    loop_end = sizeof(noble_social);
-                }
-                break;
-            case FIL_EPI:
-                {
-                    noble_episodic * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
-                    temp = (n_byte*)(&local_episodic[episodic_count]);
-                    loop_end = sizeof(noble_episodic);
-                }
-                break;
-            default:
-                {
-                    n_string_block information;
-                    return SHOW_ERROR(information); /*unkown kind*/
-                }
-                break;
+                case FIL_LAN:
+                    temp = (n_byte*)(local_sim->land);
+                    loop_end = NON_PTR_LAND;
+                    break;
+                case FIL_BEI:
+                    temp = (n_byte*) &(local_sim->beings[ape_count]);
+                    loop_end = sizeof(noble_being);
+                    break;
+                case FIL_SOE:
+                    {
+                        noble_social * local_social = being_social(&(local_sim->beings[ape_count]));
+                        temp = (n_byte*)(&local_social[social_count]);
+                        loop_end = sizeof(noble_social);
+                    }
+                    break;
+                case FIL_EPI:
+                    {
+                        noble_episodic * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
+                        temp = (n_byte*)(&local_episodic[episodic_count]);
+                        loop_end = sizeof(noble_episodic);
+                    }
+                    break;
+                default:
+                    {
+                        return SHOW_ERROR("Unknown file kind"); /*unknown kind*/
+                    }
+                    break;
             }
             if(temp != 0L)
             {

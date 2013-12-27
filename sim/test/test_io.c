@@ -119,6 +119,10 @@ static void check_io(void)
     
     io_disk_read(input_file, "compare_file.txt");
     
+    io_whitespace(input_file);
+    
+    input_file->location = 0;
+    
     if (io_read_buff(input_file, (n_byte *)&check_two, test_file_format) != FIL_BEI)
     {
         SHOW_ERROR("Wrong filetype found");

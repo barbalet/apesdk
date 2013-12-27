@@ -664,6 +664,7 @@ void io_whitespace(n_file * input)
         local_data[loop++] = 0;
     }
     input->size = out_loop;
+    
 }
 
 /**
@@ -888,21 +889,24 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
 
     found_text[0] = io_read(fil);
     if (found_text[0] == 0)
+    {
         return (FILE_EOF);
+    }
     found_text[1] = io_read(fil);
     if (found_text[0] == '}' && found_text[1] == ';')
+    {
         return (FILE_END_INCLUSION);
+    }
     found_text[2] = io_read(fil);
     found_text[3] = io_read(fil);
     found_text[4] = io_read(fil);
     found_text[5] = io_read(fil);
-
+    
     while((commands_bytes[0] != 0) || (commands_bytes[1] != 0) ||
             (commands_bytes[2] != 0) || (commands_bytes[3] != 0) ||
             (commands_bytes[4] != 0) || (commands_bytes[5] != 0))
     {
         commands_bytes = (n_byte *) commands[lp].characters;
-
         if (((commands_bytes[0] == found_text[0]) && (commands_bytes[1] == found_text[1])) &&
                 ((commands_bytes[2] == found_text[2]) && (commands_bytes[3] == found_text[3])) &&
                 ((commands_bytes[4] == found_text[4]) && (commands_bytes[5] == found_text[5])))
