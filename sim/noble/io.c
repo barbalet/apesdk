@@ -902,9 +902,7 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
     found_text[4] = io_read(fil);
     found_text[5] = io_read(fil);
     
-    while((commands_bytes[0] != 0) || (commands_bytes[1] != 0) ||
-            (commands_bytes[2] != 0) || (commands_bytes[3] != 0) ||
-            (commands_bytes[4] != 0) || (commands_bytes[5] != 0))
+    while (POPULATED(commands_bytes))
     {
         commands_bytes = (n_byte *) commands[lp].characters;
         if (((commands_bytes[0] == found_text[0]) && (commands_bytes[1] == found_text[1])) &&
@@ -916,6 +914,30 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
         lp ++;
     }
     return -1;
+}
+
+n_int io_find_size_data(noble_file_entry * commands)
+{
+    n_int   max_entry = 0;
+    n_int   lp = 0;
+    n_byte  last_incl = FILE_INCL(commands[lp].incl_kind);
+    while (POPULATED(commands[lp].characters))
+    {
+        n_byte	data_incl = FILE_INCL(commands[lp].incl_kind);
+        if (last_incl != data_incl)
+        {
+            n_int	data_kind = FILE_KIND(commands[lp].incl_kind);
+            n_int   data_size = ((data_kind == FILE_TYPE_BYTE2) ? 2 : 1);
+            n_int   running_entry = commands[lp].location;
+            running_entry += data_size * commands[lp].number;
+            if (running_entry > max_entry)
+            {
+                max_entry = running_entry;
+            }
+        }
+        lp++;
+    }
+    return max_entry;
 }
 
 #define	FILE_MACRO_CONCLUSION(ch)	(((comman_req==1) && (ch) == ',') || \

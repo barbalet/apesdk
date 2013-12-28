@@ -36,7 +36,7 @@
 
 #define CONSOLE_ONLY /* Please maintain this define until after ALIFE XIII July 22nd */
 #define CONSOLE_REQUIRED
-#define AUDIT_FILE
+#undef  AUDIT_FILE
 
 #include <stdio.h>
 #include <string.h>
@@ -142,8 +142,6 @@ static void audit(void)
     printf("sizeof(n_byte) %d\n",(int)sizeof(n_byte));
     printf("sizeof(n_byte2) %d\n",(int)sizeof(n_byte2));
     printf("sizeof(n_uint) %d\n",(int)sizeof(n_uint));
-
-    printf("NON_PTR_BEING %d\n",(int)NON_PTR_BEING);
 
     printf("sizeof(n_byte	*)) %d \n", (int)sizeof(n_byte	*));
     /*

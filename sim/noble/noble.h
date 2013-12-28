@@ -198,6 +198,10 @@ typedef	struct
     const n_string what_is_it;
 } noble_file_entry;
 
+
+
+#define POPULATED(ch) ((ch[0] != 0) || (ch[1] != 0) || (ch[2] != 0) || (ch[3] != 0) || (ch[4] != 0) || (ch[5] != 0))
+
 /* include externally, if needed */
 
 #define FILE_COPYRIGHT      0x00
@@ -686,6 +690,9 @@ void io_file_writeoff(n_int * entry, n_file * file);
 void io_file_string(n_int entry, n_file * file, n_constant_string string);
 
 void io_offset(n_byte * start, n_byte * point, n_string text);
+
+n_int io_find_size_data(noble_file_entry * commands);
+
 
 /*
  This provides the land interface into entity but not the universe.

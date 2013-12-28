@@ -129,13 +129,21 @@ n_file * file_out(void)
 n_int	file_in(n_file * input_file)
 {
     n_int  ret_val;
-    n_byte temp_store[LARGEST_INIT_PTR];
+    n_byte *temp_store = 0L;
     n_uint ape_count = 0;
     n_uint social_count = 0;
     n_uint episodic_count = 0;
 
     noble_simulation * local_sim = sim_sim();
+    n_int  size_buffer = io_find_size_data((noble_file_entry *)noble_file_format);
 
+    temp_store = (n_byte *)io_new(size_buffer);
+    
+    if (temp_store == 0L)
+    {
+        return SHOW_ERROR("No temporary storage memory available");
+    }
+    
     io_whitespace(input_file);
     
     input_file->location = 0;
@@ -168,7 +176,7 @@ n_int	file_in(n_file * input_file)
             {
                 case FIL_LAN:
                     temp = (n_byte*)(local_sim->land);
-                    loop_end = NON_PTR_LAND;
+                    loop_end = 11; /* Needs to be fixed */
                     break;
                 case FIL_BEI:
                     temp = (n_byte*) &(local_sim->beings[ape_count]);
