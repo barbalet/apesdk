@@ -919,24 +919,27 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
 n_int io_find_size_data(noble_file_entry * commands)
 {
     n_int   max_entry = 0;
-    n_int   lp = 0;
-    n_byte  last_incl = FILE_INCL(commands[lp].incl_kind);
-    while (POPULATED(commands[lp].characters))
-    {
+    n_int   lp = 1;
+    n_byte  last_incl = FILE_INCL(commands[0].incl_kind);
+    n_byte *last_characters = commands[0].characters;
+    do{
         n_byte	data_incl = FILE_INCL(commands[lp].incl_kind);
+        last_characters = commands[lp].characters;
+        
         if (last_incl != data_incl)
         {
-            n_int	data_kind = FILE_KIND(commands[lp].incl_kind);
-            n_int   data_size = ((data_kind == FILE_TYPE_BYTE2) ? 2 : 1);
-            n_int   running_entry = commands[lp].location;
-            running_entry += data_size * commands[lp].number;
+            n_int   data_size = ((FILE_KIND(commands[lp-1].incl_kind) == FILE_TYPE_BYTE2) ? 2 : 1);
+            n_int   running_entry = commands[lp-1].location;
+            running_entry += data_size * commands[lp-1].number;
             if (running_entry > max_entry)
             {
                 max_entry = running_entry;
             }
+            last_incl = data_incl;
         }
         lp++;
     }
+    while (POPULATED(last_characters));
     return max_entry;
 }
 
