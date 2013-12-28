@@ -1922,8 +1922,40 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
     return FULLY_ASLEEP;
 }
 
-#ifdef BRAINCODE_ON
+/*
+ 
+ Rough sketch on brain compression method
+ 
+ Hypthesis:
+ 
+     From a zeroed brain,
+     
+     After n OUTPUT_ACTUATOR firings into the brain, and,
+     
+     After m brain_cycle occurrences with the states recorded,
+     
+     There should be a near identical brain to a standard run brain.
+     
+     n and m are independent but an acceptable level needs to be recorded.
+ 
+ Data set:
+ 
+     Type (either output actuator or brain cycle)
+     
+     For output actuator, record position in brain (n_byte2) and set value (n_byte)
+     
+     For brain cycle, record awake or asleep.
+     
+     Position in brain is on the 32k boundry, the delimiting could be:
+     
+     Position in brain - if 32k-1 then actuator set. If 64k-1, then brain cycle
+     
+     Set value is set value if actuator set, 0 is asleep, 1 is awake if brain cycle
+ 
+ */
 
+
+#ifdef BRAINCODE_ON
 
 static void being_brain_probe(noble_being * local)
 {

@@ -916,6 +916,7 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
     return -1;
 }
 
+/* find the largest size data unit to handle the file copying to data structures */
 n_int io_find_size_data(noble_file_entry * commands)
 {
     n_int   max_entry = 0;
@@ -925,7 +926,6 @@ n_int io_find_size_data(noble_file_entry * commands)
     do{
         n_byte	data_incl = FILE_INCL(commands[lp].incl_kind);
         last_characters = commands[lp].characters;
-        
         if (last_incl != data_incl)
         {
             n_int   data_size = ((FILE_KIND(commands[lp-1].incl_kind) == FILE_TYPE_BYTE2) ? 2 : 1);
