@@ -593,9 +593,9 @@ typedef struct{
     n_int     lowest_c;
     n_int     co_x;
     n_int     co_y;
-    n_vect2 * dimensions;
-    n_vect2 * value_vector;
-    n_byte2 * combined;
+    n_vect2   dimensions;
+    n_vect2   value_vector;
+    n_byte2   *combined;
 } draw_terrain_scan_struct;
 
 static void draw_terrain_scan(void * screen, void * structure, void * x_location)
@@ -604,21 +604,21 @@ static void draw_terrain_scan(void * screen, void * structure, void * x_location
     n_byte  * buf_offscr = (n_byte *) screen;
     n_int     scrx = ((n_int*)x_location)[0];
     /* take the very bottom pixel */
-    n_int     dim_x = dtss->dimensions->x;
-    n_int     dim_y1 = dtss->dimensions->y - 1;
+    n_int     dim_x =  dtss->dimensions.x;
+    n_int     dim_y1 = dtss->dimensions.y - 1;
     n_int     pixy = (scrx + (dim_x >> 1)) + (dim_y1 * dim_x );
     n_int     actual = dim_y1;
     /* start with a map point which is below/off the screen */
     n_int     scry = dtss->const_lowdiv2;
     /* rotated and add offset (which will be &ed off) */
-    n_int     big_x = dtss->lowest_s + (scrx * dtss->value_vector->y);
+    n_int     big_x = dtss->lowest_s + (scrx * dtss->value_vector.y);
     /* rotated and sub offset (subtracted further down) */
-    n_int     big_y = dtss->lowest_c - (scrx * dtss->value_vector->x);
+    n_int     big_y = dtss->lowest_c - (scrx * dtss->value_vector.x);
     n_byte2 * combined = dtss->combined;
     n_int     co_x = dtss->co_x;
     n_int     co_y = dtss->co_y;
-    n_int     valc2 = dtss->value_vector->y << 1;
-    n_int     vals2 = dtss->value_vector->x << 1;
+    n_int     valc2 = dtss->value_vector.y << 1;
+    n_int     vals2 = dtss->value_vector.x << 1;
     while(actual > -1)
     {
         const n_uint   check_change = CONVERT_X((big_x >> 8), co_x) | CONVERT_Y((big_y >> 8), co_y);
@@ -639,6 +639,7 @@ static void draw_terrain_scan(void * screen, void * structure, void * x_location
         big_y -= valc2;
     }
     io_free(&x_location);
+    io_free(&structure);
 }
 
 static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dimensions)
@@ -668,7 +669,7 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         
         vect2_direction(&value_vector, terrain_turn + 128, 105);
         
-        dtss.value_vector = &value_vector;
+        vect2_copy(&(dtss.value_vector), &value_vector);
         
         dtss.lowest_s = ((value_vector.x * (((lowest_y)) - dimensions->y)));
         dtss.lowest_c = ((value_vector.y * (((lowest_y)) - dimensions->y)));
@@ -686,14 +687,19 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         }
         
         dtss.const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
-        dtss.dimensions = dimensions;
+        
+        vect2_copy(&(dtss.dimensions), dimensions);
         
         /* repeat until the right-most row is reached */
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
             n_int * number = io_new(sizeof(n_int));
+            draw_terrain_scan_struct * local_dtss = (draw_terrain_scan_struct *)io_new(sizeof(draw_terrain_scan_struct));
+            
+            io_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
+            
             number[0] = scrx;
-            execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)&dtss, (void*)number);
+            execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)local_dtss, (void*)number);
             scrx++;               /* next column */
         }
         execute_complete_added();
