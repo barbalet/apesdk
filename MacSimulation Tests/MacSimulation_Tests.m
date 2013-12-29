@@ -121,7 +121,7 @@ noble_being      * being = 0L;
     XCTAssertTrue(being->location[1] == 20105, @"Y value is wrong (%d)", being->location[1]);
     
     [self actionMouseClick];
-    
+    /*
     shared_cycle(1000, NUM_VIEW);
     shared_cycle(1000, NUM_TERRAIN);
     
@@ -136,7 +136,7 @@ noble_being      * being = 0L;
     
     shared_cycle(1000, NUM_VIEW);
     shared_cycle(1000, NUM_TERRAIN);
-    
+    */
     NSLog(@"Location %d %d", being->location[0], being->location[1]);
     
     XCTAssertTrue(being->location[0] == 6396, @"X value is wrong (%d)", being->location[0]);

@@ -148,6 +148,7 @@ static n_uint	tilt_y = 0;
 
 n_byte	check_about = 0;
 n_uint	tilt_z = 118;
+n_byte  terrain_turn = 0;
 
 static n_int toggle_weather = 1;
 static n_int toggle_brain = 1;
@@ -657,7 +658,6 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
     {
         const n_int    lowest_y = ((dimensions->y + 256) * dimensions->y)/256;
         noble_being * loc_being = local_sim->select;
-        const n_int turn = being_facing(loc_being);
         draw_terrain_scan_struct dtss;
         
         /* start at the left-most row */
@@ -666,7 +666,7 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         n_int flatval;
         n_vect2 value_vector;
         
-        vect2_direction(&value_vector, turn + 128, 105);
+        vect2_direction(&value_vector, terrain_turn + 128, 105);
         
         dtss.value_vector = &value_vector;
         
@@ -957,7 +957,9 @@ static void	draw_meters(noble_simulation * local_sim)
         /* draw direction facing */
         {
             n_vect2 direction_facing;
-            being_facing_vector(loc_being, &direction_facing, 63);
+            
+            vect2_direction(&direction_facing, 128 + 64+ 256 - terrain_turn + loc_being->direction_facing, 63 * 32);
+
             (void)math_join(75+ FACING_OFFSIDE, 25, direction_facing.x, (direction_facing.y), &local_kind);
         }
 

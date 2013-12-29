@@ -80,6 +80,8 @@ static n_int control_toggle_pause(n_byte actual_toggle)
 
 extern n_byte	check_about;
 extern n_uint	tilt_z;
+extern n_byte   terrain_turn;
+
 
 static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
 {
@@ -174,22 +176,14 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 {
                     if (sy > 0)
                     {
-                        being_move(local, -1, 0);
-                    }
-                    else
-                    {
-                        being_move(local, -32, 1);
+                        terrain_turn = ( terrain_turn + 1) & 255;
                     }
                 }
                 else
                 {
-                    if (sy > 0)
+                    if (sy <= 0)
                     {
-                        being_move(local, 32, 1);
-                    }
-                    else
-                    {
-                        being_move(local, 1, 0);
+                        terrain_turn = ( terrain_turn + 255) & 255;
                     }
                 }
             }
