@@ -919,7 +919,7 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
 /* find the largest size data unit to handle the file copying to data structures */
 n_int io_find_size_data(noble_file_entry * commands)
 {
-    n_int   max_entry = 0;
+    n_uint   max_entry = 0;
     n_int   lp = 1;
     n_byte  last_incl = FILE_INCL(commands[0].incl_kind);
     n_byte *last_characters = commands[0].characters;
@@ -928,9 +928,9 @@ n_int io_find_size_data(noble_file_entry * commands)
         last_characters = commands[lp].characters;
         if (last_incl != data_incl)
         {
-            n_int   data_size = ((FILE_KIND(commands[lp-1].incl_kind) == FILE_TYPE_BYTE2) ? 2 : 1);
-            n_int   running_entry = commands[lp-1].location;
-            running_entry += data_size * commands[lp-1].number;
+            n_uint   data_size = ((FILE_KIND(commands[lp-1].incl_kind) == FILE_TYPE_BYTE2) ? 2 : 1);
+            n_uint   running_entry = commands[lp-1].start_location;
+            running_entry += data_size * commands[lp-1].number_entries;
             if (running_entry > max_entry)
             {
                 max_entry = running_entry;
@@ -1052,8 +1052,8 @@ n_int	io_read_buff(n_file * fil, n_byte * data, const noble_file_entry * command
             n_byte  com_inclusion = FILE_INCL(commands[result_number].incl_kind);
             n_byte  com_kind      = FILE_KIND(commands[result_number].incl_kind);
 
-            n_byte  com_number_of = commands[result_number].number;
-            n_byte2 com_location  = commands[result_number].location;
+            n_uint  com_number_of = commands[result_number].number_entries;
+            n_uint  com_location  = commands[result_number].start_location;
 
             n_uint	loop = 0;
             n_byte *local_data = &data[com_location];
@@ -1178,10 +1178,10 @@ n_int io_write_buff(n_file * fil, void * data, const noble_file_entry * commands
             if (release == FILE_ERROR)
             {
                 n_uint	loop = 0;
-                n_byte	data_type   = FILE_KIND(commands[offset].incl_kind);
-                n_uint end_loop    = commands[offset].number;
-                n_byte2	data_offset = commands[offset].location;
-                n_int	right_ending  = (FILE_INCL(commands[offset+1].incl_kind) != command_num);
+                n_byte	data_type    = FILE_KIND(commands[offset].incl_kind);
+                n_uint  end_loop     = commands[offset].number_entries;
+                n_uint	data_offset  = commands[offset].start_location;
+                n_int	right_ending = (FILE_INCL(commands[offset+1].incl_kind) != command_num);
 
                 right_ending |= ((commands[offset+1].characters[0] == 0) && (commands[offset+1].characters[1] == 0) &&
                                  (commands[offset+1].characters[2] == 0) && (commands[offset+1].characters[3] == 0) &&
@@ -1354,8 +1354,8 @@ n_int io_write_csv(n_file * fil, n_byte * data, const noble_file_entry * command
             {
                 n_uint	loop = 0;
                 n_byte	data_type   = FILE_KIND(commands[offset].incl_kind);
-                n_uint end_loop    = commands[offset].number;
-                n_byte2	data_offset = commands[offset].location;
+                n_uint  end_loop    = commands[offset].number_entries;
+                n_uint	data_offset = commands[offset].start_location;
 
                 if (data_type != FILE_TYPE_PACKED)
                 {
@@ -1504,13 +1504,13 @@ void io_audit_file(const noble_file_entry * format, n_byte section_to_audit)
     do
     {
         n_byte   local_incl_kind  = format[loop].incl_kind;
-        n_byte   local_number     = format[loop].number;
-        n_byte2  local_location   = format[loop].location;
+        n_uint   local_number     = format[loop].number_entries;
+        n_uint   local_location   = format[loop].start_location;
         n_string_block   printout_characters = {0};
         local_characters = (n_byte*)format[loop].characters;
         if ((local_incl_kind & 0xF0) == section_to_audit)
         {
-            n_byte local_type = local_incl_kind & 0x0F;
+            n_uint local_type = local_incl_kind & 0x0F;
 
             if (local_type == FILE_TYPE_BYTE_EXT)
             {
@@ -1526,7 +1526,7 @@ void io_audit_file(const noble_file_entry * format, n_byte section_to_audit)
                 printout_characters[4] = local_characters[4];
                 printout_characters[5] = local_characters[5];
 
-                printf("%s \t %d * %d = %d bytes \t reported/actual/diff offset %d / %d / %d\n", printout_characters,
+                printf("%s \t %lu * %lu = %lu bytes \t reported/actual/diff offset %d / %d / %d\n", printout_characters,
                        local_number, local_type, (local_number * local_type), (int)local_location, (int)being_counter, ((int)local_location - (int)being_counter));
 
                 being_counter += (local_number * local_type);

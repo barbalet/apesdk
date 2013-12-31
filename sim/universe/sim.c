@@ -372,23 +372,30 @@ static void sim_brain_dialogue_loop(noble_simulation * local_sim, noble_being * 
 #endif
 
 
-void sim_being_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+static void sim_being_universal_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    n_byte awake = (being_awake(local_sim, local_being) != 0);
-    being_cycle_universal(local_sim,local_being, awake);
+    being_cycle_universal(local_sim,local_being, (being_awake(local_sim, local_being) != 0));
+}
+
+static void sim_being_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    if (being_awake(local_sim, local_being) == 0) return;
     
-    if (awake)
+    being_cycle_awake(local_sim, local_being);
+}
+
+static void sim_being_interpret(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    if (being_awake(local_sim, local_being) == 0) return;
+
+    if (interpret == 0L) return;
+    
+    if(interpret_cycle(interpret, -1, local_sim->beings, local_being, &sim_start_conditions, &sim_end_conditions) == -1)
     {
-        if(interpret_cycle(interpret, -1, local_sim->beings, local_being, &sim_start_conditions, &sim_end_conditions) == -1)
-        {
-            interpret_cleanup(&interpret);
-        }
-        if(interpret == 0L)
-        {
-            being_cycle_awake(local_sim, local_being);
-        }
+        interpret_cleanup(&interpret);
     }
 }
+
 
 static void sim_time(noble_simulation * local_sim)
 {
@@ -409,8 +416,18 @@ void sim_cycle(void)
     weather_cycle(sim.land);
 #endif
     
-    being_loop(&sim, 0L, sim_being_loop, 0L);
+    being_loop(&sim, 0L, sim_being_universal_loop, 0L);
 
+    if (interpret)
+    {
+        /* unfortunately the ApeScript interface is still not thread safe */
+        being_loop_no_thread(&sim, 0L, sim_being_interpret, 0L);
+    }
+    else
+    {
+        being_loop(&sim, 0L, sim_being_cycle, 0L);
+    }
+    
     being_loop(&sim, 0L, sim_brain_loop, 0L);
     
 #ifdef BRAINCODE_ON

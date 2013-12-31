@@ -193,8 +193,8 @@ typedef	struct
 {
     n_byte  characters[7];
     n_byte  incl_kind;
-    n_byte  number;
-    n_byte2 location;
+    n_uint  number_entries;
+    n_uint  start_location;
     const n_string what_is_it;
 } noble_file_entry;
 
