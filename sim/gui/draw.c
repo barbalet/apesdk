@@ -179,20 +179,6 @@ n_int draw_toggle_territory(void)
     return toggle_territory;
 }
 
-/*
- sketch functions are used for low-level pixel drawing
- */
-
-#ifdef REVERSE_BIT
-
-#define	BIT_SPAN(spx)		(1<<((spx)&7))
-
-#else
-
-#define	BIT_SPAN(spx)		(128>>((spx)&7))
-
-#endif
-
 /* this needs to be grouped eventually, it is here as a test */
 
 #define UNDRAW_MAX          100000
