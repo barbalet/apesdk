@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -2415,7 +2415,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                             /** Avoid memories about yourself, since we're interested
                                in gossip about other beings */
                             
-                            if (being_name_compartison(local_being, local_episodic[e].first_name[j], local_episodic[e].family_name[j]))
+                            if (being_name_comparison(local_being, local_episodic[e].first_name[j], local_episodic[e].family_name[j]))
                             {
                                 if (((j == BEING_MET) &&
                                         (local_episodic[e].event != EVENT_SEEK_MATE) &&

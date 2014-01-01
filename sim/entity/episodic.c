@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -147,7 +147,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local)
         if (local_episodic[i].event >= EVENT_INTENTION)
         {
             /** is this my intention, or someone else's? */
-            if (being_name_compartison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
+            if (being_name_comparison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
             {
                 if (local_episodic[i].date[0] < local_sim->land->date[0])
                 {
@@ -294,7 +294,7 @@ n_int episodic_first_person_memories_percent(
             else
             {
                 /** ratio of first person memories to other memories */
-                if (being_name_compartison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
+                if (being_name_comparison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                 {
                     hits++;
                 }

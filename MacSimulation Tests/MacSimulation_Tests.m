@@ -3,7 +3,7 @@
 //  MacSimulation Tests
 //
 //  Created by Thomas Barbalet on 7/4/13.
-//  Copyright (c) 2013 Thomas Barbalet. All rights reserved.
+//  Copyright (c) 2014 Thomas Barbalet. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -61,8 +61,8 @@
 enum being_energy
 {
     BEING_DEAD   = 0,
-    BEING_HUNGRY = (10*128),
-    BEING_FULL   = (BEING_HUNGRY*3)
+    BEING_HUNGRY = (10 * 128),
+    BEING_FULL   = (BEING_HUNGRY * 3)
 };
 
 #define SOCIAL_RESPECT_NORMAL	127
@@ -272,7 +272,7 @@ n_byte2 being_random(noble_being * value);
 void being_set_select_name(noble_simulation * sim, n_string name);
 n_string being_get_select_name(noble_simulation * sim);
 
-n_int being_name_compartison(noble_being * value, n_byte2 gender_name, n_byte2 family_name);
+n_int being_name_comparison(noble_being * value, n_byte2 gender_name, n_byte2 family_name);
 
 void social_graph_link_name(
     noble_simulation * local_sim,

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -156,7 +156,7 @@ static void drives_sex(
             /** if sex drive is above a mate seeking threshold and
             the being has no current goal */
             if ((being_drive(local, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
-                    (local->goal[0]==GOAL_NONE))
+                    (local->goal[0] == GOAL_NONE))
             {
                 /** either search for a preferred mate, or mate randomly */
                 if (GENE_MATE_SEEK(being_genetics(local))&1)
@@ -172,7 +172,7 @@ static void drives_sex(
                         {
                             /** not someone else's mate */
                             
-                            if (being_name_compartison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
+                            if (being_name_comparison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                             {
                                 /** set a goal to seek the remembered mate */
                                 local->goal[0]=GOAL_MATE;
@@ -263,7 +263,7 @@ static void drives_fatigue(
     {
         being_inc_drive(local, DRIVE_FATIGUE);
         /** Add extra fatigue when swimming */
-        if (being_state(local)&BEING_STATE_SWIMMING)
+        if (being_state(local) & BEING_STATE_SWIMMING)
         {
             being_inc_drive(local, DRIVE_FATIGUE);
         }

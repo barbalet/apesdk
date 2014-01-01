@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -77,9 +77,14 @@ static n_int weather_delta(n_land * local_land)
     n_int    lx = 0;
     n_int    average = 0;
     n_int    map_dimensions2;
+    n_int    map_bits2;
+    
     NA_ASSERT(local_land, "local_weather NULL");
     
     map_dimensions2 = land_map_dimension(local_land) / 2;
+    
+    map_bits2       = land_map_bits(local_land) - 1;
+    if (map_bits2 < 0) return 0;
     
     while (lx < map_dimensions2)
     {
@@ -91,7 +96,7 @@ static n_int weather_delta(n_land * local_land)
         }
         lx++;
     }
-    average = average >> (MAP_BITS-1);
+    average = average >> map_bits2;
     return average;
 }
 
@@ -102,10 +107,14 @@ void weather_cycle(n_land * local_land)
     n_byte2       * delta_pressure;
     n_int         ly = 0;
     n_int         map_dimensions2;
+    n_int         map_bits2;
     
     NA_ASSERT(local_land, "local_land NULL");
 
     map_dimensions2 = land_map_dimension(local_land)/ 2;
+    map_bits2       = land_map_bits(local_land) - 1;
+    if (map_bits2 < 0) return;
+    
     
     local_delta = weather_delta(local_land);
     atmosphere  = local_land->atmosphere;
@@ -126,14 +135,14 @@ void weather_cycle(n_land * local_land)
         while ( lx < map_dimensions2 )
         {
             n_int	local_atm =
-                ((n_int)delta_pressure[ lx | ly_neu ] << (MAP_BITS-1))
-                - (512 << (MAP_BITS-1))
+                ((n_int)delta_pressure[ lx | ly_neu ] << map_bits2)
+                - (512 << map_bits2)
                 - atmosphere[ ((lx + 1 ) & (map_dimensions2-1)) | ly_neu ]
                 + atmosphere[ ((lx + (map_dimensions2-1) ) & ((map_dimensions2)-1)) | ly_neu ]
                 - atmosphere[ lx | ly_plu ]
                 + atmosphere[ lx | ly_min ];
 
-            atmosphere[ lx | ly_neu ] += (local_atm - local_delta) >> (MAP_BITS-1);
+            atmosphere[ lx | ly_neu ] += (local_atm - local_delta) >> map_bits2;
             lx++;
         }
         ly++;
@@ -147,6 +156,7 @@ void weather_init(n_land * local_land)
     n_byte2	  *delta_pressure;
     n_int	   ly = 0;
     n_int      map_dimension2;
+    n_int      map_bits2;
     
     NA_ASSERT(local_land, "local_land NULL");
     
@@ -159,6 +169,8 @@ void weather_init(n_land * local_land)
     atmosphere = local_land->atmosphere;
     delta_pressure = local_land->delta_pressure;
     map_dimension2 = land_map_dimension(local_land)/2;
+    map_bits2      = land_map_bits(local_land) - 1;
+    if (map_bits2 < 0) return;
     
     NA_ASSERT(land, "land NULL");
     NA_ASSERT(atmosphere, "atmosphere NULL");
@@ -171,7 +183,7 @@ void weather_init(n_land * local_land)
         n_int	lx = 0;
         while ( lx < map_dimension2 )
         {
-            n_uint		offset = ( lx << 1 ) + ( ly << (1+MAP_BITS) );
+            n_uint		offset = ( lx << 1 ) + ( ly << (2 + map_bits2) );
             n_c_int		total_land = land[ offset ]
                                      + land[ 1 + offset ]
                                      + land[ (map_dimension2*2) + offset ]
@@ -358,6 +370,12 @@ n_int land_map_dimension(n_land * land)
 {
     (void)land; /* land is not used here */
     return MAP_DIMENSION;
+}
+
+n_int land_map_bits(n_land * land)
+{
+    (void)land;
+    return MAP_BITS;
 }
 
 static void land_tide(n_land * local_land)

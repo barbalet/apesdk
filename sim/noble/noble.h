@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -68,9 +68,9 @@
 
 /*! @define */
 #define	VERSION_NUMBER		     696
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2013 "
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2014 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2013."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2014."
 
 /*! @define */
 #define	NOBLE_APE_SIGNATURE		    (('N'<< 8) | 'A')
@@ -826,6 +826,8 @@ void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * l
 n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_byte * kind);
 
 n_int land_map_dimension(n_land * land);
+n_int land_map_bits(n_land * land);
+
 
 /*0*/
 

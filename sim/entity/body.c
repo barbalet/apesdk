@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -329,6 +329,8 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
  * @param carrying Things which are carried
  * @param hand left or right hand
  */
+
+/* TODO: body_action_chew needs to contain full food_eat path */
 static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if (!((carrying & INVENTORY_GRASS) ||

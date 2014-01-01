@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -296,7 +296,7 @@ n_byte2 being_family_name(noble_being * value)
     return (GET_NAME_FAMILY(being_family_first_name(value),being_family_second_name(value)));
 }
 
-n_int being_name_compartison(noble_being * value, n_byte2 gender_name, n_byte2 family_name)
+n_int being_name_comparison(noble_being * value, n_byte2 gender_name, n_byte2 family_name)
 {
     return ((being_gender_name(value) == gender_name) && (being_family_name(value) == family_name));
 }
@@ -1277,7 +1277,7 @@ static void being_find_name_loop(noble_simulation * sim, noble_being * local, vo
     being_find_name_struct * bfns = (being_find_name_struct *)data;
     if (bfns->local == 0L)
     {
-        if (being_name_compartison(local, bfns->first_gender, bfns->family))
+        if (being_name_comparison(local, bfns->first_gender, bfns->family))
         {
             bfns->local = local;
         }
@@ -1533,7 +1533,7 @@ n_int episode_description(
     }
 
     if ((local_episodic[index].event>0) &&
-            being_name_compartison(local_being, local_episodic[index].first_name[0], local_episodic[index].family_name[0]))
+            being_name_comparison(local_being, local_episodic[index].first_name[0], local_episodic[index].family_name[0]))
     {
         being_name_byte2(local_episodic[index].first_name[BEING_MET], local_episodic[index].family_name[BEING_MET], name_str);
 
@@ -2173,7 +2173,7 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
 
     /** is this the same as the name of the being to which we are paying attention? */
     if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local))) &&
-        being_name_compartison(other, nearest->local->goal[1], nearest->local->goal[2]))
+        being_name_comparison(other, nearest->local->goal[1], nearest->local->goal[2]))
     {
         being_delta(nearest->local, other, &difference_vector);
         if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
@@ -2194,7 +2194,7 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
     n_vect2        difference_vector;
 
     /** is this the same as the name of the being to which we are paying attention? */
-    if (being_name_compartison(other,
+    if (being_name_comparison(other,
             nearest->local_social->first_name[BEING_MET],
             nearest->local_social->family_name[BEING_MET]))
     {
@@ -3032,7 +3032,7 @@ static n_int being_set_unique_name(noble_being * beings,
         for (i = 0; i < number; i++)
         {
             noble_being * other_being = &beings[i];
-            if (being_name_compartison(local_being, being_gender_name(other_being), being_family_name(other_being)))
+            if (being_name_comparison(local_being, being_gender_name(other_being), being_family_name(other_being)))
             {
                 found = 0;
                 break;

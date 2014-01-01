@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -305,7 +305,7 @@ enum PREFERENCES_MATE
 #define ANTIBODY_DEPLETION_PROB               100
 #define ANTIBODY_GENERATION_PROB(bei)         (being_energy(bei))
 
-#define RANDOM_PATHOGEN(seed,pathogen_type)   (((seed&31)*8)+pathogen_type)
+#define RANDOM_PATHOGEN(seed,pathogen_type)   (((seed%(255/PATHOGEN_TRANSMISSION_TOTAL))*PATHOGEN_TRANSMISSION_TOTAL)+pathogen_type)
 #define PATHOGEN_SEVERITY(pathogen)           (((pathogen)*(pathogen))>>11)
 #define PATHOGEN_TRANSMISSION(pathogen)       ((pathogen)&7)
 
@@ -318,7 +318,8 @@ enum PATHOGEN_TRANSMISSION_METHOD
     PATHOGEN_TRANSMISSION_FOOD_VEGETABLE,
     PATHOGEN_TRANSMISSION_FOOD_FRUIT,
     PATHOGEN_TRANSMISSION_FOOD_SHELLFISH,
-    PATHOGEN_TRANSMISSION_FOOD_SEAWEED
+    PATHOGEN_TRANSMISSION_FOOD_SEAWEED,
+    PATHOGEN_TRANSMISSION_TOTAL
 };
 
 enum
@@ -727,6 +728,8 @@ enum drives_definition
 #define NAMES_FEMALE                256
 
 /* energy values for different foods */
+
+/* TODO: add EGGS and potentially INSECTS  to food groups */
 
 enum FOOD_KINDS
 {

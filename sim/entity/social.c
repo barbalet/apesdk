@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2013 Tom Barbalet. All rights reserved.
+ Copyright 1996-2014 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -765,7 +765,7 @@ n_int get_noble_social(
         {
             if (graph[i].entity_type==ENTITY_BEING)
             {
-                if (being_name_compartison(met_being, graph[i].first_name[BEING_MET], graph[i].family_name[BEING_MET]))
+                if (being_name_comparison(met_being, graph[i].first_name[BEING_MET], graph[i].family_name[BEING_MET]))
                 {
                     return i;
                 }
