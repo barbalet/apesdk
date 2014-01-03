@@ -2521,16 +2521,12 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     n_int	tmp_speed;
     /** delta_energy is the energy required for movement */
     n_int	az;
-    n_int	delta_z;
 
-    n_vect2 location_vector;
-    n_vect2 facing_vector;
-    n_vect2 slope_vector;
-    n_vect2 looking_vector;
 #ifdef TERRITORY_ON
     n_uint territory_index;
 #endif
     being_nearest nearest;
+    n_int         test_land = 1;
 
     nearest.opposite_sex = 0L;
     nearest.same_sex = 0L;
@@ -2542,19 +2538,32 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     episodic_cycle(sim, local);
 #endif
 
-    vect2_byte2(&location_vector, being_location(local));
+    {
+        n_vect2 location_vector;
+        n_vect2 facing_vector;
+        n_vect2 slope_vector;
+        n_vect2 looking_vector;
 
-    being_facing_vector(local, &facing_vector, 4);
+        vect2_byte2(&location_vector, being_location(local));
 
-    land_vect2(&slope_vector,&az,land,&location_vector);
+        being_facing_vector(local, &facing_vector, 4);
 
-    vect2_add(&looking_vector, &location_vector, &facing_vector);
+        land_vect2(&slope_vector, &az, land, &location_vector);
 
-    delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
+        vect2_add(&looking_vector, &location_vector, &facing_vector);
+        
+        test_land = (MAP_WATERTEST(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(looking_vector.x)),
+                                   POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(looking_vector.y))) != 0);
+        
+        {
+            n_int delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
 
-    tmp_speed = ((delta_z + 280) >> 4);
-
+            tmp_speed = ((delta_z + 280) >> 4);
+        }
+    }
 #ifdef LAND_ON
+    /* TODO why not test_land here? */
+    
     if (WATER_TEST(az,land->tide_level) != 0)
     {
         loc_state |= BEING_STATE_SWIMMING;
@@ -2593,14 +2602,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 
     /** If it sees water in the distance then turn */
-#ifdef LAND_ON
-    if (((loc_state & BEING_STATE_SWIMMING) != 0) ||
-            (MAP_WATERTEST(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(looking_vector.x)),
-                           POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(looking_vector.y))) != 0))
-
-#else
-    if ((loc_state & BEING_STATE_SWIMMING) != 0)
-#endif
+    if (((loc_state & BEING_STATE_SWIMMING) != 0) || test_land)
     {
         n_uint	      loop;
 
@@ -2664,7 +2666,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             {
                 /** eating when stopped */
                 n_byte  food_type;
-                n_int energy = food_eat(sim->land, location_vector.x, location_vector.y, az, &food_type, local);
+                n_int energy = food_eat(sim->land, being_location_x(local), being_location_y(local), az, &food_type, local);
                 
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
