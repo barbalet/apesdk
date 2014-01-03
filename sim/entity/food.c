@@ -57,6 +57,15 @@
 
 #define GENE_ENERGY_FROM_SEAWEED(gene)      GENE_VAL_REG(gene, 0, 9, 11, 12)
 
+/** Energy from bird eggs */
+
+#define GENE_ENERGY_FROM_BIRD_EGGS(gene)    GENE_VAL_REG(gene, 7, 1, 9, 5)
+
+/** Energy from lizard eggs */
+
+#define GENE_ENERGY_FROM_LIZARD_EGGS(gene)  GENE_VAL_REG(gene, 15, 3, 12, 8)
+
+
 /**
  * @brief How much energy is absorbed from a given type of food
  * @param food_type The type of food
@@ -72,9 +81,20 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
     n_int   shellfish = GENE_ENERGY_FROM_SHELLFISH(genetics);
     n_int   seawood = GENE_ENERGY_FROM_SEAWEED(genetics);
 
+    n_int   bird_eggs = GENE_ENERGY_FROM_BIRD_EGGS(genetics);
+    n_int   lizard_eggs = GENE_ENERGY_FROM_LIZARD_EGGS(genetics);
+    
     n_int        return_value = 0;
     /** note that the absorbition for different foods is normalised */
-    n_int absorb_denom = 1 + vegetable + fruit + seawood;
+    n_int absorb_denom = 1 + vegetable + fruit + seawood + bird_eggs + lizard_eggs;
+    
+#ifdef METABOLISM_ON
+    /** update metabolism */
+    metabolism_eat(local, food_type);
+#endif
+    /** ingest pathogens from certain foods */
+    being_ingest_pathogen(local, food_type);
+    
     switch (food_type)
     {
     case FOOD_VEGETABLE:
@@ -87,6 +107,12 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
         return_value = (shellfish << 4) / absorb_denom;
         break;
     case FOOD_SEAWEED:
+        return_value = (seawood << 4) / absorb_denom;
+        break;
+    case FOOD_BIRD_EGGS:
+        return_value = (seawood << 4) / absorb_denom;
+        break;
+    case FOOD_LIZARD_EGGS:
         return_value = (seawood << 4) / absorb_denom;
         break;
     default:
@@ -135,6 +161,8 @@ void food_values(n_land * local_land,
                  n_int loc_y,
                  n_int *grass, n_int *trees, n_int *bush)
 {
+    /* TODO include bird and lizard eggs */
+    
     /** grass at this location */
     *grass =
         food_location(local_land, loc_x, loc_y, VARIABLE_BIOLOGY_GRASS)+OFFSET_GRASS;
@@ -167,6 +195,8 @@ static n_byte food_eat_land(
     n_byte food_type = FOOD_VEGETABLE;
     n_int grass, trees, bush;
 
+    /* TODO Handle this logic centrally - including the int values in the function not outside */
+    
     food_values(local_land, loc_x,loc_y,&grass, &trees, &bush);
 
     /** which is the dominant form of vegetation in this area? */
@@ -271,12 +301,6 @@ n_int food_eat(
         /** in the intertidal zone */
         *food_type = food_intertidal(local_land, loc_x, loc_y, &max_energy);
     }
-#ifdef METABOLISM_ON
-    /** update metabolism */
-    metabolism_eat(local_being, *food_type);
-#endif
-    /** ingest pathogens from certain foods */
-    being_ingest_pathogen(local_being, *food_type);
 
     return food_absorption(local_being, max_energy, *food_type);
 }

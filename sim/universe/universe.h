@@ -453,7 +453,9 @@ enum inventory_type
     INVENTORY_GRASS = 512,
     INVENTORY_SCRAPER = 1024,
     INVENTORY_SPEAR = 2048,
-    INVENTORY_FISH = 4096
+    INVENTORY_FISH = 4096,
+    INVENTORY_BIRD_EGGS = 8192,
+    INVENTORY_LIZARD_EGGS = 16384
 };
 
 #define VALUABLE_OBJECT    (INVENTORY_NUT & INVENTORY_SHELL)
@@ -737,6 +739,8 @@ enum FOOD_KINDS
     FOOD_FRUIT,
     FOOD_SHELLFISH,
     FOOD_SEAWEED,
+    FOOD_BIRD_EGGS,
+    FOOD_LIZARD_EGGS,
     FOOD_TYPES
 };
 
@@ -766,7 +770,9 @@ enum energy_types
     ENERGY_SEAWEED             = 30,
     ENERGY_SHELLFISH           = 300,
     ENERGY_NUT                 = 200,
-    ENERGY_FISH                = 600
+    ENERGY_FISH                = 600,
+    ENERGY_BIRD_EGGS           = 800,
+    ENERGY_LIZARD_EGGS         = 1000
 };
 
 /* speed of running away */

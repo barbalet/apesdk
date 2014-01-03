@@ -180,25 +180,6 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
 
 }
 
-void brain_hash(n_byte *local_brain, n_byte * local_brain_hash)   /**< TODO THIS IS WRONG! FIX!*/
-{
-    const n_byte	*known_values = (n_byte *)"0123456789ABCDEF";
-    n_uint	hash_value = 0;
-    local_brain_hash[0]  = known_values[ ((hash_value >> 0) & 15 ) ];
-    local_brain_hash[1]  = known_values[ ((hash_value >> 4) & 15) ];
-    local_brain_hash[2]  = ' ';
-    local_brain_hash[3]  = known_values[ ((hash_value >> 8) & 15) ];
-    local_brain_hash[4]  = known_values[ ((hash_value >> 12) & 15) ];
-    local_brain_hash[5]  = ' ';
-    local_brain_hash[6]  = known_values[ ((hash_value >> 16) & 15) ];
-    local_brain_hash[7]  = known_values[ ((hash_value >> 20) & 15) ];
-    local_brain_hash[8]  = ' ';
-    local_brain_hash[9]  = known_values[ ((hash_value >> 24) & 15) ];
-    local_brain_hash[10] = known_values[ ((hash_value >> 28) & 15) ];
-
-    local_brain_hash[11] = 0;
-}
-
 /**     "XXX_#NNN_#NNN"*/
 /**     "0123456789012"*/
 
@@ -1346,7 +1327,8 @@ void brain_dialogue(
                     if (carrying==0) carrying = being_carried(meeter_being,BODY_LEFT_HAND);
                     if (carrying!=0)
                     {
-                        switch(addr0[0]%9)
+                        /* TODO Is this willed into existence? */
+                        switch(addr0[0]%12)
                         {
                         case 0:
                             obj_type = INVENTORY_BRANCH;
@@ -1374,6 +1356,15 @@ void brain_dialogue(
                             break;
                         case 8:
                             obj_type = INVENTORY_SPEAR;
+                            break;
+                        case 9:
+                            obj_type = INVENTORY_FISH;
+                            break;
+                        case 10:
+                            obj_type = INVENTORY_BIRD_EGGS;
+                            break;
+                        case 11:
+                            obj_type = INVENTORY_LIZARD_EGGS;
                             break;
                         }
                         if (carrying & obj_type)

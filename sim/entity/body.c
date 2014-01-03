@@ -247,11 +247,11 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
                 /* carry fish */
                 if (carrying & INVENTORY_SPEAR)
                 {
-                    being_take(local,BODY_LEFT_HAND,INVENTORY_FISH);
+                    being_take(local,BODY_LEFT_HAND, INVENTORY_FISH);
                 }
                 else
                 {
-                    being_take(local,hand,INVENTORY_FISH);
+                    being_take(local,hand, INVENTORY_FISH);
                 }
                 episodic_self(sim, local, EVENT_FISH, AFFECT_FISH, 0);
             }
@@ -330,12 +330,13 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
  * @param hand left or right hand
  */
 
-/* TODO: body_action_chew needs to contain full food_eat path */
 static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if (!((carrying & INVENTORY_GRASS) ||
             (carrying & INVENTORY_TWIG) ||
             (carrying & INVENTORY_FISH) ||
+            (carrying & INVENTORY_BIRD_EGGS) ||
+            (carrying & INVENTORY_LIZARD_EGGS) ||
             (carrying & INVENTORY_NUT_CRACKED)))
     {
         hand = BODY_LEFT_HAND;
@@ -344,6 +345,8 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
     if ((carrying & INVENTORY_GRASS) ||
             (carrying & INVENTORY_TWIG) ||
             (carrying & INVENTORY_FISH) ||
+            (carrying & INVENTORY_BIRD_EGGS) ||
+            (carrying & INVENTORY_LIZARD_EGGS) ||
             (carrying & INVENTORY_NUT_CRACKED))
     {
         if (hand == BODY_RIGHT_HAND)
@@ -373,6 +376,24 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
                 /** consume nut */
                 being_energy_delta(local, food_absorption(local, ENERGY_NUT, FOOD_VEGETABLE));
                 being_drop(local,hand);
+            }
+            else
+            {
+                if (carrying & INVENTORY_BIRD_EGGS)
+                {
+                    /** consume nut */
+                    being_energy_delta(local, food_absorption(local, ENERGY_BIRD_EGGS, FOOD_BIRD_EGGS));
+                    being_drop(local,hand);
+                }
+                else
+                {
+                    if (carrying & INVENTORY_LIZARD_EGGS)
+                    {
+                        /** consume nut */
+                        being_energy_delta(local, food_absorption(local, ENERGY_LIZARD_EGGS, FOOD_LIZARD_EGGS));
+                        being_drop(local,hand);
+                    }
+                }
             }
         }
     }
@@ -449,9 +470,12 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
         {
             if (az > TIDE_MAX)
             {
+                /* TODO handle this logic centrally */
+
                 n_int grass, trees, bush;
                 food_values(sim->land, being_location_x(local), being_location_y(local), &grass, &trees, &bush);
 
+                
                 if ((grass>bush) && (grass>trees))
                 {
                     being_take(local,hand, INVENTORY_GRASS);

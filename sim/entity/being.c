@@ -1386,6 +1386,12 @@ static void being_inventory_string(n_string string, n_int * location, n_int item
     case INVENTORY_FISH:
         io_string_write(string,"fish",location);
         break;
+    case INVENTORY_BIRD_EGGS:
+        io_string_write(string,"bird eggs",location);
+        break;
+    case INVENTORY_LIZARD_EGGS:
+        io_string_write(string,"lizard eggs",location);
+        break;
     case INVENTORY_CHILD:
     case INVENTORY_WOUND:
     case INVENTORY_GROOMED:
@@ -1564,6 +1570,16 @@ n_int episode_description(
                 io_string_write(str,"seaweed",&string_index);
                 break;
             }
+            case FOOD_BIRD_EGGS:
+            {
+                io_string_write(str,"bird eggs",&string_index);
+                break;
+            }
+            case FOOD_LIZARD_EGGS:
+            {
+                io_string_write(str,"lizard eggs",&string_index);
+                break;
+            }
             }
             break;
         }
@@ -1616,6 +1632,22 @@ n_int episode_description(
                         if (local_episodic[index].arg & INVENTORY_NUT_CRACKED)
                         {
                             io_string_write(str,"a cracked nut ",&string_index);
+                        }
+                        else
+                        {
+                            {
+                                if (local_episodic[index].arg & INVENTORY_BIRD_EGGS)
+                                {
+                                    io_string_write(str,"birds eggs ",&string_index);
+                                }
+                                else
+                                {
+                                    if (local_episodic[index].arg & INVENTORY_LIZARD_EGGS)
+                                    {
+                                        io_string_write(str,"lizard eggs ",&string_index);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

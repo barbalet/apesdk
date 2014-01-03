@@ -1388,9 +1388,6 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
             lpx++;
         }
         tilt_y = ( tilt_y + 2 ) & 255;
-#ifdef BRAIN_HASH
-        draw_string(brain_hash_out, 12, 495,  &local_mono);
-#endif
     }
 }
 
