@@ -489,7 +489,7 @@ static n_int sim_memory(n_uint offscreen_size)
     return being_memory(&sim, offbuffer, &current_location, memory_allocated);
 }
 
-void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
+static void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
 {
     n_uint  lp = 0;
     math_bilinear_512_4096(small_map, map);

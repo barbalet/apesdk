@@ -167,8 +167,7 @@ typedef	struct
 {
     n_byte2 signature;
     n_byte2 version;
-}
-n_version;
+} n_version;
 
 /*! @struct
  @field x     X value in the 2d vector.
@@ -198,8 +197,6 @@ typedef	struct
     const n_string what_is_it;
 } noble_file_entry;
 
-
-
 #define POPULATED(ch) ((ch[0] != 0) || (ch[1] != 0) || (ch[2] != 0) || (ch[3] != 0) || (ch[4] != 0) || (ch[5] != 0))
 
 /* include externally, if needed */
@@ -223,20 +220,7 @@ enum file_element_type
 #define	ASCII_LOWERCASE(val)	(((val) >= 'a') && ((val) <= 'z'))
 #define	ASCII_UPPERCASE(val)	(((val) >= 'A') && ((val) <= 'Z'))
 
-#define CHAR_TAB                 (9)
-#define CHAR_SPACE               (32)
-
-/* this is v2 of the file parsing, v3 is soon to be implemented through the scripting interface */
-#define CHAR_EOF              	  0
-#define	IS_RETURN(val)			  (((val) == 10) || ((val) == 13))
-#define IS_TAB(val)               ((val) == CHAR_TAB)
-#define IS_SPACE(val)             ((val) == CHAR_SPACE)
-#define	IS_WHITE_HORIZON(val)	  (IS_TAB(val)  || IS_SPACE(val))
-#define	IS_WHITE_SPACE(val)		  (IS_WHITE_HORIZON((val))||IS_RETURN((val)))
 #define FILE_OKAY				  0x0000
-#define FILE_END_INCLUSION        0x0101
-#define	FILE_TYPE(num)			  ((num)&0x07)
-#define	FILE_CONTINUATION		  0x80
 #define	FILE_ERROR				  (-1)
 
 typedef n_string (n_console_input)(n_string value, n_int length);

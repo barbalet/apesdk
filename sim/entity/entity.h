@@ -337,7 +337,6 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
 
 void being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data);
 
-
 void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data);
 
 typedef struct{

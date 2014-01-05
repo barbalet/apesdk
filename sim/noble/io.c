@@ -47,6 +47,20 @@
 static n_int command_line_execution;
 static n_int command_line_external_exit = 0;
 
+#define CHAR_TAB                 (9)
+#define CHAR_SPACE               (32)
+
+/* this is v2 of the file parsing, v3 is soon to be implemented through the scripting interface */
+#define CHAR_EOF              	  0
+#define	IS_RETURN(val)			  (((val) == 10) || ((val) == 13))
+#define IS_TAB(val)               ((val) == CHAR_TAB)
+#define IS_SPACE(val)             ((val) == CHAR_SPACE)
+#define	IS_WHITE_HORIZON(val)	  (IS_TAB(val)  || IS_SPACE(val))
+#define	IS_WHITE_SPACE(val)		  (IS_WHITE_HORIZON((val))||IS_RETURN((val)))
+#define FILE_END_INCLUSION        0x0101
+#define	FILE_TYPE(num)			  ((num)&0x07)
+#define	FILE_CONTINUATION		  0x80
+
 void  io_command_line_execution_set(void)
 {
     command_line_execution = 1;

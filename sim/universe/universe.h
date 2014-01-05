@@ -1398,8 +1398,6 @@ n_int sim_thread_console_quit(void);
 void  sim_thread_console(void);
 #endif
 
-void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block);
-
 #ifdef CONSOLE_REQUIRED
 
 const static noble_console_command control_commands[] =
