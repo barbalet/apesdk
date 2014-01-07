@@ -571,9 +571,16 @@ void being_loop(noble_simulation * sim, noble_being * being_not, being_loop_fn b
         }
         loop++;
     }
-    execute_complete_added();
 #else
     being_loop_no_thread(sim, being_not, bf_func, data);
+#endif
+}
+
+void being_loop_wait(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
+{
+    being_loop(sim, being_not, bf_func, data);
+#ifdef EXECUTE_THREADED
+    execute_complete_added();
 #endif
 }
 
@@ -754,7 +761,7 @@ noble_being * being_from_name(noble_simulation * sim, n_string name)
     bfns.being_from_name = 0L;
     io_lower(name, io_length(name,STRING_BLOCK_SIZE));
     bfns.name = name;
-    being_loop(sim, 0L, being_from_name_loop, &bfns);
+    being_loop_wait(sim, 0L, being_from_name_loop, &bfns);
     return bfns.being_from_name;
 }
 
@@ -1227,7 +1234,7 @@ static noble_being * being_find_closest(noble_simulation * sim, noble_being * ac
     bfcs.genetics = being_genetics(actual);
     bfcs.actual_age = being_dob(actual);
     
-    being_loop(sim, actual, being_find_closest_loop, &bfcs);
+    being_loop_wait(sim, actual, being_find_closest_loop, &bfcs);
     
     return bfcs.return_value;
 }
@@ -1261,7 +1268,7 @@ static noble_being * being_find_child(noble_simulation * sim, n_genetics * genet
     bfcs.max_age = max_age;
     bfcs.genetics = genetics;
     bfcs.return_value = 0L;
-    being_loop(sim, 0L, being_find_child_loop, &bfcs);
+    being_loop_wait(sim, 0L, being_find_child_loop, &bfcs);
     return bfcs.return_value;
 }
 

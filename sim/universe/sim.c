@@ -416,7 +416,7 @@ void sim_cycle(void)
     weather_cycle(sim.land);
 #endif
     
-    being_loop(&sim, 0L, sim_being_universal_loop, 0L);
+    being_loop_wait(&sim, 0L, sim_being_universal_loop, 0L);
 
     if (interpret)
     {
@@ -426,40 +426,40 @@ void sim_cycle(void)
     else
     {
         /** Listen for any shouts */
-        being_loop(&sim, 0L, being_listen, 0L);
+        being_loop_wait(&sim, 0L, being_listen, 0L);
 #ifdef EPISODIC_ON
-        being_loop(&sim, 0L, episodic_cycle, 0L);
+        being_loop_wait(&sim, 0L, episodic_cycle, 0L);
 #endif
-        being_loop(&sim, 0L, sim_being_cycle, 0L);
-        being_loop(&sim, 0L, drives_cycle, 0L);
+        being_loop_wait(&sim, 0L, sim_being_cycle, 0L);
+        being_loop_wait(&sim, 0L, drives_cycle, 0L);
     }
     
-    being_loop(&sim, 0L, sim_brain_loop, 0L);
+    being_loop_wait(&sim, 0L, sim_brain_loop, 0L);
     
 #ifdef BRAINCODE_ON
-    being_loop(&sim, 0L, sim_brain_dialogue_loop, 0L);
+    being_loop_wait(&sim, 0L, sim_brain_dialogue_loop, 0L);
 #endif
     {
         n_int       max_honor = 0;
         
-        being_loop(&sim, 0L, being_tidy_loop, &max_honor);
+        being_loop_wait(&sim, 0L, being_tidy_loop, &max_honor);
         
         if (max_honor)
         {
-            being_loop(&sim, 0L, being_recalibrate_honor_loop, 0L);
+            being_loop_wait(&sim, 0L, being_recalibrate_honor_loop, 0L);
         }
     }
     {
         being_remove_loop2_struct * brls = being_remove_initial(&sim);
         
-        being_loop(&sim, 0L, being_remove_loop1, 0L);
+        being_loop_wait(&sim, 0L, being_remove_loop1, 0L);
         being_loop_no_thread(&sim, 0L, being_remove_loop2, brls);
         
         being_remove_final(&sim, &brls);
     }
-    being_loop(&sim, 0L, social_initial_loop, 0L);
+    being_loop_wait(&sim, 0L, social_initial_loop, 0L);
     
-    being_loop(&sim, 0L, social_secondary_loop, 0L);
+    being_loop_wait(&sim, 0L, social_secondary_loop, 0L);
     sim_time(&sim);
 }
 
@@ -648,7 +648,7 @@ static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * d
 
 void sim_flood(void)
 {
-    being_loop(&sim, 0L, sim_flood_loop, 0L);
+    being_loop_wait(&sim, 0L, sim_flood_loop, 0L);
 }
 
 void sim_healthy_carrier(void)
