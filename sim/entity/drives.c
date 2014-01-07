@@ -284,13 +284,10 @@ static void drives_fatigue(
  * @param awake Whether the ape is awake
  * @param sim Pointer to the simulation
  */
-void drives_cycle(
-    noble_being * local,
-    n_int awake,
-    noble_simulation * sim)
+void drives_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    drives_hunger(local);
-    drives_sociability(local, sim);
-    drives_sex(local, awake, sim);
-    drives_fatigue(local);
+    drives_hunger(local_being);
+    drives_sociability(local_being, local_sim);
+    drives_sex(local_being, being_awake(local_sim,local_being), local_sim);
+    drives_fatigue(local_being);
 }

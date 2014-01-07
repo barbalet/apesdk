@@ -145,7 +145,6 @@ n_byte episodic_intention(
     n_byte2 mins_ahead,
     n_byte args);
 
-void episodic_cycle(noble_simulation * local_sim, noble_being * local);
 n_byte episodic_anecdote(
     noble_simulation * local_sim,
     noble_being * local,
@@ -155,10 +154,6 @@ void being_init_braincode(noble_being * local,
                           noble_being * other,
                           n_byte friend_foe,
                           n_byte internal);
-
-void drives_cycle(noble_being * local,
-                  n_int awake,
-                  noble_simulation * sim);
 
 n_byte get_braincode_instruction(noble_being * local_being);
 

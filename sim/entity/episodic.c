@@ -131,66 +131,70 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
  * @param local_sim pointer to the simulation
  * @param local pointer to the ape
  */
-void episodic_cycle(noble_simulation * local_sim, noble_being * local)
+void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    n_int i;
-    noble_episodic * local_episodic = being_episodic(local);
-    n_genetics * genetics = being_genetics(local);
-
-    if (!local_episodic) return;
-
-    for (i=0; i<EPISODIC_SIZE; i++)
+    if (being_awake(local_sim, local_being) == 0) return;
+    
     {
-        if (local_episodic[i].event == 0) continue;
+        n_int i;
+        noble_episodic * local_episodic = being_episodic(local_being);
+        n_genetics * genetics = being_genetics(local_being);
 
-        /** remove intentions which are outdated */
-        if (local_episodic[i].event >= EVENT_INTENTION)
+        if (!local_episodic) return;
+
+        for (i=0; i<EPISODIC_SIZE; i++)
         {
-            /** is this my intention, or someone else's? */
-            if (being_name_comparison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
+            if (local_episodic[i].event == 0) continue;
+
+            /** remove intentions which are outdated */
+            if (local_episodic[i].event >= EVENT_INTENTION)
             {
-                if (local_episodic[i].date[0] < local_sim->land->date[0])
+                /** is this my intention, or someone else's? */
+                if (being_name_comparison(local_being, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                 {
-                    local_episodic[i].event = 0;
-                    continue;
-                }
-                else
-                {
-                    if (local_episodic[i].time < local_sim->land->time)
+                    if (local_episodic[i].date[0] < local_sim->land->date[0])
                     {
                         local_episodic[i].event = 0;
                         continue;
                     }
+                    else
+                    {
+                        if (local_episodic[i].time < local_sim->land->time)
+                        {
+                            local_episodic[i].event = 0;
+                            continue;
+                        }
+                    }
                 }
+                episodic_intention_update(local_sim, local_being, i);
             }
-            episodic_intention_update(local_sim,local,i);
-        }
 
-        /** fade towards EPISODIC_AFFECT_ZERO */
-        if (local_episodic[i].affect < EPISODIC_AFFECT_ZERO)
-        {
-            /** negative memories fade */
-            if (EPISODIC_AFFECT_ZERO - local_episodic[i].affect > 16)
+            /** fade towards EPISODIC_AFFECT_ZERO */
+            if (local_episodic[i].affect < EPISODIC_AFFECT_ZERO)
             {
-                local_episodic[i].affect+=(1+GENE_NEGATIVE_AFFECT_FADE(genetics));
-            }
-            else
-            {
-                local_episodic[i].affect++;
-            }
-        }
-        else
-        {
-            if (local_episodic[i].affect > EPISODIC_AFFECT_ZERO)
-            {
-                /** positive memories fade */
-                if (local_episodic[i].affect - EPISODIC_AFFECT_ZERO > 16)
+                /** negative memories fade */
+                if (EPISODIC_AFFECT_ZERO - local_episodic[i].affect > 16)
                 {
-                    local_episodic[i].affect-=(1+GENE_POSITIVE_AFFECT_FADE(genetics));
+                    local_episodic[i].affect+=(1+GENE_NEGATIVE_AFFECT_FADE(genetics));
                 }
                 else
                 {
-                    local_episodic[i].affect--;
+                    local_episodic[i].affect++;
+                }
+            }
+            else
+            {
+                if (local_episodic[i].affect > EPISODIC_AFFECT_ZERO)
+                {
+                    /** positive memories fade */
+                    if (local_episodic[i].affect - EPISODIC_AFFECT_ZERO > 16)
+                    {
+                        local_episodic[i].affect-=(1+GENE_POSITIVE_AFFECT_FADE(genetics));
+                    }
+                    else
+                    {
+                        local_episodic[i].affect--;
+                    }
                 }
             }
         }

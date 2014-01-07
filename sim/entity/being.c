@@ -2336,18 +2336,20 @@ static void being_listen_loop(noble_simulation * sim, noble_being * other, void 
  * @param sim Pointer to the simulation
  * @param current_being_index Array index of the current being
  */
-static void being_listen(noble_simulation * sim, noble_being * local)
+void being_listen(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     being_listen_struct bls;
-    bls.max_shout_volume = 127;
-    bls.local = local;
-    /** clear shout values */
-    if (local->shout[SHOUT_CTR] > 0)
-    {
-        local->shout[SHOUT_CTR]--;
-    }
-    being_loop_no_thread(sim, local, being_listen_loop, &bls);
     
+    if (being_awake(local_sim, local_being) == 0) return;
+    
+    bls.max_shout_volume = 127;
+    bls.local = local_being;
+    /** clear shout values */
+    if (local_being->shout[SHOUT_CTR] > 0)
+    {
+        local_being->shout[SHOUT_CTR]--;
+    }
+    being_loop_no_thread(local_sim, local_being, being_listen_loop, &bls);
 }
 
 static void being_closest_loop(noble_simulation * sim, noble_being * test_being, void * data)
@@ -2530,13 +2532,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
     nearest.opposite_sex = 0L;
     nearest.same_sex = 0L;
-
-    /** Listen for any shouts */
-    being_listen(sim, local);
-
-#ifdef EPISODIC_ON
-    episodic_cycle(sim, local);
-#endif
 
     {
         n_vect2 location_vector;
@@ -2893,9 +2888,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         }
     }
 #endif
-
-    /** update biological drives */
-    drives_cycle(local, awake, sim);
 
     being_set_energy(local, loc_e);
     being_set_speed(local, (n_byte)loc_s);

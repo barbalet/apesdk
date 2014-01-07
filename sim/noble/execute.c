@@ -137,10 +137,9 @@ static void * execute_thread(void * id)
              */
             struct timespec tim, tim2;
             tim.tv_sec = 0;
-            tim.tv_nsec = 6;
+            tim.tv_nsec = 1;
             (void)nanosleep(&tim , &tim2);
         }
-        
         if (value->state == ES_WAITING)
         {
             execute_object * object = value->executed;

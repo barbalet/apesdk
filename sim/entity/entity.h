@@ -237,6 +237,8 @@ enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location);
 void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
 
+void being_listen(noble_simulation * sim, noble_being * local, void * data);
+
 #ifdef BRAINCODE_ON
 n_byte * being_braincode_external(noble_being * value);
 n_byte * being_braincode_internal(noble_being * value);
@@ -258,8 +260,12 @@ void being_erase(noble_being * value);
 
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
 
+void   episodic_cycle(noble_simulation * local_sim, noble_being * local, void * data);
+
 void   being_cycle_awake(noble_simulation * sim, noble_being * local);
 void   being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake);
+
+void   drives_cycle(noble_simulation * local_sim, noble_being * local_being, void * data);
 
 void    being_state_description(n_byte2 state, n_string result);
 
