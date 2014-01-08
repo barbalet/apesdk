@@ -416,7 +416,7 @@ void sim_cycle(void)
     weather_cycle(sim.land);
 #endif
     
-    being_loop_wait(&sim, 0L, sim_being_universal_loop, 0L);
+    being_loop(&sim, 0L, sim_being_universal_loop, 0L);
 
     if (interpret)
     {
@@ -426,18 +426,18 @@ void sim_cycle(void)
     else
     {
         /** Listen for any shouts */
-        being_loop_wait(&sim, 0L, being_listen, 0L);
+        being_loop(&sim, 0L, being_listen, 0L);
 #ifdef EPISODIC_ON
-        being_loop_wait(&sim, 0L, episodic_cycle, 0L);
+        being_loop(&sim, 0L, episodic_cycle, 0L);
 #endif
-        being_loop_wait(&sim, 0L, sim_being_cycle, 0L);
-        being_loop_wait(&sim, 0L, drives_cycle, 0L);
+        being_loop(&sim, 0L, sim_being_cycle, 0L);
+        being_loop(&sim, 0L, drives_cycle, 0L);
     }
     
-    being_loop_wait(&sim, 0L, sim_brain_loop, 0L);
+    being_loop(&sim, 0L, sim_brain_loop, 0L);
     
 #ifdef BRAINCODE_ON
-    being_loop_wait(&sim, 0L, sim_brain_dialogue_loop, 0L);
+    being_loop(&sim, 0L, sim_brain_dialogue_loop, 0L);
 #endif
     {
         n_int       max_honor = 0;
@@ -457,7 +457,7 @@ void sim_cycle(void)
         
         being_remove_final(&sim, &brls);
     }
-    being_loop_wait(&sim, 0L, social_initial_loop, 0L);
+    being_loop(&sim, 0L, social_initial_loop, 0L);
     
     being_loop_wait(&sim, 0L, social_secondary_loop, 0L);
     sim_time(&sim);

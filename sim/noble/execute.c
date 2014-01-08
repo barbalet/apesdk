@@ -63,9 +63,9 @@ typedef struct
     execute_state  state;
 } execution_thread;
 
-static int global_cycle = 1;
-static int execution_cycle = 0;
-static int threads_started = 0;
+static n_int global_cycle = 1;
+static n_int execution_cycle = 0;
+static n_int threads_started = 0;
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
 
@@ -172,7 +172,7 @@ static void * execute_thread(void * id)
 void execute_init(void)
 {
 #ifdef    EXECUTE_THREADED
-    int loop = 0;
+    n_int loop = 0;
     while (loop < MAX_EXECUTION_THREAD_SIZE)
     {
         pthread_create(&thread[loop], NULL, execute_thread, &execution[loop]);
