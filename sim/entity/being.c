@@ -1748,8 +1748,12 @@ n_int episode_description(
         }
     }
 #endif
+    str[string_index] = 0;
+    
     string_index = 0;
+    
     io_string_write(description, str, &string_index);
+    
     return social;
 }
 

@@ -48,7 +48,7 @@
 
 #undef   DEBUG_NON_FILE_HANDLE    /* Stops there being a file handle for debug output */
 
-#define  EXECUTE_THREADED
+#undef  EXECUTE_THREADED
 
 #ifdef COMMAND_LINE_EXPLICIT
 

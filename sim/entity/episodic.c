@@ -479,7 +479,7 @@ static void episodic_store_full(
             n_string_block time = {0};
             n_string_block combination = {0};
             n_int social_event;
-
+            
             being_name_simple(local, str);
 
             social_event = episode_description(local_sim, local, replace, description);
