@@ -1265,7 +1265,7 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
                                       'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
                                      };
     n_uint	lp = 0, division = 1000000;
-    while (lp < 5)
+    while (lp < 6)
     {
         if ((count + 1) > division)
         {
@@ -1281,7 +1281,6 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
         division /= 10;
         lp++;
     }
-    cycles_per_sec[5] = ('0' + ((count / 10) % 10));
     cycles_per_sec[6] = ('0' + ((count / 1) % 10));
     draw_string(cycles_per_sec, terrain_dim_x - 110, 142, local_mono);
 }
@@ -1669,7 +1668,15 @@ n_int  draw_cycle(void)
 #ifdef NON_THREADED_DRAW
     draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
 #else
-    draw_terrain_threadable(local_sim, &local_vect);
+    /* TODO: Make the threaded draw command line safe */
+    if (io_command_line_execution())
+    {
+        draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
+    }
+    else
+    {
+        draw_terrain_threadable(local_sim, &local_vect);
+    }
 #endif
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */

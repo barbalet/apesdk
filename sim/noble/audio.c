@@ -120,7 +120,7 @@ void audio_fft(n_byte inverse, n_uint power_sample)
     BlockSize = 2;
     while (BlockSize <= NumSamples)
     {
-        n_double delta_angle = angle_numerator / (double)BlockSize;
+        n_double delta_angle = angle_numerator / (n_double)BlockSize;
         n_double sm2 = sin ( -2 * delta_angle );
         n_double sm1 = sin ( -delta_angle );
         n_double cm2 = cos ( -2 * delta_angle );
