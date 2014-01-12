@@ -318,8 +318,14 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
 
     io_time_to_string(time, local_sim->land->time, local_sim->land->date[0], local_sim->land->date[1]);
 
+    if (local_sim->delta_cycles)
+    {
+        sprintf(beingstr,"%sBrain Cycles Per Second: %ld\n", beingstr, local_sim->delta_cycles);
+    }
+    
+    
     sprintf(beingstr,"%s%s", beingstr, time);
-
+    
     if (simulation_executing)
     {
         sprintf(beingstr,"%s Simulation running", beingstr);
