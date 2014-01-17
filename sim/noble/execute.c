@@ -65,9 +65,22 @@ typedef struct
 
 static n_int global_cycle = 1;
 static n_int execution_cycle = 0;
-static n_int threads_started = 0;
+
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
+
+static void execute_wait_ms(void)
+{
+    /* In time cycle testing this may be seen to be wasted time
+     the problem however is the execution is not available
+     */
+
+    struct timespec tim, tim2;
+    tim.tv_sec = 0;
+    tim.tv_nsec = 1;
+    (void)nanosleep(&tim , &tim2);
+}
+
 
 #endif
 
@@ -76,17 +89,20 @@ void execute_add(execute_function * function, void * general_data, void * read_d
 #ifndef EXECUTE_THREADED
     function(general_data,read_data,write_data);
 #else
-    if (threads_started == 0)
-    {
-        execute_init();
-    }
+    n_byte2     random[2];
+    n_byte2    *value = (n_byte2*)function;
+    random[0] = value[0];
+    random[1] = value[1];
     
     execution_cycle = 1;
     do{
-        n_int loop = 0;
+        n_int   loop = 0;
+        n_byte2 loop_order = math_random(random);
+        
         while (loop < MAX_EXECUTION_THREAD_SIZE)
         {
-            if (execution[loop].state == ES_DONE)
+            n_byte2 hit_location = (loop ^ loop_order) & (MAX_EXECUTION_THREAD_SIZE - 1);
+            if (execution[hit_location].state == ES_DONE)
             {
                 execute_object * new_object = io_new(sizeof(execute_object));
                 new_object->function = function;
@@ -94,14 +110,15 @@ void execute_add(execute_function * function, void * general_data, void * read_d
                 new_object->read_data = read_data;
                 new_object->write_data = write_data;
                     
-                execution[loop].executed = new_object;
-                execution[loop].state = ES_WAITING;
+                execution[hit_location].executed = new_object;
+                execution[hit_location].state = ES_WAITING;
                 
                 return;
             }
             
             loop++;
         }
+        execute_wait_ms();
     }while (global_cycle);
 #endif
 }
@@ -132,13 +149,7 @@ static void * execute_thread(void * id)
         n_int            all_idle = 1;
         if (value->state != ES_WAITING)
         {
-            /* In time cycle testing this may be seen to be wasted time
-               the problem however is the execution is not available
-             */
-            struct timespec tim, tim2;
-            tim.tv_sec = 0;
-            tim.tv_nsec = 1;
-            (void)nanosleep(&tim , &tim2);
+            execute_wait_ms();
         }
         if (value->state == ES_WAITING)
         {
@@ -178,6 +189,5 @@ void execute_init(void)
         pthread_create(&thread[loop], NULL, execute_thread, &execution[loop]);
         loop++;
     }
-    threads_started = 1;
 #endif
 }

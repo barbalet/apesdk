@@ -936,7 +936,7 @@ n_int io_find_size_data(noble_file_entry * commands)
     n_uint   max_entry = 0;
     n_int   lp = 1;
     n_byte  last_incl = FILE_INCL(commands[0].incl_kind);
-    n_byte *last_characters = commands[0].characters;
+    n_byte *last_characters;
     do{
         n_byte	data_incl = FILE_INCL(commands[lp].incl_kind);
         last_characters = commands[lp].characters;
