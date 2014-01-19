@@ -33,12 +33,18 @@
  
  ****************************************************************/
 
-#include <pthread.h>
-#include <time.h>
-
 #include "noble.h"
 
+#ifdef	_WIN32
+
+#undef EXECUTE_THREADED
+
+#endif
+
 #ifdef EXECUTE_THREADED
+
+#include <pthread.h>
+#include <time.h>
 
 #define MAX_EXECUTION_THREAD_SIZE 8
 

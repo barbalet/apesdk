@@ -342,10 +342,12 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
             return_value = SHARED_CYCLE_DEBUG_OUTPUT;
         }
 #endif
+#ifndef	_WIN32
         if (sim_thread_console_quit())
         {
             return_value = SHARED_CYCLE_QUIT;
         }
+#endif
     }
     return return_value;
 }

@@ -62,7 +62,7 @@ static HWND           global_hwnd[NUMBER_WINDOWS];
 static HBITMAP        offscreen[NUMBER_WINDOWS];
 static BITMAPINFO	* bmp_info[NUMBER_WINDOWS];
 
-static n_int		  window_definition[NUMBER_WINDOWS] = {NUM_VIEW, NUM_TERRAIN};
+static n_byte		  window_definition[NUMBER_WINDOWS] = {NUM_VIEW, NUM_TERRAIN};
 
 static n_int            firedown = -1;
 static unsigned char    firecontrol = 0;
@@ -208,7 +208,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     while (loop < NUMBER_WINDOWS)
     {
-        window_definition[loop] = shared_init(window_definition[loop], tmpres);
+        window_definition[loop] = (n_byte)shared_init(window_definition[loop], tmpres);
 
 
         bmp_info[loop] = (LPBITMAPINFO) malloc(sizeof(BYTE) * (sizeof(BITMAPINFOHEADER)
@@ -273,11 +273,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 1;
 
     case WM_PAINT:
-        shared_cycle((60*clock())/(CLK_TCK), NUM_VIEW);
-        shared_cycle((60*clock())/(CLK_TCK), NUM_TERRAIN);
-        shared_cycle_draw(NUM_VIEW, 512, 512);
-        shared_cycle_draw(NUM_TERRAIN, 512, 512);
-        /*
+		{
+			n_uint  local_time = time(0L)/*(60*clock())/CLK_TCK*/;
+			shared_cycle(local_time, NUM_VIEW, 512, 512);
+			shared_cycle(local_time, NUM_TERRAIN, 512, 512);
+
+		}
+		/*
         }*/
         plat_update();
 
@@ -297,7 +299,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     case WM_MOUSEMOVE:
         if (firedown != -1)
         {
-            shared_mouseReceived(LOWORD(lParam), HIWORD(lParam), firedown);
+            shared_mouseReceived(LOWORD(lParam), HIWORD(lParam), (n_byte)firedown);
         }
         return 0;
 
@@ -348,7 +350,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         shared_keyUp();
         return 0;
     case WM_CLOSE:
-
+		PostMessage(hwnd, WM_DESTROY, 0, 0);
         return 0;
 
     case WM_COMMAND:
@@ -424,7 +426,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         case FILE_SAVE_AS_HANDLE:
             dialog_up = 1;
-            plat_file_save_as(&sim_fileout);
+			/* TODO: Need to fix
+            plat_file_save_as(&sim_fileout); */
             dialog_up = 0;
             return 0;
         case FILE_EXIT_HANDLE:
@@ -434,6 +437,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 0;
 
     case WM_DESTROY:
+		/*
         if (io_disk_check((unsigned char *)"NobleApeAutoload.txt") == 1)
         {
             unsigned long		buff_len;
@@ -443,6 +447,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             fclose(outputfile);
             io_free(buff);
         }
+		*/
         DeleteObject(offscreen[0]);
         DeleteObject(offscreen[1]);
         sim_close();
@@ -499,9 +504,6 @@ static void plat_file_open(n_byte script)
 {
     char actual_file_name[MAX_PATH] = { 0 };
     long file_return ;
-    DWORD seek_result;
-    BOOL read_result;
-    DWORD read_len;
 
     OPENFILENAME opf;
     ZeroMemory(&opf, sizeof(opf));
@@ -523,7 +525,7 @@ static void plat_file_open(n_byte script)
     if (file_return )
     {
 
-        if(shared_openFileName(current_file_name, script) == 0)
+        if(shared_openFileName((n_string)current_file_name, script) == 0)
         {
             MessageBox(global_hwnd[0], TEXT("File processing failed"), TEXT("Noble Ape File Error"), MB_OK);
             CloseHandle(current_file);
@@ -567,7 +569,7 @@ static unsigned char plat_file_save(n_file_out cfo)
         CloseHandle(current_file);
         return 0;
     }
-    io_free(buff);
+    io_free(&buff);
     CloseHandle(current_file);
     return 1;
 }

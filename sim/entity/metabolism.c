@@ -193,6 +193,9 @@ void metabolism_vascular_response(noble_simulation * local_sim, noble_being * lo
         n_uint hr_diff = GET_MT(local_being,METABOLISM_HEART_RATE) - HEART_RATE_RESTING;
         n_int mult = response;
         if (mult==0) mult=-1;
+
+		/* TODO: Fix metablism interface with functions rather than macros */
+
         GET_MT(local_being,METABOLISM_HEART_RATE) += (n_int)(1+(hr_diff>>2))*mult;
 
         for (i = 0; i < VASCULAR_SIZE; i++)

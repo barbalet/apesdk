@@ -244,7 +244,7 @@ n_int being_honor_compare(noble_being * first, noble_being * second)
     return 0;
 }
 
-static n_int being_honor_immune(noble_being * value)
+static n_byte being_honor_immune(noble_being * value)
 {
     n_int local_honor = being_honor(value);
     if (local_honor < 250) /* ALPHA_RANK */
@@ -2647,6 +2647,8 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             /** Find the closest beings */
             being_closest(sim, local, &nearest);
         }
+
+		/* TODO: SOCIAL_THRESHOLD should not be a macro, it should be a function returning n_int */
 
         if (being_drive(local, DRIVE_SOCIAL) > SOCIAL_THRESHOLD(local))
         {
