@@ -249,7 +249,7 @@ static n_byte being_honor_immune(noble_being * value)
     n_int local_honor = being_honor(value);
     if (local_honor < 250) /* ALPHA_RANK */
     {
-        return 1+(local_honor>>6);
+        return (n_byte)(1 + (local_honor>>6));
     }
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }

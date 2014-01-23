@@ -49,7 +49,6 @@
 #ifndef	_WIN32
 
 #include <pthread.h>
-#include <unistd.h>
 
 #endif
 
@@ -228,8 +227,6 @@ n_int sim_new(void)
 
 #ifndef	_WIN32
 
-#include <pthread.h>
-
 static n_int      sim_quit_value = 0;
 static pthread_t  threads[2] = {0};
 static n_byte     threads_running[2] = {0};
@@ -241,8 +238,6 @@ n_int sim_thread_console_quit(void)
 
 static void sim_console_clean_up(void)
 {
-    n_int loop = 0;
-
     if ((io_command_line_execution() == 0) || sim_quit_value)
     {
         return;
@@ -253,15 +248,6 @@ static void sim_console_clean_up(void)
     console_quit(0L,0L,0L);
 
     while (console_executing()) {}
-
-    while (loop < 2)
-    {
-        if (threads_running[loop] != 0)
-        {
-            pthread_cancel(threads[loop]);
-        }
-        loop++;
-    }
 }
 
 static void *sim_thread(void *threadid)
@@ -272,7 +258,7 @@ static void *sim_thread(void *threadid)
         sim_console_clean_up();
     }
     local[0] = 0;
-    pthread_exit(NULL);
+    pthread_exit(0L);
 }
 
 void sim_thread_console(void)

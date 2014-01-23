@@ -182,7 +182,7 @@ static void * execute_thread(void * id)
             }
         }
     }while (global_cycle);
-    pthread_exit(NULL);
+    pthread_exit(0L);
 }
 #endif
 
@@ -192,7 +192,7 @@ void execute_init(void)
     n_int loop = 0;
     while (loop < MAX_EXECUTION_THREAD_SIZE)
     {
-        pthread_create(&thread[loop], NULL, execute_thread, &execution[loop]);
+        pthread_create(&thread[loop], 0L, execute_thread, &execution[loop]);
         loop++;
     }
 #endif
