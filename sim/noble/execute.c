@@ -34,7 +34,7 @@
  ****************************************************************/
 
 #include "noble.h"
-
+#undef EXECUTE_THREADED
 #ifdef EXECUTE_THREADED
 
 #ifdef _WIN32
@@ -43,22 +43,23 @@
 #include <tchar.h>
 #include <strsafe.h>
 
+#define MAX_EXECUTION_THREAD_SIZE 4
+
 #else
 
 #include <pthread.h>
-
-#endif
-
 #include <time.h>
 
 #define MAX_EXECUTION_THREAD_SIZE 8
+
+#endif
+
 
 typedef enum
 {
     ES_DONE = 0,
     ES_WAITING,
-    ES_STARTED,
-    ES_CLOSED
+    ES_STARTED
 }execute_state;
 
 typedef struct
@@ -96,11 +97,12 @@ static void execute_wait_ms(void)
     /* In time cycle testing this may be seen to be wasted time
      the problem however is the execution is not available
      */
-
+#ifndef _WIN32
     struct timespec tim, tim2;
     tim.tv_sec = 0;
     tim.tv_nsec = 1;
     (void)nanosleep(&tim , &tim2);
+#endif
 }
 
 
@@ -157,30 +159,16 @@ void execute_complete_added(void)
 void execute_close(void)
 {
 #ifdef EXECUTE_THREADED
-#ifdef _WIN32
-    n_int   all_not_closed = 1;
-    n_int   loop;
-#endif
     global_cycle = 0;
 #ifdef _WIN32
-    do{
-        loop = 0;
-        all_not_closed = 0;
-        while (loop < MAX_EXECUTION_THREAD_SIZE)
-        {
-            if (execution[loop].state != ES_CLOSED)
-            {
-                all_not_closed = 1;
-            }
-            loop++;
-        }
-    } while (all_not_closed);
-    loop = 0;
-    while (loop < MAX_EXECUTION_THREAD_SIZE)
-    {
-        CloseHandle(thread[i]);
-        loop++;
-    }
+	{
+		n_int loop = 0;
+		while (loop < MAX_EXECUTION_THREAD_SIZE)
+		{
+			CloseHandle(thread[loop]);
+			loop++;
+		}
+	}
 #endif
 #endif
 }
@@ -222,7 +210,6 @@ static void execute_thread_generic(void * id)
             }
         }
     }while (global_cycle);
-    value->state = ES_CLOSED;
 }
 
 #ifdef _WIN32
@@ -254,14 +241,14 @@ void execute_init(void)
     while (loop < MAX_EXECUTION_THREAD_SIZE)
     {
 #ifdef _WIN32
-        threadId[i] = i;
-        thread[i] = CreateThread(
+        threadId[loop] = loop;
+        thread[loop] = CreateThread(
                                        NULL,                   // default security attributes
                                        0,                      // use default stack size
                                        execute_thread_win,       // thread function name
-                                       pDataArray[i],          // argument to thread function
+                                       &execution[loop],          // argument to thread function
                                        0,                      // use default creation flags
-                                       &threadId[i]);   // returns the thread identifier
+                                       &threadId[loop]);   // returns the thread identifier
 #else
         pthread_create(&thread[loop], 0L, execute_thread_posix, &execution[loop]);
 #endif
