@@ -250,7 +250,9 @@ static void sim_console_clean_up(void)
     while (console_executing()) {}
 }
 
-static void *sim_thread(void *threadid)
+
+
+static void *sim_thread_posix(void *threadid)
 {
     n_byte *local = (n_byte *)threadid;
     if (io_console(&sim, (noble_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
@@ -276,7 +278,7 @@ void sim_thread_console(void)
             if (threads_running[loop] == 0)
             {
                 threads_running[loop] = 1;
-                pthread_create(&threads[loop], 0L, sim_thread, &threads_running[loop]);
+                pthread_create(&threads[loop], 0L, sim_thread_posix, &threads_running[loop]);
                 return;
             }
             loop++;

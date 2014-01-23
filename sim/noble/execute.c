@@ -35,15 +35,20 @@
 
 #include "noble.h"
 
-#ifdef	_WIN32
+#ifdef EXECUTE_THREADED
 
-#undef EXECUTE_THREADED
+#ifdef _WIN32
+
+#include <windows.h>
+#include <tchar.h>
+#include <strsafe.h>
+
+#else
+
+#include <pthread.h>
 
 #endif
 
-#ifdef EXECUTE_THREADED
-
-#include <pthread.h>
 #include <time.h>
 
 #define MAX_EXECUTION_THREAD_SIZE 8
@@ -52,7 +57,8 @@ typedef enum
 {
     ES_DONE = 0,
     ES_WAITING,
-    ES_STARTED
+    ES_STARTED,
+    ES_CLOSED
 }execute_state;
 
 typedef struct
@@ -72,7 +78,17 @@ typedef struct
 static n_int global_cycle = 1;
 static n_int execution_cycle = 0;
 
+
+#ifdef _WIN32
+
+static HANDLE            thread[MAX_EXECUTION_THREAD_SIZE];
+static DWORD             threadId[MAX_EXECUTION_THREAD_SIZE];
+#else
+
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
+
+#endif
+
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
 
 static void execute_wait_ms(void)
@@ -141,13 +157,37 @@ void execute_complete_added(void)
 void execute_close(void)
 {
 #ifdef EXECUTE_THREADED
+#ifdef _WIN32
+    n_int   all_not_closed = 1;
+    n_int   loop;
+#endif
     global_cycle = 0;
+#ifdef _WIN32
+    do{
+        loop = 0;
+        all_not_closed = 0;
+        while (loop < MAX_EXECUTION_THREAD_SIZE)
+        {
+            if (execution[loop].state != ES_CLOSED)
+            {
+                all_not_closed = 1;
+            }
+            loop++;
+        }
+    } while (all_not_closed);
+    loop = 0;
+    while (loop < MAX_EXECUTION_THREAD_SIZE)
+    {
+        CloseHandle(thread[i]);
+        loop++;
+    }
+#endif
 #endif
 }
 
 #ifdef EXECUTE_THREADED
 
-static void * execute_thread(void * id)
+static void execute_thread_generic(void * id)
 {
     execution_thread * value = id;
     do{
@@ -161,7 +201,7 @@ static void * execute_thread(void * id)
         {
             execute_object * object = value->executed;
             value->state = ES_STARTED;
-    
+            
             if (object->function(object->general_data, object->read_data, object->write_data) == -1)
             {
                 execute_close();
@@ -182,8 +222,29 @@ static void * execute_thread(void * id)
             }
         }
     }while (global_cycle);
+    value->state = ES_CLOSED;
+}
+
+#ifdef _WIN32
+
+static DWORD WINAPI execute_thread_win( LPVOID lpParam )
+{
+    HANDLE hStdout;
+    hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    if( hStdout == INVALID_HANDLE_VALUE )
+        return 1;
+    execute_thread_generic((void *)lpParam);
+    return 0;
+}
+
+#else
+static void * execute_thread_posix(void * id)
+{
+    execute_thread_generic(id);
     pthread_exit(0L);
 }
+#endif
+
 #endif
 
 void execute_init(void)
@@ -192,7 +253,18 @@ void execute_init(void)
     n_int loop = 0;
     while (loop < MAX_EXECUTION_THREAD_SIZE)
     {
-        pthread_create(&thread[loop], 0L, execute_thread, &execution[loop]);
+#ifdef _WIN32
+        threadId[i] = i;
+        thread[i] = CreateThread(
+                                       NULL,                   // default security attributes
+                                       0,                      // use default stack size
+                                       execute_thread_win,       // thread function name
+                                       pDataArray[i],          // argument to thread function
+                                       0,                      // use default creation flags
+                                       &threadId[i]);   // returns the thread identifier
+#else
+        pthread_create(&thread[loop], 0L, execute_thread_posix, &execution[loop]);
+#endif
         loop++;
     }
 #endif
