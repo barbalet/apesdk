@@ -1,0 +1,476 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4AFA637D1892621C00AEE4B1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AFA637C1892621C00AEE4B1 /* Cocoa.framework */; };
+		4AFA637F1892621C00AEE4B1 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AFA637E1892621C00AEE4B1 /* ScreenSaver.framework */; };
+		4AFA63891892621C00AEE4B1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4AFA63871892621C00AEE4B1 /* InfoPlist.strings */; };
+		4AFA638D1892621C00AEE4B1 /* NobleApeScreenSaverView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA638C1892621C00AEE4B1 /* NobleApeScreenSaverView.m */; };
+		4AFA63B41892643800AEE4B1 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63941892643800AEE4B1 /* audio.c */; };
+		4AFA63B51892643800AEE4B1 /* execute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63951892643800AEE4B1 /* execute.c */; };
+		4AFA63B61892643800AEE4B1 /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63961892643800AEE4B1 /* interpret.c */; };
+		4AFA63B71892643800AEE4B1 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63971892643800AEE4B1 /* io.c */; };
+		4AFA63B81892643800AEE4B1 /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63981892643800AEE4B1 /* land.c */; };
+		4AFA63B91892643800AEE4B1 /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63991892643800AEE4B1 /* math.c */; };
+		4AFA63BA1892643800AEE4B1 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA639A1892643800AEE4B1 /* network.c */; };
+		4AFA63BB1892643800AEE4B1 /* noble.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AFA639B1892643800AEE4B1 /* noble.h */; };
+		4AFA63BC1892643800AEE4B1 /* parse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA639C1892643800AEE4B1 /* parse.c */; };
+		4AFA63BD1892643800AEE4B1 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA639E1892643800AEE4B1 /* console.c */; };
+		4AFA63BE1892643800AEE4B1 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA639F1892643800AEE4B1 /* file.c */; };
+		4AFA63BF1892643800AEE4B1 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63A01892643800AEE4B1 /* sim.c */; };
+		4AFA63C01892643800AEE4B1 /* universe.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AFA63A11892643800AEE4B1 /* universe.h */; };
+		4AFA63C11892643800AEE4B1 /* universe_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AFA63A21892643800AEE4B1 /* universe_internal.h */; };
+		4AFA63C21892643800AEE4B1 /* being.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63A41892643800AEE4B1 /* being.c */; };
+		4AFA63C31892643800AEE4B1 /* body.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63A51892643800AEE4B1 /* body.c */; };
+		4AFA63C41892643800AEE4B1 /* brain.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63A61892643800AEE4B1 /* brain.c */; };
+		4AFA63C51892643800AEE4B1 /* drives.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63A71892643800AEE4B1 /* drives.c */; };
+		4AFA63C61892643800AEE4B1 /* entity.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AFA63A81892643800AEE4B1 /* entity.h */; };
+		4AFA63C71892643800AEE4B1 /* entity_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AFA63A91892643800AEE4B1 /* entity_internal.h */; };
+		4AFA63C81892643800AEE4B1 /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63AA1892643800AEE4B1 /* episodic.c */; };
+		4AFA63C91892643800AEE4B1 /* food.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63AB1892643800AEE4B1 /* food.c */; };
+		4AFA63CA1892643800AEE4B1 /* metabolism.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63AC1892643800AEE4B1 /* metabolism.c */; };
+		4AFA63CB1892643800AEE4B1 /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63AD1892643800AEE4B1 /* social.c */; };
+		4AFA63CC1892643800AEE4B1 /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63AE1892643800AEE4B1 /* speak.c */; };
+		4AFA63CD1892643800AEE4B1 /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63B01892643800AEE4B1 /* draw.c */; };
+		4AFA63CE1892643800AEE4B1 /* gui.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AFA63B11892643800AEE4B1 /* gui.h */; };
+		4AFA63CF1892643800AEE4B1 /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AFA63B21892643800AEE4B1 /* shared.c */; };
+		4AFA63D01892643800AEE4B1 /* shared.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AFA63B31892643800AEE4B1 /* shared.h */; };
+		4AFA63D2189264C200AEE4B1 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AFA63D1189264C200AEE4B1 /* OpenGL.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4AFA63791892621C00AEE4B1 /* NobleApeScreenSaver.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NobleApeScreenSaver.saver; sourceTree = BUILT_PRODUCTS_DIR; };
+		4AFA637C1892621C00AEE4B1 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		4AFA637E1892621C00AEE4B1 /* ScreenSaver.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenSaver.framework; path = System/Library/Frameworks/ScreenSaver.framework; sourceTree = SDKROOT; };
+		4AFA63811892621C00AEE4B1 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		4AFA63821892621C00AEE4B1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		4AFA63831892621C00AEE4B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		4AFA63861892621C00AEE4B1 /* NobleApeScreenSaver-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NobleApeScreenSaver-Info.plist"; sourceTree = "<group>"; };
+		4AFA63881892621C00AEE4B1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		4AFA638A1892621C00AEE4B1 /* NobleApeScreenSaver-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NobleApeScreenSaver-Prefix.pch"; sourceTree = "<group>"; };
+		4AFA638B1892621C00AEE4B1 /* NobleApeScreenSaverView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NobleApeScreenSaverView.h; sourceTree = "<group>"; };
+		4AFA638C1892621C00AEE4B1 /* NobleApeScreenSaverView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NobleApeScreenSaverView.m; sourceTree = "<group>"; };
+		4AFA63941892643800AEE4B1 /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio.c; sourceTree = "<group>"; };
+		4AFA63951892643800AEE4B1 /* execute.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = execute.c; sourceTree = "<group>"; };
+		4AFA63961892643800AEE4B1 /* interpret.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interpret.c; sourceTree = "<group>"; };
+		4AFA63971892643800AEE4B1 /* io.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = io.c; sourceTree = "<group>"; };
+		4AFA63981892643800AEE4B1 /* land.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = land.c; sourceTree = "<group>"; };
+		4AFA63991892643800AEE4B1 /* math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = math.c; sourceTree = "<group>"; };
+		4AFA639A1892643800AEE4B1 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
+		4AFA639B1892643800AEE4B1 /* noble.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = noble.h; sourceTree = "<group>"; };
+		4AFA639C1892643800AEE4B1 /* parse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = parse.c; sourceTree = "<group>"; };
+		4AFA639E1892643800AEE4B1 /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = console.c; sourceTree = "<group>"; };
+		4AFA639F1892643800AEE4B1 /* file.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = file.c; sourceTree = "<group>"; };
+		4AFA63A01892643800AEE4B1 /* sim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sim.c; sourceTree = "<group>"; };
+		4AFA63A11892643800AEE4B1 /* universe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe.h; sourceTree = "<group>"; };
+		4AFA63A21892643800AEE4B1 /* universe_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = universe_internal.h; sourceTree = "<group>"; };
+		4AFA63A41892643800AEE4B1 /* being.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = being.c; sourceTree = "<group>"; };
+		4AFA63A51892643800AEE4B1 /* body.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = body.c; sourceTree = "<group>"; };
+		4AFA63A61892643800AEE4B1 /* brain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = brain.c; sourceTree = "<group>"; };
+		4AFA63A71892643800AEE4B1 /* drives.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = drives.c; sourceTree = "<group>"; };
+		4AFA63A81892643800AEE4B1 /* entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = entity.h; sourceTree = "<group>"; };
+		4AFA63A91892643800AEE4B1 /* entity_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = entity_internal.h; sourceTree = "<group>"; };
+		4AFA63AA1892643800AEE4B1 /* episodic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = episodic.c; sourceTree = "<group>"; };
+		4AFA63AB1892643800AEE4B1 /* food.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = food.c; sourceTree = "<group>"; };
+		4AFA63AC1892643800AEE4B1 /* metabolism.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = metabolism.c; sourceTree = "<group>"; };
+		4AFA63AD1892643800AEE4B1 /* social.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = social.c; sourceTree = "<group>"; };
+		4AFA63AE1892643800AEE4B1 /* speak.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = speak.c; sourceTree = "<group>"; };
+		4AFA63B01892643800AEE4B1 /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw.c; sourceTree = "<group>"; };
+		4AFA63B11892643800AEE4B1 /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
+		4AFA63B21892643800AEE4B1 /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shared.c; sourceTree = "<group>"; };
+		4AFA63B31892643800AEE4B1 /* shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
+		4AFA63D1189264C200AEE4B1 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4AFA63741892621C00AEE4B1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AFA637F1892621C00AEE4B1 /* ScreenSaver.framework in Frameworks */,
+				4AFA637D1892621C00AEE4B1 /* Cocoa.framework in Frameworks */,
+				4AFA63D2189264C200AEE4B1 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4AFA636E1892621C00AEE4B1 = {
+			isa = PBXGroup;
+			children = (
+				4AFA63841892621C00AEE4B1 /* NobleApeScreenSaver */,
+				4AFA637B1892621C00AEE4B1 /* Frameworks */,
+				4AFA637A1892621C00AEE4B1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4AFA637A1892621C00AEE4B1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA63791892621C00AEE4B1 /* NobleApeScreenSaver.saver */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4AFA637B1892621C00AEE4B1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA637C1892621C00AEE4B1 /* Cocoa.framework */,
+				4AFA637E1892621C00AEE4B1 /* ScreenSaver.framework */,
+				4AFA63801892621C00AEE4B1 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4AFA63801892621C00AEE4B1 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA63D1189264C200AEE4B1 /* OpenGL.framework */,
+				4AFA63811892621C00AEE4B1 /* AppKit.framework */,
+				4AFA63821892621C00AEE4B1 /* CoreData.framework */,
+				4AFA63831892621C00AEE4B1 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		4AFA63841892621C00AEE4B1 /* NobleApeScreenSaver */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA63931892643800AEE4B1 /* noble */,
+				4AFA639D1892643800AEE4B1 /* universe */,
+				4AFA63A31892643800AEE4B1 /* entity */,
+				4AFA63AF1892643800AEE4B1 /* gui */,
+				4AFA638B1892621C00AEE4B1 /* NobleApeScreenSaverView.h */,
+				4AFA638C1892621C00AEE4B1 /* NobleApeScreenSaverView.m */,
+				4AFA63851892621C00AEE4B1 /* Supporting Files */,
+			);
+			path = NobleApeScreenSaver;
+			sourceTree = "<group>";
+		};
+		4AFA63851892621C00AEE4B1 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA63861892621C00AEE4B1 /* NobleApeScreenSaver-Info.plist */,
+				4AFA63871892621C00AEE4B1 /* InfoPlist.strings */,
+				4AFA638A1892621C00AEE4B1 /* NobleApeScreenSaver-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4AFA63931892643800AEE4B1 /* noble */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA63941892643800AEE4B1 /* audio.c */,
+				4AFA63951892643800AEE4B1 /* execute.c */,
+				4AFA63961892643800AEE4B1 /* interpret.c */,
+				4AFA63971892643800AEE4B1 /* io.c */,
+				4AFA63981892643800AEE4B1 /* land.c */,
+				4AFA63991892643800AEE4B1 /* math.c */,
+				4AFA639A1892643800AEE4B1 /* network.c */,
+				4AFA639B1892643800AEE4B1 /* noble.h */,
+				4AFA639C1892643800AEE4B1 /* parse.c */,
+			);
+			name = noble;
+			path = sim/noble;
+			sourceTree = SOURCE_ROOT;
+		};
+		4AFA639D1892643800AEE4B1 /* universe */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA639E1892643800AEE4B1 /* console.c */,
+				4AFA639F1892643800AEE4B1 /* file.c */,
+				4AFA63A01892643800AEE4B1 /* sim.c */,
+				4AFA63A11892643800AEE4B1 /* universe.h */,
+				4AFA63A21892643800AEE4B1 /* universe_internal.h */,
+			);
+			name = universe;
+			path = sim/universe;
+			sourceTree = SOURCE_ROOT;
+		};
+		4AFA63A31892643800AEE4B1 /* entity */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA63A41892643800AEE4B1 /* being.c */,
+				4AFA63A51892643800AEE4B1 /* body.c */,
+				4AFA63A61892643800AEE4B1 /* brain.c */,
+				4AFA63A71892643800AEE4B1 /* drives.c */,
+				4AFA63A81892643800AEE4B1 /* entity.h */,
+				4AFA63A91892643800AEE4B1 /* entity_internal.h */,
+				4AFA63AA1892643800AEE4B1 /* episodic.c */,
+				4AFA63AB1892643800AEE4B1 /* food.c */,
+				4AFA63AC1892643800AEE4B1 /* metabolism.c */,
+				4AFA63AD1892643800AEE4B1 /* social.c */,
+				4AFA63AE1892643800AEE4B1 /* speak.c */,
+			);
+			name = entity;
+			path = sim/entity;
+			sourceTree = SOURCE_ROOT;
+		};
+		4AFA63AF1892643800AEE4B1 /* gui */ = {
+			isa = PBXGroup;
+			children = (
+				4AFA63B01892643800AEE4B1 /* draw.c */,
+				4AFA63B11892643800AEE4B1 /* gui.h */,
+				4AFA63B21892643800AEE4B1 /* shared.c */,
+				4AFA63B31892643800AEE4B1 /* shared.h */,
+			);
+			name = gui;
+			path = sim/gui;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		4AFA63751892621C00AEE4B1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AFA63CE1892643800AEE4B1 /* gui.h in Headers */,
+				4AFA63C11892643800AEE4B1 /* universe_internal.h in Headers */,
+				4AFA63BB1892643800AEE4B1 /* noble.h in Headers */,
+				4AFA63C71892643800AEE4B1 /* entity_internal.h in Headers */,
+				4AFA63C01892643800AEE4B1 /* universe.h in Headers */,
+				4AFA63D01892643800AEE4B1 /* shared.h in Headers */,
+				4AFA63C61892643800AEE4B1 /* entity.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		4AFA63781892621C00AEE4B1 /* NobleApeScreenSaver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4AFA63901892621C00AEE4B1 /* Build configuration list for PBXNativeTarget "NobleApeScreenSaver" */;
+			buildPhases = (
+				4AFA63731892621C00AEE4B1 /* Sources */,
+				4AFA63741892621C00AEE4B1 /* Frameworks */,
+				4AFA63751892621C00AEE4B1 /* Headers */,
+				4AFA63761892621C00AEE4B1 /* Resources */,
+				4AFA63771892621C00AEE4B1 /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NobleApeScreenSaver;
+			productName = NobleApeScreenSaver;
+			productReference = 4AFA63791892621C00AEE4B1 /* NobleApeScreenSaver.saver */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4AFA636F1892621C00AEE4B1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = "Thomas Barbalet";
+			};
+			buildConfigurationList = 4AFA63721892621C00AEE4B1 /* Build configuration list for PBXProject "NobleApeScreenSaver" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 4AFA636E1892621C00AEE4B1;
+			productRefGroup = 4AFA637A1892621C00AEE4B1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4AFA63781892621C00AEE4B1 /* NobleApeScreenSaver */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4AFA63761892621C00AEE4B1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AFA63891892621C00AEE4B1 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		4AFA63771892621C00AEE4B1 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4AFA63731892621C00AEE4B1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AFA63BC1892643800AEE4B1 /* parse.c in Sources */,
+				4AFA63C21892643800AEE4B1 /* being.c in Sources */,
+				4AFA63B71892643800AEE4B1 /* io.c in Sources */,
+				4AFA63C31892643800AEE4B1 /* body.c in Sources */,
+				4AFA63B41892643800AEE4B1 /* audio.c in Sources */,
+				4AFA63CA1892643800AEE4B1 /* metabolism.c in Sources */,
+				4AFA63BF1892643800AEE4B1 /* sim.c in Sources */,
+				4AFA63C51892643800AEE4B1 /* drives.c in Sources */,
+				4AFA63BD1892643800AEE4B1 /* console.c in Sources */,
+				4AFA63B61892643800AEE4B1 /* interpret.c in Sources */,
+				4AFA63C91892643800AEE4B1 /* food.c in Sources */,
+				4AFA63C81892643800AEE4B1 /* episodic.c in Sources */,
+				4AFA63CC1892643800AEE4B1 /* speak.c in Sources */,
+				4AFA63CF1892643800AEE4B1 /* shared.c in Sources */,
+				4AFA63B51892643800AEE4B1 /* execute.c in Sources */,
+				4AFA63BA1892643800AEE4B1 /* network.c in Sources */,
+				4AFA63CD1892643800AEE4B1 /* draw.c in Sources */,
+				4AFA63B81892643800AEE4B1 /* land.c in Sources */,
+				4AFA638D1892621C00AEE4B1 /* NobleApeScreenSaverView.m in Sources */,
+				4AFA63CB1892643800AEE4B1 /* social.c in Sources */,
+				4AFA63C41892643800AEE4B1 /* brain.c in Sources */,
+				4AFA63BE1892643800AEE4B1 /* file.c in Sources */,
+				4AFA63B91892643800AEE4B1 /* math.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		4AFA63871892621C00AEE4B1 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4AFA63881892621C00AEE4B1 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4AFA638E1892621C00AEE4B1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		4AFA638F1892621C00AEE4B1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		4AFA63911892621C00AEE4B1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NobleApeScreenSaver/NobleApeScreenSaver-Prefix.pch";
+				INFOPLIST_FILE = "NobleApeScreenSaver/NobleApeScreenSaver-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Debug;
+		};
+		4AFA63921892621C00AEE4B1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NobleApeScreenSaver/NobleApeScreenSaver-Prefix.pch";
+				INFOPLIST_FILE = "NobleApeScreenSaver/NobleApeScreenSaver-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4AFA63721892621C00AEE4B1 /* Build configuration list for PBXProject "NobleApeScreenSaver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4AFA638E1892621C00AEE4B1 /* Debug */,
+				4AFA638F1892621C00AEE4B1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4AFA63901892621C00AEE4B1 /* Build configuration list for PBXNativeTarget "NobleApeScreenSaver" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4AFA63911892621C00AEE4B1 /* Debug */,
+				4AFA63921892621C00AEE4B1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4AFA636F1892621C00AEE4B1 /* Project object */;
+}

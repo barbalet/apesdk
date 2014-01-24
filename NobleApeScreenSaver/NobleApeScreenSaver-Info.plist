@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFile</key>
-	<string>nobleape</string>
+	<string></string>
 	<key>CFBundleIdentifier</key>
 	<string>com.nobleape.${PRODUCT_NAME:rfc1034identifier}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -15,20 +15,16 @@
 	<key>CFBundleName</key>
 	<string>${PRODUCT_NAME}</string>
 	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.696</string>
+	<string>1.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
+	<string>1.0</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 1996-2014 Tom Barbalet. All rights reserved.</string>
-	<key>NSMainNibFile</key>
-	<string>nobleape</string>
 	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+	<string>NobleApeScreenSaverView</string>
 </dict>
 </plist>

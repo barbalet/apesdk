@@ -453,7 +453,7 @@ void sim_cycle(void)
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
 
-#define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 400))
+#define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 6))
 
 static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * location)
 {
