@@ -38,13 +38,11 @@
 @interface NoblePadView : UIView
 {
     id             displayLink;
-    unsigned int  colorLookUp[256];
-    unsigned int  offscreenBuffer[1024*768];
+    unsigned int   colorLookUp[256];
+    unsigned int   offscreenBuffer[10240*7680];
 
     CGContextRef   drawRef;
     CGRect         bounds;
-    
-    long           fIdentification;
 }
 
 - (void) animationTimer;

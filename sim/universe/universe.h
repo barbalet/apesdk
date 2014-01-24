@@ -41,7 +41,7 @@
 #define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
 
 #define TERRITORY_ON  /* entity */
-#define BRAINCODE_ON  /* entity */
+#undef BRAINCODE_ON  /* entity */
 #define IMMUNE_ON     /* entity */
 #define METABOLISM_ON /* entity */
 

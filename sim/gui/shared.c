@@ -352,13 +352,6 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     return return_value;
 }
 
-#ifdef NO_LONGER_SUPPORTED
-void shared_cycle_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
-{
-    draw_cycle(fIdentification, dim_x, dim_y);
-}
-#endif
-
 n_int shared_init(n_byte view, n_uint random)
 {
     n_byte2 fit[256 * 3];

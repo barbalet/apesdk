@@ -50,7 +50,7 @@
 #include <pthread.h>
 #include <time.h>
 
-#define MAX_EXECUTION_THREAD_SIZE 8
+#define MAX_EXECUTION_THREAD_SIZE 2
 
 #endif
 

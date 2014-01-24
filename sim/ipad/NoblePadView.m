@@ -49,27 +49,37 @@
 // per-window timer function, basic time based animation preformed here
 - (void)animationTimer
 {
-    shared_cycle(CFAbsoluteTimeGetCurrent(), fIdentification);
     [self setNeedsDisplay];
 }
 
 - (void) drawRect:(CGRect)rect;
 {
-    CGContextRef  context = UIGraphicsGetCurrentContext();
-    int             dimensionX = rect.size.width;
-    int             dimensionY = rect.size.height;
-    int             ly = 0;
-    int             loop = 0;
-    int             loopColors=0;
+    CGContextRef   context = UIGraphicsGetCurrentContext();
+    n_int          dimensionX = rect.size.width;
+    n_int          dimensionY = rect.size.height;
+    int            ly = 0;
+    int            loop = 0;
+    int            loopColors=0;
 
-    unsigned char * index = shared_draw(fIdentification);
+    unsigned char * index = shared_draw(NUM_TERRAIN);
     unsigned short fit[256 * 3];
 
+    static          n_int oldDimensionX = -1;
+    
+    if (drawRef == nil || (oldDimensionX != dimensionX))
+    {
+        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width, rect.size.height, 8, rect.size.width * 4, colorSpace, /*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGImageAlphaNoneSkipFirst);
+        CGColorSpaceRelease( colorSpace );
+        
+        oldDimensionX = dimensionX;
+    }
+    
     CGContextSaveGState(context);
 
-    shared_cycle_draw(fIdentification, dimensionX, dimensionY);
-    
-    shared_timeForColor(fit, fIdentification);
+    (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
+        
+    shared_timeForColor(fit, NUM_TERRAIN);
     
     if (index == 0L) return;
 
@@ -99,7 +109,7 @@
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
     if ( local_image )
     {
-        CGContextDrawImage( context, bounds, local_image );
+        CGContextDrawImage( context, rect, local_image );
         CGImageRelease( local_image );
     }
     CGContextRestoreGState(context);
@@ -118,7 +128,7 @@
 {
 	UITouch*	touch = [[event touchesForView:self] anyObject];
 	CGPoint location = [touch locationInView:self];
-    shared_mouseReceived(location.x, location.y, fIdentification);
+    shared_mouseReceived(location.x, location.y, NUM_TERRAIN);
 }
 
 // Handles the end of a touch event when the touch is a tap.
@@ -161,31 +171,8 @@
 // ---------------------------------
 
 - (void) awakeFromNib
-{
-
-    int localHeight = [self bounds].size.height;
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-
-    fIdentification = shared_init(localHeight == 512, CFAbsoluteTimeGetCurrent());
-    
-    switch(localHeight)
-    {
-        case 256:
-            bounds = CGRectMake(0, 0, 256, 256);
-            drawRef = CGBitmapContextCreate( offscreenBuffer, 256, 256, 8, 256 * 4, colorSpace, kCGImageAlphaNoneSkipFirst );
-            break;
-        case 512:
-            bounds = CGRectMake(0, 0, 512, 512);
-            drawRef = CGBitmapContextCreate( offscreenBuffer, 512, 512, 8, 512 * 4, colorSpace, kCGImageAlphaNoneSkipFirst );
-            break;
-        case 768:
-            bounds = CGRectMake(0, 0, 1024, 768);
-            drawRef = CGBitmapContextCreate( offscreenBuffer, 1024, 768, 8, 1024 * 4, colorSpace, kCGImageAlphaNoneSkipFirst );
-            break;
-    }
-
-    CGColorSpaceRelease( colorSpace );
-
+{    
+    (void)shared_init(NUM_TERRAIN, CFAbsoluteTimeGetCurrent());
 	displayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(animationTimer)];
 	[displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 

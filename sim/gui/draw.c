@@ -39,7 +39,7 @@
 
 /* the weather/time of day icons hard coded */
 
-#define NON_THREADED_DRAW
+#undef NON_THREADED_DRAW
 
 #ifndef GRAPHLESS_GUI
 
