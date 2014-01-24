@@ -34,7 +34,8 @@
  ****************************************************************/
 
 #include "noble.h"
-#undef EXECUTE_THREADED
+
+
 #ifdef EXECUTE_THREADED
 
 #ifdef _WIN32
@@ -50,10 +51,9 @@
 #include <pthread.h>
 #include <time.h>
 
-#define MAX_EXECUTION_THREAD_SIZE 2
+#define MAX_EXECUTION_THREAD_SIZE 3
 
 #endif
-
 
 typedef enum
 {
@@ -84,6 +84,7 @@ static n_int execution_cycle = 0;
 
 static HANDLE            thread[MAX_EXECUTION_THREAD_SIZE];
 static DWORD             threadId[MAX_EXECUTION_THREAD_SIZE];
+
 #else
 
 static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
@@ -125,8 +126,7 @@ void execute_add(execute_function * function, void * general_data, void * read_d
         
         while (loop < MAX_EXECUTION_THREAD_SIZE)
         {
-            n_byte2 hit_location = (loop ^ loop_order) & (MAX_EXECUTION_THREAD_SIZE - 1);
-            if (execution[hit_location].state == ES_DONE)
+            if (execution[loop].state == ES_DONE)
             {
                 execute_object * new_object = io_new(sizeof(execute_object));
                 new_object->function = function;
@@ -134,8 +134,8 @@ void execute_add(execute_function * function, void * general_data, void * read_d
                 new_object->read_data = read_data;
                 new_object->write_data = write_data;
                     
-                execution[hit_location].executed = new_object;
-                execution[hit_location].state = ES_WAITING;
+                execution[loop].executed = new_object;
+                execution[loop].state = ES_WAITING;
                 
                 return;
             }
@@ -225,13 +225,14 @@ static DWORD WINAPI execute_thread_win( LPVOID lpParam )
 }
 
 #else
+
 static void * execute_thread_posix(void * id)
 {
     execute_thread_generic(id);
     pthread_exit(0L);
 }
-#endif
 
+#endif
 #endif
 
 void execute_init(void)
@@ -242,13 +243,7 @@ void execute_init(void)
     {
 #ifdef _WIN32
         threadId[loop] = loop;
-        thread[loop] = CreateThread(
-                                       NULL,                   // default security attributes
-                                       0,                      // use default stack size
-                                       execute_thread_win,       // thread function name
-                                       &execution[loop],          // argument to thread function
-                                       0,                      // use default creation flags
-                                       &threadId[loop]);   // returns the thread identifier
+        thread[loop] = CreateThread(NULL, 0, execute_thread_win, &execution[loop], 0, &threadId[loop]);
 #else
         pthread_create(&thread[loop], 0L, execute_thread_posix, &execution[loop]);
 #endif

@@ -52,9 +52,9 @@
 #define	WEATHER_ON
 #undef RANDOM_INITIAL_BRAINCODE
 
-#undef	FIXED_RANDOM_SIM
-#define	LARGE_SIM (20)
-#undef  SOFT_BRAIN_ON
+#undef	 FIXED_RANDOM_SIM
+#define	 LARGE_SIM 16
+#define  SOFT_BRAIN_ON
 
 #define EPISODIC_AFFECT_ZERO (16384)
 
