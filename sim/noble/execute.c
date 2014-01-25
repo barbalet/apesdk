@@ -99,10 +99,10 @@ static void execute_wait_ms(void)
      the problem however is the execution is not available
      */
 #ifndef _WIN32
-    struct timespec tim, tim2;
+/*    struct timespec tim, tim2;
     tim.tv_sec = 0;
     tim.tv_nsec = 1;
-    (void)nanosleep(&tim , &tim2);
+    (void)nanosleep(&tim , &tim2);*/
 #endif
 }
 
@@ -121,9 +121,7 @@ void execute_add(execute_function * function, void * general_data, void * read_d
     
     execution_cycle = 1;
     do{
-        n_int   loop = 0;
-        n_byte2 loop_order = math_random(random);
-        
+        n_int   loop = 0;        
         while (loop < MAX_EXECUTION_THREAD_SIZE)
         {
             if (execution[loop].state == ES_DONE)

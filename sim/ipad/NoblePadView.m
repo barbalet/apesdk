@@ -105,13 +105,15 @@
         }
         ly++;
     }
-    
+
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
+
     if ( local_image )
     {
         CGContextDrawImage( context, rect, local_image );
         CGImageRelease( local_image );
     }
+    
     CGContextRestoreGState(context);
 }
 
