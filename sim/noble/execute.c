@@ -51,7 +51,7 @@
 #include <pthread.h>
 #include <time.h>
 
-#define MAX_EXECUTION_THREAD_SIZE 3
+#define MAX_EXECUTION_THREAD_SIZE 4
 
 #endif
 
@@ -99,10 +99,10 @@ static void execute_wait_ms(void)
      the problem however is the execution is not available
      */
 #ifndef _WIN32
-/*    struct timespec tim, tim2;
+    struct timespec tim, tim2;
     tim.tv_sec = 0;
     tim.tv_nsec = 1;
-    (void)nanosleep(&tim , &tim2);*/
+    (void)nanosleep(&tim , &tim2);
 #endif
 }
 
@@ -148,9 +148,12 @@ void execute_add(execute_function * function, void * general_data, void * read_d
 void execute_complete_added(void)
 {
 #ifdef EXECUTE_THREADED
-    do
+    while (1 == 1)
     {
-    }while (execution_cycle);
+        if (execution_cycle == 0)
+            break;
+        execute_wait_ms();
+    }
 #endif
 }
 
@@ -179,6 +182,7 @@ static void execute_thread_generic(void * id)
     do{
         n_int            loop = 0;
         n_int            all_idle = 1;
+        
         if (value->state != ES_WAITING)
         {
             execute_wait_ms();
@@ -194,19 +198,21 @@ static void execute_thread_generic(void * id)
             }
             value->state = ES_DONE;
             io_free((void **)&object);
-            while ((loop < MAX_EXECUTION_THREAD_SIZE) && all_idle)
-            {
-                if (execution[loop].state != ES_DONE)
-                {
-                    all_idle = 0;
-                }
-                loop++;
-            }
-            if (all_idle)
-            {
-                execution_cycle = 0;
-            }
         }
+        while (loop < MAX_EXECUTION_THREAD_SIZE)
+        {
+            if (execution[loop].state != ES_DONE)
+            {
+                all_idle = 0;
+                break;
+            }
+            loop++;
+        }
+        if (all_idle)
+        {
+            execution_cycle = 0;
+        }
+
     }while (global_cycle);
 }
 

@@ -40,15 +40,10 @@
 #import <OpenGL/glu.h>
 #import <OpenGL/OpenGL.h>
 
-#undef ON_DISPLAY_UPDATE
 
 @interface NobleMacView : NSOpenGLView
 {
-#ifdef ON_DISPLAY_UPDATE
-    CVDisplayLinkRef displayLink;
-#else
     NSTimer*         timerAnimation;
-#endif
     GLubyte          colorTable[256][3];
     GLubyte          outputBuffer[2048*1536*3];
     n_byte           fIdentification;
@@ -56,9 +51,7 @@
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;
 
-#ifndef ON_DISPLAY_UPDATE
 - (void) animationTimer:(NSTimer *)localTimer;
-#endif
 
 - (void) drawRect:(NSRect)rect;
 

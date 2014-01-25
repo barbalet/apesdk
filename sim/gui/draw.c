@@ -39,7 +39,15 @@
 
 /* the weather/time of day icons hard coded */
 
+#ifdef EXECUTE_THREADED
+
 #undef NON_THREADED_DRAW
+
+#else
+
+#define NON_THREADED_DRAW
+
+#endif
 
 #ifndef GRAPHLESS_GUI
 

@@ -78,13 +78,11 @@
      }];
 }
 
-#ifndef ON_DISPLAY_UPDATE
 /* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
 	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
 }
-#endif
 
 - (void) drawRect:(NSRect)rect
 {
@@ -165,26 +163,8 @@
 - (void)quitProcedure
 {
     shared_close();
-#ifdef ON_DISPLAY_UPDATE
-    CVDisplayLinkRelease(displayLink);
-#endif
     exit(0);
 }
-
-#ifdef ON_DISPLAY_UPDATE
-- (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
-{
-    [self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
-    return kCVReturnSuccess;
-}
-
-
-static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
-{
-    NobleMacView* localView = (__bridge NobleMacView *)(displayLinkContext);
-    return [localView getFrameForTime:outputTime];
-}
-#endif
 
 -(id) initWithFrame:(NSRect) frameRect
 {
@@ -244,25 +224,11 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     
     [[self window] orderFrontRegardless];
     
-#ifdef ON_DISPLAY_UPDATE
-    {
-        GLint swapInt = 1;
-        [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
-    }
-    CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
-    CVDisplayLinkSetOutputCallback(displayLink, &displayLinkCallback, (__bridge void*)self);
-    {
-        CGLContextObj cglContext = [[self openGLContext] CGLContextObj];
-        CGLPixelFormatObj cglPixelFormat = [[self pixelFormat] CGLPixelFormatObj];
-        CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
-    }
-    CVDisplayLinkStart(displayLink);
-#else
+
     /* start animation timer */
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
-#endif
 }
 
 #pragma mark ---- IB Actions ----
