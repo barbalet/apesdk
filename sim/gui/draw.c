@@ -587,17 +587,19 @@ typedef struct{
     n_int     lowest_c;
     n_int     co_x;
     n_int     co_y;
-    n_int     scrx;
+
     n_vect2   dimensions;
     n_vect2   value_vector;
     n_byte2   *combined;
+    
+    n_byte    *offscreen;
 } draw_terrain_scan_struct;
 
-static void draw_terrain_scan(void * screen, void * structure, void * unused)
+static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
 {
-    draw_terrain_scan_struct * dtss = (draw_terrain_scan_struct *)structure;
-    n_byte  * buf_offscr = (n_byte *) screen;
-    n_int     scrx = dtss->scrx;
+    draw_terrain_scan_struct * dtss = (draw_terrain_scan_struct *)void_dtss;
+    n_byte  * buf_offscr = (n_byte *) dtss->offscreen;
+    n_int     scrx = ((n_int *)xlocation)[0];
     /* take the very bottom pixel */
     n_int     dim_x =  dtss->dimensions.x;
     n_int     dim_y1 = dtss->dimensions.y - 1;
@@ -633,7 +635,7 @@ static void draw_terrain_scan(void * screen, void * structure, void * unused)
         big_x -= vals2;
         big_y -= valc2;
     }
-    io_free(&structure);
+    io_free(&xlocation);
 }
 
 static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dimensions)
@@ -684,15 +686,19 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         
         vect2_copy(&(dtss.dimensions), dimensions);
         
+        dtss.offscreen = buf_offscr;
+        
         /* repeat until the right-most row is reached */
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
+            n_int * screen_x_location = io_new(sizeof(n_int));
+            /*
             draw_terrain_scan_struct * local_dtss = (draw_terrain_scan_struct *)io_new(sizeof(draw_terrain_scan_struct));
             
             io_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
-            
-            local_dtss->scrx = scrx;
-            execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)local_dtss, 0L);
+            */
+            screen_x_location[0] = scrx;
+            execute_add(((execute_function*)draw_terrain_scan), (void*)&dtss, (void*)screen_x_location, 0L);
             scrx++;               /* next column */
         }
         execute_complete_added();
