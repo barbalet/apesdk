@@ -587,16 +587,17 @@ typedef struct{
     n_int     lowest_c;
     n_int     co_x;
     n_int     co_y;
+    n_int     scrx;
     n_vect2   dimensions;
     n_vect2   value_vector;
     n_byte2   *combined;
 } draw_terrain_scan_struct;
 
-static void draw_terrain_scan(void * screen, void * structure, void * x_location)
+static void draw_terrain_scan(void * screen, void * structure, void * unused)
 {
     draw_terrain_scan_struct * dtss = (draw_terrain_scan_struct *)structure;
     n_byte  * buf_offscr = (n_byte *) screen;
-    n_int     scrx = ((n_int*)x_location)[0];
+    n_int     scrx = dtss->scrx;
     /* take the very bottom pixel */
     n_int     dim_x =  dtss->dimensions.x;
     n_int     dim_y1 = dtss->dimensions.y - 1;
@@ -632,7 +633,6 @@ static void draw_terrain_scan(void * screen, void * structure, void * x_location
         big_x -= vals2;
         big_y -= valc2;
     }
-    io_free(&x_location);
     io_free(&structure);
 }
 
@@ -687,13 +687,12 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         /* repeat until the right-most row is reached */
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
-            n_int * number = io_new(sizeof(n_int));
             draw_terrain_scan_struct * local_dtss = (draw_terrain_scan_struct *)io_new(sizeof(draw_terrain_scan_struct));
             
             io_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
             
-            number[0] = scrx;
-            execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)local_dtss, (void*)number);
+            local_dtss->scrx = scrx;
+            execute_add(((execute_function*)draw_terrain_scan), (void*)buf_offscr, (void*)local_dtss, 0L);
             scrx++;               /* next column */
         }
         execute_complete_added();
