@@ -636,6 +636,7 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
         big_y -= valc2;
     }
     io_free(&xlocation);
+    io_free(&void_dtss);
 }
 
 static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dimensions)
@@ -692,13 +693,13 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
             n_int * screen_x_location = io_new(sizeof(n_int));
-            /*
+
             draw_terrain_scan_struct * local_dtss = (draw_terrain_scan_struct *)io_new(sizeof(draw_terrain_scan_struct));
             
             io_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
-            */
+
             screen_x_location[0] = scrx;
-            execute_add(((execute_function*)draw_terrain_scan), (void*)&dtss, (void*)screen_x_location, 0L);
+            execute_add(((execute_function*)draw_terrain_scan), (void*)local_dtss, (void*)screen_x_location, 0L);
             scrx++;               /* next column */
         }
         execute_complete_added();
