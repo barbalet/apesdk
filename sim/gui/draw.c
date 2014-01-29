@@ -39,16 +39,6 @@
 
 /* the weather/time of day icons hard coded */
 
-#ifdef EXECUTE_THREADED
-
-#undef NON_THREADED_DRAW
-
-#else
-
-#define NON_THREADED_DRAW
-
-#endif
-
 #ifndef GRAPHLESS_GUI
 
 extern void  graph_draw(noble_simulation * local_sim, n_byte * graph, n_int dim_x, n_int dim_y);
@@ -581,6 +571,8 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
     }
 }
 
+#ifdef EXECUTE_THREADED
+
 typedef struct{
     n_int     const_lowdiv2;
     n_int     lowest_s;
@@ -706,6 +698,7 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
     }
 }
 
+#endif
 
 static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 {
@@ -1679,9 +1672,8 @@ n_int  draw_cycle(void)
 
     draw_apes(local_sim, 0);    /* hi res */
     draw_apes(local_sim, 1);    /* lo res */
-#ifdef NON_THREADED_DRAW
-    draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
-#else
+
+#ifdef EXECUTE_THREADED
     /* TODO: Make the threaded draw command line safe */
     if (io_command_line_execution())
     {
@@ -1691,6 +1683,8 @@ n_int  draw_cycle(void)
     {
         draw_terrain_threadable(local_sim, &local_vect);
     }
+#else
+    draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
 #endif
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */

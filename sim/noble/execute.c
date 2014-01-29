@@ -68,6 +68,8 @@ typedef struct
     void             * general_data;
     void             * read_data;
     void             * write_data;
+    n_int              count;
+    n_int              size;
 } execute_object;
 
 typedef struct
@@ -109,19 +111,14 @@ static void execute_wait_ms(void)
 
 #endif
 
-void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
+static void execute_add_genetic(execute_function * function, void * general_data, void * read_data, void * write_data, n_int count, n_int size)
 {
 #ifndef EXECUTE_THREADED
     function(general_data,read_data,write_data);
 #else
-    n_byte2     random[2];
-    n_byte2    *value = (n_byte2*)function;
-    random[0] = value[0];
-    random[1] = value[1];
-    
     execution_cycle = 1;
     do{
-        n_int   loop = 0;        
+        n_int   loop = 0;
         while (loop < MAX_EXECUTION_THREAD_SIZE)
         {
             if (execution[loop].state == ES_DONE)
@@ -129,12 +126,12 @@ void execute_add(execute_function * function, void * general_data, void * read_d
                 execute_object * new_object = io_new(sizeof(execute_object));
                 new_object->function = function;
                 new_object->general_data = general_data;
-                new_object->read_data = read_data;
+                new_object->read_data  = read_data;
                 new_object->write_data = write_data;
-                    
+                new_object->count      = count;
+                new_object->size       = size;
                 execution[loop].executed = new_object;
                 execution[loop].state = ES_WAITING;
-                
                 return;
             }
             
@@ -143,6 +140,11 @@ void execute_add(execute_function * function, void * general_data, void * read_d
         execute_wait_ms();
     }while (global_cycle);
 #endif
+}
+
+void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
+{
+    execute_add_genetic(function, general_data, read_data, write_data, 1, 0);
 }
 
 void execute_complete_added(void)
