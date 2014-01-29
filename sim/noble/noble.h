@@ -557,6 +557,8 @@ typedef n_int (execute_function)(void * general_data, void * read_data, void * w
 
 void  execute_add(execute_function function, void * general_data, void * read_data, void * write_data);
 
+void  execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size);
+
 void  execute_init(void);
 
 void  execute_close(void);

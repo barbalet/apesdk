@@ -51,7 +51,7 @@
 #include <pthread.h>
 #include <time.h>
 
-#define MAX_EXECUTION_THREAD_SIZE 4
+#define MAX_EXECUTION_THREAD_SIZE 8
 
 #endif
 
@@ -95,7 +95,7 @@ static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
 
 static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
 
-static void execute_wait_ms(void)
+static void execute_wait_ns(void)
 {
     /* In time cycle testing this may be seen to be wasted time
      the problem however is the execution is not available
@@ -137,7 +137,7 @@ static void execute_add_genetic(execute_function * function, void * general_data
             
             loop++;
         }
-        execute_wait_ms();
+        execute_wait_ns();
     }while (global_cycle);
 #endif
 }
@@ -147,6 +147,11 @@ void execute_add(execute_function * function, void * general_data, void * read_d
     execute_add_genetic(function, general_data, read_data, write_data, 1, 0);
 }
 
+void execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size)
+{
+    execute_add_genetic(function, general_data, read_data, 0L, count, size);
+}
+
 void execute_complete_added(void)
 {
 #ifdef EXECUTE_THREADED
@@ -154,7 +159,7 @@ void execute_complete_added(void)
     {
         if (execution_cycle == 0)
             break;
-        execute_wait_ms();
+        execute_wait_ns();
     }
 #endif
 }
@@ -187,16 +192,33 @@ static void execute_thread_generic(void * id)
         
         if (value->state != ES_WAITING)
         {
-            execute_wait_ms();
+            execute_wait_ns();
         }
         if (value->state == ES_WAITING)
         {
             execute_object * object = value->executed;
             value->state = ES_STARTED;
             
-            if (object->function(object->general_data, object->read_data, object->write_data) == -1)
+            if (object->size)
             {
-                execute_close();
+                n_byte *location = (n_byte *)object->read_data;
+                n_int   loop = 0;
+                while (loop < object->count)
+                {
+                    if (object->function(object->general_data, (void *)&location[loop * object->size], 0L) == -1)
+                    {
+                        execute_close();
+                        break;
+                    }
+                    loop++;
+                }
+            }
+            else
+            {
+                if (object->function(object->general_data, object->read_data, object->write_data) == -1)
+                {
+                    execute_close();
+                }
             }
             value->state = ES_DONE;
             io_free((void **)&object);

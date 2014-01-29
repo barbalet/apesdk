@@ -578,7 +578,32 @@ static void being_loop_generic(noble_simulation * sim, noble_being * being_not, 
 
 void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread)
 {
+#if 1
+    n_uint loop  = 0;
+    n_int  count = beings_per_thread;
+    while (loop < sim->num)
+    {
+        noble_being * output = &(sim->beings[loop]);
+        
+        if ((beings_per_thread + loop) >= sim->num)
+        {
+            count = sim->num - loop;
+        }
+        
+        execute_group(((execute_function*)bf_func), (void*)sim, (void*)output, count, sizeof(noble_being));
+        
+        if (count != beings_per_thread)
+        {
+            break;
+        }
+        else
+        {
+            loop += count;
+        }
+    }
+#else
     being_loop_generic(sim, 0L, bf_func, 0L);
+#endif
 }
 
 void being_loop_wait(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
