@@ -107,11 +107,9 @@ static void execute_wait_ns(void)
     (void)nanosleep(&tim , &tim2);
 #endif
 }
-
-
 #endif
 
-static void execute_add_genetic(execute_function * function, void * general_data, void * read_data, void * write_data, n_int count, n_int size)
+static void execute_add_generic(execute_function * function, void * general_data, void * read_data, void * write_data, n_int count, n_int size)
 {
 #ifndef EXECUTE_THREADED
     function(general_data,read_data,write_data);
@@ -137,19 +135,18 @@ static void execute_add_genetic(execute_function * function, void * general_data
             
             loop++;
         }
-        execute_wait_ns();
     }while (global_cycle);
 #endif
 }
 
 void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
 {
-    execute_add_genetic(function, general_data, read_data, write_data, 1, 0);
+    execute_add_generic(function, general_data, read_data, write_data, 1, 0);
 }
 
 void execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size)
 {
-    execute_add_genetic(function, general_data, read_data, 0L, count, size);
+    execute_add_generic(function, general_data, read_data, 0L, count, size);
 }
 
 void execute_complete_added(void)

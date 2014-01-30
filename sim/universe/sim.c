@@ -404,7 +404,7 @@ void sim_cycle(void)
     weather_cycle(sim.land);
 #endif
     
-    being_loop(&sim, sim_being_universal_loop, 16);
+    being_loop(&sim, sim_being_universal_loop, 32);
 
     if (interpret)
     {
@@ -414,18 +414,18 @@ void sim_cycle(void)
     else
     {
         /** Listen for any shouts */
-        being_loop(&sim, being_listen, 16);
+        being_loop(&sim, being_listen, 32);
 #ifdef EPISODIC_ON
-        being_loop(&sim, episodic_cycle, 16);
+        being_loop(&sim, episodic_cycle, 32);
 #endif
-        being_loop(&sim, sim_being_cycle, 8);
+        being_loop(&sim, sim_being_cycle, 16);
         being_loop(&sim, drives_cycle, 32);
     }
     
-    being_loop(&sim, sim_brain_loop, 2);
+    being_loop(&sim, sim_brain_loop, 16);
     
 #ifdef BRAINCODE_ON
-    being_loop(&sim, sim_brain_dialogue_loop, 8);
+    being_loop(&sim, sim_brain_dialogue_loop, 32);
 #endif
     {
         n_int       max_honor = 0;
@@ -445,7 +445,7 @@ void sim_cycle(void)
         
         being_remove_final(&sim, &brls);
     }
-    being_loop(&sim, social_initial_loop, 8);
+    being_loop(&sim, social_initial_loop, 32);
     
     being_loop_wait(&sim, 0L, social_secondary_loop, 0L);
     sim_time(&sim);
@@ -453,7 +453,7 @@ void sim_cycle(void)
 
 #define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
 
-#define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 0))
+#define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 200))
 
 static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * location)
 {
