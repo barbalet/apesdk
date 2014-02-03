@@ -1194,6 +1194,20 @@ noble_immune_system;
 typedef struct
 {
     n_byte2     location[2];
+} dead_body;
+
+#define NUMBER_OF_BODIES (256)
+
+typedef struct
+{
+    dead_body bodies[NUMBER_OF_BODIES];
+    n_byte2   count;
+    n_byte2   location;
+} noble_remains;
+
+typedef struct
+{
+    n_byte2     location[2];
     n_byte      direction_facing;
     n_byte      velocity;
     n_byte2     stored_energy;
@@ -1266,10 +1280,13 @@ typedef void (being_death_event)(noble_being * deceased, void * sim);
 typedef struct
 {
     n_land        * land;
+    
+    noble_remains * remains;
+    
     noble_being   * beings;
-
+    
     noble_being   * select; /* used by gui */
-
+    
     n_uint	        num;
     n_uint	        max;
 

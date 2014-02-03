@@ -461,6 +461,12 @@ static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * 
     *location += sizeof(n_land);
 }
 
+static void sim_memory_remains(noble_simulation * local, n_byte * buffer, n_uint * location)
+{
+    local->remains = (noble_remains *) & buffer[ *location ];
+    *location += sizeof(noble_remains);
+}
+
 static n_int sim_memory(n_uint offscreen_size)
 {
     n_uint	current_location = 0;
@@ -476,6 +482,8 @@ static n_int sim_memory(n_uint offscreen_size)
     current_location = offscreen_size;
 
     sim_memory_land(&sim, offbuffer, &current_location);
+    
+    sim_memory_remains(&sim, offbuffer, &current_location);
     
     memory_allocated = memory_allocated - offscreen_size - current_location;
     
@@ -541,6 +549,8 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         sim.land->genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
     }
 
+    being_remains_init(&sim); /* Eventually this should be captured through the file handling and moved into the code below */
+    
     if (kind != KIND_MEMORY_SETUP)
     {
         land_clear(sim.land, kind, AGE_OF_MATURITY);

@@ -359,4 +359,8 @@ being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim);
 
 void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct ** brls);
 
+void being_remains_init(noble_simulation * sim);
+
+void being_remains(noble_simulation * sim, noble_being * dead);
+
 #endif /* NOBLEAPE_ENTITY_H */

@@ -1552,6 +1552,29 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
     io_string_write(string,name_str,location);
 }
 
+void being_remains_init(noble_simulation * sim)
+{
+    noble_remains * remains = sim->remains;
+    
+    remains->count = 0;
+    remains->location = 0;
+}
+
+void being_remains(noble_simulation * sim, noble_being * dead)
+{
+    noble_remains * remains  = sim->remains;
+    n_byte2         location = remains->location;
+
+    remains->bodies[location].location[0] = dead->location[0];
+    remains->bodies[location].location[1] = dead->location[1];
+    remains->location = (remains->location + 1) % NUMBER_OF_BODIES;
+
+    if (remains->count < NUMBER_OF_BODIES)
+    {
+        remains->count++;
+    }
+}
+
 n_int episode_description(
     noble_simulation * sim,
     noble_being * local_being,
@@ -3576,6 +3599,7 @@ void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void 
     }
     else
     {
+        being_remains(local_sim, local);
         if (local == brls->reference)
         {
             brls->selected_died = 1;

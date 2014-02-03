@@ -1463,6 +1463,32 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
 }
 
 
+static void draw_remains(noble_simulation * sim, n_byte * screen)
+{
+    noble_remains * remains = sim->remains;
+    n_int           loop = 0;
+    while(loop < remains->count)
+    {
+        dead_body * body = &(remains->bodies[loop]);
+        n_int       px = body->location[0];
+        n_int       py = body->location[1];
+        n_int       mx = APESPACE_TO_MAPSPACE(px);
+        n_int       my = APESPACE_TO_MAPSPACE(py);
+    
+        n_int       lx = 510;
+        
+        while (lx < 515)
+        {
+            screen[((mx + lx)&511) + (((my)&511) * 512)] = COLOUR_YELLOW;
+            screen[((mx)&511) + (((my + lx)&511) * 512)] = COLOUR_YELLOW;
+            lx++;
+        }
+        
+        
+        loop++;
+    }
+}
+
 static void draw_tides(n_byte * map, n_byte * screen, n_byte tide)
 {
     n_byte	tide_compress[45];
@@ -1614,12 +1640,14 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         {
             draw_region(local_sim->select);
         }
+        draw_remains(local_sim, local_col.screen);
     }
 
     if (local_sim->select)
     {
         being_loop_no_thread(local_sim, 0L, draw_apes_loop, &local_col);
     }
+    
 }
 
 static void draw_errors(noble_simulation * local_sim)
