@@ -51,9 +51,9 @@
 
 static n_interpret *interpret = 0L;
 
-n_int draw_error(n_constant_string error_text)
+n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
-    printf("ERROR: %s\n",error_text);
+    printf("ERROR: %s @%s, %ld\n",error_text, location, line_number);
     return -1;
 }
 

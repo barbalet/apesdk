@@ -295,7 +295,7 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
     void * sim_return = 0L;
     
-    (void)draw_error(0L, 0L, 0);
+    shared_clearErrors();
     draw_undraw_clear();
     
     sim_return = sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0));
