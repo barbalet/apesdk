@@ -274,13 +274,11 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
     case WM_PAINT:
 		{
-			n_uint  local_time = time(0L)/*(60*clock())/CLK_TCK*/;
+			n_uint  local_time = time(0L);
 			shared_cycle(local_time, NUM_VIEW, 512, 512);
 			shared_cycle(local_time, NUM_TERRAIN, 512, 512);
 
 		}
-		/*
-        }*/
         plat_update();
 
         InvalidateRect(global_hwnd[0], NULL, TRUE);
@@ -426,8 +424,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         case FILE_SAVE_AS_HANDLE:
             dialog_up = 1;
-			/* TODO: Need to fix
-            plat_file_save_as(&sim_fileout); */
+            plat_file_save_as();
             dialog_up = 0;
             return 0;
         case FILE_EXIT_HANDLE:
@@ -437,17 +434,6 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 0;
 
     case WM_DESTROY:
-		/*
-        if (io_disk_check((unsigned char *)"NobleApeAutoload.txt") == 1)
-        {
-            unsigned long		buff_len;
-            unsigned char * buff = sim_fileout(&buff_len);
-            FILE          * outputfile = fopen("NobleApeAutoload.txt","w");
-            fwrite(buff, buff_len, 1, outputfile);
-            fclose(outputfile);
-            io_free(buff);
-        }
-		*/
         DeleteObject(offscreen[0]);
         DeleteObject(offscreen[1]);
         sim_close();
@@ -574,10 +560,10 @@ static unsigned char plat_file_save(n_file_out cfo)
     return 1;
 }
 
-static unsigned char plat_file_save_as(n_file_out cfo)
+static unsigned char plat_file_save_as(void)
 {
     BOOL save_result;
-    char actual_file_name[MAX_PATH] = { 0 };
+    n_block_string actual_file_name;
 
     OPENFILENAME opf;
     ZeroMemory(&opf, sizeof(opf));
@@ -609,7 +595,6 @@ static unsigned char plat_file_save_as(n_file_out cfo)
         MessageBox(global_hwnd[WINDOW_ONE], TEXT("Unable to save file"), TEXT("Noble Ape File Error"), MB_OK);
         return 0;
     }
-    plat_file_save(cfo);
-
+    shared_saveFileName(actual_file_name);
     return 1;
 }
