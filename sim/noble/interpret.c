@@ -492,10 +492,10 @@ static n_int	interpret_code(n_interpret * interp)
     n_int	 cycle_count = 0;
     n_int	 end_loop    = io_bytes_to_int(local_data);
 
-    if (interp->location != 0)
+    if (interp->interpret_location != 0)
     {
-        loop = interp->location;
-        interp->location = 0;
+        loop = interp->interpret_location;
+        interp->interpret_location = 0;
     }
 
     /* this is the interpret loop */
@@ -573,7 +573,7 @@ static n_int	interpret_code(n_interpret * interp)
 
     if ((interp->leave != 0) || (cycle_count == CYCLE_COUNT_RESET))
     {
-        interp->location = loop;
+        interp->interpret_location = loop;
     }
     else
     {
@@ -630,7 +630,7 @@ n_int interpret_cycle(n_interpret * code, n_int exit_offset,
         return 0;
     }
     
-    code->data = data;
+    code->interpret_data = data;
     
     if (code->localized_leave)
     {
@@ -641,7 +641,7 @@ n_int interpret_cycle(n_interpret * code, n_int exit_offset,
         return 1;
     }
 
-    if (code->location == 0)
+    if (code->interpret_location == 0)
     {
         interpret_start(code);
         if (start != 0L)
@@ -655,7 +655,7 @@ n_int interpret_cycle(n_interpret * code, n_int exit_offset,
         return -1;
     }
 
-    if (code->location == 0)
+    if (code->interpret_location == 0)
     {
         if ((code != 0L) && (end != 0L))
         {

@@ -287,7 +287,7 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
             return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
         }
         {
-            noble_being * local_being = (noble_being *)((n_interpret *)code)->data;
+            noble_being * local_being = (noble_being *)((n_interpret *)code)->interpret_data;
             n_byte *local_brain = being_brain(local_being);
             if (local_brain != 0L)
             {
@@ -430,7 +430,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
         }
 
         {
-            noble_being * local_current = (noble_being *)code->data;
+            noble_being * local_current = (noble_being *)code->interpret_data;
             n_int		  local_number = 0;
             n_vect2       local_vr0;
             vect2_direction(&local_vr0, local_vr[0], 32);
@@ -480,7 +480,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                 if ( second_value == VARIABLE_IS_VISIBLE )
                 {
                     /* range already checked */
-                    noble_being * local_being = (noble_being *)code->data;
+                    noble_being * local_being = (noble_being *)code->interpret_data;
                     local_number = being_los(local_sim->land, local_being, (n_byte2)quick_x, (n_byte2)quick_y);
                 }
                 else
@@ -546,7 +546,7 @@ n_int sketch_output(void * vcode, n_byte * kind, n_int * number)
                     return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
                 }
                 {
-                    noble_being * local_being = (noble_being *)code->data;
+                    noble_being * local_being = (noble_being *)code->interpret_data;
                     n_byte *local_brain = being_brain(local_being);
                     if (local_brain != 0L)
                     {

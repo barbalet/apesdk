@@ -320,7 +320,7 @@ n_int     file_interpret(n_file * input_file)
     interpret->input_greater   = VARIABLE_WEATHER;
     interpret->special_less    = VARIABLE_VECT_X;
 
-    interpret->location = 0;
+    interpret->interpret_location = 0;
     interpret->leave = 0;
     interpret->localized_leave = 0;
 

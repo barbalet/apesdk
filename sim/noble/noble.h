@@ -968,14 +968,14 @@ typedef struct
 {
     n_file			*binary_code;
 
-    n_int			 number_buffer[NUMBER_MAX];
+    n_int			 number_buffer[NUMBER_MAX]; /* per entry */
 
     variable_string *variable_strings;
-    n_int		    *variable_references;
+    n_int		    *variable_references; /* per entry */
 
-    n_int	  	     braces_count;
-    n_brace		     braces[BRACES_MAX];
-    n_byte		     main_status;
+    n_int	  	     braces_count;        /* per entry */
+    n_brace		     braces[BRACES_MAX];  /* per entry */
+    n_byte		     main_status;         /* per entry */
 
     n_int		     main_entry;
     n_int		     input_greater;
@@ -984,11 +984,11 @@ typedef struct
     script_input    *sc_input;
     script_output   *sc_output;
 
-    n_int           location;
-    n_int           leave;
-    n_int           localized_leave;
+    n_int           interpret_location; /* per entry */
+    n_int           leave;              /* per entry */
+    n_int           localized_leave;    /* per entry */
     
-    void *          data;
+    void *          interpret_data;     /* per entry */
 } n_interpret;
 
 /* used for stripping ApeScript errors for documentation */
