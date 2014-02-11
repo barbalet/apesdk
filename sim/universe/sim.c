@@ -410,7 +410,7 @@ void sim_cycle(void)
     if (interpret)
     {
         /* unfortunately the ApeScript interface is still not thread safe */
-        being_loop_no_thread(&sim, 0L, sim_being_interpret, 0L);
+        being_loop(&sim, sim_being_interpret, 16);
     }
     else
     {
