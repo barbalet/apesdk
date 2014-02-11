@@ -588,28 +588,11 @@ static n_int	interpret_code(n_interpret * interp, n_individual_interpret * indiv
     return 0;
 }
 
-n_individual_interpret * interpret_individual(void)
+void interpret_individual(n_individual_interpret * individual)
 {
-    n_individual_interpret * individual = 0L;
-    
-    if((individual = io_new(sizeof(n_individual_interpret))) == 0L)
-    {
-        return 0L;
-    }
-    
-    individual->variable_references = 0L;
-    
-    if((individual->variable_references = (n_int *)io_new(VARIABLE_MAX * sizeof(n_int))) == 0L)
-    {
-        io_free((void **)&individual);
-        return 0L;
-    }
-    
     individual->interpret_location = 0;
     individual->leave = 0;
     individual->localized_leave = 0;
-    
-    return individual;
 }
 
 /**
@@ -628,15 +611,6 @@ void interpret_cleanup(n_interpret ** to_clean)
     if ((*to_clean)->binary_code != 0L)
     {
         io_file_free(&((*to_clean)->binary_code));
-    }
-    io_free((void**)to_clean);
-}
-
-void interpret_individual_cleanup(n_individual_interpret ** to_clean)
-{
-    if ((*to_clean)->variable_references == 0L)
-    {
-        io_free((void**)&((*to_clean)->variable_references));
     }
     io_free((void**)to_clean);
 }

@@ -116,8 +116,9 @@ int main(int argc, char *argv[])
 {
     n_int   return_value = 0;
     
-    n_individual_interpret *individual = interpret_individual();
+    n_individual_interpret individual;
 
+    interpret_individual(&individual);
     
     if (argc != 2)
     {
@@ -133,8 +134,8 @@ int main(int argc, char *argv[])
     
     do
     {
-        return_value = interpret_cycle(interpret, individual, VARIABLE_EXIT - VARIABLE_FIRST_REAL_ONE, 0L,0L,0L,0L);
-        if (individual->leave != 0)
+        return_value = interpret_cycle(interpret, &individual, VARIABLE_EXIT - VARIABLE_FIRST_REAL_ONE, 0L,0L,0L,0L);
+        if (individual.leave != 0)
         {
 #ifdef COMMAND_LINE_DEBUG
             printf("...");
@@ -148,8 +149,6 @@ int main(int argc, char *argv[])
     {
         printf("ERROR: Script %s Ended with Error\n",argv[1]);
     }
-
-    interpret_individual_cleanup(&individual);
     
     lance_close();
 

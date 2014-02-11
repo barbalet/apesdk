@@ -965,11 +965,11 @@ typedef struct
     
     void *          interpret_data;     /* per entry */
     
-    n_int		    *variable_references; /* per entry */
+    n_int		    variable_references[VARIABLE_MAX]; /* per entry */
     
-    n_int	  	     braces_count;        /* per entry */
-    n_brace		     braces[BRACES_MAX];  /* per entry */
-    n_byte		     main_status;         /* per entry */
+    n_int	  	    braces_count;        /* per entry */
+    n_brace		    braces[BRACES_MAX];  /* per entry */
+    n_byte		    main_status;         /* per entry */
 } n_individual_interpret;
 
 
@@ -979,10 +979,9 @@ n_int io_apescript_error(AE_ENUM value);
 
 n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * variables);
 
-n_individual_interpret * interpret_individual(void);
+void interpret_individual(n_individual_interpret * individual);
 
 void  interpret_cleanup(n_interpret ** to_clean);
-void  interpret_individual_cleanup(n_individual_interpret ** to_clean);
 n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n_int exit_offset,
                       void * structure, void * data,
                       script_external * start, script_external * end);

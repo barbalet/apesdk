@@ -217,7 +217,6 @@ n_byte	* offbuffer = 0L;
 static noble_simulation	sim;
 
 static n_interpret *interpret = 0L;
-static n_individual_interpret *individual_interpret = 0L;
 
 static n_int        sim_new_progress = 0;
 
@@ -320,9 +319,6 @@ n_int     file_interpret(n_file * input_file)
 
     interpret->input_greater   = VARIABLE_WEATHER;
     interpret->special_less    = VARIABLE_VECT_X;
-
-    individual_interpret = interpret_individual();
-
     return 0;
 }
 
@@ -373,11 +369,15 @@ static void sim_being_cycle(noble_simulation * local_sim, noble_being * local_be
 
 static void sim_being_interpret(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
+    n_individual_interpret individual;
+    
+    interpret_individual(&individual);
+    
     if (being_awake(local_sim, local_being) == 0) return;
 
     if (interpret == 0L) return;
     
-    if(interpret_cycle(interpret, individual_interpret, -1,
+    if(interpret_cycle(interpret, &individual, -1,
                        local_sim->beings, local_being,
                        &sim_start_conditions, &sim_end_conditions) == -1)
     {
@@ -520,18 +520,11 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     
     if (kind == KIND_NEW_SIMULATION)
     {
-        
         if(interpret)
         {
             interpret_cleanup(&interpret);
             interpret = 0L;
         }
-        if(individual_interpret)
-        {
-            interpret_individual_cleanup(&individual_interpret);
-            individual_interpret = 0L;
-        }
-        
     }
     sim.delta_cycles = 0;
     sim.count_cycles = 0;
@@ -610,8 +603,6 @@ void sim_close(void)
     sim_console_clean_up();
 #endif
     interpret_cleanup(&interpret);
-    interpret_individual_cleanup(&individual_interpret);
-
     io_free((void **) &offbuffer);
     /*death_record_file_cleanup();*/
 }
