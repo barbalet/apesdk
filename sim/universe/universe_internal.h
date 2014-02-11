@@ -290,10 +290,10 @@ static const noble_file_entry noble_file_format[]=
 /* functions */
 
 n_int sketch_input(void *code, n_byte kind, n_int value);
-n_int sketch_output(void * vcode, n_byte * kind, n_int * number);
+n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * number);
 
-void sim_end_conditions(void * code, void * structure, void * data);
-void sim_start_conditions(void * code, void * structure, void * data);
+void sim_end_conditions(void * individual, void * structure, void * data);
+void sim_start_conditions(void * individual, void * structure, void * data);
 
 void console_external_watch(void);
 

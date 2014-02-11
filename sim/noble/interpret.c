@@ -49,21 +49,21 @@
  * @param location the location in the execution points.
  * @return minus one on failure, zero on success.
  */
-static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
+static	n_int	interpret_braces(n_individual_interpret * individual, n_byte * eval, n_int location)
 {
     n_int		local_b_count;
     
-    NA_ASSERT(code, "code NULL");
+    NA_ASSERT(individual, "individual NULL");
     NA_ASSERT(eval, "eval NULL");
     
-    local_b_count = code->braces_count;
+    local_b_count = individual->braces_count;
     if(location == -1)
     {
         if(local_b_count == 0)
         {
             return io_apescript_error(AE_TOO_MANY_CLOSE_BRACES);
         }
-        code->braces_count--;
+        individual->braces_count--;
     }
     else
     {
@@ -73,7 +73,7 @@ static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
         {
             return io_apescript_error(AE_MAXIMUM_BRACES_REACHED);
         }
-        local_evaluate = code->braces[ local_b_count ].evaluate;
+        local_evaluate = individual->braces[ local_b_count ].evaluate;
         while(loop < SIZE_OF_EVALUATE)
         {
             n_byte	eval_val = 0;
@@ -83,8 +83,8 @@ static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
             }
             local_evaluate[ loop++ ] = eval_val;
         }
-        code->braces[ local_b_count ].braces_start = location;
-        code->braces_count++;
+        individual->braces[ local_b_count ].braces_start = location;
+        individual->braces_count++;
     }
     return 0;
 }
@@ -97,7 +97,7 @@ static	n_int	interpret_braces(n_interpret * code, n_byte * eval, n_int location)
  * @param end_char the end character expected.
  * @return minus one on failure, otherwise the number of execution points to advance.
  */
-static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * number, n_byte end_char)
+static n_int interpret_apply(n_interpret * code, n_individual_interpret * individual, n_byte * evaluate, n_int * number, n_byte end_char)
 {
     n_int	val_a, val_b, val_c;
     
@@ -109,7 +109,7 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
     if (evaluate == 0L) return SHOW_ERROR("Nothing to evaluate");
     if (number == 0L) return SHOW_ERROR("No numbers provided");
     
-    if(code->sc_output(code,evaluate,&val_a) == -1)
+    if(code->sc_output(code, individual, evaluate,&val_a) == -1)
     {
         return io_apescript_error(AE_FIRST_VALUE_FAILED);
     }
@@ -122,7 +122,7 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
     {
         return io_apescript_error(AE_UNKNOWN_SYNTAX_MISSING_EQUALS);
     }
-    if(code->sc_output(code,&evaluate[4],&val_b) == -1)
+    if(code->sc_output(code, individual, &evaluate[4],&val_b) == -1)
     {
         return io_apescript_error(AE_SECOND_VALUE_FAILED);
     }
@@ -222,7 +222,7 @@ static n_int interpret_apply(n_interpret * code, n_byte * evaluate, n_int * numb
  * @param location the location in the execution points.
  * @return minus one on failure, otherwise the number of execution points to advance.
  */
-static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location)
+static n_int interpret_syntax(n_interpret * code, n_individual_interpret * individual, n_byte * value, n_int location)
 {
     n_byte	first_value;
     n_byte	second_value;
@@ -240,15 +240,15 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
     if(first_value == '}')  /* what do you do with the tailing brace? */
     {
         n_brace	*local_brace;
-        n_int	brace_value = (code->braces_count) - 1;
+        n_int	brace_value = (individual->braces_count) - 1;
         if(brace_value < 0 )
         {
             return io_apescript_error(AE_TOO_MANY_CLOSE_BRACES);
         }
-        local_brace = &(code->braces[brace_value]);
+        local_brace = &(individual->braces[brace_value]);
         if(local_brace->evaluate[0] == 0)  /* exit if */
         {
-            if(interpret_braces(code,0L,-1) == -1)
+            if(interpret_braces(individual, 0L, -1) == -1)
             {
                 return -1; /* Enough error information provided by this point */
             }
@@ -277,7 +277,7 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
         {
             return io_apescript_error(AE_IF_WHILE_NOT_FOLLOWED_BY_BRACKET);
         }
-        return_value = interpret_apply(code, &value[3], &output_number, ')');
+        return_value = interpret_apply(code, individual, &value[3], &output_number, ')');
         if(return_value == -1)
         {
             return -1; /* Enough information presented by this point */
@@ -331,7 +331,7 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
                 io_int_to_bytes(output_number, location_write);
                 location_write = (n_byte *)&function_location[1 + SIZEOF_NUMBER_WRITE];
                 io_int_to_bytes(continuation,location_write);
-                if(interpret_braces(code, (n_byte *)function_location, 0) == -1)
+                if(interpret_braces(individual, (n_byte *)function_location, 0) == -1)
                 {
                     return -1; /* Enough information presented by this point */
                 }
@@ -350,17 +350,17 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
         }
         if(second_value == VARIABLE_FUNCTION)
         {
-            if(code->sc_input(code, value[4], (4 + return_value + location) ) == -1)
+            if(code->sc_input(individual, value[4], (4 + return_value + location) ) == -1)
             {
                 return io_apescript_error(AE_FUNCTION_SETTING_FAILED);
             }
             if(value[4] == code->main_entry)
             {
-                if(interpret_braces(code,0L,0) == -1)
+                if(interpret_braces(individual,0L,0) == -1)
                 {
                     return io_apescript_error(AE_ERROR_STARTING_MAIN);
                 }
-                code->main_status = MAIN_RUN;
+                individual->main_status = MAIN_RUN;
                 SC_DEBUG_STRING("function( ");
                 SC_DEBUG_STRING(scdebug_variable(value[4]));
                 SC_DEBUG_STRING(" ){");
@@ -368,7 +368,7 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
                 SC_DEBUG_NEWLINE;
                 return 3 + 4; /* tF(tf){*/
             }
-            if(code->main_status != MAIN_NOT_RUN)
+            if(individual->main_status != MAIN_NOT_RUN)
             {
                 return io_apescript_error(AE_CODE_AFTER_MAIN);
             }
@@ -404,11 +404,11 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
         /* evaulate accordingly */
         if(second_value == VARIABLE_IF)
         {
-            error_value = interpret_braces(code,0L,0);
+            error_value = interpret_braces(individual,0L,0);
         }
         if(second_value == VARIABLE_WHILE)
         {
-            error_value = interpret_braces(code,&value[3],location + return_value + 4);
+            error_value = interpret_braces(individual,&value[3],location + return_value + 4);
         }
         if(error_value == -1)
         {
@@ -416,7 +416,7 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
         }
         return return_value + 4;
     }
-    if(code->main_status == MAIN_NOT_RUN)
+    if(individual->main_status == MAIN_NOT_RUN)
     {
         return io_apescript_error(AE_CODE_OUTSIDE_FUNCTION);
     }
@@ -427,12 +427,12 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
         {
             return io_apescript_error(AE_INPUT_VARIABLE_WITHOUT_EQUALS);
         }
-        return_value = interpret_apply(code, &value[4], &output_number, ';');
+        return_value = interpret_apply(code, individual, &value[4], &output_number, ';');
         if(return_value == -1)
         {
             return -1; /* Enough information presented by this point */
         }
-        if(code->sc_input(code, second_value,output_number) == -1)
+        if(code->sc_input(individual, second_value,output_number) == -1)
         {
             return io_apescript_error(AE_ASSIGN_VALUE_FAILED);
         }
@@ -450,22 +450,22 @@ static n_int interpret_syntax(n_interpret * code, n_byte * value, n_int location
  * The start of the interpreter cycle.
  * @param interp pointer to the interpreter structure that is being executed.
  */
-static void interpret_start(n_interpret * interp)
+static void interpret_start(n_interpret * interp, n_individual_interpret * individual)
 {
     n_byte	*local_data     = interp->binary_code->data;
     n_int	*local_number   = interp->number_buffer;
-    n_int	*local_variable = interp->variable_references;
+    n_int	*local_variable = individual->variable_references;
     n_int	 end_loop = io_bytes_to_int(local_data);
     n_byte	*start_numbers = &local_data[end_loop];
     n_int	 local_number_num = io_bytes_to_int(start_numbers);
     n_int	 loop = 0;
-    interp->main_status = MAIN_NOT_RUN;
-    interp->braces_count = 0;
+    individual->main_status = MAIN_NOT_RUN;
+    individual->braces_count = 0;
     while(loop++ < BRACES_MAX)
     {
-        (void)interpret_braces(interp,0L,0); /* No errors in this initialisation */
+        (void)interpret_braces(individual,0L,0); /* No errors in this initialisation */
     }
-    interp->braces_count = 0;
+    individual->braces_count = 0;
     loop = 1;
     local_number[0] = 0;
     while(loop < local_number_num)
@@ -485,23 +485,23 @@ static void interpret_start(n_interpret * interp)
  * @param interp pointer to the interpreter structure that is being executed.
  * @return zero on success, minus one on failure.
  */
-static n_int	interpret_code(n_interpret * interp)
+static n_int	interpret_code(n_interpret * interp, n_individual_interpret * individual)
 {
     n_byte	*local_data  = interp->binary_code->data;
     n_int	 loop        = SIZEOF_NUMBER_WRITE;
     n_int	 cycle_count = 0;
     n_int	 end_loop    = io_bytes_to_int(local_data);
 
-    if (interp->interpret_location != 0)
+    if (individual->interpret_location != 0)
     {
-        loop = interp->interpret_location;
-        interp->interpret_location = 0;
+        loop = individual->interpret_location;
+        individual->interpret_location = 0;
     }
 
     /* this is the interpret loop */
     do
     {
-        n_int	result = interpret_syntax(interp,&local_data[loop], loop);
+        n_int	result = interpret_syntax(interp, individual, &local_data[loop], loop);
         if(result == -1)
         {
             return -1; /* Enough information presented by this point */
@@ -514,13 +514,13 @@ static n_int	interpret_code(n_interpret * interp)
         else     /* This is the while check conditional */
         {
             n_brace * local_brace;
-            n_int	  brace_number = (interp->braces_count - 1);
+            n_int	  brace_number = (individual->braces_count - 1);
             n_byte	  first_evaluate;
             if(brace_number < 0)
             {
                 return io_apescript_error(AE_TOO_MANY_CLOSE_BRACES);
             }
-            local_brace = &(interp->braces[brace_number]);
+            local_brace = &(individual->braces[brace_number]);
             first_evaluate = local_brace->evaluate[0];
             if(first_evaluate == 'r' || first_evaluate == 'f')  /* check the function run */
             {
@@ -532,7 +532,7 @@ static n_int	interpret_code(n_interpret * interp)
                 else   /* end of the run function , put back to where 'run' is called */
                 {
                     loop = io_bytes_to_int(&(local_brace->evaluate[1 + SIZEOF_NUMBER_WRITE]));
-                    if(interpret_braces(interp,0L,-1) == -1)  /* remove the run function from braces */
+                    if(interpret_braces(individual,0L,-1) == -1)  /* remove the run function from braces */
                     {
                         return -1; /* Enough information presented by this point */
                     }
@@ -545,13 +545,13 @@ static n_int	interpret_code(n_interpret * interp)
             {
                 n_int	  return_value = 0;
 
-                if(interpret_apply(interp, local_brace->evaluate, &return_value, ')') == -1)
+                if(interpret_apply(interp, individual, local_brace->evaluate, &return_value, ')') == -1)
                 {
                     return -1; /* Enough information presented by this point */
                 }
                 if(return_value == 0)
                 {
-                    if(interpret_braces(interp, 0L, -1) == -1)
+                    if(interpret_braces(individual, 0L, -1) == -1)
                     {
                         return -1; /* Enough information presented by this point */
                     }
@@ -569,15 +569,15 @@ static n_int	interpret_code(n_interpret * interp)
 
         cycle_count++;
     }
-    while((loop < end_loop) && (cycle_count < CYCLE_COUNT_RESET) && (interp->leave == 0));
+    while((loop < end_loop) && (cycle_count < CYCLE_COUNT_RESET) && (individual->leave == 0));
 
-    if ((interp->leave != 0) || (cycle_count == CYCLE_COUNT_RESET))
+    if ((individual->leave != 0) || (cycle_count == CYCLE_COUNT_RESET))
     {
-        interp->interpret_location = loop;
+        individual->interpret_location = loop;
     }
     else
     {
-        if(interp->main_status == MAIN_NOT_RUN)
+        if(individual->main_status == MAIN_NOT_RUN)
         {
             return io_apescript_error(AE_NO_MAIN_CODE);
         }
@@ -586,6 +586,30 @@ static n_int	interpret_code(n_interpret * interp)
     }
 
     return 0;
+}
+
+n_individual_interpret * interpret_individual(void)
+{
+    n_individual_interpret * individual = 0L;
+    
+    if((individual = io_new(sizeof(n_individual_interpret))) == 0L)
+    {
+        return 0L;
+    }
+    
+    individual->variable_references = 0L;
+    
+    if((individual->variable_references = (n_int *)io_new(VARIABLE_MAX * sizeof(n_int))) == 0L)
+    {
+        io_free((void **)&individual);
+        return 0L;
+    }
+    
+    individual->interpret_location = 0;
+    individual->leave = 0;
+    individual->localized_leave = 0;
+    
+    return individual;
 }
 
 /**
@@ -605,6 +629,11 @@ void interpret_cleanup(n_interpret ** to_clean)
     {
         io_file_free(&((*to_clean)->binary_code));
     }
+    io_free((void**)to_clean);
+}
+
+void interpret_individual_cleanup(n_individual_interpret ** to_clean)
+{
     if ((*to_clean)->variable_references == 0L)
     {
         io_free((void**)&((*to_clean)->variable_references));
@@ -621,7 +650,7 @@ void interpret_cleanup(n_interpret ** to_clean)
  * @param end the function to be run at the end of the ApeScript cycle.
  * @return -1 in error case, 0 in leave and don't cycle back, 1 in leave and continue to cycle back.
  */
-n_int interpret_cycle(n_interpret * code, n_int exit_offset,
+n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n_int exit_offset,
                       void * structure, void * data,
                       script_external * start, script_external * end)
 {
@@ -630,44 +659,44 @@ n_int interpret_cycle(n_interpret * code, n_int exit_offset,
         return 0;
     }
     
-    code->interpret_data = data;
+    individual->interpret_data = data;
     
-    if (code->localized_leave)
+    if (individual->localized_leave)
     {
-        code->localized_leave--;
+        individual->localized_leave--;
     } /* the localized_leave = 1 case is where the interpreter was left initially */
-    if (code->localized_leave)
+    if (individual->localized_leave)
     {
         return 1;
     }
 
-    if (code->interpret_location == 0)
+    if (individual->interpret_location == 0)
     {
-        interpret_start(code);
+        interpret_start(code, individual);
         if (start != 0L)
         {
-            (*start)(code, structure, data);
+            (*start)(individual, structure, data);
         }
     }
 
-    if (interpret_code(code) == -1)
+    if (interpret_code(code, individual) == -1)
     {
         return -1;
     }
 
-    if (code->interpret_location == 0)
+    if (individual->interpret_location == 0)
     {
         if ((code != 0L) && (end != 0L))
         {
-            (*end)(code, structure, data);
+            (*end)(individual, structure, data);
         }
     }
 
-    code->localized_leave = code->leave;
+    individual->localized_leave = individual->leave;
 
     if (exit_offset > -1)
     {
-        n_int * variables = code->variable_references;
+        n_int * variables = individual->variable_references;
         if (variables[exit_offset] == 0)
         {
             return 1;

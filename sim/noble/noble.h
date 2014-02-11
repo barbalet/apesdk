@@ -909,7 +909,7 @@ variable array.
 @discussion The two primay interfaces in ApeScript relate to the getting and
 setting of information. This function covers the setting of information.
 */
-typedef n_int (script_input )(void * code, n_byte kind, n_int value);
+typedef n_int (script_input )(void * individual, n_byte kind, n_int value);
 
 /*! @typedef
 @field code The pointer to the n_interpret struct.
@@ -919,9 +919,9 @@ typedef n_int (script_input )(void * code, n_byte kind, n_int value);
 @discussion The two primay interfaces in ApeScript relate to the getting and
 setting of information. This function covers the getting of information.
 */
-typedef n_int (script_output)(void * code, n_byte * kind, n_int * number);
+typedef n_int (script_output)(void * code, void * individual, n_byte * kind, n_int * number);
 
-typedef void (script_external)(void * code, void * structure, void * data);
+typedef void (script_external)(void * individual, void * structure, void * data);
 
 #define	VARIABLE_WIDTH		    32
 
@@ -940,30 +940,7 @@ typedef struct
     n_int			 braces_start;
 } n_brace;
 
-/*! @struct
-@field binary_code The file structure that contains the binary code to be interpreted.
-@field number_buffer The array of const-like stored number values.
-@field variable_strings The array linked to the strings used for parsing and linking to the variable index.
-@field variable_references The array of values of the variable index.
-@field braces_count The number of braces currently in use.
-@field braces The array of braces structs currently in use.
-@field main_status Whether a main section of code has been reached or exists in the execution. (CHECK FOR VALIDITY)
-@field main_entry The variable index that is classified as main in ApeScript. In this impementation
-it is the function name "being".
-@field input_greater Everything greater than this variable index number is an input variable.
-@field special_less Everything less than this variable index number is a special variable.
-@field sc_input This is the function pointer to the input handling function which is external to ApeScript.
-@field sc_output This is the function pointer to the output handling function which is external to ApeScript.
-@field specific This defines which specific ApeScript instance is being run and is defined outside ApeScript and
-remains constant through the execution cycle.
-@field location         DOX_TEXT_MISSING
-@field leave            DOX_TEXT_MISSING
-@field localized_leave  DOX_TEXT_MISSING
-@discussion A good majority of this data should be considered opaque and not altered through the course of
-normal use of ApeScript. It may be interesting to change some of this information in experimenting with ApeScript
-for future development. It is planned in the future that the front of the ApeScript struct will be identical to the
-n_file struct for ease of transitioning between both structs.
-*/
+
 typedef struct
 {
     n_file			*binary_code;
@@ -971,11 +948,6 @@ typedef struct
     n_int			 number_buffer[NUMBER_MAX]; /* per entry */
 
     variable_string *variable_strings;
-    n_int		    *variable_references; /* per entry */
-
-    n_int	  	     braces_count;        /* per entry */
-    n_brace		     braces[BRACES_MAX];  /* per entry */
-    n_byte		     main_status;         /* per entry */
 
     n_int		     main_entry;
     n_int		     input_greater;
@@ -983,13 +955,23 @@ typedef struct
 
     script_input    *sc_input;
     script_output   *sc_output;
+} n_interpret;
 
+typedef struct
+{
     n_int           interpret_location; /* per entry */
     n_int           leave;              /* per entry */
     n_int           localized_leave;    /* per entry */
     
     void *          interpret_data;     /* per entry */
-} n_interpret;
+    
+    n_int		    *variable_references; /* per entry */
+    
+    n_int	  	     braces_count;        /* per entry */
+    n_brace		     braces[BRACES_MAX];  /* per entry */
+    n_byte		     main_status;         /* per entry */
+} n_individual_interpret;
+
 
 /* used for stripping ApeScript errors for documentation */
 
@@ -997,8 +979,13 @@ n_int io_apescript_error(AE_ENUM value);
 
 n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * variables);
 
+n_individual_interpret * interpret_individual(void);
+
 void  interpret_cleanup(n_interpret ** to_clean);
-n_int interpret_cycle(n_interpret * code, n_int exit_offset, void * structure, void * data, script_external * start, script_external * end);
+void  interpret_individual_cleanup(n_individual_interpret ** to_clean);
+n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n_int exit_offset,
+                      void * structure, void * data,
+                      script_external * start, script_external * end);
 
 #ifdef	SCRIPT_DEBUG
 

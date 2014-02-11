@@ -397,8 +397,6 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         return 0L;
     }
 
-    final_prog->variable_references = 0L;
-
     if((final_prog->binary_code = io_file_new())== 0L)
     {
         io_free((void **)&final_prog);
@@ -412,12 +410,6 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     }
 
     final_prog->binary_code->location = SIZEOF_NUMBER_WRITE;
-
-    if((final_prog->variable_references = (n_int *)io_new(VARIABLE_MAX * sizeof(n_int))) == 0L)
-    {
-        interpret_cleanup(&final_prog);
-        return 0L;
-    }
 
     final_prog->variable_strings = variables;
     final_prog->special_less    = (VARIABLE_IF + 1);

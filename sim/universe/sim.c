@@ -217,8 +217,9 @@ n_byte	* offbuffer = 0L;
 static noble_simulation	sim;
 
 static n_interpret *interpret = 0L;
+static n_individual_interpret *individual_interpret = 0L;
 
-static n_int            sim_new_progress = 0;
+static n_int        sim_new_progress = 0;
 
 n_int sim_new(void)
 {
@@ -320,9 +321,7 @@ n_int     file_interpret(n_file * input_file)
     interpret->input_greater   = VARIABLE_WEATHER;
     interpret->special_less    = VARIABLE_VECT_X;
 
-    interpret->interpret_location = 0;
-    interpret->leave = 0;
-    interpret->localized_leave = 0;
+    individual_interpret = interpret_individual();
 
     return 0;
 }
@@ -378,7 +377,9 @@ static void sim_being_interpret(noble_simulation * local_sim, noble_being * loca
 
     if (interpret == 0L) return;
     
-    if(interpret_cycle(interpret, -1, local_sim->beings, local_being, &sim_start_conditions, &sim_end_conditions) == -1)
+    if(interpret_cycle(interpret, individual_interpret, -1,
+                       local_sim->beings, local_being,
+                       &sim_start_conditions, &sim_end_conditions) == -1)
     {
         interpret_cleanup(&interpret);
     }
@@ -517,10 +518,20 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     
     sim_new_progress = 1;
     
-    if ((kind == KIND_NEW_SIMULATION) && (interpret))
+    if (kind == KIND_NEW_SIMULATION)
     {
-        interpret_cleanup(&interpret);
-        interpret = 0L;
+        
+        if(interpret)
+        {
+            interpret_cleanup(&interpret);
+            interpret = 0L;
+        }
+        if(individual_interpret)
+        {
+            interpret_individual_cleanup(&individual_interpret);
+            individual_interpret = 0L;
+        }
+        
     }
     sim.delta_cycles = 0;
     sim.count_cycles = 0;
@@ -599,6 +610,8 @@ void sim_close(void)
     sim_console_clean_up();
 #endif
     interpret_cleanup(&interpret);
+    interpret_individual_cleanup(&individual_interpret);
+
     io_free((void **) &offbuffer);
     /*death_record_file_cleanup();*/
 }
