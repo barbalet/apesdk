@@ -122,10 +122,10 @@ static void commands_process_run(n_int value, n_int * notification)
     }
 }
 
-n_int commands_input(void *code, n_byte kind, n_int value)
+n_int commands_input(void *vindividual, n_byte kind, n_int value)
 {
-    n_interpret *interp = (n_interpret *)code;
-    n_int *local_vr = interp->variable_references;
+    n_individual_interpret *individual = (n_individual_interpret *)vindividual;
+    n_int *local_vr = individual->variable_references;
 
     if (kind > VARIABLE_READWRITE)
     {
@@ -151,16 +151,17 @@ n_int commands_input(void *code, n_byte kind, n_int value)
         }
         if (kind == VARIABLE_ESCAPE)
         {
-            interp->leave = value;
+            individual->leave = value;
         }
         return 0;
     }
     return -1; /* where this fails is more important than this failure */
 }
 
-n_int commands_output(void * vcode, n_byte * kind, n_int * number)
+n_int commands_output(void * vcode, void * vindividual, n_byte * kind, n_int * number)
 {
-    n_interpret * code = (n_interpret *) vcode;
+    n_interpret *code = (n_interpret *)vcode;
+    n_individual_interpret *individual = (n_individual_interpret *)vindividual;
     n_byte	first_value = kind[0];
     n_byte	second_value = kind[1];
     if(first_value == 'n')
@@ -170,7 +171,7 @@ n_int commands_output(void * vcode, n_byte * kind, n_int * number)
     }
     if((first_value == 't') && (VARIABLE_SPECIAL(second_value, code)==0))
     {
-        n_int	*local_vr = code->variable_references;
+        n_int	*local_vr = individual->variable_references;
 
         if(second_value>VARIABLE_READWRITE)
         {

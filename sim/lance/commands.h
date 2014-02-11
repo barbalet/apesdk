@@ -152,10 +152,9 @@ static variable_string	variable_codes[VARIABLE_MAX]=
 
 #define FRACTION_OF_SECOND      (6)
 
-n_int commands_output(void * vcode, n_byte * kind, n_int * number);
+n_int commands_output(void * vcode, void * vindividual, n_byte * kind, n_int * number);
 
-n_int commands_input(void *code, n_byte kind, n_int value);
-
+n_int commands_input(void *vindividual, n_byte kind, n_int value);
 
 #endif
 

@@ -81,10 +81,6 @@ static n_int	lance_interpret(n_byte * buff, n_uint len)
     interpret->sc_output = &commands_output;
 
     interpret->input_greater   = VARIABLE_READWRITE;
-
-    interpret->location = 0;
-    interpret->leave = 0;
-    interpret->localized_leave = 0;
     
     return 0;
 }
@@ -120,6 +116,9 @@ int main(int argc, char *argv[])
 {
     n_int   return_value = 0;
     
+    n_individual_interpret *individual = interpret_individual();
+
+    
     if (argc != 2)
     {
         printf("ERROR: Single script file string expected\n");
@@ -134,13 +133,14 @@ int main(int argc, char *argv[])
     
     do
     {
-        return_value = interpret_cycle(interpret, VARIABLE_EXIT - VARIABLE_FIRST_REAL_ONE, 0L,0L,0L,0L);
-        if (interpret->leave != 0)
+        return_value = interpret_cycle(interpret, individual, VARIABLE_EXIT - VARIABLE_FIRST_REAL_ONE, 0L,0L,0L,0L);
+        if (individual->leave != 0)
         {
 #ifdef COMMAND_LINE_DEBUG
             printf("...");
 #endif
         }
+        
     }
     while (return_value == 1);
 
@@ -149,6 +149,8 @@ int main(int argc, char *argv[])
         printf("ERROR: Script %s Ended with Error\n",argv[1]);
     }
 
+    interpret_individual_cleanup(&individual);
+    
     lance_close();
 
     return 1;
