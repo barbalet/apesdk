@@ -442,8 +442,10 @@ void shared_mouseUp(void)
 
 void shared_about(n_constant_string value)
 {
+    n_string_block full_value;
     toggle_pause = 1;
-    draw_about(value);
+    sprintf(full_value, "%s %ld Cores", value, execute_threads_value());
+    draw_about(full_value);
 }
 
 n_byte * shared_draw(n_byte fIdentification)

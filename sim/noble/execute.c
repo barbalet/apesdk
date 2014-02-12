@@ -44,16 +44,15 @@
 #include <tchar.h>
 #include <strsafe.h>
 
-#define MAX_EXECUTION_THREAD_SIZE 4
-
 #else
 
 #include <pthread.h>
 #include <time.h>
 
-#define MAX_EXECUTION_THREAD_SIZE 8
 
 #endif
+
+#define MAX_EXECUTION_THREAD_SIZE 4
 
 typedef enum
 {
@@ -89,11 +88,23 @@ static DWORD             threadId[MAX_EXECUTION_THREAD_SIZE];
 
 #else
 
-static pthread_t         thread[MAX_EXECUTION_THREAD_SIZE] = {0L};
+static pthread_t         *thread = 0L;
 
 #endif
 
-static execution_thread  execution[MAX_EXECUTION_THREAD_SIZE] = {0L};
+static execution_thread  *execution = 0L;
+
+static n_int execution_thread_size = MAX_EXECUTION_THREAD_SIZE;
+
+void execute_threads(n_int value)
+{
+    execution_thread_size = value;
+}
+
+n_int execute_threads_value(void)
+{
+    return execution_thread_size;
+}
 
 static void execute_wait_ns(void)
 {
@@ -168,7 +179,7 @@ void execute_close(void)
 #ifdef _WIN32
 	{
 		n_int loop = 0;
-		while (loop < MAX_EXECUTION_THREAD_SIZE)
+		while (loop < execution_thread_size)
 		{
 			CloseHandle(thread[loop]);
 			loop++;
@@ -235,6 +246,7 @@ static void execute_thread_generic(void * id)
         }
 
     }while (global_cycle);
+    
 }
 
 #ifdef _WIN32
@@ -264,7 +276,29 @@ void execute_init(void)
 {
 #ifdef    EXECUTE_THREADED
     n_int loop = 0;
-    while (loop < MAX_EXECUTION_THREAD_SIZE)
+    
+    thread = (pthread_t*)io_new(execution_thread_size * sizeof(pthread_t));
+    
+    if (thread == 0L)
+    {
+        (void)SHOW_ERROR("Threads failed to allocate");
+        return;
+    }
+    
+    execution = (execution_thread *)io_new(execution_thread_size * sizeof(execution_thread));
+
+    
+    if (execution == 0L)
+    {
+        io_free((void **)&thread);
+        (void)SHOW_ERROR("Execution thread failed to allocate");
+        return;
+    }
+    
+    io_erase((n_byte*)thread, execution_thread_size * sizeof(pthread_t));
+    io_erase((n_byte*)execution, execution_thread_size * sizeof(execution_thread));
+    
+    while (loop < execution_thread_size)
     {
 #ifdef _WIN32
         threadId[loop] = loop;

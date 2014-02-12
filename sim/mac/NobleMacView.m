@@ -206,6 +206,9 @@
         window_value = NUM_GRAPH;
     }
 #endif
+    
+    execute_threads([[NSProcessInfo processInfo] processorCount]);
+    
     {
         n_int shared_response = shared_init(window_value, (n_uint)CFAbsoluteTimeGetCurrent());
         
