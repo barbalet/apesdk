@@ -310,8 +310,12 @@ void execute_init(void)
         (void)SHOW_ERROR("Execution thread failed to allocate");
         return;
     }
-    
+#ifdef _WIN32
+    io_erase((n_byte*)thread, execution_thread_size * sizeof(HANDLE));
+	io_erase((n_byte*)threadId, execution_thread_size * sizeof(DWORD));
+#else
     io_erase((n_byte*)thread, execution_thread_size * sizeof(pthread_t));
+#endif
     io_erase((n_byte*)execution, execution_thread_size * sizeof(execution_thread));
     
     while (loop < execution_thread_size)

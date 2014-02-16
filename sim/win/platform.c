@@ -563,7 +563,7 @@ static unsigned char plat_file_save(n_file_out cfo)
 static unsigned char plat_file_save_as(void)
 {
     BOOL save_result;
-    n_block_string actual_file_name;
+    char actual_file_name[MAX_PATH];
 
     OPENFILENAME opf;
     ZeroMemory(&opf, sizeof(opf));
