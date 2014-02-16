@@ -2505,6 +2505,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
 
 n_int console_quit(void * ptr, n_string response, n_console_output output_function)
 {
+    simulation_executing = 0;
     (void)console_stop(ptr, response, output_function);
     return io_quit(ptr, response, output_function);
 }

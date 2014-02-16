@@ -597,6 +597,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
 void sim_close(void)
 {
+    console_quit(0L, 0L, 0L);
     io_console_quit();
     execute_close();
 #ifndef _WIN32
