@@ -77,8 +77,9 @@ char	list_of_files[NUMBER_OF_FILES][FILE_STRING_SIZE]=
     "start"
 };
 
-n_int draw_error(n_constant_string error_text)
+n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
+    printf("ERROR: %s @ %s %ld\n",(const n_string) error_text, location, line_number);
     return -1;
 }
 
@@ -205,8 +206,8 @@ void audit_file_io(FILE * html_write)
     do
     {
         n_byte   local_incl_kind  = noble_file_format[loop].incl_kind;
-        n_byte   local_number     = noble_file_format[loop].number;
-        n_byte2  local_location   = noble_file_format[loop].location;
+        n_byte   local_number     = noble_file_format[loop].number_entries;
+        n_byte2  local_location   = noble_file_format[loop].start_location;
         n_string local_what_is_it = noble_file_format[loop].what_is_it;
 
         n_byte   printout_characters[7] = {0};
@@ -390,6 +391,7 @@ n_int convert_txt_to_html(char * text_name, char * html_name)
     while (!feof(text_file));
     fclose(text_file);
     fclose(html_file);
+    return 0;
 }
 
 
