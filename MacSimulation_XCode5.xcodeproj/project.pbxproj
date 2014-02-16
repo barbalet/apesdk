@@ -54,7 +54,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4A36001417124025004DAFBA /* MacSimulation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSimulation.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A36001417124025004DAFBA /* Noble Ape (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Noble Ape (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A36001717124025004DAFBA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A36001A17124025004DAFBA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		4A36001B17124025004DAFBA /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -149,7 +149,7 @@
 		4A36001517124025004DAFBA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A36001417124025004DAFBA /* MacSimulation.app */,
+				4A36001417124025004DAFBA /* Noble Ape (Debug).app */,
 				5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */,
 			);
 			name = Products;
@@ -306,7 +306,7 @@
 			);
 			name = MacSimulation;
 			productName = MacSimulation;
-			productReference = 4A36001417124025004DAFBA /* MacSimulation.app */;
+			productReference = 4A36001417124025004DAFBA /* Noble Ape (Debug).app */;
 			productType = "com.apple.product-type.application";
 		};
 		5A4805DF178676EB007220D7 /* MacSimulation Tests */ = {
@@ -534,7 +534,7 @@
 					"-DGRAPHLESS_GUI",
 					"-DNOBLE_APE_ASSERT",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Noble Ape (Debug)";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
@@ -566,7 +566,7 @@
 					"-DGRAPHLESS_GUI",
 					"-DNOBLE_APE_ASSERT",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Noble Ape";
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
