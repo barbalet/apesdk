@@ -83,8 +83,8 @@ static n_int execution_cycle = 0;
 
 #ifdef _WIN32
 
-static HANDLE            thread[MAX_EXECUTION_THREAD_SIZE];
-static DWORD             threadId[MAX_EXECUTION_THREAD_SIZE];
+static HANDLE            *thread = 0L;
+static DWORD             *threadId = 0L;
 
 #else
 
@@ -277,7 +277,11 @@ void execute_init(void)
 #ifdef    EXECUTE_THREADED
     n_int loop = 0;
     
+#ifdef _WIN32
+    thread = (HANDLE*)io_new(execution_thread_size * sizeof(HANDLE));
+#else
     thread = (pthread_t*)io_new(execution_thread_size * sizeof(pthread_t));
+#endif
     
     if (thread == 0L)
     {
@@ -285,12 +289,24 @@ void execute_init(void)
         return;
     }
     
+#ifdef _WIN32
+    threadId = (DWORD*)io_new(execution_thread_size * sizeof(DWORD));
+    if (threadId == 0L)
+    {
+        io_free((void **)&thread);
+        (void)SHOW_ERROR("ThreadIds failed to allocate");
+        return;
+    }
+#endif
+    
     execution = (execution_thread *)io_new(execution_thread_size * sizeof(execution_thread));
 
-    
     if (execution == 0L)
     {
         io_free((void **)&thread);
+#ifdef _WIN32
+        io_free((void **)&threadId);
+#endif
         (void)SHOW_ERROR("Execution thread failed to allocate");
         return;
     }
