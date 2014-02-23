@@ -63,11 +63,11 @@
 #define LATITUDE_MEAN_TEMPERATURE 20000
 
 /*! @define */
-#define	SHORT_VERSION_NAME		 "Noble Ape 0.697 "
+#define	SHORT_VERSION_NAME		 "Noble Ape 0.698 "
 #define	FULL_DATE				 __DATE__
 
 /*! @define */
-#define	VERSION_NUMBER		     697
+#define	VERSION_NUMBER		     698
 #define	COPYRIGHT_DATE		     "Copyright 1996 - 2014 "
 
 #define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2014."
