@@ -1349,7 +1349,6 @@ n_int     file_in(n_file * input_file);
 n_int     file_interpret(n_file * input_file);
 
 void	  sim_close(void);
-void	  sim_populations(n_uint	*total, n_uint * female, n_uint * male);
 
 n_int sim_new(void);
 

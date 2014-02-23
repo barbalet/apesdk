@@ -614,29 +614,6 @@ void sim_set_select(noble_being * select)
     console_external_watch();
 }
 
-void sim_populations(n_uint	*total, n_uint * female, n_uint * male)
-{
-    n_uint  loop = 0;
-    n_uint  local_female = 0;
-    n_uint  local_male = 0;
-    while (loop < sim.num)
-    {
-        noble_being * local = &sim.beings[loop];
-        if (FIND_SEX(GET_I(local))==SEX_FEMALE)
-        {
-            local_female++;
-        }
-        else
-        {
-            local_male++;
-        }
-        loop++;
-    }
-    *total = sim.num;
-    *female = local_female;
-    *male = local_male;
-}
-
 static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * data)
 {
     n_int         local_x = APESPACE_TO_MAPSPACE(being_location_x(local));
