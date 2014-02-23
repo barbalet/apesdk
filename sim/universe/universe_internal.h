@@ -211,12 +211,12 @@ static const noble_file_entry noble_file_format[]=
 #endif
     
 #ifdef BRAINCODE_ON
-    {"brreg=", FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, 454, "Brain code register"},
-    {"brpro=", FIL_BEI | FILE_TYPE_BYTE, (sizeof(noble_brain_probe)*BRAINCODE_PROBES), 457, "Brain code probe"},
+    {"brreg=", FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, 451, "Brain code register"},
+    {"brpro=", FIL_BEI | FILE_TYPE_BYTE, (sizeof(noble_brain_probe)*BRAINCODE_PROBES), 454, "Brain code probe"},
 #endif
     
 #ifdef METABOLISM_ON
-    {"metao=", FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, 554, "Metabolism"},
+    {"metao=", FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, 550, "Metabolism"},
     
     /* fixed to here */
     /*
