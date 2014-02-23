@@ -61,7 +61,7 @@ noble_being      * being = 0L;
 - (void)testWeatherCheckSum
 {
     n_uint hash = math_hash((n_byte *)value->land->atmosphere, (MAP_AREA*sizeof(n_c_int)/2));
-    XCTAssertTrue(hash == 0x8232846f8b53c59d, @"Hash doesn't comply with prior weather hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x6da27da42367d12f, @"Hash doesn't comply with prior weather hashes (%lx)", hash);
 }
 
 - (void)testBeingCheckSum
@@ -69,9 +69,9 @@ noble_being      * being = 0L;
 
     n_int length = sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *);
     n_uint hash = math_hash((n_byte *)being, length);
-    XCTAssertTrue(length == 2704, @"Length doesn't comply with prior length (%ld)", length);
+    XCTAssertTrue(length == 70296, @"Length doesn't comply with prior length (%ld)", length);
     
-    XCTAssertTrue(hash == 0xcf57c761d1f3db58, @"Hash doesn't comply with prior being hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x6ec8ca3c978c691a, @"Hash doesn't comply with prior being hashes (%lx)", hash);
 }
 
 - (void)testBrainCheckSum
@@ -83,7 +83,7 @@ noble_being      * being = 0L;
 - (void)testSocialCheckSum
 {
     n_uint hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
-    XCTAssertTrue(hash == 0x9641d9201ee7241, @"Hash doesn't comply with prior social hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x2e003149cb028b53, @"Hash doesn't comply with prior social hashes (%lx)", hash);
 }
 
 - (void)testEpisodicCheckSum
@@ -101,46 +101,40 @@ noble_being      * being = 0L;
     shared_mouseReceived(map_x, map_y, NUM_VIEW);
 }
 
-#ifdef NEED_TO_FIX
 - (void)testMouseClick
 {
-    XCTAssertTrue(value->select == 0, @"Selected being is non-zero");
     [self actionMouseClick];
-    shared_cycle(1000, NUM_VIEW);
-    shared_cycle(1000, NUM_TERRAIN);
+    shared_cycle(1000, NUM_VIEW, 512, 512);
+    shared_cycle(1000, NUM_TERRAIN, 512, 512);
     shared_mouseUp();
-    shared_cycle(1000, NUM_VIEW);
-    shared_cycle(1000, NUM_TERRAIN);
-    XCTAssertTrue(value->select == 2, @"Selected being is found");
+    shared_cycle(1000, NUM_VIEW, 512, 512);
+    shared_cycle(1000, NUM_TERRAIN, 512, 512);
+    XCTAssertTrue(value->select == being, @"Selected being is found");
 }
-#endif
 
 - (void)testMouseDrag
 {
-    XCTAssertTrue(being->location[0] == 10915, @"X value is wrong (%d)", being->location[0]);
-    XCTAssertTrue(being->location[1] == 20105, @"Y value is wrong (%d)", being->location[1]);
+    XCTAssertTrue(being->location[0] == 24160, @"X value is wrong (%d)", being->location[0]);
+    XCTAssertTrue(being->location[1] == 3415, @"Y value is wrong (%d)", being->location[1]);
     
     [self actionMouseClick];
-    /*
-    shared_cycle(1000, NUM_VIEW);
-    shared_cycle(1000, NUM_TERRAIN);
+    shared_cycle(1000, NUM_VIEW, 512, 512);
+    shared_cycle(1000, NUM_TERRAIN, 512, 512);
     
     shared_mouseReceived(100, 100, NUM_VIEW);
     shared_mouseOption(1);
     
-    shared_cycle(1000, NUM_VIEW);
-    shared_cycle(1000, NUM_TERRAIN);
-    
+    shared_cycle(1000, NUM_VIEW, 512, 512);
+    shared_cycle(1000, NUM_TERRAIN, 512, 512);
     shared_mouseOption(0);
     shared_mouseUp();
     
-    shared_cycle(1000, NUM_VIEW);
-    shared_cycle(1000, NUM_TERRAIN);
-    */
+    shared_cycle(1000, NUM_VIEW, 512, 512);
+    shared_cycle(1000, NUM_TERRAIN, 512, 512);
     NSLog(@"Location %d %d", being->location[0], being->location[1]);
     
-    XCTAssertTrue(being->location[0] == 6396, @"X value is wrong (%d)", being->location[0]);
-    XCTAssertTrue(being->location[1] == 6394, @"Y value is wrong (%d)", being->location[1]);
+    XCTAssertTrue(being->location[0] == 6394, @"X value is wrong (%d)", being->location[0]);
+    XCTAssertTrue(being->location[1] == 6398, @"Y value is wrong (%d)", being->location[1]);
 }
 
 static n_uint hash_comparison[4] =
@@ -159,15 +153,16 @@ static n_uint hash_comparison[4] =
     
     shared_flood();
 
-    shared_simulate(1);
-    shared_simulate(2);
-
+    shared_cycle(1000, NUM_VIEW, 512, 512);
+    shared_cycle(1000, NUM_TERRAIN, 512, 512);
+    
     hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == 0xf07db769957bb69a, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
  
     while (time < ((TIME_DAY_MINUTES * 1)/2))
     {
-        shared_simulate(time * 3);
+        shared_cycle(1000 * time, NUM_VIEW, 512, 512);
+        shared_cycle(1000 * time, NUM_TERRAIN, 512, 512);
         time++;
     }
     
@@ -188,7 +183,8 @@ static n_uint hash_comparison[4] =
         
     while (time < ((TIME_DAY_MINUTES * 3)/2))
     {
-        shared_simulate(time * 3);
+        shared_cycle(1000 * time, NUM_VIEW, 512, 512);
+        shared_cycle(1000 * time, NUM_TERRAIN, 512, 512);
         time++;
     }
 
@@ -221,15 +217,16 @@ static n_uint hash_comparison[4] =
     
     shared_flood();
     
-    shared_simulate(1);
-    shared_simulate(2);
+    shared_cycle(1000, NUM_VIEW, 512, 512);
+    shared_cycle(1000, NUM_TERRAIN, 512, 512);
     
     hash = math_hash((n_byte *)being, sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *));
     XCTAssertTrue(hash == 0xf07db769957bb69a, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
     
     while (time < ((TIME_DAY_MINUTES * 1)/2))
     {
-        shared_simulate(time * 3);
+        shared_cycle(1000 * time, NUM_VIEW, 512, 512);
+        shared_cycle(1000 * time, NUM_TERRAIN, 512, 512);
         time++;
     }
     
