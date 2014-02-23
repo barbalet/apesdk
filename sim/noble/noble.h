@@ -308,8 +308,8 @@ typedef struct
 
 enum window_num
 {
-    NUM_TERRAIN = (0),
-    NUM_VIEW	= (1)
+    NUM_VIEW    = (0),
+    NUM_TERRAIN	= (1)
 #ifndef GRAPHLESS_GUI
    ,NUM_GRAPH   = (2)
 #endif

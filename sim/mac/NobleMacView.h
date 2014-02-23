@@ -40,6 +40,8 @@
 #import <OpenGL/glu.h>
 #import <OpenGL/OpenGL.h>
 
+#include "../gui/shared.h"
+#include "../graph/graph.h"
 
 @interface NobleMacView : NSOpenGLView
 {
@@ -62,6 +64,8 @@
 - (id)   initWithFrame:(NSRect) frameRect;
 - (void) awakeFromNib;
 
+- (void)startEverything;
+
 - (void) quitProcedure;
 
 -(IBAction) aboutDialog:(id) sender;
@@ -73,23 +77,12 @@
 
 -(IBAction) menuControlClearErrors:(id) sender;
 
--(IBAction) menuControlNoTerritory:(id) sender;
--(IBAction) menuControlNoWeather:(id) sender;
--(IBAction) menuControlNoBrain:(id) sender;
--(IBAction) menuControlNoBrainCode:(id) sender;
-
--(IBAction) menuControlFlood:(id) sender;
--(IBAction) menuControlHealthyCarrier:(id) sender;
-
 -(IBAction) menuFileNew:(id) sender;
 -(IBAction) menuFileOpen:(id) sender;
 -(IBAction) menuFileOpenScript:(id) sender;
 -(IBAction) menuFileSaveAs:(id) sender;
 
 -(IBAction) menuQuit:(id) sender;
-
--(IBAction) loadManual:(id) sender;
--(IBAction) loadSimulationPage:(id) sender;
 
 -(void)keyUp:(NSEvent *)theEvent;
 -(void)keyDown:(NSEvent *)theEvent;

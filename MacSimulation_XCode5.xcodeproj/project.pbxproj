@@ -37,6 +37,7 @@
 		4A8ABB2517D452DC00D68884 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A8ABB2417D452DC00D68884 /* QuartzCore.framework */; };
 		4A94505317CDC33C00D5893C /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504D17CDC33C00D5893C /* draw.c */; };
 		4A94505417CDC33C00D5893C /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504F17CDC33C00D5893C /* shared.c */; };
+		5A33158018B9BCAB00FE28C6 /* NobleSimulationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A33157F18B9BCAB00FE28C6 /* NobleSimulationView.m */; };
 		5A4805E2178676EB007220D7 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A4805E1178676EB007220D7 /* XCTest.framework */; };
 		5A4805E8178676EB007220D7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A4805E6178676EB007220D7 /* InfoPlist.strings */; };
 		5A4805EA178676EB007220D7 /* MacSimulation_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */; };
@@ -99,6 +100,8 @@
 		4A94504E17CDC33C00D5893C /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
 		4A94504F17CDC33C00D5893C /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shared.c; sourceTree = "<group>"; };
 		4A94505017CDC33C00D5893C /* shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
+		5A33157E18B9BCAB00FE28C6 /* NobleSimulationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NobleSimulationView.h; sourceTree = "<group>"; };
+		5A33157F18B9BCAB00FE28C6 /* NobleSimulationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NobleSimulationView.m; sourceTree = "<group>"; };
 		5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MacSimulation Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A4805E1178676EB007220D7 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		5A4805E5178676EB007220D7 /* MacSimulation Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MacSimulation Tests-Info.plist"; sourceTree = "<group>"; };
@@ -223,6 +226,8 @@
 				4A8ABB2217D44D4000D68884 /* nobleape.xib */,
 				4A36004B1712409A004DAFBA /* NobleMacView.h */,
 				4A36004C1712409A004DAFBA /* NobleMacView.m */,
+				5A33157E18B9BCAB00FE28C6 /* NobleSimulationView.h */,
+				5A33157F18B9BCAB00FE28C6 /* NobleSimulationView.m */,
 			);
 			name = mac;
 			path = sim/mac;
@@ -333,7 +338,7 @@
 		4A36000C17124025004DAFBA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Thomas Barbalet";
 				TargetAttributes = {
 					5A4805DF178676EB007220D7 = {
@@ -387,6 +392,7 @@
 			files = (
 				4A36002B17124025004DAFBA /* AppDelegate.m in Sources */,
 				4A36005C1712409A004DAFBA /* being.c in Sources */,
+				5A33158018B9BCAB00FE28C6 /* NobleSimulationView.m in Sources */,
 				4A36005D1712409A004DAFBA /* body.c in Sources */,
 				4A36005E1712409A004DAFBA /* brain.c in Sources */,
 				4A36005F1712409A004DAFBA /* drives.c in Sources */,
@@ -478,7 +484,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -504,7 +510,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -580,6 +586,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
 					"$(inherited)",
@@ -608,6 +615,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_FRAMEWORKS_DIR)",

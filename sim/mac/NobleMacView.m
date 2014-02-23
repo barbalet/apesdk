@@ -33,9 +33,6 @@
  
  ****************************************************************/
 
-#include "../gui/shared.h"
-#include "../graph/graph.h"
-
 #import "NobleMacView.h"
 
 #include <stdio.h>
@@ -102,9 +99,6 @@
     
     if (index == 0L) return;
     
-    do{
-    }while (shared_draw(fIdentification) == 0);
-    
     [[self openGLContext] makeCurrentContext];
 
     {
@@ -170,24 +164,28 @@
     return YES;
 }
 
+/* is over-ridden in the Noble Ape Simulation */
+
 - (void) awakeFromNib
 {
+    fIdentification = 0;
+    
+    [self startEverything];
+}
+
+- (void)startEverything
+{
     NSSize increments;
-    n_byte  window_value = NUM_TERRAIN;
     
     increments.height = 4;
     increments.width = 4;
+    [[self window] setContentResizeIncrements:increments];
     
-    if ([[[self window] title] isEqualToString:@"View"])
-    {
-        window_value = NUM_VIEW;
-    }
-
+    [[self window] setLevel:kCGMaximumWindowLevel];
+    
     execute_threads([[NSProcessInfo processInfo] processorCount]);
-    
     {
-        n_int shared_response = shared_init(window_value, (n_uint)CFAbsoluteTimeGetCurrent());
-        
+        n_int shared_response = shared_init(fIdentification, (n_uint)CFAbsoluteTimeGetCurrent());
         if (shared_response == -1)
         {
             [self quitProcedure];
@@ -199,14 +197,11 @@
         }
     }
     
-    [[self window] setContentResizeIncrements:increments];
-        
-    [[self window] setLevel:kCGMaximumWindowLevel];
-
     /* start animation timer */
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
+
 }
 
 #pragma mark ---- IB Actions ----
@@ -234,36 +229,6 @@
 -(IBAction) menuControlClearErrors:(id) sender
 {
     shared_clearErrors();
-}
-
--(IBAction) menuControlNoTerritory:(id) sender
-{
-    shared_notTerritory();
-}
-
--(IBAction) menuControlNoWeather:(id) sender
-{
-    shared_notWeather();
-}
-
--(IBAction) menuControlNoBrain:(id) sender
-{
-    shared_notBrain();
-}
-
--(IBAction) menuControlNoBrainCode:(id) sender
-{
-    shared_notBrainCode();
-}
-
--(IBAction) menuControlFlood:(id) sender
-{
-    shared_flood();
-}
-
--(IBAction) menuControlHealthyCarrier:(id) sender
-{
-    shared_healthy_carrier();
 }
 
 -(IBAction) menuQuit:(id) sender
@@ -320,13 +285,11 @@
                  [[NSSound soundNamed:@"Pop"] play];
              }
          }
-         
      }];
 }
 
 
--(IBAction) menuFileSaveAs:
-(id) sender
+-(IBAction) menuFileSaveAs:(id) sender
 {
     NSSavePanel *panel = [NSSavePanel savePanel];
     NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
@@ -341,16 +304,6 @@
          }
          
      }];
-}
-
--(IBAction) loadManual:(id) sender
-{
-    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/man/"]];
-}
-
--(IBAction) loadSimulationPage:(id)sender
-{
-    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/sim/"]];
 }
 
 #pragma mark ---- Method Overrides ----
@@ -404,7 +357,7 @@
 {
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     n_int location_x = (n_int)location.x;
-    n_int location_y = (n_int)location.y;
+    n_int location_y = (n_int)([self bounds].size.height - location.y);
     if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
     {
         shared_mouseOption(1);
@@ -413,7 +366,7 @@
     {
         shared_mouseOption(0);
     }
-	shared_mouseReceived(location_x, (n_int)([self bounds].size.height) - location_y, fIdentification);
+	shared_mouseReceived(location_x, location_y, fIdentification);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent
