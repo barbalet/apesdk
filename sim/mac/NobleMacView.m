@@ -107,9 +107,6 @@
     
     [[self openGLContext] makeCurrentContext];
 
-#ifndef GRAPHLESS_GUI
-    if (fIdentification != NUM_GRAPH)
-#endif
     {
         n_int           ly = 0;
         n_int           loop = 0;
@@ -140,22 +137,7 @@
             ly++;
         }
     }
-#ifndef GRAPHLESS_GUI
-    else
-    {
-        n_int loop = 0;
-        n_int loop_end = dimensionX*dimensionY;
-        while (loop < loop_end)
-        {
-            n_int inverse = loop_end - loop - 1;
-            
-            outputBuffer[(loop*3)] = index[(inverse*3)];
-            outputBuffer[(loop*3)+1] = index[(inverse*3)+1];
-            outputBuffer[(loop*3)+2] = index[(inverse*3)+2];
-            loop++;
-        }
-    }
-#endif
+
     glDrawPixels((GLsizei)dimensionX, (GLsizei)dimensionY,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
     [[self openGLContext] flushBuffer];
 }
@@ -200,13 +182,7 @@
     {
         window_value = NUM_VIEW;
     }
-#ifndef GRAPHLESS_GUI
-    if ([[[self window] title] isEqualToString:@"Graph"])
-    {
-        window_value = NUM_GRAPH;
-    }
-#endif
-    
+
     execute_threads([[NSProcessInfo processInfo] processorCount]);
     
     {
@@ -224,9 +200,8 @@
     }
     
     [[self window] setContentResizeIncrements:increments];
-    
-    [[self window] orderFrontRegardless];
-    
+        
+    [[self window] setLevel:kCGMaximumWindowLevel];
 
     /* start animation timer */
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
@@ -377,64 +352,6 @@
 {
     [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/sim/"]];
 }
-
-#ifndef GRAPHLESS_GUI
-
--(IBAction) graphClearBraincode:(id)sender
-{
-    graph_command(GC_CLEAR_BRAINCODE);
-}
-
--(IBAction) graphIdeosphere:(id)sender
-{
-    graph_command(GC_IDEOSPHERE);
-}
-
--(IBAction) graphBraincode:(id)sender
-{
-    graph_command(GC_BRAINCODE);
-}
-
--(IBAction) graphGenepool:(id)sender
-{
-    graph_command(GC_GENEPOOL);
-}
-
--(IBAction) graphHonor:(id)sender
-{
-    graph_command(GC_HONOR);
-}
-
--(IBAction) graphPathogens:(id)sender
-{
-    graph_command(GC_PATHOGENS);
-}
-
--(IBAction) graphRelationships:(id)sender
-{
-    graph_command(GC_RELATIONSHIPS);
-}
-
--(IBAction) graphPreferences:(id)sender
-{
-    graph_command(GC_PREFERENCES);
-}
-
--(IBAction) graphPhasespace:(id)sender
-{
-    graph_command(GC_PHASESPACE);
-}
-
--(IBAction) graphSocial:(id)sender
-{
-    graph_command(GC_SOCIALSIM);
-}
-
--(IBAction) graphVascular:(id)sender
-{
-    graph_command(GC_VASCULAR);
-}
-#endif
 
 #pragma mark ---- Method Overrides ----
 
