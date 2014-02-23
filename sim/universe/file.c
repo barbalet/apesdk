@@ -247,23 +247,24 @@ n_int	file_in(n_file * input_file)
     return SHOW_ERROR("Process file failed");
 }
 
-n_int sketch_input(void *code, n_byte kind, n_int value)
+n_int sketch_input(void *vcode, n_byte kind, n_int value)
 {
     noble_simulation * local_sim = sim_sim();
-    
-    n_int *local_vr = ((n_individual_interpret *)code)->variable_references;
+    n_individual_interpret * code = (n_individual_interpret *)vcode;
+    n_int *local_vr = code->variable_references;
+    void *local_data = code->interpret_data;
     noble_being	*local_being = 0L;
     n_int temp_select = local_vr[ VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE ];
 
     if( temp_select < 0 )
     {
-        return io_apescript_error(AE_SELECTED_ENTITY_OUT_OF_RANGE);
+        return io_apescript_error(local_data, AE_SELECTED_ENTITY_OUT_OF_RANGE);
     }
     {
         n_uint local_select = temp_select;
         if( local_select >= local_sim->num)
         {
-            return io_apescript_error(AE_SELECTED_ENTITY_OUT_OF_RANGE);
+            return io_apescript_error(local_data, AE_SELECTED_ENTITY_OUT_OF_RANGE);
         }
         local_being = &(local_sim->beings[local_select]);
     }
@@ -278,13 +279,13 @@ n_int sketch_input(void *code, n_byte kind, n_int value)
 
         if((value < 0) || (value > 255))
         {
-            return io_apescript_error(AE_VALUE_OUT_OF_RANGE);
+            return io_apescript_error(local_data, AE_VALUE_OUT_OF_RANGE);
         }
 
         if( (current_x < 0) || (current_y < 0) || (current_z < 0) ||
                 (current_x > 31) || (current_y > 31) || (current_z > 31))
         {
-            return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
+            return io_apescript_error(local_data, AE_COORDINATES_OUT_OF_RANGE);
         }
         {
             noble_being * local_being = (noble_being *)((n_individual_interpret *)code)->interpret_data;
@@ -474,7 +475,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     if( (quick_x < 0) || (quick_y < 0) ||
                             (quick_x > APESPACE_BOUNDS ) || (quick_y > APESPACE_BOUNDS) )
                     {
-                        return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
+                        return io_apescript_error(individual->interpret_data, AE_COORDINATES_OUT_OF_RANGE);
                     }
                 }
 
@@ -491,7 +492,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         n_int	int_qu_op = local_vr[VARIABLE_BIOLOGY_OPERATOR-VARIABLE_VECT_ANGLE];
                         if((int_qu_op < 0 ) || (int_qu_op > (VARIABLE_BIOLOGY_EAGLE - VARIABLE_BIOLOGY_AREA)))
                         {
-                            return io_apescript_error(AE_VALUE_OUT_OF_RANGE);
+                            return io_apescript_error(individual->interpret_data, AE_VALUE_OUT_OF_RANGE);
                         }
                         local_number = land_operator_interpolated(local_sim->land,
                                        (n_byte)quick_x, (n_byte)quick_y, (n_byte*)&operators[int_qu_op-VARIABLE_BIOLOGY_AREA]);
@@ -529,7 +530,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 if( (quick_x < 0) || (quick_y < 0) ||
                         (quick_x > APESPACE_BOUNDS ) || (quick_y > APESPACE_BOUNDS) )
                 {
-                    return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
+                    return io_apescript_error(individual->interpret_data, AE_COORDINATES_OUT_OF_RANGE);
                 }
 
                 local_number = weather_seven_values(local_sim->land, quick_x, quick_y);
@@ -544,7 +545,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 if( (current_x < 0) || (current_y < 0) || (current_z < 0) ||
                         (current_x > 31) || (current_y > 31) || (current_z > 31))
                 {
-                    return io_apescript_error(AE_COORDINATES_OUT_OF_RANGE);
+                    return io_apescript_error(individual->interpret_data, AE_COORDINATES_OUT_OF_RANGE);
                 }
                 {
                     noble_being * local_being = (noble_being *)individual->interpret_data;
@@ -569,13 +570,13 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
 
                 if( temp_select < 0 )
                 {
-                    return io_apescript_error(AE_SELECTED_ENTITY_OUT_OF_RANGE);
+                    return io_apescript_error(individual->interpret_data, AE_SELECTED_ENTITY_OUT_OF_RANGE);
                 }
                 {
                     n_uint local_select = temp_select;
                     if( local_select >= local_sim->num)
                     {
-                        return io_apescript_error(AE_SELECTED_ENTITY_OUT_OF_RANGE);
+                        return io_apescript_error(individual->interpret_data, AE_SELECTED_ENTITY_OUT_OF_RANGE);
                     }
                     local_being = &(local_sim->beings[local_select]);
                     if (local_being!=0L)

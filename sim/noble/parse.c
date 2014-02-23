@@ -86,6 +86,8 @@ static variable_string	* local_var_codes;
 n_file                  * file_debug = 0L;
 static n_int              single_entry = 1;
 
+static void             * writable_selection;
+
 n_file * scdebug_file_ready(void)
 {
     return io_file_ready(single_entry, file_debug);
@@ -96,18 +98,23 @@ void scdebug_file_cleanup(void)
     io_file_cleanup(&single_entry, &file_debug);
 }
 
-void scdebug_writeon(void)
+void scdebug_writeon(void * ptr)
 {
+    writable_selection = ptr;
     io_file_writeon(&single_entry, &file_debug, 1);
 }
 
-void scdebug_writeoff(void)
+void scdebug_writeoff(void * ptr)
 {
+    if (ptr != writable_selection) return;
+    
     io_file_writeoff(&single_entry, file_debug);
 }
 
-void scdebug_string(n_constant_string string)
+void scdebug_string(void * ptr,n_constant_string string)
 {
+    if (ptr != writable_selection) return;
+
     io_file_string(single_entry, file_debug, string);
 }
 
@@ -125,10 +132,12 @@ n_string scdebug_variable(n_int variable)
     return return_value;
 }
 
-void scdebug_int(n_int number)
+void scdebug_int(void * ptr, n_int number)
 {
     if (single_entry == 0) return;
 
+    if (ptr != writable_selection) return;
+    
 #ifndef COMMAND_LINE_DEBUG
     if(file_debug  != 0L)
     {
@@ -139,10 +148,12 @@ void scdebug_int(n_int number)
 #endif
 }
 
-void scdebug_newline(void)
+void scdebug_newline(void * ptr)
 {
     if (single_entry == 0) return;
 
+    if (ptr != writable_selection) return;
+    
 #ifndef COMMAND_LINE_DEBUG
     if(file_debug != 0L)
 #endif
@@ -168,8 +179,10 @@ void scdebug_newline(void)
     }
 }
 
-void scdebug_tabstep(n_int steps)
+void scdebug_tabstep(void * ptr, n_int steps)
 {
+    if (ptr != writable_selection) return;
+
 #ifndef COMMAND_LINE_DEBUG
     if(file_debug != 0L)
 #endif
@@ -192,7 +205,7 @@ static n_int parse_number(n_interpret * interpret, const n_byte * number)
         n_byte temp = number[point_counter++];
         if((!ASCII_NUMBER(temp)) && (temp != 0))
         {
-            return io_apescript_error(AE_NUMBER_EXPECTED); /* this error should never occur */
+            return io_apescript_error(0L, AE_NUMBER_EXPECTED); /* this error should never occur */
         }
         out_value = (out_value * 10) + (temp - '0');
     }
@@ -200,7 +213,7 @@ static n_int parse_number(n_interpret * interpret, const n_byte * number)
 
     if((out_value < 0) || (out_value > 0x7fffffff))
     {
-        return io_apescript_error(AE_NUMBER_OUT_OF_RANGE);
+        return io_apescript_error(0L, AE_NUMBER_OUT_OF_RANGE);
     }
 
     /* is this number already stored? */
@@ -218,7 +231,7 @@ static n_int parse_number(n_interpret * interpret, const n_byte * number)
     }
     else
     {
-        return io_apescript_error(AE_MAXIMUM_NUMBERS_REACHED);
+        return io_apescript_error(0L, AE_MAXIMUM_NUMBERS_REACHED);
     }
     return loop;
 }
@@ -247,13 +260,13 @@ static n_int parse_write_code(n_interpret * final_prog, n_byte value, n_byte cod
 
     if(io_file_write(final_prog->binary_code, value) == -1)
     {
-        return io_apescript_error(AE_MAXIMUM_SCRIPT_SIZE_REACHED);
+        return io_apescript_error(0L, AE_MAXIMUM_SCRIPT_SIZE_REACHED);
     }
     if(CODE_VALUE_REQUIRED(value))
     {
         if(io_file_write(final_prog->binary_code, code) == -1)
         {
-            return io_apescript_error(AE_MAXIMUM_SCRIPT_SIZE_REACHED);
+            return io_apescript_error(0L, AE_MAXIMUM_SCRIPT_SIZE_REACHED);
         }
 
 #ifdef ROUGH_CODE_OUT
@@ -327,7 +340,7 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
             }
             else
             {
-                return io_apescript_error(AE_MAXIMUM_VARIABLES_REACHED);
+                return io_apescript_error(0L, AE_MAXIMUM_VARIABLES_REACHED);
             }
             result = loop;
         }
@@ -347,7 +360,7 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
         }
         if(result == -1)  /* no error reported up until now */
         {
-            return io_apescript_error(AE_UNKNOWN_SYNTAX_PARSER_BUFFER);
+            return io_apescript_error(0L, AE_UNKNOWN_SYNTAX_PARSER_BUFFER);
         }
         if(parse_write_code(final_prog, previous, (n_byte)result) == -1)
         {
@@ -438,7 +451,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         if(convert == 'F')
         {
             interpret_cleanup(&final_prog);
-            (void)io_apescript_error(AE_UNKNOWN_SYNTAX_PARSER_CONVERT);
+            (void)io_apescript_error(0L, AE_UNKNOWN_SYNTAX_PARSER_CONVERT);
             return 0L;
         }
         if((previous != convert) && (previous != 0))
@@ -455,7 +468,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         if(buffer_size == (VARIABLE_WIDTH -  1))
         {
             interpret_cleanup(&final_prog);
-            (void)io_apescript_error(AE_MAXIMUM_SCRIPT_SIZE_REACHED);
+            (void)io_apescript_error(0L, AE_MAXIMUM_SCRIPT_SIZE_REACHED);
             return 0L;
         }
         previous = convert;

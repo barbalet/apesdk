@@ -55,11 +55,28 @@
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
-- (void)debugOutput
+-(NSOpenPanel*) uniformOpenPanel
+{
+    NSOpenPanel *panel = [NSOpenPanel openPanel];
+    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
+	[panel  setAllowedFileTypes:fileTypes];
+    [panel  setCanChooseDirectories:NO];
+    [panel  setAllowsMultipleSelection:NO];
+    return panel;
+}
+
+
+-(NSSavePanel*) uniformSavePanel
 {
     NSSavePanel *panel = [NSSavePanel savePanel];
     NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
 	[panel  setAllowedFileTypes:fileTypes];
+    return panel;
+}
+
+- (void)debugOutput
+{
+    NSSavePanel *panel = [self uniformSavePanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
          if (result == NSFileHandlingPanelOKButton)
@@ -87,18 +104,18 @@
     n_int         dimensionY = (n_int)rect.size.height;
     n_byte        * index = shared_draw(fIdentification);
     
-    shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dimensionX, dimensionY);
-    if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
-    {
-        [self debugOutput];
-    }
-    if (returned_value == SHARED_CYCLE_QUIT)
-    {
-        [self quitProcedure];
-    }
-    
     if (index == 0L) return;
-    
+    {
+        shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dimensionX, dimensionY);
+        if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
+        {
+            [self debugOutput];
+        }
+        if (returned_value == SHARED_CYCLE_QUIT)
+        {
+            [self quitProcedure];
+        }
+    }
     [[self openGLContext] makeCurrentContext];
 
     {
@@ -181,7 +198,8 @@
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
     
-    [[self window] setLevel:kCGMainMenuWindowLevel];
+    
+    /*[[self window] setLevel:kCGFloatingWindowLevelKey];*/
     
     execute_threads([[NSProcessInfo processInfo] processorCount]);
     {
@@ -201,7 +219,9 @@
 	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
-
+    
+    [[self window] makeKeyAndOrderFront:nil];
+    [NSApp activateIgnoringOtherApps:YES];
 }
 
 #pragma mark ---- IB Actions ----
@@ -246,11 +266,7 @@
 
 -(IBAction) menuFileOpen:(id) sender
 {
-    NSOpenPanel *panel = [NSOpenPanel openPanel];
-    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
-	[panel setAllowedFileTypes:fileTypes];
-    [panel setCanChooseDirectories:NO];
-    [panel setAllowsMultipleSelection:NO];
+    NSOpenPanel *panel = [self uniformOpenPanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
          if (result == NSFileHandlingPanelOKButton)
@@ -269,11 +285,7 @@
 
 -(IBAction) menuFileOpenScript:(id) sender
 {
-    NSOpenPanel *panel = [NSOpenPanel openPanel];
-    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
-	[panel      setAllowedFileTypes:fileTypes];
-    [panel  setCanChooseDirectories:NO];
-    [panel  setAllowsMultipleSelection:NO];
+    NSOpenPanel *panel = [self uniformOpenPanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
          if (result == NSFileHandlingPanelOKButton)
@@ -291,9 +303,7 @@
 
 -(IBAction) menuFileSaveAs:(id) sender
 {
-    NSSavePanel *panel = [NSSavePanel savePanel];
-    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
-	[panel  setAllowedFileTypes:fileTypes];
+    NSSavePanel *panel = [self uniformSavePanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
          if (result == NSFileHandlingPanelOKButton)

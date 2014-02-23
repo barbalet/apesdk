@@ -311,7 +311,7 @@ n_int     file_interpret(n_file * input_file)
     }
     else
     {
-        SC_DEBUG_ON; /* turn on debugging after script loading */
+        SC_DEBUG_ON(sim.select); /* turn on debugging after script loading */
     }
 
     interpret->sc_input  = &sketch_input;
@@ -408,8 +408,7 @@ void sim_cycle(void)
     being_loop(&sim, sim_being_universal_loop, 32);
 
     if (interpret)
-    {
-        /* unfortunately the ApeScript interface is still not thread safe */
+    {        
         being_loop(&sim, sim_being_interpret, 16);
     }
     else

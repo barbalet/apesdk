@@ -1435,12 +1435,6 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
         return 0;
     }
 
-    SC_DEBUG_STRING(" [ ERROR : ");
-    SC_DEBUG_STRING( simulation_date_time_error );
-    SC_DEBUG_STRING(" ]");
-    SC_DEBUG_NEWLINE;
-    SC_DEBUG_OFF;
-
     if (io_command_line_execution())
     {
         io_console_out(simulation_date_time_error);

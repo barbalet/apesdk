@@ -978,7 +978,7 @@ typedef struct
 
 /* used for stripping ApeScript errors for documentation */
 
-n_int io_apescript_error(AE_ENUM value);
+n_int io_apescript_error(void * ptr, AE_ENUM value);
 
 n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * variables);
 
@@ -994,21 +994,22 @@ n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n
 n_file * scdebug_file_ready(void);
 void     scdebug_file_cleanup(void);
 
-void     scdebug_string(n_constant_string string);
-void     scdebug_int(n_int number);
-void     scdebug_newline(void);
-void     scdebug_tabstep(n_int steps);
+void     scdebug_string(void * ptr, n_constant_string string);
+void     scdebug_int(void * ptr, n_int number);
+void     scdebug_newline(void * ptr);
+void     scdebug_tabstep(void * ptr, n_int steps);
 n_string scdebug_variable(n_int variable);
-void     scdebug_writeon(void);
-void     scdebug_writeoff(void);
 
-#define	SC_DEBUG_STRING(string)	scdebug_string(string)
-#define SC_DEBUG_NUMBER(number) scdebug_int(number)
-#define	SC_DEBUG_NEWLINE		scdebug_newline()
-#define	SC_DEBUG_UP				scdebug_tabstep(1)
-#define	SC_DEBUG_DOWN			scdebug_tabstep(-1)
-#define	SC_DEBUG_ON				scdebug_writeon()
-#define SC_DEBUG_OFF			scdebug_writeoff()
+void     scdebug_writeon(void * ptr);
+void     scdebug_writeoff(void * ptr);
+
+#define	SC_DEBUG_STRING(ptr, string)	scdebug_string(ptr, string)
+#define SC_DEBUG_NUMBER(ptr, number) scdebug_int(ptr, number)
+#define	SC_DEBUG_NEWLINE(ptr)		scdebug_newline(ptr)
+#define	SC_DEBUG_UP(ptr)			scdebug_tabstep(ptr,1)
+#define	SC_DEBUG_DOWN(ptr)			scdebug_tabstep(ptr,-1)
+#define	SC_DEBUG_ON(ptr)            scdebug_writeon(ptr)
+#define SC_DEBUG_OFF(ptr)			scdebug_writeoff(ptr)
 
 #else
 
@@ -1017,7 +1018,7 @@ void     scdebug_writeoff(void);
 #define	SC_DEBUG_NEWLINE		/* */
 #define	SC_DEBUG_UP				/* */
 #define	SC_DEBUG_DOWN			/* */
-#define	SC_DEBUG_ON				/* */
+#define	SC_DEBUG_ON(ptr)		/* ptr */
 #define SC_DEBUG_OFF			/* */
 
 #endif
