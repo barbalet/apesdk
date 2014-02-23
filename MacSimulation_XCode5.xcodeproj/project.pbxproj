@@ -575,7 +575,7 @@
 		5A4805EE178676EB007220D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/MacSimulation.app/Contents/MacOS/MacSimulation";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Noble Ape (Debug).app/Contents/MacOS/Noble Ape (Debug)";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
@@ -603,7 +603,7 @@
 		5A4805EF178676EB007220D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/MacSimulation.app/Contents/MacOS/MacSimulation";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Noble Ape.app/Contents/MacOS/Noble Ape";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
