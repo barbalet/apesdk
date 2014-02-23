@@ -181,7 +181,7 @@
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
     
-    [[self window] setLevel:kCGMaximumWindowLevel];
+    [[self window] setLevel:kCGMainMenuWindowLevel];
     
     execute_threads([[NSProcessInfo processInfo] processorCount]);
     {
