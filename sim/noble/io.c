@@ -400,7 +400,7 @@ n_int io_read_bin(n_file * fil, n_byte * local_byte)
  * @param fil the pointer to the n_file data that is read from.
  * @return CHAR_EOF if there is a problem and the byte value if it is successful.
  */
-n_byte	io_read(n_file * fil)
+static n_byte	io_read(n_file * fil)
 {
     n_byte val = 0;
     if (io_read_bin(fil, &val) == -1)

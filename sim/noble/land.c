@@ -601,7 +601,36 @@ void land_init(n_land * local, n_byte * scratch)
     local_random[1] = local->genetics[1];
 
     math_patch(local->map, scratch, &math_random, local_random, MAP_BITS, 0, 7, 1);
-
+/*
+    {
+        n_uint initial_map = math_hash(local->map, MAP_AREA);
+        n_uint final_map;
+        n_file map_link;
+        n_file *compressed_map = io_file_new();
+        n_file *decompressed_map = io_file_new();
+        
+        map_link.data = local->map;
+        map_link.location = 0;
+        map_link.size = MAP_AREA;
+        
+        compress_compress(&map_link, compressed_map);
+        printf("compressed sized %ld %ld  %d\n", compressed_map->location, compressed_map->size, MAP_AREA);
+        
+        compressed_map->size = compressed_map->location;
+        
+        compressed_map->location = 0;
+        
+        compress_expand(compressed_map, decompressed_map);
+        
+        final_map = math_hash(decompressed_map->data, MAP_AREA);
+        
+        printf("hash %ld %ld\n", initial_map, final_map);
+        
+        io_file_free(&compressed_map);
+        io_file_free(&decompressed_map);
+    }
+*/
+    
     land_tide(local);
 }
 

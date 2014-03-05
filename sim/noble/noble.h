@@ -659,7 +659,6 @@ n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value,
 
 void       io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count);
 void       io_time_to_string(n_string value, n_int minutes, n_int days, n_int centuries);
-n_byte     io_read(n_file * fil);
 n_int      io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char);
 n_int      io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line);
 n_int      io_command(n_file * fil, const noble_file_entry * commands);
@@ -681,6 +680,9 @@ void io_file_string(n_int entry, n_file * file, n_constant_string string);
 void io_offset(n_byte * start, n_byte * point, n_string text);
 
 n_int io_find_size_data(noble_file_entry * commands);
+
+void compress_compress(n_file *input, n_file *output);
+void compress_expand(n_file *input,   n_file *output);
 
 
 /*
