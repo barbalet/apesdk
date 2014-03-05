@@ -99,6 +99,28 @@ static n_int weather_delta(n_land * local_land)
     average = average >> map_bits2;
     return average;
 }
+/*
+static void weather_wrap(n_c_int * section)
+{
+    n_c_int max = -2147483648;
+    n_c_int min = 2147483647;
+    n_int placement = 0;
+    
+    while (placement < MAP_AREA / 4)
+    {
+        n_c_int value = section[placement++];
+        if (value > max)
+        {
+            max = value;
+        }
+        if (value < min)
+        {
+            min = value;
+        }
+    }
+    printf("range %d bottom %d\n", max - min, min);
+}
+*/
 
 void weather_cycle(n_land * local_land)
 {
@@ -147,6 +169,8 @@ void weather_cycle(n_land * local_land)
         }
         ly++;
     }
+    
+    /*weather_wrap(atmosphere);*/
 }
 
 void weather_init(n_land * local_land)
@@ -225,6 +249,38 @@ void weather_init(n_land * local_land)
         weather_cycle(local_land);
         ly++;
     }
+    
+/*
+     {
+         n_uint initial_map = math_hash((n_byte *)local_land->atmosphere, sizeof(n_c_int) * MAP_AREA /4);
+         n_uint final_map;
+         n_file map_link;
+         n_file *compressed_map = io_file_new();
+         n_file *decompressed_map = io_file_new();
+         
+         weather_wrap(local_land->atmosphere);
+         
+         map_link.data = (n_byte *)local_land->atmosphere;
+         map_link.location = 0;
+         map_link.size = sizeof(n_c_int) * MAP_AREA /4;
+         
+         compress_compress(&map_link, compressed_map);
+         printf("compressed sized %ld %ld  %ld\n", compressed_map->location, compressed_map->size, sizeof(n_c_int) * MAP_AREA /4);
+         
+         compressed_map->size = compressed_map->location;
+         
+         compressed_map->location = 0;
+         
+         compress_expand(compressed_map, decompressed_map);
+         
+         final_map = math_hash(decompressed_map->data, sizeof(n_c_int) * MAP_AREA /4);
+         
+         printf("hash %ld %ld\n", initial_map, final_map);
+         
+         io_file_free(&compressed_map);
+         io_file_free(&decompressed_map);
+     }
+*/
 }
 
 n_int weather_pressure(n_land * land, n_int px, n_int py, n_int dimension2)
@@ -601,35 +657,6 @@ void land_init(n_land * local, n_byte * scratch)
     local_random[1] = local->genetics[1];
 
     math_patch(local->map, scratch, &math_random, local_random, MAP_BITS, 0, 7, 1);
-/*
-    {
-        n_uint initial_map = math_hash(local->map, MAP_AREA);
-        n_uint final_map;
-        n_file map_link;
-        n_file *compressed_map = io_file_new();
-        n_file *decompressed_map = io_file_new();
-        
-        map_link.data = local->map;
-        map_link.location = 0;
-        map_link.size = MAP_AREA;
-        
-        compress_compress(&map_link, compressed_map);
-        printf("compressed sized %ld %ld  %d\n", compressed_map->location, compressed_map->size, MAP_AREA);
-        
-        compressed_map->size = compressed_map->location;
-        
-        compressed_map->location = 0;
-        
-        compress_expand(compressed_map, decompressed_map);
-        
-        final_map = math_hash(decompressed_map->data, MAP_AREA);
-        
-        printf("hash %ld %ld\n", initial_map, final_map);
-        
-        io_file_free(&compressed_map);
-        io_file_free(&decompressed_map);
-    }
-*/
     
     land_tide(local);
 }
