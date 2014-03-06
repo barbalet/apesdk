@@ -99,28 +99,41 @@ static n_int weather_delta(n_land * local_land)
     average = average >> map_bits2;
     return average;
 }
+
 /*
+ * The weather is maintained in a 18-bit band from bits_neg
+ */
 static void weather_wrap(n_c_int * section)
 {
-    n_c_int max = -2147483648;
-    n_c_int min = 2147483647;
-    n_int placement = 0;
-    
-    while (placement < MAP_AREA / 4)
+    const n_int bits_neg = (-131072 * 254) / 256;
+    const n_int bits_pos = ( 131071 * 254) / 256;
+    n_int max = bits_neg;
+    n_int min = bits_pos;
     {
-        n_c_int value = section[placement++];
-        if (value > max)
+        n_int placement = 0;
+        while (placement < (MAP_AREA / 4))
         {
-            max = value;
-        }
-        if (value < min)
-        {
-            min = value;
+            n_c_int value = section[placement++];
+            if (value > max)
+            {
+                max = value;
+            }
+            if (value < min)
+            {
+                min = value;
+            }
         }
     }
-    printf("range %d bottom %d\n", max - min, min);
+    if ((min < bits_neg) || (max > bits_pos))
+    {
+        n_int placement = 0;
+        while (placement < (MAP_AREA / 4))
+        {
+            n_c_int value = section[placement];
+            section[placement++] = (value * 253) / 256;
+        }
+    }
 }
-*/
 
 void weather_cycle(n_land * local_land)
 {
@@ -170,7 +183,7 @@ void weather_cycle(n_land * local_land)
         ly++;
     }
     
-    /*weather_wrap(atmosphere);*/
+    weather_wrap(atmosphere);
 }
 
 void weather_init(n_land * local_land)
