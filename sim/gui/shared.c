@@ -379,24 +379,24 @@ n_int shared_notPause(void)
     return control_toggle_pause(1);
 }
 
-void shared_notWeather(void)
+n_int shared_notWeather(void)
 {
-    (void)draw_toggle_weather();
+    return draw_toggle_weather();
 }
 
-void shared_notBrain(void)
+n_int shared_notBrain(void)
 {
-    (void)draw_toggle_brain();
+    return draw_toggle_brain();
 }
 
-void shared_notBrainCode(void)
+n_int shared_notBrainCode(void)
 {
-    (void)draw_toggle_braincode();
+    return draw_toggle_braincode();
 }
 
-void shared_notTerritory(void)
+n_int shared_notTerritory(void)
 {
-    (void)draw_toggle_territory();
+    return draw_toggle_territory();
 }
 
 void shared_flood(void)

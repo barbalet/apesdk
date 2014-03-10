@@ -60,10 +60,10 @@ void shared_close(void);
 
 n_int shared_notPause(void);
 
-void shared_notWeather(void);
-void shared_notBrain(void);
-void shared_notBrainCode(void);
-void shared_notTerritory(void);
+n_int shared_notWeather(void);
+n_int shared_notBrain(void);
+n_int shared_notBrainCode(void);
+n_int shared_notTerritory(void);
 
 void shared_flood(void);
 void shared_healthy_carrier(void);

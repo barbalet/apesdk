@@ -50,22 +50,22 @@
 
 -(IBAction) menuControlNoTerritory:(id) sender
 {
-    shared_notTerritory();
+    [self menuCheckMark:sender check:shared_notTerritory()];
 }
 
 -(IBAction) menuControlNoWeather:(id) sender
 {
-    shared_notWeather();
+    [self menuCheckMark:sender check:shared_notWeather()];
 }
 
 -(IBAction) menuControlNoBrain:(id) sender
 {
-    shared_notBrain();
+    [self menuCheckMark:sender check:shared_notBrain()];
 }
 
 -(IBAction) menuControlNoBrainCode:(id) sender
 {
-    shared_notBrainCode();
+    [self menuCheckMark:sender check:shared_notBrainCode()];
 }
 
 -(IBAction) menuControlFlood:(id) sender

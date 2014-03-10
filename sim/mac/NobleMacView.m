@@ -231,9 +231,17 @@
     shared_about("Macintosh INTEL Cocoa");
 }
 
+-(void)menuCheckMark:(id)sender check:(n_int)value
+{
+    if ([sender respondsToSelector:@selector(setState:)])
+    {
+        [sender setState:(value ? NSOnState : NSOffState)];
+    }
+}
+
 -(IBAction) menuControlPause:(id) sender
 {
-    (void)shared_notPause(); /* should handle check mark */
+    [self menuCheckMark:sender check:shared_notPause()];
 }
 
 -(IBAction) menuControlPrevious:(id) sender

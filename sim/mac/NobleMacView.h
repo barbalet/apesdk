@@ -64,9 +64,11 @@
 - (id)   initWithFrame:(NSRect) frameRect;
 - (void) awakeFromNib;
 
-- (void)startEverything;
+- (void) startEverything;
 
 - (void) quitProcedure;
+
+- (void) menuCheckMark:(id)sender check:(n_int)value;
 
 -(IBAction) aboutDialog:(id) sender;
 
