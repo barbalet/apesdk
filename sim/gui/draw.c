@@ -177,6 +177,11 @@ n_int draw_toggle_territory(void)
     return toggle_territory;
 }
 
+n_int draw_toggle_threaded(n_int toggle)
+{
+    return execute_toggle(toggle);
+}
+
 /* this needs to be grouped eventually, it is here as a test */
 
 #define UNDRAW_MAX          100000
@@ -571,8 +576,6 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
     }
 }
 
-#ifdef EXECUTE_THREADED
-
 typedef struct{
     n_int     const_lowdiv2;
     n_int     lowest_s;
@@ -698,8 +701,6 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
     }
 }
 
-#endif
-
 static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 {
     n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
@@ -794,8 +795,6 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
 
 #define mndivmonth		7
 #define mndivyear		91
-
-
 
 #define FH_SCREEN(x)  (x)
 

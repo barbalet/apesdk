@@ -96,15 +96,7 @@ static execution_thread  *execution = 0L;
 
 static n_int execution_thread_size = MAX_EXECUTION_THREAD_SIZE;
 
-void execute_threads(n_int value)
-{
-    execution_thread_size = value;
-}
-
-n_int execute_threads_value(void)
-{
-    return execution_thread_size;
-}
+static n_int execution_toggle = 0;
 
 static void execute_wait_ns(void)
 {
@@ -186,6 +178,38 @@ void execute_close(void)
 		}
 	}
 #endif
+#endif
+}
+
+
+n_int execute_toggle(n_int toggle)
+{
+#ifdef EXECUTE_THREADED
+    if (toggle)
+    {
+        execution_toggle ^= 1;
+    }
+    return execution_toggle;
+#else
+    return 0;
+#endif
+}
+
+void execute_threads(n_int value)
+{
+#ifdef EXECUTE_THREADED
+    execution_thread_size = value;
+#else
+    (void)value;
+#endif
+}
+
+n_int execute_threads_value(void)
+{
+#ifdef EXECUTE_THREADED
+    return execution_thread_size;
+#else
+    return 1;
 #endif
 }
 

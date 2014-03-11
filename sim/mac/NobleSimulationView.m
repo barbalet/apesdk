@@ -68,6 +68,11 @@
     [self menuCheckMark:sender check:shared_notBrainCode()];
 }
 
+-(IBAction) menuControlNoThreaded:(id)sender
+{
+    [self menuCheckMark:sender check:shared_notThreaded()];
+}
+
 -(IBAction) menuControlFlood:(id) sender
 {
     shared_flood();

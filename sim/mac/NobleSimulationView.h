@@ -45,6 +45,7 @@
 -(IBAction) menuControlNoWeather:(id) sender;
 -(IBAction) menuControlNoBrain:(id) sender;
 -(IBAction) menuControlNoBrainCode:(id) sender;
+-(IBAction) menuControlNoThreaded:(id)sender;
 
 -(IBAction) menuControlFlood:(id) sender;
 -(IBAction) menuControlHealthyCarrier:(id) sender;

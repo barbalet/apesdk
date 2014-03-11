@@ -196,6 +196,15 @@
                             <menuItem isSeparatorItem="YES" id="270">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
+                            <menuItem title="Threaded" id="ajy-Ar-u23">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="menuControlNoThreaded:" target="-1" id="wLL-2A-wEk"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="KSk-3m-Lo2">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                            </menuItem>
                             <menuItem title="Flood" keyEquivalent="F" id="349">
                                 <connections>
                                     <action selector="menuControlFlood:" target="241" id="353"/>

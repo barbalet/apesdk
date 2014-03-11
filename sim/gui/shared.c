@@ -399,6 +399,11 @@ n_int shared_notTerritory(void)
     return draw_toggle_territory();
 }
 
+n_int shared_notThreaded(void)
+{
+    return draw_toggle_threaded(1);
+}
+
 void shared_flood(void)
 {
     sim_flood();
@@ -443,8 +448,16 @@ void shared_mouseUp(void)
 void shared_about(n_constant_string value)
 {
     n_string_block full_value;
+    n_int          cores = execute_threads_value();
     toggle_pause = 1;
-    sprintf(full_value, "%s %ld Cores", value, execute_threads_value());
+    if (cores > 1)
+    {
+        sprintf(full_value, "%s %ld Cores", value, cores);
+    }
+    else
+    {
+        sprintf(full_value, "%s 1 Core", value);
+    }
     draw_about(full_value);
 }
 

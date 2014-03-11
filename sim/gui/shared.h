@@ -64,6 +64,7 @@ n_int shared_notWeather(void);
 n_int shared_notBrain(void);
 n_int shared_notBrainCode(void);
 n_int shared_notTerritory(void);
+n_int shared_notThreaded(void);
 
 void shared_flood(void);
 void shared_healthy_carrier(void);
