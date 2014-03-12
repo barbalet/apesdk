@@ -52,8 +52,6 @@
 
 #endif
 
-#define MAX_EXECUTION_THREAD_SIZE 4
-
 typedef enum
 {
     ES_DONE = 0,
@@ -94,7 +92,7 @@ static pthread_t         *thread = 0L;
 
 static execution_thread  *execution = 0L;
 
-static n_int execution_thread_size = MAX_EXECUTION_THREAD_SIZE;
+static n_int execution_thread_size = 4;
 
 static n_int execution_toggle = 0;
 
@@ -120,7 +118,7 @@ static void execute_add_generic(execute_function * function, void * general_data
     execution_cycle = 1;
     do{
         n_int   loop = 0;
-        while (loop < MAX_EXECUTION_THREAD_SIZE)
+        while (loop < execution_thread_size)
         {
             if (execution[loop].state == ES_DONE)
             {
@@ -221,11 +219,11 @@ static void execute_thread_generic(void * id)
     do{
         n_int            loop = 0;
         n_int            all_idle = 1;
-        
+ /*
         if (value->state != ES_WAITING)
         {
             execute_wait_ns();
-        }
+        } */
         if (value->state == ES_WAITING)
         {
             execute_object * object = value->executed;
@@ -255,7 +253,7 @@ static void execute_thread_generic(void * id)
             value->state = ES_DONE;
             io_free((void **)&object);
         }
-        while (loop < MAX_EXECUTION_THREAD_SIZE)
+        while (loop < execution_thread_size)
         {
             if (execution[loop].state != ES_DONE)
             {
