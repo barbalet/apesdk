@@ -414,18 +414,18 @@ void sim_cycle(void)
     else
     {
         /** Listen for any shouts */
-        being_loop(&sim, being_listen, 32);
+        being_loop(&sim, being_listen, 64);
 #ifdef EPISODIC_ON
-        being_loop(&sim, episodic_cycle, 32);
+        being_loop(&sim, episodic_cycle, 64);
 #endif
-        being_loop(&sim, sim_being_cycle, 16);
+        being_loop(&sim, sim_being_cycle, 8);
         being_loop(&sim, drives_cycle, 32);
     }
     
     being_loop(&sim, sim_brain_loop, 16);
     
 #ifdef BRAINCODE_ON
-    being_loop(&sim, sim_brain_dialogue_loop, 32);
+    being_loop(&sim, sim_brain_dialogue_loop, 8);
 #endif
     {
         n_int       max_honor = 0;
