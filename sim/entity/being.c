@@ -3578,10 +3578,7 @@ void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being,
 {
     if (being_energy(local_being) == BEING_DEAD)
     {
-        if (local_sim->ext_death != 0L)
-        {
-            local_sim->ext_death(local_being,local_sim);
-        }
+        local_sim->ext_death(local_being,local_sim);
     }
 }
 

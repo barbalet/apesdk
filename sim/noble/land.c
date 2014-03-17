@@ -150,7 +150,6 @@ void weather_cycle(n_land * local_land)
     map_bits2       = land_map_bits(local_land) - 1;
     if (map_bits2 < 0) return;
     
-    
     local_delta = weather_delta(local_land);
     atmosphere  = local_land->atmosphere;
     delta_pressure  = local_land->delta_pressure;

@@ -400,6 +400,8 @@ static void sim_time(noble_simulation * local_sim)
 
 void sim_cycle(void)
 {
+    n_int       max_honor = 0;
+
     land_cycle(sim.land);
 #ifdef WEATHER_ON
     weather_cycle(sim.land);
@@ -427,27 +429,33 @@ void sim_cycle(void)
 #ifdef BRAINCODE_ON
     being_loop(&sim, sim_brain_dialogue_loop, 8);
 #endif
+        
+    being_loop_wait(&sim, 0L, being_tidy_loop, &max_honor);
+    
+    being_loop(&sim, social_initial_loop, 32);
+    
+    if (max_honor)
     {
-        n_int       max_honor = 0;
-        
-        being_loop_wait(&sim, 0L, being_tidy_loop, &max_honor);
-        
-        if (max_honor)
-        {
-            being_loop_wait(&sim, 0L, being_recalibrate_honor_loop, 0L);
-        }
+        being_loop(&sim, being_recalibrate_honor_loop, 64);
     }
+    
+    being_loop(&sim, social_secondary_loop, 64);
+
     {
         being_remove_loop2_struct * brls = being_remove_initial(&sim);
         
-        being_loop_wait(&sim, 0L, being_remove_loop1, 0L);
+        
+        if (sim.ext_death != 0L)
+        {
+            being_loop_wait(&sim, 0L, being_remove_loop1, 0L);
+        }
+        
         being_loop_no_thread(&sim, 0L, being_remove_loop2, brls);
         
         being_remove_final(&sim, &brls);
     }
-    being_loop(&sim, social_initial_loop, 32);
+
     
-    being_loop_wait(&sim, 0L, social_secondary_loop, 0L);
     sim_time(&sim);
 }
 

@@ -219,11 +219,10 @@ static void execute_thread_generic(void * id)
     do{
         n_int            loop = 0;
         n_int            all_idle = 1;
- /*
         if (value->state != ES_WAITING)
         {
             execute_wait_ns();
-        } */
+        }
         if (value->state == ES_WAITING)
         {
             execute_object * object = value->executed;
@@ -253,6 +252,7 @@ static void execute_thread_generic(void * id)
             value->state = ES_DONE;
             io_free((void **)&object);
         }
+        loop = 0;
         while (loop < execution_thread_size)
         {
             if (execution[loop].state != ES_DONE)
@@ -266,7 +266,6 @@ static void execute_thread_generic(void * id)
         {
             execution_cycle = 0;
         }
-
     }while (global_cycle);
     
 }
