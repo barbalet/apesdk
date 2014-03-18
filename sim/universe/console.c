@@ -302,7 +302,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     n_string_block beingstr, time;
     n_int int_data[2];
 
-    being_loop_wait(local_sim, 0L, console_simulation_loop, int_data);
+    being_loop_no_thread(local_sim, 0L, console_simulation_loop, int_data);
 
     sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension(local_sim->land));
     sprintf(beingstr,"%sLand seed: %d %d\n",beingstr, (int)local_sim->land->genetics[0],(int)local_sim->land->genetics[1]);

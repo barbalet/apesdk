@@ -791,7 +791,7 @@ noble_being * being_from_name(noble_simulation * sim, n_string name)
     bfns.being_from_name = 0L;
     io_lower(name, io_length(name,STRING_BLOCK_SIZE));
     bfns.name = name;
-    being_loop_wait(sim, 0L, being_from_name_loop, &bfns);
+    being_loop_no_thread(sim, 0L, being_from_name_loop, &bfns);
     return bfns.being_from_name;
 }
 
