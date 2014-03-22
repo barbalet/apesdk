@@ -560,23 +560,20 @@ void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being
 
 static void being_loop_generic(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
 {
-    if (execute_threaded_state())
+#ifdef EXECUTE_THREADED
+    n_uint loop = 0;
+    while (loop < sim->num)
     {
-        n_uint loop = 0;
-        while (loop < sim->num)
-        {
-            noble_being * output = &(sim->beings[loop]);
-            if (output != being_not)
-            {            
-                execute_add(((execute_function*)bf_func), (void*)sim, (void*)output, data);
-            }
-            loop++;
+        noble_being * output = &(sim->beings[loop]);
+        if (output != being_not)
+        {            
+            execute_add(((execute_function*)bf_func), (void*)sim, (void*)output, data);
         }
+        loop++;
     }
-    else
-    {
-        being_loop_no_thread(sim, being_not, bf_func, data);
-    }
+#else
+    being_loop_no_thread(sim, being_not, bf_func, data);
+#endif
 }
 
 void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread)
@@ -612,10 +609,9 @@ void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_
 void being_loop_wait(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
 {
     being_loop_generic(sim, being_not, bf_func, data);
-    if (execute_threaded_state())
-    {
-        execute_complete_added();
-    }
+#ifdef EXECUTE_THREADED
+    execute_complete_added();
+#endif
 }
 
 /**
