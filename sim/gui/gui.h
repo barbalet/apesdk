@@ -131,7 +131,7 @@ n_int draw_toggle_braincode(void);
 
 n_int draw_toggle_territory(void);
 
-n_int draw_toggle_threaded(n_int toggle);
+n_int draw_toggle_threaded(void);
 
 void draw_fit(n_byte * points, n_byte2 * color_fit);
 

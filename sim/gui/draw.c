@@ -177,9 +177,9 @@ n_int draw_toggle_territory(void)
     return toggle_territory;
 }
 
-n_int draw_toggle_threaded(n_int toggle)
-{
-    return execute_toggle(toggle);
+n_int draw_toggle_threaded(void)
+{    
+    return execute_toggle();
 }
 
 /* this needs to be grouped eventually, it is here as a test */
@@ -719,7 +719,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
         n_byte2      * combined = (n_byte2 *)local_sim->land->highres;
         noble_being * loc_being = local_sim->select;
-        const n_int turn = being_facing(loc_being);
+        const n_int turn = terrain_turn;
         const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         const n_int co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
 
@@ -1694,19 +1694,24 @@ n_int  draw_cycle(void)
     draw_apes(local_sim, 0);    /* hi res */
     draw_apes(local_sim, 1);    /* lo res */
 
-#ifdef EXECUTE_THREADED
-    /* TODO: Make the threaded draw command line safe */
-    if (io_command_line_execution())
+    /* TODO: Simplify this logic */
+    if (execute_threaded_state())
     {
-        draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
+        /* TODO: Make the threaded draw command line safe */
+        if (io_command_line_execution())
+        {
+            draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
+        }
+        else
+        {
+            draw_terrain_threadable(local_sim, &local_vect);
+        }
     }
     else
     {
-        draw_terrain_threadable(local_sim, &local_vect);
+        draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
     }
-#else
-    draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
-#endif
+    
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */
 

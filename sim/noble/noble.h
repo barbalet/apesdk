@@ -567,7 +567,8 @@ void  execute_complete_added(void);
 
 void  execute_threads(n_int value);
 n_int execute_threads_value(void);
-n_int execute_toggle(n_int toggle);
+n_int execute_toggle(void);
+n_int execute_threaded_state(void);
 
 void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
 void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);

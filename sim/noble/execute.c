@@ -94,7 +94,9 @@ static execution_thread  *execution = 0L;
 
 static n_int execution_thread_size = 4;
 
-static n_int execution_toggle = 0;
+static n_int execution_toggle = 1;
+
+static n_int execution_threaded = 0;
 
 static void execute_wait_ns(void)
 {
@@ -112,32 +114,36 @@ static void execute_wait_ns(void)
 
 static void execute_add_generic(execute_function * function, void * general_data, void * read_data, void * write_data, n_int count, n_int size)
 {
-#ifndef EXECUTE_THREADED
-    function(general_data,read_data,write_data);
-#else
-    execution_cycle = 1;
-    do{
-        n_int   loop = 0;
-        while (loop < execution_thread_size)
-        {
-            if (execution[loop].state == ES_DONE)
+    
+    if (execute_threaded_state())
+    {
+        execution_cycle = 1;
+        do{
+            n_int   loop = 0;
+            while (loop < execution_thread_size)
             {
-                execute_object * new_object = io_new(sizeof(execute_object));
-                new_object->function = function;
-                new_object->general_data = general_data;
-                new_object->read_data  = read_data;
-                new_object->write_data = write_data;
-                new_object->count      = count;
-                new_object->size       = size;
-                execution[loop].executed = new_object;
-                execution[loop].state = ES_WAITING;
-                return;
+                if (execution[loop].state == ES_DONE)
+                {
+                    execute_object * new_object = io_new(sizeof(execute_object));
+                    new_object->function = function;
+                    new_object->general_data = general_data;
+                    new_object->read_data  = read_data;
+                    new_object->write_data = write_data;
+                    new_object->count      = count;
+                    new_object->size       = size;
+                    execution[loop].executed = new_object;
+                    execution[loop].state = ES_WAITING;
+                    return;
+                }
+                
+                loop++;
             }
-            
-            loop++;
-        }
-    }while (global_cycle);
-#endif
+        }while (global_cycle);
+    }
+    else
+    {
+        function(general_data,read_data,write_data);
+    }
 }
 
 void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
@@ -152,42 +158,60 @@ void execute_group(execute_function * function, void * general_data, void * read
 
 void execute_complete_added(void)
 {
-#ifdef EXECUTE_THREADED
-    while (1 == 1)
+    if (execute_threaded_state())
     {
-        if (execution_cycle == 0)
-            break;
-        execute_wait_ns();
+        while (1 == 1)
+        {
+            if (execution_cycle == 0)
+                break;
+            execute_wait_ns();
+        }
     }
-#endif
 }
 
 void execute_close(void)
 {
-#ifdef EXECUTE_THREADED
-    global_cycle = 0;
-#ifdef _WIN32
-	{
-		n_int loop = 0;
-		while (loop < execution_thread_size)
-		{
-			CloseHandle(thread[loop]);
-			loop++;
-		}
-	}
-#endif
-#endif
+    if (execute_threaded_state())
+    {
+        global_cycle = 0;
+    #ifdef _WIN32
+        {
+            n_int loop = 0;
+            while (loop < execution_thread_size)
+            {
+                CloseHandle(thread[loop]);
+                loop++;
+            }
+        }
+    #endif
+    }
+    execution_threaded = 0;
+    execution_cycle = 0;
 }
 
 
-n_int execute_toggle(n_int toggle)
+n_int execute_toggle(void)
 {
 #ifdef EXECUTE_THREADED
-    if (toggle)
+    execution_toggle ^= 1;
+    if (execution_threaded)
     {
-        execution_toggle ^= 1;
+        execute_close();
+    }
+    else
+    {
+        execute_init();
     }
     return execution_toggle;
+#else
+    return 0;
+#endif
+}
+
+n_int execute_threaded_state(void)
+{
+#ifdef EXECUTE_THREADED
+    return execution_threaded;
 #else
     return 0;
 #endif
@@ -204,11 +228,14 @@ void execute_threads(n_int value)
 
 n_int execute_threads_value(void)
 {
-#ifdef EXECUTE_THREADED
-    return execution_thread_size;
-#else
-    return 1;
-#endif
+    if (execute_threaded_state())
+    {
+        return execution_thread_size;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 #ifdef EXECUTE_THREADED
@@ -349,5 +376,6 @@ void execute_init(void)
 #endif
         loop++;
     }
+    execution_threaded = 1;
 #endif
 }

@@ -401,7 +401,7 @@ n_int shared_notTerritory(void)
 
 n_int shared_notThreaded(void)
 {
-    return draw_toggle_threaded(1);
+    return draw_toggle_threaded();
 }
 
 void shared_flood(void)
