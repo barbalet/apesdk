@@ -719,7 +719,7 @@ static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
         const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
         n_byte2      * combined = (n_byte2 *)local_sim->land->highres;
         noble_being * loc_being = local_sim->select;
-        const n_int turn = being_facing(loc_being);
+        const n_int turn = terrain_turn;
         const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         const n_int co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
 
