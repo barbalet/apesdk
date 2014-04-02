@@ -28,33 +28,12 @@ freely, subject to the following restrictions:
 #include <stdio.h>
 #include <stdlib.h>
 
-/*
-3 ways to decode a PNG from a file to RGBA pixel data (and 2 in-memory ways).
-*/
-
-/*
-Example 1
-Decode from disk to raw pixels with a single function call
-*/
-void decodeOneStep(const char* filename)
-{
-    unsigned error;
-    unsigned char* image;
-    unsigned width, height;
-
-    error = lodepng_decode32_file(&image, &width, &height, filename);
-    if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
-
-    /*use image here*/
-
-    free(image);
-}
 
 /*
 Example 2
 Load PNG file from disk to memory first, then decode to raw pixels in memory.
 */
-void decodeTwoSteps(const char* filename)
+void decodeTwoSteps(const char* filename, const char * outputFilename)
 {
     unsigned error;
     unsigned char* image;
@@ -68,6 +47,10 @@ void decodeTwoSteps(const char* filename)
 
     free(png);
 
+    error = lodepng_encode32_file(outputFilename, image, width, height);
+    if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
+
+    
     /*use image here*/
 
     free(image);
@@ -91,6 +74,7 @@ void decodeWithState(const char* filename)
 
     lodepng_load_file(&png, &pngsize, filename);
     error = lodepng_decode(&image, &width, &height, &state, png, pngsize);
+    
     if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
 
     free(png);
@@ -104,9 +88,7 @@ void decodeWithState(const char* filename)
 
 int main(int argc, char *argv[])
 {
-    const char* filename = argc > 1 ? argv[1] : "test.png";
-
-    decodeOneStep(filename);
+    decodeTwoSteps("art/bushTrunk3.png", "bushtrunk.png");
     return 0;
 }
 
