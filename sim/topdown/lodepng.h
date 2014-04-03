@@ -817,78 +817,7 @@ return value: error code (0 means ok)
 unsigned lodepng_save_file(const unsigned char* buffer, size_t buffersize, const char* filename);
 #endif /*LODEPNG_COMPILE_DISK*/
 
-#ifdef LODEPNG_COMPILE_CPP
-//The LodePNG C++ wrapper uses std::vectors instead of manually allocated memory buffers.
-namespace lodepng
-{
-#ifdef LODEPNG_COMPILE_PNG
-class State : public LodePNGState
-{
-public:
-    State();
-    State(const State& other);
-    virtual ~State();
-    State& operator=(const State& other);
-};
 
-#ifdef LODEPNG_COMPILE_DECODER
-//Same as other lodepng::decode, but using a State for more settings and information.
-unsigned decode(std::vector<unsigned char>& out, unsigned& w, unsigned& h,
-                State& state,
-                const unsigned char* in, size_t insize);
-unsigned decode(std::vector<unsigned char>& out, unsigned& w, unsigned& h,
-                State& state,
-                const std::vector<unsigned char>& in);
-#endif /*LODEPNG_COMPILE_DECODER*/
-
-#ifdef LODEPNG_COMPILE_ENCODER
-//Same as other lodepng::encode, but using a State for more settings and information.
-unsigned encode(std::vector<unsigned char>& out,
-                const unsigned char* in, unsigned w, unsigned h,
-                State& state);
-unsigned encode(std::vector<unsigned char>& out,
-                const std::vector<unsigned char>& in, unsigned w, unsigned h,
-                State& state);
-#endif /*LODEPNG_COMPILE_ENCODER*/
-
-#ifdef LODEPNG_COMPILE_DISK
-/*
-Load a file from disk into an std::vector. If the vector is empty, then either
-the file doesn't exist or is an empty file.
-*/
-void load_file(std::vector<unsigned char>& buffer, const std::string& filename);
-
-/*
-Save the binary data in an std::vector to a file on disk. The file is overwritten
-without warning.
-*/
-void save_file(const std::vector<unsigned char>& buffer, const std::string& filename);
-#endif //LODEPNG_COMPILE_DISK
-#endif //LODEPNG_COMPILE_PNG
-
-#ifdef LODEPNG_COMPILE_ZLIB
-#ifdef LODEPNG_COMPILE_DECODER
-//Zlib-decompress an unsigned char buffer
-unsigned decompress(std::vector<unsigned char>& out, const unsigned char* in, size_t insize,
-                    const LodePNGDecompressSettings& settings = lodepng_default_decompress_settings);
-
-//Zlib-decompress an std::vector
-unsigned decompress(std::vector<unsigned char>& out, const std::vector<unsigned char>& in,
-                    const LodePNGDecompressSettings& settings = lodepng_default_decompress_settings);
-#endif //LODEPNG_COMPILE_DECODER
-
-#ifdef LODEPNG_COMPILE_ENCODER
-//Zlib-compress an unsigned char buffer
-unsigned compress(std::vector<unsigned char>& out, const unsigned char* in, size_t insize,
-                  const LodePNGCompressSettings& settings = lodepng_default_compress_settings);
-
-//Zlib-compress an std::vector
-unsigned compress(std::vector<unsigned char>& out, const std::vector<unsigned char>& in,
-                  const LodePNGCompressSettings& settings = lodepng_default_compress_settings);
-#endif //LODEPNG_COMPILE_ENCODER
-#endif //LODEPNG_COMPILE_ZLIB
-} //namespace lodepng
-#endif /*LODEPNG_COMPILE_CPP*/
 
 /*
 TODO:
