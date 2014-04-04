@@ -41,6 +41,7 @@ fi
 
 
 gcc ${CFLAGS} -c $SOURCEDIR/lodepng.c -o lodepng.o
+gcc ${CFLAGS} -c $SOURCEDIR/imagemath.c -o imagemath.o
 gcc ${CFLAGS} -c $SOURCEDIR/topdown.c -o topdown.o
 
 gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o $SOURCEDIR/topdown *.o -lz -lm -lpthread
