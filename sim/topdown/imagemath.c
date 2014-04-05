@@ -59,7 +59,7 @@ noble_image * image_init(unsigned width, unsigned height)
         return 0L;
     }
     
-    memset(alloc, 0, size);
+    memset(alloc, 255, size);
     
     image->height = height;
     image->width = width;
@@ -143,4 +143,47 @@ void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned
         
         loop_height++;
     }
+}
+
+void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, unsigned left, unsigned alpha)
+{
+    unsigned loop_height = 0;
+    while (loop_height < image->height)
+    {
+        unsigned loop_width = 0;
+        unsigned loop = 0;
+        unsigned comb_height = top + loop_height;
+        unsigned comb_width = (left * 3);
+        
+        unsigned image_width3 = (image->width * 3);
+        unsigned canvas_width3 = (canvas->width * 3);
+        unsigned char * band_canvas = &canvas->image[comb_height * canvas->width * 3];
+        unsigned char * band_image = &image->image[loop_height * image->width * 3];
+        
+        if (comb_height >= canvas->height)
+        {
+            return;
+        }
+        
+        while (loop_width < image_width3)
+        {
+            unsigned char canvas, image;
+            if (comb_width >= canvas_width3)
+            {
+                break;
+            }
+            canvas = band_canvas[comb_width];
+            
+            image = band_image[loop_width++];
+            
+            band_canvas[comb_width ++] = ((canvas * (256 - alpha)) + (image * alpha)) >> 8;
+        }
+        
+        loop_height++;
+    }
+}
+
+void image_create(noble_image * image, char * filename)
+{
+    (void)lodepng_encode24_file(filename, image->image, image->width, image->height);
 }

@@ -50,4 +50,8 @@ void image_free(noble_image ** image_free);
 
 void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned left);
 
+void image_create(noble_image * image, char * filename);
+
+void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, unsigned left, unsigned alpha);
+
 #endif
