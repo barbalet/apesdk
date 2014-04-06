@@ -46,6 +46,10 @@ typedef struct
 noble_image * image_init(unsigned width, unsigned height);
 noble_image * image_from_file(char * file_name);
 
+noble_image * image_half(noble_image * full);
+
+noble_image * image_rotate(noble_image * full);
+
 void image_free(noble_image ** image_free);
 
 void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned left);

@@ -44,6 +44,12 @@ noble_image * image_init(unsigned width, unsigned height)
     noble_image   * image = 0L;
     unsigned char * alloc = 0L;
     unsigned        size = width * height * 3;
+    
+    if (size == 0)
+    {
+        return 0L;
+    }
+    
     alloc = malloc(size);
     
     if (alloc == 0L)
@@ -65,6 +71,66 @@ noble_image * image_init(unsigned width, unsigned height)
     image->width = width;
     image->image = alloc;
     return image;
+}
+
+noble_image * image_half(noble_image * full)
+{
+    unsigned half_width  = full->width >> 1;
+    unsigned half_height = full->height >> 1;
+    noble_image   * half = image_init(half_width, half_height);
+    if (half)
+    {
+        unsigned loop_height = 0;
+        unsigned loop = 0;
+        while (loop_height < half_height)
+        {
+            unsigned loop_width = 0;
+            unsigned full_height = (loop_height<<1) * full->width;
+            while(loop_width < half_width)
+            {
+                unsigned full_image_location = ((full_height + (loop_width<<1)) * 3);
+                
+                half->image[loop++] = full->image[full_image_location++];
+                half->image[loop++] = full->image[full_image_location++];
+                half->image[loop++] = full->image[full_image_location];
+                
+                loop_width++;
+            }
+            loop_height++;
+        }
+    }
+    return half;
+}
+
+noble_image * image_rotate(noble_image * full)
+{
+    unsigned rotated_width  = full->height;
+    unsigned rotated_height = full->width;
+    
+    noble_image   * rotated = image_init(rotated_width, rotated_height);
+    if (rotated)
+    {
+        unsigned loop_height = 0;
+        unsigned loop = 0;
+        while (loop_height < rotated_height)
+        {
+            unsigned loop_width = 0;
+            unsigned full_height = loop_height * rotated_width;
+            
+            while(loop_width < rotated_width)
+            {
+                unsigned full_image_location = (((rotated_width - loop_width - 1) * rotated_height) +  loop_height) * 3;
+                
+                rotated->image[loop++] = full->image[full_image_location++];
+                rotated->image[loop++] = full->image[full_image_location++];
+                rotated->image[loop++] = full->image[full_image_location];
+                
+                loop_width++;
+            }
+            loop_height++;
+        }
+    }
+    return rotated;
 }
 
 noble_image * image_from_file(char * file_name)

@@ -47,17 +47,37 @@ int main(int argc, char *argv[])
     noble_image * grass2 = image_from_file("art/grass2.png");
     noble_image * grass3 = image_from_file("art/grass3.png");
     
+    noble_image * grass_rotate;
+    noble_image * grass_rotate2;
+    
     noble_image * branch1 = image_from_file("art/branches1.png");
     noble_image * branch2 = image_from_file("art/branches2.png");
     noble_image * branch3 = image_from_file("art/branches3.png");
     
+    noble_image * retain;
+    
+    retain = image_half(grass1);
+    image_free(&grass1);
+    grass1 = retain;
+
+    retain = image_half(grass2);
+    image_free(&grass2);
+    grass2 = retain;
+
+    retain = image_half(grass3);
+    image_free(&grass3);
+    grass3 = retain;
+    
+    grass_rotate = image_rotate(grass3);
+    grass_rotate2 = image_rotate(grass_rotate);
+
     unsigned loopx = 0;
     while (loopx < 8)
     {
         unsigned loopy = 0;
         while (loopy < 8)
         {
-            unsigned random = ((loopx)+(loopy*2))&3;
+            unsigned random = ((loopx)+(loopy*2))%5;
             noble_image *image_here = 0L;
             
             switch(random)
@@ -71,7 +91,11 @@ int main(int argc, char *argv[])
                 case 3:
                     image_here = grass3;
                     break;
+                case 4:
+                    image_here = grass_rotate2;
+                    break;
                 default:
+                    image_here = grass_rotate;
                     break;
             }
             
@@ -84,7 +108,7 @@ int main(int argc, char *argv[])
         }
         loopx++;
     }
-    
+
     image_add_alpha(canvas, branch3, 10, 123, 130);
     image_add_alpha(canvas, branch2, 210, 450, 130);
     image_add_alpha(canvas, branch1, 570, 210, 130);
@@ -104,6 +128,9 @@ int main(int argc, char *argv[])
     image_free(&grass1);
     image_free(&grass2);
     image_free(&grass3);
+    
+    image_free(&grass_rotate);
+    image_free(&grass_rotate2);
 
     image_free(&branch1);
     image_free(&branch2);
