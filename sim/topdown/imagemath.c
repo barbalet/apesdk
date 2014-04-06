@@ -117,33 +117,75 @@ void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned
     unsigned loop_height = 0;
     while (loop_height < image->height)
     {
-        unsigned loop_width = 0;
-        unsigned loop = 0;
-        unsigned comb_height = top + loop_height;
-        unsigned comb_width = (left * 3);
-
+        
+        
         unsigned image_width3 = (image->width * 3);
         unsigned canvas_width3 = (canvas->width * 3);
-        unsigned char * band_canvas = &canvas->image[comb_height * canvas->width * 3];
-        unsigned char * band_image = &image->image[loop_height * image->width * 3];
+
+        unsigned comb_height = top + loop_height;
+        unsigned comb_width = left + image->width;
         
         if (comb_height >= canvas->height)
         {
             return;
         }
         
-        while (loop_width < image_width3)
+        if (left >= canvas->width)
         {
-            if (comb_width >= canvas_width3)
-            {
-                break;
-            }
-            band_canvas[comb_width ++] = band_image[loop_width++];
+            return;
         }
+        
+        if (comb_width >= canvas->width)
+        {
+            comb_width = canvas->width-1;
+        }
+        
+        comb_width = (comb_width - left) * 3;
+        
+        memcpy(&canvas->image[(canvas_width3 * comb_height) + (left * 3)],
+               &image->image[(image_width3 * loop_height)],
+               comb_width);
         
         loop_height++;
     }
 }
+
+/*
+ 
+ void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned left)
+ {
+ unsigned loop_height = 0;
+ while (loop_height < image->height)
+ {
+ unsigned loop_width = 0;
+ unsigned loop = 0;
+ unsigned comb_height = top + loop_height;
+ unsigned comb_width = (left * 3);
+ 
+ unsigned image_width3 = (image->width * 3);
+ unsigned canvas_width3 = (canvas->width * 3);
+ unsigned char * band_canvas = &canvas->image[comb_height * canvas->width * 3];
+ unsigned char * band_image = &image->image[loop_height * image->width * 3];
+ 
+ if (comb_height >= canvas->height)
+ {
+ return;
+ }
+
+while (loop_width < image_width3)
+{
+    if (comb_width >= canvas_width3)
+    {
+        break;
+    }
+    band_canvas[comb_width ++] = band_image[loop_width++];
+}
+
+loop_height++;
+}
+}
+
+ */
 
 void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, unsigned left, unsigned alpha)
 {
@@ -173,9 +215,13 @@ void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, un
                 break;
             }
             canvas = band_canvas[comb_width];
-            
             image = band_image[loop_width++];
-            
+            band_canvas[comb_width ++] = ((canvas * (256 - alpha)) + (image * alpha)) >> 8;
+            canvas = band_canvas[comb_width];
+            image = band_image[loop_width++];
+            band_canvas[comb_width ++] = ((canvas * (256 - alpha)) + (image * alpha)) >> 8;
+            canvas = band_canvas[comb_width];
+            image = band_image[loop_width++];
             band_canvas[comb_width ++] = ((canvas * (256 - alpha)) + (image * alpha)) >> 8;
         }
         
