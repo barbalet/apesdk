@@ -43,12 +43,15 @@ typedef struct
     unsigned char * image;
 }noble_image;
 
-noble_image * image_init(unsigned width, unsigned height);
+noble_image * image_init_clear(unsigned width, unsigned height, unsigned clear);
+
 noble_image * image_from_file(char * file_name);
 
 noble_image * image_half(noble_image * full);
+noble_image * image_third(noble_image * full);
 
-noble_image * image_rotate(noble_image * full);
+noble_image * image_rotate_90(noble_image * full);
+noble_image * image_rotate_45(noble_image * full);
 
 void image_free(noble_image ** image_free);
 

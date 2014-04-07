@@ -41,9 +41,17 @@
 
 int main(int argc, char *argv[])
 {
-    noble_image * canvas = image_init(1024, 1024);
+    noble_image * canvas = image_init_clear(1024, 1024, 1);
     
+    noble_image * branch1_full = image_from_file("art/branches1.png");
+    noble_image * branch1_half = image_half(branch1_full);
+    noble_image * branch1_0  = image_third(branch1_full);
+    noble_image * branch1_45 = image_rotate_45(branch1_half);
+    noble_image * branch1_90 = image_rotate_90(branch1_0);
+    noble_image * branch1_135 = image_rotate_90(branch1_45);
+
     noble_image * grass1 = image_from_file("art/grass1.png");
+
     noble_image * grass2 = image_from_file("art/grass2.png");
     noble_image * grass3 = image_from_file("art/grass3.png");
     
@@ -55,6 +63,10 @@ int main(int argc, char *argv[])
     noble_image * branch3 = image_from_file("art/branches3.png");
     
     noble_image * retain;
+    
+    unsigned loopx = 0;
+
+    srand(12123123);
     
     retain = image_half(grass1);
     image_free(&grass1);
@@ -68,16 +80,20 @@ int main(int argc, char *argv[])
     image_free(&grass3);
     grass3 = retain;
     
-    grass_rotate = image_rotate(grass3);
-    grass_rotate2 = image_rotate(grass_rotate);
+    grass_rotate = image_rotate_90(grass3);
+    grass_rotate2 = image_rotate_90(grass_rotate);
 
-    unsigned loopx = 0;
-    while (loopx < 8)
+    image_add(canvas, branch1_45, 180, 180);
+    image_add(canvas, branch1_135, 600, 600);
+    image_add(canvas, branch1_0, 50, 50);
+    image_add(canvas, branch1_90, 450, 450);
+    
+    while (loopx < 16)
     {
         unsigned loopy = 0;
-        while (loopy < 8)
+        while (loopy < 16)
         {
-            unsigned random = ((loopx)+(loopy*2))%5;
+            unsigned random = (rand())%5;
             noble_image *image_here = 0L;
             
             switch(random)
@@ -101,7 +117,7 @@ int main(int argc, char *argv[])
             
             if (image_here)
             {
-                image_add(canvas, image_here, loopx*128, loopy*128);
+                image_add_alpha(canvas, image_here, loopx*64, loopy*64, 80);
             }
             
             loopy++;
@@ -109,21 +125,13 @@ int main(int argc, char *argv[])
         loopx++;
     }
 
-    image_add_alpha(canvas, branch3, 10, 123, 130);
-    image_add_alpha(canvas, branch2, 210, 450, 130);
-    image_add_alpha(canvas, branch1, 570, 210, 130);
-
-    image_add_alpha(canvas, branch1, 930, 403, 130);
-    image_add_alpha(canvas, branch3, 450, 570, 130);
-    image_add_alpha(canvas, branch2, 323, 720, 130);
+    image_free(&branch1_full);
+    image_free(&branch1_half);
     
-    image_add_alpha(canvas, branch3, 830, 723, 130);
-    image_add_alpha(canvas, branch2, 123, 623, 130);
-    image_add_alpha(canvas, branch1, 920, 293, 130);
-
-    image_create(canvas, "bushtrunk.png");
-    
-    image_free(&canvas);
+    image_free(&branch1_0);
+    image_free(&branch1_45);
+    image_free(&branch1_90);
+    image_free(&branch1_135);
     
     image_free(&grass1);
     image_free(&grass2);
@@ -132,10 +140,11 @@ int main(int argc, char *argv[])
     image_free(&grass_rotate);
     image_free(&grass_rotate2);
 
-    image_free(&branch1);
-    image_free(&branch2);
-    image_free(&branch3);
-    
+
+    image_create(canvas, "bushtrunk.png");
+
+    image_free(&canvas);
+
     return 0;
 }
 

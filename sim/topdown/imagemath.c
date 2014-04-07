@@ -39,7 +39,7 @@
 #include "lodepng.h"
 #include "imagemath.h"
 
-noble_image * image_init(unsigned width, unsigned height)
+noble_image * image_init_clear(unsigned width, unsigned height, unsigned clear)
 {
     noble_image   * image = 0L;
     unsigned char * alloc = 0L;
@@ -64,8 +64,10 @@ noble_image * image_init(unsigned width, unsigned height)
         free(alloc);
         return 0L;
     }
-    
-    memset(alloc, 255, size);
+    if (clear)
+    {
+        memset(alloc, 255, size);
+    }
     
     image->height = height;
     image->width = width;
@@ -77,7 +79,7 @@ noble_image * image_half(noble_image * full)
 {
     unsigned half_width  = full->width >> 1;
     unsigned half_height = full->height >> 1;
-    noble_image   * half = image_init(half_width, half_height);
+    noble_image   * half = image_init_clear(half_width, half_height, 0);
     if (half)
     {
         unsigned loop_height = 0;
@@ -102,12 +104,41 @@ noble_image * image_half(noble_image * full)
     return half;
 }
 
-noble_image * image_rotate(noble_image * full)
+noble_image * image_third(noble_image * full)
+{
+    unsigned third_width  = full->width / 3;
+    unsigned third_height = full->height / 3;
+    noble_image   * third = image_init_clear(third_width, third_height, 0);
+    if (third)
+    {
+        unsigned loop_height = 0;
+        unsigned loop = 0;
+        while (loop_height < third_height)
+        {
+            unsigned loop_width = 0;
+            unsigned full_height = (loop_height * 3) * full->width;
+            while(loop_width < third_width)
+            {
+                unsigned full_image_location = ((full_height + (loop_width * 3)) * 3);
+                
+                third->image[loop++] = full->image[full_image_location++];
+                third->image[loop++] = full->image[full_image_location++];
+                third->image[loop++] = full->image[full_image_location];
+                
+                loop_width++;
+            }
+            loop_height++;
+        }
+    }
+    return third;
+}
+
+noble_image * image_rotate_90(noble_image * full)
 {
     unsigned rotated_width  = full->height;
     unsigned rotated_height = full->width;
     
-    noble_image   * rotated = image_init(rotated_width, rotated_height);
+    noble_image   * rotated = image_init_clear(rotated_width, rotated_height, 0);
     if (rotated)
     {
         unsigned loop_height = 0;
@@ -124,6 +155,44 @@ noble_image * image_rotate(noble_image * full)
                 rotated->image[loop++] = full->image[full_image_location++];
                 rotated->image[loop++] = full->image[full_image_location++];
                 rotated->image[loop++] = full->image[full_image_location];
+                
+                loop_width++;
+            }
+            loop_height++;
+        }
+    }
+    return rotated;
+}
+
+noble_image * image_rotate_45(noble_image * full)
+{
+    unsigned        side = full->height;
+    noble_image   * rotated;
+    
+    if (full->width > side)
+    {
+        side = full->width;
+    }
+    
+    rotated = image_init_clear(side, side, 1);
+    
+    if (rotated)
+    {
+        unsigned loop_height = 0;
+        signed offset_height = ((side*2)  - (full->height + full->width))/2;
+        unsigned loop = 0;
+        while (loop_height < full->height)
+        {
+            unsigned loop_width = 0;
+            while (loop_width < full->width)
+            {
+                signed rotated_height = ((((loop_width + loop_height)) + offset_height)) >> 1;
+                signed rotated_width = ((((loop_width - loop_height)) + side)) >> 1;
+                signed offset_rotate = ((rotated_height * side) + rotated_width) * 3;
+                
+                rotated->image[offset_rotate++] = full->image[loop++];
+                rotated->image[offset_rotate++] = full->image[loop++];
+                rotated->image[offset_rotate++] = full->image[loop++];
                 
                 loop_width++;
             }
