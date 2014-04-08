@@ -202,6 +202,28 @@ noble_image * image_rotate_45(noble_image * full)
     return rotated;
 }
 
+noble_image * image_cut(noble_image * full, unsigned top, unsigned left, unsigned bottom, unsigned right)
+{
+    noble_image * cut = image_init_clear(right - left, bottom - top, 0);
+    
+    if (cut)
+    {
+        unsigned loop_height = 0;
+        unsigned width_3 = (right - left) * 3;
+        while (loop_height < cut->height)
+        {
+            unsigned char to = 0L;
+            unsigned char from = 0L;
+            memcpy(&(cut->image[(loop_height * cut->width * 3)]),
+                   &(full->image[(((loop_height + top) * full->width) + left) * 3]),
+                   width_3);
+
+            loop_height++;
+        }
+    }
+    return cut;
+}
+
 noble_image * image_from_file(char * file_name)
 {
     noble_image   * return_image = 0L;

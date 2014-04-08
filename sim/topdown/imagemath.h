@@ -53,6 +53,8 @@ noble_image * image_third(noble_image * full);
 noble_image * image_rotate_90(noble_image * full);
 noble_image * image_rotate_45(noble_image * full);
 
+noble_image * image_cut(noble_image * full, unsigned top, unsigned left, unsigned bottom, unsigned right);
+
 void image_free(noble_image ** image_free);
 
 void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned left);

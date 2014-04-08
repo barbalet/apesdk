@@ -46,7 +46,9 @@ int main(int argc, char *argv[])
     noble_image * branch1_full = image_from_file("art/branches1.png");
     noble_image * branch1_half = image_half(branch1_full);
     noble_image * branch1_0  = image_third(branch1_full);
-    noble_image * branch1_45 = image_rotate_45(branch1_half);
+    noble_image * branch1_45_full = image_rotate_45(branch1_half);
+    noble_image * branch1_45 = image_cut(branch1_45_full, 55, 20, 260, 280);
+    
     noble_image * branch1_90 = image_rotate_90(branch1_0);
     noble_image * branch1_135 = image_rotate_90(branch1_45);
 
@@ -58,14 +60,10 @@ int main(int argc, char *argv[])
     noble_image * grass_rotate;
     noble_image * grass_rotate2;
     
-    noble_image * branch1 = image_from_file("art/branches1.png");
-    noble_image * branch2 = image_from_file("art/branches2.png");
-    noble_image * branch3 = image_from_file("art/branches3.png");
-    
     noble_image * retain;
     
     unsigned loopx = 0;
-
+    
     srand(12123123);
     
     retain = image_half(grass1);
@@ -82,12 +80,15 @@ int main(int argc, char *argv[])
     
     grass_rotate = image_rotate_90(grass3);
     grass_rotate2 = image_rotate_90(grass_rotate);
-
-    image_add(canvas, branch1_45, 180, 180);
-    image_add(canvas, branch1_135, 600, 600);
-    image_add(canvas, branch1_0, 50, 50);
-    image_add(canvas, branch1_90, 450, 450);
     
+    image_add(canvas, branch1_0, 50, 50);
+    image_add(canvas, branch1_45, 220, 220);
+    image_add(canvas, branch1_90, 440, 440);
+
+    image_add(canvas, branch1_135, 700, 700);
+    
+    image_free(&branch1_45_full);
+
     while (loopx < 16)
     {
         unsigned loopy = 0;
@@ -117,14 +118,14 @@ int main(int argc, char *argv[])
             
             if (image_here)
             {
-                image_add_alpha(canvas, image_here, loopx*64, loopy*64, 80);
+                image_add_alpha(canvas, image_here, (loopx*64) + (rand()%50), (loopy*64) + (rand()%50), 10+(rand()%150));
             }
             
             loopy++;
         }
         loopx++;
     }
-
+    
     image_free(&branch1_full);
     image_free(&branch1_half);
     
@@ -139,7 +140,6 @@ int main(int argc, char *argv[])
     
     image_free(&grass_rotate);
     image_free(&grass_rotate2);
-
 
     image_create(canvas, "bushtrunk.png");
 
