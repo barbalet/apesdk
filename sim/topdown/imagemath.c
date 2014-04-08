@@ -307,43 +307,6 @@ void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned
     }
 }
 
-/*
- 
- void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned left)
- {
- unsigned loop_height = 0;
- while (loop_height < image->height)
- {
- unsigned loop_width = 0;
- unsigned loop = 0;
- unsigned comb_height = top + loop_height;
- unsigned comb_width = (left * 3);
- 
- unsigned image_width3 = (image->width * 3);
- unsigned canvas_width3 = (canvas->width * 3);
- unsigned char * band_canvas = &canvas->image[comb_height * canvas->width * 3];
- unsigned char * band_image = &image->image[loop_height * image->width * 3];
- 
- if (comb_height >= canvas->height)
- {
- return;
- }
-
-while (loop_width < image_width3)
-{
-    if (comb_width >= canvas_width3)
-    {
-        break;
-    }
-    band_canvas[comb_width ++] = band_image[loop_width++];
-}
-
-loop_height++;
-}
-}
-
- */
-
 void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, unsigned left, unsigned alpha)
 {
     unsigned loop_height = 0;
@@ -386,7 +349,77 @@ void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, un
     }
 }
 
+void image_combination(noble_image * canvas, noble_image * image, unsigned top, unsigned left)
+{
+    unsigned loop_height = 0;
+    while (loop_height < image->height)
+    {
+        unsigned loop_width = 0;
+        unsigned loop = 0;
+        unsigned comb_height = top + loop_height;
+        unsigned comb_width = (left * 3);
+        
+        unsigned image_width3 = (image->width * 3);
+        unsigned canvas_width3 = (canvas->width * 3);
+        unsigned char * band_canvas = &canvas->image[comb_height * canvas->width * 3];
+        unsigned char * band_image = &image->image[loop_height * image->width * 3];
+        
+        if (comb_height >= canvas->height)
+        {
+            return;
+        }
+        
+        while (loop_width < image_width3)
+        {
+            unsigned char canvas, image;
+            unsigned char combination;
+            if (comb_width >= canvas_width3)
+            {
+                break;
+            }
+            
+            canvas = band_canvas[comb_width] ^ 255;
+            image = band_image[loop_width++] ^ 255;
+            combination = canvas + image;
+            if (combination > 255) combination = 255;
+            combination = combination ^ 255;
+            band_canvas[comb_width ++] = combination;
+
+            canvas = band_canvas[comb_width] ^ 255;
+            image = band_image[loop_width++] ^ 255;
+            combination = canvas + image;
+            if (combination > 255) combination = 255;
+            combination = combination ^ 255;
+            band_canvas[comb_width ++] = combination;
+
+            canvas = band_canvas[comb_width] ^ 255;
+            image = band_image[loop_width++] ^ 255;
+            combination = canvas + image;
+            if (combination > 255) combination = 255;
+            combination = combination ^ 255;
+            band_canvas[comb_width ++] = combination;
+        }
+        
+        loop_height++;
+    }
+}
+
 void image_create(noble_image * image, char * filename)
 {
     (void)lodepng_encode24_file(filename, image->image, image->width, image->height);
+}
+
+noble_image * image_grayscale(noble_image * full)
+{
+    unsigned loop_end = full->height * full->width * 3;
+    unsigned loop = 0;
+    while (loop < loop_end)
+    {
+        unsigned total = full->image[loop] + full->image[loop + 1] + full->image[loop + 2];
+        
+        full->image[loop] = full->image[loop + 1] = full->image[loop + 2] = total / 3;
+        
+        loop += 3;
+    }
+    return full;
 }

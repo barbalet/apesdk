@@ -63,4 +63,8 @@ void image_create(noble_image * image, char * filename);
 
 void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, unsigned left, unsigned alpha);
 
+void image_combination(noble_image * canvas, noble_image * image, unsigned top, unsigned left);
+
+noble_image * image_grayscale(noble_image * full);
+
 #endif

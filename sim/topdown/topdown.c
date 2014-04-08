@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     noble_image * branch1_full = image_from_file("art/branches1.png");
     noble_image * branch1_half = image_half(branch1_full);
     noble_image * branch1_0  = image_third(branch1_full);
-    noble_image * branch1_45_full = image_rotate_45(branch1_half);
+    noble_image * branch1_45_full = image_grayscale(image_rotate_45(branch1_half));
     noble_image * branch1_45 = image_cut(branch1_45_full, 55, 20, 260, 280);
     
     noble_image * branch1_90 = image_rotate_90(branch1_0);
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
             
             if (image_here)
             {
-                image_add_alpha(canvas, image_here, (loopx*64) + (rand()%50), (loopy*64) + (rand()%50), 10+(rand()%150));
+                image_combination(canvas, image_here, (loopx*64) + (rand()%50), (loopy*64) + (rand()%50));
             }
             
             loopy++;
