@@ -634,7 +634,7 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
     io_free(&void_dtss);
 }
 
-static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dimensions)
+static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_byte threadable)
 {
     n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
     
@@ -694,99 +694,19 @@ static void draw_terrain_threadable(noble_simulation * local_sim, n_vect2 * dime
             io_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
 
             screen_x_location[0] = scrx;
-            execute_add(((execute_function*)draw_terrain_scan), (void*)local_dtss, (void*)screen_x_location, 0L);
+            
+            if (threadable)
+            {
+                execute_add(((execute_function*)draw_terrain_scan), (void*)local_dtss, (void*)screen_x_location, 0L);
+            }
+            else
+            {
+                draw_terrain_scan(local_dtss, screen_x_location, 0L);
+            }
+            
             scrx++;               /* next column */
         }
         execute_complete_added();
-    }
-}
-
-static void draw_terrain(noble_simulation * local_sim, n_int dim_x, n_int dim_y)
-{
-    n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
-    
-    if (buf_offscr == 0L)
-    {
-        return;
-    }
-
-    if (local_sim->select == 0L)
-    {
-        io_erase(buf_offscr, dim_x * dim_y);
-        return;
-    }
-    {
-        const n_int    lowest_y = ((dim_y + 256) * dim_y)/256;
-        n_byte2      * combined = (n_byte2 *)local_sim->land->highres;
-        noble_being * loc_being = local_sim->select;
-        const n_int turn = terrain_turn;
-        const n_int co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
-        const n_int co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
-
-        n_byte * loc_offscr = buf_offscr;
-        
-        /* start at the left-most row */
-        n_int scrx = (0 - (dim_x >> 1));
-        /* find the central map point */
-        n_int flatval = combined[CONVERT_X(2048, co_x) | CONVERT_Y(2048, co_y)] & 255;
-        
-        n_int const_lowdiv2;
-        
-        /* get the local cos value for the turn angle */
-        /* get the local sin value for the turn angle */
-
-        n_vect2 value_vector;
-        n_int   valc2, vals2;
-        n_int   lowest_s, lowest_c;
-        
-        vect2_direction(&value_vector, turn + 128, 105);
-
-        valc2 = (value_vector.y << 1);
-        vals2 = (value_vector.x << 1);
-
-        lowest_s = ((value_vector.x * (((lowest_y)) - dim_y)));
-        lowest_c = ((value_vector.y * (((lowest_y)) - dim_y)));
-
-        if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
-        {
-            flatval = WATER_MAP;   /*    put it on water level */
-        }
-
-        const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
-
-        while (scrx < (dim_x - (dim_x >> 1)))   /* repeat until the right-most row is reached */
-        {
-            /* take the very bottom pixel */
-            n_int pixy = (scrx + (dim_x >> 1)) + ((dim_y - 1) * dim_x );
-            n_int actual = (dim_y - 1);
-            /* start with a map point which is below/off the screen */
-            n_int scry = const_lowdiv2;
-            /* rotated and add offset (which will be &ed off) */
-            n_int big_x = lowest_s + (scrx * value_vector.y);
-            /* rotated and sub offset (subtracted further down) */
-            n_int big_y = lowest_c - (scrx * value_vector.x);
-
-            while(actual > -1)
-            {
-                const n_uint   check_change = CONVERT_X((big_x >> 8),co_x) | CONVERT_Y((big_y >> 8), co_y);
-                const n_byte2  value = combined[check_change];
-                const n_int    z00 = value & 255;
-                const n_byte   col00   = value >> 8;
-                n_int          aval = (scry - z00);
-                if (aval < -1) aval = -1;
-                
-                while (actual > aval)
-                {
-                    loc_offscr[pixy] = col00;
-                    pixy -= dim_x;
-                    actual--;
-                }
-                scry--;           /* next map point from screen value */
-                big_x -= vals2;
-                big_y -= valc2;
-            }
-            scrx++;               /* next column */
-        }
     }
 }
 
@@ -1698,14 +1618,14 @@ n_int  draw_cycle(void)
     /* TODO: Make the threaded draw command line safe */
     if (io_command_line_execution())
     {
-        draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
+        draw_terrain(local_sim, &local_vect, 0);
     }
     else
     {
-        draw_terrain_threadable(local_sim, &local_vect);
+        draw_terrain(local_sim, &local_vect, 1);
     }
 #else
-    draw_terrain(local_sim, terrain_dim_x, terrain_dim_y);
+    draw_terrain(local_sim, &local_vect, 0);
 #endif
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */

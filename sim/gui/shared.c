@@ -516,3 +516,12 @@ void shared_saveFileName(n_string cStringFileName)
     (void)control_toggle_pause(0);
     (void)console_save(0L, cStringFileName, 0L);
 }
+
+void shared_rotate(n_double num, n_byte wwind)
+{
+    if (wwind == NUM_TERRAIN)
+    {
+        n_int integer_rotation_256 = (n_int)((num * 256) / 360);
+        terrain_turn = (n_byte)(((n_int)terrain_turn + 512 + integer_rotation_256) & 255);
+    }
+}

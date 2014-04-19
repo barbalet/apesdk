@@ -69,6 +69,8 @@ n_int shared_notThreaded(void);
 void shared_flood(void);
 void shared_healthy_carrier(void);
 
+void shared_rotate(n_double num, n_byte wwind);
+
 void shared_keyReceived(n_byte2 value, n_byte fIdentification);
 
 void shared_keyUp(void);

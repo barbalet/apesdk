@@ -462,7 +462,7 @@
 
 - (void)rotateWithEvent:(NSEvent *)event
 {
-    NSLog(@"New behavior: rotateWithEvent %@", event);
+    shared_rotate((n_double)[event rotation], fIdentification);
 }
 
 @end
