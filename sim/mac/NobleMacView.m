@@ -441,23 +441,23 @@
 
 - (void)beginGestureWithEvent:(NSEvent *)event
 {
-    NSLog(@"New behavior: beginGestureWithEvent");
+    /* NSLog(@"New behavior: beginGestureWithEvent"); */
 }
 
 - (void)endGestureWithEvent:(NSEvent *)event
 {
-    NSLog(@"New behavior: endGestureWithEvent");
+    /* NSLog(@"New behavior: endGestureWithEvent"); */
 }
 
 - (void)magnifyWithEvent:(NSEvent *)event
 {
-    NSLog(@"New behavior: magnifyWithEvent %f %@", [event magnification], event);
+    /* NSLog(@"New behavior: magnifyWithEvent %f %@", [event magnification], event); */
     /* (1.0 + [event magnification]) */
 }
 
 - (void)swipeWithEvent:(NSEvent *)event
 {
-    NSLog(@"New behavior: swipeWithEvent %f %f %@", [event deltaX], [event deltaY], event);
+    /* NSLog(@"New behavior: swipeWithEvent %f %f %@", [event deltaX], [event deltaY], event); */
 }
 
 - (void)rotateWithEvent:(NSEvent *)event
