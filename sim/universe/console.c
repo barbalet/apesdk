@@ -596,7 +596,7 @@ static void watch_vascular(void *ptr, n_string beingname, noble_being * local_be
         }
 
         radius = metabolism_vascular_radius(local_being, i);
-        sprintf(str,"%02d.%02d",
+        sprintf(str,"%2d.%02d",
                 (int)radius/100,
                 (int)radius%100);
         io_string_write(result, str, &watch_string_length);
@@ -607,7 +607,7 @@ static void watch_vascular(void *ptr, n_string beingname, noble_being * local_be
             j++;
         }
 
-        sprintf(str,"%06u",
+        sprintf(str,"%6u",
                 (unsigned int)(local_being->vessel[i].flow_rate));
         io_string_write(result, str, &watch_string_length);
         j+=io_length(str,STRING_BLOCK_SIZE);
@@ -627,7 +627,7 @@ static void watch_vascular(void *ptr, n_string beingname, noble_being * local_be
             j++;
         }
 
-        sprintf(str,"%02u.%02u",
+        sprintf(str,"%2u.%02u",
                 (unsigned int)(local_being->vessel[i].temperature/1000),
                 (unsigned int)(local_being->vessel[i].temperature%1000)/10);
         io_string_write(result, str, &watch_string_length);
