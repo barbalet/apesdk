@@ -392,6 +392,18 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
+n_int console_next(void * ptr, n_string response, n_console_output output_function)
+{
+    being_change_selected((noble_simulation *) ptr, 1);
+    return 0;
+}
+
+n_int console_previous(void * ptr, n_string response, n_console_output output_function)
+{
+    being_change_selected((noble_simulation *) ptr, 0);
+    return 0;
+}
+
 #ifdef BRAINCODE_ON
 void console_populate_braincode(noble_simulation * local_sim, line_braincode function)
 {

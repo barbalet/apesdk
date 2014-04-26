@@ -1968,6 +1968,36 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
     }
 }
 
+void being_change_selected(noble_simulation * sim, n_byte forwards)
+{
+    noble_being * local_select = sim->select;
+    noble_being * first = sim->beings;
+    noble_being * last = &(sim->beings[sim->num - 1]);
+    if (forwards)
+    {
+        if (sim->select != last)
+        {
+            local_select++;
+        }
+        else
+        {
+            local_select = first;
+        }
+    }
+    else
+    {
+        if (sim->select != first)
+        {
+            local_select--;
+        }
+        else
+        {
+            local_select = last;
+        }
+    }
+    sim_set_select(local_select);
+}
+
 /**
  This checks to see if the Noble Ape is awake
  @param sim The simulation pointer
@@ -3614,8 +3644,10 @@ being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim)
     brls->count = 0;
     
     if (being_remove_external)
-    do {}
-    while(being_remove_external);
+    {
+        do {}
+        while(being_remove_external);
+    }
     
     being_remove_internal = 1;
     return brls;

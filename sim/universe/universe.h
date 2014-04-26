@@ -1389,6 +1389,8 @@ n_int console_probes(void * ptr, n_string response, n_console_output output_func
 n_int console_watch(void * ptr, n_string response, n_console_output output_function);
 n_int console_logging(void * ptr, n_string response, n_console_output output_function);
 n_int console_list(void * ptr, n_string response, n_console_output output_function);
+n_int console_next(void * ptr, n_string response, n_console_output output_function);
+n_int console_previous(void * ptr, n_string response, n_console_output output_function);
 n_int console_simulation(void * ptr, n_string response, n_console_output output_function);
 n_int console_step(void * ptr, n_string response, n_console_output output_function);
 n_int console_run(void * ptr, n_string response, n_console_output output_function);
@@ -1480,6 +1482,12 @@ const static noble_console_command control_commands[] =
     {&console_list,          "ls",             "",                     ""},
     {&console_list,          "dir",            "",                     ""},
 
+    {&console_next,          "next",           "",                     "Next ape"},
+
+    {&console_previous,      "previous",       "",                     "Previous ape"},
+    {&console_previous,      "prev",           "",                     ""},
+
+    
     {&console_debug,         "debug",           "",                    "Run debug check"},
 
     {0L, 0L},
