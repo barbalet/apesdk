@@ -45,7 +45,7 @@
  */
 void metabolism_vascular_description(n_int index, n_string description)
 {
-    n_string str[] =
+    const n_string str[] =
     {
         "Ascending Aorta",
         "Thoracic Aorta",
@@ -80,45 +80,6 @@ void metabolism_vascular_description(n_int index, n_string description)
     io_string_write(description, str[index], &location);
 }
 
-const n_string metabolism_text[] =
-{
-    "",
-    "Protein",
-    "Starch",
-    "Fat",
-    "Sugar",
-    "Water",
-    "Bile",
-    "Glucose",
-    "Muscle",
-    "Amino Acids",
-    "Glucogen",
-    "Adrenalin",
-    "Glycogen",
-    "Ammonia",
-    "Urea",
-    "Lactate",
-    "Oxygen",
-    "CO2",
-    "Fatty Acids",
-    "Triglyceride",
-    "Adipose",
-    "Insulin",
-    "ADP",
-    "ATP",
-    "Energy",
-    "Heat",
-    "Pyruvate",
-    "Waste",
-    "Leptin",
-    "Ghrelin",
-    "prolactin",
-    "Milk",
-    "Heart rate Hz",
-    "Breathing rate Hz",
-    "Thermoregulator",
-    "Lung Capacity"
-};
 
 /**
  * @brief Returns a description of the given metabolism index
@@ -127,6 +88,46 @@ const n_string metabolism_text[] =
  */
 n_string metabolism_description(n_int index)
 {
+    const n_string metabolism_text[] =
+    {
+        "",
+        "Protein",
+        "Starch",
+        "Fat",
+        "Sugar",
+        "Water",
+        "Bile",
+        "Glucose",
+        "Muscle",
+        "Amino Acids",
+        "Glucogen",
+        "Adrenalin",
+        "Glycogen",
+        "Ammonia",
+        "Urea",
+        "Lactate",
+        "Oxygen",
+        "CO2",
+        "Fatty Acids",
+        "Triglyceride",
+        "Adipose",
+        "Insulin",
+        "ADP",
+        "ATP",
+        "Energy",
+        "Heat",
+        "Pyruvate",
+        "Waste",
+        "Leptin",
+        "Ghrelin",
+        "prolactin",
+        "Milk",
+        "Heart rate Hz",
+        "Breathing rate Hz",
+        "Thermoregulator",
+        "Lung Capacity"
+    };
+    
     return metabolism_text[index];
 }
 
@@ -350,7 +351,7 @@ static const n_int metabolic_pathway[] =
  * @param index Metabolism type index
  * @return Maximum value
  */
-static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
+static n_int metabolism_below_capacity(noble_being * local_being, n_int index)
 {
     n_byte2 capacity = 1000;
 
@@ -403,7 +404,7 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  * @param active Whether to set the state as active (1) or inactive (0)
  */ static void metabolism_set_state(noble_being * local_being, n_byte2 state, n_byte active)
 {
-    if (active!=0)
+    if (active != 0)
     {
         GET_MT(local_being,METABOLISM_STATE) |= state;
     }
@@ -1127,13 +1128,8 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
  */ void metabolism_eat(noble_being * local_being,
                         n_byte food_type)
 {
-    n_byte2 i;
-    n_byte2 qty[6];
-
-    for (i=0; i<6; i++)
-    {
-        qty[i]=0;
-    }
+    n_int i = METABOLISM_PROTEIN;
+    n_byte2 qty[6] = {0};
 
     switch (food_type)
     {
@@ -1161,12 +1157,13 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_byte2 index)
         break;
     }
 
-    for (i=0; i<5; i++)
+    while (i <= METABOLISM_WATER)
     {
         if (GET_MT(local_being,i) < metabolism_below_capacity(local_being, i))
         {
             GET_MT(local_being,i) += qty[i];
         }
+        i++;
     }
 }
 
