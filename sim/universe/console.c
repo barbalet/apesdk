@@ -639,9 +639,9 @@ static void watch_vascular(void *ptr, n_string beingname, noble_being * local_be
             j++;
         }
 
-        sprintf(str,"%2u.%02u",
-                (unsigned int)(local_being->vessel[i].temperature/1000),
-                (unsigned int)(local_being->vessel[i].temperature%1000)/10);
+        sprintf(str,"%2d.%02d",
+                (int)(local_being->vessel[i].temperature/1000),
+                (int)(local_being->vessel[i].temperature%1000)/10);
         io_string_write(result, str, &watch_string_length);
 
         io_string_write(result, "\n", &watch_string_length);

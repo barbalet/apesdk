@@ -1164,7 +1164,7 @@ typedef	struct
     n_uint flow_rate;
     n_uint volume;
     n_uint pressure;
-    n_uint temperature;
+    n_int temperature;
 }
 noble_vessel;
 

@@ -798,9 +798,10 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_int index)
  * @param local_sim Pointer to the simulation
  * @param local_being Pointer to the being
  * @return Core temperature
- */ static n_uint metabolism_thermoregulation(noble_simulation * local_sim, noble_being * local_being)
+ */ static n_int metabolism_thermoregulation(noble_simulation * local_sim, noble_being * local_being)
 {
-    n_uint i,index,conduction,water_conduction=0,core_temp=0,diff;
+    n_byte2 index = 0;
+    n_int water_conduction=0,core_temp=0,diff;
     n_int local_z;
     n_vect2 slope_vector, location_vector;
     n_int ambient_temperature = weather_temperature(local_sim->land,
@@ -822,60 +823,60 @@ static n_int metabolism_below_capacity(noble_being * local_being, n_int index)
         water_conduction = 1;
     }
 
-    index = 0;
     while (index < VASCULAR_SIZE)
     {
-        n_uint paths = 0;
-        for (i = 0; i < VASCULAR_SIZE; i++)
+        n_byte2 i = 0;
+        
+        n_int temperature_vessel_index = local_being->vessel[index].temperature;
+        
+        while (i < VASCULAR_SIZE)
         {
-            if (local_being->vessel[i].parent == index) paths++;
-        }
-        if (paths > 0)
-        {
-            for (i = 0; i < VASCULAR_SIZE; i++)
+            if ((local_being->vessel[i].parent == index) && (i != index))
             {
-                if (local_being->vessel[i].parent == index)
+                n_int conduction = 6;
+                
+                /** Adjust temperature */
+                if (temperature_vessel_index > local_being->vessel[i].temperature)
                 {
-                    /** Adjust temperature */
-                    if (local_being->vessel[index].temperature > local_being->vessel[i].temperature)
+                    diff = temperature_vessel_index - local_being->vessel[i].temperature;
+                    local_being->vessel[i].temperature += 1 + (diff>>1);
+                }
+                else
+                {
+                    diff = local_being->vessel[i].temperature - temperature_vessel_index;
+                    local_being->vessel[i].temperature -= 1 + (diff>>1);
+                }
+#if 0
+                /** temperature loss from thermal conduction to the environment */
+                if (i < VASCULAR_SIZE_CORE)
+                {
+                    if (i < (VASCULAR_SIZE_CORE>>1))
                     {
-                        diff = local_being->vessel[index].temperature - local_being->vessel[i].temperature;
-                        local_being->vessel[i].temperature += 1 + (diff>>1);
+                        conduction = 6;
                     }
                     else
                     {
-                        diff = local_being->vessel[i].temperature - local_being->vessel[index].temperature;
-                        local_being->vessel[i].temperature -= 1 + (diff>>1);
-                    }
-
-                    /** temperature loss from thermal conduction to the environment */
-                    if (i < VASCULAR_SIZE_CORE)
-                    {
-                        if (i < (VASCULAR_SIZE_CORE>>1))
-                        {
-                            conduction = 6;
-                        }
-                        else
-                        {
-                            conduction = 3 - water_conduction;
-                        }
-                    }
-                    else
-                    {
-                        conduction = 2 - water_conduction;
-                    }
-                    if (ambient_temperature < (n_int)local_being->vessel[i].temperature)
-                    {
-                        diff = local_being->vessel[i].temperature - ambient_temperature;
-                        local_being->vessel[i].temperature -= 1 + (diff>>conduction);
-                    }
-                    if (ambient_temperature > (n_int)local_being->vessel[i].temperature)
-                    {
-                        diff = ambient_temperature - local_being->vessel[i].temperature;
-                        local_being->vessel[i].temperature += 1 + (diff>>conduction);
+                        conduction = 3 - water_conduction;
                     }
                 }
+                else
+                {
+                    conduction = 2 - water_conduction;
+                }
+#endif
+                if (ambient_temperature < (n_int)local_being->vessel[i].temperature)
+                {
+                    diff = local_being->vessel[i].temperature - ambient_temperature;
+                    local_being->vessel[i].temperature -= 1 + (diff>>conduction);
+                }
+                if (ambient_temperature > (n_int)local_being->vessel[i].temperature)
+                {
+                    diff = ambient_temperature - local_being->vessel[i].temperature;
+                    local_being->vessel[i].temperature += 1 + (diff>>conduction);
+                }
+
             }
+            i++;
         }
         /** update the core temperature */
         if (index < VASCULAR_SIZE_CORE) core_temp += local_being->vessel[index].temperature;
