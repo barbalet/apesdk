@@ -574,215 +574,6 @@ static void watch_appearance(void *ptr, n_string beingname, noble_being * local_
     io_string_write(result, str, &watch_string_length);
 }
 
-/**
- * Display values for the vascular system
- * @param ptr pointer to a noble_simulation object
- * @param beingname name of the being
- * @param local_being being to be watched
- * @param result resulting text
- */
-static void watch_vascular(void *ptr, n_string beingname, noble_being * local_being, n_string result)
-{
-#ifdef METABOLISM_ON
-    n_int i,j,radius;
-    n_string_block str;
-    const n_int col[] = {24,32,41,53};
-
-    io_string_write(result, "\nHeart rate: ", &watch_string_length);
-    sprintf(str,"%d bpm  %.1f Hz\n",GET_MT(local_being,METABOLISM_HEART_RATE)*60/1000,GET_MT(local_being,METABOLISM_HEART_RATE)/1000.0f);
-    io_string_write(result, str, &watch_string_length);
-
-    io_string_write(result, "\nVessel                  Radius    Flow   Pressure    Temp C\n", &watch_string_length);
-
-    for (i=0; i<60; i++)
-        io_string_write(result, "-", &watch_string_length);
-
-    io_string_write(result, "\n", &watch_string_length);
-    for (i=0; i<VASCULAR_SIZE; i++)
-    {
-        metabolism_vascular_description(i,str);
-        io_string_write(result, str, &watch_string_length);
-        for (j=io_length(str,STRING_BLOCK_SIZE); j<col[0]; j++)
-        {
-            io_string_write(result, " ", &watch_string_length);
-        }
-
-        radius = metabolism_vascular_radius(local_being, i);
-        sprintf(str,"%2d.%02d",
-                (int)radius/100,
-                (int)radius%100);
-        io_string_write(result, str, &watch_string_length);
-        j+=io_length(str,STRING_BLOCK_SIZE);
-        while (j<col[1])
-        {
-            io_string_write(result, " ", &watch_string_length);
-            j++;
-        }
-
-        sprintf(str,"%6u",
-                (unsigned int)(local_being->vessel[i].flow_rate));
-        io_string_write(result, str, &watch_string_length);
-        j+=io_length(str,STRING_BLOCK_SIZE);
-        while (j<col[2])
-        {
-            io_string_write(result, " ", &watch_string_length);
-            j++;
-        }
-
-        sprintf(str,"%10u",
-                (unsigned int)(local_being->vessel[i].pressure));
-        io_string_write(result, str, &watch_string_length);
-        j+=io_length(str,STRING_BLOCK_SIZE);
-        while (j<col[3])
-        {
-            io_string_write(result, " ", &watch_string_length);
-            j++;
-        }
-
-        sprintf(str,"%2d.%02d",
-                (int)(local_being->vessel[i].temperature/1000),
-                (int)(local_being->vessel[i].temperature%1000)/10);
-        io_string_write(result, str, &watch_string_length);
-
-        io_string_write(result, "\n", &watch_string_length);
-    }
-#endif
-}
-
-/**
- * Show values for the respiration system
- * @param ptr pointer to noble_simulation object
- * @param beingname name of the being
- * @param local_being being to be observed
- * @param result resulting text
- */
-static void watch_respiration(void *ptr, n_string beingname, noble_being * local_being, n_string result)
-{
-#ifdef METABOLISM_ON
-    n_string_block str;
-
-    io_string_write(result, "\nBreathing rate: ", &watch_string_length);
-    sprintf(str,"%d Vf   %.1f Hz\n",GET_MT(local_being,METABOLISM_BREATHING_RATE)*60/1000,GET_MT(local_being,METABOLISM_BREATHING_RATE)/1000.0f);
-    io_string_write(result, str, &watch_string_length);
-    io_string_write(result, "Lung Capacity:  ", &watch_string_length);
-    sprintf(str,"%d cm^3\n",GET_MT(local_being,METABOLISM_LUNG_CAPACITY));
-    io_string_write(result, str, &watch_string_length);
-    sprintf(str,"%s %05u   %s %05u\n",
-            metabolism_description(METABOLISM_OXYGEN),
-            GET_MT(local_being,METABOLISM_OXYGEN),
-            metabolism_description(METABOLISM_CO2),
-            GET_MT(local_being,METABOLISM_CO2));
-    io_string_write(result, str, &watch_string_length);
-    sprintf(str,"%s %05u   %s %05u\n",
-            metabolism_description(METABOLISM_GLUCOSE),
-            GET_MT(local_being,METABOLISM_GLUCOSE),
-            metabolism_description(METABOLISM_PYRUVATE),
-            GET_MT(local_being,METABOLISM_PYRUVATE));
-    io_string_write(result, str, &watch_string_length);
-#endif
-}
-
-/**
- * Show the metabolism for a given being
- * @param ptr pointer to noble_simulation object
- * @param beingname being name
- * @param local_being being to be viewed
- * @param result resulting text
- */
-static void watch_metabolism(void *ptr, n_string beingname, noble_being * local_being, n_string result)
-{
-#ifdef METABOLISM_ON
-    n_string_block str;
-
-    io_string_write(result, "\nStomach:\n", &watch_string_length);
-    sprintf(str,"  %s:   %d\t%s: %d\n  %s:  %d\t%s:     %d\n  %s:   %d\t%s:   %d\n  %s:  %d\t%s: %d\n",
-            metabolism_description(METABOLISM_WATER),
-            GET_MT(local_being,METABOLISM_WATER),
-            metabolism_description(METABOLISM_PROTEIN),
-            GET_MT(local_being,METABOLISM_PROTEIN),
-            metabolism_description(METABOLISM_STARCH),
-            GET_MT(local_being,METABOLISM_STARCH),
-            metabolism_description(METABOLISM_FAT),
-            GET_MT(local_being,METABOLISM_FAT),
-            metabolism_description(METABOLISM_SUGAR),
-            GET_MT(local_being,METABOLISM_SUGAR),
-            metabolism_description(METABOLISM_BILE),
-            GET_MT(local_being,METABOLISM_BILE),
-            metabolism_description(METABOLISM_LEPTIN),
-            GET_MT(local_being,METABOLISM_LEPTIN),
-            metabolism_description(METABOLISM_GHRELIN),
-            GET_MT(local_being,METABOLISM_GHRELIN));
-    io_string_write(result, str, &watch_string_length);
-
-    io_string_write(result, "Liver:\n", &watch_string_length);
-    sprintf(str,"  %s: %d\n  %s:  %d\n  %s: %d\n  %s: %d\n  %s: %d\n",
-            metabolism_description(METABOLISM_GLUCOGEN),
-            GET_MT(local_being,METABOLISM_GLUCOGEN),
-            metabolism_description(METABOLISM_GLYCOGEN),
-            GET_MT(local_being,METABOLISM_GLYCOGEN),
-            metabolism_description(METABOLISM_ADRENALIN),
-            GET_MT(local_being,METABOLISM_ADRENALIN),
-            metabolism_description(METABOLISM_AMMONIA),
-            GET_MT(local_being,METABOLISM_AMMONIA),
-            metabolism_description(METABOLISM_LACTATE),
-            GET_MT(local_being,METABOLISM_LACTATE));
-    io_string_write(result, str, &watch_string_length);
-
-    io_string_write(result, "Kidneys:\n", &watch_string_length);
-    sprintf(str,"  %s: %d\n",
-            metabolism_description(METABOLISM_UREA),
-            GET_MT(local_being,METABOLISM_UREA));
-    io_string_write(result, str, &watch_string_length);
-
-    io_string_write(result, "Lungs:\n", &watch_string_length);
-    sprintf(str,"  %s: %d\n  %s:    %d\n",
-            metabolism_description(METABOLISM_OXYGEN),
-            GET_MT(local_being,METABOLISM_OXYGEN),
-            metabolism_description(METABOLISM_CO2),
-            GET_MT(local_being,METABOLISM_CO2));
-    io_string_write(result, str, &watch_string_length);
-
-    io_string_write(result, "Pancreas:\n", &watch_string_length);
-    sprintf(str,"  %s: %d\n  %s: %d\n  %s: %d\n",
-            metabolism_description(METABOLISM_FATTY_ACIDS),
-            GET_MT(local_being,METABOLISM_FATTY_ACIDS),
-            metabolism_description(METABOLISM_TRIGLYCERIDE),
-            GET_MT(local_being,METABOLISM_TRIGLYCERIDE),
-            metabolism_description(METABOLISM_INSULIN),
-            GET_MT(local_being,METABOLISM_INSULIN));
-    io_string_write(result, str, &watch_string_length);
-
-    sprintf(str,"%s: %d\n",
-            metabolism_description(METABOLISM_ADIPOSE),
-            GET_MT(local_being,METABOLISM_ADIPOSE));
-    io_string_write(result, str, &watch_string_length);
-
-    io_string_write(result, "Tissue:\n", &watch_string_length);
-    sprintf(str,"  %s: %d   %s: %d\n  %s: %d   %s: %d\n  %s: %d   %s: %d\n  %s: %d   %s: %d\n  %s: %d\n  %s: %d\n",
-            metabolism_description(METABOLISM_PROLACTIN),
-            GET_MT(local_being,METABOLISM_PROLACTIN),
-            metabolism_description(METABOLISM_MILK),
-            GET_MT(local_being,METABOLISM_MILK),
-            metabolism_description(METABOLISM_AMINO_ACIDS),
-            GET_MT(local_being,METABOLISM_AMINO_ACIDS),
-            metabolism_description(METABOLISM_MUSCLE),
-            GET_MT(local_being,METABOLISM_MUSCLE),
-            metabolism_description(METABOLISM_GLUCOSE),
-            GET_MT(local_being,METABOLISM_GLUCOSE),
-            metabolism_description(METABOLISM_PYRUVATE),
-            GET_MT(local_being,METABOLISM_PYRUVATE),
-            metabolism_description(METABOLISM_ADP),
-            GET_MT(local_being,METABOLISM_ADP),
-            metabolism_description(METABOLISM_ATP),
-            GET_MT(local_being,METABOLISM_ATP),
-            metabolism_description(METABOLISM_ENERGY),
-            GET_MT(local_being,METABOLISM_ENERGY),
-            metabolism_description(METABOLISM_HEAT),
-            GET_MT(local_being,METABOLISM_HEAT));
-    io_string_write(result, str, &watch_string_length);
-#endif
-}
-
 static n_string static_result;
 
 static void watch_line_braincode(n_string string, n_int line)
@@ -1004,11 +795,6 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
         return;
     }
 
-#ifdef METABOLISM_ON
-    heart_rate = GET_MT(local_being,METABOLISM_HEART_RATE)*60/1000;
-    breathing_rate = GET_MT(local_being,METABOLISM_BREATHING_RATE)*60/1000;
-#endif
-
     being_state_description(being_state(local_being), status);
     being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
@@ -1169,21 +955,6 @@ n_int console_speech(void * ptr, n_string response, n_console_output output_func
     return console_duplicate(ptr, response, output_function, "Speech", watch_speech);
 }
 
-/**
- * Show the vascular system
- * @param ptr pointer to noble_simulation object
- * @param response
- * @param output_function
- * @return 0
- */
-n_int console_vascular(void * ptr, n_string response, n_console_output output_function)
-{
-#ifdef METABOLISM_ON
-    return console_duplicate(ptr, response, output_function, "Vascular system", watch_vascular);
-#else
-    return 0;
-#endif
-}
 
 /**
  * Show appearance values
@@ -1195,38 +966,6 @@ n_int console_vascular(void * ptr, n_string response, n_console_output output_fu
 n_int console_appearance(void * ptr, n_string response, n_console_output output_function)
 {
     return console_duplicate(ptr, response, output_function, "Appearance", watch_appearance);
-}
-
-/**
- * Show respiration values
- * @param ptr pointer to noble_simulation object
- * @param response
- * @param output_function
- * @return 0
- */
-n_int console_respiration(void * ptr, n_string response, n_console_output output_function)
-{
-#ifdef METABOLISM_ON
-    return console_duplicate(ptr, response, output_function, "Respiration system", watch_respiration);
-#else
-    return 0;
-#endif
-}
-
-/**
- * Show metabolism values
- * @param ptr pointer to noble_simulation object
- * @param response
- * @param output_function
- * @return 0
- */
-n_int console_metabolism(void * ptr, n_string response, n_console_output output_function)
-{
-#ifdef METABOLISM_ON
-    return console_duplicate(ptr, response, output_function, "Metabolism", watch_metabolism);
-#else
-    return 0;
-#endif
 }
 
 static void histogram_being_state_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
@@ -1380,21 +1119,7 @@ static void watch_being(void * ptr, n_console_output output_function)
             watch_brainprobes(ptr, being_get_select_name(local_sim), local_being, beingstr);
             break;
         }
-        case WATCH_VASCULAR:
-        {
-            watch_vascular(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        case WATCH_RESPIRATION:
-        {
-            watch_respiration(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        case WATCH_METABOLISM:
-        {
-            watch_metabolism(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
+
         case WATCH_APPEARANCE:
         {
             watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
@@ -1750,36 +1475,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                 output_function(output);
                 return 0;
             }
-            if ((io_find(response,0,length,"cardi",5)>-1) ||
-                    (io_find(response,0,length,"vasc",4)>-1))
-            {
-                watch_type = WATCH_VASCULAR;
-                
-                io_string_write(output, "Watching vascular system for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
-                output_function(output);
-                return 0;
-            }
-            if ((io_find(response,0,length,"breath",6)>-1) ||
-                    (io_find(response,0,length,"respir",6)>-1))
-            {
-                watch_type = WATCH_RESPIRATION;
-                
-                io_string_write(output, "Watching respiration system for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
-                output_function(output);
-                return 0;
-            }
-            if ((io_find(response,0,length,"metab",5)>-1) ||
-                    (io_find(response,0,length,"chem",4)>-1))
-            {
-                watch_type = WATCH_METABOLISM;
-                
-                io_string_write(output, "Watching metabolism for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
-                output_function(output);
-                return 0;
-            }
+
             if (io_find(response,0,length,"appear",6)>-1)
             {
                 watch_type = WATCH_APPEARANCE;

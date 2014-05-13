@@ -85,19 +85,6 @@
 #define IMMUNE_BYTES    0
 #endif
 
-#ifdef METABOLISM_ON
-#define VASCULAR_BYTES        (sizeof(noble_vessel))
-#define HEART_RATE_BYTES      (sizeof(n_byte2))
-#define BREATHING_RATE_BYTES  (sizeof(n_byte2))
-#define THERMOREGULATOR_BYTES (sizeof(n_byte2))
-#define METABOLISM_BYTES      (sizeof(n_byte2)*METABOLISM_SIZE)
-#else
-#define VASCULAR_BYTES        0
-#define HEART_RATE_BYTES      0
-#define BREATHING_RATE_BYTES  0
-#define THERMOREGULATOR_BYTES 0
-#define METABOLISM_BYTES      0
-#endif
 
 #define GENETICS_BYTES    (sizeof(n_genetics)*CHROMOSOMES)
 #define GENETICS_ENTRIES  1
@@ -118,9 +105,9 @@
 #define OFFSET_TERRITORY	(OFFSET_EPISODIC+EPISODIC_BYTES+DRIVES_BYTES+GOALS_BYTES+PREFERENCES+GENERATIONS_BYTES)
 #define OFFSET_IMMUNE		((OFFSET_GENETICS+GENETICS_BYTES+DRIVES_BYTES+6+PREFERENCES+GENERATIONS_BYTES+8)+TERRITORY_BYTES)
 #define OFFSET_VASCULAR	        (OFFSET_IMMUNE+IMMUNE_BYTES)
-#define OFFSET_METABOLISM       (OFFSET_VASCULAR+(VASCULAR_BYTES*VASCULAR_SIZE))
+#define OFFSET_METABOLISM       (OFFSET_VASCULAR)
 
-#define OFFSET_BRAINCODE	(OFFSET_METABOLISM+METABOLISM_BYTES)
+#define OFFSET_BRAINCODE	(OFFSET_METABOLISM)
 
 enum file_section_type
 {
@@ -213,28 +200,6 @@ static const noble_file_entry noble_file_format[]=
 #ifdef BRAINCODE_ON
     {"brreg=", FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, 451, "Brain code register"},
     {"brpro=", FIL_BEI | FILE_TYPE_BYTE, (sizeof(noble_brain_probe)*BRAINCODE_PROBES), 454, "Brain code probe"},
-#endif
-    
-#ifdef METABOLISM_ON
-    {"metao=", FIL_BEI | FILE_TYPE_BYTE2, METABOLISM_SIZE, 550, "Metabolism"},
-    
-    /* fixed to here */
-    /*
-     {"vasca=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR, "Vascular system 1"},
-     {"vascb=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*2), "Vascular system 2"},
-     {"vascc=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*4), "Vascular system 3"},
-     {"vascd=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*6), "Vascular system 4"},
-     {"vasce=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*8), "Vascular system 5"},
-     {"vascf=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*10), "Vascular system 6"},
-     {"vascg=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*12), "Vascular system 7"},
-     {"vasch=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*14), "Vascular system 8"},
-     {"vasci=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*16), "Vascular system 9"},
-     {"vascj=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*18), "Vascular system 10"},
-     {"vasck=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*20), "Vascular system 11"},
-     {"vascl=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*22), "Vascular system 12"},
-     {"vascm=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*24), "Vascular system 13"},
-     {"vascn=", FIL_BEI | FILE_TYPE_BYTE2, VASCULAR_BYTES, OFFSET_VASCULAR+(VASCULAR_BYTES*26), "Vascular system 14"},
-     */
 #endif
     
 #endif

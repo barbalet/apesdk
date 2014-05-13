@@ -2145,11 +2145,6 @@ static void being_brain_probe(noble_being * local)
 /** stuff still goes on during sleep */
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
-    /* By default return towards a resting state */
-#ifdef METABOLISM_ON
-    metabolism_cycle(sim, local);
-#endif
-
     being_immune_response(local);
     
 #ifdef BRAINCODE_ON
@@ -2764,9 +2759,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
                 if (energy > BEING_DEAD)
                 {
-#ifdef METABOLISM_ON
-                    metabolism_vascular_response(sim, local, VASCULAR_PARASYMPATHETIC);
-#endif
                     loc_e += energy;
 
                     being_reset_drive(local, DRIVE_HUNGER);
@@ -2930,10 +2922,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                         /** hungry mothers stop producing milk */
                         if (being_energy(mother) > BEING_HUNGRY)
                         {
-                            /** suckling induces relaxation */
-#ifdef METABOLISM_ON
-                            metabolism_suckle(sim,local,mother);
-#endif
                             /** mother loses energy */
                             being_energy_delta(mother, 0 - SUCKLING_ENERGY);
                             /** child gains energy */
@@ -3466,10 +3454,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         being_set_brainatates(local, 1, 0, 1024, 0);
 #endif
     }
-
-#ifdef METABOLISM_ON
-    metabolism_init(local);
-#endif
     return 0;
 }
 
@@ -3533,9 +3517,6 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
                 insulation = fat_mass * 5 / BEING_MAX_MASS_FAT_G;
                 delta_e += (delta_energy + 10 - insulation) >> 3;
                 conductance = 4;
-#ifdef METABOLISM_ON
-                metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(1+GENE_SWIM(genetics)));
-#endif
             }
             else
             {
@@ -3543,16 +3524,8 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
                 {
                     /** going uphill */
                     delta_energy += GENE_HILL_CLIMB(genetics);
-#ifdef METABOLISM_ON
-                    metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*(8+(GENE_HILL_CLIMB(genetics)>>1)));
-#endif
                 }
-                else
-                {
-#ifdef METABOLISM_ON
-                    metabolism_vascular_response(local_sim, local_being, VASCULAR_SYMPATHETIC*8);
-#endif
-                }
+
                 delta_energy = ((delta_energy * delta_energy) >> 9);
                 
                 /* the more massive the more energy consumed when moving */

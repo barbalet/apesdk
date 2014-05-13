@@ -15,7 +15,6 @@
 		4A36005F1712409A004DAFBA /* drives.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600381712409A004DAFBA /* drives.c */; };
 		4A3600601712409A004DAFBA /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003B1712409A004DAFBA /* episodic.c */; };
 		4A3600611712409A004DAFBA /* food.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003C1712409A004DAFBA /* food.c */; };
-		4A3600621712409A004DAFBA /* metabolism.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003D1712409A004DAFBA /* metabolism.c */; };
 		4A3600631712409A004DAFBA /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003E1712409A004DAFBA /* social.c */; };
 		4A3600641712409A004DAFBA /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A36003F1712409A004DAFBA /* speak.c */; };
 		4A3600681712409A004DAFBA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A3600481712409A004DAFBA /* main.m */; };
@@ -72,7 +71,6 @@
 		4A36003A1712409A004DAFBA /* entity_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = entity_internal.h; sourceTree = "<group>"; };
 		4A36003B1712409A004DAFBA /* episodic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = episodic.c; sourceTree = "<group>"; };
 		4A36003C1712409A004DAFBA /* food.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = food.c; sourceTree = "<group>"; };
-		4A36003D1712409A004DAFBA /* metabolism.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = metabolism.c; sourceTree = "<group>"; };
 		4A36003E1712409A004DAFBA /* social.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = social.c; sourceTree = "<group>"; };
 		4A36003F1712409A004DAFBA /* speak.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = speak.c; sourceTree = "<group>"; };
 		4A3600481712409A004DAFBA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -211,7 +209,6 @@
 				4A36003A1712409A004DAFBA /* entity_internal.h */,
 				4A36003B1712409A004DAFBA /* episodic.c */,
 				4A36003C1712409A004DAFBA /* food.c */,
-				4A36003D1712409A004DAFBA /* metabolism.c */,
 				4A36003E1712409A004DAFBA /* social.c */,
 				4A36003F1712409A004DAFBA /* speak.c */,
 			);
@@ -400,7 +397,6 @@
 				4A36005F1712409A004DAFBA /* drives.c in Sources */,
 				4A3600601712409A004DAFBA /* episodic.c in Sources */,
 				4A3600611712409A004DAFBA /* food.c in Sources */,
-				4A3600621712409A004DAFBA /* metabolism.c in Sources */,
 				4A3600631712409A004DAFBA /* social.c in Sources */,
 				4A3600641712409A004DAFBA /* speak.c in Sources */,
 				4A3600681712409A004DAFBA /* main.m in Sources */,

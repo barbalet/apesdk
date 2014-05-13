@@ -43,7 +43,6 @@
 #define TERRITORY_ON  /* entity */
 #define BRAINCODE_ON  /* entity */
 #define IMMUNE_ON     /* entity */
-#define METABOLISM_ON /* entity */
 
 #undef  FEATURE_SET
 
@@ -390,34 +389,6 @@ static const n_int interval_steps[] =
 { 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
 static const n_constant_string interval_description[] = { "mins","hours","days","months","years" };
 
-#define METABOLISM_HUNGER_THRESHOLD 1
-#define METABOLISM_MAX_PRODUCTS     4
-#define METABOLISM_MAX_REACTANTS    4
-#define GLUCOSE_THRESHOLD_MAX       500
-#define GLUCOSE_THRESHOLD_MIN       200
-#define GLUCOSE_THRESHOLD_STARVE    100
-#define ADRENALIN_MAX               1000
-
-#define VASCULAR_SIZE               28
-#define VASCULAR_SIZE_CORE          19
-#define VASCULAR_CONSTRICTION_ZERO  127
-#define BLOOD_VISCOSITY             3500000
-#define BLOOD_DENSITY               105000
-#define CORE_TEMPERATURE            37000
-
-#define VASCULAR_PARASYMPATHETIC    -1
-#define VASCULAR_SYMPATHETIC        1
-
-#define RANK_STRESS_ALPHA           200
-/* minimum and maximum heart rate in Hz x 1000 */
-#define HEART_RATE_MAX(sim,bei)     ((1338333 - AGE_IN_DAYS(sim,bei))/365)
-#define HEART_RATE_RESTING          1000
-
-/* minimum and maximum breathing rate in Hz x 1000 */
-#define BREATHING_RATE_MIN          167
-#define BREATHING_RATE_MAX          300
-#define CO2_PANT                    1400
-
 /* nature in the range 0-15 from the genetics
    nurture in the range 0-255 from learned preferences.
    Resulting value is in the range 0-15 */
@@ -753,9 +724,6 @@ enum
     WATCH_EPISODIC,
     WATCH_BRAINCODE,
     WATCH_BRAINPROBES,
-    WATCH_VASCULAR,
-    WATCH_RESPIRATION,
-    WATCH_METABOLISM,
     WATCH_APPEARANCE,
     WATCH_SPEECH,
     WATCH_STATES
@@ -1130,46 +1098,6 @@ noble_brain_probe;
 
 #endif
 
-#ifdef METABOLISM_ON
-
-/*! @struct
- @field parent array index of the parent
- @field constriction Constriction or dilation (mm 127=none)
- @field hardening Reduction in elasticity (Mpa x 1000)
- @field length length (cm x 1000)
- @field thickness thickness (cm x 1000)
- @field radius radius (cm x 1000)
- @field elasticity elasticity (Mpa x 1000)
- @field resistance resistance (Pa.s/ml x 1000)
- @field intertia inertia (Pa.s2/ml x 1000)
- @field compliance compliance (ml/Pa x 10)
- @field flow_rate Rate of flow (133416ml x 1000)
- @field volume volume (133416ml x 1000)
- @field pressure pressure (1mmHg x 1000)
- @field temperature temperature (C x 1000)
- @discussion Vessel object.
- */
-typedef	struct
-{
-    n_byte2 parent;      
-    n_byte  constriction;
-    n_byte  hardening;
-    n_byte2 length;
-    n_byte2 thickness;
-    n_byte2 radius;
-    n_byte2 elasticity;
-    n_uint resistance;
-    n_uint inertia;
-    n_uint compliance;
-    n_uint flow_rate;
-    n_uint volume;
-    n_uint pressure;
-    n_int temperature;
-}
-noble_vessel;
-
-#endif
-
 #ifdef IMMUNE_ON
 
 /*! @struct
@@ -1253,12 +1181,7 @@ typedef struct
     n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
     noble_brain_probe brainprobe[BRAINCODE_PROBES];
 #endif
-#ifdef METABOLISM_ON
-    n_byte2 metabolism[METABOLISM_SIZE];
-#endif
-#ifdef METABOLISM_ON
-    noble_vessel vessel[VASCULAR_SIZE];
-#endif
+
     n_byte            brain[DOUBLE_BRAIN];
     noble_social       social[SOCIAL_SIZE];
     noble_episodic   episodic[EPISODIC_SIZE];
@@ -1302,9 +1225,6 @@ typedef struct
 
 /* macros defined to ease in the vectorised code */
 
-#ifdef METABOLISM_ON
-#define	GET_MT(bei,index) ((bei)->metabolism[index])
-#endif
 #define GET_A(bei,index) ((bei)->attention[index])
 #define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
@@ -1377,9 +1297,7 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
 n_int console_being(void * ptr, n_string response, n_console_output output_function);
 n_int console_braincode(void * ptr, n_string response, n_console_output output_function);
 n_int console_speech(void * ptr, n_string response, n_console_output output_function);
-n_int console_vascular(void * ptr, n_string response, n_console_output output_function);
-n_int console_respiration(void * ptr, n_string response, n_console_output output_function);
-n_int console_metabolism(void * ptr, n_string response, n_console_output output_function);
+
 n_int console_social_graph(void * ptr, n_string response, n_console_output output_function);
 n_int console_genome(void * ptr, n_string response, n_console_output output_function);
 n_int console_appearance(void * ptr, n_string response, n_console_output output_function);
@@ -1464,12 +1382,7 @@ const static noble_console_command control_commands[] =
     {&console_social_graph,  "graph",          "(ape name)",           "* Show social graph for a named ape"},
     {&console_braincode,     "braincode",      "(ape name)",           "* Show braincode for a named ape"},
     {&console_speech,        "speech",         "(ape name)",           "* Show speech for a named ape"},
-    {&console_vascular,      "vascular",       "(ape name)",           "* Show vascular system for a named ape"},
-    {&console_respiration,   "respiration",    "(ape name)",           "* Show respiration system for a named ape"},
-    {&console_respiration,   "breathing",      "",                     ""},
-    {&console_respiration,   "breath",         "",                     ""},
-    {&console_metabolism,    "metabolism",     "(ape name)",           "* Show metabolism for a named ape"},
-    {&console_metabolism,    "chemistry",      "",                     ""},
+
     {&console_episodic,      "episodic",       "(ape name)",           "* Show episodic memory for a named ape"},
     {&console_probes,        "probes",         "(ape name)",           "* Show brain probes for a named ape"},
     {&console_stats,         "stats",          "(ape name)",           "* Show parameters for a named ape"},

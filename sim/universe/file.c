@@ -974,12 +974,7 @@ void file_audit(void)
         FILE_CHECK(&here.braincode_register[0]);
         FILE_CHECK(&here.brainprobe[0]);
 #endif
-#ifdef METABOLISM_ON
-        FILE_CHECK(&here.metabolism[0]);
-#endif
-#ifdef METABOLISM_ON
-        FILE_CHECK(&here.vessel[0]);
-#endif
+
         FILE_CHECK(&here.brain[0]);
         FILE_CHECK(&here.social[0]);
         FILE_CHECK(&here.episodic[0]);

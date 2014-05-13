@@ -932,17 +932,6 @@ static n_int social_meet(
 #endif
         }
 
-#ifdef METABOLISM_ON
-        /** relax with friends, be viglant with enemies */
-        if (graph[index].friend_foe > social_respect_mean(sim,meeter_being))
-        {
-            metabolism_vascular_response(sim, meeter_being, VASCULAR_PARASYMPATHETIC);
-        }
-        else
-        {
-            metabolism_vascular_response(sim, meeter_being, VASCULAR_SYMPATHETIC*10);
-        }
-#endif
         if (location_type == LOCATION_KNOWN)
         {
             /** this being was seen somewhere in my vicinity */

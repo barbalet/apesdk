@@ -88,10 +88,6 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
     /** note that the absorbition for different foods is normalised */
     n_int absorb_denom = 1 + vegetable + fruit + seawood + bird_eggs + lizard_eggs;
     
-#ifdef METABOLISM_ON
-    /** update metabolism */
-    metabolism_eat(local, food_type);
-#endif
     /** ingest pathogens from certain foods */
     being_ingest_pathogen(local, food_type);
     
