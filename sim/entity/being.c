@@ -432,19 +432,37 @@ n_genetics * being_fetal_genetics(noble_being * value)
     return value->fetal_genetics;
 }
 
+/* TODO: Remove this kind of access eventually */
 n_int   being_energy(noble_being * value)
 {
     return value->stored_energy;
 }
 
-void   being_set_energy(noble_being * value, n_int energy)
+n_int   being_energy_less_than(noble_being * value, n_int less_than)
 {
-    value->stored_energy = (n_byte2)energy;
+    return being_energy(value) < less_than;
+}
+
+void  being_dead(noble_being * value)
+{
+    value->stored_energy = BEING_DEAD;
+}
+
+void being_living(noble_being * value)
+{
+    value->stored_energy = BEING_FULL;
 }
 
 void   being_energy_delta(noble_being * value, n_int delta)
 {
-    being_set_energy(value, being_energy(value) + delta);
+    n_int total = value->stored_energy + delta;
+
+    if (total < BEING_DEAD)
+    {
+        total = BEING_DEAD;
+    }
+    
+    value->stored_energy = (n_byte2) total;
 }
 
 n_int   being_drive(noble_being * value, enum drives_definition drive)
@@ -1160,16 +1178,9 @@ static void being_immune_response(noble_being * local)
         }
     }
     math_random3(local_random);
-    if ((local_random[0] < (total_antigens>>2)) && (being_energy(local) > BEING_DEAD))
+    if ((local_random[0] < (total_antigens>>2)) && (being_energy_less_than(local, BEING_DEAD + 1) == 0))
     {
-        if (being_energy(local)>PATHOGEN_SEVERITY(max_severity))
-        {
-            being_energy_delta(local, 0-PATHOGEN_SEVERITY(max_severity));
-        }
-        else
-        {
-            being_set_energy(local, BEING_DEAD);
-        }
+        being_energy_delta(local, 0-PATHOGEN_SEVERITY(max_severity));
     }
 #endif
 }
@@ -2007,9 +2018,8 @@ void being_change_selected(noble_simulation * sim, n_byte forwards)
 n_byte being_awake(noble_simulation * sim, noble_being * local)
 {
     n_land  * land  =   sim->land;
-    n_int     local_energy = being_energy(local);
-
-    if(local_energy == BEING_DEAD)
+    
+    if (being_energy_less_than(local, BEING_DEAD + 1))
     {
         return FULLY_ASLEEP;
     }
@@ -2031,7 +2041,7 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 
     /** ... slightly awake to eat */
 
-    if(local_energy < BEING_HUNGRY)
+    if (being_energy_less_than(local, BEING_HUNGRY + 1))
     {
         return SLIGHTLY_AWAKE;
     }
@@ -2517,7 +2527,6 @@ static void being_interact(noble_simulation * sim,
                            n_int  * awake,
                            n_byte * state,
                            n_int  * speed,
-                           n_int  * energy,
                            n_byte   opposite_sex)
 {
     if (other_being != 0L)
@@ -2562,13 +2571,11 @@ static void being_interact(noble_simulation * sim,
                 if ((other_being_distance < SQUABBLE_RANGE) && ((being_dob(other_being)+AGE_OF_MATURITY) < today_days))
                 {
                     n_byte2 squabble_val;
-                    being_set_energy(local, *energy);
                     being_set_speed(local, (n_byte)*speed);
                     squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, sim);
                     if (squabble_val != 0)
                     {
                         *state |= squabble_val;
-                        *energy = being_energy(local);
                         *speed = being_speed(local);
                     }
                 }
@@ -2597,7 +2604,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     n_int         birth_days         = being_dob(local);
 
     n_int	      loc_s              = being_speed(local);
-    n_int	      loc_e              = being_energy(local);
     n_int	      loc_h              = GET_H(local);
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
@@ -2665,11 +2671,11 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 
     {
-        n_int   hungry = (loc_e < BEING_HUNGRY);
+        n_int   hungry = being_energy_less_than(local, BEING_HUNGRY);
 
         if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING | BEING_STATE_MOVING)) == BEING_STATE_AWAKE)
         {
-            hungry = (loc_e < BEING_FULL);
+            hungry = being_energy_less_than(local, BEING_FULL);
         }
 
         if (hungry != 0)
@@ -2734,13 +2740,13 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                            local,
                            nearest.same_sex, nearest.same_sex_distance,
                            &awake, &loc_state,
-                           &loc_s, &loc_e, 0);
+                           &loc_s, 0);
 
             being_interact(sim,
                            local,
                            nearest.opposite_sex, nearest.opposite_sex_distance,
                            &awake, &loc_state,
-                           &loc_s, &loc_e, 1);
+                           &loc_s, 1);
         }
     }
 
@@ -2757,25 +2763,18 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
 
-                if (energy > BEING_DEAD)
+                being_energy_delta(local, energy);
+
+                being_reset_drive(local, DRIVE_HUNGER);
+
+                loc_state |= BEING_STATE_EATING;
+                /** grow */
+                if (loc_h < BEING_MAX_HEIGHT)
                 {
-                    loc_e += energy;
-
-                    being_reset_drive(local, DRIVE_HUNGER);
-
-                    loc_state |= BEING_STATE_EATING;
-                    /** grow */
-                    if (loc_h < BEING_MAX_HEIGHT)
+                    if ((birth_days+AGE_OF_MATURITY) > today_days)
                     {
-                        if ((birth_days+AGE_OF_MATURITY) > today_days)
-                        {
-                            loc_h += ENERGY_TO_GROWTH(local,energy);
-                        }
+                        loc_h += ENERGY_TO_GROWTH(local,energy);
                     }
-                }
-                else
-                {
-                    loc_s = 10;
                 }
             }
         }
@@ -2797,7 +2796,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     {
         if ((loc_state & BEING_STATE_SWIMMING) != 0)
         {
-            tmp_speed = (loc_e >> 7);
+            tmp_speed = (being_energy(local) >> 7);
         }
         else
         {
@@ -2920,13 +2919,14 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                             mother->inventory[BODY_FRONT] -= INVENTORY_GROOMED;
                         }
                         /** hungry mothers stop producing milk */
-                        if (being_energy(mother) > BEING_HUNGRY)
+                        if (being_energy_less_than(mother, BEING_HUNGRY) == 0)
                         {
                             /** mother loses energy */
                             being_energy_delta(mother, 0 - SUCKLING_ENERGY);
                             /** child gains energy */
-                            loc_e += SUCKLING_ENERGY;
-
+                            
+                            being_energy_delta(local, SUCKLING_ENERGY);
+                            
                             /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
@@ -2973,7 +2973,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 #endif
 
-    being_set_energy(local, loc_e);
     being_set_speed(local, (n_byte)loc_s);
     GET_H(local) = (n_byte2) loc_h;
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
@@ -3422,8 +3421,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         local->date_of_birth[0] = land->date[0];
         local->date_of_birth[1] = land->date[1];
     }
-
-    being_set_energy(local, BEING_FULL + 15);
+    
+    being_living(local);
 
     if (random_factor)
     {
@@ -3459,7 +3458,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
 void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    n_int	     local_e = being_energy(local_being);
     n_genetics  *genetics = being_genetics(local_being);
     n_int        local_honor = being_honor(local_being);
     n_land	    *land   = local_sim->land;
@@ -3546,7 +3544,8 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
         if (delta_e < 1) delta_e = 1;
     }
     
-    local_e -= delta_e;
+    being_energy_delta(local_being, 0 - delta_e);
+    
     
     if (land->time == 0)
     {
@@ -3556,17 +3555,10 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
         {
             if(being_random(local_being) < (age_in_years - 29))
             {
-                local_e -= BEING_HUNGRY;
+                being_energy_delta(local_being, 0 - BEING_HUNGRY);
             }
         }
     }
-    
-    if (local_e < BEING_DEAD)
-    {
-        local_e = BEING_DEAD;
-    }
-    
-    being_set_energy(local_being, local_e);
 }
 
 void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data)
@@ -3579,7 +3571,7 @@ n_int being_remove_external = 0;
 
 void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    if (being_energy(local_being) == BEING_DEAD)
+    if (being_energy_less_than(local_being, BEING_DEAD + 1))
     {
         local_sim->ext_death(local_being,local_sim);
     }
@@ -3588,7 +3580,8 @@ void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being,
 void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data)
 {
     being_remove_loop2_struct * brls = (being_remove_loop2_struct *)data;
-    if (being_energy(local) != BEING_DEAD)
+    
+    if (being_energy_less_than(local, BEING_DEAD + 1) == 0)
     {
         if ( local != brls->being_count )
         {

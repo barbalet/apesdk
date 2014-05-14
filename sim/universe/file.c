@@ -829,7 +829,7 @@ void sim_start_conditions(void * vindividual, void * structure, void * data)
 
     variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = being_facing(local_being);
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
-    variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = being_energy(local_being);
+    variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = 0;
 #ifdef NEED_TO_FIX
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
 #endif
@@ -882,13 +882,10 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
     if (local_speed > 39) local_speed = 39;
     if (local_speed < 0)  local_speed = 0;
 
-    if (local_energy < BEING_DEAD) local_energy = BEING_DEAD;
-    if (local_energy > BEING_FULL) local_energy = BEING_FULL;
-
     being_wander(local_being, local_facing - being_facing(local_being));
 
     being_set_speed(local_being, (n_byte) local_speed);
-    being_set_energy(local_being, local_energy);
+    being_energy_delta(local_being, local_energy);
 
     GET_H(local_being)  = (n_byte2)local_height;
     if (local_goal_type!=GOAL_NONE)

@@ -629,7 +629,7 @@ static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * d
     
     if (local_z < 160)
     {
-        being_set_energy(local, BEING_DEAD);
+        being_dead(local);
     }
 }
 
@@ -645,7 +645,7 @@ void sim_healthy_carrier(void)
     while (loop < sim.num)
     {
         noble_being * local = &sim.beings[loop];
-        being_set_energy(local, BEING_DEAD);
+        being_dead(local);
         loop++;
     }
 }

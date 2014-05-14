@@ -51,7 +51,7 @@
 static void drives_hunger(noble_being * local)
 {
     /** if the being is hungry and its hunger drive is not already saturated */
-    if (being_energy(local) < BEING_HUNGRY)
+    if (being_energy_less_than(local, BEING_HUNGRY))
     {
         /** increase hunger drive */
         being_inc_drive(local, DRIVE_HUNGER);

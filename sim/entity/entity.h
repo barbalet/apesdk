@@ -221,7 +221,10 @@ n_int being_pregnant(noble_being * value);
 n_genetics * being_fetal_genetics(noble_being * value);
 
 n_int being_energy(noble_being * value);
-void   being_set_energy(noble_being * value, n_int energy);
+n_int   being_energy_less_than(noble_being * value, n_int less_than);
+
+void  being_dead(noble_being * value);
+void  being_living(noble_being * value);
 
 void   being_energy_delta(noble_being * value, n_int delta);
 
