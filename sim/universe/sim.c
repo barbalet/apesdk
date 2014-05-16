@@ -95,6 +95,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "biology_output",
 
     "hungry",
+    "energy",
     "location_z",
 
     "test_z",
@@ -123,7 +124,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "facing",
 
     "speed",
-    "energy",
+    "energy_delta",
 
     "honor",
     "parasites",

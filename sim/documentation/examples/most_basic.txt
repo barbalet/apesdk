@@ -1,1 +1,1 @@
-function ( being ) {	energy = hungry * 2;}
+function ( being ) {    full = hungry * 3;    if (energy < full) {        energy_delta = full - energy;    }}

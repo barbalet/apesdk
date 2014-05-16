@@ -56,7 +56,6 @@ gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/execute.c -o execute.o
 
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/being.c -o being.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/body.c -o body.o
-gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/metabolism.c -o metabolism.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/brain.c -o brain.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/social.c -o social.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/entity/episodic.c -o episodic.o

@@ -455,6 +455,12 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
             case VARIABLE_HUNGRY:
                 local_number = BEING_HUNGRY;
                 break;
+            case VARIABLE_ENERGY:
+                {
+                    noble_being * local_being = (noble_being *)individual->interpret_data;
+                    local_number = being_energy(local_being);
+                }
+                break;
             case VARIABLE_LOCATION_Z:
             case VARIABLE_TEST_Z:
             case VARIABLE_IS_VISIBLE:
@@ -829,7 +835,7 @@ void sim_start_conditions(void * vindividual, void * structure, void * data)
 
     variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = being_facing(local_being);
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
-    variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE] = 0;
+    variables[VARIABLE_ENERGY_DELTA - VARIABLE_VECT_ANGLE] = 0;
 #ifdef NEED_TO_FIX
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
 #endif
@@ -855,7 +861,7 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
 
     n_int	local_facing = variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE];
     n_int	local_speed  = variables[VARIABLE_SPEED  - VARIABLE_VECT_ANGLE];
-    n_int	local_energy = variables[VARIABLE_ENERGY - VARIABLE_VECT_ANGLE];
+    n_int	local_energy_delta = variables[VARIABLE_ENERGY_DELTA - VARIABLE_VECT_ANGLE];
     n_int	local_height = variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE];
     n_int	local_goal_type = variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE];
     n_int	local_goal_x = variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE];
@@ -885,7 +891,7 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
     being_wander(local_being, local_facing - being_facing(local_being));
 
     being_set_speed(local_being, (n_byte) local_speed);
-    being_energy_delta(local_being, local_energy);
+    being_energy_delta(local_being, local_energy_delta);
 
     GET_H(local_being)  = (n_byte2)local_height;
     if (local_goal_type!=GOAL_NONE)
