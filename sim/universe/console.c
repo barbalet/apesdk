@@ -464,67 +464,6 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
 #endif
 
 /**
- * Displays a text representation of the braincode programs
- * @param ptr pointer to a noble_simulation object
- * @param local_being being to be analysed
- * @param result resulting text output
- * @param outer if 1 then show the outer braincode, otherwise show the inner
- * @param columns The number of columns to use for displaying the code
- */
-/*
-static void show_braincode(void * ptr, noble_being * local_being, n_string result, n_int outer, n_int columns)
-{
-    n_int i, j, col, offset, program_pointer, instructions_per_column;
-    n_byte * code;
-    n_string_block braincode_str;
-    n_byte values[BRAINCODE_BYTES_PER_INSTRUCTION];
-    const n_int spacing_between_columns = 5;
-
-    if (columns<1) columns=1;
-    instructions_per_column = (BRAINCODE_SIZE/BRAINCODE_BYTES_PER_INSTRUCTION)/columns;
-
-    if (outer==0)
-    {
-        code = being_braincode_internal(local_being);
-    }
-    else
-    {
-        code = being_braincode_external(local_being);
-    }
-
-    for (i = 0; i < instructions_per_column; i++)
-    {
-        for (col = 0; col < columns; col++)
-        {
-            offset = i + (col*instructions_per_column);
-            program_pointer = offset + (i*BRAINCODE_BYTES_PER_INSTRUCTION);
-
-            values[0] = BRAINCODE_INSTRUCTION(code, program_pointer);
-            values[1] = BRAINCODE_VALUE(code, program_pointer, 0);
-            values[2] = BRAINCODE_VALUE(code, program_pointer, 1);
-            brain_three_byte_command(braincode_str, values);
-            for (j = 0; j < io_length(braincode_str,STRING_BLOCK_SIZE); j++)
-            {
-                result[watch_string_length++] = braincode_str[j];
-            }
-            if (col<columns-1)
-            {
-                for (j = 0; j < spacing_between_columns; j++)
-                {
-                    result[watch_string_length++] = ' ';
-                }
-            }
-            else
-            {
-                result[watch_string_length++] = '\n';
-            }
-        }
-    }
-    result[watch_string_length++] = '\n';
-}
-*/
-
-/**
  * Show the appearance parameters for a being
  * @param ptr pointer to a noble_simulation object
  * @param beingname name of the being
