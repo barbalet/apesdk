@@ -241,14 +241,14 @@ static n_byte parse_character(n_byte temp)
     if(ASCII_BRACES(temp) || ASCII_BRACKET(temp))
         return temp;
     if((ASCII_EQUAL(temp) || ASCII_LOGICAL(temp))||(ASCII_ARITHMETIC(temp) || ASCII_DIRECTIONAL(temp)))
-        return '=';
+        return APESCRIPT_OPERATOR;
     if(ASCII_NUMBER(temp))
-        return 'n';
+        return APESCRIPT_NUMBER;
     if(ASCII_TEXT(temp))
-        return 't';
+        return APESCRIPT_TEXT;
     if(ASCII_SEMICOLON(temp))
-        return ';';
-    return 'F';
+        return APESCRIPT_SEMICOLON;
+    return APESCRIPT_FAILURE;
 }
 
 static n_int parse_write_code(n_interpret * final_prog, n_byte value, n_byte code)
@@ -275,7 +275,7 @@ static n_int parse_write_code(n_interpret * final_prog, n_byte value, n_byte cod
     }
 
 #ifdef ROUGH_CODE_OUT
-    if (value == ';' || value == '{' || value == '}')
+    if (value == APESCRIPT_SEMICOLON || value == APESCRIPT_OPEN_BRACE || value == APESCRIPT_CLOSE_BRACE)
     {
         fprintf(rough_code_file, "\n");
     }
@@ -306,7 +306,7 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
     n_int			 loop = 0;
     switch(previous)
     {
-    case ('n'):
+    case (APESCRIPT_NUMBER):
         result = parse_number(final_prog, buffer); /* this loads the number into the number buffer */
         if(result == -1)
         {
@@ -317,7 +317,7 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
             return -1;
         }
         break;
-    case ('t'):
+    case (APESCRIPT_TEXT):
         while((loop < variable_num) && (result == -1))
         {
             if(parse_string(variable_codes[loop], buffer, VARIABLE_WIDTH) == 1)
@@ -349,7 +349,7 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
             return -1;
         }
         break;
-    case ('='):
+    case (APESCRIPT_OPERATOR):
         while((loop < SYNTAX_NUM) && (result == -1))
         {
             if(parse_string(syntax_codes[loop],buffer,SYNTAX_WIDTH) == 1)
@@ -448,7 +448,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     {
         n_byte	temp = local_data[ loop++ ];
         n_byte	convert = parse_character(temp);
-        if(convert == 'F')
+        if(convert == APESCRIPT_FAILURE)
         {
             interpret_cleanup(&final_prog);
             (void)io_apescript_error(0L, AE_UNKNOWN_SYNTAX_PARSER_CONVERT);

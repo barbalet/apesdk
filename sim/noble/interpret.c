@@ -118,7 +118,7 @@ static n_int interpret_apply(n_interpret * code, n_individual_interpret * indivi
         *number = val_a;
         return 3;
     }
-    if(evaluate[2] != '=')
+    if(evaluate[2] != APESCRIPT_OPERATOR)
     {
         return io_apescript_error(individual->interpret_data, AE_UNKNOWN_SYNTAX_MISSING_EQUALS);
     }
@@ -237,7 +237,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
     first_value = value[0];
     second_value = value[1];
 
-    if(first_value == '}')  /* what do you do with the tailing brace? */
+    if(first_value == APESCRIPT_CLOSE_BRACE)  /* what do you do with the tailing brace? */
     {
         n_brace	*local_brace;
         n_int	brace_value = (individual->braces_count) - 1;
@@ -259,7 +259,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         }
         return 0; /* exit while and run function */
     }
-    if(first_value != 't')
+    if(first_value != APESCRIPT_TEXT)
     {
         return io_apescript_error(individual->interpret_data, AE_LINE_START_INCORRECT);
     }
@@ -273,18 +273,18 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
     {
         n_int	return_value;
         n_int	error_value = -1;
-        if(value[2] != '(')
+        if(value[2] != APESCRIPT_OPEN_BRACKET)
         {
             return io_apescript_error(individual->interpret_data, AE_IF_WHILE_NOT_FOLLOWED_BY_BRACKET);
         }
-        return_value = interpret_apply(code, individual, &value[3], &output_number, ')');
+        return_value = interpret_apply(code, individual, &value[3], &output_number, APESCRIPT_CLOSE_BRACKET);
         if(return_value == -1)
         {
             return -1; /* Enough information presented by this point */
         }
         if(second_value == VARIABLE_FUNCTION || second_value == VARIABLE_RUN)
         {
-            if(value[3] != 't')
+            if(value[3] != APESCRIPT_TEXT)
             {
                 return io_apescript_error(individual->interpret_data, AE_FUNCTION_ISNT_VARIABLE);
             }
@@ -320,12 +320,12 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
             {
                 return io_apescript_error(individual->interpret_data, AE_FUNCTION_OUT_OF_RANGE);
             }
-            if(value[3 + return_value] != ';')
+            if(value[3 + return_value] != APESCRIPT_SEMICOLON)
             {
                 return io_apescript_error(individual->interpret_data, AE_WITHOUT_SEMICOLON);
             }
             {
-                n_byte	function_location[SIZE_OF_EVALUATE] = {'f',0};
+                n_byte	function_location[SIZE_OF_EVALUATE] = {APESCRIPT_FUNCTION,0};
                 n_byte	*location_write =(n_byte *)&function_location[1];
                 n_int	continuation = return_value + 4 + location;
                 io_int_to_bytes(output_number, location_write);
@@ -344,7 +344,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
             return 0; /* want to trigger while check */
         }
         /* if the future code will contain if()run(); then the if should be checked here */
-        if(value[3 + return_value] != '{')
+        if(value[3 + return_value] != APESCRIPT_OPEN_BRACE)
         {
             return io_apescript_error(individual->interpret_data, AE_WITHOUT_OPEN_BRACE);
         }
@@ -385,11 +385,11 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
                 /* get actual point, avoid text variable numerical reference to { } */
                 if(CODE_VALUE_REQUIRED(actual_value))
                     loop++;
-                if(actual_value == '{')
+                if(actual_value == APESCRIPT_OPEN_BRACE)
                 {
                     braces_open ++;
                 }
-                if(actual_value == '}')
+                if(actual_value == APESCRIPT_CLOSE_BRACE)
                 {
                     braces_open --;
                 }
@@ -423,11 +423,11 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
     if(VARIABLE_INPUT(second_value, code))  /* x = y + z; */
     {
         n_int	return_value;
-        if((value[2] != '=') || (value[3] != SYNTAX_EQUALS))
+        if((value[2] != APESCRIPT_OPERATOR) || (value[3] != SYNTAX_EQUALS))
         {
             return io_apescript_error(individual->interpret_data, AE_INPUT_VARIABLE_WITHOUT_EQUALS);
         }
-        return_value = interpret_apply(code, individual, &value[4], &output_number, ';');
+        return_value = interpret_apply(code, individual, &value[4], &output_number, APESCRIPT_SEMICOLON);
         if(return_value == -1)
         {
             return -1; /* Enough information presented by this point */
@@ -522,11 +522,11 @@ static n_int	interpret_code(n_interpret * interp, n_individual_interpret * indiv
             }
             local_brace = &(individual->braces[brace_number]);
             first_evaluate = local_brace->evaluate[0];
-            if(first_evaluate == 'r' || first_evaluate == 'f')  /* check the function run */
+            if(first_evaluate == APESCRIPT_RUN || first_evaluate == APESCRIPT_FUNCTION)  /* check the function run */
             {
-                if(first_evaluate == 'f')
+                if(first_evaluate == APESCRIPT_FUNCTION)
                 {
-                    local_brace->evaluate[0] = 'r';
+                    local_brace->evaluate[0] = APESCRIPT_RUN;
                     loop = io_bytes_to_int(&(local_brace->evaluate[1]));
                 }
                 else   /* end of the run function , put back to where 'run' is called */
@@ -545,7 +545,7 @@ static n_int	interpret_code(n_interpret * interp, n_individual_interpret * indiv
             {
                 n_int	  return_value = 0;
 
-                if(interpret_apply(interp, individual, local_brace->evaluate, &return_value, ')') == -1)
+                if(interpret_apply(interp, individual, local_brace->evaluate, &return_value, APESCRIPT_CLOSE_BRACKET) == -1)
                 {
                     return -1; /* Enough information presented by this point */
                 }

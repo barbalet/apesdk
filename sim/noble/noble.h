@@ -867,6 +867,20 @@ enum SYNTAX_ADDITIONAL_BRAINCODE
     SYNTAX_DATA
 };
 
+enum APESCRIPT_INTERPRET_TYPES
+{
+    APESCRIPT_OPEN_BRACKET =  ('('),
+    APESCRIPT_CLOSE_BRACKET = (')'),
+    APESCRIPT_OPEN_BRACE =    ('{'),
+    APESCRIPT_CLOSE_BRACE =   ('}'),
+    APESCRIPT_OPERATOR =      ('='),
+    APESCRIPT_NUMBER =        ('n'),
+    APESCRIPT_TEXT =          ('t'),
+    APESCRIPT_SEMICOLON =     (';'),
+    APESCRIPT_FAILURE =       ('F'),
+    APESCRIPT_FUNCTION =      ('f'),
+    APESCRIPT_RUN =           ('r')
+};
 #define ASCII_TEXT(num)		  ((ASCII_UPPERCASE(num) || ASCII_LOWERCASE(num)) || ((num) == '_'))
 
 #define	ASCII_SEMICOLON(num)  ((num) == ';')
@@ -881,7 +895,7 @@ enum SYNTAX_ADDITIONAL_BRAINCODE
 
 #define ASCII_DIRECTIONAL(num) (((num)=='<')||((num)=='>'))
 
-#define	CODE_VALUE_REQUIRED(num)	(((num) == '=' || (num) == 'n') || ((num) == 't'))
+#define	CODE_VALUE_REQUIRED(num)	(((num) == APESCRIPT_OPERATOR || (num) == APESCRIPT_NUMBER) || ((num) == 't'))
 
 #define	SIZEOF_NUMBER_WRITE      (sizeof(n_int))
 
@@ -950,15 +964,11 @@ typedef struct
 typedef struct
 {
     n_file			*binary_code;
-
     n_int			 number_buffer[NUMBER_MAX]; /* per entry */
-
     variable_string *variable_strings;
-
     n_int		     main_entry;
     n_int		     input_greater;
     n_int		     special_less;
-
     script_input    *sc_input;
     script_output   *sc_output;
 } n_interpret;
@@ -968,11 +978,8 @@ typedef struct
     n_int           interpret_location; /* per entry */
     n_int           leave;              /* per entry */
     n_int           localized_leave;    /* per entry */
-    
     void *          interpret_data;     /* per entry */
-    
     n_int		    variable_references[VARIABLE_MAX]; /* per entry */
-    
     n_int	  	    braces_count;        /* per entry */
     n_brace		    braces[BRACES_MAX];  /* per entry */
     n_byte		    main_status;         /* per entry */

@@ -410,12 +410,12 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
     n_individual_interpret * individual = (n_individual_interpret *) vindividual;
     n_byte	first_value = kind[0];
     n_byte	second_value = kind[1];
-    if(first_value == 'n')
+    if(first_value == APESCRIPT_NUMBER)
     {
         *number = code->number_buffer[second_value];
         return 0;
     }
-    if((first_value == 't') && (VARIABLE_SPECIAL(second_value, code)==0))
+    if((first_value == APESCRIPT_TEXT) && (VARIABLE_SPECIAL(second_value, code)==0))
     {
         n_int	*local_vr = individual->variable_references;
 
