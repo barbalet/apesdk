@@ -32,7 +32,6 @@
 		4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A360078171240FE004DAFBA /* OpenGL.framework */; };
 		4A7DC3E41749CD710013F2E9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A7DC3E31749CD710013F2E9 /* network.c */; };
 		4A8ABB2317D44D4000D68884 /* nobleape.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A8ABB2217D44D4000D68884 /* nobleape.xib */; };
-		4A8ABB2517D452DC00D68884 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A8ABB2417D452DC00D68884 /* QuartzCore.framework */; };
 		4A94505317CDC33C00D5893C /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504D17CDC33C00D5893C /* draw.c */; };
 		4A94505417CDC33C00D5893C /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A94504F17CDC33C00D5893C /* shared.c */; };
 		5A33158018B9BCAB00FE28C6 /* NobleSimulationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A33157F18B9BCAB00FE28C6 /* NobleSimulationView.m */; };
@@ -116,7 +115,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A8ABB2517D452DC00D68884 /* QuartzCore.framework in Frameworks */,
 				4A360079171240FE004DAFBA /* OpenGL.framework in Frameworks */,
 				4A36001817124025004DAFBA /* Cocoa.framework in Frameworks */,
 			);
