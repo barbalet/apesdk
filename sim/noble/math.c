@@ -517,6 +517,14 @@ n_byte math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw)
     return 0;
 }
 
+n_c_uint math_hash_fnv1(n_constant_string key)
+{
+    n_c_uint hash = 2166136261;
+    while(*key)
+        hash = (16777619 * hash) ^ (*key++);
+    return hash;
+}
+
 /**
  Creates a near-unique integer value from a block of data. This is
  similar to CRC or other hash methods.
