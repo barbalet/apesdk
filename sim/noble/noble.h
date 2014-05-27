@@ -43,10 +43,8 @@
 /*	Variable Definitions */
 
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
-/*#undef   COMMAND_LINE_DEBUG        Sends the debug output as printf output - added through command line build */
+#undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
-
-#undef   DEBUG_NON_FILE_HANDLE    /* Stops there being a file handle for debug output */
 
 #define  EXECUTE_THREADED
 
@@ -898,7 +896,7 @@ enum APESCRIPT_INTERPRET_TYPES
 
 #define ASCII_DIRECTIONAL(num) (((num)=='<')||((num)=='>'))
 
-#define	CODE_VALUE_REQUIRED(num)	(((num) == APESCRIPT_OPERATOR || (num) == APESCRIPT_NUMBER) || ((num) == 't'))
+#define	CODE_VALUE_REQUIRED(num) (((num) == APESCRIPT_OPERATOR || (num) == APESCRIPT_NUMBER) || ((num) == APESCRIPT_TEXT))
 
 #define	SIZEOF_NUMBER_WRITE      (sizeof(n_int))
 

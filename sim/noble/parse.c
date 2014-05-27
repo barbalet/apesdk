@@ -254,15 +254,14 @@ static n_byte parse_character(n_byte temp)
 static n_int parse_write_code(n_interpret * final_prog, n_byte value, n_byte code)
 {
 #ifdef ROUGH_CODE_OUT
-    FILE * rough_code_file = fopen("rough_code.txt","a");
-    fprintf(rough_code_file, "%c ",value);
+    printf("%c ",value);
 #endif
 
-    if(io_file_write(final_prog->binary_code, value) == -1)
+    if (io_file_write(final_prog->binary_code, value) == -1)
     {
         return io_apescript_error(0L, AE_MAXIMUM_SCRIPT_SIZE_REACHED);
     }
-    if(CODE_VALUE_REQUIRED(value))
+    if (CODE_VALUE_REQUIRED(value))
     {
         if(io_file_write(final_prog->binary_code, code) == -1)
         {
@@ -270,18 +269,14 @@ static n_int parse_write_code(n_interpret * final_prog, n_byte value, n_byte cod
         }
 
 #ifdef ROUGH_CODE_OUT
-        fprintf(rough_code_file, "%d ",code);
+        printf("%d ",code);
 #endif
     }
 
 #ifdef ROUGH_CODE_OUT
     if (value == APESCRIPT_SEMICOLON || value == APESCRIPT_OPEN_BRACE || value == APESCRIPT_CLOSE_BRACE)
     {
-        fprintf(rough_code_file, "\n");
-    }
-    if (fclose(rough_code_file) != 0)
-    {
-        return SHOW_ERROR("File failed to close");
+        printf("\n");
     }
 #endif
     return 0;
@@ -403,8 +398,12 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     n_int	      buffer_size = 0;
     n_byte	      previous = 0;
 
+    /* remove the white space from the input file */
+    
     io_whitespace(input);
 
+    /* perform the initial allocations */
+    
     if((final_prog = io_new(sizeof(n_interpret))) == 0L)
     {
         return 0L;
@@ -422,6 +421,8 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         return 0L;
     }
 
+    /* allow for the space for the size to be written after everything else has been written/calculated */
+    
     final_prog->binary_code->location = SIZEOF_NUMBER_WRITE;
 
     final_prog->variable_strings = variables;
@@ -434,6 +435,8 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
 
     number_num = 1;
 
+    /* clear everything initially */
+    
     while(loop < NUMBER_MAX)
     {
         local_number[ loop++ ] = 0;
@@ -444,36 +447,50 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     local_data = input->data;
     end_loop = input->size;
 
+    /* work through each character in the input file */
+    
     while(loop < end_loop)
     {
         n_byte	temp = local_data[ loop++ ];
+        /* each character has a particular type */
         n_byte	convert = parse_character(temp);
-        if(convert == APESCRIPT_FAILURE)
+        /* if it is a failure type i.e. not to be used, then fail */
+        if (convert == APESCRIPT_FAILURE)
         {
             interpret_cleanup(&final_prog);
             (void)io_apescript_error(0L, AE_UNKNOWN_SYNTAX_PARSER_CONVERT);
             return 0L;
         }
-        if((previous != convert) && (previous != 0))
+        /* if there is a change in type, then parse the previous buffer */
+        if ((previous != convert) && (previous != 0))
         {
             if(parse_buffer(final_prog, previous, buffer) == -1)
             {
                 interpret_cleanup(&final_prog);
                 return 0L;
             }
+            
+            /* clear the buffer for new characters coming in */
             buffer_size = 0;
             io_erase(buffer, VARIABLE_WIDTH);
         }
+        
+        /* add the character to the buffer */
         buffer[buffer_size++] = temp;
-        if(buffer_size == (VARIABLE_WIDTH -  1))
+        
+        /* if the buffer gets to big, it's a problem */
+        if (buffer_size == (VARIABLE_WIDTH -  1))
         {
             interpret_cleanup(&final_prog);
             (void)io_apescript_error(0L, AE_MAXIMUM_SCRIPT_SIZE_REACHED);
             return 0L;
         }
+        
+        /* track the previous type */
         previous = convert;
     }
-    if(parse_buffer(final_prog, previous, buffer) == -1)
+    /* handle the last type case at the end of the input file */
+    if (parse_buffer(final_prog, previous, buffer) == -1)
     {
         interpret_cleanup(&final_prog);
         return 0L;
@@ -496,7 +513,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
             }
             loop_sizeof_number++;
         }
-        while(loop<end_loop)
+        while (loop<end_loop)
         {
             io_int_to_bytes((final_prog->number_buffer[loop]),local_numbers); /* write the numbers */
             loop_sizeof_number = 0;
