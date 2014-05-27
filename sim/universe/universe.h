@@ -150,6 +150,8 @@ enum SECONDARY_APESCRIPT
     VARIABLE_ID_NUMBER,
     VARIABLE_DATE_OF_BIRTH,
 
+    VARIABLE_IS_ERROR,
+    
     VARIABLE_WEATHER,  /* Everything after this value can be both set and get */
     VARIABLE_BRAIN_VALUE, /* This is a special case, all the remainder are stored as variables */
 

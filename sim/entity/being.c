@@ -2596,6 +2596,43 @@ static void being_interact(noble_simulation * sim,
     }
 }
 
+typedef struct{
+    n_int counter;
+    n_int return_value;
+    noble_being * being;
+}being_index_loop_struct;
+
+void being_index_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    being_index_loop_struct * bils = (being_index_loop_struct *) data;
+    
+    if (bils->return_value != -1)
+    {
+        return;
+    }
+    
+    if (local_being == bils->being)
+    {
+        bils->return_value = bils->counter;
+    }
+    else
+    {
+        bils->counter++;
+    }
+}
+
+n_int being_index(noble_simulation * sim, noble_being * local)
+{
+    being_index_loop_struct value;
+    
+    value.return_value = -1;
+    value.being = local;
+    value.counter = 0;
+    
+    being_loop_no_thread(sim, 0L, being_index_loop, &value);
+    return value.return_value;
+}
+
 void being_cycle_awake(noble_simulation * sim, noble_being * local)
 {
     n_land      * land               = sim->land;

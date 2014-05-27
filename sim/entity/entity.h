@@ -367,4 +367,6 @@ void being_remains_init(noble_simulation * sim);
 
 void being_remains(noble_simulation * sim, noble_being * dead);
 
+n_int being_index(noble_simulation * sim, noble_being * local);
+
 #endif /* NOBLEAPE_ENTITY_H */

@@ -264,7 +264,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         return io_apescript_error(individual->interpret_data, AE_LINE_START_INCORRECT);
     }
 
-    if((second_value > VARIABLE_IF)&&(second_value <= code->input_greater))
+    if((second_value > VARIABLE_IF) && (second_value <= code->input_greater))
     {
         return io_apescript_error(individual->interpret_data, AE_OUTPUT_SET_AS_INPUT_VARIABLE);
     }

@@ -415,7 +415,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
         *number = code->number_buffer[second_value];
         return 0;
     }
-    if((first_value == APESCRIPT_TEXT) && (VARIABLE_SPECIAL(second_value, code)==0))
+    if((first_value == APESCRIPT_TEXT) && (VARIABLE_SPECIAL(second_value, code) == 0))
     {
         n_int	*local_vr = individual->variable_references;
 
@@ -434,23 +434,23 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
         {
             noble_being * local_current = (noble_being *)individual->interpret_data;
             n_int		  local_number = 0;
-            n_vect2       local_vr0;
-            vect2_direction(&local_vr0, local_vr[0], 32);
+            n_vect2       local_vector;
+            vect2_direction(&local_vector, local_vr[0], 32);
             switch(second_value)
             {
 
             case VARIABLE_VECT_X:
-                local_number = local_vr0.x;
+                local_number = local_vector.x;
                 break;
 
             case VARIABLE_VECT_Y:
-                local_number = local_vr0.y;
+                local_number = local_vector.y;
                 break;
             case VARIABLE_RANDOM:
                 local_number = being_random(local_current);
                 break;
             case VARIABLE_WATER_LEVEL:
-                local_number = WATER_MAP;
+                local_number = local_sim->land->tide_level;
                 break;
             case VARIABLE_HUNGRY:
                 local_number = BEING_HUNGRY;
@@ -518,14 +518,16 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 local_number = (local_sim->land->date[0]) + (local_sim->land->date[1] * TIME_CENTURY_DAYS);
                 break;
             case VARIABLE_CURRENT_BEING:
-#ifdef NEED_TO_FIX
-                local_number = code->specific;
-#endif
+                local_number = being_index(local_sim, (noble_being *)individual->interpret_data);
                 break;
             case VARIABLE_NUMBER_BEINGS:
                 local_number = local_sim->num;
                 break;
 
+            case VARIABLE_IS_ERROR:
+                local_number = -1;
+                break;
+                    
             case VARIABLE_WEATHER:
             {
                 n_int	quick_x;
@@ -565,8 +567,8 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
             break;
             default:
             {
-                n_int		 temp_select = local_vr[ VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE ];
-                noble_being	*local_being = 0L;
+                n_int		     temp_select = local_vr[ VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE ];
+                noble_being	    *local_being = 0L;
                 noble_social    *local_social_graph = 0L;
                 noble_social     social_graph;
 #ifdef EPISODIC_ON
@@ -585,7 +587,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         return io_apescript_error(individual->interpret_data, AE_SELECTED_ENTITY_OUT_OF_RANGE);
                     }
                     local_being = &(local_sim->beings[local_select]);
-                    if (local_being!=0L)
+                    if (local_being != 0L)
                     {
                         local_social_graph = being_social(local_being);
                         if (local_social_graph!=0L)
@@ -601,7 +603,15 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
 #endif
                     }
                 }
-                if ((local_being!=0L) && (local_social_graph!=0L))
+                /* TODO: if the being knows the other being it may be possible to guess some of these */
+                
+                /* if the current being can't see the other being, it can't get this information */
+                
+                if (being_los(local_sim->land, local_current, (n_byte2)being_location_x(local_being), (n_byte2)being_location_y(local_being)) == 0)
+                {
+                    local_number = -1;
+                }
+                else if ((local_being != 0L) && (local_social_graph != 0L))
                 {
                     switch(second_value)
                     {
@@ -836,9 +846,9 @@ void sim_start_conditions(void * vindividual, void * structure, void * data)
     variables[VARIABLE_FACING - VARIABLE_VECT_ANGLE] = being_facing(local_being);
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
     variables[VARIABLE_ENERGY_DELTA - VARIABLE_VECT_ANGLE] = 0;
-#ifdef NEED_TO_FIX
-    variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = identifier;
-#endif
+
+    variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = being_index(sim_sim(), local_being);
+
     variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = GET_H(local_being);
     variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->goal[0];
     variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->goal[1];

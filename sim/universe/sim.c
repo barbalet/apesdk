@@ -110,13 +110,14 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "location_x",
     "location_y",
 
-    "state",  /* new ! */
+    "state",
 
-    /* 18 */
     "id_number",
     "date_of_birth",
 
+    "is_error",    
     "weather",
+    
     "brain_value",		/* special input/output */
     /* actual variables start here */
 
