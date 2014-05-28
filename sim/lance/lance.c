@@ -74,7 +74,7 @@ static n_int	lance_interpret(n_byte * buff, n_uint len)
     }
     else
     {
-        SC_DEBUG_ON; /* turn on debugging after script loading */
+        SC_DEBUG_ON(0L); /* turn on debugging after script loading */
     }
 
     interpret->sc_input  = &commands_input;
