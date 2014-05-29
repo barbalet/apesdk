@@ -348,7 +348,7 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
         break;
             
     case (APESCRIPT_STRING):
-        result = parse_quoted_string(final_prog, buffer); /* this loads the number into the number buffer */
+        result = parse_quoted_string(final_prog, (n_constant_string)buffer); /* this loads the number into the number buffer */
         if(result == -1)
         {
             return -1;
