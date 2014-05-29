@@ -1,5 +1,14 @@
 function ( main ) {
-   test_random = random;
+   string = "this is a string";
+   string_two = "this is ALSO a string";
+   if (string != string_two)
+   {
+      string_two = "this is a string"; 
+   }
+   if (string == string_two)
+   {
+      test_random = random;
+   }
    escape = 3;
    random_seed = 345;
    test_random = random;

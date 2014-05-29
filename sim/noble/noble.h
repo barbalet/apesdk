@@ -879,8 +879,11 @@ enum APESCRIPT_INTERPRET_TYPES
     APESCRIPT_SEMICOLON =     (';'),
     APESCRIPT_FAILURE =       ('F'),
     APESCRIPT_FUNCTION =      ('f'),
-    APESCRIPT_RUN =           ('r')
+    APESCRIPT_RUN =           ('r'),
+    APESCRIPT_STRING =        ('"')
 };
+
+#define ASCII_QUOTE(num)      ((num) == '"')
 
 #define ASCII_TEXT(num)		  ((ASCII_UPPERCASE(num) || ASCII_LOWERCASE(num)) || ((num) == '_'))
 

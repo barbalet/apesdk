@@ -78,6 +78,8 @@ static const n_byte	syntax_codes[SYNTAX_NUM][SYNTAX_WIDTH]=
 static n_int	variable_num;
 static n_int	number_num;
 
+static n_int    quote_up;
+
 #ifdef SCRIPT_DEBUG
 
 static n_int	          tab_step = 0;
@@ -192,29 +194,10 @@ void scdebug_tabstep(void * ptr, n_int steps)
 }
 #endif
 
-/* outputs the number of bytes to advance in the interpret stream */
-static n_int parse_number(n_interpret * interpret, const n_byte * number)
+
+static n_int parse_number_add(n_interpret * interpret, n_int out_value)
 {
     n_int 	loop = 0;
-    n_int 	out_value = 0;
-    n_int 	point_counter = 0;
-
-    /* read out the number from the interpret stream */
-    do
-    {
-        n_byte temp = number[point_counter++];
-        if((!ASCII_NUMBER(temp)) && (temp != 0))
-        {
-            return io_apescript_error(0L, AE_NUMBER_EXPECTED); /* this error should never occur */
-        }
-        out_value = (out_value * 10) + (temp - '0');
-    }
-    while((number[point_counter]!=0) && (out_value>-1));
-
-    if((out_value < 0) || (out_value > 0x7fffffff))
-    {
-        return io_apescript_error(0L, AE_NUMBER_OUT_OF_RANGE);
-    }
 
     /* is this number already stored? */
     while(loop < number_num)
@@ -236,18 +219,69 @@ static n_int parse_number(n_interpret * interpret, const n_byte * number)
     return loop;
 }
 
+/* outputs the number of bytes to advance in the interpret stream */
+static n_int parse_number(n_interpret * interpret, const n_byte * number)
+{
+    n_int 	out_value = 0;
+    n_int 	point_counter = 0;
+
+    /* read out the number from the interpret stream */
+    do
+    {
+        n_byte temp = number[point_counter++];
+        if((!ASCII_NUMBER(temp)) && (temp != 0))
+        {
+            return io_apescript_error(0L, AE_NUMBER_EXPECTED); /* this error should never occur */
+        }
+        out_value = (out_value * 10) + (temp - '0');
+    }
+    while((number[point_counter]!=0) && (out_value>-1));
+
+    if((out_value < 0) || (out_value > 0x7fffffff))
+    {
+        return io_apescript_error(0L, AE_NUMBER_OUT_OF_RANGE);
+    }
+
+    return parse_number_add(interpret, out_value);
+}
+
+static n_int parse_quoted_string(n_interpret * interpret, n_constant_string string)
+{
+    return parse_number_add(interpret, (n_int)math_hash_fnv1(string));
+}
+
 static n_byte parse_character(n_byte temp)
 {
+    if(ASCII_QUOTE(temp))
+    {
+        quote_up ^= 1;
+        return APESCRIPT_STRING;
+    }
+    
+    if (quote_up)
+    {
+        return APESCRIPT_STRING;
+    }
     if(ASCII_BRACES(temp) || ASCII_BRACKET(temp))
+    {
         return temp;
+    }
     if((ASCII_EQUAL(temp) || ASCII_LOGICAL(temp))||(ASCII_ARITHMETIC(temp) || ASCII_DIRECTIONAL(temp)))
+    {
         return APESCRIPT_OPERATOR;
+    }
     if(ASCII_NUMBER(temp))
+    {
         return APESCRIPT_NUMBER;
+    }
     if(ASCII_TEXT(temp))
+    {
         return APESCRIPT_TEXT;
+    }
     if(ASCII_SEMICOLON(temp))
+    {
         return APESCRIPT_SEMICOLON;
+    }
     return APESCRIPT_FAILURE;
 }
 
@@ -308,6 +342,18 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
             return -1;
         }
         if(parse_write_code(final_prog, previous, (n_byte)result) == -1)  /* this writes the number allocation code */
+        {
+            return -1;
+        }
+        break;
+            
+    case (APESCRIPT_STRING):
+        result = parse_quoted_string(final_prog, buffer); /* this loads the number into the number buffer */
+        if(result == -1)
+        {
+            return -1;
+        }
+        if(parse_write_code(final_prog, APESCRIPT_NUMBER, (n_byte)result) == -1)  /* this writes the number allocation code */
         {
             return -1;
         }
@@ -434,6 +480,8 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     variable_num = main_entry + 1;
 
     number_num = 1;
+    
+    quote_up = 0;
 
     /* clear everything initially */
     

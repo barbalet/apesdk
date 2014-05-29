@@ -36,13 +36,13 @@ else
     CFLAGS=-O2 
 fi
 
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/io.c -o io.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/math.c -o math.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/parse.c -o parse.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c noble/interpret.c -o interpret.o
+gcc ${CFLAGS} -DNOBLE_APE_ASSERT -c noble/io.c -o io.o
+gcc ${CFLAGS} -DNOBLE_APE_ASSERT -c noble/math.c -o math.o
+gcc ${CFLAGS} -DNOBLE_APE_ASSERT -c noble/parse.c -o parse.o
+gcc ${CFLAGS} -DNOBLE_APE_ASSERT -c noble/interpret.c -o interpret.o
 
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c lance/commands.c -o commands.o
-gcc ${CFLAGS} -DCOMMAND_LINE_DEBUG -DNOBLE_APE_ASSERT -c lance/lance.c -o lance.o
+gcc ${CFLAGS} -DNOBLE_APE_ASSERT -c lance/commands.c -o commands.o
+gcc ${CFLAGS} -DNOBLE_APE_ASSERT -c lance/lance.c -o lance.o
 
 gcc ${CFLAGS} -I/usr/include -o ../../lance io.o math.o parse.o interpret.o lance.o commands.o
 
