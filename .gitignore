@@ -1,1 +1,6 @@
 .DS_Store
+contents.xcworkspacedata
+*.xccheckout
+UserInterfaceState.xcuserstate
+*.xcscheme
+xcschememanagement.plist
