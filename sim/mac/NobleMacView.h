@@ -40,7 +40,7 @@
 #import <OpenGL/glu.h>
 #import <OpenGL/OpenGL.h>
 
-#include "../gui/shared.h"
+#include "../mac/shared.h"
 #include "../graph/graph.h"
 
 @interface NobleMacView : NSOpenGLView
