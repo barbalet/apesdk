@@ -41,7 +41,6 @@
 #import <OpenGL/OpenGL.h>
 
 #include "../mac/shared.h"
-#include "../graph/graph.h"
 
 @interface NobleMacView : NSOpenGLView
 {
