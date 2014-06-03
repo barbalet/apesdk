@@ -58,40 +58,22 @@ n_int shared_init(n_byte view, n_uint random);
 
 void shared_close(void);
 
-n_int shared_notPause(void);
-
-n_int shared_notWeather(void);
-n_int shared_notBrain(void);
-n_int shared_notBrainCode(void);
-n_int shared_notTerritory(void);
-n_int shared_notThreaded(void);
-
-void shared_flood(void);
-void shared_healthy_carrier(void);
+n_int shared_menu(n_int menuValue);
 
 void shared_rotate(n_double num, n_byte wwind);
 
 void shared_keyReceived(n_byte2 value, n_byte fIdentification);
-
 void shared_keyUp(void);
 
 void shared_mouseOption(n_byte option);
-
 void shared_mouseReceived(n_int valX, n_int valY, n_byte fIdentification);
-
 void shared_mouseUp(void);
 
 void shared_about(n_constant_string value);
 
 n_byte * shared_draw(n_byte fIdentification);
 
-void shared_timeForColor(n_byte2 * fit, n_int fIdentification);
-
-void shared_previousApe(void);
-
-void shared_nextApe(void);
-
-void shared_clearErrors(void);
+void shared_color(n_byte2 * fit, n_int fIdentification);
 
 n_int shared_new(n_uint seed);
 

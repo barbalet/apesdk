@@ -48,49 +48,64 @@
     [self startEverything];
 }
 
+-(IBAction) menuControlPause:(id) sender
+{
+    [self menuCheckMark:sender check:shared_menu(NA_MENU_PAUSE)];
+}
+
+-(IBAction) menuControlPrevious:(id) sender
+{
+    (void) shared_menu(NA_MENU_PREVIOUS_APE);
+}
+
+-(IBAction) menuControlNext:(id) sender
+{
+    (void) shared_menu(NA_MENU_NEXT_APE);
+}
+
+-(IBAction) menuControlClearErrors:(id) sender
+{
+    (void) shared_menu(NA_MENU_CLEAR_ERRORS);
+}
+
 -(IBAction) menuControlNoTerritory:(id) sender
 {
-    [self menuCheckMark:sender check:shared_notTerritory()];
+    [self menuCheckMark:sender check:shared_menu(NA_MENU_TERRITORY)];
 }
 
 -(IBAction) menuControlNoWeather:(id) sender
 {
-    [self menuCheckMark:sender check:shared_notWeather()];
+    [self menuCheckMark:sender check:shared_menu(NA_MENU_WEATHER)];
 }
 
 -(IBAction) menuControlNoBrain:(id) sender
 {
-    [self menuCheckMark:sender check:shared_notBrain()];
+    [self menuCheckMark:sender check:shared_menu(NA_MENU_BRAIN)];
 }
 
 -(IBAction) menuControlNoBrainCode:(id) sender
 {
-    [self menuCheckMark:sender check:shared_notBrainCode()];
-}
-
--(IBAction) menuControlNoThreaded:(id)sender
-{
-    [self menuCheckMark:sender check:shared_notThreaded()];
+    [self menuCheckMark:sender check:shared_menu(NA_MENU_BRAINCODE)];
 }
 
 -(IBAction) menuControlFlood:(id) sender
 {
-    shared_flood();
+    (void) shared_menu(NA_MENU_FLOOD);
 }
 
 -(IBAction) menuControlHealthyCarrier:(id) sender
 {
-    shared_healthy_carrier();
+    (void) shared_menu(NA_MENU_HEALTHY_CARRIER);
 }
 
 -(IBAction) loadManual:(id) sender
 {
-    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/man/"]];
+    [self loadUrlString:@"http://www.nobleape.com/man/"];
 }
 
 -(IBAction) loadSimulationPage:(id)sender
 {
-    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: @"http://www.nobleape.com/sim/"]];
+    [self loadUrlString:@"http://www.nobleape.com/sim/"];
 }
 
 @end

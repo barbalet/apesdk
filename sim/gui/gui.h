@@ -67,6 +67,20 @@ enum colour_type
     COLOUR_RED       =   (255)
 };
 
+enum
+{
+    NA_MENU_PAUSE = 0,
+    NA_MENU_WEATHER,
+    NA_MENU_BRAIN,
+    NA_MENU_BRAINCODE,
+    NA_MENU_TERRITORY,
+    NA_MENU_PREVIOUS_APE,
+    NA_MENU_NEXT_APE,
+    NA_MENU_CLEAR_ERRORS,
+    NA_MENU_FLOOD,
+    NA_MENU_HEALTHY_CARRIER
+};
+
 #define	NON_INTERPOLATED COLOUR_GREY
 
 #define	spot_colour(alpha,spx,spy,col)	alpha[((spx)|((spy)<<8))]=(col)
@@ -130,8 +144,6 @@ n_int draw_toggle_brain(void);
 n_int draw_toggle_braincode(void);
 
 n_int draw_toggle_territory(void);
-
-n_int draw_toggle_threaded(n_int toggle);
 
 void draw_fit(n_byte * points, n_byte2 * color_fit);
 

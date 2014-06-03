@@ -124,7 +124,7 @@
         n_int			loopColors = 0;
         n_byte2         fit[256*3];
         
-        shared_timeForColor(fit, fIdentification);
+        shared_color(fit, fIdentification);
         
         while(loopColors < 256)
         {
@@ -198,9 +198,6 @@
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
     
-    
-    /*[[self window] setLevel:kCGFloatingWindowLevelKey];*/
-    
     execute_threads([[NSProcessInfo processInfo] processorCount]);
     {
         n_int shared_response = shared_init(fIdentification, (n_uint)CFAbsoluteTimeGetCurrent());
@@ -224,6 +221,11 @@
     [NSApp activateIgnoringOtherApps:YES];
 }
 
+- (void)loadUrlString:(NSString*) urlString
+{
+    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: urlString]];
+}
+
 #pragma mark ---- IB Actions ----
 
 -(IBAction) aboutDialog:(id) sender
@@ -237,26 +239,6 @@
     {
         [sender setState:(value ? NSOnState : NSOffState)];
     }
-}
-
--(IBAction) menuControlPause:(id) sender
-{
-    [self menuCheckMark:sender check:shared_notPause()];
-}
-
--(IBAction) menuControlPrevious:(id) sender
-{
-    shared_previousApe();
-}
-
--(IBAction) menuControlNext:(id) sender
-{
-    shared_nextApe();
-}
-
--(IBAction) menuControlClearErrors:(id) sender
-{
-    shared_clearErrors();
 }
 
 -(IBAction) menuQuit:(id) sender

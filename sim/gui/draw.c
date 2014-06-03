@@ -177,11 +177,6 @@ n_int draw_toggle_territory(void)
     return toggle_territory;
 }
 
-n_int draw_toggle_threaded(n_int toggle)
-{
-    return execute_toggle(toggle);
-}
-
 /* this needs to be grouped eventually, it is here as a test */
 
 #define UNDRAW_MAX          100000

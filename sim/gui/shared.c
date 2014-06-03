@@ -230,8 +230,6 @@ static void control_key(n_byte wwind, n_byte2 num)
     }
 }
 
-
-
 #ifdef SCRIPT_DEBUG
 
 static n_int script_entry = 1;
@@ -274,7 +272,7 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
     void * sim_return = 0L;
     
-    shared_clearErrors();
+    shared_menu(NA_MENU_CLEAR_ERRORS);
     draw_undraw_clear();
     
     sim_return = sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0));
@@ -353,46 +351,6 @@ void shared_close(void)
     sim_close();
 }
 
-n_int shared_notPause(void)
-{
-    return control_toggle_pause(1);
-}
-
-n_int shared_notWeather(void)
-{
-    return draw_toggle_weather();
-}
-
-n_int shared_notBrain(void)
-{
-    return draw_toggle_brain();
-}
-
-n_int shared_notBrainCode(void)
-{
-    return draw_toggle_braincode();
-}
-
-n_int shared_notTerritory(void)
-{
-    return draw_toggle_territory();
-}
-
-n_int shared_notThreaded(void)
-{
-    return draw_toggle_threaded(1);
-}
-
-void shared_flood(void)
-{
-    sim_flood();
-}
-
-void shared_healthy_carrier(void)
-{
-    sim_healthy_carrier();
-}
-
 void shared_keyReceived(n_byte2 value, n_byte fIdentification)
 {
     key_down = 1;
@@ -445,20 +403,10 @@ n_byte * shared_draw(n_byte fIdentification)
     return draw_pointer(fIdentification);
 }
 
-void shared_timeForColor(n_byte2 * fit, n_int fIdentification)
+void shared_color(n_byte2 * fit, n_int fIdentification)
 {
     noble_simulation * local_sim = sim_sim();
     draw_color_time(fit, local_sim->land->time);
-}
-
-void shared_previousApe(void)
-{
-    (void)control_key(0, 2079);
-}
-
-void shared_nextApe(void)
-{
-    (void)control_key(0, 2078);
 }
 
 void shared_clearErrors(void)
@@ -503,4 +451,36 @@ void shared_rotate(n_double num, n_byte wwind)
         n_int integer_rotation_256 = (n_int)((num * 256) / 360);
         terrain_turn = (n_byte)(((n_int)terrain_turn + 512 + integer_rotation_256) & 255);
     }
+}
+
+n_int shared_menu(n_int menuVal)
+{
+    switch (menuVal) {
+        case NA_MENU_PAUSE:
+            return control_toggle_pause(1);
+        case NA_MENU_WEATHER:
+            return draw_toggle_weather();
+        case NA_MENU_BRAIN:
+            return draw_toggle_brain();
+        case NA_MENU_BRAINCODE:
+            return draw_toggle_braincode();
+        case NA_MENU_TERRITORY:
+            return draw_toggle_territory();
+        case NA_MENU_PREVIOUS_APE:
+            (void)control_key(0, 2079);
+            return 0;
+        case NA_MENU_NEXT_APE:
+            (void)control_key(0, 2078);
+            return 0;
+        case NA_MENU_CLEAR_ERRORS:
+            (void)draw_error(0L, 0L, 0);
+            return 0;
+        case NA_MENU_FLOOD:
+            sim_flood();
+            return 0;
+        case NA_MENU_HEALTHY_CARRIER:
+            sim_healthy_carrier();
+            return 0;
+    }
+    return -1;
 }

@@ -35,6 +35,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+#include "../gui/gui.h"
 #import "NobleMacView.h"
 
 @interface NobleSimulationView : NobleMacView
@@ -45,12 +46,18 @@
 -(IBAction) menuControlNoWeather:(id) sender;
 -(IBAction) menuControlNoBrain:(id) sender;
 -(IBAction) menuControlNoBrainCode:(id) sender;
--(IBAction) menuControlNoThreaded:(id)sender;
 
 -(IBAction) menuControlFlood:(id) sender;
 -(IBAction) menuControlHealthyCarrier:(id) sender;
 
 -(IBAction) loadManual:(id) sender;
 -(IBAction) loadSimulationPage:(id) sender;
+
+-(IBAction) menuControlPause:(id) sender;
+
+-(IBAction) menuControlPrevious:(id) sender;
+-(IBAction) menuControlNext:(id) sender;
+
+-(IBAction) menuControlClearErrors:(id) sender;
 
 @end

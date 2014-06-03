@@ -68,16 +68,11 @@
 
 - (void) quitProcedure;
 
+- (void) loadUrlString:(NSString*) urlString;
+
 - (void) menuCheckMark:(id)sender check:(n_int)value;
 
 -(IBAction) aboutDialog:(id) sender;
-
--(IBAction) menuControlPause:(id) sender;
-
--(IBAction) menuControlPrevious:(id) sender;
--(IBAction) menuControlNext:(id) sender;
-
--(IBAction) menuControlClearErrors:(id) sender;
 
 -(IBAction) menuFileNew:(id) sender;
 -(IBAction) menuFileOpen:(id) sender;
