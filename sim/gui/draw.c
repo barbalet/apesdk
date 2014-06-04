@@ -418,24 +418,6 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
     }
 }
 
-static n_byte2 draw_genetic_patch(n_byte2 * value)
-{
-    static	n_uint	location;
-    n_byte2	return_value = 0;
-    if (value == 0L)
-    {
-        location = 0;
-    }
-    else
-    {
-        /* this number of genetics contributes to the fur */
-        return_value = value[location%6];
-        location++;
-    }
-    return return_value;
-}
-
-
 /* this is the ocelot landscape algorithm */
 
 #define POS_HIRES(num) ((num+(4096*2))&4095)
