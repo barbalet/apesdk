@@ -104,6 +104,7 @@
     n_byte        * index = shared_draw(fIdentification);
     
     if (index == 0L) return;
+    
     {
         shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dimensionX, dimensionY);
         if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
