@@ -58,6 +58,15 @@ typedef struct
 
 #define FIL_BEI (0x30)
 
+n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
+{
+    if (error_text)
+    {
+        printf("ERROR: %s @ %s %ld\n", (n_constant_string)error_text, location, line_number);
+    }
+    return -1;
+}
+
 static const noble_file_entry test_file_format[]=
 {
     {"being{", FIL_BEI,  0, 0,                  "Being Definition"},
@@ -76,15 +85,6 @@ static const noble_file_entry test_file_format[]=
     {"overr=", FIL_BEI | FILE_TYPE_BYTE2, 1, 34, "ApeScript overrides"},
     {{0, 0, 0, 0, 0, 0, 0},0, 0, 0, 0L}
 };
-
-n_int draw_error(n_constant_string error_text)
-{
-    if (error_text)
-    {
-        printf("ERROR: %s\n", error_text);
-    }
-    return -1;
-}
 
 static void test_pad_with_noise(n_uint random, test_being * value)
 {

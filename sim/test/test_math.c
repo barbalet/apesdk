@@ -41,12 +41,9 @@
 #include "../noble/noble.h"
 
 
-n_int draw_error(n_constant_string error_text)
+n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
-    if (error_text)
-    {
-        printf("ERROR: %s\n", error_text);
-    }
+    printf("ERROR: %s @ %s %ld\n",(const n_string) error_text, location, line_number);
     return -1;
 }
 
