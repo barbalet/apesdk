@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Noble Ape
-GenericName=Noble Ape
-Comment=An artificial life simulation
-Exec=na %U
-Icon=nobleape
-Terminal=false
-Categories=Game;Simulation;
