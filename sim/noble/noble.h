@@ -225,17 +225,6 @@ typedef n_string (n_console_input)(n_string value, n_int length);
 
 typedef void (n_console_output)(n_constant_string value);
 
-/*! @typedef
- @field px The x location of the window buffer being drawn.
- @field py The y location of the window buffer being drawn.
- @field information Information pointer coming through the n_join
- structure.
- @return If non-zero, this may exit the drawing depending on the
- particular use of the generic draw function.
- @discussion This is the agnostic window buffer interface to
- allow drawing at a high-level without causing problems over the
- two primary window buffer formats used in Noble Ape currently.
- */
 typedef n_byte (n_pixel)(n_int px, n_int py, n_int dx, n_int dy, void * information);
 
 typedef n_byte2 (n_patch)(n_byte2 * local);
@@ -273,6 +262,18 @@ typedef struct
     n_pixel * pixel_draw;
     void	* information;
 } n_join;
+
+typedef struct
+{
+    n_byte	* screen;
+    n_byte	* background;
+} n_background8;
+
+typedef struct
+{
+    n_byte  * screen;
+    n_byte	  color;
+} n_color8;
 
 /*! @struct
 @field size The size of the file in bytes.

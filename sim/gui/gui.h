@@ -90,18 +90,6 @@ enum
 /*	Icon Offset */
 #define	ICONOFFSET					27
 
-typedef struct
-{
-    n_byte	* screen;
-    n_byte	* background;
-} n_background8;
-
-typedef struct
-{
-    n_byte  * screen;
-    n_byte	  color;
-} n_color8;
-
 /*
  n_uint braincode_standard_deviation(noble_being * local_being);
  void braincode_number_of_instructions(
