@@ -58,8 +58,6 @@
 
 #endif
 
-#define LATITUDE_MEAN_TEMPERATURE 20000
-
 /*! @define */
 #define	SHORT_VERSION_NAME		 "Noble Ape 0.698 "
 #define	FULL_DATE				 __DATE__
@@ -82,6 +80,8 @@
 typedef	double	n_double;
 
 #define TWO_PI ((n_double)(6.2831853071795864769252867665590057683943))
+
+#define SINE_MAXIMUM (26880)
 
 /*! @typedef n_string
  @discussion This is the string format for the Noble Ape development */
