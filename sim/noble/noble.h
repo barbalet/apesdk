@@ -580,11 +580,13 @@ void  vect2_d(
 n_int vect2_dot(
     n_vect2 * initial, n_vect2 * second,
     n_int multiplier, n_int divisor);
-void  vect2_direction(n_vect2 * initial, n_int direction, n_int divisor);
-void  vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
-void  vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
-void  vect2_copy(n_vect2 * to, n_vect2 * from);
-void  vect2_populate(n_vect2 * value, n_int x, n_int y);
+void vect2_direction(n_vect2 * initial, n_int direction, n_int divisor);
+void vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
+void vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
+void vect2_copy(n_vect2 * to, n_vect2 * from);
+void vect2_populate(n_vect2 * value, n_int x, n_int y);
+
+void vect2_rotation(n_vect2 * location, n_vect2 * rotation);
 
 n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i);
 

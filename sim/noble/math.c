@@ -236,7 +236,6 @@ void vect2_back_byte2(n_vect2 * converter, n_byte2 * output)
     if (converter->x < 0) converter->x = 0;
     if (converter->y < 0) converter->y = 0;
 
-
     output[0] = (n_byte2) converter->x;
     output[1] = (n_byte2) converter->y;
 }
@@ -251,6 +250,17 @@ void  vect2_populate(n_vect2 * value, n_int x, n_int y)
 {
     value->x = x;
     value->y = y;
+}
+
+void vect2_rotation(n_vect2 * location, n_vect2 * rotation)
+{
+    n_vect2 temp;
+    
+    temp.x = ((location->x * rotation->x) + (location->y * rotation->y)) / SINE_MAXIMUM;
+    temp.y = ((location->x * rotation->y) - (location->y * rotation->x)) / SINE_MAXIMUM;
+    
+    location->x = temp.x;
+    location->y = temp.y;
 }
 
 /**
