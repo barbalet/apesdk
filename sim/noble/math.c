@@ -263,6 +263,40 @@ void vect2_rotation(n_vect2 * location, n_vect2 * rotation)
     location->y = temp.y;
 }
 
+n_int vect2_nonzero(n_vect2 * nonzero)
+{
+    return ((nonzero->x != 0) || (nonzero->y != 0));
+}
+
+void vect2_maxmin(n_vect2 * points, n_int number, n_vect2 * maxmin)
+{
+    n_int loop = 0;
+    
+    while(loop < number)
+    {
+        n_int px = points[loop].x;
+        n_int py = points[loop].y;
+        if (px < maxmin[0].x)
+        {
+            maxmin[0].x = px;
+        }
+        if (py < maxmin[0].y)
+        {
+            maxmin[0].y = py;
+        }
+
+        if (px > maxmin[1].x)
+        {
+            maxmin[1].x = px;
+        }
+        if (py > maxmin[1].y)
+        {
+            maxmin[1].y = py;
+        }
+        loop++;
+    }
+}
+
 /**
  * This function creates the fractal landscapes and the genetic fur patterns
  * currently. It combines a fractal generator and a stacked nearest-neighbor

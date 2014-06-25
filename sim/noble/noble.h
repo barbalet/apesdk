@@ -588,6 +588,10 @@ void vect2_populate(n_vect2 * value, n_int x, n_int y);
 
 void vect2_rotation(n_vect2 * location, n_vect2 * rotation);
 
+n_int vect2_nonzero(n_vect2 * nonzero);
+
+void vect2_maxmin(n_vect2 * points, n_int number, n_vect2 * maxmin);
+
 n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i);
 
 void math_general_execution(n_int instruction, n_int is_constant0, n_int is_constant1,
