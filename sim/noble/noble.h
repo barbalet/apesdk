@@ -570,6 +570,8 @@ n_int execute_toggle(n_int toggle);
 
 void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
 void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
+void  vect2_center(n_vect2 * center, n_vect2 * initial, n_vect2 * second);
+
 void  vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
 void  vect2_multiplier(
     n_vect2 * equals, n_vect2 * initial,
@@ -590,7 +592,8 @@ void vect2_rotation(n_vect2 * location, n_vect2 * rotation);
 
 n_int vect2_nonzero(n_vect2 * nonzero);
 
-void vect2_maxmin(n_vect2 * points, n_int number, n_vect2 * maxmin);
+n_vect2 * vect2_min_max_init(void);
+void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin);
 
 n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i);
 

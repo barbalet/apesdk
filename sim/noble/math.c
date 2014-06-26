@@ -99,6 +99,14 @@ void vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
     equals->y = initial->y + second->y;
 }
 
+
+void vect2_center(n_vect2 * center, n_vect2 * initial, n_vect2 * second)
+{
+    vect2_add(center, initial, second);
+    center->x = center->x / 2;
+    center->y = center->y / 2;
+}
+
 /**
  * Subtracts one 2d vector from another 2d vector into a resultant vector.
  * @param equals the vector that holds the result.
@@ -268,7 +276,19 @@ n_int vect2_nonzero(n_vect2 * nonzero)
     return ((nonzero->x != 0) || (nonzero->y != 0));
 }
 
-void vect2_maxmin(n_vect2 * points, n_int number, n_vect2 * maxmin)
+n_vect2 * vect2_min_max_init(void)
+{
+    n_vect2 * min_max = io_new(2 * sizeof(n_vect2));
+    if (min_max == 0L)
+    {
+        return 0L;
+    }
+    vect2_populate(&min_max[0], 2147483647, 2147483647);
+    vect2_populate(&min_max[1], -2147483648, -2147483648);
+    return min_max;
+}
+
+void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
 {
     n_int loop = 0;
     
