@@ -753,7 +753,7 @@ void math_random3(n_byte2 * local)
 }
 
 /* all this hardcoding will need to be de-hardcoded in the future */
-void math_bilinear_512_4096(n_byte * side512, n_byte * data)
+void math_bilinear_512_4096(n_byte * side512, n_byte * data, n_byte double_spread)
 {
     n_int loop_y = 0;
         
@@ -794,8 +794,14 @@ void math_bilinear_512_4096(n_byte * side512, n_byte * data)
             z10 = z10 << 3;
 
             value = (n_byte)((z00 + (((z01 * mic_x) + (z10 * mic_y) + (z11 * mic_x * mic_y) ) >> 6)));
-            
-            data[(point<<1)|1] = data[point<<1] = value;
+            if (double_spread)
+            {
+                data[(point<<1)|1] = data[point<<1] = value;
+            }
+            else
+            {
+                data[point] = value;
+            }
             loop_x++;
         }
         loop_y++;

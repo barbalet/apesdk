@@ -674,7 +674,7 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
     }
 }
 
-void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_byte * scratch)
+void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_byte * scratch, n_byte double_spread)
 {
     n_byte2	local_random[2];
 
@@ -693,7 +693,7 @@ void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_byte * sc
     
     if (map_hires)
     {
-        math_bilinear_512_4096(map, map_hires);
+        math_bilinear_512_4096(map, map_hires, double_spread);
     }
 }
 
