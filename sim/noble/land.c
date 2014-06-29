@@ -446,7 +446,7 @@ n_int land_map_bits(n_land * land)
     return MAP_BITS;
 }
 
-static void land_tide(n_land * local_land)
+void land_tide(n_land * local_land)
 {
     n_int time_of_day;
     n_int current_time;;
@@ -468,6 +468,25 @@ static void land_tide(n_land * local_land)
         NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
         
         local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
+    }
+    
+    if (local_land->highres)
+    {
+        n_uint  lp = 0;
+        while (lp < (HI_RES_MAP_AREA/32))
+        {
+            local_land->highres_tide[lp++] = 0;
+        }
+        lp = 0;
+        while (lp < HI_RES_MAP_AREA)
+        {
+            n_byte val = local_land->highres[lp<<1];
+            if ((val > 105) && (val < 151))
+            {
+                local_land->highres_tide[lp>>5] |= 1 << (lp & 31);
+            }
+            lp++;
+        }
     }
 }
 
@@ -655,22 +674,27 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
     }
 }
 
-void land_init(n_land * local, n_byte * scratch)
+void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_byte * scratch)
 {
     n_byte2	local_random[2];
 
-    NA_ASSERT(local, "local NULL");
+    NA_ASSERT(generator, "generator NULL");
+    NA_ASSERT(map, "map NULL");
     NA_ASSERT(scratch, "scratch NULL");
     
-    if (local == 0L) return;
+    if (generator == 0L) return;
+    if (map == 0L) return;
     if (scratch == 0L) return;
     
-    local_random[0] = local->genetics[0];
-    local_random[1] = local->genetics[1];
+    local_random[0] = generator[0];
+    local_random[1] = generator[1];
 
-    math_patch(local->map, scratch, &math_random, local_random, MAP_BITS, 0, 7, 1);
+    math_patch(map, scratch, &math_random, local_random, MAP_BITS, 0, 7, 1);
     
-    land_tide(local);
+    if (map_hires)
+    {
+        math_bilinear_512_4096(map, map_hires);
+    }
 }
 
 void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location)

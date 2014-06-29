@@ -500,27 +500,6 @@ static n_int sim_memory(n_uint offscreen_size)
     return being_memory(&sim, offbuffer, &current_location, memory_allocated);
 }
 
-static void sim_tide_block(n_byte * small_map, n_byte * map, n_c_uint * tide_block)
-{
-    n_uint  lp = 0;
-    math_bilinear_512_4096(small_map, map);
-
-    while (lp < (HI_RES_MAP_AREA/32))
-    {
-        tide_block[lp++] = 0;
-    }
-    lp = 0;
-    while (lp < HI_RES_MAP_AREA)
-    {
-        n_byte val = map[lp<<1];
-        if ((val > 105) && (val < 151))
-        {
-            tide_block[lp>>5] |= 1 << (lp & 31);
-        }
-        lp++;
-    }
-}
-
 void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size)
 {
     n_byte2	local_random[2];
@@ -568,8 +547,8 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     {
         land_clear(sim.land, kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
-        land_init(sim.land , &offbuffer[landbuffer_size]);
-        sim_tide_block(sim.land->map, sim.land->highres, sim.land->highres_tide);
+        land_init(sim.land->genetics, sim.land->map, sim.land->highres, &offbuffer[landbuffer_size]);
+        land_tide(sim.land);
 #endif
         if (kind != KIND_LOAD_FILE)
         {
