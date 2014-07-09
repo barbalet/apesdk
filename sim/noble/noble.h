@@ -46,7 +46,12 @@
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
 
-#define  EXECUTE_THREADED
+
+#ifdef NOBLE_IPAD
+    #undef  EXECUTE_THREADED
+#else
+    #define EXECUTE_THREADED
+#endif
 
 #ifdef COMMAND_LINE_EXPLICIT
 

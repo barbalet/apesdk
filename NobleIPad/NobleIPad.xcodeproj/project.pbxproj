@@ -546,6 +546,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NobleIPad/NobleIPad-Prefix.pch";
 				INFOPLIST_FILE = "NobleIPad/NobleIPad-Info.plist";
+				OTHER_CFLAGS = (
+					"-DGRAPHLESS_GUI",
+					"-DNOBLE_IPAD",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -556,9 +560,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NobleIPad/NobleIPad-Prefix.pch";
 				INFOPLIST_FILE = "NobleIPad/NobleIPad-Info.plist";
+				OTHER_CFLAGS = (
+					"-DGRAPHLESS_GUI",
+					"-DNOBLE_IPAD",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -623,6 +632,7 @@
 				5AE2D29E196CB66800F4D02D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5AE2D29F196CB66800F4D02D /* Build configuration list for PBXNativeTarget "NobleIPadTests" */ = {
 			isa = XCConfigurationList;
@@ -631,6 +641,7 @@
 				5AE2D2A1196CB66800F4D02D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
