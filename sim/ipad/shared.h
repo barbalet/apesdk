@@ -1,6 +1,6 @@
 /****************************************************************
 
- NoblePadView.h
+ shared.h
 
  =============================================================
 
@@ -33,23 +33,62 @@
 
  ****************************************************************/
 
-#import <UIKit/UIKit.h>
+#ifndef NOBLEAPE_SHARED_H
+#define NOBLEAPE_SHARED_H
 
-#include "../gui/gui.h"
+#ifndef	_WIN32
 
-@interface NoblePadView : UIView
-{
-    id             displayLink;
-    unsigned int   colorLookUp[256];
-    unsigned int   offscreenBuffer[2000*3000];
+#include "../noble/noble.h"
 
-    CGContextRef   drawRef;
-}
+#else
 
-- (void) animationTimer;
-- (void) drawRect:(CGRect)rect;
+#include "..\noble\noble.h"
 
-- (id)   initWithFrame:(CGRect)frame;
-- (void) awakeFromNib;
+#endif
 
-@end
+typedef enum{
+    SHARED_CYCLE_OK = 0,
+    SHARED_CYCLE_QUIT,
+    SHARED_CYCLE_DEBUG_OUTPUT
+}shared_cycle_state;
+
+shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_x, n_int dim_y);
+
+n_int shared_init(n_byte view, n_uint random);
+
+void shared_close(void);
+
+n_int shared_menu(n_int menuValue);
+
+void shared_rotate(n_double num, n_byte wwind);
+
+void shared_keyReceived(n_byte2 value, n_byte fIdentification);
+void shared_keyUp(void);
+
+void shared_mouseOption(n_byte option);
+void shared_mouseReceived(n_int valX, n_int valY, n_byte fIdentification);
+void shared_mouseUp(void);
+
+void shared_about(n_constant_string value);
+
+n_byte * shared_draw(n_byte fIdentification);
+
+void shared_color(n_byte2 * fit, n_int fIdentification);
+
+n_int shared_new(n_uint seed);
+
+n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
+
+void shared_saveFileName(n_string cStringFileName);
+
+void shared_script_debug_handle(n_string cStringFileName);
+
+void shared_clearErrors(void);
+
+#ifndef	_WIN32
+
+n_int sim_thread_console_quit(void);
+
+#endif
+
+#endif /* NOBLEAPE_SHARED_H */

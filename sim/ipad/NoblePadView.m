@@ -36,7 +36,7 @@
 
 #include "../noble/noble.h"
 #include "../universe/universe.h"
-#include "../gui/shared.h"
+#include "shared.h"
 
 #import "NoblePadView.h"
 
@@ -69,7 +69,7 @@
     if (drawRef == nil || (oldDimensionX != dimensionX))
     {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width, rect.size.height, 8, rect.size.width * 4, colorSpace, /*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGImageAlphaNoneSkipFirst);
+        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width, rect.size.height, 8, rect.size.width * 4, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGImageAlphaNoneSkipFirst);
         CGColorSpaceRelease( colorSpace );
         
         oldDimensionX = dimensionX;
@@ -79,7 +79,7 @@
 
     (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
         
-    shared_timeForColor(fit, NUM_TERRAIN);
+    shared_color(fit, NUM_TERRAIN);
     
     if (index == 0L) return;
 
@@ -141,12 +141,12 @@
 
 - (void)buttonNextApe:(id)sender
 {
-    shared_nextApe();
+    (void) shared_menu(NA_MENU_NEXT_APE);
 }
 
 - (void)buttonPreviousApe:(id)sender
 {
-    shared_previousApe();
+    (void) shared_menu(NA_MENU_PREVIOUS_APE);
 }
 
 - (void)buttonClearErrors:(id)sender
