@@ -372,45 +372,61 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
         n_int	val = seg14[conv[str[char_loop] - 32]];
         n_int	offset = char_loop << 3;
         /* draw the character as a 14-segment LCD/LED output */
+        
         ledfir(3, 8, 15);
+        
         ledfir(3, 2, 14);
+        
         ledfir(1, 0, 13);
         ledfir(2, 0, 13);
         ledfir(3, 0, 13);
         ledfir(4, 0, 13);
         ledfir(5, 0, 13);
+        
         ledfir(6, 3, 12);
         ledfir(6, 2, 12);
         ledfir(6, 1, 12);
+        
         ledfir(6, 5, 11);
         ledfir(6, 6, 11);
         ledfir(6, 7, 11);
+        
         ledfir(5, 8, 10);
         ledfir(4, 8, 10);
         ledfir(3, 8, 10);
         ledfir(2, 8, 10);
         ledfir(1, 8, 10);
+        
         ledfir(0, 7, 9);
         ledfir(0, 6, 9);
         ledfir(0, 5, 9);
+        
         ledfir(0, 1, 8);
         ledfir(0, 2, 8);
         ledfir(0, 3, 8);
+        
         ledfir(4, 4, 7);
         ledfir(5, 4, 7);
+        
         ledfir(2, 4, 6);
         ledfir(1, 4, 6);
+        
         ledfir(3, 7, 5);
         ledfir(3, 6, 5);
         ledfir(3, 5, 5);
+        
         ledfir(5, 7, 4);
         ledfir(4, 6, 4);
+        
         ledfir(1, 7, 3);
         ledfir(2, 6, 3);
+        
         ledfir(5, 1, 2);
         ledfir(4, 2, 2);
+        
         ledfir(1, 1, 1);
         ledfir(2, 2, 1);
+        
         ledfir(3, 1, 0);
         ledfir(3, 2, 0);
         ledfir(3, 3, 0);
