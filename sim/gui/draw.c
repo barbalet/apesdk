@@ -351,7 +351,7 @@ void draw_about(n_constant_string platform)
 
 /* draws a string starting at point (off_x,off_y) */
 
-#define	ledfir(x,y,c)	if(((val>> c )&1)) (*local_draw)((x + off_x + offset),((y + off_y)), 0, 0, local_info)
+#define	ledfir(x,y,c)	if(((val >> c)&1)) (*local_draw)((x + off_x + offset),((y + off_y)), 0, 0, local_info)
 
 /**
  This is used to produce letter LED style letters through the generic
@@ -1101,7 +1101,7 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
 
 static void draw_region(noble_being * local)
 {
-    n_join	local_draw;
+    n_join	 local_draw;
     n_byte * draw = draw_pointer(NUM_VIEW);
     n_int    ly = 0;
 

@@ -230,7 +230,7 @@ typedef n_string (n_console_input)(n_string value, n_int length);
 
 typedef void (n_console_output)(n_constant_string value);
 
-typedef n_byte (n_pixel)(n_int px, n_int py, n_int dx, n_int dy, void * information);
+typedef n_byte (n_pixel)(n_int x1, n_int y1, n_int x2, n_int y2, void * information);
 
 typedef n_byte2 (n_patch)(n_byte2 * local);
 
