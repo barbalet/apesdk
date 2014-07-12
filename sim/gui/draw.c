@@ -362,54 +362,15 @@ void draw_about(n_constant_string platform)
 
 #define	ledfir(x,y,c, dx, dy)	if(((val >> c)&1)) (*local_draw)((x + off_x + offset),((y + off_y)), dx, dy, local_info)
 
-
-void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
+static n_byte draw_character_line(n_int px, n_int py, n_int dx, n_int dy, void * data)
 {
-    n_pixel	* local_draw = draw->pixel_draw;
-    void	* local_info = draw->information;
+    n_join local_join;
     
-    n_int	char_loop = 0;
-    while (str[char_loop] > 31)
-    {
-        n_int	val = seg14[conv[str[char_loop] - 32]];
-        n_int	offset = char_loop << 3;
-        /* draw the character as a 14-segment LCD/LED output */
-        
-        ledfir(3, 8, 15, 0, 0);
-        
-        ledfir(3, 2, 14, 0, 0);
-        
-        ledfir(1, 0, 13, 4, 0);
-        
-        ledfir(6, 1, 12, 0, 2);
-        
-        ledfir(6, 5, 11, 0, 2);
-        
-        ledfir(1, 8, 10, 4, 0);
-        
-        ledfir(0, 5, 9, 0, 2);
-        
-        ledfir(0, 1, 8, 0, 2);
-        
-        ledfir(4, 4, 7, 1, 0);
-        
-        ledfir(1, 4, 6, 1, 0);
-        
-        ledfir(3, 5, 5, 0, 2);
-        
-        ledfir(4, 6, 4, 1, 1);
-        
-        ledfir(2, 6, 3, -1, 1);
-        
-        ledfir(4, 2, 2, 1, -1);
-        
-        ledfir(1, 1, 1, 1, 1);
-        
-        ledfir(3, 1, 0, 0, 2);
-        char_loop ++;
-    }
+    local_join.pixel_draw = pixel_map;
+    local_join.information = data;
+    
+    return math_join(px,py,dx,dy, &local_join);
 }
-
 
 /**
  This is used to produce letter LED style letters through the generic
@@ -419,7 +380,7 @@ void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * 
  @param off_y The starting y location for the string to be drawn.
  @param draw The generic draw function used to draw the character.
  */
-void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
+void draw_string_x(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 {
     n_pixel	* local_draw = draw->pixel_draw;
     void	* local_info = draw->information;
@@ -491,6 +452,13 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
         char_loop ++;
     }
 }
+
+void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
+{
+    /*draw->pixel_draw = &draw_character_line;*/
+    draw_string_x(str,off_x, off_y, draw);
+}
+
 
 /* this is the ocelot landscape algorithm */
 
