@@ -244,6 +244,15 @@ static n_byte pixel_map(n_int px, n_int py, n_int dx, n_int dy, void * informati
     return 0;
 }
 
+static n_byte pixel_map_checker(n_int px, n_int py, n_int dx, n_int dy, void * information)
+{
+    if ((px + py) & 1)
+    {
+        return pixel_map(px, py, dx, dy, information);
+    }
+    return 0;
+}
+
 static n_byte pixel_overlay(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
@@ -351,7 +360,56 @@ void draw_about(n_constant_string platform)
 
 /* draws a string starting at point (off_x,off_y) */
 
-#define	ledfir(x,y,c)	if(((val >> c)&1)) (*local_draw)((x + off_x + offset),((y + off_y)), 0, 0, local_info)
+#define	ledfir(x,y,c, dx, dy)	if(((val >> c)&1)) (*local_draw)((x + off_x + offset),((y + off_y)), dx, dy, local_info)
+
+
+void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
+{
+    n_pixel	* local_draw = draw->pixel_draw;
+    void	* local_info = draw->information;
+    
+    n_int	char_loop = 0;
+    while (str[char_loop] > 31)
+    {
+        n_int	val = seg14[conv[str[char_loop] - 32]];
+        n_int	offset = char_loop << 3;
+        /* draw the character as a 14-segment LCD/LED output */
+        
+        ledfir(3, 8, 15, 0, 0);
+        
+        ledfir(3, 2, 14, 0, 0);
+        
+        ledfir(1, 0, 13, 4, 0);
+        
+        ledfir(6, 1, 12, 0, 2);
+        
+        ledfir(6, 5, 11, 0, 2);
+        
+        ledfir(1, 8, 10, 4, 0);
+        
+        ledfir(0, 5, 9, 0, 2);
+        
+        ledfir(0, 1, 8, 0, 2);
+        
+        ledfir(4, 4, 7, 1, 0);
+        
+        ledfir(1, 4, 6, 1, 0);
+        
+        ledfir(3, 5, 5, 0, 2);
+        
+        ledfir(4, 6, 4, 1, 1);
+        
+        ledfir(2, 6, 3, -1, 1);
+        
+        ledfir(4, 2, 2, 1, -1);
+        
+        ledfir(1, 1, 1, 1, 1);
+        
+        ledfir(3, 1, 0, 0, 2);
+        char_loop ++;
+    }
+}
+
 
 /**
  This is used to produce letter LED style letters through the generic
@@ -373,63 +431,63 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
         n_int	offset = char_loop << 3;
         /* draw the character as a 14-segment LCD/LED output */
         
-        ledfir(3, 8, 15);
+        ledfir(3, 8, 15, 0, 0);
         
-        ledfir(3, 2, 14);
+        ledfir(3, 2, 14, 0, 0);
         
-        ledfir(1, 0, 13);
-        ledfir(2, 0, 13);
-        ledfir(3, 0, 13);
-        ledfir(4, 0, 13);
-        ledfir(5, 0, 13);
+        ledfir(1, 0, 13, 0, 0);
+        ledfir(2, 0, 13, 0, 0);
+        ledfir(3, 0, 13, 0, 0);
+        ledfir(4, 0, 13, 0, 0);
+        ledfir(5, 0, 13, 0, 0);
         
-        ledfir(6, 3, 12);
-        ledfir(6, 2, 12);
-        ledfir(6, 1, 12);
+        ledfir(6, 3, 12, 0, 0);
+        ledfir(6, 2, 12, 0, 0);
+        ledfir(6, 1, 12, 0, 0);
         
-        ledfir(6, 5, 11);
-        ledfir(6, 6, 11);
-        ledfir(6, 7, 11);
+        ledfir(6, 5, 11, 0, 0);
+        ledfir(6, 6, 11, 0, 0);
+        ledfir(6, 7, 11, 0, 0);
         
-        ledfir(5, 8, 10);
-        ledfir(4, 8, 10);
-        ledfir(3, 8, 10);
-        ledfir(2, 8, 10);
-        ledfir(1, 8, 10);
+        ledfir(5, 8, 10, 0, 0);
+        ledfir(4, 8, 10, 0, 0);
+        ledfir(3, 8, 10, 0, 0);
+        ledfir(2, 8, 10, 0, 0);
+        ledfir(1, 8, 10, 0, 0);
         
-        ledfir(0, 7, 9);
-        ledfir(0, 6, 9);
-        ledfir(0, 5, 9);
+        ledfir(0, 7, 9, 0, 0);
+        ledfir(0, 6, 9, 0, 0);
+        ledfir(0, 5, 9, 0, 0);
         
-        ledfir(0, 1, 8);
-        ledfir(0, 2, 8);
-        ledfir(0, 3, 8);
+        ledfir(0, 1, 8, 0, 0);
+        ledfir(0, 2, 8, 0, 0);
+        ledfir(0, 3, 8, 0, 0);
         
-        ledfir(4, 4, 7);
-        ledfir(5, 4, 7);
+        ledfir(4, 4, 7, 0, 0);
+        ledfir(5, 4, 7, 0, 0);
         
-        ledfir(2, 4, 6);
-        ledfir(1, 4, 6);
+        ledfir(2, 4, 6, 0, 0);
+        ledfir(1, 4, 6, 0, 0);
         
-        ledfir(3, 7, 5);
-        ledfir(3, 6, 5);
-        ledfir(3, 5, 5);
+        ledfir(3, 7, 5, 0, 0);
+        ledfir(3, 6, 5, 0, 0);
+        ledfir(3, 5, 5, 0, 0);
         
-        ledfir(5, 7, 4);
-        ledfir(4, 6, 4);
+        ledfir(5, 7, 4, 0, 0);
+        ledfir(4, 6, 4, 0, 0);
         
-        ledfir(1, 7, 3);
-        ledfir(2, 6, 3);
+        ledfir(1, 7, 3, 0, 0);
+        ledfir(2, 6, 3, 0, 0);
         
-        ledfir(5, 1, 2);
-        ledfir(4, 2, 2);
+        ledfir(5, 1, 2, 0, 0);
+        ledfir(4, 2, 2, 0, 0);
         
-        ledfir(1, 1, 1);
-        ledfir(2, 2, 1);
+        ledfir(1, 1, 1, 0, 0);
+        ledfir(2, 2, 1, 0, 0);
         
-        ledfir(3, 1, 0);
-        ledfir(3, 2, 0);
-        ledfir(3, 3, 0);
+        ledfir(3, 1, 0, 0, 0);
+        ledfir(3, 2, 0, 0, 0);
+        ledfir(3, 3, 0, 0, 0);
         char_loop ++;
     }
 }
@@ -871,7 +929,7 @@ static void	draw_meters(noble_simulation * local_sim)
             
             vect2_direction(&direction_facing, 128 + 64+ 256 - terrain_turn + loc_being->direction_facing, 63 * 32);
 
-            (void)math_join(75+ FACING_OFFSIDE, 25, direction_facing.x, (direction_facing.y), &local_kind);
+            (void)math_join_vect2(75+ FACING_OFFSIDE, 25, &direction_facing, &local_kind);
         }
 
         {
@@ -910,11 +968,16 @@ static void	draw_meters(noble_simulation * local_sim)
         vect2_direction(&hour_hand, ((loc_land->time) << 6) / mndivhr, 2688);
         vect2_direction(&minute_hand, ((loc_land->time) << 6) / mndivmin, 2016);
         
-        (void)math_join(17, 25, year_hand.y, -year_hand.x, &local_kind);
-        (void)math_join(33, 25, month_hand.y, -month_hand.x, &local_kind);
+        vect2_rotate90(&year_hand);
+        vect2_rotate90(&month_hand);
+        vect2_rotate90(&hour_hand);
+        vect2_rotate90(&minute_hand);
         
-        (void)math_join(25, 25, hour_hand.y, -hour_hand.x, &local_kind);
-        (void)math_join(25, 25, minute_hand.y, -minute_hand.x, &local_kind);
+        (void)math_join_vect2(17, 25, &year_hand, &local_kind);
+        (void)math_join_vect2(33, 25, &month_hand, &local_kind);
+        
+        (void)math_join_vect2(25, 25, &hour_hand, &local_kind);
+        (void)math_join_vect2(25, 25, &minute_hand, &local_kind);
     }
     ha1 = 0;
     while (ha1 < 32)
@@ -1103,25 +1166,24 @@ static void draw_region(noble_being * local)
 {
     n_join	 local_draw;
     n_byte * draw = draw_pointer(NUM_VIEW);
-    n_int    ly = 0;
+    n_int    ly = 63;
 
     if (draw == 0L) return;
 
     local_draw.information = draw;
-    local_draw.pixel_draw  = &pixel_map;
+    local_draw.pixel_draw  = &pixel_map_checker;
 
     while (ly < MAP_DIMENSION)
     {
-        n_int   lx = 63;
-        while (lx < MAP_DIMENSION)
-        {
-            draw[ lx | ((ly) << MAP_BITS) ] = COLOUR_YELLOW;
-            draw[ ly | ((lx) << MAP_BITS) ] = COLOUR_YELLOW;
-            lx += 64;
-        }
-        ly += 2;
+        math_line(0, ly, MAP_DIMENSION, ly, &local_draw);
+        math_line(ly, 0, ly, MAP_DIMENSION, &local_draw);
+        ly += 64;
     }
+
 #ifdef TERRITORY_ON
+    
+    local_draw.pixel_draw  = &pixel_map;
+
     ly = 0;
     while (ly < TERRITORY_DIMENSION)
     {

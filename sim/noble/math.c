@@ -207,6 +207,13 @@ n_int math_sine(n_int direction, n_int divisor)
     return new_sd[(direction)&255] / (divisor);
 }
 
+void vect2_rotate90(n_vect2 * rotation)
+{
+    n_int  temp = rotation->y;
+    rotation->y = 0 - rotation->x;
+    rotation->x = temp;
+}
+
 /**
  This produces a direction vector
  @param initial The vector output
@@ -579,6 +586,18 @@ n_byte math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw)
         }
     }
     return 0;
+}
+
+n_byte math_join_vect2(n_int sx, n_int sy, n_vect2 * vect, n_join * draw)
+{
+    return math_join(sx, sy, vect->x, vect->y, draw);
+}
+
+n_byte math_line(n_int x1, n_int y1, n_int x2, n_int y2, n_join * draw)
+{
+    n_int dx = x2 - x1;
+    n_int dy = y2 - y1;
+    return math_join(x1, y1, dx, dy, draw);
 }
 
 n_c_uint math_hash_fnv1(n_constant_string key)

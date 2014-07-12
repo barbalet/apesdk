@@ -230,7 +230,7 @@ typedef n_string (n_console_input)(n_string value, n_int length);
 
 typedef void (n_console_output)(n_constant_string value);
 
-typedef n_byte (n_pixel)(n_int x1, n_int y1, n_int x2, n_int y2, void * information);
+typedef n_byte (n_pixel)(n_int px, n_int py, n_int dx, n_int dy, void * information);
 
 typedef n_byte2 (n_patch)(n_byte2 * local);
 
@@ -587,6 +587,7 @@ void  vect2_d(
 n_int vect2_dot(
     n_vect2 * initial, n_vect2 * second,
     n_int multiplier, n_int divisor);
+void vect2_rotate90(n_vect2 * rotation);
 void vect2_direction(n_vect2 * initial, n_int direction, n_int divisor);
 void vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
 void vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
@@ -627,7 +628,10 @@ void    math_patch(n_byte * local_map, n_byte * scratch,
                    n_byte refined_start, n_byte refined_end,
                    n_byte rotate);
 
-n_int       math_sine(n_int direction, n_int divisor);
+n_int  math_sine(n_int direction, n_int divisor);
+
+n_byte math_join_vect2(n_int sx, n_int sy, n_vect2 * vect, n_join * draw);
+n_byte math_line(n_int x1, n_int y1, n_int x2, n_int y2, n_join * draw);
 
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);

@@ -763,7 +763,7 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
             being_point.information = (void *) &translate;
             being_point.pixel_draw  = &being_ground;
 
-            if(math_join(start.x, start.y, delta.x, delta.y, &being_point))
+            if(math_join_vect2(start.x, start.y, &delta, &being_point))
             {
                 return 0;
             }
