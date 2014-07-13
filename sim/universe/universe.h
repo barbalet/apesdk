@@ -1222,6 +1222,9 @@ typedef struct
     n_uint          delta_cycles;
     n_uint          count_cycles;
     
+    n_uint          delta_frames;
+    n_uint          count_frames;
+    
     being_birth_event * ext_birth;
     being_death_event * ext_death;
 } noble_simulation;

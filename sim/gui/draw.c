@@ -1180,12 +1180,8 @@ static void draw_weather(n_land * local_land)
     }
 }
 
-
-static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
+static void draw_count_number(n_uint count, n_string value)
 {
-    n_string_block  cycles_per_sec = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
-                                      'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
-                                     };
     n_uint	lp = 0, division = 1000000;
     while (lp < 6)
     {
@@ -1193,18 +1189,33 @@ static void draw_brain_cyles_per_second(n_uint count, n_join * local_mono)
         {
             if (division != 0)
             {
-                cycles_per_sec[lp] = (n_byte)('0' + ((count / division) % 10));
+                value[lp] = (n_byte)('0' + ((count / division) % 10));
             }
             else
             {
-                cycles_per_sec[lp] = (n_byte)('0');
+                value[lp] = (n_byte)('0');
             }
         }
         division /= 10;
         lp++;
     }
-    cycles_per_sec[6] = ('0' + ((count / 1) % 10));
-    draw_string(cycles_per_sec, terrain_dim_x - 110, 142, local_mono);
+    value[6] = ('0' + ((count / 1) % 10));
+}
+
+static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
+{
+    n_string_block  bcps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
+        'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
+    };
+    n_string_block  fps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
+        'F', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0
+    };
+
+    draw_count_number(bcps, bcps_string);
+    draw_count_number(fps, fps_string);
+    
+    draw_string(bcps_string, terrain_dim_x - 110, 142, local_mono);
+    draw_string(fps_string, terrain_dim_x - 110, 160, local_mono);
 }
 
 /* draws the rotating brain, this is always draw and never erase */
@@ -1254,7 +1265,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
         local_mono.pixel_draw  = &pixel_overlay;
         local_mono.information = draw_pointer(NUM_TERRAIN);
 
-        draw_brain_cyles_per_second(local_sim->delta_cycles, &local_mono);
+        draw_metrics(local_sim->delta_cycles, local_sim->delta_frames, &local_mono);
 
         if (local == 0L)
         {

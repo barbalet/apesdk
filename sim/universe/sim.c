@@ -392,11 +392,15 @@ static void sim_time(noble_simulation * local_sim)
 {
     local_sim->count_cycles += local_sim->num;
     
+    local_sim->count_frames ++;
+    
     if ((local_sim->real_time - local_sim->last_time) > 60)
     {
         local_sim->last_time = local_sim->real_time;
         local_sim->delta_cycles = local_sim->count_cycles;
+        local_sim->delta_frames = local_sim->count_frames;
         local_sim->count_cycles = 0;
+        local_sim->count_frames = 0;
     }
 }
 
@@ -516,6 +520,8 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     }
     sim.delta_cycles = 0;
     sim.count_cycles = 0;
+    sim.delta_frames = 0;
+    sim.count_frames = 0;
     sim.real_time = randomise;
     sim.last_time = randomise;
 
