@@ -360,17 +360,8 @@ void draw_about(n_constant_string platform)
 
 /* draws a string starting at point (off_x,off_y) */
 
-#define	ledfir(x,y,c, dx, dy)	if(((val >> c)&1)) (*local_draw)((x + off_x + offset),((y + off_y)), dx, dy, local_info)
+#define	ledfir(x, y, dx, dy, c)	if(((val >> c)&1)) (*local_draw)((x + off_x + offset),((y + off_y)), dx, dy, local_info)
 
-static n_byte draw_character_line(n_int px, n_int py, n_int dx, n_int dy, void * data)
-{
-    n_join local_join;
-    
-    local_join.pixel_draw = pixel_map;
-    local_join.information = data;
-    
-    return math_join(px,py,dx,dy, &local_join);
-}
 
 /**
  This is used to produce letter LED style letters through the generic
@@ -380,11 +371,11 @@ static n_byte draw_character_line(n_int px, n_int py, n_int dx, n_int dy, void *
  @param off_y The starting y location for the string to be drawn.
  @param draw The generic draw function used to draw the character.
  */
-void draw_string_x(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
+void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 {
     n_pixel	* local_draw = draw->pixel_draw;
     void	* local_info = draw->information;
-
+    
     n_int	char_loop = 0;
     while (str[char_loop] > 31)
     {
@@ -392,71 +383,53 @@ void draw_string_x(n_constant_string str, n_int off_x, n_int off_y, n_join * dra
         n_int	offset = char_loop << 3;
         /* draw the character as a 14-segment LCD/LED output */
         
-        ledfir(3, 8, 15, 0, 0);
+        ledfir(3, 8, 0, 0, 15);
         
-        ledfir(3, 2, 14, 0, 0);
+        ledfir(3, 2, 0, 0, 14);
         
-        ledfir(1, 0, 13, 0, 0);
-        ledfir(2, 0, 13, 0, 0);
-        ledfir(3, 0, 13, 0, 0);
-        ledfir(4, 0, 13, 0, 0);
-        ledfir(5, 0, 13, 0, 0);
+        ledfir(1, 0, 4, 0, 13);
         
-        ledfir(6, 3, 12, 0, 0);
-        ledfir(6, 2, 12, 0, 0);
-        ledfir(6, 1, 12, 0, 0);
+        ledfir(6, 1, 0, 2, 12);
         
-        ledfir(6, 5, 11, 0, 0);
-        ledfir(6, 6, 11, 0, 0);
-        ledfir(6, 7, 11, 0, 0);
+        ledfir(6, 5, 0, 2, 11);
         
-        ledfir(5, 8, 10, 0, 0);
-        ledfir(4, 8, 10, 0, 0);
-        ledfir(3, 8, 10, 0, 0);
-        ledfir(2, 8, 10, 0, 0);
-        ledfir(1, 8, 10, 0, 0);
+        ledfir(1, 8, 4, 0, 10);
         
-        ledfir(0, 7, 9, 0, 0);
-        ledfir(0, 6, 9, 0, 0);
-        ledfir(0, 5, 9, 0, 0);
+        ledfir(0, 5, 0, 2, 9);
         
-        ledfir(0, 1, 8, 0, 0);
-        ledfir(0, 2, 8, 0, 0);
-        ledfir(0, 3, 8, 0, 0);
+        ledfir(0, 1, 0, 2, 8);
         
-        ledfir(4, 4, 7, 0, 0);
-        ledfir(5, 4, 7, 0, 0);
+        ledfir(4, 4, 1, 0, 7);
         
-        ledfir(2, 4, 6, 0, 0);
-        ledfir(1, 4, 6, 0, 0);
+        ledfir(1, 4, 1, 0, 6);
         
-        ledfir(3, 7, 5, 0, 0);
-        ledfir(3, 6, 5, 0, 0);
-        ledfir(3, 5, 5, 0, 0);
+        ledfir(3, 5, 0, 2, 5);
         
-        ledfir(5, 7, 4, 0, 0);
-        ledfir(4, 6, 4, 0, 0);
+        ledfir(4, 6, 0, 1, 4);
         
-        ledfir(1, 7, 3, 0, 0);
-        ledfir(2, 6, 3, 0, 0);
+        ledfir(2, 6, -1, 1, 3);
         
-        ledfir(5, 1, 2, 0, 0);
-        ledfir(4, 2, 2, 0, 0);
+        ledfir(4, 2, 1, -1, 2);
         
-        ledfir(1, 1, 1, 0, 0);
-        ledfir(2, 2, 1, 0, 0);
+        ledfir(1, 1, 1, 1, 1);
         
-        ledfir(3, 1, 0, 0, 0);
-        ledfir(3, 2, 0, 0, 0);
-        ledfir(3, 3, 0, 0, 0);
+        ledfir(3, 1, 0, 2, 0);
         char_loop ++;
     }
 }
 
+
+static n_byte draw_character_line(n_int px, n_int py, n_int dx, n_int dy, void * data)
+{
+    return math_join(px, py, dx, dy, data);
+}
+
 void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 {
-    /*draw->pixel_draw = &draw_character_line;*/
-    draw_string_x(str,off_x, off_y, draw);
+    n_join local_pixel;
+    local_pixel.pixel_draw = &draw_character_line;
+    local_pixel.information = draw;
+    draw_string_line(str, off_x, off_y, &local_pixel);
 }
 
 
