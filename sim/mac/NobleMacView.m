@@ -193,6 +193,7 @@
 - (void)startEverything
 {
     NSSize increments;
+    NSTimeInterval interval;
     
     increments.height = 4;
     increments.width = 4;
@@ -213,7 +214,10 @@
     }
     
     /* start animation timer */
-	timerAnimation = [NSTimer timerWithTimeInterval:(1.0f/60.0f) target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
+    
+    interval = 1.0f/((NSTimeInterval)shared_max_fps());
+    
+	timerAnimation = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
     

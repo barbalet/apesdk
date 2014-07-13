@@ -60,6 +60,8 @@ void shared_close(void);
 
 n_int shared_menu(n_int menuValue);
 
+n_uint shared_max_fps(void);
+
 void shared_rotate(n_double num, n_byte wwind);
 
 void shared_keyReceived(n_byte2 value, n_byte fIdentification);

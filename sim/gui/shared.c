@@ -453,6 +453,11 @@ void shared_rotate(n_double num, n_byte wwind)
     }
 }
 
+n_uint shared_max_fps(void)
+{
+    return 60;
+}
+
 n_int shared_menu(n_int menuVal)
 {
     switch (menuVal) {
