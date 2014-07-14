@@ -97,28 +97,33 @@
 	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
 }
 
+
+- (void) awakeFromNib
+{
+    NSSize size = [[self window] frame].size;
+    
+    fIdentification = 0;
+    
+    [self startEverything];
+    
+    glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, size.width, 0, size.height, -1, 1);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
 - (void) drawRect:(NSRect)rect
 {
-    n_int           dim_x = (n_int)rect.size.width;
-    n_int           dim_y = (n_int)rect.size.height;
-    static n_byte   outputBuffer[2048*1536*3];
+    NSSize size = rect.size;
     
-    {
-        shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dim_x, dim_y);
-        if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
-        {
-            [self debugOutput];
-        }
-        if (returned_value == SHARED_CYCLE_QUIT)
-        {
-            [self quitProcedure];
-        }
-    }
     [[self openGLContext] makeCurrentContext];
-
-    shared_draw(outputBuffer, fIdentification, dim_x, dim_y);
     
-    glDrawPixels((GLsizei)dim_x, (GLsizei)dim_y,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
+    shared_draw(0L, fIdentification, (n_int)size.width, (n_int)size.height);
+    
     [[self openGLContext] flushBuffer];
 }
 
@@ -148,15 +153,6 @@
 - (BOOL)resignFirstResponder
 {
     return YES;
-}
-
-/* is over-ridden in the Noble Ape Simulation */
-
-- (void) awakeFromNib
-{
-    fIdentification = 0;
-    
-    [self startEverything];
 }
 
 - (void)startEverything

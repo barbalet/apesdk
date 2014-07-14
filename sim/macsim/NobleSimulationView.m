@@ -48,6 +48,31 @@
     [self startEverything];
 }
 
+- (void) drawRect:(NSRect)rect
+{
+    n_int           dim_x = (n_int)rect.size.width;
+    n_int           dim_y = (n_int)rect.size.height;
+    static n_byte   outputBuffer[2048*1536*3];
+    
+    {
+        shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dim_x, dim_y);
+        if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
+        {
+            [self debugOutput];
+        }
+        if (returned_value == SHARED_CYCLE_QUIT)
+        {
+            [self quitProcedure];
+        }
+    }
+    [[self openGLContext] makeCurrentContext];
+    
+    shared_draw(outputBuffer, fIdentification, dim_x, dim_y);
+    
+    glDrawPixels((GLsizei)dim_x, (GLsizei)dim_y,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
+    [[self openGLContext] flushBuffer];
+}
+
 -(IBAction) menuControlPause:(id) sender
 {
     [self menuCheckMark:sender check:shared_menu(NA_MENU_PAUSE)];

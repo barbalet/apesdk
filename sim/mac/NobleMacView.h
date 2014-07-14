@@ -78,6 +78,8 @@
 
 -(IBAction) menuQuit:(id) sender;
 
+- (void)debugOutput;
+
 -(void)keyUp:(NSEvent *)theEvent;
 -(void)keyDown:(NSEvent *)theEvent;
 
