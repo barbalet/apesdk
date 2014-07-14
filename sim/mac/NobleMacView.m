@@ -99,14 +99,12 @@
 
 - (void) drawRect:(NSRect)rect
 {
-    n_int         dimensionX = (n_int)rect.size.width;
-    n_int         dimensionY = (n_int)rect.size.height;
-    n_byte        * index = shared_draw(fIdentification);
-    
-    if (index == 0L) return;
+    n_int           dim_x = (n_int)rect.size.width;
+    n_int           dim_y = (n_int)rect.size.height;
+    static n_byte   outputBuffer[2048*1536*3];
     
     {
-        shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dimensionX, dimensionY);
+        shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dim_x, dim_y);
         if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
         {
             [self debugOutput];
@@ -118,38 +116,9 @@
     }
     [[self openGLContext] makeCurrentContext];
 
-    {
-        n_int           ly = 0;
-        n_int           loop = 0;
-        n_int			loopColors = 0;
-        n_byte2         fit[256*3];
-        
-        shared_color(fit, fIdentification);
-        
-        while(loopColors < 256)
-        {
-            colorTable[loopColors][0] = fit[loop++] >> 8;
-            colorTable[loopColors][1] = fit[loop++] >> 8;
-            colorTable[loopColors][2] = fit[loop++] >> 8;
-            loopColors++;
-        }
-        loop = 0;
-        while(ly < dimensionY)
-        {
-            n_int    lx = 0;
-            n_byte * indexLocalX = &index[(dimensionY-ly-1)*dimensionX];
-            while(lx < dimensionX)
-            {
-                unsigned char value = indexLocalX[lx++] ;
-                outputBuffer[loop++] = colorTable[value][0];
-                outputBuffer[loop++] = colorTable[value][1];
-                outputBuffer[loop++] = colorTable[value][2];
-            }
-            ly++;
-        }
-    }
-
-    glDrawPixels((GLsizei)dimensionX, (GLsizei)dimensionY,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
+    shared_draw(outputBuffer, fIdentification, dim_x, dim_y);
+    
+    glDrawPixels((GLsizei)dim_x, (GLsizei)dim_y,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
     [[self openGLContext] flushBuffer];
 }
 
@@ -361,7 +330,6 @@
 {
     return YES;
 }
-
 
 - (void)mouseDown:(NSEvent *)theEvent
 {

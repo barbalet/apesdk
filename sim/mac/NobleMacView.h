@@ -40,13 +40,11 @@
 #import <OpenGL/glu.h>
 #import <OpenGL/OpenGL.h>
 
-#include "../mac/shared.h"
+#include "../noble/shared.h"
 
 @interface NobleMacView : NSOpenGLView
 {
     NSTimer*         timerAnimation;
-    GLubyte          colorTable[256][3];
-    GLubyte          outputBuffer[2048*1536*3];
     n_byte           fIdentification;
 }
 

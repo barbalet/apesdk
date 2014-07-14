@@ -60,6 +60,8 @@ void shared_close(void);
 
 n_int shared_menu(n_int menuValue);
 
+n_uint shared_max_fps(void);
+
 void shared_rotate(n_double num, n_byte wwind);
 
 void shared_keyReceived(n_byte2 value, n_byte fIdentification);
@@ -71,9 +73,7 @@ void shared_mouseUp(void);
 
 void shared_about(n_constant_string value);
 
-n_byte * shared_draw(n_byte fIdentification);
-
-void shared_color(n_byte2 * fit, n_int fIdentification);
+void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y);
 
 n_int shared_new(n_uint seed);
 
@@ -82,8 +82,6 @@ n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
 void shared_saveFileName(n_string cStringFileName);
 
 void shared_script_debug_handle(n_string cStringFileName);
-
-void shared_clearErrors(void);
 
 #ifndef	_WIN32
 

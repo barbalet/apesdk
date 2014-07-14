@@ -398,17 +398,6 @@ void shared_about(n_constant_string value)
     draw_about(full_value);
 }
 
-n_byte * shared_draw(n_byte fIdentification)
-{
-    return draw_pointer(fIdentification);
-}
-
-void shared_color(n_byte2 * fit, n_int fIdentification)
-{
-    noble_simulation * local_sim = sim_sim();
-    draw_color_time(fit, local_sim->land->time);
-}
-
 void shared_clearErrors(void)
 {
     (void)draw_error(0L, 0L, 0);
@@ -489,3 +478,87 @@ n_int shared_menu(n_int menuVal)
     }
     return -1;
 }
+
+#ifdef NOBLE_IPAD
+
+void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
+{
+    n_int           ly = 0;
+    n_c_uint * offscreenBuffer = (n_c_uint *) outputBuffer;
+    n_c_uint   colorLookUp[256];
+    n_int	   loopColors = 0;
+    n_int      loop = 0;
+
+    noble_simulation * local_sim = sim_sim();
+    n_byte2         fit[256*3];
+
+    n_byte   * index = draw_pointer(fIdentification);
+
+    if (index == 0L) return;
+
+    draw_color_time(fit, local_sim->land->time);
+
+    while(loopColors < 256)
+    {
+        n_byte colR = fit[loop++] >> 8;
+        n_byte colG = fit[loop++] >> 8;
+        n_byte colB = fit[loop++] >> 8;
+        colorLookUp[ loopColors ] = (colB << 24) | (colG << 16) | (colR << 8);
+        loopColors++;
+    }
+
+    loop = 0;
+    while(ly < dim_y)
+    {
+        n_int    lx = 0;
+        n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
+        while(lx < dim_x)
+        {
+            offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
+        }
+        ly++;
+    }
+}
+
+#else
+
+void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
+{
+    n_int           ly = 0;
+    n_int           loop = 0;
+    n_int			loopColors = 0;
+    n_byte2         fit[256*3];
+    n_byte          colorTable[256][3];
+    noble_simulation * local_sim = sim_sim();
+    n_byte           * index = draw_pointer(fIdentification);
+    
+    if (index == 0L) return;
+    
+    draw_color_time(fit, local_sim->land->time);
+    
+    while(loopColors < 256)
+    {
+        colorTable[loopColors][0] = fit[loop++] >> 8;
+        colorTable[loopColors][1] = fit[loop++] >> 8;
+        colorTable[loopColors][2] = fit[loop++] >> 8;
+        loopColors++;
+    }
+    loop = 0;
+    while(ly < dim_y)
+    {
+        n_int    lx = 0;
+        n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
+        while(lx < dim_x)
+        {
+            unsigned char value = indexLocalX[lx++] ;
+            outputBuffer[loop++] = colorTable[value][0];
+            outputBuffer[loop++] = colorTable[value][1];
+            outputBuffer[loop++] = colorTable[value][2];
+        }
+        ly++;
+    }
+}
+
+#endif
+
+

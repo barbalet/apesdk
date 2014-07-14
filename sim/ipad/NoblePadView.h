@@ -40,9 +40,7 @@
 @interface NoblePadView : UIView
 {
     id             displayLink;
-    unsigned int   colorLookUp[256];
     unsigned int   offscreenBuffer[2000*3000];
-
     CGContextRef   drawRef;
 }
 

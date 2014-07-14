@@ -61,7 +61,6 @@
     int            loop = 0;
     int            loopColors=0;
 
-    unsigned char * index = shared_draw(NUM_TERRAIN);
     unsigned short fit[256 * 3];
 
     static          n_int oldDimensionX = -1;
@@ -78,33 +77,8 @@
     CGContextSaveGState(context);
 
     (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
-        
-    shared_color(fit, NUM_TERRAIN);
     
-    if (index == 0L) return;
-
-    while(loopColors < 256)
-    {
-        unsigned char colR = fit[loop++] >> 8;
-        unsigned char colG = fit[loop++] >> 8;
-        unsigned char colB = fit[loop++] >> 8;
-
-        colorLookUp[ loopColors ] = (colB << 24) | (colG << 16) | (colR << 8);
-
-        loopColors++;
-    }
-    
-    loop = 0;
-    while(ly < dimensionY)
-    {
-        n_int    lx = 0;
-        n_byte * indexLocalX = &index[(dimensionY-ly-1)*dimensionX];
-        while(lx < dimensionX)
-        {
-            offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
-        }
-        ly++;
-    }
+    shared_draw(offscreenBuffer, NUM_TERRAIN, dimensionX, dimensionY);
 
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
 

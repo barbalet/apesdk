@@ -58,6 +58,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5A0DE13019735B29008A6E06 /* shared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
 		5AE2D26A196CB66800F4D02D /* NobleIPad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NobleIPad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5AE2D26D196CB66800F4D02D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		5AE2D26F196CB66800F4D02D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -108,7 +109,6 @@
 		5AE2D2CB196CB6C500F4D02D /* NoblePadView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoblePadView.m; sourceTree = "<group>"; };
 		5AE2D2CC196CB6C500F4D02D /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		5AE2D2CD196CB6C500F4D02D /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		5AE2D2EA196CB7CA00F4D02D /* shared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -231,6 +231,7 @@
 				5AE2D2AE196CB6C500F4D02D /* network.c */,
 				5AE2D2AF196CB6C500F4D02D /* noble.h */,
 				5AE2D2B0196CB6C500F4D02D /* parse.c */,
+				5A0DE13019735B29008A6E06 /* shared.h */,
 			);
 			name = noble;
 			path = ../../sim/noble;
@@ -279,7 +280,6 @@
 				5AE2D2CB196CB6C500F4D02D /* NoblePadView.m */,
 				5AE2D2CC196CB6C500F4D02D /* ViewController.h */,
 				5AE2D2CD196CB6C500F4D02D /* ViewController.m */,
-				5AE2D2EA196CB7CA00F4D02D /* shared.h */,
 			);
 			name = ipad;
 			path = ../../sim/ipad;

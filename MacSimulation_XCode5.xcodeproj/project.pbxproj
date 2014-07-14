@@ -94,10 +94,10 @@
 		4A94504D17CDC33C00D5893C /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = draw.c; sourceTree = "<group>"; };
 		4A94504E17CDC33C00D5893C /* gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gui.h; sourceTree = "<group>"; };
 		4A94504F17CDC33C00D5893C /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shared.c; sourceTree = "<group>"; };
-		5A05D160193D51050099D425 /* shared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
 		5A05D162193D512D0099D425 /* nobleape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = nobleape.xib; sourceTree = "<group>"; };
 		5A05D163193D512D0099D425 /* NobleSimulationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NobleSimulationView.h; sourceTree = "<group>"; };
 		5A05D164193D512D0099D425 /* NobleSimulationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NobleSimulationView.m; sourceTree = "<group>"; };
+		5A1222C5197356F9003D424F /* shared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = "<group>"; };
 		5A4805E0178676EB007220D7 /* MacSimulation Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MacSimulation Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A4805E1178676EB007220D7 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		5A4805E5178676EB007220D7 /* MacSimulation Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MacSimulation Tests-Info.plist"; sourceTree = "<group>"; };
@@ -220,7 +220,6 @@
 			children = (
 				5ABD659B18B9C5F200269DEC /* AppDelegate.h */,
 				5ABD659C18B9C5F200269DEC /* AppDelegate.m */,
-				5A05D160193D51050099D425 /* shared.h */,
 				4A3600481712409A004DAFBA /* main.m */,
 				4A36004B1712409A004DAFBA /* NobleMacView.h */,
 				4A36004C1712409A004DAFBA /* NobleMacView.m */,
@@ -242,6 +241,7 @@
 				5AD73C46184894FC0081457D /* execute.c */,
 				4A3600531712409A004DAFBA /* noble.h */,
 				4A3600541712409A004DAFBA /* parse.c */,
+				5A1222C5197356F9003D424F /* shared.h */,
 			);
 			name = noble;
 			path = sim/noble;
