@@ -42,6 +42,10 @@
 
 @implementation NobleMacView
 
+static NSString * sharedString_LastSaved       = @"LastSaved";
+static NSString * sharedString_LastOpen        = @"LastOpen";
+static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
+
 /* pixel format definition */
 + (NSOpenGLPixelFormat*) basicPixelFormat
 {
@@ -160,9 +164,20 @@
     NSSize increments;
     NSTimeInterval interval;
     
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString * value = [prefs stringForKey:sharedString_LastSaved];
+    shared_saved_string(SSS_SAVED, (n_string)[value UTF8String]);
+    
+    value = [prefs stringForKey:sharedString_LastOpen];
+    shared_saved_string(SSS_OPEN, (n_string)[value UTF8String]);
+
+    value = [prefs stringForKey:sharedString_LastOpenScript];
+    shared_saved_string(SSS_OPEN_SCRIPT, (n_string)[value UTF8String]);
+
     increments.height = 4;
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
+
     
     execute_threads([[NSProcessInfo processInfo] processorCount]);
     {
@@ -232,9 +247,20 @@
          {
              NSString *name = [panel.URL path];
              char * cStringFileName = (char *)[name UTF8String];
+             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+
              if (!shared_openFileName(cStringFileName,0))
              {
                  [[NSSound soundNamed:@"Pop"] play];
+                 [prefs removeObjectForKey:sharedString_LastOpen];
+                 [prefs synchronize];
+                 shared_saved_string(SSS_OPEN, 0L);
+             }
+             else
+             {
+                 [prefs setObject:name forKey:sharedString_LastOpen];
+                 [prefs synchronize];
+                 shared_saved_string(SSS_OPEN, cStringFileName);
              }
          }
          
@@ -251,9 +277,19 @@
          {
              NSString *name = [panel.URL path];
              char * cStringFileName = (char *)[name UTF8String];
+             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
              if (!shared_openFileName(cStringFileName,1))
              {
                  [[NSSound soundNamed:@"Pop"] play];
+                 [prefs removeObjectForKey:sharedString_LastOpenScript];
+                 [prefs synchronize];
+                 shared_saved_string(SSS_OPEN_SCRIPT, 0L);
+             }
+             else
+             {
+                 [prefs setObject:name forKey:sharedString_LastOpenScript];
+                 [prefs synchronize];
+                 shared_saved_string(SSS_OPEN_SCRIPT, cStringFileName);
              }
          }
      }];
@@ -269,6 +305,10 @@
          {
              NSString *name = [panel.URL path];
              char * cStringFileName = (char *)[name UTF8String];
+             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+             [prefs setObject:name forKey:sharedString_LastSaved];
+             [prefs synchronize];
+             shared_saved_string(SSS_SAVED, cStringFileName);
              shared_saveFileName(cStringFileName);
          }
          
