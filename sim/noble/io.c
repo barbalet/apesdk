@@ -927,6 +927,9 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
         }
         lp ++;
     }
+    
+    io_output_contents(fil);
+    
     return SHOW_ERROR((n_constant_string)found_text);
 }
 
@@ -1034,9 +1037,20 @@ n_int io_read_data(n_file * fil, n_byte2 command, n_byte * data_read)
     return SHOW_ERROR("Type not found");
 }
 
-void io_output_contents(n_file * fil)
+void io_output_contents(n_file * file)
 {
-    printf("* * * * * * FILE * * * * * *\n");
+    n_uint loop = 0;
+    printf("--------------------FILE--------------------\n");
+    printf("Location %ld\n", file->location);
+    printf("Size %ld\n", file->size);
+    printf("* * * * * * \n");
+    
+    while (loop < file->location)
+    {
+        printf("%c", file->data[loop++]);
+    }
+    printf("--------------------------------------------n");
+
 }
 
 /**

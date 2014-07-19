@@ -687,7 +687,7 @@ void       io_help_line(noble_console_command * specific, n_console_output outpu
 
 void       io_console_quit(void);
 
-void       io_output_contents(n_file * debug);
+void       io_output_contents(n_file * file);
 
 n_file * io_file_ready(n_int entry, n_file * file);
 
