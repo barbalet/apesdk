@@ -896,7 +896,7 @@ n_int io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line)
 /* find the variable command */
 n_int io_command(n_file * fil, const noble_file_entry * commands)
 {
-    n_byte   found_text[6];
+    n_byte   found_text[7] = {0};
     n_byte * commands_bytes = (n_byte *) commands[0].characters;
 
     n_byte2 lp = 0;
@@ -927,7 +927,7 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
         }
         lp ++;
     }
-    return -1;
+    return SHOW_ERROR((n_constant_string)found_text);
 }
 
 /* find the largest size data unit to handle the file copying to data structures */
@@ -1034,6 +1034,10 @@ n_int io_read_data(n_file * fil, n_byte2 command, n_byte * data_read)
     return SHOW_ERROR("Type not found");
 }
 
+void io_output_contents(n_file * fil)
+{
+    printf("* * * * * * FILE * * * * * *\n");
+}
 
 /**
  @discussion This function takes a file and parses the file date with the commands
