@@ -57,13 +57,7 @@
     CGContextRef   context = UIGraphicsGetCurrentContext();
     n_int          dimensionX = rect.size.width;
     n_int          dimensionY = rect.size.height;
-    int            ly = 0;
-    int            loop = 0;
-    int            loopColors=0;
-
-    unsigned short fit[256 * 3];
-
-    static          n_int oldDimensionX = -1;
+    static n_int   oldDimensionX = -1;
     
     if (drawRef == nil || (oldDimensionX != dimensionX))
     {
@@ -78,7 +72,7 @@
 
     (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
     
-    shared_draw(offscreenBuffer, NUM_TERRAIN, dimensionX, dimensionY);
+    shared_draw((n_byte *)offscreenBuffer, NUM_TERRAIN, dimensionX, dimensionY);
 
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
 
@@ -125,7 +119,7 @@
 
 - (void)buttonClearErrors:(id)sender
 {
-    shared_clearErrors();
+    shared_menu(NA_MENU_CLEAR_ERRORS);
 }
 
 - (void)buttonNewSimulation:(id)sender
