@@ -661,9 +661,9 @@ void       io_file_free(n_file ** file);
 
 n_int      io_number(n_string number_string, n_int * actual_value, n_int * decimal_divisor);
 
-void       io_file_aiff_header(void * fptr, n_uint total_samples);
+void       audio_aiff_header(void * fptr, n_uint total_samples);
 
-void       io_file_aiff_body(void * fptr, n_audio *samples, n_uint number_samples);
+void       audio_aiff_body(void * fptr, n_audio *samples, n_uint number_samples);
 
 n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
 n_int      io_help(void * ptr, n_string response, n_console_output output_function);

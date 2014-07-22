@@ -40,6 +40,7 @@
 
 #include "noble.h"
 #include <math.h>
+#include <stdio.h>
 
 static n_double frequency[AUDIO_FFT_MAX_BUFFER];
 static n_double timedomain[AUDIO_FFT_MAX_BUFFER];
@@ -260,5 +261,72 @@ void audio_set_frequency(n_uint entry, n_uint value)
     frequency[entry] = value/1E+00;
     frequencyi[entry] = 0E+00;
 
+}
+
+static void audio_aiff_uint(n_byte * buffer, n_uint value)
+{
+    buffer[0] = (value & 0xff000000) >> 24;
+    buffer[1] = (value & 0x00ff0000) >> 16;
+    buffer[2] = (value & 0x0000ff00) >> 8;
+    buffer[3] = (value & 0x000000ff) >> 0;
+}
+
+void audio_aiff_body(void * fptr, n_audio *samples, n_uint number_samples)
+{
+    fwrite(samples,number_samples,sizeof(n_audio),(FILE*)fptr);
+}
+
+static void audio_header(n_byte * header)
+{
+    header[0] =  'F';
+    header[1] =  'O';
+    header[2] =  'R';
+    header[3] =  'M';
+    
+    header[8]  = 'A';
+    header[9]  = 'I';
+    header[10] = 'F';
+    header[11] = 'F';
+    
+    header[12] = 'C';
+    header[13] = 'O';
+    header[14] = 'M';
+    header[15] = 'M';
+    
+    header[19] = 18;
+    
+    header[21] = 1;
+    
+    header[27] = 16;
+    
+    header[28] = 0x40;
+    header[29] = 0x0e;
+    header[30] = 0xac;
+    header[31] = 0x44;
+    
+    header[38] = 'S';
+    header[39] = 'S';
+    header[40] = 'N';
+    header[41] = 'D';
+}
+
+static n_uint audio_total_size(n_uint total_samples)
+{
+    return 4 + 8 + 18 + 8 + (sizeof(n_audio) * total_samples) + 8;
+}
+
+static n_uint audio_sound_size(n_uint total_samples)
+{
+    return (2 * total_samples) + 8;
+}
+
+void audio_aiff_header(void * fptr, n_uint total_samples)
+{
+    n_byte header[54] = {0};
+    audio_header(header);
+    audio_aiff_uint(&header[4],  audio_total_size(total_samples));
+    audio_aiff_uint(&header[22], total_samples);
+    audio_aiff_uint(&header[42], audio_sound_size(total_samples));
+    fwrite(header, 54, 1, (FILE*)fptr);
 }
 

@@ -200,7 +200,7 @@ void speak_out(n_string filename, n_string paragraph)
         return;
     }
 
-    io_file_aiff_header(out_file, total_length);
+    audio_aiff_header(out_file, total_length);
     do
     {
         n_uint    power_sample = (speak_length(found_character = paragraph[loop++]) + AUDIO_FFT_MAX_BITS - 2);
@@ -239,7 +239,7 @@ void speak_out(n_string filename, n_string paragraph)
             {
                 audio_clear_output(output, length);
             }
-            io_file_aiff_body(out_file, output, length);
+            audio_aiff_body(out_file, output, length);
         }
     }
     while (found_character != '\n' && found_character != 0);
