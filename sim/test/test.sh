@@ -65,4 +65,13 @@ diff check_file.txt compare_file.txt
 rm test_io
 rm compare_file.txt
 
+gcc ${CFLAGS} -c test_apescript.c -o test_apescript.o
+
+gcc ${CFLAGS} -I/usr/include -o test_apescript io.o math.o parse.o interpret.o test_apescript.o
+
+./test_apescript check_apescript.txt
+
+rm test_apescript
+
+
 rm *.o
