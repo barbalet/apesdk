@@ -715,16 +715,15 @@ void compress_expand(n_file *input,   n_file *output);
 
 /*	Land - Screen conversion */
 
-/*
 #ifdef NOBLE_IPAD
 
 #define MAP_BITS                      (8)
 
-#else*/
+#else
 
 #define MAP_BITS                      (9)
 
-/*#endif*/
+#endif
 
 #define MAP_DIMENSION                 (1<<(MAP_BITS))
 #define MAP_AREA                      (1<<(2*MAP_BITS))

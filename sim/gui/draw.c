@@ -438,7 +438,7 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 #define POS_HIRES(num) ((num+(HI_RES_MAP_DIMENSION*2))&(HI_RES_MAP_DIMENSION-1))
 
 #define CONVERT_X(x, cx)  (n_uint)((POS_HIRES((x)+cx)) )
-#define CONVERT_Y(y, cy)  (n_uint)((POS_HIRES((y)+cy)) << 12)
+#define CONVERT_Y(y, cy)  (n_uint)((POS_HIRES((y)+cy)) << HI_RES_MAP_BITS)
 
 #define CONVERT_XY(x,y)   (CONVERT_X(x) | CONVERT_Y(y))
 
