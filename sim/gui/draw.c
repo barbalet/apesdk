@@ -435,7 +435,7 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 
 /* this is the ocelot landscape algorithm */
 
-#define POS_HIRES(num) ((num+(4096*2))&4095)
+#define POS_HIRES(num) ((num+(HI_RES_MAP_DIMENSION*2))&(HI_RES_MAP_DIMENSION-1))
 
 #define CONVERT_X(x, cx)  (n_uint)((POS_HIRES((x)+cx)) )
 #define CONVERT_Y(y, cy)  (n_uint)((POS_HIRES((y)+cy)) << 12)
@@ -663,7 +663,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 
         dtss.combined = (n_byte2 *)local_sim->land->highres;
         
-        flatval = dtss.combined[CONVERT_X(2048, dtss.co_x) | CONVERT_Y(2048, dtss.co_y)] & 255;
+        flatval = dtss.combined[CONVERT_X((HI_RES_MAP_DIMENSION/2), dtss.co_x) | CONVERT_Y((HI_RES_MAP_DIMENSION/2), dtss.co_y)] & 255;
         
         if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {

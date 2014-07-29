@@ -782,10 +782,10 @@ void math_bilinear_512_4096(n_byte * side512, n_byte * data, n_byte double_sprea
     if (side512 == 0L) return;
     if (data == 0L) return;
     
-    while (loop_y < 4096)
+    while (loop_y < HI_RES_MAP_DIMENSION)
     {
         n_int loop_x = 0;
-        while (loop_x < 4096)
+        while (loop_x < HI_RES_MAP_DIMENSION)
         {
             /* find the micro x (on the map used for bilinear interpolation) */
             n_int mic_x = ( loop_x & 7);
@@ -796,17 +796,17 @@ void math_bilinear_512_4096(n_byte * side512, n_byte * data, n_byte double_sprea
             n_int mac_y = (loop_y >> 3);
 
             n_uint px0 = (mac_x);
-            n_uint py0 = (mac_y * 512);
+            n_uint py0 = (mac_y * MAP_DIMENSION);
 
-            n_uint px1 = (mac_x + 1) & 511;
-            n_uint py1 = ((mac_y + 1) & 511) * 512;
+            n_uint px1 = (mac_x + 1) & (MAP_DIMENSION-1);
+            n_uint py1 = ((mac_y + 1) & (MAP_DIMENSION-1)) * MAP_DIMENSION;
 
             n_int z00 = side512[px0|py0];
 
             n_int z01 = side512[px1|py0];
             n_int z10 = side512[px0|py1] - z00;
             n_int z11 = side512[px1|py1] - z01 - z10;
-            n_uint point = loop_x + (loop_y *4096);
+            n_uint point = loop_x + (loop_y * HI_RES_MAP_DIMENSION);
             n_byte value;
 
             z01 = (z01 - z00) << 3;
