@@ -58,7 +58,7 @@
     n_int          dimensionX = rect.size.width;
     n_int          dimensionY = rect.size.height;
     static n_int   oldDimensionX = -1;
-    
+        
     if (drawRef == nil || (oldDimensionX != dimensionX))
     {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();

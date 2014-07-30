@@ -47,7 +47,7 @@
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
 
 
-#ifdef NOBLE_IPAD
+#ifdef NOBLE_IOS
     #undef  EXECUTE_THREADED
 #else
     #define EXECUTE_THREADED
@@ -715,7 +715,7 @@ void compress_expand(n_file *input,   n_file *output);
 
 /*	Land - Screen conversion */
 
-#ifdef NOBLE_IPAD
+#ifdef NOBLE_IOS
 
 #define MAP_BITS                      (8)
 

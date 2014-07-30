@@ -484,7 +484,7 @@ void shared_saved_string(shared_saved_string_type ssst, n_string value)
     
 }
 
-#ifdef NOBLE_IPAD
+#ifdef NOBLE_IOS
 
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
