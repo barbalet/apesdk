@@ -156,9 +156,7 @@
 - (void) awakeFromNib
 {    
     (void)shared_init(NUM_TERRAIN, CFAbsoluteTimeGetCurrent());
-    
-    shared_menu(NA_MENU_BRAINCODE);
-    
+        
 	displayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(animationTimer)];
 	[displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 

@@ -111,7 +111,23 @@ static void execute_wait_ns(void)
 static void execute_add_generic(execute_function * function, void * general_data, void * read_data, void * write_data, n_int count, n_int size)
 {
 #ifndef EXECUTE_THREADED
-    function(general_data,read_data,write_data);
+    if (size)
+    {
+        n_byte *location = (n_byte *)read_data;
+        n_int   loop = 0;
+        while (loop < count)
+        {
+            if (function(general_data, (void *)&location[loop * size], 0L) == -1)
+            {
+                break;
+            }
+            loop++;
+        }
+    }
+    else
+    {
+        function(general_data,read_data,write_data);
+    }
 #else
     execution_cycle = 1;
     do{
