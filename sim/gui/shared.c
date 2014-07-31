@@ -168,24 +168,15 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
         }
         else
         {
-            n_int sx = px + py - ((upper_x + upper_y)>>1);
-            n_int sy = px - py;
-            if ((sx * sx) + (sy * sy) > 16384)
+            n_int sx = px -((upper_x)>>1);
+            if (sx > 0)
             {
-                if (sx > 0)
-                {
-                    if (sy > 0)
-                    {
-                        terrain_turn = ( terrain_turn + 1) & 255;
-                    }
-                }
-                else
-                {
-                    if (sy <= 0)
-                    {
-                        terrain_turn = ( terrain_turn + 255) & 255;
-                    }
-                }
+                terrain_turn = ( terrain_turn + 1) & 255;
+            }
+
+            if (sx <= 0)
+            {
+                terrain_turn = ( terrain_turn + 255) & 255;
             }
         }
     }

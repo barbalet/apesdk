@@ -54,20 +54,22 @@
 
 - (void) drawRect:(CGRect)rect;
 {
+    float scaleFactor = [[UIScreen mainScreen] scale];
+    
     CGContextRef   context = UIGraphicsGetCurrentContext();
-    n_int          dimensionX = rect.size.width;
-    n_int          dimensionY = rect.size.height;
+    n_int          dimensionX = rect.size.width * scaleFactor;
+    n_int          dimensionY = rect.size.height * scaleFactor;
     static n_int   oldDimensionX = -1;
-        
+    
     if (drawRef == nil || (oldDimensionX != dimensionX))
     {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width, rect.size.height, 8, rect.size.width * 4, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGImageAlphaNoneSkipFirst);
+        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width * scaleFactor, rect.size.height * scaleFactor, 8, rect.size.width * 4 * scaleFactor, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGImageAlphaNoneSkipFirst);
         CGColorSpaceRelease( colorSpace );
         
         oldDimensionX = dimensionX;
     }
-    
+        
     CGContextSaveGState(context);
 
     (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
@@ -78,14 +80,14 @@
 
     if ( local_image )
     {
+
         CGContextDrawImage( context, rect, local_image );
         CGImageRelease( local_image );
     }
     
     CGContextRestoreGState(context);
+    CGContextScaleCTM(context, scaleFactor, scaleFactor); /* new */
 }
-
-
 
 // Handles the start of a touch
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -98,13 +100,24 @@
 {
 	UITouch*	touch = [[event touchesForView:self] anyObject];
 	CGPoint location = [touch locationInView:self];
-    shared_mouseReceived(location.x, location.y, NUM_TERRAIN);
+    float scaleFactor = [[UIScreen mainScreen] scale];
+
+    
+    shared_mouseReceived(location.x * scaleFactor, location.y * scaleFactor, NUM_TERRAIN);
 }
 
 // Handles the end of a touch event when the touch is a tap.
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     shared_mouseUp();
+}
+
+- (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event
+{
+    if (motion == UIEventSubtypeMotionShake)
+    {
+        shared_menu(NA_MENU_NEXT_APE);
+    }
 }
 
 - (void)buttonNextApe:(id)sender

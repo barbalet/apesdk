@@ -65,6 +65,8 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
+    [self setNeedsStatusBarAppearanceUpdate];
+
     [super viewDidAppear:animated];
 }
 
@@ -80,7 +82,14 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
+    [self setNeedsStatusBarAppearanceUpdate];
+
     // Return YES for supported orientations
+    return YES;
+}
+
+- (BOOL)prefersStatusBarHidden
+{
     return YES;
 }
 
