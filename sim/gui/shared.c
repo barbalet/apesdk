@@ -297,13 +297,11 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     if(fIdentification == NUM_TERRAIN)
     {
         sim_realtime(ticks);
-        draw_window(dim_x, dim_y);
-                
+
         if ((io_command_line_execution() != 1) && (!toggle_pause))
         {
             sim_cycle();
         }
-        draw_cycle();
 #ifdef SCRIPT_DEBUG
         if (shared_script_debug_ready())
         {
@@ -475,70 +473,45 @@ void shared_saved_string(shared_saved_string_type ssst, n_string value)
     
 }
 
-#ifdef NOBLE_IOS
-
-void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
-{
-    n_int           ly = 0;
-    n_c_uint * offscreenBuffer = (n_c_uint *) outputBuffer;
-    n_c_uint   colorLookUp[256];
-    n_int	   loopColors = 0;
-    n_int      loop = 0;
-
-    noble_simulation * local_sim = sim_sim();
-    n_byte2         fit[256*3];
-
-    n_byte   * index = draw_pointer(fIdentification);
-
-    if (index == 0L) return;
-
-    draw_color_time(fit, local_sim->land->time);
-
-    while(loopColors < 256)
-    {
-        n_byte colR = fit[loop++] >> 8;
-        n_byte colG = fit[loop++] >> 8;
-        n_byte colB = fit[loop++] >> 8;
-        colorLookUp[ loopColors ] = (colB << 24) | (colG << 16) | (colR << 8);
-        loopColors++;
-    }
-
-    loop = 0;
-    while(ly < dim_y)
-    {
-        n_int    lx = 0;
-        n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
-        while(lx < dim_x)
-        {
-            offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
-        }
-        ly++;
-    }
-}
-
-#else
-
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
     n_int           ly = 0;
     n_int           loop = 0;
     n_int			loopColors = 0;
     n_byte2         fit[256*3];
-    n_byte          colorTable[256][3];
     noble_simulation * local_sim = sim_sim();
     n_byte           * index = draw_pointer(fIdentification);
-    
+#ifdef NOBLE_IOS
+    n_c_uint         * offscreenBuffer = (n_c_uint *) outputBuffer;
+    n_c_uint        colorLookUp[256];
+#else
+    n_byte          colorLookUp[256][3];
+#endif
     if (index == 0L) return;
     
-    draw_color_time(fit, local_sim->land->time);
+    if (fIdentification == NUM_TERRAIN)
+    {
+        draw_window(dim_x, dim_y);
+        draw_cycle();
+    }
     
+    draw_color_time(fit, local_sim->land->time);
+
     while(loopColors < 256)
     {
-        colorTable[loopColors][0] = fit[loop++] >> 8;
-        colorTable[loopColors][1] = fit[loop++] >> 8;
-        colorTable[loopColors][2] = fit[loop++] >> 8;
+#ifdef NOBLE_IOS
+        n_byte colR = fit[loop++] >> 8;
+        n_byte colG = fit[loop++] >> 8;
+        n_byte colB = fit[loop++] >> 8;
+        colorLookUp[ loopColors ] = (colB << 24) | (colG << 16) | (colR << 8);
+#else
+        colorLookUp[loopColors][0] = fit[loop++] >> 8;
+        colorLookUp[loopColors][1] = fit[loop++] >> 8;
+        colorLookUp[loopColors][2] = fit[loop++] >> 8;
+#endif
         loopColors++;
     }
+    
     loop = 0;
     while(ly < dim_y)
     {
@@ -546,15 +519,19 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
         n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
         while(lx < dim_x)
         {
+#ifdef NOBLE_IOS
+            offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
+#else
             unsigned char value = indexLocalX[lx++] ;
-            outputBuffer[loop++] = colorTable[value][0];
-            outputBuffer[loop++] = colorTable[value][1];
-            outputBuffer[loop++] = colorTable[value][2];
+            outputBuffer[loop++] = colorLookUp[value][0];
+            outputBuffer[loop++] = colorLookUp[value][1];
+            outputBuffer[loop++] = colorLookUp[value][2];
+#endif
         }
         ly++;
     }
+    
 }
 
-#endif
 
 
