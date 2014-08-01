@@ -73,6 +73,7 @@ typedef struct
 {
     execute_object * executed;
     execute_state  state;
+    n_byte2        random[2];
 } execution_thread;
 
 static n_int global_cycle = 1;
@@ -221,7 +222,10 @@ static void execute_thread_generic(void * id)
         n_int            all_idle = 1;
         if (value->state != ES_WAITING)
         {
-            execute_wait_ns();
+            if ((math_random(value->random) & 255) == 1)
+            {
+                execute_wait_ns();
+            }
         }
         if (value->state == ES_WAITING)
         {
@@ -296,7 +300,9 @@ static void * execute_thread_posix(void * id)
 void execute_init(void)
 {
 #ifdef    EXECUTE_THREADED
-    n_int loop = 0;
+    n_int   loop = 0;
+    n_byte2 master_random[2] = {0xf672, 0x3e71};
+    
     
 #ifdef _WIN32
     thread = (HANDLE*)io_new(execution_thread_size * sizeof(HANDLE));
@@ -341,6 +347,11 @@ void execute_init(void)
     
     while (loop < execution_thread_size)
     {
+        execution[loop].random[0] = master_random[1];
+        execution[loop].random[1] = master_random[0];
+        
+        math_random3(master_random);
+        
 #ifdef _WIN32
         threadId[loop] = loop;
         thread[loop] = CreateThread(NULL, 0, execute_thread_win, &execution[loop], 0, &threadId[loop]);

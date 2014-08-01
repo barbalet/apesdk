@@ -470,27 +470,32 @@ void land_tide(n_land * local_land)
         local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
     }
     
-    if (old_tide != local_land->tide_level)
+    if (old_tide == local_land->tide_level)
     {
         return;
     }
     
     if (local_land->highres)
     {
-        n_uint  lp = 0;
-        while (lp < (HI_RES_MAP_AREA/32))
-        {
-            local_land->highres_tide[lp++] = 0;
-        }
-        lp = 0;
+        n_uint   lp = 0;
+        n_c_uint value_setting = 0;
+        io_erase((n_byte *)local_land->highres_tide, sizeof(n_c_uint) * HI_RES_MAP_AREA/32);
+        
         while (lp < HI_RES_MAP_AREA)
         {
             n_byte val = local_land->highres[lp<<1];
             if ((val > 105) && (val < 151))
             {
-                local_land->highres_tide[lp>>5] |= 1 << (lp & 31);
+                 value_setting |= 1 << (lp & 31);
+            }
+            
+            if ((lp & 31) == 31)
+            {
+                local_land->highres_tide[lp>>5] = value_setting;
+                value_setting = 0;
             }
             lp++;
+
         }
     }
 }
