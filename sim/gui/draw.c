@@ -260,6 +260,14 @@ static n_byte pixel_overlay(n_int px, n_int py, n_int dx, n_int dy, void * infor
     return 0;
 }
 
+static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * information)
+{
+    /*n_byte *byte_info = information;
+    byte_info[ px + (py * terrain_dim_x) ] = (4 * byte_info[ px + (py * terrain_dim_x) ])/5;*/
+    return 0;
+}
+
+
 static n_byte pixel_grey(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
@@ -524,7 +532,7 @@ void draw_fit(n_byte * points, n_byte2 * color_fit)
 
         color_fit[(COLOUR_YELLOW*3)    ] = 0xeeff;
         color_fit[(COLOUR_YELLOW*3) + 1] = 0xeeff;
-        color_fit[(COLOUR_YELLOW*3) + 2] = 0x0000;
+        color_fit[(COLOUR_YELLOW*3) + 2] = 0x2222;
 
         color_fit[(COLOUR_RED_DARK*3)    ] = (0xeeff * 3) >> 2;
         color_fit[(COLOUR_RED_DARK*3) + 1] = 0x0000;
@@ -719,12 +727,14 @@ static void	draw_meters(noble_simulation * local_sim)
     n_land       * loc_land  =   local_sim->land;
     noble_being  * loc_being =   local_sim->select;
     n_pixel 	 * local_draw = &pixel_overlay;
+    n_pixel      * local_draw_black = &pixel_black;
     n_byte		 * local_info = draw_pointer(NUM_TERRAIN);
     const n_byte * local_icon;
     n_int		   ha1 = 6;
     n_int		   ha2 = 0;
     n_int		   hr = 0;
     n_join		   local_kind;
+    n_join		   local_kind_black;
     n_genetics    *genetics = being_genetics(loc_being);
 
     if (local_info == 0L)
@@ -734,14 +744,25 @@ static void	draw_meters(noble_simulation * local_sim)
 
     local_kind.pixel_draw = local_draw;
     local_kind.information = local_info;
+    local_kind_black.pixel_draw = local_draw_black;
+    local_kind_black.information = local_info;
 
     while (hr < 41)
     {
-        (*local_draw)(5 , 5 + hr, 0, 0, local_info);
-        (*local_draw)(45, 5 + hr, 0, 0, local_info);
-        (*local_draw)(5 + hr, 45, 0, 0, local_info);
-        (*local_draw)(5 + hr, 5,  0, 0, local_info);
-        hr += 2;
+        if (hr != 40)
+        {
+            math_join(5,5+hr,40,0,&local_kind_black);
+        }
+
+        if ((hr&1) == 0)
+        {
+            (*local_draw)(5 , 5 + hr, 0, 0, local_info);
+            (*local_draw)(45, 5 + hr, 0, 0, local_info);
+            (*local_draw)(5 + hr, 45, 0, 0, local_info);
+            (*local_draw)(5 + hr, 5,  0, 0, local_info);
+        }
+        
+        hr ++;
     }
 
     hr = 0;
@@ -768,16 +789,28 @@ static void	draw_meters(noble_simulation * local_sim)
         hr = 0;
         while (hr < 41)
         {
-            (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
-            (*local_draw)(50 + 45+ FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
-            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 45, 0, 0, local_info);
-            (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 5, 0, 0, local_info);
+            
+            if (hr != 40)
+            {
+                math_join(50 + 5 + FACING_OFFSIDE, 5+hr, 40, 0, &local_kind_black);
+                math_join(50 + 55 + SP_EN_OFFSIDE, 5+hr, 8, 0, &local_kind_black);
+                math_join(50 + 55 + 18 + SP_EN_OFFSIDE, 5+hr, 8, 0, &local_kind_black);
+            }
+            
+            if ((hr&1) == 0)
+            {
+                (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw)(50 + 45+ FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 45, 0, 0, local_info);
+                (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 5, 0, 0, local_info);
 
-            (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-            (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-            (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-            (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-            hr += 2;
+                (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+                
+                (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+            }
+            hr ++;
         }
         hr = 0;
         while (hr < 9)
