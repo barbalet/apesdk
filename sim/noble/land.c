@@ -449,8 +449,8 @@ n_int land_map_bits(n_land * land)
 void land_tide(n_land * local_land)
 {
     n_int time_of_day;
-    n_int current_time;;
-    
+    n_int current_time;
+    n_byte old_tide = local_land->tide_level;
     NA_ASSERT(local_land, "local_land NULL");
     
     time_of_day     = local_land->time;
@@ -468,6 +468,11 @@ void land_tide(n_land * local_land)
         NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
         
         local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
+    }
+    
+    if (old_tide != local_land->tide_level)
+    {
+        return;
     }
     
     if (local_land->highres)
