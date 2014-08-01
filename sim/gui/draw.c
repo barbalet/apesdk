@@ -262,8 +262,8 @@ static n_byte pixel_overlay(n_int px, n_int py, n_int dx, n_int dy, void * infor
 
 static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
-    /*n_byte *byte_info = information;
-    byte_info[ px + (py * terrain_dim_x) ] = (4 * byte_info[ px + (py * terrain_dim_x) ])/5;*/
+    n_byte *byte_info = information;
+    byte_info[ px + (py * terrain_dim_x) ] = 0;
     return 0;
 }
 
@@ -749,9 +749,9 @@ static void	draw_meters(noble_simulation * local_sim)
 
     while (hr < 41)
     {
-        if (hr != 40)
+        if ((hr != 40) && (hr != 0))
         {
-            math_join(5,5+hr,40,0,&local_kind_black);
+            math_join(6, 5+hr, 38, 0, &local_kind_black);
         }
 
         if ((hr&1) == 0)
@@ -790,11 +790,11 @@ static void	draw_meters(noble_simulation * local_sim)
         while (hr < 41)
         {
             
-            if (hr != 40)
+            if ((hr != 40) && (hr != 0))
             {
-                math_join(50 + 5 + FACING_OFFSIDE, 5+hr, 40, 0, &local_kind_black);
-                math_join(50 + 55 + SP_EN_OFFSIDE, 5+hr, 8, 0, &local_kind_black);
-                math_join(50 + 55 + 18 + SP_EN_OFFSIDE, 5+hr, 8, 0, &local_kind_black);
+                math_join(51 + 5 + FACING_OFFSIDE, 5+hr, 38, 0, &local_kind_black);
+                math_join(51 + 55 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
+                math_join(51 + 55 + 18 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
             }
             
             if ((hr&1) == 0)

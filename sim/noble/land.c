@@ -450,7 +450,6 @@ void land_tide(n_land * local_land)
 {
     n_int time_of_day;
     n_int current_time;
-    n_byte old_tide = local_land->tide_level;
     NA_ASSERT(local_land, "local_land NULL");
     
     time_of_day     = local_land->time;
@@ -468,35 +467,6 @@ void land_tide(n_land * local_land)
         NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
         
         local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
-    }
-    
-    if (old_tide == local_land->tide_level)
-    {
-        return;
-    }
-    
-    if (local_land->highres)
-    {
-        n_uint   lp = 0;
-        n_c_uint value_setting = 0;
-        io_erase((n_byte *)local_land->highres_tide, sizeof(n_c_uint) * HI_RES_MAP_AREA/32);
-        
-        while (lp < HI_RES_MAP_AREA)
-        {
-            n_byte val = local_land->highres[lp<<1];
-            if ((val > 105) && (val < 151))
-            {
-                 value_setting |= 1 << (lp & 31);
-            }
-            
-            if ((lp & 31) == 31)
-            {
-                local_land->highres_tide[lp>>5] = value_setting;
-                value_setting = 0;
-            }
-            lp++;
-
-        }
     }
 }
 
@@ -684,7 +654,7 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
     }
 }
 
-void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_byte * scratch, n_byte double_spread)
+void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * tide, n_byte * scratch, n_byte double_spread)
 {
     n_byte2	local_random[2];
 
@@ -703,7 +673,28 @@ void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_byte * sc
     
     if (map_hires)
     {
+        n_uint   lp = 0;
+        n_c_uint value_setting = 0;
         math_bilinear_512_4096(map, map_hires, double_spread);
+
+        io_erase((n_byte *)tide, sizeof(n_c_uint) * HI_RES_MAP_AREA/32);
+        
+        while (lp < HI_RES_MAP_AREA)
+        {
+            n_byte val = map_hires[lp<<1];
+            if ((val > 105) && (val < 151))
+            {
+                value_setting |= 1 << (lp & 31);
+            }
+            
+            if ((lp & 31) == 31)
+            {
+                tide[lp>>5] = value_setting;
+                value_setting = 0;
+            }
+            lp++;
+            
+        }
     }
 }
 

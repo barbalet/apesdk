@@ -840,7 +840,7 @@ n_int weather_temperature(n_land * local_land, n_int px, n_int py);
 void  weather_cycle(n_land * local_land);
 weather_values weather_seven_values(n_land * local_land, n_int px, n_int py);
 
-void  land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_byte * scratch, n_byte double_spread);
+void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * tide, n_byte * scratch, n_byte double_spread);
 void  land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start);
 void  land_cycle(n_land * local_land);
 void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);
