@@ -430,10 +430,15 @@ void sim_cycle(void)
         being_loop(&sim, drives_cycle, 32);
     }
     
-    being_loop(&sim, sim_brain_loop, 16);
-    
+    if (sim.land->time & 1)
+    {
+        being_loop(&sim, sim_brain_loop, 16);
+    }
 #ifdef BRAINCODE_ON
-    being_loop(&sim, sim_brain_dialogue_loop, 8);
+    else
+    {
+        being_loop(&sim, sim_brain_dialogue_loop, 8);
+    }
 #endif
         
     being_loop_wait(&sim, 0L, being_tidy_loop, &max_honor);

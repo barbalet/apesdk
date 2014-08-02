@@ -285,7 +285,19 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
 #endif
     if((mouse_down == 1) && (mouse_identification == fIdentification))
     {
-        control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
+        
+#if (MAP_BITS == 8)
+#ifndef NOBLE_IOS
+        if (fIdentification == NUM_VIEW)
+        {
+            control_mouse(mouse_identification, mouse_x/2, mouse_y/2, mouse_option);
+        }
+        else
+#endif
+#endif
+        {
+            control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
+        }
     }
     if((key_down == 1) && (key_identification == fIdentification))
     {
@@ -511,6 +523,45 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 #endif
         loopColors++;
     }
+    
+#if (MAP_BITS == 8)
+#ifndef NOBLE_IOS
+    if (fIdentification == NUM_VIEW)
+    {
+        loop = 0;
+        while(ly < 512)
+        {
+            n_byte * indexLocalX = &index[(255-(ly>>1))*256];
+
+            if (ly&1)
+            {
+                io_copy(&outputBuffer[loop - (3*512)], &outputBuffer[loop], (3*512));
+                loop += (3*512);
+            }
+            else
+            {
+                n_int    lx = 0;
+                while(lx < 256)
+                {
+                    unsigned char value = indexLocalX[lx++] ;
+                    outputBuffer[loop++] = colorLookUp[value][0];
+                    outputBuffer[loop++] = colorLookUp[value][1];
+                    outputBuffer[loop++] = colorLookUp[value][2];
+                    outputBuffer[loop++] = colorLookUp[value][0];
+                    outputBuffer[loop++] = colorLookUp[value][1];
+                    outputBuffer[loop++] = colorLookUp[value][2];
+
+                }
+            }
+            
+            ly++;
+        }
+
+        
+        return;
+    }
+#endif
+#endif
     
     loop = 0;
     while(ly < dim_y)

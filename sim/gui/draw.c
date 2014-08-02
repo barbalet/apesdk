@@ -303,15 +303,22 @@ n_byte * draw_pointer(n_byte which_one)
 
 /*	shows the about information */
 
-#define	TAB_LENGTH	(36)
 
 void draw_about(n_constant_string platform)
 {
     n_join	local_draw;
     n_byte *buffer = draw_pointer(NUM_VIEW);
-    n_int   loop = 0;
+#if (MAP_BITS == 9)
     n_int   line_y_offset = 128 + 24;
+    n_int   linx_x_offset = 84;
+    n_int   tab_offset  = 36;
+#else
+    n_int   line_y_offset = 12;
+    n_int   linx_x_offset = 12;
+    n_int   tab_offset  = 0;
 
+#endif
+    
     if(check_about == 1 || buffer == 0L)
     {
         check_about = 0;
@@ -320,49 +327,62 @@ void draw_about(n_constant_string platform)
 
     local_draw.information = buffer;
     local_draw.pixel_draw  = &pixel_map;
-
-    while (loop < 214)
+#if (MAP_BITS == 9)
     {
-        n_int  py = (MAP_DIMENSION/2) - 128 + loop;
-        const n_int px = (MAP_DIMENSION/2) - 200;
-        n_byte * from_point = &buffer[(py*MAP_DIMENSION) + px];
-        io_erase(from_point, 400);
-        loop++;
+        n_int   loop = 0;
+        while (loop < 214)
+        {
+            n_int  py = (MAP_DIMENSION/2) - 128 + loop;
+            const n_int px = (MAP_DIMENSION/2) - 200;
+            n_byte * from_point = &buffer[(py*MAP_DIMENSION) + px];
+            io_erase(from_point, 400);
+            loop++;
+        }
     }
+#endif
+    
 
-    draw_string(SHORT_VERSION_NAME,     84, line_y_offset, &local_draw);
+    draw_string(SHORT_VERSION_NAME,     linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
     line_y_offset += 12;
-
-    draw_string(FULL_VERSION_COPYRIGHT, 84 + TAB_LENGTH, line_y_offset, &local_draw);
-    line_y_offset += 12;
-
-    draw_string(COPYRIGHT_FOLLOW,       84 + TAB_LENGTH, line_y_offset, &local_draw);
-    line_y_offset += 12;
+#if (MAP_BITS == 9)
+    draw_string(FULL_VERSION_COPYRIGHT, linx_x_offset + tab_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
 
+    draw_string(COPYRIGHT_FOLLOW,       linx_x_offset + tab_offset, line_y_offset, &local_draw);
+#else
+    draw_string(COPYRIGHT_DATE, linx_x_offset + tab_offset, line_y_offset, &local_draw);
+    line_y_offset += 12;
+    
+    draw_string(COPYRIGHT_NAME,       linx_x_offset + tab_offset, line_y_offset, &local_draw);
 
-    draw_string(FULL_DATE,              84, line_y_offset, &local_draw);
+#endif
     line_y_offset += 12;
     line_y_offset += 12;
-
-    draw_string(platform, 84 + TAB_LENGTH, line_y_offset, &local_draw);
-    line_y_offset += 12;
-    line_y_offset += 12;
-
-    draw_string("This software and Noble Ape are a continuing ", 84, line_y_offset, &local_draw);
-    line_y_offset += 12;
-
-    draw_string("work of Tom Barbalet begun on 13 June 1996.", 84, line_y_offset, &local_draw);
+    
+    draw_string(FULL_DATE,              linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
     line_y_offset += 12;
 
-
-    draw_string("No apes or cats were harmed in the writing ", 84, line_y_offset, &local_draw);
+    draw_string(platform,               linx_x_offset + tab_offset, line_y_offset, &local_draw);
+    line_y_offset += 12;
     line_y_offset += 12;
 
-    draw_string("of this software.", 84, line_y_offset, &local_draw);
+#if (MAP_BITS == 9)
+    
+    draw_string("This software and Noble Ape are a continuing ", linx_x_offset, line_y_offset, &local_draw);
+    line_y_offset += 12;
 
+    draw_string("work of Tom Barbalet begun on 13 June 1996.", linx_x_offset, line_y_offset, &local_draw);
+    line_y_offset += 12;
+    line_y_offset += 12;
+
+
+    draw_string("No apes or cats were harmed in the writing ", linx_x_offset, line_y_offset, &local_draw);
+    line_y_offset += 12;
+
+    draw_string("of this software.", linx_x_offset, line_y_offset, &local_draw);
+#endif
     check_about = 1;
 }
 
@@ -1432,8 +1452,8 @@ static void draw_remains(noble_simulation * sim, n_byte * screen)
         
         while (lx < 515)
         {
-            screen[((mx + lx)&511) + (((my)&511) * 512)] = COLOUR_YELLOW;
-            screen[((mx)&511) + (((my + lx)&511) * 512)] = COLOUR_YELLOW;
+            screen[((mx + lx)&(MAP_DIMENSION-1)) + (((my)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
+            screen[((mx)&(MAP_DIMENSION-1)) + (((my + lx)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
             lx++;
         }
         

@@ -50,7 +50,7 @@
 #ifdef NOBLE_IOS
     #undef  EXECUTE_THREADED
 #else
-    #define EXECUTE_THREADED
+    #define  EXECUTE_THREADED
 #endif
 
 #ifdef COMMAND_LINE_EXPLICIT
