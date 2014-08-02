@@ -351,11 +351,10 @@ void draw_about(n_constant_string platform)
 
     draw_string(COPYRIGHT_FOLLOW,       linx_x_offset + tab_offset, line_y_offset, &local_draw);
 #else
-    draw_string(COPYRIGHT_DATE, linx_x_offset + tab_offset, line_y_offset, &local_draw);
+    draw_string(COPYRIGHT_DATE,         linx_x_offset + tab_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
     
-    draw_string(COPYRIGHT_NAME,       linx_x_offset + tab_offset, line_y_offset, &local_draw);
-
+    draw_string(COPYRIGHT_NAME,         linx_x_offset + tab_offset, line_y_offset, &local_draw);
 #endif
     line_y_offset += 12;
     line_y_offset += 12;
@@ -369,14 +368,12 @@ void draw_about(n_constant_string platform)
     line_y_offset += 12;
 
 #if (MAP_BITS == 9)
-    
     draw_string("This software and Noble Ape are a continuing ", linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
 
     draw_string("work of Tom Barbalet begun on 13 June 1996.", linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
     line_y_offset += 12;
-
 
     draw_string("No apes or cats were harmed in the writing ", linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;

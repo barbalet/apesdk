@@ -563,7 +563,11 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 #endif
         if (kind != KIND_LOAD_FILE)
         {
+#if (MAPBITS == 8)
             n_uint count_to = sim.max >> 2;
+#else
+            n_uint count_to = sim.max >> 4;
+#endif
 #ifdef WEATHER_ON
             weather_init(sim.land);
 #endif       

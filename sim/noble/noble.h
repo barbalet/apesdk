@@ -330,7 +330,7 @@ enum window_num
 #define BRAINCODE_MAX_FREQUENCY            16
 
 /* number of bytes per instruction */
-#define BRAINCODE_BYTES_PER_INSTRUCTION     3
+#define BRAINCODE_BYTES_PER_INSTRUCTION    3
 
 /* number of instructions which a MVB copies */
 #define BRAINCODE_BLOCK_COPY               16
@@ -721,7 +721,7 @@ void compress_expand(n_file *input,   n_file *output);
 
 #else
 
-#define MAP_BITS                      (9)
+#define MAP_BITS                      (8)
 
 #endif
 

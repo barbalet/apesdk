@@ -39,6 +39,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		5ACDDF6C198DA15700AD3102 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5AE673DD1988BB6C00871717 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5AE673E41988BB6C00871717;
+			remoteInfo = NobleApeiOS;
+		};
+		5ACDDF6E198DA15800AD3102 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5AE673DD1988BB6C00871717 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5AE673E41988BB6C00871717;
+			remoteInfo = NobleApeiOS;
+		};
 		5AE673FC1988BB6C00871717 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5AE673DD1988BB6C00871717 /* Project object */;
@@ -278,6 +292,8 @@
 			);
 			dependencies = (
 				5AE673FD1988BB6C00871717 /* PBXTargetDependency */,
+				5ACDDF6D198DA15700AD3102 /* PBXTargetDependency */,
+				5ACDDF6F198DA15800AD3102 /* PBXTargetDependency */,
 			);
 			name = NobleApeiOSTests;
 			productName = NobleApeiOSTests;
@@ -385,6 +401,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		5ACDDF6D198DA15700AD3102 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5AE673E41988BB6C00871717 /* NobleApeiOS */;
+			targetProxy = 5ACDDF6C198DA15700AD3102 /* PBXContainerItemProxy */;
+		};
+		5ACDDF6F198DA15800AD3102 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5AE673E41988BB6C00871717 /* NobleApeiOS */;
+			targetProxy = 5ACDDF6E198DA15800AD3102 /* PBXContainerItemProxy */;
+		};
 		5AE673FD1988BB6C00871717 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 5AE673E41988BB6C00871717 /* NobleApeiOS */;
