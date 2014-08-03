@@ -515,7 +515,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
         n_byte colR = fit[loop++] >> 8;
         n_byte colG = fit[loop++] >> 8;
         n_byte colB = fit[loop++] >> 8;
-        colorLookUp[ loopColors ] = (colB << 24) | (colG << 16) | (colR << 8);
+        colorLookUp[ loopColors ] = (colR << 16) | (colG << 8) | (colB << 0);
 #else
         colorLookUp[loopColors][0] = fit[loop++] >> 8;
         colorLookUp[loopColors][1] = fit[loop++] >> 8;

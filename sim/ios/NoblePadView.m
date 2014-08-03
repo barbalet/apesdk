@@ -54,7 +54,7 @@
 
 - (float)screenScale
 {
-    return 1.0; /*[[UIScreen mainScreen] scale];*/
+    return [[UIScreen mainScreen] scale];
 }
 
 - (void) drawRect:(CGRect)rect;
@@ -69,7 +69,7 @@
     if (drawRef == nil || (oldDimensionX != dimensionX))
     {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width * scaleFactor, rect.size.height * scaleFactor, 8, rect.size.width * 4 * scaleFactor, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGImageAlphaNoneSkipFirst);
+        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width * scaleFactor, rect.size.height * scaleFactor, 8, rect.size.width * 4 * scaleFactor, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGBitmapByteOrder32Little|kCGImageAlphaNoneSkipFirst);
         CGColorSpaceRelease( colorSpace );
         
         oldDimensionX = dimensionX;
@@ -85,9 +85,9 @@
 
     if ( local_image )
     {
-
-        CGContextDrawImage( context, rect, local_image );
-        CGImageRelease( local_image );
+        CGContextSetBlendMode(context, kCGBlendModeCopy);
+        CGContextDrawImage(context, rect, local_image);
+        CGImageRelease(local_image);
     }
     
     CGContextRestoreGState(context);

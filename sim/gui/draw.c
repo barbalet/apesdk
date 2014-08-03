@@ -636,18 +636,20 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
         const n_byte2  value        = combined[check_change];
         const n_int    z00          = value & 255;
         const n_byte   col00        = value >> 8;
+
         n_int          aval         = (scry - z00);
         if (aval < -1) aval = -1;
         
+        scry--;           /* next map point from screen value */
+        big_x -= vals2;
+        big_y -= valc2;
+
         while (actual > aval)
         {
             buf_offscr[pixy] = col00;
             pixy -= dim_x;
             actual--;
         }
-        scry--;           /* next map point from screen value */
-        big_x -= vals2;
-        big_y -= valc2;
     }
     io_free(&xlocation);
     io_free(&void_dtss);
