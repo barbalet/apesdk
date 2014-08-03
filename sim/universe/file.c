@@ -273,6 +273,7 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
     {
     case VARIABLE_BRAIN_VALUE:
     {
+#ifdef BRAIN_ON
         n_int	current_x = local_vr[VARIABLE_BRAIN_X - VARIABLE_VECT_ANGLE];
         n_int	current_y = local_vr[VARIABLE_BRAIN_Y - VARIABLE_VECT_ANGLE];
         n_int	current_z = local_vr[VARIABLE_BRAIN_Z - VARIABLE_VECT_ANGLE];
@@ -296,6 +297,7 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
             }
         }
         /* add brain value */
+#endif
         return 0;
     }
 
@@ -546,6 +548,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
             break;
             case VARIABLE_BRAIN_VALUE:
             {
+#ifdef BRAIN_ON
                 n_int	current_x = local_vr[VARIABLE_BRAIN_X - VARIABLE_VECT_ANGLE];
                 n_int	current_y = local_vr[VARIABLE_BRAIN_Y - VARIABLE_VECT_ANGLE];
                 n_int	current_z = local_vr[VARIABLE_BRAIN_Z - VARIABLE_VECT_ANGLE];
@@ -563,6 +566,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_number = TRACK_BRAIN(local_brain, current_x, current_y, current_z);
                     }
                 }
+#endif
             }
             break;
             default:
@@ -987,8 +991,9 @@ void file_audit(void)
         FILE_CHECK(&here.braincode_register[0]);
         FILE_CHECK(&here.brainprobe[0]);
 #endif
-
+#ifdef BRAIN_ON
         FILE_CHECK(&here.brain[0]);
+#endif
         FILE_CHECK(&here.social[0]);
         FILE_CHECK(&here.episodic[0]);
     }

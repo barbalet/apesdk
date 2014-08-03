@@ -44,6 +44,8 @@
 #define BRAINCODE_ON  /* entity */
 #define IMMUNE_ON     /* entity */
 
+#undef  BRAIN_ON
+
 #undef  FEATURE_SET
 
 /* dimension of the territory map */
@@ -1185,7 +1187,9 @@ typedef struct
     noble_brain_probe brainprobe[BRAINCODE_PROBES];
 #endif
 
+#ifdef BRAIN_ON
     n_byte            brain[DOUBLE_BRAIN];
+#endif
     noble_social       social[SOCIAL_SIZE];
     noble_episodic   episodic[EPISODIC_SIZE];
 } noble_being;

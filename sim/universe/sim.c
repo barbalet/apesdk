@@ -324,6 +324,7 @@ n_int     file_interpret(n_file * input_file)
     return 0;
 }
 
+#ifdef BRAIN_ON
 static void sim_brain_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_byte2 local_brain_state[3];
@@ -337,6 +338,8 @@ static void sim_brain_loop(noble_simulation * local_sim, noble_being * local_bei
         }
     }
 }
+#endif
+
 
 #ifdef BRAINCODE_ON
 
@@ -432,7 +435,9 @@ void sim_cycle(void)
     
     if (sim.land->time & 1)
     {
+#ifdef BRAIN_ON
         being_loop(&sim, sim_brain_loop, 16);
+#endif
     }
 #ifdef BRAINCODE_ON
     else

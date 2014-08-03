@@ -52,9 +52,14 @@
     [self setNeedsDisplay];
 }
 
+- (float)screenScale
+{
+    return 1.0; /*[[UIScreen mainScreen] scale];*/
+}
+
 - (void) drawRect:(CGRect)rect;
 {
-    float scaleFactor = [[UIScreen mainScreen] scale];
+    float scaleFactor = [self screenScale];
     
     CGContextRef   context = UIGraphicsGetCurrentContext();
     n_int          dimensionX = rect.size.width * scaleFactor;
@@ -75,7 +80,7 @@
     (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
     
     shared_draw((n_byte *)offscreenBuffer, NUM_TERRAIN, dimensionX, dimensionY);
-
+    
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
 
     if ( local_image )
@@ -100,7 +105,7 @@
 {
 	UITouch*	touch = [[event touchesForView:self] anyObject];
 	CGPoint location = [touch locationInView:self];
-    float scaleFactor = [[UIScreen mainScreen] scale];
+    float scaleFactor = [self screenScale];
 
     
     shared_mouseReceived(location.x * scaleFactor, location.y * scaleFactor, NUM_TERRAIN);

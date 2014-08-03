@@ -142,7 +142,9 @@ static const n_byte2 seg14[ 60 ] =
 static n_byte           number_errors;
 static n_string_block	error_array[MAX_NUMBER_ERRORS + 1];
 
+#ifdef BRAIN_ON
 static n_uint	tilt_y = 0;
+#endif
 
 n_byte	check_about = 0;
 n_uint	tilt_z = 118;
@@ -1261,14 +1263,19 @@ static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
         'F', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0
     };
 
-    draw_count_number(bcps, bcps_string);
-    draw_count_number(fps, fps_string);
+    if (bcps)
+    {
+        draw_count_number(bcps, bcps_string);
+        draw_string(bcps_string, terrain_dim_x - 110, 142, local_mono);
+    }
     
-    draw_string(bcps_string, terrain_dim_x - 110, 142, local_mono);
+    draw_count_number(fps, fps_string);
     draw_string(fps_string, terrain_dim_x - 110, 160, local_mono);
 }
 
 /* draws the rotating brain, this is always draw and never erase */
+
+#ifdef BRAIN_ON
 
 static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
 {
@@ -1372,7 +1379,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
         tilt_y = ( tilt_y + 2 ) & 255;
     }
 }
-
+#endif
 n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
     n_int	           loop = 0;
@@ -1687,10 +1694,20 @@ n_int  draw_cycle(void)
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */
 
+#ifdef BRAIN_ON
     if (toggle_brain)
     {
         draw_brain(local_sim, &local_vect);
     }
+#else
+    {
+        n_join local_mono;
+        
+        local_mono.pixel_draw  = &pixel_overlay;
+        local_mono.information = draw_pointer(NUM_TERRAIN);
+        draw_metrics(0, local_sim->delta_frames, &local_mono);
+    }
+#endif
     
 #ifdef BRAINCODE_ON
     if (toggle_braincode)

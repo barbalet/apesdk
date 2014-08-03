@@ -50,11 +50,10 @@
 
 #define	LAND_ON
 #define	WEATHER_ON
-#undef RANDOM_INITIAL_BRAINCODE
+#undef  RANDOM_INITIAL_BRAINCODE
 
 #undef	 FIXED_RANDOM_SIM
 #undef	 LARGE_SIM
-#define  SOFT_BRAIN_ON
 
 #define EPISODIC_AFFECT_ZERO (16384)
 
@@ -160,7 +159,10 @@ void braincode_number_of_instructions(
 
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
+#ifdef BRAIN_ON
 n_byte * being_brain(noble_being * value);
+#endif
+
 noble_episodic * being_episodic(noble_being * value);
 noble_social * being_social(noble_being * value);
 

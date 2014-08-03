@@ -174,7 +174,9 @@ n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location,
     while (lpx < local->max)
     {
         noble_being * local_being = &(local->beings[ lpx ]);
+#ifdef BRAIN_ON
         io_erase(local_being->brain, DOUBLE_BRAIN);
+#endif
         io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(noble_social)));
         io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
         lpx ++;
@@ -334,10 +336,12 @@ n_int being_posture_under(noble_being * value, enum posture_type post)
     return (value->posture < post);
 }
 
+#ifdef BRAIN_ON
 n_byte * being_brain(noble_being * value)
 {
     return value->brain;
 }
+#endif
 
 noble_episodic * being_episodic(noble_being * value)
 {
@@ -2092,6 +2096,7 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 
 
 #ifdef BRAINCODE_ON
+#ifdef BRAIN_ON
 
 static void being_brain_probe(noble_being * local)
 {
@@ -2149,7 +2154,7 @@ static void being_brain_probe(noble_being * local)
         i++;
     }
 }
-
+#endif
 #endif
 
 /** stuff still goes on during sleep */
@@ -2158,8 +2163,11 @@ void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte a
     being_immune_response(local);
     
 #ifdef BRAINCODE_ON
+#ifdef BRAIN_ON
+
     /** may need to add external probe linking too */
     being_brain_probe(local);
+#endif
 #endif
 
     if ((awake == 0) && local)
@@ -3227,7 +3235,6 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 {
     /** this is the being to be born */
     n_byte        ch;
-    n_byte      * brain_memory;
 #ifdef EPISODIC_ON
     noble_social * local_social_graph = being_social(local);
     noble_episodic * local_episodic = being_episodic(local);
@@ -3243,16 +3250,19 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     
     being_erase(local);
 
-    brain_memory = being_brain(local);
-
-    if (brain_memory != 0L)
+#ifdef BRAIN_ON
     {
-        io_erase(brain_memory, DOUBLE_BRAIN);
+        n_byte      * brain_memory = being_brain(local);
+        if (brain_memory != 0L)
+        {
+            io_erase(brain_memory, DOUBLE_BRAIN);
+        }
+        else
+        {
+            return SHOW_ERROR("Brain memory not available");
+        }
     }
-    else
-    {
-        return SHOW_ERROR("Brain memory not available");
-    }
+#endif
     
     local->goal[0]=GOAL_NONE;
 
@@ -3477,19 +3487,16 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     }
     
     local->crowding = MIN_CROWDING;
-
+#ifdef BRAIN_ON
     if (being_brain(local))
     {
         /** These magic numbers were found in March 2001 -
             feel free to change them! */
-#ifdef SOFT_BRAIN_ON
         being_set_brainatates(local, 0, 171, 0, 146);
         being_set_brainatates(local, 1, 86, 501, 73);
-#else
-        being_set_brainatates(local, 0, 0, 1024, 0);
-        being_set_brainatates(local, 1, 0, 1024, 0);
-#endif
+
     }
+#endif
     return 0;
 }
 
