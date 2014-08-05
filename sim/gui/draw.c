@@ -366,10 +366,10 @@ void draw_about(n_constant_string platform)
     line_y_offset += 12;
 
     draw_string(platform,               linx_x_offset + tab_offset, line_y_offset, &local_draw);
+#if (MAP_BITS == 9)    
     line_y_offset += 12;
     line_y_offset += 12;
 
-#if (MAP_BITS == 9)
     draw_string("This software and Noble Ape are a continuing ", linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
 
