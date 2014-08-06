@@ -50,6 +50,8 @@
 
 #endif
 
+#undef MULTITOUCH_CONTROLS
+
 #define	TERRAINWINDOW(alpha)   (alpha)
 #define	VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA)
 

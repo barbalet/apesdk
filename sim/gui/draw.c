@@ -303,9 +303,40 @@ n_byte * draw_pointer(n_byte which_one)
     return 0L;
 }
 
+#ifdef MULTITOUCH_CONTROLS
+
+typedef enum
+{
+    TC_SHOW_NOTHING = 0,
+    TC_SHOW_CONTROLS,
+    TC_LEFT_STATE,
+    TC_LEFT_STATE_CONTROLS,
+    TC_RIGHT_STATE,
+    TC_RIGHT_STATE_CONTROLS
+}touch_control_state;
+
+touch_control_state tc_state = TC_SHOW_NOTHING;
+n_int               tc_countdown = 0;
+
+
+void draw_tc_controls(n_join * local_mono)
+{
+    const n_int offset_y = 40;
+    const n_int half_y = terrain_dim_y / 2;
+    const n_int fraction_x = 40;
+    
+    math_line(5,  half_y + offset_y, 5, half_y - offset_y, local_mono);
+    math_line(fraction_x - 5, half_y, 5, half_y + offset_y, local_mono);
+    math_line(fraction_x - 5, half_y, 5, half_y - offset_y, local_mono);
+    
+    math_line(terrain_dim_x - 5,      half_y + offset_y,   terrain_dim_x - 5, half_y - offset_y, local_mono);
+    math_line(terrain_dim_x - fraction_x + 5, half_y, terrain_dim_x - 5, half_y + offset_y, local_mono);
+    math_line(terrain_dim_x - fraction_x + 5, half_y, terrain_dim_x - 5, half_y - offset_y, local_mono);
+}
+
+#endif
+
 /*	shows the about information */
-
-
 void draw_about(n_constant_string platform)
 {
     n_join	local_draw;
@@ -737,8 +768,6 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 #define mndivmonth		7
 #define mndivyear		91
 
-#define FH_SCREEN(x)  (x)
-
 /*
  * kind = 0, erase
  * kind = 1, draw-cycle
@@ -800,10 +829,11 @@ static void	draw_meters(noble_simulation * local_sim)
 #define FACING_OFFSIDE  ((terrain_dim_x-(512-411)))
 #define SP_EN_OFFSIDE   ((terrain_dim_x-(512-325)))
 
-#define GENETICS_X      ((terrain_dim_x-(512-(182))))
-#define GENETICS_Y      (50)
+#define GENETICS_X      (terrain_dim_x-69)
+#define GENETICS_Y      (55)
 
-#define GENDER_X        (terrain_dim_x-(512-312))
+#define GENDER_X        (terrain_dim_x-110)
+#define GENDER_Y        (10)
 
     if (local_sim->select)
     {
@@ -854,7 +884,6 @@ static void	draw_meters(noble_simulation * local_sim)
             hr++;
         }
 
-
         (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 25, -1, 0, &local_kind);
         (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 25, 1, 0, &local_kind);
         (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 15, -2, 0, &local_kind);
@@ -867,56 +896,36 @@ static void	draw_meters(noble_simulation * local_sim)
         {
             n_uint	ha3 = 0;
             n_genetics	genetic_block = genetics[ha2];
-            ha1 = 6;
+            ha1 = 0;
             while (ha3 < (sizeof(n_genetics)*4))
             {
                 n_int four = ( genetic_block >> (ha3 * 2) ) & 3 ;
                 if ( four != 0 )
-                    (void)math_join(285+GENETICS_X + (ha2 * 10), FH_SCREEN(ha1)+GENETICS_Y, 7, 0, &local_kind);
+                    (void)math_join((ha1)+GENETICS_X,  GENETICS_Y + (ha2 * 10), 0, 7, &local_kind);
                 ha1++;
                 if ( four == 3 )
-                    (void)math_join(285+GENETICS_X + (ha2 * 10), FH_SCREEN(ha1)+GENETICS_Y, 7, 0, &local_kind);
-                ha1 += 4;
+                    (void)math_join((ha1)+GENETICS_X, GENETICS_Y + (ha2 * 10), 0, 7, &local_kind);
+                ha1 += 3;
                 ha3++;
             }
             ha2++;
         }
 
         /* draw sex */
-        (void)math_join(125+GENDER_X, FH_SCREEN(20)+GENETICS_Y, 5, (11), &local_kind);
-        (void)math_join(130+GENDER_X, FH_SCREEN(31)+GENETICS_Y, 5, (-11), &local_kind);
-        (void)math_join(135+GENDER_X, FH_SCREEN(20)+GENETICS_Y, -10, 0, &local_kind);
+        (void)math_join(5+GENDER_X, (10)+GENDER_Y, 5, (11), &local_kind);
+        (void)math_join(10+GENDER_X, (21)+GENDER_Y, 5, (-11), &local_kind);
+        (void)math_join(15+GENDER_X, (10)+GENDER_Y, -10, 0, &local_kind);
         if (FIND_SEX(GET_I(loc_being)) == SEX_FEMALE)
         {
-            (void)math_join(130+GENDER_X, FH_SCREEN(30)+GENETICS_Y, 0, (6), &local_kind);
-            (void)math_join(128+GENDER_X, FH_SCREEN(33)+GENETICS_Y, 4, 0, &local_kind);
+            (void)math_join(10+GENDER_X, (20)+GENDER_Y, 0, (6), &local_kind);
+            (void)math_join(8+GENDER_X, (23)+GENDER_Y, 4, 0, &local_kind);
         }
         else
         {
-            (void)math_join(135+GENDER_X, FH_SCREEN(20)+GENETICS_Y, 4, (-4), &local_kind);
-            (void)math_join(139+GENDER_X, FH_SCREEN(16)+GENETICS_Y, -2, 0, &local_kind);
-            (void)math_join(139+GENDER_X, FH_SCREEN(16)+GENETICS_Y, 0, (2), &local_kind);
+            (void)math_join(15+GENDER_X, (10)+GENDER_Y, 4, (-4), &local_kind);
+            (void)math_join(19+GENDER_X, (6)+GENDER_Y, -2, 0, &local_kind);
+            (void)math_join(19+GENDER_X, (6)+GENDER_Y, 0, (2), &local_kind);
         }
-
-
-#ifdef FELINE
-
-        (void)math_join(159+GENDER_X, FH_SCREEN(25)+GENETICS_Y, -9, (0), &local_kind);
-        (void)math_join(181+GENDER_X, FH_SCREEN(25)+GENETICS_Y, 9, (0), &local_kind);
-
-        (void)math_join(159+GENDER_X, FH_SCREEN(22)+GENETICS_Y, -7, (-2), &local_kind);
-        (void)math_join(181+GENDER_X, FH_SCREEN(28)+GENETICS_Y, 7, (2), &local_kind);
-
-        (void)math_join(159+GENDER_X, FH_SCREEN(28)+GENETICS_Y, -7, (2), &local_kind);
-        (void)math_join(181+GENDER_X, FH_SCREEN(22)+GENETICS_Y, 7, (-2), &local_kind);
-
-        (void)math_join(150+GENDER_X, FH_SCREEN(5)+GENETICS_Y, 2, (8), &local_kind);
-        (void)math_join(150+GENDER_X, FH_SCREEN(5)+GENETICS_Y, 8, (2), &local_kind);
-
-        (void)math_join(190+GENDER_X, FH_SCREEN(5)+GENETICS_Y, -2, (8), &local_kind);
-        (void)math_join(190+GENDER_X, FH_SCREEN(5)+GENETICS_Y, -8, (2), &local_kind);
-
-#endif
 
         /* draw direction facing */
         {
@@ -935,11 +944,11 @@ static void	draw_meters(noble_simulation * local_sim)
 
             if (local_speed != 0)
             {
-                (void)math_join(106 +SP_EN_OFFSIDE, FH_SCREEN(45-local_speed), 6, 0, &local_kind);
+                (void)math_join(106 +SP_EN_OFFSIDE, (45-local_speed), 6, 0, &local_kind);
             }
             if (local_energy > 127)
             {
-                (void)math_join(106 + 18 + SP_EN_OFFSIDE, FH_SCREEN(45-(local_energy >> 7)), 6, 0, &local_kind);
+                (void)math_join(106 + 18 + SP_EN_OFFSIDE, (45-(local_energy >> 7)), 6, 0, &local_kind);
 
             }
             local_icon = &icns[weather_seven_values(local_sim->land, local_x, local_y) << 7];
@@ -1258,8 +1267,10 @@ static void draw_count_number(n_uint count, n_string value)
 
 static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
 {
+    n_int offset_y = 100;
+    
     n_string_block  bcps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
-        'B', 'C', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
+        'B', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
     };
     n_string_block  fps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
         'F', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0
@@ -1268,11 +1279,14 @@ static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
     if (bcps)
     {
         draw_count_number(bcps, bcps_string);
-        draw_string(bcps_string, terrain_dim_x - 110, 142, local_mono);
+        draw_string(bcps_string, terrain_dim_x - 98, offset_y, local_mono);
+        offset_y += 18;
     }
-    
-    draw_count_number(fps, fps_string);
-    draw_string(fps_string, terrain_dim_x - 110, 160, local_mono);
+    if (fps)
+    {
+        draw_count_number(fps, fps_string);
+        draw_string(fps_string, terrain_dim_x - 98, offset_y, local_mono);
+    }
 }
 
 /* draws the rotating brain, this is always draw and never erase */
@@ -1670,9 +1684,13 @@ n_int  draw_cycle(void)
 {
     noble_simulation * local_sim = sim_sim();
     n_vect2            local_vect;
+    n_join             local_mono;
     
     if (sim_new()) return 0;
     if (check_about) return 0;
+    
+    local_mono.pixel_draw  = &pixel_overlay;
+    local_mono.information = draw_pointer(NUM_TERRAIN);
     
     local_vect.x = terrain_dim_x;
     local_vect.y = terrain_dim_y;
@@ -1703,10 +1721,6 @@ n_int  draw_cycle(void)
     }
 #else
     {
-        n_join local_mono;
-        
-        local_mono.pixel_draw  = &pixel_overlay;
-        local_mono.information = draw_pointer(NUM_TERRAIN);
         draw_metrics(0, local_sim->delta_frames, &local_mono);
     }
 #endif
@@ -1724,6 +1738,10 @@ n_int  draw_cycle(void)
     {
         draw_weather(local_sim->land); /* 10 */
     }
+#endif
+    
+#ifdef MULTITOUCH_CONTROLS
+    draw_tc_controls(&local_mono);
 #endif
     return 0;
 }
