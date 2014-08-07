@@ -305,33 +305,25 @@ n_byte * draw_pointer(n_byte which_one)
 
 #ifdef MULTITOUCH_CONTROLS
 
-typedef enum
-{
-    TC_SHOW_NOTHING = 0,
-    TC_SHOW_CONTROLS,
-    TC_LEFT_STATE,
-    TC_LEFT_STATE_CONTROLS,
-    TC_RIGHT_STATE,
-    TC_RIGHT_STATE_CONTROLS
-}touch_control_state;
-
-touch_control_state tc_state = TC_SHOW_NOTHING;
-n_int               tc_countdown = 0;
-
+extern touch_control_state tc_state;
 
 void draw_tc_controls(n_join * local_mono)
 {
-    const n_int offset_y = 40;
     const n_int half_y = terrain_dim_y / 2;
-    const n_int fraction_x = 40;
     
-    math_line(5,  half_y + offset_y, 5, half_y - offset_y, local_mono);
-    math_line(fraction_x - 5, half_y, 5, half_y + offset_y, local_mono);
-    math_line(fraction_x - 5, half_y, 5, half_y - offset_y, local_mono);
+    if (tc_state == TCS_SHOW_CONTROLS || tc_state == TCS_LEFT_STATE_CONTROLS)
+    {
+        math_line(5,  half_y + TC_OFFSET_Y, 5, half_y - TC_OFFSET_Y, local_mono);
+        math_line(TC_FRACTION_X - 5, half_y, 5, half_y + TC_OFFSET_Y, local_mono);
+        math_line(TC_FRACTION_X - 5, half_y, 5, half_y - TC_OFFSET_Y, local_mono);
+    }
     
-    math_line(terrain_dim_x - 5,      half_y + offset_y,   terrain_dim_x - 5, half_y - offset_y, local_mono);
-    math_line(terrain_dim_x - fraction_x + 5, half_y, terrain_dim_x - 5, half_y + offset_y, local_mono);
-    math_line(terrain_dim_x - fraction_x + 5, half_y, terrain_dim_x - 5, half_y - offset_y, local_mono);
+    if (tc_state == TCS_SHOW_CONTROLS || tc_state == TCS_RIGHT_STATE_CONTROLS)
+    {
+        math_line(terrain_dim_x - 5,      half_y + TC_OFFSET_Y,   terrain_dim_x - 5, half_y - TC_OFFSET_Y, local_mono);
+        math_line(terrain_dim_x - TC_FRACTION_X + 5, half_y, terrain_dim_x - 5, half_y + TC_OFFSET_Y, local_mono);
+        math_line(terrain_dim_x - TC_FRACTION_X + 5, half_y, terrain_dim_x - 5, half_y - TC_OFFSET_Y, local_mono);
+    }
 }
 
 #endif
@@ -1396,6 +1388,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
     }
 }
 #endif
+
 n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
     n_int	           loop = 0;
@@ -1455,7 +1448,6 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     return -1;
 }
 
-
 static void draw_remains(noble_simulation * sim, n_byte * screen)
 {
     noble_remains * remains = sim->remains;
@@ -1476,8 +1468,6 @@ static void draw_remains(noble_simulation * sim, n_byte * screen)
             screen[((mx)&(MAP_DIMENSION-1)) + (((my + lx)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
             lx++;
         }
-        
-        
         loop++;
     }
 }
@@ -1491,7 +1481,7 @@ static void draw_tides(n_byte * map, n_byte * screen, n_byte tide)
     n_int	dr = 128;
     n_int	fl = tide_point;
     n_int	fp = 0;
-    while(lp<45)
+    while (lp < 45)
     {
         tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl-fp));
         if (lp == tide_point)
@@ -1526,7 +1516,7 @@ static void draw_tides_hi_res(n_byte * data, n_c_uint * block, n_byte tide)
     n_int	fl = tide_point;
     n_int	fp = 0;
 
-    while(lp<45)
+    while (lp < 45)
     {
         tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl-fp));
         if (lp == tide_point)

@@ -92,6 +92,23 @@ enum
 /*	Icon Offset */
 #define	ICONOFFSET					27
 
+#ifdef MULTITOUCH_CONTROLS
+
+typedef enum
+{
+    TCS_SHOW_NOTHING = 0,
+    TCS_SHOW_CONTROLS,
+    TCS_LEFT_STATE,
+    TCS_LEFT_STATE_CONTROLS,
+    TCS_RIGHT_STATE,
+    TCS_RIGHT_STATE_CONTROLS
+}touch_control_state;
+
+#define TC_OFFSET_Y   (40)
+#define TC_FRACTION_X (40)
+
+#endif
+
 /*
  n_uint braincode_standard_deviation(noble_being * local_being);
  void braincode_number_of_instructions(

@@ -82,6 +82,12 @@ extern n_byte	check_about;
 extern n_uint	tilt_z;
 extern n_byte   terrain_turn;
 
+#ifdef MULTITOUCH_CONTROLS
+
+touch_control_state tc_state = TCS_SHOW_NOTHING;
+n_int               tc_countdown = 0;
+
+#endif
 
 static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
 {
@@ -150,6 +156,14 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     if (wwind == NUM_TERRAIN)
     {
         n_int upper_x, upper_y;
+        
+#ifdef MULTITOUCH_CONTROLS
+        if ((tc_state&1) == 0)
+        {
+            tc_state++;
+            tc_countdown = 60;
+        }
+#endif
         draw_terrain_coord(&upper_x, &upper_y);
 
         if (option != 0)
@@ -168,7 +182,38 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
         }
         else
         {
-            n_int sx = px -((upper_x)>>1);
+            n_int sx = px - ((upper_x)>>1);
+#ifdef MULTITOUCH_CONTROLS
+            if (px < TC_FRACTION_X)
+            {
+                if (tc_state == TCS_LEFT_STATE_CONTROLS)
+                {
+                    printf("TCS_SHOW_NOTHING\n");
+                    tc_state = TCS_SHOW_NOTHING;
+                }
+                else
+                {
+                    printf("TCS_RIGHT_STATE\n");
+                    tc_state = TCS_RIGHT_STATE;
+                }
+                tc_countdown = 0;
+            }
+            
+            if (px > (upper_x - TC_FRACTION_X))
+            {
+                if (tc_state == TCS_RIGHT_STATE_CONTROLS)
+                {
+                    printf("TCS_SHOW_NOTHING\n");
+                    tc_state = TCS_SHOW_NOTHING;
+                }
+                else
+                {
+                    printf("TCS_LEFT_STATE\n");
+                    tc_state = TCS_LEFT_STATE;
+                }
+                tc_countdown = 0;
+            }
+#endif
             if (sx > 0)
             {
                 terrain_turn = ( terrain_turn + 1) & 255;
@@ -309,7 +354,16 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     if(fIdentification == NUM_TERRAIN)
     {
         sim_realtime(ticks);
-
+#ifdef MULTITOUCH_CONTROLS
+        if (tc_countdown)
+        {
+            tc_countdown--;
+            if (tc_countdown == 0)
+            {
+                tc_state --;
+            }
+        }
+#endif
         if ((io_command_line_execution() != 1) && (!toggle_pause))
         {
             sim_cycle();
