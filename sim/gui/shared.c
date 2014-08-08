@@ -85,6 +85,7 @@ extern n_byte   terrain_turn;
 #ifdef MULTITOUCH_CONTROLS
 
 touch_control_state tc_state = TCS_SHOW_NOTHING;
+touch_control_state tc_temp_state = TCS_SHOW_NOTHING;
 n_int               tc_countdown = 0;
 
 #endif
@@ -189,12 +190,12 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 if (tc_state == TCS_LEFT_STATE_CONTROLS)
                 {
                     printf("TCS_SHOW_NOTHING\n");
-                    tc_state = TCS_SHOW_NOTHING;
+                    tc_temp_state = TCS_SHOW_NOTHING;
                 }
                 else
                 {
                     printf("TCS_RIGHT_STATE\n");
-                    tc_state = TCS_RIGHT_STATE;
+                    tc_temp_state = TCS_RIGHT_STATE;
                 }
                 tc_countdown = 0;
             }
@@ -204,12 +205,12 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 if (tc_state == TCS_RIGHT_STATE_CONTROLS)
                 {
                     printf("TCS_SHOW_NOTHING\n");
-                    tc_state = TCS_SHOW_NOTHING;
+                    tc_temp_state = TCS_SHOW_NOTHING;
                 }
                 else
                 {
                     printf("TCS_LEFT_STATE\n");
-                    tc_state = TCS_LEFT_STATE;
+                    tc_temp_state = TCS_LEFT_STATE;
                 }
                 tc_countdown = 0;
             }
@@ -328,7 +329,7 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
 #ifndef	_WIN32
     sim_thread_console();
 #endif
-    if((mouse_down == 1) && (mouse_identification == fIdentification))
+    if ((mouse_down == 1) && (mouse_identification == fIdentification))
     {
         
 #if (MAP_BITS == 8)
@@ -344,6 +345,15 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
             control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
         }
     }
+    
+    if ((mouse_down == 0) && (mouse_identification == fIdentification))
+    {
+        if (tc_temp_state != tc_state)
+        {
+            tc_state = tc_temp_state;
+        }
+    }
+    
     if((key_down == 1) && (key_identification == fIdentification))
     {
         if ((key_identification == NUM_VIEW) || (key_identification == NUM_TERRAIN))
