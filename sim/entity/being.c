@@ -1873,47 +1873,35 @@ const n_string EnglishNames[576] =
 };
 
 
-/** Surname = 16, Male = 256, Female = 256 */
+/** Surname = 16, Female = 64, Male = 256,  */
 const n_string EnglishNamesShort[] =
 {
     "Adams","Baker","Brown","Davis","Evans","Green","Jones","Mason",
     "Moore","Myers","Perry","Price","Quinn","Smith","White","Young",
     
-    "Agnes","Aimee","Alice","Alina","Amber","Anita","April","Becky",
-    "Beryl","Carla","Chloe","Coral","Donna","Doris","Edana","Edith",
-    "Edlyn","Effie","Elena","Elise","Eliza","Ellen","Emily","Erika",
-    "Ethel","Faith","Fiona","Flora","Gilda","Grace","Hazel","Hetty",
-    "Hilda","Holly","Honey","Irene","Ivory","Janet","Jewel","Kacey",
-    "Keely","Kerri","Lacey","Linda","Livia","Mabel","Madge","Mandy",
-    "Maude","Maura","Mavis","Megan","Mercy","Misty","Moira","Molly",
-    "Nancy","Naomi","Norma","Nydia","Pansy","Patty","Pearl","Polly",
-    "Rhoda","Robin","Sacha","Sadie","Sally","Sarah","Shana","Tammy",
-    "Tanya","Tatum","Thora","Tilda","Tracy","Trina","Udele","Valda",
-    "Vania","Wanda","Wilda","Willa",
+    "Agnes","Aimee","Alice","Amber","Anita","April","Becky","Beryl",
+    "Carla","Chloe","Donna","Doris","Edith","Elena","Elise","Ellen",
+    "Emily","Erika","Ethel","Faith","Fiona","Flora","Gilda","Grace",
+    "Hazel","Helen","Hilda","Holly","Irene","Janet","Jewel","Kacey",
+    
+    "Kerri","Lacey","Linda","Mabel","Madge","Mandy","Maude","Mavis",
+    "Megan","Mercy","Misty","Molly","Nancy","Naomi","Norma","Nydia",
+    "Pansy","Patty","Pearl","Polly","Rhoda","Robin","Sadie","Sally",
+    "Sarah","Tammy","Tanya","Tilda","Tracy","Vania","Wanda","Wilda",
 
     
-    "Aaron",
-    "Abbott",
-    "Abel",
-    "Adam",
-    "Albern","Albert","Alfie","Alfred","Alvin","Amery","Amos","Andrew","Angus","Ansel","Arlen",
-    "Arnold","Arvel","Austin","Axel","Baird","Barry","Basil","Bert","Blair","Blake","Boris","Brent","Brian","Brice","Brock",
-    "Bruce","Bruno","Bryant","Buck","Bud","Burton","Byron","Calvin","Carl","Carter","Carver","Cary","Casey","Casper","Cecil",
-    "Cedric","Claude","Clive","Clyde","Colin","Conan","Connor","Conrad","Conroy","Conway","Corwin","Craig","Crosby","Culver",
-    "Curt","Curtis","Cyril","Damon","Daniel","Darcy","David","Dean","Declan","Dennis","Derek","Dermot","Derwin","Dexter",
-    "Dillon","Dion","Dirk","Donald","Dorian","Drew","Dudley","Duncan","Dwayne","Dwight","Dylan","Earl","Edgar","Edwin","Efrain",
-    "Egbert","Elbert","Elmer","Elroy","Elton","Elvis","Emmett","Emrick","Ernest","Errol","Esmond","Eugene","Evan","Ezra","Fabian",
-    "Farley","Felix","Fenton","Ferris","Finbar","Floyd","Foster","Fox","Frank","Gale","Galvin","Garret","Garth","Gavin","George",
-    "Gideon","Giles","Gilroy","Glenn","Godwin","Graham","Grant","Guy","Hadden","Hadley","Hadwin","Hale","Hall","Hamlin","Hardy",
-    "Harley","Hector","Henry","Herman","Homer","Howard","Hubert","Hunter","Ian","Isaac","Isaiah","Ivan","Ives","Jack","Jacob",
-    "Jarvis","Jason","Jasper","Jed","Jerome","Jesse","John","Joshua","Justin","Keaton","Keith","Kelsey","Kelvin","Kent","Kerry",
-    "Kevin","Kirby","Kirk","Kit","Kody","Konrad","Kurt","Kyle","Lamont","Landon","Lane","Lars","Lee","Leroy","Leslie","Lester",
-    "Lionel","Lloyd","Logan","Lowell","Lyndon","Marcus","Marlon","Martin","Marvin","Medwin","Melvin","Merlin","Miles","Morgan",
-    "Morris","Morton","Murray","Neal","Nigel","Noel","Norman","Olaf","Olin","Oliver","Oscar","Oswald","Otis","Owen","Paul",
-    "Perry","Peter","Philip","Pierce","Quincy","Quinn","Ralph","Rex","Riley","Rodney","Roger","Roland","Rolf","Ronald","Rory",
-    "Ross","Roy","Rufus","Rupert","Ryan","Samson","Samuel","Scott","Sean","Seth","Shawn","Sidney","Simon","Sloane","Stacy",
-    "Thomas","Toby","Todd","Tony","Trent","Trevor","Troy","Tyler","Unwin","Vance","Victor","Walter","Warren","Wayne","Wilbur",
-    "Willis","Wyatt","Wylie"
+    "Aaron","Alfie","Alvin","Amery","Angus","Ansel","Arlen","Arvel",
+    "Baird","Barry","Basil","Blair","Blake","Boris","Brent","Brian",
+    "Brice","Brock","Bruce","Bruno","Byron","Casey","Cecil","Clive",
+    "Clyde","Colin","Conan","Craig","Cyril","Damon","Darcy","David",
+    
+    "Derek","Dylan","Edgar","Edwin","Elmer","Elroy","Elton","Elvis",
+    "Errol","Felix","Floyd","Frank","Garth","Gavin","Giles","Glenn",
+    "Grant","Hardy","Henry","Homer","Isaac","Jacob","Jason","Jesse",
+    "Keith","Kevin","Kirby","Leroy","Lloyd","Logan","Miles","Nigel",
+    "Oscar","Perry","Peter","Quinn","Ralph","Riley","Roger","Rufus",
+    "Scott","Shawn","Simon","Stacy","Trent","Tyler","Unwin","Vance",
+    "Wayne","Wyatt","Wylie"
 };
 
 static void  being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name)
