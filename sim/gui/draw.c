@@ -1307,8 +1307,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
         n_int	      act_x2a, term_1a, term_2a;
 
         n_byte	    * brainptr = local;
-        n_byte	    * obrainptr = &local[ BRAIN_OFFSET(32 * 32 * 32) ];
-        
+        n_byte	    * obrainptr = &local[ 32 * 32 * 32 ];
         n_int         a11, a12, a13, a21, a23, a31, a32, a33;
         
         n_vect2       vect_y, vect_z;
@@ -1355,7 +1354,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
                 n_int	lpz = 0;
                 while (lpz < 32)
                 {
-                    if ((brainptr[BRAIN_OFFSET(loop)] ^ obrainptr[BRAIN_OFFSET(loop)]) >> 5)
+                    if ((brainptr[loop] ^ obrainptr[loop]) >> 5)
                     {
                         n_int	scr_z = 256 + (act_x1 >> 11);
                         n_int	s_x = ((act_x2 * scr_z) >> 16) + center_x;

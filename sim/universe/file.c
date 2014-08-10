@@ -310,6 +310,8 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
     case VARIABLE_HEIGHT:
         GET_H(local_being) = (n_byte2) value;
         break;
+            
+#if 0 /* TODO: This should not be done */
     case VARIABLE_FAMILY_NAME_ONE:
         being_set_family_name(local_being,
                         UNPACK_FAMILY_FIRST_NAME((n_byte2) value),
@@ -320,6 +322,7 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
                         UNPACK_FAMILY_FIRST_NAME(being_family_name(local_being)),
                         UNPACK_FAMILY_SECOND_NAME((n_byte2) value));
         break;
+#endif
     case VARIABLE_GOAL_TYPE:
         local_being->goal[0] = (n_byte) (value % 3);
         break;
@@ -632,12 +635,14 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     case VARIABLE_FIRST_NAME:
                         local_number = being_gender_name(local_being);
                         break;
+#if 0 /* TODO: This should not be done */
                     case VARIABLE_FAMILY_NAME_ONE:
                         local_number = UNPACK_FAMILY_FIRST_NAME(being_family_name(local_being));
                         break;
                     case VARIABLE_FAMILY_NAME_TWO:
                         local_number = UNPACK_FAMILY_SECOND_NAME(being_family_name(local_being));
                         break;
+#endif
                     case VARIABLE_GOAL_TYPE:
                         local_number = local_being->goal[0];
                         break;
@@ -778,12 +783,14 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     case VARIABLE_MEMORY_FIRST_NAME:
                         local_number = social_graph.first_name[BEING_MET];
                         break;
+#if 0 /* TODO: This should not be done */
                     case VARIABLE_MEMORY_FAMILY_NAME_ONE:
                         local_number = UNPACK_FAMILY_FIRST_NAME(social_graph.family_name[BEING_MET]);
                         break;
                     case VARIABLE_MEMORY_FAMILY_NAME_TWO:
                         local_number = UNPACK_FAMILY_SECOND_NAME(social_graph.family_name[BEING_MET]);
                         break;
+#endif
 #ifdef EPISODIC_ON
                     case VARIABLE_MEMORY_LOCATION_X:
                         local_number = episodic.location[0];
@@ -803,14 +810,15 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     case VARIABLE_MEMORY_FIRST_NAME0:
                         local_number = episodic.first_name[0];
                         break;
+                    case VARIABLE_MEMORY_FIRST_NAME1:
+                        local_number = episodic.first_name[BEING_MET];
+                        break;
+#if 0 /* TODO: This should not be done */
                     case VARIABLE_MEMORY_FAMILY_NAME_ONE0:
                         local_number = UNPACK_FAMILY_FIRST_NAME(episodic.family_name[0]);
                         break;
                     case VARIABLE_MEMORY_FAMILY_NAME_TWO0:
                         local_number = UNPACK_FAMILY_SECOND_NAME(episodic.family_name[0]);
-                        break;
-                    case VARIABLE_MEMORY_FIRST_NAME1:
-                        local_number = episodic.first_name[BEING_MET];
                         break;
                     case VARIABLE_MEMORY_FAMILY_NAME_ONE1:
                         local_number = UNPACK_FAMILY_FIRST_NAME(episodic.family_name[BEING_MET]);
@@ -818,6 +826,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     case VARIABLE_MEMORY_FAMILY_NAME_TWO1:
                         local_number = UNPACK_FAMILY_SECOND_NAME(episodic.family_name[BEING_MET]);
                         break;
+#endif
                     case VARIABLE_MEMORY_EVENT:
                         local_number = episodic.event;
                         break;

@@ -256,71 +256,6 @@ static n_byte being_honor_immune(noble_being * value)
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }
 
-n_byte being_first_name(noble_being * value)
-{
-    if (value == 0L)
-    {
-        return 0;
-    }
-    {
-        noble_social * local_social = being_social(value);
-        return local_social->first_name[BEING_MET]&255;
-    }
-}
-
-static void being_set_first_name(noble_being * value, n_byte2 name)
-{
-    noble_social * local_social = being_social(value);
-    local_social->first_name[BEING_MET] = name;
-}
-
-void being_set_family_name(noble_being * value, n_byte first, n_byte last)
-{
-    noble_social * local_social = being_social(value);
-    local_social->family_name[BEING_MET] = GET_NAME_FAMILY(first,last);
-}
-
-n_byte2 being_gender_name(noble_being * value)
-{
-    if (value == 0L)
-    {
-        return 0;
-    }
-    return (n_byte2)((being_first_name(value) | (FIND_SEX(GET_I(value))<<8)));
-}
-
-n_byte2 being_family_name(noble_being * value)
-{
-    if (value == 0L)
-    {
-        return 0;
-    }
-    return (GET_NAME_FAMILY(being_family_first_name(value),being_family_second_name(value)));
-}
-
-n_int being_name_comparison(noble_being * value, n_byte2 gender_name, n_byte2 family_name)
-{
-    return ((being_gender_name(value) == gender_name) && (being_family_name(value) == family_name));
-}
-
-n_byte being_family_first_name(noble_being * value)
-{
-    noble_social * local_social = being_social(value);
-    return UNPACK_FAMILY_FIRST_NAME(local_social->family_name[BEING_MET]);
-}
-
-n_byte being_family_second_name(noble_being * value)
-{
-    if (value == 0L)
-    {
-        return 0;
-    }
-    {
-        noble_social * local_social = being_social(value);
-        return UNPACK_FAMILY_SECOND_NAME(local_social->family_name[BEING_MET]);
-    }
-}
-
 n_byte being_posture(noble_being * value)
 {
     return value->posture;
@@ -1825,56 +1760,14 @@ n_int episode_description(
     return social;
 }
 
-/** Surname = 64, Male = 256, Female = 256 */
-const n_string EnglishNames[576] =
-{
-    "Adams","Allen","Bailey","Baker","Barnes","Bell","Brooks","Brown","Butler","Clark","Cook","Cooper","Davies","Davis","Evans",
-    "Fisher","Foster","Graham","Gray","Green","Hall","Harris","Hill","Howard","Hughes","James","Jones","Kelly","King","Lewis",
-    "Long","Mason","Matine","Miller","Moore","Morgan","Munroe","Murphy","Mutz","Myers","Nelson","Owen","Parker","Perry",
-    "Powell","Price","Quinn","Reed","Reid","Rogers","Rose","Reis","Scrim","Smith","Taylor","Thiel","Turner","Walker","Ward",
-    "Watson","White","Wilson","Wood","Young",
+#ifdef SHORT_NAMES
 
-    "Ada","Agatha","Agnes","Aileen","Aimee","Alanna","Alda","Alice","Alina","Alison","Alma","Amanda","Amber","Andrea","Angela",
-    "Anita","Anthea","April","Ariana","Arleen","Astrid","Audrey","Beata","Becky","Beryl","Bess","Bianca","Blair","Blythe",
-    "Bonnie","Brenda","Briana","Brooke","Carla","Carly","Carmen","Cheryl","Chloe","Coral","Daphne","Davida","Dawn","Denise",
-    "Donna","Dora","Doris","Echo","Eda","Edana","Edith","Edlyn","Edna","Edwina","Effie","Eileen","Elaine","Elena","Elga",
-    "Elise","Eliza","Ella","Ellen","Eloise","Elsie","Elvira","Emily","Emma","Erika","Erin","Estra","Ethel","Eudora","Eunice",
-    "Faith","Fannie","Fawn","Faye","Fedora","Fern","Fiona","Flora","Gale","Gaye","Geneva","Gilda","Gladys","Gloria","Grace",
-    "Gwynne","Harley","Hattie","Hazel","Hetty","Hilda","Holly","Honey","Hope","Ingrid","Irene","Iris","Ivory","Ivy","Jade",
-    "Jane","Janet","Janice","Jeanne","Jemima","Jewel","Joan","Joanna","Joy","June","Kacey","Kara","Kate","Kay","Keely","Kelsey",
-    "Kendra","Kerri","Kyla","Lacey","Lane","Lara","Larina","Leanne","Leslie","Linda","Livia","Lizzie","Lois","Lorena","Lulu",
-    "Luna","Lynn","Mabel","Madge","Maggie","Maia","Maisie","Mandy","Marcia","Margot","Marnia","Mary","Maude","Maura","Mavis",
-    "Maxine","Megan","Melody","Mercy","Meris","Merle","Miriam","Misty","Moira","Molly","Mona","Monica","Mora","Morgan","Muriel",
-    "Myra","Myrtle","Nancy","Naomi","Nell","Nerita","Nina","Noelle","Nola","Norma","Nydia","Odette","Olga","Opal","Oprah","Orva",
-    "Page","Pamela","Pansy","Patty","Pearl","Phoebe","Polly","Quenna","Questa","Rachel","Ramona","Regina","Rhea","Rhoda","Rita",
-    "Robin","Rosa","Rowena","Ruby","Ruth","Sacha","Sadie","Salena","Sally","Salome","Sandra","Sarah","Serena","Shana","Sharon",
-    "Sheila","Sibley","Silver","Sirena","Talia","Tamara","Tammy","Tanya","Tara","Tasha","Tatum","Tess","Thalia","Thea","Thelma",
-    "Thora","Tilda","Tina","Tracy","Trina","Trista","Tyne","Udele","Ula","Ulrica","Ulva","Una","Unity","Ursa","Ursula","Valda",
-    "Vania","Veleda","Vera","Verda","Violet","Vita","Wanda","Wilda","Willa","Willow","Wynne","Zea","Zelda","Zera","Zoe",
-
-    "Aaron","Abbott","Abel","Adam","Albern","Albert","Alfie","Alfred","Alvin","Amery","Amos","Andrew","Angus","Ansel","Arlen",
-    "Arnold","Arvel","Austin","Axel","Baird","Barry","Basil","Bert","Blair","Blake","Boris","Brent","Brian","Brice","Brock",
-    "Bruce","Bruno","Bryant","Buck","Bud","Burton","Byron","Calvin","Carl","Carter","Carver","Cary","Casey","Casper","Cecil",
-    "Cedric","Claude","Clive","Clyde","Colin","Conan","Connor","Conrad","Conroy","Conway","Corwin","Craig","Crosby","Culver",
-    "Curt","Curtis","Cyril","Damon","Daniel","Darcy","David","Dean","Declan","Dennis","Derek","Dermot","Derwin","Dexter",
-    "Dillon","Dion","Dirk","Donald","Dorian","Drew","Dudley","Duncan","Dwayne","Dwight","Dylan","Earl","Edgar","Edwin","Efrain",
-    "Egbert","Elbert","Elmer","Elroy","Elton","Elvis","Emmett","Emrick","Ernest","Errol","Esmond","Eugene","Evan","Ezra","Fabian",
-    "Farley","Felix","Fenton","Ferris","Finbar","Floyd","Foster","Fox","Frank","Gale","Galvin","Garret","Garth","Gavin","George",
-    "Gideon","Giles","Gilroy","Glenn","Godwin","Graham","Grant","Guy","Hadden","Hadley","Hadwin","Hale","Hall","Hamlin","Hardy",
-    "Harley","Hector","Henry","Herman","Homer","Howard","Hubert","Hunter","Ian","Isaac","Isaiah","Ivan","Ives","Jack","Jacob",
-    "Jarvis","Jason","Jasper","Jed","Jerome","Jesse","John","Joshua","Justin","Keaton","Keith","Kelsey","Kelvin","Kent","Kerry",
-    "Kevin","Kirby","Kirk","Kit","Kody","Konrad","Kurt","Kyle","Lamont","Landon","Lane","Lars","Lee","Leroy","Leslie","Lester",
-    "Lionel","Lloyd","Logan","Lowell","Lyndon","Marcus","Marlon","Martin","Marvin","Medwin","Melvin","Merlin","Miles","Morgan",
-    "Morris","Morton","Murray","Neal","Nigel","Noel","Norman","Olaf","Olin","Oliver","Oscar","Oswald","Otis","Owen","Paul",
-    "Perry","Peter","Philip","Pierce","Quincy","Quinn","Ralph","Rex","Riley","Rodney","Roger","Roland","Rolf","Ronald","Rory",
-    "Ross","Roy","Rufus","Rupert","Ryan","Samson","Samuel","Scott","Sean","Seth","Shawn","Sidney","Simon","Sloane","Stacy",
-    "Thomas","Toby","Todd","Tony","Trent","Trevor","Troy","Tyler","Unwin","Vance","Victor","Walter","Warren","Wayne","Wilbur",
-    "Willis","Wyatt","Wylie"
-};
-
+/* ape names */
+#define NAMES_SURNAMES              16
+#define NAMES_FIRST                 64
 
 /** Surname = 16, Female = 64, Male = 64,  */
-const n_string EnglishNamesShort[] =
+const n_string EnglishNames[144] =
 {
     "Adams","Baker","Brown","Davis","Evans","Green","Jones","Mason",
     "Moore","Myers","Perry","Price","Quinn","Smith","White","Young",
@@ -1900,6 +1793,146 @@ const n_string EnglishNamesShort[] =
     "Scott","Shawn","Simon","Trent","Tyler","Unwin","Vance","Wayne"
 };
 
+#else
+
+/* ape names */
+#define NAMES_SURNAMES              64
+#define NAMES_FIRST                 256
+
+/** Surname = 64, Male = 256, Female = 256 */
+const n_string EnglishNames[576] =
+{
+    "Adams","Allen","Bailey","Baker","Barnes","Bell","Brooks","Brown","Butler","Clark","Cook","Cooper","Davies","Davis","Evans",
+    "Fisher","Foster","Graham","Gray","Green","Hall","Harris","Hill","Howard","Hughes","James","Jones","Kelly","King","Lewis",
+    "Long","Mason","Matine","Miller","Moore","Morgan","Munroe","Murphy","Mutz","Myers","Nelson","Owen","Parker","Perry",
+    "Powell","Price","Quinn","Reed","Reid","Rogers","Rose","Reis","Scrim","Smith","Taylor","Thiel","Turner","Walker","Ward",
+    "Watson","White","Wilson","Wood","Young",
+    
+    "Ada","Agatha","Agnes","Aileen","Aimee","Alanna","Alda","Alice","Alina","Alison","Alma","Amanda","Amber","Andrea","Angela",
+    "Anita","Anthea","April","Ariana","Arleen","Astrid","Audrey","Beata","Becky","Beryl","Bess","Bianca","Blair","Blythe",
+    "Bonnie","Brenda","Briana","Brooke","Carla","Carly","Carmen","Cheryl","Chloe","Coral","Daphne","Davida","Dawn","Denise",
+    "Donna","Dora","Doris","Echo","Eda","Edana","Edith","Edlyn","Edna","Edwina","Effie","Eileen","Elaine","Elena","Elga",
+    "Elise","Eliza","Ella","Ellen","Eloise","Elsie","Elvira","Emily","Emma","Erika","Erin","Estra","Ethel","Eudora","Eunice",
+    "Faith","Fannie","Fawn","Faye","Fedora","Fern","Fiona","Flora","Gale","Gaye","Geneva","Gilda","Gladys","Gloria","Grace",
+    "Gwynne","Harley","Hattie","Hazel","Hetty","Hilda","Holly","Honey","Hope","Ingrid","Irene","Iris","Ivory","Ivy","Jade",
+    "Jane","Janet","Janice","Jeanne","Jemima","Jewel","Joan","Joanna","Joy","June","Kacey","Kara","Kate","Kay","Keely","Kelsey",
+    "Kendra","Kerri","Kyla","Lacey","Lane","Lara","Larina","Leanne","Leslie","Linda","Livia","Lizzie","Lois","Lorena","Lulu",
+    "Luna","Lynn","Mabel","Madge","Maggie","Maia","Maisie","Mandy","Marcia","Margot","Marnia","Mary","Maude","Maura","Mavis",
+    "Maxine","Megan","Melody","Mercy","Meris","Merle","Miriam","Misty","Moira","Molly","Mona","Monica","Mora","Morgan","Muriel",
+    "Myra","Myrtle","Nancy","Naomi","Nell","Nerita","Nina","Noelle","Nola","Norma","Nydia","Odette","Olga","Opal","Oprah","Orva",
+    "Page","Pamela","Pansy","Patty","Pearl","Phoebe","Polly","Quenna","Questa","Rachel","Ramona","Regina","Rhea","Rhoda","Rita",
+    "Robin","Rosa","Rowena","Ruby","Ruth","Sacha","Sadie","Salena","Sally","Salome","Sandra","Sarah","Serena","Shana","Sharon",
+    "Sheila","Sibley","Silver","Sirena","Talia","Tamara","Tammy","Tanya","Tara","Tasha","Tatum","Tess","Thalia","Thea","Thelma",
+    "Thora","Tilda","Tina","Tracy","Trina","Trista","Tyne","Udele","Ula","Ulrica","Ulva","Una","Unity","Ursa","Ursula","Valda",
+    "Vania","Veleda","Vera","Verda","Violet","Vita","Wanda","Wilda","Willa","Willow","Wynne","Zea","Zelda","Zera","Zoe",
+    
+    "Aaron","Abbott","Abel","Adam","Albern","Albert","Alfie","Alfred","Alvin","Amery","Amos","Andrew","Angus","Ansel","Arlen",
+    "Arnold","Arvel","Austin","Axel","Baird","Barry","Basil","Bert","Blair","Blake","Boris","Brent","Brian","Brice","Brock",
+    "Bruce","Bruno","Bryant","Buck","Bud","Burton","Byron","Calvin","Carl","Carter","Carver","Cary","Casey","Casper","Cecil",
+    "Cedric","Claude","Clive","Clyde","Colin","Conan","Connor","Conrad","Conroy","Conway","Corwin","Craig","Crosby","Culver",
+    "Curt","Curtis","Cyril","Damon","Daniel","Darcy","David","Dean","Declan","Dennis","Derek","Dermot","Derwin","Dexter",
+    "Dillon","Dion","Dirk","Donald","Dorian","Drew","Dudley","Duncan","Dwayne","Dwight","Dylan","Earl","Edgar","Edwin","Efrain",
+    "Egbert","Elbert","Elmer","Elroy","Elton","Elvis","Emmett","Emrick","Ernest","Errol","Esmond","Eugene","Evan","Ezra","Fabian",
+    "Farley","Felix","Fenton","Ferris","Finbar","Floyd","Foster","Fox","Frank","Gale","Galvin","Garret","Garth","Gavin","George",
+    "Gideon","Giles","Gilroy","Glenn","Godwin","Graham","Grant","Guy","Hadden","Hadley","Hadwin","Hale","Hall","Hamlin","Hardy",
+    "Harley","Hector","Henry","Herman","Homer","Howard","Hubert","Hunter","Ian","Isaac","Isaiah","Ivan","Ives","Jack","Jacob",
+    "Jarvis","Jason","Jasper","Jed","Jerome","Jesse","John","Joshua","Justin","Keaton","Keith","Kelsey","Kelvin","Kent","Kerry",
+    "Kevin","Kirby","Kirk","Kit","Kody","Konrad","Kurt","Kyle","Lamont","Landon","Lane","Lars","Lee","Leroy","Leslie","Lester",
+    "Lionel","Lloyd","Logan","Lowell","Lyndon","Marcus","Marlon","Martin","Marvin","Medwin","Melvin","Merlin","Miles","Morgan",
+    "Morris","Morton","Murray","Neal","Nigel","Noel","Norman","Olaf","Olin","Oliver","Oscar","Oswald","Otis","Owen","Paul",
+    "Perry","Peter","Philip","Pierce","Quincy","Quinn","Ralph","Rex","Riley","Rodney","Roger","Roland","Rolf","Ronald","Rory",
+    "Ross","Roy","Rufus","Rupert","Ryan","Samson","Samuel","Scott","Sean","Seth","Shawn","Sidney","Simon","Sloane","Stacy",
+    "Thomas","Toby","Todd","Tony","Trent","Trevor","Troy","Tyler","Unwin","Vance","Victor","Walter","Warren","Wayne","Wilbur",
+    "Willis","Wyatt","Wylie"
+};
+
+#endif
+
+#define FAMILY_NAME_AND_MOD (NAMES_SURNAMES - 1)
+#define FIRST_NAME_AND_MOD  (NAMES_FIRST - 1)
+
+#define UNPACK_FAMILY_FIRST_NAME(packed_family_name)  (packed_family_name & FAMILY_NAME_AND_MOD)
+#define UNPACK_FAMILY_SECOND_NAME(packed_family_name) ((packed_family_name / NAMES_SURNAMES)&FAMILY_NAME_AND_MOD)
+#define GET_NAME_FAMILY(f0,f1) ((n_byte2)((f0&FAMILY_NAME_AND_MOD)|((f1&FAMILY_NAME_AND_MOD)*NAMES_SURNAMES)))
+
+
+void being_unpack_family(n_byte2 name, n_byte * values)
+{
+    values[0] = UNPACK_FAMILY_FIRST_NAME(name);
+    values[1] = UNPACK_FAMILY_SECOND_NAME(name);
+}
+
+n_byte being_first_name(noble_being * value)
+{
+    if (value == 0L)
+    {
+        return 0;
+    }
+    {
+        noble_social * local_social = being_social(value);
+        return local_social->first_name[BEING_MET] & FIRST_NAME_AND_MOD;
+    }
+}
+
+static void being_set_first_name(noble_being * value, n_byte2 name)
+{
+    noble_social * local_social = being_social(value);
+    local_social->first_name[BEING_MET] = name & FIRST_NAME_AND_MOD;
+}
+
+void being_set_family_name(noble_being * value, n_byte first, n_byte last)
+{
+    noble_social * local_social = being_social(value);
+    local_social->family_name[BEING_MET] = GET_NAME_FAMILY(first,last);
+}
+
+n_byte2 being_gender_name(noble_being * value)
+{
+    if (value == 0L)
+    {
+        return 0;
+    }
+    return (n_byte2)((being_first_name(value) | (FIND_SEX(GET_I(value))<<8)));
+}
+
+n_byte2 being_family_name(noble_being * value)
+{
+    if (value == 0L)
+    {
+        return 0;
+    }
+    return (GET_NAME_FAMILY(being_family_first_name(value),being_family_second_name(value)));
+}
+
+n_int being_name_comparison(noble_being * value, n_byte2 gender_name, n_byte2 family_name)
+{
+    return ((being_gender_name(value) == gender_name) && (being_family_name(value) == family_name));
+}
+
+n_byte being_family_first_name(noble_being * value)
+{
+    if (value == 0L)
+    {
+        return 0;
+    }
+    {
+        noble_social * local_social = being_social(value);
+        return UNPACK_FAMILY_FIRST_NAME(local_social->family_name[BEING_MET]);
+    }
+}
+
+n_byte being_family_second_name(noble_being * value)
+{
+    if (value == 0L)
+    {
+        return 0;
+    }
+    {
+        noble_social * local_social = being_social(value);
+        return UNPACK_FAMILY_SECOND_NAME(local_social->family_name[BEING_MET]);
+    }
+}
+
 static void  being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name)
 {
     n_int  position = 0;
@@ -1911,7 +1944,7 @@ static void  being_name(n_byte female, n_int first, n_byte family0, n_byte famil
         }
         else
         {
-            io_string_write(name, EnglishNames[ NAMES_SURNAMES + 256 + first ], &position);
+            io_string_write(name, EnglishNames[ NAMES_SURNAMES + NAMES_FIRST + first ], &position);
         }
         io_string_write(name, " ", &position);
         io_string_write(name, EnglishNames[ family0 ], &position);
@@ -3294,10 +3327,8 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
     
     local->goal[0]=GOAL_NONE;
 
-    /** Set learned preferences to 0.5 (no preference in
-        either direction.
-        This may seem like tabla rasa, but there are genetic
-        biases */
+    /** Set learned preferences to 0.5 (no preference in either direction.
+        This may seem like tabla rasa, but there are genetic biases */
     for (ch = 0; ch < PREFERENCES; ch++)
     {
         local->learned_preference[ch]=127;

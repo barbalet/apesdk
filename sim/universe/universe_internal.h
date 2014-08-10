@@ -248,9 +248,7 @@ static const noble_file_entry noble_file_format[]=
     
 };
 
-#define	BRAIN_LOCATION(lx, ly, lz)	(BRAIN_OFFSET((lx)|((ly)<<5)|((lz)<<10)))
-
-#define	TRACK_BRAIN(loc,lx,ly,lz)	((loc)[BRAIN_LOCATION(lx, ly, lz)])
+#define	TRACK_BRAIN(loc,lx,ly,lz)	((loc)[(lx)|((ly)<<5)|((lz)<<10)])
 
 /* functions */
 

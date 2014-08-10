@@ -775,12 +775,16 @@ static n_int attention_similar_affect(n_int episode_index,
 static n_int similar_name(noble_episodic * episodic, n_int * carry_through)
 {
     n_int similarity = 3;
-
-    if (UNPACK_FAMILY_FIRST_NAME(episodic->family_name[BEING_MET]) == carry_through[0]) similarity--;
-    if (UNPACK_FAMILY_SECOND_NAME(episodic->family_name[BEING_MET]) == carry_through[1]) similarity--;
+    n_byte values[2];
+    
+    being_unpack_family(episodic->family_name[BEING_MET], values);
+    
+    if (values[0] == carry_through[0]) similarity--;
+    if (values[1] == carry_through[1]) similarity--;
     if (episodic->first_name[BEING_MET] == carry_through[2]) similarity--;
     return similarity;
 }
+
 
 /**
  * @brief Returns the similarity between a given episodic memory event and the given being name
@@ -791,12 +795,16 @@ static n_int similar_name(noble_episodic * episodic, n_int * carry_through)
  */
 static n_int attention_similar_name(n_int episode_index,
                                     noble_episodic * episodic,
+                                    noble_being * meeter,
                                     n_int * memory_visited)
 {
     n_int name[3];
-
-    name[0] = UNPACK_FAMILY_FIRST_NAME(episodic[episode_index].family_name[BEING_MET]);
-    name[1] = UNPACK_FAMILY_SECOND_NAME(episodic[episode_index].family_name[BEING_MET]);
+    n_byte values[2];
+    
+    being_unpack_family(episodic->family_name[BEING_MET], values);
+    
+    name[0] = values[0];
+    name[1] = values[1];
     name[2] = episodic[episode_index].first_name[BEING_MET];
 
     return attention_similar(episode_index, episodic, memory_visited, name, similar_name);
@@ -1253,7 +1261,7 @@ void brain_dialogue(
                     new_episode_index = attention_similar_date(episode_index, episodic, memory_visited);
                     break;
                 case 7: /** Shift attention to a similar name */
-                    new_episode_index = attention_similar_name(episode_index, episodic, memory_visited);
+                    new_episode_index = attention_similar_name(episode_index, episodic, meeter_being, memory_visited);
                     break;
                 case 8: /** Shift attention to a similar affect */
                     new_episode_index = attention_similar_affect(episode_index, episodic, memory_visited);

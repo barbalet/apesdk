@@ -345,7 +345,8 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
             control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
         }
     }
-    
+
+#ifdef MULTITOUCH_CONTROLS
     if ((mouse_down == 0) && (mouse_identification == fIdentification))
     {
         if (tc_temp_state != tc_state)
@@ -353,6 +354,7 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
             tc_state = tc_temp_state;
         }
     }
+#endif
     
     if((key_down == 1) && (key_identification == fIdentification))
     {

@@ -51,9 +51,9 @@
 #define	LAND_ON
 #define	WEATHER_ON
 #undef  RANDOM_INITIAL_BRAINCODE
-
-#undef	 FIXED_RANDOM_SIM
-#undef	 LARGE_SIM
+#undef  SHORT_NAMES
+#undef	FIXED_RANDOM_SIM
+#undef	LARGE_SIM
 
 #define EPISODIC_AFFECT_ZERO (16384)
 
@@ -175,6 +175,8 @@ void being_honor_inc_dec(noble_being * inc, noble_being * dec);
 void being_honor_swap(noble_being * victor, noble_being * vanquished);
 
 n_int being_honor_compare(noble_being * first, noble_being * second);
+
+void being_unpack_family(n_byte2 name, n_byte * values);
 
 n_byte being_first_name(noble_being * value);
 
