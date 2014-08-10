@@ -1873,7 +1873,7 @@ const n_string EnglishNames[576] =
 };
 
 
-/** Surname = 16, Female = 64, Male = 256,  */
+/** Surname = 16, Female = 64, Male = 64,  */
 const n_string EnglishNamesShort[] =
 {
     "Adams","Baker","Brown","Davis","Evans","Green","Jones","Mason",
@@ -1889,19 +1889,15 @@ const n_string EnglishNamesShort[] =
     "Pansy","Patty","Pearl","Polly","Rhoda","Robin","Sadie","Sally",
     "Sarah","Tammy","Tanya","Tilda","Tracy","Vania","Wanda","Wilda",
 
+    "Aaron","Angus","Barry","Basil","Blair","Blake","Boris","Brent",
+    "Brian","Brock","Bruce","Bruno","Byron","Casey","Cecil","Clive",
+    "Clyde","Colin","Craig","Cyril","Damon","Darcy","David","Derek",
+    "Edgar","Edwin","Elmer","Elroy","Elton","Errol","Felix","Floyd",
     
-    "Aaron","Alfie","Alvin","Amery","Angus","Ansel","Arlen","Arvel",
-    "Baird","Barry","Basil","Blair","Blake","Boris","Brent","Brian",
-    "Brice","Brock","Bruce","Bruno","Byron","Casey","Cecil","Clive",
-    "Clyde","Colin","Conan","Craig","Cyril","Damon","Darcy","David",
-    
-    "Derek","Dylan","Edgar","Edwin","Elmer","Elroy","Elton","Elvis",
-    "Errol","Felix","Floyd","Frank","Garth","Gavin","Giles","Glenn",
-    "Grant","Hardy","Henry","Homer","Isaac","Jacob","Jason","Jesse",
-    "Keith","Kevin","Kirby","Leroy","Lloyd","Logan","Miles","Nigel",
-    "Oscar","Perry","Peter","Quinn","Ralph","Riley","Roger","Rufus",
-    "Scott","Shawn","Simon","Stacy","Trent","Tyler","Unwin","Vance",
-    "Wayne","Wyatt","Wylie"
+    "Frank","Garth","Gavin","Giles","Glenn","Grant","Henry","Homer",
+    "Isaac","Jacob","Jason","Jesse","Keith","Kevin","Leroy","Lloyd",
+    "Logan","Miles","Nigel","Oscar","Peter","Quinn","Ralph","Roger",
+    "Scott","Shawn","Simon","Trent","Tyler","Unwin","Vance","Wayne"
 };
 
 static void  being_name(n_byte female, n_int first, n_byte family0, n_byte family1, n_string name)
