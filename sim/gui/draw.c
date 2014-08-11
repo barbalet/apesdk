@@ -310,19 +310,47 @@ extern touch_control_state tc_state;
 void draw_tc_controls(n_join * local_mono)
 {
     const n_int half_y = terrain_dim_y / 2;
-    
-    if (tc_state == TCS_SHOW_CONTROLS || tc_state == TCS_LEFT_STATE_CONTROLS)
+    n_vect2 point1, point2, point3;
+
+    if (tc_state == TCS_SHOW_CONTROLS)
     {
-        math_line(5,  half_y + TC_OFFSET_Y, 5, half_y - TC_OFFSET_Y, local_mono);
-        math_line(TC_FRACTION_X - 5, half_y, 5, half_y + TC_OFFSET_Y, local_mono);
-        math_line(TC_FRACTION_X - 5, half_y, 5, half_y - TC_OFFSET_Y, local_mono);
+        vect2_populate(&point1, 5, half_y + TC_OFFSET_Y);
+        vect2_populate(&point2, 5, half_y - TC_OFFSET_Y);
+        vect2_populate(&point3, TC_FRACTION_X - 5, half_y);
+        
+        math_line_vect(&point1, &point2, local_mono);
+        math_line_vect(&point2, &point3, local_mono);
+        math_line_vect(&point3, &point1, local_mono);
+        
+        vect2_populate(&point1, terrain_dim_x - 5, half_y + TC_OFFSET_Y);
+        vect2_populate(&point2, terrain_dim_x - 5, half_y - TC_OFFSET_Y);
+        vect2_populate(&point3, terrain_dim_x - TC_FRACTION_X + 5, half_y);
+        
+        math_line_vect(&point1, &point2, local_mono);
+        math_line_vect(&point2, &point3, local_mono);
+        math_line_vect(&point3, &point1, local_mono);
+    }
+
+    if (tc_state == TCS_LEFT_STATE_CONTROLS)
+    {
+        vect2_populate(&point1, TC_FRACTION_X - 5, half_y + TC_OFFSET_Y);
+        vect2_populate(&point2, TC_FRACTION_X - 5, half_y - TC_OFFSET_Y);
+        vect2_populate(&point3, 5, half_y);
+        
+        math_line_vect(&point1, &point2, local_mono);
+        math_line_vect(&point2, &point3, local_mono);
+        math_line_vect(&point3, &point1, local_mono);
     }
     
-    if (tc_state == TCS_SHOW_CONTROLS || tc_state == TCS_RIGHT_STATE_CONTROLS)
+    if (tc_state == TCS_RIGHT_STATE_CONTROLS)
     {
-        math_line(terrain_dim_x - 5,      half_y + TC_OFFSET_Y,   terrain_dim_x - 5, half_y - TC_OFFSET_Y, local_mono);
-        math_line(terrain_dim_x - TC_FRACTION_X + 5, half_y, terrain_dim_x - 5, half_y + TC_OFFSET_Y, local_mono);
-        math_line(terrain_dim_x - TC_FRACTION_X + 5, half_y, terrain_dim_x - 5, half_y - TC_OFFSET_Y, local_mono);
+        vect2_populate(&point1, terrain_dim_x - TC_FRACTION_X + 5, half_y + TC_OFFSET_Y);
+        vect2_populate(&point2, terrain_dim_x - TC_FRACTION_X + 5, half_y - TC_OFFSET_Y);
+        vect2_populate(&point3, terrain_dim_x - 5, half_y);
+        
+        math_line_vect(&point1, &point2, local_mono);
+        math_line_vect(&point2, &point3, local_mono);
+        math_line_vect(&point3, &point1, local_mono);
     }
 }
 

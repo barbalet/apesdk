@@ -631,6 +631,7 @@ void    math_patch(n_byte * local_map, n_byte * scratch,
 n_int  math_sine(n_int direction, n_int divisor);
 
 n_byte math_join_vect2(n_int sx, n_int sy, n_vect2 * vect, n_join * draw);
+n_byte math_line_vect(n_vect2 * point1, n_vect2 * point2, n_join * draw);
 n_byte math_line(n_int x1, n_int y1, n_int x2, n_int y2, n_join * draw);
 
 void       io_entry_execution(n_int argc, n_string * argv);

@@ -159,10 +159,11 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
         n_int upper_x, upper_y;
         
 #ifdef MULTITOUCH_CONTROLS
-        if ((tc_state&1) == 0)
+        if ((tc_state & 1) == 0)
         {
-            tc_state++;
+            tc_temp_state = tc_state + 1;
             tc_countdown = 60;
+            
         }
 #endif
         draw_terrain_coord(&upper_x, &upper_y);
@@ -189,30 +190,30 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
             {
                 if (tc_state == TCS_LEFT_STATE_CONTROLS)
                 {
-                    printf("TCS_SHOW_NOTHING\n");
-                    tc_temp_state = TCS_SHOW_NOTHING;
+                    tc_temp_state = TCS_SHOW_CONTROLS;
+                    tc_countdown = 60;
                 }
                 else
                 {
-                    printf("TCS_RIGHT_STATE\n");
-                    tc_temp_state = TCS_RIGHT_STATE;
+                    tc_temp_state = TCS_RIGHT_STATE_CONTROLS;
+                    tc_countdown = 60;
                 }
-                tc_countdown = 0;
+                return;
             }
             
             if (px > (upper_x - TC_FRACTION_X))
             {
                 if (tc_state == TCS_RIGHT_STATE_CONTROLS)
                 {
-                    printf("TCS_SHOW_NOTHING\n");
-                    tc_temp_state = TCS_SHOW_NOTHING;
+                    tc_temp_state = TCS_SHOW_CONTROLS;
+                    tc_countdown = 60;
                 }
                 else
                 {
-                    printf("TCS_LEFT_STATE\n");
-                    tc_temp_state = TCS_LEFT_STATE;
+                    tc_temp_state = TCS_LEFT_STATE_CONTROLS;
+                    tc_countdown = 60;
                 }
-                tc_countdown = 0;
+                return;
             }
 #endif
             if (sx > 0)
@@ -332,14 +333,12 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     if ((mouse_down == 1) && (mouse_identification == fIdentification))
     {
         
-#if (MAP_BITS == 8)
-#ifndef NOBLE_IOS
+#if 0
         if (fIdentification == NUM_VIEW)
         {
             control_mouse(mouse_identification, mouse_x/2, mouse_y/2, mouse_option);
         }
         else
-#endif
 #endif
         {
             control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
@@ -372,7 +371,10 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
             tc_countdown--;
             if (tc_countdown == 0)
             {
-                tc_state --;
+                if ((tc_state & 1) == 1)
+                {
+                    tc_temp_state = tc_state - 1;
+                }
             }
         }
 #endif
