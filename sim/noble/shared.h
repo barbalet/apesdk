@@ -82,7 +82,11 @@ void shared_mouseUp(void);
 
 void shared_about(n_constant_string value);
 
+#ifdef NOBLE_IOS
+n_c_uint * shared_draw(n_byte fIdentification, n_int dim_x, n_int dim_y);
+#else
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y);
+#endif
 
 n_int shared_new(n_uint seed);
 

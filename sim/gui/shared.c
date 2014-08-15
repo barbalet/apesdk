@@ -553,27 +553,36 @@ void shared_saved_string(shared_saved_string_type ssst, n_string value)
     
 }
 
+#ifdef NOBLE_IOS
+n_c_uint * shared_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
+#else
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
+#endif
 {
     n_int           ly = 0;
     n_int           loop = 0;
     n_int			loopColors = 0;
     n_byte2         fit[256*3];
     noble_simulation * local_sim = sim_sim();
-    n_byte           * index = draw_pointer(fIdentification);
 #ifdef NOBLE_IOS
-    n_c_uint         * offscreenBuffer = (n_c_uint *) outputBuffer;
     n_c_uint        colorLookUp[256];
 #else
+    n_byte           * index = draw_pointer(fIdentification);
     n_byte          colorLookUp[256][3];
-#endif
+
     if (index == 0L) return;
-    
+#endif
+
     if (fIdentification == NUM_TERRAIN)
     {
         draw_window(dim_x, dim_y);
         draw_cycle();
     }
+    
+#ifdef NOBLE_IOS
+    return (n_c_uint *) draw_pointer(fIdentification);
+#else
+    
     
     draw_color_time(fit, local_sim->land->time);
 
@@ -631,6 +640,14 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 #endif
 #endif
     
+#ifdef NOBLE_IOS
+    loop = 0;
+    while(loop < (dim_x*dim_y))
+    {
+        offscreenBuffer[loop] = colorLookUp[ index[ loop] ];
+        loop++;
+    }
+#else
     loop = 0;
     while(ly < dim_y)
     {
@@ -638,17 +655,15 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
         n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
         while(lx < dim_x)
         {
-#ifdef NOBLE_IOS
-            offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
-#else
-            unsigned char value = indexLocalX[lx++] ;
+            n_byte value = indexLocalX[lx++] ;
             outputBuffer[loop++] = colorLookUp[value][0];
             outputBuffer[loop++] = colorLookUp[value][1];
             outputBuffer[loop++] = colorLookUp[value][2];
-#endif
         }
         ly++;
     }
+#endif
+#endif
     
 }
 

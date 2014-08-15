@@ -65,21 +65,22 @@
     n_int          dimensionX = rect.size.width * scaleFactor;
     n_int          dimensionY = rect.size.height * scaleFactor;
     static n_int   oldDimensionX = -1;
+    n_c_uint *     localOffBuffer;
+    
+    (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
+
+    localOffBuffer = shared_draw(NUM_TERRAIN, dimensionX, dimensionY);
     
     if (drawRef == nil || (oldDimensionX != dimensionX))
     {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width * scaleFactor, rect.size.height * scaleFactor, 8, rect.size.width * 4 * scaleFactor, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGBitmapByteOrder32Little|kCGImageAlphaNoneSkipFirst);
+        drawRef = CGBitmapContextCreate(localOffBuffer, rect.size.width * scaleFactor, rect.size.height * scaleFactor, 8, rect.size.width * 4 * scaleFactor, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGBitmapByteOrder32Little|kCGImageAlphaNoneSkipFirst);
         CGColorSpaceRelease( colorSpace );
         
         oldDimensionX = dimensionX;
     }
         
     CGContextSaveGState(context);
-
-    (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
-    
-    shared_draw((n_byte *)offscreenBuffer, NUM_TERRAIN, dimensionX, dimensionY);
     
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
 

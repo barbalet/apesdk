@@ -393,7 +393,6 @@ void draw_about(n_constant_string platform)
         }
     }
 #endif
-    
 
     draw_string(SHORT_VERSION_NAME,     linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
@@ -646,6 +645,27 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
     }
 }
 
+#ifdef NOBLE_IOS
+
+static void draw_color_time_ios(n_c_uint * color_fit, n_byte2 time)
+{
+    n_int loop = 0;
+    n_int loopColors = 0;
+    n_byte2 color_fit16[256*3];
+    draw_color_time(color_fit16, time);
+    while (loopColors < 256)
+    {
+        n_byte colR = color_fit16[loop++] >> 8;
+        n_byte colG = color_fit16[loop++] >> 8;
+        n_byte colB = color_fit16[loop++] >> 8;
+        color_fit[ loopColors ] = (colR << 16) | (colG << 8) | (colB << 0);
+        loopColors++;
+    }
+}
+
+#endif
+
+
 typedef struct{
     n_int     const_lowdiv2;
     n_int     lowest_s;
@@ -656,19 +676,31 @@ typedef struct{
     n_vect2   dimensions;
     n_vect2   value_vector;
     n_byte2   *combined;
-    
+#ifdef NOBLE_IOS
+    n_c_uint  *offscreen;
+    n_c_uint  colorMap[256];
+#else
     n_byte    *offscreen;
+#endif
 } draw_terrain_scan_struct;
 
 static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
 {
     draw_terrain_scan_struct * dtss = (draw_terrain_scan_struct *)void_dtss;
+#ifdef NOBLE_IOS
+    n_c_uint  * buf_offscr = dtss->offscreen;
+#else
     n_byte  * buf_offscr = (n_byte *) dtss->offscreen;
+#endif
     n_int     scrx = ((n_int *)xlocation)[0];
     /* take the very bottom pixel */
     n_int     dim_x =  dtss->dimensions.x;
     n_int     dim_y1 = dtss->dimensions.y - 1;
+#ifdef NOBLE_IOS
+    n_int     pixy = (scrx + (dim_x >> 1));
+#else
     n_int     pixy = (scrx + (dim_x >> 1)) + (dim_y1 * dim_x );
+#endif
     n_int     actual = dim_y1;
     /* start with a map point which is below/off the screen */
     n_int     scry = dtss->const_lowdiv2;
@@ -686,8 +718,11 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
         const n_uint   check_change = CONVERT_X((big_x >> 8), co_x) | CONVERT_Y((big_y >> 8), co_y);
         const n_byte2  value        = combined[check_change];
         const n_int    z00          = value & 255;
+#ifdef NOBLE_IOS
+        const n_c_uint   col00        = dtss->colorMap[value >> 8];
+#else
         const n_byte   col00        = value >> 8;
-
+#endif
         n_int          aval         = (scry - z00);
         if (aval < -1) aval = -1;
         
@@ -698,7 +733,11 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
         while (actual > aval)
         {
             buf_offscr[pixy] = col00;
+#ifdef NOBLE_IOS
+            pixy += dim_x;
+#else
             pixy -= dim_x;
+#endif
             actual--;
         }
     }
@@ -723,6 +762,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
     {
         const n_int    lowest_y = ((dimensions->y + 256) * dimensions->y)/256;
         noble_being * loc_being = local_sim->select;
+
         draw_terrain_scan_struct dtss;
         
         /* start at the left-most row */
@@ -730,7 +770,9 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
         /* find the central map point */
         n_int flatval;
         n_vect2 value_vector;
-        
+#ifdef NOBLE_IOS
+        draw_color_time_ios(dtss.colorMap, local_sim->land->time);
+#endif
         vect2_direction(&value_vector, terrain_turn + 128, 105);
         
         vect2_copy(&(dtss.value_vector), &value_vector);
@@ -1728,6 +1770,8 @@ n_int  draw_cycle(void)
 #else
     draw_terrain(local_sim, &local_vect, 0);
 #endif
+
+#ifndef NOBLE_IOS
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */
 
@@ -1741,7 +1785,7 @@ n_int  draw_cycle(void)
         draw_metrics(0, local_sim->delta_frames, &local_mono);
     }
 #endif
-    
+
 #ifdef BRAINCODE_ON
     if (toggle_braincode)
     {
@@ -1759,6 +1803,7 @@ n_int  draw_cycle(void)
     
 #ifdef MULTITOUCH_CONTROLS
     draw_tc_controls(&local_mono);
+#endif
 #endif
     return 0;
 }
