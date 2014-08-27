@@ -333,13 +333,15 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     if ((mouse_down == 1) && (mouse_identification == fIdentification))
     {
         
-#if 0
         if (fIdentification == NUM_VIEW)
         {
+#if (MAP_BITS == 8)
             control_mouse(mouse_identification, mouse_x/2, mouse_y/2, mouse_option);
+#else
+            control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
+#endif
         }
         else
-#endif
         {
             control_mouse(mouse_identification, mouse_x, mouse_y, mouse_option);
         }
