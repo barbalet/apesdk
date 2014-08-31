@@ -973,8 +973,10 @@ static void watch_being(void * ptr, n_console_output output_function)
 
 
     if (being_remove_internal)
+    {
         do {}
         while(being_remove_internal);
+    }
 
     being_remove_external = 1;
 
@@ -1033,45 +1035,45 @@ static void watch_being(void * ptr, n_console_output output_function)
 
         switch(watch_type)
         {
-        case WATCH_ALL:
-        {
-            watch_stats(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        case WATCH_SOCIAL_GRAPH:
-        {
-            watch_social_graph(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        case WATCH_EPISODIC:
-        {
-            watch_episodic(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        case WATCH_BRAINCODE:
-        {
-            watch_braincode(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        case WATCH_BRAINPROBES:
-        {
-            watch_brainprobes(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
+            case WATCH_ALL:
+            {
+                watch_stats(ptr, being_get_select_name(local_sim), local_being, beingstr);
+                break;
+            }
+            case WATCH_SOCIAL_GRAPH:
+            {
+                watch_social_graph(ptr, being_get_select_name(local_sim), local_being, beingstr);
+                break;
+            }
+            case WATCH_EPISODIC:
+            {
+                watch_episodic(ptr, being_get_select_name(local_sim), local_being, beingstr);
+                break;
+            }
+            case WATCH_BRAINCODE:
+            {
+                watch_braincode(ptr, being_get_select_name(local_sim), local_being, beingstr);
+                break;
+            }
+            case WATCH_BRAINPROBES:
+            {
+                watch_brainprobes(ptr, being_get_select_name(local_sim), local_being, beingstr);
+                break;
+            }
+
+            case WATCH_APPEARANCE:
+            {
+                watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
+                break;
+            }
+            case WATCH_SPEECH:
+            {
+                watch_speech(ptr, being_get_select_name(local_sim), local_being, beingstr);
+                break;
+            }
         }
 
-        case WATCH_APPEARANCE:
-        {
-            watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        case WATCH_SPEECH:
-        {
-            watch_speech(ptr, being_get_select_name(local_sim), local_being, beingstr);
-            break;
-        }
-        }
-
-        if (watch_type!=WATCH_NONE)
+        if (watch_type != WATCH_NONE)
         {
             output_function(beingstr);
         }
@@ -1463,19 +1465,19 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
     {
         if (save_interval_steps < 60)
         {
-            sprintf(output,"Current time interval is %d mins", (int)save_interval_steps);
+            sprintf(output,"Current time interval is %d min(s)", (int)save_interval_steps);
             output_function(output);
         }
         else
         {
             if (save_interval_steps < 60*24)
             {
-                sprintf(output,"Current time interval is %d hours", (int)save_interval_steps/60);
+                sprintf(output,"Current time interval is %d hour(s)", (int)save_interval_steps/60);
                 output_function(output);
             }
             else
             {
-                sprintf(output,"Current time interval is %d days", (int)save_interval_steps/(60*24));
+                sprintf(output,"Current time interval is %d day(s)", (int)save_interval_steps/(60*24));
                 output_function(output);
             }
         }
@@ -2157,64 +2159,3 @@ n_int console_quit(void * ptr, n_string response, n_console_output output_functi
     return io_quit(ptr, response, output_function);
 }
 
-n_file                  * file_death_record = 0L;
-static n_int              death_record_single_entry = 1;
-
-n_file * death_record_file_ready(void)
-{
-    return io_file_ready(death_record_single_entry, file_death_record);
-}
-
-void death_record_file_cleanup(void)
-{
-    io_file_cleanup(&death_record_single_entry, &file_death_record);
-}
-
-/*
-void death_record_writeoff(void)
-{
-    io_file_writeoff(&death_record_single_entry, file_death_record);
-}
-*/
- 
-void console_capture_death(noble_being * deceased, void * sim)
-{
-    n_string_block output_string = {0};
-    n_string_block being_name = {0};
-    
-    being_name_simple(deceased, being_name);
-    
-    watch_stats(sim, being_name, deceased, output_string);
-    
-    io_file_writeon(&death_record_single_entry, &file_death_record, 0);
-    io_file_string(death_record_single_entry, file_death_record, output_string);
-}
-
-n_int console_death(void * ptr, n_string response, n_console_output output_function)
-{
-    if (response == 0L) return 0;
-    
-    console_stop(ptr,"",output_function);
-
-    if (file_death_record == 0L)
-    {
-        (void)SHOW_ERROR("No output contents");
-        return 0;
-    }
-
-    if (io_disk_write(file_death_record, response) != FILE_ERROR)
-    {
-        if (output_function)
-        {
-            n_string_block output_string;
-            n_int          location = 0;
-            
-            io_string_write(output_string, "Death record file ", &location);
-            io_string_write(output_string, response, &location);
-            io_string_write(output_string, " saved\n", &location);
-            
-            output_function(output_string);
-        }
-    }
-    return 0;
-}

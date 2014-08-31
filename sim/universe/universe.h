@@ -1355,8 +1355,6 @@ const static noble_console_command control_commands[] =
 
     {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 
-    {&console_death,         "death",          "[file]",               "Create a death record file"},
-
     {&console_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
     {&console_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Noble Ape alphabet"},
     {&console_file,          "file",           "[(component)]",        "Information on the file format"},
