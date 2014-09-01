@@ -531,7 +531,7 @@ enum being_interaction_social
 #define SQUABBLE_RANGE          METRES_TO_APESPACE(5)
 
 /* Distance within which mating can take place */
-#define MATING_RANGE            METRES_TO_APESPACE(2)
+#define MATING_RANGE            METRES_TO_APESPACE(5)
 
 /* Tollerance within which social drive continues to increase */
 #define SOCIAL_TOLLERANCE       0

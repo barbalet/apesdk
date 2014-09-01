@@ -563,14 +563,6 @@ void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_
 #endif
 }
 
-void being_loop_wait(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
-{
-    being_loop_generic(sim, being_not, bf_func, data);
-#ifdef EXECUTE_THREADED
-    execute_complete_added();
-#endif
-}
-
 /**
  * @brief Check if a being is on ground or in water
  * @param px x coordinate of the being location
@@ -1214,7 +1206,7 @@ static noble_being * being_find_closest(noble_simulation * sim, noble_being * ac
     bfcs.genetics = being_genetics(actual);
     bfcs.actual_age = being_dob(actual);
     
-    being_loop_wait(sim, actual, being_find_closest_loop, &bfcs);
+    being_loop_no_thread(sim, actual, being_find_closest_loop, &bfcs);
     
     return bfcs.return_value;
 }
@@ -1248,7 +1240,7 @@ static noble_being * being_find_child(noble_simulation * sim, n_genetics * genet
     bfcs.max_age = max_age;
     bfcs.genetics = genetics;
     bfcs.return_value = 0L;
-    being_loop_wait(sim, 0L, being_find_child_loop, &bfcs);
+    being_loop_no_thread(sim, 0L, being_find_child_loop, &bfcs);
     return bfcs.return_value;
 }
 

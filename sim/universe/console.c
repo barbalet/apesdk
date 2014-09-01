@@ -61,7 +61,7 @@ n_int nolog = 0;
 n_int indicator_index = 1;
 
 /** How many steps at which to periodically save the simulation */
-n_uint save_interval_steps = 60 * 24;
+n_uint save_interval_steps = 60;
 
 n_int          console_file_interaction = 0;
 n_string_block console_file_name;
@@ -940,7 +940,7 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
     
     for (i = 0; i < BEING_STATES; i++) histogram[i] = 0;
 
-    being_loop_wait(local_sim, 0L, histogram_being_state_loop, histogram);
+    being_loop_no_thread(local_sim, 0L, histogram_being_state_loop, histogram);
 
     if (normalize)
     {
@@ -1540,12 +1540,15 @@ n_int console_step(void * ptr, n_string response, n_console_output output_functi
     while ((loop < save_interval_steps) && simulation_running)
     {
         sim_cycle();
-        watch_being(local_sim, output_function);
         if (local_sim->num == 0)
         {
             simulation_running = 0;
         }
         loop++;
+    }
+    if (response != RUN_STEP_CONST)
+    {
+        watch_being(local_sim, output_function);
     }
 
     if (response != RUN_STEP_CONST)
@@ -1606,6 +1609,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 n_string_block  output;
                 n_uint end_point = (number * interval_steps[interval]);
                 n_uint temp_save_interval_steps = save_interval_steps;
+                n_uint count = 0;
                 save_interval_steps = 1;
 
                 if (forever)
@@ -1622,8 +1626,26 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 while ((i < end_point) && simulation_running)
                 {
                     console_step(ptr, RUN_STEP_CONST, output_function);
+                    
+                    if (temp_save_interval_steps)
+                    {
+                        if ((count % temp_save_interval_steps) == 0)
+                        {
+                            watch_being(ptr, output_function);
+                        }
+                    }
+                    count++;
                     if (!forever) i++;
                 }
+                
+                if (temp_save_interval_steps)
+                {
+                    if ((count % temp_save_interval_steps) != 1)
+                    {
+                        watch_being(ptr, output_function);
+                    }
+                }
+
                 save_interval_steps = temp_save_interval_steps;
                 run = 1;
             }

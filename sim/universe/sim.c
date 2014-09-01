@@ -446,7 +446,7 @@ void sim_cycle(void)
     }
 #endif
         
-    being_loop_wait(&sim, 0L, being_tidy_loop, &max_honor);
+    being_loop_no_thread(&sim, 0L, being_tidy_loop, &max_honor);
     
     being_loop(&sim, social_initial_loop, 32);
     
@@ -463,7 +463,7 @@ void sim_cycle(void)
         
         if (sim.ext_death != 0L)
         {
-            being_loop_wait(&sim, 0L, being_remove_loop1, 0L);
+            being_loop_no_thread(&sim, 0L, being_remove_loop1, 0L);
         }
         
         being_loop_no_thread(&sim, 0L, being_remove_loop2, brls);
@@ -636,7 +636,7 @@ static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * d
 
 void sim_flood(void)
 {
-    being_loop_wait(&sim, 0L, sim_flood_loop, 0L);
+    being_loop_no_thread(&sim, 0L, sim_flood_loop, 0L);
 }
 
 void sim_healthy_carrier(void)

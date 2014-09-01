@@ -1434,21 +1434,27 @@ n_int social_mate(
     n_int loc_state = 0;
     n_int attraction = 0;
     n_int attract;
-    n_byte2 matingprob;
+/*    n_byte2 matingprob;*/
     noble_social * meeter_social_graph = being_social(meeter_being);
 
     if (!meeter_social_graph) return -1;
 
-    if ((being_drive(meeter_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
-            (being_drive(met_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE))
+    /*if ((being_drive(meeter_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
+            (being_drive(met_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE))*/
     {
+        
         /** mating is probabilistic, with a bias towards
             higher status individuals */
+        
+        /*
+        
         matingprob = being_random(meeter_being);
         if (matingprob <
                 (32000 + (n_byte2)(met_being->honor)*
-                 GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB))
+                 GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB)) */
         {
+            
+            
             /** attractiveness based upon various criteria */
             attraction = 1 +
                          social_attraction_pheromone(meeter_being,met_being) +
@@ -1462,9 +1468,10 @@ n_int social_mate(
                          ;
 
             /** some minimum level of attraction required for pair bonding */
-            if (meeter_social_graph[being_index].attraction > PAIR_BOND_THRESHOLD)
+            /*if (meeter_social_graph[being_index].attraction > PAIR_BOND_THRESHOLD)
             {
                 attraction++;
+                */
                 if (distance < MATING_RANGE)
                 {
                     /** transmit pathogens */
@@ -1480,11 +1487,12 @@ n_int social_mate(
                         }
                     }
                 }
+            /*
             }
             else
             {
                 attraction--;
-            }
+            }*/
         }
 
         attract = meeter_social_graph[being_index].attraction;

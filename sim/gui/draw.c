@@ -778,7 +778,10 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
             
             scrx++;               /* next column */
         }
-        execute_complete_added();
+        if (threadable)
+        {
+            execute_complete_added();
+        }
     }
 }
 
