@@ -369,9 +369,7 @@ void draw_about(n_constant_string platform)
     n_int   line_y_offset = 12;
     n_int   linx_x_offset = 12;
     n_int   tab_offset  = 0;
-
 #endif
-    
     if(check_about == 1 || buffer == 0L)
     {
         check_about = 0;
@@ -534,16 +532,6 @@ n_byte	land_points[] =
     190, 8, 15, 7,
     208, 208, 216, 206,
     255, 255, 255, 255
-};
-
-n_byte	fur_points[] =
-{
-    0,	 0,	 0,   0,
-    60, 1,    1,  1,
-    96, 92,  51,  23,
-    160, 128,  128,  128,
-    190, 250, 250, 250,
-    255, 255, 255, 255,
 };
 
 void draw_fit(n_byte * points, n_byte2 * color_fit)

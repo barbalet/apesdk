@@ -157,7 +157,6 @@ void draw_fit(n_byte * points, n_byte2 * color_fit);
 void  draw_terrain_coord(n_int * co_x, n_int * co_y);
 
 extern n_byte land_points[];
-extern n_byte fur_points[];
 
 void draw_color_time(n_byte2 * color_fit, n_byte2 time);
 
