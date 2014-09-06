@@ -154,6 +154,7 @@ static n_int toggle_weather = 1;
 static n_int toggle_brain = 1;
 static n_int toggle_braincode = 0;
 static n_int toggle_territory = 0;
+static n_int toggle_tidedaylight = 0;
 
 n_int draw_toggle_weather(void)
 {
@@ -177,6 +178,12 @@ n_int draw_toggle_territory(void)
 {
     toggle_territory ^= 1;
     return toggle_territory;
+}
+
+n_int draw_toggle_tide_daylight(void)
+{
+    toggle_tidedaylight ^= 1;
+    return toggle_tidedaylight;
 }
 
 /* this needs to be grouped eventually, it is here as a test */
@@ -391,7 +398,6 @@ void draw_about(n_constant_string platform)
         }
     }
 #endif
-    
 
     draw_string(SHORT_VERSION_NAME,     linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
@@ -611,22 +617,24 @@ void draw_color_time(n_byte2 * color_fit, n_byte2 time)
     n_int	loop = 0;
     n_int	sign = 1;
 
-    if (darken < 1)
-        sign = -1;
+    if (!toggle_tidedaylight)
+    {    
+        if (darken < 1)
+            sign = -1;
 
-    darken = (darken * darken) / 402;
-    darken = (sign * darken) + 624;
-    
-    while(loop < (COLOUR_GREY * 3))
-    {
-        n_int cg_val = color_group[loop];
-        n_int response = (cg_val * darken) >> 10;
-
-        color_fit[loop] = (n_byte2)response;
+        darken = (darken * darken) / 402;
+        darken = (sign * darken) + 624;
         
-        loop++;
-    }
+        while(loop < (COLOUR_GREY * 3))
+        {
+            n_int cg_val = color_group[loop];
+            n_int response = (cg_val * darken) >> 10;
 
+            color_fit[loop] = (n_byte2)response;
+            
+            loop++;
+        }
+    }
     while(loop < (256 * 3))
     {
         color_fit[loop] = color_group[loop];
@@ -1499,6 +1507,12 @@ static void draw_tides(n_byte * map, n_byte * screen, n_byte tide)
     n_int	dr = 128;
     n_int	fl = tide_point;
     n_int	fp = 0;
+    
+    if (toggle_tidedaylight)
+    {
+        return;
+    }
+    
     while (lp < 45)
     {
         tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl-fp));
@@ -1534,6 +1548,11 @@ static void draw_tides_hi_res(n_byte * data, n_c_uint * block, n_byte tide)
     n_int	fl = tide_point;
     n_int	fp = 0;
 
+    if (toggle_tidedaylight)
+    {
+        return;
+    }
+    
     while (lp < 45)
     {
         tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl-fp));

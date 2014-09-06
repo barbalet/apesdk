@@ -722,7 +722,7 @@ void compress_expand(n_file *input,   n_file *output);
 
 #else
 
-#define MAP_BITS                      (9)
+#define MAP_BITS                      (8)
 
 #endif
 

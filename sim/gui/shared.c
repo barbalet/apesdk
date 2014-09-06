@@ -531,6 +531,8 @@ n_int shared_menu(n_int menuVal)
             return draw_toggle_braincode();
         case NA_MENU_TERRITORY:
             return draw_toggle_territory();
+        case NA_MENU_TIDEDAYLIGHT:
+            return draw_toggle_tide_daylight();
         case NA_MENU_PREVIOUS_APE:
             (void)control_key(0, 2079);
             return 0;

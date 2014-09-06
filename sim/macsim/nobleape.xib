@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6206.9" systemVersion="13D65" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1050" defaultVersion="1080" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6206.9"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication"/>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="MainMenu" systemMenu="main" id="29" userLabel="MainMenu">
             <items>
                 <menuItem title="Noble Ape" id="56">
@@ -193,16 +193,13 @@
                                     <action selector="menuControlNoTerritory:" target="241" id="357"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="270">
-                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
-                            </menuItem>
-                            <menuItem title="Threaded" id="ajy-Ar-u23">
+                            <menuItem title="Switch Off Daylight/Tides" id="YRa-eJ-jIn">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="menuControlNoThreaded:" target="-1" id="wLL-2A-wEk"/>
+                                    <action selector="menuControlDaylightTide:" target="241" id="Uac-jI-dFw"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="KSk-3m-Lo2">
+                            <menuItem isSeparatorItem="YES" id="270">
                                 <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                             </menuItem>
                             <menuItem title="Flood" keyEquivalent="F" id="349">

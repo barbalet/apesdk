@@ -75,6 +75,7 @@ enum
     NA_MENU_WEATHER,
     NA_MENU_BRAIN,
     NA_MENU_BRAINCODE,
+    NA_MENU_TIDEDAYLIGHT,
     NA_MENU_TERRITORY,
     NA_MENU_PREVIOUS_APE,
     NA_MENU_NEXT_APE,
@@ -151,6 +152,8 @@ n_int draw_toggle_brain(void);
 n_int draw_toggle_braincode(void);
 
 n_int draw_toggle_territory(void);
+
+n_int draw_toggle_tide_daylight(void);
 
 void draw_fit(n_byte * points, n_byte2 * color_fit);
 
