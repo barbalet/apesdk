@@ -514,7 +514,7 @@ void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being
         loop++;
     }
 }
-
+/*
 static void being_loop_generic(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
 {
 #ifdef EXECUTE_THREADED
@@ -532,6 +532,7 @@ static void being_loop_generic(noble_simulation * sim, noble_being * being_not, 
     being_loop_no_thread(sim, being_not, bf_func, data);
 #endif
 }
+ */
 
 void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread)
 {

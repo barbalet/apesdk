@@ -14,7 +14,6 @@
 		4A4E399D17D7573400780335 /* drives.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E398117D7573400780335 /* drives.c */; };
 		4A4E399E17D7573400780335 /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E398417D7573400780335 /* episodic.c */; };
 		4A4E399F17D7573400780335 /* food.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E398517D7573400780335 /* food.c */; };
-		4A4E39A017D7573400780335 /* metabolism.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E398617D7573400780335 /* metabolism.c */; };
 		4A4E39A117D7573400780335 /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E398717D7573400780335 /* social.c */; };
 		4A4E39A217D7573400780335 /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E398817D7573400780335 /* speak.c */; };
 		4A4E39A317D7573400780335 /* longterm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E398917D7573400780335 /* longterm.c */; };
@@ -55,7 +54,6 @@
 		4A4E398317D7573400780335 /* entity_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = entity_internal.h; sourceTree = "<group>"; };
 		4A4E398417D7573400780335 /* episodic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = episodic.c; sourceTree = "<group>"; };
 		4A4E398517D7573400780335 /* food.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = food.c; sourceTree = "<group>"; };
-		4A4E398617D7573400780335 /* metabolism.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = metabolism.c; sourceTree = "<group>"; };
 		4A4E398717D7573400780335 /* social.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = social.c; sourceTree = "<group>"; };
 		4A4E398817D7573400780335 /* speak.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = speak.c; sourceTree = "<group>"; };
 		4A4E398917D7573400780335 /* longterm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = longterm.c; path = sim/longterm.c; sourceTree = SOURCE_ROOT; };
@@ -125,7 +123,6 @@
 				4A4E398317D7573400780335 /* entity_internal.h */,
 				4A4E398417D7573400780335 /* episodic.c */,
 				4A4E398517D7573400780335 /* food.c */,
-				4A4E398617D7573400780335 /* metabolism.c */,
 				4A4E398717D7573400780335 /* social.c */,
 				4A4E398817D7573400780335 /* speak.c */,
 			);
@@ -223,7 +220,6 @@
 				4A4E399F17D7573400780335 /* food.c in Sources */,
 				4A4E39A417D7573400780335 /* audio.c in Sources */,
 				4A4E39A117D7573400780335 /* social.c in Sources */,
-				4A4E39A017D7573400780335 /* metabolism.c in Sources */,
 				4A4E39AC17D7573400780335 /* console.c in Sources */,
 				4A4E39A717D7573400780335 /* land.c in Sources */,
 				4A4E39AA17D7573400780335 /* parse.c in Sources */,
