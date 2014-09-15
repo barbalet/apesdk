@@ -3662,8 +3662,18 @@ void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value
     value->honor = (n_byte)(((n_int)value->honor*220)/255);
 }
 
-n_int being_remove_internal = 0;
-n_int being_remove_external = 0;
+static n_int being_remove_internal_value = 0;
+static n_int being_remove_external_value = 0;
+
+n_int being_remove_internal(void)
+{
+    return being_remove_internal_value;
+}
+
+void being_remove_external_set(n_int value)
+{
+    being_remove_external_value = value;
+}
 
 void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
@@ -3705,13 +3715,13 @@ being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim)
     brls->selected_died = 0;
     brls->count = 0;
     
-    if (being_remove_external)
+    if (being_remove_external_value)
     {
         do {}
-        while(being_remove_external);
+        while(being_remove_external_value);
     }
     
-    being_remove_internal = 1;
+    being_remove_internal_value = 1;
     return brls;
 }
 
@@ -3735,7 +3745,7 @@ void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct 
         (void)SHOW_ERROR("No Apes remain start new run");
     }
     
-    being_remove_internal = 0;
+    being_remove_internal_value = 0;
     io_free((void **)brls);
 }
 

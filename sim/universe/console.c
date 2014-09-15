@@ -953,9 +953,6 @@ static void histogram_being_state(noble_simulation * local_sim, n_uint * histogr
     }
 }
 
-
-extern n_int being_remove_internal;
-extern n_int being_remove_external;
 /**
  * Watch a particular being
  * @param ptr pointer to noble_simulation object
@@ -972,13 +969,13 @@ static void watch_being(void * ptr, n_console_output output_function)
     n_byte2 state;
 
 
-    if (being_remove_internal)
+    if (being_remove_internal())
     {
         do {}
-        while(being_remove_internal);
+        while(being_remove_internal());
     }
 
-    being_remove_external = 1;
+    being_remove_external_set(1);
 
     if (watch_type == WATCH_STATES)
     {
@@ -1078,7 +1075,7 @@ static void watch_being(void * ptr, n_console_output output_function)
             output_function(beingstr);
         }
     }
-    being_remove_external = 0;
+    being_remove_external_set(0);
 }
 
 static n_int console_on_off(n_string response)

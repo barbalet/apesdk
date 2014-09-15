@@ -458,19 +458,14 @@ void sim_cycle(void)
     being_loop(&sim, social_secondary_loop, 64);
 
     {
-        being_remove_loop2_struct * brls = being_remove_initial(&sim);
-        
-        
+        being_remove_loop2_struct * brls = being_remove_initial(&sim);        
         if (sim.ext_death != 0L)
         {
             being_loop_no_thread(&sim, 0L, being_remove_loop1, 0L);
         }
-        
         being_loop_no_thread(&sim, 0L, being_remove_loop2, brls);
-        
         being_remove_final(&sim, &brls);
     }
-
     
     sim_time(&sim);
 }

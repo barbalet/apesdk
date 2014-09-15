@@ -256,6 +256,9 @@ typedef void (being_loop_fn)(noble_simulation * sim, noble_being * actual, void 
 void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data);
 void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread);
 
+void  being_remove_external_set(n_int value);
+n_int being_remove_internal(void);
+
 void   metabolism_vascular_description(n_int index, n_string description);
 n_string metabolism_description(n_int index);
 n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index);
