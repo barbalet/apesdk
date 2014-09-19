@@ -1247,7 +1247,7 @@ static void draw_weather(n_land * local_land)
         while(px < (map_dimensions2))
         {
             n_int	scr_x = px << 1;
-            n_int	tmp = weather_pressure(local_land, px, py, map_dimensions2);
+            n_int	tmp = weather_pressure(local_land, WEATHER_TO_MAPSPACE(px), WEATHER_TO_MAPSPACE(py)); /* from weather dimension to map dimension */
             if(tmp > WEATHER_CLOUD)
             {
                 (*local_draw)(scr_x+1, scr_y+1, 0, 0, local_info);

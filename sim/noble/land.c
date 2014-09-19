@@ -91,7 +91,7 @@ static n_int weather_delta(n_land * local_land)
         n_int ly = 0;
         while (ly < map_dimensions2)
         {
-            average += weather_pressure(local_land, lx, ly, map_dimensions2);
+            average += weather_pressure(local_land, WEATHER_TO_MAPSPACE(lx), WEATHER_TO_MAPSPACE(ly));
             ly++;
         }
         lx++;
@@ -261,100 +261,31 @@ void weather_init(n_land * local_land)
         weather_cycle(local_land);
         ly++;
     }
-    
-/*
-     {
-         n_uint initial_map = math_hash((n_byte *)local_land->atmosphere, sizeof(n_c_int) * MAP_AREA /4);
-         n_uint final_map;
-         n_file map_link;
-         n_file *compressed_map = io_file_new();
-         n_file *decompressed_map = io_file_new();
-         
-         weather_wrap(local_land->atmosphere);
-         
-         map_link.data = (n_byte *)local_land->atmosphere;
-         map_link.location = 0;
-         map_link.size = sizeof(n_c_int) * MAP_AREA /4;
-         
-         compress_compress(&map_link, compressed_map);
-         printf("compressed sized %ld %ld  %ld\n", compressed_map->location, compressed_map->size, sizeof(n_c_int) * MAP_AREA /4);
-         
-         compressed_map->size = compressed_map->location;
-         
-         compressed_map->location = 0;
-         
-         compress_expand(compressed_map, decompressed_map);
-         
-         final_map = math_hash(decompressed_map->data, sizeof(n_c_int) * MAP_AREA /4);
-         
-         printf("hash %ld %ld\n", initial_map, final_map);
-         
-         io_file_free(&compressed_map);
-         io_file_free(&decompressed_map);
-     }
-*/
 }
 
-n_int weather_pressure(n_land * land, n_int px, n_int py, n_int dimension2)
+n_int weather_pressure(n_land * land, n_int px, n_int py)
 {
-    return  land->atmosphere[(dimension2 * py) + px];
+    n_int   dimension2 = land_map_dimension(land)/2;
+
+    n_int   tpx = ((px/2) + dimension2) % dimension2;
+    n_int   tpy = ((py/2) + dimension2) % dimension2;
+    
+    return  land->atmosphere[(dimension2 * tpy) + tpx];
 }
 
-/**
- * Returns temperature in degrees C x 1000
- * This is an approximation of temperature which varies daily and annually
- * @param local_land Land object
- * @param wea Weather object
- * @param px x map coordinate
- * @param py y map coordinate
- * @returns Temperature in degrees C x 1000
- */
-n_int	weather_temperature(n_land * local_land, n_int px, n_int py)
+void  weather_wind_vector(n_land * local_land, n_vect2 * pos, n_vect2 * wind)
 {
-    n_int map_dimensions2 = land_map_dimension(local_land)/2;
-    const n_int annual_average = 18000;
-    const n_int annual_temperature_variance = 3000;
-    n_int daily_temperature_variance, daily_offset, annual_offset;
-    n_int annual_idx, daily_idx, time_of_day;
-    n_uint annual_time, current_time;
-
-    NA_ASSERT(local_land, "local_land NULL");
-    
-    if (local_land == 0L) return SHOW_ERROR("No land provided");
-    
-    time_of_day = local_land->time;
-    current_time = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
-    
-    annual_time = current_time - ((current_time/(TIME_YEAR_DAYS*TIME_DAY_MINUTES))*(TIME_YEAR_DAYS*TIME_DAY_MINUTES));
-    annual_idx = (annual_time*255/(TIME_YEAR_DAYS*TIME_DAY_MINUTES)) - 64;
-    if (annual_idx<0) annual_idx += 256;
-    
-    annual_offset = math_sine(annual_idx, NEW_SD_MULTIPLE / annual_temperature_variance);
-    
-    daily_temperature_variance = 2000 + math_sine(annual_idx, NEW_SD_MULTIPLE / 1000);
-    
-    daily_idx = (time_of_day*255/TIME_DAY_MINUTES) - 64;
-    if (daily_idx<0) daily_idx += 256;
-    
-    daily_offset = math_sine(daily_idx, NEW_SD_MULTIPLE/daily_temperature_variance);
-    
-    return annual_average + annual_offset + daily_offset - (weather_pressure(local_land, px, py, map_dimensions2) /32);
-}
-
-void  weather_wind_vector(n_land * local_land, n_int px, n_int py, n_int * wind_dx, n_int * wind_dy)
-{
-    n_int   map_dimensions2 = land_map_dimension(local_land)/2;
     n_int	local_pressure;
     NA_ASSERT(local_land, "local_land NULL");
-    NA_ASSERT(wind_dx, "wind_dx NULL");
-    NA_ASSERT(wind_dy, "wind_dy NULL");
+    NA_ASSERT(pos, "pos NULL");
+    NA_ASSERT(wind, "wind NULL");
 
-    if (wind_dx == 0L) return;
-    if (wind_dy == 0L) return;
+    if (pos == 0L) return;
+    if (wind == 0L) return;
     
-    local_pressure = weather_pressure(local_land, (px>>1), (py>>1), map_dimensions2);
-    *wind_dx = local_pressure - weather_pressure(local_land, (px>>1) - 1, (py>>1), map_dimensions2);
-    *wind_dy = local_pressure - weather_pressure(local_land, (px>>1), (py>>1) - 1, map_dimensions2);
+    local_pressure = weather_pressure(local_land, pos->x, pos->y);
+    wind->x = local_pressure - weather_pressure(local_land, pos->x - WEATHER_TO_MAPSPACE(1), (pos->y>>1));
+    wind->y = local_pressure - weather_pressure(local_land, pos->x, pos->y  - WEATHER_TO_MAPSPACE(1));
 }
 
 weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
@@ -362,11 +293,8 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
     n_byte	ret_val;
     n_int	val;
     n_int   local_time;
-    n_int   map_dimension2 = land_map_dimension(local_land)/2;
     n_int   map_x = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(px));
-    n_int   weather_x = map_x>>1;
     n_int   map_y = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(py));
-    n_int   weather_y = map_y>>1;
     
     NA_ASSERT(local_land, "local_land NULL");
     
@@ -385,7 +313,7 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
         ret_val = WEATHER_SEVEN_SUNNY_DAY;
     }
 
-    val = weather_pressure(local_land, weather_x, weather_y, map_dimension2);
+    val = weather_pressure(local_land, map_x, map_y);
 
     if ( val == -1)
     {

@@ -1287,8 +1287,7 @@ void brain_dialogue(
                 case 15:
                 {
                     /** atmosphere pressure */
-                    n_int map_dimensions2 = land_map_dimension(sim->land)/2;
-                    n_int pressure = weather_pressure(sim->land, POSITIVE_LAND_COORD(local_x) >> 1, POSITIVE_LAND_COORD(local_y) >> 1, map_dimensions2);
+                    n_int pressure = weather_pressure(sim->land, POSITIVE_LAND_COORD(local_x), POSITIVE_LAND_COORD(local_y));
 
                     if (pressure > 100000) pressure = 100000;
                     if (pressure < 0) pressure = 0;
@@ -1298,11 +1297,13 @@ void brain_dialogue(
                 case 16:
                 {
                     /** wind magnitude */
-                    n_int w_dx=0, w_dy=0;
-                    weather_wind_vector(sim->land, local_x, local_y, &w_dx, &w_dy);
-                    if (w_dx<0) w_dx=-w_dx;
-                    if (w_dy<0) w_dy=-w_dy;
-                    addr1[0] = (n_byte)((w_dx+w_dy)>>7);
+                    n_vect2 wind;
+                    n_vect2 position;
+                    vect2_populate(&position, local_x, local_y);
+                    weather_wind_vector(sim->land, &position, &wind);
+                    if (wind.x<0) wind.x=-wind.x;
+                    if (wind.y<0) wind.y=-wind.y;
+                    addr1[0] = (n_byte)((wind.x+wind.y)>>7);
                     break;
                 }
                 case 17:
