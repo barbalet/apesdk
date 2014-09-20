@@ -332,36 +332,6 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
     return ret_val;
 }
 
-/* Not currently used yet 
-static n_int time_actual_to_perceived(n_int actual_time)
-{
-    if (actual_time >= DUSK_END_POINT)
-    {
-        n_int relative_time = actual_time - DUSK_END_POINT;
-        return (238 - 16) + NIGHT_TIME_DIVISION(relative_time);
-    }
-    if (actual_time >= DAY_END_POINT)
-    {
-        n_int relative_time = actual_time - DAY_END_POINT;
-        return (238 - 16 - 4) + DAWN_DUSK_TIME_DIVISION(relative_time);
-    }
-    if (actual_time >= DAWN_END_POINT)
-    {
-        n_int relative_time = actual_time - DAWN_END_POINT;
-        return (238 - 16 - 4 - 192) + DAY_TIME_DIVISION(relative_time);
-    }
-    if (actual_time >= NIGHT_END_POINT)
-    {
-        n_int relative_time = actual_time - NIGHT_END_POINT;
-        return (238 - 16 - 4 - 192 - 4) + DAWN_DUSK_TIME_DIVISION(relative_time);
-    }
-    {
-        n_int relative_time = actual_time;
-        return NIGHT_TIME_DIVISION(relative_time);
-    }
-}
-*/
-
 n_int land_map_dimension(n_land * land)
 {
     (void)land; /* land is not used here */
@@ -585,7 +555,7 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
 void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * tide, n_byte * scratch, n_byte double_spread)
 {
     n_byte2	local_random[2];
-
+    n_int   refine = 0;
     NA_ASSERT(generator, "generator NULL");
     NA_ASSERT(map, "map NULL");
     NA_ASSERT(scratch, "scratch NULL");
@@ -597,7 +567,14 @@ void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * 
     local_random[0] = generator[0];
     local_random[1] = generator[1];
 
-    math_patch(map, scratch, &math_random, local_random, MAP_BITS, 0, 7, 1);
+    math_pack(MAP_AREA, 128, map, scratch);
+    
+    while (refine < 7)
+    {
+        math_patch(map, &math_memory_location, &math_random, local_random, refine);
+        math_round(map, scratch, &math_memory_location);
+        refine++;
+    }
     
     if (map_hires)
     {

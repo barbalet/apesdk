@@ -324,175 +324,169 @@ void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
     }
 }
 
+
+void math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2)
+{
+    n_int loop = 0;
+    while (loop < size)
+    {
+        alloc1[loop]=value;
+        alloc2[loop]=value;
+        loop++;
+    }
+}
+
+
+n_int math_memory_location(n_int px, n_int py)
+{
+#define	POSITIVE_TILE_COORD(num)	  ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
+
+    return POSITIVE_TILE_COORD(px) + (POSITIVE_TILE_COORD(py) << MAP_BITS);
+}
+
+
+
+void math_round(n_byte * local_map, n_byte * scratch,
+                n_memory_location * mem_func)
+{
+    n_int	local_tile_dimension = 1 << MAP_BITS;
+
+    n_int span_minor = 0;
+    /** Perform four nearest neighbor blur runs */
+    while (span_minor < 4)
+    {
+        n_byte	*front, *back;
+        n_int	py = 0;
+        
+        if ((span_minor&1) == 0)
+        {
+            front = local_map;
+            back = scratch;
+        }
+        else
+        {
+            front = scratch;
+            back = local_map;
+        }
+        while (py < local_tile_dimension)
+        {
+            n_int	px = 0;
+            while (px < local_tile_dimension)
+            {
+                n_int	sum = 0;
+                n_int	ty = -1;
+                while (ty < 2)
+                {
+                    n_int	tx = -1;
+                    while (tx < 2)
+                    {
+                        sum += front[(*mem_func)((px+tx),(py+ty))];
+                        tx++;
+                    }
+                    ty++;
+                }
+                back[(*mem_func)((px),(py))] = (n_byte)(sum / 9);
+                px ++;
+            }
+            py ++;
+        }
+        span_minor ++;
+    }
+}
+
 /**
  * This function creates the fractal landscapes and the genetic fur patterns
  * currently. It combines a fractal generator and a stacked nearest-neighbor
  * blur.
  * @param local_map       pointer to the map array
- * @param scratch         pointer to the scratch memory that should be the same size as local_map
  * @param func            the n_patch function that takes the form n_byte2 (n_patch)(n_byte2 * local)
  * @param arg             the pointer that is passed into the patch function
- * @param patch_bits      each side of the map is 2^patch_bits, total area is 2^(patch_bits*2)
- * @param refined_start   the layer the fractal starts (for repeating fractals)
- * @param refined_end     the layer the fractal ends (for courser fractals)
- * @param rotate          whether the map contains the 45 deg rotate every other level
- */
-void math_patch(n_byte * local_map, n_byte * scratch,
+ * @param patch_bits      each side of the map is 2^patch_bits, total area is 2^(patch_bits*2) */
+void math_patch(n_byte * local_map,
+                n_memory_location * mem_func,
                 n_patch * func, n_byte2 * arg,
-                n_int patch_bits,
-                n_byte refined_start, n_byte refined_end,
-                n_byte rotate)
+                n_int refine)
 {
-#define	POSITIVE_TILE_COORD(num)	  ((num+(3*local_tile_dimension))&(local_tile_dimension-1))
     /** size of the local tiles */
-    n_int	local_tile_dimension = 1 << patch_bits;
     /** number of 256 x 256 tiles in each dimension */
-    n_int	local_tiles = 1 << (patch_bits-8);
-    /** internal tile size is 2^refine */
-    n_int	refine = refined_start;
-    n_int   loop = 0;
+    const n_int local_tiles = 1 << (MAP_BITS-8);
+    const n_int span_major = (64 >> ((refine&7)^7));
+    const n_int span_minor = (1 << ((refine&7)^7));
+    n_int tile_y = 0;
+
     NA_ASSERT(local_map, "local_map NULL");
-    NA_ASSERT(scratch, "scratch NULL");
     NA_ASSERT(func, "func NULL");
     NA_ASSERT(arg, "arg NULL");
-    /**
-     *  Average value in the byte array should start at 128.
-     */
-    while (loop < (local_tile_dimension * local_tile_dimension))
+    
+    /** begin the tile traversal in the y dimension */
+    while (tile_y < local_tiles)
     {
-        local_map[loop]=128;
-        scratch[loop]=128;
-        loop++;
-    }
-    /** start the traversal of inner tile size */
-    while (refine < refined_end)
-    {
-        n_int span_major;
-        n_int span_minor;
-        n_int tile_y = 0;
-        /** if rotate is modulo 2 then do the tiles smallest to largest */
-        if ((rotate&2) == 0)
+        /** begin the tile traversal in the x dimension */
+        n_int tile_x = 0;
+        while (tile_x < local_tiles)
         {
-            span_major = (64 >> (refine&7));
-            span_minor = (1 << (refine&7));
-        }
-        else
-        {
-            span_major = (64 >> ((refine&7)^7));
-            span_minor = (1 << ((refine&7)^7));
-        }
-        /** begin the tile traversal in the y dimension */
-        while (tile_y < local_tiles)
-        {
-            /** begin the tile traversal in the x dimension */
-            n_int tile_x = 0;
-            while (tile_x < local_tiles)
-            {
-                /** scan through the span_minor values */
-                n_int	py = 0;
-                while (py < span_minor)
-                {
-                    n_int	px = 0;
-                    while (px < span_minor)
-                    {
-                        /** each of the smaller tiles are based on 256 * 256 tiles */
-                        n_int	val1 = ((px << 2) + (py << 10));
-                        n_int	ty = 0;
-                        n_int	tseed = (*func)(arg);
-
-                        while (ty < 4)
-                        {
-                            n_int	tx = 0;
-                            while (tx < 4)
-                            {
-                                n_int	val2 = (tseed >> (tx | (ty << 2)));
-                                n_int	val3 = ((((val2 & 1) << 1)-1) * 20);
-                                n_int	my = 0;
-
-                                val2 = (tx | (ty << 8));
-
-                                while (my < span_major)
-                                {
-                                    n_int	mx = 0;
-                                    while (mx < span_major)
-                                    {
-                                        n_int	point = ((mx | (my << 8)) + (span_major * (val1 + val2)));
-                                        n_int	pointx = (point & 255);
-                                        n_int	pointy = (point >> 8);
-                                        /** perform rotation on 2,3,6,7,10,11 etc */
-                                        if ((refine&2) && ((rotate&1) != 0))
-                                        {
-                                            n_int pointx_tmp = pointx + pointy;
-                                            pointy = pointx - pointy;
-                                            pointx = pointx_tmp;
-                                        }
-                                        {
-                                            /** include the wrap around for the 45 degree rotation cases in particular */
-                                            n_uint newloc = POSITIVE_TILE_COORD(pointx + (tile_x<<8)) + ((POSITIVE_TILE_COORD(pointy + (tile_y<<8))) << patch_bits);
-                                            n_int	local_map_point = local_map[newloc] + val3;
-                                            if (local_map_point < 0) local_map_point = 0;
-                                            if (local_map_point > 255) local_map_point = 255;
-                                            local_map[newloc] = (n_byte)local_map_point;
-                                        }
-                                        mx++;
-                                    }
-                                    my++;
-                                }
-                                tx++;
-                            }
-                            ty++;
-                        }
-                        px++;
-                    }
-                    py++;
-                }
-
-                tile_x++;
-            }
-            tile_y++;
-        }
-        /** Perform four nearest neighbor blur runs */
-        span_minor = 0;
-        while (span_minor < 4)
-        {
-            n_byte	*front, *back;
+            /** scan through the span_minor values */
             n_int	py = 0;
-
-            if ((span_minor&1) == 0)
-            {
-                front = local_map;
-                back = scratch;
-            }
-            else
-            {
-                front = scratch;
-                back = local_map;
-            }
-            while (py < local_tile_dimension)
+            while (py < span_minor)
             {
                 n_int	px = 0;
-                while (px < local_tile_dimension)
+                while (px < span_minor)
                 {
-                    n_int	sum = 0;
-                    n_int	ty = -1;
-                    while (ty < 2)
+                    /** each of the smaller tiles are based on 256 * 256 tiles */
+                    n_int	val1 = ((px << 2) + (py << 10));
+                    n_int	ty = 0;
+                    n_int	tseed = (*func)(arg);
+
+                    while (ty < 4)
                     {
-                        n_int	tx = -1;
-                        while (tx < 2)
+                        n_int	tx = 0;
+                        while (tx < 4)
                         {
-                            sum += front[POSITIVE_TILE_COORD(px+tx) | ((POSITIVE_TILE_COORD(py+ty)) << patch_bits)];
+                            n_int	val2 = (tseed >> (tx | (ty << 2)));
+                            n_int	val3 = ((((val2 & 1) << 1)-1) * 20);
+                            n_int	my = 0;
+
+                            val2 = (tx | (ty << 8));
+
+                            while (my < span_major)
+                            {
+                                n_int	mx = 0;
+                                while (mx < span_major)
+                                {
+                                    n_int	point = ((mx | (my << 8)) + (span_major * (val1 + val2)));
+                                    n_int	pointx = (point & 255);
+                                    n_int	pointy = (point >> 8);
+                                    /** perform rotation on 2,3,6,7,10,11 etc */
+                                    if (refine&2)
+                                    {
+                                        n_int pointx_tmp = pointx + pointy;
+                                        pointy = pointx - pointy;
+                                        pointx = pointx_tmp;
+                                    }
+                                    {
+                                        /** include the wrap around for the 45 degree rotation cases in particular */
+                                        n_uint newloc = (*mem_func)((pointx + (tile_x<<8)) ,(pointy + (tile_y<<8)));
+                                        n_int	local_map_point = local_map[newloc] + val3;
+                                        if (local_map_point < 0) local_map_point = 0;
+                                        if (local_map_point > 255) local_map_point = 255;
+                                        local_map[newloc] = (n_byte)local_map_point;
+                                    }
+                                    mx++;
+                                }
+                                my++;
+                            }
                             tx++;
                         }
                         ty++;
                     }
-                    back[px | (py << patch_bits)] = (n_byte)(sum / 9);
-                    px ++;
+                    px++;
                 }
-                py ++;
+                py++;
             }
-            span_minor ++;
+
+            tile_x++;
         }
-        refine ++;
+        tile_y++;
     }
 }
 

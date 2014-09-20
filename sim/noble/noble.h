@@ -232,6 +232,8 @@ typedef void (n_console_output)(n_constant_string value);
 
 typedef n_byte (n_pixel)(n_int px, n_int py, n_int dx, n_int dy, void * information);
 
+typedef n_int (n_memory_location)(n_int px, n_int py);
+
 typedef n_byte2 (n_patch)(n_byte2 * local);
 
 typedef n_int (n_console)(void * ptr, n_string response, n_console_output output_function);
@@ -622,11 +624,14 @@ n_byte2 math_random(n_byte2 * local);
 void    math_random3(n_byte2 * local);
 n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);
 n_int   math_spread_byte(n_byte val);
-void    math_patch(n_byte * local_map, n_byte * scratch,
-                   n_patch * func, n_byte2 * arg,
-                   n_int patch_bits,
-                   n_byte refined_start, n_byte refined_end,
-                   n_byte rotate);
+void    math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2);
+n_int math_memory_location(n_int px, n_int py);
+void math_patch(n_byte * local_map,
+                n_memory_location * mem_func,
+                n_patch * func, n_byte2 * arg,
+                n_int refine);
+void math_round(n_byte * local_map, n_byte * scratch,
+                n_memory_location * mem_func);
 
 n_int  math_sine(n_int direction, n_int divisor);
 
