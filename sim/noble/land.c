@@ -580,7 +580,7 @@ void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * 
     {
         n_uint   lp = 0;
         n_c_uint value_setting = 0;
-        math_bilinear_512_4096(map, map_hires, double_spread);
+        math_bilinear_8_times(map, map_hires, double_spread);
 
         io_erase((n_byte *)tide, sizeof(n_c_uint) * HI_RES_MAP_AREA/32);
         

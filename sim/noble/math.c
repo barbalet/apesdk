@@ -353,7 +353,7 @@ void math_round(n_byte * local_map, n_byte * scratch,
 
     n_int span_minor = 0;
     /** Perform four nearest neighbor blur runs */
-    while (span_minor < 4)
+    while (span_minor < 6)
     {
         n_byte	*front, *back;
         n_int	py = 0;
@@ -396,8 +396,7 @@ void math_round(n_byte * local_map, n_byte * scratch,
 
 /**
  * This function creates the fractal landscapes and the genetic fur patterns
- * currently. It combines a fractal generator and a stacked nearest-neighbor
- * blur.
+ * currently.
  * @param local_map       pointer to the map array
  * @param func            the n_patch function that takes the form n_byte2 (n_patch)(n_byte2 * local)
  * @param arg             the pointer that is passed into the patch function
@@ -410,8 +409,8 @@ void math_patch(n_byte * local_map,
     /** size of the local tiles */
     /** number of 256 x 256 tiles in each dimension */
     const n_int local_tiles = 1 << (MAP_BITS-8);
-    const n_int span_major = (64 >> ((refine&7)^7));
-    const n_int span_minor = (1 << ((refine&7)^7));
+    const n_int span_minor = (64 >> ((refine&7)^7));
+    const n_int span_major = (1 << ((refine&7)^7));
     n_int tile_y = 0;
 
     NA_ASSERT(local_map, "local_map NULL");
@@ -483,7 +482,6 @@ void math_patch(n_byte * local_map,
                 }
                 py++;
             }
-
             tile_x++;
         }
         tile_y++;
@@ -773,7 +771,7 @@ void math_random3(n_byte2 * local)
 }
 
 /* all this hardcoding will need to be de-hardcoded in the future */
-void math_bilinear_512_4096(n_byte * side512, n_byte * data, n_byte double_spread)
+void math_bilinear_8_times(n_byte * side512, n_byte * data, n_byte double_spread)
 {
     n_int loop_y = 0;
         

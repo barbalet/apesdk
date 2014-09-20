@@ -230,9 +230,21 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     [self quitProcedure];
 }
 
+static n_uint randomizing_agent = 0x28e49a3e;
+
 -(IBAction) menuFileNew:(id) sender
 {
-	if (shared_new((n_uint)CFAbsoluteTimeGetCurrent()) != 0)
+    n_uint loop = 0;
+    n_byte2 *ra_in_2_bytes = (n_byte2*)&randomizing_agent;
+    
+    randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent();
+    
+    while (loop < (sizeof(n_uint)/2))
+    {
+        math_random(&ra_in_2_bytes[loop*2]);
+        loop++;
+    }    
+	if (shared_new(randomizing_agent) != 0)
     {
         [self quitProcedure];
     }

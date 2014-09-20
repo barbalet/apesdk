@@ -616,7 +616,7 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
 n_c_uint math_hash_fnv1(n_constant_string key);
 n_uint   math_hash(n_byte * values, n_uint length);
 
-void     math_bilinear_512_4096(n_byte * side512, n_byte * data, n_byte double_spread);
+void    math_bilinear_8_times(n_byte * side512, n_byte * data, n_byte double_spread);
 
 n_uint  math_root(n_uint squ);
 n_byte  math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn);
@@ -625,12 +625,12 @@ void    math_random3(n_byte2 * local);
 n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);
 n_int   math_spread_byte(n_byte val);
 void    math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2);
-n_int math_memory_location(n_int px, n_int py);
-void math_patch(n_byte * local_map,
+n_int   math_memory_location(n_int px, n_int py);
+void    math_patch(n_byte * local_map,
                 n_memory_location * mem_func,
                 n_patch * func, n_byte2 * arg,
                 n_int refine);
-void math_round(n_byte * local_map, n_byte * scratch,
+void   math_round(n_byte * local_map, n_byte * scratch,
                 n_memory_location * mem_func);
 
 n_int  math_sine(n_int direction, n_int divisor);
