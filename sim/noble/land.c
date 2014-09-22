@@ -572,7 +572,7 @@ void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * 
     while (refine < 7)
     {
         math_patch(map, &math_memory_location, &math_random, local_random, refine);
-        math_round(map, scratch, &math_memory_location);
+        math_round_smarter(map, scratch, &math_memory_location);
         refine++;
     }
     

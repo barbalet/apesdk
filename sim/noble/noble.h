@@ -633,6 +633,9 @@ void    math_patch(n_byte * local_map,
 void   math_round(n_byte * local_map, n_byte * scratch,
                 n_memory_location * mem_func);
 
+void   math_round_smarter(n_byte * local_map, n_byte * scratch,
+                   n_memory_location * mem_func);
+
 n_int  math_sine(n_int direction, n_int divisor);
 
 n_byte math_join_vect2(n_int sx, n_int sy, n_vect2 * vect, n_join * draw);
