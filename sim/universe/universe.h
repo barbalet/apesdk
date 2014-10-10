@@ -92,7 +92,6 @@ static const n_byte	operators[17][7] =
 #define AGE_IN_DAYS(sim,bei)        (TIME_IN_DAYS(sim->land->date) - being_dob(bei))
 #define AGE_IN_YEARS(sim,bei)       (AGE_IN_DAYS(sim,bei)/TIME_YEAR_DAYS)
 
-
 /* in days, a little young, yes */
 #define AGE_OF_MATURITY (30)
 
@@ -567,12 +566,6 @@ enum being_interaction_social
 
 /* returns height in real units (mm) */
 #define GET_BEING_HEIGHT(bei) (GET_H(bei)*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
-
-/* Minimum lung capacity in cubic centimetres */
-#define MIN_LUNG_CAPACITY(bei) (GET_BEING_HEIGHT(bei)*4000/BEING_MAX_HEIGHT_MM)
-
-/* Maximum lung capacity in cubic centimetres */
-#define MAX_LUNG_CAPACITY(bei) (GET_BEING_HEIGHT(bei)*6000/BEING_MAX_HEIGHT_MM)
 
 /* the amount of growth for a given energy intake
    Note that if AGE_OF_MATURITY is changed then this may

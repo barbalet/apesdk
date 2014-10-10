@@ -621,7 +621,7 @@ static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * d
 {
     n_int         local_x = APESPACE_TO_MAPSPACE(being_location_x(local));
     n_int         local_y = APESPACE_TO_MAPSPACE(being_location_y(local));
-    n_int         local_z = QUICK_LAND(sim->land, local_x, local_y);
+    n_int         local_z = land_location(sim->land, local_x, local_y);
     
     if (local_z < 160)
     {

@@ -715,15 +715,6 @@ n_int io_find_size_data(noble_file_entry * commands);
 void compress_compress(n_file *input, n_file *output);
 void compress_expand(n_file *input,   n_file *output);
 
-
-/*
- This provides the land interface into entity but not the universe.
-
- This should reduce the use of universe.h in the entity .c/h files.
- */
-
-/*	Land - Screen conversion */
-
 #ifdef NOBLE_IOS
 
 #define MAP_BITS                      (8)
@@ -772,8 +763,6 @@ void compress_expand(n_file *input,   n_file *output);
 
 #endif
 
-#define SECONDS_PER_SIMULATION_STEP (60)
-
 #define	WEATHER_CLOUD		(32768)
 #define	WEATHER_RAIN		(98304)
 
@@ -787,9 +776,7 @@ void compress_expand(n_file *input,   n_file *output);
 
 #define LUNAR_ORBIT_MINS            39312
 
-#define	QUICK_LAND(local, px, py) (((local)->map)[POSITIVE_LAND_COORD(px)|(POSITIVE_LAND_COORD(py)<<MAP_BITS)])
-#define	WATER_TEST(pz,w)				((pz)<(w))
-#define	MAP_WATERTEST(local,px,py)		WATER_TEST(QUICK_LAND(local,(px),(py)),local->tide_level)
+#define	WATER_TEST(pz,w)            ((pz)<(w))
 
 #define	WATER_MAP		      128
 
@@ -814,21 +801,13 @@ void compress_expand(n_file *input,   n_file *output);
 #define DAY_TIME_DIVISION(time)       ((time)>>2)
 
 /*
-  Night 1184  - 1439
-  Night 0 - 351
-  Dawn  352 - 383
-  Day   384 - 1151
-  Dusk  1152 - 1183
+ Night 1184  - 1439
+ Night 0 - 351
+ Dawn  352 - 383
+ Day   384 - 1151
+ Dusk  1152 - 1183
  */
 
-/*! @struct
- @field time          Time in minutes from midnight.
- @field date          Date including days and centuries.
- @field genetics      Generator seed used to create the landscape.
- @field map           Map for z height.
- @field weather       Convenience pointer used for bad weather line-of-sight.
- @discussion This structure provides the basics for the static land, time and tides.
- */
 typedef	struct
 {
     n_byte2     time;                             /* save-able */
@@ -859,6 +838,8 @@ n_int land_map_dimension(n_land * land);
 n_int land_map_bits(n_land * land);
 
 void land_tide(n_land * local_land);
+n_int land_location(n_land * land, n_int px, n_int py);
+
 
 /*0*/
 

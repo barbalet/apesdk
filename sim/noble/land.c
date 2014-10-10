@@ -344,6 +344,11 @@ n_int land_map_bits(n_land * land)
     return MAP_BITS;
 }
 
+n_int land_location(n_land * land, n_int px, n_int py)
+{
+    return land->map[math_memory_location(px, py)];
+}
+
 void land_tide(n_land * local_land)
 {
     n_int time_of_day;
@@ -413,9 +418,9 @@ static n_int land_operator(n_land * local_land, n_int locx, n_int locy, n_byte *
     NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(specific_kind, "specific_kind NULL");
     
-    fg  = QUICK_LAND(local_land, locx, locy);
-    dfg = QUICK_LAND(local_land, locx + 1, locy);
-    fdg = QUICK_LAND(local_land, locx, locy + 1);
+    fg  = land_location(local_land, locx, locy);
+    dfg = land_location(local_land, locx + 1, locy);
+    fdg = land_location(local_land, locx, locy + 1);
     
     dfg = (dfg - fg) * 8;
     fdg = (fdg - fg) * 8;
@@ -620,12 +625,12 @@ void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * lo
     
     loc_x = location->x;
     loc_y = location->y;
-    z = QUICK_LAND(local, APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
+    z = land_location(local, APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
 
     if (actual_z != 0L)
     {
         *actual_z = z;
     }
-    output->x = (z - QUICK_LAND(local, (APESPACE_TO_MAPSPACE(loc_x) + 1), APESPACE_TO_MAPSPACE(loc_y)));
-    output->y = (z - QUICK_LAND(local, APESPACE_TO_MAPSPACE(loc_x), (APESPACE_TO_MAPSPACE(loc_y) + 1)));
+    output->x = (z - land_location(local, (APESPACE_TO_MAPSPACE(loc_x) + 1), APESPACE_TO_MAPSPACE(loc_y)));
+    output->y = (z - land_location(local, APESPACE_TO_MAPSPACE(loc_x), (APESPACE_TO_MAPSPACE(loc_y) + 1)));
 }

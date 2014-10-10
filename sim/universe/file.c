@@ -510,7 +510,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     }
                     else
                     {
-                        local_number = QUICK_LAND(local_sim->land, quick_x, quick_y);
+                        local_number = land_location(local_sim->land, quick_x, quick_y);
                     }
                 }
             }

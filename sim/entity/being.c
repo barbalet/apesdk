@@ -465,12 +465,12 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
         vect2_direction(&temp_vector, turn_plus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        z_plus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        z_plus = land_location(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
 
         vect2_direction(&temp_vector, turn_minus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        z_minus = QUICK_LAND(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        z_minus = land_location(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
 
         if (z_minus > z_plus)
         {
@@ -610,7 +610,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
         
         local_z += being_pixel->start_z;
         
-        if (local_z < WALK_ON_WATER(QUICK_LAND(being_pixel->land, px, py),being_pixel->land->tide_level))
+        if (local_z < WALK_ON_WATER(land_location(being_pixel->land, px, py),being_pixel->land->tide_level))
         {
             return 1;
         }
@@ -663,8 +663,8 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     }
 
     {
-        n_int	start_z = (n_int)WALK_ON_WATER(QUICK_LAND(land, start.x, start.y),land->tide_level) + 3; /* the nominal height of the Noble Ape */
-        n_int	delta_z = ((n_int)WALK_ON_WATER(QUICK_LAND(land, (start.x + delta.x), (start.y + delta.y)),land->tide_level)) - start_z + 3; /* the nominal height of the Noble Ape */
+        n_int	start_z = (n_int)WALK_ON_WATER(land_location(land, start.x, start.y),land->tide_level) + 3; /* the nominal height of the Noble Ape */
+        n_int	delta_z = ((n_int)WALK_ON_WATER(land_location(land, (start.x + delta.x), (start.y + delta.y)),land->tide_level)) - start_z + 3; /* the nominal height of the Noble Ape */
         n_int	common_divisor = vect2_dot(&delta, &delta, 1, 1);
         being_draw 	  translate;
 
@@ -2092,7 +2092,7 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 
     /** ... fully awake to swim */
 
-    if(WATER_TEST(QUICK_LAND(land, APESPACE_TO_MAPSPACE(being_location_x(local)), APESPACE_TO_MAPSPACE(being_location_y(local))),land->tide_level))
+    if(WATER_TEST(land_location(land, APESPACE_TO_MAPSPACE(being_location_x(local)), APESPACE_TO_MAPSPACE(being_location_y(local))),land->tide_level))
     {
         return FULLY_AWAKE;
     }
@@ -2741,8 +2741,10 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
         vect2_add(&looking_vector, &location_vector, &facing_vector);
         
-        test_land = (MAP_WATERTEST(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(looking_vector.x)),
-                                   POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(looking_vector.y))) != 0);
+
+                     
+        test_land = (WATER_TEST(land_location(land,(APESPACE_TO_MAPSPACE(looking_vector.x)),
+                                          (APESPACE_TO_MAPSPACE(looking_vector.y))),land->tide_level)!= 0);
         
         {
             n_int delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
@@ -3454,8 +3456,11 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
             location[1] = (n_byte2)(being_random(local) & APESPACE_BOUNDS);
             loop ++;
         }
-        while ((loop < 20) && (MAP_WATERTEST(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1]))));
+        while ((loop < 20) && (WATER_TEST(land_location(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1])),land->tide_level)));
 
+        
+        
+        
         being_set_location(local, location);
 
         {
