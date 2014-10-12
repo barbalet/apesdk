@@ -64,11 +64,11 @@
 #endif
 
 /*! @define */
-#define	SHORT_VERSION_NAME		 "Noble Ape 0.698 "
+#define	SHORT_VERSION_NAME		 "Noble Ape 0.699 "
 #define	FULL_DATE				 __DATE__
 
 /*! @define */
-#define	VERSION_NUMBER		     698
+#define	VERSION_NUMBER		     699
 #define	COPYRIGHT_DATE		     "Copyright 1996 - 2014 "
 
 #define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2014."
