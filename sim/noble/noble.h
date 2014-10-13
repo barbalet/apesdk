@@ -814,8 +814,8 @@ typedef	struct
     n_byte2     date[2];                          /* save-able */
     n_byte2     genetics[2];                      /* save-able */
     n_byte      tide_level;                       /* generated */
-    n_byte      map[MAP_AREA];                    /* generated */
-    n_byte      highres[HI_RES_MAP_AREA * 2];     /* generated */
+    n_byte      topology[MAP_AREA];                    /* generated */
+    n_byte      topology_highdef[HI_RES_MAP_AREA * 2];     /* generated */
     n_c_uint    highres_tide[HI_RES_MAP_AREA/32]; /* generated */
     n_byte2     delta_pressure[ MAP_AREA / 4];    /* generated */
     n_c_int		atmosphere[ MAP_AREA / 4];        /* save-able and generate-able */
@@ -828,7 +828,7 @@ n_int weather_pressure(n_land * local_land, n_int px, n_int py);
 void  weather_cycle(n_land * local_land);
 weather_values weather_seven_values(n_land * local_land, n_int px, n_int py);
 
-void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * tide, n_byte * scratch, n_byte double_spread);
+void  land_init(n_land * local_land, n_byte * scratch, n_byte double_spread);
 void  land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start);
 void  land_cycle(n_land * local_land);
 void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);

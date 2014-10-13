@@ -558,7 +558,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     {
         land_clear(sim.land, kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
-        land_init(sim.land->genetics, sim.land->map, sim.land->highres, sim.land->highres_tide, &offbuffer[landbuffer_size], 1);
+        land_init(sim.land, &offbuffer[landbuffer_size], 1);
         land_tide(sim.land);
 #endif
         if (kind != KIND_LOAD_FILE)

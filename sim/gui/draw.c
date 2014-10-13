@@ -737,7 +737,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
         dtss.co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         dtss.co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
 
-        dtss.combined = (n_byte2 *)local_sim->land->highres;
+        dtss.combined = (n_byte2 *)local_sim->land->topology_highdef;
         
         flatval = dtss.combined[CONVERT_X((HI_RES_MAP_DIMENSION/2), dtss.co_x) | CONVERT_Y((HI_RES_MAP_DIMENSION/2), dtss.co_y)] & 255;
         
@@ -1607,7 +1607,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
         local_col.color = COLOUR_RED_DARK;
     }
     
-    if (local_col.screen == local_sim->land->highres)
+    if (local_col.screen == local_sim->land->topology_highdef)
     {
         local_8bit.pixel_draw = &pixel_color8_hires;
     }
@@ -1618,7 +1618,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     
     local_8bit.information = &local_col;
     
-    if (local_col.screen == local_sim->land->highres)
+    if (local_col.screen == local_sim->land->topology_highdef)
     {
         draw_apeloc_hires(local_sim, bei, &local_8bit);
     }
@@ -1636,12 +1636,12 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
     if (lores == 0) /* set up drawing environ */
     {
         draw_undraw();
-        local_col.screen = local_sim->land->highres;
+        local_col.screen = local_sim->land->topology_highdef;
     }
     else
     {
         local_col.screen = draw_pointer(NUM_VIEW);
-        io_copy(local_sim->land->map, local_col.screen, MAP_AREA);
+        io_copy(local_sim->land->topology, local_col.screen, MAP_AREA);
     }
 
     if (lores == 0)
@@ -1650,12 +1650,12 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         if (local_tide != local_sim->land->tide_level)
         {
             local_tide = local_sim->land->tide_level;
-            draw_tides_hi_res(local_sim->land->highres, local_sim->land->highres_tide, local_tide);
+            draw_tides_hi_res(local_sim->land->topology_highdef, local_sim->land->highres_tide, local_tide);
         }
     }
     else
     {
-        draw_tides(local_sim->land->map, local_col.screen, local_sim->land->tide_level);
+        draw_tides(local_sim->land->topology, local_col.screen, local_sim->land->tide_level);
         if (toggle_territory)
         {
             draw_region(local_sim->select);

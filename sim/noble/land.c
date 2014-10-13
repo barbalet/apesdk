@@ -187,10 +187,10 @@ void weather_cycle(n_land * local_land)
 
 void weather_init(n_land * local_land)
 {
-    n_byte    *land;
     n_c_int	  *atmosphere;
     n_byte2	  *delta_pressure;
     n_int	   ly = 0;
+    n_int	   ly2 = 0;
     n_int      map_dimension2;
     n_int      map_bits2;
     
@@ -198,10 +198,6 @@ void weather_init(n_land * local_land)
     
     if (local_land == 0L) return;
     
-    land		= local_land->map;
-    
-    if (land == 0L) return;
-
     atmosphere = local_land->atmosphere;
     delta_pressure = local_land->delta_pressure;
     map_dimension2 = land_map_dimension(local_land)/2;
@@ -217,14 +213,17 @@ void weather_init(n_land * local_land)
     while ( ly < map_dimension2 )
     {
         n_int	lx = 0;
+        ly2 = ly << 1;
         while ( lx < map_dimension2 )
         {
-            n_uint		offset = ( lx << 1 ) + ( ly << (2 + map_bits2) );
-            n_c_int		total_land = land[ offset ]
-                                     + land[ 1 + offset ]
-                                     + land[ (map_dimension2*2) + offset ]
-                                     + land[ (map_dimension2*2) + 1 + offset ];
-            atmosphere[ (map_dimension2 * ly) + lx ] = total_land;
+            n_int lx2 = lx << 1;
+            n_int     total_land =  land_location(local_land, lx2,     ly2)
+                                    + land_location(local_land, lx2 + 1, ly2)
+                                    + land_location(local_land, lx2,     ly2 + 1)
+                                    + land_location(local_land, lx2 + 1, ly2 + 1);
+            
+            
+            atmosphere[ (map_dimension2 * ly) + lx ] = (n_c_int)total_land;
             lx++;
         }
         ly++;
@@ -346,7 +345,7 @@ n_int land_map_bits(n_land * land)
 
 n_int land_location(n_land * land, n_int px, n_int py)
 {
-    return land->map[math_memory_location(px, py)];
+    return land->topology[math_memory_location(px, py)];
 }
 
 void land_tide(n_land * local_land)
@@ -537,7 +536,7 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
     NA_ASSERT(local, "local NULL");
     if (local == 0L) return;
     {
-        n_byte *local_map = local->map;
+        n_byte *local_map = local->topology;
         n_uint	loop      = 0;
         NA_ASSERT(local_map, "local_map NULL");
         
@@ -557,41 +556,36 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
     }
 }
 
-void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * tide, n_byte * scratch, n_byte double_spread)
+void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread)
 {
     n_byte2	local_random[2];
     n_int   refine = 0;
-    NA_ASSERT(generator, "generator NULL");
-    NA_ASSERT(map, "map NULL");
-    NA_ASSERT(scratch, "scratch NULL");
     
-    if (generator == 0L) return;
-    if (map == 0L) return;
-    if (scratch == 0L) return;
-    
-    local_random[0] = generator[0];
-    local_random[1] = generator[1];
+    local_random[0] = local_land->genetics[0];
+    local_random[1] = local_land->genetics[1];
 
-    math_pack(MAP_AREA, 128, map, scratch);
+    math_pack(MAP_AREA, 128, local_land->topology, scratch);
     
     while (refine < 7)
     {
-        math_patch(map, &math_memory_location, &math_random, local_random, refine);
-        math_round_smarter(map, scratch, &math_memory_location);
+        math_patch(local_land->topology, &math_memory_location, &math_random, local_random, refine);
+        math_round_smarter(local_land->topology, scratch, &math_memory_location);
         refine++;
     }
     
-    if (map_hires)
+    if (local_land->topology_highdef)
     {
         n_uint   lp = 0;
         n_c_uint value_setting = 0;
-        math_bilinear_8_times(map, map_hires, double_spread);
+        n_c_uint * local_hires_tides= local_land->highres_tide;
+        n_byte   * local_hires = local_land->topology_highdef;
+        math_bilinear_8_times(local_land->topology, local_land->topology_highdef, double_spread);
 
-        io_erase((n_byte *)tide, sizeof(n_c_uint) * HI_RES_MAP_AREA/32);
+        io_erase((n_byte *)local_land->highres_tide, sizeof(n_c_uint) * HI_RES_MAP_AREA/32);
         
         while (lp < HI_RES_MAP_AREA)
         {
-            n_byte val = map_hires[lp<<1];
+            n_byte val = local_hires[lp<<1];
             if ((val > 105) && (val < 151))
             {
                 value_setting |= 1 << (lp & 31);
@@ -599,7 +593,7 @@ void land_init(n_byte2 * generator, n_byte * map, n_byte *map_hires, n_c_uint * 
             
             if ((lp & 31) == 31)
             {
-                tide[lp>>5] = value_setting;
+                local_hires_tides[lp>>5] = value_setting;
                 value_setting = 0;
             }
             lp++;
