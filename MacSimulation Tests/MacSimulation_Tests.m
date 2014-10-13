@@ -11,7 +11,7 @@
 #include "../sim/noble/noble.h"
 #include "../sim/entity/entity.h"
 #include "../sim/universe/universe.h"
-#include "../sim/gui/shared.h"
+#include "../sim/noble/shared.h"
 
 
 @interface MacSimulation_Tests : XCTestCase
@@ -54,7 +54,7 @@ noble_being      * being = 0L;
 
 - (void)testMapCheckSum
 {
-    n_uint hash = math_hash((n_byte *)value->land->map, MAP_AREA);    
+    n_uint hash = math_hash((n_byte *)value->land->topology, MAP_AREA);
     XCTAssertTrue(hash == 0xdd4de0fa74ffc961, @"Hash doesn't comply with prior map hashes (%lx)", hash);
 }
 
@@ -142,9 +142,7 @@ noble_being      * being = 0L;
     n_uint  time = 3;
     n_uint hash = math_hash((n_byte *)being, sizeof(noble_being));
     XCTAssertTrue(hash == 0x52d78f67b881df87, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
-    
-    shared_flood();
-    
+        
     shared_cycle(1000, NUM_VIEW, 512, 512);
     shared_cycle(1000, NUM_TERRAIN, 512, 512);
     
@@ -199,7 +197,7 @@ noble_being      * being = 0L;
      hash = math_hash((n_byte *)value->land->atmosphere, (MAP_AREA*sizeof(n_c_int)/2));
      XCTAssertTrue(hash == 0x106da9dae6533ea1, @"Longterm hash doesn't comply with prior weather hashes (%lx)", hash);
      */
-    hash = math_hash((n_byte *)value->land->map, MAP_AREA);
+    hash = math_hash((n_byte *)value->land->topology, MAP_AREA);
     XCTAssertTrue(hash == 0xdd4de0fa74ffc961, @"Longterm hash doesn't comply with prior map hashes (%lx)", hash);
 }
 
