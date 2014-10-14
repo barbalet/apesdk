@@ -815,15 +815,16 @@ void compress_expand(n_file *input,   n_file *output);
 
 typedef	struct
 {
-    n_byte2     time;                             /* save-able */
-    n_byte4     date;                             /* save-able */
-    n_byte2     genetics[2];                      /* save-able */
-    n_byte      tide_level;                       /* generated */
+    n_byte4     date;                                  /* save-able */
+    n_byte2     genetics[2];                           /* save-able */
+    n_byte2     time;                                  /* save-able */
+
     n_byte      topology[MAP_AREA];                    /* generated */
-    n_byte      topology_highdef[HI_RES_MAP_AREA * 2];     /* generated */
-    n_byte4     highres_tide[HI_RES_MAP_AREA/32]; /* generated */
-    n_byte2     delta_pressure[ MAP_AREA / 4];    /* generated */
-    n_c_int		atmosphere[ MAP_AREA / 4];        /* save-able and generate-able */
+    n_byte      topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
+    n_byte4     highres_tide[HI_RES_MAP_AREA/32];      /* generated */
+    n_byte2     delta_pressure[ MAP_AREA / 4];         /* generated */
+    n_c_int		atmosphere[ MAP_AREA / 4];             /* save-able and generate-able */
+    n_byte      tide_level;                            /* generated */
 }
 n_land;
 

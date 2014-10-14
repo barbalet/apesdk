@@ -130,9 +130,10 @@ static const noble_file_entry noble_file_format[]=
 #endif
 #ifdef USE_FIL_LAN
     {"landd{", FIL_LAN,  0, 0, "land definition"},
-    {"timed=", FIL_LAN | FILE_TYPE_BYTE2, 1, 0,  "Time in minutes"},
-    {"dated=", FIL_LAN | FILE_TYPE_BYTE2, 2, 2,  "Date in days and millenia"},
-    {"landg=", FIL_LAN | FILE_TYPE_BYTE2, 2, 6,  "Seed that created the land"},
+    {"dated=", FIL_LAN | FILE_TYPE_BYTE4, 1, 0,  "Date in days and millenia"},
+    {"landg=", FIL_LAN | FILE_TYPE_BYTE2, 2, 4,  "Seed that created the land"},
+    {"timed=", FIL_LAN | FILE_TYPE_BYTE2, 1, 8,  "Time in minutes"},
+
 #endif
     /* the line above is a substantial limit to the simulation space. The weather will limit the map area to;
      ((sizeof(n_int)/2) * (MAP_AREA)/(256*256)) <= 255
@@ -152,7 +153,7 @@ static const noble_file_entry noble_file_format[]=
     {"facin=", FIL_BEI | FILE_TYPE_BYTE,  1, 4, "Direction facing"},    /*n_byte	facing;*/
     {"speed=", FIL_BEI | FILE_TYPE_BYTE,  1, 5, "Speed traveling"},    /*n_byte	speed;*/
     {"energ=", FIL_BEI | FILE_TYPE_BYTE2, 1, 6, "Energy within"},   /*n_byte2	energy;*/
-    {"datob=", FIL_BEI | FILE_TYPE_BYTE2, 2, 8, "Date of birth in days and millenia"},    /*n_byte2	date_of_birth[2];*/
+    {"datob=", FIL_BEI | FILE_TYPE_BYTE4, 1, 8, "Date of birth in days and millenia"},    /*n_byte2	date_of_birth[2];*/
     {"rando=", FIL_BEI | FILE_TYPE_BYTE2, 2, 12,"Random within"},    /*n_byte2 seed[2];*/
     {"state=", FIL_BEI | FILE_TYPE_BYTE2, 1, 16,"State description"},    /*n_byte2	state;*/
     
@@ -169,7 +170,7 @@ static const noble_file_entry noble_file_format[]=
     {"paras=", FIL_BEI | FILE_TYPE_BYTE, 1, 60, "Number of parasites"},     /*n_byte  parasites;*/
     {"honor=", FIL_BEI | FILE_TYPE_BYTE, 1, 61, "Honor"},     /*n_byte  honor;*/
 
-    {"conce=", FIL_BEI | FILE_TYPE_BYTE2, 2, 62, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
+    {"conce=", FIL_BEI | FILE_TYPE_BYTE4, 1, 62, "Date of conception in days and millenia"}, /*n_byte2	date_of_conception[2];*/
     
     {"atten=", FIL_BEI | FILE_TYPE_BYTE, ATTENTION_SIZE, 66, "Attention group"}, /*n_byte attention[ATTENTION_SIZE];*/
     
@@ -208,7 +209,7 @@ static const noble_file_entry noble_file_format[]=
     {"sgcia{", FIL_SOE,  0, 0, "Social graph definition"},
     {"sgloc=", FIL_SOE | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, /* n_byte2 location[2];*/
     {"sgtim=", FIL_SOE | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
-    {"sgdat=", FIL_SOE | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
+    {"sgdat=", FIL_SOE | FILE_TYPE_BYTE4, 1, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
     {"sgfin=", FIL_SOE | FILE_TYPE_BYTE2, 1, 10, "First name"},/* n_byte2 first_name;*/
     {"sgfan=", FIL_SOE | FILE_TYPE_BYTE2, 1, 14, "Family name"},/* n_byte2 family_name;*/
     
@@ -230,7 +231,7 @@ static const noble_file_entry noble_file_format[]=
     {"episo{", FIL_EPI,  0, 0, "Episodic memory definition"},
     {"eploc=", FIL_EPI | FILE_TYPE_BYTE2, 2, 0, "Location in x and y coordinates"}, /* n_byte2 location[2];*/
     {"eptim=", FIL_EPI | FILE_TYPE_BYTE2, 1, 4, "Time in minutes"}, /* n_byte2 time;*/
-    {"epdat=", FIL_EPI | FILE_TYPE_BYTE2, 2, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
+    {"epdat=", FIL_EPI | FILE_TYPE_BYTE4, 1, 6, "Date in days and millenia"}, /* n_byte2 date[2];*/
     {"epfin=", FIL_EPI | FILE_TYPE_BYTE2, 2, 10, "First name"},/* n_byte2 first_name;*/
     {"epfan=", FIL_EPI | FILE_TYPE_BYTE2, 2, 14, "Family name"},/* n_byte2 family_name;*/
     

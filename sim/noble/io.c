@@ -1280,7 +1280,9 @@ n_int io_write_buff(n_file * fil, void * data, const noble_file_entry * commands
                                 num_write = byte_data[data_offset + loop];
                                 break;
                             case FILE_TYPE_BYTE2:
+                            {
                                 num_write = ((n_byte2 *)  &byte_data[data_offset + (loop * 2)])[0];
+                            }
                                 break;
                             case FILE_TYPE_BYTE4:
                                 num_write = ((n_byte4 *) &byte_data[data_offset + (loop * 4)])[0];
