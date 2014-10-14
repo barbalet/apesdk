@@ -152,18 +152,10 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, voi
                 /** is this my intention, or someone else's? */
                 if (being_name_comparison(local_being, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                 {
-                    if (local_episodic[i].date < local_sim->land->date)
+                    if (spacetime_before_now(&local_episodic[i].space_time, local_sim->land))
                     {
                         local_episodic[i].event = 0;
                         continue;
-                    }
-                    else
-                    {
-                        if (local_episodic[i].time < local_sim->land->time)
-                        {
-                            local_episodic[i].event = 0;
-                            continue;
-                        }
                     }
                 }
                 episodic_intention_update(local_sim, local_being, i);
@@ -447,16 +439,16 @@ static void episodic_store_full(
     if (replace == -1) return;
 
     old_event = local_episodic[replace].event;
-    old_time = local_episodic[replace].time;
+    old_time = local_episodic[replace].space_time.time;
 
     /** insert the current event into the episodic memory */
     local_episodic[replace].event       = event;
     local_episodic[replace].affect      = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
 
-    local_episodic[replace].location[0] = (n_byte2)being_location_x(local);
-    local_episodic[replace].location[1] = (n_byte2)being_location_y(local);
-    local_episodic[replace].time        = new_time =local_sim->land->time;
-    local_episodic[replace].date        = local_sim->land->date;
+    spacetime_set(&local_episodic[replace].space_time, local_sim->land, being_location(local));
+    
+    new_time = local_episodic[replace].space_time.time;
+    
     local_episodic[replace].first_name[BEING_MEETER]=name1;
     local_episodic[replace].family_name[BEING_MEETER]=family1;
     local_episodic[replace].first_name[BEING_MET]=name2;
@@ -632,7 +624,7 @@ n_byte episodic_intention(
     if (event==0) return 0;
 
     time = local_sim->land->time + mins_ahead;
-    date = local_episodic[episode_index].date;
+    date = local_episodic[episode_index].space_time.date;
     if (time >= TIME_DAY_MINUTES)
     {
         /** increment date by one day */
@@ -643,8 +635,8 @@ n_byte episodic_intention(
     if (event >= EVENT_INTENTION)
     {
         /** extend the time of an existing intention */
-        local_episodic[episode_index].time = time;
-        local_episodic[episode_index].date = date;
+        local_episodic[episode_index].space_time.time = time;
+        local_episodic[episode_index].space_time.date = date;
         local_episodic[episode_index].arg = args;
         /** if this was someone else's intention it now becomes yours */
         local_episodic[episode_index].first_name[BEING_MEETER] = being_gender_name(local);
@@ -673,8 +665,8 @@ n_byte episodic_intention(
 
     local_episodic[replace] = local_episodic[episode_index];
     local_episodic[replace].event = EVENT_INTENTION + event;
-    local_episodic[replace].time = time;
-    local_episodic[replace].date = date;
+    local_episodic[replace].space_time.time = time;
+    local_episodic[replace].space_time.date = date;
     local_episodic[replace].first_name[BEING_MEETER] = being_gender_name(local);
     local_episodic[replace].family_name[BEING_MEETER] = being_family_name(local);
     local_episodic[replace].arg = args;

@@ -755,16 +755,16 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         break;
 
                     case VARIABLE_SOCIAL_GRAPH_LOCATION_X:
-                        local_number = social_graph.location[0];
+                        local_number = social_graph.space_time.location[0];
                         break;
                     case VARIABLE_SOCIAL_GRAPH_LOCATION_Y:
-                        local_number = social_graph.location[1];
+                        local_number = social_graph.space_time.location[1];
                         break;
                     case VARIABLE_SOCIAL_GRAPH_TIME:
-                        local_number = social_graph.time;
+                        local_number = social_graph.space_time.time;
                         break;
                     case VARIABLE_SOCIAL_GRAPH_DATE:
-                        local_number = social_graph.date;
+                        local_number = social_graph.space_time.date;
                         break;
                     case VARIABLE_SOCIAL_GRAPH_ATTRACTION:
                         local_number = social_graph.attraction;
@@ -790,16 +790,16 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
 #endif
 #ifdef EPISODIC_ON
                     case VARIABLE_MEMORY_LOCATION_X:
-                        local_number = episodic.location[0];
+                        local_number = episodic.space_time.location[0];
                         break;
                     case VARIABLE_MEMORY_LOCATION_Y:
-                        local_number = episodic.location[1];
+                        local_number = episodic.space_time.location[1];
                         break;
                     case VARIABLE_MEMORY_TIME:
-                        local_number = episodic.time;
+                        local_number = episodic.space_time.time;
                         break;
                     case VARIABLE_MEMORY_DATE:
-                        local_number = episodic.date;
+                        local_number = episodic.space_time.date;
                         break;
                     case VARIABLE_MEMORY_FIRST_NAME0:
                         local_number = episodic.first_name[0];
@@ -1010,9 +1010,9 @@ void file_audit(void)
     {
         noble_social here;
 
-        FILE_CHECK(&here.location[0]);
-        FILE_CHECK(&here.time);
-        FILE_CHECK(&here.date);
+        FILE_CHECK(&here.space_time.location[0]);
+        FILE_CHECK(&here.space_time.time);
+        FILE_CHECK(&here.space_time.date);
         FILE_CHECK(&here.first_name[0]);
         FILE_CHECK(&here.family_name[0]);
 
@@ -1035,9 +1035,9 @@ void file_audit(void)
     {
         noble_episodic here;
         
-        FILE_CHECK(&here.location[0]);
-        FILE_CHECK(&here.time);
-        FILE_CHECK(&here.date);
+        FILE_CHECK(&here.space_time.location[0]);
+        FILE_CHECK(&here.space_time.time);
+        FILE_CHECK(&here.space_time.date);
         FILE_CHECK(&here.first_name[0]);
         FILE_CHECK(&here.family_name[0]);
         FILE_CHECK(&here.event);

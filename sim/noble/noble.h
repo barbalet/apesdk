@@ -188,6 +188,14 @@ typedef struct
     n_int y;
 } n_vect2;
 
+typedef struct
+{
+    n_byte4  date;
+    n_byte2  location[2];
+    n_byte2  time;
+}
+n_spacetime;
+
 /*! @struct
  @field characters Characters that represent these values in the file.
  @field incl_kind  Included type and the kind of value combined together.
@@ -1042,6 +1050,12 @@ n_string scdebug_variable(n_int variable);
 
 void     scdebug_writeon(void * ptr);
 void     scdebug_writeoff(void * ptr);
+
+n_int spacetime_after(n_spacetime * initial, n_spacetime * second);
+void  spacetime_copy(n_spacetime * to, n_spacetime * from);
+n_int spacetime_before_now(n_spacetime * initial, n_land * now);
+void  spacetime_set(n_spacetime * set, n_land * local, n_byte2 * location);
+
 
 #define	SC_DEBUG_STRING(ptr, string)	scdebug_string(ptr, string)
 #define SC_DEBUG_NUMBER(ptr, number) scdebug_int(ptr, number)

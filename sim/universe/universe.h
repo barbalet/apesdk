@@ -981,15 +981,6 @@ typedef struct
 #endif
 
 
-typedef struct
-{
-    n_byte2  location[2];
-    n_byte2  time;
-    n_byte2  date[2];
-}
-n_space_time;
-
-
 /*! @struct
  @discussion This describes a disposition towards other beings or things
  (an edge in the social graph)
@@ -1009,9 +1000,7 @@ n_space_time;
  */
 typedef struct
 {
-    n_byte2  location[2];
-    n_byte2  time;
-    n_byte4  date;
+    n_spacetime space_time;
 
     n_byte2  first_name[2];
     n_byte2  family_name[2];
@@ -1050,10 +1039,7 @@ typedef struct
  */
 typedef struct
 {
-    n_byte2  location[2];
-    n_byte2  time;
-    n_byte4  date;
-
+    n_spacetime space_time;
     n_byte2  first_name[2];
     n_byte2  family_name[2];
 

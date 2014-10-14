@@ -713,7 +713,7 @@ static n_int attention_similar(n_int episode_index,
  */
 static n_int similar_time(noble_episodic * episodic, n_int * carry_through)
 {
-    n_int dt = episodic->time - carry_through[0];
+    n_int dt = episodic->space_time.time - carry_through[0];
     if (dt < 0)
     {
         dt = - dt;
@@ -732,7 +732,7 @@ static n_int attention_similar_time(n_int episode_index,
                                     noble_episodic * episodic,
                                     n_int * memory_visited)
 {
-    n_int time = episodic[episode_index].time;
+    n_int time = episodic[episode_index].space_time.time;
     return attention_similar(episode_index, episodic, memory_visited, &time, similar_time);
 }
 
@@ -818,7 +818,7 @@ static n_int attention_similar_name(n_int episode_index,
  */
 static n_int similar_date(noble_episodic * episodic, n_int * carry_through)
 {
-    n_int dd = episodic->date - carry_through[0];
+    n_int dd = episodic->space_time.date - carry_through[0];
     if (dd < 0)
     {
         dd = - dd;
@@ -837,7 +837,7 @@ static n_int attention_similar_date(n_int episode_index,
                                     noble_episodic * episodic,
                                     n_int * memory_visited)
 {
-    n_int time = episodic[episode_index].date;
+    n_int time = episodic[episode_index].space_time.date;
     return attention_similar(episode_index, episodic, memory_visited, &time, similar_date);
 }
 
@@ -849,8 +849,8 @@ static n_int attention_similar_date(n_int episode_index,
  */
 static n_int similar_place(noble_episodic * episodic, n_int * carry_through)
 {
-    n_int dx = episodic->location[0] - carry_through[0];
-    n_int dy = episodic->location[1] - carry_through[1];
+    n_int dx = episodic->space_time.location[0] - carry_through[0];
+    n_int dy = episodic->space_time.location[1] - carry_through[1];
     /** TODO should be calculated in the future with wrap around comparison */
     n_int da = (dx * dx) + (dy * dy);
     return da;
@@ -868,8 +868,8 @@ static n_int attention_similar_place(n_int episode_index,
                                      n_int * memory_visited)
 {
     n_int location[2];
-    location[0] = episodic[episode_index].location[0];
-    location[1] = episodic[episode_index].location[1];
+    location[0] = episodic[episode_index].space_time.location[0];
+    location[1] = episodic[episode_index].space_time.location[1];
     return attention_similar(episode_index, episodic, memory_visited, location, similar_place);
 }
 
@@ -1279,10 +1279,10 @@ void brain_dialogue(
                     addr1[0] = episodic[episode_index].arg&255;
                     break;
                 case 13:
-                    addr1[0] = (n_byte)(episodic[episode_index].location[0] * 255 / land_map_dimension(sim->land));
+                    addr1[0] = (n_byte)(episodic[episode_index].space_time.location[0] * 255 / land_map_dimension(sim->land));
                     break;
                 case 14:
-                    addr1[0] = (n_byte)(episodic[episode_index].location[1] * 255 / land_map_dimension(sim->land));
+                    addr1[0] = (n_byte)(episodic[episode_index].space_time.location[1] * 255 / land_map_dimension(sim->land));
                     break;
                 case 15:
                 {
@@ -1425,8 +1425,8 @@ void brain_dialogue(
                     }
                     /** set territory attention to the location where the episode occurred */
                     GET_A(meeter_being,ATTENTION_TERRITORY) =
-                        (APESPACE_TO_TERRITORY(episodic[episode_index].location[1])*16)+
-                        APESPACE_TO_TERRITORY(episodic[episode_index].location[0]);
+                        (APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[1])*16)+
+                        APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[0]);
                 }
                 break;
             }
@@ -1459,8 +1459,8 @@ void brain_dialogue(
                     if (!(meeter_being->script_overrides&OVERRIDE_GOAL))
                     {
                         meeter_being->goal[0] = GOAL_LOCATION;
-                        meeter_being->goal[1] = episodic[episode_index].location[0];
-                        meeter_being->goal[2] = episodic[episode_index].location[1];
+                        meeter_being->goal[1] = episodic[episode_index].space_time.location[0];
+                        meeter_being->goal[2] = episodic[episode_index].space_time.location[1];
                         meeter_being->goal[3] = GOAL_TIMEOUT;
                     }
                     break;

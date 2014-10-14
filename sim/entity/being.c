@@ -1692,12 +1692,12 @@ n_int episode_description(
             return SHOW_ERROR("No string in episodic description");
         }
 
-        days_elapsed = current_date - local_episodic[index].date;
-        if (days_elapsed==0)
+        days_elapsed = current_date - local_episodic[index].space_time.date;
+        if (days_elapsed == 0)
         {
-            time_elapsed = sim->land->time - local_episodic[index].time;
+            time_elapsed = sim->land->time - local_episodic[index].space_time.time;
 
-            if (time_elapsed<60)
+            if (time_elapsed < 60)
             {
                 if (time_elapsed == 0)
                 {

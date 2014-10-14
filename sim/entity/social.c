@@ -807,10 +807,10 @@ static n_int get_stranger_link(
                 {
                     /** Forget old stuff in order to avoid
                     	too much inflexibility */
-                    time_since_met = sim->land->date - graph[i].date;
+                    time_since_met = sim->land->date - graph[i].space_time.date;
                     
                     if ((time_since_met >= SOCIAL_FORGET_DAYS) ||
-                        (graph[i].date==0))
+                        (graph[i].space_time.date==0))
                     {
                         stranger = familiarity;
                         stranger_index = i;
@@ -934,20 +934,21 @@ static n_int social_meet(
         if (location_type == LOCATION_KNOWN)
         {
             /** this being was seen somewhere in my vicinity */
-            graph[index].location[0] = (n_byte2)being_location_x(meeter_being);
-            graph[index].location[1] = (n_byte2)being_location_y(meeter_being);
+            graph[index].space_time.location[0] = (n_byte2)being_location_x(meeter_being);
+            graph[index].space_time.location[1] = (n_byte2)being_location_y(meeter_being);
         }
         else {
             /** location unknown */
-            graph[index].location[0] = 0;
-            graph[index].location[1] = 0;
+            graph[index].space_time.location[0] = 0;
+            graph[index].space_time.location[1] = 0;
         }
 
         /** record the state of the met beting */
         graph[index].belief = being_state(met_being);
 
         /** date of the meeting */
-        graph[index].date = sim->land->date;
+        graph[index].space_time.date = sim->land->date;
+        graph[index].space_time.time = sim->land->time;
 
         /** getting more familiar */
         if (familiarity < 65535)
@@ -1689,14 +1690,13 @@ n_int social_chat(
                     if (meeter_graph[i].familiarity < 65535) meeter_graph[i].familiarity++;
 
                     /** update this being's belief */
-                    if (met_graph[idx].date > meeter_graph[i].date)
+                    if (spacetime_after(&met_graph[idx].space_time, &meeter_graph[i].space_time))
                     {
                         /** belief about location */
-                        meeter_graph[i].location[0] = met_graph[idx].location[0];
-                        meeter_graph[i].location[1] = met_graph[idx].location[1];
+                        spacetime_copy(&meeter_graph[i].space_time, &met_graph[idx].space_time);
+                        
                         /** belief about state */
                         meeter_graph[i].belief = met_graph[idx].belief;
-                        meeter_graph[i].date = met_graph[idx].date;
                     }
                     speaking |= BEING_STATE_SPEAKING;
                 }

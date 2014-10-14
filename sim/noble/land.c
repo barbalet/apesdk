@@ -618,3 +618,55 @@ void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * lo
     output->x = (z - land_location(local, (APESPACE_TO_MAPSPACE(loc_x) + 1), APESPACE_TO_MAPSPACE(loc_y)));
     output->y = (z - land_location(local, APESPACE_TO_MAPSPACE(loc_x), (APESPACE_TO_MAPSPACE(loc_y) + 1)));
 }
+
+n_int spacetime_after(n_spacetime * initial, n_spacetime * second)
+{
+    if (initial->date < second->date)
+    {
+        return 0;
+    }
+    if (initial->date > second->date)
+    {
+        return 1;
+    }
+    if (initial->time > second->time)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+n_int spacetime_before_now(n_spacetime * initial, n_land * now)
+{
+    if (initial->date > now->date)
+    {
+        return 0;
+    }
+    if (initial->date < now->date)
+    {
+        return 1;
+    }
+    if (initial->time < now->time)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+void spacetime_copy(n_spacetime * to, n_spacetime * from)
+{
+    to->location[0] = from->location[0];
+    to->location[1] = from->location[1];
+    
+    to->date = from->date;
+    to->time = from->time;
+}
+
+void spacetime_set(n_spacetime * set, n_land * local, n_byte2 * location)
+{
+    set->location[0] = location[0];
+    set->location[1] = location[1];
+    set->time        = local->time;
+    set->date        = local->date;
+
+}
