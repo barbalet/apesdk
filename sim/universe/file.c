@@ -520,7 +520,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 local_number = local_sim->land->time;
                 break;
             case VARIABLE_DATE:
-                local_number = (local_sim->land->date[0]) + (local_sim->land->date[1] * TIME_CENTURY_DAYS);
+                local_number = local_sim->land->date;
                 break;
             case VARIABLE_CURRENT_BEING:
                 local_number = being_index(local_sim, (noble_being *)individual->interpret_data);
@@ -764,10 +764,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_number = social_graph.time;
                         break;
                     case VARIABLE_SOCIAL_GRAPH_DATE:
-                        local_number = social_graph.date[0];
-                        break;
-                    case VARIABLE_SOCIAL_GRAPH_CENTURY:
-                        local_number = social_graph.date[1];
+                        local_number = social_graph.date;
                         break;
                     case VARIABLE_SOCIAL_GRAPH_ATTRACTION:
                         local_number = social_graph.attraction;
@@ -802,10 +799,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_number = episodic.time;
                         break;
                     case VARIABLE_MEMORY_DATE:
-                        local_number = episodic.date[0];
-                        break;
-                    case VARIABLE_MEMORY_CENTURY:
-                        local_number = episodic.date[1];
+                        local_number = episodic.date;
                         break;
                     case VARIABLE_MEMORY_FIRST_NAME0:
                         local_number = episodic.first_name[0];
@@ -959,7 +953,7 @@ void file_audit(void)
         FILE_CHECK(&here.direction_facing);
         FILE_CHECK(&here.velocity);
         FILE_CHECK(&here.stored_energy);
-        FILE_CHECK(&here.date_of_birth[0]);
+        FILE_CHECK(&here.date_of_birth);
         FILE_CHECK(&here.seed[0]);
         FILE_CHECK(&here.macro_state);
         FILE_CHECK(&here.brain_state[0]);
@@ -974,7 +968,7 @@ void file_audit(void)
         FILE_CHECK(&here.parasites);
         FILE_CHECK(&here.honor);
 
-        FILE_CHECK(&here.date_of_conception[0]); /* constant */
+        FILE_CHECK(&here.date_of_conception); /* constant */
         FILE_CHECK(&here.attention[0]);
         FILE_CHECK(&here.genetics[0]);           /* constant */
         FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
@@ -1010,7 +1004,7 @@ void file_audit(void)
         n_land         here;
         
         FILE_CHECK(&here.time);
-        FILE_CHECK(&here.date[0]);
+        FILE_CHECK(&here.date);
         FILE_CHECK(&here.genetics[0]);
     }
     {
@@ -1018,7 +1012,7 @@ void file_audit(void)
 
         FILE_CHECK(&here.location[0]);
         FILE_CHECK(&here.time);
-        FILE_CHECK(&here.date[0]);
+        FILE_CHECK(&here.date);
         FILE_CHECK(&here.first_name[0]);
         FILE_CHECK(&here.family_name[0]);
 
@@ -1043,7 +1037,7 @@ void file_audit(void)
         
         FILE_CHECK(&here.location[0]);
         FILE_CHECK(&here.time);
-        FILE_CHECK(&here.date[0]);
+        FILE_CHECK(&here.date);
         FILE_CHECK(&here.first_name[0]);
         FILE_CHECK(&here.family_name[0]);
         FILE_CHECK(&here.event);
