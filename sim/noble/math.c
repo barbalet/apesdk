@@ -691,9 +691,9 @@ n_byte math_line(n_int x1, n_int y1, n_int x2, n_int y2, n_join * draw)
     return math_join(x1, y1, dx, dy, draw);
 }
 
-n_c_uint math_hash_fnv1(n_constant_string key)
+n_byte4 math_hash_fnv1(n_constant_string key)
 {
-    n_c_uint hash = 2166136261;
+    n_byte4 hash = 2166136261;
     while(*key)
         hash = (16777619 * hash) ^ (*key++);
     return hash;

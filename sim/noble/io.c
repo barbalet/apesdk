@@ -878,8 +878,23 @@ n_int io_find_size_data(noble_file_entry * commands)
         last_characters = commands[lp].characters;
         if (last_incl != data_incl)
         {
-            n_uint   data_size = ((FILE_KIND(commands[lp-1].incl_kind) == FILE_TYPE_BYTE2) ? 2 : 1);
+            n_uint   local_kind = FILE_KIND(commands[lp-1].incl_kind);
+            n_uint   data_size;
             n_uint   running_entry = commands[lp-1].start_location;
+            
+            switch(local_kind)
+            {
+                case FILE_TYPE_BYTE4:
+                    data_size = 4;
+                    break;
+                case FILE_TYPE_BYTE2:
+                    data_size = 2;
+                    break;
+                default:
+                    data_size = 1;
+                    break;
+            }
+            
             running_entry += data_size * commands[lp-1].number_entries;
             if (running_entry > max_entry)
             {
@@ -936,17 +951,22 @@ n_int io_read_data(n_file * fil, n_byte2 command, n_byte * data_read)
     }
 
     if ((type_from_command == FILE_TYPE_BYTE) ||
-            (type_from_command == FILE_TYPE_BYTE_EXT) ||
-            (type_from_command == FILE_TYPE_BYTE2))
+        (type_from_command == FILE_TYPE_BYTE_EXT) ||
+        (type_from_command == FILE_TYPE_BYTE2) ||
+        (type_from_command == FILE_TYPE_BYTE4))
     {
         n_uint	number = 0;
         n_byte	num_char;
         n_int   response_code = io_read_byte4(fil, &number, &num_char);
 
         if (response_code == 0)
+        {
             return SHOW_ERROR("Expected number not found");
+        }
         if (response_code < 0)
+        {
             return SHOW_ERROR("Expected number too big");
+        }
 
         if ((type_from_command == FILE_TYPE_BYTE) || (type_from_command == FILE_TYPE_BYTE_EXT))
         {
@@ -961,6 +981,12 @@ n_int io_read_data(n_file * fil, n_byte2 command, n_byte * data_read)
             if (number > 0x0000ffff)
                 return SHOW_ERROR("Expected two byte too big");
             data_read2[0] = (n_byte2) number;
+        }
+        
+        if (type_from_command == FILE_TYPE_BYTE4)
+        {
+            n_byte4	* data_read4 = (n_byte4 *)data_read;
+            data_read4[0] = (n_byte4) number;
         }
 
         if (FILE_MACRO_CONCLUSION(num_char))
@@ -1036,9 +1062,13 @@ n_int	io_read_buff(n_file * fil, n_byte * data, const noble_file_entry * command
             {
                 n_byte	local_kind = com_kind;
                 if ((loop + 1) != com_number_of)
+                {
                     local_kind |= FILE_CONTINUATION;
+                }
                 if (io_read_data(fil, local_kind, local_data) != FILE_OKAY)
+                {
                     return (FILE_ERROR);
+                }
                 if (com_kind == FILE_TYPE_PACKED)
                 {
                     local_data = &local_data[ PACKED_DATA_BLOCK ];
@@ -1230,28 +1260,31 @@ n_int io_write_buff(n_file * fil, void * data, const noble_file_entry * commands
                     IO_CHECK_ERROR(io_write(fil, (n_string)writeout_commands, 0));
                     while (loop < end_loop)
                     {
-                        n_byte2	num_write = 0;
+                        n_byte4 num_write = 0;
                         switch (data_type)
                         {
-                        case FILE_TYPE_BYTE_EXT:
-                            if((loop != 0) && ((loop % 3) == 0) && (loop != 126))
-                            {
-                                n_string_block block_code = {0};
-                                if (func != 0L) (*func)(block_code, &byte_data[data_offset + loop]);
-                                IO_CHECK_ERROR(io_write(fil, "", 1));
-                                IO_CHECK_ERROR(io_write(fil, "", 2));
-                                IO_CHECK_ERROR(io_write(fil, "/* ", 0));
-                                IO_CHECK_ERROR(io_writenumber(fil, loop, 1, 0));
-                                IO_CHECK_ERROR(io_write(fil, "", 2));
-                                IO_CHECK_ERROR(io_write(fil, (n_string)block_code, 0));
-                                IO_CHECK_ERROR(io_write(fil, " */", 2));
-                            }
-                        case FILE_TYPE_BYTE:
-                            num_write = byte_data[data_offset + loop];
-                            break;
-                        case FILE_TYPE_BYTE2:
-                            num_write = ((n_byte2 *) & byte_data[data_offset + (loop * 2)])[0];
-                            break;
+                            case FILE_TYPE_BYTE_EXT:
+                                if((loop != 0) && ((loop % 3) == 0) && (loop != 126))
+                                {
+                                    n_string_block block_code = {0};
+                                    if (func != 0L) (*func)(block_code, &byte_data[data_offset + loop]);
+                                    IO_CHECK_ERROR(io_write(fil, "", 1));
+                                    IO_CHECK_ERROR(io_write(fil, "", 2));
+                                    IO_CHECK_ERROR(io_write(fil, "/* ", 0));
+                                    IO_CHECK_ERROR(io_writenumber(fil, loop, 1, 0));
+                                    IO_CHECK_ERROR(io_write(fil, "", 2));
+                                    IO_CHECK_ERROR(io_write(fil, (n_string)block_code, 0));
+                                    IO_CHECK_ERROR(io_write(fil, " */", 2));
+                                }
+                            case FILE_TYPE_BYTE:
+                                num_write = byte_data[data_offset + loop];
+                                break;
+                            case FILE_TYPE_BYTE2:
+                                num_write = ((n_byte2 *)  &byte_data[data_offset + (loop * 2)])[0];
+                                break;
+                            case FILE_TYPE_BYTE4:
+                                num_write = ((n_byte4 *) &byte_data[data_offset + (loop * 4)])[0];
+                                break;
                         }
                         loop++;
 
@@ -1482,7 +1515,7 @@ void io_audit_file(const noble_file_entry * format, n_byte section_to_audit)
                 local_type = FILE_TYPE_BYTE;
             }
 
-            if ((local_type == FILE_TYPE_BYTE) || (local_type == FILE_TYPE_BYTE2))
+            if ((local_type == FILE_TYPE_BYTE) || (local_type == FILE_TYPE_BYTE2) || (local_type == FILE_TYPE_BYTE4))
             {
                 printout_characters[0] = local_characters[0];
                 printout_characters[1] = local_characters[1];
@@ -1527,12 +1560,12 @@ void io_three_string_combination(n_string output, n_string first, n_string secon
     io_string_write(output, third, &position);
 }
 
-void io_time_to_string(n_string value, n_int minutes, n_int days, n_int centuries)
+void io_time_to_string(n_string value, n_int minutes, n_int days)
 {
     n_int military_time = (minutes % 60);
     n_int hours = (minutes/60);
     military_time += hours * 100;
-    sprintf(value,"%4ld:%ld/%ld",military_time,days,centuries);
+    sprintf(value,"%4ld:%ld", military_time, days);
 }
 
 void io_offset(n_byte * start, n_byte * point, n_string text)

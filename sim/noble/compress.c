@@ -70,7 +70,7 @@
 #endif
 
 n_c_int   code_value[TABLE_SIZE];         /* This is code value array            */
-n_c_uint  prefix_code[TABLE_SIZE];        /* This array holds the prefix codes   */
+n_byte4  prefix_code[TABLE_SIZE];        /* This array holds the prefix codes   */
 n_byte    append_character[TABLE_SIZE];              /* This array holds the appended chars */
 
 /*
@@ -79,7 +79,7 @@ n_byte    append_character[TABLE_SIZE];              /* This array holds the app
  ** the string is not found, the first available index in the string table is
  ** returned instead.
  */
-static n_c_int find_match(n_c_uint hash_prefix, n_c_uint hash_character)
+static n_c_int find_match(n_byte4 hash_prefix, n_byte4 hash_character)
 {
 	n_c_int offset;
 	n_c_int index=(hash_character<<HASHING_SHIFT) ^ hash_prefix;
@@ -112,7 +112,7 @@ static n_c_int find_match(n_c_uint hash_prefix, n_c_uint hash_character)
  ** it in buffer. The buffer can then be output in reverse order by
  ** the expansion program.
  */
-static n_byte * decode_string(n_byte *buffer, n_c_uint code)
+static n_byte * decode_string(n_byte *buffer, n_byte4 code)
 {
 	n_c_int i;
 	i=0;
@@ -135,9 +135,9 @@ static n_byte * decode_string(n_byte *buffer, n_c_uint code)
  */
 unsigned int input_code(n_file *input)
 {
-	n_c_uint return_value;
+	n_byte4 return_value;
 	static n_c_int input_bit_count=0;
-	static n_c_uint input_bit_buffer=0L;
+	static n_byte4 input_bit_buffer=0L;
 	while (input_bit_count<=24)
     {
         n_byte byte_character;
@@ -152,11 +152,11 @@ unsigned int input_code(n_file *input)
 	return return_value;
 }
 
-void output_code(n_file *output, n_c_uint code)
+void output_code(n_file *output, n_byte4 code)
 {
 	static n_c_int output_bit_count=0;
-	static n_c_uint output_bit_buffer=0L;
-	output_bit_buffer|=(n_c_uint) code << (32-BITS-output_bit_count);
+	static n_byte4 output_bit_buffer=0L;
+	output_bit_buffer|=(n_byte4) code << (32-BITS-output_bit_count);
 	output_bit_count += BITS;
 	while (output_bit_count>=8)
     {
@@ -175,9 +175,9 @@ void output_code(n_file *output, n_c_uint code)
  */
 void compress_compress(n_file *input,n_file *output)
 {
-	n_c_uint next_code = 256;                 /* next available string code */
-	n_c_uint string_code;
-	n_c_uint index = 0;
+	n_byte4 next_code = 256;                 /* next available string code */
+	n_byte4 string_code;
+	n_byte4 index = 0;
     n_byte   byte_character;
     
 	while(index<TABLE_SIZE)     /* clear string table */
@@ -196,7 +196,7 @@ void compress_compress(n_file *input,n_file *output)
         
 	while (io_read_bin(input, &byte_character) != -1)
     {
-        n_c_uint character = byte_character;
+        n_byte4 character = byte_character;
         
 		index = find_match(string_code, character);
         
@@ -227,9 +227,9 @@ void compress_compress(n_file *input,n_file *output)
  */
 void compress_expand(n_file *input,n_file *output)
 {
-	n_c_uint next_code =  256;
-	n_c_uint new_code;
-	n_c_uint old_code=input_code(input);
+	n_byte4 next_code =  256;
+	n_byte4 new_code;
+	n_byte4 old_code=input_code(input);
 	n_c_int  character=old_code;
 	n_byte   *string;
     

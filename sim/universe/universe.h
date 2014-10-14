@@ -89,7 +89,7 @@ static const n_byte	operators[17][7] =
     /*AHWOUS*/
 };
 
-#define AGE_IN_DAYS(sim,bei)        (TIME_IN_DAYS(sim->land->date) - being_dob(bei))
+#define AGE_IN_DAYS(sim,bei)        (sim->land->date - being_dob(bei))
 #define AGE_IN_YEARS(sim,bei)       (AGE_IN_DAYS(sim,bei)/TIME_YEAR_DAYS)
 
 /* in days, a little young, yes */
@@ -797,7 +797,7 @@ enum affect_type
 };
 /* ------- ------- ------- GENETICS FOR THE NOBLE APES (BETA) ------- ------- ------- */
 
-typedef n_c_uint n_genetics;
+typedef n_byte4 n_genetics;
 
 enum mutation_type
 {
@@ -982,6 +982,16 @@ typedef struct
 
 #endif
 
+
+typedef struct
+{
+    n_byte2  location[2];
+    n_byte2  time;
+    n_byte2  date[2];
+}
+n_space_time;
+
+
 /*! @struct
  @discussion This describes a disposition towards other beings or things
  (an edge in the social graph)
@@ -1003,7 +1013,7 @@ typedef struct
 {
     n_byte2  location[2];
     n_byte2  time;
-    n_byte2  date[2];
+    n_byte4  date;
 
     n_byte2  first_name[2];
     n_byte2  family_name[2];
@@ -1044,7 +1054,7 @@ typedef struct
 {
     n_byte2  location[2];
     n_byte2  time;
-    n_byte2  date[2];
+    n_byte4  date;
 
     n_byte2  first_name[2];
     n_byte2  family_name[2];
@@ -1133,7 +1143,7 @@ typedef struct
     n_byte      direction_facing;
     n_byte      velocity;
     n_byte2     stored_energy;
-    n_byte2     date_of_birth[2];
+    n_byte4     date_of_birth;
     n_byte2     seed[2];
     n_byte2     macro_state;
     n_byte2     brain_state[6];
@@ -1148,7 +1158,7 @@ typedef struct
     n_byte      parasites;
     n_byte      honor;
 
-    n_byte2     date_of_conception[2]; /* constant */
+    n_byte4     date_of_conception; /* constant */
     n_byte      attention[ATTENTION_SIZE];
     n_genetics  genetics[CHROMOSOMES];           /* constant */
     n_genetics  fetal_genetics[CHROMOSOMES];           /* constant */

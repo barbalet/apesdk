@@ -986,8 +986,8 @@ static void	draw_meters(noble_simulation * local_sim)
         n_vect2 hour_hand;
         n_vect2 minute_hand;
         
-        vect2_direction(&year_hand, ((loc_land->date[0]) << 6) / mndivyear, 5440);
-        vect2_direction(&month_hand, ((loc_land->date[0]) << 6) / mndivmonth, 5440);
+        vect2_direction(&year_hand, ((loc_land->date) << 6) / mndivyear, 5440);
+        vect2_direction(&month_hand, ((loc_land->date) << 6) / mndivmonth, 5440);
         vect2_direction(&hour_hand, ((loc_land->time) << 6) / mndivhr, 2688);
         vect2_direction(&minute_hand, ((loc_land->time) << 6) / mndivmin, 2016);
         
@@ -1432,7 +1432,7 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
 #endif
         if (local_land)
         {
-            io_time_to_string(simulation_date_time, local_land->time, local_land->date[0], local_land->date[1]);
+            io_time_to_string(simulation_date_time, local_land->time, local_land->date);
         
             io_string_write(simulation_date_time_error, simulation_date_time, &position);
             io_string_write(simulation_date_time_error, " ", &position);
@@ -1501,7 +1501,7 @@ static void draw_remains(noble_simulation * sim, n_byte * screen)
 static void draw_tides(n_byte * map, n_byte * screen, n_byte tide)
 {
     n_byte	tide_compress[45];
-    n_uint  lp = 0;
+    n_int   lp = 0;
     n_byte	tide_point = tide - 106;
     n_int	ar = 106;
     n_int	dr = 128;
@@ -1538,7 +1538,7 @@ static void draw_tides(n_byte * map, n_byte * screen, n_byte tide)
     }
 }
 
-static void draw_tides_hi_res(n_byte * data, n_c_uint * block, n_byte tide)
+static void draw_tides_hi_res(n_byte * data, n_byte4 * block, n_byte tide)
 {
     n_byte	tide_compress[45];
     n_uint  lp = 0;
@@ -1568,7 +1568,7 @@ static void draw_tides_hi_res(n_byte * data, n_c_uint * block, n_byte tide)
     lp = 0;
     while (lp < HI_RES_MAP_AREA)
     {
-        n_c_uint  block_group = block[lp >> 5];
+        n_byte4  block_group = block[lp >> 5];
 
         if (block_group != 0)
         {

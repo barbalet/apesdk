@@ -46,11 +46,16 @@
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
 
+#ifdef OVERWRITE_THREADED
+
+#else
 
 #ifdef NOBLE_IOS
     #undef  EXECUTE_THREADED
 #else
     #define  EXECUTE_THREADED
+#endif
+
 #endif
 
 #ifdef COMMAND_LINE_EXPLICIT
@@ -106,7 +111,7 @@ typedef	unsigned char	n_byte;
  expectations on the byte ordering. */
 typedef	unsigned short	n_byte2;
 
-typedef	unsigned int	n_c_uint;
+typedef	unsigned int	n_byte4;
 typedef	int				n_c_int;
 
 #ifndef _WIN64
@@ -211,7 +216,8 @@ enum file_element_type
     FILE_TYPE_BYTE		= 0x01,
     FILE_TYPE_BYTE2		= 0x02,
     FILE_TYPE_BYTE_EXT	= 0x03,
-    FILE_TYPE_PACKED	= 0x05
+    FILE_TYPE_PACKED	= 0x05,
+    FILE_TYPE_BYTE4     = 0x06
 };
 
 #define FILE_INCL(num)      ((num) & 0xf0)
@@ -613,7 +619,7 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
                             n_byte *bc0, n_byte *bc1,
                             n_int braincode_min_loop);
 
-n_c_uint math_hash_fnv1(n_constant_string key);
+n_byte4 math_hash_fnv1(n_constant_string key);
 n_uint   math_hash(n_byte * values, n_uint length);
 
 void    math_bilinear_8_times(n_byte * side512, n_byte * data, n_byte double_spread);
@@ -687,7 +693,7 @@ n_int      io_disk_check(n_constant_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
 
 void       io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count);
-void       io_time_to_string(n_string value, n_int minutes, n_int days, n_int centuries);
+void       io_time_to_string(n_string value, n_int minutes, n_int days);
 n_int      io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char);
 n_int      io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line);
 n_int      io_command(n_file * fil, const noble_file_entry * commands);
@@ -772,7 +778,6 @@ void compress_expand(n_file *input,   n_file *output);
 #define TIME_YEAR_MINUTES           (TIME_MONTH_MINUTES * 13)
 #define TIME_YEAR_DAYS              (7 * 52)				/*364 also = 13 * 28 */
 #define	TIME_CENTURY_DAYS           (TIME_YEAR_DAYS * 100)
-#define TIME_IN_DAYS(time)          (n_uint)(((time)[1]*TIME_CENTURY_DAYS)+(time)[0])
 
 #define LUNAR_ORBIT_MINS            39312
 
@@ -811,12 +816,12 @@ void compress_expand(n_file *input,   n_file *output);
 typedef	struct
 {
     n_byte2     time;                             /* save-able */
-    n_byte2     date[2];                          /* save-able */
+    n_byte4     date;                             /* save-able */
     n_byte2     genetics[2];                      /* save-able */
     n_byte      tide_level;                       /* generated */
     n_byte      topology[MAP_AREA];                    /* generated */
     n_byte      topology_highdef[HI_RES_MAP_AREA * 2];     /* generated */
-    n_c_uint    highres_tide[HI_RES_MAP_AREA/32]; /* generated */
+    n_byte4     highres_tide[HI_RES_MAP_AREA/32]; /* generated */
     n_byte2     delta_pressure[ MAP_AREA / 4];    /* generated */
     n_c_int		atmosphere[ MAP_AREA / 4];        /* save-able and generate-able */
 }
@@ -829,7 +834,7 @@ void  weather_cycle(n_land * local_land);
 weather_values weather_seven_values(n_land * local_land, n_int px, n_int py);
 
 void  land_init(n_land * local_land, n_byte * scratch, n_byte double_spread);
-void  land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start);
+void  land_clear(n_land * local, KIND_OF_USE kind, n_byte4 start);
 void  land_cycle(n_land * local_land);
 void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);
 n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_byte * kind);

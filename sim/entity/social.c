@@ -807,11 +807,10 @@ static n_int get_stranger_link(
                 {
                     /** Forget old stuff in order to avoid
                     	too much inflexibility */
-                    time_since_met =
-                        TIME_IN_DAYS(sim->land->date) -
-                        TIME_IN_DAYS(graph[i].date);
+                    time_since_met = sim->land->date - graph[i].date;
+                    
                     if ((time_since_met >= SOCIAL_FORGET_DAYS) ||
-                            (TIME_IN_DAYS(graph[i].date)==0))
+                        (graph[i].date==0))
                     {
                         stranger = familiarity;
                         stranger_index = i;
@@ -948,8 +947,7 @@ static n_int social_meet(
         graph[index].belief = being_state(met_being);
 
         /** date of the meeting */
-        graph[index].date[0] = sim->land->date[0];
-        graph[index].date[1] = sim->land->date[1];
+        graph[index].date = sim->land->date;
 
         /** getting more familiar */
         if (familiarity < 65535)
@@ -1378,8 +1376,7 @@ n_uint social_respect_mean(
     body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
 
     /** store the date of conception */
-    female->date_of_conception[0] = sim->land->date[0];
-    female->date_of_conception[1] = sim->land->date[1];
+    female->date_of_conception = sim->land->date;
     
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
@@ -1692,15 +1689,14 @@ n_int social_chat(
                     if (meeter_graph[i].familiarity < 65535) meeter_graph[i].familiarity++;
 
                     /** update this being's belief */
-                    if (TIME_IN_DAYS(met_graph[idx].date) > TIME_IN_DAYS(meeter_graph[i].date))
+                    if (met_graph[idx].date > meeter_graph[i].date)
                     {
                         /** belief about location */
                         meeter_graph[i].location[0] = met_graph[idx].location[0];
                         meeter_graph[i].location[1] = met_graph[idx].location[1];
                         /** belief about state */
                         meeter_graph[i].belief = met_graph[idx].belief;
-                        meeter_graph[i].date[0] = met_graph[idx].date[0];
-                        meeter_graph[i].date[1] = met_graph[idx].date[1];
+                        meeter_graph[i].date = met_graph[idx].date;
                     }
                     speaking |= BEING_STATE_SPEAKING;
                 }

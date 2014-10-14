@@ -328,7 +328,7 @@ void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta
 
 n_int being_dob(noble_being * value)
 {
-    return TIME_IN_DAYS(value->date_of_birth);
+    return value->date_of_birth;
 }
 
 void being_facing_towards(noble_being * value, n_vect2 * vector)
@@ -363,7 +363,7 @@ n_genetics * being_genetics(noble_being * value)
 
 n_int being_pregnant(noble_being * value)
 {
-    return TIME_IN_DAYS(value->date_of_conception);
+    return value->date_of_conception;
 }
 
 n_genetics * being_fetal_genetics(noble_being * value)
@@ -1236,7 +1236,7 @@ static noble_being * being_find_child(noble_simulation * sim, n_genetics * genet
 {
     being_find_child_struct bfcs;
     
-    bfcs.today = TIME_IN_DAYS(sim->land->date);
+    bfcs.today = sim->land->date;
     bfcs.comparison_best = 0;
     bfcs.max_age = max_age;
     bfcs.genetics = genetics;
@@ -1533,7 +1533,7 @@ n_int episode_description(
     n_uint days_elapsed,time_elapsed;
     n_uint current_date;
 
-    current_date = TIME_IN_DAYS(sim->land->date);
+    current_date = sim->land->date;
     local_episodic = being_episodic(local_being);
 
     if(local_episodic == 0L)
@@ -1692,7 +1692,7 @@ n_int episode_description(
             return SHOW_ERROR("No string in episodic description");
         }
 
-        days_elapsed = current_date - TIME_IN_DAYS(&(local_episodic[index].date[0]));
+        days_elapsed = current_date - local_episodic[index].date;
         if (days_elapsed==0)
         {
             time_elapsed = sim->land->time - local_episodic[index].time;
@@ -2594,7 +2594,7 @@ static void being_interact(noble_simulation * sim,
     if (other_being != 0L)
     {
         n_land      * land         = sim->land;
-        n_int         today_days   = TIME_IN_DAYS(land->date);
+        n_int         today_days   = land->date;
         n_int         birth_days   = being_dob(local);
         n_uint        local_is_female = FIND_SEX(GET_I(local));
 
@@ -2699,7 +2699,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 {
     n_land      * land               = sim->land;
     n_uint        local_is_female    = FIND_SEX(GET_I(local));
-    n_int         today_days         = TIME_IN_DAYS(land->date);
+    n_int         today_days         = land->date;
     n_int         birth_days         = being_dob(local);
 
     n_int	      loc_s              = being_speed(local);
@@ -2924,8 +2924,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             ((being_pregnant(local) + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
     {
         /** zero value indicates ready to conceive */
-        local->date_of_conception[0] = 0;
-        local->date_of_conception[1] = 0;
+        local->date_of_conception = 0;
     }
 
     if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING)) == BEING_STATE_AWAKE)
@@ -3499,8 +3498,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
         local->social_y = local->social_ny =
                               (math_random(local->seed) & 32767)+16384;
         
-        local->date_of_birth[0] = 0;
-        local->date_of_birth[1] = 0;
+        local->date_of_birth = 0;
     }
     else
     {
@@ -3522,8 +3520,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
                               being_family_name(mother),
                               mother->father_name[1]);
         
-        local->date_of_birth[0] = land->date[0];
-        local->date_of_birth[1] = land->date[1];
+        local->date_of_birth = land->date;
     }
     
     being_living(local);

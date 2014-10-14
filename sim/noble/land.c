@@ -204,7 +204,6 @@ void weather_init(n_land * local_land)
     map_bits2      = land_map_bits(local_land) - 1;
     if (map_bits2 < 0) return;
     
-    NA_ASSERT(land, "land NULL");
     NA_ASSERT(atmosphere, "atmosphere NULL");
     NA_ASSERT(delta_pressure, "delta_pressure NULL");
     io_erase((n_byte *)local_land->atmosphere, sizeof(n_c_int) * MAP_AREA / 4);
@@ -355,7 +354,7 @@ void land_tide(n_land * local_land)
     NA_ASSERT(local_land, "local_land NULL");
     
     time_of_day     = local_land->time;
-    current_time    = time_of_day + (TIME_IN_DAYS(local_land->date) * TIME_DAY_MINUTES);
+    current_time    = time_of_day + (local_land->date * TIME_DAY_MINUTES);
     
     {
         n_int lunar_mins      = current_time % LUNAR_ORBIT_MINS;
@@ -382,15 +381,7 @@ void land_cycle(n_land * local_land)
     if (local_land->time == TIME_DAY_MINUTES)
     {
         local_land->time = 0;
-        local_land->date[0]++;
-        if(local_land->date[0] == TIME_CENTURY_DAYS)
-        {
-            local_land->date[0] = 0;
-            if(local_land->date[1] != 0xffff)
-                local_land->date[1]++;
-            else
-                local_land->date[1] = 0;
-        }
+        local_land->date++;
 
     }
 
@@ -531,7 +522,7 @@ n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_
     }
 }
 
-void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
+void land_clear(n_land * local, KIND_OF_USE kind, n_byte4 start)
 {
     NA_ASSERT(local, "local NULL");
     if (local == 0L) return;
@@ -550,8 +541,7 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte2 start)
         if (kind != KIND_LOAD_FILE)
         {
             local->time = 0;
-            local->date[0] = start;
-            local->date[1] = 0;
+            local->date = start;
         }
     }
 }
@@ -576,12 +566,12 @@ void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread)
     if (local_land->topology_highdef)
     {
         n_uint   lp = 0;
-        n_c_uint value_setting = 0;
-        n_c_uint * local_hires_tides= local_land->highres_tide;
+        n_byte4 value_setting = 0;
+        n_byte4 * local_hires_tides= local_land->highres_tide;
         n_byte   * local_hires = local_land->topology_highdef;
         math_bilinear_8_times(local_land->topology, local_land->topology_highdef, double_spread);
 
-        io_erase((n_byte *)local_land->highres_tide, sizeof(n_c_uint) * HI_RES_MAP_AREA/32);
+        io_erase((n_byte *)local_land->highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
         
         while (lp < HI_RES_MAP_AREA)
         {

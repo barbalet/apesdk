@@ -818,7 +818,7 @@ static n_int attention_similar_name(n_int episode_index,
  */
 static n_int similar_date(noble_episodic * episodic, n_int * carry_through)
 {
-    n_int dd = TIME_IN_DAYS(episodic->date) - carry_through[0];
+    n_int dd = episodic->date - carry_through[0];
     if (dd < 0)
     {
         dd = - dd;
@@ -837,7 +837,7 @@ static n_int attention_similar_date(n_int episode_index,
                                     noble_episodic * episodic,
                                     n_int * memory_visited)
 {
-    n_int time = TIME_IN_DAYS(&episodic[episode_index].date[0]);
+    n_int time = episodic[episode_index].date;
     return attention_similar(episode_index, episodic, memory_visited, &time, similar_date);
 }
 

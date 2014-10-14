@@ -283,7 +283,7 @@ static void console_simulation_loop(noble_simulation * local_sim, noble_being * 
     {
         int_data[0]++;
     }
-    if ((TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being)) < AGE_OF_MATURITY)
+    if ((local_sim->land->date - being_dob(local_being)) < AGE_OF_MATURITY)
     {
         int_data[1]++;
     }
@@ -316,7 +316,7 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     }
     sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)local_sim->land->tide_level);
 
-    io_time_to_string(time, local_sim->land->time, local_sim->land->date[0], local_sim->land->date[1]);
+    io_time_to_string(time, local_sim->land->time, local_sim->land->date);
 
     if (local_sim->delta_cycles)
     {
@@ -748,7 +748,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
             GET_BEING_HEIGHT(local_being),
             being_facing(local_being),
             ((FIND_SEX(GET_I(local_being)) == SEX_FEMALE) ? 'F' : 'M'),
-            TIME_IN_DAYS(local_sim->land->date) - being_dob(local_being),
+            local_sim->land->date - being_dob(local_being),
             (int)being_drive(local_being, DRIVE_HUNGER),
             (int)being_drive(local_being, DRIVE_SOCIAL),
             (int)being_drive(local_being, DRIVE_FATIGUE),
@@ -1964,7 +1964,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
             sprintf(output_value,"%sMale\t",output_value);
         }
 
-        current_date = TIME_IN_DAYS(local_sim->land->date);
+        current_date = local_sim->land->date;
         local_dob = being_dob(b);
         age_in_years = AGE_IN_YEARS(local_sim,b);
         age_in_months = ((current_date - local_dob) - (age_in_years * TIME_YEAR_DAYS)) / (TIME_YEAR_DAYS/12);
