@@ -608,11 +608,12 @@ n_byte episodic_intention(
     n_byte2 mins_ahead,
     n_byte args)
 {
-    n_int replace;
-    n_byte2 time;
     n_byte4 date;
+    n_byte2 time;
+    n_int   replace;
+    n_byte  event;
+
     noble_episodic * local_episodic = being_episodic(local);
-    n_byte event;
 
     if (local_episodic == 0L)
     {
@@ -645,8 +646,7 @@ n_byte episodic_intention(
     }
 
     /** only certain types of events become intentions */
-    if (!((event==EVENT_GROOM) ||
-            (event==EVENT_CHAT)))
+    if (!((event==EVENT_GROOM) || (event==EVENT_CHAT)))
     {
         return 0;
     }
@@ -661,14 +661,26 @@ n_byte episodic_intention(
                   local_episodic[episode_index].family_name[BEING_MET],
                   local, local_sim);
 
-    if (replace == -1) return 0;
-
-    local_episodic[replace] = local_episodic[episode_index];
+    if (replace == -1)
+    {
+        return 0;
+    }
+    
+    if (replace == episode_index)
+    {
+        return 0;
+    }
+    
+    io_copy((n_byte*)&local_episodic[episode_index], (n_byte*)&local_episodic[replace], sizeof(noble_episodic));
+    
     local_episodic[replace].event = EVENT_INTENTION + event;
+    
     local_episodic[replace].space_time.time = time;
     local_episodic[replace].space_time.date = date;
+    
     local_episodic[replace].first_name[BEING_MEETER] = being_gender_name(local);
     local_episodic[replace].family_name[BEING_MEETER] = being_family_name(local);
+    
     local_episodic[replace].arg = args;
 
     return 1;
