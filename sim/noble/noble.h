@@ -627,7 +627,7 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
                             n_byte *bc0, n_byte *bc1,
                             n_int braincode_min_loop);
 
-n_byte4 math_hash_fnv1(n_constant_string key);
+n_byte4  math_hash_fnv1(n_constant_string key);
 n_uint   math_hash(n_byte * values, n_uint length);
 
 void    math_bilinear_8_times(n_byte * side512, n_byte * data, n_byte double_spread);

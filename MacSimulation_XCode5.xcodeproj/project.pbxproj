@@ -37,8 +37,8 @@
 		5A05D166193D512D0099D425 /* NobleSimulationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A05D164193D512D0099D425 /* NobleSimulationView.m */; };
 		5A4805E2178676EB007220D7 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A4805E1178676EB007220D7 /* XCTest.framework */; };
 		5A4805E8178676EB007220D7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A4805E6178676EB007220D7 /* InfoPlist.strings */; };
-		5A4805EA178676EB007220D7 /* MacSimulation_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */; };
 		5A52AC8918C6F626001D2B59 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 5A52AC8818C6F626001D2B59 /* compress.c */; };
+		5AA6E28119FD065F009E5DA1 /* MacSimulation_Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA6E28019FD065F009E5DA1 /* MacSimulation_Tests.m */; };
 		5ABD659D18B9C5F200269DEC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ABD659C18B9C5F200269DEC /* AppDelegate.m */; };
 		5AD73C47184894FC0081457D /* execute.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD73C46184894FC0081457D /* execute.c */; };
 /* End PBXBuildFile section */
@@ -102,9 +102,9 @@
 		5A4805E1178676EB007220D7 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		5A4805E5178676EB007220D7 /* MacSimulation Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MacSimulation Tests-Info.plist"; sourceTree = "<group>"; };
 		5A4805E7178676EB007220D7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MacSimulation_Tests.m; sourceTree = "<group>"; };
 		5A4805EB178676EB007220D7 /* MacSimulation Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MacSimulation Tests-Prefix.pch"; sourceTree = "<group>"; };
 		5A52AC8818C6F626001D2B59 /* compress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compress.c; sourceTree = "<group>"; };
+		5AA6E28019FD065F009E5DA1 /* MacSimulation_Tests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MacSimulation_Tests.m; path = sim/macsim/MacSimulation_Tests.m; sourceTree = SOURCE_ROOT; };
 		5ABD659B18B9C5F200269DEC /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		5ABD659C18B9C5F200269DEC /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		5AD73C46184894FC0081457D /* execute.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = execute.c; sourceTree = "<group>"; };
@@ -285,7 +285,7 @@
 		5A4805E3178676EB007220D7 /* MacSimulation Tests */ = {
 			isa = PBXGroup;
 			children = (
-				5A4805E9178676EB007220D7 /* MacSimulation_Tests.m */,
+				5AA6E28019FD065F009E5DA1 /* MacSimulation_Tests.m */,
 				5A4805E4178676EB007220D7 /* Supporting Files */,
 			);
 			path = "MacSimulation Tests";
@@ -430,7 +430,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A4805EA178676EB007220D7 /* MacSimulation_Tests.m in Sources */,
+				5AA6E28119FD065F009E5DA1 /* MacSimulation_Tests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,10 +542,11 @@
 				INFOPLIST_FILE = "MacSimulation/MacSimulation-Info.plist";
 				LLVM_LTO = NO;
 				LLVM_VECTORIZE_LOOPS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DGRAPHLESS_GUI",
 					"-DNOBLE_APE_ASSERT",
+					"-DEXPLICIT_DEBUG",
 				);
 				PRODUCT_NAME = "Noble Ape (Debug)";
 				SDKROOT = macosx;
@@ -574,7 +575,7 @@
 				INFOPLIST_FILE = "MacSimulation/MacSimulation-Info.plist";
 				LLVM_LTO = NO;
 				LLVM_VECTORIZE_LOOPS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DGRAPHLESS_GUI",
 					"-DNOBLE_APE_ASSERT",
