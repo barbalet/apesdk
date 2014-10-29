@@ -835,20 +835,39 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
     n_byte2 lp = 0;
 
     found_text[0] = io_read(fil);
-    if (found_text[0] == 0)
+    if (found_text[0] == CHAR_EOF)
     {
         return (FILE_EOF);
     }
-    found_text[1] = io_read(fil);
+    
+    if ((found_text[1] = io_read(fil)) == CHAR_EOF)
+    {
+        return SHOW_ERROR("Second character failed");
+    }
+    
     if (found_text[0] == '}' && found_text[1] == ';')
     {
         return (FILE_END_INCLUSION);
     }
-    found_text[2] = io_read(fil);
-    found_text[3] = io_read(fil);
-    found_text[4] = io_read(fil);
-    found_text[5] = io_read(fil);
     
+    
+    if ((found_text[2] = io_read(fil)) == CHAR_EOF)
+    {
+        return SHOW_ERROR("Third character failed");
+    }
+    if ((found_text[3] = io_read(fil)) == CHAR_EOF)
+    {
+        return SHOW_ERROR("Fourth character failed");
+    }
+    if ((found_text[4] = io_read(fil)) == CHAR_EOF)
+    {
+        return SHOW_ERROR("Fifth character failed");
+    }
+    if ((found_text[5] = io_read(fil)) == CHAR_EOF)
+    {
+        return SHOW_ERROR("Sixth character failed");
+    }
+
     while (POPULATED(commands_bytes))
     {
         commands_bytes = (n_byte *) commands[lp].characters;
