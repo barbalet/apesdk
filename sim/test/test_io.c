@@ -47,7 +47,7 @@ typedef struct
     n_byte      direction_facing;
     n_byte      velocity;
     n_byte2     stored_energy;
-    n_byte2     date_of_birth[2];
+    n_byte4     date_of_birth;
     n_byte2     seed[2];
     n_byte2     macro_state;
     n_byte2     brain_state[6];
@@ -74,7 +74,7 @@ static const noble_file_entry test_file_format[]=
     {"facin=", FIL_BEI | FILE_TYPE_BYTE,  1, 4, "Direction facing"},    /*n_byte	facing;*/
     {"speed=", FIL_BEI | FILE_TYPE_BYTE,  1, 5, "Speed traveling"},    /*n_byte	speed;*/
     {"energ=", FIL_BEI | FILE_TYPE_BYTE2, 1, 6, "Energy within"},   /*n_byte2	energy;*/
-    {"datob=", FIL_BEI | FILE_TYPE_BYTE2, 2, 8, "Date of birth in days and millenia"},    /*n_byte2	date_of_birth[2];*/
+    {"datob=", FIL_BEI | FILE_TYPE_BYTE4, 1, 8, "Date of birth in days and millenia"},    /*n_byte4	date_of_birth;*/
     {"rando=", FIL_BEI | FILE_TYPE_BYTE2, 2, 12,"Random within"},    /*n_byte2 seed[2];*/
     {"state=", FIL_BEI | FILE_TYPE_BYTE2, 1, 16,"State description"},    /*n_byte2	state;*/
     
@@ -102,14 +102,14 @@ static void test_pad_with_noise(n_uint random, test_being * value)
 }
 
 
-static void check_io(void)
+static void check_io(n_uint random)
 {
     test_being   check_one;
     test_being   check_two;
     n_file *     output_file = io_file_new();
     n_file *     input_file = io_file_new();
     
-    test_pad_with_noise(0xf7283da, &check_one);
+    test_pad_with_noise(random, &check_one);
     
     io_write_buff(output_file, &check_one, test_file_format, FIL_BEI, 0L);
     
@@ -120,9 +120,7 @@ static void check_io(void)
     io_disk_read(input_file, "compare_file.txt");
     
     io_whitespace(input_file);
-    
-    input_file->location = 0;
-    
+        
     if (io_read_buff(input_file, (n_byte *)&check_two, test_file_format) != FIL_BEI)
     {
         SHOW_ERROR("Wrong filetype found");
@@ -139,7 +137,10 @@ static void check_io(void)
 
 int main(int argc, const char * argv[])
 {
-    check_io();
+    check_io(0x12345678);
+    check_io(0x87654321);
+    /* this final check is compared in a file diff */
+    check_io(0xf7283da);
     return 0;
 }
 

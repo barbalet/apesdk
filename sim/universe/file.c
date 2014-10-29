@@ -146,8 +146,6 @@ n_int	file_in(n_file * input_file)
     
     io_whitespace(input_file);
     
-    input_file->location = 0;
-
     ret_val = io_read_buff(input_file, temp_store, noble_file_format);
 
     if(ret_val != FIL_VER) /* signature must be first */
@@ -176,7 +174,7 @@ n_int	file_in(n_file * input_file)
             {
                 case FIL_LAN:
                     temp = (n_byte*)(local_sim->land);
-                    loop_end = 11; /* Needs to be fixed */
+                    loop_end = 10; /* Needs to be fixed */
                     break;
                 case FIL_BEI:
                     temp = (n_byte*) &(local_sim->beings[ape_count]);

@@ -41,6 +41,7 @@ fi
 
 gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/execute.c -o execute.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
@@ -63,11 +64,12 @@ gcc ${CFLAGS} -I/usr/include -o test_io *.o -lz -lm -lpthread
 diff check_file.txt compare_file.txt
 
 rm test_io
+rm test_io.o
 rm compare_file.txt
 
 gcc ${CFLAGS} -c test_apescript.c -o test_apescript.o
 
-gcc ${CFLAGS} -I/usr/include -o test_apescript io.o math.o parse.o interpret.o test_apescript.o
+gcc ${CFLAGS} -I/usr/include -o test_apescript *.o
 
 ./test_apescript check_apescript.txt
 

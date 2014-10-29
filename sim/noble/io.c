@@ -611,7 +611,7 @@ void io_whitespace(n_file * input)
         local_data[loop++] = 0;
     }
     input->size = out_loop;
-    
+    input->location = 0;
 }
 
 /**
@@ -1024,7 +1024,6 @@ void io_output_contents(n_file * file)
  */
 n_int	io_read_buff(n_file * fil, n_byte * data, const noble_file_entry * commands)
 {
-
     n_int	inclusion_number = 0xffff;
     n_int	result_number = 0;
     do
