@@ -66,6 +66,8 @@ diff check_file.txt compare_file.txt
 rm test_io
 rm test_io.o
 rm compare_file.txt
+rm compare_file_type.txt
+rm compare_file_unit.txt
 
 gcc ${CFLAGS} -c test_apescript.c -o test_apescript.o
 

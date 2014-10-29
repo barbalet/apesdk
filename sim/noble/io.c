@@ -1027,7 +1027,7 @@ void io_output_contents(n_file * file)
     {
         printf("%c", file->data[loop++]);
     }
-    printf("--------------------------------------------n");
+    printf("\n--------------------------------------------\n");
 
 }
 
