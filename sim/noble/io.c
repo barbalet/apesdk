@@ -611,7 +611,7 @@ void io_whitespace(n_file * input)
         local_data[loop++] = 0;
     }
     input->size = out_loop;
-    input->location = 0;
+    
 }
 
 /**
@@ -835,39 +835,20 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
     n_byte2 lp = 0;
 
     found_text[0] = io_read(fil);
-    if (found_text[0] == CHAR_EOF)
+    if (found_text[0] == 0)
     {
         return (FILE_EOF);
     }
-    
-    if ((found_text[1] = io_read(fil)) == CHAR_EOF)
-    {
-        return SHOW_ERROR("Second character failed");
-    }
-    
+    found_text[1] = io_read(fil);
     if (found_text[0] == '}' && found_text[1] == ';')
     {
         return (FILE_END_INCLUSION);
     }
+    found_text[2] = io_read(fil);
+    found_text[3] = io_read(fil);
+    found_text[4] = io_read(fil);
+    found_text[5] = io_read(fil);
     
-    
-    if ((found_text[2] = io_read(fil)) == CHAR_EOF)
-    {
-        return SHOW_ERROR("Third character failed");
-    }
-    if ((found_text[3] = io_read(fil)) == CHAR_EOF)
-    {
-        return SHOW_ERROR("Fourth character failed");
-    }
-    if ((found_text[4] = io_read(fil)) == CHAR_EOF)
-    {
-        return SHOW_ERROR("Fifth character failed");
-    }
-    if ((found_text[5] = io_read(fil)) == CHAR_EOF)
-    {
-        return SHOW_ERROR("Sixth character failed");
-    }
-
     while (POPULATED(commands_bytes))
     {
         commands_bytes = (n_byte *) commands[lp].characters;
@@ -1027,7 +1008,7 @@ void io_output_contents(n_file * file)
     {
         printf("%c", file->data[loop++]);
     }
-    printf("\n--------------------------------------------\n");
+    printf("--------------------------------------------n");
 
 }
 
@@ -1043,6 +1024,7 @@ void io_output_contents(n_file * file)
  */
 n_int	io_read_buff(n_file * fil, n_byte * data, const noble_file_entry * commands)
 {
+
     n_int	inclusion_number = 0xffff;
     n_int	result_number = 0;
     do
