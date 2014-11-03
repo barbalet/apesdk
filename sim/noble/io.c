@@ -236,6 +236,7 @@ n_int io_disk_read(n_file * local_file, n_string file_name)
                 n_int error = io_file_write(local_file, local_char);
                 if (error != 0)
                 {
+                    fclose(in_file);
                     return FILE_ERROR;
                 }
             }
