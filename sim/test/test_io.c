@@ -101,36 +101,63 @@ static void test_pad_with_noise(n_uint random, test_being * value)
     }
 }
 
-
-static void check_io(void)
+static void test_file_write(n_string file_name, n_uint random, n_byte4 * hash)
 {
-    test_being   check_one;
-    test_being   check_two;
-    n_file *     output_file = io_file_new();
-    n_file *     input_file = io_file_new();
+    test_being  check_being;
+    n_file *    output_file = io_file_new();
     
-    test_pad_with_noise(0xf7283da, &check_one);
+    test_pad_with_noise(random, &check_being);
+
+    io_write_buff(output_file, &check_being, test_file_format, FIL_BEI, 0L);
     
-    io_write_buff(output_file, &check_one, test_file_format, FIL_BEI, 0L);
-    
-    io_disk_write(output_file, "compare_file.txt");
+    io_disk_write(output_file, file_name);
     
     io_file_free(&output_file);
     
-    io_disk_read(input_file, "compare_file.txt");
+    if (hash)
+    {
+        *hash = math_hash((n_byte*)&check_being, sizeof(test_being));
+    }
+}
+
+static n_int test_file_read(n_string file_name, n_byte4 * hash)
+{
+    test_being  check_being;
+    n_file *    input_file = io_file_new();
+    
+    io_disk_read(input_file, file_name);
     
     io_whitespace(input_file);
     
     input_file->location = 0;
     
-    if (io_read_buff(input_file, (n_byte *)&check_two, test_file_format) != FIL_BEI)
+    if (io_read_buff(input_file, (n_byte *)&check_being, test_file_format) != FIL_BEI)
     {
-        SHOW_ERROR("Wrong filetype found");
+        io_file_free(&input_file);
+
+        return SHOW_ERROR("Wrong filetype found");
     }
+    
     io_file_free(&input_file);
     
-    if (math_hash((n_byte*)&check_one, sizeof(test_being)) !=
-        math_hash((n_byte*)&check_two, sizeof(test_being)))
+    if (hash)
+    {
+        *hash = math_hash((n_byte*)&check_being, sizeof(test_being));
+    }
+    
+    return 0;
+}
+
+static void check_io(void)
+{
+    n_byte4 hash_write = 0;
+    n_byte4 hash_read = 0;
+    
+    test_file_write("compare_file.txt", 0xf7283da, &hash_write);
+    
+    (void)test_file_read("compare_file.txt", &hash_read);
+    
+    if (hash_write != hash_read)
     {
         SHOW_ERROR("Read/write not equal");
     }

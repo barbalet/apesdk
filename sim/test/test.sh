@@ -39,12 +39,15 @@ else
     CFLAGS=-O2 
 fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/compress.c -o compress.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/execute.c -o execute.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o audio.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/network.c -o network.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
 
 gcc ${CFLAGS} -c test_math.c -o test_math.o
 
@@ -62,12 +65,13 @@ gcc ${CFLAGS} -I/usr/include -o test_io *.o -lz -lm -lpthread
 
 diff check_file.txt compare_file.txt
 
+rm test_io.o
 rm test_io
 rm compare_file.txt
 
 gcc ${CFLAGS} -c test_apescript.c -o test_apescript.o
 
-gcc ${CFLAGS} -I/usr/include -o test_apescript io.o math.o parse.o interpret.o test_apescript.o
+gcc ${CFLAGS} -I/usr/include -o test_apescript *.o
 
 ./test_apescript check_apescript.txt
 

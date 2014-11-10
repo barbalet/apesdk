@@ -576,14 +576,12 @@ extern n_int draw_error(n_constant_string error_text, n_constant_string location
 typedef n_int (execute_function)(void * general_data, void * read_data, void * write_data);
 
 void  execute_add(execute_function function, void * general_data, void * read_data, void * write_data);
-
 void  execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size);
 
+void  execute_complete_added(void);
 void  execute_init(void);
-
 void  execute_close(void);
 
-void  execute_complete_added(void);
 
 void  execute_threads(n_int value);
 n_int execute_threads_value(void);
