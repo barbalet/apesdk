@@ -37,7 +37,6 @@
 
 typedef struct
 {
-    void * next;
     n_string message;
     n_int * spaces;
     n_string_block * direct_rendering;
@@ -48,44 +47,145 @@ typedef struct
     n_int time_to_expire;
 } n_message;
 
-static n_message * first_message = 0L;
+#define MAXIMUM_NUMBER_MESSAGE 10
 
-static n_message * message_find_last(void)
+static n_int number_messages = 0;
+
+n_message messages[MAXIMUM_NUMBER_MESSAGE];
+
+n_int * message_find_spaces(n_string string, n_int * count)
 {
-    n_message * return_message = first_message;
-    if (return_message == 0L)
+    n_int local_count = 0;
+    n_int loop = 0;
+    n_int *return_value = 0L;
+    
+    if (*count)
+    {
+        return_value = io_new(*count * sizeof(n_int));
+    }
+    
+    if (string == 0L)
     {
         return 0L;
     }
-    if (return_message->next)
+    
+    if (string[0] == 0)
     {
-        do
-        {
-            return_message = return_message->next;
-        }while(return_message->next);
+        return 0L;
     }
-    return return_message;
+    
+    do{
+        if (string[loop] == ' ')
+        {
+            if (*count)
+            {
+                return_value[local_count] = loop;
+            }
+            local_count++;
+
+        }
+    }while(string[loop]);
+    
+    return return_value;
+}
+
+n_string message_string_copy(n_string string)
+{
+    n_string return_string = 0L;
+    n_uint    string_length = io_length(string, STRING_BLOCK_SIZE) + 1;
+    if (string_length > 0)
+    {
+        return_string = (n_string)io_new(string_length);
+        io_copy((n_byte *)string, (n_byte *)return_string, string_length-1);
+        return_string[string_length-1] = 0;
+    }
+    return return_string;
+}
+
+void message_remove(n_int remove)
+{
+    n_message *value = &messages[remove];
+    
+    if (value)
+    {
+        if (value->message)
+        {
+            io_free((void**)&(value->message));
+        }
+        if (value->spaces)
+        {
+            io_free((void**)&(value->spaces));
+        }
+    }
+    if (remove != (number_messages-1))
+    {
+        n_message *copy_from = &messages[number_messages-1];
+        value->message = copy_from->message;
+        value->spaces = copy_from->spaces;
+        value->direct_rendering = copy_from->direct_rendering;
+        value->x = copy_from->x;
+        value->y = copy_from->y;
+        value->width = copy_from->width;
+        value->height = copy_from->height;
+        value->time_to_expire = copy_from->time_to_expire;
+    }
+    number_messages--;
 }
 
 void message_add(n_string message, n_int time_to_expire)
 {
-    n_message * return_message = io_new(sizeof(n_message));
-    if (return_message == 0L)
+    n_int *  spaces;
+    n_string copied_message;
+    n_int    space_count = 0;
+    
+    if (number_messages == (MAXIMUM_NUMBER_MESSAGE-1))
+    {
+        /* if the message stack is full remove the oldest message */
+        n_int loop = 0;
+        n_int oldest_loop = 0;
+        n_int oldest_time_to_expire = 100000;
+        while (loop < number_messages)
+        {
+            if (oldest_time_to_expire > messages[loop].time_to_expire)
+            {
+                oldest_loop = loop;
+                oldest_time_to_expire = messages[loop].time_to_expire;
+            }
+            loop++;
+        }
+        message_remove(oldest_loop);
+    }
+    
+    if (message == 0L)
     {
         return;
     }
-    return_message->next = 0L;
-    return_message->message = message;
-    return_message->time_to_expire = time_to_expire;
-
-    if (first_message == 0L)
+    if (time_to_expire == 0)
     {
-        first_message = return_message;
+        return;
     }
-    else
+    (void)message_find_spaces(message, &space_count);
+    if (space_count == 0)
     {
-        n_message * previous_message = message_find_last();
-        previous_message->next = return_message;
+        return;
     }
+    spaces = message_find_spaces(message, &space_count);
+    if (spaces == 0L)
+    {
+        return;
+    }
+    copied_message = message_string_copy(message);
+    if (copied_message == 0L)
+    {
+        io_free((void**)&(spaces));
+        return;
+    }
+    messages[number_messages].time_to_expire = time_to_expire;
+    messages[number_messages].message = copied_message;
+    messages[number_messages].spaces = spaces;
+    number_messages++;
 }
+
+
+
 
