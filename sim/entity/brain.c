@@ -1162,7 +1162,7 @@ void brain_dialogue(
     n_byte internal = (meeter_being == met_being);
     const n_int braincode_min_loop = 8*BRAINCODE_BYTES_PER_INSTRUCTION;
     n_int i = 0, itt = 0;
-    n_int actor_index, possible_actor_index;
+    n_int actor_index;
     n_int episode_index = (n_int)(GET_A(meeter_being,ATTENTION_EPISODE));
     n_int territory_index = (n_int)(GET_A(meeter_being,ATTENTION_TERRITORY));
     n_int relationship_index = (n_int)(GET_A(meeter_being,ATTENTION_RELATIONSHIP));
@@ -1413,6 +1413,7 @@ void brain_dialogue(
                 /** If attention has shifted to a new episode */
                 if (new_episode_index>-1)
                 {
+                    n_int possible_actor_index;
                     episode_index = new_episode_index;
                     GET_A(meeter_being,ATTENTION_EPISODE) = (n_byte)episode_index;
                     /** Shift attention to the being in this episode */
@@ -1632,7 +1633,7 @@ void brain_dialogue(
 
                     n = pspace[0]%PREFERENCES;
 
-                    if ((prf > 55) && (prf<155))
+                    if ((prf > 55) && (prf < 155))
                     {
                         if (meeter_being->learned_preference[n] < 255)
                         {

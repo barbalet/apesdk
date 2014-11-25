@@ -108,7 +108,7 @@ n_int episodic_met_being_celebrity(
     noble_being * meeter_being,
     noble_being * met_being);
 void episodic_store_memory(
-    noble_being * local, n_byte event, n_int affect,
+    noble_being * local, being_episodic_event_type event, n_int affect,
     noble_simulation * local_sim,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2, n_byte2 arg);
@@ -118,7 +118,7 @@ void episodic_food(noble_simulation * local_sim, noble_being * local, n_int ener
 void episodic_self(
     noble_simulation * local_sim,
     noble_being * local,
-    n_byte event,
+    being_episodic_event_type event,
     n_int affect,
     n_byte2 arg);
 
@@ -126,15 +126,15 @@ void episodic_close(
     noble_simulation * local_sim,
     noble_being * local,
     noble_being * other,
-    n_byte event,
-    n_int affect,
+    being_episodic_event_type event,
+    affect_type affect,
     n_byte2 arg);
 
 void episodic_interaction(
     noble_simulation * local_sim,
     noble_being * local,
     noble_being * other,
-    n_byte event,
+    being_episodic_event_type event,
     n_int affect,
     n_byte2 arg);
 

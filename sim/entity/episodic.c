@@ -325,7 +325,7 @@ n_int episodic_first_person_memories_percent(
  * @return array index of the episodic memory which can be replaced.
  */
 static n_int noble_episodic_replace_index(
-    n_byte event,
+    being_episodic_event_type event,
     n_int affect,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2,
@@ -413,7 +413,7 @@ static n_int noble_episodic_replace_index(
  */
 static void episodic_store_full(
     noble_being * local,
-    n_byte event,
+    being_episodic_event_type event,
     n_int affect,
     noble_simulation * local_sim,
     n_byte2 name1, n_byte2 family1,
@@ -516,7 +516,7 @@ void episodic_food(noble_simulation * local_sim, noble_being * local, n_int ener
  */
 void episodic_store_memory(
     noble_being * local,
-    n_byte event,
+    being_episodic_event_type event,
     n_int affect,
     noble_simulation * local_sim,
     n_byte2 name1, n_byte2 family1,
@@ -536,7 +536,7 @@ void episodic_store_memory(
 void episodic_self(
     noble_simulation * local_sim,
     noble_being * local,
-    n_byte event,
+    being_episodic_event_type event,
     n_int affect,
     n_byte2 arg)
 {
@@ -557,8 +557,8 @@ void episodic_close(
     noble_simulation * local_sim,
     noble_being * local,
     noble_being * other,
-    n_byte event,
-    n_int affect,
+    being_episodic_event_type event,
+    affect_type affect,
     n_byte2 arg)
 {
     episodic_store_memory(
@@ -579,7 +579,7 @@ void episodic_interaction(
     noble_simulation * local_sim,
     noble_being * local,
     noble_being * other,
-    n_byte event,
+    being_episodic_event_type event,
     n_int affect,
     n_byte2 arg)
 {

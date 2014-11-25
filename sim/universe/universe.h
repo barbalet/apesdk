@@ -772,7 +772,7 @@ enum energy_types
 
 /* Affect values are composed from primitives */
 
-enum affect_type
+typedef enum
 {
     AFFECT_MATE                 = COMPOSITE_AFFECT(1000,0,0,      0,0,0,       0,0,0),
     AFFECT_BIRTH                = COMPOSITE_AFFECT(1500,0,1000,   0,100,100,   200,200,50),
@@ -792,7 +792,7 @@ enum affect_type
     AFFECT_FISH                 = COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0),
     AFFECT_SMILED               = COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0),
     AFFECT_GLOWER               = COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0)
-};
+}affect_type;
 /* ------- ------- ------- GENETICS FOR THE NOBLE APES (BETA) ------- ------- ------- */
 
 typedef n_byte4 n_genetics;
@@ -1042,7 +1042,7 @@ typedef struct
     n_spacetime space_time;
     n_byte2  first_name[2];
     n_byte2  family_name[2];
-
+    
     n_byte   event;
     n_byte   food;
     n_byte2  affect;

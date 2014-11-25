@@ -534,7 +534,7 @@ void social_action(
     if (other == 0L)
     {
         /** individual action */
-        switch(action%INDIVIDUAL_ACTIONS)
+        switch(action % INDIVIDUAL_ACTIONS)
         {
         case ACTION_JAB:
             body_action_jab(sim, local, carrying, hand);
@@ -565,7 +565,7 @@ void social_action(
     else
     {
         /** social action */
-        switch(action%SOCIAL_ACTIONS)
+        switch(action % SOCIAL_ACTIONS)
         {
         case ACTION_PROD:
             body_action_interactive_change(sim, local, other, BODY_RIGHT_HAND, BODY_FRONT,
