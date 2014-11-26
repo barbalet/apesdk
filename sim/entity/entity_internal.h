@@ -86,17 +86,22 @@ void metabolism_vascular_response(noble_simulation * local_sim, noble_being * lo
 void metabolism_eat(noble_being * local_being, n_byte food_type);
 void metabolism_suckle(noble_simulation * sim,noble_being * child, noble_being * mother);
 
-void social_action(
-    noble_simulation * sim,
-    noble_being * meeter_being,
-    noble_being * met_being,
-    n_byte action);
-n_int social_network(noble_being * meeter_being, noble_being * met_being, n_int distance, noble_simulation *sim);
-n_int social_set_relationship(noble_being * meeter_being,n_byte relationship,noble_being * met_being,noble_simulation * sim);
-n_int social_get_relationship(noble_being * meeter_being,
-                              n_byte relationship,
-                              noble_simulation * sim);
-n_byte social_groom(noble_being * meeter_being, noble_being * met_being, n_int distance, n_int awake, n_byte2 familiarity, noble_simulation * sim);
+void social_action(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, n_byte action);
+n_int social_network(noble_simulation *sim, noble_being * meeter_being, noble_being * met_being, n_int distance);
+
+n_int social_set_relationship(noble_simulation * sim, noble_being * meeter_being, n_byte relationship,noble_being * met_being);
+
+n_int social_get_relationship(noble_simulation * sim,
+                              noble_being * meeter_being,
+                              n_byte relationship);
+
+n_byte social_groom(noble_simulation * sim,
+                    noble_being * meeter_being,
+                    noble_being * met_being,
+                    n_int distance,
+                    n_int awake,
+                    n_byte2 familiarity);
+
 n_byte2 social_squabble(noble_being * meeter_being, noble_being * met_being, n_uint distance, n_int is_female, noble_simulation * sim);
 n_int social_mate(noble_being * meeter_being, noble_being * met_being, n_int being_index, n_int distance, noble_simulation * sim);
 n_int social_chat(noble_being * meeter_being, noble_being * met_being, n_int being_index, noble_simulation * sim);
@@ -107,9 +112,12 @@ n_int episodic_met_being_celebrity(
     noble_simulation * local_sim,
     noble_being * meeter_being,
     noble_being * met_being);
+
 void episodic_store_memory(
-    noble_being * local, being_episodic_event_type event, n_int affect,
     noble_simulation * local_sim,
+    noble_being * local,
+    being_episodic_event_type event,
+    affect_type affect,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2, n_byte2 arg);
 
@@ -119,7 +127,7 @@ void episodic_self(
     noble_simulation * local_sim,
     noble_being * local,
     being_episodic_event_type event,
-    n_int affect,
+    affect_type affect,
     n_byte2 arg);
 
 void episodic_close(
@@ -135,7 +143,7 @@ void episodic_interaction(
     noble_being * local,
     noble_being * other,
     being_episodic_event_type event,
-    n_int affect,
+    affect_type affect,
     n_byte2 arg);
 
 n_byte episodic_intention(

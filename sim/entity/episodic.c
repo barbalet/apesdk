@@ -515,10 +515,10 @@ void episodic_food(noble_simulation * local_sim, noble_being * local, n_int ener
  * @param arg Any additional arguments
  */
 void episodic_store_memory(
+    noble_simulation * local_sim,
     noble_being * local,
     being_episodic_event_type event,
-    n_int affect,
-    noble_simulation * local_sim,
+    affect_type affect,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2,
     n_byte2 arg)
@@ -537,10 +537,10 @@ void episodic_self(
     noble_simulation * local_sim,
     noble_being * local,
     being_episodic_event_type event,
-    n_int affect,
+    affect_type affect,
     n_byte2 arg)
 {
-    episodic_store_memory(local, event, affect, local_sim,
+    episodic_store_memory(local_sim, local, event, affect,
                           being_gender_name(local), being_family_name(local),
                           0, 0, arg);
 }
@@ -562,9 +562,9 @@ void episodic_close(
     n_byte2 arg)
 {
     episodic_store_memory(
-        local, event, affect, local_sim,
+        local_sim, local, event, affect,
         being_gender_name(other), being_family_name(other),
-        0,0, arg);
+        0, 0, arg);
 }
 /**
  * @brief Remember a particular interaction between two beings
@@ -580,11 +580,11 @@ void episodic_interaction(
     noble_being * local,
     noble_being * other,
     being_episodic_event_type event,
-    n_int affect,
+    affect_type affect,
     n_byte2 arg)
 {
     episodic_store_memory(
-        local, event, affect, local_sim,
+        local_sim, local, event, affect,
         being_gender_name(local),being_family_name(local),
         being_gender_name(other),being_family_name(other), arg);
 }
@@ -771,10 +771,10 @@ n_byte episodic_anecdote(
  * An empty function
  */
 void episodic_store_memory(
+    noble_simulation * local_sim,
     noble_being * local,
     n_byte event,
     n_int affect,
-    noble_simulation * local_sim,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2,
     n_byte2 arg)

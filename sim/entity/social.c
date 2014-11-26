@@ -975,9 +975,9 @@ static n_int social_meet(
  * @return Array index of the social graph for the given type of relationship, -1 if not found
  */
 n_int social_get_relationship(
+    noble_simulation * sim,
     noble_being * meeter_being,
-    n_byte relationship,
-    noble_simulation * sim)
+    n_byte relationship)
 {
     n_int index;
     noble_social * meeter_social_graph;
@@ -1010,10 +1010,10 @@ n_int social_get_relationship(
  * @param sim Pointer to the simulation
  * @return Array index of the meeter social graph, -1 if not met
  */
-n_int social_set_relationship(noble_being * meeter_being,
+n_int social_set_relationship(noble_simulation * sim,
+                              noble_being * meeter_being,
                               n_byte relationship,
-                              noble_being * met_being,
-                              noble_simulation * sim)
+                              noble_being * met_being)
 {
     n_int index;
     noble_social * meeter_social_graph;
@@ -1048,11 +1048,10 @@ n_int social_set_relationship(noble_being * meeter_being,
  * @param sim Pointer to the simulation
  * @return Array index of the meeter social graph, -1 if not met
  */
-n_int social_network(
+n_int social_network(noble_simulation *sim,
     noble_being * meeter_being,
     noble_being * met_being,
-    n_int distance,
-    noble_simulation *sim)
+    n_int distance)
 {
     n_int being_index = -1;
     if (distance < SOCIAL_RANGE)
@@ -1073,12 +1072,12 @@ n_int social_network(
  * @return 1 if grooming, 0 otherwise
  */
 n_byte social_groom(
+    noble_simulation * sim,
     noble_being * meeter_being,
     noble_being * met_being,
     n_int distance,
     n_int awake,
-    n_byte2 familiarity,
-    noble_simulation * sim)
+    n_byte2 familiarity)
 {
     n_int meeter_index, met_index;
     n_byte max = 0, grooming = 0, groom_decisions, groomloc, fem;
@@ -1648,7 +1647,7 @@ n_int social_chat(
             relationship_index = GET_A(meeter_being,ATTENTION_RELATIONSHIP);
             if (relationship_index>0)
             {
-                idx = social_get_relationship(meeter_being,relationship_index,sim);
+                idx = social_get_relationship(sim, meeter_being, relationship_index);
             }
             else
             {

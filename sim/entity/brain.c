@@ -1391,7 +1391,7 @@ void brain_dialogue(
                 case 23:
                 {
                     /** shift attention to a given social graph entry based on relationship */
-                    n_int idx = social_get_relationship(meeter_being,(n_byte)relationship_index,sim);
+                    n_int idx = social_get_relationship(sim, meeter_being, (n_byte)relationship_index);
                     if (idx > -1)
                     {
                         actor_index = idx;
@@ -1661,7 +1661,7 @@ void brain_dialogue(
                     /** avoid repeated anecdotes in the same conversation */
                     if (anecdote_episode_index != episode_index)
                     {
-                        if (episodic_anecdote(sim, meeter_being, met_being)!=0)
+                        if (episodic_anecdote(sim, meeter_being, met_being) != 0)
                         {
                             anecdote_episode_index = episode_index;
                         }

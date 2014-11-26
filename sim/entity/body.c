@@ -157,7 +157,7 @@ static void body_action_interactive(noble_simulation * sim, noble_being * local,
 /*** This block should also be the same function ***/
 
 static void body_action_interactive_change(noble_simulation * sim, noble_being * local, noble_being * other,
-        n_byte local_attention, n_byte other_attention, n_byte kind, n_byte positive, n_int affect)
+        n_byte local_attention, n_byte other_attention, n_byte kind, n_byte positive, affect_type affect)
 {
     n_int index;
     GET_A(local,ATTENTION_BODY) = local_attention;

@@ -181,8 +181,8 @@ static void drives_sex(
                                 local->goal[3]=GOAL_TIMEOUT;
                                 /** remember seeking a mate */
                                 episodic_store_memory(
-                                    local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                     local_sim,
+                                    local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                     being_gender_name(local), being_family_name(local),
                                     local->goal[1], local->goal[2],0);
                                 break;
@@ -218,8 +218,8 @@ static void drives_sex(
                         if (local->goal[0]==GOAL_MATE)
                         {
                             episodic_store_memory(
-                                local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                 local_sim,
+                                local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                 being_gender_name(local), being_family_name(local),
                                 local->goal[1], local->goal[2],0);
                         }

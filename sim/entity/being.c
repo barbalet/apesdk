@@ -2279,7 +2279,7 @@ static void being_create_family_links(noble_being * mother,
                 {
                     parent[2+(j*2)+i] = 0L;
                     /** graph index for parent's mother or father */
-                    index = social_get_relationship(parent[j], (n_byte)(RELATIONSHIP_MOTHER+i),sim);
+                    index = social_get_relationship(sim, parent[j], (n_byte)(RELATIONSHIP_MOTHER+i));
                     if ((index > -1) && (parent_social_graph != 0L))
                     {
                         /** store the grandparent reference if still living */
@@ -2318,13 +2318,13 @@ static void being_create_family_links(noble_being * mother,
                         {
                             if (parent_social_graph[i].relationship==RELATIONSHIP_SON)
                             {
-                                social_set_relationship(child, RELATIONSHIP_BROTHER, sibling, sim);
+                                social_set_relationship(sim, child, RELATIONSHIP_BROTHER, sibling);
                             }
                             else
                             {
-                                social_set_relationship(child, RELATIONSHIP_SISTER, sibling, sim);
+                                social_set_relationship(sim, child, RELATIONSHIP_SISTER, sibling);
                             }
-                            social_set_relationship(sibling, sibling_relation, child, sim);
+                            social_set_relationship(sim, sibling, sibling_relation, child);
                         }
                     }
                 }
@@ -2340,20 +2340,20 @@ static void being_create_family_links(noble_being * mother,
         /** create the parent/child social graph relation */
         if (FIND_SEX(GET_I(child)) == SEX_FEMALE)
         {
-            social_set_relationship(parent[i], parent_relation[i], child, sim);
+            social_set_relationship(sim, parent[i], parent_relation[i], child);
         }
         else
         {
-            social_set_relationship(parent[i], parent_relation[i]+1, child, sim);
+            social_set_relationship(sim, parent[i], parent_relation[i]+1, child);
         }
 
         if (i%2==0)
         {
-            social_set_relationship(child, child_relation[i], parent[i], sim);
+            social_set_relationship(sim, child, child_relation[i], parent[i]);
         }
         else
         {
-            social_set_relationship(child, child_relation[i]+1, parent[i], sim);
+            social_set_relationship(sim, child, child_relation[i]+1, parent[i]);
         }
     }
 
@@ -2602,7 +2602,7 @@ static void being_interact(noble_simulation * sim,
 
         /** social networking */
         n_byte2 familiarity=0;
-        n_int   being_index = social_network(local, other_being, other_being_distance, sim);
+        n_int   being_index = social_network(sim, local, other_being, other_being_distance);
 
         being_delta(local, other_being, &delta_vector);
 
@@ -2619,7 +2619,7 @@ static void being_interact(noble_simulation * sim,
 
         if ((birth_days+AGE_OF_MATURITY)<today_days)
         {
-            if (social_groom(local, other_being, other_being_distance, *awake, familiarity, sim))
+            if (social_groom(sim, local, other_being, other_being_distance, *awake, familiarity))
             {
                 *state |= BEING_STATE_GROOMING;
 
@@ -2815,7 +2815,8 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         /** swimming proficiency */
         tmp_speed = (tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
 
-        episodic_self(sim, local, EVENT_SWIM, being_energy(local), 0);
+        /* TODO: affect_type should probably be used rather than energy? */
+        episodic_self(sim, local, EVENT_SWIM, (affect_type)being_energy(local), 0);
 
         /** bathing removes parasites */
         if (local->parasites > 0) local->parasites--;

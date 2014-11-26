@@ -792,7 +792,7 @@ typedef enum
     AFFECT_FISH                 = COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0),
     AFFECT_SMILED               = COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0),
     AFFECT_GLOWER               = COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0)
-}affect_type;
+} affect_type;
 /* ------- ------- ------- GENETICS FOR THE NOBLE APES (BETA) ------- ------- ------- */
 
 typedef n_byte4 n_genetics;
@@ -1080,8 +1080,7 @@ typedef	struct
     n_byte frequency;
     n_byte offset;
     n_byte state;
-}
-noble_brain_probe;
+} noble_brain_probe;
 
 #endif
 
@@ -1102,8 +1101,7 @@ typedef	struct
 
     n_byte antibodies[IMMUNE_POPULATION];
     n_byte shape_antibody[IMMUNE_POPULATION];
-}
-noble_immune_system;
+} noble_immune_system;
 
 #endif
 
