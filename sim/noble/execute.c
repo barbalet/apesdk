@@ -155,16 +155,6 @@ static void execute_add_generic(execute_function * function, void * general_data
 #endif
 }
 
-void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
-{
-    execute_add_generic(function, general_data, read_data, write_data, 1, 0);
-}
-
-void execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size)
-{
-    execute_add_generic(function, general_data, read_data, 0L, count, size);
-}
-
 void execute_complete_added(void)
 {
 #ifdef EXECUTE_THREADED
@@ -175,6 +165,24 @@ void execute_complete_added(void)
         execute_wait_ns();
     }
 #endif
+}
+
+void execute_add(execute_function * function, void * general_data, void * read_data, void * write_data)
+{
+    /* This is short-hand to allow for generic execution paths */
+    if (function)
+    {
+        execute_add_generic(function, general_data, read_data, write_data, 1, 0);
+    }
+    else
+    {
+        execute_complete_added();
+    }
+}
+
+void execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size)
+{
+    execute_add_generic(function, general_data, read_data, 0L, count, size);
 }
 
 void execute_close(void)

@@ -546,22 +546,28 @@ void land_clear(n_land * local, KIND_OF_USE kind, n_byte4 start)
     }
 }
 
-void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread)
+void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec)
 {
     n_byte2	local_random[2];
     n_int   refine = 0;
     
-    local_random[0] = local_land->genetics[0];
-    local_random[1] = local_land->genetics[1];
-
-    math_pack(MAP_AREA, 128, local_land->topology, scratch);
+    local_random[0] = seed[0];
+    local_random[1] = seed[1];
     
     while (refine < 7)
     {
-        math_patch(local_land->topology, &math_memory_location, &math_random, local_random, refine);
-        math_round_smarter(local_land->topology, scratch, &math_memory_location);
+        math_patch(local_map, &math_memory_location, &math_random, local_random, refine);
+        math_round(local_map, scratch, &math_memory_location, exec);
         refine++;
     }
+}
+
+
+void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread, execute_thread_stub * exec)
+{
+    math_pack(MAP_AREA, 128, local_land->topology, scratch);
+    
+    land_creation(local_land->topology, scratch, local_land->genetics, exec);
     
     if (local_land->topology_highdef)
     {

@@ -324,7 +324,6 @@ void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
     }
 }
 
-
 void math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2)
 {
     n_int loop = 0;
@@ -336,62 +335,11 @@ void math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2)
     }
 }
 
-
 n_int math_memory_location(n_int px, n_int py)
 {
 #define	POSITIVE_TILE_COORD(num)	  ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
 
     return POSITIVE_TILE_COORD(px) + (POSITIVE_TILE_COORD(py) << MAP_BITS);
-}
-
-
-
-void math_round(n_byte * local_map, n_byte * scratch,
-                n_memory_location * mem_func)
-{
-    n_int	local_tile_dimension = 1 << MAP_BITS;
-
-    n_int span_minor = 0;
-    /** Perform four nearest neighbor blur runs */
-    while (span_minor < 6)
-    {
-        n_byte	*front, *back;
-        n_int	py = 0;
-        
-        if ((span_minor&1) == 0)
-        {
-            front = local_map;
-            back = scratch;
-        }
-        else
-        {
-            front = scratch;
-            back = local_map;
-        }
-        while (py < local_tile_dimension)
-        {
-            n_int	px = 0;
-            while (px < local_tile_dimension)
-            {
-                n_int	sum = 0;
-                n_int	ty = -1;
-                while (ty < 2)
-                {
-                    n_int	tx = -1;
-                    while (tx < 2)
-                    {
-                        sum += front[(*mem_func)((px+tx),(py+ty))];
-                        tx++;
-                    }
-                    ty++;
-                }
-                back[(*mem_func)((px),(py))] = (n_byte)(sum / 9);
-                px ++;
-            }
-            py ++;
-        }
-        span_minor ++;
-    }
 }
 
 typedef struct{
@@ -400,7 +348,6 @@ typedef struct{
     n_byte    *back;
     n_memory_location * mem_func;
 } math_round_smarter_struct;
-
 
 static void math_round_smarter_scan(void * void_mrss, void * xlocation, void * unused)
 {
@@ -441,8 +388,8 @@ static void math_round_smarter_scan(void * void_mrss, void * xlocation, void * u
     io_free(&xlocation);
 }
 
-void math_round_smarter(n_byte * local_map, n_byte * scratch,
-                n_memory_location * mem_func)
+void math_round(n_byte * local_map, n_byte * scratch,
+                n_memory_location * mem_func, execute_thread_stub * exec)
 {
     n_int span_minor = 0;
     
@@ -470,18 +417,22 @@ void math_round_smarter(n_byte * local_map, n_byte * scratch,
             n_int * xlocation = io_new(sizeof(n_int));
             xlocation[0] = px;
             
-#ifdef EXECUTE_THREADED
-            execute_add(((execute_function*)math_round_smarter_scan), (void*)&mrss, (void*)xlocation, 0L);
-#else
-            math_round_smarter_scan((void*)&mrss, xlocation, 0L);
-#endif
-            
+            if (exec)
+            {
+                (exec)(((execute_function*)math_round_smarter_scan), (void*)&mrss, (void*)xlocation, 0L);
+            }
+            else
+            {
+                math_round_smarter_scan((void*)&mrss, xlocation, 0L);
+            }
             px ++;
         }
 
-#ifdef EXECUTE_THREADED
-        execute_complete_added();
-#endif
+        if (exec)
+        {
+            (exec)(0L, 0L, 0L, 0L);
+        }
+        
         span_minor ++;
     }
 }

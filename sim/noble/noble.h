@@ -572,8 +572,8 @@ extern n_int draw_error(n_constant_string error_text, n_constant_string location
 
 #define IO_LOWER_CHAR(value)   if(ASCII_UPPERCASE(value)) (value) += 'a' - 'A'
 
-
 typedef n_int (execute_function)(void * general_data, void * read_data, void * write_data);
+typedef void (execute_thread_stub)(execute_function function, void * general_data, void * read_data, void * write_data);
 
 void  execute_add(execute_function function, void * general_data, void * read_data, void * write_data);
 void  execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size);
@@ -642,11 +642,9 @@ void    math_patch(n_byte * local_map,
                 n_memory_location * mem_func,
                 n_patch * func, n_byte2 * arg,
                 n_int refine);
-void   math_round(n_byte * local_map, n_byte * scratch,
-                n_memory_location * mem_func);
 
-void   math_round_smarter(n_byte * local_map, n_byte * scratch,
-                   n_memory_location * mem_func);
+void math_round(n_byte * local_map, n_byte * scratch,
+                        n_memory_location * mem_func, execute_thread_stub * exec);
 
 n_int  math_sine(n_int direction, n_int divisor);
 
@@ -840,7 +838,10 @@ n_int weather_pressure(n_land * local_land, n_int px, n_int py);
 void  weather_cycle(n_land * local_land);
 weather_values weather_seven_values(n_land * local_land, n_int px, n_int py);
 
-void  land_init(n_land * local_land, n_byte * scratch, n_byte double_spread);
+void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec);
+
+void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread, execute_thread_stub * exec);
+
 void  land_clear(n_land * local, KIND_OF_USE kind, n_byte4 start);
 void  land_cycle(n_land * local_land);
 void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);
