@@ -807,7 +807,7 @@ static n_int get_stranger_link(
                 {
                     /** Forget old stuff in order to avoid
                     	too much inflexibility */
-                    time_since_met = sim->land->date - graph[i].space_time.date;
+                    time_since_met = land_date() - graph[i].space_time.date;
                     
                     if ((time_since_met >= SOCIAL_FORGET_DAYS) ||
                         (graph[i].space_time.date==0))
@@ -947,8 +947,8 @@ static n_int social_meet(
         graph[index].belief = being_state(met_being);
 
         /** date of the meeting */
-        graph[index].space_time.date = sim->land->date;
-        graph[index].space_time.time = sim->land->time;
+        graph[index].space_time.date = land_date();
+        graph[index].space_time.time = land_time();
 
         /** getting more familiar */
         if (familiarity < 65535)
@@ -1376,7 +1376,7 @@ n_uint social_respect_mean(
     body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
 
     /** store the date of conception */
-    female->date_of_conception = sim->land->date;
+    female->date_of_conception = land_date();
     
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);

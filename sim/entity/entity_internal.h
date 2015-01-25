@@ -62,7 +62,6 @@ typedef struct
 void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);
 
 n_int food_eat(
-    n_land * local_land,
     n_int loc_x,
     n_int loc_y,
     n_int az,
@@ -71,8 +70,7 @@ n_int food_eat(
 
 n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type);
 
-void food_values(n_land * local_land,
-                 n_int loc_x,
+void food_values(n_int loc_x,
                  n_int loc_y,
                  n_int *grass, n_int *trees, n_int *bush);
 

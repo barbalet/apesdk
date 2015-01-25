@@ -563,7 +563,6 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
     n_int           loop = 0;
     n_int			loopColors = 0;
     n_byte2         fit[256*3];
-    noble_simulation * local_sim = sim_sim();
     n_byte           * index = draw_pointer(fIdentification);
 #ifdef NOBLE_IOS
     n_c_uint         * offscreenBuffer = (n_c_uint *) outputBuffer;
@@ -579,7 +578,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
         draw_cycle();
     }
     
-    draw_color_time(fit, local_sim->land->time);
+    draw_color_time(fit);
 
     while(loopColors < 256)
     {

@@ -1563,8 +1563,11 @@ void io_three_string_combination(n_string output, n_string first, n_string secon
     io_string_write(output, third, &position);
 }
 
-void io_time_to_string(n_string value, n_int minutes, n_int days)
+void io_time_to_string(n_string value)
 {
+    n_int minutes = land_time();
+    n_int days = land_date();
+    
     n_int military_time = (minutes % 60);
     n_int hours = (minutes/60);
     military_time += hours * 100;

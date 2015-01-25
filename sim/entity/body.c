@@ -237,7 +237,7 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
 
         vect2_byte2(&location_vector, being_location(local));
         being_facing_vector(local, &facing_vector, 4);
-        land_vect2(&slope_vector,&az, sim->land, &location_vector);
+        land_vect2(&slope_vector, &az, &location_vector);
 
         if ((az > WATER_MAP) && (az < TIDE_MAX))
         {
@@ -464,7 +464,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
         n_vect2 location_vector,facing_vector,slope_vector;
         vect2_byte2(&location_vector, being_location(local));
         being_facing_vector(local, &facing_vector, 4);
-        land_vect2(&slope_vector,&az,sim->land,&location_vector);
+        land_vect2(&slope_vector,&az,&location_vector);
 
         if (az > WATER_MAP)
         {
@@ -473,7 +473,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                 /* TODO handle this logic centrally */
 
                 n_int grass, trees, bush;
-                food_values(sim->land, being_location_x(local), being_location_y(local), &grass, &trees, &bush);
+                food_values(being_location_x(local), being_location_y(local), &grass, &trees, &bush);
 
                 
                 if ((grass>bush) && (grass>trees))

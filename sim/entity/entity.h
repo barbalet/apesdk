@@ -264,7 +264,7 @@ n_string metabolism_description(n_int index);
 n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index);
 
 void  being_name_byte2(n_byte2 first, n_byte2 family, n_string name);
-n_int being_init(n_land * land, noble_being * beings, n_int number, noble_being * local, noble_being * mother,
+n_int being_init(noble_being * beings, n_int number, noble_being * local, noble_being * mother,
                  n_byte2* random_factor);
 void being_erase(noble_being * value);
 
@@ -338,7 +338,7 @@ void          being_move(noble_being * local, n_int vel, n_byte kind);
 void          being_change_selected(noble_simulation * sim, n_byte forwards);
 n_byte        being_awake(noble_simulation * sim, noble_being * local);
 
-n_byte        being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly);
+n_byte        being_los(noble_being * local, n_byte2 lx, n_byte2 ly);
 
 void          speak_out(n_string filename, n_string paragraph);
 

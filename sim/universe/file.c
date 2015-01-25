@@ -58,7 +58,7 @@ static void fileout_land(n_file * file_out, noble_simulation * value, noble_file
     io_write_buff(file_out, loc_signature, format, FIL_VER, 0L);
 #endif
 #ifdef USE_FIL_LAN
-    io_write_buff(file_out, value->land, format, FIL_LAN, 0L);
+    io_write_buff(file_out, land_ptr(), format, FIL_LAN, 0L);
 #endif
 #ifdef USE_FIL_WEA
     io_write_buff(file_out, value->weather, format, FIL_WEA, 0L);
@@ -175,7 +175,7 @@ n_int	file_in(n_file * input_file)
             switch (ret_val)
             {
                 case FIL_LAN:
-                    temp = (n_byte*)(local_sim->land);
+                    temp = (n_byte*)land_ptr();
                     loop_end = 11; /* Needs to be fixed */
                     break;
                 case FIL_BEI:
@@ -455,7 +455,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 local_number = being_random(local_current);
                 break;
             case VARIABLE_WATER_LEVEL:
-                local_number = local_sim->land->tide_level;
+                local_number = land_tide_level();
                 break;
             case VARIABLE_HUNGRY:
                 local_number = BEING_HUNGRY;
@@ -494,7 +494,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 {
                     /* range already checked */
                     noble_being * local_being = (noble_being *)individual->interpret_data;
-                    local_number = being_los(local_sim->land, local_being, (n_byte2)quick_x, (n_byte2)quick_y);
+                    local_number = being_los(local_being, (n_byte2)quick_x, (n_byte2)quick_y);
                 }
                 else
                 {
@@ -505,22 +505,22 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         {
                             return io_apescript_error(individual->interpret_data, AE_VALUE_OUT_OF_RANGE);
                         }
-                        local_number = land_operator_interpolated(local_sim->land,
+                        local_number = land_operator_interpolated(
                                        (n_byte)quick_x, (n_byte)quick_y, (n_byte*)&operators[int_qu_op-VARIABLE_BIOLOGY_AREA]);
                     }
                     else
                     {
-                        local_number = land_location(local_sim->land, quick_x, quick_y);
+                        local_number = land_location(quick_x, quick_y);
                     }
                 }
             }
             break;
 
             case VARIABLE_TIME:
-                local_number = local_sim->land->time;
+                local_number = land_time();
                 break;
             case VARIABLE_DATE:
-                local_number = local_sim->land->date;
+                local_number = land_date();
                 break;
             case VARIABLE_CURRENT_BEING:
                 local_number = being_index(local_sim, (noble_being *)individual->interpret_data);
@@ -546,7 +546,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     return io_apescript_error(individual->interpret_data, AE_COORDINATES_OUT_OF_RANGE);
                 }
 
-                local_number = weather_seven_values(local_sim->land, quick_x, quick_y);
+                local_number = weather_seven_values(quick_x, quick_y);
             }
             break;
             case VARIABLE_BRAIN_VALUE:
@@ -614,7 +614,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 
                 /* if the current being can't see the other being, it can't get this information */
                 
-                if (being_los(local_sim->land, local_current, (n_byte2)being_location_x(local_being), (n_byte2)being_location_y(local_being)) == 0)
+                if (being_los(local_current, (n_byte2)being_location_x(local_being), (n_byte2)being_location_y(local_being)) == 0)
                 {
                     local_number = -1;
                 }
@@ -999,13 +999,6 @@ void file_audit(void)
 #endif
         FILE_CHECK(&here.social[0]);
         FILE_CHECK(&here.episodic[0]);
-    }
-    {
-        n_land         here;
-        
-        FILE_CHECK(&here.time);
-        FILE_CHECK(&here.date);
-        FILE_CHECK(&here.genetics[0]);
     }
     {
         noble_social here;

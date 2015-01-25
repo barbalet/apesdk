@@ -283,7 +283,7 @@ static void console_simulation_loop(noble_simulation * local_sim, noble_being * 
     {
         int_data[0]++;
     }
-    if ((local_sim->land->date - being_dob(local_being)) < AGE_OF_MATURITY)
+    if ((land_date() - being_dob(local_being)) < AGE_OF_MATURITY)
     {
         int_data[1]++;
     }
@@ -301,11 +301,11 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     noble_simulation * local_sim = (noble_simulation *) ptr;
     n_string_block beingstr, time;
     n_int int_data[2];
-
+    n_byte2 *local_land_genetics = land_genetics();
     being_loop_no_thread(local_sim, 0L, console_simulation_loop, int_data);
 
-    sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension(local_sim->land));
-    sprintf(beingstr,"%sLand seed: %d %d\n",beingstr, (int)local_sim->land->genetics[0],(int)local_sim->land->genetics[1]);
+    sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension());
+    sprintf(beingstr,"%sLand seed: %d %d\n",beingstr, (int)local_land_genetics[0], (int)local_land_genetics[1]);
     sprintf(beingstr,"%sPopulation: %d   ", beingstr, (int)local_sim->num);
     sprintf(beingstr,"%sAdults: %d   Juveniles: %d\n", beingstr, (int)(local_sim->num - int_data[1]),(int)int_data[1]);
     if (local_sim->num > 0)
@@ -314,9 +314,9 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
                 (int)int_data[0], int_data[0]*100.0f/local_sim->num,
                 (int)(local_sim->num - int_data[0]),(local_sim->num - int_data[0])*100.0f/local_sim->num);
     }
-    sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)local_sim->land->tide_level);
+    sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)land_tide_level());
 
-    io_time_to_string(time, local_sim->land->time, local_sim->land->date);
+    io_time_to_string(time);
 
     if (local_sim->delta_cycles)
     {
@@ -721,7 +721,6 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
  */
 static void watch_stats(void *ptr, n_string beingname, noble_being * local_being, n_string result)
 {
-    noble_simulation  *local_sim = (noble_simulation *)ptr;
     n_string_block     str;
     n_string_block     relationship_str;
     n_string_block     status;
@@ -748,7 +747,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
             GET_BEING_HEIGHT(local_being),
             being_facing(local_being),
             ((FIND_SEX(GET_I(local_being)) == SEX_FEMALE) ? 'F' : 'M'),
-            local_sim->land->date - being_dob(local_being),
+            land_date() - being_dob(local_being),
             (int)being_drive(local_being, DRIVE_HUNGER),
             (int)being_drive(local_being, DRIVE_SOCIAL),
             (int)being_drive(local_being, DRIVE_FATIGUE),
@@ -985,8 +984,8 @@ static void watch_being(void * ptr, n_console_output output_function)
         watch_string_length=0;
 
         sprintf((n_string)str,"\nTime:        %02d:%02d\n\n",
-                (int)(local_sim->land->time/60),
-                (int)(local_sim->land->time%60));
+                (int)(land_time()/60),
+                (int)(land_time()%60));
         io_string_write(beingstr,str,&watch_string_length);
         histogram_being_state(local_sim, (n_uint*)histogram, 1);
         for (i = 0; i < BEING_STATES; i++)
@@ -1669,11 +1668,11 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
  */
 n_int console_reset(void * ptr, n_string response, n_console_output output_function)
 {
-    noble_simulation * local_sim = (noble_simulation *) ptr;
     n_byte2 seed[2];
+    n_byte2 * local_land_genetics = land_genetics();
 
-    seed[0] = local_sim->land->genetics[0];
-    seed[1] = local_sim->land->genetics[1];
+    seed[0] = local_land_genetics[0];
+    seed[1] = local_land_genetics[1];
 
     math_random3(seed);
 
@@ -1928,7 +1927,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
                     }
                     case 3:
                     {
-                        if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
+                        if (AGE_IN_DAYS(b)<AGE_OF_MATURITY) passed=1;
                         break;
                     }
                     }
@@ -1964,9 +1963,9 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
             sprintf(output_value,"%sMale\t",output_value);
         }
 
-        current_date = local_sim->land->date;
+        current_date = land_date();
         local_dob = being_dob(b);
-        age_in_years = AGE_IN_YEARS(local_sim,b);
+        age_in_years = AGE_IN_YEARS(b);
         age_in_months = ((current_date - local_dob) - (age_in_years * TIME_YEAR_DAYS)) / (TIME_YEAR_DAYS/12);
         age_in_days = (current_date - local_dob) - ((TIME_YEAR_DAYS/12) * age_in_months) - (age_in_years * TIME_YEAR_DAYS);
 
@@ -2078,7 +2077,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                             b = being_from_name(local_sim, name);
                             if (b!=0L)
                             {
-                                if (AGE_IN_DAYS(local_sim,b)<AGE_OF_MATURITY) passed=1;
+                                if (AGE_IN_DAYS(b)<AGE_OF_MATURITY) passed=1;
                             }
                             break;
                         }

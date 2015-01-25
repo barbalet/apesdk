@@ -610,9 +610,9 @@ void draw_fit(n_byte * points, n_byte2 * color_fit)
     }
 }
 
-void draw_color_time(n_byte2 * color_fit, n_byte2 time)
+void draw_color_time(n_byte2 * color_fit)
 {
-    n_int   day_rotation =((time*255)/TIME_DAY_MINUTES);
+    n_int   day_rotation =((land_time()*255)/TIME_DAY_MINUTES);
     n_int   darken =  math_sine(day_rotation + 64 + 128, NEW_SD_MULTIPLE/400);
     n_int	loop = 0;
     n_int	sign = 1;
@@ -650,9 +650,7 @@ typedef struct{
     n_int     co_y;
 
     n_vect2   dimensions;
-    n_vect2   value_vector;
-    n_byte2   *combined;
-    
+    n_vect2   value_vector;    
     n_byte    *offscreen;
 } draw_terrain_scan_struct;
 
@@ -672,7 +670,7 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
     n_int     big_x = dtss->lowest_s + (scrx * dtss->value_vector.y);
     /* rotated and sub offset (subtracted further down) */
     n_int     big_y = dtss->lowest_c - (scrx * dtss->value_vector.x);
-    n_byte2 * combined = dtss->combined;
+    n_byte2 * combined = (n_byte2 *)land_topology_highdef();
     n_int     co_x = dtss->co_x;
     n_int     co_y = dtss->co_y;
     n_int     valc2 = dtss->value_vector.y << 1;
@@ -721,6 +719,8 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
         noble_being * loc_being = local_sim->select;
         draw_terrain_scan_struct dtss;
         
+        n_byte2 *  local_combined = (n_byte2 *)land_topology_highdef();
+        
         /* start at the left-most row */
         n_int scrx = (0 - (dimensions->x >> 1));
         /* find the central map point */
@@ -736,10 +736,8 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
         
         dtss.co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
         dtss.co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
-
-        dtss.combined = (n_byte2 *)local_sim->land->topology_highdef;
         
-        flatval = dtss.combined[CONVERT_X((HI_RES_MAP_DIMENSION/2), dtss.co_x) | CONVERT_Y((HI_RES_MAP_DIMENSION/2), dtss.co_y)] & 255;
+        flatval = local_combined[CONVERT_X((HI_RES_MAP_DIMENSION/2), dtss.co_x) | CONVERT_Y((HI_RES_MAP_DIMENSION/2), dtss.co_y)] & 255;
         
         if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {
@@ -793,7 +791,6 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
  */
 static void	draw_meters(noble_simulation * local_sim)
 {
-    n_land       * loc_land  =   local_sim->land;
     noble_being  * loc_being =   local_sim->select;
     n_pixel 	 * local_draw = &pixel_overlay;
     n_pixel      * local_draw_black = &pixel_black;
@@ -970,14 +967,14 @@ static void	draw_meters(noble_simulation * local_sim)
                 (void)math_join(106 + 18 + SP_EN_OFFSIDE, (45-(local_energy >> 7)), 6, 0, &local_kind);
 
             }
-            local_icon = &icns[weather_seven_values(local_sim->land, local_x, local_y) << 7];
+            local_icon = &icns[weather_seven_values(local_x, local_y) << 7];
         }
 
     }
     else
     {
         /* still give weather even with no Noble Apes */
-        local_icon = &icns[weather_seven_values(local_sim->land, 0, 0) << 7];
+        local_icon = &icns[weather_seven_values(0, 0) << 7];
     }
 
     {
@@ -986,10 +983,10 @@ static void	draw_meters(noble_simulation * local_sim)
         n_vect2 hour_hand;
         n_vect2 minute_hand;
         
-        vect2_direction(&year_hand, ((loc_land->date) << 6) / mndivyear, 5440);
-        vect2_direction(&month_hand, ((loc_land->date) << 6) / mndivmonth, 5440);
-        vect2_direction(&hour_hand, ((loc_land->time) << 6) / mndivhr, 2688);
-        vect2_direction(&minute_hand, ((loc_land->time) << 6) / mndivmin, 2016);
+        vect2_direction(&year_hand, ((land_date()) << 6) / mndivyear, 5440);
+        vect2_direction(&month_hand, ((land_date()) << 6) / mndivmonth, 5440);
+        vect2_direction(&hour_hand, ((land_time()) << 6) / mndivhr, 2688);
+        vect2_direction(&minute_hand, ((land_time()) << 6) / mndivmin, 2016);
         
         vect2_rotate90(&year_hand);
         vect2_rotate90(&month_hand);
@@ -1227,9 +1224,9 @@ static void draw_region(noble_being * local)
 #endif
 }
 
-static void draw_weather(n_land * local_land)
+static void draw_weather(void)
 {
-    n_int map_dimensions2 = land_map_dimension(local_land)/2;
+    n_int map_dimensions2 = land_map_dimension()/2;
     n_color8	 local_col;
     n_pixel	   * local_draw = &pixel_color8;
     void	   * local_info = &local_col;
@@ -1247,7 +1244,7 @@ static void draw_weather(n_land * local_land)
         while(px < (map_dimensions2))
         {
             n_int	scr_x = px << 1;
-            n_int	tmp = weather_pressure(local_land, WEATHER_TO_MAPSPACE(px), WEATHER_TO_MAPSPACE(py)); /* from weather dimension to map dimension */
+            n_int	tmp = weather_pressure(WEATHER_TO_MAPSPACE(px), WEATHER_TO_MAPSPACE(py)); /* from weather dimension to map dimension */
             if(tmp > WEATHER_CLOUD)
             {
                 (*local_draw)(scr_x+1, scr_y+1, 0, 0, local_info);
@@ -1421,8 +1418,6 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     n_byte	           error_char_copy;
     n_string_block     simulation_date_time = {0};
     n_string_block     simulation_date_time_error = {0};
-    noble_simulation * local_sim = sim_sim();
-    n_land           * local_land = local_sim->land;
     n_int              position = 0;
     
     if (error_text)
@@ -1430,13 +1425,12 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
 #ifdef NOBLE_APE_ASSERT
         printf("ERROR: %s\n", error_text);
 #endif
-        if (local_land)
-        {
-            io_time_to_string(simulation_date_time, local_land->time, local_land->date);
-        
-            io_string_write(simulation_date_time_error, simulation_date_time, &position);
-            io_string_write(simulation_date_time_error, " ", &position);
-        }
+
+        io_time_to_string(simulation_date_time);
+    
+        io_string_write(simulation_date_time_error, simulation_date_time, &position);
+        io_string_write(simulation_date_time_error, " ", &position);
+
         
         if(number_errors == MAX_NUMBER_ERRORS)
         {
@@ -1598,7 +1592,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     /* makes this use thread safe */
     io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
     
-    if (being_los(local_sim->land, local_sim->select, (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
+    if (being_los(local_sim->select, (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
     {
         local_col.color = COLOUR_RED;
     }
@@ -1607,7 +1601,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
         local_col.color = COLOUR_RED_DARK;
     }
     
-    if (local_col.screen == local_sim->land->topology_highdef)
+    if (local_col.screen == land_topology_highdef())
     {
         local_8bit.pixel_draw = &pixel_color8_hires;
     }
@@ -1618,7 +1612,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     
     local_8bit.information = &local_col;
     
-    if (local_col.screen == local_sim->land->topology_highdef)
+    if (local_col.screen == land_topology_highdef())
     {
         draw_apeloc_hires(local_sim, bei, &local_8bit);
     }
@@ -1636,26 +1630,26 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
     if (lores == 0) /* set up drawing environ */
     {
         draw_undraw();
-        local_col.screen = local_sim->land->topology_highdef;
+        local_col.screen = land_topology_highdef();
     }
     else
     {
         local_col.screen = draw_pointer(NUM_VIEW);
-        io_copy(local_sim->land->topology, local_col.screen, MAP_AREA);
+        io_copy(land_topology(), local_col.screen, MAP_AREA);
     }
 
     if (lores == 0)
     {
         static n_byte local_tide;
-        if (local_tide != local_sim->land->tide_level)
+        if (local_tide != land_tide_level())
         {
-            local_tide = local_sim->land->tide_level;
-            draw_tides_hi_res(local_sim->land->topology_highdef, local_sim->land->highres_tide, local_tide);
+            local_tide = land_tide_level();
+            draw_tides_hi_res(land_topology_highdef(), land_highres_tide(), local_tide);
         }
     }
     else
     {
-        draw_tides(local_sim->land->topology, local_col.screen, local_sim->land->tide_level);
+        draw_tides(land_topology(), local_col.screen, land_tide_level());
         if (toggle_territory)
         {
             draw_region(local_sim->select);
@@ -1763,7 +1757,7 @@ n_int  draw_cycle(void)
 #ifdef WEATHER_ON
     if (toggle_weather)
     {
-        draw_weather(local_sim->land); /* 10 */
+        draw_weather(); /* 10 */
     }
 #endif
     

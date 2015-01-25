@@ -919,9 +919,9 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         return meeter_social_graph[actor_index].attraction;
         /** Location */
     case 15:
-        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(meeter_being)) * 255 / land_map_dimension(sim->land));
+        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(meeter_being)) * 255 / land_map_dimension());
     case 16:
-        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension(sim->land));
+        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension());
         /** Being state (lower)*/
     case 17:
         return (n_byte)(being_state(meeter_being)&255);
@@ -1049,7 +1049,6 @@ static n_byte territory_familiarity(noble_being * local_being,
 
 static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_byte * local_addr10, noble_being * meeter_being, noble_being * met_being, n_int actor_index, n_byte is_const1, n_int episode_index, noble_episodic * episodic)
 {
-    n_land * local_land = local_sim->land;
     n_int new_episode_index=-1;
     n_int switcher = addr00%25;
     n_int local_x = APESPACE_TO_MAPSPACE(being_location_x(meeter_being));
@@ -1115,15 +1114,15 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
             *local_addr10 = episodic[episode_index].arg&255;
             break;
         case 13:
-            *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[0] * 255 / land_map_dimension(local_land));
+            *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[0] * 255 / land_map_dimension());
             break;
         case 14:
-            *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[1] * 255 / land_map_dimension(local_land));
+            *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[1] * 255 / land_map_dimension());
             break;
         case 15:
         {
             /** atmosphere pressure */
-            n_int pressure = weather_pressure(local_land, POSITIVE_LAND_COORD(local_x), POSITIVE_LAND_COORD(local_y));
+            n_int pressure = weather_pressure(POSITIVE_LAND_COORD(local_x), POSITIVE_LAND_COORD(local_y));
             
             if (pressure > 100000) pressure = 100000;
             if (pressure < 0) pressure = 0;
@@ -1136,14 +1135,14 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
             n_vect2 wind;
             n_vect2 position;
             vect2_populate(&position, local_x, local_y);
-            weather_wind_vector(local_land, &position, &wind);
+            weather_wind_vector(&position, &wind);
             if (wind.x<0) wind.x=-wind.x;
             if (wind.y<0) wind.y=-wind.y;
             *local_addr10 = (n_byte)((wind.x+wind.y)>>7);
             break;
         }
         case 17:
-            *local_addr10 = (n_byte)(local_land->time>>3);
+            *local_addr10 = (n_byte)(land_time()>>3);
             break;
         case 18:
             /** attention to body */

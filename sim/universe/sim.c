@@ -409,9 +409,9 @@ void sim_cycle(void)
 {
     n_int       max_honor = 0;
 
-    land_cycle(sim.land);
+    land_cycle();
 #ifdef WEATHER_ON
-    weather_cycle(sim.land);
+    weather_cycle();
 #endif
     
     being_loop(&sim, sim_being_universal_loop, 32);
@@ -431,7 +431,7 @@ void sim_cycle(void)
         being_loop(&sim, drives_cycle, 32);
     }
     
-    if (sim.land->time & 1)
+    if (land_time() & 1)
     {
 #ifdef BRAIN_ON
         being_loop(&sim, sim_brain_loop, 16);
@@ -468,15 +468,9 @@ void sim_cycle(void)
     sim_time(&sim);
 }
 
-#define	MINIMAL_ALLOCATION	(sizeof(n_land)+(MAP_AREA)+(2*HI_RES_MAP_AREA)+(HI_RES_MAP_AREA/8)+(512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
+#define	MINIMAL_ALLOCATION	((512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
 
 #define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 200))
-
-static void sim_memory_land(noble_simulation * local, n_byte * buffer, n_uint * location)
-{
-    local->land = (n_land *) & buffer[ *location ];
-    *location += sizeof(n_land);
-}
 
 static void sim_memory_remains(noble_simulation * local, n_byte * buffer, n_uint * location)
 {
@@ -497,8 +491,6 @@ static n_int sim_memory(n_uint offscreen_size)
     offbuffer = io_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
 
     current_location = offscreen_size;
-
-    sim_memory_land(&sim, offbuffer, &current_location);
     
     sim_memory_remains(&sim, offbuffer, &current_location);
     
@@ -543,25 +535,28 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     }
     if ((kind != KIND_LOAD_FILE) && (kind != KIND_MEMORY_SETUP))
     {
+        n_byte2 local_genetics[2];
         local_random[0] = (n_byte2)(randomise >> 16) & 0xffff;
         local_random[1] = (n_byte2)(randomise & 0xffff);
 
-        sim.land->genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
-        sim.land->genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+        local_genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+        local_genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+        land_set_genetics(local_genetics);
+
     }
 
     being_remains_init(&sim); /* Eventually this should be captured through the file handling and moved into the code below */
     
     if (kind != KIND_MEMORY_SETUP)
     {
-        land_clear(sim.land, kind, AGE_OF_MATURITY);
+        land_clear(kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
 #ifdef EXECUTE_THREADED
-        land_init(sim.land, &offbuffer[landbuffer_size], 1, execute_add);
+        land_init(&offbuffer[landbuffer_size], 1, execute_add);
 #else
-        land_init(sim.land, &offbuffer[landbuffer_size], 1, 0L);
+        land_init(&offbuffer[landbuffer_size], 1, 0L);
 #endif
-        land_tide(sim.land);
+        land_tide();
 #endif
         if (kind != KIND_LOAD_FILE)
         {
@@ -571,7 +566,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
             n_uint count_to = sim.max >> 4;
 #endif
 #ifdef WEATHER_ON
-            weather_init(sim.land);
+            weather_init();
 #endif       
             sim.num = 0;
             while (sim.num < count_to)
@@ -579,7 +574,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
                 math_random3(local_random);
                 if((sim.num + 1) < sim.max)
                 {
-                    if (being_init(sim.land, sim.beings, sim.num, &sim.beings[sim.num], 0L, local_random) != 0)
+                    if (being_init(sim.beings, sim.num, &sim.beings[sim.num], 0L, local_random) != 0)
                     {                        
                         being_erase(&sim.beings[sim.num]);
                         break;
@@ -623,7 +618,7 @@ static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * d
 {
     n_int         local_x = APESPACE_TO_MAPSPACE(being_location_x(local));
     n_int         local_y = APESPACE_TO_MAPSPACE(being_location_y(local));
-    n_int         local_z = land_location(sim->land, local_x, local_y);
+    n_int         local_z = land_location(local_x, local_y);
     
     if (local_z < 160)
     {

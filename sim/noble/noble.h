@@ -192,7 +192,7 @@ typedef struct
 {
     n_byte4  date;
     n_byte2  location[2];
-    n_byte2  time;
+    n_byte4  time;
 }
 n_spacetime;
 
@@ -697,7 +697,7 @@ n_int      io_disk_check(n_constant_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
 
 void       io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count);
-void       io_time_to_string(n_string value, n_int minutes, n_int days);
+void       io_time_to_string(n_string value);
 n_int      io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char);
 n_int      io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line);
 n_int      io_command(n_file * fil, const noble_file_entry * commands);
@@ -817,41 +817,27 @@ void compress_expand(n_file *input,   n_file *output);
  Dusk  1152 - 1183
  */
 
-typedef	struct
-{
-    n_byte4     date;                                  /* save-able */
-    n_byte2     genetics[2];                           /* save-able */
-    n_byte2     time;                                  /* save-able */
-
-    n_byte      topology[MAP_AREA];                    /* generated */
-    n_byte      topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
-    n_byte4     highres_tide[HI_RES_MAP_AREA/32];      /* generated */
-    n_byte2     delta_pressure[ MAP_AREA / 4];         /* generated */
-    n_c_int		atmosphere[ MAP_AREA / 4];             /* save-able and generate-able */
-    n_byte      tide_level;                            /* generated */
-}
-n_land;
-
-void  weather_init(n_land * local_land);
-void  weather_wind_vector(n_land * local_land, n_vect2 * pos, n_vect2 * wind);
-n_int weather_pressure(n_land * local_land, n_int px, n_int py);
-void  weather_cycle(n_land * local_land);
-weather_values weather_seven_values(n_land * local_land, n_int px, n_int py);
+void  weather_init(void);
+void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind);
+n_int weather_pressure(n_int px, n_int py);
+void  weather_cycle(void);
+weather_values weather_seven_values(n_int px, n_int py);
 
 void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec);
+void land_set_genetics(n_byte2 * genetics);
 
-void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread, execute_thread_stub * exec);
+void land_init(n_byte * scratch, n_byte double_spread, execute_thread_stub * exec);
 
-void  land_clear(n_land * local, KIND_OF_USE kind, n_byte4 start);
-void  land_cycle(n_land * local_land);
-void  land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location);
-n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_byte * kind);
+void  land_clear(KIND_OF_USE kind, n_byte4 start);
+void  land_cycle(void);
+void  land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location);
+n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind);
 
-n_int land_map_dimension(n_land * land);
-n_int land_map_bits(n_land * land);
+n_int land_map_dimension(void);
+n_int land_map_bits(void);
 
-void land_tide(n_land * local_land);
-n_int land_location(n_land * land, n_int px, n_int py);
+void land_tide(void);
+n_int land_location(n_int px, n_int py);
 
 
 /*0*/
@@ -1036,6 +1022,15 @@ n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n
                       void * structure, void * data,
                       script_external * start, script_external * end);
 
+void * land_ptr(void);
+n_byte4 land_date(void);
+n_byte4 land_time(void);
+n_byte2 * land_genetics(void);
+n_byte land_tide_level(void);
+n_byte * land_topology(void);
+n_byte * land_topology_highdef(void);
+n_byte4 * land_highres_tide(void);
+
 #ifdef	SCRIPT_DEBUG
 
 n_file * scdebug_file_ready(void);
@@ -1052,8 +1047,8 @@ void     scdebug_writeoff(void * ptr);
 
 n_int spacetime_after(n_spacetime * initial, n_spacetime * second);
 void  spacetime_copy(n_spacetime * to, n_spacetime * from);
-n_int spacetime_before_now(n_spacetime * initial, n_land * now);
-void  spacetime_set(n_spacetime * set, n_land * local, n_byte2 * location);
+n_int spacetime_before_now(n_spacetime * initial);
+void  spacetime_set(n_spacetime * set, n_byte2 * location);
 
 
 #define	SC_DEBUG_STRING(ptr, string)	scdebug_string(ptr, string)

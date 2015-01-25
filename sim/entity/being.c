@@ -85,7 +85,6 @@ typedef	struct
     n_int 		offset_y;
     n_int       visibility_delta;
     n_int       visibility_total;
-    n_land *land;
 }
 being_draw;
 
@@ -440,7 +439,7 @@ n_int   being_mass(noble_being * value)
     return value->mass;
 }
 
-static void being_turn_away_from_water(noble_being * value, n_land * land)
+static void being_turn_away_from_water(noble_being * value)
 {
     n_int	it_water_turn = 0;
     n_vect2 location_vector;
@@ -465,12 +464,12 @@ static void being_turn_away_from_water(noble_being * value, n_land * land)
         vect2_direction(&temp_vector, turn_plus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        z_plus = land_location(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        z_plus = land_location(POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
 
         vect2_direction(&temp_vector, turn_minus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        z_minus = land_location(land, POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        z_minus = land_location(POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
 
         if (z_minus > z_plus)
         {
@@ -580,7 +579,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
     
     if (abs_sum)
     {
-        weather_values   seven_values = weather_seven_values(being_pixel->land, MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
+        weather_values   seven_values = weather_seven_values(MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
         n_int  span10 = ((abs_sum - 1) ? 1448 : 1024);
         
         switch (seven_values)
@@ -610,7 +609,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
         
         local_z += being_pixel->start_z;
         
-        if (local_z < WALK_ON_WATER(land_location(being_pixel->land, px, py),being_pixel->land->tide_level))
+        if (local_z < WALK_ON_WATER(land_location(px, py), land_tide_level()))
         {
             return 1;
         }
@@ -618,7 +617,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
     return 0;
 }
 
-static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx, n_int ly)
+static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
 {
     n_vect2    start, delta, vector_facing;
 
@@ -663,8 +662,8 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
     }
 
     {
-        n_int	start_z = (n_int)WALK_ON_WATER(land_location(land, start.x, start.y),land->tide_level) + 3; /* the nominal height of the Noble Ape */
-        n_int	delta_z = ((n_int)WALK_ON_WATER(land_location(land, (start.x + delta.x), (start.y + delta.y)),land->tide_level)) - start_z + 3; /* the nominal height of the Noble Ape */
+        n_int	start_z = (n_int)WALK_ON_WATER(land_location(start.x, start.y),land_tide_level()) + 3; /* the nominal height of the Noble Ape */
+        n_int	delta_z = (n_int)WALK_ON_WATER(land_location((start.x + delta.x), (start.y + delta.y)),land_tide_level()) - start_z + 3; /* the nominal height of the Noble Ape */
         n_int	common_divisor = vect2_dot(&delta, &delta, 1, 1);
         being_draw 	  translate;
 
@@ -689,7 +688,6 @@ static n_byte being_los_projection(n_land * land, noble_being * local, n_int lx,
             translate.visibility_delta = GENE_VISION_DELTA(being_genetics(local));
         }
 
-        translate.land = land;
         {
             n_join		  being_point;
             being_point.information = (void *) &translate;
@@ -780,7 +778,7 @@ n_string being_get_select_name(noble_simulation * sim)
  @param ly The y location of the point to be seen.
  @return 1 can see, 0 can not see
  */
-n_byte being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly)
+n_byte being_los(noble_being * local, n_byte2 lx, n_byte2 ly)
 {
     /* There is probably a logical simplification of this
        as I can't think of it here is the brute force method.
@@ -797,48 +795,48 @@ n_byte being_los(n_land * land, noble_being * local, n_byte2 lx, n_byte2 ly)
            2
     */
 
-    if (being_los_projection(land, local,lx,ly) == 1)
+    if (being_los_projection(local,lx,ly) == 1)
         return 1;
 
     if ((local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2))
     {
-        if (being_los_projection(land, local,lx+MAP_APE_RESOLUTION_SIZE,ly) == 1)
+        if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly) == 1)
             return 1;
     }
 
     if ((local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3))
     {
-        if (being_los_projection(land, local,lx+MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
+        if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
     if ((local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4))
     {
-        if (being_los_projection(land, local,lx,ly+MAP_APE_RESOLUTION_SIZE) == 1)
+        if (being_los_projection(local,lx,ly+MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
     if ((local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5))
     {
-        if (being_los_projection(land, local,lx-MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
+        if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
     if ((local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6))
     {
-        if (being_los_projection(land, local,lx-MAP_APE_RESOLUTION_SIZE,ly) == 1)
+        if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly) == 1)
             return 1;
     }
     if ((local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7))
     {
-        if (being_los_projection(land, local,lx-MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
+        if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
     if ((local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0))
     {
-        if (being_los_projection(land, local,lx,ly-MAP_APE_RESOLUTION_SIZE) == 1)
+        if (being_los_projection(local,lx,ly-MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
     if ((local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1))
     {
-        if (being_los_projection(land, local,lx+MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
+        if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
     return 0;
@@ -1214,7 +1212,6 @@ static noble_being * being_find_closest(noble_simulation * sim, noble_being * ac
 
 typedef struct
 {
-    n_int         today;
     n_uint        comparison_best;
     n_int         max_age;
     n_genetics  * genetics;
@@ -1225,7 +1222,7 @@ static void being_find_child_loop(noble_simulation * sim, noble_being * local, v
 {
     being_find_child_struct * bfcs = (being_find_child_struct *) data;
     n_uint        comparison = being_genetic_comparison(bfcs->genetics, being_genetics(local), -1);
-    if ((comparison > bfcs->comparison_best) &&  ((bfcs->today - being_dob(local)) < bfcs->max_age))
+    if ((comparison > bfcs->comparison_best) &&  ((land_date() - being_dob(local)) < bfcs->max_age))
     {
         bfcs->comparison_best = comparison;
         bfcs->return_value = local;
@@ -1235,8 +1232,6 @@ static void being_find_child_loop(noble_simulation * sim, noble_being * local, v
 static noble_being * being_find_child(noble_simulation * sim, n_genetics * genetics, n_int max_age)
 {
     being_find_child_struct bfcs;
-    
-    bfcs.today = sim->land->date;
     bfcs.comparison_best = 0;
     bfcs.max_age = max_age;
     bfcs.genetics = genetics;
@@ -1531,9 +1526,7 @@ n_int episode_description(
     n_string_block str2, name_str;
     noble_episodic * local_episodic;
     n_uint days_elapsed,time_elapsed;
-    n_uint current_date;
 
-    current_date = sim->land->date;
     local_episodic = being_episodic(local_being);
 
     if(local_episodic == 0L)
@@ -1692,10 +1685,10 @@ n_int episode_description(
             return SHOW_ERROR("No string in episodic description");
         }
 
-        days_elapsed = current_date - local_episodic[index].space_time.date;
+        days_elapsed = land_date() - local_episodic[index].space_time.date;
         if (days_elapsed == 0)
         {
-            time_elapsed = sim->land->time - local_episodic[index].space_time.time;
+            time_elapsed = land_time() - local_episodic[index].space_time.time;
 
             if (time_elapsed < 60)
             {
@@ -2075,15 +2068,13 @@ void being_change_selected(noble_simulation * sim, n_byte forwards)
  */
 n_byte being_awake(noble_simulation * sim, noble_being * local)
 {
-    n_land  * land  =   sim->land;
-    
     if (being_energy_less_than(local, BEING_DEAD + 1))
     {
         return FULLY_ASLEEP;
     }
 
     /** if it is not night, the being is fully awake */
-    if(IS_NIGHT(land->time) == 0)
+    if(IS_NIGHT(land_time()) == 0)
     {
         return FULLY_AWAKE;
     }
@@ -2092,7 +2083,7 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 
     /** ... fully awake to swim */
 
-    if(WATER_TEST(land_location(land, APESPACE_TO_MAPSPACE(being_location_x(local)), APESPACE_TO_MAPSPACE(being_location_y(local))),land->tide_level))
+    if(WATER_TEST(land_location(APESPACE_TO_MAPSPACE(being_location_x(local)), APESPACE_TO_MAPSPACE(being_location_y(local))),land_tide_level()))
     {
         return FULLY_AWAKE;
     }
@@ -2369,7 +2360,7 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
         being_name_comparison(other, nearest->local->goal[1], nearest->local->goal[2]))
     {
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (compare_distance < nearest->opposite_sex_distance)
@@ -2393,7 +2384,7 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
     {
         /** Is this being within sight? */
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local)))
@@ -2525,7 +2516,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
         if (compare_distance < nearest->opposite_sex_distance)
         {
             /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
-            if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+            if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
             {
                 nearest->opposite_sex_distance = compare_distance;
                 nearest->opposite_sex = test_being;
@@ -2538,7 +2529,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
         {
             if (FIND_SEX(GET_I(test_being)) == FIND_SEX(GET_I(nearest->local)))
             {
-                if (being_los(sim->land, nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+                if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
                 {
                     nearest->same_sex_distance = compare_distance;
                     nearest->same_sex = test_being;
@@ -2593,8 +2584,7 @@ static void being_interact(noble_simulation * sim,
 {
     if (other_being != 0L)
     {
-        n_land      * land         = sim->land;
-        n_int         today_days   = land->date;
+        n_int         today_days   = land_date();
         n_int         birth_days   = being_dob(local);
         n_uint        local_is_female = FIND_SEX(GET_I(local));
 
@@ -2697,9 +2687,8 @@ n_int being_index(noble_simulation * sim, noble_being * local)
 
 void being_cycle_awake(noble_simulation * sim, noble_being * local)
 {
-    n_land      * land               = sim->land;
     n_uint        local_is_female    = FIND_SEX(GET_I(local));
-    n_int         today_days         = land->date;
+    n_int         today_days         = land_date();
     n_int         birth_days         = being_dob(local);
 
     n_int	      loc_s              = being_speed(local);
@@ -2737,14 +2726,14 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
         being_facing_vector(local, &facing_vector, 4);
 
-        land_vect2(&slope_vector, &az, land, &location_vector);
+        land_vect2(&slope_vector, &az, &location_vector);
 
         vect2_add(&looking_vector, &location_vector, &facing_vector);
         
 
                      
-        test_land = (WATER_TEST(land_location(land,(APESPACE_TO_MAPSPACE(looking_vector.x)),
-                                          (APESPACE_TO_MAPSPACE(looking_vector.y))),land->tide_level)!= 0);
+        test_land = (WATER_TEST(land_location((APESPACE_TO_MAPSPACE(looking_vector.x)),
+                                          (APESPACE_TO_MAPSPACE(looking_vector.y))),land_tide_level())!= 0);
         
         {
             n_int delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
@@ -2755,7 +2744,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 #ifdef LAND_ON
     /* TODO why not test_land here? */
     
-    if (WATER_TEST(az,land->tide_level) != 0)
+    if (WATER_TEST(az,land_tide_level()) != 0)
     {
         loc_state |= BEING_STATE_SWIMMING;
     }
@@ -2797,7 +2786,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     {
         n_uint	      loop;
 
-        being_turn_away_from_water(local, land);
+        being_turn_away_from_water(local);
 
         /** horizontally oriented posture */
         being_set_posture(local, 0);
@@ -2860,7 +2849,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             {
                 /** eating when stopped */
                 n_byte  food_type;
-                n_int energy = food_eat(sim->land, being_location_x(local), being_location_y(local), az, &food_type, local);
+                n_int energy = food_eat(being_location_x(local), being_location_y(local), az, &food_type, local);
                 
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
@@ -2946,7 +2935,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                     {
                         being_child = &(sim->beings[sim->num]);
 
-                        if (being_init(sim->land, sim->beings, sim->num, being_child, local, 0L) == 0)
+                        if (being_init(sim->beings, sim->num, being_child, local, 0L) == 0)
                         {
                             episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
                             being_create_family_links(local,being_child,sim);
@@ -3285,7 +3274,7 @@ static void being_random_genetics(n_genetics * value, n_byte2 * random, n_int ma
  * @param random_factor Random seed
  * @return 0
  */
-n_int being_init(n_land * land, noble_being * beings, n_int number,
+n_int being_init(noble_being * beings, n_int number,
                  noble_being * local, noble_being * mother,
                  n_byte2* random_factor)
 {
@@ -3373,7 +3362,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
 
         being_random3(local);
 
-        being_set_random1(local, land->time);
+        being_set_random1(local, (n_byte2)land_time());
 
         being_random3(local);
     }
@@ -3456,7 +3445,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
             location[1] = (n_byte2)(being_random(local) & APESPACE_BOUNDS);
             loop ++;
         }
-        while ((loop < 20) && (WATER_TEST(land_location(land, APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1])),land->tide_level)));
+        while ((loop < 20) && (WATER_TEST(land_location(APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1])),land_tide_level())));
 
         
         
@@ -3521,7 +3510,7 @@ n_int being_init(n_land * land, noble_being * beings, n_int number,
                               being_family_name(mother),
                               mother->father_name[1]);
         
-        local->date_of_birth = land->date;
+        local->date_of_birth = land_date();
     }
     
     being_living(local);
@@ -3559,7 +3548,6 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
 {
     n_genetics  *genetics = being_genetics(local_being);
     n_int        local_honor = being_honor(local_being);
-    n_land	    *land   = local_sim->land;
     n_int        delta_e = 0;
     n_int        conductance = 5;
     n_int       *max_honor = data;
@@ -3596,12 +3584,12 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
             n_int local_z;
             n_vect2 slope_vector;
             
-            land_vect2(&slope_vector, &local_z,land, &location_vector);
+            land_vect2(&slope_vector, &local_z, &location_vector);
             
             delta_z = vect2_dot(&slope_vector,&facing_vector,1,96);
             delta_energy = ((512 - delta_z) * local_s)/80;
             
-            if (WATER_TEST(local_z,land->tide_level))
+            if (WATER_TEST(local_z, land_tide_level()))
             {
                 n_int insulation=0;
                 /** the more body fat, the less energy is lost whilst swimming */
@@ -3646,9 +3634,9 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
     being_energy_delta(local_being, 0 - delta_e);
     
     
-    if (land->time == 0)
+    if (land_time() == 0)
     {
-        n_int age_in_years = AGE_IN_YEARS(local_sim,local_being);
+        n_int age_in_years = AGE_IN_YEARS(local_being);
         /** this simulates natural death or at least some trauma the ape may or may not be able to recover from */
         if (age_in_years > 29)
         {

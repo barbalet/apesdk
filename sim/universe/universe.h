@@ -89,8 +89,8 @@ static const n_byte	operators[17][7] =
     /*AHWOUS*/
 };
 
-#define AGE_IN_DAYS(sim,bei)        (sim->land->date - being_dob(bei))
-#define AGE_IN_YEARS(sim,bei)       (AGE_IN_DAYS(sim,bei)/TIME_YEAR_DAYS)
+#define AGE_IN_DAYS(bei)        (land_date() - being_dob(bei))
+#define AGE_IN_YEARS(bei)       (AGE_IN_DAYS(bei)/TIME_YEAR_DAYS)
 
 /* in days, a little young, yes */
 #define AGE_OF_MATURITY (30)
@@ -1189,9 +1189,7 @@ typedef void (being_death_event)(noble_being * deceased, void * sim);
  It is primarily used by the GUI layer to address down into the Core layer.
  */
 typedef struct
-{
-    n_land        * land;
-    
+{    
     noble_remains * remains;
     
     noble_being   * beings;

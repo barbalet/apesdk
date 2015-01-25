@@ -72,7 +72,59 @@
  ?
  */
 
-static n_int weather_delta(n_land * local_land)
+static n_byte4     m_date;                                  /* save-able */
+static n_byte2     m_genetics[2];                           /* save-able */
+static n_byte2     m_time;                                  /* save-able */
+
+static n_byte      m_topology[MAP_AREA];                    /* generated */
+static n_byte      m_topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
+static n_byte4     m_highres_tide[HI_RES_MAP_AREA/32];      /* generated */
+static n_byte2     m_delta_pressure[ MAP_AREA / 4];         /* generated */
+static n_c_int	   m_atmosphere[ MAP_AREA / 4];             /* save-able and generate-able */
+static n_byte      m_tide_level;                            /* generated */
+
+void * land_ptr(void)
+{
+    return &m_date;
+}
+
+n_byte4 land_date(void)
+{
+    return m_date;
+}
+
+n_byte4 land_time(void)
+{
+    return m_time;
+}
+
+n_byte2 * land_genetics(void)
+{
+    return (n_byte2 *)m_genetics;
+}
+
+n_byte land_tide_level(void)
+{
+    return m_tide_level;
+}
+
+n_byte * land_topology_highdef(void)
+{
+    return (n_byte *)m_topology_highdef;
+}
+
+n_byte * land_topology(void)
+{
+    return (n_byte *)m_topology;
+}
+
+n_byte4 * land_highres_tide(void)
+{
+    return (n_byte4 *)m_highres_tide;
+}
+
+
+static n_int weather_delta(void)
 {
     n_int    lx = 0;
     n_int    average = 0;
@@ -81,9 +133,9 @@ static n_int weather_delta(n_land * local_land)
     
     NA_ASSERT(local_land, "local_weather NULL");
     
-    map_dimensions2 = land_map_dimension(local_land) / 2;
+    map_dimensions2 = land_map_dimension() / 2;
     
-    map_bits2       = land_map_bits(local_land) - 1;
+    map_bits2       = land_map_bits() - 1;
     if (map_bits2 < 0) return 0;
     
     while (lx < map_dimensions2)
@@ -91,7 +143,7 @@ static n_int weather_delta(n_land * local_land)
         n_int ly = 0;
         while (ly < map_dimensions2)
         {
-            average += weather_pressure(local_land, WEATHER_TO_MAPSPACE(lx), WEATHER_TO_MAPSPACE(ly));
+            average += weather_pressure(WEATHER_TO_MAPSPACE(lx), WEATHER_TO_MAPSPACE(ly));
             ly++;
         }
         lx++;
@@ -135,30 +187,16 @@ static void weather_wrap(n_c_int * section)
     }
 }
 
-void weather_cycle(n_land * local_land)
+void weather_cycle(void)
 {
     n_int         local_delta;
-    n_c_int       * atmosphere;
-    n_byte2       * delta_pressure;
     n_int         ly = 0;
-    n_int         map_dimensions2;
-    n_int         map_bits2;
+    n_int         map_dimensions2 = land_map_dimension()/ 2;
+    n_int         map_bits2 = land_map_bits() - 1;
     
-    NA_ASSERT(local_land, "local_land NULL");
-
-    map_dimensions2 = land_map_dimension(local_land)/ 2;
-    map_bits2       = land_map_bits(local_land) - 1;
     if (map_bits2 < 0) return;
     
-    local_delta = weather_delta(local_land);
-    atmosphere  = local_land->atmosphere;
-    delta_pressure  = local_land->delta_pressure;
-    
-    NA_ASSERT(atmosphere, "atmosphere NULL");
-    NA_ASSERT(delta_pressure, "delta_pressure NULL");
-    
-    if (atmosphere == 0L) return;
-    if (delta_pressure == 0L) return;
+    local_delta = weather_delta();
     
     while ( ly < map_dimensions2 )
     {
@@ -169,45 +207,33 @@ void weather_cycle(n_land * local_land)
         while ( lx < map_dimensions2 )
         {
             n_int	local_atm =
-                ((n_int)delta_pressure[ lx | ly_neu ] << map_bits2)
+                ((n_int)m_delta_pressure[ lx | ly_neu ] << map_bits2)
                 - (512 << map_bits2)
-                - atmosphere[ ((lx + 1 ) & (map_dimensions2-1)) | ly_neu ]
-                + atmosphere[ ((lx + (map_dimensions2-1) ) & ((map_dimensions2)-1)) | ly_neu ]
-                - atmosphere[ lx | ly_plu ]
-                + atmosphere[ lx | ly_min ];
+                - m_atmosphere[ ((lx + 1 ) & (map_dimensions2-1)) | ly_neu ]
+                + m_atmosphere[ ((lx + (map_dimensions2-1) ) & ((map_dimensions2)-1)) | ly_neu ]
+                - m_atmosphere[ lx | ly_plu ]
+                + m_atmosphere[ lx | ly_min ];
 
-            atmosphere[ lx | ly_neu ] += (local_atm - local_delta) >> map_bits2;
+            m_atmosphere[ lx | ly_neu ] += (local_atm - local_delta) >> map_bits2;
             lx++;
         }
         ly++;
     }
     
-    weather_wrap(atmosphere);
+    weather_wrap(m_atmosphere);
 }
 
-void weather_init(n_land * local_land)
+void weather_init(void)
 {
-    n_c_int	  *atmosphere;
-    n_byte2	  *delta_pressure;
-    n_int	   ly = 0;
-    n_int	   ly2 = 0;
-    n_int      map_dimension2;
-    n_int      map_bits2;
+    n_int map_dimension2 = land_map_dimension()/2;
+    n_int map_bits2      = land_map_bits() - 1;
+    n_int ly = 0;
+    n_int ly2 = 0;
     
-    NA_ASSERT(local_land, "local_land NULL");
-    
-    if (local_land == 0L) return;
-    
-    atmosphere = local_land->atmosphere;
-    delta_pressure = local_land->delta_pressure;
-    map_dimension2 = land_map_dimension(local_land)/2;
-    map_bits2      = land_map_bits(local_land) - 1;
     if (map_bits2 < 0) return;
     
-    NA_ASSERT(atmosphere, "atmosphere NULL");
-    NA_ASSERT(delta_pressure, "delta_pressure NULL");
-    io_erase((n_byte *)local_land->atmosphere, sizeof(n_c_int) * MAP_AREA / 4);
-    io_erase((n_byte *)local_land->delta_pressure, sizeof(n_byte2) * MAP_AREA / 4);
+    io_erase((n_byte *)m_atmosphere, sizeof(n_c_int) * MAP_AREA / 4);
+    io_erase((n_byte *)m_delta_pressure, sizeof(n_byte2) * MAP_AREA / 4);
 
     while ( ly < map_dimension2 )
     {
@@ -216,13 +242,13 @@ void weather_init(n_land * local_land)
         while ( lx < map_dimension2 )
         {
             n_int lx2 = lx << 1;
-            n_int     total_land =  land_location(local_land, lx2,     ly2)
-                                    + land_location(local_land, lx2 + 1, ly2)
-                                    + land_location(local_land, lx2,     ly2 + 1)
-                                    + land_location(local_land, lx2 + 1, ly2 + 1);
+            n_int     total_land =  land_location(lx2,     ly2)
+                                    + land_location(lx2 + 1, ly2)
+                                    + land_location(lx2,     ly2 + 1)
+                                    + land_location(lx2 + 1, ly2 + 1);
             
             
-            atmosphere[ (map_dimension2 * ly) + lx ] = (n_c_int)total_land;
+            m_atmosphere[ (map_dimension2 * ly) + lx ] = (n_c_int)total_land;
             lx++;
         }
         ly++;
@@ -236,11 +262,11 @@ void weather_init(n_land * local_land)
         n_uint      ly_neu = (ly * map_dimension2);
         while ( lx < (map_dimension2) )
         {
-            delta_pressure[ ly_neu + lx ]
-                  = (n_byte2)(atmosphere[ (( lx + 1 ) & ((map_dimension2)-1)) + ly_neu]
-                  - atmosphere[(( lx + ((map_dimension2)-1) ) & ((map_dimension2)-1)) + ly_neu]
-                  + atmosphere[ lx + ly_plu ]
-                  - atmosphere[ lx + ly_min ]
+            m_delta_pressure[ ly_neu + lx ]
+                  = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension2)-1)) + ly_neu]
+                  - m_atmosphere[(( lx + ((map_dimension2)-1) ) & ((map_dimension2)-1)) + ly_neu]
+                  + m_atmosphere[ lx + ly_plu ]
+                  - m_atmosphere[ lx + ly_min ]
                   + 512);
             lx++;
         }
@@ -250,28 +276,28 @@ void weather_init(n_land * local_land)
     ly = 0;
     while( ly < (map_dimension2 * map_dimension2)) 
     {
-        atmosphere[ ly ] = 0;
+        m_atmosphere[ ly ] = 0;
         ly++;
     }
     ly = 0;
     while( ly < (map_dimension2 * 2))
     {
-        weather_cycle(local_land);
+        weather_cycle();
         ly++;
     }
 }
 
-n_int weather_pressure(n_land * land, n_int px, n_int py)
+n_int weather_pressure(n_int px, n_int py)
 {
-    n_int   dimension2 = land_map_dimension(land)/2;
+    n_int   dimension2 = land_map_dimension()/2;
 
     n_int   tpx = ((px/2) + dimension2) % dimension2;
     n_int   tpy = ((py/2) + dimension2) % dimension2;
     
-    return  land->atmosphere[(dimension2 * tpy) + tpx];
+    return  m_atmosphere[(dimension2 * tpy) + tpx];
 }
 
-void  weather_wind_vector(n_land * local_land, n_vect2 * pos, n_vect2 * wind)
+void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind)
 {
     n_int	local_pressure;
     NA_ASSERT(local_land, "local_land NULL");
@@ -281,28 +307,26 @@ void  weather_wind_vector(n_land * local_land, n_vect2 * pos, n_vect2 * wind)
     if (pos == 0L) return;
     if (wind == 0L) return;
     
-    local_pressure = weather_pressure(local_land, pos->x, pos->y);
-    wind->x = local_pressure - weather_pressure(local_land, pos->x - WEATHER_TO_MAPSPACE(1), (pos->y>>1));
-    wind->y = local_pressure - weather_pressure(local_land, pos->x, pos->y  - WEATHER_TO_MAPSPACE(1));
+    local_pressure = weather_pressure(pos->x, pos->y);
+    wind->x = local_pressure - weather_pressure(pos->x - WEATHER_TO_MAPSPACE(1), (pos->y>>1));
+    wind->y = local_pressure - weather_pressure(pos->x, pos->y  - WEATHER_TO_MAPSPACE(1));
 }
 
-weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
+weather_values	weather_seven_values(n_int px, n_int py)
 {
     n_byte	ret_val;
     n_int	val;
-    n_int   local_time;
     n_int   map_x = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(px));
     n_int   map_y = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(py));
     
     NA_ASSERT(local_land, "local_land NULL");
     
-    local_time = local_land->time;
     
-    if(IS_DAWNDUSK(local_time))
+    if(IS_DAWNDUSK(m_time))
     {
         return WEATHER_SEVEN_DAWN_DUSK;
     }
-    if(IS_NIGHT(local_time))
+    if(IS_NIGHT(m_time))
     {
         ret_val = WEATHER_SEVEN_CLEAR_NIGHT;
     }
@@ -311,7 +335,7 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
         ret_val = WEATHER_SEVEN_SUNNY_DAY;
     }
 
-    val = weather_pressure(local_land, map_x, map_y);
+    val = weather_pressure(map_x, map_y);
 
     if ( val == -1)
     {
@@ -330,35 +354,28 @@ weather_values	weather_seven_values(n_land * local_land, n_int px, n_int py)
     return ret_val;
 }
 
-n_int land_map_dimension(n_land * land)
+n_int land_map_dimension(void)
 {
-    (void)land; /* land is not used here */
     return MAP_DIMENSION;
 }
 
-n_int land_map_bits(n_land * land)
+n_int land_map_bits(void)
 {
-    (void)land;
     return MAP_BITS;
 }
 
-n_int land_location(n_land * land, n_int px, n_int py)
+n_int land_location(n_int px, n_int py)
 {
-    return land->topology[math_memory_location(px, py)];
+    return m_topology[math_memory_location(px, py)];
 }
 
-void land_tide(n_land * local_land)
+void land_tide(void)
 {
-    n_int time_of_day;
-    n_int current_time;
-    NA_ASSERT(local_land, "local_land NULL");
-    
-    time_of_day     = local_land->time;
-    current_time    = time_of_day + (local_land->date * TIME_DAY_MINUTES);
+    n_int current_time    = m_time + (m_date * TIME_DAY_MINUTES);
     
     {
         n_int lunar_mins      = current_time % LUNAR_ORBIT_MINS;
-        n_int lunar_angle_256 = (((time_of_day * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
+        n_int lunar_angle_256 = (((m_time * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
         n_int solar_mins      =  current_time    % (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
         n_int solar_angle_256 = (solar_mins * 255) / (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
 
@@ -367,25 +384,20 @@ void land_tide(n_land * local_land)
         
         NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
         
-        local_land->tide_level = (n_byte)(WATER_MAP + lunar + solar);
+        m_tide_level = (n_byte)(WATER_MAP + lunar + solar);
     }
 }
 
-void land_cycle(n_land * local_land)
+void land_cycle(void)
 {
-    NA_ASSERT(local_land, "local_land NULL");
-
-    if (local_land == 0L) return;
-    
-    local_land->time++;
-    if (local_land->time == TIME_DAY_MINUTES)
+    m_time++;
+    if (m_time == TIME_DAY_MINUTES)
     {
-        local_land->time = 0;
-        local_land->date++;
-
+        m_time = 0;
+        m_date++;
     }
 
-    land_tide(local_land);
+    land_tide();
 }
 
 #define	OPERATOR_AREA(fg, dfg, fdg)					((((dfg) * (dfg)) + ((fdg) * (fdg))) >> 6)
@@ -396,7 +408,7 @@ void land_cycle(n_land * local_land)
 
 #define	WATER_MAP2									(WATER_MAP * 2)
 
-static n_int land_operator(n_land * local_land, n_int locx, n_int locy, n_byte *specific_kind)
+static n_int land_operator(n_int locx, n_int locy, n_byte *specific_kind)
 {
     n_int	temp = 0, temp_add;
     n_int	number_sum = 0;
@@ -408,9 +420,9 @@ static n_int land_operator(n_land * local_land, n_int locx, n_int locy, n_byte *
     NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(specific_kind, "specific_kind NULL");
     
-    fg  = land_location(local_land, locx, locy);
-    dfg = land_location(local_land, locx + 1, locy);
-    fdg = land_location(local_land, locx, locy + 1);
+    fg  = land_location(locx, locy);
+    dfg = land_location(locx + 1, locy);
+    fdg = land_location(locx, locy + 1);
     
     dfg = (dfg - fg) * 8;
     fdg = (fdg - fg) * 8;
@@ -446,12 +458,12 @@ static n_int land_operator(n_land * local_land, n_int locx, n_int locy, n_byte *
     }
     if(specific_kind[3] != '.')
     {
-        if(IS_NIGHT(local_land->time) == 0)
+        if(IS_NIGHT(m_time) == 0)
         {
             /* 180 is minutes in the day / 8 */
-            n_int hr = ((((local_land->time << 6) / 180) + 32) & 255);
+            n_int hr = ((((m_time << 6) / 180) + 32) & 255);
 
-            n_int weather = weather_seven_values(local_land, MAPSPACE_TO_APESPACE(locx), MAPSPACE_TO_APESPACE(locy));
+            n_int weather = weather_seven_values(MAPSPACE_TO_APESPACE(locx), MAPSPACE_TO_APESPACE(locy));
 
             n_int   weather_divide = (105 + ((weather % 3) * 30));
             n_vect2 time_weather;
@@ -498,52 +510,45 @@ static n_int land_operator(n_land * local_land, n_int locx, n_int locy, n_byte *
     return (temp);
 }
 
-n_int land_operator_interpolated(n_land * local_land, n_int locx, n_int locy, n_byte * kind)
+n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
 {
     NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(kind, "kind NULL");
 
     {
-        n_int map_dimension = land_map_dimension(local_land);
+        n_int map_dimension = land_map_dimension();
         n_int map_x = APESPACE_TO_MAPSPACE(locx);
         n_int map_y = APESPACE_TO_MAPSPACE(locy);
 
         /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
         n_int interpolated;
         interpolated = APESPACE_TO_MAPSPACE(
-                           land_operator(local_land, (map_x+1)&(map_dimension-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
+                           land_operator((map_x+1)&(map_dimension-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
         interpolated += APESPACE_TO_MAPSPACE(
-                            land_operator(local_land, (map_x-1)&(map_dimension-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
+                            land_operator((map_x-1)&(map_dimension-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
         interpolated += APESPACE_TO_MAPSPACE(
-                            land_operator(local_land, map_x, (map_y+1)&(map_dimension-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
+                            land_operator(map_x, (map_y+1)&(map_dimension-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
         interpolated += APESPACE_TO_MAPSPACE(
-                            land_operator(local_land, map_x, (map_y-1)&(map_dimension-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
+                            land_operator(map_x, (map_y-1)&(map_dimension-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
         return interpolated >> 1;
     }
 }
 
-void land_clear(n_land * local, KIND_OF_USE kind, n_byte4 start)
+void land_clear(KIND_OF_USE kind, n_byte4 start)
 {
-    NA_ASSERT(local, "local NULL");
-    if (local == 0L) return;
+    n_uint	loop      = 0;
+    
+    while (loop < (MAP_AREA))
     {
-        n_byte *local_map = local->topology;
-        n_uint	loop      = 0;
-        NA_ASSERT(local_map, "local_map NULL");
-        
-        if (local_map == 0L) return;
-        
-        while (loop < (MAP_AREA))
-        {
-            local_map[loop] = 128;
-            loop++;
-        }
-        if (kind != KIND_LOAD_FILE)
-        {
-            local->time = 0;
-            local->date = start;
-        }
+        m_topology[loop] = 128;
+        loop++;
     }
+    if (kind != KIND_LOAD_FILE)
+    {
+        m_time = 0;
+        m_date = start;
+    }
+
 }
 
 void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec)
@@ -562,26 +567,29 @@ void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute
     }
 }
 
-
-void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread, execute_thread_stub * exec)
+void land_set_genetics(n_byte2 * genetics)
 {
-    math_pack(MAP_AREA, 128, local_land->topology, scratch);
+    m_genetics[0] = genetics[0];
+    m_genetics[1] = genetics[1];
+}
+
+void land_init(n_byte * scratch, n_byte double_spread, execute_thread_stub * exec)
+{
+    math_pack(MAP_AREA, 128, m_topology, scratch);
     
-    land_creation(local_land->topology, scratch, local_land->genetics, exec);
+    land_creation(m_topology, scratch, m_genetics, exec);
     
-    if (local_land->topology_highdef)
+    if (m_topology_highdef) /* TODO: Need better interface */
     {
         n_uint   lp = 0;
         n_byte4 value_setting = 0;
-        n_byte4 * local_hires_tides= local_land->highres_tide;
-        n_byte   * local_hires = local_land->topology_highdef;
-        math_bilinear_8_times(local_land->topology, local_land->topology_highdef, double_spread);
+        math_bilinear_8_times(m_topology, m_topology_highdef, double_spread);
 
-        io_erase((n_byte *)local_land->highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
+        io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
         
         while (lp < HI_RES_MAP_AREA)
         {
-            n_byte val = local_hires[lp<<1];
+            n_byte val = m_topology_highdef[lp<<1];
             if ((val > 105) && (val < 151))
             {
                 value_setting |= 1 << (lp & 31);
@@ -589,7 +597,7 @@ void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread, exec
             
             if ((lp & 31) == 31)
             {
-                local_hires_tides[lp>>5] = value_setting;
+                m_highres_tide[lp>>5] = value_setting;
                 value_setting = 0;
             }
             lp++;
@@ -598,7 +606,7 @@ void land_init(n_land * local_land, n_byte * scratch, n_byte double_spread, exec
     }
 }
 
-void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * location)
+void land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location)
 {
     n_int loc_x;
     n_int loc_y;
@@ -610,19 +618,18 @@ void land_vect2(n_vect2 * output, n_int * actual_z, n_land * local, n_vect2 * lo
     NA_ASSERT(location, "location NULL");
 
     if (output == 0L) return;
-    if (local == 0L) return;
     if (location == 0L) return;
     
     loc_x = location->x;
     loc_y = location->y;
-    z = land_location(local, APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
+    z = land_location(APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
 
     if (actual_z != 0L)
     {
         *actual_z = z;
     }
-    output->x = (z - land_location(local, (APESPACE_TO_MAPSPACE(loc_x) + 1), APESPACE_TO_MAPSPACE(loc_y)));
-    output->y = (z - land_location(local, APESPACE_TO_MAPSPACE(loc_x), (APESPACE_TO_MAPSPACE(loc_y) + 1)));
+    output->x = (z - land_location((APESPACE_TO_MAPSPACE(loc_x) + 1), APESPACE_TO_MAPSPACE(loc_y)));
+    output->y = (z - land_location(APESPACE_TO_MAPSPACE(loc_x), (APESPACE_TO_MAPSPACE(loc_y) + 1)));
 }
 
 n_int spacetime_after(n_spacetime * initial, n_spacetime * second)
@@ -642,17 +649,17 @@ n_int spacetime_after(n_spacetime * initial, n_spacetime * second)
     return 0;
 }
 
-n_int spacetime_before_now(n_spacetime * initial, n_land * now)
+n_int spacetime_before_now(n_spacetime * initial)
 {
-    if (initial->date > now->date)
+    if (initial->date > m_date)
     {
         return 0;
     }
-    if (initial->date < now->date)
+    if (initial->date < m_date)
     {
         return 1;
     }
-    if (initial->time < now->time)
+    if (initial->time < m_time)
     {
         return 1;
     }
@@ -668,11 +675,11 @@ void spacetime_copy(n_spacetime * to, n_spacetime * from)
     to->time = from->time;
 }
 
-void spacetime_set(n_spacetime * set, n_land * local, n_byte2 * location)
+void spacetime_set(n_spacetime * set, n_byte2 * location)
 {
     set->location[0] = location[0];
     set->location[1] = location[1];
-    set->time        = local->time;
-    set->date        = local->date;
+    set->time        = m_time;
+    set->date        = m_date;
 
 }

@@ -152,7 +152,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, voi
                 /** is this my intention, or someone else's? */
                 if (being_name_comparison(local_being, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                 {
-                    if (spacetime_before_now(&local_episodic[i].space_time, local_sim->land))
+                    if (spacetime_before_now(&local_episodic[i].space_time))
                     {
                         local_episodic[i].event = 0;
                         continue;
@@ -424,8 +424,8 @@ static void episodic_store_full(
     noble_episodic * local_episodic = being_episodic(local);
     n_int replace;
     n_byte  old_event;
-    n_byte2 old_time;
-    n_byte2 new_time;
+    n_byte4 old_time;
+    n_byte4 new_time;
 
     if (local_episodic == 0L)
     {
@@ -445,7 +445,7 @@ static void episodic_store_full(
     local_episodic[replace].event       = event;
     local_episodic[replace].affect      = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
 
-    spacetime_set(&local_episodic[replace].space_time, local_sim->land, being_location(local));
+    spacetime_set(&local_episodic[replace].space_time, being_location(local));
     
     new_time = local_episodic[replace].space_time.time;
     
@@ -480,7 +480,7 @@ static void episodic_store_full(
                 return;
             }
 
-            io_time_to_string(time, local_sim->land->time, local_sim->land->date);
+            io_time_to_string(time);
 
             io_three_string_combination(combination, time, str, description, 35);
 
@@ -609,7 +609,7 @@ n_byte episodic_intention(
     n_byte args)
 {
     n_byte4 date;
-    n_byte2 time;
+    n_byte4 time;
     n_int   replace;
     n_byte  event;
 
@@ -624,7 +624,7 @@ n_byte episodic_intention(
 
     if (event==0) return 0;
 
-    time = local_sim->land->time + mins_ahead;
+    time = land_time();
     date = local_episodic[episode_index].space_time.date;
     if (time >= TIME_DAY_MINUTES)
     {

@@ -138,7 +138,7 @@ static void drives_sex(
 {
     n_int i,max;
     noble_social * local_social_graph = being_social(local);
-    n_int age_in_days = AGE_IN_DAYS(local_sim,local);
+    n_int age_in_days = AGE_IN_DAYS(local);
 
 #ifdef EPISODIC_ON
     noble_episodic * local_episodic = being_episodic(local);

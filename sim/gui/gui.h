@@ -161,7 +161,7 @@ void  draw_terrain_coord(n_int * co_x, n_int * co_y);
 
 extern n_byte land_points[];
 
-void draw_color_time(n_byte2 * color_fit, n_byte2 time);
+void draw_color_time(n_byte2 * color_fit);
 
 void draw_undraw_clear(void);
 
