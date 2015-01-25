@@ -131,8 +131,6 @@ static n_int weather_delta(void)
     n_int    map_dimensions2;
     n_int    map_bits2;
     
-    NA_ASSERT(local_land, "local_weather NULL");
-    
     map_dimensions2 = land_map_dimension() / 2;
     
     map_bits2       = land_map_bits() - 1;
@@ -300,7 +298,6 @@ n_int weather_pressure(n_int px, n_int py)
 void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind)
 {
     n_int	local_pressure;
-    NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(pos, "pos NULL");
     NA_ASSERT(wind, "wind NULL");
 
@@ -318,9 +315,6 @@ weather_values	weather_seven_values(n_int px, n_int py)
     n_int	val;
     n_int   map_x = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(px));
     n_int   map_y = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(py));
-    
-    NA_ASSERT(local_land, "local_land NULL");
-    
     
     if(IS_DAWNDUSK(m_time))
     {
@@ -417,7 +411,6 @@ static n_int land_operator(n_int locx, n_int locy, n_byte *specific_kind)
     n_int	dfg;
     n_int	fdg;
     
-    NA_ASSERT(local_land, "local_land NULL");
     NA_ASSERT(specific_kind, "specific_kind NULL");
     
     fg  = land_location(locx, locy);
@@ -512,32 +505,28 @@ static n_int land_operator(n_int locx, n_int locy, n_byte *specific_kind)
 
 n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
 {
-    NA_ASSERT(local_land, "local_land NULL");
+    n_int map_dimension = land_map_dimension();
+    n_int map_x = APESPACE_TO_MAPSPACE(locx);
+    n_int map_y = APESPACE_TO_MAPSPACE(locy);
+    n_int interpolated;
+
     NA_ASSERT(kind, "kind NULL");
-
-    {
-        n_int map_dimension = land_map_dimension();
-        n_int map_x = APESPACE_TO_MAPSPACE(locx);
-        n_int map_y = APESPACE_TO_MAPSPACE(locy);
-
-        /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
-        n_int interpolated;
-        interpolated = APESPACE_TO_MAPSPACE(
-                           land_operator((map_x+1)&(map_dimension-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
-        interpolated += APESPACE_TO_MAPSPACE(
-                            land_operator((map_x-1)&(map_dimension-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
-        interpolated += APESPACE_TO_MAPSPACE(
-                            land_operator(map_x, (map_y+1)&(map_dimension-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
-        interpolated += APESPACE_TO_MAPSPACE(
-                            land_operator(map_x, (map_y-1)&(map_dimension-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
-        return interpolated >> 1;
-    }
+    
+    /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
+    interpolated = APESPACE_TO_MAPSPACE(
+                       land_operator((map_x+1)&(map_dimension-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
+    interpolated += APESPACE_TO_MAPSPACE(
+                        land_operator((map_x-1)&(map_dimension-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
+    interpolated += APESPACE_TO_MAPSPACE(
+                        land_operator(map_x, (map_y+1)&(map_dimension-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
+    interpolated += APESPACE_TO_MAPSPACE(
+                        land_operator(map_x, (map_y-1)&(map_dimension-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
+    return interpolated >> 1;
 }
 
 void land_clear(KIND_OF_USE kind, n_byte4 start)
 {
     n_uint	loop      = 0;
-    
     while (loop < (MAP_AREA))
     {
         m_topology[loop] = 128;
@@ -573,38 +562,39 @@ void land_set_genetics(n_byte2 * genetics)
     m_genetics[1] = genetics[1];
 }
 
-void land_init(n_byte * scratch, n_byte double_spread, execute_thread_stub * exec)
+void land_init(n_byte * scratch, execute_thread_stub * exec)
 {
     math_pack(MAP_AREA, 128, m_topology, scratch);
     
     land_creation(m_topology, scratch, m_genetics, exec);
-    
-    if (m_topology_highdef) /* TODO: Need better interface */
-    {
-        n_uint   lp = 0;
-        n_byte4 value_setting = 0;
-        math_bilinear_8_times(m_topology, m_topology_highdef, double_spread);
+}
 
-        io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
-        
-        while (lp < HI_RES_MAP_AREA)
+void land_init_high_def(n_byte double_spread)
+{
+    n_uint   lp = 0;
+    n_byte4  value_setting = 0;
+    
+    math_bilinear_8_times(m_topology, m_topology_highdef, double_spread);
+    io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
+    
+    while (lp < HI_RES_MAP_AREA)
+    {
+        n_byte val = m_topology_highdef[lp<<1];
+        if ((val > 105) && (val < 151))
         {
-            n_byte val = m_topology_highdef[lp<<1];
-            if ((val > 105) && (val < 151))
-            {
-                value_setting |= 1 << (lp & 31);
-            }
-            
-            if ((lp & 31) == 31)
-            {
-                m_highres_tide[lp>>5] = value_setting;
-                value_setting = 0;
-            }
-            lp++;
-            
+            value_setting |= 1 << (lp & 31);
         }
+        
+        if ((lp & 31) == 31)
+        {
+            m_highres_tide[ lp >> 5 ] = value_setting;
+            value_setting = 0;
+        }
+        lp++;
+        
     }
 }
+
 
 void land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location)
 {

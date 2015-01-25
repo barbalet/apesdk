@@ -826,7 +826,8 @@ weather_values weather_seven_values(n_int px, n_int py);
 void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec);
 void land_set_genetics(n_byte2 * genetics);
 
-void land_init(n_byte * scratch, n_byte double_spread, execute_thread_stub * exec);
+void land_init(n_byte * scratch, execute_thread_stub * exec);
+void land_init_high_def(n_byte double_spread);
 
 void  land_clear(KIND_OF_USE kind, n_byte4 start);
 void  land_cycle(void);

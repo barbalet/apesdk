@@ -552,10 +552,11 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         land_clear(kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
 #ifdef EXECUTE_THREADED
-        land_init(&offbuffer[landbuffer_size], 1, execute_add);
+        land_init(&offbuffer[landbuffer_size], execute_add);
 #else
-        land_init(&offbuffer[landbuffer_size], 1, 0L);
+        land_init(&offbuffer[landbuffer_size], 0L);
 #endif
+        land_init_high_def(1);
         land_tide();
 #endif
         if (kind != KIND_LOAD_FILE)
