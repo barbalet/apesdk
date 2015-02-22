@@ -1029,36 +1029,43 @@ static void	draw_meters(noble_simulation * local_sim)
  */
 static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw)
 {
-    n_int		 magx = APESPACE_TO_MAPSPACE(being_location_x(bei));
-    n_int		 magy = APESPACE_TO_MAPSPACE(being_location_y(bei));
     n_pixel     *local_draw = draw->pixel_draw;
     void	    *local_info = draw->information;
-    n_int		  ty;
     n_int		  start = -1, stop = 2;
-    n_int		  time_coef = sim->real_time >> 4;
+    n_int		time_coef = sim->real_time >> 4;
     n_int	    start_point = ((time_coef &3 )) + 3;
-    ty = start;
-    while (ty < stop)
+    n_vect2     location;
+    n_vect2     delta;
+    
+    being_space(bei, &location);
+    
+    being_convert_to_map(&location);
+    
+    
+    delta.y = start;
+    while (delta.y < stop)
     {
-        n_int tx = start;
-        while (tx < stop)
+        delta.x = start;
+        while (delta.x < stop)
         {
-            n_int	scrx = (magx + tx);
-            n_int	scry = (magy + ty);
-            (*local_draw)(POSITIVE_LAND_COORD(scrx), POSITIVE_LAND_COORD(scry), 0, 0, local_info);
-            tx++;
+            n_vect2 screen;
+            
+            vect2_add(&screen, &location, &delta);
+
+            (*local_draw)(POSITIVE_LAND_COORD(screen.x), POSITIVE_LAND_COORD(screen.y), 0, 0, local_info);
+            delta.x++;
         }
-        ty++;
+        delta.y++;
     }
     if (bei == sim->select)
     {
-        ty = -1;
+        n_int ty = -1;
         while (ty < 2)
         {
-            (*local_draw)(POSITIVE_LAND_COORD(magx + ty), POSITIVE_LAND_COORD(magy - 2 ), 0, 0, local_info);
-            (*local_draw)(POSITIVE_LAND_COORD(magx + ty), POSITIVE_LAND_COORD(magy + 2 ), 0, 0, local_info);
-            (*local_draw)(POSITIVE_LAND_COORD(magx - 2 ), POSITIVE_LAND_COORD(magy + ty), 0, 0, local_info);
-            (*local_draw)(POSITIVE_LAND_COORD(magx + 2 ), POSITIVE_LAND_COORD(magy + ty), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(location.x + ty), POSITIVE_LAND_COORD(location.y - 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(location.x + ty), POSITIVE_LAND_COORD(location.y + 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(location.x - 2 ), POSITIVE_LAND_COORD(location.y + ty), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD(location.x + 2 ), POSITIVE_LAND_COORD(location.y + ty), 0, 0, local_info);
             ty++;
         }
         start_point++;
@@ -1074,28 +1081,28 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
         n_color8	*local_col = local_info;
         local_col->color = COLOUR_GREY;
         if(local_facing == 0 || local_facing == 7)
-            (*local_draw)(POSITIVE_LAND_COORD(magx + start_point ), POSITIVE_LAND_COORD(magy - 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x + start_point ), POSITIVE_LAND_COORD(location.y - 2 ),
                           0, 0, local_info); /* F */
         if(local_facing == 1 || local_facing == 0)
-            (*local_draw)(POSITIVE_LAND_COORD(magx + start_point ), POSITIVE_LAND_COORD(magy + 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x + start_point ), POSITIVE_LAND_COORD(location.y + 2 ),
                           0, 0, local_info); /* E */
         if(local_facing == 2 || local_facing == 1)
-            (*local_draw)(POSITIVE_LAND_COORD(magx + 2 ), POSITIVE_LAND_COORD(magy + start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x + 2 ), POSITIVE_LAND_COORD(location.y + start_point ),
                           0, 0, local_info); /* A */
         if(local_facing == 3 || local_facing == 2)
-            (*local_draw)(POSITIVE_LAND_COORD(magx - 2 ), POSITIVE_LAND_COORD(magy + start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x - 2 ), POSITIVE_LAND_COORD(location.y + start_point ),
                           0, 0, local_info); /* B */
         if(local_facing == 4 || local_facing == 3)
-            (*local_draw)(POSITIVE_LAND_COORD(magx - start_point ), POSITIVE_LAND_COORD(magy + 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x - start_point ), POSITIVE_LAND_COORD(location.y + 2 ),
                           0, 0, local_info); /* H */
         if(local_facing == 5 || local_facing == 4)
-            (*local_draw)(POSITIVE_LAND_COORD(magx - start_point ), POSITIVE_LAND_COORD(magy - 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x - start_point ), POSITIVE_LAND_COORD(location.y - 2 ),
                           0, 0, local_info); /* G */
         if(local_facing == 6 || local_facing == 5)
-            (*local_draw)(POSITIVE_LAND_COORD(magx - 2 ), POSITIVE_LAND_COORD(magy - start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x - 2 ), POSITIVE_LAND_COORD(location.y - start_point ),
                           0, 0, local_info); /* D */
         if(local_facing == 7 || local_facing == 6)
-            (*local_draw)(POSITIVE_LAND_COORD(magx + 2 ), POSITIVE_LAND_COORD(magy - start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD(location.x + 2 ), POSITIVE_LAND_COORD(location.y - start_point ),
                           0, 0, local_info); /* C */
     }
 }
@@ -1484,17 +1491,18 @@ static void draw_remains(noble_simulation * sim, n_byte * screen)
     while(loop < remains->count)
     {
         dead_body * body = &(remains->bodies[loop]);
-        n_int       px = body->location[0];
-        n_int       py = body->location[1];
-        n_int       mx = APESPACE_TO_MAPSPACE(px);
-        n_int       my = APESPACE_TO_MAPSPACE(py);
-    
         n_int       lx = 510;
+        n_vect2     location;
+        
+        location.x = body->location[0];
+        location.y = body->location[1];
+        
+        being_convert_to_map(&location);
         
         while (lx < 515)
         {
-            screen[((mx + lx)&(MAP_DIMENSION-1)) + (((my)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
-            screen[((mx)&(MAP_DIMENSION-1)) + (((my + lx)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
+            screen[((location.x + lx)&(MAP_DIMENSION-1)) + (((location.y)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
+            screen[((location.x)&(MAP_DIMENSION-1)) + (((location.y + lx)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
             lx++;
         }
         loop++;

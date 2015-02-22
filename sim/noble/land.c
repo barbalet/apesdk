@@ -610,7 +610,6 @@ void land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location)
 
     NA_ASSERT(output, "output NULL");
     NA_ASSERT(actual_z, "actual_z NULL");
-    NA_ASSERT(local, "local NULL");
     NA_ASSERT(location, "location NULL");
 
     if (output == 0L) return;
@@ -618,6 +617,7 @@ void land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location)
     
     loc_x = location->x;
     loc_y = location->y;
+        
     z = land_location(APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
 
     if (actual_z != 0L)

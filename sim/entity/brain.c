@@ -864,10 +864,13 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 14:
         return meeter_social_graph[actor_index].attraction;
         /** Location */
+            
+/*
     case 15:
-        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_x(meeter_being)) * 255 / land_map_dimension());
+        return (n_byte)(APESPACE_TO _MAPSPACE(being_location_x(meeter_being)) * 255 / land_map_dimension());
     case 16:
-        return (n_byte)(APESPACE_TO_MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension());
+        return (n_byte)(APESPACE_TO _MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension());
+ */
         /** Being state (lower)*/
     case 17:
         return (n_byte)(being_state(meeter_being)&255);
@@ -997,14 +1000,19 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
 {
     n_int new_episode_index=-1;
     n_int switcher = addr00%25;
-    n_int local_x = APESPACE_TO_MAPSPACE(being_location_x(meeter_being));
-    n_int local_y = APESPACE_TO_MAPSPACE(being_location_y(meeter_being));
+    
+    n_vect2 location;
+
     noble_social * meeter_social_graph = being_social(meeter_being);
     n_int territory_index = (n_int)(GET_A(meeter_being,ATTENTION_TERRITORY));
     n_int memory_visited[EPISODIC_SIZE];
     n_int i;
     n_int relationship_index = (n_int)(GET_A(meeter_being,ATTENTION_RELATIONSHIP));
 
+    
+    being_space(meeter_being, &location);
+    being_convert_to_map(&location);
+    
     /** clear episodes visited.
      This array helps to avoid repeatedly visiting the same memories */
     for (i = 0; i < EPISODIC_SIZE; i++)
@@ -1068,7 +1076,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
         case 15:
         {
             /** atmosphere pressure */
-            n_int pressure = weather_pressure(POSITIVE_LAND_COORD(local_x), POSITIVE_LAND_COORD(local_y));
+            n_int pressure = weather_pressure(POSITIVE_LAND_COORD(location.x), POSITIVE_LAND_COORD(location.y));
             
             if (pressure > 100000) pressure = 100000;
             if (pressure < 0) pressure = 0;
@@ -1079,9 +1087,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
         {
             /** wind magnitude */
             n_vect2 wind;
-            n_vect2 position;
-            vect2_populate(&position, local_x, local_y);
-            weather_wind_vector(&position, &wind);
+            weather_wind_vector(&location, &wind);
             if (wind.x<0) wind.x=-wind.x;
             if (wind.y<0) wind.y=-wind.y;
             *local_addr10 = (n_byte)((wind.x+wind.y)>>7);

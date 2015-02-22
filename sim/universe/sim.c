@@ -617,11 +617,12 @@ void sim_set_select(noble_being * select)
 
 static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * data)
 {
-    n_int         local_x = APESPACE_TO_MAPSPACE(being_location_x(local));
-    n_int         local_y = APESPACE_TO_MAPSPACE(being_location_y(local));
-    n_int         local_z = land_location(local_x, local_y);
+    n_vect2 location;
     
-    if (local_z < 160)
+    being_space(local, &location);
+    being_convert_to_map(&location);
+
+    if (land_location_vect(&location) < 160)
     {
         being_dead(local);
     }
