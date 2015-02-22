@@ -739,7 +739,6 @@ void compress_expand(n_file *input,   n_file *output);
 #define MAP_AREA                      (1<<(2*MAP_BITS))
 
 #define APESPACE_TO_MAPSPACE(num)     ((num)>>6)
-#define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
 #define MAPSPACE_TO_APESPACE(num)     ((num)<<6)
 
 #define HI_RES_MAP_BITS               (MAP_BITS+3)
@@ -837,7 +836,7 @@ n_int land_map_bits(void);
 
 void land_tide(void);
 n_int land_location(n_int px, n_int py);
-
+n_int land_location_vect(n_vect2 * value);
 
 /*0*/
 

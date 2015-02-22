@@ -646,8 +646,8 @@ typedef struct{
     n_int     const_lowdiv2;
     n_int     lowest_s;
     n_int     lowest_c;
-    n_int     co_x;
-    n_int     co_y;
+    
+    n_vect2   co;
 
     n_vect2   dimensions;
     n_vect2   value_vector;    
@@ -671,8 +671,8 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
     /* rotated and sub offset (subtracted further down) */
     n_int     big_y = dtss->lowest_c - (scrx * dtss->value_vector.x);
     n_byte2 * combined = (n_byte2 *)land_topology_highdef();
-    n_int     co_x = dtss->co_x;
-    n_int     co_y = dtss->co_y;
+    n_int     co_x = dtss->co.x;
+    n_int     co_y = dtss->co.y;
     n_int     valc2 = dtss->value_vector.y << 1;
     n_int     vals2 = dtss->value_vector.x << 1;
     while(actual > -1)
@@ -734,10 +734,9 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
         dtss.lowest_s = ((value_vector.x * (((lowest_y)) - dimensions->y)));
         dtss.lowest_c = ((value_vector.y * (((lowest_y)) - dimensions->y)));
         
-        dtss.co_x = APESPACE_TO_HR_MAPSPACE(being_location_x(loc_being));
-        dtss.co_y = APESPACE_TO_HR_MAPSPACE(being_location_y(loc_being));
+        being_high_res(loc_being, &dtss.co);
         
-        flatval = local_combined[CONVERT_X((HI_RES_MAP_DIMENSION/2), dtss.co_x) | CONVERT_Y((HI_RES_MAP_DIMENSION/2), dtss.co_y)] & 255;
+        flatval = local_combined[CONVERT_X((HI_RES_MAP_DIMENSION/2), dtss.co.x) | CONVERT_Y((HI_RES_MAP_DIMENSION/2), dtss.co.y)] & 255;
         
         if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {
@@ -1110,37 +1109,39 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
  */
 static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join * draw)
 {
-    n_int		  magx = APESPACE_TO_HR_MAPSPACE(being_location_x(bei));
-    n_int		  magy = APESPACE_TO_HR_MAPSPACE(being_location_y(bei));
     n_pixel     *local_draw = draw->pixel_draw;
     void	    *local_info = draw->information;
-    n_int		  ty;
-    n_int		  start = -1, stop = 2;
-    n_int		  time_coef = sim->real_time >> 4;
-    n_int	      start_point = ((time_coef &3 )) + 3;
+    n_int		 start = -1, stop = 2;
+    n_int		 time_coef = sim->real_time >> 4;
+    n_int	     start_point = ((time_coef &3 )) + 3;
 
-    ty = start;
-    while (ty < stop)
+    n_vect2      location;
+    n_vect2      delta;
+    
+    being_high_res(bei, &location);
+    
+    delta.y = start;
+    while (delta.y < stop)
     {
-        n_int tx = start;
-        while (tx < stop)
+        delta.x = start;
+        while (delta.x < stop)
         {
-            n_int	scrx = (magx + tx);
-            n_int	scry = (magy + ty);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(scrx), POSITIVE_LAND_COORD_HIRES(scry), 0, 0, local_info);
-            tx++;
+            n_vect2 screen_point;
+            vect2_add(&screen_point, &location, &delta);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(screen_point.x), POSITIVE_LAND_COORD_HIRES(screen_point.y), 0, 0, local_info);
+            delta.x++;
         }
-        ty++;
+        delta.y++;
     }
     if (bei == sim->select)
     {
-        ty = -1;
+        n_int ty = -1;
         while (ty < 2)
         {
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + ty), POSITIVE_LAND_COORD_HIRES(magy - 2 ), 0, 0, local_info);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + ty), POSITIVE_LAND_COORD_HIRES(magy + 2 ), 0, 0, local_info);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - 2 ), POSITIVE_LAND_COORD_HIRES(magy + ty), 0, 0, local_info);
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + 2 ), POSITIVE_LAND_COORD_HIRES(magy + ty), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + ty), POSITIVE_LAND_COORD_HIRES(location.y - 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + ty), POSITIVE_LAND_COORD_HIRES(location.y + 2 ), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - 2 ), POSITIVE_LAND_COORD_HIRES(location.y + ty), 0, 0, local_info);
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + 2 ), POSITIVE_LAND_COORD_HIRES(location.y + ty), 0, 0, local_info);
             ty++;
         }
         start_point++;
@@ -1156,28 +1157,36 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
         n_color8	*local_col = local_info;
         local_col->color = COLOUR_GREY;
         if(local_facing == 0 || local_facing == 7)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + start_point ), POSITIVE_LAND_COORD_HIRES(magy - 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location.y - 2 ),
                           0, 0, local_info); /* F */
         if(local_facing == 1 || local_facing == 0)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + start_point ), POSITIVE_LAND_COORD_HIRES(magy + 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location.y + 2 ),
                           0, 0, local_info); /* E */
         if(local_facing == 2 || local_facing == 1)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + 2 ), POSITIVE_LAND_COORD_HIRES(magy + start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location.y + start_point ),
                           0, 0, local_info); /* A */
         if(local_facing == 3 || local_facing == 2)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - 2 ), POSITIVE_LAND_COORD_HIRES(magy + start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location.y + start_point ),
                           0, 0, local_info); /* B */
         if(local_facing == 4 || local_facing == 3)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - start_point ), POSITIVE_LAND_COORD_HIRES(magy + 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location.y + 2 ),
                           0, 0, local_info); /* H */
         if(local_facing == 5 || local_facing == 4)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - start_point ), POSITIVE_LAND_COORD_HIRES(magy - 2 ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location.y - 2 ),
                           0, 0, local_info); /* G */
         if(local_facing == 6 || local_facing == 5)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx - 2 ), POSITIVE_LAND_COORD_HIRES(magy - start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location.y - start_point ),
                           0, 0, local_info); /* D */
         if(local_facing == 7 || local_facing == 6)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(magx + 2 ), POSITIVE_LAND_COORD_HIRES(magy - start_point ),
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location.y - start_point ),
                           0, 0, local_info); /* C */
     }
 }

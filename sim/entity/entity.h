@@ -341,4 +341,10 @@ void being_remains_init(noble_simulation * sim);
 
 n_int being_index(noble_simulation * sim, noble_being * local);
 
+void being_high_res(noble_being * value, n_vect2 * vector);
+void being_convert_to_map(n_vect2 * value);
+void being_space(noble_being * value, n_vect2 * vector);
+
+
+
 #endif /* NOBLEAPE_ENTITY_H */

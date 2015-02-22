@@ -298,6 +298,26 @@ n_int being_location_y(noble_being * value)
     return (n_int)value->location[1];
 }
 
+#define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
+
+void being_high_res(noble_being * value, n_vect2 * vector)
+{
+    vector->x = APESPACE_TO_HR_MAPSPACE(being_location_x(value));
+    vector->y = APESPACE_TO_HR_MAPSPACE(being_location_y(value));
+}
+
+void being_convert_to_map(n_vect2 * value)
+{
+    value->x = APESPACE_TO_MAPSPACE(value->x);
+    value->y = APESPACE_TO_MAPSPACE(value->y);
+}
+
+void being_space(noble_being * value, n_vect2 * vector)
+{
+    vector->x = value->location[0];
+    vector->y = value->location[1];
+}
+
 n_byte2 * being_location(noble_being * value)
 {
     return value->location;
@@ -469,12 +489,16 @@ static void being_turn_away_from_water(noble_being * value)
         vect2_direction(&temp_vector, turn_plus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        z_plus = land_location(POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        being_convert_to_map(&temp_vector);
+        
+        z_plus = land_location_vect(&temp_vector);
 
         vect2_direction(&temp_vector, turn_minus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        z_minus = land_location(POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.x)), POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(temp_vector.y)));
+        being_convert_to_map(&temp_vector);
+        
+        z_minus = land_location_vect(&temp_vector);
 
         if (z_minus > z_plus)
         {
@@ -624,16 +648,16 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
 
 static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
 {
-    n_vect2    start, delta, vector_facing;
+    n_vect2    start, delta, vector_facing, start_delta;
 
     /* TODO: Check for being awake - need a land and being based awake check */
     
     vect2_byte2(&start, being_location(local));
 
-    delta.x = lx;
-    delta.y = ly;
+    start_delta.x = lx;
+    start_delta.y = ly;
 
-    vect2_subtract(&delta, &delta, &start);
+    vect2_subtract(&delta, &start_delta, &start);
 
     {
         n_int distance_squared = vect2_dot(&delta, &delta, 1, 1);
@@ -655,10 +679,10 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
     }
 
     /** move everything from being co-ordinates to map co-ordinates */
-    start.x = APESPACE_TO_MAPSPACE(start.x);
-    start.y = APESPACE_TO_MAPSPACE(start.y);
-    delta.x = APESPACE_TO_MAPSPACE(delta.x);
-    delta.y = APESPACE_TO_MAPSPACE(delta.y);
+    
+    being_convert_to_map(&start);
+    being_convert_to_map(&delta);
+    being_convert_to_map(&start_delta);
 
     /* check trivial case first - self aware (after co-ord translation) */
     if ((delta.x == 0) && (delta.y == 0))
@@ -667,8 +691,8 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
     }
 
     {
-        n_int	start_z = (n_int)WALK_ON_WATER(land_location(start.x, start.y),land_tide_level()) + 3; /* the nominal height of the Noble Ape */
-        n_int	delta_z = (n_int)WALK_ON_WATER(land_location((start.x + delta.x), (start.y + delta.y)),land_tide_level()) - start_z + 3; /* the nominal height of the Noble Ape */
+        n_int	start_z = (n_int)WALK_ON_WATER(land_location_vect(&start),land_tide_level()) + 3; /* the nominal height of the Noble Ape */
+        n_int	delta_z = (n_int)WALK_ON_WATER(land_location_vect(&start_delta),land_tide_level()) - start_z + 3; /* the nominal height of the Noble Ape */
         n_int	common_divisor = vect2_dot(&delta, &delta, 1, 1);
         being_draw 	  translate;
 
@@ -2087,12 +2111,17 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
     /** if it  night the being is... */
 
     /** ... fully awake to swim */
-
-    if(WATER_TEST(land_location(APESPACE_TO_MAPSPACE(being_location_x(local)), APESPACE_TO_MAPSPACE(being_location_y(local))),land_tide_level()))
     {
-        return FULLY_AWAKE;
+        n_vect2 location;
+        
+        being_space(local, &location);
+        being_convert_to_map(&location);
+        
+        if(WATER_TEST(land_location_vect(&location),land_tide_level()))
+        {
+            return FULLY_AWAKE;
+        }
     }
-
     /** ... slightly awake to eat */
 
     if (being_energy_less_than(local, BEING_HUNGRY + 1))
@@ -2728,17 +2757,12 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         n_vect2 looking_vector;
 
         vect2_byte2(&location_vector, being_location(local));
-
         being_facing_vector(local, &facing_vector, 4);
-
         land_vect2(&slope_vector, &az, &location_vector);
-
         vect2_add(&looking_vector, &location_vector, &facing_vector);
-        
-
-                     
-        test_land = (WATER_TEST(land_location((APESPACE_TO_MAPSPACE(looking_vector.x)),
-                                          (APESPACE_TO_MAPSPACE(looking_vector.y))),land_tide_level())!= 0);
+        being_convert_to_map(&looking_vector);
+ 
+        test_land = (WATER_TEST(land_location_vect(&looking_vector),land_tide_level())!= 0);
         
         {
             n_int delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
