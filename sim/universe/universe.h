@@ -325,60 +325,6 @@ enum PATHOGEN_TRANSMISSION_METHOD
 
 enum
 {
-    METABOLISM_STATE=0,
-    METABOLISM_PROTEIN,
-    METABOLISM_STARCH,
-    METABOLISM_FAT,
-    METABOLISM_SUGAR,
-    METABOLISM_WATER,
-    METABOLISM_BILE,
-    METABOLISM_GLUCOSE,
-    METABOLISM_MUSCLE,
-    METABOLISM_AMINO_ACIDS,
-    METABOLISM_GLUCOGEN,
-    METABOLISM_ADRENALIN,
-    METABOLISM_GLYCOGEN,
-    METABOLISM_AMMONIA,
-    METABOLISM_UREA,
-    METABOLISM_LACTATE,
-    METABOLISM_OXYGEN,
-    METABOLISM_CO2,
-    METABOLISM_FATTY_ACIDS,
-    METABOLISM_TRIGLYCERIDE,
-    METABOLISM_ADIPOSE,
-    METABOLISM_INSULIN,
-    METABOLISM_ADP,
-    METABOLISM_ATP,
-    METABOLISM_ENERGY,
-    METABOLISM_HEAT,
-    METABOLISM_PYRUVATE,
-    METABOLISM_WASTE,
-    METABOLISM_LEPTIN,
-    METABOLISM_GHRELIN,
-    METABOLISM_PROLACTIN,
-    METABOLISM_MILK,
-    METABOLISM_HEART_RATE,
-    METABOLISM_BREATHING_RATE,
-    METABOLISM_THERMOREGULATOR,
-    METABOLISM_LUNG_CAPACITY,
-    METABOLISM_SIZE
-};
-
-enum
-{
-    ORGAN_STOMACH=1,
-    ORGAN_MUSCLES,
-    ORGAN_LIVER,
-    ORGAN_KIDNEYS,
-    ORGAN_LUNGS,
-    ORGAN_PANCREAS_A,
-    ORGAN_PANCREAS_B,
-    ORGAN_TISSUE,
-    ORGANS
-};
-
-enum
-{
     INTERVAL_MINS = 0,
     INTERVAL_HOURS,
     INTERVAL_DAYS,
@@ -563,7 +509,7 @@ enum being_interaction_social
 #define BEING_MAX_HEIGHT    65535
 
 /* returns height in real units (mm) */
-#define GET_BEING_HEIGHT(bei) (GET_H(bei)*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
+#define GET_BEING_HEIGHT(bei) (being_height(bei)*BEING_MAX_HEIGHT_MM/BEING_MAX_HEIGHT)
 
 /* the amount of growth for a given energy intake
    Note that if AGE_OF_MATURITY is changed then this may
@@ -1214,7 +1160,6 @@ typedef struct
 /* macros defined to ease in the vectorised code */
 
 #define GET_A(bei,index) ((bei)->attention[index])
-#define GET_H(bei)      ((bei)->height)
 #define GET_M(bei)      ((bei)->mass)
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])

@@ -308,7 +308,7 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
         local_being->parasites = (n_byte) value;
         break;
     case VARIABLE_HEIGHT:
-        GET_H(local_being) = (n_byte2) value;
+        being_set_height(local_being, value);
         break;
             
 #if 0 /* TODO: This should not be done */
@@ -630,7 +630,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_number = local_being->parasites;
                         break;
                     case VARIABLE_HEIGHT:
-                        local_number = GET_H(local_being);
+                        local_number = being_height(local_being);
                         break;
                     case VARIABLE_FIRST_NAME:
                         local_number = being_gender_name(local_being);
@@ -856,7 +856,7 @@ void sim_start_conditions(void * vindividual, void * structure, void * data)
 
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = being_index(sim_sim(), local_being);
 
-    variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = GET_H(local_being);
+    variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = being_height(local_being);
     variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->goal[0];
     variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->goal[1];
     variables[VARIABLE_GOAL_Y - VARIABLE_VECT_ANGLE] = local_being->goal[2];
@@ -910,7 +910,8 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
     being_set_speed(local_being, (n_byte) local_speed);
     being_energy_delta(local_being, local_energy_delta);
 
-    GET_H(local_being)  = (n_byte2)local_height;
+    being_set_height(local_being, local_height);
+    
     if (local_goal_type!=GOAL_NONE)
     {
         local_being->goal[0]  = (n_byte2)local_goal_type;

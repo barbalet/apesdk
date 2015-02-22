@@ -739,15 +739,13 @@ void compress_expand(n_file *input,   n_file *output);
 #define MAP_AREA                      (1<<(2*MAP_BITS))
 
 #define APESPACE_TO_MAPSPACE(num)     ((num)>>6)
+#define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
+#define MAPSPACE_TO_APESPACE(num)     ((num)<<6)
 
 #define HI_RES_MAP_BITS               (MAP_BITS+3)
 
 #define HI_RES_MAP_DIMENSION          (1<<(HI_RES_MAP_BITS))
 #define HI_RES_MAP_AREA               (1<<(2*HI_RES_MAP_BITS))
-
-#define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
-
-#define MAPSPACE_TO_APESPACE(num)     ((num)<<6)
 
 #define MAP_APE_RESOLUTION_SIZE       (MAPSPACE_TO_APESPACE(MAP_DIMENSION))
 #define	APESPACE_BOUNDS               ((MAP_APE_RESOLUTION_SIZE)-1)

@@ -148,15 +148,6 @@ typedef enum
     EVENTS
 }being_episodic_event_type;
 
-void braincode_number_of_instructions(
-                                      noble_simulation * sim,
-                                      noble_being * local_being,
-                                      n_int * no_of_sensors,
-                                      n_int * no_of_actuators,
-                                      n_int * no_of_operators,
-                                      n_int * no_of_conditionals,
-                                      n_int * no_of_data);
-
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
 #ifdef BRAIN_ON
@@ -169,14 +160,6 @@ noble_social * being_social(noble_being * value);
 n_int being_brainstates(noble_being * value, n_int awake, n_byte2 * states);
 
 n_byte being_honor(noble_being * value);
-
-void being_honor_inc_dec(noble_being * inc, noble_being * dec);
-
-void being_honor_swap(noble_being * victor, noble_being * vanquished);
-
-n_int being_honor_compare(noble_being * first, noble_being * second);
-
-void being_unpack_family(n_byte2 name, n_byte * values);
 
 n_byte being_first_name(noble_being * value);
 
@@ -196,53 +179,38 @@ n_byte being_posture(noble_being * value);
 
 void being_set_posture(noble_being * value, n_byte post);
 
-n_int being_posture_under(noble_being * value, enum posture_type post);
-
 n_int being_location_x(noble_being * value);
 
 n_int being_location_y(noble_being * value);
 
-n_byte2 * being_location(noble_being * value);
-
-void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta);
 void being_set_location(noble_being * value, n_byte2 * from);
 
 n_int being_dob(noble_being * value);
 
 n_byte being_speed(noble_being * value);
+
 void being_set_speed(noble_being * value, n_byte sp);
 
-void being_facing_towards(noble_being * value, n_vect2 * vector);
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor);
 
 n_byte being_facing(noble_being * value);
+
 void being_wander(noble_being * value, n_int wander);
 
 n_genetics * being_genetics(noble_being * value);
 
-n_int being_pregnant(noble_being * value);
-
-n_genetics * being_fetal_genetics(noble_being * value);
-
 n_int being_energy(noble_being * value);
-n_int   being_energy_less_than(noble_being * value, n_int less_than);
 
 void  being_dead(noble_being * value);
-void  being_living(noble_being * value);
 
 void   being_energy_delta(noble_being * value, n_int delta);
 
 n_int   being_drive(noble_being * value, enum drives_definition drive);
-void    being_inc_drive(noble_being * value, enum drives_definition drive);
-void    being_dec_drive(noble_being * value, enum drives_definition drive);
-void    being_reset_drive(noble_being * value, enum drives_definition drive);
 
 n_int   being_height(noble_being * value);
-n_int   being_mass(noble_being * value);
+void    being_set_height(noble_being * value, n_int height);
 
-enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location);
-void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location);
-void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
+n_int   being_mass(noble_being * value);
 
 void being_listen(noble_simulation * sim, noble_being * local, void * data);
 
@@ -370,8 +338,6 @@ being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim);
 void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct ** brls);
 
 void being_remains_init(noble_simulation * sim);
-
-void being_remains(noble_simulation * sim, noble_being * dead);
 
 n_int being_index(noble_simulation * sim, noble_being * local);
 

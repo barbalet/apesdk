@@ -422,7 +422,7 @@ static void social_meet_update_features(
 
     noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
                             FEATURESET_HEIGHT,
-                            GET_H(met_being));
+                            being_height(met_being));
 
     noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
                             FEATURESET_FAT,
@@ -654,14 +654,14 @@ static n_int social_attraction_height(
     8-11 prefer shorter*/
     if (ppref >= 8)
     {
-        if ((ppref>=12) && (GET_H(met_being) > GET_H(meeter_being)))
+        if ((ppref>=12) && (being_height(met_being) > being_height(meeter_being)))
         {
             /** prefer taller */
             return 1;
         }
         else
         {
-            if ((ppref<12) && (GET_H(met_being) < GET_H(meeter_being)))
+            if ((ppref<12) && (being_height(met_being) < being_height(meeter_being)))
             {
                 /** prefer shorter */
                 return 1;

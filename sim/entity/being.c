@@ -434,6 +434,11 @@ n_int   being_height(noble_being * value)
     return value->height;
 }
 
+void    being_set_height(noble_being * value, n_int height)
+{
+    value->height = (n_byte2)height;
+}
+
 n_int   being_mass(noble_being * value)
 {
     return value->mass;
@@ -2692,7 +2697,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     n_int         birth_days         = being_dob(local);
 
     n_int	      loc_s              = being_speed(local);
-    n_int	      loc_h              = GET_H(local);
+    n_int	      loc_h              = being_height(local);
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
     n_int         fat_mass, child_mass = 0;
@@ -3064,7 +3069,9 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 #endif
 
     being_set_speed(local, (n_byte)loc_s);
-    GET_H(local) = (n_byte2) loc_h;
+    
+    being_set_height(local, loc_h);
+    
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     being_set_state(local, loc_state);
 }
@@ -3517,15 +3524,17 @@ n_int being_init(noble_being * beings, n_int number,
 
     if (random_factor)
     {
-        GET_H(local) = BIRTH_HEIGHT;
+        being_set_height(local, BIRTH_HEIGHT);
+        
         GET_M(local) = BIRTH_MASS;
     }
     else
     {
         /** produce an initial distribution of heights and masses*/
         being_random3(local);
-        GET_H(local) = BIRTH_HEIGHT +
-                       (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT));
+        being_set_height(local, BIRTH_HEIGHT +
+                         (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT)));
+        
         GET_M(local) = BIRTH_MASS +
                        (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
     }

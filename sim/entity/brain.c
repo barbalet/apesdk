@@ -507,60 +507,6 @@ n_byte get_braincode_instruction_type(n_byte instruction_type)
 
 /* return the number of instruction_types in the braincode */
 
-void braincode_number_of_instructions(
-                                             noble_simulation * sim,
-                                             noble_being * local_being,
-                                             n_int * no_of_sensors,
-                                             n_int * no_of_actuators,
-                                             n_int * no_of_operators,
-                                             n_int * no_of_conditionals,
-                                             n_int * no_of_data)
-{
-#ifdef BRAINCODE_ON
-    n_int i,j,instruction;
-    
-    *no_of_sensors = 0;
-    *no_of_actuators = 0;
-    *no_of_operators = 0;
-    *no_of_conditionals = 0;
-    *no_of_data = 0;
-    
-    for (i=0; i<BRAINCODE_SIZE; i+=3)
-    {
-        for (j=0; j<2; j++)
-        {
-            if (j==0)
-            {
-                instruction = being_braincode_internal(local_being)[i] & 63;
-            }
-            else
-            {
-                instruction = being_braincode_external(local_being)[i] & 63;
-            }
-            if ((instruction >= BRAINCODE_SENSORS_START) && (instruction < BRAINCODE_ACTUATORS_START))
-            {
-                *no_of_sensors = *no_of_sensors + 1;
-            }
-            if ((instruction >= BRAINCODE_ACTUATORS_START) && (instruction < BRAINCODE_OPERATORS_START))
-            {
-                *no_of_actuators = *no_of_actuators + 1;
-            }
-            if ((instruction >= BRAINCODE_OPERATORS_START) && (instruction < BRAINCODE_CONDITIONALS_START))
-            {
-                *no_of_operators = *no_of_operators + 1;
-            }
-            if ((instruction >= BRAINCODE_CONDITIONALS_START) && (instruction < BRAINCODE_DATA_START))
-            {
-                *no_of_conditionals = *no_of_conditionals + 1;
-            }
-            if ((instruction >= BRAINCODE_DATA_START) && (instruction < BRAINCODE_INSTRUCTIONS))
-            {
-                *no_of_data = *no_of_data + 1;
-            }
-        }
-    }
-#endif
-}
 
 /**
  * @brief returns a random braincode instruction

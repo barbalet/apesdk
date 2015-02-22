@@ -165,4 +165,40 @@ n_byte get_braincode_instruction(noble_being * local_being);
 
 void being_ingest_pathogen(noble_being * local, n_byte food_type);
 
+n_int being_posture_under(noble_being * value, enum posture_type post);
+
+void being_honor_inc_dec(noble_being * inc, noble_being * dec);
+
+void being_honor_swap(noble_being * victor, noble_being * vanquished);
+
+n_int being_honor_compare(noble_being * first, noble_being * second);
+
+void being_unpack_family(n_byte2 name, n_byte * values);
+
+n_byte2 * being_location(noble_being * value);
+
+void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta);
+
+void being_facing_towards(noble_being * value, n_vect2 * vector);
+
+n_int being_pregnant(noble_being * value);
+
+n_genetics * being_fetal_genetics(noble_being * value);
+
+n_int being_energy_less_than(noble_being * value, n_int less_than);
+
+void  being_living(noble_being * value);
+
+void  being_inc_drive(noble_being * value, enum drives_definition drive);
+
+void  being_dec_drive(noble_being * value, enum drives_definition drive);
+
+void  being_reset_drive(noble_being * value, enum drives_definition drive);
+
+enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location);
+void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location);
+void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
+
+void being_remains(noble_simulation * sim, noble_being * dead);
+
 #endif /* NOBLEAPE_ENTITY_INTERNAL_H */
