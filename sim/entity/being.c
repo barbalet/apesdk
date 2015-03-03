@@ -306,12 +306,6 @@ void being_high_res(noble_being * value, n_vect2 * vector)
     vector->y = APESPACE_TO_HR_MAPSPACE(being_location_y(value));
 }
 
-void being_convert_to_map(n_vect2 * value)
-{
-    value->x = APESPACE_TO_MAPSPACE(value->x);
-    value->y = APESPACE_TO_MAPSPACE(value->y);
-}
-
 void being_space(noble_being * value, n_vect2 * vector)
 {
     vector->x = value->location[0];
@@ -489,14 +483,14 @@ static void being_turn_away_from_water(noble_being * value)
         vect2_direction(&temp_vector, turn_plus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        being_convert_to_map(&temp_vector);
+        land_convert_to_map(&temp_vector);
         
         z_plus = land_location_vect(&temp_vector);
 
         vect2_direction(&temp_vector, turn_minus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
-        being_convert_to_map(&temp_vector);
+        land_convert_to_map(&temp_vector);
         
         z_minus = land_location_vect(&temp_vector);
 
@@ -680,9 +674,9 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
 
     /** move everything from being co-ordinates to map co-ordinates */
     
-    being_convert_to_map(&start);
-    being_convert_to_map(&delta);
-    being_convert_to_map(&start_delta);
+    land_convert_to_map(&start);
+    land_convert_to_map(&delta);
+    land_convert_to_map(&start_delta);
 
     /* check trivial case first - self aware (after co-ord translation) */
     if ((delta.x == 0) && (delta.y == 0))
@@ -2115,7 +2109,7 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
         n_vect2 location;
         
         being_space(local, &location);
-        being_convert_to_map(&location);
+        land_convert_to_map(&location);
         
         if(WATER_TEST(land_location_vect(&location),land_tide_level()))
         {
@@ -2760,7 +2754,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         being_facing_vector(local, &facing_vector, 4);
         land_vect2(&slope_vector, &az, &location_vector);
         vect2_add(&looking_vector, &location_vector, &facing_vector);
-        being_convert_to_map(&looking_vector);
+        land_convert_to_map(&looking_vector);
  
         test_land = (WATER_TEST(land_location_vect(&looking_vector),land_tide_level())!= 0);
         

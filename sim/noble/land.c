@@ -677,5 +677,10 @@ void spacetime_set(n_spacetime * set, n_byte2 * location)
     set->location[1] = location[1];
     set->time        = m_time;
     set->date        = m_date;
+}
 
+void land_convert_to_map(n_vect2 * value)
+{
+    value->x = APESPACE_TO_MAPSPACE(value->x);
+    value->y = APESPACE_TO_MAPSPACE(value->y);
 }

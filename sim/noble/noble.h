@@ -1048,6 +1048,7 @@ void  spacetime_copy(n_spacetime * to, n_spacetime * from);
 n_int spacetime_before_now(n_spacetime * initial);
 void  spacetime_set(n_spacetime * set, n_byte2 * location);
 
+void land_convert_to_map(n_vect2 * value);
 
 #define	SC_DEBUG_STRING(ptr, string)	scdebug_string(ptr, string)
 #define SC_DEBUG_NUMBER(ptr, number) scdebug_int(ptr, number)

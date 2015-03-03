@@ -1038,9 +1038,7 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
     n_vect2     delta;
     
     being_space(bei, &location);
-    
-    being_convert_to_map(&location);
-    
+    land_convert_to_map(&location);
     
     delta.y = start;
     while (delta.y < stop)
@@ -1497,7 +1495,7 @@ static void draw_remains(noble_simulation * sim, n_byte * screen)
         location.x = body->location[0];
         location.y = body->location[1];
         
-        being_convert_to_map(&location);
+        land_convert_to_map(&location);
         
         while (lx < 515)
         {

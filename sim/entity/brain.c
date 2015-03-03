@@ -1011,7 +1011,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
 
     
     being_space(meeter_being, &location);
-    being_convert_to_map(&location);
+    land_convert_to_map(&location);
     
     /** clear episodes visited.
      This array helps to avoid repeatedly visiting the same memories */

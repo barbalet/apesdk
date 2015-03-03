@@ -620,7 +620,7 @@ static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * d
     n_vect2 location;
     
     being_space(local, &location);
-    being_convert_to_map(&location);
+    land_convert_to_map(&location);
 
     if (land_location_vect(&location) < 160)
     {
