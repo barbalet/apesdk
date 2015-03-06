@@ -77,7 +77,7 @@ static void drives_sociability_loop(noble_simulation * local_sim, noble_being * 
     n_int   distance_squared;
     n_vect2 difference_vector;
     /* this needs to be checked against simulation near sight and sound values */
-    const n_int apespace_span = APESPACE_TO_MAPSPACE(10);
+    const n_int apespace_span = 2; /*(10) >> APE_TO_MAP_BIT_RATIO; too low */
     being_delta(dsd->being, other, &difference_vector);
     /* los should not be used here, it's too expensive */
     distance_squared = vect2_dot(&difference_vector, &difference_vector, 1, 1);

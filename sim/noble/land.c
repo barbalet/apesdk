@@ -514,19 +514,15 @@ n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
     n_int map_dimension = land_map_dimension();
     n_int map_x = APESPACE_TO_MAPSPACE(locx);
     n_int map_y = APESPACE_TO_MAPSPACE(locy);
-    n_int interpolated;
-
+    n_int interpolated;    
     NA_ASSERT(kind, "kind NULL");
     
     /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
-    interpolated = APESPACE_TO_MAPSPACE(
-                       land_operator((map_x+1)&(map_dimension-1), map_y, kind)*(locx-MAPSPACE_TO_APESPACE(map_x)));
-    interpolated += APESPACE_TO_MAPSPACE(
-                        land_operator((map_x-1)&(map_dimension-1), map_y, kind)*(MAPSPACE_TO_APESPACE(map_x+1)-locx));
-    interpolated += APESPACE_TO_MAPSPACE(
-                        land_operator(map_x, (map_y+1)&(map_dimension-1), kind)*(locy-MAPSPACE_TO_APESPACE(map_y)));
-    interpolated += APESPACE_TO_MAPSPACE(
-                        land_operator(map_x, (map_y-1)&(map_dimension-1), kind)*(MAPSPACE_TO_APESPACE(map_y+1)-locy));
+    interpolated  = (land_operator((map_x+1)&(map_dimension-1), map_y, kind)*(locx-(map_x << APE_TO_MAP_BIT_RATIO))) >> APE_TO_MAP_BIT_RATIO;
+    interpolated += (land_operator((map_x-1)&(map_dimension-1), map_y, kind)*(((map_x+1)<<APE_TO_MAP_BIT_RATIO)-locx)) >> APE_TO_MAP_BIT_RATIO;
+    interpolated += (land_operator(map_x, (map_y+1)&(map_dimension-1), kind)*(locy-(map_y<<APE_TO_MAP_BIT_RATIO))) >> APE_TO_MAP_BIT_RATIO;
+    interpolated += (land_operator(map_x, (map_y-1)&(map_dimension-1), kind)*(((map_y+1)<<APE_TO_MAP_BIT_RATIO)-locy)) >> APE_TO_MAP_BIT_RATIO;
+    
     return interpolated >> 1;
 }
 
