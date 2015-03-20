@@ -324,15 +324,15 @@ void draw_tc_controls(n_join * local_mono)
         vect2_populate(&point1, 5, half_y + TC_OFFSET_Y);
         vect2_populate(&point2, 5, half_y - TC_OFFSET_Y);
         vect2_populate(&point3, TC_FRACTION_X - 5, half_y);
-        
+
         math_line_vect(&point1, &point2, local_mono);
         math_line_vect(&point2, &point3, local_mono);
         math_line_vect(&point3, &point1, local_mono);
-        
+
         vect2_populate(&point1, terrain_dim_x - 5, half_y + TC_OFFSET_Y);
         vect2_populate(&point2, terrain_dim_x - 5, half_y - TC_OFFSET_Y);
         vect2_populate(&point3, terrain_dim_x - TC_FRACTION_X + 5, half_y);
-        
+
         math_line_vect(&point1, &point2, local_mono);
         math_line_vect(&point2, &point3, local_mono);
         math_line_vect(&point3, &point1, local_mono);
@@ -343,18 +343,18 @@ void draw_tc_controls(n_join * local_mono)
         vect2_populate(&point1, TC_FRACTION_X - 5, half_y + TC_OFFSET_Y);
         vect2_populate(&point2, TC_FRACTION_X - 5, half_y - TC_OFFSET_Y);
         vect2_populate(&point3, 5, half_y);
-        
+
         math_line_vect(&point1, &point2, local_mono);
         math_line_vect(&point2, &point3, local_mono);
         math_line_vect(&point3, &point1, local_mono);
     }
-    
+
     if (tc_state == TCS_RIGHT_STATE_CONTROLS)
     {
         vect2_populate(&point1, terrain_dim_x - TC_FRACTION_X + 5, half_y + TC_OFFSET_Y);
         vect2_populate(&point2, terrain_dim_x - TC_FRACTION_X + 5, half_y - TC_OFFSET_Y);
         vect2_populate(&point3, terrain_dim_x - 5, half_y);
-        
+
         math_line_vect(&point1, &point2, local_mono);
         math_line_vect(&point2, &point3, local_mono);
         math_line_vect(&point3, &point1, local_mono);
@@ -410,18 +410,18 @@ void draw_about(n_constant_string platform)
 #else
     draw_string(COPYRIGHT_DATE,         linx_x_offset + tab_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
-    
+
     draw_string(COPYRIGHT_NAME,         linx_x_offset + tab_offset, line_y_offset, &local_draw);
 #endif
     line_y_offset += 12;
     line_y_offset += 12;
-    
+
     draw_string(FULL_DATE,              linx_x_offset, line_y_offset, &local_draw);
     line_y_offset += 12;
     line_y_offset += 12;
 
     draw_string(platform,               linx_x_offset + tab_offset, line_y_offset, &local_draw);
-#if (MAP_BITS == 9)    
+#if (MAP_BITS == 9)
     line_y_offset += 12;
     line_y_offset += 12;
 
@@ -457,44 +457,44 @@ void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * 
 {
     n_pixel	* local_draw = draw->pixel_draw;
     void	* local_info = draw->information;
-    
+
     n_int	char_loop = 0;
     while (str[char_loop] > 31)
     {
         n_int	val = seg14[conv[str[char_loop] - 32]];
         n_int	offset = char_loop << 3;
         /* draw the character as a 14-segment LCD/LED output */
-        
+
         ledfir(3, 8, 0, 0, 15);
-        
+
         ledfir(3, 2, 0, 0, 14);
-        
+
         ledfir(1, 0, 4, 0, 13);
-        
+
         ledfir(6, 1, 0, 2, 12);
-        
+
         ledfir(6, 5, 0, 2, 11);
-        
+
         ledfir(1, 8, 4, 0, 10);
-        
+
         ledfir(0, 5, 0, 2, 9);
-        
+
         ledfir(0, 1, 0, 2, 8);
-        
+
         ledfir(4, 4, 1, 0, 7);
-        
+
         ledfir(1, 4, 1, 0, 6);
-        
+
         ledfir(3, 5, 0, 2, 5);
-        
+
         ledfir(4, 6, 0, 1, 4);
-        
+
         ledfir(2, 6, -1, 1, 3);
-        
+
         ledfir(4, 2, 1, -1, 2);
-        
+
         ledfir(1, 1, 1, 1, 1);
-        
+
         ledfir(3, 1, 0, 2, 0);
         char_loop ++;
     }
@@ -618,20 +618,20 @@ void draw_color_time(n_byte2 * color_fit)
     n_int	sign = 1;
 
     if (!toggle_tidedaylight)
-    {    
+    {
         if (darken < 1)
             sign = -1;
 
         darken = (darken * darken) / 402;
         darken = (sign * darken) + 624;
-        
+
         while(loop < (COLOUR_GREY * 3))
         {
             n_int cg_val = color_group[loop];
             n_int response = (cg_val * darken) >> 10;
 
             color_fit[loop] = (n_byte2)response;
-            
+
             loop++;
         }
     }
@@ -642,15 +642,16 @@ void draw_color_time(n_byte2 * color_fit)
     }
 }
 
-typedef struct{
+typedef struct
+{
     n_int     const_lowdiv2;
     n_int     lowest_s;
     n_int     lowest_c;
-    
+
     n_vect2   co;
 
     n_vect2   dimensions;
-    n_vect2   value_vector;    
+    n_vect2   value_vector;
     n_byte    *offscreen;
 } draw_terrain_scan_struct;
 
@@ -684,7 +685,7 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
 
         n_int          aval         = (scry - z00);
         if (aval < -1) aval = -1;
-        
+
         scry--;           /* next map point from screen value */
         big_x -= vals2;
         big_y -= valc2;
@@ -703,12 +704,12 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
 static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_byte threadable)
 {
     n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
-    
+
     if (buf_offscr == 0L)
     {
         return;
     }
-    
+
     if (local_sim->select == 0L)
     {
         io_erase(buf_offscr, dimensions->x * dimensions->y);
@@ -718,48 +719,48 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
         const n_int    lowest_y = ((dimensions->y + 256) * dimensions->y)/256;
         noble_being * loc_being = local_sim->select;
         draw_terrain_scan_struct dtss;
-        
+
         n_byte2 *  local_combined = (n_byte2 *)land_topology_highdef();
-        
+
         /* start at the left-most row */
         n_int scrx = (0 - (dimensions->x >> 1));
         /* find the central map point */
         n_int flatval;
         n_vect2 value_vector;
-        
+
         vect2_direction(&value_vector, terrain_turn + 128, 105);
-        
+
         vect2_copy(&(dtss.value_vector), &value_vector);
-        
+
         dtss.lowest_s = ((value_vector.x * (((lowest_y)) - dimensions->y)));
         dtss.lowest_c = ((value_vector.y * (((lowest_y)) - dimensions->y)));
-        
+
         being_high_res(loc_being, &dtss.co);
-        
+
         flatval = local_combined[CONVERT_X((HI_RES_MAP_DIMENSION/2), dtss.co.x) | CONVERT_Y((HI_RES_MAP_DIMENSION/2), dtss.co.y)] & 255;
-        
+
         if (flatval < WATER_MAP)   /* if the central map point is underwater,*/
         {
             flatval = WATER_MAP;   /*    put it on water level */
         }
-        
+
         dtss.const_lowdiv2 = (((lowest_y)) >> 1) + flatval;
-        
+
         vect2_copy(&(dtss.dimensions), dimensions);
-        
+
         dtss.offscreen = buf_offscr;
-        
+
         /* repeat until the right-most row is reached */
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
             n_int * screen_x_location = io_new(sizeof(n_int));
 
             draw_terrain_scan_struct * local_dtss = (draw_terrain_scan_struct *)io_new(sizeof(draw_terrain_scan_struct));
-            
+
             io_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
 
             screen_x_location[0] = scrx;
-            
+
             if (threadable)
             {
                 execute_add(((execute_function*)draw_terrain_scan), (void*)local_dtss, (void*)screen_x_location, 0L);
@@ -768,7 +769,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
             {
                 draw_terrain_scan(local_dtss, screen_x_location, 0L);
             }
-            
+
             scrx++;               /* next column */
         }
         if (threadable)
@@ -826,7 +827,7 @@ static void	draw_meters(noble_simulation * local_sim)
             (*local_draw)(5 + hr, 45, 0, 0, local_info);
             (*local_draw)(5 + hr, 5,  0, 0, local_info);
         }
-        
+
         hr ++;
     }
 
@@ -836,7 +837,7 @@ static void	draw_meters(noble_simulation * local_sim)
     {
         n_vect2 hour_clock;
         vect2_direction(&hour_clock, ((hr << 8) / 12), 320);
-        
+
         (void)math_join((25 + (hour_clock.x / 5)), (25 + (hour_clock.y / 5)), (hour_clock.x / 17), (hour_clock.y / 17), &local_kind);
         hr++;
     }
@@ -855,14 +856,14 @@ static void	draw_meters(noble_simulation * local_sim)
         hr = 0;
         while (hr < 41)
         {
-            
+
             if ((hr != 40) && (hr != 0))
             {
                 math_join(51 + 5 + FACING_OFFSIDE, 5+hr, 38, 0, &local_kind_black);
                 math_join(51 + 55 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
                 math_join(51 + 55 + 18 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
             }
-            
+
             if ((hr&1) == 0)
             {
                 (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
@@ -872,7 +873,7 @@ static void	draw_meters(noble_simulation * local_sim)
 
                 (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
                 (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-                
+
                 (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
                 (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
             }
@@ -945,7 +946,7 @@ static void	draw_meters(noble_simulation * local_sim)
         /* draw direction facing */
         {
             n_vect2 direction_facing;
-            
+
             vect2_direction(&direction_facing, 128 + 64+ 256 - terrain_turn + loc_being->direction_facing, 63 * 32);
 
             (void)math_join_vect2(75+ FACING_OFFSIDE, 25, &direction_facing, &local_kind);
@@ -981,20 +982,20 @@ static void	draw_meters(noble_simulation * local_sim)
         n_vect2 month_hand;
         n_vect2 hour_hand;
         n_vect2 minute_hand;
-        
+
         vect2_direction(&year_hand, ((land_date()) << 6) / mndivyear, 5440);
         vect2_direction(&month_hand, ((land_date()) << 6) / mndivmonth, 5440);
         vect2_direction(&hour_hand, ((land_time()) << 6) / mndivhr, 2688);
         vect2_direction(&minute_hand, ((land_time()) << 6) / mndivmin, 2016);
-        
+
         vect2_rotate90(&year_hand);
         vect2_rotate90(&month_hand);
         vect2_rotate90(&hour_hand);
         vect2_rotate90(&minute_hand);
-        
+
         (void)math_join_vect2(17, 25, &year_hand, &local_kind);
         (void)math_join_vect2(33, 25, &month_hand, &local_kind);
-        
+
         (void)math_join_vect2(25, 25, &hour_hand, &local_kind);
         (void)math_join_vect2(25, 25, &minute_hand, &local_kind);
     }
@@ -1036,10 +1037,10 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
     n_int	    start_point = ((time_coef &3 )) + 3;
     n_vect2     location;
     n_vect2     delta;
-    
+
     being_space(bei, &location);
     land_convert_to_map(&location);
-    
+
     delta.y = start;
     while (delta.y < stop)
     {
@@ -1047,7 +1048,7 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
         while (delta.x < stop)
         {
             n_vect2 screen;
-            
+
             vect2_add(&screen, &location, &delta);
 
             (*local_draw)(POSITIVE_LAND_COORD(screen.x), POSITIVE_LAND_COORD(screen.y), 0, 0, local_info);
@@ -1122,9 +1123,9 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
 
     n_vect2      location;
     n_vect2      delta;
-    
+
     being_high_res(bei, &location);
-    
+
     delta.y = start;
     while (delta.y < stop)
     {
@@ -1215,7 +1216,7 @@ static void draw_region(noble_being * local)
     }
 
 #ifdef TERRITORY_ON
-    
+
     local_draw.pixel_draw  = &pixel_map;
 
     ly = 0;
@@ -1298,13 +1299,13 @@ static void draw_count_number(n_uint count, n_string value)
 static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
 {
     n_int offset_y = 100;
-    
+
     n_string_block  bcps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
-        'B', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
-    };
+                                   'B', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
+                                  };
     n_string_block  fps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
-        'F', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0
-    };
+                                  'F', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0
+                                 };
 
     if (bcps)
     {
@@ -1347,13 +1348,13 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
         n_byte	    * brainptr = local;
         n_byte	    * obrainptr = &local[ 32 * 32 * 32 ];
         n_int         a11, a12, a13, a21, a23, a31, a32, a33;
-        
+
         n_vect2       vect_y, vect_z;
-        
+
         vect2_direction(&vect_y, turn_y, 105);
-        
+
         vect2_direction(&vect_z, turn_z, NEW_SD_MULTIPLE/1152);
-        
+
         a32 =  vect_y.x;
         a12 =  vect_y.y;
         a21 =  vect_z.x;
@@ -1433,7 +1434,7 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     n_string_block     simulation_date_time = {0};
     n_string_block     simulation_date_time_error = {0};
     n_int              position = 0;
-    
+
     if (error_text)
     {
 #ifdef NOBLE_APE_ASSERT
@@ -1441,11 +1442,11 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
 #endif
 
         io_time_to_string(simulation_date_time);
-    
+
         io_string_write(simulation_date_time_error, simulation_date_time, &position);
         io_string_write(simulation_date_time_error, " ", &position);
 
-        
+
         if(number_errors == MAX_NUMBER_ERRORS)
         {
             io_string_write(simulation_date_time_error, " ** Maximum errors reached **" , &position);
@@ -1491,12 +1492,12 @@ static void draw_remains(noble_simulation * sim, n_byte * screen)
         dead_body * body = &(remains->bodies[loop]);
         n_int       lx = 510;
         n_vect2     location;
-        
+
         location.x = body->location[0];
         location.y = body->location[1];
-        
+
         land_convert_to_map(&location);
-        
+
         while (lx < 515)
         {
             screen[((location.x + lx)&(MAP_DIMENSION-1)) + (((location.y)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
@@ -1516,12 +1517,12 @@ static void draw_tides(n_byte * map, n_byte * screen, n_byte tide)
     n_int	dr = 128;
     n_int	fl = tide_point;
     n_int	fp = 0;
-    
+
     if (toggle_tidedaylight)
     {
         return;
     }
-    
+
     while (lp < 45)
     {
         tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl-fp));
@@ -1561,7 +1562,7 @@ static void draw_tides_hi_res(n_byte * data, n_byte4 * block, n_byte tide)
     {
         return;
     }
-    
+
     while (lp < 45)
     {
         tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl-fp));
@@ -1603,10 +1604,10 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
 {
     n_join			local_8bit;
     n_color8        local_col;
-    
+
     /* makes this use thread safe */
     io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
-    
+
     if (being_los(local_sim->select, (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
     {
         local_col.color = COLOUR_RED;
@@ -1615,7 +1616,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     {
         local_col.color = COLOUR_RED_DARK;
     }
-    
+
     if (local_col.screen == land_topology_highdef())
     {
         local_8bit.pixel_draw = &pixel_color8_hires;
@@ -1624,9 +1625,9 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     {
         local_8bit.pixel_draw  = &pixel_color8;
     }
-    
+
     local_8bit.information = &local_col;
-    
+
     if (local_col.screen == land_topology_highdef())
     {
         draw_apeloc_hires(local_sim, bei, &local_8bit);
@@ -1676,7 +1677,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
     {
         being_loop_no_thread(local_sim, 0L, draw_apes_loop, &local_col);
     }
-    
+
 }
 
 static void draw_errors(noble_simulation * local_sim)
@@ -1721,13 +1722,13 @@ n_int  draw_cycle(void)
     noble_simulation * local_sim = sim_sim();
     n_vect2            local_vect;
     n_join             local_mono;
-    
+
     if (sim_new()) return 0;
     if (check_about) return 0;
-    
+
     local_mono.pixel_draw  = &pixel_overlay;
     local_mono.information = draw_pointer(NUM_TERRAIN);
-    
+
     local_vect.x = terrain_dim_x;
     local_vect.y = terrain_dim_y;
 
@@ -1760,7 +1761,7 @@ n_int  draw_cycle(void)
         draw_metrics(0, local_sim->delta_frames, &local_mono);
     }
 #endif
-    
+
 #ifdef BRAINCODE_ON
     if (toggle_braincode)
     {
@@ -1775,7 +1776,7 @@ n_int  draw_cycle(void)
         draw_weather(); /* 10 */
     }
 #endif
-    
+
 #ifdef MULTITOUCH_CONTROLS
     draw_tc_controls(&local_mono);
 #endif

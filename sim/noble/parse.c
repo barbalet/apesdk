@@ -109,7 +109,7 @@ void scdebug_writeon(void * ptr)
 void scdebug_writeoff(void * ptr)
 {
     if (ptr != writable_selection) return;
-    
+
     io_file_writeoff(&single_entry, file_debug);
 }
 
@@ -125,9 +125,9 @@ n_string scdebug_variable(n_int variable)
     n_string return_value = 0L;
     if((variable < VARIABLE_MAX)
 #ifndef COMMAND_LINE_DEBUG
-       && (file_debug  != 0L)
+            && (file_debug  != 0L)
 #endif
-       )
+      )
     {
         return_value = (n_string) local_var_codes[variable];
     }
@@ -139,7 +139,7 @@ void scdebug_int(void * ptr, n_int number)
     if (single_entry == 0) return;
 
     if (ptr != writable_selection) return;
-    
+
 #ifndef COMMAND_LINE_DEBUG
     if(file_debug  != 0L)
     {
@@ -155,7 +155,7 @@ void scdebug_newline(void * ptr)
     if (single_entry == 0) return;
 
     if (ptr != writable_selection) return;
-    
+
 #ifndef COMMAND_LINE_DEBUG
     if(file_debug != 0L)
 #endif
@@ -257,7 +257,7 @@ static n_byte parse_character(n_byte temp)
         quote_up ^= 1;
         return APESCRIPT_STRING;
     }
-    
+
     if (quote_up)
     {
         return APESCRIPT_STRING;
@@ -346,7 +346,7 @@ static n_int parse_buffer(n_interpret * final_prog, n_byte previous, const n_byt
             return -1;
         }
         break;
-            
+
     case (APESCRIPT_STRING):
         result = parse_quoted_string(final_prog, (n_constant_string)buffer); /* this loads the number into the number buffer */
         if(result == -1)
@@ -445,11 +445,11 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     n_byte	      previous = 0;
 
     /* remove the white space from the input file */
-    
+
     io_whitespace(input);
 
     /* perform the initial allocations */
-    
+
     if((final_prog = io_new(sizeof(n_interpret))) == 0L)
     {
         return 0L;
@@ -468,7 +468,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     }
 
     /* allow for the space for the size to be written after everything else has been written/calculated */
-    
+
     final_prog->binary_code->location = SIZEOF_NUMBER_WRITE;
 
     final_prog->variable_strings = variables;
@@ -480,11 +480,11 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     variable_num = main_entry + 1;
 
     number_num = 1;
-    
+
     quote_up = 0;
 
     /* clear everything initially */
-    
+
     while(loop < NUMBER_MAX)
     {
         local_number[ loop++ ] = 0;
@@ -496,7 +496,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
     end_loop = input->size;
 
     /* work through each character in the input file */
-    
+
     while(loop < end_loop)
     {
         n_byte	temp = local_data[ loop++ ];
@@ -517,15 +517,15 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
                 interpret_cleanup(&final_prog);
                 return 0L;
             }
-            
+
             /* clear the buffer for new characters coming in */
             buffer_size = 0;
             io_erase(buffer, VARIABLE_WIDTH);
         }
-        
+
         /* add the character to the buffer */
         buffer[buffer_size++] = temp;
-        
+
         /* if the buffer gets to big, it's a problem */
         if (buffer_size == (VARIABLE_WIDTH -  1))
         {
@@ -533,7 +533,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
             (void)io_apescript_error(0L, AE_MAXIMUM_SCRIPT_SIZE_REACHED);
             return 0L;
         }
-        
+
         /* track the previous type */
         previous = convert;
     }

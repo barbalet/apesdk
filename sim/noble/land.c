@@ -130,12 +130,12 @@ static n_int weather_delta(void)
     n_int    average = 0;
     n_int    map_dimensions2;
     n_int    map_bits2;
-    
+
     map_dimensions2 = land_map_dimension() / 2;
-    
+
     map_bits2       = land_map_bits() - 1;
     if (map_bits2 < 0) return 0;
-    
+
     while (lx < map_dimensions2)
     {
         n_int ly = 0;
@@ -191,11 +191,11 @@ void weather_cycle(void)
     n_int         ly = 0;
     n_int         map_dimensions2 = land_map_dimension()/ 2;
     n_int         map_bits2 = land_map_bits() - 1;
-    
+
     if (map_bits2 < 0) return;
-    
+
     local_delta = weather_delta();
-    
+
     while ( ly < map_dimensions2 )
     {
         n_int	ly_min = ((ly + (map_dimensions2-1) ) & ((map_dimensions2)-1)) * map_dimensions2;
@@ -217,7 +217,7 @@ void weather_cycle(void)
         }
         ly++;
     }
-    
+
     weather_wrap(m_atmosphere);
 }
 
@@ -227,9 +227,9 @@ void weather_init(void)
     n_int map_bits2      = land_map_bits() - 1;
     n_int ly = 0;
     n_int ly2 = 0;
-    
+
     if (map_bits2 < 0) return;
-    
+
     io_erase((n_byte *)m_atmosphere, sizeof(n_c_int) * MAP_AREA / 4);
     io_erase((n_byte *)m_delta_pressure, sizeof(n_byte2) * MAP_AREA / 4);
 
@@ -244,8 +244,8 @@ void weather_init(void)
                                     + land_location(lx2 + 1, ly2)
                                     + land_location(lx2,     ly2 + 1)
                                     + land_location(lx2 + 1, ly2 + 1);
-            
-            
+
+
             m_atmosphere[ (map_dimension2 * ly) + lx ] = (n_c_int)total_land;
             lx++;
         }
@@ -261,18 +261,18 @@ void weather_init(void)
         while ( lx < (map_dimension2) )
         {
             m_delta_pressure[ ly_neu + lx ]
-                  = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension2)-1)) + ly_neu]
-                  - m_atmosphere[(( lx + ((map_dimension2)-1) ) & ((map_dimension2)-1)) + ly_neu]
-                  + m_atmosphere[ lx + ly_plu ]
-                  - m_atmosphere[ lx + ly_min ]
-                  + 512);
+                = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension2)-1)) + ly_neu]
+                            - m_atmosphere[(( lx + ((map_dimension2)-1) ) & ((map_dimension2)-1)) + ly_neu]
+                            + m_atmosphere[ lx + ly_plu ]
+                            - m_atmosphere[ lx + ly_min ]
+                            + 512);
             lx++;
         }
         ly++;
     }
-    
+
     ly = 0;
-    while( ly < (map_dimension2 * map_dimension2)) 
+    while( ly < (map_dimension2 * map_dimension2))
     {
         m_atmosphere[ ly ] = 0;
         ly++;
@@ -291,7 +291,7 @@ n_int weather_pressure(n_int px, n_int py)
 
     n_int   tpx = ((px/2) + dimension2) % dimension2;
     n_int   tpy = ((py/2) + dimension2) % dimension2;
-    
+
     return  m_atmosphere[(dimension2 * tpy) + tpx];
 }
 
@@ -303,7 +303,7 @@ void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind)
 
     if (pos == 0L) return;
     if (wind == 0L) return;
-    
+
     local_pressure = weather_pressure(pos->x, pos->y);
     wind->x = local_pressure - weather_pressure(pos->x - WEATHER_TO_MAPSPACE(1), (pos->y>>1));
     wind->y = local_pressure - weather_pressure(pos->x, pos->y  - WEATHER_TO_MAPSPACE(1));
@@ -315,7 +315,7 @@ weather_values	weather_seven_values(n_int px, n_int py)
     n_int	val;
     n_int   map_x = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(px));
     n_int   map_y = POSITIVE_LAND_COORD(APESPACE_TO_MAPSPACE(py));
-    
+
     if(IS_DAWNDUSK(m_time))
     {
         return WEATHER_SEVEN_DAWN_DUSK;
@@ -335,7 +335,7 @@ weather_values	weather_seven_values(n_int px, n_int py)
     {
         return WEATHER_SEVEN_ERROR; /* Error has already been shown */
     }
-    
+
     if(val > WEATHER_RAIN)
     {
         return ret_val+2;
@@ -372,7 +372,7 @@ n_int land_location_vect(n_vect2 * value)
 void land_tide(void)
 {
     n_int current_time    = m_time + (m_date * TIME_DAY_MINUTES);
-    
+
     {
         n_int lunar_mins      = current_time % LUNAR_ORBIT_MINS;
         n_int lunar_angle_256 = (((m_time * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
@@ -381,9 +381,9 @@ void land_tide(void)
 
         n_int lunar = math_sine(lunar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_LUNAR);
         n_int solar = math_sine(solar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_SOLAR);
-        
+
         NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
-        
+
         m_tide_level = (n_byte)(WATER_MAP + lunar + solar);
     }
 }
@@ -412,17 +412,17 @@ static n_int land_operator(n_int locx, n_int locy, n_byte *specific_kind)
 {
     n_int	temp = 0, temp_add;
     n_int	number_sum = 0;
-    
+
     n_int	fg;
     n_int	dfg;
     n_int	fdg;
-    
+
     NA_ASSERT(specific_kind, "specific_kind NULL");
-    
+
     fg  = land_location(locx, locy);
     dfg = land_location(locx + 1, locy);
     fdg = land_location(locx, locy + 1);
-    
+
     dfg = (dfg - fg) * 8;
     fdg = (fdg - fg) * 8;
 
@@ -466,7 +466,7 @@ static n_int land_operator(n_int locx, n_int locy, n_byte *specific_kind)
 
             n_int   weather_divide = (105 + ((weather % 3) * 30));
             n_vect2 time_weather;
-            
+
             vect2_direction(&time_weather, hr, weather_divide * 32);
             vect2_offset(&time_weather, 840/ weather_divide, 840/ weather_divide);
 
@@ -514,15 +514,15 @@ n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
     n_int map_dimension = land_map_dimension();
     n_int map_x = APESPACE_TO_MAPSPACE(locx);
     n_int map_y = APESPACE_TO_MAPSPACE(locy);
-    n_int interpolated;    
+    n_int interpolated;
     NA_ASSERT(kind, "kind NULL");
-    
+
     /*  Not bilinear interpolation but linear interpolation. Probably should replace with bilinear (ie each value has x and y dependency) */
     interpolated  = (land_operator((map_x+1)&(map_dimension-1), map_y, kind)*(locx-(map_x << APE_TO_MAP_BIT_RATIO))) >> APE_TO_MAP_BIT_RATIO;
     interpolated += (land_operator((map_x-1)&(map_dimension-1), map_y, kind)*(((map_x+1)<<APE_TO_MAP_BIT_RATIO)-locx)) >> APE_TO_MAP_BIT_RATIO;
     interpolated += (land_operator(map_x, (map_y+1)&(map_dimension-1), kind)*(locy-(map_y<<APE_TO_MAP_BIT_RATIO))) >> APE_TO_MAP_BIT_RATIO;
     interpolated += (land_operator(map_x, (map_y-1)&(map_dimension-1), kind)*(((map_y+1)<<APE_TO_MAP_BIT_RATIO)-locy)) >> APE_TO_MAP_BIT_RATIO;
-    
+
     return interpolated >> 1;
 }
 
@@ -546,10 +546,10 @@ void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute
 {
     n_byte2	local_random[2];
     n_int   refine = 0;
-    
+
     local_random[0] = seed[0];
     local_random[1] = seed[1];
-    
+
     while (refine < 7)
     {
         math_patch(local_map, &math_memory_location, &math_random, local_random, refine);
@@ -567,7 +567,7 @@ void land_set_genetics(n_byte2 * genetics)
 void land_init(n_byte * scratch, execute_thread_stub * exec)
 {
     math_pack(MAP_AREA, 128, m_topology, scratch);
-    
+
     land_creation(m_topology, scratch, m_genetics, exec);
 }
 
@@ -575,10 +575,10 @@ void land_init_high_def(n_byte double_spread)
 {
     n_uint   lp = 0;
     n_byte4  value_setting = 0;
-    
+
     math_bilinear_8_times(m_topology, m_topology_highdef, double_spread);
     io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
-    
+
     while (lp < HI_RES_MAP_AREA)
     {
         n_byte val = m_topology_highdef[lp<<1];
@@ -586,14 +586,14 @@ void land_init_high_def(n_byte double_spread)
         {
             value_setting |= 1 << (lp & 31);
         }
-        
+
         if ((lp & 31) == 31)
         {
             m_highres_tide[ lp >> 5 ] = value_setting;
             value_setting = 0;
         }
         lp++;
-        
+
     }
 }
 
@@ -610,10 +610,10 @@ void land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location)
 
     if (output == 0L) return;
     if (location == 0L) return;
-    
+
     loc_x = location->x;
     loc_y = location->y;
-        
+
     z = land_location(APESPACE_TO_MAPSPACE(loc_x), APESPACE_TO_MAPSPACE(loc_y));
 
     if (actual_z != 0L)
@@ -662,7 +662,7 @@ void spacetime_copy(n_spacetime * to, n_spacetime * from)
 {
     to->location[0] = from->location[0];
     to->location[1] = from->location[1];
-    
+
     to->date = from->date;
     to->time = from->time;
 }

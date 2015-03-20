@@ -448,7 +448,7 @@ void brain_sentence(n_string string, n_byte * response)
     n_int  format       = brain_format(instruction, command, value0, value1);
     n_string_block      first_word, second_word;
     n_int  position     = 0;
-    
+
     brain_longword(first_word, value0);
     brain_longword(second_word, value1);
 
@@ -722,9 +722,9 @@ static n_int similar_name(noble_episodic * episodic, n_int * carry_through)
 {
     n_int similarity = 3;
     n_byte values[2];
-    
+
     being_unpack_family(episodic->family_name[BEING_MET], values);
-    
+
     if (values[0] == carry_through[0]) similarity--;
     if (values[1] == carry_through[1]) similarity--;
     if (episodic->first_name[BEING_MET] == carry_through[2]) similarity--;
@@ -746,9 +746,9 @@ static n_int attention_similar_name(n_int episode_index,
 {
     n_int name[3];
     n_byte values[2];
-    
+
     being_unpack_family(episodic->family_name[BEING_MET], values);
-    
+
     name[0] = values[0];
     name[1] = values[1];
     name[2] = episodic[episode_index].first_name[BEING_MET];
@@ -864,13 +864,13 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 14:
         return meeter_social_graph[actor_index].attraction;
         /** Location */
-            
-/*
-    case 15:
-        return (n_byte)(APESPACE_TO _MAPSPACE(being_location_x(meeter_being)) * 255 / land_map_dimension());
-    case 16:
-        return (n_byte)(APESPACE_TO _MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension());
- */
+
+        /*
+            case 15:
+                return (n_byte)(APESPACE_TO _MAPSPACE(being_location_x(meeter_being)) * 255 / land_map_dimension());
+            case 16:
+                return (n_byte)(APESPACE_TO _MAPSPACE(being_location_y(meeter_being)) * 255 / land_map_dimension());
+         */
         /** Being state (lower)*/
     case 17:
         return (n_byte)(being_state(meeter_being)&255);
@@ -976,7 +976,7 @@ static n_byte territory_familiarity(noble_being * local_being,
 #ifdef TERRITORY_ON
     n_uint familiarity = (n_uint)(local_being->territory[index].familiarity);
     n_uint i,max_familiarity = 1;
-    
+
     /** find the maximum familiarity */
     for (i=0; i<TERRITORY_AREA; i++)
     {
@@ -985,12 +985,12 @@ static n_byte territory_familiarity(noble_being * local_being,
             max_familiarity = (n_uint)local_being->territory[i].familiarity;
         }
     }
-    
+
     if (max_familiarity == 0)
     {
         return 0;
     }
-    
+
     result = (n_byte)(familiarity*255/max_familiarity);
 #endif
     return result;
@@ -1000,7 +1000,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
 {
     n_int new_episode_index=-1;
     n_int switcher = addr00%25;
-    
+
     n_vect2 location;
 
     noble_social * meeter_social_graph = being_social(meeter_being);
@@ -1009,10 +1009,10 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
     n_int i;
     n_int relationship_index = (n_int)(GET_A(meeter_being,ATTENTION_RELATIONSHIP));
 
-    
+
     being_space(meeter_being, &location);
     land_convert_to_map(&location);
-    
+
     /** clear episodes visited.
      This array helps to avoid repeatedly visiting the same memories */
     for (i = 0; i < EPISODIC_SIZE; i++)
@@ -1021,182 +1021,182 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
     }
     switch (switcher)
     {
-            /** Shift attention to a different actor */
-        case 0:
-            actor_index = get_actor_index(meeter_social_graph, is_const1 % SOCIAL_SIZE);
+        /** Shift attention to a different actor */
+    case 0:
+        actor_index = get_actor_index(meeter_social_graph, is_const1 % SOCIAL_SIZE);
+        /** store the current focus of attention */
+        GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
+        break;
+        /** Shift attention to a different episode */
+    case 1:
+        new_episode_index = is_const1 % EPISODIC_SIZE;
+        break;
+        /** Shift attention to a different territory */
+    case 2:
+        territory_index = is_const1;
+        GET_A(meeter_being, ATTENTION_TERRITORY) = (n_byte)territory_index;
+        break;
+        /** Shift attention to a body region */
+    case 3:
+        GET_A(meeter_being,ATTENTION_BODY) = is_const1 % INVENTORY_SIZE;
+        break;
+    case 4: /** Shift attention to a similar location */
+        new_episode_index = attention_similar_place(episode_index, episodic, memory_visited);
+        break;
+    case 5: /** Shift attention to a similar time */
+        new_episode_index = attention_similar_time(episode_index, episodic, memory_visited);
+        break;
+    case 6: /** Shift attention to a similar date */
+        new_episode_index = attention_similar_date(episode_index, episodic, memory_visited);
+        break;
+    case 7: /** Shift attention to a similar name */
+        new_episode_index = attention_similar_name(episode_index, episodic, meeter_being, memory_visited);
+        break;
+    case 8: /** Shift attention to a similar affect */
+        new_episode_index = attention_similar_affect(episode_index, episodic, memory_visited);
+        break;
+    case 9:
+        *local_addr10 = episodic[episode_index].event;
+        break;
+    case 10:
+        *local_addr10 = episodic[episode_index].food;
+        break;
+    case 11:
+        *local_addr10 = episodic[episode_index].affect&255;
+        break;
+    case 12:
+        *local_addr10 = episodic[episode_index].arg&255;
+        break;
+    case 13:
+        *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[0] * 255 / land_map_dimension());
+        break;
+    case 14:
+        *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[1] * 255 / land_map_dimension());
+        break;
+    case 15:
+    {
+        /** atmosphere pressure */
+        n_int pressure = weather_pressure(POSITIVE_LAND_COORD(location.x), POSITIVE_LAND_COORD(location.y));
+
+        if (pressure > 100000) pressure = 100000;
+        if (pressure < 0) pressure = 0;
+        *local_addr10 = (n_byte)(pressure>>9);
+        break;
+    }
+    case 16:
+    {
+        /** wind magnitude */
+        n_vect2 wind;
+        weather_wind_vector(&location, &wind);
+        if (wind.x<0) wind.x=-wind.x;
+        if (wind.y<0) wind.y=-wind.y;
+        *local_addr10 = (n_byte)((wind.x+wind.y)>>7);
+        break;
+    }
+    case 17:
+        *local_addr10 = (n_byte)(land_time()>>3);
+        break;
+    case 18:
+        /** attention to body */
+        *local_addr10 = GET_A(meeter_being,ATTENTION_BODY)*30;
+        break;
+    case 19:
+#ifdef TERRITORY_ON
+        /** territory name */
+        *local_addr10 = meeter_being->territory[territory_index].name;
+#endif
+        break;
+    case 20:
+        /** territory familiarity */
+        *local_addr10 = territory_familiarity(meeter_being,(n_byte2)territory_index);
+        break;
+    case 21:
+        /** territory familiarity */
+        *local_addr10 = territory_familiarity(met_being,(n_byte2)territory_index);
+        break;
+    case 22:
+    {
+        /** carrying object */
+        n_byte2 carrying = being_carried(meeter_being,BODY_RIGHT_HAND);
+        n_byte2 obj_type=0;
+
+        if (carrying==0) carrying = being_carried(meeter_being,BODY_LEFT_HAND);
+        if (carrying!=0)
+        {
+            /* TODO Is this willed into existence? */
+            switch(addr00%12)
+            {
+            case 0:
+                obj_type = INVENTORY_BRANCH;
+                break;
+            case 1:
+                obj_type = INVENTORY_TWIG;
+                break;
+            case 2:
+                obj_type = INVENTORY_ROCK;
+                break;
+            case 3:
+                obj_type = INVENTORY_SHELL;
+                break;
+            case 4:
+                obj_type = INVENTORY_GRASS;
+                break;
+            case 5:
+                obj_type = INVENTORY_NUT;
+                break;
+            case 6:
+                obj_type = INVENTORY_NUT_CRACKED;
+                break;
+            case 7:
+                obj_type = INVENTORY_SCRAPER;
+                break;
+            case 8:
+                obj_type = INVENTORY_SPEAR;
+                break;
+            case 9:
+                obj_type = INVENTORY_FISH;
+                break;
+            case 10:
+                obj_type = INVENTORY_BIRD_EGGS;
+                break;
+            case 11:
+                obj_type = INVENTORY_LIZARD_EGGS;
+                break;
+            }
+            if (carrying & obj_type)
+            {
+                *local_addr10 = 255;
+            }
+            else
+            {
+                *local_addr10 = 0;
+            }
+        }
+
+        break;
+    }
+    case 23:
+    {
+        /** shift attention to a given social graph entry based on relationship */
+        n_int idx = social_get_relationship(local_sim, meeter_being, (n_byte)relationship_index);
+        if (idx > -1)
+        {
+            actor_index = idx;
             /** store the current focus of attention */
             GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
-            break;
-            /** Shift attention to a different episode */
-        case 1:
-            new_episode_index = is_const1 % EPISODIC_SIZE;
-            break;
-            /** Shift attention to a different territory */
-        case 2:
-            territory_index = is_const1;
-            GET_A(meeter_being, ATTENTION_TERRITORY) = (n_byte)territory_index;
-            break;
-            /** Shift attention to a body region */
-        case 3:
-            GET_A(meeter_being,ATTENTION_BODY) = is_const1 % INVENTORY_SIZE;
-            break;
-        case 4: /** Shift attention to a similar location */
-            new_episode_index = attention_similar_place(episode_index, episodic, memory_visited);
-            break;
-        case 5: /** Shift attention to a similar time */
-            new_episode_index = attention_similar_time(episode_index, episodic, memory_visited);
-            break;
-        case 6: /** Shift attention to a similar date */
-            new_episode_index = attention_similar_date(episode_index, episodic, memory_visited);
-            break;
-        case 7: /** Shift attention to a similar name */
-            new_episode_index = attention_similar_name(episode_index, episodic, meeter_being, memory_visited);
-            break;
-        case 8: /** Shift attention to a similar affect */
-            new_episode_index = attention_similar_affect(episode_index, episodic, memory_visited);
-            break;
-        case 9:
-            *local_addr10 = episodic[episode_index].event;
-            break;
-        case 10:
-            *local_addr10 = episodic[episode_index].food;
-            break;
-        case 11:
-            *local_addr10 = episodic[episode_index].affect&255;
-            break;
-        case 12:
-            *local_addr10 = episodic[episode_index].arg&255;
-            break;
-        case 13:
-            *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[0] * 255 / land_map_dimension());
-            break;
-        case 14:
-            *local_addr10 = (n_byte)(episodic[episode_index].space_time.location[1] * 255 / land_map_dimension());
-            break;
-        case 15:
-        {
-            /** atmosphere pressure */
-            n_int pressure = weather_pressure(POSITIVE_LAND_COORD(location.x), POSITIVE_LAND_COORD(location.y));
-            
-            if (pressure > 100000) pressure = 100000;
-            if (pressure < 0) pressure = 0;
-            *local_addr10 = (n_byte)(pressure>>9);
-            break;
         }
-        case 16:
-        {
-            /** wind magnitude */
-            n_vect2 wind;
-            weather_wind_vector(&location, &wind);
-            if (wind.x<0) wind.x=-wind.x;
-            if (wind.y<0) wind.y=-wind.y;
-            *local_addr10 = (n_byte)((wind.x+wind.y)>>7);
-            break;
-        }
-        case 17:
-            *local_addr10 = (n_byte)(land_time()>>3);
-            break;
-        case 18:
-            /** attention to body */
-            *local_addr10 = GET_A(meeter_being,ATTENTION_BODY)*30;
-            break;
-        case 19:
-#ifdef TERRITORY_ON
-            /** territory name */
-            *local_addr10 = meeter_being->territory[territory_index].name;
-#endif
-            break;
-        case 20:
-            /** territory familiarity */
-            *local_addr10 = territory_familiarity(meeter_being,(n_byte2)territory_index);
-            break;
-        case 21:
-            /** territory familiarity */
-            *local_addr10 = territory_familiarity(met_being,(n_byte2)territory_index);
-            break;
-        case 22:
-        {
-            /** carrying object */
-            n_byte2 carrying = being_carried(meeter_being,BODY_RIGHT_HAND);
-            n_byte2 obj_type=0;
-            
-            if (carrying==0) carrying = being_carried(meeter_being,BODY_LEFT_HAND);
-            if (carrying!=0)
-            {
-                /* TODO Is this willed into existence? */
-                switch(addr00%12)
-                {
-                    case 0:
-                        obj_type = INVENTORY_BRANCH;
-                        break;
-                    case 1:
-                        obj_type = INVENTORY_TWIG;
-                        break;
-                    case 2:
-                        obj_type = INVENTORY_ROCK;
-                        break;
-                    case 3:
-                        obj_type = INVENTORY_SHELL;
-                        break;
-                    case 4:
-                        obj_type = INVENTORY_GRASS;
-                        break;
-                    case 5:
-                        obj_type = INVENTORY_NUT;
-                        break;
-                    case 6:
-                        obj_type = INVENTORY_NUT_CRACKED;
-                        break;
-                    case 7:
-                        obj_type = INVENTORY_SCRAPER;
-                        break;
-                    case 8:
-                        obj_type = INVENTORY_SPEAR;
-                        break;
-                    case 9:
-                        obj_type = INVENTORY_FISH;
-                        break;
-                    case 10:
-                        obj_type = INVENTORY_BIRD_EGGS;
-                        break;
-                    case 11:
-                        obj_type = INVENTORY_LIZARD_EGGS;
-                        break;
-                }
-                if (carrying & obj_type)
-                {
-                    *local_addr10 = 255;
-                }
-                else
-                {
-                    *local_addr10 = 0;
-                }
-            }
-            
-            break;
-        }
-        case 23:
-        {
-            /** shift attention to a given social graph entry based on relationship */
-            n_int idx = social_get_relationship(local_sim, meeter_being, (n_byte)relationship_index);
-            if (idx > -1)
-            {
-                actor_index = idx;
-                /** store the current focus of attention */
-                GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
-            }
-            break;
-        }
-        case 24:
-        {
-            /** shift attention to a different relationship type */
-            relationship_index = 1+(*local_addr10 % (OTHER_MOTHER-1));
-            /** store the current relationship attention */
-            GET_A(meeter_being,ATTENTION_RELATIONSHIP) = (n_byte)relationship_index;
-            break;
-        }
+        break;
     }
-    
+    case 24:
+    {
+        /** shift attention to a different relationship type */
+        relationship_index = 1+(*local_addr10 % (OTHER_MOTHER-1));
+        /** store the current relationship attention */
+        GET_A(meeter_being,ATTENTION_RELATIONSHIP) = (n_byte)relationship_index;
+        break;
+    }
+    }
+
     /** If attention has shifted to a new episode */
     if (new_episode_index > -1)
     {
@@ -1213,8 +1213,8 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
         }
         /** set territory attention to the location where the episode occurred */
         GET_A(meeter_being,ATTENTION_TERRITORY) =
-        (APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[1])*16)+
-        APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[0]);
+            (APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[1])*16)+
+            APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[0]);
     }
 }
 
@@ -1300,112 +1300,112 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
 }
 
 static void brain_first_action(noble_simulation * local_sim, n_byte awake,
-                                n_byte * local_addr00, n_byte * local_addr10,
-                                noble_being * meeter_being, noble_being * met_being, n_int episode_index,
-                                noble_episodic * episodic, n_byte pspace0, n_int actor_index,
-                                noble_social * meeter_social_graph, n_byte is_const1)
+                               n_byte * local_addr00, n_byte * local_addr10,
+                               noble_being * meeter_being, noble_being * met_being, n_int episode_index,
+                               noble_episodic * episodic, n_byte pspace0, n_int actor_index,
+                               noble_social * meeter_social_graph, n_byte is_const1)
 {
     switch(*local_addr00 % 6)
     {
-            /** individual or social action */
-        case 0:
-            if ((awake != 0) && (*local_addr00 > 127))
+        /** individual or social action */
+    case 0:
+        if ((awake != 0) && (*local_addr00 > 127))
+        {
+            if (meeter_being == met_being)
             {
-                if (meeter_being == met_being)
-                {
-                    social_action(local_sim, meeter_being, 0L, *local_addr10);
-                }
-                else
-                {
-                    social_action(local_sim, meeter_being, met_being, *local_addr10);
-                }
+                social_action(local_sim, meeter_being, 0L, *local_addr10);
+            }
+            else
+            {
+                social_action(local_sim, meeter_being, met_being, *local_addr10);
+            }
 
-                *local_addr00 = 0;
-            }
-            break;
-            /** Set location goal */
-        case 1:
-            if (!(meeter_being->script_overrides&OVERRIDE_GOAL))
-            {
-                meeter_being->goal[0] = GOAL_LOCATION;
-                meeter_being->goal[1] = episodic[episode_index].space_time.location[0];
-                meeter_being->goal[2] = episodic[episode_index].space_time.location[1];
-                meeter_being->goal[3] = GOAL_TIMEOUT;
-            }
-            break;
-            /** alter friend or foe value */
-        case 2:
-        {
-            n_byte fof0 = pspace0;
-            n_byte fof1 = *local_addr10;
-            
-            if (fof0 > (n_byte)(fof1 + 85))
-            {
-                if (meeter_social_graph[actor_index].friend_foe < 170)
-                {
-                    meeter_social_graph[actor_index].friend_foe++;
-                }
-            }
-            if (fof1>(n_byte)(fof0+85))
-            {
-                if (meeter_social_graph[actor_index].friend_foe > 85)
-                {
-                    meeter_social_graph[actor_index].friend_foe--;
-                }
-            }
-            break;
+            *local_addr00 = 0;
         }
-            /** alter attraction */
-        case 3:
+        break;
+        /** Set location goal */
+    case 1:
+        if (!(meeter_being->script_overrides&OVERRIDE_GOAL))
         {
-            n_byte att0 = *local_addr10;
-            n_byte att1 = pspace0;
-            
-            if (att0>(n_byte)(att1+85))
-            {
-                if (meeter_social_graph[actor_index].attraction < 255)
-                {
-                    meeter_social_graph[actor_index].attraction++;
-                }
-            }
-            if (att1>(n_byte)(att0+85))
-            {
-                if (meeter_social_graph[actor_index].attraction > 16)
-                {
-                    meeter_social_graph[actor_index].attraction--;
-                }
-            }
-            break;
+            meeter_being->goal[0] = GOAL_LOCATION;
+            meeter_being->goal[1] = episodic[episode_index].space_time.location[0];
+            meeter_being->goal[2] = episodic[episode_index].space_time.location[1];
+            meeter_being->goal[3] = GOAL_TIMEOUT;
         }
-            /** alter familiarity */
-        case 4:
-            /** The values 10 and 20 meetings were just found experimentally */
-            if ((*local_addr10>100) && (*local_addr10<150))
-            {
-                if (meeter_social_graph[actor_index].familiarity < 65535)
-                {
-                    meeter_social_graph[actor_index].familiarity++;
-                    *local_addr10 = 0;
-                }
-            }
-            if ((*local_addr10>150) && (*local_addr10<200))
-            {
-                if (meeter_social_graph[actor_index].familiarity > 10)
-                {
-                    meeter_social_graph[actor_index].familiarity--;
-                    *local_addr10 = 0;
-                }
-            }
-            break;
-            /** brainprobe frequency */
-        case 5:
+        break;
+        /** alter friend or foe value */
+    case 2:
+    {
+        n_byte fof0 = pspace0;
+        n_byte fof1 = *local_addr10;
+
+        if (fof0 > (n_byte)(fof1 + 85))
         {
-            n_int  n = pspace0 % BRAINCODE_PROBES;
-            n_byte f = 1 + (is_const1 % BRAINCODE_MAX_FREQUENCY);
-            
-            meeter_being->brainprobe[n].frequency = f;
-            break;
+            if (meeter_social_graph[actor_index].friend_foe < 170)
+            {
+                meeter_social_graph[actor_index].friend_foe++;
+            }
         }
+        if (fof1>(n_byte)(fof0+85))
+        {
+            if (meeter_social_graph[actor_index].friend_foe > 85)
+            {
+                meeter_social_graph[actor_index].friend_foe--;
+            }
+        }
+        break;
+    }
+    /** alter attraction */
+    case 3:
+    {
+        n_byte att0 = *local_addr10;
+        n_byte att1 = pspace0;
+
+        if (att0>(n_byte)(att1+85))
+        {
+            if (meeter_social_graph[actor_index].attraction < 255)
+            {
+                meeter_social_graph[actor_index].attraction++;
+            }
+        }
+        if (att1>(n_byte)(att0+85))
+        {
+            if (meeter_social_graph[actor_index].attraction > 16)
+            {
+                meeter_social_graph[actor_index].attraction--;
+            }
+        }
+        break;
+    }
+    /** alter familiarity */
+    case 4:
+        /** The values 10 and 20 meetings were just found experimentally */
+        if ((*local_addr10>100) && (*local_addr10<150))
+        {
+            if (meeter_social_graph[actor_index].familiarity < 65535)
+            {
+                meeter_social_graph[actor_index].familiarity++;
+                *local_addr10 = 0;
+            }
+        }
+        if ((*local_addr10>150) && (*local_addr10<200))
+        {
+            if (meeter_social_graph[actor_index].familiarity > 10)
+            {
+                meeter_social_graph[actor_index].familiarity--;
+                *local_addr10 = 0;
+            }
+        }
+        break;
+        /** brainprobe frequency */
+    case 5:
+    {
+        n_int  n = pspace0 % BRAINCODE_PROBES;
+        n_byte f = 1 + (is_const1 % BRAINCODE_MAX_FREQUENCY);
+
+        meeter_being->brainprobe[n].frequency = f;
+        break;
+    }
     }
 }
 
@@ -1439,7 +1439,7 @@ void brain_dialogue(
     n_int episode_index = (n_int)(GET_A(meeter_being,ATTENTION_EPISODE));
     n_int anecdote_episode_index=-1;
     n_int intention_episode_index=-1;
-    
+
     noble_social * meeter_social_graph = being_social(meeter_being);
     noble_episodic * episodic = being_episodic(meeter_being);
     n_int max_itterations;
@@ -1482,166 +1482,166 @@ void brain_dialogue(
         switch(instruction)
         {
             /** General sensor */
-            case BRAINCODE_SEN:
+        case BRAINCODE_SEN:
+        {
+            addr1[0] = brain_first_sense(sim, meeter_being, met_being, meeter_social_graph, actor_index, addr0[0]);
+            break;
+        }
+        case BRAINCODE_SEN2:
+        {
+            being_second_sense(sim, addr0[0], &addr1[0], meeter_being, met_being, actor_index, IS_CONST1, episode_index, episodic);
+            break;
+        }
+        case BRAINCODE_SEN3:
+
+            addr1[0] = brain_third_sense(sim, meeter_being, met_being, internal, addr0[0], addr1);
+            break;
+            /** Action */
+        case BRAINCODE_ACT:
+        {
+
+            brain_first_action(sim, awake, &addr0[0], &addr1[0], meeter_being, met_being, episode_index,
+                               episodic, pspace[0], actor_index, meeter_social_graph, IS_CONST1);
+            break;
+        }
+        case BRAINCODE_ACT2:
+        {
+            switch(addr0[0]%6)
             {
-                addr1[0] = brain_first_sense(sim, meeter_being, met_being, meeter_social_graph, actor_index, addr0[0]);
+            case 0: /* brainprobe type */
+            {
+                n_int  n = pspace[0] % BRAINCODE_PROBES;
+                n_byte typ = IS_CONST1 & 1;
+
+                meeter_being->brainprobe[n].type = typ;
                 break;
             }
-            case BRAINCODE_SEN2:
+            case 1: /** brainprobe address */
             {
-                being_second_sense(sim, addr0[0], &addr1[0], meeter_being, met_being, actor_index, IS_CONST1, episode_index, episodic);
+                n_int n = pspace[0] % BRAINCODE_PROBES;
+                n_byte adr = IS_CONST1;
+
+                meeter_being->brainprobe[n].address = adr;
                 break;
             }
-            case BRAINCODE_SEN3:
-
-                addr1[0] = brain_third_sense(sim, meeter_being, met_being, internal, addr0[0], addr1);
-                break;
-                /** Action */
-            case BRAINCODE_ACT:
+            case 2: /** shout out */
             {
-                
-                brain_first_action(sim, awake, &addr0[0], &addr1[0], meeter_being, met_being, episode_index,
-                                   episodic, pspace[0], actor_index, meeter_social_graph, IS_CONST1);
-                break;
-            }
-            case BRAINCODE_ACT2:
-            {
-                switch(addr0[0]%6)
+                n_byte msg = addr1[0];
+                if (is_constant1)
                 {
-                case 0: /* brainprobe type */
-                {
-                    n_int  n = pspace[0] % BRAINCODE_PROBES;
-                    n_byte typ = IS_CONST1 & 1;
-
-                    meeter_being->brainprobe[n].type = typ;
-                    break;
+                    msg = value1;
                 }
-                case 1: /** brainprobe address */
+                if ((internal!=0) && (awake!=0) &&
+                        (!(being_state(meeter_being)&BEING_STATE_SHOUTING)) &&
+                        (!(being_state(meeter_being)&BEING_STATE_SPEAKING)) &&
+                        (meeter_being->shout[SHOUT_CONTENT]==0) &&
+                        (meeter_being->shout[SHOUT_HEARD]==0) &&
+                        (meeter_being->shout[SHOUT_CTR]==0) &&
+                        (msg>0))
                 {
-                    n_int n = pspace[0] % BRAINCODE_PROBES;
-                    n_byte adr = IS_CONST1;
-                    
-                    meeter_being->brainprobe[n].address = adr;
-                    break;
-                }
-                case 2: /** shout out */
-                {
-                    n_byte msg = addr1[0];
-                    if (is_constant1)
-                    {
-                        msg = value1;
-                    }
-                    if ((internal!=0) && (awake!=0) &&
-                            (!(being_state(meeter_being)&BEING_STATE_SHOUTING)) &&
-                            (!(being_state(meeter_being)&BEING_STATE_SPEAKING)) &&
-                            (meeter_being->shout[SHOUT_CONTENT]==0) &&
-                            (meeter_being->shout[SHOUT_HEARD]==0) &&
-                            (meeter_being->shout[SHOUT_CTR]==0) &&
-                            (msg>0))
-                    {
-                        meeter_being->shout[SHOUT_CTR] = SHOUT_REFRACTORY;
-                        being_add_state(meeter_being, BEING_STATE_SHOUTING);
-                        /** volume of message */
-                        meeter_being->shout[SHOUT_VOLUME] = pspace[0];
-                        /** type of message */
-                        meeter_being->shout[SHOUT_CONTENT] = msg;
-                    }
-                    break;
-                }
-                case 3: /** intention */
-                {
-                    if (intention_episode_index != episode_index)
-                    {
-                        n_byte v0 = pspace[0];
-                        n_byte v1 = IS_CONST1;
-                        if (episodic_intention(sim,meeter_being,episode_index,(n_byte2)(v0*10),v1)!=0)
-                        {
-                            intention_episode_index = episode_index;
-                        }
-                    }
-                    break;
-                }
-                case 4: /** brainprobe offset */
-                {
-                    n_int n = pspace[0] % BRAINCODE_PROBES;
-                    n_byte offset = IS_CONST1;
-
-                    meeter_being->brainprobe[n].offset = offset;
-                    break;
-                }
-                case 5: /** posture */
-                    if (awake != 0)
-                    {
-                        being_set_posture(meeter_being, addr1[0]);
-                    }
-                    break;
+                    meeter_being->shout[SHOUT_CTR] = SHOUT_REFRACTORY;
+                    being_add_state(meeter_being, BEING_STATE_SHOUTING);
+                    /** volume of message */
+                    meeter_being->shout[SHOUT_VOLUME] = pspace[0];
+                    /** type of message */
+                    meeter_being->shout[SHOUT_CONTENT] = msg;
                 }
                 break;
             }
-            case BRAINCODE_ACT3:
-                switch(addr0[0]%2)
+            case 3: /** intention */
+            {
+                if (intention_episode_index != episode_index)
                 {
-                    /** brainprobe position */
-                case 0:
-                {
-                    n_int  n = pspace[0] % BRAINCODE_PROBES;
-                    n_byte p = IS_CONST1;
-                    meeter_being->brainprobe[n].position = p;
-                    break;
+                    n_byte v0 = pspace[0];
+                    n_byte v1 = IS_CONST1;
+                    if (episodic_intention(sim,meeter_being,episode_index,(n_byte2)(v0*10),v1)!=0)
+                    {
+                        intention_episode_index = episode_index;
+                    }
                 }
-                /** alter learned preferences */
-                case 1:
-                {
-                    n_int n;
-                    n_byte prf = addr1[0];
+                break;
+            }
+            case 4: /** brainprobe offset */
+            {
+                n_int n = pspace[0] % BRAINCODE_PROBES;
+                n_byte offset = IS_CONST1;
 
-                    n = pspace[0]%PREFERENCES;
-
-                    if ((prf > 55) && (prf < 155))
-                    {
-                        if (meeter_being->learned_preference[n] < 255)
-                        {
-                            meeter_being->learned_preference[n]++;
-                            addr1[0] = 0;
-                        }
-                    }
-                    if (prf >= 155)
-                    {
-                        if (meeter_being->learned_preference[n] > 0)
-                        {
-                            meeter_being->learned_preference[n]--;
-                            addr1[0] = 0;
-                        }
-                    }
-                    break;
-                }
+                meeter_being->brainprobe[n].offset = offset;
                 break;
-                }
-                /** spread anecdote */
-            case BRAINCODE_ANE:
-                if (internal == 0)
+            }
+            case 5: /** posture */
+                if (awake != 0)
                 {
-                    /** not internal dialogue */
-                    /** avoid repeated anecdotes in the same conversation */
-                    if (anecdote_episode_index != episode_index)
+                    being_set_posture(meeter_being, addr1[0]);
+                }
+                break;
+            }
+            break;
+        }
+        case BRAINCODE_ACT3:
+            switch(addr0[0]%2)
+            {
+                /** brainprobe position */
+            case 0:
+            {
+                n_int  n = pspace[0] % BRAINCODE_PROBES;
+                n_byte p = IS_CONST1;
+                meeter_being->brainprobe[n].position = p;
+                break;
+            }
+            /** alter learned preferences */
+            case 1:
+            {
+                n_int n;
+                n_byte prf = addr1[0];
+
+                n = pspace[0]%PREFERENCES;
+
+                if ((prf > 55) && (prf < 155))
+                {
+                    if (meeter_being->learned_preference[n] < 255)
                     {
-                        if (episodic_anecdote(sim, meeter_being, met_being) != 0)
-                        {
-                            anecdote_episode_index = episode_index;
-                        }
+                        meeter_being->learned_preference[n]++;
+                        addr1[0] = 0;
+                    }
+                }
+                if (prf >= 155)
+                {
+                    if (meeter_being->learned_preference[n] > 0)
+                    {
+                        meeter_being->learned_preference[n]--;
+                        addr1[0] = 0;
                     }
                 }
                 break;
-                
-            default:
-                math_general_execution(instruction, is_constant0, is_constant1,
-                                       addr0, addr1, value0, &i,
-                                       IS_CONST0, IS_CONST1,
-                                       pspace,
-                                       &addr0, &addr1,
-                                       bc0, bc1,
-                                       braincode_min_loop);
-                break;
+            }
+            break;
+            }
+            /** spread anecdote */
+        case BRAINCODE_ANE:
+            if (internal == 0)
+            {
+                /** not internal dialogue */
+                /** avoid repeated anecdotes in the same conversation */
+                if (anecdote_episode_index != episode_index)
+                {
+                    if (episodic_anecdote(sim, meeter_being, met_being) != 0)
+                    {
+                        anecdote_episode_index = episode_index;
+                    }
+                }
+            }
+            break;
+
+        default:
+            math_general_execution(instruction, is_constant0, is_constant1,
+                                   addr0, addr1, value0, &i,
+                                   IS_CONST0, IS_CONST1,
+                                   pspace,
+                                   &addr0, &addr1,
+                                   bc0, bc1,
+                                   braincode_min_loop);
+            break;
 
 
         }

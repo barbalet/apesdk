@@ -149,19 +149,19 @@ n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location,
 {
     n_uint  lpx = 0;
     n_uint  number_apes = 0;
-    
+
     if (memory_available < 1)
     {
         return SHOW_ERROR("Memory not available");
     }
-    
+
     number_apes = (memory_available / sizeof(noble_being)) - 1;
-    
+
     if (number_apes < 1)
     {
         return SHOW_ERROR("Not enough memory for an ape");
     }
-    
+
 #ifdef LARGE_SIM
     local->max = LARGE_SIM;
 #else
@@ -169,7 +169,7 @@ n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location,
 #endif
     local->beings = (noble_being *) & buffer[  * location ];
     * location += sizeof(noble_being) * local->max ;
-    
+
     while (lpx < local->max)
     {
         noble_being * local_being = &(local->beings[ lpx ]);
@@ -195,11 +195,11 @@ static void being_set_brainatates(noble_being * value, n_int asleep, n_byte2 val
 n_int being_brainstates(noble_being * value, n_int asleep, n_byte2 * states)
 {
     n_int three_offset = (asleep ? 0 : 3);
-    
+
     states[0] = value->brain_state[three_offset + 0];
     states[1] = value->brain_state[three_offset + 1];
     states[2] = value->brain_state[three_offset + 2];
-    
+
     return ((states[0] != 0) || (states[1] != 1024) || (states[2] != 0));
 }
 
@@ -236,12 +236,12 @@ n_int being_honor_compare(noble_being * first, noble_being * second)
     {
         return 1;
     }
-    
+
     if (first->honor < second->honor)
     {
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -413,7 +413,7 @@ void   being_energy_delta(noble_being * value, n_int delta)
     {
         total = BEING_DEAD;
     }
-    
+
     value->stored_energy = (n_byte2) total;
 }
 
@@ -484,14 +484,14 @@ static void being_turn_away_from_water(noble_being * value)
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
         land_convert_to_map(&temp_vector);
-        
+
         z_plus = land_location_vect(&temp_vector);
 
         vect2_direction(&temp_vector, turn_minus, 128);
         vect2_add(&temp_vector, &temp_vector, &location_vector);
 
         land_convert_to_map(&temp_vector);
-        
+
         z_minus = land_location_vect(&temp_vector);
 
         if (z_minus > z_plus)
@@ -545,7 +545,7 @@ static void being_loop_generic(noble_simulation * sim, noble_being * being_not, 
     {
         noble_being * output = &(sim->beings[loop]);
         if (output != being_not)
-        {            
+        {
             execute_add(((execute_function*)bf_func), (void*)sim, (void*)output, data);
         }
         loop++;
@@ -564,14 +564,14 @@ void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_
     while (loop < sim->num)
     {
         noble_being * output = &(sim->beings[loop]);
-        
+
         if ((beings_per_thread + loop) >= sim->num)
         {
             count = sim->num - loop;
         }
-        
+
         execute_group(((execute_function*)bf_func), (void*)sim, (void*)output, count, sizeof(noble_being));
-        
+
         if (count != beings_per_thread)
         {
             break;
@@ -599,39 +599,39 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
     being_draw * being_pixel = (being_draw *) params;
     n_int        d_vis = being_pixel->visibility_delta;
     n_int	     local_z = ((px*(being_pixel->offset_x)) + (py*(being_pixel->offset_y))) >> 9;
-    
+
     if (abs_sum)
     {
         weather_values   seven_values = weather_seven_values(MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
         n_int  span10 = ((abs_sum - 1) ? 1448 : 1024);
-        
+
         switch (seven_values)
         {
-            case WEATHER_SEVEN_SUNNY_DAY:
-            case WEATHER_SEVEN_CLOUDY_DAY:
-                being_pixel->visibility_total += (span10 * (d_vis + 16)) >> 11;
-                break;
-            case WEATHER_SEVEN_RAINY_DAY:
-            case WEATHER_SEVEN_DAWN_DUSK:
-                being_pixel->visibility_total += (span10 * ((2 * d_vis) + 25)) >> 11;
-                break;
-            case WEATHER_SEVEN_CLEAR_NIGHT:
-                being_pixel->visibility_total += (span10 * ((5 * d_vis) + 65)) >> 11;
-            case WEATHER_SEVEN_CLOUDY_NIGHT:
-                being_pixel->visibility_total += (span10 * ((8 * d_vis) + 93)) >> 11;
-            case WEATHER_SEVEN_RAINY_NIGHT:
-                being_pixel->visibility_total += (span10 * ((12 * d_vis) + 145)) >> 11;
-                break;
-                
-            case WEATHER_SEVEN_ERROR:
-            default:
-                return 1;
+        case WEATHER_SEVEN_SUNNY_DAY:
+        case WEATHER_SEVEN_CLOUDY_DAY:
+            being_pixel->visibility_total += (span10 * (d_vis + 16)) >> 11;
+            break;
+        case WEATHER_SEVEN_RAINY_DAY:
+        case WEATHER_SEVEN_DAWN_DUSK:
+            being_pixel->visibility_total += (span10 * ((2 * d_vis) + 25)) >> 11;
+            break;
+        case WEATHER_SEVEN_CLEAR_NIGHT:
+            being_pixel->visibility_total += (span10 * ((5 * d_vis) + 65)) >> 11;
+        case WEATHER_SEVEN_CLOUDY_NIGHT:
+            being_pixel->visibility_total += (span10 * ((8 * d_vis) + 93)) >> 11;
+        case WEATHER_SEVEN_RAINY_NIGHT:
+            being_pixel->visibility_total += (span10 * ((12 * d_vis) + 145)) >> 11;
+            break;
+
+        case WEATHER_SEVEN_ERROR:
+        default:
+            return 1;
         }
         if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
             return 1;
-        
+
         local_z += being_pixel->start_z;
-        
+
         if (local_z < WALK_ON_WATER(land_location(px, py), land_tide_level()))
         {
             return 1;
@@ -645,7 +645,7 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
     n_vect2    start, delta, vector_facing, start_delta;
 
     /* TODO: Check for being awake - need a land and being based awake check */
-    
+
     vect2_byte2(&start, being_location(local));
 
     start_delta.x = lx;
@@ -673,7 +673,7 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
     }
 
     /** move everything from being co-ordinates to map co-ordinates */
-    
+
     land_convert_to_map(&start);
     land_convert_to_map(&delta);
     land_convert_to_map(&start_delta);
@@ -697,7 +697,7 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
 
         {
             n_vect2 offset = {0};
-            
+
             vect2_d(&offset, &delta, 512 * delta_z, common_divisor);
 
             start_z -= vect2_dot(&start, &offset, 1, 512);
@@ -705,9 +705,9 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
             translate.start_z = start_z;
             translate.offset_x = offset.x;
             translate.offset_y = offset.y;
-            
+
             translate.visibility_total = 100 * GENE_VISION_INITIAL(being_genetics(local));
-            
+
             translate.visibility_delta = GENE_VISION_DELTA(being_genetics(local));
         }
 
@@ -725,10 +725,11 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
     return 1;
 }
 
-typedef struct{
+typedef struct
+{
     n_string name;
     noble_being * being_from_name;
-}being_from_name_loop_struct;
+} being_from_name_loop_struct;
 
 static void being_from_name_loop(noble_simulation * sim, noble_being * local, void * data)
 {
@@ -739,11 +740,11 @@ static void being_from_name_loop(noble_simulation * sim, noble_being * local, vo
     {
         return;
     }
-    
+
     being_name_simple(local, str);
-    
+
     io_lower(str, io_length(str,STRING_BLOCK_SIZE));
-    
+
     if (io_find(str,0,io_length(str,STRING_BLOCK_SIZE),bfns->name,io_length(bfns->name,STRING_BLOCK_SIZE))>-1)
     {
         bfns->being_from_name = local;
@@ -1157,7 +1158,7 @@ n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_
 {
     n_int   loop = 0;
     n_uint  addition = 0;
-    
+
     if (FIND_SEX(secondary[CHROMOSOME_Y]) != SEX_FEMALE)
     {
         if (parse_requirements == 1) return 0;
@@ -1166,7 +1167,7 @@ n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_
     {
         if (parse_requirements == 0) return 0;
     }
-    
+
     while (loop < CHROMOSOMES)
     {
         n_genetics comparison = primary[loop] ^ secondary[loop];
@@ -1192,19 +1193,19 @@ static void being_find_closest_loop(noble_simulation * sim, noble_being * local,
 
     n_byte success = 0;
     n_int  local_dob = being_dob(local);
-    
+
     if (bfcs->older == 0) success = 1;
-    
+
     if ((bfcs->older == 1) && ((local_dob - AGE_OF_MATURITY) > bfcs->actual_age))
     {
         success = 1;
     }
-    
+
     if ((bfcs->older == -1) && ((bfcs->actual_age - AGE_OF_MATURITY) > local_dob))
     {
         success = 1;
     }
-    
+
     if (success)
     {
         n_uint comparison = being_genetic_comparison(bfcs->genetics, being_genetics(local), bfcs->parse_requirements);
@@ -1227,9 +1228,9 @@ static noble_being * being_find_closest(noble_simulation * sim, noble_being * ac
     bfcs.return_value = 0L;
     bfcs.genetics = being_genetics(actual);
     bfcs.actual_age = being_dob(actual);
-    
+
     being_loop_no_thread(sim, actual, being_find_closest_loop, &bfcs);
-    
+
     return bfcs.return_value;
 }
 
@@ -1516,7 +1517,7 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
 void being_remains_init(noble_simulation * sim)
 {
     noble_remains * remains = sim->remains;
-    
+
     remains->count = 0;
     remains->location = 0;
 }
@@ -1761,11 +1762,11 @@ n_int episode_description(
     }
 #endif
     str[string_index] = 0;
-    
+
     string_index = 0;
-    
+
     io_string_write(description, str, &string_index);
-    
+
     return social;
 }
 
@@ -1780,12 +1781,12 @@ const n_string EnglishNames[144] =
 {
     "Adams","Baker","Brown","Davis","Evans","Green","Jones","Mason",
     "Moore","Myers","Perry","Price","Quinn","Smith","White","Young",
-    
+
     "Agnes","Aimee","Alice","Amber","Anita","April","Becky","Beryl",
     "Carla","Chloe","Donna","Doris","Edith","Elena","Elise","Ellen",
     "Emily","Erika","Ethel","Faith","Fiona","Flora","Gilda","Grace",
     "Hazel","Helen","Hilda","Holly","Irene","Janet","Jewel","Kacey",
-    
+
     "Kerri","Lacey","Linda","Mabel","Madge","Mandy","Maude","Mavis",
     "Megan","Mercy","Misty","Molly","Nancy","Naomi","Norma","Nydia",
     "Pansy","Patty","Pearl","Polly","Rhoda","Robin","Sadie","Sally",
@@ -1795,7 +1796,7 @@ const n_string EnglishNames[144] =
     "Brian","Brock","Bruce","Bruno","Byron","Casey","Cecil","Clive",
     "Clyde","Colin","Craig","Cyril","Damon","Darcy","David","Derek",
     "Edgar","Edwin","Elmer","Elroy","Elton","Errol","Felix","Floyd",
-    
+
     "Frank","Garth","Gavin","Giles","Glenn","Grant","Henry","Homer",
     "Isaac","Jacob","Jason","Jesse","Keith","Kevin","Leroy","Lloyd",
     "Logan","Miles","Nigel","Oscar","Peter","Quinn","Ralph","Roger",
@@ -1816,7 +1817,7 @@ const n_string EnglishNames[576] =
     "Long","Mason","Matine","Miller","Moore","Morgan","Munroe","Murphy","Mutz","Myers","Nelson","Owen","Parker","Perry",
     "Powell","Price","Quinn","Reed","Reid","Rogers","Rose","Reis","Scrim","Smith","Taylor","Thiel","Turner","Walker","Ward",
     "Watson","White","Wilson","Wood","Young",
-    
+
     "Ada","Agatha","Agnes","Aileen","Aimee","Alanna","Alda","Alice","Alina","Alison","Alma","Amanda","Amber","Andrea","Angela",
     "Anita","Anthea","April","Ariana","Arleen","Astrid","Audrey","Beata","Becky","Beryl","Bess","Bianca","Blair","Blythe",
     "Bonnie","Brenda","Briana","Brooke","Carla","Carly","Carmen","Cheryl","Chloe","Coral","Daphne","Davida","Dawn","Denise",
@@ -1834,7 +1835,7 @@ const n_string EnglishNames[576] =
     "Sheila","Sibley","Silver","Sirena","Talia","Tamara","Tammy","Tanya","Tara","Tasha","Tatum","Tess","Thalia","Thea","Thelma",
     "Thora","Tilda","Tina","Tracy","Trina","Trista","Tyne","Udele","Ula","Ulrica","Ulva","Una","Unity","Ursa","Ursula","Valda",
     "Vania","Veleda","Vera","Verda","Violet","Vita","Wanda","Wilda","Willa","Willow","Wynne","Zea","Zelda","Zera","Zoe",
-    
+
     "Aaron","Abbott","Abel","Adam","Albern","Albert","Alfie","Alfred","Alvin","Amery","Amos","Andrew","Angus","Ansel","Arlen",
     "Arnold","Arvel","Austin","Axel","Baird","Barry","Basil","Bert","Blair","Blake","Boris","Brent","Brian","Brice","Brock",
     "Bruce","Bruno","Bryant","Buck","Bud","Burton","Byron","Calvin","Carl","Carter","Carver","Cary","Casey","Casper","Cecil",
@@ -2107,10 +2108,10 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
     /** ... fully awake to swim */
     {
         n_vect2 location;
-        
+
         being_space(local, &location);
         land_convert_to_map(&location);
-        
+
         if(WATER_TEST(land_location_vect(&location),land_tide_level()))
         {
             return FULLY_AWAKE;
@@ -2136,35 +2137,35 @@ n_byte being_awake(noble_simulation * sim, noble_being * local)
 }
 
 /*
- 
+
  Rough sketch on brain compression method
- 
+
  Hypthesis:
- 
+
      From a zeroed brain,
-     
+
      After n OUTPUT_ACTUATOR firings into the brain, and,
-     
+
      After m brain_cycle occurrences with the states recorded,
-     
+
      There should be a near identical brain to a standard run brain.
-     
+
      n and m are independent but an acceptable level needs to be recorded.
- 
+
  Data set:
- 
+
      Type (either output actuator or brain cycle)
-     
+
      For output actuator, record position in brain (n_byte2) and set value (n_byte)
-     
+
      For brain cycle, record awake or asleep.
-     
+
      Position in brain is on the 32k boundry, the delimiting could be:
-     
+
      Position in brain - if 32k-1 then actuator set. If 64k-1, then brain cycle
-     
+
      Set value is set value if actuator set, 0 is asleep, 1 is awake if brain cycle
- 
+
  */
 
 
@@ -2176,14 +2177,14 @@ static void being_brain_probe(noble_being * local)
     n_byte * local_brain = being_brain(local);
     n_int    i = 0;
     n_int    count[NUMBER_BRAINPROBE_TYPES] = {0};
-    
+
     if (local_brain == 0L) return;
-    
+
     while (i < BRAINCODE_PROBES)
     {
         count[local->brainprobe[i++].type]++;
     }
-    
+
     /** check to ensure that there are a minimum number of sensors and actuators */
     if (count[INPUT_SENSOR] < (BRAINCODE_PROBES>>2))
     {
@@ -2193,10 +2194,10 @@ static void being_brain_probe(noble_being * local)
     {
         local->brainprobe[0].type = OUTPUT_ACTUATOR;
     }
-    
+
     /** update each probe */
     i = 0;
-    
+
     while (i < BRAINCODE_PROBES)
     {
         local->brainprobe[i].state++;
@@ -2234,7 +2235,7 @@ static void being_brain_probe(noble_being * local)
 void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
 {
     being_immune_response(local);
-    
+
 #ifdef BRAINCODE_ON
 #ifdef BRAIN_ON
 
@@ -2385,7 +2386,7 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
 
     /** is this the same as the name of the being to which we are paying attention? */
     if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local))) &&
-        being_name_comparison(other, nearest->local->goal[1], nearest->local->goal[2]))
+            being_name_comparison(other, nearest->local->goal[1], nearest->local->goal[2]))
     {
         being_delta(nearest->local, other, &difference_vector);
         if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
@@ -2407,8 +2408,8 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
 
     /** is this the same as the name of the being to which we are paying attention? */
     if (being_name_comparison(other,
-            nearest->local_social->first_name[BEING_MET],
-            nearest->local_social->family_name[BEING_MET]))
+                              nearest->local_social->first_name[BEING_MET],
+                              nearest->local_social->family_name[BEING_MET]))
     {
         /** Is this being within sight? */
         being_delta(nearest->local, other, &difference_vector);
@@ -2446,8 +2447,8 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
  * @param same_sex_distance Returned distance to the closest being of the same sex
  */
 static void being_follow(noble_simulation * sim,
-                           noble_being * local,
-                           being_nearest * nearest)
+                         noble_being * local,
+                         being_nearest * nearest)
 {
     noble_social * local_social_graph;
     n_int          social_graph_index;
@@ -2467,19 +2468,19 @@ static void being_follow(noble_simulation * sim,
             return;
         }
     }
-    
+
     local_social_graph = being_social(local);
     if (local_social_graph == 0L) return;
-    
+
     /** which entry in the social graph are we paying attention to? */
     social_graph_index = GET_A(local,ATTENTION_ACTOR);
-    
+
     nearest->local_social = &local_social_graph[social_graph_index];
-    
+
     /** Does this entry correspond to another being? */
     if ((social_graph_index>0) &&
-        (local_social_graph[social_graph_index].entity_type == ENTITY_BEING) &&
-        (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, social_graph_index)))
+            (local_social_graph[social_graph_index].entity_type == ENTITY_BEING) &&
+            (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, social_graph_index)))
     {
         being_loop_no_thread(sim, local, being_follow_loop2, nearest);
     }
@@ -2496,13 +2497,13 @@ static void being_listen_loop(noble_simulation * sim, noble_being * other, void 
     being_listen_struct * bls = (being_listen_struct *)data;
     n_vect2       difference_vector;
     n_uint        compare_distance;
-    
+
     being_delta(bls->local, other, &difference_vector);
     compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
     /** listen for the nearest shout out */
     if ((being_state(other)&BEING_STATE_SHOUTING) &&
-        (compare_distance < SHOUT_RANGE) &&
-        (other->shout[SHOUT_VOLUME] > bls->max_shout_volume))
+            (compare_distance < SHOUT_RANGE) &&
+            (other->shout[SHOUT_VOLUME] > bls->max_shout_volume))
     {
         bls->max_shout_volume = other->shout[SHOUT_VOLUME];
         bls->local->shout[SHOUT_HEARD] = other->shout[SHOUT_CONTENT];
@@ -2519,9 +2520,9 @@ static void being_listen_loop(noble_simulation * sim, noble_being * other, void 
 void being_listen(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     being_listen_struct bls;
-    
+
     if (being_awake(local_sim, local_being) == 0) return;
-    
+
     bls.max_shout_volume = 127;
     bls.local = local_being;
     /** clear shout values */
@@ -2578,8 +2579,8 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
  * @return The number of beings in the vicinity
  */
 static void being_closest(noble_simulation * sim,
-                            noble_being * local,
-                            being_nearest * nearest)
+                          noble_being * local,
+                          being_nearest * nearest)
 {
     nearest->local = local;
     nearest->opposite_sex_distance = 0xffffffff;
@@ -2676,21 +2677,22 @@ static void being_interact(noble_simulation * sim,
     }
 }
 
-typedef struct{
+typedef struct
+{
     n_int counter;
     n_int return_value;
     noble_being * being;
-}being_index_loop_struct;
+} being_index_loop_struct;
 
 void being_index_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     being_index_loop_struct * bils = (being_index_loop_struct *) data;
-    
+
     if (bils->return_value != -1)
     {
         return;
     }
-    
+
     if (local_being == bils->being)
     {
         bils->return_value = bils->counter;
@@ -2704,11 +2706,11 @@ void being_index_loop(noble_simulation * local_sim, noble_being * local_being, v
 n_int being_index(noble_simulation * sim, noble_being * local)
 {
     being_index_loop_struct value;
-    
+
     value.return_value = -1;
     value.being = local;
     value.counter = 0;
-    
+
     being_loop_no_thread(sim, 0L, being_index_loop, &value);
     return value.return_value;
 }
@@ -2755,9 +2757,9 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         land_vect2(&slope_vector, &az, &location_vector);
         vect2_add(&looking_vector, &location_vector, &facing_vector);
         land_convert_to_map(&looking_vector);
- 
+
         test_land = (WATER_TEST(land_location_vect(&looking_vector),land_tide_level())!= 0);
-        
+
         {
             n_int delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
 
@@ -2766,7 +2768,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 #ifdef LAND_ON
     /* TODO why not test_land here? */
-    
+
     if (WATER_TEST(az,land_tide_level()) != 0)
     {
         loc_state |= BEING_STATE_SWIMMING;
@@ -2813,7 +2815,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
         /** horizontally oriented posture */
         being_set_posture(local, 0);
-        
+
         /** When swimming drop everything except what's on your head or back.
            Note that the groomed flag is also cleared */
 
@@ -2846,7 +2848,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             being_closest(sim, local, &nearest);
         }
 
-		/* TODO: SOCIAL_THRESHOLD should not be a macro, it should be a function returning n_int */
+        /* TODO: SOCIAL_THRESHOLD should not be a macro, it should be a function returning n_int */
 
         if (being_drive(local, DRIVE_SOCIAL) > SOCIAL_THRESHOLD(local))
         {
@@ -2873,7 +2875,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                 /** eating when stopped */
                 n_byte  food_type;
                 n_int energy = food_eat(being_location_x(local), being_location_y(local), az, &food_type, local);
-                
+
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
 
@@ -2924,8 +2926,8 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     if (tmp_speed < loc_s) loc_s--;
 
     if ((local->goal[0]==GOAL_NONE) &&
-        (nearest.opposite_sex == 0L) &&
-        (nearest.same_sex == 0L) &&
+            (nearest.opposite_sex == 0L) &&
+            (nearest.same_sex == 0L) &&
             (being_random(local) < 1000 + 3600*GENE_STAGGER(genetics)))
     {
         n_int	 wander = math_spread_byte(being_random(local) & 7);
@@ -3037,9 +3039,9 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                             /** mother loses energy */
                             being_energy_delta(mother, 0 - SUCKLING_ENERGY);
                             /** child gains energy */
-                            
+
                             being_energy_delta(local, SUCKLING_ENERGY);
-                            
+
                             /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
@@ -3087,9 +3089,9 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 #endif
 
     being_set_speed(local, (n_byte)loc_s);
-    
+
     being_set_height(local, loc_h);
-    
+
     GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
     being_set_state(local, loc_state);
 }
@@ -3103,7 +3105,7 @@ void being_init_braincode(noble_being * local,
 {
     n_byte2 * local_random = being_get_random(local);
     n_uint ch,i,most_similar_index,diff,min,actor_index;
-    noble_social * graph;    
+    noble_social * graph;
     if (other==0L)
     {
         /** initially seed the brain with instructions which are random but genetically biased */
@@ -3194,7 +3196,7 @@ static n_int being_set_unique_name(noble_being * beings,
 
     local_random[0] = random_factor[0];
     local_random[1] = random_factor[1];
-    
+
     /** random number initialization */
     math_random3(local_random);
     math_random3(local_random);
@@ -3222,13 +3224,13 @@ static n_int being_set_unique_name(noble_being * beings,
 
         /** avoid the same two family names */
         if (UNPACK_FAMILY_FIRST_NAME(mother_family_name) ==
-            UNPACK_FAMILY_SECOND_NAME(father_family_name))
+                UNPACK_FAMILY_SECOND_NAME(father_family_name))
         {
             possible_family_name =
-            GET_NAME_FAMILY(UNPACK_FAMILY_FIRST_NAME(mother_family_name),
-                            (math_random(local_random) & FAMILY_NAME_AND_MOD));
+                GET_NAME_FAMILY(UNPACK_FAMILY_FIRST_NAME(mother_family_name),
+                                (math_random(local_random) & FAMILY_NAME_AND_MOD));
         }
-        
+
         if (samples == 1024)
         {
             /** switch naming order */
@@ -3236,21 +3238,21 @@ static n_int being_set_unique_name(noble_being * beings,
                 GET_NAME_FAMILY(UNPACK_FAMILY_SECOND_NAME(mother_family_name),
                                 UNPACK_FAMILY_FIRST_NAME(father_family_name));
         }
-        
+
         /** avoid the same two family names */
         if (UNPACK_FAMILY_SECOND_NAME(mother_family_name) ==
-            UNPACK_FAMILY_FIRST_NAME(father_family_name))
+                UNPACK_FAMILY_FIRST_NAME(father_family_name))
         {
             possible_family_name =
-            GET_NAME_FAMILY(UNPACK_FAMILY_SECOND_NAME(mother_family_name),
-                            (math_random(local_random) & FAMILY_NAME_AND_MOD));
+                GET_NAME_FAMILY(UNPACK_FAMILY_SECOND_NAME(mother_family_name),
+                                (math_random(local_random) & FAMILY_NAME_AND_MOD));
         }
 
         being_set_first_name(local_being,possible_first_name);
         being_set_family_name(local_being,
                               UNPACK_FAMILY_FIRST_NAME(possible_family_name),
                               UNPACK_FAMILY_SECOND_NAME(possible_family_name));
-        
+
         /** does the name already exist in the population */
         found = 1;
         for (i = 0; i < number; i++)
@@ -3275,9 +3277,9 @@ static void being_random_genetics(n_genetics * value, n_byte2 * random, n_int ma
     while (loop < CHROMOSOMES)
     {
         n_uint loop2 = 0;
-        
+
         value[loop] = 0;
-        
+
         while (loop2 < (sizeof(n_genetics)*8))
         {
             if (math_random(random)&1)
@@ -3317,7 +3319,7 @@ n_int being_init(noble_being * beings, n_int number,
     {
         return SHOW_ERROR("Episodic memory not available");
     }
-    
+
     being_erase(local);
 
 #ifdef BRAIN_ON
@@ -3333,7 +3335,7 @@ n_int being_init(noble_being * beings, n_int number,
         }
     }
 #endif
-    
+
     local->goal[0]=GOAL_NONE;
 
     /** Set learned preferences to 0.5 (no preference in either direction.
@@ -3373,16 +3375,16 @@ n_int being_init(noble_being * beings, n_int number,
         being_set_random(local, random_factor);
         being_random3(local);
         being_random3(local);
-        
+
     }
     else if (mother)
     {
         (void)being_random(mother);
-        
+
         being_set_random(local, being_get_random(mother));
 
         being_random3(local);
-        
+
         being_set_random1(local, being_get_random(mother)[0]);
 
         being_random3(local);
@@ -3400,16 +3402,16 @@ n_int being_init(noble_being * beings, n_int number,
 #ifdef BRAINCODE_ON
 
     being_random3(local);
-    
+
 #ifdef EPISODIC_ON
     /** has no social connections initially */
     io_erase((n_byte*)local_social_graph,sizeof(noble_social)*SOCIAL_SIZE);
-    
+
     for (ch=0; ch<EPISODIC_SIZE; ch++)
     {
         local_episodic[ch].affect=EPISODIC_AFFECT_ZERO;
     }
-    
+
     local_social_graph[0].relationship=RELATIONSHIP_SELF;
     for (ch=0; ch<SOCIAL_SIZE; ch++)
     {
@@ -3420,7 +3422,7 @@ n_int being_init(noble_being * beings, n_int number,
         local_social_graph[ch].friend_foe = SOCIAL_RESPECT_NORMAL;
     }
 #endif
-    
+
     being_init_braincode(local,0L,0,
                          BRAINCODE_INTERNAL);
     being_init_braincode(local,0L,0,
@@ -3453,7 +3455,7 @@ n_int being_init(noble_being * beings, n_int number,
         local->brainprobe[ch].offset = (n_byte)being_random(local)&255;
     }
 #endif
-    
+
     being_facing_init(local);
 
     if (random_factor)
@@ -3472,47 +3474,47 @@ n_int being_init(noble_being * beings, n_int number,
         }
         while ((loop < 20) && (WATER_TEST(land_location(APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1])),land_tide_level())));
 
-        
-        
-        
+
+
+
         being_set_location(local, location);
 
         {
             n_genetics mother_genetics[CHROMOSOMES];
             n_genetics father_genetics[CHROMOSOMES];
             n_byte2    gene_random[2];
-            
+
             being_random3(local);
-            
+
             gene_random[0] = being_random(local);
             being_random3(local);
             being_random3(local);
 
             gene_random[1] = being_random(local);
-            
+
             being_random_genetics(mother_genetics, gene_random, 0);
-            
+
             being_random3(local);
-            
+
             gene_random[0] = being_random(local);
             being_random3(local);
             being_random3(local);
             being_random3(local);
-            
+
             gene_random[1] = being_random(local);
-            
+
             being_random_genetics(father_genetics, gene_random, 1);
             being_random3(local);
-            
+
             body_genetics(beings, number, being_genetics(local), mother_genetics, father_genetics, gene_random);
-            
+
             being_set_unique_name(beings, number, local, 0L, 0L);
         }
         local->social_x = local->social_nx =
                               (math_random(local->seed) & 32767)+16384;
         local->social_y = local->social_ny =
                               (math_random(local->seed) & 32767)+16384;
-        
+
         local->date_of_birth = 0;
     }
     else
@@ -3525,25 +3527,25 @@ n_int being_init(noble_being * beings, n_int number,
         (void) being_random(local);
         local->social_x = local->social_nx = mother->social_x;
         local->social_y = local->social_ny = mother->social_y;
- 
+
         genetics_set(being_genetics(local), being_fetal_genetics(mother));
-        
+
         /** ascribed social status */
         local->honor = (n_byte)being_honor(mother);
 
         being_set_unique_name(beings, number, local,
                               being_family_name(mother),
                               mother->father_name[1]);
-        
+
         local->date_of_birth = land_date();
     }
-    
+
     being_living(local);
 
     if (random_factor)
     {
         being_set_height(local, BIRTH_HEIGHT);
-        
+
         GET_M(local) = BIRTH_MASS;
     }
     else
@@ -3552,11 +3554,11 @@ n_int being_init(noble_being * beings, n_int number,
         being_random3(local);
         being_set_height(local, BIRTH_HEIGHT +
                          (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT)));
-        
+
         GET_M(local) = BIRTH_MASS +
                        (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
     }
-    
+
     local->crowding = MIN_CROWDING;
 #ifdef BRAIN_ON
     if (being_brain(local))
@@ -3585,37 +3587,37 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
     if(being_awake(local_sim, local_being))
     {
         n_int	local_s  = being_speed(local_being);
-        
+
         n_vect2	location_vector;
         n_vect2	facing_vector;
-        
+
         vect2_byte2(&location_vector, being_location(local_being));
-        
+
         being_facing_vector(local_being, &facing_vector, 1);
-        
+
         if (local_s > 0)
         {
             n_byte2 location[2];
             vect2_d(&location_vector, &facing_vector, local_s, 512);
-            
+
             /* vector to n_byte2 may do incorrect wrap around MUST be improved */
             location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
             location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
-            
+
             being_set_location(local_being, location);
         }
-        
+
         {
             n_int delta_z;
             n_int delta_energy;
             n_int local_z;
             n_vect2 slope_vector;
-            
+
             land_vect2(&slope_vector, &local_z, &location_vector);
-            
+
             delta_z = vect2_dot(&slope_vector,&facing_vector,1,96);
             delta_energy = ((512 - delta_z) * local_s)/80;
-            
+
             if (WATER_TEST(local_z, land_tide_level()))
             {
                 n_int insulation=0;
@@ -3639,7 +3641,7 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
                 }
 
                 delta_energy = ((delta_energy * delta_energy) >> 9);
-                
+
                 /* the more massive the more energy consumed when moving */
                 delta_e += (delta_energy + 4 + (GET_M(local_being)*5/BEING_MAX_MASS_G)) >> 2;
             }
@@ -3650,17 +3652,17 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
         being_set_speed(local_being, 0);
         delta_e += (7) >> 2;
     }
-    
+
     if (delta_e > 0)
     {
         /** hairy creatures are better insulated */
         delta_e -= ((GENE_HAIR(genetics)*delta_e)>>conductance);
         if (delta_e < 1) delta_e = 1;
     }
-    
+
     being_energy_delta(local_being, 0 - delta_e);
-    
-    
+
+
     if (land_time() == 0)
     {
         n_int age_in_years = AGE_IN_YEARS(local_being);
@@ -3704,7 +3706,7 @@ void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being,
 void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data)
 {
     being_remove_loop2_struct * brls = (being_remove_loop2_struct *)data;
-    
+
     if (being_energy_less_than(local, BEING_DEAD + 1) == 0)
     {
         if ( local != brls->being_count )
@@ -3727,18 +3729,18 @@ void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void 
 being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim)
 {
     being_remove_loop2_struct * brls = (being_remove_loop2_struct *)io_new(sizeof(being_remove_loop2_struct));
-    
+
     brls->reference = local_sim->select;
     brls->being_count = local_sim->beings;
     brls->selected_died = 0;
     brls->count = 0;
-    
+
     if (being_remove_external_value)
     {
         do {}
         while(being_remove_external_value);
     }
-    
+
     being_remove_internal_value = 1;
     return brls;
 }
@@ -3757,12 +3759,12 @@ void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct 
             sim_set_select(0L);
         }
     }
-    
+
     if ((*brls)->count == 0)
     {
         (void)SHOW_ERROR("No Apes remain start new run");
     }
-    
+
     being_remove_internal_value = 0;
     io_free((void **)brls);
 }

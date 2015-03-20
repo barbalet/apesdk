@@ -99,7 +99,7 @@ typedef enum
     BEING_STATE_SHOWFORCE = 512,
     BEING_STATE_ATTACK = 1024,
     BEING_STATES = 12
-}being_state_type;
+} being_state_type;
 
 typedef enum
 {
@@ -146,7 +146,7 @@ typedef enum
     EVENT_TICKLED,
     EVENT_TICKLED_BY,
     EVENTS
-}being_episodic_event_type;
+} being_episodic_event_type;
 
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
@@ -324,12 +324,13 @@ void being_recalibrate_honor_loop(noble_simulation * local, noble_being * value,
 
 void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data);
 
-typedef struct{
+typedef struct
+{
     noble_being * being_count;
     noble_being * reference;
     n_int         selected_died;
     n_uint        count;
-}being_remove_loop2_struct;
+} being_remove_loop2_struct;
 
 void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data);
 

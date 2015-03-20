@@ -203,7 +203,7 @@ n_int io_bytes_to_int(n_byte * bytes)
 {
     /*n_uint unsigned_value;*/
     n_int return_value;
-    
+
     io_copy(bytes, (n_byte *)&return_value, sizeof(n_int));
     return return_value;
 }
@@ -612,7 +612,7 @@ void io_whitespace(n_file * input)
         local_data[loop++] = 0;
     }
     input->size = out_loop;
-    
+
 }
 
 /**
@@ -849,7 +849,7 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
     found_text[3] = io_read(fil);
     found_text[4] = io_read(fil);
     found_text[5] = io_read(fil);
-    
+
     while (POPULATED(commands_bytes))
     {
         commands_bytes = (n_byte *) commands[lp].characters;
@@ -861,9 +861,9 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
         }
         lp ++;
     }
-    
+
     io_output_contents(fil);
-    
+
     return SHOW_ERROR((n_constant_string)found_text);
 }
 
@@ -874,7 +874,8 @@ n_int io_find_size_data(noble_file_entry * commands)
     n_int   lp = 1;
     n_byte  last_incl = FILE_INCL(commands[0].incl_kind);
     n_byte *last_characters;
-    do{
+    do
+    {
         n_byte	data_incl = FILE_INCL(commands[lp].incl_kind);
         last_characters = commands[lp].characters;
         if (last_incl != data_incl)
@@ -882,20 +883,20 @@ n_int io_find_size_data(noble_file_entry * commands)
             n_uint   local_kind = FILE_KIND(commands[lp-1].incl_kind);
             n_uint   data_size;
             n_uint   running_entry = commands[lp-1].start_location;
-            
+
             switch(local_kind)
             {
-                case FILE_TYPE_BYTE4:
-                    data_size = 4;
-                    break;
-                case FILE_TYPE_BYTE2:
-                    data_size = 2;
-                    break;
-                default:
-                    data_size = 1;
-                    break;
+            case FILE_TYPE_BYTE4:
+                data_size = 4;
+                break;
+            case FILE_TYPE_BYTE2:
+                data_size = 2;
+                break;
+            default:
+                data_size = 1;
+                break;
             }
-            
+
             running_entry += data_size * commands[lp-1].number_entries;
             if (running_entry > max_entry)
             {
@@ -952,9 +953,9 @@ n_int io_read_data(n_file * fil, n_byte2 command, n_byte * data_read)
     }
 
     if ((type_from_command == FILE_TYPE_BYTE) ||
-        (type_from_command == FILE_TYPE_BYTE_EXT) ||
-        (type_from_command == FILE_TYPE_BYTE2) ||
-        (type_from_command == FILE_TYPE_BYTE4))
+            (type_from_command == FILE_TYPE_BYTE_EXT) ||
+            (type_from_command == FILE_TYPE_BYTE2) ||
+            (type_from_command == FILE_TYPE_BYTE4))
     {
         n_uint	number = 0;
         n_byte	num_char;
@@ -983,7 +984,7 @@ n_int io_read_data(n_file * fil, n_byte2 command, n_byte * data_read)
                 return SHOW_ERROR("Expected two byte too big");
             data_read2[0] = (n_byte2) number;
         }
-        
+
         if (type_from_command == FILE_TYPE_BYTE4)
         {
             n_byte4	* data_read4 = (n_byte4 *)data_read;
@@ -1004,7 +1005,7 @@ void io_output_contents(n_file * file)
     printf("Location %ld\n", file->location);
     printf("Size %ld\n", file->size);
     printf("* * * * * * \n");
-    
+
     while (loop < file->location)
     {
         printf("%c", file->data[loop++]);
@@ -1264,30 +1265,30 @@ n_int io_write_buff(n_file * fil, void * data, const noble_file_entry * commands
                         n_byte4 num_write = 0;
                         switch (data_type)
                         {
-                            case FILE_TYPE_BYTE_EXT:
-                                if((loop != 0) && ((loop % 3) == 0) && (loop != 126))
-                                {
-                                    n_string_block block_code = {0};
-                                    if (func != 0L) (*func)(block_code, &byte_data[data_offset + loop]);
-                                    IO_CHECK_ERROR(io_write(fil, "", 1));
-                                    IO_CHECK_ERROR(io_write(fil, "", 2));
-                                    IO_CHECK_ERROR(io_write(fil, "/* ", 0));
-                                    IO_CHECK_ERROR(io_writenumber(fil, loop, 1, 0));
-                                    IO_CHECK_ERROR(io_write(fil, "", 2));
-                                    IO_CHECK_ERROR(io_write(fil, (n_string)block_code, 0));
-                                    IO_CHECK_ERROR(io_write(fil, " */", 2));
-                                }
-                            case FILE_TYPE_BYTE:
-                                num_write = byte_data[data_offset + loop];
-                                break;
-                            case FILE_TYPE_BYTE2:
+                        case FILE_TYPE_BYTE_EXT:
+                            if((loop != 0) && ((loop % 3) == 0) && (loop != 126))
                             {
-                                num_write = ((n_byte2 *)  &byte_data[data_offset + (loop * 2)])[0];
+                                n_string_block block_code = {0};
+                                if (func != 0L) (*func)(block_code, &byte_data[data_offset + loop]);
+                                IO_CHECK_ERROR(io_write(fil, "", 1));
+                                IO_CHECK_ERROR(io_write(fil, "", 2));
+                                IO_CHECK_ERROR(io_write(fil, "/* ", 0));
+                                IO_CHECK_ERROR(io_writenumber(fil, loop, 1, 0));
+                                IO_CHECK_ERROR(io_write(fil, "", 2));
+                                IO_CHECK_ERROR(io_write(fil, (n_string)block_code, 0));
+                                IO_CHECK_ERROR(io_write(fil, " */", 2));
                             }
-                                break;
-                            case FILE_TYPE_BYTE4:
-                                num_write = ((n_byte4 *) &byte_data[data_offset + (loop * 4)])[0];
-                                break;
+                        case FILE_TYPE_BYTE:
+                            num_write = byte_data[data_offset + loop];
+                            break;
+                        case FILE_TYPE_BYTE2:
+                        {
+                            num_write = ((n_byte2 *)  &byte_data[data_offset + (loop * 2)])[0];
+                        }
+                        break;
+                        case FILE_TYPE_BYTE4:
+                            num_write = ((n_byte4 *) &byte_data[data_offset + (loop * 4)])[0];
+                            break;
                         }
                         loop++;
 
@@ -1549,7 +1550,7 @@ void io_three_string_combination(n_string output, n_string first, n_string secon
     n_int total = count - (command_length + addition_length + 1);
     n_int loop2 = 0;
     n_int position = 0;
-    
+
     io_string_write(output, " ", &position);
     io_string_write(output, first, &position);
     io_string_write(output, " ", &position);
@@ -1567,7 +1568,7 @@ void io_time_to_string(n_string value)
 {
     n_int minutes = land_time();
     n_int days = land_date();
-    
+
     n_int military_time = (minutes % 60);
     n_int hours = (minutes/60);
     military_time += hours * 100;
@@ -1738,14 +1739,16 @@ void io_string_write(n_string dest, n_string insert, n_int * pos)
 {
     n_int  loop = 0;
     n_byte character = 127;
-    do {
+    do
+    {
         character = insert [loop++];
         if (character)
         {
             dest[*pos] = character;
             *(pos) += 1;
         }
-    } while (character);
+    }
+    while (character);
     dest[*pos] = 0;
 }
 
@@ -1800,9 +1803,9 @@ void io_file_cleanup(n_int * entry, n_file ** file)
     /* This setting to zero may be duplicated in at least one place
      but provides additional protection - it may not be needed following
      a case-by-case review */
-    
+
     *entry = 0;
-    
+
     if (*file)
     {
         io_file_free(file);
@@ -1847,12 +1850,12 @@ void io_file_writeoff(n_int * entry, n_file * file)
 void io_file_string(n_int entry, n_file * file, n_constant_string string)
 {
     if (entry == 0) return;
-    
+
     if((string != 0L)
 #ifndef COMMAND_LINE_DEBUG
-       && (file  != 0L)
+            && (file  != 0L)
 #endif
-       )
+      )
     {
 #ifndef COMMAND_LINE_DEBUG
         io_write(file, string, 0);

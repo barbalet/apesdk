@@ -1,11 +1,11 @@
 /****************************************************************
- 
+
  execute.c
- 
+
  =============================================================
- 
+
  Copyright 1996-2015 Tom Barbalet. All rights reserved.
- 
+
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
@@ -14,10 +14,10 @@
  sell copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
  conditions:
- 
+
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,11 +26,11 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
- 
+
  This software and Noble Ape are a continuing work of Tom Barbalet,
  begun on 13 June 1996. No apes or cats were harmed in the writing
  of this software.
- 
+
  ****************************************************************/
 
 #include "noble.h"
@@ -57,7 +57,7 @@ typedef enum
     ES_DONE = 0,
     ES_WAITING,
     ES_STARTED
-}execute_state;
+} execute_state;
 
 typedef struct
 {
@@ -131,7 +131,8 @@ static void execute_add_generic(execute_function * function, void * general_data
     }
 #else
     execution_cycle = 1;
-    do{
+    do
+    {
         n_int   loop = 0;
         while (loop < execution_thread_size)
         {
@@ -148,10 +149,11 @@ static void execute_add_generic(execute_function * function, void * general_data
                 execution[loop].state = ES_WAITING;
                 return;
             }
-            
+
             loop++;
         }
-    }while (global_cycle);
+    }
+    while (global_cycle);
 #endif
 }
 
@@ -190,14 +192,14 @@ void execute_close(void)
 #ifdef EXECUTE_THREADED
     global_cycle = 0;
 #ifdef _WIN32
-	{
-		n_int loop = 0;
-		while (loop < execution_thread_size)
-		{
-			CloseHandle(thread[loop]);
-			loop++;
-		}
-	}
+    {
+        n_int loop = 0;
+        while (loop < execution_thread_size)
+        {
+            CloseHandle(thread[loop]);
+            loop++;
+        }
+    }
 #endif
 #endif
 }
@@ -225,7 +227,8 @@ n_int execute_threads_value(void)
 static void execute_thread_generic(void * id)
 {
     execution_thread * value = id;
-    do{
+    do
+    {
         n_int            loop = 0;
         n_int            all_idle = 1;
         if (value->state != ES_WAITING)
@@ -239,7 +242,7 @@ static void execute_thread_generic(void * id)
         {
             execute_object * object = value->executed;
             value->state = ES_STARTED;
-            
+
             if (object->size)
             {
                 n_byte *location = (n_byte *)object->read_data;
@@ -278,8 +281,9 @@ static void execute_thread_generic(void * id)
         {
             execution_cycle = 0;
         }
-    }while (global_cycle);
-    
+    }
+    while (global_cycle);
+
 }
 
 #ifdef _WIN32
@@ -310,20 +314,20 @@ void execute_init(void)
 #ifdef    EXECUTE_THREADED
     n_int   loop = 0;
     n_byte2 master_random[2] = {0xf672, 0x3e71};
-    
-    
+
+
 #ifdef _WIN32
     thread = (HANDLE*)io_new(execution_thread_size * sizeof(HANDLE));
 #else
     thread = (pthread_t*)io_new(execution_thread_size * sizeof(pthread_t));
 #endif
-    
+
     if (thread == 0L)
     {
         (void)SHOW_ERROR("Threads failed to allocate");
         return;
     }
-    
+
 #ifdef _WIN32
     threadId = (DWORD*)io_new(execution_thread_size * sizeof(DWORD));
     if (threadId == 0L)
@@ -333,7 +337,7 @@ void execute_init(void)
         return;
     }
 #endif
-    
+
     execution = (execution_thread *)io_new(execution_thread_size * sizeof(execution_thread));
 
     if (execution == 0L)
@@ -347,19 +351,19 @@ void execute_init(void)
     }
 #ifdef _WIN32
     io_erase((n_byte*)thread, execution_thread_size * sizeof(HANDLE));
-	io_erase((n_byte*)threadId, execution_thread_size * sizeof(DWORD));
+    io_erase((n_byte*)threadId, execution_thread_size * sizeof(DWORD));
 #else
     io_erase((n_byte*)thread, execution_thread_size * sizeof(pthread_t));
 #endif
     io_erase((n_byte*)execution, execution_thread_size * sizeof(execution_thread));
-    
+
     while (loop < execution_thread_size)
     {
         execution[loop].random[0] = master_random[1];
         execution[loop].random[1] = master_random[0];
-        
+
         math_random3(master_random);
-        
+
 #ifdef _WIN32
         threadId[loop] = loop;
         thread[loop] = CreateThread(NULL, 0, execute_thread_win, &execution[loop], 0, &threadId[loop]);

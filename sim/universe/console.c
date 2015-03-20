@@ -162,7 +162,7 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
             n_string_block relationship_str2;
             n_string_block met_being_name;
             n_string_block result_str;
-            
+
             /** Print the name and familiarity */
             social_graph_link_name(local_sim, local_being, i, BEING_MET, met_being_name);
 
@@ -322,10 +322,10 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     {
         sprintf(beingstr,"%sBrain Cycles Per Second: %ld\n", beingstr, local_sim->delta_cycles);
     }
-    
-    
+
+
     sprintf(beingstr,"%s%s", beingstr, time);
-    
+
     if (simulation_executing)
     {
         sprintf(beingstr,"%s Simulation running", beingstr);
@@ -354,7 +354,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     n_string_block line_text;
     n_int          location = 0;
     n_uint          loop = 0;
-    
+
     /** show names in index order */
     while (loop < local_sim->num)
     {
@@ -365,9 +365,9 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
 
         /** get the name of the being */
         being_name_simple(local_being, name);
-        
+
         io_string_write(line_text, name, &location);
-        
+
         length = io_length(name, STRING_BLOCK_SIZE);
 
         while (length < 24)
@@ -375,7 +375,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
             io_string_write(line_text, " ", &location);
             length++;
         }
-        
+
         if ((loop % 3) == 2)
         {
             output_function(line_text);
@@ -388,7 +388,7 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     {
         output_function(line_text);
     }
-    
+
     return 0;
 }
 
@@ -418,18 +418,18 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
         n_int           position = 0;
 
         io_string_write(initial_information, "EXT                                                         INT", &position);
-        
+
         (*function)(initial_information, -1);
 
         while(loop < 22)
         {
             n_string_block command_information;
-            
+
             n_string_block first_internal;
             n_string_block first_external;
-            
+
             position = 0;
-            
+
             brain_three_byte_command((n_string)first_internal, &internal_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
             brain_three_byte_command((n_string)first_external, &external_bc[loop*BRAINCODE_BYTES_PER_INSTRUCTION]);
 
@@ -446,7 +446,7 @@ void console_populate_braincode(noble_simulation * local_sim, line_braincode fun
 
                 brain_three_byte_command((n_string)second_internal, &internal_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
                 brain_three_byte_command((n_string)second_external, &external_bc[(loop+22)*BRAINCODE_BYTES_PER_INSTRUCTION]);
-                
+
                 io_string_write(command_information, first_external, &position);
                 io_string_write(command_information, "  ", &position);
                 io_string_write(command_information, second_external, &position);
@@ -936,7 +936,7 @@ static void histogram_being_state_loop(noble_simulation * local_sim, noble_being
 static void histogram_being_state(noble_simulation * local_sim, n_uint * histogram, n_byte normalize)
 {
     n_uint i;
-    
+
     for (i = 0; i < BEING_STATES; i++) histogram[i] = 0;
 
     being_loop_no_thread(local_sim, 0L, histogram_being_state_loop, histogram);
@@ -1031,42 +1031,42 @@ static void watch_being(void * ptr, n_console_output output_function)
 
         switch(watch_type)
         {
-            case WATCH_ALL:
-            {
-                watch_stats(ptr, being_get_select_name(local_sim), local_being, beingstr);
-                break;
-            }
-            case WATCH_SOCIAL_GRAPH:
-            {
-                watch_social_graph(ptr, being_get_select_name(local_sim), local_being, beingstr);
-                break;
-            }
-            case WATCH_EPISODIC:
-            {
-                watch_episodic(ptr, being_get_select_name(local_sim), local_being, beingstr);
-                break;
-            }
-            case WATCH_BRAINCODE:
-            {
-                watch_braincode(ptr, being_get_select_name(local_sim), local_being, beingstr);
-                break;
-            }
-            case WATCH_BRAINPROBES:
-            {
-                watch_brainprobes(ptr, being_get_select_name(local_sim), local_being, beingstr);
-                break;
-            }
+        case WATCH_ALL:
+        {
+            watch_stats(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
+        case WATCH_SOCIAL_GRAPH:
+        {
+            watch_social_graph(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
+        case WATCH_EPISODIC:
+        {
+            watch_episodic(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
+        case WATCH_BRAINCODE:
+        {
+            watch_braincode(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
+        case WATCH_BRAINPROBES:
+        {
+            watch_brainprobes(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
 
-            case WATCH_APPEARANCE:
-            {
-                watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
-                break;
-            }
-            case WATCH_SPEECH:
-            {
-                watch_speech(ptr, being_get_select_name(local_sim), local_being, beingstr);
-                break;
-            }
+        case WATCH_APPEARANCE:
+        {
+            watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
+        case WATCH_SPEECH:
+        {
+            watch_speech(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            break;
+        }
         }
 
         if (watch_type != WATCH_NONE)
@@ -1280,13 +1280,13 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
     if (total_tests > 0)
     {
         n_string_block output;
-        
+
         sprintf(output, "Matches %03u.%04u percent\n",
                 (n_c_int)(total_matches*100/total_tests),
                 (n_c_int)(total_matches*1000000/total_tests)%10000);
         output_function(output);
 
-    
+
         output_function("Block Percent   Instances");
         output_function("-------------------------");
 
@@ -1377,7 +1377,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                     (io_find(response,0,length,"friend",6)>-1))
             {
                 watch_type = WATCH_SOCIAL_GRAPH;
-                
+
                 io_string_write(output, "Watching social graph for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
                 output_function(output);
@@ -1388,7 +1388,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
                     (io_find(response,0,length,"memory",6)>-1))
             {
                 watch_type = WATCH_EPISODIC;
-                
+
                 io_string_write(output, "Watching episodic memory for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
                 output_function(output);
@@ -1397,7 +1397,7 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
             if (io_find(response,0,length,"speech",6)>-1)
             {
                 watch_type = WATCH_SPEECH;
-                
+
                 io_string_write(output, "Watching speech for ", &position);
                 io_string_write(output, being_get_select_name(local_sim), &position);
                 output_function(output);
@@ -1622,7 +1622,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 while ((i < end_point) && simulation_running)
                 {
                     console_step(ptr, RUN_STEP_CONST, output_function);
-                    
+
                     if (temp_save_interval_steps)
                     {
                         if ((count % temp_save_interval_steps) == 0)
@@ -1633,7 +1633,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                     count++;
                     if (!forever) i++;
                 }
-                
+
                 if (temp_save_interval_steps)
                 {
                     if ((count % temp_save_interval_steps) != 1)
@@ -1769,7 +1769,7 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
         n_int position = 0;
         io_string_write(console_file_name, response, &position);
         position = 0;
-        
+
         io_string_write(output_string, "Simulation file ", &position);
         io_string_write(output_string, response, &position);
         io_string_write(output_string, " saved\n", &position);
@@ -1838,9 +1838,9 @@ static n_int console_base_open(void * ptr, n_string response, n_console_output o
         {
             n_int position = 0;
             io_string_write(console_file_name, response, &position);
-            
+
             position = 0;
-            
+
             io_string_write(output_string, "Simulation file ", &position);
             io_string_write(output_string, response, &position);
             io_string_write(output_string, " open\n", &position);
@@ -1904,7 +1904,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
                 b = &local_sim->beings[j];
 
                 honor = being_honor(b);
-                
+
                 if (honor >= max_honor)
                 {
                     passed=0;
@@ -1949,7 +1949,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
         sprintf(output_value, "%03d   ", (int)(being_honor(b)));
 
         being_name_simple(b, str);
-        
+
         sprintf(output_value, "%s%s", output_value,str);
 
         for (k=0; k<25-io_length(str,STRING_BLOCK_SIZE); k++) sprintf(output_value, "%s ", output_value);
@@ -1991,7 +1991,7 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 n_int console_debug(void * ptr, n_string response, n_console_output output_function)
 {
     file_audit();
-    
+
     return 0;
 }
 
@@ -2071,9 +2071,9 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                         {
                             noble_being * b=0L;
                             n_string_block name;
-                            
+
                             being_name_byte2(local_episodic[e].first_name[j], local_episodic[e].family_name[j], name);
-                            
+
                             b = being_from_name(local_sim, name);
                             if (b!=0L)
                             {
@@ -2087,7 +2087,7 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
                         {
                             /** Avoid memories about yourself, since we're interested
                                in gossip about other beings */
-                            
+
                             if (being_name_comparison(local_being, local_episodic[e].first_name[j], local_episodic[e].family_name[j]))
                             {
                                 if (((j == BEING_MET) &&
@@ -2154,9 +2154,9 @@ n_int console_epic(void * ptr, n_string response, n_console_output output_functi
         {
             n_string_block output_value;
             /** get the name of the being */
-            
+
             being_name_byte2(first_name[i], family_name[i], name);
-            
+
             sprintf(output_value, "%06d %s", (int)hits[i], name);
             output_function(output_value);
         }

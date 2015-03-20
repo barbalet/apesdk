@@ -1,11 +1,11 @@
 /****************************************************************
- 
+
  imagemath.c
- 
+
  =============================================================
- 
+
  Copyright 1996-2015 Tom Barbalet. All rights reserved.
- 
+
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
@@ -14,10 +14,10 @@
  sell copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
  conditions:
- 
+
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,11 +26,11 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
- 
+
  This software and Noble Ape are a continuing work of Tom Barbalet,
  begun on 13 June 1996. No apes or cats were harmed in the writing
  of this software.
- 
+
  ****************************************************************/
 
 #include <string.h>
@@ -44,21 +44,21 @@ noble_image * image_init_clear(unsigned width, unsigned height, unsigned clear)
     noble_image   * image = 0L;
     unsigned char * alloc = 0L;
     unsigned        size = width * height * 3;
-    
+
     if (size == 0)
     {
         return 0L;
     }
-    
+
     alloc = malloc(size);
-    
+
     if (alloc == 0L)
     {
         return 0L;
     }
-    
+
     image = (noble_image *)malloc(sizeof(noble_image));
-    
+
     if (image == 0L)
     {
         free(alloc);
@@ -68,7 +68,7 @@ noble_image * image_init_clear(unsigned width, unsigned height, unsigned clear)
     {
         memset(alloc, 255, size);
     }
-    
+
     image->height = height;
     image->width = width;
     image->image = alloc;
@@ -91,11 +91,11 @@ noble_image * image_half(noble_image * full)
             while(loop_width < half_width)
             {
                 unsigned full_image_location = ((full_height + (loop_width<<1)) * 3);
-                
+
                 half->image[loop++] = full->image[full_image_location++];
                 half->image[loop++] = full->image[full_image_location++];
                 half->image[loop++] = full->image[full_image_location];
-                
+
                 loop_width++;
             }
             loop_height++;
@@ -120,11 +120,11 @@ noble_image * image_third(noble_image * full)
             while(loop_width < third_width)
             {
                 unsigned full_image_location = ((full_height + (loop_width * 3)) * 3);
-                
+
                 third->image[loop++] = full->image[full_image_location++];
                 third->image[loop++] = full->image[full_image_location++];
                 third->image[loop++] = full->image[full_image_location];
-                
+
                 loop_width++;
             }
             loop_height++;
@@ -137,7 +137,7 @@ noble_image * image_rotate_90(noble_image * full)
 {
     unsigned rotated_width  = full->height;
     unsigned rotated_height = full->width;
-    
+
     noble_image   * rotated = image_init_clear(rotated_width, rotated_height, 0);
     if (rotated)
     {
@@ -147,15 +147,15 @@ noble_image * image_rotate_90(noble_image * full)
         {
             unsigned loop_width = 0;
             unsigned full_height = loop_height * rotated_width;
-            
+
             while(loop_width < rotated_width)
             {
                 unsigned full_image_location = (((rotated_width - loop_width - 1) * rotated_height) +  loop_height) * 3;
-                
+
                 rotated->image[loop++] = full->image[full_image_location++];
                 rotated->image[loop++] = full->image[full_image_location++];
                 rotated->image[loop++] = full->image[full_image_location];
-                
+
                 loop_width++;
             }
             loop_height++;
@@ -168,14 +168,14 @@ noble_image * image_rotate_45(noble_image * full)
 {
     unsigned        side = full->height;
     noble_image   * rotated;
-    
+
     if (full->width > side)
     {
         side = full->width;
     }
-    
+
     rotated = image_init_clear(side, side, 1);
-    
+
     if (rotated)
     {
         unsigned loop_height = 0;
@@ -189,11 +189,11 @@ noble_image * image_rotate_45(noble_image * full)
                 signed rotated_height = ((((loop_width + loop_height)) + offset_height)) >> 1;
                 signed rotated_width = ((((loop_width - loop_height)) + side)) >> 1;
                 signed offset_rotate = ((rotated_height * side) + rotated_width) * 3;
-                
+
                 rotated->image[offset_rotate++] = full->image[loop++];
                 rotated->image[offset_rotate++] = full->image[loop++];
                 rotated->image[offset_rotate++] = full->image[loop++];
-                
+
                 loop_width++;
             }
             loop_height++;
@@ -205,7 +205,7 @@ noble_image * image_rotate_45(noble_image * full)
 noble_image * image_cut(noble_image * full, unsigned top, unsigned left, unsigned bottom, unsigned right)
 {
     noble_image * cut = image_init_clear(right - left, bottom - top, 0);
-    
+
     if (cut)
     {
         unsigned loop_height = 0;
@@ -233,10 +233,10 @@ noble_image * image_from_file(char * file_name)
     unsigned error;
     unsigned char* png;
     size_t pngsize;
-    
+
     lodepng_load_file(&png, &pngsize, file_name);
     error = lodepng_decode24(&image, &width, &height, png, pngsize);
-    
+
     free(png);
 
     if (error != 0)
@@ -246,13 +246,13 @@ noble_image * image_from_file(char * file_name)
     }
 
     return_image = (noble_image *)malloc(sizeof(noble_image));
-    
+
     if (return_image == 0L)
     {
         free(image);
         return 0L;
     }
-    
+
     return_image->width  = width;
     return_image->height = height;
     return_image->image  = image;
@@ -263,7 +263,7 @@ noble_image * image_from_file(char * file_name)
 void image_free(noble_image ** image_free)
 {
     if (*image_free == 0L) return;
-    
+
     free((*image_free)->image);
     free(*image_free);
     *image_free = 0L;
@@ -274,35 +274,35 @@ void image_add(noble_image * canvas, noble_image * image, unsigned top, unsigned
     unsigned loop_height = 0;
     while (loop_height < image->height)
     {
-        
-        
+
+
         unsigned image_width3 = (image->width * 3);
         unsigned canvas_width3 = (canvas->width * 3);
 
         unsigned comb_height = top + loop_height;
         unsigned comb_width = left + image->width;
-        
+
         if (comb_height >= canvas->height)
         {
             return;
         }
-        
+
         if (left >= canvas->width)
         {
             return;
         }
-        
+
         if (comb_width >= canvas->width)
         {
             comb_width = canvas->width-1;
         }
-        
+
         comb_width = (comb_width - left) * 3;
-        
+
         memcpy(&canvas->image[(canvas_width3 * comb_height) + (left * 3)],
                &image->image[(image_width3 * loop_height)],
                comb_width);
-        
+
         loop_height++;
     }
 }
@@ -316,17 +316,17 @@ void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, un
         unsigned loop = 0;
         unsigned comb_height = top + loop_height;
         unsigned comb_width = (left * 3);
-        
+
         unsigned image_width3 = (image->width * 3);
         unsigned canvas_width3 = (canvas->width * 3);
         unsigned char * band_canvas = &canvas->image[comb_height * canvas->width * 3];
         unsigned char * band_image = &image->image[loop_height * image->width * 3];
-        
+
         if (comb_height >= canvas->height)
         {
             return;
         }
-        
+
         while (loop_width < image_width3)
         {
             unsigned char canvas, image;
@@ -344,7 +344,7 @@ void image_add_alpha(noble_image * canvas, noble_image * image, unsigned top, un
             image = band_image[loop_width++];
             band_canvas[comb_width ++] = ((canvas * (256 - alpha)) + (image * alpha)) >> 8;
         }
-        
+
         loop_height++;
     }
 }
@@ -358,17 +358,17 @@ void image_combination(noble_image * canvas, noble_image * image, unsigned top, 
         unsigned loop = 0;
         unsigned comb_height = top + loop_height;
         unsigned comb_width = (left * 3);
-        
+
         unsigned image_width3 = (image->width * 3);
         unsigned canvas_width3 = (canvas->width * 3);
         unsigned char * band_canvas = &canvas->image[comb_height * canvas->width * 3];
         unsigned char * band_image = &image->image[loop_height * image->width * 3];
-        
+
         if (comb_height >= canvas->height)
         {
             return;
         }
-        
+
         while (loop_width < image_width3)
         {
             unsigned char canvas, image;
@@ -377,7 +377,7 @@ void image_combination(noble_image * canvas, noble_image * image, unsigned top, 
             {
                 break;
             }
-            
+
             canvas = band_canvas[comb_width] ^ 255;
             image = band_image[loop_width++] ^ 255;
             combination = canvas + image;
@@ -399,7 +399,7 @@ void image_combination(noble_image * canvas, noble_image * image, unsigned top, 
             combination = combination ^ 255;
             band_canvas[comb_width ++] = combination;
         }
-        
+
         loop_height++;
     }
 }
@@ -416,9 +416,9 @@ noble_image * image_grayscale(noble_image * full)
     while (loop < loop_end)
     {
         unsigned total = full->image[loop] + full->image[loop + 1] + full->image[loop + 2];
-        
+
         full->image[loop] = full->image[loop + 1] = full->image[loop + 2] = total / 3;
-        
+
         loop += 3;
     }
     return full;

@@ -125,16 +125,16 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
             noble_being *	desired_ape = local_sim->select;
             n_uint  high_squ = 31;
             n_uint	loop = 0;
-            
+
             while (loop < local_sim->num)
             {
                 noble_being	* current_ape = &(local_sim->beings[loop]);
-                
+
                 n_int	screen_x = APESPACE_TO_MAPSPACE(being_location_x(current_ape)) - px;
                 n_int	screen_y = APESPACE_TO_MAPSPACE(being_location_y(current_ape)) - py;
-                
+
                 n_uint	current_squ = (screen_x * screen_x) + (screen_y * screen_y);
-                
+
                 if (high_squ > current_squ)
                 {
                     high_squ = current_squ;
@@ -143,7 +143,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 loop++;
             }
             if (local_sim->select != desired_ape)
-            {                
+            {
                 sim_set_select(desired_ape);
             }
             else
@@ -160,13 +160,13 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
     if (wwind == NUM_TERRAIN)
     {
         n_int upper_x, upper_y;
-        
+
 #ifdef MULTITOUCH_CONTROLS
         if ((tc_state & 1) == 0)
         {
             tc_temp_state = tc_state + 1;
             tc_countdown = 60;
-            
+
         }
 #endif
         draw_terrain_coord(&upper_x, &upper_y);
@@ -203,7 +203,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 }
                 return;
             }
-            
+
             if (px > (upper_x - TC_FRACTION_X))
             {
                 if (tc_state == TCS_RIGHT_STATE_CONTROLS)
@@ -304,7 +304,7 @@ void shared_script_debug_handle(n_string cStringFileName)
 
 void shared_script_debug_handle(n_string cStringFileName)
 {
-    
+
 }
 
 #endif
@@ -312,12 +312,12 @@ void shared_script_debug_handle(n_string cStringFileName)
 static void * control_init(KIND_OF_USE kind, n_uint randomise)
 {
     void * sim_return = 0L;
-    
+
     shared_menu(NA_MENU_CLEAR_ERRORS);
     draw_undraw_clear();
-    
+
     sim_return = sim_init(kind, randomise, OFFSCREENSIZE, VIEWWINDOW(0));
-    
+
     if (sim_return)
     {
         return draw_offscreen(sim_return);
@@ -335,7 +335,7 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
 #endif
     if ((mouse_down == 1) && (mouse_identification == fIdentification))
     {
-        
+
         if (fIdentification == NUM_VIEW)
         {
 #if (MAP_BITS == 8)
@@ -359,7 +359,7 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
         }
     }
 #endif
-    
+
     if((key_down == 1) && (key_identification == fIdentification))
     {
         if ((key_identification == NUM_VIEW) || (key_identification == NUM_TERRAIN))
@@ -486,7 +486,7 @@ n_int shared_new(n_uint seed)
     (void)control_init(KIND_NEW_SIMULATION, seed);
 
     NewBlock = 0;
-    
+
     return 0;
 }
 
@@ -523,41 +523,42 @@ n_uint shared_max_fps(void)
 
 n_int shared_menu(n_int menuVal)
 {
-    switch (menuVal) {
-        case NA_MENU_PAUSE:
-            return control_toggle_pause(1);
-        case NA_MENU_WEATHER:
-            return draw_toggle_weather();
-        case NA_MENU_BRAIN:
-            return draw_toggle_brain();
-        case NA_MENU_BRAINCODE:
-            return draw_toggle_braincode();
-        case NA_MENU_TERRITORY:
-            return draw_toggle_territory();
-        case NA_MENU_TIDEDAYLIGHT:
-            return draw_toggle_tide_daylight();
-        case NA_MENU_PREVIOUS_APE:
-            (void)control_key(0, 2079);
-            return 0;
-        case NA_MENU_NEXT_APE:
-            (void)control_key(0, 2078);
-            return 0;
-        case NA_MENU_CLEAR_ERRORS:
-            (void)draw_error(0L, 0L, 0);
-            return 0;
-        case NA_MENU_FLOOD:
-            sim_flood();
-            return 0;
-        case NA_MENU_HEALTHY_CARRIER:
-            sim_healthy_carrier();
-            return 0;
+    switch (menuVal)
+    {
+    case NA_MENU_PAUSE:
+        return control_toggle_pause(1);
+    case NA_MENU_WEATHER:
+        return draw_toggle_weather();
+    case NA_MENU_BRAIN:
+        return draw_toggle_brain();
+    case NA_MENU_BRAINCODE:
+        return draw_toggle_braincode();
+    case NA_MENU_TERRITORY:
+        return draw_toggle_territory();
+    case NA_MENU_TIDEDAYLIGHT:
+        return draw_toggle_tide_daylight();
+    case NA_MENU_PREVIOUS_APE:
+        (void)control_key(0, 2079);
+        return 0;
+    case NA_MENU_NEXT_APE:
+        (void)control_key(0, 2078);
+        return 0;
+    case NA_MENU_CLEAR_ERRORS:
+        (void)draw_error(0L, 0L, 0);
+        return 0;
+    case NA_MENU_FLOOD:
+        sim_flood();
+        return 0;
+    case NA_MENU_HEALTHY_CARRIER:
+        sim_healthy_carrier();
+        return 0;
     }
     return -1;
 }
 
 void shared_saved_string(shared_saved_string_type ssst, n_string value)
 {
-    
+
 }
 
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
@@ -574,13 +575,13 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
     n_byte          colorLookUp[256][3];
 #endif
     if (index == 0L) return;
-    
+
     if (fIdentification == NUM_TERRAIN)
     {
         draw_window(dim_x, dim_y);
         draw_cycle();
     }
-    
+
     draw_color_time(fit);
 
     while(loopColors < 256)
@@ -597,7 +598,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 #endif
         loopColors++;
     }
-    
+
 #if (MAP_BITS == 8)
 #ifndef NOBLE_IOS
     if (fIdentification == NUM_VIEW)
@@ -627,16 +628,16 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 
                 }
             }
-            
+
             ly++;
         }
 
-        
+
         return;
     }
 #endif
 #endif
-    
+
     loop = 0;
     while(ly < dim_y)
     {
@@ -655,7 +656,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
         }
         ly++;
     }
-    
+
 }
 
 

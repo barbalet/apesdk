@@ -58,23 +58,24 @@ n_int * message_find_spaces(n_string string, n_int * count)
     n_int local_count = 0;
     n_int loop = 0;
     n_int *return_value = 0L;
-    
+
     if (*count)
     {
         return_value = io_new(*count * sizeof(n_int));
     }
-    
+
     if (string == 0L)
     {
         return 0L;
     }
-    
+
     if (string[0] == 0)
     {
         return 0L;
     }
-    
-    do{
+
+    do
+    {
         if (string[loop] == ' ')
         {
             if (*count)
@@ -84,8 +85,9 @@ n_int * message_find_spaces(n_string string, n_int * count)
             local_count++;
 
         }
-    }while(string[loop]);
-    
+    }
+    while(string[loop]);
+
     return return_value;
 }
 
@@ -105,7 +107,7 @@ n_string message_string_copy(n_string string)
 void message_remove(n_int remove)
 {
     n_message *value = &messages[remove];
-    
+
     if (value)
     {
         if (value->message)
@@ -137,7 +139,7 @@ void message_add(n_string message, n_int time_to_expire)
     n_int *  spaces;
     n_string copied_message;
     n_int    space_count = 0;
-    
+
     if (number_messages == (MAXIMUM_NUMBER_MESSAGE-1))
     {
         /* if the message stack is full remove the oldest message */
@@ -155,7 +157,7 @@ void message_add(n_string message, n_int time_to_expire)
         }
         message_remove(oldest_loop);
     }
-    
+
     if (message == 0L)
     {
         return;

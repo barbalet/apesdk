@@ -103,7 +103,7 @@ typedef enum
     TCS_LEFT_STATE_CONTROLS,
     TCS_RIGHT_STATE,
     TCS_RIGHT_STATE_CONTROLS
-}touch_control_state;
+} touch_control_state;
 
 #define TC_OFFSET_Y   (40)
 #define TC_FRACTION_X (40)

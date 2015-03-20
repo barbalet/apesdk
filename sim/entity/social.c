@@ -103,7 +103,7 @@ static void noble_feature_set(noble_feature * to, n_byte feature_type, n_byte2 f
  * @return array index of a given feature type within a set
  */
 static n_int noble_featureset_feature_index(noble_featureset * s,
-                                            n_byte feature_type)
+        n_byte feature_type)
 {
     n_int i=0;
 
@@ -136,9 +136,9 @@ static void noble_featureset_normalise_feature_frequencies(noble_featureset *s)
     {
         tot += (n_uint)s->features[i].frequency;
     }
-    
+
     if (tot == 0) tot = 1;
-    
+
     for (i = 0; i < s->feature_number; i++)
     {
         s->features[i].frequency = (n_byte2)((n_uint)s->features[i].frequency * max / tot);
@@ -219,10 +219,10 @@ static n_int noble_featureset_update(noble_featureset * s,
             {
                 noble_feature_copy(&(s->features[i]), &(s->features[i-1]));
             }
-            
-            
+
+
             noble_feature_set(&(s->features[j]), (n_byte)feature_type, (n_byte2)feature_value);
-            
+
             for (i = 0; i < (n_int)s->feature_number; i++)
             {
                 for (j = i+1; j < (n_int)s->feature_number; j++)
@@ -808,9 +808,9 @@ static n_int get_stranger_link(
                     /** Forget old stuff in order to avoid
                     	too much inflexibility */
                     time_since_met = land_date() - graph[i].space_time.date;
-                    
+
                     if ((time_since_met >= SOCIAL_FORGET_DAYS) ||
-                        (graph[i].space_time.date==0))
+                            (graph[i].space_time.date==0))
                     {
                         stranger = familiarity;
                         stranger_index = i;
@@ -875,7 +875,7 @@ static n_int social_meet(
 
         /** get the social graph index of the corresponding stereotype */
         stereotype_index = social_get_stereotype(
-            meeter_being, index);
+                               meeter_being, index);
 #endif
         /** set the focus of attention to this being */
         GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)index;
@@ -937,7 +937,8 @@ static n_int social_meet(
             graph[index].space_time.location[0] = (n_byte2)being_location_x(meeter_being);
             graph[index].space_time.location[1] = (n_byte2)being_location_y(meeter_being);
         }
-        else {
+        else
+        {
             /** location unknown */
             graph[index].space_time.location[0] = 0;
             graph[index].space_time.location[1] = 0;
@@ -1049,9 +1050,9 @@ n_int social_set_relationship(noble_simulation * sim,
  * @return Array index of the meeter social graph, -1 if not met
  */
 n_int social_network(noble_simulation *sim,
-    noble_being * meeter_being,
-    noble_being * met_being,
-    n_int distance)
+                     noble_being * meeter_being,
+                     noble_being * met_being,
+                     n_int distance)
 {
     n_int being_index = -1;
     if (distance < SOCIAL_RANGE)
@@ -1182,7 +1183,7 @@ n_byte social_groom(
             /** Alter social status relations.
             The groomer gains status, since they are providing a service */
             being_honor_inc_dec(meeter_being, met_being);
-            
+
             /** Decrement parasites */
             if (met_being->parasites >= PARASITES_REMOVED)
             {
@@ -1372,12 +1373,12 @@ n_uint social_respect_mean(
     {
         return;
     }
-    
+
     body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
 
     /** store the date of conception */
     female->date_of_conception = land_date();
-    
+
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
 
@@ -1431,7 +1432,7 @@ n_int social_mate(
     n_int loc_state = 0;
     n_int attraction = 0;
     n_int attract;
-/*    n_byte2 matingprob;*/
+    /*    n_byte2 matingprob;*/
     noble_social * meeter_social_graph = being_social(meeter_being);
 
     if (!meeter_social_graph) return -1;
@@ -1439,19 +1440,19 @@ n_int social_mate(
     /*if ((being_drive(meeter_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
             (being_drive(met_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE))*/
     {
-        
+
         /** mating is probabilistic, with a bias towards
             higher status individuals */
-        
+
         /*
-        
+
         matingprob = being_random(meeter_being);
         if (matingprob <
                 (32000 + (n_byte2)(met_being->honor)*
                  GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB)) */
         {
-            
-            
+
+
             /** attractiveness based upon various criteria */
             attraction = 1 +
                          social_attraction_pheromone(meeter_being,met_being) +
@@ -1469,21 +1470,21 @@ n_int social_mate(
             {
                 attraction++;
                 */
-                if (distance < MATING_RANGE)
+            if (distance < MATING_RANGE)
+            {
+                /** transmit pathogens */
+                being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_SEX);
+                being_immune_transmit(met_being, meeter_being, PATHOGEN_TRANSMISSION_SEX);
+                /** check opposite sexes */
+                if ((FIND_SEX(GET_I(meeter_being)) == SEX_FEMALE) &&
+                        (FIND_SEX(GET_I(met_being)) != SEX_FEMALE))
                 {
-                    /** transmit pathogens */
-                    being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_SEX);
-                    being_immune_transmit(met_being, meeter_being, PATHOGEN_TRANSMISSION_SEX);
-                    /** check opposite sexes */
-                    if ((FIND_SEX(GET_I(meeter_being)) == SEX_FEMALE) &&
-                            (FIND_SEX(GET_I(met_being)) != SEX_FEMALE))
+                    if (being_pregnant(meeter_being) == 0)
                     {
-                        if (being_pregnant(meeter_being) == 0)
-                        {
-                            social_conception(meeter_being, met_being, sim);
-                        }
+                        social_conception(meeter_being, met_being, sim);
                     }
                 }
+            }
             /*
             }
             else
@@ -1693,7 +1694,7 @@ n_int social_chat(
                     {
                         /** belief about location */
                         spacetime_copy(&meeter_graph[i].space_time, &met_graph[idx].space_time);
-                        
+
                         /** belief about state */
                         meeter_graph[i].belief = met_graph[idx].belief;
                     }

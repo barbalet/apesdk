@@ -46,18 +46,20 @@
 
 #endif
 
-typedef enum{
+typedef enum
+{
     SHARED_CYCLE_OK = 0,
     SHARED_CYCLE_QUIT,
     SHARED_CYCLE_DEBUG_OUTPUT
-}shared_cycle_state;
+} shared_cycle_state;
 
 
-typedef enum{
+typedef enum
+{
     SSS_OPEN = 0,
     SSS_OPEN_SCRIPT,
     SSS_SAVED
-}shared_saved_string_type;
+} shared_saved_string_type;
 
 void shared_saved_string(shared_saved_string_type ssst, n_string value);
 

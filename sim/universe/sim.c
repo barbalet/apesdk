@@ -115,9 +115,9 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "id_number",
     "date_of_birth",
 
-    "is_error",    
+    "is_error",
     "weather",
-    
+
     "brain_value",		/* special input/output */
     /* actual variables start here */
 
@@ -205,7 +205,7 @@ static variable_string	apescript_variable_codes[VARIABLE_MAX]=
     "memory_family_last_one",
     "memory_event",
     "memory_affect",
-            
+
     "being"
 };
 
@@ -366,20 +366,20 @@ static void sim_being_universal_loop(noble_simulation * local_sim, noble_being *
 static void sim_being_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     if (being_awake(local_sim, local_being) == 0) return;
-    
+
     being_cycle_awake(local_sim, local_being);
 }
 
 static void sim_being_interpret(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     n_individual_interpret individual;
-    
+
     interpret_individual(&individual);
-    
+
     if (being_awake(local_sim, local_being) == 0) return;
 
     if (interpret == 0L) return;
-    
+
     if(interpret_cycle(interpret, &individual, -1,
                        local_sim->beings, local_being,
                        &sim_start_conditions, &sim_end_conditions) == -1)
@@ -392,9 +392,9 @@ static void sim_being_interpret(noble_simulation * local_sim, noble_being * loca
 static void sim_time(noble_simulation * local_sim)
 {
     local_sim->count_cycles += local_sim->num;
-    
+
     local_sim->count_frames ++;
-    
+
     if ((local_sim->real_time - local_sim->last_time) > 60)
     {
         local_sim->last_time = local_sim->real_time;
@@ -413,11 +413,11 @@ void sim_cycle(void)
 #ifdef WEATHER_ON
     weather_cycle();
 #endif
-    
+
     being_loop(&sim, sim_being_universal_loop, 32);
 
     if (interpret)
-    {        
+    {
         being_loop(&sim, sim_being_interpret, 16);
     }
     else
@@ -430,7 +430,7 @@ void sim_cycle(void)
         being_loop(&sim, sim_being_cycle, 8);
         being_loop(&sim, drives_cycle, 32);
     }
-    
+
     if (land_time() & 1)
     {
 #ifdef BRAIN_ON
@@ -443,20 +443,20 @@ void sim_cycle(void)
         being_loop(&sim, sim_brain_dialogue_loop, 8);
     }
 #endif
-        
+
     being_loop_no_thread(&sim, 0L, being_tidy_loop, &max_honor);
-    
+
     being_loop(&sim, social_initial_loop, 32);
-    
+
     if (max_honor)
     {
         being_loop(&sim, being_recalibrate_honor_loop, 64);
     }
-    
+
     being_loop(&sim, social_secondary_loop, 64);
 
     {
-        being_remove_loop2_struct * brls = being_remove_initial(&sim);        
+        being_remove_loop2_struct * brls = being_remove_initial(&sim);
         if (sim.ext_death != 0L)
         {
             being_loop_no_thread(&sim, 0L, being_remove_loop1, 0L);
@@ -464,7 +464,7 @@ void sim_cycle(void)
         being_loop_no_thread(&sim, 0L, being_remove_loop2, brls);
         being_remove_final(&sim, &brls);
     }
-    
+
     sim_time(&sim);
 }
 
@@ -482,29 +482,29 @@ static n_int sim_memory(n_uint offscreen_size)
 {
     n_uint	current_location = 0;
     n_uint  memory_allocated = MAXIMUM_ALLOCATION;
-    
+
     if (memory_allocated < MINIMAL_ALLOCATION)
     {
         return SHOW_ERROR("Not enough memory to run");
     }
-    
+
     offbuffer = io_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
 
     current_location = offscreen_size;
-    
+
     sim_memory_remains(&sim, offbuffer, &current_location);
-    
+
     memory_allocated = memory_allocated - offscreen_size - current_location;
-    
+
     return being_memory(&sim, offbuffer, &current_location, memory_allocated);
 }
 
 void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size)
 {
     n_byte2	local_random[2];
-    
+
     sim_new_progress = 1;
-    
+
     if (kind == KIND_NEW_SIMULATION)
     {
         if(interpret)
@@ -546,7 +546,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     }
 
     being_remains_init(&sim); /* Eventually this should be captured through the file handling and moved into the code below */
-    
+
     if (kind != KIND_MEMORY_SETUP)
     {
         land_clear(kind, AGE_OF_MATURITY);
@@ -568,7 +568,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 #endif
 #ifdef WEATHER_ON
             weather_init();
-#endif       
+#endif
             sim.num = 0;
             while (sim.num < count_to)
             {
@@ -576,7 +576,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
                 if((sim.num + 1) < sim.max)
                 {
                     if (being_init(sim.beings, sim.num, &sim.beings[sim.num], 0L, local_random) != 0)
-                    {                        
+                    {
                         being_erase(&sim.beings[sim.num]);
                         break;
                     }
@@ -592,7 +592,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     sim_set_select(sim.beings);
 
     sim_new_progress = 0;
-    
+
     return ((void *) offbuffer);
 }
 
@@ -618,7 +618,7 @@ void sim_set_select(noble_being * select)
 static void sim_flood_loop(noble_simulation * sim, noble_being * local, void * data)
 {
     n_vect2 location;
-    
+
     being_space(local, &location);
     land_convert_to_map(&location);
 

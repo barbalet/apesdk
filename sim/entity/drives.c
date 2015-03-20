@@ -101,7 +101,7 @@ static void drives_sociability(
     dsd.beings_in_vacinity = 0;
     dsd.being = local;
     being_loop_no_thread(sim, local, drives_sociability_loop, &dsd);
-    
+
     /** if the being is not overcrowded and its social drive is not saturated */
     if (dsd.beings_in_vacinity < local->crowding + SOCIAL_TOLLERANCE)
     {
@@ -171,7 +171,7 @@ static void drives_sex(
                         if (local_episodic[i].event == EVENT_MATE)
                         {
                             /** not someone else's mate */
-                            
+
                             if (being_name_comparison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                             {
                                 /** set a goal to seek the remembered mate */

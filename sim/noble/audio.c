@@ -282,28 +282,28 @@ static void audio_header(n_byte * header)
     header[1] =  'O';
     header[2] =  'R';
     header[3] =  'M';
-    
+
     header[8]  = 'A';
     header[9]  = 'I';
     header[10] = 'F';
     header[11] = 'F';
-    
+
     header[12] = 'C';
     header[13] = 'O';
     header[14] = 'M';
     header[15] = 'M';
-    
+
     header[19] = 18;
-    
+
     header[21] = 1;
-    
+
     header[27] = 16;
-    
+
     header[28] = 0x40;
     header[29] = 0x0e;
     header[30] = 0xac;
     header[31] = 0x44;
-    
+
     header[38] = 'S';
     header[39] = 'S';
     header[40] = 'N';

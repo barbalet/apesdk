@@ -1,11 +1,11 @@
 /****************************************************************
- 
+
  test_math.c
- 
+
  =============================================================
- 
+
  Copyright 1996-2015 Tom Barbalet. All rights reserved.
- 
+
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
@@ -14,10 +14,10 @@
  sell copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
  conditions:
- 
+
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,14 +26,14 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
- 
+
  This software and Noble Ape are a continuing work of Tom Barbalet,
  begun on 13 June 1996. No apes or cats were harmed in the writing
  of this software.
- 
+
  ****************************************************************/
 
-/* this doesn't currently work, it is included here for unit 
+/* this doesn't currently work, it is included here for unit
     testing in the future */
 
 #include <stdio.h>
@@ -63,13 +63,13 @@ void check_math(void)
     n_int   loop = 0;
     n_int   sum = 0;
     n_vect2 sum_vect = {0};
-    
+
     (void)check_root(1234, 1522756);
     (void)check_root(4, 17);
     (void)check_root(4, 16);
     (void)check_root(3, 15);
     (void)check_root(3, 14);
-    
+
     while (loop < 256)
     {
         n_vect2 each_vect;
@@ -78,12 +78,12 @@ void check_math(void)
         vect2_d(&sum_vect, &each_vect, 1, 1);
         loop++;
     }
-    
+
     if (sum != 0)
     {
         printf("scalar sum expecting 0 instead %ld\n", sum);
     }
-    
+
     if (sum_vect.x != 0 || sum_vect.y != 0)
     {
         printf("vect sum expecting 0, 0 instead %ld, %ld\n", sum_vect.x, sum_vect.y);

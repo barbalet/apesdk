@@ -92,7 +92,7 @@ static void audit_compart_offset()
     audit_print_offset(start,(n_byte *)&(local.drives[0]),"drives[0]");
     audit_print_offset(start,(n_byte *)&(local.goal[0]),"goal[0]");
     audit_print_offset(start,(n_byte *)&(local.learned_preference[0]),"learned_preference[0]");
-    
+
     audit_print_offset(start,(n_byte *)&(local.generation_min),"generation_min");
 
     audit_print_offset(start,(n_byte *)&(local.territory[0]),"territory[0]");
@@ -100,10 +100,10 @@ static void audit_compart_offset()
 
     audit_print_offset(start,(n_byte *)&(local.vessel[0]),"vessel[0]");
     audit_print_offset(start,(n_byte *)&(local.metabolism[0]),"metabolism[0]");
-    
+
     audit_print_offset(start,(n_byte *)&(local.braincode_register[0]),"braincode_register[0]");
     audit_print_offset(start,(n_byte *)&(local.brainprobe[0]),"brainprobe[0]");
-    
+
     audit_print_offset(start,(n_byte *)&(local.vessel[0]),"vessel[0]");
     audit_print_offset(start,(n_byte *)&(local.vessel[1]),"vessel[1]");
     audit_print_offset(start,(n_byte *)&(local.vessel[2]),"vessel[2]");
@@ -132,7 +132,7 @@ static void audit_compart_offset()
     audit_print_offset(start,(n_byte *)&(local.vessel[25]),"vessel[25]");
     audit_print_offset(start,(n_byte *)&(local.vessel[26]),"vessel[26]");
     audit_print_offset(start,(n_byte *)&(local.vessel[27]),"vessel[27]");
-    
+
     audit_print_offset(start,(n_byte *)&(local.brain),"brain");
 }
 

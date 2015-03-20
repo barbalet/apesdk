@@ -273,18 +273,18 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 1;
 
     case WM_PAINT:
-		{
-			n_uint  local_time = time(0L);
-			shared_cycle(local_time, NUM_VIEW, 512, 512);
-			shared_cycle(local_time, NUM_TERRAIN, 512, 512);
+    {
+        n_uint  local_time = time(0L);
+        shared_cycle(local_time, NUM_VIEW, 512, 512);
+        shared_cycle(local_time, NUM_TERRAIN, 512, 512);
 
-		}
-        plat_update();
+    }
+    plat_update();
 
-        InvalidateRect(global_hwnd[0], NULL, TRUE);
-        InvalidateRect(global_hwnd[1], NULL, TRUE);
+    InvalidateRect(global_hwnd[0], NULL, TRUE);
+    InvalidateRect(global_hwnd[1], NULL, TRUE);
 
-        return 0;
+    return 0;
 
     case WM_LBUTTONUP:
         firedown = -1;
@@ -348,7 +348,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         shared_keyUp();
         return 0;
     case WM_CLOSE:
-		PostMessage(hwnd, WM_DESTROY, 0, 0);
+        PostMessage(hwnd, WM_DESTROY, 0, 0);
         return 0;
 
     case WM_COMMAND:

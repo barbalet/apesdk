@@ -52,10 +52,10 @@
 static	n_int	interpret_braces(n_individual_interpret * individual, n_byte * eval, n_int location)
 {
     n_int		local_b_count;
-    
+
     NA_ASSERT(individual, "individual NULL");
     NA_ASSERT(eval, "eval NULL");
-    
+
     local_b_count = individual->braces_count;
     if(location == -1)
     {
@@ -100,15 +100,15 @@ static	n_int	interpret_braces(n_individual_interpret * individual, n_byte * eval
 static n_int interpret_apply(n_interpret * code, n_individual_interpret * individual, n_byte * evaluate, n_int * number, n_byte end_char)
 {
     n_int	val_a, val_b, val_c;
-    
+
     NA_ASSERT(code, "code NULL");
     NA_ASSERT(evaluate, "evaluate NULL");
     NA_ASSERT(number, "number NULL");
-    
+
     if (code == 0L) return SHOW_ERROR("No code provided");
     if (evaluate == 0L) return SHOW_ERROR("Nothing to evaluate");
     if (number == 0L) return SHOW_ERROR("No numbers provided");
-    
+
     if(code->sc_output(code, individual, evaluate,&val_a) == -1)
     {
         return io_apescript_error(individual->interpret_data, AE_FIRST_VALUE_FAILED);
@@ -227,13 +227,13 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
     n_byte	first_value;
     n_byte	second_value;
     n_int	output_number = 0;
-    
+
     NA_ASSERT(code, "code NULL");
     NA_ASSERT(value, "value NULL");
-    
+
     if (code == 0L) return SHOW_ERROR("No code provided");
     if (value == 0L) return SHOW_ERROR("No values provided");
-    
+
     first_value = value[0];
     second_value = value[1];
 
@@ -632,9 +632,9 @@ n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n
     {
         return 0;
     }
-    
+
     individual->interpret_data = data;
-    
+
     if (individual->localized_leave)
     {
         individual->localized_leave--;

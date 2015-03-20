@@ -51,9 +51,9 @@
 #else
 
 #ifdef NOBLE_IOS
-    #undef  EXECUTE_THREADED
+#undef  EXECUTE_THREADED
 #else
-    #define  EXECUTE_THREADED
+#define  EXECUTE_THREADED
 #endif
 
 #endif
@@ -331,7 +331,7 @@ enum window_num
     NUM_VIEW    = (0),
     NUM_TERRAIN	= (1)
 #ifndef GRAPHLESS_GUI
-   ,NUM_GRAPH   = (2)
+                  ,NUM_GRAPH   = (2)
 #endif
 };
 
@@ -367,7 +367,7 @@ enum BRAINCODE_COMMANDS
     /* data */
     BRAINCODE_DAT0 = 0,
     BRAINCODE_DAT1,
-    
+
     /* operators */
     BRAINCODE_ADD,
     BRAINCODE_SUB,
@@ -382,7 +382,7 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_INV,
     BRAINCODE_STP,
     BRAINCODE_LTP,
-    
+
     /* conditionals */
     BRAINCODE_JMZ,
     BRAINCODE_JMN,
@@ -392,18 +392,18 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_SEQ,
     BRAINCODE_SNE,
     BRAINCODE_SLT,
-    
+
     /* sensors */
     BRAINCODE_SEN,
     BRAINCODE_SEN2,
     BRAINCODE_SEN3,
-    
+
     /* actuators */
     BRAINCODE_ACT,
     BRAINCODE_ACT2,
     BRAINCODE_ACT3,
     BRAINCODE_ANE,
-    
+
     BRAINCODE_INSTRUCTIONS
 };
 
@@ -446,7 +446,7 @@ enum window_information
     TERRAIN_WINDOW_HEIGHT       = (1536),
     TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
 #ifndef GRAPHLESS_GUI
-   ,GRAPH_WINDOW_WIDTH_BITS     = 9,
+                                  ,GRAPH_WINDOW_WIDTH_BITS     = 9,
     GRAPH_WINDOW_WIDTH		    = (1<<GRAPH_WINDOW_WIDTH_BITS),
     GRAPH_WINDOW_HEIGHT         = (512),
     GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3)
@@ -639,12 +639,12 @@ n_int   math_spread_byte(n_byte val);
 void    math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2);
 n_int   math_memory_location(n_int px, n_int py);
 void    math_patch(n_byte * local_map,
-                n_memory_location * mem_func,
-                n_patch * func, n_byte2 * arg,
-                n_int refine);
+                   n_memory_location * mem_func,
+                   n_patch * func, n_byte2 * arg,
+                   n_int refine);
 
 void math_round(n_byte * local_map, n_byte * scratch,
-                        n_memory_location * mem_func, execute_thread_stub * exec);
+                n_memory_location * mem_func, execute_thread_stub * exec);
 
 n_int  math_sine(n_int direction, n_int divisor);
 

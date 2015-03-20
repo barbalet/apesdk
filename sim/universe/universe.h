@@ -152,7 +152,7 @@ enum SECONDARY_APESCRIPT
     VARIABLE_DATE_OF_BIRTH,
 
     VARIABLE_IS_ERROR,
-    
+
     VARIABLE_WEATHER,  /* Everything after this value can be both set and get */
     VARIABLE_BRAIN_VALUE, /* This is a special case, all the remainder are stored as variables */
 
@@ -876,7 +876,8 @@ enum mutation_type
 
 /** used with social_meet function to specify whether
     the location should be included within the social graph entry */
-enum being_meet_location_type {
+enum being_meet_location_type
+{
     LOCATION_KNOWN = 0,
     LOCATION_UNKNOWN
 };
@@ -890,7 +891,8 @@ enum
     ENTITY_TERRITORY
 };
 
-enum featureset_members {
+enum featureset_members
+{
     FEATURESET_PIGMENTATION,
     FEATURESET_HAIR,
     FEATURESET_HEIGHT,
@@ -959,11 +961,11 @@ typedef struct
     n_byte   relationship;
 
     n_byte   entity_type;
-    
+
 #ifdef FEATURE_SET
     noble_featureset classification;
 #endif
-    
+
 #ifdef BRAINCODE_ON
     n_byte   braincode[BRAINCODE_SIZE];
 #endif
@@ -988,7 +990,7 @@ typedef struct
     n_spacetime space_time;
     n_byte2  first_name[2];
     n_byte2  family_name[2];
-    
+
     n_byte   event;
     n_byte   food;
     n_byte2  affect;
@@ -1135,13 +1137,13 @@ typedef void (being_death_event)(noble_being * deceased, void * sim);
  It is primarily used by the GUI layer to address down into the Core layer.
  */
 typedef struct
-{    
+{
     noble_remains * remains;
-    
+
     noble_being   * beings;
-    
+
     noble_being   * select; /* used by gui */
-    
+
     n_uint	        num;
     n_uint	        max;
 
@@ -1149,10 +1151,10 @@ typedef struct
     n_uint          last_time;
     n_uint          delta_cycles;
     n_uint          count_cycles;
-    
+
     n_uint          delta_frames;
     n_uint          count_frames;
-    
+
     being_birth_event * ext_birth;
     being_death_event * ext_death;
 } noble_simulation;
@@ -1325,7 +1327,7 @@ const static noble_console_command control_commands[] =
     {&console_previous,      "previous",       "",                     "Previous ape"},
     {&console_previous,      "prev",           "",                     ""},
 
-    
+
     {&console_debug,         "debug",           "",                    "Run debug check"},
 
     {0L, 0L},

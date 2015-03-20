@@ -75,13 +75,13 @@ static void fileout_being(n_file * file_out, noble_simulation * value, n_int bei
     n_int loop_episodic = (EPISODIC_SIZE * being);
     n_int loop_episodic_end = loop + EPISODIC_SIZE;
 #endif
-    
+
 #ifdef USE_FIL_BEI
     io_write_buff(file_out, &(value->beings[being]), format, FIL_BEI, 0L);
 #endif
 #ifdef USE_FIL_SOE
     while (loop < loop_end)
-    {        
+    {
         io_write_buff(file_out, being_social(&(value->beings[being])), format, FIL_SOE, &brain_three_byte_command);
         loop++;
     }
@@ -138,14 +138,14 @@ n_int	file_in(n_file * input_file)
     n_int  size_buffer = io_find_size_data((noble_file_entry *)noble_file_format);
 
     temp_store = (n_byte *)io_new(size_buffer);
-    
+
     if (temp_store == 0L)
     {
         return SHOW_ERROR("No temporary storage memory available");
     }
-    
+
     io_whitespace(input_file);
-    
+
     input_file->location = 0;
 
     ret_val = io_read_buff(input_file, temp_store, noble_file_format);
@@ -174,33 +174,33 @@ n_int	file_in(n_file * input_file)
             n_uint	loop_end = 0;
             switch (ret_val)
             {
-                case FIL_LAN:
-                    temp = (n_byte*)land_ptr();
-                    loop_end = 11; /* Needs to be fixed */
-                    break;
-                case FIL_BEI:
-                    temp = (n_byte*) &(local_sim->beings[ape_count]);
-                    loop_end = sizeof(noble_being);
-                    break;
-                case FIL_SOE:
-                    {
-                        noble_social * local_social = being_social(&(local_sim->beings[ape_count]));
-                        temp = (n_byte*)(&local_social[social_count]);
-                        loop_end = sizeof(noble_social);
-                    }
-                    break;
-                case FIL_EPI:
-                    {
-                        noble_episodic * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
-                        temp = (n_byte*)(&local_episodic[episodic_count]);
-                        loop_end = sizeof(noble_episodic);
-                    }
-                    break;
-                default:
-                    {
-                        return SHOW_ERROR("Unknown file kind"); /*unknown kind*/
-                    }
-                    break;
+            case FIL_LAN:
+                temp = (n_byte*)land_ptr();
+                loop_end = 11; /* Needs to be fixed */
+                break;
+            case FIL_BEI:
+                temp = (n_byte*) &(local_sim->beings[ape_count]);
+                loop_end = sizeof(noble_being);
+                break;
+            case FIL_SOE:
+            {
+                noble_social * local_social = being_social(&(local_sim->beings[ape_count]));
+                temp = (n_byte*)(&local_social[social_count]);
+                loop_end = sizeof(noble_social);
+            }
+            break;
+            case FIL_EPI:
+            {
+                noble_episodic * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
+                temp = (n_byte*)(&local_episodic[episodic_count]);
+                loop_end = sizeof(noble_episodic);
+            }
+            break;
+            default:
+            {
+                return SHOW_ERROR("Unknown file kind"); /*unknown kind*/
+            }
+            break;
             }
             if(temp != 0L)
             {
@@ -310,17 +310,17 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
     case VARIABLE_HEIGHT:
         being_set_height(local_being, value);
         break;
-            
+
 #if 0 /* TODO: This should not be done */
     case VARIABLE_FAMILY_NAME_ONE:
         being_set_family_name(local_being,
-                        UNPACK_FAMILY_FIRST_NAME((n_byte2) value),
-                        UNPACK_FAMILY_SECOND_NAME(being_family_name(local_being)));
+                              UNPACK_FAMILY_FIRST_NAME((n_byte2) value),
+                              UNPACK_FAMILY_SECOND_NAME(being_family_name(local_being)));
         break;
     case VARIABLE_FAMILY_NAME_TWO:
         being_set_family_name(local_being,
-                        UNPACK_FAMILY_FIRST_NAME(being_family_name(local_being)),
-                        UNPACK_FAMILY_SECOND_NAME((n_byte2) value));
+                              UNPACK_FAMILY_FIRST_NAME(being_family_name(local_being)),
+                              UNPACK_FAMILY_SECOND_NAME((n_byte2) value));
         break;
 #endif
     case VARIABLE_GOAL_TYPE:
@@ -461,11 +461,11 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 local_number = BEING_HUNGRY;
                 break;
             case VARIABLE_ENERGY:
-                {
-                    noble_being * local_being = (noble_being *)individual->interpret_data;
-                    local_number = being_energy(local_being);
-                }
-                break;
+            {
+                noble_being * local_being = (noble_being *)individual->interpret_data;
+                local_number = being_energy(local_being);
+            }
+            break;
             case VARIABLE_LOCATION_Z:
             case VARIABLE_TEST_Z:
             case VARIABLE_IS_VISIBLE:
@@ -506,7 +506,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                             return io_apescript_error(individual->interpret_data, AE_VALUE_OUT_OF_RANGE);
                         }
                         local_number = land_operator_interpolated(
-                                       (n_byte)quick_x, (n_byte)quick_y, (n_byte*)&operators[int_qu_op-VARIABLE_BIOLOGY_AREA]);
+                                           (n_byte)quick_x, (n_byte)quick_y, (n_byte*)&operators[int_qu_op-VARIABLE_BIOLOGY_AREA]);
                     }
                     else
                     {
@@ -532,7 +532,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
             case VARIABLE_IS_ERROR:
                 local_number = -1;
                 break;
-                    
+
             case VARIABLE_WEATHER:
             {
                 n_int	quick_x;
@@ -611,9 +611,9 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     }
                 }
                 /* TODO: if the being knows the other being it may be possible to guess some of these */
-                
+
                 /* if the current being can't see the other being, it can't get this information */
-                
+
                 if (being_los(local_current, (n_byte2)being_location_x(local_being), (n_byte2)being_location_y(local_being)) == 0)
                 {
                     local_number = -1;
@@ -911,7 +911,7 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
     being_energy_delta(local_being, local_energy_delta);
 
     being_set_height(local_being, local_height);
-    
+
     if (local_goal_type!=GOAL_NONE)
     {
         local_being->goal[0]  = (n_byte2)local_goal_type;
@@ -1020,15 +1020,15 @@ void file_audit(void)
 #ifdef FEATURE_SET
         FILE_CHECK(&here.classification);
 #endif
-            
+
 #ifdef BRAINCODE_ON
         FILE_CHECK(&here.braincode[0]);
 #endif
-        
+
     }
     {
         noble_episodic here;
-        
+
         FILE_CHECK(&here.space_time.location[0]);
         FILE_CHECK(&here.space_time.time);
         FILE_CHECK(&here.space_time.date);

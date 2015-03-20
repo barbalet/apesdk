@@ -475,7 +475,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                 n_int grass, trees, bush;
                 food_values(being_location_x(local), being_location_y(local), &grass, &trees, &bush);
 
-                
+
                 if ((grass>bush) && (grass>trees))
                 {
                     being_take(local,hand, INVENTORY_GRASS);
@@ -611,7 +611,7 @@ void social_action(
 n_int genetics_compare(n_genetics * genetics_a, n_genetics * genetics_b)
 {
     n_int loop = 0;
-    
+
     while (loop < CHROMOSOMES)
     {
         if (genetics_a[loop] != genetics_b[loop])
@@ -722,9 +722,9 @@ static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mut
                              ((CHROMOSOME_FROM_FATHER(chromosome) >> point ) & 3));
             break;
         default:
-                math_random3(local);
+            math_random3(local);
 
-                child_gene = DIPLOID(
+            child_gene = DIPLOID(
                              (math_random(local) & 3), (math_random(local) & 3));
         }
     }
@@ -865,7 +865,7 @@ static void genetics_transpose(n_genetics * genetics, n_byte2 * local)
         /** locations within the chromosomes */
         n_byte2 local_random0 = math_random(local);
         n_byte2 local_random1 = math_random(local);
-        
+
         n_byte source_offset = (local_random0>>8)&31;
         n_byte dest_offset   = local_random1&31;
         /** whether to invert the sequence */
@@ -926,7 +926,7 @@ void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_
                 genetics[ch] = genetics_crossover(mother_genetics[ch], father_genetics[ch], local);
             }
         }
-        
+
         /** Y chromosome does not undergo crossover and passes from father to son */
         if (sex != SEX_FEMALE)
         {

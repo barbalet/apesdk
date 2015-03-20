@@ -134,7 +134,7 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
 void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     if (being_awake(local_sim, local_being) == 0) return;
-    
+
     {
         n_int i;
         noble_episodic * local_episodic = being_episodic(local_being);
@@ -446,9 +446,9 @@ static void episodic_store_full(
     local_episodic[replace].affect      = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
 
     spacetime_set(&local_episodic[replace].space_time, being_location(local));
-    
+
     new_time = local_episodic[replace].space_time.time;
-    
+
     local_episodic[replace].first_name[BEING_MEETER]=name1;
     local_episodic[replace].family_name[BEING_MEETER]=family1;
     local_episodic[replace].first_name[BEING_MET]=name2;
@@ -470,7 +470,7 @@ static void episodic_store_full(
             n_string_block time = {0};
             n_string_block combination = {0};
             n_int social_event;
-            
+
             being_name_simple(local, str);
 
             social_event = episode_description(local_sim, local, replace, description);
@@ -665,22 +665,22 @@ n_byte episodic_intention(
     {
         return 0;
     }
-    
+
     if (replace == episode_index)
     {
         return 0;
     }
-    
+
     io_copy((n_byte*)&local_episodic[episode_index], (n_byte*)&local_episodic[replace], sizeof(noble_episodic));
-    
+
     local_episodic[replace].event = EVENT_INTENTION + event;
-    
+
     local_episodic[replace].space_time.time = time;
     local_episodic[replace].space_time.date = date;
-    
+
     local_episodic[replace].first_name[BEING_MEETER] = being_gender_name(local);
     local_episodic[replace].family_name[BEING_MEETER] = being_family_name(local);
-    
+
     local_episodic[replace].arg = args;
 
     return 1;

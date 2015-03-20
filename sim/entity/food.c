@@ -83,14 +83,14 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
 
     n_int   bird_eggs = GENE_ENERGY_FROM_BIRD_EGGS(genetics);
     n_int   lizard_eggs = GENE_ENERGY_FROM_LIZARD_EGGS(genetics);
-    
+
     n_int        return_value = 0;
     /** note that the absorbition for different foods is normalised */
     n_int absorb_denom = 1 + vegetable + fruit + seawood + bird_eggs + lizard_eggs;
-    
+
     /** ingest pathogens from certain foods */
     being_ingest_pathogen(local, food_type);
-    
+
     switch (food_type)
     {
     case FOOD_VEGETABLE:
@@ -156,7 +156,7 @@ void food_values(n_int loc_x,
                  n_int *grass, n_int *trees, n_int *bush)
 {
     /* TODO include bird and lizard eggs */
-    
+
     /** grass at this location */
     *grass =
         food_location(loc_x, loc_y, VARIABLE_BIOLOGY_GRASS)+OFFSET_GRASS;
@@ -189,7 +189,7 @@ static n_byte food_eat_land(
     n_int grass, trees, bush;
 
     /* TODO Handle this logic centrally - including the int values in the function not outside */
-    
+
     food_values(loc_x,loc_y,&grass, &trees, &bush);
 
     /** which is the dominant form of vegetation in this area? */
