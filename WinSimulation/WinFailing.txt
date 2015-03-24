@@ -1,0 +1,16 @@
+1>------ Build started: Project: WinSimulation, Configuration: Release Win32 ------
+1>  platform.c
+1>..\..\sim\win\platform.c(277): warning C4244: 'initializing' : conversion from 'time_t' to 'n_uint', possible loss of data
+1>..\..\sim\win\platform.c(368): warning C4013: 'shared_notPause' undefined; assuming extern returning int
+1>..\..\sim\win\platform.c(375): warning C4013: 'shared_previousApe' undefined; assuming extern returning int
+1>..\..\sim\win\platform.c(378): warning C4013: 'shared_nextApe' undefined; assuming extern returning int
+1>..\..\sim\win\platform.c(382): warning C4013: 'shared_clearErrors' undefined; assuming extern returning int
+1>..\..\sim\win\platform.c(464): warning C4047: 'function' : 'n_byte *' differs in levels of indirection from 'n_byte'
+1>..\..\sim\win\platform.c(464): warning C4024: 'shared_draw' : different types for formal and actual parameter 1
+1>..\..\sim\win\platform.c(464): error C2198: 'shared_draw' : too few arguments for call
+1>..\..\sim\win\platform.c(464): error C2440: '=' : cannot convert from 'void' to 'unsigned char *'
+1>..\..\sim\win\platform.c(501): warning C4090: '=' : different 'const' qualifiers
+1>..\..\sim\win\platform.c(503): warning C4090: '=' : different 'const' qualifiers
+1>..\..\sim\win\platform.c(575): warning C4090: '=' : different 'const' qualifiers
+1>..\..\sim\win\platform.c(578): warning C4090: '=' : different 'const' qualifiers
+========== Build: 0 succeeded, 1 failed, 0 up-to-date, 0 skipped ==========

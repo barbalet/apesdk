@@ -10,6 +10,42 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\sim\entity\being.c" />
+    <ClCompile Include="..\..\sim\entity\body.c" />
+    <ClCompile Include="..\..\sim\entity\brain.c" />
+    <ClCompile Include="..\..\sim\entity\drives.c" />
+    <ClCompile Include="..\..\sim\entity\episodic.c" />
+    <ClCompile Include="..\..\sim\entity\food.c" />
+    <ClCompile Include="..\..\sim\entity\social.c" />
+    <ClCompile Include="..\..\sim\entity\speak.c" />
+    <ClCompile Include="..\..\sim\gui\draw.c" />
+    <ClCompile Include="..\..\sim\gui\message.c" />
+    <ClCompile Include="..\..\sim\gui\shared.c" />
+    <ClCompile Include="..\..\sim\noble\audio.c" />
+    <ClCompile Include="..\..\sim\noble\compress.c" />
+    <ClCompile Include="..\..\sim\noble\execute.c" />
+    <ClCompile Include="..\..\sim\noble\interpret.c" />
+    <ClCompile Include="..\..\sim\noble\io.c" />
+    <ClCompile Include="..\..\sim\noble\land.c" />
+    <ClCompile Include="..\..\sim\noble\math.c" />
+    <ClCompile Include="..\..\sim\noble\network.c" />
+    <ClCompile Include="..\..\sim\noble\parse.c" />
+    <ClCompile Include="..\..\sim\universe\console.c" />
+    <ClCompile Include="..\..\sim\universe\file.c" />
+    <ClCompile Include="..\..\sim\universe\sim.c" />
+    <ClCompile Include="..\..\sim\win\platform.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\sim\entity\entity.h" />
+    <ClInclude Include="..\..\sim\entity\entity_internal.h" />
+    <ClInclude Include="..\..\sim\gui\gui.h" />
+    <ClInclude Include="..\..\sim\noble\noble.h" />
+    <ClInclude Include="..\..\sim\noble\shared.h" />
+    <ClInclude Include="..\..\sim\universe\universe.h" />
+    <ClInclude Include="..\..\sim\universe\universe_internal.h" />
+    <ClInclude Include="..\..\sim\win\platform.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7E6B974B-976B-4A58-981C-F7F2965C9832}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -73,40 +109,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\sim\entity\entity.h" />
-    <ClInclude Include="..\..\sim\entity\entity_internal.h" />
-    <ClInclude Include="..\..\sim\gui\gui.h" />
-    <ClInclude Include="..\..\sim\gui\shared.h" />
-    <ClInclude Include="..\..\sim\noble\noble.h" />
-    <ClInclude Include="..\..\sim\universe\universe.h" />
-    <ClInclude Include="..\..\sim\universe\universe_internal.h" />
-    <ClInclude Include="..\..\sim\win\platform.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\sim\entity\being.c" />
-    <ClCompile Include="..\..\sim\entity\body.c" />
-    <ClCompile Include="..\..\sim\entity\brain.c" />
-    <ClCompile Include="..\..\sim\entity\drives.c" />
-    <ClCompile Include="..\..\sim\entity\episodic.c" />
-    <ClCompile Include="..\..\sim\entity\food.c" />
-    <ClCompile Include="..\..\sim\entity\metabolism.c" />
-    <ClCompile Include="..\..\sim\entity\social.c" />
-    <ClCompile Include="..\..\sim\entity\speak.c" />
-    <ClCompile Include="..\..\sim\gui\draw.c" />
-    <ClCompile Include="..\..\sim\gui\shared.c" />
-    <ClCompile Include="..\..\sim\noble\audio.c" />
-    <ClCompile Include="..\..\sim\noble\execute.c" />
-    <ClCompile Include="..\..\sim\noble\interpret.c" />
-    <ClCompile Include="..\..\sim\noble\io.c" />
-    <ClCompile Include="..\..\sim\noble\land.c" />
-    <ClCompile Include="..\..\sim\noble\math.c" />
-    <ClCompile Include="..\..\sim\noble\parse.c" />
-    <ClCompile Include="..\..\sim\universe\console.c" />
-    <ClCompile Include="..\..\sim\universe\file.c" />
-    <ClCompile Include="..\..\sim\universe\sim.c" />
-    <ClCompile Include="..\..\sim\win\platform.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

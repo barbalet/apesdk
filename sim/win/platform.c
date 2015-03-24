@@ -34,7 +34,7 @@
  ****************************************************************/
 
 #include "../gui/gui.h"
-#include "../gui/shared.h"
+#include "../noble/shared.h"
 #include "platform.h"
 #include <windows.h>
 #include <time.h>

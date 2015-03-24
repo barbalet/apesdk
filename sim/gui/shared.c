@@ -39,7 +39,18 @@
 #include <stdio.h>
 
 #include "gui.h"
+
+#ifndef	_WIN32
+
 #include "shared.h"
+
+#else
+
+#include "..\noble\shared.h"
+
+#endif
+
+
 
 static n_int   mouse_x, mouse_y;
 static n_byte  mouse_option, mouse_identification;
