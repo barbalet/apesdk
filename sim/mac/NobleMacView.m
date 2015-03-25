@@ -162,18 +162,6 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 - (void)startEverything
 {
     NSSize increments;
-    NSTimeInterval interval;
-    
-    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    NSString * value = [prefs stringForKey:sharedString_LastSaved];
-    shared_saved_string(SSS_SAVED, (n_string)[value UTF8String]);
-    
-    value = [prefs stringForKey:sharedString_LastOpen];
-    shared_saved_string(SSS_OPEN, (n_string)[value UTF8String]);
-
-    value = [prefs stringForKey:sharedString_LastOpenScript];
-    shared_saved_string(SSS_OPEN_SCRIPT, (n_string)[value UTF8String]);
-
     increments.height = 4;
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
@@ -195,7 +183,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     
     /* start animation timer */
     
-    interval = 1.0f/((NSTimeInterval)shared_max_fps());
+    NSTimeInterval interval = 1.0f/((NSTimeInterval)shared_max_fps());
     
 	timerAnimation = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
@@ -265,15 +253,12 @@ static n_uint randomizing_agent = 0x28e49a3e;
              {
                  [[NSSound soundNamed:@"Pop"] play];
                  [prefs removeObjectForKey:sharedString_LastOpen];
-                 [prefs synchronize];
-                 shared_saved_string(SSS_OPEN, 0L);
              }
              else
              {
                  [prefs setObject:name forKey:sharedString_LastOpen];
-                 [prefs synchronize];
-                 shared_saved_string(SSS_OPEN, cStringFileName);
              }
+             [prefs synchronize];
          }
          
      }];
@@ -294,15 +279,12 @@ static n_uint randomizing_agent = 0x28e49a3e;
              {
                  [[NSSound soundNamed:@"Pop"] play];
                  [prefs removeObjectForKey:sharedString_LastOpenScript];
-                 [prefs synchronize];
-                 shared_saved_string(SSS_OPEN_SCRIPT, 0L);
              }
              else
              {
                  [prefs setObject:name forKey:sharedString_LastOpenScript];
-                 [prefs synchronize];
-                 shared_saved_string(SSS_OPEN_SCRIPT, cStringFileName);
              }
+             [prefs synchronize];
          }
      }];
 }
@@ -320,7 +302,6 @@ static n_uint randomizing_agent = 0x28e49a3e;
              NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
              [prefs setObject:name forKey:sharedString_LastSaved];
              [prefs synchronize];
-             shared_saved_string(SSS_SAVED, cStringFileName);
              shared_saveFileName(cStringFileName);
          }
          

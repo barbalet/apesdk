@@ -365,26 +365,26 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
             /** Control Menu... **/
         case CONTROL_PAUSE_HANDLE:
-            if (shared_notPause())
+            if (shared_menu(NA_MENU_PAUSE))
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_CHECKED);
             else
                 CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_UNCHECKED);
             return 0;
 
         case CONTROL_PREV_HANDLE:
-            shared_previousApe();
+            (void) shared_menu(NA_MENU_PREVIOUS_APE);
             return 0;
         case CONTROL_NEXT_HANDLE:
-            shared_nextApe();
+            (void) shared_menu(NA_MENU_NEXT_APE);
             return 0;
 
         case CONTROL_CLEAR_ERRORS:
-            shared_clearErrors();
+            (void) shared_menu(NA_MENU_CLEAR_ERRORS);
             return 0;
 
 
         case CONTROL_NO_WEATHER_HANDLE:
-            if (draw_toggle_weather())
+            if (shared_menu(NA_MENU_WEATHER))
                 CheckMenuItem(hMenuPopup[2], CONTROL_NO_WEATHER_HANDLE, MF_UNCHECKED);
             else
                 CheckMenuItem(hMenuPopup[2], CONTROL_NO_WEATHER_HANDLE, MF_CHECKED);
@@ -455,14 +455,14 @@ static void plat_update()
     {
         SIZE            sz;
         HDC             hdcMem;
-        unsigned char * value;
+        unsigned char   value[512*512];
 
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);
         hdcMem = CreateCompatibleDC(hdc[lp]);
 
-        value = shared_draw(window_definition[lp]);
-
+        shared_draw(value, window_definition[lp], 512, 512);
+        
         SetDIBits(hdcMem, offscreen[lp], 0, 512-lp, value, bmp_info[lp], DIB_RGB_COLORS);
 
         SelectObject(hdcMem, offscreen[lp]);

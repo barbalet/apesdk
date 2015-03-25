@@ -53,16 +53,6 @@ typedef enum
     SHARED_CYCLE_DEBUG_OUTPUT
 } shared_cycle_state;
 
-
-typedef enum
-{
-    SSS_OPEN = 0,
-    SSS_OPEN_SCRIPT,
-    SSS_SAVED
-} shared_saved_string_type;
-
-void shared_saved_string(shared_saved_string_type ssst, n_string value);
-
 shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_x, n_int dim_y);
 
 n_int shared_init(n_byte view, n_uint random);

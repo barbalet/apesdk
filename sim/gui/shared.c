@@ -567,11 +567,6 @@ n_int shared_menu(n_int menuVal)
     return -1;
 }
 
-void shared_saved_string(shared_saved_string_type ssst, n_string value)
-{
-
-}
-
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
     n_int           ly = 0;
