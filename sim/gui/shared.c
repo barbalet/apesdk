@@ -428,6 +428,7 @@ n_int shared_init(n_byte view, n_uint random)
         }
     }
     draw_fit(land_points, fit);
+    draw_color_group_update(fit);
     return view;
 }
 
@@ -567,6 +568,17 @@ n_int shared_menu(n_int menuVal)
     return -1;
 }
 
+n_byte * shared_legacy_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
+{
+    if (fIdentification == NUM_TERRAIN)
+    {
+        draw_window(dim_x, dim_y);
+        draw_cycle();
+    }
+    draw_cycle();
+    return draw_pointer(fIdentification);
+}
+
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
     n_int           ly = 0;
@@ -625,13 +637,13 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
                 while(lx < 256)
                 {
                     unsigned char value = indexLocalX[lx++] ;
-                    outputBuffer[loop++] = colorLookUp[value][0];
-                    outputBuffer[loop++] = colorLookUp[value][1];
-                    outputBuffer[loop++] = colorLookUp[value][2];
-                    outputBuffer[loop++] = colorLookUp[value][0];
-                    outputBuffer[loop++] = colorLookUp[value][1];
-                    outputBuffer[loop++] = colorLookUp[value][2];
 
+                    outputBuffer[loop++] = colorLookUp[value][0];
+                    outputBuffer[loop++] = colorLookUp[value][1];
+                    outputBuffer[loop++] = colorLookUp[value][2];
+                    outputBuffer[loop++] = colorLookUp[value][0];
+                    outputBuffer[loop++] = colorLookUp[value][1];
+                    outputBuffer[loop++] = colorLookUp[value][2];
                 }
             }
 

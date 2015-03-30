@@ -163,6 +163,8 @@ extern n_byte land_points[];
 
 void draw_color_time(n_byte2 * color_fit);
 
+void draw_color_group_update(n_byte2 * color_fit);
+
 void draw_undraw_clear(void);
 
 n_byte * draw_pointer(n_byte which_one);

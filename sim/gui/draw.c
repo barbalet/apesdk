@@ -606,8 +606,12 @@ void draw_fit(n_byte * points, n_byte2 * color_fit)
         color_fit[(COLOUR_RED*3) + 1] = 0x0000;
         color_fit[(COLOUR_RED*3) + 2] = 0x0000;
 
-        io_copy((n_byte *)color_fit, (n_byte *)color_group, sizeof(n_byte2) * 3 * 256);
     }
+}
+
+void draw_color_group_update(n_byte2 * color_fit)
+{
+    io_copy((n_byte *)color_fit, (n_byte *)color_group, sizeof(n_byte2) * 3 * 256);
 }
 
 void draw_color_time(n_byte2 * color_fit)

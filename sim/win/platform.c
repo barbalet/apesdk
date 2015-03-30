@@ -455,7 +455,7 @@ static void plat_update()
     {
         SIZE            sz;
         HDC             hdcMem;
-        unsigned char   value[512*512];
+        unsigned char   * value = shared_legacy_draw(lp, 512, 512);
 
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);
@@ -516,7 +516,6 @@ static void plat_file_open(n_byte script)
             MessageBox(global_hwnd[0], TEXT("File processing failed"), TEXT("Noble Ape File Error"), MB_OK);
             CloseHandle(current_file);
         }
-
         CloseHandle(current_file);
     }
 }

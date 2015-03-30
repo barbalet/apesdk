@@ -750,12 +750,10 @@ n_int io_write(n_file * fil, n_constant_string ch, n_byte new_line)
     }
     if (new_line&1)
     {
-#ifndef	_WIN32
-        FILE_MACRO_WRITE(10);
-#else
+#ifdef	_WIN32
         FILE_MACRO_WRITE(13);
-        FILE_MACRO_WRITE(10);
 #endif
+        FILE_MACRO_WRITE(10);
     }
     if (new_line&2)
     {
