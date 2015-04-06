@@ -1105,6 +1105,7 @@ static n_int console_on_off(n_string response)
 
 n_int console_event(void * ptr, n_string response, n_console_output output_function)
 {
+#ifdef EPISODIC_ON
     n_int return_response = console_on_off(response);
 
     if (return_response == -1)
@@ -1127,7 +1128,9 @@ n_int console_event(void * ptr, n_string response, n_console_output output_funct
         episodic_logging(output_function, 0);
         output_function("Event output turned on");
     }
-
+#else
+    output_function("Episodic not supported in this build");
+#endif
     return 0;
 }
 

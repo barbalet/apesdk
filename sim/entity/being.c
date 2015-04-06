@@ -2830,8 +2830,9 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         tmp_speed = (tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
 
         /* TODO: affect_type should probably be used rather than energy? */
+#ifdef EPISODIC_ON
         episodic_self(sim, local, EVENT_SWIM, (affect_type)being_energy(local), 0);
-
+#endif
         /** bathing removes parasites */
         if (local->parasites > 0) local->parasites--;
     }
@@ -2875,9 +2876,11 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                 /** eating when stopped */
                 n_byte  food_type;
                 n_int energy = food_eat(being_location_x(local), being_location_y(local), az, &food_type, local);
-
+                
+#ifdef EPISODIC_ON
                 /** remember eating */
                 episodic_food(sim, local, energy, food_type);
+#endif
 
                 being_energy_delta(local, energy);
 
@@ -2962,7 +2965,9 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
                         if (being_init(sim->beings, sim->num, being_child, local, 0L) == 0)
                         {
+#ifdef EPISODIC_ON
                             episodic_close(sim, local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
+#endif
                             being_create_family_links(local,being_child,sim);
                             if (sim->ext_birth != 0)
                             {
@@ -2989,8 +2994,10 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                         being_set_location(being_child, being_location(local));
 
                         child_mass = GET_M(being_child);
+#ifdef EPISODIC_ON
                         episodic_close(sim, local, being_child, EVENT_CARRIED, AFFECT_CARRYING, 0);
                         episodic_close(sim, being_child, local, EVENT_CARRIED_BY, AFFECT_CARRIED, 0);
+#endif
                     }
                 }
             }
@@ -3046,9 +3053,10 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
                             being_immune_seed(mother, local);
-
+#ifdef EPISODIC_ON
                             episodic_close(sim, mother, local, EVENT_SUCKLED, AFFECT_SUCKLING, 0);
                             episodic_close(sim, local, mother, EVENT_SUCKLED_BY, AFFECT_SUCKLING, 0);
+#endif
                         }
                     }
                 }

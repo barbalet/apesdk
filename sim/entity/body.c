@@ -196,6 +196,7 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
         hand = BODY_LEFT_HAND;
         carrying = being_carried(local,hand);
     }
+#ifdef EPISODIC_ON
     if (carrying!=0)
     {
         if (carrying & INVENTORY_BRANCH)
@@ -217,6 +218,7 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
             }
         }
     }
+#endif
 }
 
 /**
@@ -253,7 +255,9 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
                 {
                     being_take(local,hand, INVENTORY_FISH);
                 }
+#ifdef EPISODIC_ON
                 episodic_self(sim, local, EVENT_FISH, AFFECT_FISH, 0);
+#endif
             }
         }
     }
@@ -353,7 +357,9 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
         {
             carrying |= 1;
         }
+#ifdef EPISODIC_ON
         episodic_self(sim, local,EVENT_CHEW, EPISODIC_AFFECT_ZERO, carrying);
+#endif
     }
     if (carrying & INVENTORY_GRASS)
     {
@@ -440,7 +446,9 @@ static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte
     if (carrying != 0)
     {
         being_drop(local,hand);
+#ifdef EPISODIC_ON
         episodic_self(sim, local, EVENT_DROP, EPISODIC_AFFECT_ZERO, carrying);
+#endif
     }
 }
 
@@ -479,31 +487,41 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                 if ((grass>bush) && (grass>trees))
                 {
                     being_take(local,hand, INVENTORY_GRASS);
+#ifdef EPISODIC_ON
                     episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_GRASS);
+#endif
                 }
                 if ((trees>grass) && (trees>bush))
                 {
                     if (being_posture_under(local, POSTURE_UPRIGHT))
                     {
                         being_take(local,hand, INVENTORY_BRANCH);
+#ifdef EPISODIC_ON
                         episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_BRANCH);
+#endif
                     }
                     else
                     {
                         being_take(local,hand, INVENTORY_NUT);
+#ifdef EPISODIC_ON
                         episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_NUT);
+#endif
                     }
                 }
                 if ((bush>grass) && (bush>trees))
                 {
                     being_take(local,hand, INVENTORY_TWIG);
+#ifdef EPISODIC_ON
                     episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_TWIG);
+#endif
                 }
             }
             else
             {
                 being_take(local,hand, INVENTORY_ROCK);
+#ifdef EPISODIC_ON
                 episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_ROCK);
+#endif
             }
         }
     }

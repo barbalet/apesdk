@@ -770,6 +770,20 @@ n_byte episodic_anecdote(
 /**
  * An empty function
  */
+void episodic_interaction(
+                          noble_simulation * local_sim,
+                          noble_being * local,
+                          noble_being * other,
+                          being_episodic_event_type event,
+                          affect_type affect,
+                          n_byte2 arg)
+{
+
+}
+
+/**
+ * An empty function
+ */
 void episodic_store_memory(
                            noble_simulation * local_sim,
                            noble_being * local,

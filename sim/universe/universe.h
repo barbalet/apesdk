@@ -36,13 +36,11 @@
 #ifndef NOBLEAPE_UNIVERSE_H
 #define NOBLEAPE_UNIVERSE_H
 
-/* displays and simulates ape's brain */
+#define  EPISODIC_ON
 
-#define EPISODIC_ON /* currently has to be included - naming doesn't work without it */
-
-#define TERRITORY_ON  /* entity */
-#define BRAINCODE_ON  /* entity */
-#define IMMUNE_ON     /* entity */
+#define  TERRITORY_ON  /* entity */
+#define  BRAINCODE_ON  /* entity */
+#define  IMMUNE_ON     /* entity */
 
 #define  BRAIN_ON
 
