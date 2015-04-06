@@ -3310,7 +3310,7 @@ n_int being_init(noble_being * beings, n_int number,
 #ifdef EPISODIC_ON
     noble_social * local_social_graph = being_social(local);
     noble_episodic * local_episodic = being_episodic(local);
-#endif
+
     if (local_social_graph == 0L)
     {
         return SHOW_ERROR("Social memory not available");
@@ -3319,7 +3319,7 @@ n_int being_init(noble_being * beings, n_int number,
     {
         return SHOW_ERROR("Episodic memory not available");
     }
-
+#endif
     being_erase(local);
 
 #ifdef BRAIN_ON

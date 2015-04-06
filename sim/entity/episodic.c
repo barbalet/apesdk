@@ -771,13 +771,13 @@ n_byte episodic_anecdote(
  * An empty function
  */
 void episodic_store_memory(
-    noble_simulation * local_sim,
-    noble_being * local,
-    n_byte event,
-    n_int affect,
-    n_byte2 name1, n_byte2 family1,
-    n_byte2 name2, n_byte2 family2,
-    n_byte2 arg)
+                           noble_simulation * local_sim,
+                           noble_being * local,
+                           being_episodic_event_type event,
+                           affect_type affect,
+                           n_byte2 name1, n_byte2 family1,
+                           n_byte2 name2, n_byte2 family2,
+                           n_byte2 arg)
 {
 }
 

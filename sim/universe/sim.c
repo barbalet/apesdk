@@ -468,7 +468,7 @@ void sim_cycle(void)
     sim_time(&sim);
 }
 
-#define	MINIMAL_ALLOCATION	((512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+1+(sizeof(noble_simulation)))
+#define	MINIMAL_ALLOCATION	((512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+sizeof(noble_remains)+1+(sizeof(noble_simulation)))
 
 #define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 200))
 
@@ -487,15 +487,15 @@ static n_int sim_memory(n_uint offscreen_size)
     {
         return SHOW_ERROR("Not enough memory to run");
     }
-
+    
     offbuffer = io_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
 
     current_location = offscreen_size;
-
+    
     sim_memory_remains(&sim, offbuffer, &current_location);
 
-    memory_allocated = memory_allocated - offscreen_size - current_location;
-
+    memory_allocated = memory_allocated - current_location;
+    
     return being_memory(&sim, offbuffer, &current_location, memory_allocated);
 }
 

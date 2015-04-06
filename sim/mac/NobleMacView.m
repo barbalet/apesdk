@@ -55,6 +55,9 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
         (NSOpenGLPixelFormatAttribute)16, /* 16 bit depth buffer */
         (NSOpenGLPixelFormatAttribute)0 /*nil*/
     };
+    
+    NSLog(@"Abtaining and returning basic pixel format");
+    
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
@@ -65,6 +68,9 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 	[panel  setAllowedFileTypes:fileTypes];
     [panel  setCanChooseDirectories:NO];
     [panel  setAllowsMultipleSelection:NO];
+    
+    NSLog(@"Abtaining and returning uniform open panel");
+    
     return panel;
 }
 
@@ -74,12 +80,18 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     NSSavePanel *panel = [NSSavePanel savePanel];
     NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
 	[panel  setAllowedFileTypes:fileTypes];
+    
+    NSLog(@"Abtaining and returning uniform save panel");
+
     return panel;
 }
 
 - (void)debugOutput
 {
     NSSavePanel *panel = [self uniformSavePanel];
+
+    NSLog(@"Abtaining debug output");
+
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
          if (result == NSFileHandlingPanelOKButton)
@@ -105,6 +117,8 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 - (void) awakeFromNib
 {
     NSSize size = [[self window] frame].size;
+    
+    NSLog(@"Starting up");
     
     fIdentification = 0;
     
@@ -133,7 +147,12 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
 - (void)quitProcedure
 {
+    NSLog(@"Quitting");
+
     shared_close();
+    
+    NSLog(@"Quitted");
+
     exit(0);
 }
 
@@ -161,23 +180,37 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
 - (void)startEverything
 {
+    NSUInteger processors = [[NSProcessInfo processInfo] processorCount];
     NSSize increments;
+    
+    randomizing_agent = (n_uint)CFAbsoluteTimeGetCurrent();
+    
     increments.height = 4;
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
-
+    
+    NSLog(@"Setting up %@ window", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
     
     execute_threads([[NSProcessInfo processInfo] processorCount]);
+    
+    NSLog(@"We have %ld processors", processors);
+    
+    if (fIdentification == NUM_TERRAIN)
     {
-        n_int shared_response = shared_init(fIdentification, (n_uint)CFAbsoluteTimeGetCurrent());
+        NSLog(@"Initialization landscape with randomizing: %lx", randomizing_agent);
+    }
+    {
+        n_int shared_response = shared_init(fIdentification, randomizing_agent);
         if (shared_response == -1)
         {
+            NSLog(@"Simulation initialization failed");
             [self quitProcedure];
             return;
         }
         else
         {
             fIdentification = (n_byte)shared_response;
+            NSLog(@"This is the %@ window", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
         }
     }
     
@@ -187,10 +220,12 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
         
         timerAnimation = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     }
+    
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
     
     [[self window] makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
+    NSLog(@"%@ window setup done", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
 }
 
 - (void)loadUrlString:(NSString*) urlString
@@ -218,14 +253,14 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     [self quitProcedure];
 }
 
-static n_uint randomizing_agent = 0x28e49a3e;
-
 -(IBAction) menuFileNew:(id) sender
 {
     n_uint loop = 0;
     n_byte2 *ra_in_2_bytes = (n_byte2*)&randomizing_agent;
     
     randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent();
+    
+    NSLog(@"New landscape with randomizing: %lx", randomizing_agent);
     
     while (loop < (sizeof(n_uint)/2))
     {
@@ -236,6 +271,7 @@ static n_uint randomizing_agent = 0x28e49a3e;
     {
         [self quitProcedure];
     }
+    NSLog(@"Finished new landscape");
 }
 
 -(IBAction) menuFileOpen:(id) sender
@@ -348,6 +384,9 @@ static n_uint randomizing_agent = 0x28e49a3e;
             {
                 local_key += 31;
             }
+            
+            NSLog(@"%@ window has key pressed value: %d", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"), local_key);
+            
 			shared_keyReceived(local_key, fIdentification);
 			[super keyDown:theEvent];
         }
@@ -368,12 +407,16 @@ static n_uint randomizing_agent = 0x28e49a3e;
     if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
     {
         shared_mouseOption(1);
+        NSLog(@"Mouse option pressed");
     }
     else
     {
         shared_mouseOption(0);
+        NSLog(@"No mouse option pressed");
     }
 	shared_mouseReceived(location_x, location_y, fIdentification);
+    
+    NSLog(@"%@ window has mouse pressed: %ld, %ld", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"), location_x, location_y);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent

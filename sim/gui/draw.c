@@ -1445,6 +1445,10 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
         printf("ERROR: %s\n", error_text);
 #endif
 
+#ifdef EXPLICIT_DEBUG
+        printf("ERROR: %s (%s, %ld)\n", error_text, location, line_number);
+
+#endif
         io_time_to_string(simulation_date_time);
 
         io_string_write(simulation_date_time_error, simulation_date_time, &position);

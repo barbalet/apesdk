@@ -46,7 +46,7 @@
 
 #define  BRAIN_ON
 
-#undef  FEATURE_SET
+#define  FEATURE_SET
 
 /* dimension of the territory map */
 #define TERRITORY_DIMENSION           (MAP_DIMENSION>>APE_TO_MAP_BIT_RATIO)

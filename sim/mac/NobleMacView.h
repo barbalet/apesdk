@@ -44,6 +44,7 @@
 
 @interface NobleMacView : NSOpenGLView
 {
+    n_uint           randomizing_agent;
     NSTimer*         timerAnimation;
     n_byte           fIdentification;
 }
