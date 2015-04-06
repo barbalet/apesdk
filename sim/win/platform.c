@@ -451,11 +451,13 @@ static void plat_update()
     HDC         hdc[NUMBER_WINDOWS];
     unsigned char lp = 0;
 
+    shared_legacy_draw(512, 512);
+    
     while (lp < NUMBER_WINDOWS)
     {
         SIZE            sz;
         HDC             hdcMem;
-        unsigned char   * value = shared_legacy_draw(lp, 512, 512);
+        unsigned char   * value = shared_legacy_pointer(lp);
 
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);

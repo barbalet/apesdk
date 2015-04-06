@@ -568,14 +568,14 @@ n_int shared_menu(n_int menuVal)
     return -1;
 }
 
-n_byte * shared_legacy_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
+void shared_legacy_draw(n_int dim_x, n_int dim_y)
 {
-    if (fIdentification == NUM_TERRAIN)
-    {
-        draw_window(dim_x, dim_y);
-        draw_cycle();
-    }
+    draw_window(dim_x, dim_y);
     draw_cycle();
+}
+
+n_byte * shared_legacy_pointer(n_byte fIdentification)
+{
     return draw_pointer(fIdentification);
 }
 
@@ -587,8 +587,8 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
     n_byte2         fit[256*3];
     n_byte           * index = draw_pointer(fIdentification);
 #ifdef NOBLE_IOS
-    n_c_uint         * offscreenBuffer = (n_c_uint *) outputBuffer;
-    n_c_uint        colorLookUp[256];
+    n_byte4         * offscreenBuffer = (n_byte4 *) outputBuffer;
+    n_byte4        colorLookUp[256];
 #else
     n_byte          colorLookUp[256][3];
 #endif

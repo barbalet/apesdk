@@ -54,7 +54,8 @@
 
 - (float)screenScale
 {
-    return 1; /*[[UIScreen mainScreen] scale];*/
+    return 1;
+    /*return [[UIScreen mainScreen] scale];*/
 }
 
 - (void) drawRect:(CGRect)rect;

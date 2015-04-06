@@ -1721,14 +1721,14 @@ void  draw_window(n_int dim_x, n_int dim_y)
     terrain_dim_y = dim_y;
 }
 
-n_int  draw_cycle(void)
+void  draw_cycle(void)
 {
     noble_simulation * local_sim = sim_sim();
     n_vect2            local_vect;
     n_join             local_mono;
 
-    if (sim_new()) return 0;
-    if (check_about) return 0;
+    if (sim_new()) return;
+    if (check_about) return;
 
     local_mono.pixel_draw  = &pixel_overlay;
     local_mono.information = draw_pointer(NUM_TERRAIN);
@@ -1761,9 +1761,7 @@ n_int  draw_cycle(void)
         draw_brain(local_sim, &local_vect);
     }
 #else
-    {
-        draw_metrics(0, local_sim->delta_frames, &local_mono);
-    }
+    draw_metrics(0, local_sim->delta_frames, &local_mono);
 #endif
 
 #ifdef BRAINCODE_ON
@@ -1784,5 +1782,4 @@ n_int  draw_cycle(void)
 #ifdef MULTITOUCH_CONTROLS
     draw_tc_controls(&local_mono);
 #endif
-    return 0;
 }

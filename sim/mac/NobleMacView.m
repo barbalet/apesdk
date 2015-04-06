@@ -182,11 +182,11 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     }
     
     /* start animation timer */
-    
-    NSTimeInterval interval = 1.0f/((NSTimeInterval)shared_max_fps());
-    
-	timerAnimation = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
-    
+    {
+        NSTimeInterval interval = 1.0f/((NSTimeInterval)shared_max_fps());
+        
+        timerAnimation = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
+    }
     [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
     
     [[self window] makeKeyAndOrderFront:nil];
