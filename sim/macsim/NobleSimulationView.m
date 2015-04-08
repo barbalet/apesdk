@@ -45,7 +45,10 @@
     {
         fIdentification = NUM_TERRAIN;
     }
+    
+    NSLog(@"%@ window starts", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
     [self startEverything];
+    NSLog(@"%@ window ends", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
 }
 
 - (void) drawRect:(NSRect)rect
@@ -56,10 +59,14 @@
     shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dim_x, dim_y);
     if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
     {
+        NSLog(@"Debug output");
+
         [self debugOutput];
     }
     if (returned_value == SHARED_CYCLE_QUIT)
     {
+        NSLog(@"Quit procedure initiated");
+
         [self quitProcedure];
     }
 

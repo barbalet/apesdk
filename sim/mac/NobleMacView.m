@@ -55,9 +55,6 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
         (NSOpenGLPixelFormatAttribute)16, /* 16 bit depth buffer */
         (NSOpenGLPixelFormatAttribute)0 /*nil*/
     };
-    
-    NSLog(@"Abtaining and returning basic pixel format");
-    
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
@@ -151,7 +148,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
     shared_close();
     
-    NSLog(@"Quitted");
+    NSLog(@"Quit");
 
     exit(0);
 }
@@ -189,7 +186,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
     
-    NSLog(@"Setting up %@ window", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
+    NSLog(@"%@ window setup started", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
     
     execute_threads([[NSProcessInfo processInfo] processorCount]);
     
@@ -210,7 +207,6 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
         else
         {
             fIdentification = (n_byte)shared_response;
-            NSLog(@"This is the %@ window", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
         }
     }
     
@@ -250,6 +246,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
 -(IBAction) menuQuit:(id) sender
 {
+    NSLog(@"Quit from menu");
     [self quitProcedure];
 }
 
