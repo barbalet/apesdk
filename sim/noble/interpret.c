@@ -61,7 +61,7 @@ static	n_int	interpret_braces(n_individual_interpret * individual, n_byte * eval
     {
         if(local_b_count == 0)
         {
-            return io_apescript_error(individual->interpret_data, AE_TOO_MANY_CLOSE_BRACES);
+            return APESCRIPT_ERROR(individual, AE_TOO_MANY_CLOSE_BRACES);
         }
         individual->braces_count--;
     }
@@ -71,7 +71,7 @@ static	n_int	interpret_braces(n_individual_interpret * individual, n_byte * eval
         n_byte		*local_evaluate;
         if(local_b_count == BRACES_MAX)
         {
-            return io_apescript_error(individual->interpret_data, AE_MAXIMUM_BRACES_REACHED);
+            return APESCRIPT_ERROR(individual, AE_MAXIMUM_BRACES_REACHED);
         }
         local_evaluate = individual->braces[ local_b_count ].evaluate;
         while(loop < SIZE_OF_EVALUATE)
@@ -111,7 +111,7 @@ static n_int interpret_apply(n_interpret * code, n_individual_interpret * indivi
 
     if(code->sc_output(code, individual, evaluate,&val_a) == -1)
     {
-        return io_apescript_error(individual->interpret_data, AE_FIRST_VALUE_FAILED);
+        return APESCRIPT_ERROR(individual, AE_FIRST_VALUE_FAILED);
     }
     if(evaluate[2] == end_char)
     {
@@ -120,11 +120,11 @@ static n_int interpret_apply(n_interpret * code, n_individual_interpret * indivi
     }
     if(evaluate[2] != APESCRIPT_OPERATOR)
     {
-        return io_apescript_error(individual->interpret_data, AE_UNKNOWN_SYNTAX_MISSING_EQUALS);
+        return APESCRIPT_ERROR(individual, AE_UNKNOWN_SYNTAX_MISSING_EQUALS);
     }
     if(code->sc_output(code, individual, &evaluate[4],&val_b) == -1)
     {
-        return io_apescript_error(individual->interpret_data, AE_SECOND_VALUE_FAILED);
+        return APESCRIPT_ERROR(individual, AE_SECOND_VALUE_FAILED);
     }
     val_c = val_a - val_b;
     switch(evaluate[3])
@@ -204,7 +204,7 @@ static n_int interpret_apply(n_interpret * code, n_individual_interpret * indivi
         }
         break;
     default:
-        return io_apescript_error(individual->interpret_data, AE_UNKNOWN_SYNTAX_NO_COMMAND);
+        return APESCRIPT_ERROR(individual, AE_UNKNOWN_SYNTAX_NO_COMMAND);
         break;
     }
 
@@ -212,7 +212,7 @@ static n_int interpret_apply(n_interpret * code, n_individual_interpret * indivi
     {
         return 7;
     }
-    return io_apescript_error(individual->interpret_data, AE_WRONG_END);
+    return APESCRIPT_ERROR(individual, AE_WRONG_END);
 }
 
 /**
@@ -243,7 +243,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         n_int	brace_value = (individual->braces_count) - 1;
         if(brace_value < 0 )
         {
-            return io_apescript_error(individual->interpret_data, AE_TOO_MANY_CLOSE_BRACES);
+            return APESCRIPT_ERROR(individual, AE_TOO_MANY_CLOSE_BRACES);
         }
         local_brace = &(individual->braces[brace_value]);
         if(local_brace->evaluate[0] == 0)  /* exit if */
@@ -261,12 +261,12 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
     }
     if(first_value != APESCRIPT_TEXT)
     {
-        return io_apescript_error(individual->interpret_data, AE_LINE_START_INCORRECT);
+        return APESCRIPT_ERROR(individual, AE_LINE_START_INCORRECT);
     }
 
     if((second_value > VARIABLE_IF) && (second_value <= code->input_greater))
     {
-        return io_apescript_error(individual->interpret_data, AE_OUTPUT_SET_AS_INPUT_VARIABLE);
+        return APESCRIPT_ERROR(individual, AE_OUTPUT_SET_AS_INPUT_VARIABLE);
     }
 
     if(VARIABLE_SPECIAL(second_value,code))  /* if/while/function/run( something ){} */
@@ -275,7 +275,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         n_int	error_value = -1;
         if(value[2] != APESCRIPT_OPEN_BRACKET)
         {
-            return io_apescript_error(individual->interpret_data, AE_IF_WHILE_NOT_FOLLOWED_BY_BRACKET);
+            return APESCRIPT_ERROR(individual, AE_IF_WHILE_NOT_FOLLOWED_BY_BRACKET);
         }
         return_value = interpret_apply(code, individual, &value[3], &output_number, APESCRIPT_CLOSE_BRACKET);
         if(return_value == -1)
@@ -286,11 +286,11 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         {
             if(value[3] != APESCRIPT_TEXT)
             {
-                return io_apescript_error(individual->interpret_data, AE_FUNCTION_ISNT_VARIABLE);
+                return APESCRIPT_ERROR(individual, AE_FUNCTION_ISNT_VARIABLE);
             }
             if(return_value != 3)
             {
-                return io_apescript_error(individual->interpret_data, AE_NON_FUNCTION_APPLIED);
+                return APESCRIPT_ERROR(individual, AE_NON_FUNCTION_APPLIED);
             }
         }
         else
@@ -311,18 +311,18 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         {
             if(output_number != 0)
             {
-                return io_apescript_error(individual->interpret_data, AE_FUNCTION_DEFINED_PRIOR);
+                return APESCRIPT_ERROR(individual, AE_FUNCTION_DEFINED_PRIOR);
             }
         }
         if(second_value == VARIABLE_RUN)
         {
             if((output_number < 1) || (output_number > 0xFFFF))
             {
-                return io_apescript_error(individual->interpret_data, AE_FUNCTION_OUT_OF_RANGE);
+                return APESCRIPT_ERROR(individual, AE_FUNCTION_OUT_OF_RANGE);
             }
             if(value[3 + return_value] != APESCRIPT_SEMICOLON)
             {
-                return io_apescript_error(individual->interpret_data, AE_WITHOUT_SEMICOLON);
+                return APESCRIPT_ERROR(individual, AE_WITHOUT_SEMICOLON);
             }
             {
                 n_byte	function_location[SIZE_OF_EVALUATE] = {APESCRIPT_FUNCTION,0};
@@ -346,19 +346,19 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         /* if the future code will contain if()run(); then the if should be checked here */
         if(value[3 + return_value] != APESCRIPT_OPEN_BRACE)
         {
-            return io_apescript_error(individual->interpret_data, AE_WITHOUT_OPEN_BRACE);
+            return APESCRIPT_ERROR(individual, AE_WITHOUT_OPEN_BRACE);
         }
         if(second_value == VARIABLE_FUNCTION)
         {
             if(code->sc_input(individual, value[4], (4 + return_value + location) ) == -1)
             {
-                return io_apescript_error(individual->interpret_data, AE_FUNCTION_SETTING_FAILED);
+                return APESCRIPT_ERROR(individual, AE_FUNCTION_SETTING_FAILED);
             }
             if(value[4] == code->main_entry)
             {
                 if(interpret_braces(individual,0L,0) == -1)
                 {
-                    return io_apescript_error(individual->interpret_data, AE_ERROR_STARTING_MAIN);
+                    return APESCRIPT_ERROR(individual, AE_ERROR_STARTING_MAIN);
                 }
                 individual->main_status = MAIN_RUN;
                 SC_DEBUG_STRING(individual->interpret_data, "function( ");
@@ -370,7 +370,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
             }
             if(individual->main_status != MAIN_NOT_RUN)
             {
-                return io_apescript_error(individual->interpret_data, AE_CODE_AFTER_MAIN);
+                return APESCRIPT_ERROR(individual, AE_CODE_AFTER_MAIN);
             }
         }
         /* if the result is zero find the end of the correctly nested } */
@@ -395,7 +395,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
                 }
                 if((loop + location) > remaining_bytes)
                 {
-                    return io_apescript_error(individual->interpret_data, AE_NO_CLOSE_BRACE_TO_END_OF_FILE);
+                    return APESCRIPT_ERROR(individual, AE_NO_CLOSE_BRACE_TO_END_OF_FILE);
                 }
             }
             while(braces_open != 0);
@@ -418,14 +418,14 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
     }
     if(individual->main_status == MAIN_NOT_RUN)
     {
-        return io_apescript_error(individual->interpret_data, AE_CODE_OUTSIDE_FUNCTION);
+        return APESCRIPT_ERROR(individual, AE_CODE_OUTSIDE_FUNCTION);
     }
     if(VARIABLE_INPUT(second_value, code))  /* x = y + z; */
     {
         n_int	return_value;
         if((value[2] != APESCRIPT_OPERATOR) || (value[3] != SYNTAX_EQUALS))
         {
-            return io_apescript_error(individual->interpret_data, AE_INPUT_VARIABLE_WITHOUT_EQUALS);
+            return APESCRIPT_ERROR(individual, AE_INPUT_VARIABLE_WITHOUT_EQUALS);
         }
         return_value = interpret_apply(code, individual, &value[4], &output_number, APESCRIPT_SEMICOLON);
         if(return_value == -1)
@@ -434,7 +434,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         }
         if(code->sc_input(individual, second_value,output_number) == -1)
         {
-            return io_apescript_error(individual->interpret_data, AE_ASSIGN_VALUE_FAILED);
+            return APESCRIPT_ERROR(individual, AE_ASSIGN_VALUE_FAILED);
         }
         SC_DEBUG_STRING(individual->interpret_data, scdebug_variable(second_value));
         SC_DEBUG_STRING(individual->interpret_data, " = ");
@@ -443,7 +443,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         SC_DEBUG_NEWLINE(individual->interpret_data);
         return return_value + 4;
     }
-    return io_apescript_error(individual->interpret_data, AE_UNKNOWN_SYNTAX_FROM_INTERPRET);
+    return APESCRIPT_ERROR(individual, AE_UNKNOWN_SYNTAX_FROM_INTERPRET);
 }
 
 /**
@@ -518,7 +518,7 @@ static n_int	interpret_code(n_interpret * interp, n_individual_interpret * indiv
             n_byte	  first_evaluate;
             if(brace_number < 0)
             {
-                return io_apescript_error(individual->interpret_data, AE_TOO_MANY_CLOSE_BRACES);
+                return APESCRIPT_ERROR(individual, AE_TOO_MANY_CLOSE_BRACES);
             }
             local_brace = &(individual->braces[brace_number]);
             first_evaluate = local_brace->evaluate[0];
@@ -579,7 +579,7 @@ static n_int	interpret_code(n_interpret * interp, n_individual_interpret * indiv
     {
         if(individual->main_status == MAIN_NOT_RUN)
         {
-            return io_apescript_error(individual->interpret_data, AE_NO_MAIN_CODE);
+            return APESCRIPT_ERROR(individual, AE_NO_MAIN_CODE);
         }
 
         SC_DEBUG_OFF(individual->interpret_data); /* turn off debugging after first cycle */

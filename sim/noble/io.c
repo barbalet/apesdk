@@ -1750,7 +1750,7 @@ void io_string_write(n_string dest, n_string insert, n_int * pos)
     dest[*pos] = 0;
 }
 
-n_int io_apescript_error(void * ptr, AE_ENUM value)
+n_int io_apescript_error(n_individual_interpret * individual, AE_ENUM value, n_constant_string location, n_int line_number)
 {
     n_int    loop = 0;
     AE_ENUM  local_enum;
@@ -1761,21 +1761,21 @@ n_int io_apescript_error(void * ptr, AE_ENUM value)
         local_error = apescript_errors[loop].error_string;
         if (value == local_enum)
         {
-            if (ptr)
+            if (individual->interpret_data)
             {
-                SC_DEBUG_STRING(ptr, " [ ERROR : ");
-                SC_DEBUG_STRING(ptr, local_error );
-                SC_DEBUG_STRING(ptr," ]");
-                SC_DEBUG_NEWLINE(ptr);
-                SC_DEBUG_OFF(ptr);
+                SC_DEBUG_STRING(individual->interpret_data, " [ ERROR : ");
+                SC_DEBUG_STRING(individual->interpret_data, local_error );
+                SC_DEBUG_STRING(individual->interpret_data," ]");
+                SC_DEBUG_NEWLINE(individual->interpret_data);
+                SC_DEBUG_OFF(individual->interpret_data);
             }
-            return SHOW_ERROR(local_error);
+            return SHOW_ERROR_FILE_LINE(local_error, location, line_number);
         }
         loop++;
     }
     while((local_enum != AE_NO_ERROR) && (local_error != 0L));
 
-    return io_apescript_error(ptr, AE_UNKNOWN_ERROR);
+    return io_apescript_error(individual, AE_UNKNOWN_ERROR, location, line_number);
 }
 
 #ifdef NOBLE_APE_ASSERT

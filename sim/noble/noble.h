@@ -568,6 +568,10 @@ extern n_int draw_error(n_constant_string error_text, n_constant_string location
 
 /* "---1---2---3---4---5---6---7--" */ /* length of the errors */
 
+#define APESCRIPT_ERROR(individual, value) (io_apescript_error(individual, value, __FILE__, __LINE__))
+
+#define SHOW_ERROR_FILE_LINE(val, file, line) (draw_error(val, file, line))
+
 #define	SHOW_ERROR(val)	(draw_error(val, __FILE__, __LINE__))
 
 #define IO_LOWER_CHAR(value)   if(ASCII_UPPERCASE(value)) (value) += 'a' - 'A'
@@ -1011,7 +1015,7 @@ typedef struct
 
 /* used for stripping ApeScript errors for documentation */
 
-n_int io_apescript_error(void * ptr, AE_ENUM value);
+n_int io_apescript_error(n_individual_interpret * individual, AE_ENUM value, n_constant_string location, n_int line_number);
 
 n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * variables);
 
