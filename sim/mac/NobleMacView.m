@@ -385,10 +385,8 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
             NSLog(@"%@ window has key pressed value: %d", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"), local_key);
             
 			shared_keyReceived(local_key, fIdentification);
-			[super keyDown:theEvent];
         }
     }
-	[super keyDown:theEvent];
 }
 
 - (BOOL)acceptsFirstMouse
