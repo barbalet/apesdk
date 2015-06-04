@@ -32,7 +32,7 @@
 #ifndef MONKEYMIND_EMOTION_H
 #define MONKEYMIND_EMOTION_H
 
-#include "monkeymind_datatypes.h"
+#include "noble.h"
 
 /* emotions binary coded according to the Lövheim Cube
    Lövheim H. A new three-dimensional model for emotions and
