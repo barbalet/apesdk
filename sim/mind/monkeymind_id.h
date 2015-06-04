@@ -38,7 +38,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "monkeymind_datatypes.h"
+#include "noble.h"
 #include "monkeymind_rand.h"
 
 #define MM_ID_LENGTH 3

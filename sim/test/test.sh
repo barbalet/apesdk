@@ -77,7 +77,7 @@ gcc ${CFLAGS} -I/usr/include -o test_apescript *.o
 
 rm test_apescript
 
-gcc ${CFLAGS} -I/usr/include -I../mind -o test_mind ../mind/*.c test_mind.c monkeymind_unittests.c
+gcc ${CFLAGS} -I/usr/include -I../mind -I../noble  -o test_mind ../mind/*.c test_mind.c monkeymind_unittests.c
 
 ./test_mind
 
