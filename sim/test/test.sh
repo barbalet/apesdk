@@ -36,7 +36,7 @@ if [ $# -ge 1 -a "$1" == "--debug" ]
 then
     CFLAGS=-g
 else
-    CFLAGS=-O2 
+    CFLAGS=-O2
 fi
 
 gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
@@ -77,5 +77,10 @@ gcc ${CFLAGS} -I/usr/include -o test_apescript *.o
 
 rm test_apescript
 
+gcc ${CFLAGS} -I/usr/include -I../mind -o test_mind ../mind/*.c test_mind.c monkeymind_unittests.c
+
+./test_mind
+
+rm test_mind
 
 rm *.o
