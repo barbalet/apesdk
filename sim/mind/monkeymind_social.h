@@ -42,6 +42,11 @@
 /* neutral friend or foe value within a 32bit integer */
 #define MM_NEUTRAL                 65535
 
+/* social orientation towards other beings */
+#define SOCIAL_POSITIVE  1
+#define SOCIAL_NEGATIVE -1
+#define SOCIAL_MEH       0
+
 n_int mm_social_graph_entry_exists(monkeymind *mind, n_int index);
 n_int mm_social_index_from_id(monkeymind * mind, mm_id * met_id);
 n_int mm_social_index_from_name(monkeymind * mind, n_uint met_name);

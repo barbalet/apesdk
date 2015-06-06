@@ -98,7 +98,10 @@ typedef struct
     /* self-organising map for classifying met individuals */
     mm_som social_categories;
 
-    /* friend or foe categories */
+    /* Social categories in various dimensions, such as
+       friend or foe and attractiveness.
+       Each entry contains a set of values associated with
+       the social_categories topological generalisations */
     mm_som_categories category[MM_CATEGORIES];
 
     /* Memory of recent sequences of events */
