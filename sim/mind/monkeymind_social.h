@@ -50,7 +50,7 @@
 n_int mm_social_graph_entry_exists(monkeymind *mind, n_int index);
 n_int mm_social_index_from_id(monkeymind * mind, mm_id * met_id);
 n_int mm_social_index_from_name(monkeymind * mind, n_uint met_name);
-void mm_social_meet(monkeymind * meeter, monkeymind * met);
+n_int mm_social_meet(monkeymind * meeter, monkeymind * met);
 void mm_social_speak(monkeymind * speaker, monkeymind * listener);
 void mm_communicate_social_categorisation(monkeymind * mind,
                                           n_int index,

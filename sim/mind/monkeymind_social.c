@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 2013-2014 Bob Mottram
+ Copyright 2013-2015 Bob Mottram
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -33,19 +33,19 @@
 
 n_int mm_social_graph_entry_exists(monkeymind *mind, n_int index)
 {
-	mm_id meeter_id, met_id;
+    mm_id meeter_id, met_id;
 
-	mm_obj_prop_get_id(&mind->social_graph[index],
-					   MM_PROPERTY_MEETER, &meeter_id);
+    mm_obj_prop_get_id(&mind->social_graph[index],
+                       MM_PROPERTY_MEETER, &meeter_id);
 
-	if (!mm_id_exists(&meeter_id)) {
-		return 0;
-	}
+    if (!mm_id_exists(&meeter_id)) {
+        return 0;
+    }
 
-	mm_obj_prop_get_id(&mind->social_graph[index],
-					   MM_PROPERTY_MET, &met_id);
+    mm_obj_prop_get_id(&mind->social_graph[index],
+                       MM_PROPERTY_MET, &met_id);
 
-	return mm_id_exists(&met_id);
+    return mm_id_exists(&met_id);
 }
 
 /* returns the social graph array index of the individual having the
@@ -53,13 +53,13 @@ n_int mm_social_graph_entry_exists(monkeymind *mind, n_int index)
 n_int mm_social_index_from_id(monkeymind * mind, mm_id * met_id)
 {
     n_int i;
-	mm_id test_id;
+    mm_id test_id;
 
     for (i = MM_SELF+1; i < MM_SIZE_SOCIAL_GRAPH; i++) {
-		if (!mm_social_graph_entry_exists(mind, i)) break;
+        if (!mm_social_graph_entry_exists(mind, i)) break;
 
-		mm_obj_prop_get_id(&mind->social_graph[i],
-						   MM_PROPERTY_MEETER, &test_id);
+        mm_obj_prop_get_id(&mind->social_graph[i],
+                           MM_PROPERTY_MEETER, &test_id);
         if (mm_id_equals(&test_id, met_id)) {
             return i;
         }
@@ -74,7 +74,7 @@ n_int mm_social_index_from_name(monkeymind * mind, n_uint met_name)
     n_int i;
 
     for (i = MM_SELF+1; i < MM_SIZE_SOCIAL_GRAPH; i++) {
-		if (!mm_social_graph_entry_exists(mind, i)) break;
+        if (!mm_social_graph_entry_exists(mind, i)) break;
 
         if (mm_obj_prop_get(&mind->social_graph[i],
                             MM_PROPERTY_MET_NAME) == met_name) {
@@ -92,7 +92,7 @@ static n_int mm_social_forget(monkeymind * mind)
 
     /* pick the individual with the fewest observations */
     for (i = 1; i < MM_SIZE_SOCIAL_GRAPH; i++) {
-		if (!mm_social_graph_entry_exists(mind, i)) break;
+        if (!mm_social_graph_entry_exists(mind, i)) break;
 
         if (mind->social_graph[i].observations < min_observations) {
             min_observations = mind->social_graph[i].observations;
@@ -303,7 +303,7 @@ void mm_communicate_social_categorisation(monkeymind * mind,
     n_uint social_x, social_y;
     n_byte normalised_properties[MM_PROPERTIES];
 
-	if (!mm_social_graph_entry_exists(mind, index)) return;
+    if (!mm_social_graph_entry_exists(mind, index)) return;
 
     individual = &mind->social_graph[index];
 
@@ -323,16 +323,23 @@ void mm_communicate_social_categorisation(monkeymind * mind,
     mm_align_categories(mind, social_x, social_y, other);
 }
 
-/* categorise an entry within the social graph */
-static void mm_social_categorisation(monkeymind * mind,
-                                     n_int index)
+/**
+ * @brief categorise an entry within the social graph
+ * @param mind Monkeymind object
+ * @param index Array index within the social graph
+ * @returns zero on success
+ */
+static n_int mm_social_categorisation(monkeymind * mind,
+                                      n_int index)
 {
     mm_object * individual;
     n_int fof_increment = 0, attraction_increment = 0;
     n_byte normalised_properties[MM_PROPERTIES];
     n_uint fof, attraction, social_x=0, social_y=0;
 
-	if (!mm_social_graph_entry_exists(mind, index)) return;
+    if (index >= MM_SIZE_SOCIAL_GRAPH) return -1;
+
+    if (!mm_social_graph_entry_exists(mind, index)) return -2;
 
     individual = &mind->social_graph[index];
 
@@ -391,14 +398,25 @@ static void mm_social_categorisation(monkeymind * mind,
     /* alter the attraction values within the classifier */
     mm_social_category_update(mind->category[MM_CATEGORY_ATTRACTION].value,
                               social_x, social_y, attraction_increment);
+
+    return 0;
 }
 
-/* adds a social graph enry at the given index */
-static void mm_social_add(monkeymind * meeter, monkeymind * met,
-                          n_int index, n_byte familiar)
+/**
+ * @brief adds a social graph enry at the given index
+ * @param meeter The being doing the meeting
+ * @param met The being who was met
+ * @param index Meeter social graph index for the met individual
+ * @param familiar non-zero if already met
+ * @return zero on success
+ */
+static n_int mm_social_add(monkeymind * meeter, monkeymind * met,
+                           n_int index, n_byte familiar)
 {
     n_int i;
     mm_object * individual;
+
+    if (index >= MM_SIZE_SOCIAL_GRAPH) return -1;
 
     individual = &meeter->social_graph[index];
 
@@ -406,17 +424,17 @@ static void mm_social_add(monkeymind * meeter, monkeymind * met,
     mm_obj_copy(met->properties, individual);
 
     mm_obj_prop_add_id(individual,
-					   MM_PROPERTY_MEETER, &meeter->id);
+                       MM_PROPERTY_MEETER, &meeter->id);
 
-	/* add an id for the social graph entry */
-	mm_id_create(&meeter->seed, &individual->id);
+    /* add an id for the social graph entry */
+    mm_id_create(&meeter->seed, &individual->id);
 
     mm_obj_prop_add(individual,
                     MM_PROPERTY_MEETER_NAME,
                     mm_get_property(meeter, MM_PROPERTY_NAME));
 
     mm_obj_prop_add_id(individual,
-					   MM_PROPERTY_MET, &met->id);
+                       MM_PROPERTY_MET, &met->id);
 
     mm_obj_prop_add(individual,
                     MM_PROPERTY_MET_NAME,
@@ -439,27 +457,37 @@ static void mm_social_add(monkeymind * meeter, monkeymind * met,
     }
 
     /* make generalisations about the met individual */
-    mm_social_categorisation(meeter, index);
+    if (mm_social_categorisation(meeter, index) != 0) return -2;
 
     /* set attention to the met being */
     meeter->attention[MM_ATTENTION_SOCIAL_GRAPH] = index;
+
+    return 0;
 }
 
-/* two individuals meet */
-void mm_social_meet(monkeymind * meeter, monkeymind * met)
+/**
+ * @brief Returns the social graph array index for a met being
+ * @param meeter The being doing the meeting
+ * @param met The being who was met
+ * @oaram familiar Returns whether this is a previously met individual
+ * @return Meeter social graph array index for the met individual
+ */
+static int mm_social_next_graph_index(monkeymind * meeter, monkeymind * met,
+                                      n_byte * familiar)
 {
-    n_byte familiar = 0;
     n_int index = mm_social_index_from_id(meeter, &met->id);
+
+    *familiar = 0;
 
     if (index == -1) {
         /* are all array entries occupied? */
-		if (mm_social_graph_entry_exists(meeter, MM_SIZE_SOCIAL_GRAPH-1)) {
+        if (mm_social_graph_entry_exists(meeter, MM_SIZE_SOCIAL_GRAPH-1)) {
             index = mm_social_forget(meeter);
         }
         else {
             /* find the last entry */
             for (index = MM_SIZE_SOCIAL_GRAPH-1; index >= 0; index--) {
-				if (mm_social_graph_entry_exists(meeter, index)) {
+                if (mm_social_graph_entry_exists(meeter, index)) {
                     index++;
                     break;
                 }
@@ -467,11 +495,25 @@ void mm_social_meet(monkeymind * meeter, monkeymind * met)
         }
     }
     else {
-        familiar = 1;
+        *familiar = 1;
     }
-    if (index == -1) return;
+    return index;
+}
 
-    mm_social_add(meeter, met, index, familiar);
+/**
+ * @brief two individuals meet
+ * @param meeter The being doing the meeting
+ * @param met The being who was met
+ * @return zero on success
+ */
+n_int mm_social_meet(monkeymind * meeter, monkeymind * met)
+{
+    n_byte familiar;
+    n_int index = mm_social_next_graph_index(meeter, met, &familiar);
+
+    if (index == -1) return -1;
+
+    return mm_social_add(meeter, met, index, familiar);
 }
 
 void mm_social_speak(monkeymind * speaker, monkeymind * listener)
