@@ -404,7 +404,7 @@ static void test_communicate_social_categorisation()
     }
 
     /* The first agent communicates its social categories to the second agent */
-    mm_communicate_social_categorisation(&m0, 1, &m1);
+    mm_communicate_social_categorisation(&m0, 1, &m1, 1);
 
     /* Check that the social categories for the second agent have
        become more similar to those of the first agent */
@@ -439,7 +439,7 @@ static void test_communicate_social_categorisation()
     }
 
     /* The first agent communicates its social categories to the second agent */
-    mm_communicate_social_categorisation(&m0, 1, &m1);
+    mm_communicate_social_categorisation(&m0, 1, &m1, 1);
 
     /* Check that the social categories for the second agent have
        become more similar to those of the first agent */
