@@ -31,14 +31,23 @@
 
 #include "monkeymind_object.h"
 
-/* initialise an object */
+/**
+ * @brief initialise an object
+ * @param obj Object to be initialised
+ */
 void mm_obj_init(mm_object * obj)
 {
     obj->length = 0;
     obj->observations = 0;
 }
 
-/* returns the range of a given object property type */
+/**
+ * @brief returns the range of a given object property type
+ * @param property_type The property type
+ * @param min Returned minimum property value
+ * @param max Returned maximum property value
+ * @return zero on success
+ */
 n_int mm_obj_prop_range(n_uint property_type,
                         n_uint * min, n_uint * max)
 {
@@ -96,8 +105,13 @@ n_int mm_obj_prop_range(n_uint property_type,
 }
 
 
-/* returns the array index of a given property type
-   or -1 if not found */
+/**
+ * @brief returns the array index of a given property type
+ *        or -1 if not found
+ * @param obj Object
+ * @param property_type Type of property
+ * @return Array index for the property type
+ */
 n_int mm_obj_prop_index(mm_object * obj,
                         n_uint property_type)
 {
@@ -147,7 +161,12 @@ n_int mm_obj_prop_index(mm_object * obj,
     return index;
 }
 
-/* adds a property to an object and returns its array index */
+/**
+ * @brief Adds a property to an object and returns its array index
+ * @param obj Object
+ * @param property_type Property type to be added
+ * @param property_value Value of the property
+ */
 n_int mm_obj_prop_add(mm_object * obj,
                       n_uint property_type,
                       n_uint property_value)
@@ -189,7 +208,13 @@ n_int mm_obj_prop_add(mm_object * obj,
     return index;
 }
 
-/* adds a property to an object and returns its array index */
+/**
+ * @brief Adds a property with an ID to an object and returns its array index
+ * @param obj Object
+ * @param property_type Property type
+ * @param property_id
+ * @return Array index of the property within the object
+ */
 n_int mm_obj_prop_add_id(mm_object * obj,
                          n_uint property_type,
                          mm_id * property_id)
@@ -231,13 +256,22 @@ n_int mm_obj_prop_add_id(mm_object * obj,
     return index;
 }
 
-/* copies one object to another */
+/**
+ * @brief copies one object to another
+ * @param src The source object
+ * @param dest The destination object
+ */
 void mm_obj_copy(mm_object *src, mm_object * dest)
 {
     memcpy((void*)dest,(void*)src,sizeof(mm_object));
 }
 
-/* removes a property from an object */
+/**
+ * @brief Removes a property from an object
+ * @param obj Object
+ * @param property_type Property type to be removed
+ * @return zero on success
+ */
 n_int mm_obj_prop_remove(mm_object * obj,
                          n_uint property_type)
 {
@@ -257,7 +291,12 @@ n_int mm_obj_prop_remove(mm_object * obj,
     return 0;
 }
 
-/* returns the value of the given object property */
+/**
+ * @brief Returns the value of the given object property
+ * @param obj Object
+ * @param property_type The property type to obtain the value for
+ * @return Property value
+ */
 n_uint mm_obj_prop_get(mm_object * obj,
                        n_uint property_type)
 {
@@ -266,7 +305,12 @@ n_uint mm_obj_prop_get(mm_object * obj,
     return 0;
 }
 
-/* returns an id for the given property type */
+/**
+ * @brief Returns the id for the given property type
+ * @param obj Object
+ * @param property_type Property type
+ * @param id Returned ID value
+ */
 void mm_obj_prop_get_id(mm_object * obj,
                         n_uint property_type,
                         mm_id * id)
@@ -274,12 +318,18 @@ void mm_obj_prop_get_id(mm_object * obj,
     n_int index = mm_obj_prop_index(obj, property_type);
     if (index > -1) {
         mm_id_copy(&obj->property_id[index], id);
-		return;
+        return;
     }
     mm_id_clear(id);
 }
 
-/* sets an object property value */
+/**
+ * @brief Sets an object property value
+ * @param obj Object
+ * @param property_type Property type
+ * @param property_value Property value
+ * @return zero on success
+ */
 n_int mm_obj_prop_set(mm_object * obj,
                       n_uint property_type,
                       n_uint property_value)
@@ -292,7 +342,13 @@ n_int mm_obj_prop_set(mm_object * obj,
     return -1;
 }
 
-/* sets an object property id */
+/**
+ * @brief sets an object property id
+ * @param obj Object
+ * @param property_type Property type
+ * @param property_id ID to set
+ * @return zero on success
+ */
 n_int mm_obj_prop_set_id(mm_object * obj,
                          n_uint property_type,
                          mm_id * property_id)
@@ -305,7 +361,12 @@ n_int mm_obj_prop_set_id(mm_object * obj,
     return -1;
 }
 
-/* normalise property values into a single byte range */
+/**
+ * @brief Normalise property values into a single byte range
+ *        This is typically used to create vectors to be processed by a SOM
+ * @param obj Object
+ * @param vect The returned array of bytes
+ */
 void mm_obj_to_vect(mm_object * obj,
                     n_byte * vect)
 {
@@ -326,12 +387,22 @@ void mm_obj_to_vect(mm_object * obj,
     }
 }
 
+/**
+ * @brief Returns true of the given object has been initialised
+ * @param obj Object
+ * @return True if the object has been initialised
+ */
 n_int mm_obj_exists(mm_object * obj)
 {
     return (obj->length > 0);
 }
 
-/* compares two objects and returns 0 if they are the same, -1 otherwise */
+/**
+ * @brief compares two objects and returns 0 if they are the same, -1 otherwise
+ * @param obj1 First object
+ * @param obj2 Second object
+ * @return zero if the two objects are the same
+ */
 n_int mm_obj_cmp(mm_object * obj1, mm_object * obj2)
 {
     n_uint i;
@@ -355,14 +426,19 @@ n_int mm_obj_cmp(mm_object * obj1, mm_object * obj2)
     return 0;
 }
 
-/* returns a score giving a rough indication of how
-   similar two objects are */
+/**
+ * @brief Returns a score giving a rough indication of how
+ *        similar two objects are
+ * @param obj1 First object
+ * @param obj2 Second object
+ * @return Similarity score
+ */
 n_int mm_obj_match(mm_object * obj1, mm_object * obj2)
 {
     n_int similarity;
     n_uint i, value, same_types = 0;
     n_uint same_values = 0;
-	mm_id test_id;
+    mm_id test_id;
 
     for (i = 0; i < obj1->length; i++) {
         value = mm_obj_prop_get(obj2, obj1->property_type[i]);
@@ -372,19 +448,27 @@ n_int mm_obj_match(mm_object * obj1, mm_object * obj2)
                 same_values++;
             }
         }
-		if (mm_id_exists(&obj1->property_id[i])) {
-			mm_obj_prop_get_id(obj2, obj1->property_type[i], &test_id);
-			if (mm_id_equals(&test_id,
-							 &obj1->property_id[i])) {
-				same_values++;
-			}
-		}
+        if (mm_id_exists(&obj1->property_id[i])) {
+            mm_obj_prop_get_id(obj2, obj1->property_type[i], &test_id);
+            if (mm_id_equals(&test_id,
+                             &obj1->property_id[i])) {
+                same_values++;
+            }
+        }
     }
     similarity = same_types + (2*same_values);
     return similarity;
 }
 
-/* change the perspective of the meeter to a given being */
+/**
+ * @brief Change the perspective of the meeter to a given being
+ *        For example "I" becomes "you"
+ * @param obj Object
+ * @param from_id ID of the from being
+ * @param from_name Name of the from being
+ * @param to_id ID of the to being
+ * @param to_name Name of the to being
+ */
 void mm_obj_change_perspective(mm_object * obj,
                                mm_id * from_id, n_uint from_name,
                                mm_id * to_id, n_uint to_name)
