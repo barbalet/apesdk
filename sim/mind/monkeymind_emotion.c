@@ -31,8 +31,14 @@
 
 #include "monkeymind_emotion.h"
 
-/* convert a set of neurotransmitter levels into a single value
-   indicating the type of emotion */
+/**
+ * @brief Convert a set of neurotransmitter levels into a single value
+ *        indicating the type of emotion
+ * @param serotonin Serotonin level
+ * @param dopamine Dopamine level
+ * @param noradrenaline Noradrenaline level
+ * @param neurotransmitter_max Maximum neurotransmitter value
+ */
 n_byte mm_neuro_to_emotion(n_uint serotonin,
                            n_uint dopamine,
                            n_uint noradrenaline,
@@ -47,7 +53,14 @@ n_byte mm_neuro_to_emotion(n_uint serotonin,
     return emotion;
 }
 
-/* convert an emotion into a set of neurotransmitter levels */
+/**
+ * @brief Convert an emotion into a set of neurotransmitter levels
+ * @param emotion The type of emotion
+ * @param serotonin Returned serotonin for this emotion
+ * @param dopamine Returned dopamine for this emotion
+ * @param noradrenaline Returned noradrenaline for this emotion
+ * @param neurotransmitter_max Maximum neurotransmitter value
+ */
 void mm_emotion_to_neuro(n_byte emotion,
                          n_uint * serotonin,
                          n_uint * dopamine,

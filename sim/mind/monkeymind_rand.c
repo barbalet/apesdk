@@ -31,7 +31,11 @@
 
 #include "monkeymind_rand.h"
 
-/* Xorshift */
+/**
+ * @brief Xorshift
+ * @param seed Random seed value
+ * @return Random unsigned integer
+ */
 n_uint mm_rand(mm_random_seed * seed)
 {
     n_uint t;
@@ -56,6 +60,11 @@ n_uint mm_rand(mm_random_seed * seed)
     return seed->value[3];
 }
 
+/**
+ * @brief Copy one random seed to another
+ * @param src The source random seed
+ * @param dest The destination random seed
+ */
 void mm_rand_copy(mm_random_seed * src, mm_random_seed * dest)
 {
     memcpy((void*)dest->value,
@@ -63,16 +72,27 @@ void mm_rand_copy(mm_random_seed * src, mm_random_seed * dest)
            4*sizeof(n_uint));
 }
 
-/* This is a special version of rand used to generate ID
-   numbers for objects or agents.
-   Potentially it could differ from the usual
-   random number generator */
+/**
+ * @brief This is a special version of rand used to generate ID
+ *        numbers for objects or agents.
+ *        Potentially it could differ from the usual
+ *        random number generator
+ * @param seed Random number seed
+ * @return Random ID
+ */
 n_uint mm_rand_id(mm_random_seed * seed)
 {
     return mm_rand(seed);
 }
 
-/* seeds the randim number generator with four values */
+/**
+ * @brief Seeds the random number generator with four values
+ * @param seed Random number seed
+ * @param a First seed component
+ * @param b Second seed component
+ * @param c Third seed component
+ * @param d Fourth seed component
+ */
 void mm_rand_init(mm_random_seed * seed,
                   n_uint a, n_uint b, n_uint c, n_uint d)
 {
