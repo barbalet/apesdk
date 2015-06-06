@@ -448,6 +448,7 @@ static n_int mm_social_add(monkeymind * meeter, monkeymind * met,
     else {
         /* subsequent meetings */
         individual->observations++;
+        /* if the limit of observations has been reached then rescale */
         if (meeter->social_graph[index].observations >=
             MM_SOCIAL_MAX_OBSERVATIONS) {
             for (i = 0; i < MM_SIZE_SOCIAL_GRAPH; i++) {
