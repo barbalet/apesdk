@@ -438,7 +438,8 @@ static void test_communicate_social_categorisation()
         }
     }
 
-    /* The first agent communicates its social categories to the second agent */
+    /* The first agent communicates its social categories to the second agent
+       with positive friendliness */
     mm_communicate_social_categorisation(&m0, 1, &m1, 1);
 
     /* Check that the social categories for the second agent have
@@ -461,6 +462,31 @@ static void test_communicate_social_categorisation()
            MM_CATEGORIES);
     assert(ctr < MM_SOCIAL_CATEGORIES_RADIUS*
            MM_SOCIAL_CATEGORIES_RADIUS*4*MM_CATEGORIES);
+
+    /* Set the social categories to some known values for both agents,
+       in the reverse order to previously.  This will check that
+       alterations to categories work in both positive and negative directions. */
+    for (c = 0; c < MM_CATEGORIES; c++) {
+        for (i = 0; i < MM_SOCIAL_CATEGORIES_DIMENSION*
+                 MM_SOCIAL_CATEGORIES_DIMENSION; i++) {
+            m0.category[c].value[i] = 20;
+            m1.category[c].value[i] = 10;
+        }
+    }
+
+    /* The first agent communicates its social categories to the second agent
+       with negative friendliness*/
+    mm_communicate_social_categorisation(&m0, 1, &m1, 0);
+
+    /* Check that the social categories for the second agent have
+       become more similar to those of the first agent */
+    for (c = 0; c < MM_CATEGORIES; c++) {
+        for (i = 0; i < MM_SOCIAL_CATEGORIES_DIMENSION*
+                 MM_SOCIAL_CATEGORIES_DIMENSION; i++) {
+            /* Should have decreased by one or two */
+            assert(m1.category[c].value[i] >= 8);
+        }
+    }
 
     printf("Ok\n");
 }
@@ -785,8 +811,8 @@ static void test_confabulation_with_episodic()
         mm_object scene;
         mm_obj_init(&scene);
         for (j = 0; j < 8 + (i%20); j++) {
-			mm_obj_prop_add(&scene, (j%6)+i, (j%7));
-		}
+            mm_obj_prop_add(&scene, (j%6)+i, (j%7));
+        }
         mm_episodic_add(&events, &scene);
         if (mm_episodic_max(&events) != i+1) {
             printf("\n%d mm_episodic_max(&events) %d\n",
@@ -805,19 +831,19 @@ static void test_confabulation_with_episodic()
 
     /* test episodic matching */
     n_int target_similarity[] = {
-		6,6,4,4,6,6,6,8,8,10
+        6,6,4,4,6,6,6,8,8,10
     };
     n_int target_offset[] = {
-		0,1,0,0,0,0,1,2,3,4
+        0,1,0,0,0,0,1,2,3,4
     };
     for (i = 0; i < 10; i++) {
         /* how similar are the events to the tale ? */
         similarity = mm_tale_match_events(&narratives.tale[i], &events, &offset);
 
-		/*printf("%d,", similarity);*/
-		/*printf("%d,", offset);*/
+        /*printf("%d,", similarity);*/
+        /*printf("%d,", offset);*/
 
-		if ((similarity != target_similarity[i]) ||
+        if ((similarity != target_similarity[i]) ||
             (offset != target_offset[i])) {
             printf("%d similarity = %d  %d\n",
                    (int)i, (int)similarity, (int)offset);
