@@ -54,6 +54,7 @@ n_int mm_social_meet(monkeymind * meeter, monkeymind * met);
 void mm_social_speak(monkeymind * speaker, monkeymind * listener);
 void mm_communicate_social_categorisation(monkeymind * mind,
                                           n_int index,
-                                          monkeymind * other);
+                                          monkeymind * other,
+                                          n_byte is_friendly);
 
 #endif

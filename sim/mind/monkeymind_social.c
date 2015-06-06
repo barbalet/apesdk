@@ -232,14 +232,28 @@ static void mm_social_category_update(n_int * categories,
     }
 }
 
-/* align the som categories of another agent with those of the current agent */
+/**
+ * @brief Align the som categories of another agent with those of the current agent
+ *        Friendly individuals tend to align their categories, unfriendly ones
+ *        dissociate their categories
+ * @param mind Monkeymind object
+ * @param social_x X coordinate within the social space of the other mind
+ * @param social_y Y coordinate within the social space of the other mind
+ * @param other Other monkeymind object
+ * @param is_friendly Either 1 if the two minds are friendly, or 0 otherwise
+ */
 static void mm_align_categories(monkeymind * mind,
                                 n_uint social_x,
                                 n_uint social_y,
-                                monkeymind * other)
+                                monkeymind * other,
+                                n_byte is_friendly)
 {
     n_int max_radius, inner_radius, i, x, y;
     n_int r, n, dx, dy, dcat;
+
+    /* positive or negative disposition */
+    n_int disposition = 1;
+    if (is_friendly <= 0) disposition = -1;
 
     max_radius =
         MM_SOCIAL_CATEGORIES_RADIUS*MM_SOCIAL_CATEGORIES_RADIUS;
@@ -264,28 +278,30 @@ static void mm_align_categories(monkeymind * mind,
                 r = dx*dx + dy*dy;
                 if (r > max_radius) continue;
 
-                /* location within the map */
+                /* location within the social categorisation map */
                 n = y*MM_SOCIAL_CATEGORIES_DIMENSION + x;
 
+                /* difference in categories */
                 dcat = mind->category[i].value[n] -
                     other->category[i].value[n];
 
+                /* categories are already within a similarity tollerance */
                 if ((dcat < 2) && (dcat > -2)) continue;
 
                 if (r < inner_radius) {
                     if (dcat > 0) {
-                        other->category[i].value[n] += 2;
+                        other->category[i].value[n] += 2*disposition;
                     }
                     else {
-                        other->category[i].value[n] -= 2;
+                        other->category[i].value[n] -= 2*disposition;
                     }
                 }
                 else {
                     if (dcat > 0) {
-                        other->category[i].value[n]++;
+                        other->category[i].value[n] += disposition;
                     }
                     else {
-                        other->category[i].value[n]--;
+                        other->category[i].value[n] -= disposition;
                     }
                 }
             }
@@ -293,24 +309,35 @@ static void mm_align_categories(monkeymind * mind,
     }
 }
 
-/* communicates the social categorisation of a given social
-   graph entry to another individual */
+/**
+ * @brief Communicates the social categorisation of a given social
+ *        graph entry to another individual
+ * @param mind Monkeymind object
+ * @param index Social graph array index of the other within the mind
+ * @param other Another monkeymind object
+ * @param is_friendly Either 1 if the two minds are friendly, or 0 otherwise
+ */
 void mm_communicate_social_categorisation(monkeymind * mind,
                                           n_int index,
-                                          monkeymind * other)
+                                          monkeymind * other,
+                                          n_byte is_friendly)
 {
     mm_object * individual;
     n_uint social_x, social_y;
     n_byte normalised_properties[MM_PROPERTIES];
 
+    /* if this has already been communicated then do nothing */
     if (!mm_social_graph_entry_exists(mind, index)) return;
 
     individual = &mind->social_graph[index];
 
+    /* get the coordinates of the other individual within the
+       topological social categorisation space */
     social_x = mm_obj_prop_get(individual, MM_PROPERTY_SOCIAL_X);
     social_y = mm_obj_prop_get(individual, MM_PROPERTY_SOCIAL_Y);
 
-    /* normalise property values into a single byte range */
+    /* normalise property values into a single byte range, so that
+       they can be efficiently used by the SOM */
     mm_obj_to_vect(individual, normalised_properties);
 
     /* adjust weights within the social categorisation SOM
@@ -319,8 +346,9 @@ void mm_communicate_social_categorisation(monkeymind * mind,
                  normalised_properties,
                  social_x, social_y);
 
-    /* align the categories */
-    mm_align_categories(mind, social_x, social_y, other);
+    /* align the categories which are associalted with the
+       topological social space */
+    mm_align_categories(mind, social_x, social_y, other, is_friendly);
 }
 
 /**
