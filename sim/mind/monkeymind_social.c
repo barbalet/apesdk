@@ -120,22 +120,28 @@ static void mm_social_evaluate(monkeymind * meeter,
                     MM_PROPERTY_ATTRACTION, attraction);
 }
 
-/* get the existing categorisation at this location */
-static n_int mm_social_get_category(n_int * categories,
+/**
+ * @brief get the existing categorisation at this location
+ * @param categories Array storing social categorisations
+ * @param social_x X coordinate in the topological social categorisation space
+ * @param social_y Y coordinate in the topological social categorisation space
+ * @return Social category value
+ */
+static n_int mm_social_get_category(n_int categories[],
                                     n_uint social_x,
                                     n_uint social_y)
 {
     n_uint n = social_y*MM_SOCIAL_CATEGORIES_DIMENSION + social_x;
-    if (categories[n] > 0) return 1;
-    if (categories[n] < 0) return -1;
-    return 0;
+    if (categories[n] > 0) return SOCIAL_POSITIVE;
+    if (categories[n] < 0) return SOCIAL_NEGATIVE;
+    return SOCIAL_MEH;
 }
 
 /* Rebalances categories such that positive and negative values
    have an average of zero.
    This helps to avoid situtaions such as liking everyone
    or hating everyone */
-static void mm_social_category_rebalance(n_int * categories)
+static void mm_social_category_rebalance(n_int categories[])
 {
     n_uint i;
     n_int average = 0, hits = 0;
