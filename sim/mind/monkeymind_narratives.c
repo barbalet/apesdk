@@ -31,11 +31,22 @@
 
 #include "monkeymind_narratives.h"
 
+/**
+ * @brief Initialise a set of narratives
+ * @param nattatives Narratives object
+ */
 void mm_narratives_init(mm_narratives * narratives)
 {
     narratives->length = 0;
 }
 
+/**
+ * @brief Copy a tale into a set of narratives
+ * @param narratices Narratives object
+ * @param index Array index within the set of narratives to which the tale
+ *        will be copied
+ * @param tale The tale to be copied
+ */
 void mm_narratives_copy(mm_narratives * narratives,
                         n_uint index,
                         mm_tale * tale)
@@ -45,8 +56,15 @@ void mm_narratives_copy(mm_narratives * narratives,
            sizeof(mm_tale));
 }
 
-/* inserts a narrative into the array of narratives at the given
-   array index */
+/**
+ * @brief Inserts a narrative into the array of narratives at the given
+ *        array index
+ * @param narratives Narratives object
+ * @param index Array index within the set of narratives to which the tale
+ *        will be copied
+ * @param tale The tale to be copied
+ * @return zero on success
+ */
 n_int mm_narratives_insert(mm_narratives * narratives,
                            n_uint index,
                            mm_tale * tale)
@@ -63,7 +81,12 @@ n_int mm_narratives_insert(mm_narratives * narratives,
     return 0;
 }
 
-/* remove a tale at the given array index */
+/**
+ * @brief Remove a tale at the given array index
+ * @param narratives Narratives object
+ * @param index Array index of the tale to be removed
+ * @return zero on success
+ */
 n_int mm_narratives_remove(mm_narratives * narratives,
                            n_uint index)
 {
@@ -79,14 +102,25 @@ n_int mm_narratives_remove(mm_narratives * narratives,
     return 0;
 }
 
-/* adds a tale to the array */
+/**
+ * @brief Adds a tale to the array
+ * @param narratives Narratives object
+ * @param tale The tale to be added
+ * @return zero on success
+ */
 n_int mm_narratives_add(mm_narratives * narratives,
                         mm_tale * tale)
 {
     return mm_narratives_insert(narratives, narratives->length, tale);
 }
 
-/* returns the array index of the narrative with the given id */
+/**
+ * @brief Returns the array index of the tale with the given ID
+ * @param narratives Narratives object to be searched
+ * @param id The ID to search for
+ * @return Array index of the tale within the narratives object,
+ *         or -1 if not found
+ */
 n_int mm_narratives_get(mm_narratives * narratives, mm_id * id)
 {
     n_uint i;
@@ -97,7 +131,11 @@ n_int mm_narratives_get(mm_narratives * narratives, mm_id * id)
     return -1;
 }
 
-/* returns the array index of the least heard tale */
+/**
+ * @brief Returns the array index of the least heard tale
+ * @param narratives Narratives object
+ * @return Array index of the least heard tale
+ */
 n_int mm_narratives_least_heard(mm_narratives * narratives)
 {
     n_int i, index = 0;
@@ -113,8 +151,15 @@ n_int mm_narratives_least_heard(mm_narratives * narratives)
     return index;
 }
 
-/* Returns the array index of the closest matching tale.
-   This acts as a sort of frame matching */
+/**
+ * @brief Returns the array index of the closest matching tale.
+ *        This acts as a sort of frame matching
+ * @param narratives Narratives object
+ * @param tale The reference/tamplate tale to match against
+ * @param min_similarity The minimum similarity to the reference tale
+ * @param offset Returned offset of the best matched tale
+ * @return Array index of the closest matching tale
+ */
 n_int mm_narratives_match_tale(mm_narratives * narratives,
                                mm_tale * tale,
                                n_int min_similarity,
@@ -135,9 +180,18 @@ n_int mm_narratives_match_tale(mm_narratives * narratives,
     return winner;
 }
 
-/* Returns the narratives array index of the closest matching tale
-   to the given episodic memory.
-   This acts as a sort of frame matching */
+/**
+ * @brief Returns the narratives array index of the closest matching tale
+ *        to the given episodic memory.
+ *        A tale and episodic memory are a similar thing - i.e. a series
+ *        of events.
+ *        This acts as a sort of frame matching
+ * @param narratives Narratives object
+ * @param events Reference episodic events
+ * @param min_similarity The minimum similarity to the reference tale
+ * @param offset Returned offset of the best matched tale
+ * @return Array index of the closest matching tale
+ */
 n_int mm_narratives_match_episodic(mm_narratives * narratives,
                                    mm_episodic * events,
                                    n_int min_similarity,
@@ -158,11 +212,28 @@ n_int mm_narratives_match_episodic(mm_narratives * narratives,
     return winner;
 }
 
+/**
+ * @brief Try to predict future episodic events by matching against a set
+ *        of tales contained within a narratives object.
+ *        This is like trying to predict the future based upon historical
+ *        (or mythological) precedents
+ * @param narratives Narratives object
+ * @param events Episodic memory object
+ * @param no_of_past_events The number of episodic past events to use as
+ *        a reference for matching
+ * @param max_results The maximum number of candidate tales to return
+ * @param results Array storing candidate future events
+ *        The format is:
+ *            similarity score,
+ *            tale array index within the narratives object,
+ *            event index within the tale
+ * @return The number of candidate matches
+ */
 n_int mm_narratives_predict_events(mm_narratives * narratives,
                                    mm_episodic * events,
                                    n_uint no_of_past_events,
                                    n_uint max_results,
-                                   n_uint * results)
+                                   n_uint results[])
 {
     n_uint i, j, k, off;
     mm_tale * tale;

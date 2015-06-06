@@ -2,6 +2,8 @@
 
  Monkeymind - an experimental cogitive architecture
 
+ A catalogue of possible motives for narrative synthesis
+
  =============================================================
 
  Copyright 2013-2015 Bob Mottram
@@ -62,6 +64,11 @@ const n_byte motives[] = {
     MOTIVE_EXPOSITION, MOTIVE_INFORMATION
 };
 
+/**
+ * @brief For a given motive return its general category
+ * @param motive The motive identifier
+ * @return General motive category
+ */
 n_byte mm_get_motive_category(n_byte motive)
 {
     if (motive < MOTIVES) {

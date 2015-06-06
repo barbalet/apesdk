@@ -2,6 +2,10 @@
 
  Monkeymind - an experimental cogitive architecture
 
+ IDs within monkeymind are strings of random numbers -
+ just like a hash value. This enables the system to scale up to
+ many minds while avoiding collisions
+
  =============================================================
 
  Copyright 2013-2015 Bob Mottram
@@ -31,7 +35,11 @@
 
 #include "monkeymind_id.h"
 
-/* create an id */
+/**
+ * @brief Creates an id
+ * @param seed Random number generator seed
+ * @param id The returned ID
+ */
 void mm_id_create(mm_random_seed * seed, mm_id * id)
 {
     n_uint i;
@@ -41,7 +49,12 @@ void mm_id_create(mm_random_seed * seed, mm_id * id)
     }
 }
 
-/* are two ids equal ? */
+/**
+ * @brief Are two ids equal ?
+ * @param id1 The first ID
+ * @param id2 The second ID
+ * @return non-zero value if the two IDs are the same
+ */
 n_int mm_id_equals(mm_id * id1, mm_id * id2)
 {
     n_uint i;
@@ -54,7 +67,11 @@ n_int mm_id_equals(mm_id * id1, mm_id * id2)
     return 1;
 }
 
-/* copy an id */
+/**
+ * @brief Copy an ID
+ * @param source Source ID
+ * @param destination Destination ID
+ */
 void mm_id_copy(mm_id * source, mm_id * destination)
 {
     n_uint i;
@@ -64,25 +81,43 @@ void mm_id_copy(mm_id * source, mm_id * destination)
     }
 }
 
-/* sets the id to a given value */
+/**
+ * @brief Sets the ID to a given value
+ *        Note that this is rather crude and only sets the first value
+ * @param id The ID to be set
+ * @param value The value to set the ID to
+ */
 void mm_id_set(mm_id * id, n_uint value)
 {
     memset((void*)id->value,'\0',MM_ID_LENGTH*sizeof(n_uint));
     id->value[0] = value;
 }
 
-/* returns a given number from the id */
+/**
+ * @brief Returns a given number from the ID
+ * @param id The ID
+ * @param index Array index within the ID
+ * @return Value from the ID
+ */
 n_uint mm_id_get(mm_id * id, n_uint index)
 {
     return id->value[index];
 }
 
-/* returns true if the id is non-zero */
+/**
+ * @brief Returns true if the id is non-zero
+ * @param id ID to be checked
+ * @return True if the ID is non-zero
+ */
 n_int mm_id_exists(mm_id * id)
 {
     return (mm_id_get(id, 0) > 0);
 }
 
+/**
+ * @brief Sets an ID to zero
+ * @param id The ID to be cleared
+ */
 void mm_id_clear(mm_id * id)
 {
     n_uint i;
