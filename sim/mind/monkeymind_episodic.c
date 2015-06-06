@@ -12,7 +12,7 @@
 
  =============================================================
 
- Copyright 2013-2014 Bob Mottram
+ Copyright 2013-2015 Bob Mottram
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
