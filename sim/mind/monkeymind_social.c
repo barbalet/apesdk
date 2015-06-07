@@ -396,9 +396,9 @@ static n_int mm_social_categorisation(monkeymind * mind,
                                       n_int index)
 {
     mm_object * individual;
-    n_int i, incr=0, fof_increment = 0, attraction_increment = 0;
+    n_int i, incr;
     n_byte normalised_properties[MM_PROPERTIES];
-    n_uint fof, attraction, social_x=0, social_y=0;
+    n_uint property_value, social_x=0, social_y=0;
     n_uint property=0, category=0;
 
     if (index >= MM_SIZE_SOCIAL_GRAPH) return -1;
@@ -409,24 +409,6 @@ static n_int mm_social_categorisation(monkeymind * mind,
 
     /* normalise property values into a single byte range */
     mm_obj_to_vect(individual, normalised_properties);
-
-    /* friendly or unfriendly? */
-    fof = mm_obj_prop_get(individual, MM_PROPERTY_FRIEND_OR_FOE);
-    if (fof > MM_NEUTRAL) {
-        fof_increment = 1;
-    }
-    if (fof < MM_NEUTRAL) {
-        fof_increment = -1;
-    }
-
-    /* attractive or unattractive? */
-    attraction = mm_obj_prop_get(individual, MM_PROPERTY_ATTRACTION);
-    if (attraction > MM_NEUTRAL) {
-        attraction_increment = 1;
-    }
-    if (attraction < MM_NEUTRAL) {
-        attraction_increment = -1;
-    }
 
     /* find the peak response within the SOM,
        corresponding to the minimum Euclidean distance */
@@ -448,16 +430,24 @@ static n_int mm_social_categorisation(monkeymind * mind,
         case 0: {
             property = MM_PROPERTY_FRIEND_OR_FOE;
             category = MM_CATEGORY_FOF;
-            incr = fof_increment;
             break;
         }
         case 1: {
             property = MM_PROPERTY_ATTRACTION;
             category = MM_CATEGORY_ATTRACTION;
-            incr = attraction_increment;
             break;
         }
         }
+
+        property_value = mm_obj_prop_get(individual, property);
+        incr = 0;
+        if (property_value > MM_NEUTRAL) {
+            incr = 1;
+        }
+        if (property_value < MM_NEUTRAL) {
+            incr = -1;
+        }
+
         mm_obj_prop_set(individual, property,
                         mm_social_get_category(mind->category[category].value,
                                                social_x, social_y));
