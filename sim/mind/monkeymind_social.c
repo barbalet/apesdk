@@ -396,9 +396,10 @@ static n_int mm_social_categorisation(monkeymind * mind,
                                       n_int index)
 {
     mm_object * individual;
-    n_int fof_increment = 0, attraction_increment = 0;
+    n_int i, incr=0, fof_increment = 0, attraction_increment = 0;
     n_byte normalised_properties[MM_PROPERTIES];
     n_uint fof, attraction, social_x=0, social_y=0;
+    n_uint property=0, category=0;
 
     if (index >= MM_SIZE_SOCIAL_GRAPH) return -1;
 
@@ -442,25 +443,28 @@ static n_int mm_social_categorisation(monkeymind * mind,
                  normalised_properties,
                  social_x, social_y);
 
-    /* alter the friend of foe status depending upon the existing
-       classification */
-    mm_obj_prop_set(individual, MM_PROPERTY_FRIEND_OR_FOE,
-                    mm_social_get_category(mind->category[MM_CATEGORY_FOF].value,
-                                           social_x, social_y));
+    for (i = 0; i < 2; i++) {
+        switch(i) {
+        case 0: {
+            property = MM_PROPERTY_FRIEND_OR_FOE;
+            category = MM_CATEGORY_FOF;
+            incr = fof_increment;
+            break;
+        }
+        case 1: {
+            property = MM_PROPERTY_ATTRACTION;
+            category = MM_CATEGORY_ATTRACTION;
+            incr = attraction_increment;
+            break;
+        }
+        }
+        mm_obj_prop_set(individual, property,
+                        mm_social_get_category(mind->category[category].value,
+                                               social_x, social_y));
 
-    /* alter the friend or foe values within the classifier */
-    mm_social_category_update(mind->category[MM_CATEGORY_FOF].value,
-                              social_x, social_y, fof_increment);
-
-    /* alter the attraction status depending upon the existing
-       classification */
-    mm_obj_prop_set(individual, MM_PROPERTY_ATTRACTION,
-                    mm_social_get_category(mind->category[MM_CATEGORY_ATTRACTION].value,
-                                           social_x, social_y));
-
-    /* alter the attraction values within the classifier */
-    mm_social_category_update(mind->category[MM_CATEGORY_ATTRACTION].value,
-                              social_x, social_y, attraction_increment);
+        mm_social_category_update(mind->category[category].value,
+                                  social_x, social_y, incr);
+    }
 
     return 0;
 }
