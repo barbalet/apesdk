@@ -31,6 +31,12 @@
 
 #include "monkeymind_social.h"
 
+/**
+ * @brief Returns true if a social graph entry exists at the given index
+ * @param mind Monkeymind object
+ * @param index Social graph array index
+ * @return True if a social graph entry exists
+ */
 n_int mm_social_graph_entry_exists(monkeymind *mind, n_int index)
 {
     mm_id meeter_id, met_id;
@@ -39,7 +45,7 @@ n_int mm_social_graph_entry_exists(monkeymind *mind, n_int index)
                        MM_PROPERTY_MEETER, &meeter_id);
 
     if (!mm_id_exists(&meeter_id)) {
-        return 0;
+        return (1 == 0);
     }
 
     mm_obj_prop_get_id(&mind->social_graph[index],
@@ -48,8 +54,13 @@ n_int mm_social_graph_entry_exists(monkeymind *mind, n_int index)
     return mm_id_exists(&met_id);
 }
 
-/* returns the social graph array index of the individual having the
-   given id */
+/**
+ * @brief Returns the social graph array index of the individual having the
+ *        given id
+ * @param mind Monkeymind object
+ * @param met_id ID of the individual to search for within the social graph
+ * @return Social graph array index, or -1 if not found
+ */
 n_int mm_social_index_from_id(monkeymind * mind, mm_id * met_id)
 {
     n_int i;
@@ -67,8 +78,13 @@ n_int mm_social_index_from_id(monkeymind * mind, mm_id * met_id)
     return -1;
 }
 
-/* returns the social graph array index of the individual having the
-   given name */
+/**
+ * @brief Returns the social graph array index of the individual having the
+ *        given name
+ * @param mind Monkeymind object
+ * @param met_name The name of the individual to search for
+ * @return Array index within the social graph, or -1 if not found
+ */
 n_int mm_social_index_from_name(monkeymind * mind, n_uint met_name)
 {
     n_int i;
@@ -84,7 +100,11 @@ n_int mm_social_index_from_name(monkeymind * mind, n_uint met_name)
     return -1;
 }
 
-/* returns the social graph array index of a forgettable individual */
+/**
+ * @brief Returns the social graph array index of a forgettable individual
+ * @param mind Monkeymind object
+ * @return Social graph array index
+ */
 static n_int mm_social_forget(monkeymind * mind)
 {
     n_int i, index = -1;
@@ -102,7 +122,12 @@ static n_int mm_social_forget(monkeymind * mind)
     return index;
 }
 
-/* the prejudice function */
+/**
+ * @brief The prejudice function
+ * @param meeter The individual doing the meeting
+ * @param met The individual being met
+ * @param social_graph_entry Social graph entry for the met individual
+ */
 static void mm_social_evaluate(monkeymind * meeter,
                                monkeymind * met,
                                mm_object * social_graph_entry)
@@ -137,10 +162,14 @@ static n_int mm_social_get_category(n_int categories[],
     return SOCIAL_MEH;
 }
 
-/* Rebalances categories such that positive and negative values
-   have an average of zero.
-   This helps to avoid situtaions such as liking everyone
-   or hating everyone */
+/**
+ * @brief Rebalances categories such that positive and negative values
+ *        have an average of zero.
+ *        This helps to avoid situtaions such as liking everyone
+ *        or hating everyone
+ * @param categories A 2D array of category values corresponding to the
+ *        topological social generalisations map
+ */
 static void mm_social_category_rebalance(n_int categories[])
 {
     n_uint i;
@@ -168,8 +197,14 @@ static void mm_social_category_rebalance(n_int categories[])
     }
 }
 
-/* update categories using the given increment */
-static void mm_social_category_update(n_int * categories,
+/**
+ * @brief Update categories using the given increment
+ * @param categories 2D map of social categories/dispositions corresponding to a SOM
+ * @param social_x X coordinate in social categorisation space
+ * @param social_y Y coordinate in social categorisation space
+ * @param increment Increment to be applied
+ */
+static void mm_social_category_update(n_int categories[],
                                       n_uint social_x,
                                       n_uint social_y,
                                       n_int increment)
@@ -545,7 +580,12 @@ n_int mm_social_meet(monkeymind * meeter, monkeymind * met)
     return mm_social_add(meeter, met, index, familiar);
 }
 
+/**
+ * @brief
+ * @param speaker
+ * @param listener
+ */
 void mm_social_speak(monkeymind * speaker, monkeymind * listener)
 {
-
+    /* TODO */
 }

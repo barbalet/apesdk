@@ -71,9 +71,9 @@ n_int mm_tale_match(mm_tale * tale1, mm_tale * tale2, n_int * offset);
 n_int mm_tale_match_events(mm_tale * tale, mm_episodic * events, n_int * offset);
 void mm_tale_confabulate(mm_tale * source, mm_tale * destination,
                          n_uint percent, mm_random_seed * seed);
-void mm_tale_change_perspective(mm_tale * tale,
-                                mm_id * from_id, n_uint from_name,
-                                mm_id * to_id, n_uint to_name);
+n_uint mm_tale_change_perspective(mm_tale * tale,
+                                  mm_id * from_id, n_uint from_name,
+                                  mm_id * to_id, n_uint to_name);
 void mm_episodic_confabulate(mm_episodic * events, mm_tale * tale,
                              n_uint percent, mm_random_seed * seed);
 

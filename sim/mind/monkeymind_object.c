@@ -468,22 +468,26 @@ n_int mm_obj_match(mm_object * obj1, mm_object * obj2)
  * @param from_name Name of the from being
  * @param to_id ID of the to being
  * @param to_name Name of the to being
+ * @return The number of changes
  */
-void mm_obj_change_perspective(mm_object * obj,
-                               mm_id * from_id, n_uint from_name,
-                               mm_id * to_id, n_uint to_name)
+n_uint mm_obj_change_perspective(mm_object * obj,
+                                 mm_id * from_id, n_uint from_name,
+                                 mm_id * to_id, n_uint to_name)
 {
-    n_uint i;
+    n_uint i, changes = 0;
 
     for (i = 0; i < obj->length; i++) {
         if (((obj->property_type[i] == MM_PROPERTY_MEETER) ||
              (obj->property_type[i] == MM_PROPERTY_MET)) &&
             (mm_id_equals(&obj->property_id[i], from_id))) {
             mm_id_copy(to_id, &obj->property_id[i]);
+            changes++;
         }
         if ((obj->property_type[i] == MM_PROPERTY_MEETER_NAME) &&
             (obj->property_value[i] == from_name)) {
             obj->property_value[i] = to_name;
+            changes++;
         }
     }
+    return changes;
 }
