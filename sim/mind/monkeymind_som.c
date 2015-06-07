@@ -31,6 +31,14 @@
 
 #include "monkeymind_som.h"
 
+/**
+ * @brief Initialise a SOM
+ * @param s SOM object
+ * @param dimension Size of the map
+ * @param vector_length The number of elements in the input vector
+ * @param learning_radius Radius within which weight adjustments occur
+ * @param seed Random number generator seed
+ */
 void mm_som_init(mm_som * s,
                  n_uint dimension,
                  n_uint vector_length,
@@ -56,8 +64,15 @@ void mm_som_init(mm_som * s,
     }
 }
 
+/**
+ * @brief Feed forward and record the coordinates of the best match
+ * @param s SOM object
+ * @param vector The input vector
+ * @param x Returned x coordinate of the best match
+ * @param y Returned y coordinate of the best match
+ */
 void mm_som_update(mm_som * s,
-                   n_byte * vector,
+                   n_byte vector[],
                    n_uint * x, n_uint * y)
 {
     n_uint xx, yy, i, ctr = 0, n = 0;
@@ -86,9 +101,15 @@ void mm_som_update(mm_som * s,
     }
 }
 
-/* adjust the weights depending upon the location of the peak response */
+/**
+ * @brief Adjust the weights depending upon the location of the peak response
+ * @param s SOM object
+ * @param vector Input vector
+ * @param x X coordinate of the best match
+ * @param y Y coordinate of the best match
+ */
 void mm_som_learn(mm_som * s,
-                  n_byte * vector,
+                  n_byte vector[],
                   n_uint x, n_uint y)
 {
     n_int xx, yy, dx, dy, max_radius, inner_radius, r, n, i;

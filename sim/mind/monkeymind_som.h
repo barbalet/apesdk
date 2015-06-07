@@ -60,11 +60,11 @@ void mm_som_init(mm_som * s,
                  mm_random_seed * seed);
 
 void mm_som_update(mm_som * s,
-                   n_byte * vector,
+                   n_byte vector[],
                    n_uint * x, n_uint * y);
 
 void mm_som_learn(mm_som * s,
-                  n_byte * vector,
+                  n_byte vector[],
                   n_uint x, n_uint y);
 
 #endif
