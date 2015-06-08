@@ -285,6 +285,8 @@ static void mm_align_categories(monkeymind * mind,
 {
     n_int max_radius, inner_radius, i, x, y;
     n_int r, n, dx, dy, dcat;
+    n_byte normalise;
+    const n_int max_response = 256;
 
     /* positive or negative disposition */
     n_int disposition = 1;
@@ -296,6 +298,7 @@ static void mm_align_categories(monkeymind * mind,
         MM_SOCIAL_CATEGORIES_RADIUS*MM_SOCIAL_CATEGORIES_RADIUS/4;
 
     for (i = 0; i < MM_CATEGORIES; i++) {
+        normalise = 0;
         for (x = (n_int)social_x - MM_SOCIAL_CATEGORIES_RADIUS;
              x <= (n_int)social_x + MM_SOCIAL_CATEGORIES_RADIUS;
              x++) {
@@ -339,6 +342,23 @@ static void mm_align_categories(monkeymind * mind,
                         other->category[i].value[n] -= disposition;
                     }
                 }
+                /* range checking */
+                if ((other->category[i].value[n] > max_response) ||
+                    (other->category[i].value[n] < -max_response)) {
+                    normalise = 1;
+                }
+            }
+        }
+        
+        /* rebalance */
+        /*mm_social_category_rebalance(other->category[i].value);*/
+
+        /* normalise if necessary to keep values in range */
+        if (normalise == 1) {
+            for (n = 0;
+                 n < MM_SOCIAL_CATEGORIES_DIMENSION*
+                     MM_SOCIAL_CATEGORIES_DIMENSION; n++) {
+                other->category[i].value[n] /= 2;
             }
         }
     }
