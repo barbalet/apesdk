@@ -41,15 +41,13 @@
 
 @implementation Noble_ApeTests
 
+//#ifdef EXPLICIT_DEBUG
 
+#include "../../sim/noble/noble.h"
+#include "../../sim/entity/entity.h"
+#include "../../sim/universe/universe.h"
 
-#ifdef EXPLICIT_DEBUG
-
-#include "../noble/noble.h"
-#include "../entity/entity.h"
-#include "../universe/universe.h"
-
-#include "../noble/shared.h"
+#include "../../sim/noble/shared.h"
 
 noble_simulation * value = 0L;
 noble_being      * being = 0L;
@@ -72,26 +70,20 @@ noble_being      * being = 0L;
     [super tearDown];
 }
 
-- (void)testCheckInitialTime
+- (void) testTime
 {
-    XCTAssertTrue(value->land->time == 0, @"Time is not initially zero");
+    XCTAssertTrue(land_time() == 0, @"Time is not initially zero");
 }
 
 - (void)testCheckInitialDate
 {
-    XCTAssertTrue(value->land->date == AGE_OF_MATURITY, @"Days is not initially AGE_OF_MATURITY (%ld)", (n_int)AGE_OF_MATURITY);
+    XCTAssertTrue(land_date() == AGE_OF_MATURITY, @"Days is not initially AGE_OF_MATURITY (%ld)", (n_int)AGE_OF_MATURITY);
 }
 
 - (void)testMapCheckSum
 {
-    n_uint hash = math_hash((n_byte *)value->land->topology, MAP_AREA);
+    n_uint hash = math_hash((n_byte *)land_topology(), MAP_AREA);
     XCTAssertTrue(hash == 0x3af2658629d5a81c, @"Hash doesn't comply with prior map hashes (%lx)", hash);
-}
-
-- (void)testWeatherCheckSum
-{
-    n_uint hash = math_hash((n_byte *)value->land->atmosphere, (MAP_AREA*sizeof(n_c_int)/2));
-    XCTAssertTrue(hash == 0x6f8fde121eec96e3, @"Hash doesn't comply with prior weather hashes (%lx)", hash);
 }
 
 - (void)testBeingCheckSum
@@ -188,7 +180,7 @@ noble_being      * being = 0L;
     XCTAssertTrue(hash == 0x47e7ab44927a7362, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
 }
 
-#endif
+//#endif
 
 
 @end

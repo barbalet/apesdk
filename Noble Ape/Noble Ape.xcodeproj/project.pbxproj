@@ -14,23 +14,17 @@
 		5AD6CADB1B27598400230534 /* body.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB41B27598300230534 /* body.c */; };
 		5AD6CADC1B27598400230534 /* brain.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB51B27598300230534 /* brain.c */; };
 		5AD6CADD1B27598400230534 /* drives.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB61B27598300230534 /* drives.c */; };
-		5AD6CADE1B27598400230534 /* entity_internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB71B27598300230534 /* entity_internal.h */; };
-		5AD6CADF1B27598400230534 /* entity.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB81B27598300230534 /* entity.h */; };
 		5AD6CAE01B27598400230534 /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB91B27598300230534 /* episodic.c */; };
 		5AD6CAE11B27598400230534 /* food.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABA1B27598300230534 /* food.c */; };
 		5AD6CAE21B27598400230534 /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABB1B27598300230534 /* social.c */; };
 		5AD6CAE31B27598400230534 /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABC1B27598300230534 /* speak.c */; };
 		5AD6CAE41B27598400230534 /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABD1B27598300230534 /* draw.c */; };
-		5AD6CAE51B27598400230534 /* gui.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABE1B27598300230534 /* gui.h */; };
 		5AD6CAE61B27598400230534 /* message.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABF1B27598300230534 /* message.c */; };
 		5AD6CAE71B27598400230534 /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC01B27598300230534 /* shared.c */; };
-		5AD6CAE81B27598400230534 /* AppDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC11B27598300230534 /* AppDelegate.h */; };
 		5AD6CAE91B27598400230534 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC21B27598300230534 /* AppDelegate.m */; };
 		5AD6CAEA1B27598400230534 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC31B27598300230534 /* main.m */; };
-		5AD6CAEB1B27598400230534 /* NobleMacView.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC41B27598300230534 /* NobleMacView.h */; };
 		5AD6CAEC1B27598400230534 /* NobleMacView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC51B27598300230534 /* NobleMacView.m */; };
 		5AD6CAEE1B27598400230534 /* nobleape.xib in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC71B27598400230534 /* nobleape.xib */; };
-		5AD6CAEF1B27598400230534 /* NobleSimulationView.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC81B27598400230534 /* NobleSimulationView.h */; };
 		5AD6CAF01B27598400230534 /* NobleSimulationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC91B27598400230534 /* NobleSimulationView.m */; };
 		5AD6CAF11B27598400230534 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACA1B27598400230534 /* audio.c */; };
 		5AD6CAF21B27598400230534 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACB1B27598400230534 /* compress.c */; };
@@ -40,14 +34,10 @@
 		5AD6CAF61B27598400230534 /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACF1B27598400230534 /* land.c */; };
 		5AD6CAF71B27598400230534 /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD01B27598400230534 /* math.c */; };
 		5AD6CAF81B27598400230534 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD11B27598400230534 /* network.c */; };
-		5AD6CAF91B27598400230534 /* noble.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD21B27598400230534 /* noble.h */; };
 		5AD6CAFA1B27598400230534 /* parse.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD31B27598400230534 /* parse.c */; };
-		5AD6CAFB1B27598400230534 /* shared.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD41B27598400230534 /* shared.h */; };
 		5AD6CAFC1B27598400230534 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD51B27598400230534 /* console.c */; };
 		5AD6CAFD1B27598400230534 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD61B27598400230534 /* file.c */; };
 		5AD6CAFE1B27598400230534 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD71B27598400230534 /* sim.c */; };
-		5AD6CAFF1B27598400230534 /* universe_internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD81B27598400230534 /* universe_internal.h */; };
-		5AD6CB001B27598400230534 /* universe.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD91B27598400230534 /* universe.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -415,23 +405,17 @@
 				5AD6CADB1B27598400230534 /* body.c in Sources */,
 				5AD6CADC1B27598400230534 /* brain.c in Sources */,
 				5AD6CADD1B27598400230534 /* drives.c in Sources */,
-				5AD6CADE1B27598400230534 /* entity_internal.h in Sources */,
-				5AD6CADF1B27598400230534 /* entity.h in Sources */,
 				5AD6CAE01B27598400230534 /* episodic.c in Sources */,
 				5AD6CAE11B27598400230534 /* food.c in Sources */,
 				5AD6CAE21B27598400230534 /* social.c in Sources */,
 				5AD6CAE31B27598400230534 /* speak.c in Sources */,
 				5AD6CAE41B27598400230534 /* draw.c in Sources */,
-				5AD6CAE51B27598400230534 /* gui.h in Sources */,
 				5AD6CAE61B27598400230534 /* message.c in Sources */,
 				5AD6CAE71B27598400230534 /* shared.c in Sources */,
-				5AD6CAE81B27598400230534 /* AppDelegate.h in Sources */,
 				5AD6CAE91B27598400230534 /* AppDelegate.m in Sources */,
 				5AD6CAEA1B27598400230534 /* main.m in Sources */,
-				5AD6CAEB1B27598400230534 /* NobleMacView.h in Sources */,
 				5AD6CAEC1B27598400230534 /* NobleMacView.m in Sources */,
 				5AD6CAEE1B27598400230534 /* nobleape.xib in Sources */,
-				5AD6CAEF1B27598400230534 /* NobleSimulationView.h in Sources */,
 				5AD6CAF01B27598400230534 /* NobleSimulationView.m in Sources */,
 				5AD6CAF11B27598400230534 /* audio.c in Sources */,
 				5AD6CAF21B27598400230534 /* compress.c in Sources */,
@@ -441,14 +425,10 @@
 				5AD6CAF61B27598400230534 /* land.c in Sources */,
 				5AD6CAF71B27598400230534 /* math.c in Sources */,
 				5AD6CAF81B27598400230534 /* network.c in Sources */,
-				5AD6CAF91B27598400230534 /* noble.h in Sources */,
 				5AD6CAFA1B27598400230534 /* parse.c in Sources */,
-				5AD6CAFB1B27598400230534 /* shared.h in Sources */,
 				5AD6CAFC1B27598400230534 /* console.c in Sources */,
 				5AD6CAFD1B27598400230534 /* file.c in Sources */,
 				5AD6CAFE1B27598400230534 /* sim.c in Sources */,
-				5AD6CAFF1B27598400230534 /* universe_internal.h in Sources */,
-				5AD6CB001B27598400230534 /* universe.h in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -658,6 +638,7 @@
 				5AD6CA941B27582F00230534 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5AD6CA951B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble ApeTests" */ = {
 			isa = XCConfigurationList;
@@ -666,6 +647,7 @@
 				5AD6CA971B27582F00230534 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5AD6CA981B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble ApeUITests" */ = {
 			isa = XCConfigurationList;
@@ -674,6 +656,7 @@
 				5AD6CA9A1B27582F00230534 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
