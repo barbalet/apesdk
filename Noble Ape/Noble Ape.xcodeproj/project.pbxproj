@@ -1,0 +1,681 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5AD6CA751B27582F00230534 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5AD6CA741B27582F00230534 /* Assets.xcassets */; };
+		5AD6CA831B27582F00230534 /* Noble_ApeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CA821B27582F00230534 /* Noble_ApeTests.m */; };
+		5AD6CA8E1B27582F00230534 /* Noble_ApeUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CA8D1B27582F00230534 /* Noble_ApeUITests.m */; };
+		5AD6CADA1B27598400230534 /* being.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB31B27598300230534 /* being.c */; };
+		5AD6CADB1B27598400230534 /* body.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB41B27598300230534 /* body.c */; };
+		5AD6CADC1B27598400230534 /* brain.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB51B27598300230534 /* brain.c */; };
+		5AD6CADD1B27598400230534 /* drives.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB61B27598300230534 /* drives.c */; };
+		5AD6CADE1B27598400230534 /* entity_internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB71B27598300230534 /* entity_internal.h */; };
+		5AD6CADF1B27598400230534 /* entity.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB81B27598300230534 /* entity.h */; };
+		5AD6CAE01B27598400230534 /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAB91B27598300230534 /* episodic.c */; };
+		5AD6CAE11B27598400230534 /* food.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABA1B27598300230534 /* food.c */; };
+		5AD6CAE21B27598400230534 /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABB1B27598300230534 /* social.c */; };
+		5AD6CAE31B27598400230534 /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABC1B27598300230534 /* speak.c */; };
+		5AD6CAE41B27598400230534 /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABD1B27598300230534 /* draw.c */; };
+		5AD6CAE51B27598400230534 /* gui.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABE1B27598300230534 /* gui.h */; };
+		5AD6CAE61B27598400230534 /* message.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CABF1B27598300230534 /* message.c */; };
+		5AD6CAE71B27598400230534 /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC01B27598300230534 /* shared.c */; };
+		5AD6CAE81B27598400230534 /* AppDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC11B27598300230534 /* AppDelegate.h */; };
+		5AD6CAE91B27598400230534 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC21B27598300230534 /* AppDelegate.m */; };
+		5AD6CAEA1B27598400230534 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC31B27598300230534 /* main.m */; };
+		5AD6CAEB1B27598400230534 /* NobleMacView.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC41B27598300230534 /* NobleMacView.h */; };
+		5AD6CAEC1B27598400230534 /* NobleMacView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC51B27598300230534 /* NobleMacView.m */; };
+		5AD6CAEE1B27598400230534 /* nobleape.xib in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC71B27598400230534 /* nobleape.xib */; };
+		5AD6CAEF1B27598400230534 /* NobleSimulationView.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC81B27598400230534 /* NobleSimulationView.h */; };
+		5AD6CAF01B27598400230534 /* NobleSimulationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC91B27598400230534 /* NobleSimulationView.m */; };
+		5AD6CAF11B27598400230534 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACA1B27598400230534 /* audio.c */; };
+		5AD6CAF21B27598400230534 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACB1B27598400230534 /* compress.c */; };
+		5AD6CAF31B27598400230534 /* execute.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACC1B27598400230534 /* execute.c */; };
+		5AD6CAF41B27598400230534 /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACD1B27598400230534 /* interpret.c */; };
+		5AD6CAF51B27598400230534 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACE1B27598400230534 /* io.c */; };
+		5AD6CAF61B27598400230534 /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACF1B27598400230534 /* land.c */; };
+		5AD6CAF71B27598400230534 /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD01B27598400230534 /* math.c */; };
+		5AD6CAF81B27598400230534 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD11B27598400230534 /* network.c */; };
+		5AD6CAF91B27598400230534 /* noble.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD21B27598400230534 /* noble.h */; };
+		5AD6CAFA1B27598400230534 /* parse.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD31B27598400230534 /* parse.c */; };
+		5AD6CAFB1B27598400230534 /* shared.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD41B27598400230534 /* shared.h */; };
+		5AD6CAFC1B27598400230534 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD51B27598400230534 /* console.c */; };
+		5AD6CAFD1B27598400230534 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD61B27598400230534 /* file.c */; };
+		5AD6CAFE1B27598400230534 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD71B27598400230534 /* sim.c */; };
+		5AD6CAFF1B27598400230534 /* universe_internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD81B27598400230534 /* universe_internal.h */; };
+		5AD6CB001B27598400230534 /* universe.h in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD91B27598400230534 /* universe.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5AD6CA7F1B27582F00230534 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5AD6CA631B27582F00230534 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5AD6CA6A1B27582F00230534;
+			remoteInfo = "Noble Ape";
+		};
+		5AD6CA8A1B27582F00230534 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5AD6CA631B27582F00230534 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5AD6CA6A1B27582F00230534;
+			remoteInfo = "Noble Ape";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		5AD6CA6B1B27582F00230534 /* Noble Ape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Noble Ape.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5AD6CA741B27582F00230534 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5AD6CA791B27582F00230534 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5AD6CA7E1B27582F00230534 /* Noble ApeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Noble ApeTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5AD6CA821B27582F00230534 /* Noble_ApeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Noble_ApeTests.m; sourceTree = "<group>"; };
+		5AD6CA841B27582F00230534 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5AD6CA891B27582F00230534 /* Noble ApeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Noble ApeUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5AD6CA8D1B27582F00230534 /* Noble_ApeUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Noble_ApeUITests.m; sourceTree = "<group>"; };
+		5AD6CA8F1B27582F00230534 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5AD6CAB31B27598300230534 /* being.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = being.c; path = ../sim/entity/being.c; sourceTree = "<group>"; };
+		5AD6CAB41B27598300230534 /* body.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = body.c; path = ../sim/entity/body.c; sourceTree = "<group>"; };
+		5AD6CAB51B27598300230534 /* brain.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = brain.c; path = ../sim/entity/brain.c; sourceTree = "<group>"; };
+		5AD6CAB61B27598300230534 /* drives.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = drives.c; path = ../sim/entity/drives.c; sourceTree = "<group>"; };
+		5AD6CAB71B27598300230534 /* entity_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = entity_internal.h; path = ../sim/entity/entity_internal.h; sourceTree = "<group>"; };
+		5AD6CAB81B27598300230534 /* entity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = entity.h; path = ../sim/entity/entity.h; sourceTree = "<group>"; };
+		5AD6CAB91B27598300230534 /* episodic.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = episodic.c; path = ../sim/entity/episodic.c; sourceTree = "<group>"; };
+		5AD6CABA1B27598300230534 /* food.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = food.c; path = ../sim/entity/food.c; sourceTree = "<group>"; };
+		5AD6CABB1B27598300230534 /* social.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = social.c; path = ../sim/entity/social.c; sourceTree = "<group>"; };
+		5AD6CABC1B27598300230534 /* speak.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = speak.c; path = ../sim/entity/speak.c; sourceTree = "<group>"; };
+		5AD6CABD1B27598300230534 /* draw.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = draw.c; path = ../sim/gui/draw.c; sourceTree = "<group>"; };
+		5AD6CABE1B27598300230534 /* gui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = gui.h; path = ../sim/gui/gui.h; sourceTree = "<group>"; };
+		5AD6CABF1B27598300230534 /* message.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = message.c; path = ../sim/gui/message.c; sourceTree = "<group>"; };
+		5AD6CAC01B27598300230534 /* shared.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = shared.c; path = ../sim/gui/shared.c; sourceTree = "<group>"; };
+		5AD6CAC11B27598300230534 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = ../sim/mac/AppDelegate.h; sourceTree = "<group>"; };
+		5AD6CAC21B27598300230534 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = ../sim/mac/AppDelegate.m; sourceTree = "<group>"; };
+		5AD6CAC31B27598300230534 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ../sim/mac/main.m; sourceTree = "<group>"; };
+		5AD6CAC41B27598300230534 /* NobleMacView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NobleMacView.h; path = ../sim/mac/NobleMacView.h; sourceTree = "<group>"; };
+		5AD6CAC51B27598300230534 /* NobleMacView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = NobleMacView.m; path = ../sim/mac/NobleMacView.m; sourceTree = "<group>"; };
+		5AD6CAC71B27598400230534 /* nobleape.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = nobleape.xib; path = ../sim/macsim/nobleape.xib; sourceTree = "<group>"; };
+		5AD6CAC81B27598400230534 /* NobleSimulationView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NobleSimulationView.h; path = ../sim/macsim/NobleSimulationView.h; sourceTree = "<group>"; };
+		5AD6CAC91B27598400230534 /* NobleSimulationView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = NobleSimulationView.m; path = ../sim/macsim/NobleSimulationView.m; sourceTree = "<group>"; };
+		5AD6CACA1B27598400230534 /* audio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = audio.c; path = ../sim/noble/audio.c; sourceTree = "<group>"; };
+		5AD6CACB1B27598400230534 /* compress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = compress.c; path = ../sim/noble/compress.c; sourceTree = "<group>"; };
+		5AD6CACC1B27598400230534 /* execute.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = execute.c; path = ../sim/noble/execute.c; sourceTree = "<group>"; };
+		5AD6CACD1B27598400230534 /* interpret.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = interpret.c; path = ../sim/noble/interpret.c; sourceTree = "<group>"; };
+		5AD6CACE1B27598400230534 /* io.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = io.c; path = ../sim/noble/io.c; sourceTree = "<group>"; };
+		5AD6CACF1B27598400230534 /* land.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = land.c; path = ../sim/noble/land.c; sourceTree = "<group>"; };
+		5AD6CAD01B27598400230534 /* math.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = math.c; path = ../sim/noble/math.c; sourceTree = "<group>"; };
+		5AD6CAD11B27598400230534 /* network.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = network.c; path = ../sim/noble/network.c; sourceTree = "<group>"; };
+		5AD6CAD21B27598400230534 /* noble.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = noble.h; path = ../sim/noble/noble.h; sourceTree = "<group>"; };
+		5AD6CAD31B27598400230534 /* parse.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = parse.c; path = ../sim/noble/parse.c; sourceTree = "<group>"; };
+		5AD6CAD41B27598400230534 /* shared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = shared.h; path = ../sim/noble/shared.h; sourceTree = "<group>"; };
+		5AD6CAD51B27598400230534 /* console.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = console.c; path = ../sim/universe/console.c; sourceTree = "<group>"; };
+		5AD6CAD61B27598400230534 /* file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = file.c; path = ../sim/universe/file.c; sourceTree = "<group>"; };
+		5AD6CAD71B27598400230534 /* sim.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = sim.c; path = ../sim/universe/sim.c; sourceTree = "<group>"; };
+		5AD6CAD81B27598400230534 /* universe_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = universe_internal.h; path = ../sim/universe/universe_internal.h; sourceTree = "<group>"; };
+		5AD6CAD91B27598400230534 /* universe.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = universe.h; path = ../sim/universe/universe.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5AD6CA681B27582F00230534 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5AD6CA7B1B27582F00230534 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5AD6CA861B27582F00230534 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5AD6CA621B27582F00230534 = {
+			isa = PBXGroup;
+			children = (
+				5AD6CB061B275C0B00230534 /* macsim */,
+				5AD6CB051B275C0800230534 /* noble */,
+				5AD6CB041B275C0500230534 /* universe */,
+				5AD6CB031B275B6D00230534 /* entity */,
+				5AD6CB021B275B6900230534 /* gui */,
+				5AD6CB011B275B6200230534 /* mac */,
+				5AD6CA6D1B27582F00230534 /* Noble Ape */,
+				5AD6CA811B27582F00230534 /* Noble ApeTests */,
+				5AD6CA8C1B27582F00230534 /* Noble ApeUITests */,
+				5AD6CA6C1B27582F00230534 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5AD6CA6C1B27582F00230534 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CA6B1B27582F00230534 /* Noble Ape.app */,
+				5AD6CA7E1B27582F00230534 /* Noble ApeTests.xctest */,
+				5AD6CA891B27582F00230534 /* Noble ApeUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5AD6CA6D1B27582F00230534 /* Noble Ape */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CA741B27582F00230534 /* Assets.xcassets */,
+				5AD6CA791B27582F00230534 /* Info.plist */,
+				5AD6CA711B27582F00230534 /* Supporting Files */,
+			);
+			path = "Noble Ape";
+			sourceTree = "<group>";
+		};
+		5AD6CA711B27582F00230534 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5AD6CA811B27582F00230534 /* Noble ApeTests */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CA821B27582F00230534 /* Noble_ApeTests.m */,
+				5AD6CA841B27582F00230534 /* Info.plist */,
+			);
+			path = "Noble ApeTests";
+			sourceTree = "<group>";
+		};
+		5AD6CA8C1B27582F00230534 /* Noble ApeUITests */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CA8D1B27582F00230534 /* Noble_ApeUITests.m */,
+				5AD6CA8F1B27582F00230534 /* Info.plist */,
+			);
+			path = "Noble ApeUITests";
+			sourceTree = "<group>";
+		};
+		5AD6CB011B275B6200230534 /* mac */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CAC11B27598300230534 /* AppDelegate.h */,
+				5AD6CAC21B27598300230534 /* AppDelegate.m */,
+				5AD6CAC31B27598300230534 /* main.m */,
+				5AD6CAC41B27598300230534 /* NobleMacView.h */,
+				5AD6CAC51B27598300230534 /* NobleMacView.m */,
+			);
+			name = mac;
+			sourceTree = "<group>";
+		};
+		5AD6CB021B275B6900230534 /* gui */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CABD1B27598300230534 /* draw.c */,
+				5AD6CABE1B27598300230534 /* gui.h */,
+				5AD6CABF1B27598300230534 /* message.c */,
+				5AD6CAC01B27598300230534 /* shared.c */,
+			);
+			name = gui;
+			sourceTree = "<group>";
+		};
+		5AD6CB031B275B6D00230534 /* entity */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CAB31B27598300230534 /* being.c */,
+				5AD6CAB41B27598300230534 /* body.c */,
+				5AD6CAB51B27598300230534 /* brain.c */,
+				5AD6CAB61B27598300230534 /* drives.c */,
+				5AD6CAB71B27598300230534 /* entity_internal.h */,
+				5AD6CAB81B27598300230534 /* entity.h */,
+				5AD6CAB91B27598300230534 /* episodic.c */,
+				5AD6CABA1B27598300230534 /* food.c */,
+				5AD6CABB1B27598300230534 /* social.c */,
+				5AD6CABC1B27598300230534 /* speak.c */,
+			);
+			name = entity;
+			sourceTree = "<group>";
+		};
+		5AD6CB041B275C0500230534 /* universe */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CAD51B27598400230534 /* console.c */,
+				5AD6CAD61B27598400230534 /* file.c */,
+				5AD6CAD71B27598400230534 /* sim.c */,
+				5AD6CAD81B27598400230534 /* universe_internal.h */,
+				5AD6CAD91B27598400230534 /* universe.h */,
+			);
+			name = universe;
+			sourceTree = "<group>";
+		};
+		5AD6CB051B275C0800230534 /* noble */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CACA1B27598400230534 /* audio.c */,
+				5AD6CACB1B27598400230534 /* compress.c */,
+				5AD6CACC1B27598400230534 /* execute.c */,
+				5AD6CACD1B27598400230534 /* interpret.c */,
+				5AD6CACE1B27598400230534 /* io.c */,
+				5AD6CACF1B27598400230534 /* land.c */,
+				5AD6CAD01B27598400230534 /* math.c */,
+				5AD6CAD11B27598400230534 /* network.c */,
+				5AD6CAD21B27598400230534 /* noble.h */,
+				5AD6CAD31B27598400230534 /* parse.c */,
+				5AD6CAD41B27598400230534 /* shared.h */,
+			);
+			name = noble;
+			sourceTree = "<group>";
+		};
+		5AD6CB061B275C0B00230534 /* macsim */ = {
+			isa = PBXGroup;
+			children = (
+				5AD6CAC71B27598400230534 /* nobleape.xib */,
+				5AD6CAC81B27598400230534 /* NobleSimulationView.h */,
+				5AD6CAC91B27598400230534 /* NobleSimulationView.m */,
+			);
+			name = macsim;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5AD6CA6A1B27582F00230534 /* Noble Ape */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5AD6CA921B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble Ape" */;
+			buildPhases = (
+				5AD6CA671B27582F00230534 /* Sources */,
+				5AD6CA681B27582F00230534 /* Frameworks */,
+				5AD6CA691B27582F00230534 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Noble Ape";
+			productName = "Noble Ape";
+			productReference = 5AD6CA6B1B27582F00230534 /* Noble Ape.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5AD6CA7D1B27582F00230534 /* Noble ApeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5AD6CA951B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble ApeTests" */;
+			buildPhases = (
+				5AD6CA7A1B27582F00230534 /* Sources */,
+				5AD6CA7B1B27582F00230534 /* Frameworks */,
+				5AD6CA7C1B27582F00230534 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5AD6CA801B27582F00230534 /* PBXTargetDependency */,
+			);
+			name = "Noble ApeTests";
+			productName = "Noble ApeTests";
+			productReference = 5AD6CA7E1B27582F00230534 /* Noble ApeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		5AD6CA881B27582F00230534 /* Noble ApeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5AD6CA981B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble ApeUITests" */;
+			buildPhases = (
+				5AD6CA851B27582F00230534 /* Sources */,
+				5AD6CA861B27582F00230534 /* Frameworks */,
+				5AD6CA871B27582F00230534 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5AD6CA8B1B27582F00230534 /* PBXTargetDependency */,
+			);
+			name = "Noble ApeUITests";
+			productName = "Noble ApeUITests";
+			productReference = 5AD6CA891B27582F00230534 /* Noble ApeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5AD6CA631B27582F00230534 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0700;
+				ORGANIZATIONNAME = "Tom Barbalet";
+				TargetAttributes = {
+					5AD6CA6A1B27582F00230534 = {
+						CreatedOnToolsVersion = 7.0;
+					};
+					5AD6CA7D1B27582F00230534 = {
+						CreatedOnToolsVersion = 7.0;
+						TestTargetID = 5AD6CA6A1B27582F00230534;
+					};
+					5AD6CA881B27582F00230534 = {
+						CreatedOnToolsVersion = 7.0;
+						TestTargetID = 5AD6CA6A1B27582F00230534;
+					};
+				};
+			};
+			buildConfigurationList = 5AD6CA661B27582F00230534 /* Build configuration list for PBXProject "Noble Ape" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5AD6CA621B27582F00230534;
+			productRefGroup = 5AD6CA6C1B27582F00230534 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5AD6CA6A1B27582F00230534 /* Noble Ape */,
+				5AD6CA7D1B27582F00230534 /* Noble ApeTests */,
+				5AD6CA881B27582F00230534 /* Noble ApeUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5AD6CA691B27582F00230534 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5AD6CA751B27582F00230534 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5AD6CA7C1B27582F00230534 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5AD6CA871B27582F00230534 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5AD6CA671B27582F00230534 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5AD6CADA1B27598400230534 /* being.c in Sources */,
+				5AD6CADB1B27598400230534 /* body.c in Sources */,
+				5AD6CADC1B27598400230534 /* brain.c in Sources */,
+				5AD6CADD1B27598400230534 /* drives.c in Sources */,
+				5AD6CADE1B27598400230534 /* entity_internal.h in Sources */,
+				5AD6CADF1B27598400230534 /* entity.h in Sources */,
+				5AD6CAE01B27598400230534 /* episodic.c in Sources */,
+				5AD6CAE11B27598400230534 /* food.c in Sources */,
+				5AD6CAE21B27598400230534 /* social.c in Sources */,
+				5AD6CAE31B27598400230534 /* speak.c in Sources */,
+				5AD6CAE41B27598400230534 /* draw.c in Sources */,
+				5AD6CAE51B27598400230534 /* gui.h in Sources */,
+				5AD6CAE61B27598400230534 /* message.c in Sources */,
+				5AD6CAE71B27598400230534 /* shared.c in Sources */,
+				5AD6CAE81B27598400230534 /* AppDelegate.h in Sources */,
+				5AD6CAE91B27598400230534 /* AppDelegate.m in Sources */,
+				5AD6CAEA1B27598400230534 /* main.m in Sources */,
+				5AD6CAEB1B27598400230534 /* NobleMacView.h in Sources */,
+				5AD6CAEC1B27598400230534 /* NobleMacView.m in Sources */,
+				5AD6CAEE1B27598400230534 /* nobleape.xib in Sources */,
+				5AD6CAEF1B27598400230534 /* NobleSimulationView.h in Sources */,
+				5AD6CAF01B27598400230534 /* NobleSimulationView.m in Sources */,
+				5AD6CAF11B27598400230534 /* audio.c in Sources */,
+				5AD6CAF21B27598400230534 /* compress.c in Sources */,
+				5AD6CAF31B27598400230534 /* execute.c in Sources */,
+				5AD6CAF41B27598400230534 /* interpret.c in Sources */,
+				5AD6CAF51B27598400230534 /* io.c in Sources */,
+				5AD6CAF61B27598400230534 /* land.c in Sources */,
+				5AD6CAF71B27598400230534 /* math.c in Sources */,
+				5AD6CAF81B27598400230534 /* network.c in Sources */,
+				5AD6CAF91B27598400230534 /* noble.h in Sources */,
+				5AD6CAFA1B27598400230534 /* parse.c in Sources */,
+				5AD6CAFB1B27598400230534 /* shared.h in Sources */,
+				5AD6CAFC1B27598400230534 /* console.c in Sources */,
+				5AD6CAFD1B27598400230534 /* file.c in Sources */,
+				5AD6CAFE1B27598400230534 /* sim.c in Sources */,
+				5AD6CAFF1B27598400230534 /* universe_internal.h in Sources */,
+				5AD6CB001B27598400230534 /* universe.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5AD6CA7A1B27582F00230534 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5AD6CA831B27582F00230534 /* Noble_ApeTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5AD6CA851B27582F00230534 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5AD6CA8E1B27582F00230534 /* Noble_ApeUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5AD6CA801B27582F00230534 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5AD6CA6A1B27582F00230534 /* Noble Ape */;
+			targetProxy = 5AD6CA7F1B27582F00230534 /* PBXContainerItemProxy */;
+		};
+		5AD6CA8B1B27582F00230534 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5AD6CA6A1B27582F00230534 /* Noble Ape */;
+			targetProxy = 5AD6CA8A1B27582F00230534 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5AD6CA901B27582F00230534 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		5AD6CA911B27582F00230534 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		5AD6CA931B27582F00230534 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Noble Ape/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-Ape";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		5AD6CA941B27582F00230534 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Noble Ape/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-Ape";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		5AD6CA961B27582F00230534 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Noble ApeTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-ApeTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Noble Ape.app/Contents/MacOS/Noble Ape";
+			};
+			name = Debug;
+		};
+		5AD6CA971B27582F00230534 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Noble ApeTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-ApeTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Noble Ape.app/Contents/MacOS/Noble Ape";
+			};
+			name = Release;
+		};
+		5AD6CA991B27582F00230534 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Noble ApeUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-ApeUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = "Noble Ape";
+				USES_XCTRUNNER = YES;
+			};
+			name = Debug;
+		};
+		5AD6CA9A1B27582F00230534 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Noble ApeUITests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-ApeUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = "Noble Ape";
+				USES_XCTRUNNER = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5AD6CA661B27582F00230534 /* Build configuration list for PBXProject "Noble Ape" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5AD6CA901B27582F00230534 /* Debug */,
+				5AD6CA911B27582F00230534 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5AD6CA921B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble Ape" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5AD6CA931B27582F00230534 /* Debug */,
+				5AD6CA941B27582F00230534 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		5AD6CA951B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble ApeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5AD6CA961B27582F00230534 /* Debug */,
+				5AD6CA971B27582F00230534 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		5AD6CA981B27582F00230534 /* Build configuration list for PBXNativeTarget "Noble ApeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5AD6CA991B27582F00230534 /* Debug */,
+				5AD6CA9A1B27582F00230534 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5AD6CA631B27582F00230534 /* Project object */;
+}
