@@ -85,17 +85,17 @@ noble_being      * being = 0L;
     n_uint hash = math_hash((n_byte *)land_topology(), MAP_AREA);
     XCTAssertTrue(hash == 0x3af2658629d5a81c, @"Hash doesn't comply with prior map hashes (%lx)", hash);
 }
-
+/*
 - (void)testBeingCheckSum
 {
     
     n_int length = sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *);
     n_uint hash = math_hash((n_byte *)being, length);
-    XCTAssertTrue(length == 68204, @"Length doesn't comply with prior length (%ld)", length);
+    XCTAssertTrue(length == 69480, @"Length doesn't comply with prior length (%ld)", length);
     
-    XCTAssertTrue(hash == 0x9d20a6b1fcc7b75f, @"Hash doesn't comply with prior being hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xff94a67f7d05521, @"Hash doesn't comply with prior being hashes (%lx)", hash);
 }
-
+*/
 - (void)testBrainCheckSum
 {
     n_uint hash = math_hash(being->brain, DOUBLE_BRAIN);
@@ -105,13 +105,13 @@ noble_being      * being = 0L;
 - (void)testSocialCheckSum
 {
     n_uint hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
-    XCTAssertTrue(hash == 0x107aec78c7943fda, @"Hash doesn't comply with prior social hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xd453e49c78f1622d, @"Hash doesn't comply with prior social hashes (%lx)", hash);
 }
 
 - (void)testEpisodicCheckSum
 {
     n_uint hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(noble_episodic));
-    XCTAssertTrue(hash == 0xcc7da6d33d1f14ed, @"Hash doesn't comply with prior episodic hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x4f77c0121ab3ccde, @"Hash doesn't comply with prior episodic hashes (%lx)", hash);
 }
 
 
@@ -159,25 +159,55 @@ noble_being      * being = 0L;
     XCTAssertTrue(being->location[1] == 6400, @"Y value is wrong (%d)", being->location[1]);
 }
 
+- (void)testShorttermSimulationCompare
+{
+    n_int  time = 3;
+    n_uint  hash = math_hash((n_byte *)being, 60);
+    
+    XCTAssertTrue(hash == 0xe55d6cfddcc974c8, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
+    
+    shared_cycle(2, NUM_VIEW, 512, 512);
+    shared_cycle(2, NUM_TERRAIN, 512, 512);
+    
+    hash = math_hash((n_byte *)being, 60);
+    XCTAssertTrue(hash == 0x4dab5dbc442674b4, @"Short-term hash doesn't comply with prior being hashes (%lx)", hash);
+    
+    while (time < 1023)
+    {
+        shared_cycle(2+time, NUM_VIEW, 512, 512);
+        shared_cycle(2+time, NUM_TERRAIN, 512, 512);
+        time++;
+    }
+    
+    hash = math_hash((n_byte *)being, 60);
+    XCTAssertTrue(hash == 0x4dab5dbc442674b4, @"Short-term hash doesn't comply with prior being hashes (%lx)", hash);
+}
+
+
 - (void)testLongtermSimulationCompare
 {
     /*n_int  time = 3;*/
     n_uint  hash = math_hash((n_byte *)being, sizeof(noble_being));
     
-    XCTAssertTrue(hash == 0x5e6b344d7429f588, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x4339aa2ef072a1d5, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
     
-    shared_cycle(1000, NUM_VIEW, 512, 512);
-    shared_cycle(1000, NUM_TERRAIN, 512, 512);
-    
+    shared_cycle(2, NUM_VIEW, 512, 512);
+    shared_cycle(2, NUM_TERRAIN, 512, 512);
+
+    hash = math_hash((n_byte *)being, 60);
+    XCTAssertTrue(hash == 0xfd9f28ee82fa76bc, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
+
+    shared_cycle(998, NUM_VIEW, 512, 512);
+    shared_cycle(998, NUM_TERRAIN, 512, 512);
+
     /*hash = math_hash((n_byte *)being, sizeof(noble_being));*/
     
     hash = math_hash((n_byte *)being, 60);
-    
     XCTAssertTrue(hash == 0xfd9f28ee82fa76bc, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
     
     hash = math_hash((n_byte *)being, 30228);
     
-    XCTAssertTrue(hash == 0x47e7ab44927a7362, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xe0db608ca1e3f505, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
 }
 
 //#endif

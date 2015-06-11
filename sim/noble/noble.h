@@ -53,7 +53,7 @@
 #ifdef NOBLE_IOS
 #undef  EXECUTE_THREADED
 #else
-#undef  EXECUTE_THREADED
+#define  EXECUTE_THREADED
 #endif
 
 #endif
@@ -330,9 +330,6 @@ enum window_num
 {
     NUM_VIEW    = (0),
     NUM_TERRAIN	= (1)
-#ifndef GRAPHLESS_GUI
-                  ,NUM_GRAPH   = (2)
-#endif
 };
 
 /* maximum bytes in a braincode program */
@@ -407,27 +404,6 @@ enum BRAINCODE_COMMANDS
     BRAINCODE_INSTRUCTIONS
 };
 
-#ifndef GRAPHLESS_GUI
-
-enum graph_commands
-{
-    GC_CLEAR_BRAINCODE = -1,
-
-    GC_IDEOSPHERE = 0,
-    GC_BRAINCODE,
-    GC_GENEPOOL,
-    GC_HONOR,
-    GC_PATHOGENS,
-    GC_RELATIONSHIPS,
-    GC_PREFERENCES,
-    GC_PHASESPACE,
-    GC_SOCIALSIM,
-    GC_MEET_PLACES,
-    GC_VASCULAR
-};
-
-#endif
-
 typedef enum
 {
     WEATHER_SEVEN_ERROR = -1,
@@ -445,12 +421,6 @@ enum window_information
     TERRAIN_WINDOW_WIDTH		= (2048),
     TERRAIN_WINDOW_HEIGHT       = (1536),
     TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
-#ifndef GRAPHLESS_GUI
-                                  ,GRAPH_WINDOW_WIDTH_BITS     = 9,
-    GRAPH_WINDOW_WIDTH		    = (1<<GRAPH_WINDOW_WIDTH_BITS),
-    GRAPH_WINDOW_HEIGHT         = (512),
-    GRAPH_WINDOW_AREA			= (GRAPH_WINDOW_WIDTH * GRAPH_WINDOW_HEIGHT * 3)
-#endif
 };
 
 typedef enum
@@ -766,15 +736,7 @@ void compress_expand(n_file *input,   n_file *output);
 
 #define LAND_DITHER(x,y,z)             (((x+y+z)&15)-(((x&y)|z)&7)-((x|(y&z))&7))
 
-#ifdef GRAPHLESS_GUI
-
 #define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA)
-
-#else
-
-#define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA + GRAPH_WINDOW_AREA)
-
-#endif
 
 #define	WEATHER_CLOUD		(32768)
 #define	WEATHER_RAIN		(98304)

@@ -39,12 +39,6 @@
 
 /* the weather/time of day icons hard coded */
 
-#ifndef GRAPHLESS_GUI
-
-extern void  graph_draw(noble_simulation * local_sim, n_byte * graph, n_int dim_x, n_int dim_y);
-
-#endif
-
 static const n_byte	icns[896] =
 {
     /* sunny day */
@@ -301,11 +295,6 @@ n_byte * draw_pointer(n_byte which_one)
     case NUM_VIEW:
         return VIEWWINDOW(local_buffer);
         break;
-#ifndef GRAPHLESS_GUI
-    case NUM_GRAPH:
-        return GRAPHWINDOW(local_buffer);
-        break;
-#endif
     }
     return 0L;
 }

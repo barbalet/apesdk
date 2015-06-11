@@ -1089,7 +1089,7 @@ typedef struct
     n_byte4     date_of_conception; /* constant */
     n_byte      attention[ATTENTION_SIZE];
     n_genetics  genetics[CHROMOSOMES];           /* constant */
-    n_genetics  fetal_genetics[CHROMOSOMES];           /* constant */
+    n_genetics  fetal_genetics[CHROMOSOMES];     /* constant */
     n_byte2     father_name[2];                  /* why is this needed? */
     n_byte2     social_x;
     n_byte2     social_y;
