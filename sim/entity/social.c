@@ -1062,6 +1062,32 @@ n_int social_network(noble_simulation *sim,
     return being_index;
 }
 
+static void social_parasite_cycle(noble_being * meeter_being, noble_being * met_being, n_int distance)
+{
+    /** acquire parasites from the environment with some low probability,
+     and existing parasites multiply */
+
+    n_int paraprob = being_random(meeter_being);
+    if (paraprob < (PARASITE_ENVIRONMENT + (PARASITE_BREED * being_parasites(meeter_being))))
+    {
+        being_add_parasites(meeter_being);
+    }
+    
+    /** parasites sap energy */
+    being_energy_delta(meeter_being, 0 - (PARASITE_ENERGY_COST * being_parasites(meeter_being)));
+    
+    if (distance < PARASITE_HOP_MAX_DISTANCE)
+    {
+        /** parasite transmission - e.g. flea hop */
+        if (being_parasites(met_being) < being_parasites(meeter_being))
+        {
+            being_add_parasites(met_being);
+            being_remove_parasites(meeter_being, 1);
+        }
+    }
+
+}
+
 /**
  * @brief Grooming behavior
  * @param meeter_being Pointer to the ape doing the meeting
@@ -1081,40 +1107,11 @@ n_byte social_groom(
     n_byte2 familiarity)
 {
     n_int meeter_index, met_index;
-    n_byte max = 0, grooming = 0, groom_decisions, groomloc, fem;
+    n_byte grooming = 0, groom_decisions, groomloc;
     n_int gpref;
-    n_int paraprob;
 
-    /** hairy beings can carry more parasites */
-    max = (n_byte)MAX_PARASITES(meeter_being);
-    /** acquire parasites from the environment with some low probability,
-    and existing parasites multiply */
-    if (meeter_being->parasites < max)
-    {
-        paraprob = being_random(meeter_being);
-        if (paraprob < PARASITE_ENVIRONMENT +
-                (PARASITE_BREED*meeter_being->parasites))
-        {
-            meeter_being->parasites++;
-        }
-    }
-
-    /** parasites sap energy */
-    being_energy_delta(meeter_being, 0 - (PARASITE_ENERGY_COST*meeter_being->parasites));
-
-    if (distance < PARASITE_HOP_MAX_DISTANCE)
-    {
-        /** hairy beings can carry more parasites */
-        max = (n_byte)MAX_PARASITES(met_being);
-        /** parasite transmission - e.g. flea hop */
-        if ((met_being->parasites < max) &&
-                (met_being->parasites < meeter_being->parasites))
-        {
-            met_being->parasites++;
-            meeter_being->parasites--;
-        }
-    }
-
+    social_parasite_cycle(meeter_being, met_being, distance);
+    
     /** social grooming removes parasites and alters
        social status relationships */
     if ((awake != FULLY_ASLEEP) &&
@@ -1124,17 +1121,18 @@ n_byte social_groom(
         n_int  groomprob = being_random(meeter_being) & 16383;
         if (familiarity > 16) familiarity=16;
 
-        /** is the groomee female? */
-        fem = (FIND_SEX(GET_I(met_being)) == SEX_FEMALE);
+        {
+            /** is the groomee female? */
+            n_byte fem = (FIND_SEX(GET_I(met_being)) == SEX_FEMALE);
 
-        /** grooming preference */
-        gpref = NATURE_NURTURE(
-                    GENE_GROOM(being_genetics(meeter_being)),
-                    meeter_being->learned_preference[PREFERENCE_GROOM_MALE+fem]);
-
+            /** grooming preference */
+            gpref = NATURE_NURTURE(
+                        GENE_GROOM(being_genetics(meeter_being)),
+                        meeter_being->learned_preference[PREFERENCE_GROOM_MALE+fem]);
+        }
         /** individuals which are familiar tend to groom more often */
         if (groomprob <
-                GROOMING_PROB + (gpref*(1+familiarity)*GROOMING_PROB_HONOR*(1+met_being->honor)))
+                GROOMING_PROB + (gpref*(1+familiarity)*GROOMING_PROB_HONOR*(1+being_honor(met_being))))
         {
             /** transmit pathogens via touch */
             being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_TOUCH);
@@ -1185,14 +1183,9 @@ n_byte social_groom(
             being_honor_inc_dec(meeter_being, met_being);
 
             /** Decrement parasites */
-            if (met_being->parasites >= PARASITES_REMOVED)
-            {
-                met_being->parasites-=PARASITES_REMOVED;
-            }
-            else
-            {
-                met_being->parasites = 0;
-            }
+            
+            being_remove_parasites(met_being, PARASITES_REMOVED);
+            
             grooming = 1;
         }
     }
@@ -1235,7 +1228,7 @@ n_byte2 social_squabble(
         agro = GENE_AGGRESSION(being_genetics(meeter_being));
         /** females are less agressive (less testosterone) */
         if (is_female) agro >>= 3;
-        if (being_random(meeter_being) < agro*4096 + agro*meeter_being->honor*10)
+        if (being_random(meeter_being) < (agro* 4096 + agro* being_honor(meeter_being)*10))
         {
             /** who is the strongest ? */
             victor = meeter_being;
@@ -1272,9 +1265,15 @@ n_byte2 social_squabble(
                 }
             }
             /** victor increases in honor */
-            if (victor->honor < 255-SQUABBLE_HONOR_ADJUST) victor->honor += SQUABBLE_HONOR_ADJUST;
+            if (being_honor(victor) < 255-SQUABBLE_HONOR_ADJUST)
+            {
+                being_honor_delta(victor, SQUABBLE_HONOR_ADJUST);
+            }
             /** vanquished decreases in honor */
-            if (vanquished->honor > SQUABBLE_HONOR_ADJUST) vanquished->honor -= SQUABBLE_HONOR_ADJUST;
+            if (being_honor(vanquished) > SQUABBLE_HONOR_ADJUST)
+            {
+                being_honor_delta(vanquished, 0-SQUABBLE_HONOR_ADJUST);
+            }
 
             punchloc = being_random(victor) % INVENTORY_SIZE;
             if (distance > SQUABBLE_SHOW_FORCE_DISTANCE)
@@ -1374,7 +1373,7 @@ n_uint social_respect_mean(
         return;
     }
 
-    body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->seed);
+    body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->delta.seed);
 
     /** store the date of conception */
     female->date_of_conception = land_date();
@@ -1382,22 +1381,22 @@ n_uint social_respect_mean(
     female->father_name[0]   = being_gender_name(male);
     female->father_name[1]   = being_first_name(male);
 
-    if (male->generation_min < female->generation_min)
+    if (male->constant.generation_min < female->constant.generation_min)
     {
-        female->child_generation_min = male->generation_min;
+        female->child_generation_min = male->constant.generation_min;
     }
     else
     {
-        female->child_generation_min = female->generation_min;
+        female->child_generation_min = female->constant.generation_min;
     }
 
-    if (male->generation_max > female->generation_max)
+    if (male->constant.generation_max > female->constant.generation_max)
     {
-        female->child_generation_max = male->generation_max;
+        female->child_generation_max = male->constant.generation_max;
     }
     else
     {
-        female->child_generation_max = female->generation_max;
+        female->child_generation_max = female->constant.generation_max;
     }
 
     /** reset sex drive and goal */

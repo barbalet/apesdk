@@ -117,8 +117,8 @@ noble_being      * being = 0L;
 
 - (void)actionMouseClick
 {
-    n_int   map_x = APESPACE_TO_MAPSPACE(being->location[0]);
-    n_int   map_y = APESPACE_TO_MAPSPACE(being->location[1]);
+    n_int   map_x = APESPACE_TO_MAPSPACE(being->delta.location[0]);
+    n_int   map_y = APESPACE_TO_MAPSPACE(being->delta.location[1]);
     
     shared_mouseReceived(map_x, map_y, NUM_VIEW);
 }
@@ -136,8 +136,8 @@ noble_being      * being = 0L;
 
 - (void)testMouseDrag
 {
-    XCTAssertTrue(being->location[0] == 9644, @"X value is wrong (%d)", being->location[0]);
-    XCTAssertTrue(being->location[1] == 1486, @"Y value is wrong (%d)", being->location[1]);
+    XCTAssertTrue(being->delta.location[0] == 9644, @"X value is wrong (%d)", being->delta.location[0]);
+    XCTAssertTrue(being->delta.location[1] == 1486, @"Y value is wrong (%d)", being->delta.location[1]);
     
     [self actionMouseClick];
     shared_cycle(1000, NUM_VIEW, 512, 512);
@@ -153,10 +153,10 @@ noble_being      * being = 0L;
     
     shared_cycle(1000, NUM_VIEW, 512, 512);
     shared_cycle(1000, NUM_TERRAIN, 512, 512);
-    NSLog(@"Location %d %d", being->location[0], being->location[1]);
+    NSLog(@"Location %d %d", being->delta.location[0], being->delta.location[1]);
     
-    XCTAssertTrue(being->location[0] == 6400, @"X value is wrong (%d)", being->location[0]);
-    XCTAssertTrue(being->location[1] == 6400, @"Y value is wrong (%d)", being->location[1]);
+    XCTAssertTrue(being->delta.location[0] == 6400, @"X value is wrong (%d)", being->delta.location[0]);
+    XCTAssertTrue(being->delta.location[1] == 6400, @"Y value is wrong (%d)", being->delta.location[1]);
 }
 
 - (void)testShorttermSimulationCompare

@@ -940,7 +940,7 @@ static void	draw_meters(noble_simulation * local_sim)
         {
             n_vect2 direction_facing;
 
-            vect2_direction(&direction_facing, 128 + 64+ 256 - terrain_turn + loc_being->direction_facing, 63 * 32);
+            vect2_direction(&direction_facing, 128 + 64+ 256 - terrain_turn + loc_being->delta.direction_facing, 63 * 32);
 
             (void)math_join_vect2(75+ FACING_OFFSIDE, 25, &direction_facing, &local_kind);
         }

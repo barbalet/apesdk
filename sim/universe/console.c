@@ -738,8 +738,8 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
 
     sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %ld\nFacing: %d\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
-            (n_uint)local_being->generation_min,
-            (n_uint)local_being->generation_max,
+            (n_uint)local_being->constant.generation_min,
+            (n_uint)local_being->constant.generation_max,
             (int)heart_rate, (int)breathing_rate,
             being_energy(local_being),
             being_location_x(local_being), being_location_y(local_being),

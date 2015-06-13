@@ -604,9 +604,6 @@ enum drives_definition
 /* maximum separation between mother and child when suckling */
 #define SUCKLING_MAX_SEPARATION     METRES_TO_APESPACE(2)
 
-/* maximum number of parasites in the range 0-255 */
-#define MAX_PARASITES(bei)   ((GENE_HAIR(being_genetics(bei))*255)>>4)
-
 /* maximum distance over which a parasite can hob from one being to another */
 #define PARASITE_HOP_MAX_DISTANCE  METRES_TO_APESPACE(2)
 
@@ -1067,13 +1064,28 @@ typedef struct
 
 typedef struct
 {
+    n_byte4     date_of_birth;
+    n_byte2     generation_min;
+    n_byte2     generation_max;
+    n_genetics  genetics[CHROMOSOMES];           /* constant */
+} noble_being_constant;
+
+typedef struct
+{
     n_byte2     location[2];
     n_byte      direction_facing;
     n_byte      velocity;
     n_byte2     stored_energy;
-    n_byte4     date_of_birth;
     n_byte2     seed[2];
     n_byte2     macro_state;
+    n_byte      parasites;
+    n_byte      honor;
+} noble_being_delta;
+
+typedef struct
+{
+    noble_being_delta delta;
+    noble_being_constant constant;
     n_byte2     brain_state[6];
     n_byte2     height;
     n_byte2     mass;
@@ -1083,14 +1095,11 @@ typedef struct
     n_byte      posture;
     n_byte2     inventory[INVENTORY_SIZE];
 
-    n_byte      parasites;
-    n_byte      honor;
-
-    n_byte4     date_of_conception; /* constant */
+    n_byte4     date_of_conception;
     n_byte      attention[ATTENTION_SIZE];
-    n_genetics  genetics[CHROMOSOMES];           /* constant */
     n_genetics  fetal_genetics[CHROMOSOMES];     /* constant */
     n_byte2     father_name[2];                  /* why is this needed? */
+
     n_byte2     social_x;
     n_byte2     social_y;
     n_byte2     social_nx; /* why is this needed? */
@@ -1098,8 +1107,6 @@ typedef struct
     n_byte      drives[DRIVES];
     n_byte2     goal[4];
     n_byte      learned_preference[PREFERENCES];
-    n_byte2     generation_min;
-    n_byte2     generation_max;
     n_byte2     child_generation_min;
     n_byte2     child_generation_max;
 #ifdef TERRITORY_ON

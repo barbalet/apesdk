@@ -301,10 +301,10 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
     }
 
     case VARIABLE_HONOR:
-        local_being->honor = (n_byte) value;
+        local_being->delta.honor = (n_byte) value;
         break;
     case VARIABLE_PARASITES:
-        local_being->parasites = (n_byte) value;
+        being_set_parasites(local_being, (n_byte) value);
         break;
     case VARIABLE_HEIGHT:
         being_set_height(local_being, value);
@@ -623,10 +623,10 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     {
 
                     case VARIABLE_HONOR:
-                        local_number = local_being->honor;
+                        local_number = being_honor(local_being);
                         break;
                     case VARIABLE_PARASITES:
-                        local_number = local_being->parasites;
+                        local_number = being_parasites(local_being);
                         break;
                     case VARIABLE_HEIGHT:
                         local_number = being_height(local_being);
@@ -865,8 +865,8 @@ void sim_start_conditions(void * vindividual, void * structure, void * data)
     variables[VARIABLE_DRIVE_SEX - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_SEX];
     variables[VARIABLE_FAMILY_NAME_ONE - VARIABLE_VECT_ANGLE] = being_family_first_name(local_being);
     variables[VARIABLE_FAMILY_NAME_TWO - VARIABLE_VECT_ANGLE] = being_family_second_name(local_being);
-    variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE] = local_being->honor;
-    variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE] = local_being->parasites;
+    variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE] = being_honor(local_being);
+    variables[VARIABLE_PARASITES - VARIABLE_VECT_ANGLE] = being_parasites(local_being);
 }
 
 void sim_end_conditions(void * vindividual, void * structure, void * data)
@@ -938,8 +938,8 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
     }
     being_set_family_name(local_being,(n_byte)local_family_name1,(n_byte)local_family_name2);
 
-    local_being->honor = (n_byte)local_honor;
-    local_being->parasites = (n_byte)local_parasites;
+    local_being->delta.honor = (n_byte)local_honor;
+    being_set_parasites(local_being, (n_byte)local_parasites);
 }
 
 #define FILE_CHECK(value) io_offset((n_byte*)&here, (n_byte*)value, #value)
@@ -949,13 +949,13 @@ void file_audit(void)
     {
         noble_being    here;
 
-        FILE_CHECK(&here.location[0]);
-        FILE_CHECK(&here.direction_facing);
-        FILE_CHECK(&here.velocity);
-        FILE_CHECK(&here.stored_energy);
-        FILE_CHECK(&here.date_of_birth);
-        FILE_CHECK(&here.seed[0]);
-        FILE_CHECK(&here.macro_state);
+        FILE_CHECK(&here.delta.location[0]);
+        FILE_CHECK(&here.delta.direction_facing);
+        FILE_CHECK(&here.delta.velocity);
+        FILE_CHECK(&here.delta.stored_energy);
+        FILE_CHECK(&here.constant.date_of_birth);
+        FILE_CHECK(&here.delta.seed[0]);
+        FILE_CHECK(&here.delta.macro_state);
         FILE_CHECK(&here.brain_state[0]);
         FILE_CHECK(&here.height);
         FILE_CHECK(&here.mass);
@@ -965,12 +965,12 @@ void file_audit(void)
         FILE_CHECK(&here.posture);
         FILE_CHECK(&here.inventory[0]);
 
-        FILE_CHECK(&here.parasites);
-        FILE_CHECK(&here.honor);
+        FILE_CHECK(&here.delta.parasites);
+        FILE_CHECK(&here.delta.honor);
 
         FILE_CHECK(&here.date_of_conception); /* constant */
         FILE_CHECK(&here.attention[0]);
-        FILE_CHECK(&here.genetics[0]);           /* constant */
+        FILE_CHECK(&here.constant.genetics[0]);           /* constant */
         FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
         FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */
         FILE_CHECK(&here.social_x);
@@ -980,8 +980,8 @@ void file_audit(void)
         FILE_CHECK(&here.drives[0]);
         FILE_CHECK(&here.goal[0]);
         FILE_CHECK(&here.learned_preference[0]);
-        FILE_CHECK(&here.generation_min);
-        FILE_CHECK(&here.generation_max);
+        FILE_CHECK(&here.constant.generation_min);
+        FILE_CHECK(&here.constant.generation_max);
         FILE_CHECK(&here.child_generation_min);
         FILE_CHECK(&here.child_generation_max);
 #ifdef TERRITORY_ON

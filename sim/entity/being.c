@@ -106,43 +106,43 @@ n_byte * being_braincode_internal(noble_being * value)
 
 void    being_set_state(noble_being * value, being_state_type state)
 {
-    value->macro_state = state;
+    value->delta.macro_state = state;
 }
 
 void    being_add_state(noble_being * value, being_state_type state)
 {
-    value->macro_state |= state;
+    value->delta.macro_state |= state;
 
 }
 n_byte2 being_state(noble_being * value)
 {
-    return value->macro_state;
+    return value->delta.macro_state;
 }
 
 static void being_random3(noble_being * value)
 {
-    math_random3(value->seed);
+    math_random3(value->delta.seed);
 }
 
 n_byte2 being_random(noble_being * value)
 {
-    return math_random(value->seed);
+    return math_random(value->delta.seed);
 }
 
 static void being_set_random(noble_being * value, n_byte2 * seed)
 {
-    value->seed[0] = seed[0];
-    value->seed[1] = seed[1];
+    value->delta.seed[0] = seed[0];
+    value->delta.seed[1] = seed[1];
 }
 
 static void being_set_random1(noble_being * value, n_byte2 seed1)
 {
-    value->seed[1] = seed1;
+    value->delta.seed[1] = seed1;
 }
 
 static n_byte2 * being_get_random(noble_being * value)
 {
-    return value->seed;
+    return value->delta.seed;
 }
 
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
@@ -208,36 +208,58 @@ void being_erase(noble_being * value)
     io_erase((n_byte*)value, sizeof(noble_being));
 }
 
+void being_honor_delta(noble_being * value, n_int delta)
+{
+    n_int honor_value = value->delta.honor;
+    if (delta > 0)
+    {
+        if ((honor_value + delta) > 255)
+        {
+            value->delta.honor = 255;
+            return;
+        }
+    }
+    else
+    {
+        if ((honor_value + delta) < 0)
+        {
+            value->delta.honor = 0;
+            return;
+        }
+    }
+    value->delta.honor += delta;
+}
+
 n_byte being_honor(noble_being * value)
 {
-    return value->honor;
+    return value->delta.honor;
 }
 
 void being_honor_inc_dec(noble_being * inc, noble_being * dec)
 {
-    if (inc->honor < 255) inc->honor++;
-    if (dec->honor > 0) dec->honor--;
+    if (inc->delta.honor < 255) inc->delta.honor++;
+    if (dec->delta.honor > 0) dec->delta.honor--;
 }
 
 void being_honor_swap(noble_being * victor, noble_being * vanquished)
 {
-    if (victor->honor < vanquished->honor)
+    if (victor->delta.honor < vanquished->delta.honor)
     {
         /** swap social status */
-        n_byte temp_hon = victor->honor;
-        victor->honor = vanquished->honor;
-        vanquished->honor = temp_hon;
+        n_byte temp_hon = victor->delta.honor;
+        victor->delta.honor = vanquished->delta.honor;
+        vanquished->delta.honor = temp_hon;
     }
 }
 
 n_int being_honor_compare(noble_being * first, noble_being * second)
 {
-    if (first->honor > second->honor)
+    if (first->delta.honor > second->delta.honor)
     {
         return 1;
     }
 
-    if (first->honor < second->honor)
+    if (first->delta.honor < second->delta.honor)
     {
         return -1;
     }
@@ -290,12 +312,12 @@ noble_social * being_social(noble_being * value)
 
 n_int being_location_x(noble_being * value)
 {
-    return (n_int)value->location[0];
+    return (n_int)value->delta.location[0];
 }
 
 n_int being_location_y(noble_being * value)
 {
-    return (n_int)value->location[1];
+    return (n_int)value->delta.location[1];
 }
 
 #define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
@@ -308,70 +330,101 @@ void being_high_res(noble_being * value, n_vect2 * vector)
 
 void being_space(noble_being * value, n_vect2 * vector)
 {
-    vector->x = value->location[0];
-    vector->y = value->location[1];
+    vector->x = value->delta.location[0];
+    vector->y = value->delta.location[1];
 }
 
 n_byte2 * being_location(noble_being * value)
 {
-    return value->location;
+    return value->delta.location;
 }
 
 void being_set_location(noble_being * value, n_byte2 * from)
 {
-    value->location[0] = from[0];
-    value->location[1] = from[1];
+    value->delta.location[0] = from[0];
+    value->delta.location[1] = from[1];
 }
 
 n_byte being_speed(noble_being * value)
 {
-    return value->velocity;
+    return value->delta.velocity;
 }
 
 void being_set_speed(noble_being * value, n_byte sp)
 {
-    value->velocity = sp;
+    value->delta.velocity = sp;
 }
 
 void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta)
 {
-    delta->x = primary->location[0] - secondary->location[0];
-    delta->y = primary->location[1] - secondary->location[1];
+    delta->x = primary->delta.location[0] - secondary->delta.location[0];
+    delta->y = primary->delta.location[1] - secondary->delta.location[1];
+}
+
+void being_add_parasites(noble_being * value)
+{
+    /* maximum number of parasites in the range 0-255 */
+    if (value->delta.parasites < ((GENE_HAIR(being_genetics(value))*255)>>4))
+    {
+        value->delta.parasites++;
+    }
+}
+
+void being_remove_parasites(noble_being * value, n_int number_of_parasites)
+{
+    if (value->delta.parasites > number_of_parasites)
+    {
+        value->delta.parasites -= number_of_parasites;
+    }
+    else
+    {
+        value->delta.parasites = 0;
+    }
+}
+
+n_int being_parasites(noble_being * value)
+{
+    return value->delta.parasites;
+}
+
+void being_set_parasites(noble_being * value, n_byte parasites)
+{
+    value->delta.parasites = parasites;
 }
 
 n_int being_dob(noble_being * value)
 {
-    return value->date_of_birth;
+    return value->constant.date_of_birth;
 }
 
 void being_facing_towards(noble_being * value, n_vect2 * vector)
 {
-    value->direction_facing = math_turn_towards(vector, value->direction_facing, 0);
+    value->delta.direction_facing = math_turn_towards(vector, value->delta.direction_facing, 0);
 }
 
 void being_wander(noble_being * value, n_int wander)
 {
-    value->direction_facing = (n_byte)((value->direction_facing + 256 + wander) & 255);
+    value->delta.direction_facing = (n_byte)((value->delta.direction_facing + 256 + wander) & 255);
 }
 
 static void being_facing_init(noble_being * value)
 {
-    value->direction_facing = (n_byte)(being_random(value) & 255);
+    value->delta.direction_facing = (n_byte)(being_random(value) & 255);
 }
 
 void being_facing_vector(noble_being * value, n_vect2 * vect, n_int divisor)
 {
-    vect2_direction(vect, value->direction_facing, divisor * 32);
+    vect2_direction(vect, value->delta.direction_facing, divisor * 32);
 }
 
 n_byte being_facing(noble_being * value)
 {
-    return value->direction_facing;
+    return value->delta.direction_facing;
 }
 
 n_genetics * being_genetics(noble_being * value)
 {
-    return value->genetics;
+    return value->constant.genetics;
 }
 
 n_int being_pregnant(noble_being * value)
@@ -387,7 +440,7 @@ n_genetics * being_fetal_genetics(noble_being * value)
 /* TODO: Remove this kind of access eventually */
 n_int   being_energy(noble_being * value)
 {
-    return value->stored_energy;
+    return value->delta.stored_energy;
 }
 
 n_int   being_energy_less_than(noble_being * value, n_int less_than)
@@ -397,24 +450,24 @@ n_int   being_energy_less_than(noble_being * value, n_int less_than)
 
 void  being_dead(noble_being * value)
 {
-    value->stored_energy = BEING_DEAD;
+    value->delta.stored_energy = BEING_DEAD;
 }
 
 void being_living(noble_being * value)
 {
-    value->stored_energy = BEING_FULL;
+    value->delta.stored_energy = BEING_FULL;
 }
 
 void   being_energy_delta(noble_being * value, n_int delta)
 {
-    n_int total = value->stored_energy + delta;
+    n_int total = value->delta.stored_energy + delta;
 
     if (total < BEING_DEAD)
     {
         total = BEING_DEAD;
     }
 
-    value->stored_energy = (n_byte2) total;
+    value->delta.stored_energy = (n_byte2) total;
 }
 
 n_int   being_drive(noble_being * value, enum drives_definition drive)
@@ -1527,8 +1580,8 @@ void being_remains(noble_simulation * sim, noble_being * dead)
     noble_remains * remains  = sim->remains;
     n_byte2         location = remains->location;
 
-    remains->bodies[location].location[0] = dead->location[0];
-    remains->bodies[location].location[1] = dead->location[1];
+    remains->bodies[location].location[0] = dead->delta.location[0];
+    remains->bodies[location].location[1] = dead->delta.location[1];
     remains->location = (remains->location + 1) % NUMBER_OF_BODIES;
 
     if (remains->count < NUMBER_OF_BODIES)
@@ -2834,7 +2887,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         episodic_self(sim, local, EVENT_SWIM, (affect_type)being_energy(local), 0);
 #endif
         /** bathing removes parasites */
-        if (local->parasites > 0) local->parasites--;
+        being_remove_parasites(local, 1);
     }
     else
     {
@@ -3363,13 +3416,13 @@ n_int being_init(noble_being * beings, n_int number,
     /** clear the generation numbers for mother and father */
     if (mother)
     {
-        local->generation_max = mother->child_generation_max + 1;
-        local->generation_min = mother->child_generation_min + 1;
+        local->constant.generation_max = mother->child_generation_max + 1;
+        local->constant.generation_min = mother->child_generation_min + 1;
     }
     else
     {
-        local->generation_max = 0;
-        local->generation_min = 0;
+        local->constant.generation_max = 0;
+        local->constant.generation_min = 0;
     }
     local->child_generation_max = 0;
     local->child_generation_min = 0;
@@ -3519,11 +3572,11 @@ n_int being_init(noble_being * beings, n_int number,
             being_set_unique_name(beings, number, local, 0L, 0L);
         }
         local->social_x = local->social_nx =
-                              (math_random(local->seed) & 32767)+16384;
+                              (math_random(local->delta.seed) & 32767)+16384;
         local->social_y = local->social_ny =
-                              (math_random(local->seed) & 32767)+16384;
+                              (math_random(local->delta.seed) & 32767)+16384;
 
-        local->date_of_birth = 0;
+        local->constant.date_of_birth = 0;
     }
     else
     {
@@ -3539,13 +3592,13 @@ n_int being_init(noble_being * beings, n_int number,
         genetics_set(being_genetics(local), being_fetal_genetics(mother));
 
         /** ascribed social status */
-        local->honor = (n_byte)being_honor(mother);
+        local->delta.honor = (n_byte)being_honor(mother);
 
         being_set_unique_name(beings, number, local,
                               being_family_name(mother),
                               mother->father_name[1]);
 
-        local->date_of_birth = land_date();
+        local->constant.date_of_birth = land_date();
     }
 
     being_living(local);
@@ -3561,10 +3614,10 @@ n_int being_init(noble_being * beings, n_int number,
         /** produce an initial distribution of heights and masses*/
         being_random3(local);
         being_set_height(local, BIRTH_HEIGHT +
-                         (local->seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT)));
+                         (local->delta.seed[0]%(BEING_MAX_HEIGHT-BIRTH_HEIGHT)));
 
         GET_M(local) = BIRTH_MASS +
-                       (local->seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
+                       (local->delta.seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
     }
 
     local->crowding = MIN_CROWDING;
@@ -3687,7 +3740,7 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
 
 void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data)
 {
-    value->honor = (n_byte)(((n_int)value->honor*220)/255);
+    value->delta.honor = (n_byte)(((n_int)(value->delta.honor)*220)/255);
 }
 
 static n_int being_remove_internal_value = 0;

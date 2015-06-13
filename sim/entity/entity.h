@@ -161,6 +161,8 @@ n_int being_brainstates(noble_being * value, n_int awake, n_byte2 * states);
 
 n_byte being_honor(noble_being * value);
 
+void being_honor_delta(noble_being * value, n_int delta);
+
 n_byte being_first_name(noble_being * value);
 
 void being_set_family_name(noble_being * value, n_byte first, n_byte last);
@@ -205,9 +207,18 @@ void  being_dead(noble_being * value);
 
 void   being_energy_delta(noble_being * value, n_int delta);
 
+n_int being_parasites(noble_being * value);
+
+void being_set_parasites(noble_being * value, n_byte parasites);
+
+void being_add_parasites(noble_being * value);
+
+void being_remove_parasites(noble_being * value, n_int number_of_parasites);
+
 n_int   being_drive(noble_being * value, enum drives_definition drive);
 
 n_int   being_height(noble_being * value);
+
 void    being_set_height(noble_being * value, n_int height);
 
 n_int   being_mass(noble_being * value);
