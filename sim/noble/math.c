@@ -324,13 +324,18 @@ void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
     }
 }
 
-void math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2)
+void math_pack(n_byte * alloc1, n_byte *alloc2)
 {
     n_int loop = 0;
-    while (loop < size)
+    while (loop < MAP_AREA)
     {
-        alloc1[loop]=value;
-        alloc2[loop]=value;
+        alloc1[loop]=128;
+        loop++;
+    }
+    loop = 0;
+    while (loop < MAP_AREA)
+    {
+        alloc2[loop]=128;
         loop++;
     }
 }

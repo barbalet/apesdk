@@ -1567,10 +1567,8 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
     io_string_write(string,name_str,location);
 }
 
-void being_remains_init(noble_simulation * sim)
+void being_remains_init(noble_remains * remains)
 {
-    noble_remains * remains = sim->remains;
-
     remains->count = 0;
     remains->location = 0;
 }

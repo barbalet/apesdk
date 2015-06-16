@@ -558,15 +558,19 @@ void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute
     }
 }
 
-void land_set_genetics(n_byte2 * genetics)
+void land_seed_genetics(n_uint seed_genetics)
 {
-    m_genetics[0] = genetics[0];
-    m_genetics[1] = genetics[1];
+    n_byte2 local_random[2];
+    local_random[0] = (n_byte2)(seed_genetics >> 16) & 0xffff;
+    local_random[1] = (n_byte2)(seed_genetics & 0xffff);
+    
+    m_genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+    m_genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
 }
 
 void land_init(n_byte * scratch, execute_thread_stub * exec)
 {
-    math_pack(MAP_AREA, 128, m_topology, scratch);
+    math_pack(m_topology, scratch);
 
     land_creation(m_topology, scratch, m_genetics, exec);
 }

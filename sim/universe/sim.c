@@ -482,11 +482,6 @@ static n_int sim_memory(n_uint offscreen_size)
 {
     n_uint	current_location = 0;
     n_uint  memory_allocated = MAXIMUM_ALLOCATION;
-
-    if (memory_allocated < MINIMAL_ALLOCATION)
-    {
-        return SHOW_ERROR("Not enough memory to run");
-    }
     
     offbuffer = io_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
 
@@ -513,18 +508,21 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
             interpret = 0L;
         }
     }
+    sim.real_time = randomise;
+    sim.last_time = randomise;
+    
+#ifdef FIXED_RANDOM_SIM
+    randomise = FIXED_RANDOM_SIM;
+#endif
+    
     sim.delta_cycles = 0;
     sim.count_cycles = 0;
     sim.delta_frames = 0;
     sim.count_frames = 0;
-    sim.real_time = randomise;
-    sim.last_time = randomise;
 
     sim.ext_birth = 0L;
-    sim.ext_death = 0L; /*&console_capture_death; */
-#ifdef FIXED_RANDOM_SIM
-    randomise = FIXED_RANDOM_SIM;
-#endif
+    sim.ext_death = 0L;
+    
     if ((kind == KIND_START_UP) || (kind == KIND_MEMORY_SETUP))
     {
         if (sim_memory(offscreen_size) != 0)
@@ -535,17 +533,10 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     }
     if ((kind != KIND_LOAD_FILE) && (kind != KIND_MEMORY_SETUP))
     {
-        n_byte2 local_genetics[2];
-        local_random[0] = (n_byte2)(randomise >> 16) & 0xffff;
-        local_random[1] = (n_byte2)(randomise & 0xffff);
-
-        local_genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
-        local_genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
-        land_set_genetics(local_genetics);
-
+        land_seed_genetics(randomise);
     }
 
-    being_remains_init(&sim); /* Eventually this should be captured through the file handling and moved into the code below */
+    being_remains_init(sim.remains); /* Eventually this should be captured through the file handling and moved into the code below */
 
     if (kind != KIND_MEMORY_SETUP)
     {

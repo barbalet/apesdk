@@ -138,7 +138,7 @@ void * io_new_range(n_uint memory_min, n_uint *memory_allocated)
             *memory_allocated = ((*memory_allocated) * 3) >> 2;
         }
     }
-    while((memory_buffer == 0L) && ((*memory_allocated)>memory_min));
+    while((memory_buffer == 0L) && ((*memory_allocated) > memory_min));
     return memory_buffer;
 }
 

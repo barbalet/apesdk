@@ -610,7 +610,7 @@ n_byte2 math_random(n_byte2 * local);
 void    math_random3(n_byte2 * local);
 n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);
 n_int   math_spread_byte(n_byte val);
-void    math_pack(n_int size, n_byte value, n_byte * alloc1, n_byte *alloc2);
+void    math_pack(n_byte * alloc1, n_byte *alloc2);
 n_int   math_memory_location(n_int px, n_int py);
 void    math_patch(n_byte * local_map,
                    n_memory_location * mem_func,
@@ -789,7 +789,7 @@ void  weather_cycle(void);
 weather_values weather_seven_values(n_int px, n_int py);
 
 void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec);
-void land_set_genetics(n_byte2 * genetics);
+void land_seed_genetics(n_uint seed_genetics);
 
 void land_init(n_byte * scratch, execute_thread_stub * exec);
 void land_init_high_def(n_byte double_spread);
