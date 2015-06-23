@@ -572,8 +572,14 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					AUTOMATION,
+				);
 				INFOPLIST_FILE = "Noble ApeTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				OTHER_CFLAGS = "-DAUTOMATED";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-ApeTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Noble Ape.app/Contents/MacOS/Noble Ape";
@@ -587,6 +593,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Noble ApeTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				OTHER_CFLAGS = "-DAUTOMATED";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-ApeTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Noble Ape.app/Contents/MacOS/Noble Ape";

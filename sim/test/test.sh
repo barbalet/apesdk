@@ -42,9 +42,11 @@ fi
 gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/compress.c -o compress.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/execute.c -o execute.o
+
 gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o audio.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
+
 gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/network.c -o network.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
@@ -76,6 +78,27 @@ gcc ${CFLAGS} -I/usr/include -o test_apescript *.o
 ./test_apescript check_apescript.txt
 
 rm test_apescript
+rm test_apescript.o
 
+gcc ${CFLAGS} -c $SOURCEDIR/entity/being.c -o being.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/body.c -o body.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/brain.c -o brain.o
+
+gcc ${CFLAGS} -c $SOURCEDIR/entity/drives.c -o drives.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/social.c -o social.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/speak.c -o speak.o
+
+gcc ${CFLAGS} -c $SOURCEDIR/entity/episodic.c -o episodic.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/food.c -o food.o
+
+gcc ${CFLAGS} -c $SOURCEDIR/universe/console.c -o console.o
+gcc ${CFLAGS} -c $SOURCEDIR/universe/file.c -o file.o
+gcc ${CFLAGS} -c $SOURCEDIR/universe/sim.c -o sim.o
+
+gcc ${CFLAGS} -c test_sim.c -o test_sim.o
+
+gcc ${CFLAGS} -I/usr/include -o test_sim *.o
+
+./test_sim
 
 rm *.o

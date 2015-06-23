@@ -531,11 +531,18 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         }
         execute_init();
     }
+
+    local_random[0] = (n_byte2)(randomise >> 16) & 0xffff;
+    local_random[1] = (n_byte2)(randomise & 0xffff);
+
+    
     if ((kind != KIND_LOAD_FILE) && (kind != KIND_MEMORY_SETUP))
     {
-        land_seed_genetics(randomise);
+        land_seed_genetics(local_random);
     }
 
+    
+    
     being_remains_init(sim.remains); /* Eventually this should be captured through the file handling and moved into the code below */
 
     if (kind != KIND_MEMORY_SETUP)

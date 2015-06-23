@@ -173,11 +173,7 @@ n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location,
     while (lpx < local->max)
     {
         noble_being * local_being = &(local->beings[ lpx ]);
-#ifdef BRAIN_ON
-        io_erase(local_being->brain, DOUBLE_BRAIN);
-#endif
-        io_erase((n_byte *)local_being->social, (SOCIAL_SIZE * sizeof(noble_social)));
-        io_erase((n_byte *)local_being->episodic, (EPISODIC_SIZE * sizeof(noble_episodic)));
+        io_erase((n_byte *)local_being, sizeof(noble_being));
         lpx ++;
     }
     return 0;

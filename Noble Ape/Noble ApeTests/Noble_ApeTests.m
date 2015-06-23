@@ -56,7 +56,7 @@ noble_being      * being = 0L;
 {
     [super setUp];
     
-    (void)shared_new(0x1382);
+    /*(void)shared_new(0x1382);*/
     
     value = sim_sim();
     
@@ -65,14 +65,15 @@ noble_being      * being = 0L;
 
 - (void)tearDown
 {
-    shared_close();
+    /*shared_close();*/
     // Tear-down code here.
     [super tearDown];
 }
 
 - (void) testTime
 {
-    XCTAssertTrue(land_time() == 0, @"Time is not initially zero");
+    n_byte4 time_value = land_time();
+    XCTAssertTrue(land_time() == 1, @"Time is %u", time_value);
 }
 
 - (void)testCheckInitialDate
@@ -83,7 +84,7 @@ noble_being      * being = 0L;
 - (void)testMapCheckSum
 {
     n_uint hash = math_hash((n_byte *)land_topology(), MAP_AREA);
-    XCTAssertTrue(hash == 0x3af2658629d5a81c, @"Hash doesn't comply with prior map hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x8059006e6bcbe5bd, @"Hash doesn't comply with prior map hashes (%lx)", hash);
 }
 /*
 - (void)testBeingCheckSum
@@ -105,7 +106,7 @@ noble_being      * being = 0L;
 - (void)testSocialCheckSum
 {
     n_uint hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
-    XCTAssertTrue(hash == 0xd453e49c78f1622d, @"Hash doesn't comply with prior social hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xc8f5d3e15e59fa1b, @"Hash doesn't comply with prior social hashes (%lx)", hash);
 }
 
 - (void)testEpisodicCheckSum
@@ -136,23 +137,14 @@ noble_being      * being = 0L;
 
 - (void)testMouseDrag
 {
-    XCTAssertTrue(being->delta.location[0] == 9644, @"X value is wrong (%d)", being->delta.location[0]);
-    XCTAssertTrue(being->delta.location[1] == 1486, @"Y value is wrong (%d)", being->delta.location[1]);
-    
     [self actionMouseClick];
-    shared_cycle(1000, NUM_VIEW, 512, 512);
-    shared_cycle(1000, NUM_TERRAIN, 512, 512);
     
     shared_mouseReceived(100, 100, NUM_VIEW);
     shared_mouseOption(1);
-    
-    shared_cycle(1000, NUM_VIEW, 512, 512);
-    shared_cycle(1000, NUM_TERRAIN, 512, 512);
+
     shared_mouseOption(0);
     shared_mouseUp();
-    
-    shared_cycle(1000, NUM_VIEW, 512, 512);
-    shared_cycle(1000, NUM_TERRAIN, 512, 512);
+
     NSLog(@"Location %d %d", being->delta.location[0], being->delta.location[1]);
     
     XCTAssertTrue(being->delta.location[0] == 6400, @"X value is wrong (%d)", being->delta.location[0]);

@@ -46,6 +46,13 @@
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
 
+#ifdef AUTOMATED
+
+#define FIXED_RANDOM_SIM 0x5261f726
+
+#endif
+
+
 #ifdef OVERWRITE_THREADED
 
 #else
@@ -789,7 +796,7 @@ void  weather_cycle(void);
 weather_values weather_seven_values(n_int px, n_int py);
 
 void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec);
-void land_seed_genetics(n_uint seed_genetics);
+void land_seed_genetics(n_byte2 * local_random);
 
 void land_init(n_byte * scratch, execute_thread_stub * exec);
 void land_init_high_def(n_byte double_spread);
