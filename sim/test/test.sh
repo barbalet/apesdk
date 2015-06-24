@@ -101,4 +101,6 @@ gcc ${CFLAGS} -I/usr/include -o test_sim *.o
 
 ./test_sim
 
+rm test_sim
+
 rm *.o

@@ -66,18 +66,18 @@ int main(int argc, const char * argv[])
         n_uint being_constant_hash = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
         n_uint being_delta_hash = math_hash((n_byte *)first_being_delta, sizeof(noble_being_delta));
         
-        if (being_hash != 0x469b11cf427b0816)
+        if (being_hash != 0x2ae161d7f87f512f)
         {
-            printf("being hash %lx\n", being_hash);
+            printf("(1)being hash %lx\n", being_hash);
         }
         
         if (being_constant_hash != 0xacbebd3b4ec84e3e)
         {
-            printf("being constant %lx\n", being_constant_hash);
+            printf("(1)being constant %lx\n", being_constant_hash);
         }
         if (being_delta_hash != 0x7e4f9731742fa5d4)
         {
-            printf("being delta %lx\n", being_delta_hash);
+            printf("(1)being delta %lx\n", being_delta_hash);
         }
         
         while (counter < 1000)
@@ -90,7 +90,7 @@ int main(int argc, const char * argv[])
         being_constant_hash = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
         being_delta_hash = math_hash((n_byte *)first_being_delta, sizeof(noble_being_delta));
         
-        if (being_hash != 0x91084c7f4d3fb1ad)
+        if (being_hash != 0x5a69d4fddfe3848d)
         {
             printf("being hash %lx\n", being_hash);
         }
@@ -99,7 +99,7 @@ int main(int argc, const char * argv[])
         {
             printf("being constant %lx\n", being_constant_hash);
         }
-        if (being_delta_hash != 0x31916ae7c6bf83b7)
+        if (being_delta_hash != 0x6117d1a9f10e0aa7)
         {
             printf("being delta %lx\n", being_delta_hash);
         }
