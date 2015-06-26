@@ -323,69 +323,69 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
         break;
 #endif
     case VARIABLE_GOAL_TYPE:
-        local_being->goal[0] = (n_byte) (value % 3);
+        local_being->wrong.goal[0] = (n_byte) (value % 3);
         break;
     case VARIABLE_GOAL_X:
-        local_being->goal[1] = (n_byte2) value;
+        local_being->wrong.goal[1] = (n_byte2) value;
         break;
     case VARIABLE_GOAL_Y:
-        local_being->goal[2] = (n_byte2) value;
+        local_being->wrong.goal[2] = (n_byte2) value;
         break;
     case VARIABLE_POSTURE:
         being_set_posture(local_being, (n_byte) value);
         break;
 
     case VARIABLE_DRIVE_HUNGER:
-        local_being->drives[DRIVE_HUNGER] = (n_byte) value;
+        local_being->wrong.drives[DRIVE_HUNGER] = (n_byte) value;
         break;
     case VARIABLE_DRIVE_SOCIAL:
-        local_being->drives[DRIVE_SOCIAL] = (n_byte) value;
+        local_being->wrong.drives[DRIVE_SOCIAL] = (n_byte) value;
         break;
     case VARIABLE_DRIVE_FATIGUE:
-        local_being->drives[DRIVE_FATIGUE] = (n_byte) value;
+        local_being->wrong.drives[DRIVE_FATIGUE] = (n_byte) value;
         break;
     case VARIABLE_DRIVE_SEX:
-        local_being->drives[DRIVE_SEX] = (n_byte) value;
+        local_being->wrong.drives[DRIVE_SEX] = (n_byte) value;
         break;
 
     case VARIABLE_PREFERENCE_MATE_HEIGHT_MALE:
-        local_being->learned_preference[PREFERENCE_MATE_HEIGHT_MALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_HEIGHT_MALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_MATE_HEIGHT_FEMALE:
-        local_being->learned_preference[PREFERENCE_MATE_HEIGHT_FEMALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_HEIGHT_FEMALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_MATE_PIGMENTATION_MALE:
-        local_being->learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_MATE_PIGMENTATION_FEMALE:
-        local_being->learned_preference[PREFERENCE_MATE_PIGMENTATION_FEMALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_PIGMENTATION_FEMALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_MATE_HAIR_MALE:
-        local_being->learned_preference[PREFERENCE_MATE_HAIR_MALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_HAIR_MALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_MATE_HAIR_FEMALE:
-        local_being->learned_preference[PREFERENCE_MATE_HAIR_FEMALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_HAIR_FEMALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_MATE_FRAME_MALE:
-        local_being->learned_preference[PREFERENCE_MATE_FRAME_MALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_FRAME_MALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_MATE_FRAME_FEMALE:
-        local_being->learned_preference[PREFERENCE_MATE_FRAME_FEMALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_MATE_FRAME_FEMALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_GROOM_MALE:
-        local_being->learned_preference[PREFERENCE_GROOM_MALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_GROOM_MALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_GROOM_FEMALE:
-        local_being->learned_preference[PREFERENCE_GROOM_FEMALE] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_GROOM_FEMALE] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_ANECDOTE_EVENT_MUTATION:
-        local_being->learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_ANECDOTE_AFFECT_MUTATION:
-        local_being->learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION] = (n_byte) value;
         break;
     case VARIABLE_PREFERENCE_CHAT:
-        local_being->learned_preference[PREFERENCE_CHAT] = (n_byte) value;
+        local_being->wrong.learned_preference[PREFERENCE_CHAT] = (n_byte) value;
         break;
     case VARIABLE_ATTENTION_ACTOR_INDEX:
         GET_A(local_being,ATTENTION_ACTOR) = (n_byte) (value % SOCIAL_SIZE);
@@ -643,29 +643,29 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         break;
 #endif
                     case VARIABLE_GOAL_TYPE:
-                        local_number = local_being->goal[0];
+                        local_number = local_being->wrong.goal[0];
                         break;
                     case VARIABLE_GOAL_X:
-                        local_number = local_being->goal[1];
+                        local_number = local_being->wrong.goal[1];
                         break;
                     case VARIABLE_GOAL_Y:
-                        local_number = local_being->goal[2];
+                        local_number = local_being->wrong.goal[2];
                         break;
                     case VARIABLE_POSTURE:
                         local_number = being_posture(local_being);
                         break;
 
                     case VARIABLE_DRIVE_HUNGER:
-                        local_number = local_being->drives[DRIVE_HUNGER];
+                        local_number = local_being->wrong.drives[DRIVE_HUNGER];
                         break;
                     case VARIABLE_DRIVE_SOCIAL:
-                        local_number = local_being->drives[DRIVE_SOCIAL];
+                        local_number = local_being->wrong.drives[DRIVE_SOCIAL];
                         break;
                     case VARIABLE_DRIVE_FATIGUE:
-                        local_number = local_being->drives[DRIVE_FATIGUE];
+                        local_number = local_being->wrong.drives[DRIVE_FATIGUE];
                         break;
                     case VARIABLE_DRIVE_SEX:
-                        local_number = local_being->drives[DRIVE_SEX];
+                        local_number = local_being->wrong.drives[DRIVE_SEX];
                         break;
 
                     case	VARIABLE_LOCATION_X:
@@ -687,43 +687,43 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_number = being_state(local_being);
                         break;
                     case	VARIABLE_PREFERENCE_MATE_HEIGHT_MALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_HEIGHT_MALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_HEIGHT_MALE];
                         break;
                     case	VARIABLE_PREFERENCE_MATE_HEIGHT_FEMALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_HEIGHT_FEMALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_HEIGHT_FEMALE];
                         break;
                     case	VARIABLE_PREFERENCE_MATE_PIGMENTATION_MALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE];
                         break;
                     case	VARIABLE_PREFERENCE_MATE_PIGMENTATION_FEMALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_PIGMENTATION_FEMALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_PIGMENTATION_FEMALE];
                         break;
                     case	VARIABLE_PREFERENCE_MATE_HAIR_MALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_HAIR_MALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_HAIR_MALE];
                         break;
                     case	VARIABLE_PREFERENCE_MATE_HAIR_FEMALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_HAIR_FEMALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_HAIR_FEMALE];
                         break;
                     case	VARIABLE_PREFERENCE_MATE_FRAME_MALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_FRAME_MALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_FRAME_MALE];
                         break;
                     case	VARIABLE_PREFERENCE_MATE_FRAME_FEMALE:
-                        local_number = local_being->learned_preference[PREFERENCE_MATE_FRAME_FEMALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_MATE_FRAME_FEMALE];
                         break;
                     case	VARIABLE_PREFERENCE_GROOM_MALE:
-                        local_number = local_being->learned_preference[PREFERENCE_GROOM_MALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_GROOM_MALE];
                         break;
                     case	VARIABLE_PREFERENCE_GROOM_FEMALE:
-                        local_number = local_being->learned_preference[PREFERENCE_GROOM_FEMALE];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_GROOM_FEMALE];
                         break;
                     case	VARIABLE_PREFERENCE_ANECDOTE_EVENT_MUTATION:
-                        local_number = local_being->learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION];
                         break;
                     case	VARIABLE_PREFERENCE_ANECDOTE_AFFECT_MUTATION:
-                        local_number = local_being->learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION];
                         break;
                     case	VARIABLE_PREFERENCE_CHAT:
-                        local_number = local_being->learned_preference[PREFERENCE_CHAT];
+                        local_number = local_being->wrong.learned_preference[PREFERENCE_CHAT];
                         break;
                     case	VARIABLE_ATTENTION_ACTOR_INDEX:
                         local_number = GET_A(local_being,ATTENTION_ACTOR);
@@ -735,22 +735,22 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_number = GET_A(local_being,ATTENTION_BODY);
                         break;
                     case	VARIABLE_SHOUT_CONTENT:
-                        local_number = local_being->shout[SHOUT_CONTENT];
+                        local_number = local_being->wrong.shout[SHOUT_CONTENT];
                         break;
                     case	VARIABLE_SHOUT_HEARD:
-                        local_number = local_being->shout[SHOUT_HEARD];
+                        local_number = local_being->wrong.shout[SHOUT_HEARD];
                         break;
                     case	VARIABLE_SHOUT_CTR:
-                        local_number = local_being->shout[SHOUT_CTR];
+                        local_number = local_being->wrong.shout[SHOUT_CTR];
                         break;
                     case	VARIABLE_SHOUT_VOLUME:
-                        local_number = local_being->shout[SHOUT_VOLUME];
+                        local_number = local_being->wrong.shout[SHOUT_VOLUME];
                         break;
                     case	VARIABLE_SHOUT_FAMILY0:
-                        local_number = local_being->shout[SHOUT_FAMILY0];
+                        local_number = local_being->wrong.shout[SHOUT_FAMILY0];
                         break;
                     case	VARIABLE_SHOUT_FAMILY1:
-                        local_number = local_being->shout[SHOUT_FAMILY1];
+                        local_number = local_being->wrong.shout[SHOUT_FAMILY1];
                         break;
 
                     case VARIABLE_SOCIAL_GRAPH_LOCATION_X:
@@ -856,13 +856,13 @@ void sim_start_conditions(void * vindividual, void * structure, void * data)
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = being_index(sim_sim(), local_being);
 
     variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = being_height(local_being);
-    variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->goal[0];
-    variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->goal[1];
-    variables[VARIABLE_GOAL_Y - VARIABLE_VECT_ANGLE] = local_being->goal[2];
-    variables[VARIABLE_DRIVE_HUNGER - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_HUNGER];
-    variables[VARIABLE_DRIVE_SOCIAL - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_SOCIAL];
-    variables[VARIABLE_DRIVE_FATIGUE - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_FATIGUE];
-    variables[VARIABLE_DRIVE_SEX - VARIABLE_VECT_ANGLE] = local_being->drives[DRIVE_SEX];
+    variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->wrong.goal[0];
+    variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->wrong.goal[1];
+    variables[VARIABLE_GOAL_Y - VARIABLE_VECT_ANGLE] = local_being->wrong.goal[2];
+    variables[VARIABLE_DRIVE_HUNGER - VARIABLE_VECT_ANGLE] = local_being->wrong.drives[DRIVE_HUNGER];
+    variables[VARIABLE_DRIVE_SOCIAL - VARIABLE_VECT_ANGLE] = local_being->wrong.drives[DRIVE_SOCIAL];
+    variables[VARIABLE_DRIVE_FATIGUE - VARIABLE_VECT_ANGLE] = local_being->wrong.drives[DRIVE_FATIGUE];
+    variables[VARIABLE_DRIVE_SEX - VARIABLE_VECT_ANGLE] = local_being->wrong.drives[DRIVE_SEX];
     variables[VARIABLE_FAMILY_NAME_ONE - VARIABLE_VECT_ANGLE] = being_family_first_name(local_being);
     variables[VARIABLE_FAMILY_NAME_TWO - VARIABLE_VECT_ANGLE] = being_family_second_name(local_being);
     variables[VARIABLE_HONOR - VARIABLE_VECT_ANGLE] = being_honor(local_being);
@@ -913,28 +913,28 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
 
     if (local_goal_type!=GOAL_NONE)
     {
-        local_being->goal[0]  = (n_byte2)local_goal_type;
-        local_being->goal[1]  = (n_byte2)local_goal_x;
-        local_being->goal[2]  = (n_byte2)local_goal_y;
-        local_being->goal[3]  = GOAL_TIMEOUT;
+        local_being->wrong.goal[0]  = (n_byte2)local_goal_type;
+        local_being->wrong.goal[1]  = (n_byte2)local_goal_x;
+        local_being->wrong.goal[2]  = (n_byte2)local_goal_y;
+        local_being->wrong.goal[3]  = GOAL_TIMEOUT;
 
-        local_being->script_overrides |= OVERRIDE_GOAL;
+        local_being->braindata.script_overrides |= OVERRIDE_GOAL;
     }
     if (local_drive_hunger>-1)
     {
-        local_being->drives[DRIVE_HUNGER]  = (n_byte)local_drive_hunger;
+        local_being->wrong.drives[DRIVE_HUNGER]  = (n_byte)local_drive_hunger;
     }
     if (local_drive_social>-1)
     {
-        local_being->drives[DRIVE_SOCIAL]  = (n_byte)local_drive_social;
+        local_being->wrong.drives[DRIVE_SOCIAL]  = (n_byte)local_drive_social;
     }
     if (local_drive_fatigue>-1)
     {
-        local_being->drives[DRIVE_FATIGUE]  = (n_byte)local_drive_fatigue;
+        local_being->wrong.drives[DRIVE_FATIGUE]  = (n_byte)local_drive_fatigue;
     }
     if (local_drive_sex>-1)
     {
-        local_being->drives[DRIVE_SEX]  = (n_byte)local_drive_sex;
+        local_being->wrong.drives[DRIVE_SEX]  = (n_byte)local_drive_sex;
     }
     being_set_family_name(local_being,(n_byte)local_family_name1,(n_byte)local_family_name2);
 
@@ -957,19 +957,19 @@ void file_audit(void)
         FILE_CHECK(&here.delta.seed[0]);
         FILE_CHECK(&here.delta.macro_state);
         FILE_CHECK(&here.braindata.brain_state[0]);
-        FILE_CHECK(&here.height);
-        FILE_CHECK(&here.mass);
-        FILE_CHECK(&here.script_overrides);
-        FILE_CHECK(&here.shout[0]);
+        FILE_CHECK(&here.delta.height);
+        FILE_CHECK(&here.delta.mass);
+        FILE_CHECK(&here.braindata.script_overrides);
+        FILE_CHECK(&here.wrong.shout[0]);
         FILE_CHECK(&here.delta.crowding);
-        FILE_CHECK(&here.posture);
-        FILE_CHECK(&here.inventory[0]);
+        FILE_CHECK(&here.delta.posture);
+        FILE_CHECK(&here.wrong.inventory[0]);
 
         FILE_CHECK(&here.delta.parasites);
         FILE_CHECK(&here.delta.honor);
 
         FILE_CHECK(&here.date_of_conception); /* constant */
-        FILE_CHECK(&here.attention[0]);
+        FILE_CHECK(&here.wrong.attention[0]);
         FILE_CHECK(&here.constant.genetics[0]);           /* constant */
         FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
         FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */
@@ -977,9 +977,9 @@ void file_audit(void)
         FILE_CHECK(&here.events.social_y);
         FILE_CHECK(&here.events.social_nx); /* why is this needed? */
         FILE_CHECK(&here.events.social_ny); /* why is this needed? */
-        FILE_CHECK(&here.drives[0]);
-        FILE_CHECK(&here.goal[0]);
-        FILE_CHECK(&here.learned_preference[0]);
+        FILE_CHECK(&here.wrong.drives[0]);
+        FILE_CHECK(&here.wrong.goal[0]);
+        FILE_CHECK(&here.wrong.learned_preference[0]);
         FILE_CHECK(&here.constant.generation_min);
         FILE_CHECK(&here.constant.generation_max);
         FILE_CHECK(&here.child_generation_min);

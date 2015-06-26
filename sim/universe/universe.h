@@ -867,7 +867,7 @@ enum mutation_type
 #define GENE_SUCKLING_RATE(gene)            GENE_VAL_REG(gene, 4, 14, 10, 15)
 
 /* A social drive threshold value above which beings interact */
-#define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->learned_preference[PREFERENCE_SOCIAL]))>>1)
+#define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->wrong.learned_preference[PREFERENCE_SOCIAL]))>>1)
 
 /** used with social_meet function to specify whether
     the location should be included within the social graph entry */
@@ -1081,6 +1081,9 @@ typedef struct
     n_byte      parasites;
     n_byte      honor;
     n_byte      crowding;
+    n_byte2     height;
+    n_byte2     mass;
+    n_byte      posture;
 } noble_being_delta;
 
 typedef struct
@@ -1090,6 +1093,7 @@ typedef struct
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
 #endif
+
     n_byte2     social_x;
     n_byte2     social_y;
     n_byte2     social_nx; /* why is this needed? */
@@ -1098,15 +1102,26 @@ typedef struct
 
 typedef struct
 {
+    n_byte2     goal[4];
+    n_byte      attention[ATTENTION_SIZE];
+    n_byte      drives[DRIVES];
+    
+    n_byte      shout[SHOUT_BYTES];
+    n_byte2     inventory[INVENTORY_SIZE];
+    n_byte      learned_preference[PREFERENCES];
+}noble_being_volatile;
+
+typedef struct
+{
 #ifdef BRAINCODE_ON
     n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
     noble_brain_probe brainprobe[BRAINCODE_PROBES];
 #endif
-    
 #ifdef BRAIN_ON
     n_byte            brain[DOUBLE_BRAIN];
 #endif
     n_byte2     brain_state[6];
+    n_byte2     script_overrides;
 } noble_being_brain;
 
 typedef struct
@@ -1115,25 +1130,18 @@ typedef struct
     noble_being_constant constant;
     noble_being_events   events;
     noble_being_brain    braindata;
-    n_byte2     height;
-    n_byte2     mass;
-    n_byte2     script_overrides;
-    n_byte      shout[SHOUT_BYTES];
-    n_byte      posture;
-    n_byte2     inventory[INVENTORY_SIZE];
-
-    n_byte4     date_of_conception;
-    n_byte      attention[ATTENTION_SIZE];
-    n_genetics  fetal_genetics[CHROMOSOMES];     /* constant */
-    n_byte2     father_name[2];                  /* why is this needed? */
-    n_byte      drives[DRIVES];
-    n_byte2     goal[4];
-    n_byte      learned_preference[PREFERENCES];
-    n_byte2     child_generation_min;
-    n_byte2     child_generation_max;
+    noble_being_volatile wrong;
 #ifdef IMMUNE_ON
     noble_immune_system immune_system;
 #endif
+    n_byte4     date_of_conception;
+
+    n_genetics  fetal_genetics[CHROMOSOMES];     /* constant */
+    n_byte2     father_name[2];                  /* why is this needed? */
+
+    n_byte2     child_generation_min;
+    n_byte2     child_generation_max;
+
 
 } noble_being;
 
@@ -1176,8 +1184,8 @@ typedef struct
 
 /* macros defined to ease in the vectorised code */
 
-#define GET_A(bei,index) ((bei)->attention[index])
-#define GET_M(bei)      ((bei)->mass)
+#define GET_A(bei,index) ((bei)->wrong.attention[index])
+#define GET_M(bei)      ((bei)->delta.mass)
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
 

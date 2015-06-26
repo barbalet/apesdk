@@ -64,6 +64,7 @@ int main(int argc, const char * argv[])
         noble_being_events * first_being_events = &(first_being->events);
         noble_being_brain * first_being_brain = &(first_being->braindata);
         noble_immune_system * first_being_immune = &(first_being->immune_system);
+        noble_being_volatile * first_being_volatile = &(first_being->wrong);
         
         n_uint being_hash = math_hash((n_byte *)first_being, sizeof(noble_being));
         n_uint being_constant_hash = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
@@ -71,6 +72,7 @@ int main(int argc, const char * argv[])
         n_uint being_events_hash = math_hash((n_byte *)first_being_events, sizeof(noble_being_events));
         n_uint being_brain_hash = math_hash((n_byte *)first_being_brain, sizeof(noble_being_brain));
         n_uint being_immune_hash = math_hash((n_byte*)first_being_immune, sizeof(noble_immune_system));
+        n_uint being_volatile_hash = math_hash((n_byte*)first_being_volatile, sizeof(noble_being_volatile));
 
         printf("(1)being hash %lx\n", being_hash);
         
@@ -83,6 +85,7 @@ int main(int argc, const char * argv[])
         printf("(1)being brain %lx\n", being_brain_hash);
         
         printf("(1)being immune %lx\n", being_immune_hash);
+        printf("(1)being volatile %lx\n", being_volatile_hash);
 
         while (counter < 1000)
         {
@@ -97,6 +100,7 @@ int main(int argc, const char * argv[])
         being_events_hash = math_hash((n_byte *)first_being_events, sizeof(noble_being_events));
         being_brain_hash = math_hash((n_byte *)first_being_brain, sizeof(noble_being_brain));
         being_immune_hash = math_hash((n_byte*)first_being_immune, sizeof(noble_immune_system));
+        being_volatile_hash = math_hash((n_byte*)first_being_volatile, sizeof(noble_being_volatile));
 
         printf("(2)being hash %lx\n", being_hash);
         
@@ -108,6 +112,8 @@ int main(int argc, const char * argv[])
         
         printf("(2)being brain %lx\n", being_brain_hash);
         printf("(2)being immune %lx\n", being_immune_hash);
+        printf("(2)being volatile %lx\n", being_volatile_hash);
+
     }
     sim_close();
     

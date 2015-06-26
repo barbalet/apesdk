@@ -924,7 +924,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         n_int n;
         for (n=0; n<INVENTORY_SIZE; n++)
         {
-            if (met_being->inventory[n] & INVENTORY_GROOMED) v++;
+            if (met_being->wrong.inventory[n] & INVENTORY_GROOMED) v++;
         }
         return (n_byte) (v<<4);
     }
@@ -934,7 +934,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         n_int n;
         for (n=0; n<INVENTORY_SIZE; n++)
         {
-            if (meeter_being->inventory[n] & INVENTORY_GROOMED) v++;
+            if (meeter_being->wrong.inventory[n] & INVENTORY_GROOMED) v++;
         }
         return (n_byte) (v<<4);
     }
@@ -946,7 +946,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         n_int n;
         for (n=0; n<INVENTORY_SIZE; n++)
         {
-            if (met_being->inventory[n] & INVENTORY_WOUND) v++;
+            if (met_being->wrong.inventory[n] & INVENTORY_WOUND) v++;
         }
         return (n_byte) (v<<4);
     }
@@ -956,7 +956,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
         n_int n;
         for (n=0; n<INVENTORY_SIZE; n++)
         {
-            if (meeter_being->inventory[n] & INVENTORY_WOUND) v++;
+            if (meeter_being->wrong.inventory[n] & INVENTORY_WOUND) v++;
         }
         return (n_byte) (v<<4);
     }
@@ -1273,9 +1273,9 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
         if ((internal!=0) &&
                 (!(being_state(meeter_being)&BEING_STATE_SHOUTING)) &&
                 (!(being_state(meeter_being)&BEING_STATE_SPEAKING)) &&
-                (meeter_being->shout[SHOUT_HEARD]>0))
+                (meeter_being->wrong.shout[SHOUT_HEARD]>0))
         {
-            return meeter_being->shout[SHOUT_HEARD];
+            return meeter_being->wrong.shout[SHOUT_HEARD];
         }
         break;
         break;
@@ -1325,12 +1325,12 @@ static void brain_first_action(noble_simulation * local_sim, n_byte awake,
         break;
         /** Set location goal */
     case 1:
-        if (!(meeter_being->script_overrides&OVERRIDE_GOAL))
+        if (!(meeter_being->braindata.script_overrides&OVERRIDE_GOAL))
         {
-            meeter_being->goal[0] = GOAL_LOCATION;
-            meeter_being->goal[1] = episodic[episode_index].space_time.location[0];
-            meeter_being->goal[2] = episodic[episode_index].space_time.location[1];
-            meeter_being->goal[3] = GOAL_TIMEOUT;
+            meeter_being->wrong.goal[0] = GOAL_LOCATION;
+            meeter_being->wrong.goal[1] = episodic[episode_index].space_time.location[0];
+            meeter_being->wrong.goal[2] = episodic[episode_index].space_time.location[1];
+            meeter_being->wrong.goal[3] = GOAL_TIMEOUT;
         }
         break;
         /** alter friend or foe value */
@@ -1464,7 +1464,7 @@ void brain_dialogue(
     else
     {
         /** variable number of itterations for chat */
-        max_itterations = 8 + meeter_being->learned_preference[PREFERENCE_CHAT];
+        max_itterations = 8 + meeter_being->wrong.learned_preference[PREFERENCE_CHAT];
     }
 
     i = 0;
@@ -1534,17 +1534,17 @@ void brain_dialogue(
                 if ((internal!=0) && (awake!=0) &&
                         (!(being_state(meeter_being)&BEING_STATE_SHOUTING)) &&
                         (!(being_state(meeter_being)&BEING_STATE_SPEAKING)) &&
-                        (meeter_being->shout[SHOUT_CONTENT]==0) &&
-                        (meeter_being->shout[SHOUT_HEARD]==0) &&
-                        (meeter_being->shout[SHOUT_CTR]==0) &&
+                        (meeter_being->wrong.shout[SHOUT_CONTENT]==0) &&
+                        (meeter_being->wrong.shout[SHOUT_HEARD]==0) &&
+                        (meeter_being->wrong.shout[SHOUT_CTR]==0) &&
                         (msg>0))
                 {
-                    meeter_being->shout[SHOUT_CTR] = SHOUT_REFRACTORY;
+                    meeter_being->wrong.shout[SHOUT_CTR] = SHOUT_REFRACTORY;
                     being_add_state(meeter_being, BEING_STATE_SHOUTING);
                     /** volume of message */
-                    meeter_being->shout[SHOUT_VOLUME] = pspace[0];
+                    meeter_being->wrong.shout[SHOUT_VOLUME] = pspace[0];
                     /** type of message */
-                    meeter_being->shout[SHOUT_CONTENT] = msg;
+                    meeter_being->wrong.shout[SHOUT_CONTENT] = msg;
                 }
                 break;
             }
@@ -1599,17 +1599,17 @@ void brain_dialogue(
 
                 if ((prf > 55) && (prf < 155))
                 {
-                    if (meeter_being->learned_preference[n] < 255)
+                    if (meeter_being->wrong.learned_preference[n] < 255)
                     {
-                        meeter_being->learned_preference[n]++;
+                        meeter_being->wrong.learned_preference[n]++;
                         addr1[0] = 0;
                     }
                 }
                 if (prf >= 155)
                 {
-                    if (meeter_being->learned_preference[n] > 0)
+                    if (meeter_being->wrong.learned_preference[n] > 0)
                     {
-                        meeter_being->learned_preference[n]--;
+                        meeter_being->wrong.learned_preference[n]--;
                         addr1[0] = 0;
                     }
                 }

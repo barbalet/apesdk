@@ -551,22 +551,22 @@ static void social_group_align_preferences(
     /** align preferences */
     for (i = 0; i < PREFERENCES; i++)
     {
-        n_int resultant = meeter_being->learned_preference[i];
-        if (resultant < met_being->learned_preference[i])
+        n_int resultant = meeter_being->wrong.learned_preference[i];
+        if (resultant < met_being->wrong.learned_preference[i])
         {
             if ((incr > 0) || ((incr < 0) && (resultant > 0)))
             {
                 resultant += incr;
             }
         }
-        else if (resultant > met_being->learned_preference[i])
+        else if (resultant > met_being->wrong.learned_preference[i])
         {
-            if ((incr > 0) || ((incr < 0) && (meeter_being->learned_preference[i]<255)))
+            if ((incr > 0) || ((incr < 0) && (meeter_being->wrong.learned_preference[i]<255)))
             {
                 resultant -= incr;
             }
         }
-        meeter_being->learned_preference[i] = (n_byte)resultant;
+        meeter_being->wrong.learned_preference[i] = (n_byte)resultant;
     }
 }
 
@@ -587,7 +587,7 @@ static n_int social_attraction_pigmentation(
         favour attractive mates */
     ppref = NATURE_NURTURE(
                 GENE_PIGMENTATION_PREFERENCE(being_genetics(being_meeter)),
-                being_meeter->learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE+fem]);
+                being_meeter->wrong.learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE+fem]);
 
     pdiff = GENE_PIGMENTATION(being_genetics(being_met)) - ppref;
 
@@ -617,7 +617,7 @@ static n_int social_attraction_hair(
 
     ppref = NATURE_NURTURE(
                 GENE_HAIR_PREFERENCE(being_genetics(meeter_being)),
-                meeter_being->learned_preference[PREFERENCE_MATE_HAIR_MALE+fem]);
+                meeter_being->wrong.learned_preference[PREFERENCE_MATE_HAIR_MALE+fem]);
     pdiff = GENE_HAIR(being_genetics(met_being)) - ppref;
 
     if ((pdiff >= -2) && (pdiff <= 2))
@@ -646,7 +646,7 @@ static n_int social_attraction_height(
 
     ppref = NATURE_NURTURE(
                 GENE_HEIGHT_PREFERENCE(being_genetics(meeter_being)),
-                meeter_being->learned_preference[PREFERENCE_MATE_HEIGHT_MALE+fem]);
+                meeter_being->wrong.learned_preference[PREFERENCE_MATE_HEIGHT_MALE+fem]);
 
     /** prefer taller or shorter,
     < 8  don't care about height
@@ -689,7 +689,7 @@ static n_int social_attraction_frame(
 
     ppref = NATURE_NURTURE(
                 GENE_FRAME_PREFERENCE(being_genetics(meeter_being)),
-                meeter_being->learned_preference[PREFERENCE_MATE_FRAME_MALE+fem]);
+                meeter_being->wrong.learned_preference[PREFERENCE_MATE_FRAME_MALE+fem]);
 
     if ((ppref>6) && (ppref<=11) && (GET_BODY_FAT(met_being) > GET_BODY_FAT(meeter_being)))
     {
@@ -1128,7 +1128,7 @@ n_byte social_groom(
             /** grooming preference */
             gpref = NATURE_NURTURE(
                         GENE_GROOM(being_genetics(meeter_being)),
-                        meeter_being->learned_preference[PREFERENCE_GROOM_MALE+fem]);
+                        meeter_being->wrong.learned_preference[PREFERENCE_GROOM_MALE+fem]);
         }
         /** individuals which are familiar tend to groom more often */
         if (groomprob <
@@ -1141,16 +1141,16 @@ n_byte social_groom(
             /** pick a body location to groom */
             groomloc = GET_A(meeter_being,ATTENTION_BODY);
             groom_decisions = 0;
-            while ((met_being->inventory[groomloc] & INVENTORY_GROOMED) && (groom_decisions<4))
+            while ((met_being->wrong.inventory[groomloc] & INVENTORY_GROOMED) && (groom_decisions<4))
             {
-                met_being->inventory[groomloc] |= INVENTORY_GROOMED;
+                met_being->wrong.inventory[groomloc] |= INVENTORY_GROOMED;
                 groomloc = (n_byte)(being_random(meeter_being) % INVENTORY_SIZE);
                 groom_decisions++;
             }
             /** groomed wounds disappear */
-            if (met_being->inventory[groomloc] & INVENTORY_WOUND)
+            if (met_being->wrong.inventory[groomloc] & INVENTORY_WOUND)
             {
-                met_being->inventory[groomloc] = INVENTORY_GROOMED;
+                met_being->wrong.inventory[groomloc] = INVENTORY_GROOMED;
             }
             /** grooming location becomes the new focus of attention */
             GET_A(meeter_being, ATTENTION_BODY) = groomloc;
@@ -1279,7 +1279,7 @@ n_byte2 social_squabble(
             if (distance > SQUABBLE_SHOW_FORCE_DISTANCE)
             {
                 /** show of force */
-                vanquished->inventory[punchloc] = 0;
+                vanquished->wrong.inventory[punchloc] = 0;
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_SHOWFORCE);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_SHOWFORCE);
 
@@ -1288,7 +1288,7 @@ n_byte2 social_squabble(
             else
             {
                 /** attack */
-                vanquished->inventory[punchloc] = INVENTORY_WOUND;
+                vanquished->wrong.inventory[punchloc] = INVENTORY_WOUND;
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_ATTACK);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_ATTACK);
                 being_honor_swap(victor, vanquished);
@@ -1403,8 +1403,8 @@ n_uint social_respect_mean(
     being_reset_drive(female, DRIVE_SEX);
     being_reset_drive(male, DRIVE_SEX);
 
-    female->goal[0]=GOAL_NONE;
-    male->goal[0]=GOAL_NONE;
+    female->wrong.goal[0]=GOAL_NONE;
+    male->wrong.goal[0]=GOAL_NONE;
 
     /** remember the event */
     episodic_interaction(sim, female, male, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(female))*AFFECT_MATE), 0);
@@ -1625,15 +1625,15 @@ n_int social_chat(
         episodic_interaction(sim, meeter_being, met_being, EVENT_CHAT, AFFECT_CHAT, 0);
         /** pick one of the individuals from their graph */
         idx=-1;
-        if (meeter_being->goal[0]==GOAL_MATE)
+        if (meeter_being->wrong.goal[0]==GOAL_MATE)
         {
             /** ask about an individual we're searching for */
             for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
             {
                 if (!SOCIAL_GRAPH_ENTRY_EMPTY(met_graph,i))
                 {
-                    if ((met_graph[i].first_name[BEING_MET]==meeter_being->goal[1]) &&
-                            (met_graph[i].family_name[BEING_MET]==meeter_being->goal[2]))
+                    if ((met_graph[i].first_name[BEING_MET]==meeter_being->wrong.goal[1]) &&
+                            (met_graph[i].family_name[BEING_MET]==meeter_being->wrong.goal[2]))
                     {
                         idx=i;
                         break;
@@ -1767,7 +1767,7 @@ void social_goals(
     n_int delta_x=0, delta_y=0, distsqr;
     n_byte2 goal;
     n_vect2 delta_vector,location_vector;
-    goal = local->goal[0];
+    goal = local->wrong.goal[0];
     switch(goal)
     {
         /** move towards a location */
@@ -1775,7 +1775,7 @@ void social_goals(
     {
         if ((being_state(local) & BEING_STATE_SWIMMING) == 0)
         {
-            vect2_byte2(&delta_vector, (n_byte2 *)&(local->goal[1]));
+            vect2_byte2(&delta_vector, (n_byte2 *)&(local->wrong.goal[1]));
             vect2_byte2(&location_vector, being_location(local));
             vect2_subtract(&delta_vector, &location_vector, &delta_vector);
             being_facing_towards(local, &delta_vector);
@@ -1792,21 +1792,21 @@ void social_goals(
                 ((being_state(local) & BEING_STATE_SWIMMING) != 0))
         {
             /** destination reached - goal cancelled */
-            local->goal[0] = GOAL_NONE;
+            local->wrong.goal[0] = GOAL_NONE;
             /** clear any script override */
-            local->script_overrides -= OVERRIDE_GOAL;
+            local->braindata.script_overrides -= OVERRIDE_GOAL;
         }
     }
 
     /** decrement the goal counter */
-    if (local->goal[3] > 0)
+    if (local->wrong.goal[3] > 0)
     {
-        local->goal[3]--;
+        local->wrong.goal[3]--;
     }
     else
     {
         /** timed out */
-        local->goal[0] = GOAL_NONE;
+        local->wrong.goal[0] = GOAL_NONE;
     }
 }
 
