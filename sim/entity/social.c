@@ -462,7 +462,7 @@ static void social_meet_update_features(
 
     noble_featureset_update(&meeter_social_graph[social_graph_index].classification,
                             FEATURESET_TERRITORY,
-                            meeter_being->territory[idx].name);
+                            meeter_being->events.territory[idx].name);
 #endif
 }
 
@@ -1536,7 +1536,7 @@ static void social_chat_territory(
 
     idx = APESPACE_TO_TERRITORY(being_location_y(meeter_being))*TERRITORY_DIMENSION +
           APESPACE_TO_TERRITORY(being_location_x(meeter_being));
-    if (meeter_being->territory[idx].name==0)
+    if (meeter_being->events.territory[idx].name==0)
     {
         i=0;
         for (y=-1; y<=1; y++)
@@ -1548,7 +1548,7 @@ static void social_chat_territory(
                     idx2 = idx + (y*TERRITORY_DIMENSION+x);
                     if (idx2<0) idx2+=TERRITORY_AREA;
                     if (idx2>=TERRITORY_AREA) idx2-=TERRITORY_AREA;
-                    i = meeter_being->territory[idx2].name;
+                    i = meeter_being->events.territory[idx2].name;
                     if (i>0)
                     {
                         y = 2;
@@ -1562,7 +1562,7 @@ static void social_chat_territory(
         {
             i = 1 + (n_byte)(being_random(meeter_being) & 255);
         }
-        meeter_being->territory[idx].name = (n_byte)i;
+        meeter_being->events.territory[idx].name = (n_byte)i;
     }
 
     /** take advice from more honorable friends */
@@ -1570,19 +1570,19 @@ static void social_chat_territory(
     {
         if (being_honor_compare(met_being, meeter_being) == 1)
         {
-            if (met_being->territory[idx].name > 0)
+            if (met_being->events.territory[idx].name > 0)
             {
-                meeter_being->territory[idx].name =
-                    met_being->territory[idx].name;
+                meeter_being->events.territory[idx].name =
+                    met_being->events.territory[idx].name;
             }
         }
         else
         {
             if ((being_honor_compare(met_being, meeter_being) == -1) &&
-                    (meeter_being->territory[idx].name > 0))
+                    (meeter_being->events.territory[idx].name > 0))
             {
-                met_being->territory[idx].name =
-                    meeter_being->territory[idx].name;
+                met_being->events.territory[idx].name =
+                    meeter_being->events.territory[idx].name;
             }
         }
     }
@@ -1816,7 +1816,7 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
     n_uint social_loop = 0;
     n_vect2 location, sum_delta = {0,0};
     n_int   familiar_being_count = 0;
-    vect2_byte2(&location,(n_byte2 *)&(local_being->social_x));
+    vect2_byte2(&location,(n_byte2 *)&(local_being->events.social_x));
     while ( social_loop < SOCIAL_SIZE_BEINGS )
     {
         noble_social * specific_individual = &(being_social(local_being)[social_loop]);
@@ -1839,7 +1839,7 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
 
                 familiar_being_count++;
 
-                vect2_byte2(&familiar_location,(n_byte2 *)&(specific_being->social_x));
+                vect2_byte2(&familiar_location,(n_byte2 *)&(specific_being->events.social_x));
 
                 vect2_subtract(&weighted_delta, &familiar_location, &location);
 
@@ -1859,7 +1859,7 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
     {
         vect2_d(&location,&sum_delta,1,(familiar_being_count*20));
     }
-    vect2_back_byte2(&location,(n_byte2 *)&(local_being->social_nx));
+    vect2_back_byte2(&location,(n_byte2 *)&(local_being->events.social_nx));
 }
 
 /**
@@ -1869,6 +1869,6 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
  */
 void social_secondary_loop(noble_simulation * local, noble_being * local_being, void * data)
 {
-    local_being->social_x = local_being->social_nx;
-    local_being->social_y = local_being->social_ny;
+    local_being->events.social_x = local_being->events.social_nx;
+    local_being->events.social_y = local_being->events.social_ny;
 }

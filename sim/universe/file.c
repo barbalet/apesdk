@@ -956,12 +956,12 @@ void file_audit(void)
         FILE_CHECK(&here.constant.date_of_birth);
         FILE_CHECK(&here.delta.seed[0]);
         FILE_CHECK(&here.delta.macro_state);
-        FILE_CHECK(&here.brain_state[0]);
+        FILE_CHECK(&here.braindata.brain_state[0]);
         FILE_CHECK(&here.height);
         FILE_CHECK(&here.mass);
         FILE_CHECK(&here.script_overrides);
         FILE_CHECK(&here.shout[0]);
-        FILE_CHECK(&here.crowding);
+        FILE_CHECK(&here.delta.crowding);
         FILE_CHECK(&here.posture);
         FILE_CHECK(&here.inventory[0]);
 
@@ -973,10 +973,10 @@ void file_audit(void)
         FILE_CHECK(&here.constant.genetics[0]);           /* constant */
         FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
         FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */
-        FILE_CHECK(&here.social_x);
-        FILE_CHECK(&here.social_y);
-        FILE_CHECK(&here.social_nx); /* why is this needed? */
-        FILE_CHECK(&here.social_ny); /* why is this needed? */
+        FILE_CHECK(&here.events.social_x);
+        FILE_CHECK(&here.events.social_y);
+        FILE_CHECK(&here.events.social_nx); /* why is this needed? */
+        FILE_CHECK(&here.events.social_ny); /* why is this needed? */
         FILE_CHECK(&here.drives[0]);
         FILE_CHECK(&here.goal[0]);
         FILE_CHECK(&here.learned_preference[0]);
@@ -985,20 +985,20 @@ void file_audit(void)
         FILE_CHECK(&here.child_generation_min);
         FILE_CHECK(&here.child_generation_max);
 #ifdef TERRITORY_ON
-        FILE_CHECK(&here.territory[0]);
+        FILE_CHECK(&here.events.territory[0]);
 #endif
 #ifdef IMMUNE_ON
         FILE_CHECK(&here.immune_system);
 #endif
 #ifdef BRAINCODE_ON
-        FILE_CHECK(&here.braincode_register[0]);
-        FILE_CHECK(&here.brainprobe[0]);
+        FILE_CHECK(&here.braindata.braincode_register[0]);
+        FILE_CHECK(&here.braindata.brainprobe[0]);
 #endif
 #ifdef BRAIN_ON
-        FILE_CHECK(&here.brain[0]);
+        FILE_CHECK(&here.braindata.brain[0]);
 #endif
-        FILE_CHECK(&here.social[0]);
-        FILE_CHECK(&here.episodic[0]);
+        FILE_CHECK(&here.events.social[0]);
+        FILE_CHECK(&here.events.episodic[0]);
     }
     {
         noble_social here;

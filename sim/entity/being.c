@@ -183,18 +183,18 @@ static void being_set_brainatates(noble_being * value, n_int asleep, n_byte2 val
 {
     n_int three_offset = (asleep ? 0 : 3);
 
-    value->brain_state[three_offset + 0] = val1;
-    value->brain_state[three_offset + 1] = val2;
-    value->brain_state[three_offset + 2] = val3;
+    value->braindata.brain_state[three_offset + 0] = val1;
+    value->braindata.brain_state[three_offset + 1] = val2;
+    value->braindata.brain_state[three_offset + 2] = val3;
 }
 
 n_int being_brainstates(noble_being * value, n_int asleep, n_byte2 * states)
 {
     n_int three_offset = (asleep ? 0 : 3);
 
-    states[0] = value->brain_state[three_offset + 0];
-    states[1] = value->brain_state[three_offset + 1];
-    states[2] = value->brain_state[three_offset + 2];
+    states[0] = value->braindata.brain_state[three_offset + 0];
+    states[1] = value->braindata.brain_state[three_offset + 1];
+    states[2] = value->braindata.brain_state[three_offset + 2];
 
     return ((states[0] != 0) || (states[1] != 1024) || (states[2] != 0));
 }
@@ -291,19 +291,19 @@ n_int being_posture_under(noble_being * value, enum posture_type post)
 #ifdef BRAIN_ON
 n_byte * being_brain(noble_being * value)
 {
-    return value->brain;
+    return value->braindata.brain;
 }
 #endif
 
 noble_episodic * being_episodic(noble_being * value)
 {
-    return value->episodic;
+    return value->events.episodic;
 
 }
 
 noble_social * being_social(noble_being * value)
 {
-    return value->social;
+    return value->events.social;
 }
 
 n_int being_location_x(noble_being * value)
@@ -2131,6 +2131,42 @@ void being_change_selected(noble_simulation * sim, n_byte forwards)
     sim_set_select(local_select);
 }
 
+n_byte being_crowding(noble_being * value)
+{
+    return value->delta.crowding;
+}
+
+void being_crowding_cycle(noble_being * value, n_int beings_in_vacinity)
+{
+    /** if the being is not overcrowded and its social drive is not saturated */
+    if (beings_in_vacinity < (value->delta.crowding + SOCIAL_TOLLERANCE))
+    {
+        /** increase the social drive */
+        being_inc_drive(value, DRIVE_SOCIAL);
+    }
+    else
+    {
+        /** decrease the social drive */
+        being_dec_drive(value, DRIVE_SOCIAL);
+    }
+    
+    /** Adjust crowding (typical expected number of neighbours). */
+    if (beings_in_vacinity < value->delta.crowding)
+    {
+        if (value->delta.crowding > MIN_CROWDING)
+        {
+            value->delta.crowding--;
+        }
+    }
+    if (beings_in_vacinity > value->delta.crowding)
+    {
+        if (value->delta.crowding < MAX_CROWDING)
+        {
+            value->delta.crowding++;
+        }
+    }
+}
+
 /**
  This checks to see if the Noble Ape is awake
  @param sim The simulation pointer
@@ -2229,17 +2265,17 @@ static void being_brain_probe(noble_being * local)
 
     while (i < BRAINCODE_PROBES)
     {
-        count[local->brainprobe[i++].type]++;
+        count[local->braindata.brainprobe[i++].type]++;
     }
 
     /** check to ensure that there are a minimum number of sensors and actuators */
     if (count[INPUT_SENSOR] < (BRAINCODE_PROBES>>2))
     {
-        local->brainprobe[0].type = INPUT_SENSOR;
+        local->braindata.brainprobe[0].type = INPUT_SENSOR;
     }
     else if (count[OUTPUT_ACTUATOR] < (BRAINCODE_PROBES>>2))
     {
-        local->brainprobe[0].type = OUTPUT_ACTUATOR;
+        local->braindata.brainprobe[0].type = OUTPUT_ACTUATOR;
     }
 
     /** update each probe */
@@ -2247,27 +2283,27 @@ static void being_brain_probe(noble_being * local)
 
     while (i < BRAINCODE_PROBES)
     {
-        local->brainprobe[i].state++;
-        if (local->brainprobe[i].state >= local->brainprobe[i].frequency)
+        local->braindata.brainprobe[i].state++;
+        if (local->braindata.brainprobe[i].state >= local->braindata.brainprobe[i].frequency)
         {
             n_byte * local_braincode = being_braincode_internal(local);
             /** position within the brain */
-            n_int position_in_brain = ((local->brainprobe[i].position * (SINGLE_BRAIN>>8))) & (SINGLE_BRAIN-1);
-            n_int position_in_braincode = local->brainprobe[i].address % BRAINCODE_SIZE;
+            n_int position_in_brain = ((local->braindata.brainprobe[i].position * (SINGLE_BRAIN>>8))) & (SINGLE_BRAIN-1);
+            n_int position_in_braincode = local->braindata.brainprobe[i].address % BRAINCODE_SIZE;
 
-            local->brainprobe[i].state = 0;
+            local->braindata.brainprobe[i].state = 0;
 
-            if (local->brainprobe[i].type == INPUT_SENSOR)
+            if (local->braindata.brainprobe[i].type == INPUT_SENSOR)
             {
                 /** address within braincode */
-                n_int set_value = (local_brain[position_in_brain] + local->brainprobe[i].offset)&255;
+                n_int set_value = (local_brain[position_in_brain] + local->braindata.brainprobe[i].offset)&255;
                 /** read from brain */
                 local_braincode[position_in_braincode] = (n_byte)set_value;
             }
             else
             {
                 /** address within braincode */
-                n_int set_value = (local_braincode[position_in_braincode] + local->brainprobe[i].offset)&255;
+                n_int set_value = (local_braincode[position_in_braincode] + local->braindata.brainprobe[i].offset)&255;
                 /** write to brain */
                 local_brain[position_in_brain] = (n_byte)set_value;
             }
@@ -3129,16 +3165,16 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         APESPACE_TO_TERRITORY(being_location_y(local))*TERRITORY_DIMENSION +
         APESPACE_TO_TERRITORY(being_location_x(local));
 
-    if (local->territory[territory_index].familiarity<65534)
+    if (local->events.territory[territory_index].familiarity<65534)
     {
-        local->territory[territory_index].familiarity++;
+        local->events.territory[territory_index].familiarity++;
     }
     else
     {
         /** rescale familiarity values */
         for (territory_index=0; territory_index<TERRITORY_AREA; territory_index++)
         {
-            local->territory[territory_index].familiarity>>=2;
+            local->events.territory[territory_index].familiarity>>=2;
         }
     }
 #endif
@@ -3487,7 +3523,7 @@ n_int being_init(noble_being * beings, n_int number,
     for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
     {
         being_random3(local);
-        local->braincode_register[ch] = (n_byte)being_random(local)&255;
+        local->braindata.braincode_register[ch] = (n_byte)being_random(local)&255;
     }
 
     /** initialize brainprobes */
@@ -3496,18 +3532,18 @@ n_int being_init(noble_being * beings, n_int number,
         being_random3(local);
         if (being_random(local)&1)
         {
-            local->brainprobe[ch].type = INPUT_SENSOR;
+            local->braindata.brainprobe[ch].type = INPUT_SENSOR;
         }
         else
         {
-            local->brainprobe[ch].type = OUTPUT_ACTUATOR;
+            local->braindata.brainprobe[ch].type = OUTPUT_ACTUATOR;
         }
-        local->brainprobe[ch].frequency = (n_byte)1 + (being_random(local)%BRAINCODE_MAX_FREQUENCY);
+        local->braindata.brainprobe[ch].frequency = (n_byte)1 + (being_random(local)%BRAINCODE_MAX_FREQUENCY);
         being_random3(local);
-        local->brainprobe[ch].address = (n_byte)being_random(local)&255;
-        local->brainprobe[ch].position = (n_byte)being_random(local)&255;
+        local->braindata.brainprobe[ch].address = (n_byte)being_random(local)&255;
+        local->braindata.brainprobe[ch].position = (n_byte)being_random(local)&255;
         being_random3(local);
-        local->brainprobe[ch].offset = (n_byte)being_random(local)&255;
+        local->braindata.brainprobe[ch].offset = (n_byte)being_random(local)&255;
     }
 #endif
 
@@ -3565,9 +3601,9 @@ n_int being_init(noble_being * beings, n_int number,
 
             being_set_unique_name(beings, number, local, 0L, 0L);
         }
-        local->social_x = local->social_nx =
+        local->events.social_x = local->events.social_nx =
                               (math_random(local->delta.seed) & 32767)+16384;
-        local->social_y = local->social_ny =
+        local->events.social_y = local->events.social_ny =
                               (math_random(local->delta.seed) & 32767)+16384;
 
         local->constant.date_of_birth = 0;
@@ -3580,8 +3616,8 @@ n_int being_init(noble_being * beings, n_int number,
         being_wander(local, being_facing(mother) - being_facing(local));
 
         (void) being_random(local);
-        local->social_x = local->social_nx = mother->social_x;
-        local->social_y = local->social_ny = mother->social_y;
+        local->events.social_x = local->events.social_nx = mother->events.social_x;
+        local->events.social_y = local->events.social_ny = mother->events.social_y;
 
         genetics_set(being_genetics(local), being_fetal_genetics(mother));
 
@@ -3614,7 +3650,7 @@ n_int being_init(noble_being * beings, n_int number,
                        (local->delta.seed[1]%(BEING_MAX_MASS_G-BIRTH_MASS));
     }
 
-    local->crowding = MIN_CROWDING;
+    local->delta.crowding = MIN_CROWDING;
 #ifdef BRAIN_ON
     if (being_brain(local))
     {

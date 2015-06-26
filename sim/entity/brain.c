@@ -842,7 +842,7 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 3:
         return being_parasites(met_being);
     case 4:
-        return meeter_being->crowding;
+        return being_crowding(meeter_being);
     case 5:
         return being_family_first_name(meeter_being);
     case 6:
@@ -974,15 +974,15 @@ static n_byte territory_familiarity(noble_being * local_being,
 {
     n_byte result=0;
 #ifdef TERRITORY_ON
-    n_uint familiarity = (n_uint)(local_being->territory[index].familiarity);
+    n_uint familiarity = (n_uint)(local_being->events.territory[index].familiarity);
     n_uint i,max_familiarity = 1;
 
     /** find the maximum familiarity */
     for (i=0; i<TERRITORY_AREA; i++)
     {
-        if (local_being->territory[i].familiarity > max_familiarity)
+        if (local_being->events.territory[i].familiarity > max_familiarity)
         {
-            max_familiarity = (n_uint)local_being->territory[i].familiarity;
+            max_familiarity = (n_uint)local_being->events.territory[i].familiarity;
         }
     }
 
@@ -1103,7 +1103,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
     case 19:
 #ifdef TERRITORY_ON
         /** territory name */
-        *local_addr10 = meeter_being->territory[territory_index].name;
+        *local_addr10 = meeter_being->events.territory[territory_index].name;
 #endif
         break;
     case 20:
@@ -1403,7 +1403,7 @@ static void brain_first_action(noble_simulation * local_sim, n_byte awake,
         n_int  n = pspace0 % BRAINCODE_PROBES;
         n_byte f = 1 + (is_const1 % BRAINCODE_MAX_FREQUENCY);
 
-        meeter_being->brainprobe[n].frequency = f;
+        meeter_being->braindata.brainprobe[n].frequency = f;
         break;
     }
     }
@@ -1443,7 +1443,7 @@ void brain_dialogue(
     noble_social * meeter_social_graph = being_social(meeter_being);
     noble_episodic * episodic = being_episodic(meeter_being);
     n_int max_itterations;
-    n_byte * pspace = (n_byte*)meeter_being->braincode_register;
+    n_byte * pspace = (n_byte*)meeter_being->braindata.braincode_register;
 
     /* what is the current actor index within episodic memory? */
     if (being_index>-1)
@@ -1513,7 +1513,7 @@ void brain_dialogue(
                 n_int  n = pspace[0] % BRAINCODE_PROBES;
                 n_byte typ = IS_CONST1 & 1;
 
-                meeter_being->brainprobe[n].type = typ;
+                meeter_being->braindata.brainprobe[n].type = typ;
                 break;
             }
             case 1: /** brainprobe address */
@@ -1521,7 +1521,7 @@ void brain_dialogue(
                 n_int n = pspace[0] % BRAINCODE_PROBES;
                 n_byte adr = IS_CONST1;
 
-                meeter_being->brainprobe[n].address = adr;
+                meeter_being->braindata.brainprobe[n].address = adr;
                 break;
             }
             case 2: /** shout out */
@@ -1566,7 +1566,7 @@ void brain_dialogue(
                 n_int n = pspace[0] % BRAINCODE_PROBES;
                 n_byte offset = IS_CONST1;
 
-                meeter_being->brainprobe[n].offset = offset;
+                meeter_being->braindata.brainprobe[n].offset = offset;
                 break;
             }
             case 5: /** posture */
@@ -1586,7 +1586,7 @@ void brain_dialogue(
             {
                 n_int  n = pspace[0] % BRAINCODE_PROBES;
                 n_byte p = IS_CONST1;
-                meeter_being->brainprobe[n].position = p;
+                meeter_being->braindata.brainprobe[n].position = p;
                 break;
             }
             /** alter learned preferences */

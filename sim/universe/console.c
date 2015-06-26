@@ -535,7 +535,7 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
     io_string_write(result, "\nRegisters:\n", &watch_string_length);
     for (i=0; i<BRAINCODE_PSPACE_REGISTERS; i++)
     {
-        result[watch_string_length++]=(char)(65+(local_being->braincode_register[i]%60));
+        result[watch_string_length++]=(char)(65+(local_being->braindata.braincode_register[i]%60));
     }
     result[watch_string_length++]='\n';
     result[watch_string_length++]='\n';
@@ -680,15 +680,15 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
 
     for (i = 0; i < BRAINCODE_PROBES; i++)
     {
-        if (local_being->brainprobe[i].type == INPUT_SENSOR)
+        if (local_being->braindata.brainprobe[i].type == INPUT_SENSOR)
         {
             sprintf((n_string)str2,"  %s  %03d   %02d   %03d    %03d  %d\n",
                     type_str,
-                    local_being->brainprobe[i].position,
-                    local_being->brainprobe[i].frequency,
-                    local_being->brainprobe[i].offset,
-                    local_being->brainprobe[i].address,
-                    local_being->brainprobe[i].state);
+                    local_being->braindata.brainprobe[i].position,
+                    local_being->braindata.brainprobe[i].frequency,
+                    local_being->braindata.brainprobe[i].offset,
+                    local_being->braindata.brainprobe[i].address,
+                    local_being->braindata.brainprobe[i].state);
             io_string_write(result, (n_string)str2, &watch_string_length);
         }
     }
@@ -697,15 +697,15 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
 
     for (i = 0; i < BRAINCODE_PROBES; i++)
     {
-        if (local_being->brainprobe[i].type == OUTPUT_ACTUATOR)
+        if (local_being->braindata.brainprobe[i].type == OUTPUT_ACTUATOR)
         {
             sprintf((n_string)str2,"  %s  %03d   %02d   %03d    %03d  %d\n",
                     type_str,
-                    local_being->brainprobe[i].position,
-                    local_being->brainprobe[i].frequency,
-                    local_being->brainprobe[i].offset,
-                    local_being->brainprobe[i].address,
-                    local_being->brainprobe[i].state);
+                    local_being->braindata.brainprobe[i].position,
+                    local_being->braindata.brainprobe[i].frequency,
+                    local_being->braindata.brainprobe[i].offset,
+                    local_being->braindata.brainprobe[i].address,
+                    local_being->braindata.brainprobe[i].state);
             io_string_write(result, (n_string)str2, &watch_string_length);
         }
     }

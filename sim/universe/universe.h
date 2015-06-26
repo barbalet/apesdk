@@ -1080,18 +1080,45 @@ typedef struct
     n_byte2     macro_state;
     n_byte      parasites;
     n_byte      honor;
+    n_byte      crowding;
 } noble_being_delta;
 
 typedef struct
 {
-    noble_being_delta delta;
-    noble_being_constant constant;
+    noble_social       social[SOCIAL_SIZE];
+    noble_episodic   episodic[EPISODIC_SIZE];
+#ifdef TERRITORY_ON
+    noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
+#endif
+    n_byte2     social_x;
+    n_byte2     social_y;
+    n_byte2     social_nx; /* why is this needed? */
+    n_byte2     social_ny; /* why is this needed? */
+} noble_being_events;
+
+typedef struct
+{
+#ifdef BRAINCODE_ON
+    n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
+    noble_brain_probe brainprobe[BRAINCODE_PROBES];
+#endif
+    
+#ifdef BRAIN_ON
+    n_byte            brain[DOUBLE_BRAIN];
+#endif
     n_byte2     brain_state[6];
+} noble_being_brain;
+
+typedef struct
+{
+    noble_being_delta    delta;
+    noble_being_constant constant;
+    noble_being_events   events;
+    noble_being_brain    braindata;
     n_byte2     height;
     n_byte2     mass;
     n_byte2     script_overrides;
     n_byte      shout[SHOUT_BYTES];
-    n_byte      crowding;
     n_byte      posture;
     n_byte2     inventory[INVENTORY_SIZE];
 
@@ -1099,32 +1126,15 @@ typedef struct
     n_byte      attention[ATTENTION_SIZE];
     n_genetics  fetal_genetics[CHROMOSOMES];     /* constant */
     n_byte2     father_name[2];                  /* why is this needed? */
-
-    n_byte2     social_x;
-    n_byte2     social_y;
-    n_byte2     social_nx; /* why is this needed? */
-    n_byte2     social_ny; /* why is this needed? */
     n_byte      drives[DRIVES];
     n_byte2     goal[4];
     n_byte      learned_preference[PREFERENCES];
     n_byte2     child_generation_min;
     n_byte2     child_generation_max;
-#ifdef TERRITORY_ON
-    noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
-#endif
 #ifdef IMMUNE_ON
     noble_immune_system immune_system;
 #endif
-#ifdef BRAINCODE_ON
-    n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
-    noble_brain_probe brainprobe[BRAINCODE_PROBES];
-#endif
 
-#ifdef BRAIN_ON
-    n_byte            brain[DOUBLE_BRAIN];
-#endif
-    noble_social       social[SOCIAL_SIZE];
-    noble_episodic   episodic[EPISODIC_SIZE];
 } noble_being;
 
 typedef void (being_birth_event)(noble_being * born, noble_being * mother, void * sim);

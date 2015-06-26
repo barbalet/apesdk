@@ -102,27 +102,7 @@ static void drives_sociability(
     dsd.being = local;
     being_loop_no_thread(sim, local, drives_sociability_loop, &dsd);
 
-    /** if the being is not overcrowded and its social drive is not saturated */
-    if (dsd.beings_in_vacinity < local->crowding + SOCIAL_TOLLERANCE)
-    {
-        /** increase the social drive */
-        being_inc_drive(local, DRIVE_SOCIAL);
-    }
-    else
-    {
-        /** decrease the social drive */
-        being_dec_drive(local, DRIVE_SOCIAL);
-    }
-
-    /** Adjust crowding (typical expected number of neighbours). */
-    if (dsd.beings_in_vacinity < local->crowding) local->crowding--;
-    if (dsd.beings_in_vacinity > local->crowding) local->crowding++;
-
-    /** Minimum expected neighbours */
-    if (local->crowding < MIN_CROWDING) local->crowding = MIN_CROWDING;
-
-    /** Maximum expected neighbours.  Beyond this behavioral sink occurs. */
-    if (local->crowding > MAX_CROWDING) local->crowding = MAX_CROWDING;
+    being_crowding_cycle(local, dsd.beings_in_vacinity);
 }
 
 /**

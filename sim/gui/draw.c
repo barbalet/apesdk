@@ -1219,7 +1219,7 @@ static void draw_region(noble_being * local)
         while (lx < TERRITORY_DIMENSION)
         {
             n_string_block string_draw;
-            n_int   value = local->territory[lx + (ly * TERRITORY_DIMENSION)].familiarity;
+            n_int   value = local->events.territory[lx + (ly * TERRITORY_DIMENSION)].familiarity;
             if (value)
             {
                 sprintf(string_draw,"%ld",value);
