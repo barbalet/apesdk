@@ -136,7 +136,7 @@ static void drives_sex(
             /** if sex drive is above a mate seeking threshold and
             the being has no current goal */
             if ((being_drive(local, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
-                    (local->wrong.goal[0] == GOAL_NONE))
+                being_check_goal(local, GOAL_NONE))
             {
                 /** either search for a preferred mate, or mate randomly */
                 if (GENE_MATE_SEEK(being_genetics(local))&1)
@@ -155,16 +155,15 @@ static void drives_sex(
                             if (being_name_comparison(local, local_episodic[i].first_name[BEING_MEETER], local_episodic[i].family_name[BEING_MEETER]))
                             {
                                 /** set a goal to seek the remembered mate */
-                                local->wrong.goal[0]=GOAL_MATE;
-                                local->wrong.goal[1]=local_episodic[i].first_name[BEING_MET];
-                                local->wrong.goal[2]=local_episodic[i].family_name[BEING_MET];
-                                local->wrong.goal[3]=GOAL_TIMEOUT;
+                                
+                                being_set_goal_mate(local, local_episodic[i].first_name[BEING_MET], local_episodic[i].family_name[BEING_MET]);
+                                
                                 /** remember seeking a mate */
                                 episodic_store_memory(
                                     local_sim,
                                     local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                     being_gender_name(local), being_family_name(local),
-                                    local->wrong.goal[1], local->wrong.goal[2],0);
+                                    local->delta.goal[1], local->delta.goal[2],0);
                                 break;
                             }
                         }
@@ -172,7 +171,7 @@ static void drives_sex(
 #endif
                     /** if the being is not seeking a remembered mate
                         then examine the social graph for attractive prospects */
-                    if (local->wrong.goal[0]!=GOAL_MATE)
+                    if (being_check_goal(local, GOAL_MATE) == 0)
                     {
                         max = 0;
                         if (!local_social_graph) return;
@@ -183,25 +182,22 @@ static void drives_sex(
                             {
                                 if ((local_social_graph[i].attraction) > max)
                                 {
+                                    
                                     /** who are we most attracted to? */
                                     max=local_social_graph[i].attraction;
-                                    local->wrong.goal[0]=GOAL_MATE;
-                                    local->wrong.goal[1]=
-                                        local_social_graph[i].first_name[BEING_MET];
-                                    local->wrong.goal[2]=
-                                        local_social_graph[i].family_name[BEING_MET];
-                                    local->wrong.goal[3]=GOAL_TIMEOUT;
+                                    
+                                    being_set_goal_mate(local, local_social_graph[i].first_name[BEING_MET], local_social_graph[i].family_name[BEING_MET]);
                                 }
                             }
                         }
                         /** if an attractive mate was found then remember this event */
-                        if (local->wrong.goal[0]==GOAL_MATE)
+                        if (being_check_goal(local, GOAL_MATE))
                         {
                             episodic_store_memory(
                                 local_sim,
                                 local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                 being_gender_name(local), being_family_name(local),
-                                local->wrong.goal[1], local->wrong.goal[2],0);
+                                local->delta.goal[1], local->delta.goal[2],0);
                         }
                     }
                 }
@@ -223,9 +219,9 @@ static void drives_sex(
         /** if sex drive falls below the mate seeking threshold and the being
             is seeking a mate, then stop seeking a mate */
         if ((being_drive(local, DRIVE_SEX) < THRESHOLD_SEEK_MATE) &&
-                (local->wrong.goal[0]==GOAL_MATE))
+             being_check_goal(local, GOAL_MATE))
         {
-            local->wrong.goal[0]=GOAL_NONE;
+            being_set_goal_none(local);
         }
     }
 }

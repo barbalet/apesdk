@@ -1327,10 +1327,9 @@ static void brain_first_action(noble_simulation * local_sim, n_byte awake,
     case 1:
         if (!(meeter_being->braindata.script_overrides&OVERRIDE_GOAL))
         {
-            meeter_being->wrong.goal[0] = GOAL_LOCATION;
-            meeter_being->wrong.goal[1] = episodic[episode_index].space_time.location[0];
-            meeter_being->wrong.goal[2] = episodic[episode_index].space_time.location[1];
-            meeter_being->wrong.goal[3] = GOAL_TIMEOUT;
+            being_set_goal_location(meeter_being,
+                                    episodic[episode_index].space_time.location[0],
+                                    episodic[episode_index].space_time.location[1]);
         }
         break;
         /** alter friend or foe value */

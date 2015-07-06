@@ -2462,6 +2462,46 @@ static void being_create_family_links(noble_being * mother,
 
 }
 
+void being_set_goal_mate(noble_being * local, n_byte2 first_name, n_byte2 family_name)
+{
+    local->delta.goal[0] = GOAL_MATE;
+    local->delta.goal[1] = first_name;
+    local->delta.goal[2] = family_name;
+    local->delta.goal[3] = GOAL_TIMEOUT;
+}
+
+void being_set_goal_none(noble_being * local)
+{
+    local->delta.goal[0] = GOAL_NONE;
+}
+
+void being_set_goal_location(noble_being * local, n_byte2 lx, n_byte2 ly)
+{
+    local->delta.goal[0] = GOAL_LOCATION;
+    local->delta.goal[1] = lx;
+    local->delta.goal[2] = ly;
+    local->delta.goal[3] = GOAL_TIMEOUT;
+}
+
+n_int being_check_goal(noble_being * local, goal_types goal)
+{
+    return (local->delta.goal[0] == goal);
+}
+
+void being_goal_cycle(noble_being * local)
+{
+    /** decrement the goal counter */
+    if (local->delta.goal[3] > 0)
+    {
+        local->delta.goal[3]--;
+    }
+    else
+    {
+        /** timed out */
+        being_set_goal_none(local);
+    }
+}
+
 static void being_follow_loop1(noble_simulation * sim, noble_being * other, void * data)
 {
     being_nearest * nearest = (being_nearest *)data;
@@ -2469,7 +2509,7 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
 
     /** is this the same as the name of the being to which we are paying attention? */
     if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local))) &&
-            being_name_comparison(other, nearest->local->wrong.goal[1], nearest->local->wrong.goal[2]))
+            being_name_comparison(other, nearest->local->delta.goal[1], nearest->local->delta.goal[2]))
     {
         being_delta(nearest->local, other, &difference_vector);
         if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
@@ -2543,7 +2583,7 @@ static void being_follow(noble_simulation * sim,
     nearest->same_sex = 0L;
 
     /** is a mate in view? */
-    if (local->wrong.goal[0]==GOAL_MATE)
+    if (being_check_goal(local, GOAL_MATE))
     {
         being_loop_no_thread(sim, local, being_follow_loop1, nearest);
         if (nearest->opposite_sex != 0L)
@@ -3010,8 +3050,8 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     if (tmp_speed < loc_s) loc_s--;
     if (tmp_speed < loc_s) loc_s--;
     if (tmp_speed < loc_s) loc_s--;
-
-    if ((local->wrong.goal[0]==GOAL_NONE) &&
+    
+    if (being_check_goal(local, GOAL_NONE) &&
             (nearest.opposite_sex == 0L) &&
             (nearest.same_sex == 0L) &&
             (being_random(local) < 1000 + 3600*GENE_STAGGER(genetics)))
@@ -3427,8 +3467,8 @@ n_int being_init(noble_being * beings, n_int number,
     }
 #endif
 
-    local->wrong.goal[0]=GOAL_NONE;
-
+    being_set_goal_none(local);
+    
     /** Set learned preferences to 0.5 (no preference in either direction.
         This may seem like tabla rasa, but there are genetic biases */
     for (ch = 0; ch < PREFERENCES; ch++)

@@ -560,15 +560,6 @@ enum being_interaction_social
 /* how close do we need to get to a goal to say that it has been reached? */
 #define GOAL_RADIUS         40000
 
-/* different types of goal */
-enum goal_types
-{
-    GOAL_NONE           = 0,
-    GOAL_LOCATION       = 1,
-    GOAL_MATE           = 2,
-    GOAL_UNKNOWN        = 3 /* add a new goal here when needed */
-};
-
 #define DRIVES_MAX          255  /* maximum value of each drive */
 
 enum drives_definition
@@ -1084,6 +1075,7 @@ typedef struct
     n_byte2     height;
     n_byte2     mass;
     n_byte      posture;
+    n_byte2     goal[4];
 } noble_being_delta;
 
 typedef struct
@@ -1102,7 +1094,6 @@ typedef struct
 
 typedef struct
 {
-    n_byte2     goal[4];
     n_byte      attention[ATTENTION_SIZE];
     n_byte      drives[DRIVES];
     

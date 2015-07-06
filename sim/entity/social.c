@@ -1403,9 +1403,9 @@ n_uint social_respect_mean(
     being_reset_drive(female, DRIVE_SEX);
     being_reset_drive(male, DRIVE_SEX);
 
-    female->wrong.goal[0]=GOAL_NONE;
-    male->wrong.goal[0]=GOAL_NONE;
-
+    being_set_goal_none(female);
+    being_set_goal_none(male);
+    
     /** remember the event */
     episodic_interaction(sim, female, male, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(female))*AFFECT_MATE), 0);
     episodic_interaction(sim, male, female, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(male))*AFFECT_MATE), 0);
@@ -1625,15 +1625,16 @@ n_int social_chat(
         episodic_interaction(sim, meeter_being, met_being, EVENT_CHAT, AFFECT_CHAT, 0);
         /** pick one of the individuals from their graph */
         idx=-1;
-        if (meeter_being->wrong.goal[0]==GOAL_MATE)
+        
+        if (being_check_goal(meeter_being, GOAL_MATE))
         {
             /** ask about an individual we're searching for */
             for (i=1; i<SOCIAL_SIZE_BEINGS; i++)
             {
                 if (!SOCIAL_GRAPH_ENTRY_EMPTY(met_graph,i))
                 {
-                    if ((met_graph[i].first_name[BEING_MET]==meeter_being->wrong.goal[1]) &&
-                            (met_graph[i].family_name[BEING_MET]==meeter_being->wrong.goal[2]))
+                    if ((met_graph[i].first_name[BEING_MET]==meeter_being->delta.goal[1]) &&
+                            (met_graph[i].family_name[BEING_MET]==meeter_being->delta.goal[2]))
                     {
                         idx=i;
                         break;
@@ -1761,53 +1762,32 @@ n_int social_chat(
  * @param loc_f The direction facing
  * @return The new direction facing
  */
-void social_goals(
-    noble_being * local)
+void social_goals(noble_being * local)
 {
-    n_int delta_x=0, delta_y=0, distsqr;
-    n_byte2 goal;
-    n_vect2 delta_vector,location_vector;
-    goal = local->wrong.goal[0];
-    switch(goal)
-    {
-        /** move towards a location */
-    case GOAL_LOCATION:
-    {
+    if (being_check_goal(local, GOAL_LOCATION))
+    {        /** move towards a location */
+        
+        n_int delta_x=0, delta_y=0, distsqr;
+        n_vect2 delta_vector,location_vector;
+        
         if ((being_state(local) & BEING_STATE_SWIMMING) == 0)
         {
-            vect2_byte2(&delta_vector, (n_byte2 *)&(local->wrong.goal[1]));
+            vect2_byte2(&delta_vector, (n_byte2 *)&(local->delta.goal[1]));
             vect2_byte2(&location_vector, being_location(local));
             vect2_subtract(&delta_vector, &location_vector, &delta_vector);
             being_facing_towards(local, &delta_vector);
         }
-        break;
-    }
-    }
 
-    /** are we there yet? */
-    if (goal==GOAL_LOCATION)
-    {
         distsqr = delta_x*delta_x + delta_y*delta_y;
-        if ((distsqr < GOAL_RADIUS) ||
-                ((being_state(local) & BEING_STATE_SWIMMING) != 0))
+        if ((distsqr < GOAL_RADIUS) || ((being_state(local) & BEING_STATE_SWIMMING) != 0))
         {
             /** destination reached - goal cancelled */
-            local->wrong.goal[0] = GOAL_NONE;
+            being_set_goal_none(local);
             /** clear any script override */
             local->braindata.script_overrides -= OVERRIDE_GOAL;
         }
     }
-
-    /** decrement the goal counter */
-    if (local->wrong.goal[3] > 0)
-    {
-        local->wrong.goal[3]--;
-    }
-    else
-    {
-        /** timed out */
-        local->wrong.goal[0] = GOAL_NONE;
-    }
+    being_goal_cycle(local);
 }
 
 void social_initial_loop(noble_simulation * local, noble_being * local_being, void * data)

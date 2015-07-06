@@ -323,13 +323,13 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
         break;
 #endif
     case VARIABLE_GOAL_TYPE:
-        local_being->wrong.goal[0] = (n_byte) (value % 3);
+        local_being->delta.goal[0] = (n_byte) (value % 3);
         break;
     case VARIABLE_GOAL_X:
-        local_being->wrong.goal[1] = (n_byte2) value;
+        local_being->delta.goal[1] = (n_byte2) value;
         break;
     case VARIABLE_GOAL_Y:
-        local_being->wrong.goal[2] = (n_byte2) value;
+        local_being->delta.goal[2] = (n_byte2) value;
         break;
     case VARIABLE_POSTURE:
         being_set_posture(local_being, (n_byte) value);
@@ -643,13 +643,13 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         break;
 #endif
                     case VARIABLE_GOAL_TYPE:
-                        local_number = local_being->wrong.goal[0];
+                        local_number = local_being->delta.goal[0];
                         break;
                     case VARIABLE_GOAL_X:
-                        local_number = local_being->wrong.goal[1];
+                        local_number = local_being->delta.goal[1];
                         break;
                     case VARIABLE_GOAL_Y:
-                        local_number = local_being->wrong.goal[2];
+                        local_number = local_being->delta.goal[2];
                         break;
                     case VARIABLE_POSTURE:
                         local_number = being_posture(local_being);
@@ -856,9 +856,9 @@ void sim_start_conditions(void * vindividual, void * structure, void * data)
     variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = being_index(sim_sim(), local_being);
 
     variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = being_height(local_being);
-    variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->wrong.goal[0];
-    variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->wrong.goal[1];
-    variables[VARIABLE_GOAL_Y - VARIABLE_VECT_ANGLE] = local_being->wrong.goal[2];
+    variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->delta.goal[0];
+    variables[VARIABLE_GOAL_X - VARIABLE_VECT_ANGLE] = local_being->delta.goal[1];
+    variables[VARIABLE_GOAL_Y - VARIABLE_VECT_ANGLE] = local_being->delta.goal[2];
     variables[VARIABLE_DRIVE_HUNGER - VARIABLE_VECT_ANGLE] = local_being->wrong.drives[DRIVE_HUNGER];
     variables[VARIABLE_DRIVE_SOCIAL - VARIABLE_VECT_ANGLE] = local_being->wrong.drives[DRIVE_SOCIAL];
     variables[VARIABLE_DRIVE_FATIGUE - VARIABLE_VECT_ANGLE] = local_being->wrong.drives[DRIVE_FATIGUE];
@@ -913,10 +913,10 @@ void sim_end_conditions(void * vindividual, void * structure, void * data)
 
     if (local_goal_type!=GOAL_NONE)
     {
-        local_being->wrong.goal[0]  = (n_byte2)local_goal_type;
-        local_being->wrong.goal[1]  = (n_byte2)local_goal_x;
-        local_being->wrong.goal[2]  = (n_byte2)local_goal_y;
-        local_being->wrong.goal[3]  = GOAL_TIMEOUT;
+        local_being->delta.goal[0]  = (n_byte2)local_goal_type;
+        local_being->delta.goal[1]  = (n_byte2)local_goal_x;
+        local_being->delta.goal[2]  = (n_byte2)local_goal_y;
+        local_being->delta.goal[3]  = GOAL_TIMEOUT;
 
         local_being->braindata.script_overrides |= OVERRIDE_GOAL;
     }
@@ -978,7 +978,7 @@ void file_audit(void)
         FILE_CHECK(&here.events.social_nx); /* why is this needed? */
         FILE_CHECK(&here.events.social_ny); /* why is this needed? */
         FILE_CHECK(&here.wrong.drives[0]);
-        FILE_CHECK(&here.wrong.goal[0]);
+        FILE_CHECK(&here.delta.goal[0]);
         FILE_CHECK(&here.wrong.learned_preference[0]);
         FILE_CHECK(&here.constant.generation_min);
         FILE_CHECK(&here.constant.generation_max);

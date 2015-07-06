@@ -148,6 +148,15 @@ typedef enum
     EVENTS
 } being_episodic_event_type;
 
+/* different types of goal */
+typedef enum
+{
+    GOAL_NONE           = 0,
+    GOAL_LOCATION       = 1,
+    GOAL_MATE           = 2,
+    GOAL_UNKNOWN        = 3 /* add a new goal here when needed */
+} goal_types;
+
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
 #ifdef BRAIN_ON
@@ -263,6 +272,13 @@ void    being_add_state(noble_being * value, being_state_type state);
 n_byte2 being_state(noble_being * value);
 
 n_byte2 being_random(noble_being * value);
+
+void being_set_goal_mate(noble_being * local, n_byte2 first_name, n_byte2 family_name);
+void being_set_goal_none(noble_being * local);
+void being_set_goal_location(noble_being * local, n_byte2 lx, n_byte2 ly);
+
+n_int being_check_goal(noble_being * local, goal_types goal);
+void being_goal_cycle(noble_being * local);
 
 void being_set_select_name(noble_simulation * sim, n_string name);
 n_string being_get_select_name(noble_simulation * sim);
