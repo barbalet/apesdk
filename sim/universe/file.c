@@ -973,10 +973,10 @@ void file_audit(void)
         FILE_CHECK(&here.constant.genetics[0]);           /* constant */
         FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
         FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */
-        FILE_CHECK(&here.events.social_x);
-        FILE_CHECK(&here.events.social_y);
-        FILE_CHECK(&here.events.social_nx); /* why is this needed? */
-        FILE_CHECK(&here.events.social_ny); /* why is this needed? */
+        FILE_CHECK(&here.delta.social_coord_x);
+        FILE_CHECK(&here.delta.social_coord_y);
+        FILE_CHECK(&here.delta.social_coord_nx); /* why is this needed? */
+        FILE_CHECK(&here.delta.social_coord_ny); /* why is this needed? */
         FILE_CHECK(&here.wrong.drives[0]);
         FILE_CHECK(&here.delta.goal[0]);
         FILE_CHECK(&here.wrong.learned_preference[0]);

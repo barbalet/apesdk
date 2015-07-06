@@ -39,7 +39,7 @@
 #define  EPISODIC_ON
 
 #define  TERRITORY_ON  /* entity */
-#define  BRAINCODE_ON  /* entity */
+#undef  BRAINCODE_ON  /* entity */
 #define  IMMUNE_ON     /* entity */
 
 #define  BRAIN_ON
@@ -1076,6 +1076,11 @@ typedef struct
     n_byte2     mass;
     n_byte      posture;
     n_byte2     goal[4];
+    
+    n_byte2     social_coord_x;
+    n_byte2     social_coord_y;
+    n_byte2     social_coord_nx; /* why is this needed? */
+    n_byte2     social_coord_ny; /* why is this needed? */
 } noble_being_delta;
 
 typedef struct
@@ -1085,11 +1090,6 @@ typedef struct
 #ifdef TERRITORY_ON
     noble_place territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
 #endif
-
-    n_byte2     social_x;
-    n_byte2     social_y;
-    n_byte2     social_nx; /* why is this needed? */
-    n_byte2     social_ny; /* why is this needed? */
 } noble_being_events;
 
 typedef struct

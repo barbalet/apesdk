@@ -3641,9 +3641,9 @@ n_int being_init(noble_being * beings, n_int number,
 
             being_set_unique_name(beings, number, local, 0L, 0L);
         }
-        local->events.social_x = local->events.social_nx =
+        local->delta.social_coord_x = local->delta.social_coord_nx =
                               (math_random(local->delta.seed) & 32767)+16384;
-        local->events.social_y = local->events.social_ny =
+        local->delta.social_coord_y = local->delta.social_coord_ny =
                               (math_random(local->delta.seed) & 32767)+16384;
 
         local->constant.date_of_birth = 0;
@@ -3656,8 +3656,8 @@ n_int being_init(noble_being * beings, n_int number,
         being_wander(local, being_facing(mother) - being_facing(local));
 
         (void) being_random(local);
-        local->events.social_x = local->events.social_nx = mother->events.social_x;
-        local->events.social_y = local->events.social_ny = mother->events.social_y;
+        local->delta.social_coord_x = local->delta.social_coord_nx = mother->delta.social_coord_x;
+        local->delta.social_coord_y = local->delta.social_coord_ny = mother->delta.social_coord_y;
 
         genetics_set(being_genetics(local), being_fetal_genetics(mother));
 

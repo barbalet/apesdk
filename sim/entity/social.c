@@ -1796,7 +1796,7 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
     n_uint social_loop = 0;
     n_vect2 location, sum_delta = {0,0};
     n_int   familiar_being_count = 0;
-    vect2_byte2(&location,(n_byte2 *)&(local_being->events.social_x));
+    vect2_byte2(&location,(n_byte2 *)&(local_being->delta.social_coord_x));
     while ( social_loop < SOCIAL_SIZE_BEINGS )
     {
         noble_social * specific_individual = &(being_social(local_being)[social_loop]);
@@ -1819,7 +1819,7 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
 
                 familiar_being_count++;
 
-                vect2_byte2(&familiar_location,(n_byte2 *)&(specific_being->events.social_x));
+                vect2_byte2(&familiar_location,(n_byte2 *)&(specific_being->delta.social_coord_x));
 
                 vect2_subtract(&weighted_delta, &familiar_location, &location);
 
@@ -1839,7 +1839,7 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
     {
         vect2_d(&location,&sum_delta,1,(familiar_being_count*20));
     }
-    vect2_back_byte2(&location,(n_byte2 *)&(local_being->events.social_nx));
+    vect2_back_byte2(&location,(n_byte2 *)&(local_being->delta.social_coord_nx));
 }
 
 /**
@@ -1849,6 +1849,6 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
  */
 void social_secondary_loop(noble_simulation * local, noble_being * local_being, void * data)
 {
-    local_being->events.social_x = local_being->events.social_nx;
-    local_being->events.social_y = local_being->events.social_ny;
+    local_being->delta.social_coord_x = local_being->delta.social_coord_nx;
+    local_being->delta.social_coord_y = local_being->delta.social_coord_ny;
 }
