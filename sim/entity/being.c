@@ -223,7 +223,7 @@ void being_honor_delta(noble_being * value, n_int delta)
             return;
         }
     }
-    value->delta.honor += delta;
+    value->delta.honor += (n_byte)delta;
 }
 
 n_byte being_honor(noble_being * value)
@@ -370,7 +370,7 @@ void being_remove_parasites(noble_being * value, n_int number_of_parasites)
 {
     if (value->delta.parasites > number_of_parasites)
     {
-        value->delta.parasites -= number_of_parasites;
+        value->delta.parasites -= (n_byte)number_of_parasites;
     }
     else
     {
@@ -466,7 +466,7 @@ void   being_energy_delta(noble_being * value, n_int delta)
     value->delta.stored_energy = (n_byte2) total;
 }
 
-n_int   being_drive(noble_being * value, enum drives_definition drive)
+n_byte   being_drive(noble_being * value, enum drives_definition drive)
 {
     return value->wrong.drives[drive];
 }
@@ -1286,7 +1286,7 @@ static noble_being * being_find_closest(noble_simulation * sim, noble_being * ac
 typedef struct
 {
     n_uint        comparison_best;
-    n_int         max_age;
+    n_uint         max_age;
     n_genetics  * genetics;
     noble_being * return_value;
 } being_find_child_struct;

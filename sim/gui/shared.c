@@ -581,6 +581,10 @@ n_byte * shared_legacy_pointer(n_byte fIdentification)
 
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
+#ifdef	_WIN32
+	n_byte           * index = draw_pointer(fIdentification);
+	io_copy(index, outputBuffer, dim_x * dim_y);
+#else
     n_int           ly = 0;
     n_int           loop = 0;
     n_int			loopColors = 0;
@@ -674,7 +678,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
         }
         ly++;
     }
-
+#endif
 }
 
 

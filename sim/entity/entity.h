@@ -224,7 +224,7 @@ void being_add_parasites(noble_being * value);
 
 void being_remove_parasites(noble_being * value, n_int number_of_parasites);
 
-n_int   being_drive(noble_being * value, enum drives_definition drive);
+n_byte   being_drive(noble_being * value, enum drives_definition drive);
 
 n_int   being_height(noble_being * value);
 

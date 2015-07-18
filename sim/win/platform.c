@@ -240,7 +240,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
         offscreen[loop] = CreateDIBitmap(hdc[loop], (const struct tagBITMAPINFOHEADER *)bmp_info[loop], 0, NULL, NULL, DIB_RGB_COLORS);
 
-        SetBitmapDimensionEx(offscreen[loop], 512, 512-loop, NULL);
+        SetBitmapDimensionEx(offscreen[loop], 512, 512 /*-loop*/, NULL);
 
         ShowWindow (global_hwnd[loop], iCmdShow) ;
         UpdateWindow (global_hwnd[loop]) ;
@@ -274,7 +274,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
     case WM_PAINT:
     {
-        n_uint  local_time = time(0L);
+        n_uint  local_time = (n_uint)time(0L);
         shared_cycle(local_time, NUM_VIEW, 512, 512);
         shared_cycle(local_time, NUM_TERRAIN, 512, 512);
 
@@ -297,6 +297,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     case WM_MOUSEMOVE:
         if (firedown != -1)
         {
+			shared_mouseOption(firecontrol);
             shared_mouseReceived(LOWORD(lParam), HIWORD(lParam), (n_byte)firedown);
         }
         return 0;
@@ -465,7 +466,7 @@ static void plat_update()
 
         shared_draw(value, window_definition[lp], 512, 512);
         
-        SetDIBits(hdcMem, offscreen[lp], 0, 512-lp, value, bmp_info[lp], DIB_RGB_COLORS);
+        SetDIBits(hdcMem, offscreen[lp], 0, 512/*-lp*/, value, bmp_info[lp], DIB_RGB_COLORS);
 
         SelectObject(hdcMem, offscreen[lp]);
         BitBlt(hdc[lp], 0, 0, sz.cx, sz.cy, hdcMem, 0, 0, SRCCOPY);
@@ -500,9 +501,9 @@ static void plat_file_open(n_byte script)
     opf.hwndOwner = global_hwnd[WINDOW_ONE];
     opf.lpstrFilter = TEXT(NOBLE_APE_FILE_OPEN);
     opf.nFilterIndex = 1;
-    opf.lpstrFile = (LPCWSTR)(current_file_name);
+    opf.lpstrFile = (LPWSTR)(current_file_name);
     opf.nMaxFile = sizeof(current_file_name);
-    opf.lpstrFileTitle = (LPCWSTR)actual_file_name;
+    opf.lpstrFileTitle = (LPWSTR)actual_file_name;
     opf.nMaxFileTitle = sizeof(actual_file_name);
     opf.lpstrInitialDir = NULL;
     opf.lpstrTitle = TEXT("Noble Ape File Open...");
@@ -573,10 +574,10 @@ static unsigned char plat_file_save_as(void)
     opf.hwndOwner = global_hwnd[WINDOW_ONE];
     opf.lpstrFilter = TEXT(NOBLE_APE_FILE_SAVE);
     opf.nFilterIndex = 1;
-    opf.lpstrFile = (LPCWSTR)current_file_name;
+    opf.lpstrFile = (LPWSTR)current_file_name;
     opf.nMaxFile = sizeof(current_file_name);
 
-    opf.lpstrFileTitle = (LPCWSTR)actual_file_name;
+    opf.lpstrFileTitle = (LPWSTR)actual_file_name;
     opf.nMaxFileTitle = sizeof(actual_file_name);
 
     opf.lpstrInitialDir = NULL;
