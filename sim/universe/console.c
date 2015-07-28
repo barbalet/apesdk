@@ -513,6 +513,9 @@ static void watch_appearance(void *ptr, n_string beingname, noble_being * local_
     io_string_write(result, str, &watch_string_length);
 }
 
+
+#ifdef BRAINCODE_ON
+
 static n_string static_result;
 
 static void watch_line_braincode(n_string string, n_int line)
@@ -520,6 +523,8 @@ static void watch_line_braincode(n_string string, n_int line)
     io_string_write(static_result, string, &watch_string_length);
     io_string_write(static_result, "\n", &watch_string_length);
 }
+
+#endif
 
 /**
  * Shows braincode for the given being
@@ -1166,6 +1171,7 @@ n_int console_logging(void * ptr, n_string response, n_console_output output_fun
     return 0;
 }
 
+#ifdef BRAINCODE_ON
 
 /**
  * Compare two braincode arrays
@@ -1206,6 +1212,8 @@ static n_int console_compare_brain(n_byte * braincode0, n_byte * braincode1, n_i
     }
     return -1;
 }
+
+#endif
 
 /**
  * Shows repeated sections of braincode

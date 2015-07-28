@@ -270,6 +270,7 @@ static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * informa
     return 0;
 }
 
+#ifdef BRAINCODE_ON
 
 static n_byte pixel_grey(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
@@ -278,23 +279,21 @@ static n_byte pixel_grey(n_int px, n_int py, n_int dx, n_int dy, void * informat
     return 0;
 }
 
+#endif
+
 n_byte * draw_pointer(n_byte which_one)
 {
-    n_byte *local_buffer = local_offscreen;
-
-    if (local_buffer == 0L)
+    if (local_offscreen)
     {
-        return local_buffer;
-    }
-
-    switch(which_one)
-    {
-    case NUM_TERRAIN:
-        return TERRAINWINDOW(local_buffer);
-        break;
-    case NUM_VIEW:
-        return VIEWWINDOW(local_buffer);
-        break;
+        switch(which_one)
+        {
+        case NUM_TERRAIN:
+            return TERRAINWINDOW(local_offscreen);
+            break;
+        case NUM_VIEW:
+            return VIEWWINDOW(local_offscreen);
+            break;
+        }
     }
     return 0L;
 }
@@ -1693,6 +1692,8 @@ static void draw_errors(noble_simulation * local_sim)
     }
 }
 
+#ifdef BRAINCODE_ON
+
 static void draw_line_braincode(n_string pointer, n_int line)
 {
     n_join	local_mono;
@@ -1700,6 +1701,8 @@ static void draw_line_braincode(n_string pointer, n_int line)
     local_mono.information = draw_pointer(NUM_TERRAIN);
     draw_string(pointer, 4 + (terrain_dim_x/2) - 256, (line*12) + 246 + (terrain_dim_y/2) - 256, &local_mono);
 }
+
+#endif
 
 void  draw_terrain_coord(n_int * co_x, n_int * co_y)
 {
