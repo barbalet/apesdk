@@ -39,7 +39,7 @@
 #define  EPISODIC_ON
 
 #define  TERRITORY_ON  /* entity */
-#undef  BRAINCODE_ON  /* entity */
+#define  BRAINCODE_ON  /* entity */
 #define  IMMUNE_ON     /* entity */
 
 #define  BRAIN_ON
