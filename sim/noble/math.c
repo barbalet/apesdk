@@ -783,29 +783,25 @@ n_byte2 math_random(n_byte2 * local)
 {
     n_byte2 tmp0;
     n_byte2 tmp1;
-
-    NA_ASSERT(local, "local NULL");
-
-    if (local == 0L) return 0;
-
+    
     tmp0 = local[0];
     tmp1 = local[1];
-
+    
     local[0] = tmp1;
     switch (tmp0 & 7)
     {
-    case 0:
-        local[1] = (n_byte2)(tmp1 ^ (tmp0 >> 1) ^ 0xd028);
-        break;
-    case 3:
-        local[1] = (n_byte2)(tmp1 ^ (tmp0 >> 2) ^ 0xae08);
-        break;
-    case 7:
-        local[1] = (n_byte2)(tmp1 ^ (tmp0 >> 3) ^ 0x6320);
-        break;
-    default:
-        local[1] = (n_byte2)(tmp1 ^ (tmp0 >> 1));
-        break;
+        case 0:
+            local[1] = (unsigned short)(tmp1 ^ (tmp0 >> 1) ^ 0xd028);
+            break;
+        case 4:
+            local[1] = (unsigned short)(tmp1 ^ (tmp0 >> 2) ^ 0xae08);
+            break;
+        case 8:
+            local[1] = (unsigned short)(tmp1 ^ (tmp0 >> 3) ^ 0x6320);
+            break;
+        default:
+            local[1] = (unsigned short)(tmp1 ^ (tmp0 >> 1));
+            break;
     }
     return (tmp1);
 }
