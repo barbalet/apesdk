@@ -74,6 +74,7 @@ typedef struct
     execute_object * executed;
     execute_state  state;
     n_byte2        random[2];
+    n_int          counter;
 } execution_thread;
 
 static n_int global_cycle = 1;
@@ -233,9 +234,15 @@ static void execute_thread_generic(void * id)
         n_int            all_idle = 1;
         if (value->state != ES_WAITING)
         {
-            if ((math_random(value->random) & 255) == 1)
+            value->counter++;
+            
+            if (value->counter == 15)
             {
-                execute_wait_ns();
+                if ((math_random(value->random) & 255) == 1)
+                {
+                    execute_wait_ns();
+                }
+                value->counter = 0;
             }
         }
         if (value->state == ES_WAITING)
@@ -361,6 +368,7 @@ void execute_init(void)
     {
         execution[loop].random[0] = master_random[1];
         execution[loop].random[1] = master_random[0];
+        execution[loop].counter = 0;
 
         math_random3(master_random);
 
