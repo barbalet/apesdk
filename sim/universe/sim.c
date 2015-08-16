@@ -405,6 +405,24 @@ static void sim_time(noble_simulation * local_sim)
     }
 }
 
+#if 1
+
+#define PROCESSING_HEAVY_WEIGHT    (4)
+#define PROCESSING_MIDDLE_WEIGHT   (8)
+#define PROCESSING_WELTER_WEIGHT  (16)
+#define PROCESSING_LIGHT_WEIGHT   (32)
+#define PROCESSING_FEATHER_WEIGHT (64)
+
+#else
+
+#define PROCESSING_HEAVY_WEIGHT    (3)
+#define PROCESSING_MIDDLE_WEIGHT   (7)
+#define PROCESSING_WELTER_WEIGHT  (17)
+#define PROCESSING_LIGHT_WEIGHT   (31)
+#define PROCESSING_FEATHER_WEIGHT (67)
+
+#endif
+
 void sim_cycle(void)
 {
     n_int       max_honor = 0;
@@ -414,46 +432,46 @@ void sim_cycle(void)
     weather_cycle();
 #endif
 
-    being_loop(&sim, sim_being_universal_loop, 32);
+    being_loop(&sim, sim_being_universal_loop, PROCESSING_LIGHT_WEIGHT);
 
     if (interpret)
     {
-        being_loop(&sim, sim_being_interpret, 16);
+        being_loop(&sim, sim_being_interpret, PROCESSING_WELTER_WEIGHT);
     }
     else
     {
         /** Listen for any shouts */
-        being_loop(&sim, being_listen, 64);
+        being_loop(&sim, being_listen, PROCESSING_FEATHER_WEIGHT);
 #ifdef EPISODIC_ON
-        being_loop(&sim, episodic_cycle, 64);
+        being_loop(&sim, episodic_cycle, PROCESSING_FEATHER_WEIGHT);
 #endif
-        being_loop(&sim, sim_being_cycle, 8);
-        being_loop(&sim, drives_cycle, 32);
+        being_loop(&sim, sim_being_cycle, PROCESSING_MIDDLE_WEIGHT);
+        being_loop(&sim, drives_cycle, PROCESSING_LIGHT_WEIGHT);
     }
 
     if (land_time() & 1)
     {
 #ifdef BRAIN_ON
-        being_loop(&sim, sim_brain_loop, 16);
+        being_loop(&sim, sim_brain_loop, PROCESSING_WELTER_WEIGHT);
 #endif
     }
 #ifdef BRAINCODE_ON
     else
     {
-        being_loop(&sim, sim_brain_dialogue_loop, 8);
+        being_loop(&sim, sim_brain_dialogue_loop, PROCESSING_MIDDLE_WEIGHT);
     }
 #endif
 
     being_loop_no_thread(&sim, 0L, being_tidy_loop, &max_honor);
 
-    being_loop(&sim, social_initial_loop, 32);
+    being_loop(&sim, social_initial_loop, PROCESSING_LIGHT_WEIGHT);
 
     if (max_honor)
     {
-        being_loop(&sim, being_recalibrate_honor_loop, 64);
+        being_loop(&sim, being_recalibrate_honor_loop, PROCESSING_FEATHER_WEIGHT);
     }
 
-    being_loop(&sim, social_secondary_loop, 64);
+    being_loop(&sim, social_secondary_loop, PROCESSING_FEATHER_WEIGHT);
 
     {
         being_remove_loop2_struct * brls = being_remove_initial(&sim);
