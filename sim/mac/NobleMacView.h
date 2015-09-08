@@ -70,32 +70,32 @@
 
 - (void) menuCheckMark:(id)sender check:(n_int)value;
 
--(IBAction) aboutDialog:(id) sender;
+- (IBAction) aboutDialog:(id) sender;
 
--(IBAction) menuFileNew:(id) sender;
--(IBAction) menuFileOpen:(id) sender;
--(IBAction) menuFileOpenScript:(id) sender;
--(IBAction) menuFileSaveAs:(id) sender;
+- (IBAction) menuFileNew:(id) sender;
+- (IBAction) menuFileOpen:(id) sender;
+- (IBAction) menuFileOpenScript:(id) sender;
+- (IBAction) menuFileSaveAs:(id) sender;
 
--(IBAction) menuQuit:(id) sender;
+- (IBAction) menuQuit:(id) sender;
 
-- (void)debugOutput;
+- (void) debugOutput;
 
--(void)keyUp:(NSEvent *)theEvent;
--(void)keyDown:(NSEvent *)theEvent;
+- (void) keyUp:(NSEvent *)theEvent;
+- (void) keyDown:(NSEvent *)theEvent;
 
--(void) mouseDown:(NSEvent *)theEvent;
--(void) rightMouseDown:(NSEvent *)theEvent;
--(void) otherMouseDown:(NSEvent *)theEvent;
+- (void) mouseDown:(NSEvent *)theEvent;
+- (void) rightMouseDown:(NSEvent *)theEvent;
+- (void) otherMouseDown:(NSEvent *)theEvent;
 
--(void) mouseUp:(NSEvent *)theEvent;
--(void) rightMouseUp:(NSEvent *)theEvent;
--(void) otherMouseUp:(NSEvent *)theEvent;
+- (void) mouseUp:(NSEvent *)theEvent;
+- (void) rightMouseUp:(NSEvent *)theEvent;
+- (void) otherMouseUp:(NSEvent *)theEvent;
 
--(void) mouseDragged:(NSEvent *)theEvent;
--(void) scrollWheel:(NSEvent *)theEvent;
+- (void) mouseDragged:(NSEvent *)theEvent;
+- (void) scrollWheel:(NSEvent *)theEvent;
 
--(void) rightMouseDragged:(NSEvent *)theEvent;
--(void) otherMouseDragged:(NSEvent *)theEvent;
+- (void) rightMouseDragged:(NSEvent *)theEvent;
+- (void) otherMouseDragged:(NSEvent *)theEvent;
 
 @end

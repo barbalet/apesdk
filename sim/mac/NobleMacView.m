@@ -58,7 +58,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
--(NSOpenPanel*) uniformOpenPanel
+- (NSOpenPanel*) uniformOpenPanel
 {
     NSOpenPanel *panel = [NSOpenPanel openPanel];
     NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
@@ -72,7 +72,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 }
 
 
--(NSSavePanel*) uniformSavePanel
+- (NSSavePanel*) uniformSavePanel
 {
     NSSavePanel *panel = [NSSavePanel savePanel];
     NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
@@ -83,7 +83,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     return panel;
 }
 
-- (void)debugOutput
+- (void) debugOutput
 {
     NSSavePanel *panel = [self uniformSavePanel];
 
@@ -142,7 +142,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     [[self openGLContext] flushBuffer];
 }
 
-- (void)quitProcedure
+- (void) quitProcedure
 {
     NSLog(@"Quitting");
 
@@ -153,29 +153,29 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     exit(0);
 }
 
--(id) initWithFrame:(NSRect) frameRect
+- (id) initWithFrame:(NSRect) frameRect
 {
     NSOpenGLPixelFormat * pf = [NobleMacView basicPixelFormat];
 	self = [super initWithFrame: frameRect pixelFormat: pf];
     return self;
 }
 
-- (BOOL)acceptsFirstResponder
+- (BOOL) acceptsFirstResponder
 {
     return YES;
 }
 
-- (BOOL)becomeFirstResponder
+- (BOOL) becomeFirstResponder
 {
     return YES;
 }
 
-- (BOOL)resignFirstResponder
+- (BOOL) resignFirstResponder
 {
     return YES;
 }
 
-- (void)startEverything
+- (void) startEverything
 {
     NSUInteger processors = [[NSProcessInfo processInfo] processorCount];
     NSSize increments;
@@ -224,19 +224,19 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     NSLog(@"%@ window setup done", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
 }
 
-- (void)loadUrlString:(NSString*) urlString
+- (void) loadUrlString:(NSString*) urlString
 {
     [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: urlString]];
 }
 
 #pragma mark ---- IB Actions ----
 
--(IBAction) aboutDialog:(id) sender
+- (IBAction) aboutDialog:(id) sender
 {
     shared_about("Macintosh INTEL Cocoa");
 }
 
--(void)menuCheckMark:(id)sender check:(n_int)value
+- (void) menuCheckMark:(id)sender check:(n_int)value
 {
     if ([sender respondsToSelector:@selector(setState:)])
     {
@@ -244,13 +244,13 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     }
 }
 
--(IBAction) menuQuit:(id) sender
+- (IBAction) menuQuit:(id) sender
 {
     NSLog(@"Quit from menu");
     [self quitProcedure];
 }
 
--(IBAction) menuFileNew:(id) sender
+- (IBAction) menuFileNew:(id) sender
 {
     n_uint loop = 0;
     n_byte2 *ra_in_2_bytes = (n_byte2*)&randomizing_agent;
@@ -271,7 +271,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     NSLog(@"Finished new landscape");
 }
 
--(IBAction) menuFileOpen:(id) sender
+- (IBAction) menuFileOpen:(id) sender
 {
     NSOpenPanel *panel = [self uniformOpenPanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
@@ -298,7 +298,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 }
 
 
--(IBAction) menuFileOpenScript:(id) sender
+- (IBAction) menuFileOpenScript:(id) sender
 {
     NSOpenPanel *panel = [self uniformOpenPanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
@@ -323,7 +323,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 }
 
 
--(IBAction) menuFileSaveAs:(id) sender
+- (IBAction) menuFileSaveAs:(id) sender
 {
     NSSavePanel *panel = [self uniformSavePanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
@@ -343,12 +343,12 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
 #pragma mark ---- Method Overrides ----
 
-- (void)keyUp:(NSEvent *)theEvent
+- (void) keyUp:(NSEvent *)theEvent
 {
     shared_keyUp();
 }
 
-- (void)keyDown:(NSEvent *)theEvent
+- (void) keyDown:(NSEvent *)theEvent
 {
     n_byte2  local_key = 0;
     if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
@@ -389,12 +389,12 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     }
 }
 
-- (BOOL)acceptsFirstMouse
+- (BOOL) acceptsFirstMouse
 {
     return YES;
 }
 
-- (void)mouseDown:(NSEvent *)theEvent
+- (void) mouseDown:(NSEvent *)theEvent
 {
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
     n_int location_x = (n_int)location.x;
@@ -414,74 +414,74 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     NSLog(@"%@ window has mouse pressed: %ld, %ld", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"), location_x, location_y);
 }
 
-- (void)rightMouseDown:(NSEvent *)theEvent
+- (void) rightMouseDown:(NSEvent *)theEvent
 {
 	[self mouseDown:theEvent];
     shared_mouseOption(1);
 }
 
-- (void)otherMouseDown:(NSEvent *)theEvent
+- (void) otherMouseDown:(NSEvent *)theEvent
 {
 	[self rightMouseDown:theEvent];
 }
 
-- (void)mouseUp:(NSEvent *)theEvent
+- (void) mouseUp:(NSEvent *)theEvent
 {
     shared_mouseUp();
 }
 
-- (void)rightMouseUp:(NSEvent *)theEvent
+- (void) rightMouseUp:(NSEvent *)theEvent
 {
 	[self mouseUp:theEvent];
 }
 
-- (void)otherMouseUp:(NSEvent *)theEvent
+- (void) otherMouseUp:(NSEvent *)theEvent
 {
 	[self mouseUp:theEvent];
 }
 
-- (void)mouseDragged:(NSEvent *)theEvent
+- (void) mouseDragged:(NSEvent *)theEvent
 {
 	[self mouseDown:theEvent];
 }
 
-- (void)rightMouseDragged:(NSEvent *)theEvent
+- (void) rightMouseDragged:(NSEvent *)theEvent
 {
 	[self rightMouseDown:theEvent];
 }
 
-- (void)otherMouseDragged:(NSEvent *)theEvent
+- (void) otherMouseDragged:(NSEvent *)theEvent
 {
 	[self rightMouseDown:theEvent];
 }
 
-- (void)scrollWheel:(NSEvent *)theEvent
+- (void) scrollWheel:(NSEvent *)theEvent
 {
     
 }
 
-- (void)beginGestureWithEvent:(NSEvent *)event
+- (void) beginGestureWithEvent:(NSEvent *)event
 {
     /* NSLog(@"New behavior: beginGestureWithEvent"); */
 }
 
-- (void)endGestureWithEvent:(NSEvent *)event
+- (void) endGestureWithEvent:(NSEvent *)event
 {
     /* NSLog(@"New behavior: endGestureWithEvent"); */
 }
 
-- (void)magnifyWithEvent:(NSEvent *)event
+- (void) magnifyWithEvent:(NSEvent *)event
 {
     /* NSLog(@"New behavior: magnifyWithEvent %f %@", [event magnification], event); */
     /* (1.0 + [event magnification]) */
 }
 
-- (void)swipeWithEvent:(NSEvent *)event
+- (void) swipeWithEvent:(NSEvent *)event
 {
     /* NSLog(@"New behavior: swipeWithEvent %f %f %@", [event deltaX], [event deltaY], event); */
 }
 
-- (void)rotateWithEvent:(NSEvent *)event
+- (void) rotateWithEvent:(NSEvent *)event
 {
     shared_rotate((n_double)[event rotation], fIdentification);
 }
