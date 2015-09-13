@@ -38,6 +38,7 @@
 		5AD6CAFC1B27598400230534 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD51B27598400230534 /* console.c */; };
 		5AD6CAFD1B27598400230534 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD61B27598400230534 /* file.c */; };
 		5AD6CAFE1B27598400230534 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD71B27598400230534 /* sim.c */; };
+		7B8CE0921BA53E23000450D7 /* NobleShared.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B8CE0911BA53E23000450D7 /* NobleShared.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +106,8 @@
 		5AD6CAD71B27598400230534 /* sim.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = sim.c; path = ../sim/universe/sim.c; sourceTree = "<group>"; };
 		5AD6CAD81B27598400230534 /* universe_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = universe_internal.h; path = ../sim/universe/universe_internal.h; sourceTree = "<group>"; };
 		5AD6CAD91B27598400230534 /* universe.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = universe.h; path = ../sim/universe/universe.h; sourceTree = "<group>"; };
+		7B8CE0901BA53E23000450D7 /* NobleShared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleShared.h; path = ../sim/mac/NobleShared.h; sourceTree = "<group>"; };
+		7B8CE0911BA53E23000450D7 /* NobleShared.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleShared.m; path = ../sim/mac/NobleShared.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -196,6 +199,8 @@
 		5AD6CB011B275B6200230534 /* mac */ = {
 			isa = PBXGroup;
 			children = (
+				7B8CE0901BA53E23000450D7 /* NobleShared.h */,
+				7B8CE0911BA53E23000450D7 /* NobleShared.m */,
 				5AD6CAC11B27598300230534 /* AppDelegate.h */,
 				5AD6CAC21B27598300230534 /* AppDelegate.m */,
 				5AD6CAC31B27598300230534 /* main.m */,
@@ -414,6 +419,7 @@
 				5AD6CAE71B27598400230534 /* shared.c in Sources */,
 				5AD6CAE91B27598400230534 /* AppDelegate.m in Sources */,
 				5AD6CAEA1B27598400230534 /* main.m in Sources */,
+				7B8CE0921BA53E23000450D7 /* NobleShared.m in Sources */,
 				5AD6CAEC1B27598400230534 /* NobleMacView.m in Sources */,
 				5AD6CAEE1B27598400230534 /* nobleape.xib in Sources */,
 				5AD6CAF01B27598400230534 /* NobleSimulationView.m in Sources */,

@@ -40,11 +40,15 @@
 
 #pragma mark ---- OpenGL Utils ----
 
-@implementation NobleMacView
+@interface NobleMacView()
 
-static NSString * sharedString_LastSaved       = @"LastSaved";
-static NSString * sharedString_LastOpen        = @"LastOpen";
-static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
+@property (nonatomic, strong) NSTimer* timerAnimation;
+@property (nonatomic, strong, readwrite) NobleShared* shared;
+
+
+@end
+
+@implementation NobleMacView
 
 /* pixel format definition */
 + (NSOpenGLPixelFormat*) basicPixelFormat
@@ -56,52 +60,6 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
         (NSOpenGLPixelFormatAttribute)0 /*nil*/
     };
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
-}
-
-- (NSOpenPanel*) uniformOpenPanel
-{
-    NSOpenPanel *panel = [NSOpenPanel openPanel];
-    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
-	[panel  setAllowedFileTypes:fileTypes];
-    [panel  setCanChooseDirectories:NO];
-    [panel  setAllowsMultipleSelection:NO];
-    
-    NSLog(@"Abtaining and returning uniform open panel");
-    
-    return panel;
-}
-
-
-- (NSSavePanel*) uniformSavePanel
-{
-    NSSavePanel *panel = [NSSavePanel savePanel];
-    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
-	[panel  setAllowedFileTypes:fileTypes];
-    
-    NSLog(@"Abtaining and returning uniform save panel");
-
-    return panel;
-}
-
-- (void) debugOutput
-{
-    NSSavePanel *panel = [self uniformSavePanel];
-
-    NSLog(@"Abtaining debug output");
-
-    [panel  beginWithCompletionHandler:^(NSInteger result)
-     {
-         if (result == NSFileHandlingPanelOKButton)
-         {
-             NSString *name = [panel.URL path];
-             char * cStringFileName = (char *)[name UTF8String];
-             shared_script_debug_handle(cStringFileName);
-         }
-         else
-         {
-             shared_script_debug_handle(0L);
-         }
-     }];
 }
 
 /* per-window timer function, basic time based animation preformed here */
@@ -116,8 +74,6 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     NSSize size = [[self window] frame].size;
     
     NSLog(@"Starting up");
-    
-    fIdentification = 0;
     
     [self startEverything];
     
@@ -136,9 +92,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     NSSize size = rect.size;
     
     [[self openGLContext] makeCurrentContext];
-    
-    shared_draw(0L, fIdentification, (n_int)size.width, (n_int)size.height);
-    
+    [_shared draw:size];
     [[self openGLContext] flushBuffer];
 }
 
@@ -146,7 +100,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 {
     NSLog(@"Quitting");
 
-    shared_close();
+    [_shared close];
     
     NSLog(@"Quit");
 
@@ -157,6 +111,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 {
     NSOpenGLPixelFormat * pf = [NobleMacView basicPixelFormat];
 	self = [super initWithFrame: frameRect pixelFormat: pf];
+    _shared = [[NobleShared alloc] init];
     return self;
 }
 
@@ -180,177 +135,41 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
     NSUInteger processors = [[NSProcessInfo processInfo] processorCount];
     NSSize increments;
     
-    randomizing_agent = (n_uint)CFAbsoluteTimeGetCurrent();
     
     increments.height = 4;
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
     
-    NSLog(@"%@ window setup started", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
-    
     execute_threads([[NSProcessInfo processInfo] processorCount]);
     
     NSLog(@"We have %ld processors", processors);
-    
-    if (fIdentification == NUM_TERRAIN)
+
+    if ([_shared start] == NO)
     {
-        NSLog(@"Initialization landscape with randomizing: %lx", randomizing_agent);
-    }
-    {
-        n_int shared_response = shared_init(fIdentification, randomizing_agent);
-        if (shared_response == -1)
-        {
-            NSLog(@"Simulation initialization failed");
-            [self quitProcedure];
-            return;
-        }
-        else
-        {
-            fIdentification = (n_byte)shared_response;
-        }
+        NSLog(@"Simulation initialization failed");
+        [self quitProcedure];
+        return;
     }
     
     /* start animation timer */
-    {
-        NSTimeInterval interval = 1.0f/((NSTimeInterval)shared_max_fps());
-        
-        timerAnimation = [NSTimer timerWithTimeInterval:interval target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
-    }
+    _timerAnimation = [NSTimer timerWithTimeInterval:[_shared timeInterval] target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     
-    [[NSRunLoop currentRunLoop] addTimer:timerAnimation forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop currentRunLoop] addTimer:_timerAnimation forMode:NSDefaultRunLoopMode];
     
     [[self window] makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
-    NSLog(@"%@ window setup done", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
-}
-
-- (void) loadUrlString:(NSString*) urlString
-{
-    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: urlString]];
-}
-
-#pragma mark ---- IB Actions ----
-
-- (IBAction) aboutDialog:(id) sender
-{
-    shared_about("Macintosh INTEL Cocoa");
-}
-
-- (void) menuCheckMark:(id)sender check:(n_int)value
-{
-    if ([sender respondsToSelector:@selector(setState:)])
-    {
-        [sender setState:(value ? NSOnState : NSOffState)];
-    }
-}
-
-- (IBAction) menuQuit:(id) sender
-{
-    NSLog(@"Quit from menu");
-    [self quitProcedure];
-}
-
-- (IBAction) menuFileNew:(id) sender
-{
-    n_uint loop = 0;
-    n_byte2 *ra_in_2_bytes = (n_byte2*)&randomizing_agent;
-    
-    randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent();
-    
-    NSLog(@"New landscape with randomizing: %lx", randomizing_agent);
-    
-    while (loop < (sizeof(n_uint)/2))
-    {
-        math_random(&ra_in_2_bytes[loop*2]);
-        loop++;
-    }    
-	if (shared_new(randomizing_agent) != 0)
-    {
-        [self quitProcedure];
-    }
-    NSLog(@"Finished new landscape");
-}
-
-- (IBAction) menuFileOpen:(id) sender
-{
-    NSOpenPanel *panel = [self uniformOpenPanel];
-    [panel  beginWithCompletionHandler:^(NSInteger result)
-     {
-         if (result == NSFileHandlingPanelOKButton)
-         {
-             NSString *name = [panel.URL path];
-             char * cStringFileName = (char *)[name UTF8String];
-             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-
-             if (!shared_openFileName(cStringFileName,0))
-             {
-                 [[NSSound soundNamed:@"Pop"] play];
-                 [prefs removeObjectForKey:sharedString_LastOpen];
-             }
-             else
-             {
-                 [prefs setObject:name forKey:sharedString_LastOpen];
-             }
-             [prefs synchronize];
-         }
-         
-     }];
-}
-
-
-- (IBAction) menuFileOpenScript:(id) sender
-{
-    NSOpenPanel *panel = [self uniformOpenPanel];
-    [panel  beginWithCompletionHandler:^(NSInteger result)
-     {
-         if (result == NSFileHandlingPanelOKButton)
-         {
-             NSString *name = [panel.URL path];
-             char * cStringFileName = (char *)[name UTF8String];
-             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-             if (!shared_openFileName(cStringFileName,1))
-             {
-                 [[NSSound soundNamed:@"Pop"] play];
-                 [prefs removeObjectForKey:sharedString_LastOpenScript];
-             }
-             else
-             {
-                 [prefs setObject:name forKey:sharedString_LastOpenScript];
-             }
-             [prefs synchronize];
-         }
-     }];
-}
-
-
-- (IBAction) menuFileSaveAs:(id) sender
-{
-    NSSavePanel *panel = [self uniformSavePanel];
-    [panel  beginWithCompletionHandler:^(NSInteger result)
-     {
-         if (result == NSFileHandlingPanelOKButton)
-         {
-             NSString *name = [panel.URL path];
-             char * cStringFileName = (char *)[name UTF8String];
-             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-             [prefs setObject:name forKey:sharedString_LastSaved];
-             [prefs synchronize];
-             shared_saveFileName(cStringFileName);
-         }
-         
-     }];
 }
 
 #pragma mark ---- Method Overrides ----
 
 - (void) keyUp:(NSEvent *)theEvent
 {
-    shared_keyUp();
+    [_shared keyUp];
 }
 
 - (void) keyDown:(NSEvent *)theEvent
 {
-    n_byte2  local_key = 0;
+    NSUInteger  local_key = 0;
     if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
     {
         local_key = 2048;
@@ -382,9 +201,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
                 local_key += 31;
             }
             
-            NSLog(@"%@ window has key pressed value: %d", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"), local_key);
-            
-			shared_keyReceived(local_key, fIdentification);
+            [_shared keyReceived:local_key];
         }
     }
 }
@@ -397,27 +214,17 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 - (void) mouseDown:(NSEvent *)theEvent
 {
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    n_int location_x = (n_int)location.x;
-    n_int location_y = (n_int)([self bounds].size.height - location.y);
-    if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
-    {
-        shared_mouseOption(1);
-        NSLog(@"Mouse option pressed");
-    }
-    else
-    {
-        shared_mouseOption(0);
-        NSLog(@"No mouse option pressed");
-    }
-	shared_mouseReceived(location_x, location_y, fIdentification);
+    NSInteger location_x = (NSInteger)location.x;
+    NSInteger location_y = (NSInteger)([self bounds].size.height - location.y);
     
-    NSLog(@"%@ window has mouse pressed: %ld, %ld", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"), location_x, location_y);
+    [_shared mouseOption:(([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))];
+    [_shared mouseReceivedWithXLocation:location_x YLocation:location_y];
 }
 
 - (void) rightMouseDown:(NSEvent *)theEvent
 {
 	[self mouseDown:theEvent];
-    shared_mouseOption(1);
+    [_shared mouseOption:YES];
 }
 
 - (void) otherMouseDown:(NSEvent *)theEvent
@@ -427,7 +234,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
 - (void) mouseUp:(NSEvent *)theEvent
 {
-    shared_mouseUp();
+    [_shared mouseUp];
 }
 
 - (void) rightMouseUp:(NSEvent *)theEvent
@@ -457,7 +264,6 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
 - (void) scrollWheel:(NSEvent *)theEvent
 {
-    
 }
 
 - (void) beginGestureWithEvent:(NSEvent *)event
@@ -483,7 +289,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
 
 - (void) rotateWithEvent:(NSEvent *)event
 {
-    shared_rotate((n_double)[event rotation], fIdentification);
+    [_shared rotation:[event rotation]];
 }
 
 @end

@@ -336,7 +336,7 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
     return 0;
 }
 
-shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_x, n_int dim_y)
+shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification, n_int dim_x, n_int dim_y)
 {
     shared_cycle_state return_value = SHARED_CYCLE_OK;
     ticks = ticks & 67108863; /* 71 58 27 88 */
@@ -344,10 +344,10 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
 #ifndef	_WIN32
     sim_thread_console();
 #endif
-    if ((mouse_down == 1) && (mouse_identification == fIdentification))
+    if ((mouse_down == 1) && (mouse_identification == localIdentification))
     {
 
-        if (fIdentification == NUM_VIEW)
+        if (localIdentification == NUM_VIEW)
         {
 #if (MAP_BITS == 8)
             control_mouse(mouse_identification, mouse_x/2, mouse_y/2, mouse_option);
@@ -371,14 +371,14 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte fIdentification, n_int dim_
     }
 #endif
 
-    if((key_down == 1) && (key_identification == fIdentification))
+    if((key_down == 1) && (key_identification == localIdentification))
     {
         if ((key_identification == NUM_VIEW) || (key_identification == NUM_TERRAIN))
         {
             control_key(key_identification, key_value);
         }
     }
-    if(fIdentification == NUM_TERRAIN)
+    if(localIdentification == NUM_TERRAIN)
     {
         sim_realtime(ticks);
 #ifdef MULTITOUCH_CONTROLS

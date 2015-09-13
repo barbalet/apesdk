@@ -42,6 +42,21 @@
 
 - (void) awakeFromNib;
 
+- (void) loadUrlString:(NSString*) urlString;
+
+- (void) menuCheckMark:(id)sender check:(int)value;
+
+- (IBAction) aboutDialog:(id) sender;
+
+- (IBAction) menuFileNew:(id) sender;
+- (IBAction) menuFileOpen:(id) sender;
+- (IBAction) menuFileOpenScript:(id) sender;
+- (IBAction) menuFileSaveAs:(id) sender;
+
+- (IBAction) menuQuit:(id) sender;
+
+- (void) debugOutput;
+
 -(IBAction) menuControlNoTerritory:(id) sender;
 -(IBAction) menuControlNoWeather:(id) sender;
 -(IBAction) menuControlNoBrain:(id) sender;

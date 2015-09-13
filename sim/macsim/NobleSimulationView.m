@@ -37,33 +37,58 @@
 
 @implementation NobleSimulationView
 
+static NSString * sharedString_LastSaved       = @"LastSaved";
+static NSString * sharedString_LastOpen        = @"LastOpen";
+static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
+
+
+- (NSOpenPanel*) uniformOpenPanel
+{
+    NSOpenPanel *panel = [NSOpenPanel openPanel];
+    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
+    [panel  setAllowedFileTypes:fileTypes];
+    [panel  setCanChooseDirectories:NO];
+    [panel  setAllowsMultipleSelection:NO];
+    
+    NSLog(@"Abtaining and returning uniform open panel");
+    
+    return panel;
+}
+
+- (NSSavePanel*) uniformSavePanel
+{
+    NSSavePanel *panel = [NSSavePanel savePanel];
+    NSArray     *fileTypes = [[NSArray alloc] initWithObjects:@"txt", nil];
+    [panel  setAllowedFileTypes:fileTypes];
+    
+    NSLog(@"Abtaining and returning uniform save panel");
+    
+    return panel;
+}
+
+
 - (void) awakeFromNib
 {
-    fIdentification = NUM_VIEW;
+    [self.shared identificationBasedOnName:[[self window] title]];
     
-    if ([[[self window] title] isEqualToString:@"Terrain"])
-    {
-        fIdentification = NUM_TERRAIN;
-    }
-    
-    NSLog(@"%@ window starts", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
     [self startEverything];
-    NSLog(@"%@ window ends", (fIdentification == NUM_TERRAIN ? @"Terrain" : @"Map"));
 }
 
 - (void) drawRect:(NSRect)rect
 {
-    n_int           dim_x = (n_int)rect.size.width;
-    n_int           dim_y = (n_int)rect.size.height;
-    static n_byte   outputBuffer[2048*1536*3];
-    shared_cycle_state returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), fIdentification, dim_x, dim_y);
-    if (returned_value == SHARED_CYCLE_DEBUG_OUTPUT)
+    NSInteger              dim_x = (NSInteger)rect.size.width;
+    NSInteger              dim_y = (NSInteger)rect.size.height;
+    static unsigned char   outputBuffer[2048*1536*3];
+    
+    [self.shared cycleWithWidth:dim_x height:dim_y];
+    
+    if ([self.shared cycleDebugOutput])
     {
         NSLog(@"Debug output");
 
         [self debugOutput];
     }
-    if (returned_value == SHARED_CYCLE_QUIT)
+    if ([self.shared cycleQuit])
     {
         NSLog(@"Quit procedure initiated");
 
@@ -72,65 +97,186 @@
 
     [[self openGLContext] makeCurrentContext];
     
-    shared_draw(outputBuffer, fIdentification, dim_x, dim_y);
+    [self.shared draw:outputBuffer width:dim_x height:dim_y];
     
     glDrawPixels((GLsizei)dim_x, (GLsizei)dim_y,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
     [[self openGLContext] flushBuffer];
 }
 
+- (void) loadUrlString:(NSString*) urlString
+{
+    [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: urlString]];
+}
+
+
+- (void) debugOutput
+{
+    NSSavePanel *panel = [self uniformSavePanel];
+    
+    NSLog(@"Abtaining debug output");
+    
+    [panel  beginWithCompletionHandler:^(NSInteger result)
+     {
+         if (result == NSFileHandlingPanelOKButton)
+         {
+             [self.shared scriptDebugHandle:[panel.URL path]];
+         }
+         else
+         {
+             [self.shared scriptDebugHandle:nil];
+         }
+     }];
+}
+
+#pragma mark ---- IB Actions ----
+
+- (IBAction) aboutDialog:(id) sender
+{
+    [self.shared about:@"Macintosh INTEL Cocoa"];
+}
+
+- (void) menuCheckMark:(id)sender check:(int)value
+{
+    if ([sender respondsToSelector:@selector(setState:)])
+    {
+        [sender setState:(value ? NSOnState : NSOffState)];
+    }
+}
+
+- (IBAction) menuQuit:(id) sender
+{
+    NSLog(@"Quit from menu");
+    [self quitProcedure];
+}
+
+- (IBAction) menuFileNew:(id) sender
+{
+    [self.shared newSimulation];
+    NSLog(@"Finished new landscape");
+}
+
+- (IBAction) menuFileOpen:(id) sender
+{
+    NSOpenPanel *panel = [self uniformOpenPanel];
+    [panel  beginWithCompletionHandler:^(NSInteger result)
+     {
+         if (result == NSFileHandlingPanelOKButton)
+         {
+             NSString *name = [panel.URL path];
+             char * cStringFileName = (char *)[name UTF8String];
+             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+             
+             if (!shared_openFileName(cStringFileName,0))
+             {
+                 [[NSSound soundNamed:@"Pop"] play];
+                 [prefs removeObjectForKey:sharedString_LastOpen];
+             }
+             else
+             {
+                 [prefs setObject:name forKey:sharedString_LastOpen];
+             }
+             [prefs synchronize];
+         }
+         
+     }];
+}
+
+
+- (IBAction) menuFileOpenScript:(id) sender
+{
+    NSOpenPanel *panel = [self uniformOpenPanel];
+    [panel  beginWithCompletionHandler:^(NSInteger result)
+     {
+         if (result == NSFileHandlingPanelOKButton)
+         {
+             NSString *name = [panel.URL path];
+             char * cStringFileName = (char *)[name UTF8String];
+             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+             if (!shared_openFileName(cStringFileName,1))
+             {
+                 [[NSSound soundNamed:@"Pop"] play];
+                 [prefs removeObjectForKey:sharedString_LastOpenScript];
+             }
+             else
+             {
+                 [prefs setObject:name forKey:sharedString_LastOpenScript];
+             }
+             [prefs synchronize];
+         }
+     }];
+}
+
+- (IBAction) menuFileSaveAs:(id) sender
+{
+    NSSavePanel *panel = [self uniformSavePanel];
+    [panel  beginWithCompletionHandler:^(NSInteger result)
+     {
+         if (result == NSFileHandlingPanelOKButton)
+         {
+             NSString *name = [panel.URL path];
+             char * cStringFileName = (char *)[name UTF8String];
+             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+             [prefs setObject:name forKey:sharedString_LastSaved];
+             [prefs synchronize];
+             shared_saveFileName(cStringFileName);
+         }
+         
+     }];
+}
+
 -(IBAction) menuControlPause:(id) sender
 {
-    [self menuCheckMark:sender check:shared_menu(NA_MENU_PAUSE)];
+    [self menuCheckMark:sender check:[self.shared menuPause]];
 }
 
 -(IBAction) menuControlPrevious:(id) sender
 {
-    (void) shared_menu(NA_MENU_PREVIOUS_APE);
+    [self.shared menuPreviousApe];
 }
 
 -(IBAction) menuControlNext:(id) sender
 {
-    (void) shared_menu(NA_MENU_NEXT_APE);
+    [self.shared menuNextApe];
 }
 
 -(IBAction) menuControlClearErrors:(id) sender
 {
-    (void) shared_menu(NA_MENU_CLEAR_ERRORS);
+    [self.shared menuClearErrors];
 }
 
 -(IBAction) menuControlNoTerritory:(id) sender
 {
-    [self menuCheckMark:sender check:shared_menu(NA_MENU_TERRITORY)];
+    [self menuCheckMark:sender check:[self.shared menuNoTerritory]];
 }
 
 -(IBAction) menuControlNoWeather:(id) sender
 {
-    [self menuCheckMark:sender check:shared_menu(NA_MENU_WEATHER)];
+    [self menuCheckMark:sender check:[self.shared menuNoWeather]];
 }
 
 -(IBAction) menuControlNoBrain:(id) sender
 {
-    [self menuCheckMark:sender check:shared_menu(NA_MENU_BRAIN)];
+    [self menuCheckMark:sender check:[self.shared menuNoBrain]];
 }
 
 -(IBAction) menuControlNoBrainCode:(id) sender
 {
-    [self menuCheckMark:sender check:shared_menu(NA_MENU_BRAINCODE)];
+    [self menuCheckMark:sender check:[self.shared menuNoBrainCode]];
 }
 
 -(IBAction) menuControlDaylightTide:(id)sender
 {
-    [self menuCheckMark:sender check:shared_menu(NA_MENU_TIDEDAYLIGHT)];
+    [self menuCheckMark:sender check:[self.shared menuDaylightTide]];
 }
 
 -(IBAction) menuControlFlood:(id) sender
 {
-    (void) shared_menu(NA_MENU_FLOOD);
+    [self.shared menuFlood];
 }
 
 -(IBAction) menuControlHealthyCarrier:(id) sender
 {
-    (void) shared_menu(NA_MENU_HEALTHY_CARRIER);
+    [self.shared menuHealthyCarrier];
 }
 
 -(IBAction) loadManual:(id) sender

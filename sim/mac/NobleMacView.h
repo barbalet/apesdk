@@ -40,14 +40,11 @@
 #import <OpenGL/glu.h>
 #import <OpenGL/OpenGL.h>
 
-#include "../noble/shared.h"
+#import "NobleShared.h"
 
 @interface NobleMacView : NSOpenGLView
-{
-    n_uint           randomizing_agent;
-    NSTimer*         timerAnimation;
-    n_byte           fIdentification;
-}
+
+@property (nonatomic, strong, readonly) NobleShared* shared;
 
 + (NSOpenGLPixelFormat*) basicPixelFormat;
 
@@ -65,21 +62,6 @@
 - (void) startEverything;
 
 - (void) quitProcedure;
-
-- (void) loadUrlString:(NSString*) urlString;
-
-- (void) menuCheckMark:(id)sender check:(n_int)value;
-
-- (IBAction) aboutDialog:(id) sender;
-
-- (IBAction) menuFileNew:(id) sender;
-- (IBAction) menuFileOpen:(id) sender;
-- (IBAction) menuFileOpenScript:(id) sender;
-- (IBAction) menuFileSaveAs:(id) sender;
-
-- (IBAction) menuQuit:(id) sender;
-
-- (void) debugOutput;
 
 - (void) keyUp:(NSEvent *)theEvent;
 - (void) keyDown:(NSEvent *)theEvent;

@@ -1,11 +1,11 @@
 /****************************************************************
-
- shared.h
-
+ 
+ NobleShared.h
+ 
  =============================================================
-
+ 
  Copyright 1996-2015 Tom Barbalet. All rights reserved.
-
+ 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
@@ -14,10 +14,10 @@
  sell copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
  conditions:
-
+ 
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
-
+ 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,72 +26,76 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
+ 
  This software and Noble Ape are a continuing work of Tom Barbalet,
  begun on 13 June 1996. No apes or cats were harmed in the writing
  of this software.
-
+ 
  ****************************************************************/
 
-#ifndef NOBLEAPE_SHARED_H
-#define NOBLEAPE_SHARED_H
+#import <Cocoa/Cocoa.h>
 
-#ifndef	_WIN32
+#include "../noble/shared.h"
+#include "../gui/gui.h"
 
-#include "../noble/noble.h"
+@interface NobleShared : NSObject
 
-#else
+- (BOOL) start;
 
-#include "..\noble\noble.h"
+- (void) about:(NSString *)aboutName;
 
-#endif
+- (void) draw:(NSSize)size;
 
-typedef enum
-{
-    SHARED_CYCLE_OK = 0,
-    SHARED_CYCLE_QUIT,
-    SHARED_CYCLE_DEBUG_OUTPUT
-} shared_cycle_state;
+- (void) draw:(unsigned char *)buffer width:(NSInteger)width height:(NSInteger)height;
 
-shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification, n_int dim_x, n_int dim_y);
+- (void) keyReceived:(NSUInteger)key;
 
-n_int shared_init(n_byte view, n_uint random);
+- (void) mouseReceivedWithXLocation:(NSInteger)xLocation YLocation:(NSInteger)yLocation;
 
-void shared_close(void);
+- (void) mouseOption:(BOOL)mouseOption;
 
-n_int shared_menu(n_int menuValue);
+- (void) keyUp;
 
-n_uint shared_max_fps(void);
+- (void) mouseUp;
 
-void shared_rotate(n_double num, n_byte wwind);
+- (void) rotation:(float)rotationAmount;
 
-void shared_keyReceived(n_byte2 value, n_byte localIdentification);
-void shared_keyUp(void);
+- (NSTimeInterval) timeInterval;
 
-void shared_mouseOption(n_byte option);
-void shared_mouseReceived(n_int valX, n_int valY, n_byte localIdentification);
-void shared_mouseUp(void);
+- (void) scriptDebugHandle:(NSString *)fileName;
 
-void shared_about(n_constant_string value);
+- (void) close;
 
-void shared_draw(n_byte * outputBuffer, n_byte localIdentification, n_int dim_x, n_int dim_y);
+- (void) identificationBasedOnName:(NSString *)windowName;
 
-void shared_legacy_draw(n_int dim_x, n_int dim_y);
+- (void) newSimulation;
 
-n_byte * shared_legacy_pointer(n_byte localIdentification);
+- (void) cycleWithWidth:(NSInteger)width height:(NSInteger)height;
 
-n_int shared_new(n_uint seed);
+- (BOOL) cycleDebugOutput;
 
-n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
+- (BOOL) cycleQuit;
 
-void shared_saveFileName(n_string cStringFileName);
+- (BOOL) menuPause;
 
-void shared_script_debug_handle(n_string cStringFileName);
+- (void) menuPreviousApe;
 
-#ifndef	_WIN32
+- (void) menuNextApe;
 
-n_int sim_thread_console_quit(void);
+- (void) menuClearErrors;
 
-#endif
+- (BOOL) menuNoTerritory;
 
-#endif /* NOBLEAPE_SHARED_H */
+- (BOOL) menuNoWeather;
+
+- (BOOL) menuNoBrain;
+
+- (BOOL) menuNoBrainCode;
+
+- (BOOL) menuDaylightTide;
+
+- (void) menuFlood;
+
+- (void) menuHealthyCarrier;
+
+@end
