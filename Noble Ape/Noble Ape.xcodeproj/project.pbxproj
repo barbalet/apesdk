@@ -39,6 +39,7 @@
 		5AD6CAFD1B27598400230534 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD61B27598400230534 /* file.c */; };
 		5AD6CAFE1B27598400230534 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAD71B27598400230534 /* sim.c */; };
 		7B8CE0921BA53E23000450D7 /* NobleShared.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B8CE0911BA53E23000450D7 /* NobleShared.m */; settings = {ASSET_TAGS = (); }; };
+		7B8CE0A01BD25C92000450D7 /* object.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8CE09F1BD25C92000450D7 /* object.c */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +109,7 @@
 		5AD6CAD91B27598400230534 /* universe.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = universe.h; path = ../sim/universe/universe.h; sourceTree = "<group>"; };
 		7B8CE0901BA53E23000450D7 /* NobleShared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleShared.h; path = ../sim/mac/NobleShared.h; sourceTree = "<group>"; };
 		7B8CE0911BA53E23000450D7 /* NobleShared.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleShared.m; path = ../sim/mac/NobleShared.m; sourceTree = "<group>"; };
+		7B8CE09F1BD25C92000450D7 /* object.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = object.c; path = ../sim/noble/object.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -262,6 +264,7 @@
 				5AD6CAD01B27598400230534 /* math.c */,
 				5AD6CAD11B27598400230534 /* network.c */,
 				5AD6CAD21B27598400230534 /* noble.h */,
+				7B8CE09F1BD25C92000450D7 /* object.c */,
 				5AD6CAD31B27598400230534 /* parse.c */,
 				5AD6CAD41B27598400230534 /* shared.h */,
 			);
@@ -418,6 +421,7 @@
 				5AD6CAE61B27598400230534 /* message.c in Sources */,
 				5AD6CAE71B27598400230534 /* shared.c in Sources */,
 				5AD6CAE91B27598400230534 /* AppDelegate.m in Sources */,
+				7B8CE0A01BD25C92000450D7 /* object.c in Sources */,
 				5AD6CAEA1B27598400230534 /* main.m in Sources */,
 				7B8CE0921BA53E23000450D7 /* NobleShared.m in Sources */,
 				5AD6CAEC1B27598400230534 /* NobleMacView.m in Sources */,
