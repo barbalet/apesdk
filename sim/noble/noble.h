@@ -335,7 +335,8 @@ typedef enum
     OBJECT_EMPTY,
     OBJECT_STRING,
     OBJECT_NUMBER,
-    OBJECT_OBJECT
+    OBJECT_ARRAY,
+    OBJECT_OBJECT,
 }n_object_type;
 
 typedef struct
@@ -344,20 +345,20 @@ typedef struct
     n_string_block data;
     void*          next;
     n_uint         name_hash;
-    n_uint         data_hash;
     n_object_type  type;
 }n_object;
 
 n_file * object_json_out(n_object * object);
 n_object * object_json_in(n_file * file);
 
-n_string object_as_string(n_object * object, n_string name, n_int * error);
-n_int object_as_number(n_object * object, n_string name, n_int * error);
-n_object * object_as_object(n_object * object, n_string name, n_int * error);
+n_string object_as_string(n_object * object, n_string name);
+n_int object_as_number(n_object * object, n_string name);
+n_object * object_as_object(n_object * object, n_string name);
 
 void object_set_number(n_object * object, n_string name, n_int set_number);
 void object_set_string(n_object * object, n_string name, n_string set_string);
 void object_set_object(n_object * object, n_string name, n_object * set_object);
+void object_set_array(n_object * object, n_string name, n_object * set_array);
 
 n_object * object_new(void);
 void object_free(n_object ** object);
