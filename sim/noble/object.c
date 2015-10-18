@@ -41,14 +41,65 @@
 
 #include "noble.h"
 
+static void object_top_level(n_file * file, n_object * top_level);
+static void object_write_chain(n_file * file, n_object *start);
+
+
 static n_object_type object_type(n_object * object)
 {
     return object->type;
 }
 
+
+static void object_top_level(n_file * file, n_object * top_level)
+{
+    io_write(file, "{", 0);
+    object_write_chain(file, top_level);
+    io_write(file, "}", 0);
+}
+
+static void object_write_chain(n_file * file, n_object *start)
+{
+    n_object * current = start;
+    do{
+        io_write(file, current->name, 0);
+        io_write(file, ":", 0);
+        switch (object_type(current))
+        {
+            case OBJECT_NUMBER:
+                {
+                    n_int * int_data = (n_int *)current->data;
+                    io_writenumber(file, int_data[0],1,0);
+                }
+                break;
+            case OBJECT_STRING:
+                io_write(file, "\"", 0);
+                io_write(file, current->data, 0);
+                io_write(file, "\"", 0);
+                break;
+            case OBJECT_OBJECT:
+                object_top_level(file, (n_object *)current->data);
+                break;
+            default:
+                (void)SHOW_ERROR("Object kind not found");
+                return;
+        }
+        if (current)
+        {
+            io_write(file, ",", 0);
+        }
+        current = (n_object *) current->next;
+    }while (current);
+}
+
+
 n_file * object_json_out(n_object * object)
 {
-    return 0;
+    n_file * output_file = io_file_new();
+    
+    object_top_level(output_file, object);
+    
+    return output_file;
 }
 
 n_object * object_json_in(n_file * file)
@@ -279,6 +330,7 @@ static void object_specific_free(n_object ** object)
     switch(object_type(referenced_object))
     {
         case OBJECT_ARRAY:
+            (void)SHOW_ERROR("No Object Implementation Yet");
             break;
         case OBJECT_OBJECT:
             {
@@ -295,7 +347,16 @@ void object_free(n_object ** object)
 {
     if (*object)
     {
-        /* TODO: Need to unwrap */
+        n_object * current = *object;
+        n_object * next = (n_object *)((*object)->next);
         object_specific_free(object);
+        if (next)
+        {
+            do{
+                next = (n_object *)(current->next);
+                object_specific_free(&current);
+                current = next;
+            }while (current);
+        }
     }
 }

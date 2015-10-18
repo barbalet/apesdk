@@ -50,6 +50,7 @@ gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/network.c -o network.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/object.c -o object.o
 
 gcc ${CFLAGS} -c test_math.c -o test_math.o
 
@@ -59,6 +60,14 @@ gcc ${CFLAGS} -I/usr/include -o test_math *.o -lz -lm -lpthread
 
 rm test_math
 rm test_math.o
+
+gcc ${CFLAGS} -c test_object.c -o test_object.o
+gcc ${CFLAGS} -I/usr/include -o test_object *.o -lz -lm -lpthread
+
+./test_object
+
+rm test_object
+rm test_object.o
 
 gcc ${CFLAGS} -c test_io.c -o test_io.o
 gcc ${CFLAGS} -I/usr/include -o test_io *.o -lz -lm -lpthread

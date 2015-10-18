@@ -1,0 +1,87 @@
+/****************************************************************
+
+ test_object.c
+
+ =============================================================
+
+ Copyright 1996-2015 Tom Barbalet. All rights reserved.
+
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+ This software and Noble Ape are a continuing work of Tom Barbalet,
+ begun on 13 June 1996. No apes or cats were harmed in the writing
+ of this software.
+
+ ****************************************************************/
+
+#include <stdio.h>
+
+#include "../noble/noble.h"
+
+n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
+{
+    if (error_text)
+    {
+        printf("ERROR: %s @ %s %ld\n", (n_constant_string)error_text, location, line_number);
+    }
+    return -1;
+}
+
+static void check_file_output(n_file * file)
+{
+    n_uint loop = 0;
+    while (loop < file->location)
+    {
+        printf("%c", file->data[loop]);
+        loop++;
+    }
+}
+
+static void check_object(void)
+{
+    n_object * new_object = object_new();
+    n_object * sub_object = object_new();
+    
+    object_set_number(new_object, "index", 1);
+    object_set_string(new_object, "name", "heavyman");
+    object_set_number(new_object, "index", 3);
+    
+    object_set_string(sub_object, "lime", "coconut");
+    object_set_number(sub_object, "count", 5);
+    
+    /*object_set_object(new_object, "information", sub_object);*/
+    
+    object_set_number(sub_object, "second_count", 10);
+
+    check_file_output(object_json_out(new_object));
+    check_file_output(object_json_out(sub_object));
+    
+    object_free(&new_object);
+    object_free(&sub_object);
+}
+
+int main(int argc, const char * argv[])
+{
+    check_object();
+    return 0;
+}
+
