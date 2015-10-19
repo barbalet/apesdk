@@ -341,8 +341,8 @@ typedef enum
 
 typedef struct
 {
-    n_string_block name;
-    n_string_block data;
+    n_string       name;
+    n_string       data;
     void*          next;
     n_uint         name_hash;
     n_object_type  type;

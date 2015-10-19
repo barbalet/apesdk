@@ -73,8 +73,9 @@ static void check_object(void)
     object_set_string(new_object, "name", "Benson");
     object_set_string(new_object, "name", "Kevin");
     
-    object_set_number(sub_object, "top", 4);
+    object_set_object(new_object, "example", sub_object);
 
+    object_set_number(sub_object, "top", 4);
 
     check_file_output(object_json_out(new_object));
     check_file_output(object_json_out(sub_object));

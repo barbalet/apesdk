@@ -97,7 +97,7 @@ static void object_write_chain(n_file * file, n_object *start)
         {
             case OBJECT_NUMBER:
                 {
-                    n_int * int_data = (n_int *)current->data;
+                    n_int * int_data = (n_int *)&current->data;
                     io_writenumber(file, int_data[0],1,0);
                 }
                 break;
@@ -162,28 +162,26 @@ static n_object * object_get(n_object * object, n_string name)
         return object;
     }
     {
-    
-    
-    n_object * previous_object = object_end_or_find(object, name);
-    n_object * set_object;
-    if (previous_object == 0L)
-    {
-        set_object = object;
-    }
-    else
-    {
-        set_object = previous_object->next;
-        if (set_object)
+        n_object * previous_object = object_end_or_find(object, name);
+        n_object * set_object;
+        if (previous_object == 0L)
         {
-            object_erase(set_object);
+            set_object = object;
         }
         else
         {
-            set_object = object_new();
+            set_object = previous_object->next;
+            if (set_object)
+            {
+                object_erase(set_object);
+            }
+            else
+            {
+                set_object = object_new();
+            }
+            previous_object->next = set_object;
         }
-        previous_object->next = set_object;
-    }
-    return set_object;
+        return set_object;
     }
 }
 
@@ -194,10 +192,10 @@ void object_set_object(n_object * object, n_string name, n_object * active_objec
     n_uint     hash = math_hash((n_byte *)name, string_length);
     n_object * set_object = object_get(object, name);
     
-    io_copy((n_byte*)name, (n_byte*)set_object->name, string_length);
+    set_object->name = name;
     set_object->name_hash = hash;
     set_object->type = OBJECT_OBJECT;
-    io_copy((n_byte*)active_object, (n_byte*)set_object->data, sizeof(n_object));
+    set_object->data = (n_string)active_object;
 }
 
 void object_set_number(n_object * object, n_string name, n_int set_number)
@@ -207,10 +205,10 @@ void object_set_number(n_object * object, n_string name, n_int set_number)
     n_object * set_object = object_get(object, name);
     n_int    * number;
     
-    io_copy((n_byte*)name, (n_byte*)set_object->name, string_length);
+    set_object->name = name;
     set_object->name_hash = hash;
     set_object->type = OBJECT_NUMBER;
-    number = (n_int *)set_object->data;
+    number = (n_int *)&set_object->data;
     number[0] = set_number;
     
 }
@@ -220,23 +218,11 @@ void object_set_string(n_object * object, n_string name, n_string set_string)
     n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
     n_uint     hash = math_hash((n_byte *)name, string_length);
     n_object * set_object = object_get(object, name);
-    n_uint     location = 0;
     
-    io_copy((n_byte*)name, (n_byte*)set_object->name, string_length);
+    set_object->name = name;
     set_object->name_hash = hash;
     set_object->type = OBJECT_STRING;
-
-    if (name[location])
-    {
-        do
-        {
-            if (set_string[location])
-            {
-                set_object->data[location] = set_string[location];
-            }
-            location++;
-        }while (set_string[location]);
-    }
+    set_object->data = set_string;
     set_object->name_hash = hash;
 }
 
@@ -273,16 +259,11 @@ void object_free(n_object ** object)
 {
     if (*object)
     {
-        n_object * current = *object;
         n_object * next = (n_object *)((*object)->next);
-        object_specific_free(object);
         if (next)
         {
-            do{
-                next = (n_object *)(current->next);
-                object_specific_free(&current);
-                current = next;
-            }while (current);
+            object_free(&next);
         }
+        object_specific_free(object);
     }
 }
