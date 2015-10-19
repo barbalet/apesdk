@@ -348,17 +348,14 @@ typedef struct
     n_object_type  type;
 }n_object;
 
-n_file * object_json_out(n_object * object);
-n_object * object_json_in(n_file * file);
 
-n_string object_as_string(n_object * object, n_string name);
-n_int object_as_number(n_object * object, n_string name);
-n_object * object_as_object(n_object * object, n_string name);
+void object_debug(n_object * object);
+
+n_file * object_json_out(n_object * object);
 
 void object_set_number(n_object * object, n_string name, n_int set_number);
 void object_set_string(n_object * object, n_string name, n_string set_string);
 void object_set_object(n_object * object, n_string name, n_object * set_object);
-void object_set_array(n_object * object, n_string name, n_object * set_array);
 
 n_object * object_new(void);
 void object_free(n_object ** object);
