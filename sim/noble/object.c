@@ -44,14 +44,14 @@
 
 static void object_top_level(n_file * file, n_object * top_level);
 static void object_write_chain(n_file * file, n_object *start);
-
+static n_object * object_new(void);
 
 static n_object_type object_type(n_object * object)
 {
     return object->type;
 }
 
-void object_debug(n_object * object)
+void obj_debug(n_object * object)
 {
     printf("Name %s ",object->name);
     printf("Name Hash %lu ", object->name_hash);
@@ -122,7 +122,7 @@ static void object_write_chain(n_file * file, n_object *start)
 }
 
 
-n_file * object_json_out(n_object * object)
+n_file * obj_json(n_object * object)
 {
     n_file * output_file = io_file_new();
     object_top_level(output_file, object);
@@ -157,6 +157,10 @@ static n_object * object_end_or_find(n_object * object, n_string name)
 
 static n_object * object_get(n_object * object, n_string name)
 {
+    if (object == 0L)
+    {
+        return object_new();
+    }
     if (object_type(object) == OBJECT_EMPTY)
     {
         return object;
@@ -185,8 +189,7 @@ static n_object * object_get(n_object * object, n_string name)
     }
 }
 
-
-void object_set_object(n_object * object, n_string name, n_object * active_object)
+n_object *  obj_object(n_object * object, n_string name, n_object * active_object)
 {
     n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
     n_uint     hash = math_hash((n_byte *)name, string_length);
@@ -196,9 +199,10 @@ void object_set_object(n_object * object, n_string name, n_object * active_objec
     set_object->name_hash = hash;
     set_object->type = OBJECT_OBJECT;
     set_object->data = (n_string)active_object;
+    return set_object;
 }
 
-void object_set_number(n_object * object, n_string name, n_int set_number)
+n_object *  obj_number(n_object * object, n_string name, n_int set_number)
 {
     n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
     n_uint     hash = math_hash((n_byte *)name, string_length);
@@ -210,10 +214,10 @@ void object_set_number(n_object * object, n_string name, n_int set_number)
     set_object->type = OBJECT_NUMBER;
     number = (n_int *)&set_object->data;
     number[0] = set_number;
-    
+    return set_object;
 }
 
-void object_set_string(n_object * object, n_string name, n_string set_string)
+n_object *  obj_string(n_object * object, n_string name, n_string set_string)
 {
     n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
     n_uint     hash = math_hash((n_byte *)name, string_length);
@@ -224,9 +228,10 @@ void object_set_string(n_object * object, n_string name, n_string set_string)
     set_object->type = OBJECT_STRING;
     set_object->data = set_string;
     set_object->name_hash = hash;
+    return set_object;
 }
 
-n_object * object_new(void)
+static n_object * object_new(void)
 {
     n_object * return_object = (n_object *)io_new(sizeof(n_object));
     if (return_object)
@@ -247,7 +252,7 @@ static void object_specific_free(n_object ** object)
         case OBJECT_OBJECT:
             {
                 n_object * child = (n_object *)referenced_object->data;
-                object_free(&child);
+                obj_free(&child);
             }
         default:
             io_free((void **)object);
@@ -255,14 +260,14 @@ static void object_specific_free(n_object ** object)
     }
 }
 
-void object_free(n_object ** object)
+void obj_free(n_object ** object)
 {
     if (*object)
     {
         n_object * next = (n_object *)((*object)->next);
         if (next)
         {
-            object_free(&next);
+            obj_free(&next);
         }
         object_specific_free(object);
     }

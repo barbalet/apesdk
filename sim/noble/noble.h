@@ -349,16 +349,15 @@ typedef struct
 }n_object;
 
 
-void object_debug(n_object * object);
+void obj_debug(n_object * object);
 
-n_file * object_json_out(n_object * object);
+n_file * obj_json(n_object * object);
 
-void object_set_number(n_object * object, n_string name, n_int set_number);
-void object_set_string(n_object * object, n_string name, n_string set_string);
-void object_set_object(n_object * object, n_string name, n_object * set_object);
+n_object * obj_number(n_object * object, n_string name, n_int set_number);
+n_object * obj_string(n_object * object, n_string name, n_string set_string);
+n_object * obj_object(n_object * object, n_string name, n_object * set_object);
 
-n_object * object_new(void);
-void object_free(n_object ** object);
+void obj_free(n_object ** object);
 
 /** \brief sine and cosine conversation */
 #define	NEW_SD_MULTIPLE			26880
