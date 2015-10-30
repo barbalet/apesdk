@@ -332,11 +332,11 @@ typedef struct
 
 typedef enum
 {
-    OBJECT_EMPTY,
+    OBJECT_EMPTY = 0,
     OBJECT_STRING,
     OBJECT_NUMBER,
-    OBJECT_ARRAY,
     OBJECT_OBJECT,
+    OBJECT_ARRAY = 4,
 }n_object_type;
 
 typedef struct

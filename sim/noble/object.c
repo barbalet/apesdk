@@ -157,17 +157,21 @@ static n_object * object_end_or_find(n_object * object, n_string name)
 
 static n_object * object_get(n_object * object, n_string name)
 {
+    n_object * set_object;
+    n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
+    n_uint     hash = math_hash((n_byte *)name, string_length);
+    
     if (object == 0L)
     {
-        return object_new();
+        object = object_new();
     }
     if (object_type(object) == OBJECT_EMPTY)
     {
-        return object;
+        set_object = object;
     }
+    else
     {
         n_object * previous_object = object_end_or_find(object, name);
-        n_object * set_object;
         if (previous_object == 0L)
         {
             set_object = object;
@@ -185,18 +189,18 @@ static n_object * object_get(n_object * object, n_string name)
             }
             previous_object->next = set_object;
         }
-        return set_object;
     }
+    
+    set_object->name = name;
+    set_object->name_hash = hash;
+    
+    return set_object;
 }
 
 n_object *  obj_object(n_object * object, n_string name, n_object * active_object)
 {
-    n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
-    n_uint     hash = math_hash((n_byte *)name, string_length);
     n_object * set_object = object_get(object, name);
     
-    set_object->name = name;
-    set_object->name_hash = hash;
     set_object->type = OBJECT_OBJECT;
     set_object->data = (n_string)active_object;
     return set_object;
@@ -204,13 +208,9 @@ n_object *  obj_object(n_object * object, n_string name, n_object * active_objec
 
 n_object *  obj_number(n_object * object, n_string name, n_int set_number)
 {
-    n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
-    n_uint     hash = math_hash((n_byte *)name, string_length);
     n_object * set_object = object_get(object, name);
     n_int    * number;
     
-    set_object->name = name;
-    set_object->name_hash = hash;
     set_object->type = OBJECT_NUMBER;
     number = (n_int *)&set_object->data;
     number[0] = set_number;
@@ -219,15 +219,10 @@ n_object *  obj_number(n_object * object, n_string name, n_int set_number)
 
 n_object *  obj_string(n_object * object, n_string name, n_string set_string)
 {
-    n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
-    n_uint     hash = math_hash((n_byte *)name, string_length);
     n_object * set_object = object_get(object, name);
-    
-    set_object->name = name;
-    set_object->name_hash = hash;
+
     set_object->type = OBJECT_STRING;
     set_object->data = set_string;
-    set_object->name_hash = hash;
     return set_object;
 }
 
