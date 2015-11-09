@@ -339,17 +339,20 @@ typedef enum
     OBJECT_ARRAY = 4,
 }n_object_type;
 
+
 typedef struct
 {
-    n_string       name;
     n_string       data;
     void*          next;
-    n_uint         name_hash;
     n_object_type  type;
+}n_array;
+
+typedef struct
+{
+    n_array        primitive;
+    n_string       name;
+    n_uint         name_hash;
 }n_object;
-
-
-void obj_debug(n_object * object);
 
 n_file * obj_json(n_object * object);
 

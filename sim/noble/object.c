@@ -42,96 +42,131 @@
 #include "noble.h"
 #include <stdio.h>
 
-static void object_top_level(n_file * file, n_object * top_level);
-static void object_write_chain(n_file * file, n_object *start);
-static n_object * object_new(void);
+static void object_write_object(n_file * file, n_object *start);
+static void object_write_array(n_file * file, n_array *start);
 
-static n_object_type object_type(n_object * object)
+static n_object_type object_type(n_array * array)
 {
-    return object->type;
+    return array->type;
 }
 
-void obj_debug(n_object * object)
+static void object_erase(n_object * object)
 {
-    printf("Name %s ",object->name);
-    printf("Name Hash %lu ", object->name_hash);
-    printf("Object ");
-    switch (object_type(object))
+    io_erase((n_byte*)object, sizeof(n_object));
+}
+
+static n_object * object_new(void)
+{
+    n_object * return_object = (n_object *)io_new(sizeof(n_object));
+    if (return_object)
     {
-        case OBJECT_EMPTY:
-            printf("OBJECT_EMPTY\n");
-            break;
-        case OBJECT_STRING:
-            printf("OBJECT_STRING\n");
-            break;
-        case OBJECT_NUMBER:
-            printf("OBJECT_NUMBER\n");
-            break;
+        object_erase(return_object);
+    }
+    return return_object;
+}
+
+static void object_specific_free(n_object ** object)
+{
+    n_object * referenced_object = * object;
+    switch(object_type(&referenced_object->primitive))
+    {
         case OBJECT_ARRAY:
-            printf("OBJECT_ARRAY\n");
+            (void)SHOW_ERROR("No Object Implementation Yet");
             break;
         case OBJECT_OBJECT:
-            printf("OBJECT_OBJECT\n");
-            break;
+        {
+            n_object * child = (n_object *)referenced_object->primitive.data;
+            obj_free(&child);
+        }
         default:
-            printf("Unknown OBJECT\n");
+            io_free((void **)object);
             break;
     }
 }
 
-static void object_top_level(n_file * file, n_object * top_level)
+void obj_free(n_object ** object)
+{
+    if (*object)
+    {
+        n_object * next = (n_object *)((*object)->primitive.next);
+        if (next)
+        {
+            obj_free(&next);
+        }
+        object_specific_free(object);
+    }
+}
+
+static void object_top_object(n_file * file, n_object * top_level)
 {
     io_write(file, "{", 0);
-    object_write_chain(file, top_level);
+    object_write_object(file, top_level);
     io_write(file, "}", 0);
 }
 
-static void object_write_chain(n_file * file, n_object *start)
+static void object_top_array(n_file * file, n_array * top_level)
+{
+    io_write(file, "[", 0);
+    object_write_array(file, top_level);
+    io_write(file, "]", 0);
+}
+
+static void * object_write_primitive(n_file * file, n_array * primitive)
+{
+    switch (object_type(primitive))
+    {
+        case OBJECT_NUMBER:
+        {
+            n_int * int_data = (n_int *)&primitive->data;
+            io_writenumber(file, int_data[0],1,0);
+        }
+            break;
+        case OBJECT_STRING:
+            io_write(file, "\"", 0);
+            io_write(file, primitive->data, 0);
+            io_write(file, "\"", 0);
+            break;
+        case OBJECT_OBJECT:
+            object_top_object(file, (n_object *)primitive->data);
+            break;
+        case OBJECT_ARRAY:
+            object_top_array(file, (n_array *)primitive->data);
+            break;
+        default:
+            (void)SHOW_ERROR("Object kind not found");
+            return 0L;
+    }
+    if (primitive->next)
+    {
+        io_write(file, ",", 0);
+    }
+    return primitive->next;
+}
+
+static void object_write_object(n_file * file, n_object *start)
 {
     n_object * current = start;
     do{
         io_write(file, "\"", 0);
         io_write(file, current->name, 0);
         io_write(file, "\":", 0);
-        switch (object_type(current))
-        {
-            case OBJECT_NUMBER:
-                {
-                    n_int * int_data = (n_int *)&current->data;
-                    io_writenumber(file, int_data[0],1,0);
-                }
-                break;
-            case OBJECT_STRING:
-                io_write(file, "\"", 0);
-                io_write(file, current->data, 0);
-                io_write(file, "\"", 0);
-                break;
-            case OBJECT_OBJECT:
-                object_top_level(file, (n_object *)current->data);
-                break;
-            default:
-                (void)SHOW_ERROR("Object kind not found");
-                return;
-        }
-        current = (n_object *) current->next;
-        if (current)
-        {
-            io_write(file, ",", 0);
-        }
+        current = (n_object *)object_write_primitive(file, &current->primitive);
     }while (current);
 }
 
+static void object_write_array(n_file * file, n_array *start)
+{
+    n_array * current = start;
+    do{
+        current = (n_array *)object_write_primitive(file, current);
+    }while (current);
+}
 
 n_file * obj_json(n_object * object)
 {
     n_file * output_file = io_file_new();
-    object_top_level(output_file, object);
+    object_top_object(output_file, object);
     return output_file;
-}
-
-static void object_erase(n_object * object)
-{
-    io_erase((n_byte*)object, sizeof(n_object));
 }
 
 static n_object * object_end_or_find(n_object * object, n_string name)
@@ -150,7 +185,7 @@ static n_object * object_end_or_find(n_object * object, n_string name)
             return previous_object;
         }
         previous_object = object;
-        object = object->next;
+        object = object->primitive.next;
     }while (object);
     return previous_object;
 }
@@ -165,7 +200,7 @@ static n_object * object_get(n_object * object, n_string name)
     {
         object = object_new();
     }
-    if (object_type(object) == OBJECT_EMPTY)
+    if (object_type(&object->primitive) == OBJECT_EMPTY)
     {
         set_object = object;
     }
@@ -178,7 +213,7 @@ static n_object * object_get(n_object * object, n_string name)
         }
         else
         {
-            set_object = previous_object->next;
+            set_object = previous_object->primitive.next;
             if (set_object)
             {
                 object_erase(set_object);
@@ -187,7 +222,7 @@ static n_object * object_get(n_object * object, n_string name)
             {
                 set_object = object_new();
             }
-            previous_object->next = set_object;
+            previous_object->primitive.next = set_object;
         }
     }
     
@@ -201,8 +236,8 @@ n_object *  obj_object(n_object * object, n_string name, n_object * active_objec
 {
     n_object * set_object = object_get(object, name);
     
-    set_object->type = OBJECT_OBJECT;
-    set_object->data = (n_string)active_object;
+    set_object->primitive.type = OBJECT_OBJECT;
+    set_object->primitive.data = (n_string)active_object;
     return set_object;
 }
 
@@ -211,8 +246,8 @@ n_object *  obj_number(n_object * object, n_string name, n_int set_number)
     n_object * set_object = object_get(object, name);
     n_int    * number;
     
-    set_object->type = OBJECT_NUMBER;
-    number = (n_int *)&set_object->data;
+    set_object->primitive.type = OBJECT_NUMBER;
+    number = (n_int *)&set_object->primitive.data;
     number[0] = set_number;
     return set_object;
 }
@@ -221,49 +256,7 @@ n_object *  obj_string(n_object * object, n_string name, n_string set_string)
 {
     n_object * set_object = object_get(object, name);
 
-    set_object->type = OBJECT_STRING;
-    set_object->data = set_string;
+    set_object->primitive.type = OBJECT_STRING;
+    set_object->primitive.data = set_string;
     return set_object;
-}
-
-static n_object * object_new(void)
-{
-    n_object * return_object = (n_object *)io_new(sizeof(n_object));
-    if (return_object)
-    {
-        object_erase(return_object);
-    }
-    return return_object;
-}
-
-static void object_specific_free(n_object ** object)
-{
-    n_object * referenced_object = * object;
-    switch(object_type(referenced_object))
-    {
-        case OBJECT_ARRAY:
-            (void)SHOW_ERROR("No Object Implementation Yet");
-            break;
-        case OBJECT_OBJECT:
-            {
-                n_object * child = (n_object *)referenced_object->data;
-                obj_free(&child);
-            }
-        default:
-            io_free((void **)object);
-            break;
-    }
-}
-
-void obj_free(n_object ** object)
-{
-    if (*object)
-    {
-        n_object * next = (n_object *)((*object)->next);
-        if (next)
-        {
-            obj_free(&next);
-        }
-        object_specific_free(object);
-    }
 }
