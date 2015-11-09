@@ -65,35 +65,33 @@ static n_object * object_new(void)
     return return_object;
 }
 
-static void object_specific_free(n_object ** object)
+static void object_primitive_free(n_array ** array)
 {
-    n_object * referenced_object = * object;
-    switch(object_type(&referenced_object->primitive))
+    n_array * referenced_array = * array;
+    switch(object_type(referenced_array))
     {
         case OBJECT_ARRAY:
-            (void)SHOW_ERROR("No Object Implementation Yet");
-            break;
         case OBJECT_OBJECT:
         {
-            n_object * child = (n_object *)referenced_object->primitive.data;
+            n_array * child = (n_array *)referenced_array->data;
             obj_free(&child);
         }
         default:
-            io_free((void **)object);
+            io_free((void **)array);
             break;
     }
 }
 
-void obj_free(n_object ** object)
+void obj_free(n_array ** array)
 {
-    if (*object)
+    if (*array)
     {
-        n_object * next = (n_object *)((*object)->primitive.next);
+        n_array * next = (n_array *)((*array)->next);
         if (next)
         {
             obj_free(&next);
         }
-        object_specific_free(object);
+        object_primitive_free(array);
     }
 }
 
@@ -229,6 +227,52 @@ static n_object * object_get(n_object * object, n_string name)
     set_object->name = name;
     set_object->name_hash = hash;
     
+    return set_object;
+}
+
+static void object_add_array(n_array * element, n_object * object)
+{
+    if (element)
+    {
+        io_erase((n_byte *)element, sizeof(n_array));
+    }
+    element->data = (n_string)object;
+    element->type = object->primitive.type;
+}
+
+n_array * obj_new_array(n_object * object)
+{
+    n_array * return_array = io_new(sizeof(n_array));
+
+    object_add_array(return_array, object);
+    
+    return return_array;
+}
+
+void obj_add_array(n_array * array, n_object * object)
+{
+    n_array * entry = array;
+    n_array * return_array;
+    do{
+        if (entry->next)
+        {
+            entry = (n_array *)entry->next;
+        }
+    }while (entry->next);
+    
+    return_array = io_new(sizeof(n_array));
+    
+    object_add_array(return_array, object);
+    
+    entry->next = return_array;
+}
+
+n_object *  obj_array(n_object * object, n_string name, n_array * active_array)
+{
+    n_object * set_object = object_get(object, name);
+    
+    set_object->primitive.type = OBJECT_ARRAY;
+    set_object->primitive.data = (n_string)active_array;
     return set_object;
 }
 

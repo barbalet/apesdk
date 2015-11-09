@@ -61,7 +61,7 @@ static void check_object(void)
 {
     n_object * new_object = obj_number(0L, "index", 1);
     n_object * sub_object = obj_number(0L, "index", 2);
-    
+        
     obj_number(sub_object, "top", 3);
     
     obj_number(new_object, "top", 2);
@@ -73,7 +73,7 @@ static void check_object(void)
 
     check_file_output(obj_json(new_object));
     check_file_output(obj_json(sub_object));
-    obj_free(&new_object);
+    obj_free((n_array**)&new_object);
 }
 
 int main(int argc, const char * argv[])
