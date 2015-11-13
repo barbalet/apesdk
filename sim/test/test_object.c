@@ -59,17 +59,18 @@ static void check_file_output(n_file * file)
 
 static void check_object(void)
 {
-    n_object * new_object = obj_number(0L, "index", 1);
-    n_object * sub_object = obj_number(0L, "index", 2);
-        
-    obj_number(sub_object, "top", 3);
+    n_object * new_object = OBJ_NUMBER(0L, "index", 1);
+    n_object * sub_object = OBJ_NUMBER(0L, "index", 2);
     
-    obj_number(new_object, "top", 2);
-    obj_string(new_object, "name", "Benson");
-    obj_string(new_object, "name", "Kevin");
-    obj_object(new_object, "example", sub_object);
+    OBJ_NUMBER(sub_object, "top", 3);
 
-    obj_number(sub_object, "top", 4);
+    OBJ_NUMBER(new_object, "top", 2);
+    OBJ_STRING(new_object, "name", "Benson");
+    OBJ_STRING(new_object, "name", "Kevin");
+
+    OBJ_OBJECT(new_object, "example", sub_object);
+
+    OBJ_NUMBER(sub_object, "top", 4);
 
     check_file_output(obj_json(new_object));
     check_file_output(obj_json(sub_object));

@@ -356,10 +356,17 @@ typedef struct
 
 n_file * obj_json(n_object * object);
 
-n_object * obj_number(n_object * object, n_string name, n_int set_number);
-n_object * obj_string(n_object * object, n_string name, n_string set_string);
-n_object * obj_object(n_object * object, n_string name, n_object * set_object);
-n_object * obj_array(n_object * object, n_string name, n_array * set_array);
+n_object * obj_get(n_object * object, n_string name);
+
+void * pr_number(void * ptr, n_int set_number);
+void * pr_string(void * ptr, n_string set_string);
+void * pr_object(void * ptr, n_object * set_object);
+void * pr_array(void * ptr, n_array * set_array);
+
+#define OBJ_NUMBER(obj, name, number)     pr_number(obj_get(obj, name), number);
+#define OBJ_STRING(obj, name, string)     pr_string(obj_get(obj, name), string);
+#define OBJ_OBJECT(obj, name, object)     pr_object(obj_get(obj, name), object);
+#define OBJ_ARRAY(obj, name, array)       pr_array(obj_get(obj, name), array);
 
 n_array * obj_new_array(n_object * object);
 void obj_add_array(n_array * array, n_object * object);

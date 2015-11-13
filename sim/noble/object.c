@@ -188,7 +188,7 @@ static n_object * object_end_or_find(n_object * object, n_string name)
     return previous_object;
 }
 
-static n_object * object_get(n_object * object, n_string name)
+n_object * obj_get(n_object * object, n_string name)
 {
     n_object * set_object;
     n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
@@ -267,40 +267,61 @@ void obj_add_array(n_array * array, n_object * object)
     entry->next = return_array;
 }
 
-n_object *  obj_array(n_object * object, n_string name, n_array * active_array)
+void * pr_pass_through(void * ptr)
 {
-    n_object * set_object = object_get(object, name);
-    
-    set_object->primitive.type = OBJECT_ARRAY;
-    set_object->primitive.data = (n_string)active_array;
-    return set_object;
+    if (ptr == 0L)
+    {
+        ptr = io_new(sizeof(n_array));
+        if (ptr)
+        {
+            io_erase((n_byte *)ptr, sizeof(n_array));
+        }
+    }
+    return ptr;
 }
 
-n_object *  obj_object(n_object * object, n_string name, n_object * active_object)
+void * pr_number(void * ptr, n_int set_number)
 {
-    n_object * set_object = object_get(object, name);
-    
-    set_object->primitive.type = OBJECT_OBJECT;
-    set_object->primitive.data = (n_string)active_object;
-    return set_object;
+    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    if (cleaned)
+    {
+        n_int    * number;
+        cleaned->type = OBJECT_NUMBER;
+        number = (n_int *)&cleaned->data;
+        number[0] = set_number;
+    }
+    return (void *)cleaned;
 }
 
-n_object *  obj_number(n_object * object, n_string name, n_int set_number)
+void * pr_string(void * ptr, n_string set_string)
 {
-    n_object * set_object = object_get(object, name);
-    n_int    * number;
-    
-    set_object->primitive.type = OBJECT_NUMBER;
-    number = (n_int *)&set_object->primitive.data;
-    number[0] = set_number;
-    return set_object;
+    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    if (cleaned)
+    {
+        cleaned->type = OBJECT_STRING;
+        cleaned->data = set_string;
+    }
+    return (void *)cleaned;
 }
 
-n_object *  obj_string(n_object * object, n_string name, n_string set_string)
+void * pr_object(void * ptr, n_object * set_object)
 {
-    n_object * set_object = object_get(object, name);
+    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    if (cleaned)
+    {
+        cleaned->type = OBJECT_OBJECT;
+        cleaned->data = (n_string)set_object;
+    }
+    return (void *)cleaned;
+}
 
-    set_object->primitive.type = OBJECT_STRING;
-    set_object->primitive.data = set_string;
-    return set_object;
+void * pr_array(void * ptr, n_array * set_array)
+{
+    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    if (cleaned)
+    {
+        cleaned->type = OBJECT_ARRAY;
+        cleaned->data = (n_string)set_array;
+    }
+    return (void *)cleaned;
 }
