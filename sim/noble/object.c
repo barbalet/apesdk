@@ -128,6 +128,7 @@ static void * object_write_primitive(n_file * file, n_array * primitive)
             object_top_object(file, (n_object *)primitive->data);
             break;
         case OBJECT_ARRAY:
+            printf("Array!\n");
             object_top_array(file, (n_array *)primitive->data);
             break;
         default:
@@ -230,41 +231,22 @@ n_object * obj_get(n_object * object, n_string name)
     return set_object;
 }
 
-static void object_add_array(n_array * element, n_object * object)
+
+n_array * pr_add_element(n_array * array, n_array * element)
 {
-    if (element)
+    if (array)
     {
-        io_erase((n_byte *)element, sizeof(n_array));
+        n_array * next = array;
+        do{
+            if (next->next)
+            {
+                next = next->next;
+            }
+        }while (next->next);
+        next->next = element;
     }
-    element->data = (n_string)object;
-    element->type = object->primitive.type;
-}
 
-n_array * obj_new_array(n_object * object)
-{
-    n_array * return_array = io_new(sizeof(n_array));
-
-    object_add_array(return_array, object);
-    
-    return return_array;
-}
-
-void obj_add_array(n_array * array, n_object * object)
-{
-    n_array * entry = array;
-    n_array * return_array;
-    do{
-        if (entry->next)
-        {
-            entry = (n_array *)entry->next;
-        }
-    }while (entry->next);
-    
-    return_array = io_new(sizeof(n_array));
-    
-    object_add_array(return_array, object);
-    
-    entry->next = return_array;
+    return element;
 }
 
 void * pr_pass_through(void * ptr)
@@ -320,8 +302,43 @@ void * pr_array(void * ptr, n_array * set_array)
     n_array * cleaned = (n_array *)pr_pass_through(ptr);
     if (cleaned)
     {
+        printf("Array !!!\n");
         cleaned->type = OBJECT_ARRAY;
         cleaned->data = (n_string)set_array;
     }
     return (void *)cleaned;
+}
+
+n_object * obj_number(n_object * obj, n_string name, n_int number)
+{
+    return pr_number(obj_get(obj, name), number);
+}
+
+n_object * obj_string(n_object * obj, n_string name, n_string string)
+{
+    return pr_string(obj_get(obj, name), string);
+}
+
+n_object * obj_object(n_object * obj, n_string name, n_object * object)
+{
+    return pr_object(obj_get(obj, name), object);
+}
+
+n_object * obj_array(n_object * obj, n_string name, n_array * array)
+{
+    n_object * got_obj = obj_get(obj, name);
+    n_object * return_obj = pr_array(got_obj, array);
+    
+    printf("obj\n");
+    io_file_debug(obj_json(obj));
+    
+    printf("got_obj\n");
+    io_file_debug(obj_json(got_obj));
+    printf("return_obj\n");
+    io_file_debug(obj_json(return_obj));
+    
+    printf("obj\n");
+    io_file_debug(obj_json(obj));
+    
+    return obj;
 }

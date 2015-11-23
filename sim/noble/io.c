@@ -1863,4 +1863,15 @@ void io_file_string(n_int entry, n_file * file, n_constant_string string)
     }
 }
 
+void io_file_debug(n_file * file)
+{
+    n_uint loop = 0;
+    while (loop < file->location)
+    {
+        printf("%c", file->data[loop]);
+        loop++;
+    }
+    printf("\n\n");
+}
+
 

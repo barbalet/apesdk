@@ -358,18 +358,19 @@ n_file * obj_json(n_object * object);
 
 n_object * obj_get(n_object * object, n_string name);
 
+n_array * pr_add_element(n_array * array, n_array * element);
+
 void * pr_number(void * ptr, n_int set_number);
 void * pr_string(void * ptr, n_string set_string);
 void * pr_object(void * ptr, n_object * set_object);
 void * pr_array(void * ptr, n_array * set_array);
 
-#define OBJ_NUMBER(obj, name, number)     pr_number(obj_get(obj, name), number);
-#define OBJ_STRING(obj, name, string)     pr_string(obj_get(obj, name), string);
-#define OBJ_OBJECT(obj, name, object)     pr_object(obj_get(obj, name), object);
-#define OBJ_ARRAY(obj, name, array)       pr_array(obj_get(obj, name), array);
+n_object * obj_number(n_object * obj, n_string name, n_int number);
+n_object * obj_string(n_object * obj, n_string name, n_string string);
+n_object * obj_object(n_object * obj, n_string name, n_object * object);
+n_object * obj_array(n_object * obj, n_string name, n_array * array);
 
-n_array * obj_new_array(n_object * object);
-void obj_add_array(n_array * array, n_object * object);
+n_array * pr_add_element(n_array * array, n_array * element);
 
 void obj_free(n_array ** array);
 
@@ -701,6 +702,7 @@ void       io_free(void ** ptr);
 void *     io_new_range(n_uint memory_min, n_uint *memory_allocated);
 n_file *   io_file_new(void);
 void       io_file_free(n_file ** file);
+void       io_file_debug(n_file * file);
 
 n_int      io_number(n_string number_string, n_int * actual_value, n_int * decimal_divisor);
 

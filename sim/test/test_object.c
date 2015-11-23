@@ -46,34 +46,43 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     return -1;
 }
 
-static void check_file_output(n_file * file)
-{
-    n_uint loop = 0;
-    while (loop < file->location)
-    {
-        printf("%c", file->data[loop]);
-        loop++;
-    }
-    printf("\n\n");
-}
-
 static void check_object(void)
 {
-    n_object * new_object = OBJ_NUMBER(0L, "index", 1);
-    n_object * sub_object = OBJ_NUMBER(0L, "index", 2);
+    n_object * new_object = obj_number(0L, "index", 1);
+    n_object * sub_object = obj_number(0L, "index", 2);
+    n_array  * new_array = pr_add_element(0L, pr_number(0L, -1));
     
-    OBJ_NUMBER(sub_object, "top", 3);
+    pr_add_element(new_array, pr_number(0L, -1));
+    pr_add_element(new_array, pr_number(0L, -1));
+    pr_add_element(new_array, pr_number(0L, -1));
+    pr_add_element(new_array, pr_number(0L, 2));
+    pr_add_element(new_array, pr_number(0L, 3));
+    pr_add_element(new_array, pr_number(0L, 4));
+    pr_add_element(new_array, pr_number(0L, 5));
+        
+    obj_number(sub_object, "top", 3);
+    
+    obj_array(sub_object, "array", new_array);
 
-    OBJ_NUMBER(new_object, "top", 2);
-    OBJ_STRING(new_object, "name", "Benson");
-    OBJ_STRING(new_object, "name", "Kevin");
+    io_file_debug(obj_json(sub_object));
 
-    OBJ_OBJECT(new_object, "example", sub_object);
+    
+    
+    obj_number(new_object, "top", 2);
+    obj_string(new_object, "name", "Benson");
+    obj_string(new_object, "name", "Kevin");
 
-    OBJ_NUMBER(sub_object, "top", 4);
+    io_file_debug(obj_json(sub_object));
+    io_file_debug(obj_json(new_object));
 
-    check_file_output(obj_json(new_object));
-    check_file_output(obj_json(sub_object));
+    obj_object(new_object, "example", sub_object);
+
+    io_file_debug(obj_json(new_object));
+
+    obj_number(sub_object, "top", 4);
+
+    io_file_debug(obj_json(new_object));
+    io_file_debug(obj_json(sub_object));
     obj_free((n_array**)&new_object);
 }
 
