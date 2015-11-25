@@ -128,7 +128,6 @@ static void * object_write_primitive(n_file * file, n_array * primitive)
             object_top_object(file, (n_object *)primitive->data);
             break;
         case OBJECT_ARRAY:
-            printf("Array!\n");
             object_top_array(file, (n_array *)primitive->data);
             break;
         default:
@@ -213,11 +212,7 @@ n_object * obj_get(n_object * object, n_string name)
         else
         {
             set_object = previous_object->primitive.next;
-            if (set_object)
-            {
-                object_erase(set_object);
-            }
-            else
+            if (set_object == 0L)
             {
                 set_object = object_new();
             }
@@ -302,7 +297,6 @@ void * pr_array(void * ptr, n_array * set_array)
     n_array * cleaned = (n_array *)pr_pass_through(ptr);
     if (cleaned)
     {
-        printf("Array !!!\n");
         cleaned->type = OBJECT_ARRAY;
         cleaned->data = (n_string)set_array;
     }
@@ -326,19 +320,5 @@ n_object * obj_object(n_object * obj, n_string name, n_object * object)
 
 n_object * obj_array(n_object * obj, n_string name, n_array * array)
 {
-    n_object * got_obj = obj_get(obj, name);
-    n_object * return_obj = pr_array(got_obj, array);
-    
-    printf("obj\n");
-    io_file_debug(obj_json(obj));
-    
-    printf("got_obj\n");
-    io_file_debug(obj_json(got_obj));
-    printf("return_obj\n");
-    io_file_debug(obj_json(return_obj));
-    
-    printf("obj\n");
-    io_file_debug(obj_json(obj));
-    
-    return obj;
+    return pr_array(obj_get(obj, name), array);
 }

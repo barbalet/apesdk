@@ -54,10 +54,11 @@ static void check_object(void)
     
     pr_add_element(new_array, pr_number(0L, -1));
     pr_add_element(new_array, pr_number(0L, -1));
-    pr_add_element(new_array, pr_number(0L, -1));
+    pr_add_element(new_array, pr_string(0L, "hello"));
     pr_add_element(new_array, pr_number(0L, 2));
-    pr_add_element(new_array, pr_number(0L, 3));
+    pr_add_element(new_array, pr_string(0L, "is"));
     pr_add_element(new_array, pr_number(0L, 4));
+    pr_add_element(new_array, pr_string(0L, "it me"));
     pr_add_element(new_array, pr_number(0L, 5));
         
     obj_number(sub_object, "top", 3);
@@ -70,6 +71,11 @@ static void check_object(void)
     
     obj_number(new_object, "top", 2);
     obj_string(new_object, "name", "Benson");
+    
+    obj_string(new_object, "another", "corner");
+    
+    io_file_debug(obj_json(new_object));
+
     obj_string(new_object, "name", "Kevin");
 
     io_file_debug(obj_json(sub_object));
