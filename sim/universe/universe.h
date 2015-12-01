@@ -1133,7 +1133,6 @@ typedef struct
     n_byte2     child_generation_min;
     n_byte2     child_generation_max;
 
-
 } noble_being;
 
 typedef void (being_birth_event)(noble_being * born, noble_being * mother, void * sim);
@@ -1209,6 +1208,7 @@ void      sim_cycle(void);
 
 /* This is the new way. Please continue forwards. */
 n_file *  file_out(void);
+n_file *  file_out_json(void);
 n_int     file_in(n_file * input_file);
 n_int     file_interpret(n_file * input_file);
 

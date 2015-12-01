@@ -50,25 +50,27 @@ static void check_object(void)
 {
     n_object * new_object = obj_number(0L, "index", 1);
     n_object * sub_object = obj_number(0L, "index", 2);
-    n_array  * new_array = pr_add_element(0L, pr_number(0L, -1));
+    n_array  * new_array = array_number(-1);
     
-    pr_add_element(new_array, pr_number(0L, -1));
-    pr_add_element(new_array, pr_number(0L, -1));
-    pr_add_element(new_array, pr_string(0L, "hello"));
-    pr_add_element(new_array, pr_number(0L, 2));
-    pr_add_element(new_array, pr_string(0L, "is"));
-    pr_add_element(new_array, pr_number(0L, 4));
-    pr_add_element(new_array, pr_string(0L, "it me"));
-    pr_add_element(new_array, pr_number(0L, 5));
+    array_add(new_array, array_number(-1));
+    array_add(new_array, array_number(-1));
+    array_add(new_array, array_string("hello"));
+    array_add(new_array, array_number(2));
+    array_add(new_array, array_string("is"));
+    array_add(new_array, array_number(4));
+    array_add(new_array, array_string("it me"));
+    array_add(new_array, array_number(50));
         
     obj_number(sub_object, "top", 3);
     
     obj_array(sub_object, "array", new_array);
 
+    array_add(new_array, array_number(10));
+    array_add(new_array, array_number(20));
+    array_add(new_array, array_number(30));
+    
     io_file_debug(obj_json(sub_object));
 
-    
-    
     obj_number(new_object, "top", 2);
     obj_string(new_object, "name", "Benson");
     

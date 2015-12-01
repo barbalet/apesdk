@@ -95,6 +95,41 @@ static void fileout_being(n_file * file_out, noble_simulation * value, n_int bei
 #endif
 }
 
+n_object * file_land_obj(void)
+{
+    n_object * noble_land = obj_number(0L, "date", land_date());
+    n_byte2  * genetics_values = land_genetics();
+    n_array  * land_genetics = array_number(genetics_values[0]);
+    array_add(land_genetics, array_number(genetics_values[1]));
+    
+    obj_array(noble_land, "genetics", land_genetics);
+    obj_number(noble_land, "time", land_time());
+    return noble_land;
+}
+
+n_object * file_sim_obj(void)
+{
+    n_object * noble_sim_identifier = obj_number(0L, "signature", NOBLE_APE_SIGNATURE);
+    obj_number(noble_sim_identifier, "version number", VERSION_NUMBER);
+    obj_string(noble_sim_identifier, "copyright", FULL_VERSION_COPYRIGHT);
+    obj_string(noble_sim_identifier, "date", FULL_DATE);
+    return noble_sim_identifier;
+}
+
+n_object * file_apes_obj(void)
+{
+    noble_simulation *local_sim = sim_sim();
+
+}
+
+n_file * file_out_json(void)
+{
+    n_object * simulation_object = obj_object(0L, "information", file_sim_obj());
+    obj_object(simulation_object, "land", file_land_obj());
+    
+    return obj_json(simulation_object);
+}
+
 n_file * file_out(void)
 {
     noble_simulation *local_sim = sim_sim();

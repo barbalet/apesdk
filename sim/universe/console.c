@@ -1762,9 +1762,9 @@ n_int console_save(void * ptr, n_string response, n_console_output output_functi
         return 0;
     }
 
-    console_stop(ptr,"",output_function);
+    console_stop(ptr, "", output_function);
 
-    file_opened = file_out();
+    file_opened = file_out_json();
     if (file_opened == 0L)
     {
         return SHOW_ERROR("Failed to generate output contents");

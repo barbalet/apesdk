@@ -188,7 +188,7 @@ static n_object * object_end_or_find(n_object * object, n_string name)
     return previous_object;
 }
 
-n_object * obj_get(n_object * object, n_string name)
+static n_object * obj_get(n_object * object, n_string name)
 {
     n_object * set_object;
     n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
@@ -226,8 +226,7 @@ n_object * obj_get(n_object * object, n_string name)
     return set_object;
 }
 
-
-n_array * pr_add_element(n_array * array, n_array * element)
+n_array * array_add(n_array * array, n_array * element)
 {
     if (array)
     {
@@ -244,7 +243,7 @@ n_array * pr_add_element(n_array * array, n_array * element)
     return element;
 }
 
-void * pr_pass_through(void * ptr)
+static void * ar_pass_through(void * ptr)
 {
     if (ptr == 0L)
     {
@@ -257,9 +256,9 @@ void * pr_pass_through(void * ptr)
     return ptr;
 }
 
-void * pr_number(void * ptr, n_int set_number)
+static void * ar_number(void * ptr, n_int set_number)
 {
-    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    n_array * cleaned = (n_array *)ar_pass_through(ptr);
     if (cleaned)
     {
         n_int    * number;
@@ -270,9 +269,9 @@ void * pr_number(void * ptr, n_int set_number)
     return (void *)cleaned;
 }
 
-void * pr_string(void * ptr, n_string set_string)
+static void * ar_string(void * ptr, n_string set_string)
 {
-    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    n_array * cleaned = (n_array *)ar_pass_through(ptr);
     if (cleaned)
     {
         cleaned->type = OBJECT_STRING;
@@ -281,9 +280,9 @@ void * pr_string(void * ptr, n_string set_string)
     return (void *)cleaned;
 }
 
-void * pr_object(void * ptr, n_object * set_object)
+static void * ar_object(void * ptr, n_object * set_object)
 {
-    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    n_array * cleaned = (n_array *)ar_pass_through(ptr);
     if (cleaned)
     {
         cleaned->type = OBJECT_OBJECT;
@@ -292,9 +291,9 @@ void * pr_object(void * ptr, n_object * set_object)
     return (void *)cleaned;
 }
 
-void * pr_array(void * ptr, n_array * set_array)
+static void * ar_array(void * ptr, n_array * set_array)
 {
-    n_array * cleaned = (n_array *)pr_pass_through(ptr);
+    n_array * cleaned = (n_array *)ar_pass_through(ptr);
     if (cleaned)
     {
         cleaned->type = OBJECT_ARRAY;
@@ -303,22 +302,42 @@ void * pr_array(void * ptr, n_array * set_array)
     return (void *)cleaned;
 }
 
+n_array * array_number(n_int set_number)
+{
+    return ar_number(0L, set_number);
+}
+
+n_array * array_string(n_string set_string)
+{
+    return ar_string(0L, set_string);
+}
+
+n_array * array_object(n_object * set_object)
+{
+    return ar_object(0L, set_object);
+}
+
+n_array * array_array(n_array * set_array)
+{
+    return ar_array(0L, set_array);
+}
+
 n_object * obj_number(n_object * obj, n_string name, n_int number)
 {
-    return pr_number(obj_get(obj, name), number);
+    return ar_number(obj_get(obj, name), number);
 }
 
 n_object * obj_string(n_object * obj, n_string name, n_string string)
 {
-    return pr_string(obj_get(obj, name), string);
+    return ar_string(obj_get(obj, name), string);
 }
 
 n_object * obj_object(n_object * obj, n_string name, n_object * object)
 {
-    return pr_object(obj_get(obj, name), object);
+    return ar_object(obj_get(obj, name), object);
 }
 
 n_object * obj_array(n_object * obj, n_string name, n_array * array)
 {
-    return pr_array(obj_get(obj, name), array);
+    return ar_array(obj_get(obj, name), array);
 }
