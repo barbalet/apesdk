@@ -116,12 +116,6 @@ n_object * file_sim_obj(void)
     return noble_sim_identifier;
 }
 
-n_object * file_apes_obj(void)
-{
-    noble_simulation *local_sim = sim_sim();
-
-}
-
 n_file * file_out_json(void)
 {
     n_object * simulation_object = obj_object(0L, "information", file_sim_obj());
