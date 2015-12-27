@@ -188,7 +188,7 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
                 }
             }
 
-            if (i != GET_A(local_being,ATTENTION_ACTOR))
+            if (i != being_attention(local_being,ATTENTION_ACTOR))
             {
                 /** Not the current focus of attention */
                 sprintf(result_str,"  %05d  %s%s\n",(int)local_social_graph[i].familiarity,met_being_name,relationship_str2);
@@ -617,7 +617,7 @@ static void watch_episodic(void *ptr, n_string beingname, noble_being * local_be
         (void)episode_description(local_sim, local_being, i, str);
         if (io_length(str, STRING_BLOCK_SIZE) > 0)
         {
-            if (GET_A(local_being,ATTENTION_EPISODE) != i)
+            if (being_attention(local_being,ATTENTION_EPISODE) != i)
             {
                 io_string_write(description, "  ", &position);
                 io_string_write(description, str, &position);
@@ -739,7 +739,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     }
 
     being_state_description(being_state(local_being), status);
-    being_relationship_description(GET_A(local_being,ATTENTION_RELATIONSHIP),relationship_str);
+    being_relationship_description(being_attention(local_being,ATTENTION_RELATIONSHIP),relationship_str);
 
     sprintf(str, "\n=== %s ===\n%s\nGeneration %lu:%lu\nHeart rate %d bpm\tBreathing rate %d Vf\nEnergy %ld\t\tLocation: %ld %ld\nHonor: %d\t\tHeight: %ld\nFacing: %d\t\tSex: %c\nAge in days: %ld\nDrives:\n  Hunger: %d\t\tSocial: %d\n  Fatigue: %d\t\tSex: %d\nBody Attention: %s\nRelationship Attention: %s\n",
             beingname, status,
@@ -757,7 +757,7 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
             (int)being_drive(local_being, DRIVE_SOCIAL),
             (int)being_drive(local_being, DRIVE_FATIGUE),
             (int)being_drive(local_being, DRIVE_SEX),
-            being_body_inventory_description(GET_A(local_being,ATTENTION_BODY)),
+            being_body_inventory_description(being_attention(local_being,ATTENTION_BODY)),
             relationship_str
            );
 

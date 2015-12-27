@@ -56,8 +56,8 @@ static void body_action_give(noble_simulation * sim, noble_being * local, noble_
             ((being_carried(other,BODY_LEFT_HAND)==0) ||
              (being_carried(other,BODY_RIGHT_HAND)==0)))
     {
-        GET_A(local,ATTENTION_BODY) = BODY_RIGHT_HAND;
-        GET_A(other,ATTENTION_BODY) = BODY_RIGHT_HAND;
+        being_set_attention(local,ATTENTION_BODY, BODY_RIGHT_HAND, __FILE__, __LINE__);
+        being_set_attention(other,ATTENTION_BODY, BODY_RIGHT_HAND, __FILE__, __LINE__);
 
         episodic_interaction(sim, local, other, EVENT_GIVEN, EPISODIC_AFFECT_ZERO, carrying);
         episodic_interaction(sim, other, local, EVENT_GIVEN_BY, AFFECT_RECEIVE, carrying);
@@ -96,8 +96,8 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
     {
         if ((carrying & INVENTORY_BRANCH) || (carrying & INVENTORY_ROCK))
         {
-            GET_A(local,ATTENTION_BODY) = BODY_RIGHT_HAND;
-            GET_A(other,ATTENTION_BODY) = BODY_BACK;
+            being_set_attention(local,ATTENTION_BODY, BODY_RIGHT_HAND, __FILE__, __LINE__);
+            being_set_attention(other,ATTENTION_BODY, BODY_BACK, __FILE__, __LINE__);
             index = get_noble_social(other,local,sim);
             if (index>-1)
             {
@@ -148,8 +148,8 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
 static void body_action_interactive(noble_simulation * sim, noble_being * local, noble_being * other,
                                     n_byte local_attention, n_byte other_attention, n_byte kind)
 {
-    GET_A(local,ATTENTION_BODY) = local_attention;
-    GET_A(other,ATTENTION_BODY) = other_attention;
+    being_set_attention(local,ATTENTION_BODY, local_attention, __FILE__, __LINE__);
+    being_set_attention(other,ATTENTION_BODY, other_attention, __FILE__, __LINE__);
     episodic_interaction(sim, local, other, kind, EPISODIC_AFFECT_ZERO, 0);
     episodic_interaction(sim, other, local, kind+1, EPISODIC_AFFECT_ZERO, 0);
 }
@@ -160,8 +160,8 @@ static void body_action_interactive_change(noble_simulation * sim, noble_being *
         n_byte local_attention, n_byte other_attention, n_byte kind, n_byte positive, affect_type affect)
 {
     n_int index;
-    GET_A(local,ATTENTION_BODY) = local_attention;
-    GET_A(other,ATTENTION_BODY) = other_attention;
+    being_set_attention(local,ATTENTION_BODY, local_attention, __FILE__, __LINE__);
+    being_set_attention(other,ATTENTION_BODY, other_attention, __FILE__, __LINE__);
     index = get_noble_social(other,local,sim);
     if (index>-1)
     {

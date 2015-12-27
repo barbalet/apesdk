@@ -1004,10 +1004,10 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
     n_vect2 location;
 
     noble_social * meeter_social_graph = being_social(meeter_being);
-    n_int territory_index = (n_int)(GET_A(meeter_being,ATTENTION_TERRITORY));
+    n_int territory_index = (n_int)(being_attention(meeter_being,ATTENTION_TERRITORY));
     n_int memory_visited[EPISODIC_SIZE];
     n_int i;
-    n_int relationship_index = (n_int)(GET_A(meeter_being,ATTENTION_RELATIONSHIP));
+    n_int relationship_index = (n_int)(being_attention(meeter_being,ATTENTION_RELATIONSHIP));
 
 
     being_space(meeter_being, &location);
@@ -1025,7 +1025,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
     case 0:
         actor_index = get_actor_index(meeter_social_graph, is_const1 % SOCIAL_SIZE);
         /** store the current focus of attention */
-        GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
+        being_set_attention(meeter_being,ATTENTION_ACTOR, actor_index, __FILE__, __LINE__);
         break;
         /** Shift attention to a different episode */
     case 1:
@@ -1034,11 +1034,11 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
         /** Shift attention to a different territory */
     case 2:
         territory_index = is_const1;
-        GET_A(meeter_being, ATTENTION_TERRITORY) = (n_byte)territory_index;
+        being_set_attention(meeter_being, ATTENTION_TERRITORY, territory_index, __FILE__, __LINE__);
         break;
         /** Shift attention to a body region */
     case 3:
-        GET_A(meeter_being,ATTENTION_BODY) = is_const1 % INVENTORY_SIZE;
+        being_set_attention(meeter_being,ATTENTION_BODY, is_const1 % INVENTORY_SIZE, __FILE__, __LINE__);
         break;
     case 4: /** Shift attention to a similar location */
         new_episode_index = attention_similar_place(episode_index, episodic, memory_visited);
@@ -1098,7 +1098,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
         break;
     case 18:
         /** attention to body */
-        *local_addr10 = GET_A(meeter_being,ATTENTION_BODY)*30;
+        *local_addr10 = being_attention(meeter_being,ATTENTION_BODY)*30;
         break;
     case 19:
 #ifdef TERRITORY_ON
@@ -1183,7 +1183,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
         {
             actor_index = idx;
             /** store the current focus of attention */
-            GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
+            being_set_attention(meeter_being,ATTENTION_ACTOR, actor_index, __FILE__, __LINE__);
         }
         break;
     }
@@ -1192,7 +1192,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
         /** shift attention to a different relationship type */
         relationship_index = 1+(*local_addr10 % (OTHER_MOTHER-1));
         /** store the current relationship attention */
-        GET_A(meeter_being,ATTENTION_RELATIONSHIP) = (n_byte)relationship_index;
+        being_set_attention(meeter_being,ATTENTION_RELATIONSHIP, relationship_index, __FILE__, __LINE__);
         break;
     }
     }
@@ -1202,19 +1202,19 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
     {
         n_int possible_actor_index;
         episode_index = new_episode_index;
-        GET_A(meeter_being,ATTENTION_EPISODE) = (n_byte)episode_index;
+        being_set_attention(meeter_being,ATTENTION_EPISODE, episode_index, __FILE__, __LINE__);
         /** Shift attention to the being in this episode */
         possible_actor_index = get_actor_index_from_episode(meeter_social_graph,episodic,episode_index);
         if (possible_actor_index>-1)
         {
             actor_index = possible_actor_index;
             /** store the change in attention */
-            GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)actor_index;
+            being_set_attention(meeter_being,ATTENTION_ACTOR, actor_index, __FILE__, __LINE__);
         }
         /** set territory attention to the location where the episode occurred */
-        GET_A(meeter_being,ATTENTION_TERRITORY) =
+        being_set_attention(meeter_being,ATTENTION_TERRITORY,
             (APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[1])*16)+
-            APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[0]);
+            APESPACE_TO_TERRITORY(episodic[episode_index].space_time.location[0]), __FILE__, __LINE__);
     }
 }
 
@@ -1435,7 +1435,7 @@ void brain_dialogue(
     const n_int braincode_min_loop = 8*BRAINCODE_BYTES_PER_INSTRUCTION;
     n_int i = 0, itt = 0;
     n_int actor_index;
-    n_int episode_index = (n_int)(GET_A(meeter_being,ATTENTION_EPISODE));
+    n_int episode_index = (n_int)(being_attention(meeter_being,ATTENTION_EPISODE));
     n_int anecdote_episode_index=-1;
     n_int intention_episode_index=-1;
 
@@ -1451,7 +1451,7 @@ void brain_dialogue(
     }
     else
     {
-        being_index = GET_A(meeter_being,ATTENTION_ACTOR);
+        being_index = being_attention(meeter_being,ATTENTION_ACTOR);
         actor_index = being_index;
     }
 

@@ -376,6 +376,8 @@ void being_high_res(noble_being * value, n_vect2 * vector);
 
 void being_space(noble_being * value, n_vect2 * vector);
 
+void being_set_attention(noble_being * value, n_int index, n_int attention, n_string file, n_int line);
 
+n_byte being_attention(noble_being * value, n_int index);
 
 #endif /* NOBLEAPE_ENTITY_H */

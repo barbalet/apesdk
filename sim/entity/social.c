@@ -878,7 +878,7 @@ static n_int social_meet(
                                meeter_being, index);
 #endif
         /** set the focus of attention to this being */
-        GET_A(meeter_being,ATTENTION_ACTOR) = (n_byte)index;
+        being_set_attention(meeter_being,ATTENTION_ACTOR, index, __FILE__, __LINE__);
 
         /** if we havn't met previously */
         if (met == 0)
@@ -1139,7 +1139,7 @@ n_byte social_groom(
             being_immune_transmit(met_being, meeter_being, PATHOGEN_TRANSMISSION_TOUCH);
 
             /** pick a body location to groom */
-            groomloc = GET_A(meeter_being,ATTENTION_BODY);
+            groomloc = being_attention(meeter_being,ATTENTION_BODY);
             groom_decisions = 0;
             while ((met_being->wrong.inventory[groomloc] & INVENTORY_GROOMED) && (groom_decisions<4))
             {
@@ -1153,7 +1153,7 @@ n_byte social_groom(
                 met_being->wrong.inventory[groomloc] = INVENTORY_GROOMED;
             }
             /** grooming location becomes the new focus of attention */
-            GET_A(meeter_being, ATTENTION_BODY) = groomloc;
+            being_set_attention(meeter_being, ATTENTION_BODY, groomloc, __FILE__, __LINE__);
 
             episodic_interaction(sim, meeter_being, met_being, EVENT_GROOM, AFFECT_GROOM, groomloc);
             episodic_interaction(sim, met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);
@@ -1645,7 +1645,7 @@ n_int social_chat(
         if (idx == -1)
         {
             /** what type of family relationship is currently being attended to */
-            relationship_index = GET_A(meeter_being,ATTENTION_RELATIONSHIP);
+            relationship_index = being_attention(meeter_being,ATTENTION_RELATIONSHIP);
             if (relationship_index>0)
             {
                 idx = social_get_relationship(sim, meeter_being, relationship_index);

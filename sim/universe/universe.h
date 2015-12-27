@@ -1174,7 +1174,7 @@ typedef struct
 
 /* macros defined to ease in the vectorised code */
 
-#define GET_A(bei,index) ((bei)->wrong.attention[index])
+
 #define GET_M(bei)      ((bei)->delta.mass)
 
 #define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])

@@ -51,6 +51,7 @@ gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/math.c -o math.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/parse.c -o parse.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/interpret.c -o interpret.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/land.c -o land.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/object.c -o object.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/audio.c -o audio.o
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/execute.c -o execute.o
 

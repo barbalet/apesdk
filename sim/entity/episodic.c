@@ -709,8 +709,8 @@ n_byte episodic_anecdote(
         return 0;
     }
 
-    affect = (n_int)(local_episodic[GET_A(local,ATTENTION_EPISODE)].affect)-EPISODIC_AFFECT_ZERO;
-    event = local_episodic[GET_A(local,ATTENTION_EPISODE)].event;
+    affect = (n_int)(local_episodic[being_attention(local,ATTENTION_EPISODE)].affect)-EPISODIC_AFFECT_ZERO;
+    event = local_episodic[being_attention(local,ATTENTION_EPISODE)].event;
 
     /** both protagonists must be awake */
     if ((event==0) ||
@@ -747,20 +747,20 @@ n_byte episodic_anecdote(
     /** find an index within the other episodic memory in which to insert */
     replace = noble_episodic_replace_index(
                   event,affect,
-                  local_episodic[GET_A(local,ATTENTION_EPISODE)].first_name[BEING_MEETER],
-                  local_episodic[GET_A(local,ATTENTION_EPISODE)].family_name[BEING_MEETER],
-                  local_episodic[GET_A(local,ATTENTION_EPISODE)].first_name[BEING_MET],
-                  local_episodic[GET_A(local,ATTENTION_EPISODE)].family_name[BEING_MET],
+                  local_episodic[being_attention(local,ATTENTION_EPISODE)].first_name[BEING_MEETER],
+                  local_episodic[being_attention(local,ATTENTION_EPISODE)].family_name[BEING_MEETER],
+                  local_episodic[being_attention(local,ATTENTION_EPISODE)].first_name[BEING_MET],
+                  local_episodic[being_attention(local,ATTENTION_EPISODE)].family_name[BEING_MET],
                   local,local_sim);
 
     if (replace==-1) return 0;
 
-    other_episodic[replace] = local_episodic[GET_A(local,ATTENTION_EPISODE)];
+    other_episodic[replace] = local_episodic[being_attention(local,ATTENTION_EPISODE)];
     other_episodic[replace].event = event;
     other_episodic[replace].affect = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
 
     /** other ape pays attention to the incoming anecdote */
-    GET_A(local,ATTENTION_EPISODE) = (n_byte)replace;
+    being_set_attention(local, ATTENTION_EPISODE, replace, __FILE__, __LINE__);
 
     return 1;
 }

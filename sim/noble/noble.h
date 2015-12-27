@@ -71,7 +71,7 @@
 
 #else
 
-#undef  NOBLE_APE_ASSERT
+#define  NOBLE_APE_ASSERT
 
 #endif
 

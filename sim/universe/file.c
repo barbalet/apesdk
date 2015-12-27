@@ -417,13 +417,13 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
         local_being->wrong.learned_preference[PREFERENCE_CHAT] = (n_byte) value;
         break;
     case VARIABLE_ATTENTION_ACTOR_INDEX:
-        GET_A(local_being,ATTENTION_ACTOR) = (n_byte) (value % SOCIAL_SIZE);
+        being_set_attention(local_being,ATTENTION_ACTOR, value % SOCIAL_SIZE, __FILE__, __LINE__);
         break;
     case VARIABLE_ATTENTION_EPISODE_INDEX:
-        GET_A(local_being,ATTENTION_EPISODE) = (n_byte) (value % EPISODIC_SIZE);
+        being_set_attention(local_being,ATTENTION_EPISODE, value % EPISODIC_SIZE, __FILE__, __LINE__);
         break;
     case VARIABLE_ATTENTION_BODY_INDEX:
-        GET_A(local_being,ATTENTION_BODY) = (n_byte) (value % INVENTORY_SIZE);
+        being_set_attention(local_being,ATTENTION_BODY, value % INVENTORY_SIZE, __FILE__, __LINE__);
         break;
     }
 
@@ -627,13 +627,13 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_social_graph = being_social(local_being);
                         if (local_social_graph!=0L)
                         {
-                            social_graph = local_social_graph[GET_A(local_being,ATTENTION_ACTOR)];
+                            social_graph = local_social_graph[being_attention(local_being,ATTENTION_ACTOR)];
                         }
 #ifdef EPISODIC_ON
                         local_episodic = being_episodic(local_being);
                         if (local_episodic != 0L)
                         {
-                            episodic = local_episodic[GET_A(local_being,ATTENTION_EPISODE)];
+                            episodic = local_episodic[being_attention(local_being,ATTENTION_EPISODE)];
                         }
 #endif
                     }
@@ -755,13 +755,13 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                         local_number = local_being->wrong.learned_preference[PREFERENCE_CHAT];
                         break;
                     case	VARIABLE_ATTENTION_ACTOR_INDEX:
-                        local_number = GET_A(local_being,ATTENTION_ACTOR);
+                        local_number = being_attention(local_being,ATTENTION_ACTOR);
                         break;
                     case	VARIABLE_ATTENTION_EPISODE_INDEX:
-                        local_number = GET_A(local_being,ATTENTION_EPISODE);
+                        local_number = being_attention(local_being,ATTENTION_EPISODE);
                         break;
                     case	VARIABLE_ATTENTION_BODY_INDEX:
-                        local_number = GET_A(local_being,ATTENTION_BODY);
+                        local_number = being_attention(local_being,ATTENTION_BODY);
                         break;
                     case	VARIABLE_SHOUT_CONTENT:
                         local_number = local_being->wrong.shout[SHOUT_CONTENT];

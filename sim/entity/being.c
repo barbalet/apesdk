@@ -96,6 +96,41 @@ n_byte * being_braincode_external(noble_being * value)
     return social_value[0].braincode;
 }
 
+void being_set_attention(noble_being * value, n_int index, n_int attention, n_string file, n_int line)
+{
+    if (index < 0)
+    {
+        NA_ASSERT(0, "index less than 0");
+    }
+    if (index >= ATTENTION_SIZE)
+    {
+        NA_ASSERT(0, "index greater than ATTENTION_SIZE");
+    }
+    if (attention < 0)
+    {
+        NA_ASSERT(0, "attention less than 0");
+    }
+    if (attention >= 255)
+    {
+        printf("attention greater than 255 %s %ld", file, line);
+        NA_ASSERT(0, "attention greater than 255");
+    }
+    value->wrong.attention[index] = attention;
+}
+
+n_byte being_attention(noble_being * value, n_int index)
+{
+    if (index < 0)
+    {
+        NA_ASSERT(0, "attention less than 0");
+    }
+    if (index >= ATTENTION_SIZE)
+    {
+        NA_ASSERT(0, "attention greater than ATTENTION_SIZE");
+    }
+    return value->wrong.attention[index];
+}
+
 n_byte * being_braincode_internal(noble_being * value)
 {
     noble_social * social_value = being_social(value);
@@ -179,7 +214,7 @@ n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location,
     return 0;
 }
 
-static void being_set_brainatates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3)
+static void being_set_brainstates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3)
 {
     n_int three_offset = (asleep ? 0 : 3);
 
@@ -563,13 +598,13 @@ enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location)
 {
     (value)->wrong.inventory[location] &= 7;
-    GET_A(value,ATTENTION_BODY) = location;
+    being_set_attention(value, ATTENTION_BODY, location, __FILE__, __LINE__);
 }
 
 void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object)
 {
     (value)->wrong.inventory[location] |= object;
-    GET_A(value,ATTENTION_BODY) = location;
+    being_set_attention(value, ATTENTION_BODY, location, __FILE__, __LINE__);
 }
 
 void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
@@ -1286,7 +1321,7 @@ static noble_being * being_find_closest(noble_simulation * sim, noble_being * ac
 typedef struct
 {
     n_uint        comparison_best;
-    n_uint         max_age;
+    n_int         max_age;
     n_genetics  * genetics;
     noble_being * return_value;
 } being_find_child_struct;
@@ -1294,8 +1329,9 @@ typedef struct
 static void being_find_child_loop(noble_simulation * sim, noble_being * local, void * data)
 {
     being_find_child_struct * bfcs = (being_find_child_struct *) data;
-    n_uint        comparison = being_genetic_comparison(bfcs->genetics, being_genetics(local), -1);
-    if ((comparison > bfcs->comparison_best) &&  ((land_date() - being_dob(local)) < bfcs->max_age))
+    n_uint  comparison = being_genetic_comparison(bfcs->genetics, being_genetics(local), -1);
+    if ((comparison > bfcs->comparison_best) &&
+        ((land_date() - being_dob(local)) < bfcs->max_age))
     {
         bfcs->comparison_best = comparison;
         bfcs->return_value = local;
@@ -2596,7 +2632,7 @@ static void being_follow(noble_simulation * sim,
     if (local_social_graph == 0L) return;
 
     /** which entry in the social graph are we paying attention to? */
-    social_graph_index = GET_A(local,ATTENTION_ACTOR);
+    social_graph_index = being_attention(local, ATTENTION_ACTOR);
 
     nearest->local_social = &local_social_graph[social_graph_index];
 
@@ -3110,7 +3146,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                                 (local->wrong.inventory[BODY_BACK] & INVENTORY_CHILD)))
                         {
                             local->wrong.inventory[BODY_BACK] |= INVENTORY_CHILD;
-                            GET_A(local,ATTENTION_BODY) = BODY_BACK;
+                            being_set_attention(local,ATTENTION_BODY, BODY_BACK, __FILE__, __LINE__);
                         }
                         carrying_child = 1;
 
@@ -3157,7 +3193,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                             mother->wrong.inventory[BODY_BACK] -= INVENTORY_CHILD;
                         }
                         mother->wrong.inventory[BODY_FRONT] |= INVENTORY_CHILD;
-                        GET_A(mother,ATTENTION_BODY) = BODY_FRONT;
+                        being_set_attention(mother,ATTENTION_BODY, BODY_FRONT, __FILE__, __LINE__);
                         /** sucking causes loss of grooming */
                         if (mother->wrong.inventory[BODY_FRONT] & INVENTORY_GROOMED)
                         {
@@ -3279,7 +3315,7 @@ void being_init_braincode(noble_being * local,
 
         most_similar_index=0;
         min=99999;
-        actor_index = GET_A(local,ATTENTION_ACTOR);
+        actor_index = being_attention(local,ATTENTION_ACTOR);
 
         /** Find the entry in the social graph with the most similar friend or foe value.
            The FOF value is used because when two beings meet for the first time this
@@ -3605,9 +3641,6 @@ n_int being_init(noble_being * beings, n_int number,
         }
         while ((loop < 20) && (WATER_TEST(land_location(APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1])),land_tide_level())));
 
-
-
-
         being_set_location(local, location);
 
         {
@@ -3696,8 +3729,8 @@ n_int being_init(noble_being * beings, n_int number,
     {
         /** These magic numbers were found in March 2001 -
             feel free to change them! */
-        being_set_brainatates(local, 0, 171, 0, 146);
-        being_set_brainatates(local, 1, 86, 501, 73);
+        being_set_brainstates(local, 0, 171, 0, 146);
+        being_set_brainstates(local, 1, 86, 501, 73);
 
     }
 #endif
