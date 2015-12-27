@@ -431,9 +431,10 @@ static void test_close()
 int main(int argc, char *argv[])
 {
     n_int   return_value = 0;
-
     n_individual_interpret individual;
 
+    printf(" --- test apescript --- start -----------------------------------------\n");
+    
     interpret_individual(&individual);
 
     if (argc != 2)
@@ -467,6 +468,7 @@ int main(int argc, char *argv[])
     }
 
     test_close();
-
+    
+    printf(" --- test apescript ---  end  -----------------------------------------\n");
     return 1;
 }

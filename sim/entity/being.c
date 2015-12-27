@@ -110,9 +110,9 @@ void being_set_attention(noble_being * value, n_int index, n_int attention, n_st
     {
         NA_ASSERT(0, "attention less than 0");
     }
-    if (attention >= 255)
+    if (attention > 255)
     {
-        printf("attention greater than 255 %s %ld", file, line);
+        printf("attention greater than 255 %s %ld (%ld)\n", file, line, attention);
         NA_ASSERT(0, "attention greater than 255");
     }
     value->wrong.attention[index] = attention;

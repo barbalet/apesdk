@@ -131,6 +131,8 @@ int main(void)
 {
     unsigned short seed[2];
 
+    printf(" --- test math --- start ----------------------------------------------\n");
+    
     seed[0] = 0x625f; seed[1] = 0xe980;
     from_seed(seed);
     
@@ -187,6 +189,8 @@ int main(void)
     
     seed[0] = 0x7fff; seed[1] = 0x7fff;
     from_seed16(seed);
+    
+    printf(" --- test math ---  end  ----------------------------------------------\n");
     
     return 1;
 }

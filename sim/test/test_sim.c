@@ -53,6 +53,8 @@ int main(int argc, const char * argv[])
 {
     n_int   counter = 0;
 
+    printf(" --- test sim --- start -----------------------------------------------\n");
+    
     sim_init(2, 0x12738291, MAP_AREA, 0);
     
     {
@@ -116,6 +118,8 @@ int main(int argc, const char * argv[])
 
     }
     sim_close();
+    
+    printf(" --- test sim ---  end  -----------------------------------------------\n");
     
     return 1;
 }

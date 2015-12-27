@@ -96,7 +96,12 @@ static void check_object(void)
 
 int main(int argc, const char * argv[])
 {
+    printf(" --- test object --- start --------------------------------------------\n");
+    
     check_object();
+
+    printf(" --- test object ---  end  --------------------------------------------\n");
+    
     return 0;
 }
 

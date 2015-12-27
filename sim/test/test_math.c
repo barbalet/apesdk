@@ -92,7 +92,12 @@ void check_math(void)
 
 int main(int argc, const char * argv[])
 {
+    printf(" --- test math --- start ----------------------------------------------\n");
+
     check_math();
+    
+    printf(" --- test math ---  end  ----------------------------------------------\n");
+
     return 0;
 }
 

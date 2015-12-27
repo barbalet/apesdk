@@ -166,7 +166,12 @@ static void check_io(void)
 
 int main(int argc, const char * argv[])
 {
+    printf(" --- test io --- start ------------------------------------------------\n");
+
     check_io();
+    
+    printf(" --- test io ---  end  ------------------------------------------------\n");
+
     return 0;
 }
 

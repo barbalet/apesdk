@@ -54,8 +54,7 @@ static	n_int	interpret_braces(n_individual_interpret * individual, n_byte * eval
     n_int		local_b_count;
 
     NA_ASSERT(individual, "individual NULL");
-    NA_ASSERT(eval, "eval NULL");
-
+    
     local_b_count = individual->braces_count;
     if(location == -1)
     {
@@ -331,6 +330,8 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
                 io_int_to_bytes(output_number, location_write);
                 location_write = (n_byte *)&function_location[1 + SIZEOF_NUMBER_WRITE];
                 io_int_to_bytes(continuation,location_write);
+                
+                NA_ASSERT((n_byte *)function_location, "eval function_location");
                 if(interpret_braces(individual, (n_byte *)function_location, 0) == -1)
                 {
                     return -1; /* Enough information presented by this point */
@@ -356,7 +357,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
             }
             if(value[4] == code->main_entry)
             {
-                if(interpret_braces(individual,0L,0) == -1)
+                if(interpret_braces(individual, 0L, 0) == -1)
                 {
                     return APESCRIPT_ERROR(individual, AE_ERROR_STARTING_MAIN);
                 }
@@ -404,11 +405,12 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         /* evaulate accordingly */
         if(second_value == VARIABLE_IF)
         {
-            error_value = interpret_braces(individual,0L,0);
+            error_value = interpret_braces(individual, 0L, 0);
         }
         if(second_value == VARIABLE_WHILE)
         {
-            error_value = interpret_braces(individual,&value[3],location + return_value + 4);
+            NA_ASSERT(&value[3], "eval value[3]");
+            error_value = interpret_braces(individual, &value[3], location + return_value + 4);
         }
         if(error_value == -1)
         {
@@ -463,7 +465,7 @@ static void interpret_start(n_interpret * interp, n_individual_interpret * indiv
     individual->braces_count = 0;
     while(loop++ < BRACES_MAX)
     {
-        (void)interpret_braces(individual,0L,0); /* No errors in this initialisation */
+        (void)interpret_braces(individual, 0L, 0); /* No errors in this initialisation */
     }
     individual->braces_count = 0;
     loop = 1;
@@ -532,7 +534,7 @@ static n_int	interpret_code(n_interpret * interp, n_individual_interpret * indiv
                 else   /* end of the run function , put back to where 'run' is called */
                 {
                     loop = io_bytes_to_int(&(local_brace->evaluate[1 + SIZEOF_NUMBER_WRITE]));
-                    if(interpret_braces(individual,0L,-1) == -1)  /* remove the run function from braces */
+                    if(interpret_braces(individual, 0L, -1) == -1)  /* remove the run function from braces */
                     {
                         return -1; /* Enough information presented by this point */
                     }
