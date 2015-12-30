@@ -878,7 +878,7 @@ static n_int social_meet(
                                meeter_being, index);
 #endif
         /** set the focus of attention to this being */
-        being_set_attention(meeter_being,ATTENTION_ACTOR, index, __FILE__, __LINE__);
+        being_set_attention(meeter_being,ATTENTION_ACTOR, index);
 
         /** if we havn't met previously */
         if (met == 0)
@@ -1153,7 +1153,7 @@ n_byte social_groom(
                 met_being->wrong.inventory[groomloc] = INVENTORY_GROOMED;
             }
             /** grooming location becomes the new focus of attention */
-            being_set_attention(meeter_being, ATTENTION_BODY, groomloc, __FILE__, __LINE__);
+            being_set_attention(meeter_being, ATTENTION_BODY, groomloc);
 
             episodic_interaction(sim, meeter_being, met_being, EVENT_GROOM, AFFECT_GROOM, groomloc);
             episodic_interaction(sim, met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);

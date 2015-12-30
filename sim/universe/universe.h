@@ -1094,7 +1094,6 @@ typedef struct
 
 typedef struct
 {
-    n_byte      attention[ATTENTION_SIZE];
     n_byte      drives[DRIVES];
     
     n_byte      shout[SHOUT_BYTES];
@@ -1113,6 +1112,7 @@ typedef struct
 #endif
     n_byte2     brain_state[6];
     n_byte2     script_overrides;
+    n_byte      attention[ATTENTION_SIZE];
 } noble_being_brain;
 
 typedef struct

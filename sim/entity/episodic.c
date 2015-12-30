@@ -760,7 +760,7 @@ n_byte episodic_anecdote(
     other_episodic[replace].affect = (n_byte2)(affect+EPISODIC_AFFECT_ZERO);
 
     /** other ape pays attention to the incoming anecdote */
-    being_set_attention(local, ATTENTION_EPISODE, replace, __FILE__, __LINE__);
+    being_set_attention(local, ATTENTION_EPISODE, replace);
 
     return 1;
 }

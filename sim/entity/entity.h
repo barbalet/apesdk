@@ -376,7 +376,9 @@ void being_high_res(noble_being * value, n_vect2 * vector);
 
 void being_space(noble_being * value, n_vect2 * vector);
 
-void being_set_attention(noble_being * value, n_int index, n_int attention, n_string file, n_int line);
+void being_clear_attention(noble_being * value);
+
+void being_set_attention(noble_being * value, n_int index, n_int attention);
 
 n_byte being_attention(noble_being * value, n_int index);
 

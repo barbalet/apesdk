@@ -417,13 +417,13 @@ n_int sketch_input(void *vcode, n_byte kind, n_int value)
         local_being->wrong.learned_preference[PREFERENCE_CHAT] = (n_byte) value;
         break;
     case VARIABLE_ATTENTION_ACTOR_INDEX:
-        being_set_attention(local_being,ATTENTION_ACTOR, value % SOCIAL_SIZE, __FILE__, __LINE__);
+        being_set_attention(local_being,ATTENTION_ACTOR, value % SOCIAL_SIZE);
         break;
     case VARIABLE_ATTENTION_EPISODE_INDEX:
-        being_set_attention(local_being,ATTENTION_EPISODE, value % EPISODIC_SIZE, __FILE__, __LINE__);
+        being_set_attention(local_being,ATTENTION_EPISODE, value % EPISODIC_SIZE);
         break;
     case VARIABLE_ATTENTION_BODY_INDEX:
-        being_set_attention(local_being,ATTENTION_BODY, value % INVENTORY_SIZE, __FILE__, __LINE__);
+        being_set_attention(local_being,ATTENTION_BODY, value % INVENTORY_SIZE);
         break;
     }
 
@@ -998,7 +998,7 @@ void file_audit(void)
         FILE_CHECK(&here.delta.honor);
 
         FILE_CHECK(&here.date_of_conception); /* constant */
-        FILE_CHECK(&here.wrong.attention[0]);
+        FILE_CHECK(&here.braindata.attention[0]);
         FILE_CHECK(&here.constant.genetics[0]);           /* constant */
         FILE_CHECK(&here.fetal_genetics[0]);           /* constant */
         FILE_CHECK(&here.father_name[0]);                  /* why is this needed? */

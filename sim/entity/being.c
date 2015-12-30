@@ -96,45 +96,25 @@ n_byte * being_braincode_external(noble_being * value)
     return social_value[0].braincode;
 }
 
-void being_set_attention(noble_being * value, n_int index, n_int attention, n_string file, n_int line)
+void being_clear_attention(noble_being * value)
 {
-    if (index < 0)
-    {
-        NA_ASSERT(0, "index less than 0");
-    }
-    if (index >= ATTENTION_SIZE)
-    {
-        NA_ASSERT(0, "index greater than ATTENTION_SIZE");
-    }
-    if (attention < 0)
-    {
-        NA_ASSERT(0, "attention less than 0");
-    }
-    if (attention > 255)
-    {
-        printf("attention greater than 255 %s %ld (%ld)\n", file, line, attention);
-        NA_ASSERT(0, "attention greater than 255");
-    }
-    value->wrong.attention[index] = attention;
+    io_erase((n_byte*)(value->braindata.attention), ATTENTION_SIZE);
+}
+
+void being_set_attention(noble_being * value, n_int index, n_int attention)
+{
+    value->braindata.attention[index] = attention;
 }
 
 n_byte being_attention(noble_being * value, n_int index)
 {
-    if (index < 0)
-    {
-        NA_ASSERT(0, "attention less than 0");
-    }
-    if (index >= ATTENTION_SIZE)
-    {
-        NA_ASSERT(0, "attention greater than ATTENTION_SIZE");
-    }
-    return value->wrong.attention[index];
+    return value->braindata.attention[index];
 }
 
 n_byte * being_braincode_internal(noble_being * value)
 {
     noble_social * social_value = being_social(value);
-    return social_value[value->wrong.attention[ATTENTION_ACTOR]].braincode;
+    return social_value[being_attention(value, ATTENTION_ACTOR)].braincode;
 }
 
 #endif
@@ -598,13 +578,13 @@ enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location)
 {
     (value)->wrong.inventory[location] &= 7;
-    being_set_attention(value, ATTENTION_BODY, location, __FILE__, __LINE__);
+    being_set_attention(value, ATTENTION_BODY, location);
 }
 
 void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object)
 {
     (value)->wrong.inventory[location] |= object;
-    being_set_attention(value, ATTENTION_BODY, location, __FILE__, __LINE__);
+    being_set_attention(value, ATTENTION_BODY, location);
 }
 
 void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
@@ -2297,6 +2277,8 @@ static void being_brain_probe(noble_being * local)
     n_int    i = 0;
     n_int    count[NUMBER_BRAINPROBE_TYPES] = {0};
 
+    return; /* testing TSB */
+
     if (local_brain == 0L) return;
 
     while (i < BRAINCODE_PROBES)
@@ -2313,7 +2295,7 @@ static void being_brain_probe(noble_being * local)
     {
         local->braindata.brainprobe[0].type = OUTPUT_ACTUATOR;
     }
-
+    
     /** update each probe */
     i = 0;
 
@@ -3146,7 +3128,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                                 (local->wrong.inventory[BODY_BACK] & INVENTORY_CHILD)))
                         {
                             local->wrong.inventory[BODY_BACK] |= INVENTORY_CHILD;
-                            being_set_attention(local,ATTENTION_BODY, BODY_BACK, __FILE__, __LINE__);
+                            being_set_attention(local,ATTENTION_BODY, BODY_BACK);
                         }
                         carrying_child = 1;
 
@@ -3193,7 +3175,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                             mother->wrong.inventory[BODY_BACK] -= INVENTORY_CHILD;
                         }
                         mother->wrong.inventory[BODY_FRONT] |= INVENTORY_CHILD;
-                        being_set_attention(mother,ATTENTION_BODY, BODY_FRONT, __FILE__, __LINE__);
+                        being_set_attention(mother,ATTENTION_BODY, BODY_FRONT);
                         /** sucking causes loss of grooming */
                         if (mother->wrong.inventory[BODY_FRONT] & INVENTORY_GROOMED)
                         {
@@ -3513,11 +3495,7 @@ n_int being_init(noble_being * beings, n_int number,
     }
 
     being_immune_init(local);
-
-    for (ch = 0; ch < ATTENTION_SIZE; ch++)
-    {
-        local->wrong.attention[ch]=0;
-    }
+    being_clear_attention(local);
 
     /** clear the generation numbers for mother and father */
     if (mother)
