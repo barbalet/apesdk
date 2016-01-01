@@ -60,9 +60,9 @@
 #define BRAINCODE_ACTUATORS_NUMBER    (1 + BRAINCODE_ANE - BRAINCODE_ACTUATORS_START)
 
 #define BRAINCODE_INSTRUCTION(braincode,i) ((braincode[i] & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS)
-#define BRAINCODE_CONSTANT0(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT0_BIT)
-#define BRAINCODE_CONSTANT1(braincode,i)   (braincode[i] & BRAINCODE_CONSTANT1_BIT)
-#define BRAINCODE_VALUE(braincode,i,n)     (braincode[i+1+n])
+#define BRAINCODE_CONSTANT0(braincode,i)    (braincode[i] & BRAINCODE_CONSTANT0_BIT)
+#define BRAINCODE_CONSTANT1(braincode,i)    (braincode[i] & BRAINCODE_CONSTANT1_BIT)
+#define BRAINCODE_VALUE(braincode,i,n)      (braincode[(i+1+n) & (BRAINCODE_SIZE - 1)])
 
 /*	Brain definitions */
 
@@ -1637,7 +1637,6 @@ void brain_dialogue(
                                    addr0, addr1, value0, &i,
                                    IS_CONST0, IS_CONST1,
                                    pspace,
-                                   &addr0, &addr1,
                                    bc0, bc1,
                                    braincode_min_loop);
             break;

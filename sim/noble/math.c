@@ -910,7 +910,6 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
                             n_byte * addr0, n_byte * addr1, n_int value0, n_int * i,
                             n_int is_const0, n_int is_const1,
                             n_byte * pspace,
-                            n_byte **maddr0, n_byte **maddr1,
                             n_byte *bc0, n_byte *bc1,
                             n_int braincode_min_loop)
 {
@@ -995,9 +994,6 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
             ptr0 = BRAINCODE_ADDRESS(ptr0 + BRAINCODE_BYTES_PER_INSTRUCTION);
             ptr1 = BRAINCODE_ADDRESS(ptr1 + BRAINCODE_BYTES_PER_INSTRUCTION);
         }
-
-        *maddr0 = addr0;
-        *maddr0 = addr1;
     }
     break;
 
