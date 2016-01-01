@@ -3,7 +3,7 @@
 //  Noble ApeUITests
 //
 //  Created by Tom Barbalet on 6/9/15.
-//  Copyright © 2015 Tom Barbalet. All rights reserved.
+//  Copyright © 2016 Tom Barbalet. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
