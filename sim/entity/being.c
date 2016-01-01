@@ -114,7 +114,8 @@ n_byte being_attention(noble_being * value, n_int index)
 n_byte * being_braincode_internal(noble_being * value)
 {
     noble_social * social_value = being_social(value);
-    return social_value[being_attention(value, ATTENTION_ACTOR)].braincode;
+    n_int          attention_location = being_attention(value, ATTENTION_ACTOR);
+    return social_value[attention_location].braincode;
 }
 
 #endif
@@ -483,28 +484,28 @@ void   being_energy_delta(noble_being * value, n_int delta)
 
 n_byte   being_drive(noble_being * value, enum drives_definition drive)
 {
-    return value->wrong.drives[drive];
+    return value->changes.drives[drive];
 }
 
 void    being_inc_drive(noble_being * value, enum drives_definition drive)
 {
-    if (value->wrong.drives[drive] < DRIVES_MAX)
+    if (value->changes.drives[drive] < DRIVES_MAX)
     {
-        value->wrong.drives[drive]++;
+        value->changes.drives[drive]++;
     }
 }
 
 void    being_dec_drive(noble_being * value, enum drives_definition drive)
 {
-    if (value->wrong.drives[drive] > 0)
+    if (value->changes.drives[drive] > 0)
     {
-        value->wrong.drives[drive]--;
+        value->changes.drives[drive]--;
     }
 }
 
 void    being_reset_drive(noble_being * value, enum drives_definition drive)
 {
-    value->wrong.drives[drive] = 0;
+    value->changes.drives[drive] = 0;
 }
 
 n_int   being_height(noble_being * value)
@@ -572,18 +573,18 @@ static void being_turn_away_from_water(noble_being * value)
 
 enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location)
 {
-    return ((value)->wrong.inventory[location]>>3)<<3;
+    return ((value)->changes.inventory[location]>>3)<<3;
 }
 
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location)
 {
-    (value)->wrong.inventory[location] &= 7;
+    (value)->changes.inventory[location] &= 7;
     being_set_attention(value, ATTENTION_BODY, location);
 }
 
 void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object)
 {
-    (value)->wrong.inventory[location] |= object;
+    (value)->changes.inventory[location] |= object;
     being_set_attention(value, ATTENTION_BODY, location);
 }
 
@@ -2277,7 +2278,6 @@ static void being_brain_probe(noble_being * local)
     n_int    i = 0;
     n_int    count[NUMBER_BRAINPROBE_TYPES] = {0};
 
-    return; /* testing TSB */
 
     if (local_brain == 0L) return;
 
@@ -2644,12 +2644,12 @@ static void being_listen_loop(noble_simulation * sim, noble_being * other, void 
     /** listen for the nearest shout out */
     if ((being_state(other)&BEING_STATE_SHOUTING) &&
             (compare_distance < SHOUT_RANGE) &&
-            (other->wrong.shout[SHOUT_VOLUME] > bls->max_shout_volume))
+            (other->changes.shout[SHOUT_VOLUME] > bls->max_shout_volume))
     {
-        bls->max_shout_volume = other->wrong.shout[SHOUT_VOLUME];
-        bls->local->wrong.shout[SHOUT_HEARD] = other->wrong.shout[SHOUT_CONTENT];
-        bls->local->wrong.shout[SHOUT_FAMILY0] = being_family_first_name(other);
-        bls->local->wrong.shout[SHOUT_FAMILY1] = being_family_second_name(other);
+        bls->max_shout_volume = other->changes.shout[SHOUT_VOLUME];
+        bls->local->changes.shout[SHOUT_HEARD] = other->changes.shout[SHOUT_CONTENT];
+        bls->local->changes.shout[SHOUT_FAMILY0] = being_family_first_name(other);
+        bls->local->changes.shout[SHOUT_FAMILY1] = being_family_second_name(other);
     }
 }
 
@@ -2667,9 +2667,9 @@ void being_listen(noble_simulation * local_sim, noble_being * local_being, void 
     bls.max_shout_volume = 127;
     bls.local = local_being;
     /** clear shout values */
-    if (local_being->wrong.shout[SHOUT_CTR] > 0)
+    if (local_being->changes.shout[SHOUT_CTR] > 0)
     {
-        local_being->wrong.shout[SHOUT_CTR]--;
+        local_being->changes.shout[SHOUT_CTR]--;
     }
     being_loop_no_thread(local_sim, local_being, being_listen_loop, &bls);
 }
@@ -2964,7 +2964,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
         {
             if (!((loop==BODY_HEAD) || (loop==BODY_BACK)))
             {
-                local->wrong.inventory[loop] = 0;
+                local->changes.inventory[loop] = 0;
             }
         }
         /** swimming proficiency */
@@ -3124,10 +3124,10 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                     n_int carrying_days = conception_days + GESTATION_DAYS + CARRYING_DAYS;
                     if (today_days < carrying_days)
                     {
-                        if (!((local->wrong.inventory[BODY_FRONT] & INVENTORY_CHILD) ||
-                                (local->wrong.inventory[BODY_BACK] & INVENTORY_CHILD)))
+                        if (!((local->changes.inventory[BODY_FRONT] & INVENTORY_CHILD) ||
+                                (local->changes.inventory[BODY_BACK] & INVENTORY_CHILD)))
                         {
-                            local->wrong.inventory[BODY_BACK] |= INVENTORY_CHILD;
+                            local->changes.inventory[BODY_BACK] |= INVENTORY_CHILD;
                             being_set_attention(local,ATTENTION_BODY, BODY_BACK);
                         }
                         carrying_child = 1;
@@ -3170,16 +3170,16 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                     if (distance < SUCKLING_MAX_SEPARATION)
                     {
                         /** child moves from back to front */
-                        if (mother->wrong.inventory[BODY_BACK] & INVENTORY_CHILD)
+                        if (mother->changes.inventory[BODY_BACK] & INVENTORY_CHILD)
                         {
-                            mother->wrong.inventory[BODY_BACK] -= INVENTORY_CHILD;
+                            mother->changes.inventory[BODY_BACK] -= INVENTORY_CHILD;
                         }
-                        mother->wrong.inventory[BODY_FRONT] |= INVENTORY_CHILD;
+                        mother->changes.inventory[BODY_FRONT] |= INVENTORY_CHILD;
                         being_set_attention(mother,ATTENTION_BODY, BODY_FRONT);
                         /** sucking causes loss of grooming */
-                        if (mother->wrong.inventory[BODY_FRONT] & INVENTORY_GROOMED)
+                        if (mother->changes.inventory[BODY_FRONT] & INVENTORY_GROOMED)
                         {
-                            mother->wrong.inventory[BODY_FRONT] -= INVENTORY_GROOMED;
+                            mother->changes.inventory[BODY_FRONT] -= INVENTORY_GROOMED;
                         }
                         /** hungry mothers stop producing milk */
                         if (being_energy_less_than(mother, BEING_HUNGRY) == 0)
@@ -3208,13 +3208,13 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     /** no longer carrying the child */
     if ((carrying_child==0) && (local_is_female == SEX_FEMALE))
     {
-        if (local->wrong.inventory[BODY_FRONT] & INVENTORY_CHILD)
+        if (local->changes.inventory[BODY_FRONT] & INVENTORY_CHILD)
         {
-            local->wrong.inventory[BODY_FRONT] -= INVENTORY_CHILD;
+            local->changes.inventory[BODY_FRONT] -= INVENTORY_CHILD;
         }
-        if (local->wrong.inventory[BODY_BACK] & INVENTORY_CHILD)
+        if (local->changes.inventory[BODY_BACK] & INVENTORY_CHILD)
         {
-            local->wrong.inventory[BODY_BACK] -= INVENTORY_CHILD;
+            local->changes.inventory[BODY_BACK] -= INVENTORY_CHILD;
         }
     }
 
@@ -3491,7 +3491,7 @@ n_int being_init(noble_being * beings, n_int number,
         This may seem like tabla rasa, but there are genetic biases */
     for (ch = 0; ch < PREFERENCES; ch++)
     {
-        local->wrong.learned_preference[ch]=127;
+        local->changes.learned_preference[ch]=127;
     }
 
     being_immune_init(local);

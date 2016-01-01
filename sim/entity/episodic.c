@@ -100,16 +100,16 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
     {
         if ((local_episodic[episode_index].arg&1)!=0)
         {
-            if (local->wrong.learned_preference[learned_preference_index]<255)
+            if (local->changes.learned_preference[learned_preference_index]<255)
             {
-                local->wrong.learned_preference[learned_preference_index]++;
+                local->changes.learned_preference[learned_preference_index]++;
             }
         }
         else
         {
-            if (local->wrong.learned_preference[learned_preference_index]>0)
+            if (local->changes.learned_preference[learned_preference_index]>0)
             {
-                local->wrong.learned_preference[learned_preference_index]--;
+                local->changes.learned_preference[learned_preference_index]--;
             }
         }
     }
@@ -729,13 +729,13 @@ n_byte episodic_anecdote(
     /** mutate with some probability */
     if (being_random(local) <
             (ANECDOTE_EVENT_MUTATION_RATE+
-             (local->wrong.learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION])*100)*mult)
+             (local->changes.learned_preference[PREFERENCE_ANECDOTE_EVENT_MUTATION])*100)*mult)
     {
         event = (n_byte)(being_random(local) % EVENTS);
     }
     if (being_random(local) <
             (ANECDOTE_AFFECT_MUTATION_RATE+
-             (local->wrong.learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION])*100)*mult)
+             (local->changes.learned_preference[PREFERENCE_ANECDOTE_AFFECT_MUTATION])*100)*mult)
     {
         /** affect gets exaggerated or downplayed */
         affect = (affect * (64 + (n_int)(being_random(local) & 127))) / 128;

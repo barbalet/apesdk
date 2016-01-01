@@ -551,22 +551,22 @@ static void social_group_align_preferences(
     /** align preferences */
     for (i = 0; i < PREFERENCES; i++)
     {
-        n_int resultant = meeter_being->wrong.learned_preference[i];
-        if (resultant < met_being->wrong.learned_preference[i])
+        n_int resultant = meeter_being->changes.learned_preference[i];
+        if (resultant < met_being->changes.learned_preference[i])
         {
             if ((incr > 0) || ((incr < 0) && (resultant > 0)))
             {
                 resultant += incr;
             }
         }
-        else if (resultant > met_being->wrong.learned_preference[i])
+        else if (resultant > met_being->changes.learned_preference[i])
         {
-            if ((incr > 0) || ((incr < 0) && (meeter_being->wrong.learned_preference[i]<255)))
+            if ((incr > 0) || ((incr < 0) && (meeter_being->changes.learned_preference[i]<255)))
             {
                 resultant -= incr;
             }
         }
-        meeter_being->wrong.learned_preference[i] = (n_byte)resultant;
+        meeter_being->changes.learned_preference[i] = (n_byte)resultant;
     }
 }
 
@@ -587,7 +587,7 @@ static n_int social_attraction_pigmentation(
         favour attractive mates */
     ppref = NATURE_NURTURE(
                 GENE_PIGMENTATION_PREFERENCE(being_genetics(being_meeter)),
-                being_meeter->wrong.learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE+fem]);
+                being_meeter->changes.learned_preference[PREFERENCE_MATE_PIGMENTATION_MALE+fem]);
 
     pdiff = GENE_PIGMENTATION(being_genetics(being_met)) - ppref;
 
@@ -617,7 +617,7 @@ static n_int social_attraction_hair(
 
     ppref = NATURE_NURTURE(
                 GENE_HAIR_PREFERENCE(being_genetics(meeter_being)),
-                meeter_being->wrong.learned_preference[PREFERENCE_MATE_HAIR_MALE+fem]);
+                meeter_being->changes.learned_preference[PREFERENCE_MATE_HAIR_MALE+fem]);
     pdiff = GENE_HAIR(being_genetics(met_being)) - ppref;
 
     if ((pdiff >= -2) && (pdiff <= 2))
@@ -646,7 +646,7 @@ static n_int social_attraction_height(
 
     ppref = NATURE_NURTURE(
                 GENE_HEIGHT_PREFERENCE(being_genetics(meeter_being)),
-                meeter_being->wrong.learned_preference[PREFERENCE_MATE_HEIGHT_MALE+fem]);
+                meeter_being->changes.learned_preference[PREFERENCE_MATE_HEIGHT_MALE+fem]);
 
     /** prefer taller or shorter,
     < 8  don't care about height
@@ -689,7 +689,7 @@ static n_int social_attraction_frame(
 
     ppref = NATURE_NURTURE(
                 GENE_FRAME_PREFERENCE(being_genetics(meeter_being)),
-                meeter_being->wrong.learned_preference[PREFERENCE_MATE_FRAME_MALE+fem]);
+                meeter_being->changes.learned_preference[PREFERENCE_MATE_FRAME_MALE+fem]);
 
     if ((ppref>6) && (ppref<=11) && (GET_BODY_FAT(met_being) > GET_BODY_FAT(meeter_being)))
     {
@@ -1128,7 +1128,7 @@ n_byte social_groom(
             /** grooming preference */
             gpref = NATURE_NURTURE(
                         GENE_GROOM(being_genetics(meeter_being)),
-                        meeter_being->wrong.learned_preference[PREFERENCE_GROOM_MALE+fem]);
+                        meeter_being->changes.learned_preference[PREFERENCE_GROOM_MALE+fem]);
         }
         /** individuals which are familiar tend to groom more often */
         if (groomprob <
@@ -1141,16 +1141,16 @@ n_byte social_groom(
             /** pick a body location to groom */
             groomloc = being_attention(meeter_being,ATTENTION_BODY);
             groom_decisions = 0;
-            while ((met_being->wrong.inventory[groomloc] & INVENTORY_GROOMED) && (groom_decisions<4))
+            while ((met_being->changes.inventory[groomloc] & INVENTORY_GROOMED) && (groom_decisions<4))
             {
-                met_being->wrong.inventory[groomloc] |= INVENTORY_GROOMED;
+                met_being->changes.inventory[groomloc] |= INVENTORY_GROOMED;
                 groomloc = (n_byte)(being_random(meeter_being) % INVENTORY_SIZE);
                 groom_decisions++;
             }
             /** groomed wounds disappear */
-            if (met_being->wrong.inventory[groomloc] & INVENTORY_WOUND)
+            if (met_being->changes.inventory[groomloc] & INVENTORY_WOUND)
             {
-                met_being->wrong.inventory[groomloc] = INVENTORY_GROOMED;
+                met_being->changes.inventory[groomloc] = INVENTORY_GROOMED;
             }
             /** grooming location becomes the new focus of attention */
             being_set_attention(meeter_being, ATTENTION_BODY, groomloc);
@@ -1279,7 +1279,7 @@ n_byte2 social_squabble(
             if (distance > SQUABBLE_SHOW_FORCE_DISTANCE)
             {
                 /** show of force */
-                vanquished->wrong.inventory[punchloc] = 0;
+                vanquished->changes.inventory[punchloc] = 0;
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_SHOWFORCE);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_SHOWFORCE);
 
@@ -1288,7 +1288,7 @@ n_byte2 social_squabble(
             else
             {
                 /** attack */
-                vanquished->wrong.inventory[punchloc] = INVENTORY_WOUND;
+                vanquished->changes.inventory[punchloc] = INVENTORY_WOUND;
                 being_energy_delta(victor, 0 - SQUABBLE_ENERGY_ATTACK);
                 being_energy_delta(vanquished, 0 -SQUABBLE_ENERGY_ATTACK);
                 being_honor_swap(victor, vanquished);

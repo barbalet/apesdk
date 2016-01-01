@@ -66,28 +66,15 @@ int main(int argc, const char * argv[])
         noble_being_events * first_being_events = &(first_being->events);
         noble_being_brain * first_being_brain = &(first_being->braindata);
         noble_immune_system * first_being_immune = &(first_being->immune_system);
-        noble_being_volatile * first_being_volatile = &(first_being->wrong);
+        noble_being_volatile * first_being_volatile = &(first_being->changes);
         
-        n_uint being_hash = math_hash((n_byte *)first_being, sizeof(noble_being));
-        n_uint being_constant_hash = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
-        n_uint being_delta_hash = math_hash((n_byte *)first_being_delta, sizeof(noble_being_delta));
-        n_uint being_events_hash = math_hash((n_byte *)first_being_events, sizeof(noble_being_events));
-        n_uint being_brain_hash = math_hash((n_byte *)first_being_brain, sizeof(noble_being_brain));
-        n_uint being_immune_hash = math_hash((n_byte*)first_being_immune, sizeof(noble_immune_system));
-        n_uint being_volatile_hash = math_hash((n_byte*)first_being_volatile, sizeof(noble_being_volatile));
-
-        printf("(1)being hash %lx\n", being_hash);
-        
-        printf("(1)being constant %lx\n", being_constant_hash);
-
-        printf("(1)being delta %lx\n", being_delta_hash);
-
-        printf("(1)being events %lx\n", being_events_hash);
-
-        printf("(1)being brain %lx\n", being_brain_hash);
-        
-        printf("(1)being immune %lx\n", being_immune_hash);
-        printf("(1)being volatile %lx\n", being_volatile_hash);
+        n_uint being_hash1 = math_hash((n_byte *)first_being, sizeof(noble_being));
+        n_uint being_constant_hash1 = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
+        n_uint being_delta_hash1 = math_hash((n_byte *)first_being_delta, sizeof(noble_being_delta));
+        n_uint being_events_hash1 = math_hash((n_byte *)first_being_events, sizeof(noble_being_events));
+        n_uint being_brain_hash1 = math_hash((n_byte *)first_being_brain, sizeof(noble_being_brain));
+        n_uint being_immune_hash1 = math_hash((n_byte*)first_being_immune, sizeof(noble_immune_system));
+        n_uint being_volatile_hash1 = math_hash((n_byte*)first_being_volatile, sizeof(noble_being_volatile));
 
         while (counter < 1000)
         {
@@ -95,26 +82,24 @@ int main(int argc, const char * argv[])
             counter ++;
         }
  
-        being_hash = math_hash((n_byte *)first_being, sizeof(noble_being));
-        being_constant_hash = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
-        being_delta_hash = math_hash((n_byte *)first_being_delta, sizeof(noble_being_delta));
-        
-        being_events_hash = math_hash((n_byte *)first_being_events, sizeof(noble_being_events));
-        being_brain_hash = math_hash((n_byte *)first_being_brain, sizeof(noble_being_brain));
-        being_immune_hash = math_hash((n_byte*)first_being_immune, sizeof(noble_immune_system));
-        being_volatile_hash = math_hash((n_byte*)first_being_volatile, sizeof(noble_being_volatile));
+        n_uint being_hash2 = math_hash((n_byte *)first_being, sizeof(noble_being));
+        n_uint being_constant_hash2 = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
+        n_uint being_delta_hash2 = math_hash((n_byte *)first_being_delta, sizeof(noble_being_delta));
+        n_uint being_events_hash2 = math_hash((n_byte *)first_being_events, sizeof(noble_being_events));
+        n_uint being_brain_hash2 = math_hash((n_byte *)first_being_brain, sizeof(noble_being_brain));
+        n_uint being_immune_hash2 = math_hash((n_byte*)first_being_immune, sizeof(noble_immune_system));
+        n_uint being_volatile_hash2 = math_hash((n_byte*)first_being_volatile, sizeof(noble_being_volatile));
 
-        printf("(2)being hash %lx\n", being_hash);
-        
-        printf("(2)being constant %lx\n", being_constant_hash);
-        
-        printf("(2)being delta %lx\n", being_delta_hash);
-        
-        printf("(2)being events %lx\n", being_events_hash);
-        
-        printf("(2)being brain %lx\n", being_brain_hash);
-        printf("(2)being immune %lx\n", being_immune_hash);
-        printf("(2)being volatile %lx\n", being_volatile_hash);
+        printf("hash %lx\n", being_hash1 ^ being_hash2);
+        printf("constant %lx\n", being_constant_hash1 ^ being_constant_hash2);
+
+        printf("delta %lx\n", being_delta_hash1 ^ being_delta_hash2);
+        printf("events %lx\n", being_events_hash1 ^ being_events_hash2);
+
+        printf("brain %lx\n", being_brain_hash1 ^ being_brain_hash2);
+        printf("immune %lx\n", being_immune_hash1 ^ being_immune_hash2);
+
+        printf("volatile %lx\n", being_volatile_hash1 ^ being_volatile_hash2);
 
     }
     sim_close();

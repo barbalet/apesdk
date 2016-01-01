@@ -858,7 +858,7 @@ enum mutation_type
 #define GENE_SUCKLING_RATE(gene)            GENE_VAL_REG(gene, 4, 14, 10, 15)
 
 /* A social drive threshold value above which beings interact */
-#define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->wrong.learned_preference[PREFERENCE_SOCIAL]))>>1)
+#define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->changes.learned_preference[PREFERENCE_SOCIAL]))>>1)
 
 /** used with social_meet function to specify whether
     the location should be included within the social graph entry */
@@ -1121,7 +1121,7 @@ typedef struct
     noble_being_constant constant;
     noble_being_events   events;
     noble_being_brain    braindata;
-    noble_being_volatile wrong;
+    noble_being_volatile changes;
 #ifdef IMMUNE_ON
     noble_immune_system immune_system;
 #endif
