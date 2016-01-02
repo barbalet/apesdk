@@ -85,6 +85,7 @@
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glEnable(GL_LINE_SMOOTH);
 }
 
 - (void) drawRect:(NSRect)rect
