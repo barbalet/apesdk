@@ -127,6 +127,18 @@ void vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
     equals->y = initial->y - second->y;
 }
 
+void vect2_divide(n_vect2 * equals, n_vect2 * initial, n_vect2 * second, n_int divisor)
+{
+    vect2_subtract(equals, second, initial);
+    
+    if (equals == 0L || (divisor == 0))
+    {
+        return;
+    }
+    equals->x = equals->x / divisor;
+    equals->y = equals->y / divisor;
+}
+
 /**
  * Multiplies one 2d vector with another 2d vector times a multiplier divided by a divisor.
  * @param equals the vector that holds the result.

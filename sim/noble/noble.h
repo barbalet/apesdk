@@ -613,6 +613,7 @@ void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
 void  vect2_center(n_vect2 * center, n_vect2 * initial, n_vect2 * second);
 
 void  vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
+void  vect2_divide(n_vect2 * equals, n_vect2 * initial, n_vect2 * second, n_int divisor);
 void  vect2_multiplier(
     n_vect2 * equals, n_vect2 * initial,
     n_vect2 * second, n_int multiplier, n_int divisor);
