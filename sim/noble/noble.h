@@ -850,9 +850,42 @@ n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind);
 n_int land_map_dimension(void);
 n_int land_map_bits(void);
 
-void land_tide(void);
+void  land_tide(void);
 n_int land_location(n_int px, n_int py);
 n_int land_location_vect(n_vect2 * value);
+
+
+n_int gldraw_scene_done();
+
+void gldraw_background_green(void);
+
+void gldraw_start_display_list(void);
+void gldraw_end_display_list(void);
+void gldraw_display_list(void);
+
+void gldraw_wide_line();
+void gldraw_thin_line();
+
+void gldraw_red(void);
+void gldraw_green(void);
+
+void gldraw_orange();
+
+void gldraw_darkgrey();
+void gldraw_grey();
+void gldraw_lightgrey();
+
+void gldraw_black();
+
+void gldraw_vertex(n_vect2 * point);
+void gldraw_line(n_vect2 * start, n_vect2 * end);
+void gldraw_quads(n_vect2 * quads, n_byte filled);
+
+void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_vect2 * location_delta, n_int turn_delta);
+
+
+void gldraw_start_points(void);
+void gldraw_end_points(void);
 
 /*0*/
 
