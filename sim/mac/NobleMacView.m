@@ -70,13 +70,16 @@
 
 
 - (void) awakeFromNib
-{
-    NSSize size = [[self window] frame].size;
-    
+{    
     NSLog(@"Starting up");
     
     [self startEverything];
-    
+}
+
+- (void) drawRect:(NSRect)rect
+{
+    NSSize size = rect.size;
+
     glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
     
     glMatrixMode(GL_PROJECTION);
@@ -86,12 +89,7 @@
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnable(GL_LINE_SMOOTH);
-}
 
-- (void) drawRect:(NSRect)rect
-{
-    NSSize size = rect.size;
-    
     [[self openGLContext] makeCurrentContext];
     [_shared draw:size];
     [[self openGLContext] flushBuffer];
