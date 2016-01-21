@@ -153,14 +153,11 @@ void gldraw_quads(n_vect2 * quads, n_byte filled)
     glEnd();
 }
 
-void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_vect2 * location_delta, n_int turn_delta)
+void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_int turn)
 {
-    n_vect2 offset;
-    vect2_add(&offset, center, location);
-    
-    glTranslatef(0-offset.x , 0-offset.y, 0);
-    glRotatef(1.40625 * turn_delta, 0, 0, 1);
-    glTranslatef(location_delta->x + offset.x, location_delta->y + offset.y, 0);
+    glTranslatef(0-center->x , 0-center->y, 0);
+    glRotatef(1.40625 * turn, 0, 0, 1);
+    glTranslatef(location->x + center->x, location->y + center->y, 0);
 }
 
 void gldraw_start_points(void)
@@ -171,5 +168,4 @@ void gldraw_start_points(void)
 void gldraw_end_points(void)
 {
     glEnd();
-
 }

@@ -881,8 +881,7 @@ void gldraw_vertex(n_vect2 * point);
 void gldraw_line(n_vect2 * start, n_vect2 * end);
 void gldraw_quads(n_vect2 * quads, n_byte filled);
 
-void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_vect2 * location_delta, n_int turn_delta);
-
+void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_int turn);
 
 void gldraw_start_points(void);
 void gldraw_end_points(void);
