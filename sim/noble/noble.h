@@ -663,9 +663,13 @@ void    math_patch(n_byte * local_map,
                    n_memory_location * mem_func,
                    n_patch * func, n_byte2 * arg,
                    n_int refine);
-
+/*
 void math_round(n_byte * local_map, n_byte * scratch,
                 n_memory_location * mem_func, execute_thread_stub * exec);
+*/
+
+void math_round(n_byte * local_map, n_byte * scratch,
+                n_memory_location * mem_func);
 
 n_int  math_sine(n_int direction, n_int divisor);
 

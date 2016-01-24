@@ -553,7 +553,11 @@ void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute
     while (refine < 7)
     {
         math_patch(local_map, &math_memory_location, &math_random, local_random, refine);
+#if 0
         math_round(local_map, scratch, &math_memory_location, exec);
+#else
+        math_round(local_map, scratch, &math_memory_location);
+#endif
         refine++;
     }
 }
