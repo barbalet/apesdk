@@ -157,6 +157,7 @@ typedef enum
     GOAL_UNKNOWN        = 3 /* add a new goal here when needed */
 } goal_types;
 
+
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
 #ifdef BRAIN_ON

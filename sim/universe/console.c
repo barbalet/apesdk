@@ -729,8 +729,6 @@ static void watch_stats(void *ptr, n_string beingname, noble_being * local_being
     n_string_block     str;
     n_string_block     relationship_str;
     n_string_block     status;
-    n_int              heart_rate = 0;
-    n_int              breathing_rate = 0;
 
     if (local_being == 0L)
     {
