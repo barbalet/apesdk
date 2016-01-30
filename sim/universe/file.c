@@ -107,6 +107,75 @@ n_object * file_land_obj(void)
     return noble_land;
 }
 
+
+n_object * file_being_constant(noble_being_constant * constant)
+{
+    n_int genetic_count = 1;
+    n_object * noble_being_contant = obj_number(0L, "date_of_birth", constant->date_of_birth);
+    n_array * generation = array_number(constant->generation_min);
+    n_array * genetics = array_number(constant->genetics[0]);
+    while (genetic_count < CHROMOSOMES)
+    {
+        array_add(genetics, array_number(constant->genetics[genetic_count++]));
+    }
+    obj_array(noble_being_contant, "genetics", genetics);
+
+    array_add(generation, array_number(constant->generation_max));
+    obj_array(noble_being_contant, "generation_range", generation);
+
+    return noble_being_contant;
+}
+
+
+n_object * file_being_delta(noble_being_delta * delta)
+{
+    n_object * noble_being_delta = obj_number(0L, "direction_facing", delta->direction_facing);
+    n_array  * location = array_number(delta->location[0]);
+    n_array  * seed = array_number(delta->seed[0]);
+    n_array  * goal = array_number(delta->goal[0]);
+    n_array  * social_coord = array_number(delta->social_coord_x);
+
+    array_add(location, array_number(delta->location[1]));
+    
+    array_add(seed, array_number(delta->seed[1]));
+    
+    array_add(goal, array_number(delta->goal[1]));
+    array_add(goal, array_number(delta->goal[2]));
+    array_add(goal, array_number(delta->goal[3]));
+    
+    array_add(social_coord, array_number(delta->social_coord_y));
+    array_add(social_coord, array_number(delta->social_coord_nx));
+    array_add(social_coord, array_number(delta->social_coord_ny));
+    
+    obj_array(noble_being_delta, "location", location);
+
+    obj_number(noble_being_delta, "velocity", delta->velocity);
+    obj_number(noble_being_delta, "stored_energy", delta->stored_energy);
+
+    obj_array(noble_being_delta, "seed", seed);
+
+    obj_number(noble_being_delta, "macro_state", delta->macro_state);
+    obj_number(noble_being_delta, "parasites", delta->parasites);
+    obj_number(noble_being_delta, "honor", delta->honor);
+    obj_number(noble_being_delta, "crowding", delta->crowding);
+    obj_number(noble_being_delta, "height", delta->height);
+    obj_number(noble_being_delta, "mass", delta->mass);
+    obj_number(noble_being_delta, "posture", delta->posture);
+
+    obj_array(noble_being_delta, "goal", goal);
+    obj_array(noble_being_delta, "social_coord", social_coord);
+
+    return noble_being_delta;
+}
+
+n_object * file_being(noble_being * being)
+{
+    n_object * noble_being = obj_object(0L, "delta", file_being_delta(&(being->delta)));
+    obj_object(noble_being, "constant", file_being_constant(&(being->constant)));
+    return noble_being;
+}
+
+
 n_object * file_sim_obj(void)
 {
     n_object * noble_sim_identifier = obj_number(0L, "signature", NOBLE_APE_SIGNATURE);
@@ -118,8 +187,23 @@ n_object * file_sim_obj(void)
 
 n_file * file_out_json(void)
 {
+    noble_simulation *local_sim = sim_sim();
+    
     n_object * simulation_object = obj_object(0L, "information", file_sim_obj());
+    
     obj_object(simulation_object, "land", file_land_obj());
+    
+    if (local_sim->num > 0)
+    {
+        n_int        count = 0;
+        noble_being *local_beings = local_sim->beings;
+        n_array     *beings = array_object(file_being(&(local_beings[0])));
+        while (count < local_sim->num)
+        {
+            array_add(beings, array_object(file_being(&(local_beings[count++]))));
+        }
+        obj_array(simulation_object, "beings", beings);
+    }
     
     return obj_json(simulation_object);
 }

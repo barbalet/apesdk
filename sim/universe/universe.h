@@ -309,6 +309,16 @@ enum PREFERENCES_MATE
     PREFERENCES
 };
 
+enum attention_type
+{
+    ATTENTION_ACTOR = 0,
+    ATTENTION_EPISODE,
+    ATTENTION_BODY,
+    ATTENTION_RELATIONSHIP,
+    ATTENTION_TERRITORY,
+    ATTENTION_UNKNOWN,
+    ATTENTION_SIZE
+};
 
 enum
 {
@@ -323,58 +333,6 @@ enum
 static const n_int interval_steps[] =
 { 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
 static const n_constant_string interval_description[] = { "mins","hours","days","months","years" };
-
-/* nature in the range 0-15 from the genetics
-   nurture in the range 0-255 from learned preferences.
-   Resulting value is in the range 0-15 */
-#define NATURE_NURTURE(nature,nurture)      (((nature) + ((nurture)>>4))>>1)
-
-
-#define VALUABLE_OBJECT    (INVENTORY_NUT & INVENTORY_SHELL)
-
-enum posture_type
-{
-    POSTURE_CROUCHING = 100,
-    POSTURE_UPRIGHT = 200
-};
-
-enum attention_type
-{
-    ATTENTION_ACTOR = 0,
-    ATTENTION_EPISODE,
-    ATTENTION_BODY,
-    ATTENTION_RELATIONSHIP,
-    ATTENTION_TERRITORY,
-    ATTENTION_UNKNOWN,
-    ATTENTION_SIZE
-};
-
-enum individual_action_type
-{
-    ACTION_PICKUP = 0,
-    ACTION_DRAG,
-    ACTION_DROP,
-    ACTION_SWAP_HANDS,
-    ACTION_BRANDISH,
-    ACTION_CHEW,
-    ACTION_BASH_OBJECTS,
-    ACTION_JAB,
-    INDIVIDUAL_ACTIONS
-};
-
-enum social_action_type
-{
-    ACTION_GIVE = 0,
-    ACTION_BASH,
-    ACTION_HUG,
-    ACTION_PROD,
-    ACTION_POINT,
-    ACTION_TICKLE,
-    ACTION_SMILE,
-    ACTION_GLOWER,
-    ACTION_PAT,
-    SOCIAL_ACTIONS
-};
 
 #define FISHING_PROB  (1<<8)
 

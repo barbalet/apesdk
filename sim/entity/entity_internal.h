@@ -291,33 +291,48 @@ enum mutation_type
 /* preference for social activity, similar to flocking */
 #define GENE_SOCIAL(gene)                   GENE_VAL_REG(gene, 22, 2, 13, 9)
 
-/* gene which controls the threshold beyond which glucose
- begins to be stored as glycogen or fat */
-#define GENE_GLUCOSE_THRESHOLD_MAX(gene)    GENE_VAL_REG(gene, 6, 15, 19, 18)
-
-/* gene which controls the threshold below which glycogen
- and fat begins to be converted to glucose */
-#define GENE_GLUCOSE_THRESHOLD_MIN(gene)    GENE_VAL_REG(gene, 16, 14, 10, 7)
-
-/* controls the rate at which glucogen is produced */
-#define GENE_GLUCOGEN_RATE(gene)            GENE_VAL_REG(gene, 17, 11, 20, 2)
-
-/* controls the rate at which insulin is produced */
-#define GENE_INSULIN_RATE(gene)             GENE_VAL_REG(gene, 13, 7, 9, 11)
-
-/* controls the rate at which adrenalin is produced */
-#define GENE_ADRENALIN_RATE(gene)           GENE_VAL_REG(gene, 16, 19, 13, 3)
-
-/* capacity of bladder */
-#define GENE_BLADDER_CAPACITY(gene)         GENE_VAL_REG(gene, 5, 15, 2, 7)
-
-#define GENE_WASTE_CAPACITY(gene)           GENE_VAL_REG(gene, 12, 11, 19, 1)
-
-/* rate of suckling */
-#define GENE_SUCKLING_RATE(gene)            GENE_VAL_REG(gene, 4, 14, 10, 15)
+/* nature in the range 0-15 from the genetics
+ nurture in the range 0-255 from learned preferences.
+ Resulting value is in the range 0-15 */
+#define NATURE_NURTURE(nature,nurture)      (((nature) + ((nurture)>>4))>>1)
 
 /* A social drive threshold value above which beings interact */
 #define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->changes.learned_preference[PREFERENCE_SOCIAL]))>>1)
+
+
+enum posture_type
+{
+    POSTURE_CROUCHING = 100,
+    POSTURE_UPRIGHT = 200
+};
+
+enum individual_action_type
+{
+    ACTION_PICKUP = 0,
+    ACTION_DRAG,
+    ACTION_DROP,
+    ACTION_SWAP_HANDS,
+    ACTION_BRANDISH,
+    ACTION_CHEW,
+    ACTION_BASH_OBJECTS,
+    ACTION_JAB,
+    INDIVIDUAL_ACTIONS
+};
+
+enum social_action_type
+{
+    ACTION_GIVE = 0,
+    ACTION_BASH,
+    ACTION_HUG,
+    ACTION_PROD,
+    ACTION_POINT,
+    ACTION_TICKLE,
+    ACTION_SMILE,
+    ACTION_GLOWER,
+    ACTION_PAT,
+    SOCIAL_ACTIONS
+};
+
 
 typedef struct
 {
@@ -347,12 +362,6 @@ void food_values(n_int loc_x,
 n_int genetics_compare(n_genetics * genetics_a, n_genetics * genetics_b);
 void  genetics_set(n_genetics * genetics_a, n_genetics * n_genetics);
 void  genetics_zero(n_genetics * genetics_a);
-
-void metabolism_init(noble_being * local_being);
-void metabolism_cycle(noble_simulation * local_sim, noble_being * local_being);
-void metabolism_vascular_response(noble_simulation * local_sim, noble_being * local_being, n_int response);
-void metabolism_eat(noble_being * local_being, n_byte food_type);
-void metabolism_suckle(noble_simulation * sim,noble_being * child, noble_being * mother);
 
 void social_action(noble_simulation * sim, noble_being * meeter_being, noble_being * met_being, n_byte action);
 n_int social_network(noble_simulation *sim, noble_being * meeter_being, noble_being * met_being, n_int distance);
