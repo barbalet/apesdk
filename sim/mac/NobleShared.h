@@ -60,6 +60,10 @@
 
 - (void) rotation:(float)rotationAmount;
 
+- (void) delta_x:(n_double)delta_x delta_y:(n_double)delta_y;
+
+- (void) zoom:(float)zoomAmount;
+
 - (NSTimeInterval) timeInterval;
 
 - (void) scriptDebugHandle:(NSString *)fileName;

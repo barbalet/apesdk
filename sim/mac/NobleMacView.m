@@ -268,27 +268,12 @@
 
 - (void) scrollWheel:(NSEvent *)theEvent
 {
-}
-
-- (void) beginGestureWithEvent:(NSEvent *)event
-{
-    /* NSLog(@"New behavior: beginGestureWithEvent"); */
-}
-
-- (void) endGestureWithEvent:(NSEvent *)event
-{
-    /* NSLog(@"New behavior: endGestureWithEvent"); */
+    [_shared delta_x:[theEvent deltaX] delta_y:[theEvent deltaY]];
 }
 
 - (void) magnifyWithEvent:(NSEvent *)event
 {
-    /* NSLog(@"New behavior: magnifyWithEvent %f %@", [event magnification], event); */
-    /* (1.0 + [event magnification]) */
-}
-
-- (void) swipeWithEvent:(NSEvent *)event
-{
-    /* NSLog(@"New behavior: swipeWithEvent %f %f %@", [event deltaX], [event deltaY], event); */
+    [_shared zoom:[event magnification]];
 }
 
 - (void) rotateWithEvent:(NSEvent *)event

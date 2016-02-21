@@ -153,10 +153,12 @@ void gldraw_quads(n_vect2 * quads, n_byte filled)
     glEnd();
 }
 
-void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_int turn)
+void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_int turn, n_int scale)
 {
+    GLfloat floating_scale = ((GLfloat)(30+scale))/30;
     glTranslatef(0-center->x , 0-center->y, 0);
     glRotatef(1.40625 * turn, 0, 0, 1);
+    glScaled(floating_scale, floating_scale, 1);
     glTranslatef(location->x + center->x, location->y + center->y, 0);
 }
 

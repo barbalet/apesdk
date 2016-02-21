@@ -132,6 +132,16 @@
     shared_rotate((n_double)rotationAmount, _identification);
 }
 
+- (void) delta_x:(n_double)delta_x delta_y:(n_double)delta_y
+{
+    shared_delta(delta_x, delta_y, _identification);
+}
+
+- (void) zoom:(float)zoomAmount;
+{
+    shared_zoom((n_double)zoomAmount, _identification);
+}
+
 - (NSTimeInterval) timeInterval
 {
     return 1.0f/((NSTimeInterval)shared_max_fps());

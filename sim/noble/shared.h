@@ -64,6 +64,8 @@ n_int shared_menu(n_int menuValue);
 n_uint shared_max_fps(void);
 
 void shared_rotate(n_double num, n_byte wwind);
+void shared_delta(n_double delta_x, n_double delta_y, n_byte wwind);
+void shared_zoom(n_double num, n_byte wwind);
 
 void shared_keyReceived(n_byte2 value, n_byte localIdentification);
 void shared_keyUp(void);

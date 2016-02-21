@@ -519,6 +519,16 @@ void shared_saveFileName(n_string cStringFileName)
     (void)console_save(0L, cStringFileName, 0L);
 }
 
+void shared_delta(n_double delta_x, n_double delta_y, n_byte wwind)
+{
+    
+}
+
+void shared_zoom(n_double num, n_byte wwind)
+{
+    
+}
+
 void shared_rotate(n_double num, n_byte wwind)
 {
     if (wwind == NUM_TERRAIN)
