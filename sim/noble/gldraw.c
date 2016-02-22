@@ -90,7 +90,6 @@ void gldraw_red(void)
     glColor3f(1, 0, 0);
 }
 
-
 void gldraw_green(void)
 {
     glColor3f(0.3, 0.3, 1);
