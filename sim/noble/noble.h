@@ -625,6 +625,7 @@ n_int vect2_dot(
     n_int multiplier, n_int divisor);
 void vect2_rotate90(n_vect2 * rotation);
 void vect2_direction(n_vect2 * initial, n_int direction, n_int divisor);
+void vect2_delta(n_vect2 * initial, n_vect2 * delta);
 void vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
 void vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 void vect2_copy(n_vect2 * to, n_vect2 * from);

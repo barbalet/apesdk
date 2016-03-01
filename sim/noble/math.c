@@ -240,6 +240,18 @@ void vect2_direction(n_vect2 * initial, n_int direction, n_int divisor)
     initial->y = ((new_sd[(direction)&255]) / (divisor));
 }
 
+void vect2_delta(n_vect2 * initial, n_vect2 * delta)
+{
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(delta, "delta NULL");
+    
+    if (initial == 0L) return;
+    if (delta == 0L) return;
+    
+    initial->x += delta->x;
+    initial->y += delta->y;
+}
+
 void vect2_offset(n_vect2 * initial, n_int dx, n_int dy)
 {
     NA_ASSERT(initial, "initial NULL");
