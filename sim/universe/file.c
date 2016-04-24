@@ -195,7 +195,7 @@ n_file * file_out_json(void)
     
     if (local_sim->num > 0)
     {
-        n_int        count = 0;
+        n_uint        count = 0;
         noble_being *local_beings = local_sim->beings;
         n_array     *beings = array_object(file_being(&(local_beings[0])));
         while (count < local_sim->num)
