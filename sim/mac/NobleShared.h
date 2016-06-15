@@ -102,4 +102,13 @@
 
 - (void) menuHealthyCarrier;
 
+- (void) savedFileName:(NSString*)name;
+
+- (BOOL) openFileName:(NSString*)name isScript:(BOOL)scriptFile;
+
++ (void) starting:(int)argc withValues:(char **)argv;
+
+- (void) numberThreads:(long)number;
+
+
 @end

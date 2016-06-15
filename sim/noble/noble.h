@@ -60,7 +60,7 @@
 #ifdef NOBLE_IOS
 #undef  EXECUTE_THREADED
 #else
-#define  EXECUTE_THREADED
+#undef  EXECUTE_THREADED
 #endif
 
 #endif

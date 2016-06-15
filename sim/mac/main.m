@@ -34,11 +34,12 @@
  ****************************************************************/
 
 #import <Cocoa/Cocoa.h>
+#import "NobleShared.h"
 
 #include "../noble/noble.h"
 
 int main(int argc, char *argv[])
 {
-    io_entry_execution(argc, argv);
+    [NobleShared starting:argc withValues:(char **)argv];
     return NSApplicationMain(argc,  (const char **) argv);
 }

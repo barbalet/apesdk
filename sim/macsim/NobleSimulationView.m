@@ -157,20 +157,10 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
      {
          if (result == NSFileHandlingPanelOKButton)
          {
-             NSString *name = [panel.URL path];
-             char * cStringFileName = (char *)[name UTF8String];
-             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-             
-             if (!shared_openFileName(cStringFileName,0))
+             if (![self.shared openFileName:[panel.URL path] isScript:NO])
              {
                  [[NSSound soundNamed:@"Pop"] play];
-                 [prefs removeObjectForKey:sharedString_LastOpen];
              }
-             else
-             {
-                 [prefs setObject:name forKey:sharedString_LastOpen];
-             }
-             [prefs synchronize];
          }
          
      }];
@@ -184,19 +174,10 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
      {
          if (result == NSFileHandlingPanelOKButton)
          {
-             NSString *name = [panel.URL path];
-             char * cStringFileName = (char *)[name UTF8String];
-             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-             if (!shared_openFileName(cStringFileName,1))
+             if (![self.shared openFileName:[panel.URL path] isScript:YES])
              {
                  [[NSSound soundNamed:@"Pop"] play];
-                 [prefs removeObjectForKey:sharedString_LastOpenScript];
              }
-             else
-             {
-                 [prefs setObject:name forKey:sharedString_LastOpenScript];
-             }
-             [prefs synchronize];
          }
      }];
 }
@@ -208,12 +189,7 @@ static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
      {
          if (result == NSFileHandlingPanelOKButton)
          {
-             NSString *name = [panel.URL path];
-             char * cStringFileName = (char *)[name UTF8String];
-             NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-             [prefs setObject:name forKey:sharedString_LastSaved];
-             [prefs synchronize];
-             shared_saveFileName(cStringFileName);
+             [self.shared savedFileName:[panel.URL path]];
          }
          
      }];

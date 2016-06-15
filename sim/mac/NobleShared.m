@@ -249,4 +249,26 @@
     (void) shared_menu(NA_MENU_HEALTHY_CARRIER);
 }
 
+- (void) savedFileName:(NSString*)name
+{
+     char * cStringFileName = (char *)[name UTF8String];
+     shared_saveFileName(cStringFileName);
+}
+
+- (BOOL) openFileName:(NSString*)name isScript:(BOOL)scriptFile
+{
+    char * cStringFileName = (char *)[name UTF8String];
+    return shared_openFileName(cStringFileName,(unsigned char)scriptFile);
+}
+
++ (void) starting:(int)argc withValues:(char **)argv
+{
+    io_entry_execution(argc, argv);
+}
+
+- (void) numberThreads:(long)number
+{
+    execute_threads(number);
+}
+
 @end

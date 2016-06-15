@@ -144,7 +144,7 @@
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
     
-    execute_threads([[NSProcessInfo processInfo] processorCount]);
+    [_shared numberThreads:processors];
     
     NSLog(@"We have %ld processors", processors);
 
