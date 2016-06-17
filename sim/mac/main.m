@@ -36,8 +36,6 @@
 #import <Cocoa/Cocoa.h>
 #import "NobleShared.h"
 
-#include "../noble/noble.h"
-
 int main(int argc, char *argv[])
 {
     [NobleShared starting:argc withValues:(char **)argv];

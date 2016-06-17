@@ -34,8 +34,6 @@
  ****************************************************************/
 
 #import <Cocoa/Cocoa.h>
-
-#include "../gui/gui.h"
 #import "NobleMacView.h"
 
 @interface NobleSimulationView : NobleMacView

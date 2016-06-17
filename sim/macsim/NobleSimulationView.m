@@ -37,10 +37,6 @@
 
 @implementation NobleSimulationView
 
-static NSString * sharedString_LastSaved       = @"LastSaved";
-static NSString * sharedString_LastOpen        = @"LastOpen";
-static NSString * sharedString_LastOpenScript  = @"LastOpenScript";
-
 
 - (NSOpenPanel*) uniformOpenPanel
 {
