@@ -118,6 +118,21 @@ n_byte * being_braincode_internal(noble_being * value)
     return social_value[attention_location].braincode;
 }
 
+#else
+
+void being_clear_attention(noble_being * value)
+{
+}
+
+void being_set_attention(noble_being * value, n_int index, n_int attention)
+{
+}
+
+n_byte being_attention(noble_being * value, n_int index)
+{
+    return 0;
+}
+
 #endif
 
 void    being_set_state(noble_being * value, being_state_type state)

@@ -42,7 +42,7 @@
 #define  BRAINCODE_ON  /* entity */
 #define  IMMUNE_ON     /* entity */
 
-#define  BRAIN_ON
+#undef  BRAIN_ON
 
 #define  FEATURE_SET
 
@@ -621,10 +621,10 @@ typedef	struct
     n_byte state;
 } noble_brain_probe;
 
+#endif
+
 typedef n_byte4 n_genetics;
 
-
-#endif
 
 #define CHROMOSOMES                 4
 #define CHROMOSOME_Y                0
