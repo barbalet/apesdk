@@ -3261,44 +3261,57 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 }
 
 #ifdef BRAINCODE_ON
+
+
+static void being_init_braincode_create(noble_being * local, n_byte internal)
+{
+    n_byte2 * local_random = being_get_random(local);
+
+    n_int ch = 0;
+    /** initially seed the brain with instructions which are random but genetically biased */
+    while (ch < BRAINCODE_SIZE)
+    {
+        math_random3(local_random);
+        if (internal != 0)
+        {
+#ifdef RANDOM_INITIAL_BRAINCODE
+            being_braincode_internal(local)[ch] = math_random(local_random) & 255;
+#else
+            being_random3(local);
+            being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+#endif
+            being_braincode_internal(local)[ch+1] = math_random(local_random) & 255;
+            being_braincode_internal(local)[ch+2] = math_random(local_random) & 255;
+        }
+        else
+        {
+#ifdef RANDOM_INITIAL_BRAINCODE
+            being_braincode_external(local)[ch] = math_random(local_random) & 255;
+#else
+            being_random3(local);
+            being_braincode_external(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
+#endif
+            being_braincode_external(local)[ch+1] = math_random(local_random) & 255;
+            being_braincode_external(local)[ch+2] = math_random(local_random) & 255;
+        }
+        ch += 3;
+    }
+}
+
+
+
+
 /** initialise inner or outer braincode */
 void being_init_braincode(noble_being * local,
                           noble_being * other,
                           n_byte friend_foe,
                           n_byte internal)
 {
-    n_byte2 * local_random = being_get_random(local);
-    n_uint ch,i,most_similar_index,diff,min,actor_index;
+    n_uint i,most_similar_index,diff,min,actor_index;
     noble_social * graph;
     if (other==0L)
     {
-        /** initially seed the brain with instructions which are random but genetically biased */
-        for (ch = 0; ch < BRAINCODE_SIZE; ch+=3)
-        {
-            math_random3(local_random);
-            if (internal != 0)
-            {
-#ifdef RANDOM_INITIAL_BRAINCODE
-                being_braincode_internal(local)[ch] = math_random(local_random) & 255;
-#else
-                being_random3(local);
-                being_braincode_internal(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
-#endif
-                being_braincode_internal(local)[ch+1] = math_random(local_random) & 255;
-                being_braincode_internal(local)[ch+2] = math_random(local_random) & 255;
-            }
-            else
-            {
-#ifdef RANDOM_INITIAL_BRAINCODE
-                being_braincode_external(local)[ch] = math_random(local_random) & 255;
-#else
-                being_random3(local);
-                being_braincode_external(local)[ch] = (math_random(local_random) & 192) | get_braincode_instruction(local);
-#endif
-                being_braincode_external(local)[ch+1] = math_random(local_random) & 255;
-                being_braincode_external(local)[ch+2] = math_random(local_random) & 255;
-            }
-        }
+        being_init_braincode_create(local, internal);
     }
     else
     {
