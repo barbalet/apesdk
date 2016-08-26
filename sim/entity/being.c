@@ -93,7 +93,7 @@ being_draw;
 n_byte * being_braincode_external(noble_being * value)
 {
     noble_social * social_value = being_social(value);
-    return social_value[0].braincode;
+    return social_value[ATTENTION_EXTERNAL].braincode;
 }
 
 void being_clear_attention(noble_being * value)
@@ -3596,10 +3596,10 @@ n_int being_init(noble_being * beings, n_int number,
     }
 #endif
 
-    being_init_braincode(local,0L,0,
-                         BRAINCODE_INTERNAL);
-    being_init_braincode(local,0L,0,
-                         BRAINCODE_EXTERNAL);
+    /* TODO: Apply fitness function around the braincode generation */
+    
+    being_init_braincode(local,0L,0, BRAINCODE_INTERNAL);
+    being_init_braincode(local,0L,0, BRAINCODE_EXTERNAL);
 
     /** randomly initialize registers */
     for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
