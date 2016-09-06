@@ -596,7 +596,7 @@ typedef struct
  */
 typedef	struct
 {
-    n_byte name;
+    n_byte  name;
     n_byte2 familiarity;
 } noble_place;
 

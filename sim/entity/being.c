@@ -210,6 +210,8 @@ n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location,
     return 0;
 }
 
+#ifdef BRAIN_ON
+
 static void being_set_brainstates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3)
 {
     n_int three_offset = (asleep ? 0 : 3);
@@ -218,6 +220,8 @@ static void being_set_brainstates(noble_being * value, n_int asleep, n_byte2 val
     value->braindata.brain_state[three_offset + 1] = val2;
     value->braindata.brain_state[three_offset + 2] = val3;
 }
+
+#endif
 
 n_int being_brainstates(noble_being * value, n_int asleep, n_byte2 * states)
 {
@@ -3598,8 +3602,8 @@ n_int being_init(noble_being * beings, n_int number,
 
     /* TODO: Apply fitness function around the braincode generation */
     
-    being_init_braincode(local,0L,0, BRAINCODE_INTERNAL);
-    being_init_braincode(local,0L,0, BRAINCODE_EXTERNAL);
+    being_init_braincode(local, 0L, 0, BRAINCODE_INTERNAL);
+    being_init_braincode(local, 0L, 0, BRAINCODE_EXTERNAL);
 
     /** randomly initialize registers */
     for (ch = 0; ch < BRAINCODE_PSPACE_REGISTERS; ch++)
