@@ -37,6 +37,8 @@
 
 typedef enum
 {
+    NAME_UNKNOWN,
+    
     NAME_ATOLL,
     NAME_BASIN,
     NAME_BAY,
@@ -60,30 +62,33 @@ typedef enum
     NAME_TOTAL
 }territory_name;
 
-
-static n_string terriory_names[NAME_TOTAL]={
-    "Atoll",
-    "Basin",
-    "Bay",
-    "Beach",
-    "Cliff",
-    "Flatland",
-    "Headland",
-    "Hill",
-    "Lagoon",
-    "Lake",
-    "Mountain",
-    "Peninsula",
-    "Pond",
-    "Ridge",
-    "River",
-    "Spring",
-    "Stream",
-    "Summit",
-    "Trench",
-    "Valley"
-};
-
+n_string territory_description(territory_name value)
+{
+    n_string territory_names[NAME_TOTAL]={
+        " ",
+        "Atoll",
+        "Basin",
+        "Bay",
+        "Beach",
+        "Cliff",
+        "Flatland",
+        "Headland",
+        "Hill",
+        "Lagoon",
+        "Lake",
+        "Mountain",
+        "Peninsula",
+        "Pond",
+        "Ridge",
+        "River",
+        "Spring",
+        "Stream",
+        "Summit",
+        "Trench",
+        "Valley"
+    };
+    return territory_names[value];
+}
 
 void territory_description_init(n_byte * land, territory_name * set_names)
 {
@@ -174,7 +179,11 @@ void territory_description_init(n_byte * land, territory_name * set_names)
                 mx++;
             }
             /* naming logic goes here */
-            
+            {
+                territory_name return_name = NAME_UNKNOWN;
+                
+                *(set_names++) = return_name;
+            }
             
             ty++;
         }

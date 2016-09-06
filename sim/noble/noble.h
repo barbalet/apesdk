@@ -776,6 +776,11 @@ void compress_expand(n_file *input,   n_file *output);
 #define TERRITORY_DIMENSION           MAPSPACE_TO_TERRITORY(MAP_DIMENSION)
 #define TERRITORY_AREA                (TERRITORY_DIMENSION*TERRITORY_DIMENSION)
 
+/* dimension of the territory map */
+
+#define APESPACE_TO_TERRITORY(num)    (APESPACE_TO_MAPSPACE(num)>>MAP_TO_TERRITORY_RATIO)
+
+
 #define HI_RES_MAP_BITS               (MAP_BITS+3)
 
 #define HI_RES_MAP_DIMENSION          (1<<(HI_RES_MAP_BITS))

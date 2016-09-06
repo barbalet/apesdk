@@ -1193,7 +1193,7 @@ static void draw_region(noble_being * local)
 {
     n_join	 local_draw;
     n_byte * draw = draw_pointer(NUM_VIEW);
-    n_int    ly = 63;
+    n_int    ly = 31;
 
     if (draw == 0L) return;
 
@@ -1204,7 +1204,7 @@ static void draw_region(noble_being * local)
     {
         math_line(0, ly, MAP_DIMENSION, ly, &local_draw);
         math_line(ly, 0, ly, MAP_DIMENSION, &local_draw);
-        ly += 64;
+        ly += 32;
     }
 
 #ifdef TERRITORY_ON
@@ -1222,7 +1222,7 @@ static void draw_region(noble_being * local)
             if (value)
             {
                 sprintf(string_draw,"%ld",value);
-                draw_string(string_draw, (lx*64)+2 , (ly*64)+5, &local_draw);
+                draw_string(string_draw, (lx*32)+2 , (ly*32)+5, &local_draw);
             }
             lx++;
         }
