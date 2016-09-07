@@ -182,7 +182,7 @@ n_int draw_toggle_tide_daylight(void)
 
 /* this needs to be grouped eventually, it is here as a test */
 
-#define UNDRAW_MAX          100000
+#define UNDRAW_MAX          (100000+ (HI_RES_MAP_DIMENSION * HI_RES_MAP_DIMENSION / 16))
 
 static n_byte * undraw_location[UNDRAW_MAX];
 static n_byte   undraw_color[UNDRAW_MAX];
@@ -242,9 +242,18 @@ static n_int terrain_dim_y = 511;
 
 static n_byte pixel_map(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
-    n_byte *byte_info = information;
-    byte_info[ px | (py<<MAP_BITS) ] = COLOUR_YELLOW;
-    return 0;
+    n_color8 local_color;
+    local_color.color = COLOUR_YELLOW;
+    local_color.screen = information;
+    return pixel_color8(px, py, dx, dy, &local_color);
+}
+
+static n_byte pixel_map_hires(n_int px, n_int py, n_int dx, n_int dy, void * information)
+{
+    n_color8 local_color;
+    local_color.color = COLOUR_YELLOW;
+    local_color.screen = information;
+    return pixel_color8_hires(px, py, dx, dy, &local_color);
 }
 
 static n_byte pixel_map_checker(n_int px, n_int py, n_int dx, n_int dy, void * information)
@@ -1189,6 +1198,25 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
     }
 }
 
+static void draw_region_hires(n_color8 * color)
+{
+    n_join	 local_draw;
+    n_int    step = (HI_RES_MAP_DIMENSION / 16);
+    n_int    ly = step - 1;
+    
+    local_draw.information = color->screen;
+    
+    if (local_draw.information == 0L) return;
+    local_draw.pixel_draw = &pixel_map_hires;
+    while (ly < HI_RES_MAP_DIMENSION)
+    {
+        math_line(0, ly, HI_RES_MAP_DIMENSION, ly, &local_draw);
+        math_line(ly, 0, ly, HI_RES_MAP_DIMENSION, &local_draw);
+        ly += step;
+    }
+}
+
+
 static void draw_region(noble_being * local)
 {
     n_join	 local_draw;
@@ -1641,18 +1669,25 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
 {
     n_color8		local_col;
 
-    if (lores == 0) /* set up drawing environ */
-    {
-        draw_undraw();
-        local_col.screen = land_topology_highdef();
-    }
-    else
+    if (lores) /* set up drawing environ */
     {
         local_col.screen = draw_pointer(NUM_VIEW);
         io_copy(land_topology(), local_col.screen, MAP_AREA);
     }
-
-    if (lores == 0)
+    else
+    {
+        draw_undraw();
+        local_col.screen = land_topology_highdef();
+    }
+    if (lores)    {
+        draw_tides(land_topology(), local_col.screen, land_tide_level());
+        if (toggle_territory)
+        {
+            draw_region(local_sim->select);
+        }
+        draw_remains(local_sim, local_col.screen);
+    }
+    else
     {
         static n_byte local_tide;
         if (local_tide != land_tide_level())
@@ -1660,15 +1695,10 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
             local_tide = land_tide_level();
             draw_tides_hi_res(land_topology_highdef(), land_highres_tide(), local_tide);
         }
-    }
-    else
-    {
-        draw_tides(land_topology(), local_col.screen, land_tide_level());
         if (toggle_territory)
         {
-            draw_region(local_sim->select);
+            draw_region_hires(&local_col);
         }
-        draw_remains(local_sim, local_col.screen);
     }
 
     if (local_sim->select)
