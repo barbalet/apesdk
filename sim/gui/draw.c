@@ -281,10 +281,10 @@ static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * informa
 
 #ifdef BRAINCODE_ON
 
-static n_byte pixel_grey(n_int px, n_int py, n_int dx, n_int dy, void * information)
+static n_byte pixel_yellow(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
-    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_GREY;
+    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
     return 0;
 }
 
@@ -1416,7 +1416,6 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
                     if ((brainptr[loop] ^ obrainptr[loop]) >> 5)
                     {
                         /* TODO Fix this re-scaling bug */
-                        /*
                         n_int	scr_z = 256 + (act_x1 >> 11);
                         n_int	s_x = ((act_x2 * scr_z) >> 16) + center_x;
                         n_int	s_y = ((act_y1 * scr_z) >> 16) + center_y - 120;
@@ -1427,7 +1426,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
                             (*local_draw_brain)(s_x + 1, s_y, 0, 0, local_info_brain);
                             (*local_draw_brain)(s_x, s_y - 1, 0, 0, local_info_brain);
                             (*local_draw_brain)(s_x, s_y + 1, 0, 0, local_info_brain);
-                        }*/
+                        }
                     }
                     act_x1 += a13;
                     act_x2 += a23;
@@ -1729,7 +1728,7 @@ static void draw_errors(noble_simulation * local_sim)
 static void draw_line_braincode(n_string pointer, n_int line)
 {
     n_join	local_mono;
-    local_mono.pixel_draw  = &pixel_grey;
+    local_mono.pixel_draw  = &pixel_yellow;
     local_mono.information = draw_pointer(NUM_TERRAIN);
     draw_string(pointer, 4 + (terrain_dim_x/2) - 256, (line*12) + 246 + (terrain_dim_y/2) - 256, &local_mono);
 }
@@ -1749,7 +1748,7 @@ void  draw_window(n_int dim_x, n_int dim_y)
     terrain_dim_y = dim_y;
 }
 
-void  draw_cycle(void)
+void  draw_cycle(n_byte size_changed)
 {
     noble_simulation * local_sim = sim_sim();
     n_vect2            local_vect;

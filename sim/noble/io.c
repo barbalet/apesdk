@@ -860,7 +860,7 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
         lp ++;
     }
 
-    io_output_contents(fil);
+    /*io_output_contents(fil);*/
 
     return SHOW_ERROR((n_constant_string)found_text);
 }

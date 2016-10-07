@@ -40,6 +40,8 @@
 
 @interface NobleShared : NSObject
 
+- (id) initWithFrame:(NSRect)frameRect;
+
 - (BOOL) start;
 
 - (void) about:(NSString *)aboutName;

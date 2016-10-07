@@ -41,16 +41,21 @@
 @property (nonatomic, assign) n_uint randomizing_agent;
 @property (nonatomic, assign) shared_cycle_state returned_value;
 
+@property (nonatomic, assign) NSInteger old_size_width;
+@property (nonatomic, assign) NSInteger old_size_height;
+
 @end
 
 @implementation NobleShared
 
-- (id) init
+- (id) initWithFrame:(NSRect)frameRect
 {
     self = [super init];
     if (self)
     {
         _identification = 0;
+        _old_size_width = frameRect.size.width;
+        _old_size_height = frameRect.size.height;
     }
     
     return self;
@@ -104,12 +109,23 @@
 
 - (void) draw:(NSSize)size
 {
-    shared_draw(0L, _identification, (n_int)size.width, (n_int)size.height);
+    NSInteger local_width = size.width;
+    NSInteger local_height = size.height;
+    
+    BOOL size_changed = (local_width != _old_size_width) || (local_height != _old_size_height);
+    
+    _old_size_width = local_width;
+    _old_size_height = local_height;
+    
+    shared_draw(0L, _identification, (n_int)size.width, (n_int)size.height, (n_byte)size_changed);
 }
 
 - (void) draw:(unsigned char *)buffer width:(NSInteger)width height:(NSInteger)height
 {
-    shared_draw(buffer, self.identification, width, height);
+    BOOL size_changed = (width != _old_size_width) || (height != _old_size_height);
+    _old_size_width = width;
+    _old_size_height = height;
+    shared_draw(buffer, self.identification, width, height, (n_byte)size_changed);
 }
 
 - (void) keyReceived:(NSUInteger)key

@@ -578,18 +578,12 @@ n_int shared_menu(n_int menuVal)
     return -1;
 }
 
-void shared_legacy_draw(n_int dim_x, n_int dim_y)
-{
-    draw_window(dim_x, dim_y);
-    draw_cycle();
-}
-
 n_byte * shared_legacy_pointer(n_byte fIdentification)
 {
     return draw_pointer(fIdentification);
 }
 
-void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y)
+void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed)
 {
 #ifdef	_WIN32
 	n_byte           * index = draw_pointer(fIdentification);
@@ -611,7 +605,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
     if (fIdentification == NUM_TERRAIN)
     {
         draw_window(dim_x, dim_y);
-        draw_cycle();
+        draw_cycle(size_changed);
     }
 
     draw_color_time(fit);

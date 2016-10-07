@@ -37,7 +37,6 @@
 
 @implementation NobleSimulationView
 
-
 - (NSOpenPanel*) uniformOpenPanel
 {
     NSOpenPanel *panel = [NSOpenPanel openPanel];

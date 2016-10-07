@@ -45,7 +45,6 @@
 @property (nonatomic, strong) NSTimer* timerAnimation;
 @property (nonatomic, strong, readwrite) NobleShared* shared;
 
-
 @end
 
 @implementation NobleMacView
@@ -67,7 +66,6 @@
 {
 	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
 }
-
 
 - (void) awakeFromNib
 {    
@@ -114,8 +112,9 @@
 - (id) initWithFrame:(NSRect) frameRect
 {
     NSOpenGLPixelFormat * pf = [NobleMacView basicPixelFormat];
-	self = [super initWithFrame: frameRect pixelFormat: pf];
-    _shared = [[NobleShared alloc] init];
+	self = [super initWithFrame:frameRect pixelFormat: pf];
+    
+    _shared = [[NobleShared alloc] initWithFrame:frameRect];
     return self;
 }
 

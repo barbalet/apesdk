@@ -42,7 +42,7 @@
 #define  BRAINCODE_ON  /* entity */
 #define  IMMUNE_ON     /* entity */
 
-#undef  BRAIN_ON
+#define  BRAIN_ON
 
 #define  FEATURE_SET
 
