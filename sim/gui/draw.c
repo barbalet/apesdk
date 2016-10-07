@@ -150,6 +150,8 @@ static n_int toggle_braincode = 0;
 static n_int toggle_territory = 0;
 static n_int toggle_tidedaylight = 0;
 
+static n_int changing_size = 0;
+
 n_int draw_toggle_weather(void)
 {
     toggle_weather ^= 1;
@@ -1347,7 +1349,7 @@ static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
 static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
 {
     n_byte  draw_big = 1;
-    if ((local_sim->select == 0L) || (number_errors != 0))
+    if ((local_sim->select == 0L) || (number_errors != 0) || changing_size)
     {
         return;
     }
@@ -1728,6 +1730,10 @@ static void draw_errors(noble_simulation * local_sim)
 static void draw_line_braincode(n_string pointer, n_int line)
 {
     n_join	local_mono;
+    if (changing_size)
+    {
+        return;
+    }
     local_mono.pixel_draw  = &pixel_yellow;
     local_mono.information = draw_pointer(NUM_TERRAIN);
     draw_string(pointer, 4 + (terrain_dim_x/2) - 256, (line*12) + 246 + (terrain_dim_y/2) - 256, &local_mono);
@@ -1753,10 +1759,12 @@ void  draw_cycle(n_byte size_changed)
     noble_simulation * local_sim = sim_sim();
     n_vect2            local_vect;
     n_join             local_mono;
-
+    
     if (sim_new()) return;
     if (check_about) return;
 
+    changing_size = size_changed;
+    
     local_mono.pixel_draw  = &pixel_overlay;
     local_mono.information = draw_pointer(NUM_TERRAIN);
 

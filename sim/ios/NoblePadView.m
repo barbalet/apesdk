@@ -80,7 +80,7 @@
 
     (void)shared_cycle(CFAbsoluteTimeGetCurrent(), NUM_TERRAIN, dimensionX, dimensionY);
     
-    shared_draw((n_byte *)offscreenBuffer, NUM_TERRAIN, dimensionX, dimensionY);
+    shared_draw((n_byte *)offscreenBuffer, NUM_TERRAIN, dimensionX, dimensionY, 0);
     
     CGImageRef local_image = CGBitmapContextCreateImage( drawRef );
 
