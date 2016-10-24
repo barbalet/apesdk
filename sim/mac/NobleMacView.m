@@ -44,6 +44,7 @@
 
 @property (nonatomic, strong) NSTimer* timerAnimation;
 @property (nonatomic, strong, readwrite) NobleShared* shared;
+@property (nonatomic, strong) NSSound* timedAudio;
 
 @end
 
@@ -64,6 +65,18 @@
 /* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
+    NSData* localSound = [_shared soundSimulation];
+    
+    if (localSound)
+    {
+        if (_timedAudio)
+        {
+            [_timedAudio stop];
+        }
+        _timedAudio = [[NSSound alloc] initWithData:localSound];
+        _timedAudio.loops = YES;
+        [_timedAudio play];
+    }
 	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
 }
 

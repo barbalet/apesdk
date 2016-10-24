@@ -112,5 +112,6 @@
 
 - (void) numberThreads:(long)number;
 
+- (NSData*) soundSimulation;
 
 @end
