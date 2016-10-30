@@ -1771,9 +1771,11 @@ void  draw_cycle(n_byte size_changed)
     local_vect.x = terrain_dim_x;
     local_vect.y = terrain_dim_y;
 
-    draw_apes(local_sim, 0);    /* hi res */
     draw_apes(local_sim, 1);    /* lo res */
+#ifndef NEW_OPENGL_ENVIRONMENT
+    draw_apes(local_sim, 0);    /* hi res */
 
+    
 #ifdef EXECUTE_THREADED
     /* TODO: Make the threaded draw command line safe */
     if (io_command_line_execution())
@@ -1805,7 +1807,7 @@ void  draw_cycle(n_byte size_changed)
         console_populate_braincode(local_sim, draw_line_braincode);
     }
 #endif
-
+#endif
 
 #ifdef WEATHER_ON
     if (toggle_weather)

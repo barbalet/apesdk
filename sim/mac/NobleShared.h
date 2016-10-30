@@ -113,5 +113,7 @@
 - (void) numberThreads:(long)number;
 
 - (NSData*) soundSimulation;
+    
+- (n_int) identification;
 
 @end

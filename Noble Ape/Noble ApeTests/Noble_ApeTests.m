@@ -99,19 +99,19 @@ noble_being      * being = 0L;
 */
 - (void)testBrainCheckSum
 {
-    n_uint hash = math_hash(being->brain, DOUBLE_BRAIN);
+    n_uint hash = math_hash(being->braindata.brain, DOUBLE_BRAIN);
     XCTAssertTrue(hash == 0xca440ed899ee9512, @"Hash doesn't comply with prior brain hashes (%lx)", hash);
 }
 
 - (void)testSocialCheckSum
 {
-    n_uint hash = math_hash((n_byte *)being->social, SOCIAL_SIZE * sizeof(noble_social));
+    n_uint hash = math_hash((n_byte *)being->events.social, SOCIAL_SIZE * sizeof(noble_social));
     XCTAssertTrue(hash == 0xc8f5d3e15e59fa1b, @"Hash doesn't comply with prior social hashes (%lx)", hash);
 }
 
 - (void)testEpisodicCheckSum
 {
-    n_uint hash = math_hash((n_byte *)being->episodic, EPISODIC_SIZE * sizeof(noble_episodic));
+    n_uint hash = math_hash((n_byte *)being->events.episodic, EPISODIC_SIZE * sizeof(noble_episodic));
     XCTAssertTrue(hash == 0x4f77c0121ab3ccde, @"Hash doesn't comply with prior episodic hashes (%lx)", hash);
 }
 

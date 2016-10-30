@@ -33,6 +33,12 @@
  
  ****************************************************************/
 
+#include "../noble/noble.h"
+
+#ifdef NEW_OPENGL_ENVIRONMENT
+#include "../ogl/ogl.h"
+
+#endif
 #import "NobleSimulationView.h"
 
 @implementation NobleSimulationView
@@ -75,6 +81,17 @@
     NSInteger              dim_y = (NSInteger)rect.size.height;
     static unsigned char   outputBuffer[2048*1536*3];
     
+    [[self openGLContext] makeCurrentContext];
+    
+#ifdef NEW_OPENGL_ENVIRONMENT
+    if (!polygonal_entry([self.shared identification]))
+    {
+        [[self openGLContext] flushBuffer];
+
+        return;
+    }
+#endif
+    
     [self.shared cycleWithWidth:dim_x height:dim_y];
     
     if ([self.shared cycleDebugOutput])
@@ -90,7 +107,7 @@
         [self quitProcedure];
     }
 
-    [[self openGLContext] makeCurrentContext];
+    /*[[self openGLContext] makeCurrentContext];*/
     
     [self.shared draw:outputBuffer width:dim_x height:dim_y];
     

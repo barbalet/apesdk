@@ -36,6 +36,8 @@
 #define CONSOLE_REQUIRED
 #define CONSOLE_ONLY
 
+#include "../noble/noble.h"
+
 #include <stdio.h>
 
 #ifndef	_WIN32
@@ -572,7 +574,12 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 #else
         land_init(&offbuffer[landbuffer_size], 0L);
 #endif
+        
+#ifdef NEW_OPENGL_ENVIRONMENT
+        land_init_high_def(0);
+#else
         land_init_high_def(1);
+#endif
         land_tide();
 #endif
         if (kind != KIND_LOAD_FILE)

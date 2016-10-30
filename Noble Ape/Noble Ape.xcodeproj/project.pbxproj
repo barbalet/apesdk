@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4A3B24681D7E0A1A009CC9E9 /* territory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3B24671D7E0A1A009CC9E9 /* territory.c */; };
+		4A5E3DA21DC6A1250054942F /* polygonal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A5E3DA01DC6A1250054942F /* polygonal.c */; };
 		5AD6CA751B27582F00230534 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5AD6CA741B27582F00230534 /* Assets.xcassets */; };
 		5AD6CA831B27582F00230534 /* Noble_ApeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CA821B27582F00230534 /* Noble_ApeTests.m */; };
 		5AD6CA8E1B27582F00230534 /* Noble_ApeUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CA8D1B27582F00230534 /* Noble_ApeUITests.m */; };
@@ -62,6 +63,8 @@
 
 /* Begin PBXFileReference section */
 		4A3B24671D7E0A1A009CC9E9 /* territory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = territory.c; path = ../sim/noble/territory.c; sourceTree = "<group>"; };
+		4A5E3DA01DC6A1250054942F /* polygonal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = polygonal.c; path = ../sim/ogl/polygonal.c; sourceTree = "<group>"; };
+		4A5E3DA11DC6A1250054942F /* ogl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ogl.h; path = ../sim/ogl/ogl.h; sourceTree = "<group>"; };
 		5AD6CA6B1B27582F00230534 /* Noble Ape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Noble Ape.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5AD6CA741B27582F00230534 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5AD6CA791B27582F00230534 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -139,6 +142,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A5E3D9F1DC6A0E00054942F /* ogl */ = {
+			isa = PBXGroup;
+			children = (
+				4A5E3DA01DC6A1250054942F /* polygonal.c */,
+				4A5E3DA11DC6A1250054942F /* ogl.h */,
+			);
+			name = ogl;
+			sourceTree = "<group>";
+		};
 		5AD6CA621B27582F00230534 = {
 			isa = PBXGroup;
 			children = (
@@ -147,6 +159,7 @@
 				5AD6CB041B275C0500230534 /* universe */,
 				5AD6CB031B275B6D00230534 /* entity */,
 				5AD6CB021B275B6900230534 /* gui */,
+				4A5E3D9F1DC6A0E00054942F /* ogl */,
 				5AD6CB011B275B6200230534 /* mac */,
 				5AD6CA6D1B27582F00230534 /* Noble Ape */,
 				5AD6CA811B27582F00230534 /* Noble ApeTests */,
@@ -412,6 +425,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A5E3DA21DC6A1250054942F /* polygonal.c in Sources */,
 				4A3B24681D7E0A1A009CC9E9 /* territory.c in Sources */,
 				5AD6CADA1B27598400230534 /* being.c in Sources */,
 				5AD6CADB1B27598400230534 /* body.c in Sources */,

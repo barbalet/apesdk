@@ -33,6 +33,12 @@
  
  ****************************************************************/
 
+#include "../noble/noble.h"
+
+#ifdef NEW_OPENGL_ENVIRONMENT
+#include "../ogl/ogl.h"
+#endif
+
 #import "NobleMacView.h"
 
 #include <stdio.h>
@@ -53,12 +59,27 @@
 /* pixel format definition */
 + (NSOpenGLPixelFormat*) basicPixelFormat
 {
+    
+#ifndef NEW_OPENGL_ENVIRONMENT
     NSOpenGLPixelFormatAttribute attributes [] = {
         NSOpenGLPFADoubleBuffer,	/* double buffered */
         NSOpenGLPFADepthSize,
         (NSOpenGLPixelFormatAttribute)16, /* 16 bit depth buffer */
         (NSOpenGLPixelFormatAttribute)0 /*nil*/
     };
+#else
+    NSOpenGLPixelFormatAttribute attributes [] = {
+        NSOpenGLPFANoRecovery,
+        NSOpenGLPFAWindow,
+        NSOpenGLPFAColorSize, 32,
+        NSOpenGLPFADepthSize, 32,
+        NSOpenGLPFAMaximumPolicy,
+        NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFAAccelerated,
+        0
+    };
+#endif
+
     return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 }
 
@@ -108,6 +129,10 @@
 
 - (void) quitProcedure
 {
+#ifdef NEW_OPENGL_ENVIRONMENT
+    polygonal_close();
+#endif
+    
     NSLog(@"Quitting");
 
     [_shared close];
