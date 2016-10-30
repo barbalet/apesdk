@@ -378,7 +378,12 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification, n_int 
             control_key(key_identification, key_value);
         }
     }
-    if(localIdentification == NUM_TERRAIN)
+
+#ifdef NEW_OPENGL_ENVIRONMENT
+    if (localIdentification == NUM_VIEW)
+#else
+    if (localIdentification == NUM_TERRAIN)
+#endif
     {
         sim_realtime(ticks);
 #ifdef MULTITOUCH_CONTROLS
@@ -411,6 +416,7 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification, n_int 
         }
 #endif
     }
+    
     return return_value;
 }
 

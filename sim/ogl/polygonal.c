@@ -71,9 +71,6 @@ static n_byte polygonal_terrain_first_run = 1;
 
 static GLdouble color[256*3] = {0.0f};
 
-static GLuint terrain_display_list;
-
-
 #define LAND_STEP_AREA 2
 
 /* TODO: step through the direction facing
@@ -163,6 +160,7 @@ static void polygonal_terrain_init()
 {
     n_int   loop = 0;
     n_byte2 points[256*3];
+    
     glShadeModel (GL_SMOOTH);	// Enable Smooth Shading
 
     glClearDepth (1.0f);
@@ -175,7 +173,6 @@ static void polygonal_terrain_init()
     glMatrixMode (GL_PROJECTION);
     // glLoadIdentity ();
     gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
-
 
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity ();
@@ -226,36 +223,8 @@ static void polygonal_terrain(void)
     polygonal_render_terrain(land_topology_highdef(), co.x, co.y);
 }
 
-static void polygonal_view()
-{
-    glShadeModel (GL_SMOOTH);	// Enable Smooth Shading
-
-    glClearDepth (1.0f);
-    glEnable (GL_DEPTH_TEST);
-    glDepthFunc (GL_LEQUAL);
-    glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-
-    glViewport (0, 0, 512, 512);
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
-    gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
-
-
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity ();
-
-    glClearColor (0.1f, 0.1f, 0.5f, 0.5f);
-
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity ();
-    gluLookAt (0, 0, 300, 0, 0, 100, 0, 20, 20);
-}
-
-
 void polygonal_close(void)
 {
-    glDeleteLists(terrain_display_list, 1);
 }
 
 
