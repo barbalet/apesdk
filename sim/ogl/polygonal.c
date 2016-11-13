@@ -99,54 +99,38 @@ static GLdouble color[256*3] = {0.0f};
 
 static void polygonal_render_terrain(n_byte * local_land, n_int co_x, n_int co_y)
 {
-    n_int       y0 = local_land[POSITIVE_LAND_COORD_HIRES(co_x) |
-                                (POSITIVE_LAND_COORD_HIRES(co_y) * HI_RES_MAP_DIMENSION)];
+    n_int       y0 = local_land[POSITIVE_LAND_COORD_HIRES(co_x) | (POSITIVE_LAND_COORD_HIRES(co_y) * HI_RES_MAP_DIMENSION)*2];
     GLdouble    point[3];
     n_int       loop_y = 0 - RESOLUTION;
     while (loop_y < RESOLUTION)
     {
         n_int   loop_x = 0 - RESOLUTION;
-        n_int   squarey =    loop_y;
         n_int   offset_y0 = (POSITIVE_LAND_COORD_HIRES(loop_y + co_y) * HI_RES_MAP_DIMENSION);
         n_int   offset_y1 = (POSITIVE_LAND_COORD_HIRES(loop_y + co_y + LAND_STEP_AREA) * HI_RES_MAP_DIMENSION);
-
-        squarey *= squarey;
 
         glBegin (GL_QUAD_STRIP);
 
         while (loop_x < RESOLUTION)
         {
-            n_int   y1 = local_land[POSITIVE_LAND_COORD_HIRES(loop_x + co_x) | offset_y0];
-            n_int   squarex = loop_x;
-
-            squarex *= squarex;
-
+            n_int   location = POSITIVE_LAND_COORD_HIRES(loop_x + co_x)| offset_y0;
+            n_int   y1 = local_land[location << 1];
+            n_byte  col = local_land[location << 1 | 1];
             point[0] = loop_x;
             point[1] = y1 - y0;
             point[2] = loop_y;
 
-            if ((squarey + squarex) < 26)
-            {
-                glColor3d (1.0f, 0.0f, 0.0f);
-            }
-            else
-            {
-                glColor3dv (&color[(y1*3)]);
-            }
+            glColor3dv (&color[(col*3)]);
+            
             glVertex3dv(point);
             point[2] += (LAND_STEP_AREA * 1.0f);
 
-            y1 = local_land[POSITIVE_LAND_COORD_HIRES(loop_x + co_x) | offset_y1];
-
+            location = POSITIVE_LAND_COORD_HIRES(loop_x + co_x)| offset_y1;
+            y1 = local_land[location << 1];
+            col = local_land[location << 1 | 1];
+            
             point[1]  = y1 - y0;
-            if ((squarey + squarex) < 26)
-            {
-                glColor3d (1.0f, 0.0f, 0.0f);
-            }
-            else
-            {
-                glColor3dv (&color[(y1*3)]);
-            }
+            glColor3dv (&color[(col*3)]);
+            
             glVertex3dv(point);
             loop_x += LAND_STEP_AREA;
         }
@@ -199,28 +183,32 @@ static void polygonal_terrain(void)
 {
     noble_simulation * local_sim = sim_sim();
     noble_being * loc_being = local_sim->select;
-    n_int turn = being_facing(loc_being);
     n_vect2 co;
-    n_int modified_turn = ((32+64+8) + turn) & 255;
-    GLdouble rotating_angle = (modified_turn * 360.0)/256.0;
 
-    being_high_res(loc_being, &co);
-    
-    if (polygonal_terrain_first_run)
-    {
-        polygonal_terrain_init();
+    if (loc_being)
+    {    
+        n_int turn = being_facing(loc_being);
+        n_int modified_turn = ((32+64+8) + turn) & 255;
+        GLdouble rotating_angle = (modified_turn * 360.0)/256.0;
+
+        being_high_res(loc_being, &co);
+        
+        if (polygonal_terrain_first_run)
+        {
+            polygonal_terrain_init();
+        }
+
+        glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glLoadIdentity ();
+
+        gluLookAt (256, 256, 256,
+                   0, 0, 0,
+                   0, 1, 0);
+
+        glRotated(rotating_angle, 0.0f, 1.0f, 0.0f);
+
+        polygonal_render_terrain(land_topology_highdef(), co.x, co.y);
     }
-
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity ();
-
-    gluLookAt (256, 256, 256,
-               0, 0, 0,
-               0, 1, 0);
-
-    glRotated(rotating_angle, 0.0f, 1.0f, 0.0f);
-
-    polygonal_render_terrain(land_topology_highdef(), co.x, co.y);
 }
 
 void polygonal_close(void)
@@ -230,7 +218,7 @@ void polygonal_close(void)
 
 n_int polygonal_entry(n_int value)
 {
-    if (value == NUM_VIEW)
+    if (value == WINDOW_PROCESSING)
     {
         return 1;
     }

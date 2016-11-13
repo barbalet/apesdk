@@ -1774,8 +1774,6 @@ void  draw_cycle(n_byte size_changed)
     draw_apes(local_sim, 1);    /* lo res */
     draw_apes(local_sim, 0);    /* hi res */
 
-#ifndef NEW_OPENGL_ENVIRONMENT
-
 #ifdef EXECUTE_THREADED
     /* TODO: Make the threaded draw command line safe */
     if (io_command_line_execution())
@@ -1806,7 +1804,6 @@ void  draw_cycle(n_byte size_changed)
     {
         console_populate_braincode(local_sim, draw_line_braincode);
     }
-#endif
 #endif
 
 #ifdef WEATHER_ON

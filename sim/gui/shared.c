@@ -379,11 +379,8 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification, n_int 
         }
     }
 
-#ifdef NEW_OPENGL_ENVIRONMENT
-    if (localIdentification == NUM_VIEW)
-#else
-    if (localIdentification == NUM_TERRAIN)
-#endif
+
+    if (localIdentification == WINDOW_PROCESSING)
     {
         sim_realtime(ticks);
 #ifdef MULTITOUCH_CONTROLS
@@ -426,7 +423,7 @@ n_int shared_init(n_byte view, n_uint random)
     key_down = 0;
     mouse_down = 0;
     mouse_drag = 0;
-    if (view == NUM_TERRAIN)
+    if (view == WINDOW_PROCESSING)
     {
         if (control_init(KIND_START_UP, random) == 0L)
         {
@@ -608,7 +605,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 #endif
     if (index == 0L) return;
 
-    if (fIdentification == NUM_TERRAIN)
+    if (fIdentification == WINDOW_PROCESSING)
     {
         draw_window(dim_x, dim_y);
         draw_cycle(size_changed);

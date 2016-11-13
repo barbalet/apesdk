@@ -381,6 +381,16 @@ enum window_num
     NUM_TERRAIN	= (1)
 };
 
+#ifdef NEW_OPENGL_ENVIRONMENT
+
+#define WINDOW_PROCESSING NUM_VIEW
+
+#else
+
+#define WINDOW_PROCESSING NUM_TERRAIN
+
+#endif
+
 /* maximum bytes in a braincode program */
 #define BRAINCODE_SIZE                    128
 
