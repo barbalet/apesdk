@@ -56,7 +56,7 @@ noble_being      * being = 0L;
 {
     [super setUp];
     
-    /*(void)shared_new(0x1382);*/
+    (void)shared_new(0x1382);
     
     value = sim_sim();
     
@@ -73,7 +73,7 @@ noble_being      * being = 0L;
 - (void) testTime
 {
     n_byte4 time_value = land_time();
-    XCTAssertTrue(land_time() == 1, @"Time is %u", time_value);
+    XCTAssertTrue(land_time() == 2, @"Time is %u", time_value);
 }
 
 - (void)testCheckInitialDate
@@ -84,7 +84,7 @@ noble_being      * being = 0L;
 - (void)testMapCheckSum
 {
     n_uint hash = math_hash((n_byte *)land_topology(), MAP_AREA);
-    XCTAssertTrue(hash == 0x8059006e6bcbe5bd, @"Hash doesn't comply with prior map hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xc4ccc927a99055cf, @"Hash doesn't comply with prior map hashes (%lx)", hash);
 }
 /*
 - (void)testBeingCheckSum
@@ -100,19 +100,19 @@ noble_being      * being = 0L;
 - (void)testBrainCheckSum
 {
     n_uint hash = math_hash(being->braindata.brain, DOUBLE_BRAIN);
-    XCTAssertTrue(hash == 0xca440ed899ee9512, @"Hash doesn't comply with prior brain hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xaa29b750cca6b7b3, @"Hash doesn't comply with prior brain hashes (%lx)", hash);
 }
 
 - (void)testSocialCheckSum
 {
     n_uint hash = math_hash((n_byte *)being->events.social, SOCIAL_SIZE * sizeof(noble_social));
-    XCTAssertTrue(hash == 0xc8f5d3e15e59fa1b, @"Hash doesn't comply with prior social hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x31e53c3a9172cf66, @"Hash doesn't comply with prior social hashes (%lx)", hash);
 }
 
 - (void)testEpisodicCheckSum
 {
     n_uint hash = math_hash((n_byte *)being->events.episodic, EPISODIC_SIZE * sizeof(noble_episodic));
-    XCTAssertTrue(hash == 0x4f77c0121ab3ccde, @"Hash doesn't comply with prior episodic hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0xe9e6c3c12d7a37ce, @"Hash doesn't comply with prior episodic hashes (%lx)", hash);
 }
 
 
@@ -147,8 +147,8 @@ noble_being      * being = 0L;
 
     NSLog(@"Location %d %d", being->delta.location[0], being->delta.location[1]);
     
-    XCTAssertTrue(being->delta.location[0] == 6400, @"X value is wrong (%d)", being->delta.location[0]);
-    XCTAssertTrue(being->delta.location[1] == 6400, @"Y value is wrong (%d)", being->delta.location[1]);
+    XCTAssertTrue(being->delta.location[0] == 7131, @"X value is wrong (%d)", being->delta.location[0]);
+    XCTAssertTrue(being->delta.location[1] == 13627, @"Y value is wrong (%d)", being->delta.location[1]);
 }
 
 - (void)testShorttermSimulationCompare

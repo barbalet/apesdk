@@ -571,7 +571,6 @@ void land_seed_genetics(n_byte2 * local_random)
 void land_init(n_byte * scratch, execute_thread_stub * exec)
 {
     math_pack(m_topology, scratch);
-
     land_creation(m_topology, scratch, m_genetics, exec);
 }
 

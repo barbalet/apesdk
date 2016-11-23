@@ -65,12 +65,12 @@
 #include "ogl.h"
 
 
-#define RESOLUTION (1024)
 
 static n_byte polygonal_terrain_first_run = 1;
 
 static GLdouble color[256*3] = {0.0f};
 
+#define LAND_RESOLUTION (1024)
 #define LAND_STEP_AREA 2
 
 /* TODO: step through the direction facing
@@ -101,16 +101,16 @@ static void polygonal_render_terrain(n_byte * local_land, n_int co_x, n_int co_y
 {
     n_int       y0 = local_land[POSITIVE_LAND_COORD_HIRES(co_x) | (POSITIVE_LAND_COORD_HIRES(co_y) * HI_RES_MAP_DIMENSION)*2];
     GLdouble    point[3];
-    n_int       loop_y = 0 - RESOLUTION;
-    while (loop_y < RESOLUTION)
+    n_int       loop_y = 0 - LAND_RESOLUTION;
+    while (loop_y < LAND_RESOLUTION)
     {
-        n_int   loop_x = 0 - RESOLUTION;
+        n_int   loop_x = 0 - LAND_RESOLUTION;
         n_int   offset_y0 = (POSITIVE_LAND_COORD_HIRES(loop_y + co_y) * HI_RES_MAP_DIMENSION);
         n_int   offset_y1 = (POSITIVE_LAND_COORD_HIRES(loop_y + co_y + LAND_STEP_AREA) * HI_RES_MAP_DIMENSION);
 
         glBegin (GL_QUAD_STRIP);
 
-        while (loop_x < RESOLUTION)
+        while (loop_x < LAND_RESOLUTION)
         {
             n_int   location = POSITIVE_LAND_COORD_HIRES(loop_x + co_x)| offset_y0;
             n_int   y1 = local_land[location << 1];
@@ -140,6 +140,7 @@ static void polygonal_render_terrain(n_byte * local_land, n_int co_x, n_int co_y
 }
 
 
+
 static void polygonal_terrain_init()
 {
     n_int   loop = 0;
@@ -151,7 +152,6 @@ static void polygonal_terrain_init()
     glEnable (GL_DEPTH_TEST);
     glDepthFunc (GL_LEQUAL);
     glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
 
     glViewport (0, 0, 512, 512);
     glMatrixMode (GL_PROJECTION);
@@ -184,7 +184,18 @@ static void polygonal_terrain(void)
     noble_simulation * local_sim = sim_sim();
     noble_being * loc_being = local_sim->select;
     n_vect2 co;
-
+    n_byte2 points[256*3];
+    n_int   loop = 0;
+    
+    draw_color_time(points);
+    
+    
+    while( loop < (256 * 3))
+    {
+        color[loop] = ((GLdouble)points[loop])/65536.f;
+        loop++;
+    }
+    
     if (loc_being)
     {    
         n_int turn = being_facing(loc_being);
