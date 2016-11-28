@@ -59,6 +59,7 @@
 
 enum colour_type
 {
+    COLOUR_BLACK     =   (0),
     COLOUR_GREY      =   (252),
     COLOUR_YELLOW    =   (253),
     COLOUR_RED_DARK  =   (254),

@@ -267,7 +267,7 @@ static n_byte pixel_map_checker(n_int px, n_int py, n_int dx, n_int dy, void * i
     return 0;
 }
 
-static n_byte pixel_overlay(n_int px, n_int py, n_int dx, n_int dy, void * information)
+static n_byte pixel_yellow(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
     byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
@@ -277,20 +277,9 @@ static n_byte pixel_overlay(n_int px, n_int py, n_int dx, n_int dy, void * infor
 static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
-    byte_info[ px + (py * terrain_dim_x) ] = 0;
+    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_BLACK;
     return 0;
 }
-
-#ifdef BRAINCODE_ON
-
-static n_byte pixel_yellow(n_int px, n_int py, n_int dx, n_int dy, void * information)
-{
-    n_byte *byte_info = information;
-    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
-    return 0;
-}
-
-#endif
 
 n_byte * draw_pointer(n_byte which_one)
 {
@@ -788,31 +777,25 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 #define mndivmonth		7
 #define mndivyear		91
 
-/*
- * kind = 0, erase
- * kind = 1, draw-cycle
- */
 static void	draw_meters(noble_simulation * local_sim)
 {
-    noble_being  * loc_being =   local_sim->select;
-    n_pixel 	 * local_draw = &pixel_overlay;
+    n_pixel 	 * local_draw_yellow = &pixel_yellow;
     n_pixel      * local_draw_black = &pixel_black;
     n_byte		 * local_info = draw_pointer(NUM_TERRAIN);
     const n_byte * local_icon;
     n_int		   ha1 = 6;
     n_int		   ha2 = 0;
     n_int		   hr = 0;
-    n_join		   local_kind;
+    n_join		   local_kind_yellow;
     n_join		   local_kind_black;
-    n_genetics    *genetics = being_genetics(loc_being);
 
     if (local_info == 0L)
     {
         return;
     }
 
-    local_kind.pixel_draw = local_draw;
-    local_kind.information = local_info;
+    local_kind_yellow.pixel_draw = local_draw_yellow;
+    local_kind_yellow.information = local_info;
     local_kind_black.pixel_draw = local_draw_black;
     local_kind_black.information = local_info;
 
@@ -825,10 +808,10 @@ static void	draw_meters(noble_simulation * local_sim)
 
         if ((hr&1) == 0)
         {
-            (*local_draw)(5 , 5 + hr, 0, 0, local_info);
-            (*local_draw)(45, 5 + hr, 0, 0, local_info);
-            (*local_draw)(5 + hr, 45, 0, 0, local_info);
-            (*local_draw)(5 + hr, 5,  0, 0, local_info);
+            (*local_draw_yellow)(5 , 5 + hr, 0, 0, local_info);
+            (*local_draw_yellow)(45, 5 + hr, 0, 0, local_info);
+            (*local_draw_yellow)(5 + hr, 45, 0, 0, local_info);
+            (*local_draw_yellow)(5 + hr, 5,  0, 0, local_info);
         }
 
         hr ++;
@@ -841,7 +824,7 @@ static void	draw_meters(noble_simulation * local_sim)
         n_vect2 hour_clock;
         vect2_direction(&hour_clock, ((hr << 8) / 12), 320);
 
-        (void)math_join((25 + (hour_clock.x / 5)), (25 + (hour_clock.y / 5)), (hour_clock.x / 17), (hour_clock.y / 17), &local_kind);
+        (void)math_join((25 + (hour_clock.x / 5)), (25 + (hour_clock.y / 5)), (hour_clock.x / 17), (hour_clock.y / 17), &local_kind_yellow);
         hr++;
     }
 
@@ -856,6 +839,7 @@ static void	draw_meters(noble_simulation * local_sim)
 
     if (local_sim->select)
     {
+        noble_being  * loc_being =   local_sim->select;
         hr = 0;
         while (hr < 41)
         {
@@ -866,32 +850,30 @@ static void	draw_meters(noble_simulation * local_sim)
                 math_join(51 + 55 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
                 math_join(51 + 55 + 18 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
             }
-
             if ((hr&1) == 0)
             {
-                (*local_draw)(50 + 5 + FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw)(50 + 45+ FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 45, 0, 0, local_info);
-                (*local_draw)(50 + 5 + hr+ FACING_OFFSIDE, 5, 0, 0, local_info);
+                (*local_draw_yellow)(50 + 5 + FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw_yellow)(50 + 45+ FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw_yellow)(50 + 5 + hr+ FACING_OFFSIDE, 45, 0, 0, local_info);
+                (*local_draw_yellow)(50 + 5 + hr+ FACING_OFFSIDE, 5, 0, 0, local_info);
 
-                (*local_draw)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw_yellow)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw_yellow)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
 
-                (*local_draw)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw_yellow)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
+                (*local_draw_yellow)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
             }
             hr ++;
         }
         hr = 0;
         while (hr < 9)
         {
-            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
-            (*local_draw)(50 + 55 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
-            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
-            (*local_draw)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
+            (*local_draw_yellow)(50 + 55 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
+            (*local_draw_yellow)(50 + 55 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
+            (*local_draw_yellow)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
+            (*local_draw_yellow)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
             hr += 2;
         }
-
         hr = 0;
 
         while (hr < 8)
@@ -899,60 +881,61 @@ static void	draw_meters(noble_simulation * local_sim)
             n_vect2 facing_clock;
             vect2_direction(&facing_clock, (hr << 5), 320);
             (void)math_join((25 + 50 + (facing_clock.x / 5))+ FACING_OFFSIDE, (25 + (facing_clock.y / 5)),
-                            (facing_clock.x / 17), (facing_clock.y / 17), &local_kind);
+                            (facing_clock.x / 17), (facing_clock.y / 17), &local_kind_yellow);
             hr++;
         }
 
-        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 25, -1, 0, &local_kind);
-        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 25, 1, 0, &local_kind);
-        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 15, -2, 0, &local_kind);
-        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 15, 2, 0, &local_kind);
-        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 35, -2, 0, &local_kind);
-        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 35, 2, 0, &local_kind);
+        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 25, -1, 0, &local_kind_yellow);
+        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 25, 1, 0, &local_kind_yellow);
+        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 15, -2, 0, &local_kind_yellow);
+        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 15, 2, 0, &local_kind_yellow);
+        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 35, -2, 0, &local_kind_yellow);
+        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 35, 2, 0, &local_kind_yellow);
 
-        /* draw genetics */
-        while (ha2 < CHROMOSOMES)
         {
-            n_uint	ha3 = 0;
-            n_genetics	genetic_block = genetics[ha2];
-            ha1 = 0;
-            while (ha3 < (sizeof(n_genetics)*4))
+            n_genetics    *genetics = being_genetics(loc_being);
+            /* draw genetics */
+            while (ha2 < CHROMOSOMES)
             {
-                n_int four = ( genetic_block >> (ha3 * 2) ) & 3 ;
-                if ( four != 0 )
-                    (void)math_join((ha1)+GENETICS_X,  GENETICS_Y + (ha2 * 10), 0, 7, &local_kind);
-                ha1++;
-                if ( four == 3 )
-                    (void)math_join((ha1)+GENETICS_X, GENETICS_Y + (ha2 * 10), 0, 7, &local_kind);
-                ha1 += 3;
-                ha3++;
+                n_uint	ha3 = 0;
+                n_genetics	genetic_block = genetics[ha2];
+                ha1 = 0;
+                while (ha3 < (sizeof(n_genetics)*4))
+                {
+                    n_int four = ( genetic_block >> (ha3 * 2) ) & 3 ;
+                    if ( four != 0 )
+                        (void)math_join((ha1)+GENETICS_X,  GENETICS_Y + (ha2 * 10), 0, 7, &local_kind_yellow);
+                    ha1++;
+                    if ( four == 3 )
+                        (void)math_join((ha1)+GENETICS_X, GENETICS_Y + (ha2 * 10), 0, 7, &local_kind_yellow);
+                    ha1 += 3;
+                    ha3++;
+                }
+                ha2++;
             }
-            ha2++;
         }
 
         /* draw sex */
-        (void)math_join(5+GENDER_X, (10)+GENDER_Y, 5, (11), &local_kind);
-        (void)math_join(10+GENDER_X, (21)+GENDER_Y, 5, (-11), &local_kind);
-        (void)math_join(15+GENDER_X, (10)+GENDER_Y, -10, 0, &local_kind);
+        (void)math_join(5+GENDER_X, (10)+GENDER_Y, 5, (11), &local_kind_yellow);
+        (void)math_join(10+GENDER_X, (21)+GENDER_Y, 5, (-11), &local_kind_yellow);
+        (void)math_join(15+GENDER_X, (10)+GENDER_Y, -10, 0, &local_kind_yellow);
         if (FIND_SEX(GET_I(loc_being)) == SEX_FEMALE)
         {
-            (void)math_join(10+GENDER_X, (20)+GENDER_Y, 0, (6), &local_kind);
-            (void)math_join(8+GENDER_X, (23)+GENDER_Y, 4, 0, &local_kind);
+            (void)math_join(10+GENDER_X, (20)+GENDER_Y, 0, (6), &local_kind_yellow);
+            (void)math_join(8+GENDER_X, (23)+GENDER_Y, 4, 0, &local_kind_yellow);
         }
         else
         {
-            (void)math_join(15+GENDER_X, (10)+GENDER_Y, 4, (-4), &local_kind);
-            (void)math_join(19+GENDER_X, (6)+GENDER_Y, -2, 0, &local_kind);
-            (void)math_join(19+GENDER_X, (6)+GENDER_Y, 0, (2), &local_kind);
+            (void)math_join(15+GENDER_X, (10)+GENDER_Y, 4, (-4), &local_kind_yellow);
+            (void)math_join(19+GENDER_X, (6)+GENDER_Y, -2, 0, &local_kind_yellow);
+            (void)math_join(19+GENDER_X, (6)+GENDER_Y, 0, (2), &local_kind_yellow);
         }
 
         /* draw direction facing */
         {
             n_vect2 direction_facing;
-
             vect2_direction(&direction_facing, 128 + 64+ 256 - terrain_turn + loc_being->delta.direction_facing, 63 * 32);
-
-            (void)math_join_vect2(75+ FACING_OFFSIDE, 25, &direction_facing, &local_kind);
+            (void)math_join_vect2(75+ FACING_OFFSIDE, 25, &direction_facing, &local_kind_yellow);
         }
 
         {
@@ -963,11 +946,11 @@ static void	draw_meters(noble_simulation * local_sim)
 
             if (local_speed != 0)
             {
-                (void)math_join(106 +SP_EN_OFFSIDE, (45-local_speed), 6, 0, &local_kind);
+                (void)math_join(106 + SP_EN_OFFSIDE, (45-local_speed), 6, 0, &local_kind_yellow);
             }
             if (local_energy > 127)
             {
-                (void)math_join(106 + 18 + SP_EN_OFFSIDE, (45-(local_energy >> 7)), 6, 0, &local_kind);
+                (void)math_join(106 + 18 + SP_EN_OFFSIDE, (45-(local_energy >> 7)), 6, 0, &local_kind_yellow);
 
             }
             local_icon = &icns[weather_seven_values(local_x, local_y) << 7];
@@ -996,11 +979,11 @@ static void	draw_meters(noble_simulation * local_sim)
         vect2_rotate90(&hour_hand);
         vect2_rotate90(&minute_hand);
 
-        (void)math_join_vect2(17, 25, &year_hand, &local_kind);
-        (void)math_join_vect2(33, 25, &month_hand, &local_kind);
+        (void)math_join_vect2(17, 25, &year_hand, &local_kind_yellow);
+        (void)math_join_vect2(33, 25, &month_hand, &local_kind_yellow);
 
-        (void)math_join_vect2(25, 25, &hour_hand, &local_kind);
-        (void)math_join_vect2(25, 25, &minute_hand, &local_kind);
+        (void)math_join_vect2(25, 25, &hour_hand, &local_kind_yellow);
+        (void)math_join_vect2(25, 25, &minute_hand, &local_kind_yellow);
     }
     ha1 = 0;
     while (ha1 < 32)
@@ -1012,7 +995,7 @@ static void	draw_meters(noble_simulation * local_sim)
         {
             if ((icon_stripe >> (31-ha2)) & 1)
             {
-                (*local_draw)(5 + ha2, 55 + ha1, 0, 0, local_info);
+                (*local_draw_yellow)(5 + ha2, 55 + ha1, 0, 0, local_info);
             }
             ha2++;
         }
@@ -1359,7 +1342,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
         n_join	      local_mono;
         n_uint        turn_y = tilt_z;
         n_uint        turn_z = tilt_y;
-        n_pixel	    * local_draw_brain = &pixel_overlay;
+        n_pixel	    * local_draw_brain = &pixel_yellow;
         void	    * local_info_brain = draw_pointer(NUM_TERRAIN);
         n_int	      lpx  = 0;
         n_int	      loop = 0;
@@ -1387,7 +1370,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
         a31 =  ((a12 * a23) >> 8);
         a33 = -((a12 * a21) >> 8);
 
-        local_mono.pixel_draw  = &pixel_overlay;
+        local_mono.pixel_draw  = &pixel_yellow;
         local_mono.information = draw_pointer(NUM_TERRAIN);
 
         draw_metrics(local_sim->delta_cycles, local_sim->delta_frames, &local_mono);
@@ -1712,7 +1695,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
 static void draw_errors(noble_simulation * local_sim)
 {
     n_join			local_mono;
-    local_mono.pixel_draw  = &pixel_overlay;
+    local_mono.pixel_draw  = &pixel_yellow;
     local_mono.information = draw_pointer(NUM_TERRAIN);
     if(number_errors != 0)
     {
@@ -1765,7 +1748,7 @@ void  draw_cycle(n_byte size_changed)
 
     changing_size = size_changed;
     
-    local_mono.pixel_draw  = &pixel_overlay;
+    local_mono.pixel_draw  = &pixel_yellow;
     local_mono.information = draw_pointer(NUM_TERRAIN);
 
     local_vect.x = terrain_dim_x;
