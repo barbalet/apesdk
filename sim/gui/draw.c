@@ -274,6 +274,16 @@ static n_byte pixel_yellow(n_int px, n_int py, n_int dx, n_int dy, void * inform
     return 0;
 }
 
+static n_byte pixel_yellow_checker(n_int px, n_int py, n_int dx, n_int dy, void * information)
+{
+    if ((px + py) & 1)
+    {
+        n_byte *byte_info = information;
+        byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
+    }
+    return 0;
+}
+
 static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
@@ -780,6 +790,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 static void	draw_meters(noble_simulation * local_sim)
 {
     n_pixel 	 * local_draw_yellow = &pixel_yellow;
+    n_pixel 	 * local_draw_yellow_checker = &pixel_yellow_checker;
     n_pixel      * local_draw_black = &pixel_black;
     n_byte		 * local_info = draw_pointer(NUM_TERRAIN);
     const n_byte * local_icon;
@@ -787,6 +798,7 @@ static void	draw_meters(noble_simulation * local_sim)
     n_int		   ha2 = 0;
     n_int		   hr = 0;
     n_join		   local_kind_yellow;
+    n_join		   local_kind_yellow_checker;
     n_join		   local_kind_black;
 
     if (local_info == 0L)
@@ -796,27 +808,25 @@ static void	draw_meters(noble_simulation * local_sim)
 
     local_kind_yellow.pixel_draw = local_draw_yellow;
     local_kind_yellow.information = local_info;
+    local_kind_yellow_checker.pixel_draw = local_draw_yellow_checker;
+    local_kind_yellow_checker.information = local_info;
     local_kind_black.pixel_draw = local_draw_black;
     local_kind_black.information = local_info;
-
+    
     while (hr < 41)
     {
         if ((hr != 40) && (hr != 0))
         {
             math_join(6, 5+hr, 38, 0, &local_kind_black);
         }
-
-        if ((hr&1) == 0)
-        {
-            (*local_draw_yellow)(5 , 5 + hr, 0, 0, local_info);
-            (*local_draw_yellow)(45, 5 + hr, 0, 0, local_info);
-            (*local_draw_yellow)(5 + hr, 45, 0, 0, local_info);
-            (*local_draw_yellow)(5 + hr, 5,  0, 0, local_info);
-        }
-
         hr ++;
     }
 
+    math_join(5, 5, 40, 0, &local_kind_yellow_checker);
+    math_join(5, 5, 0, 40, &local_kind_yellow_checker);
+    math_join(45, 5, 0, 40, &local_kind_yellow_checker);
+    math_join(5, 45, 40, 0, &local_kind_yellow_checker);
+    
     hr = 0;
 
     while (hr < 12)
@@ -850,30 +860,25 @@ static void	draw_meters(noble_simulation * local_sim)
                 math_join(51 + 55 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
                 math_join(51 + 55 + 18 + SP_EN_OFFSIDE, 5+hr, 6, 0, &local_kind_black);
             }
-            if ((hr&1) == 0)
-            {
-                (*local_draw_yellow)(50 + 5 + FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw_yellow)(50 + 45+ FACING_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw_yellow)(50 + 5 + hr+ FACING_OFFSIDE, 45, 0, 0, local_info);
-                (*local_draw_yellow)(50 + 5 + hr+ FACING_OFFSIDE, 5, 0, 0, local_info);
-
-                (*local_draw_yellow)(58 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw_yellow)(50 + 55 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-
-                (*local_draw_yellow)(58 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-                (*local_draw_yellow)(50 + 55 + 18 + SP_EN_OFFSIDE, 5 + hr, 0, 0, local_info);
-            }
             hr ++;
         }
-        hr = 0;
-        while (hr < 9)
-        {
-            (*local_draw_yellow)(50 + 55 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
-            (*local_draw_yellow)(50 + 55 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
-            (*local_draw_yellow)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 5, 0, 0, local_info);
-            (*local_draw_yellow)(50 + 55 + 18 + hr + SP_EN_OFFSIDE, 45, 0, 0, local_info);
-            hr += 2;
-        }
+        
+        math_join(50 + 5 + FACING_OFFSIDE, 5, 0, 40, &local_kind_yellow_checker);
+        math_join(50 + 45+ FACING_OFFSIDE, 5, 0, 40, &local_kind_yellow_checker);
+        math_join(50 + 5 + FACING_OFFSIDE, 45, 40, 0, &local_kind_yellow_checker);
+        math_join(50 + 5 + FACING_OFFSIDE, 5, 40, 0, &local_kind_yellow_checker);
+        
+        math_join(58 + 55 + SP_EN_OFFSIDE, 5, 0, 40, &local_kind_yellow_checker);
+        math_join(50 + 55 + SP_EN_OFFSIDE, 5, 0, 40, &local_kind_yellow_checker);
+        
+        math_join(58 + 55 + 18 + SP_EN_OFFSIDE, 5, 0, 40, &local_kind_yellow_checker);
+        math_join(50 + 55 + 18 + SP_EN_OFFSIDE, 5, 0, 40, &local_kind_yellow_checker);
+        
+        math_join(50 + 55 + SP_EN_OFFSIDE, 5, 9, 0, &local_kind_yellow_checker);
+        math_join(50 + 55 + SP_EN_OFFSIDE, 45, 9, 0, &local_kind_yellow_checker);
+        math_join(50 + 55 + 18 + SP_EN_OFFSIDE, 5, 9, 0, &local_kind_yellow_checker);
+        math_join(50 + 55 + 18 + SP_EN_OFFSIDE, 45, 9, 0, &local_kind_yellow_checker);
+        
         hr = 0;
 
         while (hr < 8)
@@ -885,12 +890,12 @@ static void	draw_meters(noble_simulation * local_sim)
             hr++;
         }
 
-        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 25, -1, 0, &local_kind_yellow);
-        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 25, 1, 0, &local_kind_yellow);
-        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 15, -2, 0, &local_kind_yellow);
-        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 15, 2, 0, &local_kind_yellow);
-        (void)math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 35, -2, 0, &local_kind_yellow);
-        (void)math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 35, 2, 0, &local_kind_yellow);
+        math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 25, -1, 0, &local_kind_yellow);
+        math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 25, 1, 0, &local_kind_yellow);
+        math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 15, -2, 0, &local_kind_yellow);
+        math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 15, 2, 0, &local_kind_yellow);
+        math_join(50 + 55 + 18+ SP_EN_OFFSIDE, 35, -2, 0, &local_kind_yellow);
+        math_join(58 + 55 + 18+ SP_EN_OFFSIDE, 35, 2, 0, &local_kind_yellow);
 
         {
             n_genetics    *genetics = being_genetics(loc_being);
@@ -916,19 +921,19 @@ static void	draw_meters(noble_simulation * local_sim)
         }
 
         /* draw sex */
-        (void)math_join(5+GENDER_X, (10)+GENDER_Y, 5, (11), &local_kind_yellow);
-        (void)math_join(10+GENDER_X, (21)+GENDER_Y, 5, (-11), &local_kind_yellow);
-        (void)math_join(15+GENDER_X, (10)+GENDER_Y, -10, 0, &local_kind_yellow);
+        math_join(5+GENDER_X, (10)+GENDER_Y, 5, (11), &local_kind_yellow);
+        math_join(10+GENDER_X, (21)+GENDER_Y, 5, (-11), &local_kind_yellow);
+        math_join(15+GENDER_X, (10)+GENDER_Y, -10, 0, &local_kind_yellow);
         if (FIND_SEX(GET_I(loc_being)) == SEX_FEMALE)
         {
-            (void)math_join(10+GENDER_X, (20)+GENDER_Y, 0, (6), &local_kind_yellow);
-            (void)math_join(8+GENDER_X, (23)+GENDER_Y, 4, 0, &local_kind_yellow);
+            math_join(10+GENDER_X, (20)+GENDER_Y, 0, (6), &local_kind_yellow);
+            math_join(8+GENDER_X, (23)+GENDER_Y, 4, 0, &local_kind_yellow);
         }
         else
         {
-            (void)math_join(15+GENDER_X, (10)+GENDER_Y, 4, (-4), &local_kind_yellow);
-            (void)math_join(19+GENDER_X, (6)+GENDER_Y, -2, 0, &local_kind_yellow);
-            (void)math_join(19+GENDER_X, (6)+GENDER_Y, 0, (2), &local_kind_yellow);
+            math_join(15+GENDER_X, (10)+GENDER_Y, 4, (-4), &local_kind_yellow);
+            math_join(19+GENDER_X, (6)+GENDER_Y, -2, 0, &local_kind_yellow);
+            math_join(19+GENDER_X, (6)+GENDER_Y, 0, (2), &local_kind_yellow);
         }
 
         /* draw direction facing */
@@ -951,7 +956,6 @@ static void	draw_meters(noble_simulation * local_sim)
             if (local_energy > 127)
             {
                 (void)math_join(106 + 18 + SP_EN_OFFSIDE, (45-(local_energy >> 7)), 6, 0, &local_kind_yellow);
-
             }
             local_icon = &icns[weather_seven_values(local_x, local_y) << 7];
         }
