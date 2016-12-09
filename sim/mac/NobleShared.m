@@ -37,7 +37,7 @@
 
 @interface NobleShared()
 
-@property (nonatomic, assign) n_int  identification;
+@property (nonatomic, assign, readwrite) n_int  identification;
 @property (nonatomic, assign) n_uint randomizing_agent;
 @property (nonatomic, assign) shared_cycle_state returned_value;
 

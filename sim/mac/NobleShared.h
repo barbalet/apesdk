@@ -114,6 +114,6 @@
 
 - (NSData*) soundSimulation;
     
-- (n_int) identification;
+@property (nonatomic, assign, readonly) n_int  identification;
 
 @end

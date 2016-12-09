@@ -71,8 +71,7 @@
 - (void) awakeFromNib
 {
     [self.shared identificationBasedOnName:[[self window] title]];
-    
-    [self startEverything];
+    [self startEverything:(self.shared.identification == WINDOW_PROCESSING)];
 }
 
 - (void) drawRect:(NSRect)rect

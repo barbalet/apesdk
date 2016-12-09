@@ -59,7 +59,7 @@
 - (id)   initWithFrame:(NSRect) frameRect;
 - (void) awakeFromNib;
 
-- (void) startEverything;
+- (void) startEverything:(BOOL)headyLifting;
 
 - (void) quitProcedure;
 

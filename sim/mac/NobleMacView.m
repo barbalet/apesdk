@@ -104,8 +104,7 @@
 - (void) awakeFromNib
 {    
     NSLog(@"Starting up");
-    
-    [self startEverything];
+    [self startEverything:YES];
 }
 
 - (void) drawRect:(NSRect)rect
@@ -171,27 +170,27 @@
     return YES;
 }
 
-- (void) startEverything
+- (void) startEverything:(BOOL)headyLifting
 {
-    NSUInteger processors = [[NSProcessInfo processInfo] processorCount];
     NSSize increments;
-    
     
     increments.height = 4;
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
-    
-    [_shared numberThreads:processors];
-    
-    NSLog(@"We have %ld processors", processors);
 
-    if ([_shared start] == NO)
+    if (headyLifting)
     {
-        NSLog(@"Simulation initialization failed");
-        [self quitProcedure];
-        return;
+        NSUInteger processors = [[NSProcessInfo processInfo] processorCount];
+        [_shared numberThreads:processors];
+        NSLog(@"We have %ld processors", processors);
+
+        if ([_shared start] == NO)
+        {
+            NSLog(@"Simulation initialization failed");
+            [self quitProcedure];
+            return;
+        }
     }
-    
     /* start animation timer */
     _timerAnimation = [NSTimer timerWithTimeInterval:[_shared timeInterval] target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
     

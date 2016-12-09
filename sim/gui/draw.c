@@ -983,26 +983,46 @@ static void	draw_meters(noble_simulation * local_sim)
         vect2_rotate90(&hour_hand);
         vect2_rotate90(&minute_hand);
 
-        (void)math_join_vect2(17, 25, &year_hand, &local_kind_yellow);
-        (void)math_join_vect2(33, 25, &month_hand, &local_kind_yellow);
+        math_join_vect2(17, 25, &year_hand, &local_kind_yellow);
+        math_join_vect2(33, 25, &month_hand, &local_kind_yellow);
 
-        (void)math_join_vect2(25, 25, &hour_hand, &local_kind_yellow);
-        (void)math_join_vect2(25, 25, &minute_hand, &local_kind_yellow);
+        math_join_vect2(25, 25, &hour_hand, &local_kind_yellow);
+        math_join_vect2(25, 25, &minute_hand, &local_kind_yellow);
     }
     ha1 = 0;
     while (ha1 < 32)
     {
         n_uint icon_stripe = (local_icon[(ha1<<2)|3] << 0) | (local_icon[(ha1<<2)|2] << 8)
                              | (local_icon[(ha1<<2)|1] << 16) | (local_icon[(ha1<<2)|0] << 24);
+        n_int startRun = -1;
+        n_int stopRun = -1;
         ha2 = 0;
         while ( ha2 < 32 )
         {
             if ((icon_stripe >> (31-ha2)) & 1)
             {
-                (*local_draw_yellow)(5 + ha2, 55 + ha1, 0, 0, local_info);
+                /*(*local_draw_yellow)(5 + ha2, 55 + ha1, 0, 0, local_info);*/
+                
+                if (startRun < 0)
+                {
+                    startRun = ha2;
+                }
+                stopRun = ha2;
+            }
+            if ((stopRun < ha2) && (startRun > -1))
+            {
+                math_join(5 + startRun, 55 + ha1, stopRun - startRun, 0, &local_kind_yellow);
+                startRun = -1;
             }
             ha2++;
         }
+        
+        if ((stopRun < ha2) && (startRun > -1))
+        {
+            math_join(5 + startRun, 55 + ha1, stopRun - startRun, 0, &local_kind_yellow);
+            startRun = -1;
+        }
+        
         ha1++;
     }
 
