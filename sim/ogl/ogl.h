@@ -42,8 +42,14 @@
 #ifndef _NOBLEAPE_OGL_H_
 #define _NOBLEAPE_OGL_H_
 
+void polygonal_init(n_int value);
 n_int polygonal_entry(n_int value);
 void polygonal_close(void);
+
+void polygonal_color(n_byte value, n_byte alpha);
+void polygonal_line(n_int px, n_int py, n_int dx, n_int dy, n_byte value);
+void polygonal_line_vect(n_int px, n_int py, n_vect2* vector, n_byte value);
+
 
 #endif /* _NOBLEAPE_OGL_H_ */
 

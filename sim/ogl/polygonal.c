@@ -64,10 +64,6 @@
 
 #include "ogl.h"
 
-
-
-static n_byte polygonal_terrain_first_run = 1;
-
 static GLdouble color[256*3] = {0.0f};
 
 #define LAND_RESOLUTION (1024)
@@ -139,10 +135,50 @@ static void polygonal_render_terrain(n_byte * local_land, n_int co_x, n_int co_y
     }
 }
 
+
+void polygonal_line(n_int px, n_int py, n_int dx, n_int dy, n_byte value)
+{
+    glBegin(GL_LINES);
+    glColor3fv((GLfloat*)&color[(value*3)]);
+    glVertex2i((int)px, (int)py);
+    glColor3fv((GLfloat*)&color[(value*3)]);
+    glVertex2i((int)(px + dx), (int)(py + dy));
+    glEnd();
+}
+
+void polygonal_line_vect(n_int px, n_int py, n_vect2* vector, n_byte value)
+{
+    glBegin(GL_LINES);
+    glColor3fv((GLfloat*)&color[(value*3)]);
+    glVertex2i((int)px, (int)py);
+    glColor3fv((GLfloat*)&color[(value*3)]);
+    glVertex2i((int)(px + vector->x), (int)(py + vector->y));
+    glEnd();
+}
+
 void polygonal_close(void)
 {
 }
 
+
+void polygonal_init(n_int value)
+{
+    if (value != WINDOW_PROCESSING)
+    {
+        glShadeModel (GL_SMOOTH);
+        glClearDepth (1.0f);
+        glEnable (GL_DEPTH_TEST);
+        glDepthFunc (GL_LEQUAL);
+        glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+        glViewport (0, 0, 512, 512);
+        glMatrixMode (GL_PROJECTION);
+        gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
+        glMatrixMode (GL_MODELVIEW);
+        glLoadIdentity ();
+        glEnable ( GL_CULL_FACE );
+        glClearColor (0.1f, 0.1f, 0.5f, 0.5f);
+    }
+}
 
 n_int polygonal_entry(n_int value)
 {
@@ -163,28 +199,12 @@ n_int polygonal_entry(n_int value)
             loop++;
         }
         
-        if (polygonal_terrain_first_run)
-        {
-            glShadeModel (GL_SMOOTH);
-            glClearDepth (1.0f);
-            glEnable (GL_DEPTH_TEST);
-            glDepthFunc (GL_LEQUAL);
-            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-            glViewport (0, 0, 512, 512);
-            glMatrixMode (GL_PROJECTION);
-            gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
-            glMatrixMode (GL_MODELVIEW);
-            glLoadIdentity ();
-            glEnable ( GL_CULL_FACE );
-            glClearColor (0.1f, 0.1f, 0.5f, 0.5f);
-            polygonal_terrain_first_run = 0;
-        }
-        
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity ();
         gluLookAt (256, 256, 256,
                    0, 0, 0,
                    0, 1, 0);
+        
         
         if (loc_being)
         {
@@ -195,7 +215,11 @@ n_int polygonal_entry(n_int value)
             being_high_res(loc_being, &co);
             glRotated(rotating_angle, 0.0f, 1.0f, 0.0f);
             polygonal_render_terrain(land_topology_highdef(), co.x, co.y);
+            glRotated(45-rotating_angle, 0.0f, 1.0f, 0.0f);
+
         }
+        draw_meters(local_sim);
+
     }
     return 0;
 }

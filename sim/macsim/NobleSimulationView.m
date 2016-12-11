@@ -72,6 +72,9 @@
 {
     [self.shared identificationBasedOnName:[[self window] title]];
     [self startEverything:(self.shared.identification == WINDOW_PROCESSING)];
+#ifdef NEW_OPENGL_ENVIRONMENT
+    polygonal_init(self.shared.identification);
+#endif
 }
 
 - (void) drawRect:(NSRect)rect
@@ -86,7 +89,6 @@
     if (!polygonal_entry([self.shared identification]))
     {
         [[self openGLContext] flushBuffer];
-
         return;
     }
 #endif
