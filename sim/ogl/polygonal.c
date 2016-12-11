@@ -139,89 +139,6 @@ static void polygonal_render_terrain(n_byte * local_land, n_int co_x, n_int co_y
     }
 }
 
-
-
-static void polygonal_terrain_init()
-{
-    n_int   loop = 0;
-    n_byte2 points[256*3];
-    
-    glShadeModel (GL_SMOOTH);	// Enable Smooth Shading
-
-    glClearDepth (1.0f);
-    glEnable (GL_DEPTH_TEST);
-    glDepthFunc (GL_LEQUAL);
-    glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-    glViewport (0, 0, 512, 512);
-    glMatrixMode (GL_PROJECTION);
-    // glLoadIdentity ();
-    gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
-
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity ();
-
-    glEnable ( GL_CULL_FACE );
-
-    glClearColor (0.1f, 0.1f, 0.5f, 0.5f);
-
-    draw_fit(land_points, points);
-
-    while( loop < (256 * 3))
-    {
-        color[loop] = ((GLdouble)points[loop])/65536.f;
-        loop++;
-    }
-
-    polygonal_terrain_first_run = 0;
-}
-
-
-
-
-static void polygonal_terrain(void)
-{
-    noble_simulation * local_sim = sim_sim();
-    noble_being * loc_being = local_sim->select;
-    n_vect2 co;
-    n_byte2 points[256*3];
-    n_int   loop = 0;
-    
-    draw_color_time(points);
-    
-    
-    while( loop < (256 * 3))
-    {
-        color[loop] = ((GLdouble)points[loop])/65536.f;
-        loop++;
-    }
-    
-    if (loc_being)
-    {    
-        n_int turn = being_facing(loc_being);
-        n_int modified_turn = ((32+64+8) + turn) & 255;
-        GLdouble rotating_angle = (modified_turn * 360.0)/256.0;
-
-        being_high_res(loc_being, &co);
-        
-        if (polygonal_terrain_first_run)
-        {
-            polygonal_terrain_init();
-        }
-
-        glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glLoadIdentity ();
-
-        gluLookAt (256, 256, 256,
-                   0, 0, 0,
-                   0, 1, 0);
-
-        glRotated(rotating_angle, 0.0f, 1.0f, 0.0f);
-
-        polygonal_render_terrain(land_topology_highdef(), co.x, co.y);
-    }
-}
-
 void polygonal_close(void)
 {
 }
@@ -233,7 +150,53 @@ n_int polygonal_entry(n_int value)
     {
         return 1;
     }
-    polygonal_terrain();
+    else
+    {
+        noble_simulation * local_sim = sim_sim();
+        noble_being * loc_being = local_sim->select;
+        n_byte2 points[256*3];
+        n_int   loop = 0;
+        draw_color_time(points);
+        while( loop < (256 * 3))
+        {
+            color[loop] = ((GLdouble)points[loop])/65536.f;
+            loop++;
+        }
+        
+        if (polygonal_terrain_first_run)
+        {
+            glShadeModel (GL_SMOOTH);
+            glClearDepth (1.0f);
+            glEnable (GL_DEPTH_TEST);
+            glDepthFunc (GL_LEQUAL);
+            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+            glViewport (0, 0, 512, 512);
+            glMatrixMode (GL_PROJECTION);
+            gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
+            glMatrixMode (GL_MODELVIEW);
+            glLoadIdentity ();
+            glEnable ( GL_CULL_FACE );
+            glClearColor (0.1f, 0.1f, 0.5f, 0.5f);
+            polygonal_terrain_first_run = 0;
+        }
+        
+        glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glLoadIdentity ();
+        gluLookAt (256, 256, 256,
+                   0, 0, 0,
+                   0, 1, 0);
+        
+        if (loc_being)
+        {
+            n_int turn = being_facing(loc_being);
+            n_int modified_turn = ((32+64+8) + turn) & 255;
+            GLdouble rotating_angle = (modified_turn * 360.0)/256.0;
+            n_vect2 co;
+            being_high_res(loc_being, &co);
+            glRotated(rotating_angle, 0.0f, 1.0f, 0.0f);
+            polygonal_render_terrain(land_topology_highdef(), co.x, co.y);
+        }
+    }
     return 0;
 }
 

@@ -42,7 +42,7 @@
 #define _NOBLEAPE_NOBLE_H_
 /*	Variable Definitions */
 
-#undef   NEW_OPENGL_ENVIRONMENT
+#define  NEW_OPENGL_ENVIRONMENT
 
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
@@ -762,7 +762,7 @@ void io_offset(n_byte * start, n_byte * point, n_string text);
 n_int io_find_size_data(noble_file_entry * commands);
 
 void compress_compress(n_file *input, n_file *output);
-void compress_expand(n_file *input,   n_file *output);
+void compress_expand(n_file *input, n_file *output);
 
 #ifdef NOBLE_IOS
 
@@ -1126,13 +1126,13 @@ void  spacetime_set(n_spacetime * set, n_byte2 * location);
 
 void land_convert_to_map(n_vect2 * value);
 
-#define	SC_DEBUG_STRING(ptr, string)	scdebug_string(ptr, string)
+#define	SC_DEBUG_STRING(ptr, string) scdebug_string(ptr, string)
 #define SC_DEBUG_NUMBER(ptr, number) scdebug_int(ptr, number)
-#define	SC_DEBUG_NEWLINE(ptr)		scdebug_newline(ptr)
-#define	SC_DEBUG_UP(ptr)			scdebug_tabstep(ptr,1)
-#define	SC_DEBUG_DOWN(ptr)			scdebug_tabstep(ptr,-1)
-#define	SC_DEBUG_ON(ptr)            scdebug_writeon(ptr)
-#define SC_DEBUG_OFF(ptr)			scdebug_writeoff(ptr)
+#define	SC_DEBUG_NEWLINE(ptr)		 scdebug_newline(ptr)
+#define	SC_DEBUG_UP(ptr)			 scdebug_tabstep(ptr,1)
+#define	SC_DEBUG_DOWN(ptr)			 scdebug_tabstep(ptr,-1)
+#define	SC_DEBUG_ON(ptr)             scdebug_writeon(ptr)
+#define SC_DEBUG_OFF(ptr)			 scdebug_writeoff(ptr)
 
 #else
 

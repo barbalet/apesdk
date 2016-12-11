@@ -70,7 +70,6 @@
 #else
     NSOpenGLPixelFormatAttribute attributes [] = {
         NSOpenGLPFANoRecovery,
-        NSOpenGLPFAWindow,
         NSOpenGLPFAColorSize, 32,
         NSOpenGLPFADepthSize, 32,
         NSOpenGLPFAMaximumPolicy,
