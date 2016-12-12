@@ -787,15 +787,6 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 #define mndivmonth		7
 #define mndivyear		91
 
-#define FACING_OFFSIDE  ((terrain_dim_x-(512-411)))
-#define SP_EN_OFFSIDE   ((terrain_dim_x-(512-325)))
-
-#define GENETICS_X      (terrain_dim_x-69)
-#define GENETICS_Y      (55)
-
-#define GENDER_X        (terrain_dim_x-110)
-#define GENDER_Y        (10)
-
 #ifdef NEW_OPENGL_ENVIRONMENT
 
 #define YELLOW_CHECKER_LINE(px, py, dx, dy) polygonal_line(px, py, dx, dy, COLOUR_YELLOW)
@@ -807,6 +798,15 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 #define COLOR_YELLOW /* COLOR_YELLOW */
 #define COLOR_YELLOW_CHECKER /* COLOR_YELLOW_CHECKER */
 
+#define FACING_OFFSIDE  (280-101)
+#define SP_EN_OFFSIDE   (280-187)
+
+#define GENETICS_X      (280-69)
+#define GENETICS_Y      (55)
+
+#define GENDER_X        170
+#define GENDER_Y        10
+
 #else
 
 #define YELLOW_CHECKER_LINE(px, py, dx, dy) math_join(px, py, dx, dy, &local_kind_yellow_checker)
@@ -817,6 +817,15 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 #define COLOR_BLACK /* COLOR_BLACK */
 #define COLOR_YELLOW /* COLOR_YELLOW */
 #define COLOR_YELLOW_CHECKER /* COLOR_YELLOW_CHECKER */
+
+#define FACING_OFFSIDE  (terrain_dim_x-101)
+#define SP_EN_OFFSIDE   (terrain_dim_x-187)
+
+#define GENETICS_X      (terrain_dim_x-69)
+#define GENETICS_Y      (55)
+
+#define GENDER_X        (terrain_dim_x-110)
+#define GENDER_Y        (10)
 
 #endif
 
@@ -927,11 +936,11 @@ void draw_meters(noble_simulation * local_sim)
             hr++;
         }
 
-        YELLOW_LINE(50 + 55 + 18+ SP_EN_OFFSIDE, 25, -1, 0);
+        YELLOW_LINE(50 + 55 + 18+ SP_EN_OFFSIDE-1, 25, 1, 0);
         YELLOW_LINE(58 + 55 + 18+ SP_EN_OFFSIDE, 25, 1, 0);
-        YELLOW_LINE(50 + 55 + 18+ SP_EN_OFFSIDE, 15, -2, 0);
+        YELLOW_LINE(50 + 55 + 18+ SP_EN_OFFSIDE-2, 15, 2, 0);
         YELLOW_LINE(58 + 55 + 18+ SP_EN_OFFSIDE, 15, 2, 0);
-        YELLOW_LINE(50 + 55 + 18+ SP_EN_OFFSIDE, 35, -2, 0);
+        YELLOW_LINE(50 + 55 + 18+ SP_EN_OFFSIDE-2, 35, 2, 0);
         YELLOW_LINE(58 + 55 + 18+ SP_EN_OFFSIDE, 35, 2, 0);
 
         {
@@ -962,21 +971,22 @@ void draw_meters(noble_simulation * local_sim)
         }
 
         /* draw sex */
-        YELLOW_LINE(5+GENDER_X, (10)+GENDER_Y, 5, (11));
-        YELLOW_LINE(10+GENDER_X, (21)+GENDER_Y, 5, (-11));
-        YELLOW_LINE(15+GENDER_X, (10)+GENDER_Y, -10, 0);
+        
+        YELLOW_LINE(GENDER_X+5, GENDER_Y+10, 5, 11);
+        YELLOW_LINE(GENDER_X+10,GENDER_Y+21, 5, -11);
+        YELLOW_LINE(GENDER_X+15,GENDER_Y+10, -10, 0);
+
         if (FIND_SEX(GET_I(loc_being)) == SEX_FEMALE)
         {
-            YELLOW_LINE(10+GENDER_X, (20)+GENDER_Y, 0, (6));
-            YELLOW_LINE(8+GENDER_X, (23)+GENDER_Y, 4, 0);
+            YELLOW_LINE(GENDER_X+10, GENDER_Y+20, 0, 6);
+            YELLOW_LINE(GENDER_X+8,  GENDER_Y+23, 4, 0);
         }
         else
         {
-            YELLOW_LINE(15+GENDER_X, (10)+GENDER_Y, 4, (-4));
-            YELLOW_LINE(19+GENDER_X, (6)+GENDER_Y, -2, 0);
-            YELLOW_LINE(19+GENDER_X, (6)+GENDER_Y, 0, (2));
+            YELLOW_LINE(GENDER_X+15, GENDER_Y+10, 4, -4);
+            YELLOW_LINE(GENDER_X+19, GENDER_Y+6, -2, 0);
+            YELLOW_LINE(GENDER_X+19, GENDER_Y+6, 0, 2);
         }
-
         /* draw direction facing */
         {
             n_vect2 direction_facing;

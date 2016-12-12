@@ -135,25 +135,29 @@ static void polygonal_render_terrain(n_byte * local_land, n_int co_x, n_int co_y
     }
 }
 
-
-void polygonal_line(n_int px, n_int py, n_int dx, n_int dy, n_byte value)
+static void polygonal_line_translate(n_int px, n_int py, n_int dx, n_int dy, n_int color_value)
 {
     glBegin(GL_LINES);
-    glColor3fv((GLfloat*)&color[(value*3)]);
+    n_int  translated_color = color_value * 3;
+    glColor3fv((GLfloat*)&color[translated_color]);
     glVertex2i((int)px, (int)py);
-    glColor3fv((GLfloat*)&color[(value*3)]);
     glVertex2i((int)(px + dx), (int)(py + dy));
     glEnd();
 }
 
+
+void polygonal_line(n_int px, n_int py, n_int dx, n_int dy, n_byte value)
+{
+    n_int translated_x  = px - 140;
+    n_int translated_y  = 170 - py;
+    n_int translated_dx = dx;
+    n_int translated_dy = 0 - dy;
+    polygonal_line_translate(translated_x, translated_y, translated_dx, translated_dy, value);
+}
+
 void polygonal_line_vect(n_int px, n_int py, n_vect2* vector, n_byte value)
 {
-    glBegin(GL_LINES);
-    glColor3fv((GLfloat*)&color[(value*3)]);
-    glVertex2i((int)px, (int)py);
-    glColor3fv((GLfloat*)&color[(value*3)]);
-    glVertex2i((int)(px + vector->x), (int)(py + vector->y));
-    glEnd();
+    polygonal_line(px, py, vector->x, vector->y, value);
 }
 
 void polygonal_close(void)
