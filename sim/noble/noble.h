@@ -198,6 +198,13 @@ typedef struct
 
 typedef struct
 {
+    n_double x;
+    n_double y;
+    n_double z;
+} n_vect3;
+
+typedef struct
+{
     n_byte4  date;
     n_byte2  location[2];
     n_byte4  time;
@@ -641,13 +648,26 @@ void vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
 void vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 void vect2_copy(n_vect2 * to, n_vect2 * from);
 void vect2_populate(n_vect2 * value, n_int x, n_int y);
-
 void vect2_rotation(n_vect2 * location, n_vect2 * rotation);
-
 n_int vect2_nonzero(n_vect2 * nonzero);
-
 n_vect2 * vect2_min_max_init(void);
 void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin);
+
+void vect3_double(n_vect3 * converter, n_double * input);
+void vect3_add(n_vect3 * equals, n_vect3 * initial, n_vect3 * second);
+void vect3_center(n_vect3 * center, n_vect3 * initial, n_vect3 * second);
+void vect3_subtract(n_vect3 * equals, n_vect3 * initial, n_vect3 * second);
+void vect3_divide(n_vect3 * equals, n_vect3 * initial, n_vect3 * second, n_double divisor);
+void vect3_multiplier(n_vect3 * equals, n_vect3 * initial, n_vect3 * second,
+                      n_double multiplier, n_double divisor);
+void vect3_d(n_vect3 * initial, n_vect3 * second, n_double multiplier, n_double divisor);
+n_double vect3_dot(n_vect3 * initial, n_vect3 * second, n_double multiplier, n_double divisor);
+void vect3_delta(n_vect3 * initial, n_vect3 * delta);
+void vect3_offset(n_vect3 * initial, n_double dx, n_double dy, n_double dz);
+void vect3_back_double(n_vect3 * converter, n_double * output);
+void vect3_copy(n_vect3 * to, n_vect3 * from);
+void vect3_populate(n_vect3 * value, n_double x, n_double y, n_double z);
+n_int vect3_nonzero(n_vect3 * nonzero);
 
 n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i);
 

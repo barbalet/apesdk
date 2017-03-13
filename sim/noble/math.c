@@ -348,6 +348,173 @@ void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
     }
 }
 
+void vect3_double(n_vect3 * converter, n_double * input)
+{
+    NA_ASSERT(converter, "converter NULL");
+    NA_ASSERT(input, "input NULL");
+    
+    if (converter == 0L) return;
+    if (input == 0L) return;
+    
+    converter->x = input[0];
+    converter->y = input[1];
+    converter->z = input[1];
+}
+
+void vect3_add(n_vect3 * equals, n_vect3 * initial, n_vect3 * second)
+{
+    NA_ASSERT(equals, "equals NULL");
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    
+    if (equals == 0L) return;
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    
+    equals->x = initial->x + second->x;
+    equals->y = initial->y + second->y;
+    equals->z = initial->z + second->z;
+}
+
+
+void vect3_center(n_vect3 * center, n_vect3 * initial, n_vect3 * second)
+{
+    vect3_add(center, initial, second);
+    center->x = center->x / 2;
+    center->y = center->y / 2;
+    center->z = center->z / 2;
+}
+
+void vect3_subtract(n_vect3 * equals, n_vect3 * initial, n_vect3 * second)
+{
+    NA_ASSERT(equals, "equals NULL");
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    
+    if (equals == 0L) return;
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    
+    equals->x = initial->x - second->x;
+    equals->y = initial->y - second->y;
+    equals->z = initial->z - second->z;
+}
+
+void vect3_divide(n_vect3 * equals, n_vect3 * initial, n_vect3 * second, n_double divisor)
+{
+    vect3_subtract(equals, second, initial);
+    
+    if (equals == 0L || (divisor == 0))
+    {
+        return;
+    }
+    equals->x = equals->x / divisor;
+    equals->y = equals->y / divisor;
+    equals->z = equals->z / divisor;
+}
+
+void vect3_multiplier(n_vect3 * equals, n_vect3 * initial, n_vect3 * second,
+                      n_double multiplier, n_double divisor)
+{
+    NA_ASSERT(equals, "equals NULL");
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    NA_ASSERT(divisor, "divisor ZERO");
+    
+    if (equals == 0L) return;
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    if (divisor == 0L) return;
+    
+    equals->x = (multiplier * initial->x * second->x) / divisor;
+    equals->y = (multiplier * initial->y * second->y) / divisor;
+    equals->z = (multiplier * initial->z * second->z) / divisor;
+}
+
+void vect3_d(n_vect3 * initial, n_vect3 * second, n_double multiplier, n_double divisor)
+{
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    NA_ASSERT(divisor, "divisor ZERO");
+    
+    if (initial == 0L) return;
+    if (second == 0L) return;
+    if (divisor == 0L) return;
+    
+    initial->x += ( (multiplier * second->x) / divisor);
+    initial->y += ( (multiplier * second->y) / divisor);
+    initial->z += ( (multiplier * second->z) / divisor);
+}
+
+n_double vect3_dot(n_vect3 * initial, n_vect3 * second,
+                n_double multiplier, n_double divisor)
+{
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(second, "second NULL");
+    NA_ASSERT(divisor, "divisor ZERO");
+    
+    if (initial == 0L) return 0;
+    if (second == 0L) return 0;
+    
+    return (multiplier * ((initial->x * second->x) + (initial->y * second->y) + (initial->z * second->z))) / divisor;
+}
+
+void vect3_delta(n_vect3 * initial, n_vect3 * delta)
+{
+    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT(delta, "delta NULL");
+    
+    if (initial == 0L) return;
+    if (delta == 0L) return;
+    
+    initial->x += delta->x;
+    initial->y += delta->y;
+    initial->z += delta->z;
+}
+
+void vect3_offset(n_vect3 * initial, n_double dx, n_double dy, n_double dz)
+{
+    NA_ASSERT(initial, "initial NULL");
+    
+    if (initial == 0L) return;
+    
+    initial->x += dx;
+    initial->y += dy;
+    initial->z += dz;
+}
+
+void vect3_back_double(n_vect3 * converter, n_double * output)
+{
+    NA_ASSERT(converter, "converter NULL");
+    NA_ASSERT(output, "output NULL");
+    
+    if (converter == 0L) return;
+    if (output == 0L) return;
+    
+    output[0] = converter->x;
+    output[1] = converter->y;
+    output[2] = converter->z;
+}
+
+void  vect3_copy(n_vect3 * to, n_vect3 * from)
+{
+    to->x = from->x;
+    to->y = from->y;
+    to->z = from->z;
+}
+
+void  vect3_populate(n_vect3 * value, n_double x, n_double y, n_double z)
+{
+    value->x = x;
+    value->y = y;
+    value->z = z;
+}
+
+n_int vect3_nonzero(n_vect3 * nonzero)
+{
+    return ((nonzero->x != 0) || (nonzero->y != 0) || (nonzero->z != 0));
+}
+
 void math_pack(n_byte * alloc1, n_byte *alloc2)
 {
     n_int loop = 0;
