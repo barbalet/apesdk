@@ -148,7 +148,7 @@
     shared_rotate((n_double)rotationAmount, _identification);
 }
 
-- (void) delta_x:(n_double)delta_x delta_y:(n_double)delta_y
+- (void) delta_x:(double)delta_x delta_y:(double)delta_y
 {
     shared_delta(delta_x, delta_y, _identification);
 }

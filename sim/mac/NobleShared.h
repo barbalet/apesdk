@@ -62,7 +62,7 @@
 
 - (void) rotation:(float)rotationAmount;
 
-- (void) delta_x:(n_double)delta_x delta_y:(n_double)delta_y;
+- (void) delta_x:(double)delta_x delta_y:(double)delta_y;
 
 - (void) zoom:(float)zoomAmount;
 
@@ -114,6 +114,6 @@
 
 - (NSData*) soundSimulation;
     
-@property (nonatomic, assign, readonly) n_int  identification;
+@property (nonatomic, assign, readonly) NSInteger  identification;
 
 @end
