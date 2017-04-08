@@ -287,9 +287,4 @@
     execute_threads(number);
 }
 
-- (NSData*) soundSimulation
-{
-    return nil;
-}
-
 @end

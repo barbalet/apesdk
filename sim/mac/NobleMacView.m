@@ -85,18 +85,6 @@
 /* per-window timer function, basic time based animation preformed here */
 - (void) animationTimer:(NSTimer *)localTimer
 {
-    NSData* localSound = [_shared soundSimulation];
-    
-    if (localSound)
-    {
-        if (_timedAudio)
-        {
-            [_timedAudio stop];
-        }
-        _timedAudio = [[NSSound alloc] initWithData:localSound];
-        _timedAudio.loops = YES;
-        [_timedAudio play];
-    }
 	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
 }
 

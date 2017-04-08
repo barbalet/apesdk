@@ -111,8 +111,6 @@
 + (void) starting:(int)argc withValues:(char **)argv;
 
 - (void) numberThreads:(long)number;
-
-- (NSData*) soundSimulation;
     
 @property (nonatomic, assign, readonly) NSInteger  identification;
 
