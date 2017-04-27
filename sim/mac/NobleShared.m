@@ -282,9 +282,4 @@
     io_entry_execution(argc, argv);
 }
 
-- (void) numberThreads:(long)number
-{
-    execute_threads(number);
-}
-
 @end

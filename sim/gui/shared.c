@@ -473,18 +473,8 @@ void shared_mouseUp(void)
 
 void shared_about(n_constant_string value)
 {
-    n_string_block full_value;
-    n_int          cores = execute_threads_value();
     toggle_pause = 1;
-    if (cores > 1)
-    {
-        sprintf(full_value, "%s %ld Cores", value, cores);
-    }
-    else
-    {
-        sprintf(full_value, "%s 1 Core", value);
-    }
-    draw_about(full_value);
+    draw_about(value);
 }
 
 void shared_clearErrors(void)

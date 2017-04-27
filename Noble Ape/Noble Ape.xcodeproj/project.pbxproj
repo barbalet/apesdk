@@ -30,7 +30,6 @@
 		5AD6CAF01B27598400230534 /* NobleSimulationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CAC91B27598400230534 /* NobleSimulationView.m */; };
 		5AD6CAF11B27598400230534 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACA1B27598400230534 /* audio.c */; };
 		5AD6CAF21B27598400230534 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACB1B27598400230534 /* compress.c */; };
-		5AD6CAF31B27598400230534 /* execute.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACC1B27598400230534 /* execute.c */; };
 		5AD6CAF41B27598400230534 /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACD1B27598400230534 /* interpret.c */; };
 		5AD6CAF51B27598400230534 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACE1B27598400230534 /* io.c */; };
 		5AD6CAF61B27598400230534 /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CACF1B27598400230534 /* land.c */; };
@@ -98,7 +97,6 @@
 		5AD6CAC91B27598400230534 /* NobleSimulationView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = NobleSimulationView.m; path = ../sim/macsim/NobleSimulationView.m; sourceTree = "<group>"; };
 		5AD6CACA1B27598400230534 /* audio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = audio.c; path = ../sim/noble/audio.c; sourceTree = "<group>"; };
 		5AD6CACB1B27598400230534 /* compress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = compress.c; path = ../sim/noble/compress.c; sourceTree = "<group>"; };
-		5AD6CACC1B27598400230534 /* execute.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = execute.c; path = ../sim/noble/execute.c; sourceTree = "<group>"; };
 		5AD6CACD1B27598400230534 /* interpret.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = interpret.c; path = ../sim/noble/interpret.c; sourceTree = "<group>"; };
 		5AD6CACE1B27598400230534 /* io.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = io.c; path = ../sim/noble/io.c; sourceTree = "<group>"; };
 		5AD6CACF1B27598400230534 /* land.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = land.c; path = ../sim/noble/land.c; sourceTree = "<group>"; };
@@ -272,7 +270,6 @@
 			children = (
 				5AD6CACA1B27598400230534 /* audio.c */,
 				5AD6CACB1B27598400230534 /* compress.c */,
-				5AD6CACC1B27598400230534 /* execute.c */,
 				5AD6CACD1B27598400230534 /* interpret.c */,
 				5AD6CACE1B27598400230534 /* io.c */,
 				5AD6CACF1B27598400230534 /* land.c */,
@@ -447,7 +444,6 @@
 				5AD6CAF01B27598400230534 /* NobleSimulationView.m in Sources */,
 				5AD6CAF11B27598400230534 /* audio.c in Sources */,
 				5AD6CAF21B27598400230534 /* compress.c in Sources */,
-				5AD6CAF31B27598400230534 /* execute.c in Sources */,
 				5AD6CAF41B27598400230534 /* interpret.c in Sources */,
 				5AD6CAF51B27598400230534 /* io.c in Sources */,
 				5AD6CAF61B27598400230534 /* land.c in Sources */,

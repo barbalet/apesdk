@@ -167,10 +167,6 @@
 
     if (headyLifting)
     {
-        NSUInteger processors = [[NSProcessInfo processInfo] processorCount];
-        [_shared numberThreads:processors];
-        NSLog(@"We have %ld processors", processors);
-
         if ([_shared start] == NO)
         {
             NSLog(@"Simulation initialization failed");

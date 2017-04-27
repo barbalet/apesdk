@@ -109,8 +109,6 @@
 - (BOOL) openFileName:(NSString*)name isScript:(BOOL)scriptFile;
 
 + (void) starting:(int)argc withValues:(char **)argv;
-
-- (void) numberThreads:(long)number;
     
 @property (nonatomic, assign, readonly) NSInteger  identification;
 

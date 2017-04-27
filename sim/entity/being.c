@@ -620,25 +620,27 @@ void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being
         loop++;
     }
 }
-/*
-static void being_loop_generic(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data)
+
+void being_add_generic(execute_function * function, void * general_data, void * read_data, void * write_data, n_int count, n_int size)
 {
-#ifdef EXECUTE_THREADED
-    n_uint loop = 0;
-    while (loop < sim->num)
+    if (size)
     {
-        noble_being * output = &(sim->beings[loop]);
-        if (output != being_not)
+        n_byte *location = (n_byte *)read_data;
+        n_int   loop = 0;
+        while (loop < count)
         {
-            execute_add(((execute_function*)bf_func), (void*)sim, (void*)output, data);
+            if (function(general_data, (void *)&location[loop * size], 0L) == -1)
+            {
+                break;
+            }
+            loop++;
         }
-        loop++;
     }
-#else
-    being_loop_no_thread(sim, being_not, bf_func, data);
-#endif
+    else
+    {
+        function(general_data,read_data,write_data);
+    }
 }
- */
 
 void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread)
 {
@@ -654,8 +656,9 @@ void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_
             count = sim->num - loop;
         }
 
-        execute_group(((execute_function*)bf_func), (void*)sim, (void*)output, count, sizeof(noble_being));
 
+        being_add_generic((execute_function*)bf_func, (void*)sim, (void*)output, 0L, count, sizeof(noble_being));
+        
         if (count != beings_per_thread)
         {
             break;

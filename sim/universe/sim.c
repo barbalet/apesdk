@@ -549,7 +549,6 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         {
             return 0L;
         }
-        execute_init();
     }
 
     local_random[0] = (n_byte2)(randomise >> 16) & 0xffff;
@@ -569,11 +568,8 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     {
         land_clear(kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
-#ifdef EXECUTE_THREADED
-        land_init(&offbuffer[landbuffer_size], execute_add);
-#else
+
         land_init(&offbuffer[landbuffer_size], 0L);
-#endif
         
 
         land_init_high_def(1);
@@ -620,7 +616,6 @@ void sim_close(void)
 {
     console_quit(0L, 0L, 0L);
     io_console_quit();
-    execute_close();
 #ifndef _WIN32
     sim_console_clean_up();
 #endif

@@ -54,18 +54,6 @@
 
 #endif
 
-#ifdef OVERWRITE_THREADED
-
-#else
-
-#ifdef NOBLE_IOS
-#undef  EXECUTE_THREADED
-#else
-#define  EXECUTE_THREADED
-#endif
-
-#endif
-
 #ifdef COMMAND_LINE_EXPLICIT
 
 #define  NOBLE_APE_ASSERT
@@ -614,17 +602,7 @@ extern n_int draw_error(n_constant_string error_text, n_constant_string location
 typedef n_int (execute_function)(void * general_data, void * read_data, void * write_data);
 typedef void (execute_thread_stub)(execute_function function, void * general_data, void * read_data, void * write_data);
 
-void  execute_add(execute_function function, void * general_data, void * read_data, void * write_data);
 void  execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size);
-
-void  execute_complete_added(void);
-void  execute_init(void);
-void  execute_close(void);
-
-
-void  execute_threads(n_int value);
-n_int execute_threads_value(void);
-n_int execute_toggle(n_int toggle);
 
 void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
 void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);

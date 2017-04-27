@@ -703,7 +703,7 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
     io_free(&void_dtss);
 }
 
-static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_byte threadable)
+static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
 {
     n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);
 
@@ -763,20 +763,8 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions, n_b
 
             screen_x_location[0] = scrx;
 
-            if (threadable)
-            {
-                execute_add(((execute_function*)draw_terrain_scan), (void*)local_dtss, (void*)screen_x_location, 0L);
-            }
-            else
-            {
-                draw_terrain_scan(local_dtss, screen_x_location, 0L);
-            }
-
+            draw_terrain_scan(local_dtss, screen_x_location, 0L);
             scrx++;               /* next column */
-        }
-        if (threadable)
-        {
-            execute_complete_added();
         }
     }
 }
@@ -1832,19 +1820,9 @@ void  draw_cycle(n_byte size_changed)
     draw_apes(local_sim, 1);    /* lo res */
     draw_apes(local_sim, 0);    /* hi res */
 
-#ifdef EXECUTE_THREADED
-    /* TODO: Make the threaded draw command line safe */
-    if (io_command_line_execution())
-    {
-        draw_terrain(local_sim, &local_vect, 0);
-    }
-    else
-    {
-        draw_terrain(local_sim, &local_vect, 1);
-    }
-#else
-    draw_terrain(local_sim, &local_vect, 0);
-#endif
+
+    draw_terrain(local_sim, &local_vect);
+
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */
 
