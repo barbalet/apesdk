@@ -893,6 +893,7 @@ void gldraw_thin_line();
 
 void gldraw_red(void);
 void gldraw_green(void);
+void gldraw_lightgreen(void);
 
 void gldraw_orange();
 

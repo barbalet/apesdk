@@ -92,7 +92,12 @@ void gldraw_red(void)
 
 void gldraw_green(void)
 {
-    glColor3f(0.3, 0.3, 1);
+    glColor3f(0.3, 1, 0.3);
+}
+
+void gldraw_lightgreen(void)
+{
+    glColor3f(0.4, 1, 0.4);
 }
 
 void gldraw_orange()
