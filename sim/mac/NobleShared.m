@@ -85,7 +85,10 @@
 
 - (BOOL) start
 {
-    _randomizing_agent = (n_uint)CFAbsoluteTimeGetCurrent();
+    _randomizing_agent  = (n_uint)CFAbsoluteTimeGetCurrent();
+    _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>8;
+    _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>16;
+    _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>24;
     
     n_int shared_response = shared_init(_identification, _randomizing_agent);
     if (shared_response == -1)
