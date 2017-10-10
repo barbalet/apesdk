@@ -168,7 +168,7 @@ void draw_undraw_clear(void);
 
 n_byte * draw_pointer(n_byte which_one);
 
-n_byte * draw_color_fit();
+n_byte * draw_color_fit(void);
 
 void draw_about(n_constant_string platform);
 

@@ -880,7 +880,6 @@ n_int land_location(n_int px, n_int py);
 n_int land_location_vect(n_vect2 * value);
 
 
-n_int gldraw_scene_done();
 
 void gldraw_background_green(void);
 
@@ -888,20 +887,23 @@ void gldraw_start_display_list(void);
 void gldraw_end_display_list(void);
 void gldraw_display_list(void);
 
-void gldraw_wide_line();
-void gldraw_thin_line();
+n_int gldraw_scene_done(void);
+
+void gldraw_wide_line(void);
+void gldraw_thin_line(void);
+
+void gldraw_orange(void);
+
+void gldraw_darkgrey(void);
+void gldraw_grey(void);
+void gldraw_lightgrey(void);
+
+void gldraw_black(void);
 
 void gldraw_red(void);
 void gldraw_green(void);
 void gldraw_lightgreen(void);
 
-void gldraw_orange();
-
-void gldraw_darkgrey();
-void gldraw_grey();
-void gldraw_lightgrey();
-
-void gldraw_black();
 
 void gldraw_vertex(n_vect2 * point);
 void gldraw_line(n_vect2 * start, n_vect2 * end);
