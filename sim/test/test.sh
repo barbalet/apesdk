@@ -39,18 +39,14 @@ else
     CFLAGS=-O2 
 fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/compress.c -o compress.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/execute.c -o execute.o
-
-gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
-
 gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/network.c -o network.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/object.c -o object.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/territory.c -o territory.o
 
 gcc ${CFLAGS} -c test_math.c -o test_math.o
 
