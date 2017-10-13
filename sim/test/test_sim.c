@@ -33,9 +33,6 @@
 
  ****************************************************************/
 
-/* this doesn't currently work, it is included here for unit
-    testing in the future */
-
 #include <stdio.h>
 #include <time.h>
 
