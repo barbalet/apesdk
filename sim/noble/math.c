@@ -190,7 +190,8 @@ void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int diviso
  and divisor noted.
  @param initial The first vector
  @param second  The second vector
- @param reference The specific Noble Ape checked for being awake
+ @param multiplier The numerator multiplier
+ @param divisor The divisor multiplier
  @return The resultant scalar
  */
 n_int vect2_dot(n_vect2 * initial, n_vect2 * second,
@@ -690,8 +691,7 @@ void math_round(n_byte * local_map, n_byte * scratch,
  * currently.
  * @param local_map       pointer to the map array
  * @param func            the n_patch function that takes the form n_byte2 (n_patch)(n_byte2 * local)
- * @param arg             the pointer that is passed into the patch function
- * @param patch_bits      each side of the map is 2^patch_bits, total area is 2^(patch_bits*2) */
+ * @param arg             the pointer that is passed into the patch function */
 void math_patch(n_byte * local_map,
                 n_memory_location * mem_func,
                 n_patch * func, n_byte2 * arg,

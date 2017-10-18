@@ -135,6 +135,7 @@
 
 - (id) initWithFrame:(NSRect) frameRect
 {
+    NSLog(@"initWithFrame");
     NSOpenGLPixelFormat * pf = [NobleMacView basicPixelFormat];
 	self = [super initWithFrame:frameRect pixelFormat: pf];
     
@@ -167,6 +168,15 @@
 
     if (headyLifting)
     {
+        if (_shared)
+        {
+            NSLog(@"_shared present");
+        }
+        else
+        {
+            NSLog(@"_shared NOT present");
+        }
+        NSLog(@"");
         if ([_shared start] == NO)
         {
             NSLog(@"Simulation initialization failed");
@@ -193,11 +203,11 @@
 - (void) keyDown:(NSEvent *)theEvent
 {
     NSUInteger  local_key = 0;
-    if (([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))
+    if (([theEvent modifierFlags] & NSEventModifierFlagControl) || ([theEvent modifierFlags] & NSEventModifierFlagOption))
     {
         local_key = 2048;
     }
-    if ([theEvent modifierFlags] & NSNumericPadKeyMask)
+    if ([theEvent modifierFlags] & NSEventModifierFlagNumericPad)
     {
         /* arrow keys have this mask */
         NSString *theArrow = [theEvent charactersIgnoringModifiers];
@@ -240,7 +250,7 @@
     NSInteger location_x = (NSInteger)location.x;
     NSInteger location_y = (NSInteger)([self bounds].size.height - location.y);
     
-    [_shared mouseOption:(([theEvent modifierFlags] & NSControlKeyMask) || ([theEvent modifierFlags] & NSAlternateKeyMask))];
+    [_shared mouseOption:(([theEvent modifierFlags] & NSEventModifierFlagControl) || ([theEvent modifierFlags] & NSEventModifierFlagOption))];
     [_shared mouseReceivedWithXLocation:location_x YLocation:location_y];
 }
 

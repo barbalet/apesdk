@@ -85,12 +85,15 @@
 
 - (BOOL) start
 {
+    NSLog(@"Randomizing element...");
     _randomizing_agent  = (n_uint)CFAbsoluteTimeGetCurrent();
     _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>8;
     _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>16;
     _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>24;
     
     n_int shared_response = shared_init(_identification, _randomizing_agent);
+    NSLog(@"shared_response is %ld", shared_response);
+
     if (shared_response == -1)
     {
         return NO;

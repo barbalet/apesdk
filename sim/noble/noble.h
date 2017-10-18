@@ -882,6 +882,7 @@ n_int land_location_vect(n_vect2 * value);
 
 
 void gldraw_background_green(void);
+void gldraw_background_black(void);
 
 void gldraw_start_display_list(void);
 void gldraw_end_display_list(void);

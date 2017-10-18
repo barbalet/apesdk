@@ -58,6 +58,12 @@ void gldraw_background_green(void)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void gldraw_background_black(void)
+{
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
 void gldraw_start_display_list(void)
 {
     terrain_display_list = glGenLists(1);
