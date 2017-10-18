@@ -166,7 +166,6 @@ void vect2_multiplier(n_vect2 * equals, n_vect2 * initial, n_vect2 * second,
 
 /**
  * Adds one 2d vector with another 2d vector times a multiplier divided by a divisor.
- * @param equals the vector that holds the result.
  * @param initial the first vector that takes the summation of the second vector.
  * @param second the second vector to be multiplied.
  * @param multiplier the scalar multiplier.
@@ -947,8 +946,7 @@ n_uint math_hash(n_byte * values, n_uint length)
 /**
  Calculates the direction location needs to turn to turn towards
  a vector.
- @param px The x vector direction.
- @param py The y vector direction.
+ @param p The x vector direction.
  @param fac The current direction facing.
  @param turn The number of facing angle units that could be turned
  (it may not be the number of angle units turned).

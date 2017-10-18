@@ -44,7 +44,7 @@
 
 /**
  * Makes sure all the data associated with the interpreter is freed etc.
- * @param code pointer to the interpreter structure that is being executed.
+ * @param individual pointer to the interpreter structure that is being executed.
  * @param eval pointer execution points being executed.
  * @param location the location in the execution points.
  * @return minus one on failure, zero on success.

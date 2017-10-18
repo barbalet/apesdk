@@ -146,7 +146,6 @@ void * io_new_range(n_uint memory_min, n_uint *memory_allocated)
  * Moves the string to lower case for the length shown.
  * @param value the string with the case to be lowered.
  * @param length the number of bytes to be lowered.
- * @return a void* pointer of the allocated bytes.
  */
 void io_lower(n_string value, n_int length)
 {
@@ -286,7 +285,6 @@ n_int io_disk_write(n_file * local_file, n_string file_name)
 
 /**
  * Appends a file to disk.
- * @param local_file the pointer to the n_file data that is written to disk.
  * @param file_name the name of the file to be appended.
  * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
  */
