@@ -894,10 +894,13 @@ void gldraw_wide_line(void);
 void gldraw_thin_line(void);
 
 void gldraw_orange(void);
+void gldraw_blue(void);
+void gldraw_blue_clear(void);
 
 void gldraw_darkgrey(void);
 void gldraw_grey(void);
 void gldraw_lightgrey(void);
+void gldraw_lightgrey_clear(void);
 
 void gldraw_black(void);
 

@@ -111,6 +111,16 @@ void gldraw_orange()
     glColor3f(0.5, 0.2, 0.0);
 }
 
+void gldraw_blue()
+{
+    glColor3f(0.0, 0.0, 0.5);
+}
+
+void gldraw_blue_clear()
+{
+    glColor4f(0.0, 0.0, 0.5, 0.5);
+}
+
 void gldraw_darkgrey()
 {
     glColor3f(0.5, 0.5, 0.5);
@@ -124,6 +134,11 @@ void gldraw_grey()
 void gldraw_lightgrey()
 {
     glColor3f(0.9, 0.9, 0.9);
+}
+
+void gldraw_lightgrey_clear()
+{
+    glColor4f(0.9, 0.9, 0.9, 0.5);
 }
 
 void gldraw_black()
