@@ -687,6 +687,8 @@ n_byte math_join_vect2(n_int sx, n_int sy, n_vect2 * vect, n_join * draw);
 n_byte math_line_vect(n_vect2 * point1, n_vect2 * point2, n_join * draw);
 n_byte math_line(n_int x1, n_int y1, n_int x2, n_int y2, n_join * draw);
 
+n_int  math_seg14(n_int character);
+
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);
 n_int      io_command_line_execution(void);
@@ -879,7 +881,7 @@ void  land_tide(void);
 n_int land_location(n_int px, n_int py);
 n_int land_location_vect(n_vect2 * value);
 
-
+void gldraw_string(n_constant_string str, n_int off_x, n_int off_y);
 
 void gldraw_background_green(void);
 void gldraw_background_black(void);

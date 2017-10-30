@@ -47,6 +47,74 @@
 static n_int draw_scene_not_done = 0;
 static GLuint  terrain_display_list = 0;
 
+
+static void gldraw_character_line(n_int px, n_int py, n_int dx, n_int dy)
+{
+    n_vect2 start;
+    n_vect2 end;
+    start.x = px;
+    start.y = py;
+    end.x = px + dx;
+    end.y = py + dy;
+    gldraw_line(&start, &end);
+}
+
+/* draws a string starting at point (off_x,off_y) */
+
+#define    glledfir(x, y, dx, dy, c)    if(((val >> c)&1)) gldraw_character_line(x + off_x - offset,y + off_y, dx, dy)
+
+/**
+ This is used to produce letter LED style letters through the generic
+ draw function specified.
+ @param str The string to be drawn.
+ @param off_x The starting x location for the string to be drawn.
+ @param off_y The starting y location for the string to be drawn.
+ @param draw The generic draw function used to draw the character.
+ */
+void gldraw_string(n_constant_string str, n_int off_x, n_int off_y)
+{
+    n_int    char_loop = 0;
+    while (str[char_loop] > 31)
+    {
+        n_int    val = math_seg14(str[char_loop] - 32);
+        n_int    offset = char_loop << 3;
+        /* draw the character as a 14-segment LCD/LED output */
+        
+        glledfir(3, 8, 0, 0, 15);
+        
+        glledfir(3, 2, 0, 0, 14);
+        
+        glledfir(1, 0, 4, 0, 13);
+        
+        glledfir(6, 1, 0, 2, 12);
+        
+        glledfir(6, 5, 0, 2, 11);
+        
+        glledfir(1, 8, 4, 0, 10);
+        
+        glledfir(0, 5, 0, 2, 9);
+        
+        glledfir(0, 1, 0, 2, 8);
+        
+        glledfir(4, 4, 1, 0, 7);
+        
+        glledfir(1, 4, 1, 0, 6);
+        
+        glledfir(3, 5, 0, 2, 5);
+        
+        glledfir(4, 6, 0, 1, 4);
+        
+        glledfir(2, 6, -1, 1, 3);
+        
+        glledfir(4, 2, 1, -1, 2);
+        
+        glledfir(1, 1, 1, 1, 1);
+        
+        glledfir(3, 1, 0, 2, 0);
+        char_loop ++;
+    }
+}
+
 n_int gldraw_scene_done()
 {
     return (draw_scene_not_done < 2);

@@ -1136,6 +1136,35 @@ n_uint math_root(n_uint input)
     return res;
 }
 
+/* from ASCII 32 - 127, corresponding to the seg14 results */
+
+/* n_byte segment = seg14[ conv[ character_value ]]; */
+static const n_byte    conv[ 96 ] =
+{
+    0, 40, 41, 0, 0, 0, 0, 42, 43, 44, 38, 39, 45, 11, 46, 47, 1, 2, 3, 4, 5, 6, 7,
+    8, 9, 10, 48, 49, 0, 50, 0, 51, 0, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+    23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 52, 53, 54, 0, 55, 56,
+    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+    32, 33, 34, 35, 36, 37, 57, 58, 59, 0, 0
+};
+
+/* one bit per segment */
+static const n_byte2 seg14[ 60 ] =
+{
+    0x0000, 0x3F00, 0x1800, 0x36C0, 0x3CC0, 0x19C0, 0x2DC0, 0x2FC0, 0x3800, 0x3FC0,
+    0x3DC0, 0x00C0, 0x3BC0, 0x3CA1, 0x2700, 0x3C21, 0x27C0, 0x23C0, 0x2F80, 0x1BC0,
+    0x2421, 0x1E00, 0x0354, 0x0700, 0x1B06, 0x1B12, 0x3F00, 0x33C0, 0x3F10, 0x33D0,
+    0x2DC0, 0x2021, 0x1F00, 0x030C, 0x1B18, 0x001E, 0x11E0, 0x240C, 0x00FF, 0x00E1,
+    
+    0x8001, 0x0101, 0x0001, 0x0014, 0x000A, 0x0008, 0x8000, 0x000C, 0xC000, 0x4008,
+    0x04C0, 0xA004, 0x2700, 0x0012, 0x3402, 0x0400, 0x0002, 0x244A, 0x0021, 0x2494
+};
+
+n_int math_seg14(n_int character)
+{
+    return seg14[conv[character]];
+}
+
 n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i)
 {
     if (BRAINCODE_ADDRESS(i) < BRAINCODE_SIZE)
