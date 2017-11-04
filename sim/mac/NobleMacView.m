@@ -135,10 +135,8 @@
 
 - (id) initWithFrame:(NSRect) frameRect
 {
-    NSLog(@"initWithFrame");
     NSOpenGLPixelFormat * pf = [NobleMacView basicPixelFormat];
 	self = [super initWithFrame:frameRect pixelFormat: pf];
-    
     _shared = [[NobleShared alloc] initWithFrame:frameRect];
     return self;
 }
@@ -168,15 +166,6 @@
 
     if (headyLifting)
     {
-        if (_shared)
-        {
-            NSLog(@"_shared present");
-        }
-        else
-        {
-            NSLog(@"_shared NOT present");
-        }
-        NSLog(@"");
         if ([_shared start] == NO)
         {
             NSLog(@"Simulation initialization failed");

@@ -1110,7 +1110,7 @@ n_int console_event(void * ptr, n_string response, n_console_output output_funct
 #ifdef EPISODIC_ON
     n_int return_response = console_on_off(response);
 
-    if (return_response == -1)
+    if ((return_response == -1) && response)
     {
         if (io_find(response, 0, io_length(response,STRING_BLOCK_SIZE),"social",6)>-1)
         {
