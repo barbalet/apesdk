@@ -763,16 +763,16 @@ n_int io_find_size_data(noble_file_entry * commands);
 void compress_compress(n_file *input, n_file *output);
 void compress_expand(n_file *input, n_file *output);
 
-#ifdef NOBLE_IOS
-
+/*#ifdef NOBLE_IOS
+*/
 #define MAP_BITS                      (8)
-
+/*
 #else
 
 #define MAP_BITS                      (9)
 
 #endif
-
+*/
 #define MAP_DIMENSION                 (1<<(MAP_BITS))
 #define MAP_AREA                      (1<<(2*MAP_BITS))
 

@@ -1498,9 +1498,9 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
     case EVENT_SEEK_MATE:
         io_string_write(string,"Searched for mate ",location);
         break;
-    case EVENT_GROOM:
+/*    case EVENT_GROOM:
         io_string_write(string,"Groomed ",location);
-        break;
+        break;*/
     case EVENT_GROOMED:
         io_string_write(string,"Groomed by ",location);
         break;
@@ -1636,7 +1636,7 @@ n_int episode_description(
     n_string_block str2, name_str;
     noble_episodic * local_episodic;
     n_uint days_elapsed,time_elapsed;
-
+    
     local_episodic = being_episodic(local_being);
 
     if(local_episodic == 0L)
@@ -1694,12 +1694,12 @@ n_int episode_description(
             io_string_write(str,"Went swimming",&string_index);
             break;
         }
-        case EVENT_GROOM:
+        case EVENT_GROOM: // this appears to be a duplicate
         {
             io_string_write(str,"Groomed ",&string_index);
             io_string_write(str,name_str,&string_index);
             io_string_write(str,"'s ",&string_index);
-            io_string_write(str,being_body_inventory_description(local_episodic[index].arg),&string_index);
+            io_string_write(str, being_body_inventory_description(local_episodic[index].arg), &string_index);
 
             social = 1;
             break;
@@ -1835,7 +1835,7 @@ n_int episode_description(
         }
         else
         {
-            if (days_elapsed==1)
+            if (days_elapsed == 1)
             {
                 io_string_write(str, " yesterday",&string_index);
             }
