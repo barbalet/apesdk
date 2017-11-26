@@ -490,7 +490,7 @@ void sim_cycle(void)
 
 #define	MINIMAL_ALLOCATION	((512*512)+(TERRAIN_WINDOW_AREA)+(sizeof(noble_being) * MIN_BEINGS)+sizeof(noble_remains)+1+(sizeof(noble_simulation)))
 
-#define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 200))
+#define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 400))
 
 static void sim_memory_remains(noble_simulation * local, n_byte * buffer, n_uint * location)
 {
@@ -502,9 +502,9 @@ static n_int sim_memory(n_uint offscreen_size)
 {
     n_uint	current_location = 0;
     n_uint  memory_allocated = MAXIMUM_ALLOCATION;
-    
+        
     offbuffer = io_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
-
+    
     current_location = offscreen_size;
     
     sim_memory_remains(&sim, offbuffer, &current_location);
@@ -577,7 +577,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 #endif
         if (kind != KIND_LOAD_FILE)
         {
-#if (MAPBITS == 8)
+#if (MAP_BITS == 8)
             n_uint count_to = sim.max >> 1;
 #else
             n_uint count_to = sim.max >> 4;
