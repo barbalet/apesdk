@@ -689,6 +689,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
 
     if (abs_sum)
     {
+        /*
         weather_values   seven_values = weather_seven_values(MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
         n_int  span10 = ((abs_sum - 1) ? 1448 : 1024);
 
@@ -716,7 +717,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
         }
         if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
             return 1;
-
+*/
         local_z += being_pixel->start_z;
 
         if (local_z < WALK_ON_WATER(land_location(px, py), land_tide_level()))
@@ -729,48 +730,62 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
 
 static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
 {
-    n_vect2    start, delta, vector_facing, start_delta;
+    n_vect2    start, delta, vector_facing, end;
 
+    
     /* TODO: Check for being awake - need a land and being based awake check */
 
     vect2_byte2(&start, being_location(local));
 
-    start_delta.x = lx;
-    start_delta.y = ly;
+    end.x = lx;
+    end.y = ly;
 
-    vect2_subtract(&delta, &start_delta, &start);
+    vect2_subtract(&delta, &end, &start);
 
     {
         n_int distance_squared = vect2_dot(&delta, &delta, 1, 1);
         if (distance_squared > (VISIBILITY_SPAN * VISIBILITY_SPAN))
+        {
             return 0;
+        }
     }
-    /** check trivial case first - self aware */
 
+    
+    /** check trivial case first - self aware */
+    
     if ((delta.x == 0) && (delta.y == 0))
     {
         return 1;
     }
     being_facing_vector(local, &vector_facing, 16);
 
+    printf("ended here 1 !\n");
+
+    
     /* if it is behind, it can't be in the line of sight */
     if (vect2_dot(&vector_facing, &delta, 1, 64) < 0)
     {
         return 0;
     }
 
+    printf("ended here 2 !\n");
+
+    
+    return 1;
+
+    
     /** move everything from being co-ordinates to map co-ordinates */
 
     land_convert_to_map(&start);
     land_convert_to_map(&delta);
-    land_convert_to_map(&start_delta);
+    land_convert_to_map(&end);
 
     /* check trivial case first - self aware (after co-ord translation) */
     if ((delta.x == 0) && (delta.y == 0))
     {
         return 1;
     }
-
+#if 0
     {
         n_int	start_z = (n_int)WALK_ON_WATER(land_location_vect(&start),land_tide_level()) + 3; /* the nominal height of the Noble Ape */
         n_int	delta_z = (n_int)WALK_ON_WATER(land_location_vect(&start_delta),land_tide_level()) - start_z + 3; /* the nominal height of the Noble Ape */
@@ -809,6 +824,9 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
             }
         }
     }
+
+#endif
+
     return 1;
 }
 
@@ -896,7 +914,7 @@ n_byte being_los(noble_being * local, n_byte2 lx, n_byte2 ly)
 
        The Noble Ape Simulation universe wraps around in all
        directions you need to calculate the line of site off the map too. */
-    n_int	local_facing = ((being_facing(local))>>5);
+  /*  n_int	local_facing = ((being_facing(local))>>5); */
 
     /*
            6
@@ -909,43 +927,43 @@ n_byte being_los(noble_being * local, n_byte2 lx, n_byte2 ly)
     if (being_los_projection(local,lx,ly) == 1)
         return 1;
 
-    if ((local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2))
+/*    if ((local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2)) */
     {
         if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly) == 1)
             return 1;
     }
 
-    if ((local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3))
+/*        if ((local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3)) */
     {
         if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
-    if ((local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4))
+/*        if ((local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4)) */
     {
         if (being_los_projection(local,lx,ly+MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
-    if ((local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5))
+/*        if ((local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5))*/
     {
         if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
-    if ((local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6))
+/*        if ((local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6))*/
     {
         if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly) == 1)
             return 1;
     }
-    if ((local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7))
+/*        if ((local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7))*/
     {
         if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
-    if ((local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0))
+/*        if ((local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0))*/
     {
         if (being_los_projection(local,lx,ly-MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
-    if ((local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1))
+/*        if ((local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1))*/
     {
         if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
@@ -2552,7 +2570,7 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
             being_name_comparison(other, nearest->local->delta.goal[1], nearest->local->delta.goal[2]))
     {
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (compare_distance < nearest->opposite_sex_distance)
@@ -2576,7 +2594,7 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
     {
         /** Is this being within sight? */
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local)))
@@ -2701,13 +2719,17 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
     n_uint        compare_distance;
     being_delta(nearest->local, test_being, &difference_vector);
     compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+    
     if (FIND_SEX(GET_I(test_being)) != FIND_SEX(GET_I(nearest->local)))
     {
         if (compare_distance < nearest->opposite_sex_distance)
         {
+
             /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
-            if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
+            if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
             {
+                printf("opposite sex identified\n");
+
                 nearest->opposite_sex_distance = compare_distance;
                 nearest->opposite_sex = test_being;
             }
@@ -2717,13 +2739,13 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
     {
         if ( compare_distance < nearest->same_sex_distance )
         {
-            if (FIND_SEX(GET_I(test_being)) == FIND_SEX(GET_I(nearest->local)))
+
+            if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
             {
-                if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y))
-                {
-                    nearest->same_sex_distance = compare_distance;
-                    nearest->same_sex = test_being;
-                }
+                printf("same sex identified\n");
+
+                nearest->same_sex_distance = compare_distance;
+                nearest->same_sex = test_being;
             }
         }
     }
@@ -2749,6 +2771,14 @@ static void being_closest(noble_simulation * sim,
     nearest->opposite_sex = 0L;
     nearest->same_sex = 0L;
     being_loop_no_thread(sim, local, being_closest_loop, nearest);
+    if (nearest->opposite_sex)
+    {
+        printf("opposite sex found!\n");
+    }
+    if (nearest->same_sex)
+    {
+        printf("same sex found!\n");
+    }
 }
 
 /**
