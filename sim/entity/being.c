@@ -2603,16 +2603,14 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
 /**
  * Follow a being to which we are paying attention
  * @param sim Pointer to the simulation
- * @param current_being_index Array index of the current being
- * @param opposite_sex Array index of the closest being of the opposite sex
- * @param same_sex Array index of the closest being of the same sex
- * @param opposite_sex_distance Returned distance to the closest being of the opposite sex
- * @param same_sex_distance Returned distance to the closest being of the same sex
+ * @param local The current being
+ * @param nearest The nearest being structure
  */
 static void being_follow(noble_simulation * sim,
                          noble_being * local,
                          being_nearest * nearest)
 {
+    /* There is a bug here where same_sex and opposite_sex appears to never be set */
     noble_social * local_social_graph;
     n_int          social_graph_index;
 
