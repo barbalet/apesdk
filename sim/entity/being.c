@@ -50,7 +50,7 @@
 
 #define VISIBILITY_MAXIMUM      (2000)
 
-#define VISIBILITY_SPAN    (VISIBILITY_MAXIMUM / ((15+16) >> 1))
+#define VISIBILITY_SPAN    VISIBILITY_MAXIMUM /*(VISIBILITY_MAXIMUM / ((15+16) >> 1))*/
 
 #define	WALK_ON_WATER(pz,w)	(((pz)<w) ? w : (pz))
 
@@ -689,35 +689,35 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
 
     if (abs_sum)
     {
-        /*
+
         weather_values   seven_values = weather_seven_values(MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
         n_int  span10 = ((abs_sum - 1) ? 1448 : 1024);
 
         switch (seven_values)
         {
-        case WEATHER_SEVEN_SUNNY_DAY:
-        case WEATHER_SEVEN_CLOUDY_DAY:
-            being_pixel->visibility_total += (span10 * (d_vis + 16)) >> 11;
-            break;
-        case WEATHER_SEVEN_RAINY_DAY:
-        case WEATHER_SEVEN_DAWN_DUSK:
-            being_pixel->visibility_total += (span10 * ((2 * d_vis) + 25)) >> 11;
-            break;
-        case WEATHER_SEVEN_CLEAR_NIGHT:
-            being_pixel->visibility_total += (span10 * ((5 * d_vis) + 65)) >> 11;
-        case WEATHER_SEVEN_CLOUDY_NIGHT:
-            being_pixel->visibility_total += (span10 * ((8 * d_vis) + 93)) >> 11;
-        case WEATHER_SEVEN_RAINY_NIGHT:
-            being_pixel->visibility_total += (span10 * ((12 * d_vis) + 145)) >> 11;
-            break;
+            case WEATHER_SEVEN_SUNNY_DAY:
+            case WEATHER_SEVEN_CLOUDY_DAY:
+                being_pixel->visibility_total += (span10 * (d_vis + 16)) >> 11;
+                break;
+            case WEATHER_SEVEN_RAINY_DAY:
+            case WEATHER_SEVEN_DAWN_DUSK:
+                being_pixel->visibility_total += (span10 * ((2 * d_vis) + 25)) >> 11;
+                break;
+            case WEATHER_SEVEN_CLEAR_NIGHT:
+                being_pixel->visibility_total += (span10 * ((5 * d_vis) + 65)) >> 11;
+            case WEATHER_SEVEN_CLOUDY_NIGHT:
+                being_pixel->visibility_total += (span10 * ((8 * d_vis) + 93)) >> 11;
+            case WEATHER_SEVEN_RAINY_NIGHT:
+                being_pixel->visibility_total += (span10 * ((12 * d_vis) + 145)) >> 11;
+                break;
 
-        case WEATHER_SEVEN_ERROR:
-        default:
-            return 1;
+            case WEATHER_SEVEN_ERROR:
+            default:
+                return 1;
         }
         if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
             return 1;
-*/
+
         local_z += being_pixel->start_z;
 
         if (local_z < WALK_ON_WATER(land_location(px, py), land_tide_level()))
@@ -728,17 +728,14 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
     return 0;
 }
 
-static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
+static n_byte being_los_projection(noble_being * local, n_byte2 * location)
 {
     n_vect2    start, delta, vector_facing, end;
-
     
     /* TODO: Check for being awake - need a land and being based awake check */
 
     vect2_byte2(&start, being_location(local));
-
-    end.x = lx;
-    end.y = ly;
+    vect2_byte2(&end, location);
 
     vect2_subtract(&delta, &end, &start);
 
@@ -757,9 +754,8 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
     {
         return 1;
     }
+    
     being_facing_vector(local, &vector_facing, 16);
-
-    printf("ended here 1 !\n");
 
     
     /* if it is behind, it can't be in the line of sight */
@@ -767,9 +763,6 @@ static n_byte being_los_projection(noble_being * local, n_int lx, n_int ly)
     {
         return 0;
     }
-
-    printf("ended here 2 !\n");
-
     
     return 1;
 
@@ -907,7 +900,7 @@ n_string being_get_select_name(noble_simulation * sim)
  @param ly The y location of the point to be seen.
  @return 1 can see, 0 can not see
  */
-n_byte being_los(noble_being * local, n_byte2 lx, n_byte2 ly)
+n_byte being_los(noble_being * local, n_byte2 * location)
 {
     /* There is probably a logical simplification of this
        as I can't think of it here is the brute force method.
@@ -924,9 +917,9 @@ n_byte being_los(noble_being * local, n_byte2 lx, n_byte2 ly)
            2
     */
 
-    if (being_los_projection(local,lx,ly) == 1)
+    if (being_los_projection(local,location) == 1)
         return 1;
-
+#if 0
 /*    if ((local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2)) */
     {
         if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly) == 1)
@@ -968,6 +961,7 @@ n_byte being_los(noble_being * local, n_byte2 lx, n_byte2 ly)
         if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
             return 1;
     }
+#endif
     return 0;
 }
 
@@ -2567,10 +2561,10 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
 
     /** is this the same as the name of the being to which we are paying attention? */
     if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local))) &&
-            being_name_comparison(other, nearest->local->delta.goal[1], nearest->local->delta.goal[2]))
+         being_name_comparison(other, nearest->local->delta.goal[1], nearest->local->delta.goal[2]))
     {
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
+        if (being_los(nearest->local, being_location(other))) /* incorrect use of los */
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (compare_distance < nearest->opposite_sex_distance)
@@ -2594,7 +2588,7 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
     {
         /** Is this being within sight? */
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
+        if (being_los(nearest->local, being_location(other)))
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local)))
@@ -2726,7 +2720,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
         {
 
             /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
-            if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
+            if (being_los(nearest->local, being_location(test_being)))
             {
                 printf("opposite sex identified\n");
 
@@ -2740,7 +2734,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
         if ( compare_distance < nearest->same_sex_distance )
         {
 
-            if (being_los(nearest->local, (n_byte2)difference_vector.x, (n_byte2)difference_vector.y)) /* incorrect use of los */
+            if (being_los(nearest->local, being_location(test_being)))
             {
                 printf("same sex identified\n");
 

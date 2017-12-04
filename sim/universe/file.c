@@ -606,7 +606,10 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 {
                     /* range already checked */
                     noble_being * local_being = (noble_being *)individual->interpret_data;
-                    local_number = being_los(local_being, (n_byte2)quick_x, (n_byte2)quick_y);
+                    n_byte2 location[2];
+                    location[0] = (n_byte2)quick_x;
+                    location[1] = (n_byte2)quick_y;
+                    local_number = being_los(local_being, location);
                 }
                 else
                 {
@@ -726,7 +729,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
 
                 /* if the current being can't see the other being, it can't get this information */
 
-                if (being_los(local_current, (n_byte2)being_location_x(local_being), (n_byte2)being_location_y(local_being)) == 0)
+                if (being_los(local_current, being_location(local_being)) == 0)
                 {
                     local_number = -1;
                 }

@@ -195,6 +195,8 @@ n_int being_location_x(noble_being * value);
 
 n_int being_location_y(noble_being * value);
 
+n_byte2 * being_location(noble_being * value);
+
 void being_set_location(noble_being * value, n_byte2 * from);
 
 n_int being_dob(noble_being * value);
@@ -337,7 +339,7 @@ n_byte        being_awake(noble_simulation * sim, noble_being * local);
 n_byte being_crowding(noble_being * value);
 void being_crowding_cycle(noble_being * value, n_int beings_in_vacinity);
 
-n_byte        being_los(noble_being * local, n_byte2 lx, n_byte2 ly);
+n_byte        being_los(noble_being * local, n_byte2 * location);
 
 void          speak_out(n_string filename, n_string paragraph);
 

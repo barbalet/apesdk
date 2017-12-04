@@ -454,8 +454,6 @@ n_int being_honor_compare(noble_being * first, noble_being * second);
 
 void being_unpack_family(n_byte2 name, n_byte * values);
 
-n_byte2 * being_location(noble_being * value);
-
 void being_remove_parasites(noble_being * value, n_int number_of_parasites);
 
 void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta);

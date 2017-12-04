@@ -570,7 +570,7 @@ void draw_fit(n_byte * points, n_byte2 * color_fit)
         color_fit[(COLOUR_YELLOW*3) + 1] = 0xeeff;
         color_fit[(COLOUR_YELLOW*3) + 2] = 0x2222;
 
-        color_fit[(COLOUR_RED_DARK*3)    ] = (0xeeff * 3) >> 2;
+        color_fit[(COLOUR_RED_DARK*3)    ] = (0xeeff * 2) >> 2; /* return to * 3 following debugging */
         color_fit[(COLOUR_RED_DARK*3) + 1] = 0x0000;
         color_fit[(COLOUR_RED_DARK*3) + 2] = 0x0000;
 
@@ -1655,7 +1655,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     /* makes this use thread safe */
     io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
 
-    if (being_los(local_sim->select, (n_byte2)being_location_x(bei), (n_byte2)being_location_y(bei)) == 1)
+    if (being_los(local_sim->select, being_location(bei)) == 1)
     {
         local_col.color = COLOUR_RED;
     }
