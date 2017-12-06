@@ -689,7 +689,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
 
     if (abs_sum)
     {
-
+/*
         weather_values   seven_values = weather_seven_values(MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
         n_int  span10 = ((abs_sum - 1) ? 1448 : 1024);
 
@@ -717,7 +717,7 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
         }
         if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
             return 1;
-
+*/
         local_z += being_pixel->start_z;
 
         if (local_z < WALK_ON_WATER(land_location(px, py), land_tide_level()))
@@ -728,14 +728,15 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
     return 0;
 }
 
-static n_byte being_los_projection(noble_being * local, n_byte2 * location)
+static n_byte being_los_projection(noble_being * local, n_vect2 * extern_end)
 {
     n_vect2    start, delta, vector_facing, end;
+    
+    vect2_copy(&end, extern_end);
     
     /* TODO: Check for being awake - need a land and being based awake check */
 
     vect2_byte2(&start, being_location(local));
-    vect2_byte2(&end, location);
 
     vect2_subtract(&delta, &end, &start);
 
@@ -764,9 +765,6 @@ static n_byte being_los_projection(noble_being * local, n_byte2 * location)
         return 0;
     }
     
-    return 1;
-
-    
     /** move everything from being co-ordinates to map co-ordinates */
 
     land_convert_to_map(&start);
@@ -778,10 +776,11 @@ static n_byte being_los_projection(noble_being * local, n_byte2 * location)
     {
         return 1;
     }
-#if 0
+
     {
-        n_int	start_z = (n_int)WALK_ON_WATER(land_location_vect(&start),land_tide_level()) + 3; /* the nominal height of the Noble Ape */
-        n_int	delta_z = (n_int)WALK_ON_WATER(land_location_vect(&start_delta),land_tide_level()) - start_z + 3; /* the nominal height of the Noble Ape */
+        const n_int noble_ape_height = 3;
+        n_int	start_z = (n_int)WALK_ON_WATER(land_location_vect(&start),land_tide_level()) + noble_ape_height;
+        n_int	delta_z = (n_int)WALK_ON_WATER(land_location_vect(&end),land_tide_level()) - start_z + noble_ape_height;
         n_int	common_divisor = vect2_dot(&delta, &delta, 1, 1);
         being_draw 	  translate;
 
@@ -817,9 +816,6 @@ static n_byte being_los_projection(noble_being * local, n_byte2 * location)
             }
         }
     }
-
-#endif
-
     return 1;
 }
 
@@ -902,12 +898,17 @@ n_string being_get_select_name(noble_simulation * sim)
  */
 n_byte being_los(noble_being * local, n_byte2 * location)
 {
+    n_int   local_facing = ((being_facing(local))>>5);
+    n_vect2 temp_location;
+    
+    temp_location.x = (n_int)location[0];
+    temp_location.y = (n_int)location[1];
+
     /* There is probably a logical simplification of this
        as I can't think of it here is the brute force method.
 
        The Noble Ape Simulation universe wraps around in all
        directions you need to calculate the line of site off the map too. */
-  /*  n_int	local_facing = ((being_facing(local))>>5); */
 
     /*
            6
@@ -917,51 +918,67 @@ n_byte being_los(noble_being * local, n_byte2 * location)
            2
     */
 
-    if (being_los_projection(local,location) == 1)
+    if (being_los_projection(local,&temp_location) == 1)
         return 1;
-#if 0
-/*    if ((local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2)) */
+
+    if ((local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2))
     {
-        if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly) == 1)
+        temp_location.x = (n_int)location[0] + MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = (n_int)location[1];
+
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
 
-/*        if ((local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3)) */
+    if ((local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3))
     {
-        if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
+        temp_location.x = (n_int)location[0] + MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = (n_int)location[1] + MAP_APE_RESOLUTION_SIZE;
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
-/*        if ((local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4)) */
+    if ((local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4))
     {
-        if (being_los_projection(local,lx,ly+MAP_APE_RESOLUTION_SIZE) == 1)
+        temp_location.x = (n_int)location[0];
+        temp_location.y = (n_int)location[1] + MAP_APE_RESOLUTION_SIZE;
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
-/*        if ((local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5))*/
+    if ((local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5))
     {
-        if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly+MAP_APE_RESOLUTION_SIZE) == 1)
+        temp_location.x = (n_int)location[0] - MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = (n_int)location[1] + MAP_APE_RESOLUTION_SIZE;
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
-/*        if ((local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6))*/
+    if ((local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6))
     {
-        if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly) == 1)
+        temp_location.x = (n_int)location[0] - MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = (n_int)location[1];
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
-/*        if ((local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7))*/
+    if ((local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7))
     {
-        if (being_los_projection(local,lx-MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
+        temp_location.x = (n_int)location[0] - MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = (n_int)location[1] - MAP_APE_RESOLUTION_SIZE;
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
-/*        if ((local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0))*/
+    if ((local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0))
     {
-        if (being_los_projection(local,lx,ly-MAP_APE_RESOLUTION_SIZE) == 1)
+        temp_location.x = (n_int)location[0];
+        temp_location.y = (n_int)location[1] - MAP_APE_RESOLUTION_SIZE;
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
-/*        if ((local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1))*/
+    if ((local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1))
     {
-        if (being_los_projection(local,lx+MAP_APE_RESOLUTION_SIZE,ly-MAP_APE_RESOLUTION_SIZE) == 1)
+        temp_location.x = (n_int)location[0] + MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = (n_int)location[1] - MAP_APE_RESOLUTION_SIZE;
+        if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
-#endif
     return 0;
 }
 
@@ -2722,8 +2739,6 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
             /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
             if (being_los(nearest->local, being_location(test_being)))
             {
-                printf("opposite sex identified\n");
-
                 nearest->opposite_sex_distance = compare_distance;
                 nearest->opposite_sex = test_being;
             }
@@ -2736,8 +2751,6 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
 
             if (being_los(nearest->local, being_location(test_being)))
             {
-                printf("same sex identified\n");
-
                 nearest->same_sex_distance = compare_distance;
                 nearest->same_sex = test_being;
             }
@@ -2765,14 +2778,6 @@ static void being_closest(noble_simulation * sim,
     nearest->opposite_sex = 0L;
     nearest->same_sex = 0L;
     being_loop_no_thread(sim, local, being_closest_loop, nearest);
-    if (nearest->opposite_sex)
-    {
-        printf("opposite sex found!\n");
-    }
-    if (nearest->same_sex)
-    {
-        printf("same sex found!\n");
-    }
 }
 
 /**

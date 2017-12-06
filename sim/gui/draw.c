@@ -117,7 +117,6 @@ static n_uint	tilt_y = 0;
 
 n_byte	check_about = 0;
 n_uint	tilt_z = 118;
-n_byte  terrain_turn = 0;
 
 static n_int toggle_weather = 1;
 static n_int toggle_brain = 1;
@@ -704,7 +703,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
         n_int flatval;
         n_vect2 value_vector;
 
-        vect2_direction(&value_vector, terrain_turn + 128, 105);
+        vect2_direction(&value_vector, being_facing(loc_being) + 128, 105);
 
         vect2_copy(&(dtss.value_vector), &value_vector);
 
@@ -952,7 +951,7 @@ void draw_meters(noble_simulation * local_sim)
         /* draw direction facing */
         {
             n_vect2 direction_facing;
-            vect2_direction(&direction_facing, 128 + 64+ 256 - terrain_turn + loc_being->delta.direction_facing, 63 * 32);
+            vect2_direction(&direction_facing, loc_being->delta.direction_facing, 63 * 32);
             YELLOW_VECT_LINE(75+ FACING_OFFSIDE, 25, &direction_facing);
         }
 

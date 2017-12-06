@@ -91,7 +91,6 @@ static n_int control_toggle_pause(n_byte actual_toggle)
 
 extern n_byte	check_about;
 extern n_uint	tilt_z;
-extern n_byte   terrain_turn;
 
 #ifdef MULTITOUCH_CONTROLS
 
@@ -232,12 +231,13 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
 #endif
             if (sx > 0)
             {
-                terrain_turn = ( terrain_turn + 1) & 255;
+                being_move(local, -1, 0);
+
             }
 
             if (sx <= 0)
             {
-                terrain_turn = ( terrain_turn + 255) & 255;
+                being_move(local, 1, 0);
             }
         }
     }
@@ -527,7 +527,20 @@ void shared_rotate(n_double num, n_byte wwind)
     if (wwind == NUM_TERRAIN)
     {
         n_int integer_rotation_256 = (n_int)((num * 256) / 360);
-        terrain_turn = (n_byte)(((n_int)terrain_turn + 512 + integer_rotation_256) & 255);
+
+        noble_being * local;
+        noble_simulation * local_sim = sim_sim();
+        if (local_sim == 0L)
+            return;
+        
+        if (local_sim->select == 0L)
+        {
+            return;
+        }
+        
+        local = local_sim->select;
+        
+        being_move(local, 0-integer_rotation_256, 0);
     }
 }
 
