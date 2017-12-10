@@ -1100,7 +1100,7 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
         H       E
            B  A */
         n_color8	*local_col = local_info;
-        local_col->color = COLOUR_GREY;
+        local_col->color = COLOUR_BLACK;
         if(local_facing == 0 || local_facing == 7)
             (*local_draw)(POSITIVE_LAND_COORD(location.x + start_point ), POSITIVE_LAND_COORD(location.y - 2 ),
                           0, 0, local_info); /* F */

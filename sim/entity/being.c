@@ -689,7 +689,6 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
 
     if (abs_sum)
     {
-/*
         weather_values   seven_values = weather_seven_values(MAPSPACE_TO_APESPACE(px), MAPSPACE_TO_APESPACE(py));
         n_int  span10 = ((abs_sum - 1) ? 1448 : 1024);
 
@@ -717,7 +716,6 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
         }
         if (being_pixel->visibility_total > VISIBILITY_MAXIMUM)
             return 1;
-*/
         local_z += being_pixel->start_z;
 
         if (local_z < WALK_ON_WATER(land_location(px, py), land_tide_level()))
