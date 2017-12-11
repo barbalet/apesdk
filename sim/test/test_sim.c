@@ -98,6 +98,24 @@ int main(int argc, const char * argv[])
 
         printf("volatile %lx\n", being_volatile_hash1 ^ being_volatile_hash2);
 
+        {
+            n_int number_beings = local_sim->num;
+            n_int outer_loop = 0;
+            n_int line_of_sight_count = 0;
+            while (outer_loop < (number_beings-1))
+            {
+                n_int inner_loop = 1;
+                while (inner_loop < number_beings)
+                {
+                    line_of_sight_count += being_los(&local_sim->beings[outer_loop],
+                                                      being_location(&local_sim->beings[inner_loop]));
+                    
+                    inner_loop++;
+                }
+                outer_loop++;
+            }
+            printf("line-of-sight count %ld for %ld\n", line_of_sight_count, number_beings);
+        }
     }
     sim_close();
     
