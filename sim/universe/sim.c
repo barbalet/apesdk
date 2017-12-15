@@ -279,9 +279,20 @@ void sim_thread_console(void)
         {
             if (threads_running[loop] == 0)
             {
+                int policy = 0;
+                struct sched_param value;
                 threads_running[loop] = 1;
                 pthread_create(&threads[loop], 0L, sim_thread_posix, &threads_running[loop]);
-                return;
+                (void)pthread_getschedparam(threads[loop], &policy, &value);
+                printf("policy %d priority %d\n", policy, value.sched_priority);
+                policy = 85;
+                /*value.sched_priority = 40;*/
+                printf("error %d\n",pthread_setschedparam(threads[loop], policy, &value));
+                
+                
+                (void)pthread_getschedparam(threads[loop], &policy, &value);
+                printf("policy %d priority %d\n", policy, value.sched_priority);
+               return;
             }
             loop++;
         }
