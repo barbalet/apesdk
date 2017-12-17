@@ -181,27 +181,26 @@ static n_int cle_load(void * ptr, n_string response, n_console_output output_fun
     return 0;
 }
 
-int main(int argc, n_string argv[])
+int command_line_run(void)
 {
-
     printf("\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE);
     printf("      For a list of commands type 'help'\n\n");
-
+    
     sprintf(simulation_filename,"%s","realtime.txt");
-
+    
 #ifdef AUDIT_FILE
     audit();
 #endif
-
+    
     local_sim = sim_sim();
     io_command_line_execution_set();
-
+    
     srand((unsigned int) time(NULL) );
     sim_init(2,rand(),MAP_AREA,0);
-
+    
     cle_load(local_sim, (n_string)simulation_filename, io_console_out);
-
-#ifndef	_WIN32
+    
+#ifndef    _WIN32
     do
     {
         sim_thread_console();
@@ -220,9 +219,45 @@ int main(int argc, n_string argv[])
         while (return_value == 0);
     }
 #endif
-
+    
     sim_close();
-
+    
     return(1);
+}
+
+int cycle_run(void)
+{
+    noble_simulation * sim;
+    n_uint count = 0;
+    
+    printf("\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE);
+
+    srand((unsigned int) time(NULL) );
+    sim_init(2,rand(),MAP_AREA,0);
+    
+    
+    sim = sim_sim();
+    while (1==1)
+    {
+        do{
+            sim_cycle();
+            count++;
+            if ((count & 1023) == 0)
+            {
+                printf("count is %ld\n", count);
+            }
+        }while (sim->num);
+        printf("new run at %ld\n", count);
+
+        sim_init(1,rand(),MAP_AREA,0);
+    }
+    /*sim_close();*/
+    
+    return(1);
+}
+
+int main(int argc, n_string argv[])
+{
+    return command_line_run();
 }
 
