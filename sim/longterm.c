@@ -43,6 +43,11 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <pthread.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/time.h>
+
 /*NOBLEMAKE DIR=""*/
 /*NOBLEMAKE DIR="noble/"*/
 /*NOBLEMAKE SET="noble.h"*/
@@ -225,39 +230,92 @@ int command_line_run(void)
     return(1);
 }
 
+static int make_periodic(unsigned int period, sigset_t * alarm_sig)
+{
+    int ret;
+    struct itimerval value;
+    
+    /* Block SIGALRM in this thread */
+    sigemptyset(alarm_sig);
+    sigaddset(alarm_sig, SIGALRM);
+    pthread_sigmask(SIG_BLOCK, alarm_sig, NULL);
+    
+    /* Set the timer to go off after the first period and then
+     repetitively */
+    value.it_value.tv_sec = period / 1000000;
+    value.it_value.tv_usec = period % 1000000;
+    value.it_interval.tv_sec = period / 1000000;
+    value.it_interval.tv_usec = period % 1000000;
+    ret = setitimer(ITIMER_REAL, &value, NULL);
+    if (ret != 0)
+    perror("Failed to set timer");
+    return ret;
+}
+
+static void wait_period(sigset_t * alarm_sig)
+{
+    int sig;
+    /* Wait for the next SIGALRM */
+    sigwait(alarm_sig, &sig);
+}
+
+#define TIMING_CONST_MS 100
+
+static n_uint count = 0;
+
+static void *periodic_thread(void *arg)
+{
+    sigset_t alarm_sig;
+    noble_simulation * sim;
+    make_periodic(1000 * TIMING_CONST_MS, &alarm_sig);
+    while (1) {
+        
+        sim = sim_sim();
+
+
+        sim_cycle();
+        count++;
+        if ((count & 2047) == 0)
+        {
+            printf("count is %ld\n", count);
+        }
+        if (sim->num == 0)
+        {
+            printf("new run at %ld\n", count);
+            
+            sim_init(1,rand(),MAP_AREA,0);
+        }
+        
+        wait_period(&alarm_sig);
+    }
+    return NULL;
+}
+
 int cycle_run(void)
 {
-    noble_simulation * sim;
-    n_uint count = 0;
+    pthread_t t_1;
+    sigset_t alarm_sig;
     
     printf("\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE);
 
-    srand((unsigned int) time(NULL) );
+    /* Block SIGALRM (not really necessary with uClibc) */
+    sigemptyset(&alarm_sig);
+    sigaddset(&alarm_sig, SIGALRM);
+    sigprocmask(SIG_BLOCK, &alarm_sig, NULL);
+    
+    srand((unsigned int) time(NULL));
     sim_init(2,rand(),MAP_AREA,0);
     
-    
-    sim = sim_sim();
-    while (1==1)
+    pthread_create(&t_1, NULL, periodic_thread, NULL);
+    while (1)
     {
-        do{
-            sim_cycle();
-            count++;
-            if ((count & 1023) == 0)
-            {
-                printf("count is %ld\n", count);
-            }
-        }while (sim->num);
-        printf("new run at %ld\n", count);
-
-        sim_init(1,rand(),MAP_AREA,0);
+        sleep(100);
     }
-    /*sim_close();*/
-    
-    return(1);
+    return 0;
 }
 
 int main(int argc, n_string argv[])
 {
-    return command_line_run();
+    return cycle_run();
 }
 
