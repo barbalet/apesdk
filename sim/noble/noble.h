@@ -42,7 +42,7 @@
 #define _NOBLEAPE_NOBLE_H_
 /*	Variable Definitions */
 
-#define  NEW_OPENGL_ENVIRONMENT
+#undef  NEW_OPENGL_ENVIRONMENT
 
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
