@@ -33,6 +33,12 @@
 
  ****************************************************************/
 
+#include "../noble/noble.h"
+
+#ifdef NEW_OPENGL_ENVIRONMENT
+#include "../ogl/ogl.h"
+#endif
+
 #include "gui.h"
 
 #include <stdio.h>
