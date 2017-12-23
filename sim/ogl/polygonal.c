@@ -46,6 +46,8 @@
 #include <OpenGL/glu.h>
 #include <OpenGL/OpenGL.h>
 
+#include <math.h>
+
 #ifndef	_WIN32
 
 #include "../noble/noble.h"
@@ -165,6 +167,59 @@ void polygonal_close(void)
 }
 
 
+static void perspectiveGL( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar )
+{
+    const GLdouble pi = 3.1415926535897932384626433832795;
+    //fH = tan( (fovY / 2) / 180 * pi ) * zNear;
+    GLdouble fH = tan( fovY / 360 * pi ) * zNear;
+    GLdouble fW = fH * aspect;
+    glFrustum( -fW, fW, -fH, fH, zNear, zFar );
+}
+
+static void lookAtGL(const GLdouble p_EyeX, const GLdouble p_EyeY, const GLdouble p_EyeZ, const GLdouble p_CenterX, const GLdouble p_CenterY, const GLdouble p_CenterZ)
+{
+    const GLdouble pi = 3.1415926535897932384626433832795;
+
+    GLdouble l_X = p_EyeX - p_CenterX;
+    GLdouble l_Y = p_EyeY - p_CenterY;
+    GLdouble l_Z = p_EyeZ - p_CenterZ;
+    
+    if(l_X == l_Y && l_Y == l_Z && l_Z == 0.0f)
+        return;
+    
+    if(l_X == l_Z && l_Z == 0.0f)
+    {
+        if (l_Y < 0.0f)
+            glRotated(-90.0f, 1, 0, 0);
+        else
+            glRotated(90.0f, 1, 0, 0);
+        glTranslated(-l_X, -l_Y, -l_Z);
+        return;
+    }
+    
+    GLdouble l_rX = 0.0f;
+    GLdouble l_rY = 0.0f;
+    
+    GLdouble l_hA = (l_X == 0.0f) ? l_Z : hypot(l_X, l_Z);
+    GLdouble l_hB;
+    if(l_Z == 0.0f)
+        l_hB = hypot(l_X, l_Y);
+    else
+        l_hB = (l_Y == 0.0f) ? l_hA : hypot(l_Y, l_hA);
+    
+    l_rX = asin(l_Y / l_hB) * (180 / pi);
+    l_rY = asin(l_X / l_hA) * (180 / pi);
+    
+    glRotated(l_rX, 1, 0, 0);
+    if(l_Z < 0.0f)
+        l_rY += 180.0f;
+    else
+        l_rY = 360.0f - l_rY;
+    
+    glRotated(l_rY, 0, 1, 0);
+    glTranslated(-p_EyeX, -p_EyeY, -p_EyeZ);
+}
+
 void polygonal_init(n_int value)
 {
     if (value != WINDOW_PROCESSING)
@@ -176,13 +231,16 @@ void polygonal_init(n_int value)
         glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
         glViewport (0, 0, 512, 512);
         glMatrixMode (GL_PROJECTION);
-        gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
+        /*gluPerspective (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);*/
+        perspectiveGL (45.0f, (GLfloat)1.0f, 0.1f, 2000.0f);
         glMatrixMode (GL_MODELVIEW);
         glLoadIdentity ();
         glEnable ( GL_CULL_FACE );
         glClearColor (0.1f, 0.1f, 0.5f, 0.5f);
     }
 }
+
+static n_int count = 0;
 
 n_int polygonal_entry(n_int value)
 {
@@ -205,9 +263,11 @@ n_int polygonal_entry(n_int value)
         
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity ();
-        gluLookAt (256, 256, 256,
-                   0, 0, 0,
-                   0, 1, 0);
+        
+        count++;
+        
+        lookAtGL(256, 256, 256,
+                 0, 0, 0);
         
         
         if (loc_being)

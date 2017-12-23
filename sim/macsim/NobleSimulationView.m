@@ -35,7 +35,6 @@
 
 #ifdef NEW_OPENGL_ENVIRONMENT
 #include "../ogl/ogl.h"
-
 #endif
 #import "NobleSimulationView.h"
 
