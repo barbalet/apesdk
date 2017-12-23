@@ -10,7 +10,6 @@
 		4A100F0D1D13CEFD0095DD3C /* noble.h in Headers */ = {isa = PBXBuildFile; fileRef = 4A100F001D13CEFD0095DD3C /* noble.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4A100F0E1D13CEFD0095DD3C /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A100F011D13CEFD0095DD3C /* audio.c */; };
 		4A100F0F1D13CEFD0095DD3C /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A100F021D13CEFD0095DD3C /* compress.c */; };
-		4A100F101D13CEFD0095DD3C /* execute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A100F031D13CEFD0095DD3C /* execute.c */; };
 		4A100F111D13CEFD0095DD3C /* gldraw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A100F041D13CEFD0095DD3C /* gldraw.c */; };
 		4A100F121D13CEFD0095DD3C /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A100F051D13CEFD0095DD3C /* interpret.c */; };
 		4A100F131D13CEFD0095DD3C /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A100F061D13CEFD0095DD3C /* io.c */; };
@@ -48,7 +47,6 @@
 		4A100F001D13CEFD0095DD3C /* noble.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = noble.h; path = ../sim/noble/noble.h; sourceTree = "<group>"; };
 		4A100F011D13CEFD0095DD3C /* audio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = audio.c; path = ../sim/noble/audio.c; sourceTree = "<group>"; };
 		4A100F021D13CEFD0095DD3C /* compress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = compress.c; path = ../sim/noble/compress.c; sourceTree = "<group>"; };
-		4A100F031D13CEFD0095DD3C /* execute.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = execute.c; path = ../sim/noble/execute.c; sourceTree = "<group>"; };
 		4A100F041D13CEFD0095DD3C /* gldraw.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = gldraw.c; path = ../sim/noble/gldraw.c; sourceTree = "<group>"; };
 		4A100F051D13CEFD0095DD3C /* interpret.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = interpret.c; path = ../sim/noble/interpret.c; sourceTree = "<group>"; };
 		4A100F061D13CEFD0095DD3C /* io.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = io.c; path = ../sim/noble/io.c; sourceTree = "<group>"; };
@@ -127,7 +125,6 @@
 				4A100F001D13CEFD0095DD3C /* noble.h */,
 				4A100F011D13CEFD0095DD3C /* audio.c */,
 				4A100F021D13CEFD0095DD3C /* compress.c */,
-				4A100F031D13CEFD0095DD3C /* execute.c */,
 				4A100F041D13CEFD0095DD3C /* gldraw.c */,
 				4A100F051D13CEFD0095DD3C /* interpret.c */,
 				4A100F061D13CEFD0095DD3C /* io.c */,
@@ -272,7 +269,6 @@
 				4A100F2E1D13CF410095DD3C /* speak.c in Sources */,
 				4A100F0E1D13CEFD0095DD3C /* audio.c in Sources */,
 				4A100F0F1D13CEFD0095DD3C /* compress.c in Sources */,
-				4A100F101D13CEFD0095DD3C /* execute.c in Sources */,
 				4A100F111D13CEFD0095DD3C /* gldraw.c in Sources */,
 				4A100F121D13CEFD0095DD3C /* interpret.c in Sources */,
 				4A100F131D13CEFD0095DD3C /* io.c in Sources */,

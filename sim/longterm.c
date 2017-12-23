@@ -316,6 +316,6 @@ int cycle_run(void)
 
 int main(int argc, n_string argv[])
 {
-    return cycle_run();
+    return command_line_run();
 }
 
