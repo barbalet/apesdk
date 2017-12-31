@@ -151,7 +151,7 @@ void gldraw_display_list(void)
 
 void gldraw_wide_line()
 {
-    glLineWidth(100);
+    glLineWidth(1);
 }
 
 void gldraw_thin_line()
