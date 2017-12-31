@@ -61,7 +61,7 @@ static void gldraw_character_line(n_int px, n_int py, n_int dx, n_int dy)
 
 /* draws a string starting at point (off_x,off_y) */
 
-#define    glledfir(x, y, dx, dy, c)    if(((val >> c)&1)) gldraw_character_line(x + off_x - offset,y + off_y, dx, dy)
+#define    glledfir(x, y, dx, dy, c)    if(((val >> c)&1)) gldraw_character_line((0- x) + off_x - offset,y + off_y,  0 - dx, dy)
 
 /**
  This is used to produce letter LED style letters through the generic
