@@ -643,6 +643,32 @@ void being_add_generic(execute_function * function, void * general_data, void * 
     }
 }
 
+void being_loop_no_sim(noble_being * beings, n_uint number_beings, being_loop_fn bf_func, n_int beings_per_thread)
+{
+    n_uint loop  = 0;
+    n_int  count = beings_per_thread;
+    while (loop < number_beings)
+    {
+        /*noble_being * output = &(beings[loop]);*/
+        
+        if ((beings_per_thread + loop) >= number_beings)
+        {
+            count = number_beings - loop;
+        }
+        
+        /*being_add_generic(bf_func, (void*)output, 0L, count, sizeof(noble_being));*/
+        
+        if (count != beings_per_thread)
+        {
+            break;
+        }
+        else
+        {
+            loop += count;
+        }
+    }
+}
+
 void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread)
 {
 #if 1
@@ -656,7 +682,6 @@ void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_
         {
             count = sim->num - loop;
         }
-
 
         being_add_generic((execute_function*)bf_func, (void*)sim, (void*)output, 0L, count, sizeof(noble_being));
         
