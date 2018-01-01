@@ -46,6 +46,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define APESPACE_WRAP(num)            (n_byte2)((num + APESPACE_BOUNDS)&(APESPACE_BOUNDS-1))
+#define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
+
 /* worst case 1500 + 180 per step */
 
 #define VISIBILITY_MAXIMUM      (2000)
@@ -350,8 +353,6 @@ n_int being_location_y(noble_being * value)
 {
     return (n_int)value->delta.location[1];
 }
-
-#define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
 
 void being_high_res(noble_being * value, n_vect2 * vector)
 {

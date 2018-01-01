@@ -151,7 +151,7 @@ void gldraw_display_list(void)
 
 void gldraw_wide_line()
 {
-    glLineWidth(1);
+    glLineWidth(2);
 }
 
 void gldraw_thin_line()
@@ -248,7 +248,7 @@ void gldraw_quads(n_vect2 * quads, n_byte filled)
 
 void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_int turn, n_int scale)
 {
-    GLfloat floating_scale = ((GLfloat)(30+scale))/30;
+    GLfloat floating_scale = ((GLfloat)(100+scale))/100;
     glTranslatef(0-center->x , 0-center->y, 0);
     glRotatef(1.40625 * turn, 0, 0, 1);
     glScaled(floating_scale, floating_scale, 1);

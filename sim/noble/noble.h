@@ -801,7 +801,6 @@ void compress_expand(n_file *input, n_file *output);
 #define	APESPACE_BOUNDS               ((MAP_APE_RESOLUTION_SIZE)-1)
 
 #define	APESPACE_CONFINED(num)        (n_byte2)((num)>APESPACE_BOUNDS ? APESPACE_BOUNDS : ((num)<0 ? 0 : (num)))
-#define APESPACE_WRAP(num)            (n_byte2)((num + APESPACE_BOUNDS)&(APESPACE_BOUNDS-1))
 
 #define LAND_TILE_EDGE                 (256)
 #define	POSITIVE_LAND_COORD(num)       ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))

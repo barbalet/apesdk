@@ -559,8 +559,6 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     {
         land_seed_genetics(local_random);
     }
-
-    
     
     being_remains_init(sim.remains); /* Eventually this should be captured through the file handling and moved into the code below */
 
@@ -568,10 +566,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     {
         land_clear(kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
-
         land_init(&offbuffer[landbuffer_size], 0L);
-        
-
         land_init_high_def(1);
         land_tide();
 #endif
