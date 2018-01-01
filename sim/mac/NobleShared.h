@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2017 Tom Barbalet. All rights reserved.
+ Copyright 1996-2018 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation

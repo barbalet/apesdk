@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2017 Tom Barbalet. All rights reserved.
+ Copyright 1996-2018 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -70,9 +70,9 @@
 
 /*! @define */
 #define	VERSION_NUMBER		     699
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2017 "
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2018 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2017."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2018."
 
 /*! @define */
 #define	NOBLE_APE_SIGNATURE		    (('N'<< 8) | 'A')
