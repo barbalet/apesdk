@@ -3474,6 +3474,28 @@ static void being_random_genetics(n_genetics * value, n_byte2 * random, n_int ma
     value[CHROMOSOME_Y] |= (male ? 2 : 3);
 }
 
+n_uint being_init_group(noble_being * beings, n_byte2 * local_random, n_uint count_to, n_uint max)
+{
+    n_uint num = 0;
+    while (num < count_to)
+    {
+        math_random3(local_random);
+        if((num + 1) < max)
+        {
+            if (being_init(beings, num, &beings[num], 0L, local_random) != 0)
+            {
+                being_erase(&beings[num]);
+                break;
+            }
+            else
+            {
+                num++;
+            }
+        }
+    }
+    return num;
+}
+
 /**
  * Initialise the ape's variables and clear its brain
  * @param sim Pointer to the simulation object

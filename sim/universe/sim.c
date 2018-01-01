@@ -595,31 +595,14 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 #endif
         if (kind != KIND_LOAD_FILE)
         {
-#if (MAP_BITS == 8)
-            n_uint count_to = sim.max >> 1;
-#else
-            n_uint count_to = sim.max >> 4;
-#endif
 #ifdef WEATHER_ON
             weather_init();
 #endif
-            sim.num = 0;
-            while (sim.num < count_to)
-            {
-                math_random3(local_random);
-                if((sim.num + 1) < sim.max)
-                {
-                    if (being_init(sim.beings, sim.num, &sim.beings[sim.num], 0L, local_random) != 0)
-                    {
-                        being_erase(&sim.beings[sim.num]);
-                        break;
-                    }
-                    else
-                    {
-                        sim.num++;
-                    }
-                }
-            }
+#if (MAP_BITS == 8)
+            sim.num = being_init_group(sim.beings, local_random, sim.max >> 1, sim.max);
+#else
+            sim.num = being_init_group(sim.beings, local_random, sim.max >> 4, sim.max);
+#endif
         }
     }
 

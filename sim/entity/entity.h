@@ -258,6 +258,9 @@ n_int  metabolism_vascular_radius(noble_being * local_being, n_int vessel_index)
 void  being_name_byte2(n_byte2 first, n_byte2 family, n_string name);
 n_int being_init(noble_being * beings, n_int number, noble_being * local, noble_being * mother,
                  n_byte2* random_factor);
+
+n_uint being_init_group(noble_being * beings, n_byte2 * local_random, n_uint count_to, n_uint max);
+
 void being_erase(noble_being * value);
 
 n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
