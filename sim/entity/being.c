@@ -2168,36 +2168,6 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
     }
 }
 
-void being_change_selected(noble_simulation * sim, n_byte forwards)
-{
-    noble_being * local_select = sim->select;
-    noble_being * first = sim->beings;
-    noble_being * last = &(sim->beings[sim->num - 1]);
-    if (forwards)
-    {
-        if (sim->select != last)
-        {
-            local_select++;
-        }
-        else
-        {
-            local_select = first;
-        }
-    }
-    else
-    {
-        if (sim->select != first)
-        {
-            local_select--;
-        }
-        else
-        {
-            local_select = last;
-        }
-    }
-    sim_set_select(local_select);
-}
-
 n_byte being_crowding(noble_being * value)
 {
     return value->delta.crowding;
@@ -3948,28 +3918,8 @@ being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim)
     return brls;
 }
 
-void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct ** brls)
+void being_remove_internal_clear(void)
 {
-    local_sim->num = (*brls)->count;
-    if ((*brls)->selected_died)
-    {
-        if ((*brls)->count)
-        {
-            sim_set_select(local_sim->beings);
-        }
-        else
-        {
-            sim_set_select(0L);
-        }
-    }
-
-    if ((*brls)->count == 0)
-    {
-        (void)SHOW_ERROR("No Apes remain start new run");
-    }
-
     being_remove_internal_value = 0;
-    io_free((void **)brls);
 }
-
 

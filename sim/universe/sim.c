@@ -425,6 +425,29 @@ static void sim_time(noble_simulation * local_sim)
 
 #endif
 
+static void sim_being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct ** brls)
+{
+    local_sim->num = (*brls)->count;
+    if ((*brls)->selected_died)
+    {
+        if ((*brls)->count)
+        {
+            sim_set_select(local_sim->beings);
+        }
+        else
+        {
+            sim_set_select(0L);
+        }
+    }
+    
+    if ((*brls)->count == 0)
+    {
+        (void)SHOW_ERROR("No Apes remain start new run");
+    }
+    being_remove_internal_clear();
+    io_free((void **)brls);
+}
+
 void sim_cycle(void)
 {
     n_int       max_honor = 0;
@@ -482,7 +505,7 @@ void sim_cycle(void)
             being_loop_no_thread(&sim, 0L, being_remove_loop1, 0L);
         }
         being_loop_no_thread(&sim, 0L, being_remove_loop2, brls);
-        being_remove_final(&sim, &brls);
+        sim_being_remove_final(&sim, &brls);
     }
 
     sim_time(&sim);

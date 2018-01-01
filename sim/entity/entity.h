@@ -249,6 +249,7 @@ void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_
 
 void  being_remove_external_set(n_int value);
 n_int being_remove_internal(void);
+void being_remove_internal_clear(void);
 
 void   metabolism_vascular_description(n_int index, n_string description);
 n_string metabolism_description(n_int index);
@@ -333,7 +334,6 @@ void episodic_logging(n_console_output * output_function, n_int social);
 n_uint social_respect_mean(noble_simulation * sim, noble_being *local_being);
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family);
 void          being_move(noble_being * local, n_int vel, n_byte kind);
-void          being_change_selected(noble_simulation * sim, n_byte forwards);
 n_byte        being_awake(noble_simulation * sim, noble_being * local);
 
 n_byte being_crowding(noble_being * value);
@@ -368,8 +368,6 @@ typedef struct
 void being_remove_loop2(noble_simulation * local_sim, noble_being * local, void * data);
 
 being_remove_loop2_struct * being_remove_initial(noble_simulation * local_sim);
-
-void being_remove_final(noble_simulation * local_sim, being_remove_loop2_struct ** brls);
 
 void being_remains_init(noble_remains * remains);
 

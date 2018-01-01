@@ -263,6 +263,9 @@ void console_external_watch(void);
 
 n_int console_executing(void);
 
+void  console_change_selected(noble_simulation * sim, n_byte forwards);
+
+
 void file_audit(void);
 
 #endif /* NOBLEAPE_UNIVERSE_INTERNAL_H */

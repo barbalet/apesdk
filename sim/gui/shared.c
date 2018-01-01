@@ -278,7 +278,7 @@ static void control_key(n_byte wwind, n_byte2 num)
     }
     if ((num > 2077) && (num < 2080))
     {
-        being_change_selected(local_sim, (num == 2078));
+        console_change_selected(local_sim, (num == 2078));
     }
 }
 

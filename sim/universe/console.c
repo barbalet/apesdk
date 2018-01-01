@@ -392,15 +392,45 @@ n_int console_list(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
+void console_change_selected(noble_simulation * sim, n_byte forwards)
+{
+    noble_being * local_select = sim->select;
+    noble_being * first = sim->beings;
+    noble_being * last = &(sim->beings[sim->num - 1]);
+    if (forwards)
+    {
+        if (sim->select != last)
+        {
+            local_select++;
+        }
+        else
+        {
+            local_select = first;
+        }
+    }
+    else
+    {
+        if (sim->select != first)
+        {
+            local_select--;
+        }
+        else
+        {
+            local_select = last;
+        }
+    }
+    sim_set_select(local_select);
+}
+
 n_int console_next(void * ptr, n_string response, n_console_output output_function)
 {
-    being_change_selected((noble_simulation *) ptr, 1);
+    console_change_selected((noble_simulation *) ptr, 1);
     return 0;
 }
 
 n_int console_previous(void * ptr, n_string response, n_console_output output_function)
 {
-    being_change_selected((noble_simulation *) ptr, 0);
+    console_change_selected((noble_simulation *) ptr, 0);
     return 0;
 }
 

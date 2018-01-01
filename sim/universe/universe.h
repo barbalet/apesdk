@@ -932,6 +932,8 @@ void watch_ape(void * ptr, n_console_output output_function);
 n_int console_speak(void * ptr, n_string response, n_console_output output_function);
 n_int console_alphabet(void * ptr, n_string response, n_console_output output_function);
 
+void console_change_selected(noble_simulation * sim, n_byte forwards);
+
 n_int console_stop(void * ptr, n_string response, n_console_output output_function);
 n_int console_idea(void * ptr, n_string response, n_console_output output_function);
 n_int console_being(void * ptr, n_string response, n_console_output output_function);
