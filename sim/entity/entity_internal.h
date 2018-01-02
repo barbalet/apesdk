@@ -57,13 +57,6 @@ enum inventory_type
     INVENTORY_LIZARD_EGGS = 16384
 };
 
-enum sleep_state
-{
-    FULLY_ASLEEP   =   0,
-    SLIGHTLY_AWAKE =   1,
-    FULLY_AWAKE    =   2
-};
-
 #define CONSUME_E(being, max_energy, food)
 
 /* offsets applied to land operator values */

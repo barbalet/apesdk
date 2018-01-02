@@ -643,29 +643,14 @@ void being_add_generic(execute_function * function, void * general_data, void * 
     }
 }
 
-void being_loop_no_sim(noble_being * beings, n_uint number_beings, being_loop_fn bf_func, n_int beings_per_thread)
+void being_loop_no_sim(noble_being * beings, n_uint number_beings, being_loop_no_sim_fn bf_func, void * data)
 {
     n_uint loop  = 0;
-    n_int  count = beings_per_thread;
     while (loop < number_beings)
     {
-        /*noble_being * output = &(beings[loop]);*/
-        
-        if ((beings_per_thread + loop) >= number_beings)
-        {
-            count = number_beings - loop;
-        }
-        
-        /*being_add_generic(bf_func, (void*)output, 0L, count, sizeof(noble_being));*/
-        
-        if (count != beings_per_thread)
-        {
-            break;
-        }
-        else
-        {
-            loop += count;
-        }
+        noble_being * output = &(beings[loop]);
+        bf_func(beings, number_beings, output, data);
+        loop++;
     }
 }
 
@@ -1435,7 +1420,7 @@ noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_by
 }
 
 /** returns the total positive and negative affect within memory */
-n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive)
+n_uint being_affect(noble_being * local, n_byte is_positive)
 {
     n_uint affect = 0;
 #ifdef EPISODIC_ON
@@ -2378,22 +2363,20 @@ static void being_brain_probe(noble_being * local)
 #endif
 
 /** stuff still goes on during sleep */
-void being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake)
+void being_cycle_universal(noble_being * local)
 {
     being_immune_response(local);
 
 #ifdef BRAINCODE_ON
 #ifdef BRAIN_ON
-
     /** may need to add external probe linking too */
     being_brain_probe(local);
 #endif
 #endif
 
-    if ((awake == 0) && local)
+    if ((local->delta.awake == 0) && local)
     {
         being_set_state(local, BEING_STATE_ASLEEP);
-
         being_reset_drive(local, DRIVE_FATIGUE);
     }
 }
@@ -2705,7 +2688,7 @@ void being_listen(noble_simulation * local_sim, noble_being * local_being, void 
 {
     being_listen_struct bls;
 
-    if (being_awake(local_sim, local_being) == 0) return;
+    if (local_being->delta.awake == 0) return;
 
     bls.max_shout_volume = 127;
     bls.local = local_being;
@@ -2910,7 +2893,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
 
     n_byte        loc_state          = BEING_STATE_ASLEEP;
     n_int         fat_mass, child_mass = 0;
-    n_int         awake = being_awake(sim, local);
+    n_int         awake = local->delta.awake;
 
     n_int         carrying_child = 0;
 
@@ -3804,7 +3787,7 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
     {
         max_honor[0] = 1;
     }
-    if(being_awake(local_sim, local_being))
+    if (local_being->delta.awake)
     {
         n_int	local_s  = being_speed(local_being);
 

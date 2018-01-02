@@ -1283,7 +1283,7 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
     default:
         if (switcher == 16) /** positive affect */
         {
-            n_uint positive = being_affect(sim,meeter_being,1)>>7;
+            n_uint positive = being_affect(meeter_being,1)>>7;
             if (positive>255) positive=255;
             return (n_byte)positive;
 
@@ -1291,7 +1291,7 @@ static n_byte brain_third_sense(noble_simulation * sim, noble_being * meeter_bei
         {
             /* (switcher == 17) negative affect */
 
-            n_uint negative=being_affect(sim,meeter_being,0)>>1;
+            n_uint negative=being_affect(meeter_being,0)>>1;
             if (negative>255) negative=255;
             return (n_byte)negative;
         }

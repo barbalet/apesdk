@@ -243,9 +243,11 @@ n_byte * being_braincode_internal(noble_being * value);
 #endif
 
 typedef void (being_loop_fn)(noble_simulation * sim, noble_being * actual, void * data);
+typedef void (being_loop_no_sim_fn)(noble_being * beings, n_uint number_beings, noble_being * actual, void * data);
 
 void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data);
 void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread);
+void being_loop_no_sim(noble_being * beings, n_uint number_beings, being_loop_no_sim_fn bf_func, void * data);
 
 void  being_remove_external_set(n_int value);
 n_int being_remove_internal(void);
@@ -263,12 +265,12 @@ n_uint being_init_group(noble_being * beings, n_byte2 * local_random, n_uint cou
 
 void being_erase(noble_being * value);
 
-n_uint being_affect(noble_simulation * local_sim, noble_being * local, n_byte is_positive);
+n_uint being_affect(noble_being * local, n_byte is_positive);
 
 void   episodic_cycle(noble_simulation * local_sim, noble_being * local, void * data);
 
 void   being_cycle_awake(noble_simulation * sim, noble_being * local);
-void   being_cycle_universal(noble_simulation * sim, noble_being * local, n_byte awake);
+void   being_cycle_universal(noble_being * local);
 
 void   drives_cycle(noble_simulation * local_sim, noble_being * local_being, void * data);
 

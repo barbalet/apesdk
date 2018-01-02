@@ -133,7 +133,7 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
  */
 void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    if (being_awake(local_sim, local_being) == 0) return;
+    if (local_being->delta.awake == 0) return;
 
     {
         n_int i;
@@ -432,7 +432,7 @@ static void episodic_store_full(
         return;
     }
 
-    if (being_awake(local_sim, local)==FULLY_ASLEEP) return;
+    if (local->delta.awake == FULLY_ASLEEP) return;
 
     replace = noble_episodic_replace_index(event,affect,name1,family1,name2,family2,local,local_sim);
 
@@ -712,13 +712,13 @@ n_byte episodic_anecdote(
 
     /** both protagonists must be awake */
     if ((event==0) ||
-            (being_awake(local_sim, local) == FULLY_ASLEEP) ||
-            (being_awake(local_sim, other) == FULLY_ASLEEP))
+            (local->delta.awake == FULLY_ASLEEP) ||
+            (other->delta.awake == FULLY_ASLEEP))
     {
         return 0;
     }
 
-    if (being_awake(local_sim, local) != FULLY_AWAKE)
+    if (local->delta.awake != FULLY_AWAKE)
     {
         /** more likely to make errors while drowsy */
         mult=2;

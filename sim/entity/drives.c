@@ -264,6 +264,6 @@ void drives_cycle(noble_simulation * local_sim, noble_being * local_being, void 
 {
     drives_hunger(local_being);
     drives_sociability(local_being, local_sim);
-    drives_sex(local_being, being_awake(local_sim,local_being), local_sim);
+    drives_sex(local_being, local_being->delta.awake, local_sim);
     drives_fatigue(local_being);
 }

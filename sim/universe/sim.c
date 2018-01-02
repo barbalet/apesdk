@@ -329,7 +329,7 @@ static void sim_brain_loop(noble_simulation * local_sim, noble_being * local_bei
 {
     n_byte2 local_brain_state[3];
 
-    if(being_brainstates(local_being, (being_awake(&sim, local_being) == 0), local_brain_state))
+    if(being_brainstates(local_being, (local_being->delta.awake == 0), local_brain_state))
     {
         n_byte			*local_brain = being_brain(local_being);
         if (local_brain != 0L)
@@ -348,7 +348,7 @@ static void sim_brain_dialogue_loop(noble_simulation * local_sim, noble_being * 
     n_byte     awake = 1;
     n_byte    *local_internal = being_braincode_internal(local_being);
     n_byte    *local_external = being_braincode_external(local_being);
-    if(being_awake(&sim, local_being) == 0)
+    if(local_being->delta.awake == 0)
     {
         awake=0;
     }
@@ -360,14 +360,19 @@ static void sim_brain_dialogue_loop(noble_simulation * local_sim, noble_being * 
 #endif
 
 
+static void sim_being_awake_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    local_being->delta.awake = being_awake(local_sim, local_being);
+}
+
 static void sim_being_universal_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    being_cycle_universal(local_sim,local_being, (being_awake(local_sim, local_being) != 0));
+    being_cycle_universal(local_being);
 }
 
 static void sim_being_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
-    if (being_awake(local_sim, local_being) == 0) return;
+    if (local_being->delta.awake == 0) return;
 
     being_cycle_awake(local_sim, local_being);
 }
@@ -378,7 +383,7 @@ static void sim_being_interpret(noble_simulation * local_sim, noble_being * loca
 
     interpret_individual(&individual);
 
-    if (being_awake(local_sim, local_being) == 0) return;
+    if (local_being->delta.awake == 0) return;
 
     if (interpret == 0L) return;
 
@@ -457,6 +462,8 @@ void sim_cycle(void)
     weather_cycle();
 #endif
 
+    being_loop(&sim, sim_being_awake_loop, PROCESSING_LIGHT_WEIGHT);
+    
     being_loop(&sim, sim_being_universal_loop, PROCESSING_LIGHT_WEIGHT);
 
     if (interpret)

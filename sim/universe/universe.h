@@ -758,6 +758,13 @@ typedef struct
     n_genetics  genetics[CHROMOSOMES];           /* constant */
 } noble_being_constant;
 
+typedef enum
+{
+    FULLY_ASLEEP   =   0,
+    SLIGHTLY_AWAKE =   1,
+    FULLY_AWAKE    =   2
+} sleep_state;
+
 typedef struct
 {
     n_byte2     location[2];
@@ -778,6 +785,8 @@ typedef struct
     n_byte2     social_coord_y;
     n_byte2     social_coord_nx; /* why is this needed? */
     n_byte2     social_coord_ny; /* why is this needed? */
+    
+    sleep_state awake;
 } noble_being_delta;
 
 typedef struct
