@@ -64,7 +64,7 @@ void episodic_logging(n_console_output * output_function, n_int social)
  * @param local pointer to the particular ape
  * @param episode_index array index of the episodic memory representing the intention
  */
-static void episodic_intention_update(noble_simulation * local_sim, noble_being * local, n_int episode_index)
+static void episodic_intention_update(noble_being * local, n_int episode_index)
 {
     noble_episodic * local_episodic = being_episodic(local);
     n_byte event;
@@ -131,10 +131,9 @@ static void episodic_intention_update(noble_simulation * local_sim, noble_being 
  * @param local_sim pointer to the simulation
  * @param local pointer to the ape
  */
-void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
+void episodic_cycle_no_sim(noble_being * local_being)
 {
     if (local_being->delta.awake == 0) return;
-
     {
         n_int i;
         noble_episodic * local_episodic = being_episodic(local_being);
@@ -158,7 +157,7 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, voi
                         continue;
                     }
                 }
-                episodic_intention_update(local_sim, local_being, i);
+                episodic_intention_update(local_being, i);
             }
 
             /** fade towards EPISODIC_AFFECT_ZERO */
@@ -191,6 +190,11 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, voi
             }
         }
     }
+}
+
+void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    episodic_cycle_no_sim(local_being);
 }
 
 /**

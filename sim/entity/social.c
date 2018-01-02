@@ -543,7 +543,7 @@ static void social_group_align_preferences(
     /** if you are friendly then make your preferences more similar,
     otherwise make them more disimilar */
     if (social_graph[social_graph_index].friend_foe >=
-            (n_byte)social_respect_mean(local_sim,meeter_being))
+            (n_byte)social_respect_mean(meeter_being))
     {
         incr = 1;
     }
@@ -1328,7 +1328,6 @@ n_byte2 social_squabble(
  * @return The average friend or foe value for all social graph entries
  */
 n_uint social_respect_mean(
-    noble_simulation * sim,
     noble_being *local_being)
 {
     n_uint noble_socials=0,average=0;
@@ -1609,7 +1608,7 @@ n_int social_chat(
     n_int speaking = 0;
     noble_social * meeter_graph = being_social(meeter_being);
     noble_social * met_graph = being_social(met_being);
-    n_uint respect_mean = social_respect_mean(sim,meeter_being);
+    n_uint respect_mean = social_respect_mean(meeter_being);
 
     if (!meeter_graph) return 0;
 
@@ -1788,7 +1787,7 @@ void social_goals(noble_being * local)
 
 void social_initial_loop(noble_simulation * local, noble_being * local_being, void * data)
 {
-    n_uint respect_mean = social_respect_mean(local,local_being);
+    n_uint respect_mean = social_respect_mean(local_being);
     n_uint social_loop = 0;
     n_vect2 location, sum_delta = {0,0};
     n_int   familiar_being_count = 0;

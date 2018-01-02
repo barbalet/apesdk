@@ -235,7 +235,15 @@ void    being_set_height(noble_being * value, n_int height);
 
 n_int   being_mass(noble_being * value);
 
+typedef struct
+{
+    n_int         max_shout_volume;
+    noble_being * local;
+} being_listen_struct;
+
 void being_listen(noble_simulation * sim, noble_being * local, void * data);
+
+void being_listen_loop_no_sim(noble_being * other, void * data);
 
 #ifdef BRAINCODE_ON
 n_byte * being_braincode_external(noble_being * value);
@@ -268,11 +276,23 @@ void being_erase(noble_being * value);
 n_uint being_affect(noble_being * local, n_byte is_positive);
 
 void   episodic_cycle(noble_simulation * local_sim, noble_being * local, void * data);
+void   episodic_cycle_no_sim(noble_being * local_being);
 
 void   being_cycle_awake(noble_simulation * sim, noble_being * local);
 void   being_cycle_universal(noble_being * local);
 
+typedef struct
+{
+    n_int         beings_in_vacinity;
+    noble_being * being;
+} drives_sociability_data;
+
+void drives_sociability_loop_no_sim(noble_being * other, void * data);
+
 void   drives_cycle(noble_simulation * local_sim, noble_being * local_being, void * data);
+
+void drives_fatigue(noble_being * local);
+void drives_hunger(noble_being * local);
 
 void    being_state_description(n_byte2 state, n_string result);
 
@@ -336,7 +356,7 @@ n_int episode_description(noble_simulation * sim,
 
 void episodic_logging(n_console_output * output_function, n_int social);
 
-n_uint social_respect_mean(noble_simulation * sim, noble_being *local_being);
+n_uint social_respect_mean(noble_being *local_being);
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family);
 void          being_move(noble_being * local, n_int vel, n_byte kind);
 n_byte        being_awake(noble_simulation * sim, noble_being * local);

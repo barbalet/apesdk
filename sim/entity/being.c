@@ -2653,13 +2653,7 @@ static void being_follow(noble_simulation * sim,
     }
 }
 
-typedef struct
-{
-    n_int         max_shout_volume;
-    noble_being * local;
-} being_listen_struct;
-
-static void being_listen_loop(noble_simulation * sim, noble_being * other, void * data)
+void being_listen_loop_no_sim(noble_being * other, void * data)
 {
     being_listen_struct * bls = (being_listen_struct *)data;
     n_vect2       difference_vector;
@@ -2677,6 +2671,11 @@ static void being_listen_loop(noble_simulation * sim, noble_being * other, void 
         bls->local->changes.shout[SHOUT_FAMILY0] = being_family_first_name(other);
         bls->local->changes.shout[SHOUT_FAMILY1] = being_family_second_name(other);
     }
+}
+
+static void being_listen_loop(noble_simulation * sim, noble_being * other, void * data)
+{
+    being_listen_loop_no_sim(other, data);
 }
 
 /**

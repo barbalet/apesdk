@@ -48,7 +48,7 @@
  * @brief Update the hunger drive
  * @param local Pointer to the ape
  */
-static void drives_hunger(noble_being * local)
+void drives_hunger(noble_being * local)
 {
     /** if the being is hungry and its hunger drive is not already saturated */
     if (being_energy_less_than(local, BEING_HUNGRY))
@@ -65,13 +65,7 @@ static void drives_hunger(noble_being * local)
     }
 }
 
-typedef struct
-{
-    n_int         beings_in_vacinity;
-    noble_being * being;
-} drives_sociability_data;
-
-static void drives_sociability_loop(noble_simulation * local_sim, noble_being * other, void * data)
+void drives_sociability_loop_no_sim(noble_being * other, void * data)
 {
     drives_sociability_data * dsd = (drives_sociability_data *)data;
     n_int   distance_squared;
@@ -87,6 +81,10 @@ static void drives_sociability_loop(noble_simulation * local_sim, noble_being * 
     }
 }
 
+static void drives_sociability_loop(noble_simulation * local_sim, noble_being * other, void * data)
+{
+    drives_sociability_loop_no_sim(other, data);
+}
 /**
  * @brief Social drive governs how likely the being is to interact with others.
  * This affects behaviors such as grooming, chatting and mating
@@ -231,7 +229,7 @@ static void drives_sex(
  * accessible to the braincode.
  * @param local Pointer to the ape
  */
-static void drives_fatigue(
+void drives_fatigue(
     noble_being * local)
 {
     /** if the being is moving fast enough then increase the fatigue drive */

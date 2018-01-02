@@ -131,7 +131,7 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
         {
         case 0:   /**< friends */
         {
-            if (local_social_graph[i].friend_foe >= social_respect_mean(local_sim,local_being))
+            if (local_social_graph[i].friend_foe >= social_respect_mean(local_being))
             {
                 found = 1;
             }
@@ -139,7 +139,7 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
         }
         case 1:   /**< enemies */
         {
-            if (local_social_graph[i].friend_foe < social_respect_mean(local_sim,local_being))
+            if (local_social_graph[i].friend_foe < social_respect_mean(local_being))
             {
                 found = 1;
             }

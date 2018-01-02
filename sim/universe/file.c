@@ -887,7 +887,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                     case VARIABLE_SOCIAL_GRAPH_FOF:
                         local_number =
                             (n_int)social_graph.friend_foe -
-                            (n_int)social_respect_mean(local_sim,local_being);
+                            (n_int)social_respect_mean(local_being);
                         break;
                     case VARIABLE_SOCIAL_GRAPH_FAMILIARITY:
                         local_number = social_graph.familiarity;
