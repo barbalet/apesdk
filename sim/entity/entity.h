@@ -377,8 +377,10 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
 void social_secondary_loop(noble_simulation * local, noble_being * local_being, void * data);
 
 void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data);
+void being_tidy_loop_no_sim(noble_being * local_being, void * data);
 
 void being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data);
+void being_recalibrate_honor_loop_no_sim(noble_being * value);
 
 void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data);
 

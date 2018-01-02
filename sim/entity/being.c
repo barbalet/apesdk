@@ -2881,9 +2881,28 @@ n_int being_index(noble_simulation * sim, noble_being * local)
     return value.return_value;
 }
 
+static void being_territory_index(noble_being * local)
+{
+    n_uint territory_index =
+    APESPACE_TO_TERRITORY(being_location_y(local))*TERRITORY_DIMENSION +
+    APESPACE_TO_TERRITORY(being_location_x(local));
+    
+    if (local->events.territory[territory_index].familiarity<65534)
+    {
+        local->events.territory[territory_index].familiarity++;
+    }
+    else
+    {
+        /** rescale familiarity values */
+        for (territory_index=0; territory_index<TERRITORY_AREA; territory_index++)
+        {
+            local->events.territory[territory_index].familiarity>>=2;
+        }
+    }
+}
+
 void being_cycle_awake(noble_simulation * sim, noble_being * local)
 {
-    n_uint        local_is_female    = FIND_SEX(GET_I(local));
     n_int         today_days         = land_date();
     n_int         birth_days         = being_dob(local);
 
@@ -2903,9 +2922,6 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     /** delta_energy is the energy required for movement */
     n_int	az;
 
-#ifdef TERRITORY_ON
-    n_uint territory_index;
-#endif
     being_nearest nearest;
     n_int         test_land = 1;
 
@@ -3231,7 +3247,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 
     /** no longer carrying the child */
-    if ((carrying_child==0) && (local_is_female == SEX_FEMALE))
+    if ((carrying_child==0) && (FIND_SEX(GET_I(local)) == SEX_FEMALE))
     {
         if (local->changes.inventory[BODY_FRONT] & INVENTORY_CHILD)
         {
@@ -3244,22 +3260,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
     }
 
 #ifdef TERRITORY_ON
-    territory_index =
-        APESPACE_TO_TERRITORY(being_location_y(local))*TERRITORY_DIMENSION +
-        APESPACE_TO_TERRITORY(being_location_x(local));
-
-    if (local->events.territory[territory_index].familiarity<65534)
-    {
-        local->events.territory[territory_index].familiarity++;
-    }
-    else
-    {
-        /** rescale familiarity values */
-        for (territory_index=0; territory_index<TERRITORY_AREA; territory_index++)
-        {
-            local->events.territory[territory_index].familiarity>>=2;
-        }
-    }
+    being_territory_index(local);
 #endif
 
     being_set_speed(local, (n_byte)loc_s);
@@ -3775,7 +3776,7 @@ n_int being_init(noble_being * beings, n_int number,
     return 0;
 }
 
-void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+void being_tidy_loop_no_sim(noble_being * local_being, void * data)
 {
     n_genetics  *genetics = being_genetics(local_being);
     n_int        local_honor = being_honor(local_being);
@@ -3879,9 +3880,19 @@ void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, vo
     }
 }
 
-void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data)
+void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data)
+{
+    being_tidy_loop_no_sim(local_being, data);
+}
+
+void  being_recalibrate_honor_loop_no_sim(noble_being * value)
 {
     value->delta.honor = (n_byte)(((n_int)(value->delta.honor)*220)/255);
+}
+
+void  being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data)
+{
+    being_recalibrate_honor_loop_no_sim(value);
 }
 
 static n_int being_remove_internal_value = 0;
