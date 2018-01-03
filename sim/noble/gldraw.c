@@ -46,6 +46,7 @@
 
 static n_int draw_scene_not_done = 0;
 static GLuint  terrain_display_list = 0;
+static GLuint  active_display_list = 0;
 
 
 static void gldraw_character_line(n_int px, n_int py, n_int dx, n_int dy)
@@ -147,6 +148,22 @@ void gldraw_end_display_list(void)
 void gldraw_display_list(void)
 {
     glCallList(terrain_display_list);
+}
+
+void gldraw_start_active_list(void)
+{
+    active_display_list = glGenLists(1);
+    glNewList(active_display_list, GL_COMPILE);
+}
+
+void gldraw_end_active_list(void)
+{
+    glEndList();
+}
+
+void gldraw_active_list(void)
+{
+    glCallList(active_display_list);
 }
 
 void gldraw_wide_line()

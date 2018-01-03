@@ -889,6 +889,10 @@ void gldraw_start_display_list(void);
 void gldraw_end_display_list(void);
 void gldraw_display_list(void);
 
+void gldraw_start_active_list(void);
+void gldraw_end_active_list(void);
+void gldraw_active_list(void);
+
 n_int gldraw_scene_done(void);
 
 void gldraw_wide_line(void);

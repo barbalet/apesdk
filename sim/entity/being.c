@@ -3787,7 +3787,7 @@ void being_tidy_loop_no_sim(noble_being * local_being, void * data)
     {
         max_honor[0] = 1;
     }
-    if (local_being->delta.awake)
+    if (local_being->delta.awake != FULLY_ASLEEP)
     {
         n_int	local_s  = being_speed(local_being);
 
