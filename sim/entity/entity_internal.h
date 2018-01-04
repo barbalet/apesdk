@@ -326,17 +326,6 @@ enum social_action_type
     SOCIAL_ACTIONS
 };
 
-
-typedef struct
-{
-    noble_being  * local;
-    noble_social * local_social;
-    n_uint         opposite_sex_distance;
-    n_uint         same_sex_distance;
-    noble_being  * opposite_sex;
-    noble_being  * same_sex;
-} being_nearest;
-
 void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);
 
 n_int food_eat(
@@ -375,7 +364,6 @@ n_byte social_groom(noble_simulation * sim,
 n_byte2 social_squabble(noble_being * meeter_being, noble_being * met_being, n_uint distance, n_int is_female, noble_simulation * sim);
 n_int social_mate(noble_being * meeter_being, noble_being * met_being, n_int being_index, n_int distance, noble_simulation * sim);
 n_int social_chat(noble_being * meeter_being, noble_being * met_being, n_int being_index, noble_simulation * sim);
-void social_goals(noble_being * local);
 n_int get_noble_social(noble_being * meeter_being, noble_being * met_being, noble_simulation * sim);
 
 n_int episodic_met_being_celebrity(

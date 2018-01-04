@@ -2881,7 +2881,7 @@ n_int being_index(noble_simulation * sim, noble_being * local)
     return value.return_value;
 }
 
-static void being_territory_index(noble_being * local)
+void being_territory_index(noble_being * local)
 {
     n_uint territory_index =
     APESPACE_TO_TERRITORY(being_location_y(local))*TERRITORY_DIMENSION +

@@ -157,6 +157,15 @@ typedef enum
     GOAL_UNKNOWN        = 3 /* add a new goal here when needed */
 } goal_types;
 
+typedef struct
+{
+    noble_being  * local;
+    noble_social * local_social;
+    n_uint         opposite_sex_distance;
+    n_uint         same_sex_distance;
+    noble_being  * opposite_sex;
+    noble_being  * same_sex;
+} being_nearest;
 
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
 
@@ -357,6 +366,14 @@ n_int episode_description(noble_simulation * sim,
 void episodic_logging(n_console_output * output_function, n_int social);
 
 n_uint social_respect_mean(noble_being *local_being);
+
+void social_goals(noble_being * local);
+
+void being_genetic_wandering(noble_being * local, being_nearest * nearest);
+
+void being_territory_index(noble_being * local);
+void being_calculate_speed(noble_being * local, n_int tmp_speed, n_byte loc_state);
+
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family);
 void          being_move(noble_being * local, n_int vel, n_byte kind);
 n_byte        being_awake(noble_simulation * sim, noble_being * local);
