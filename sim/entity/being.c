@@ -2802,7 +2802,7 @@ static void being_interact(noble_simulation * sim,
 
         being_facing_towards(local, &delta_vector);
 
-        if ((birth_days+AGE_OF_MATURITY)<today_days)
+        if ((birth_days+AGE_OF_MATURITY) < today_days)
         {
             if (social_groom(sim, local, other_being, other_being_distance, *awake, familiarity))
             {
@@ -2901,232 +2901,44 @@ static void being_territory_index(noble_being * local)
     }
 }
 
-void being_cycle_awake(noble_simulation * sim, noble_being * local)
+n_int being_temporary_speed(noble_being* local, n_int * test_land, n_int *az)
+
 {
-    n_int         today_days         = land_date();
-    n_int         birth_days         = being_dob(local);
-
-    n_int	      loc_s              = being_speed(local);
-    n_int	      loc_h              = being_height(local);
-
-    n_byte        loc_state          = BEING_STATE_ASLEEP;
-    n_int         fat_mass, child_mass = 0;
-    n_int         awake = local->delta.awake;
-
-    n_int         carrying_child = 0;
-
-    n_genetics *  genetics = being_genetics(local);
-
-    /** tmp_speed is the optimum speed based on the gradient */
-    n_int	tmp_speed;
-    /** delta_energy is the energy required for movement */
-    n_int	az;
-
-    being_nearest nearest;
-    n_int         test_land = 1;
-
-    nearest.opposite_sex = 0L;
-    nearest.same_sex = 0L;
-
-    {
-        n_vect2 location_vector;
-        n_vect2 facing_vector;
-        n_vect2 slope_vector;
-        n_vect2 looking_vector;
-
-        vect2_byte2(&location_vector, being_location(local));
-        being_facing_vector(local, &facing_vector, 4);
-        land_vect2(&slope_vector, &az, &location_vector);
-        vect2_add(&looking_vector, &location_vector, &facing_vector);
-        land_convert_to_map(&looking_vector);
-
-        test_land = (WATER_TEST(land_location_vect(&looking_vector),land_tide_level())!= 0);
-
-        {
-            n_int delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
-
-            tmp_speed = ((delta_z + 280) >> 4);
-        }
-    }
-#ifdef LAND_ON
-    /* TODO why not test_land here? */
-
-    if (WATER_TEST(az,land_tide_level()) != 0)
-    {
-        loc_state |= BEING_STATE_SWIMMING;
-    }
-#endif
-
-    if (awake != FULLY_ASLEEP)
-    {
-        loc_state |= BEING_STATE_AWAKE;
-    }
-
-    if (loc_s != 0)
-    {
-        loc_state |= BEING_STATE_MOVING;
-    }
-
-    {
-        n_int   hungry = being_energy_less_than(local, BEING_HUNGRY);
-
-        if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING | BEING_STATE_MOVING)) == BEING_STATE_AWAKE)
-        {
-            hungry = being_energy_less_than(local, BEING_FULL);
-        }
-
-        if (hungry != 0)
-        {
-            loc_state |= BEING_STATE_HUNGRY;
-        }
-    }
-
-    /** amount of body fat in kg */
-    fat_mass = GET_BODY_FAT(local);
-    if (fat_mass > BEING_MAX_MASS_FAT_G)
-    {
-        fat_mass = BEING_MAX_MASS_FAT_G;
-    }
-
-    /** If it sees water in the distance then turn */
-    if (((loc_state & BEING_STATE_SWIMMING) != 0) || test_land)
-    {
-        n_uint	      loop;
-
-        being_turn_away_from_water(local);
-
-        /** horizontally oriented posture */
-        being_set_posture(local, 0);
-
-        /** When swimming drop everything except what's on your head or back.
-           Note that the groomed flag is also cleared */
-
-        for (loop=0; loop<INVENTORY_SIZE; loop++)
-        {
-            if (!((loop==BODY_HEAD) || (loop==BODY_BACK)))
-            {
-                local->changes.inventory[loop] = 0;
-            }
-        }
-        /** swimming proficiency */
-        tmp_speed = (tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
-
-        /* TODO: affect_type should probably be used rather than energy? */
-#ifdef EPISODIC_ON
-        episodic_self(sim, local, EVENT_SWIM, (affect_type)being_energy(local), 0);
-#endif
-        /** bathing removes parasites */
-        being_remove_parasites(local, 1);
-    }
-    else
-    {
-        /** adjust speed using genetics */
-        tmp_speed = (tmp_speed * (GENE_SPEED(genetics)+8)) >> 3;
-
-        /** is the being to which we are paying attention within view? */
-        being_follow(sim, local, &nearest);
-        if (nearest.opposite_sex == 0L)
-        {
-            /** Find the closest beings */
-            being_closest(sim, local, &nearest);
-        }
-
-        /* TODO: SOCIAL_THRESHOLD should not be a macro, it should be a function returning n_int */
-
-        if (being_drive(local, DRIVE_SOCIAL) > SOCIAL_THRESHOLD(local))
-        {
-            being_interact(sim,
-                           local,
-                           nearest.same_sex, nearest.same_sex_distance,
-                           &awake, &loc_state,
-                           &loc_s, 0);
-
-            being_interact(sim,
-                           local,
-                           nearest.opposite_sex, nearest.opposite_sex_distance,
-                           &awake, &loc_state,
-                           &loc_s, 1);
-        }
-    }
-
-    if ((loc_state & (BEING_STATE_SWIMMING | BEING_STATE_GROOMING | BEING_STATE_ATTACK | BEING_STATE_SHOWFORCE)) == 0)
-    {
-        if ((loc_state & BEING_STATE_HUNGRY) != 0)
-        {
-            if (loc_s == 0)
-            {
-                /** eating when stopped */
-                n_byte  food_type;
-                n_int energy = food_eat(being_location_x(local), being_location_y(local), az, &food_type, local);
-                
-#ifdef EPISODIC_ON
-                /** remember eating */
-                episodic_food(sim, local, energy, food_type);
-#endif
-
-                being_energy_delta(local, energy);
-
-                being_reset_drive(local, DRIVE_HUNGER);
-
-                loc_state |= BEING_STATE_EATING;
-                /** grow */
-                if (loc_h < BEING_MAX_HEIGHT)
-                {
-                    if ((birth_days+AGE_OF_MATURITY) > today_days)
-                    {
-                        loc_h += ENERGY_TO_GROWTH(local,energy);
-                    }
-                }
-            }
-        }
-        else
-        {
-            /** orient towards a goal */
-            social_goals(local);
-            if (loc_s==0)
-            {
-                loc_s = 10;
-            }
-        }
-    }
-
-    if (tmp_speed > 39) tmp_speed = 39;
-    if (tmp_speed < 0) tmp_speed = 0;
-
-    if ((awake != FULLY_AWAKE) || (loc_state & BEING_STATE_HUNGRY))
-    {
-        if ((loc_state & BEING_STATE_SWIMMING) != 0)
-        {
-            tmp_speed = (being_energy(local) >> 7);
-        }
-        else
-        {
-            tmp_speed = 0;
-        }
-    }
-
-    if (tmp_speed > loc_s) loc_s++;
-    if (tmp_speed < loc_s) loc_s--;
-    if (tmp_speed < loc_s) loc_s--;
-    if (tmp_speed < loc_s) loc_s--;
+    n_vect2 location_vector;
+    n_vect2 facing_vector;
+    n_vect2 slope_vector;
+    n_vect2 looking_vector;
     
-    if (being_check_goal(local, GOAL_NONE) &&
-            (nearest.opposite_sex == 0L) &&
-            (nearest.same_sex == 0L) &&
-            (being_random(local) < 1000 + 3600*GENE_STAGGER(genetics)))
+    vect2_byte2(&location_vector, being_location(local));
+    being_facing_vector(local, &facing_vector, 4);
+    land_vect2(&slope_vector, az, &location_vector);
+    vect2_add(&looking_vector, &location_vector, &facing_vector);
+    land_convert_to_map(&looking_vector);
+    
+    *test_land = (WATER_TEST(land_location_vect(&looking_vector),land_tide_level())!= 0);
+    
     {
-        n_int	 wander = math_spread_byte(being_random(local) & 7);
-        being_wander(local, wander);
+        n_int delta_z = vect2_dot(&slope_vector,&facing_vector,1,24);
+        return ((delta_z + 280) >> 4);
     }
+}
 
+n_int being_conception_child_mass(noble_simulation * sim, noble_being * local, n_byte loc_state)
+{
+    n_int         birth_days = being_dob(local);
+    n_int         today_days = land_date();
+    n_int         child_mass = 0;
+    n_int         carrying_child = 0;
+    n_genetics *  genetics = being_genetics(local);
+    
     /** a certain time after giving birth females become receptive again */
     if ((being_pregnant(local) != 0) &&
-            ((being_pregnant(local) + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
+        ((being_pregnant(local) + GESTATION_DAYS + CONCEPTION_INHIBITION_DAYS) < today_days))
     {
         /** zero value indicates ready to conceive */
         local->date_of_conception = 0;
     }
-
+    
     if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING)) == BEING_STATE_AWAKE)
     {
         n_uint conception_days = being_pregnant(local) ;
@@ -3137,14 +2949,14 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             {
                 /** A mother could have multiple children, so only find the youngest */
                 noble_being * being_child = being_find_child(sim, genetics, CARRYING_DAYS);
-
+                
                 /** Birth */
                 if (being_child == 0L)
                 {
                     if((sim->num + 1) < sim->max)
                     {
                         being_child = &(sim->beings[sim->num]);
-
+                        
                         if (being_init(sim->beings, sim->num, being_child, local, 0L) == 0)
                         {
 #ifdef EPISODIC_ON
@@ -3166,15 +2978,15 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                     if (today_days < carrying_days)
                     {
                         if (!((local->changes.inventory[BODY_FRONT] & INVENTORY_CHILD) ||
-                                (local->changes.inventory[BODY_BACK] & INVENTORY_CHILD)))
+                              (local->changes.inventory[BODY_BACK] & INVENTORY_CHILD)))
                         {
                             local->changes.inventory[BODY_BACK] |= INVENTORY_CHILD;
                             being_set_attention(local,ATTENTION_BODY, BODY_BACK);
                         }
                         carrying_child = 1;
-
+                        
                         being_set_location(being_child, being_location(local));
-
+                        
                         child_mass = GET_M(being_child);
 #ifdef EPISODIC_ON
                         episodic_close(sim, local, being_child, EVENT_CARRIED, AFFECT_CARRYING, 0);
@@ -3186,11 +2998,11 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             else
             {
                 /** Compute the mass of the unborn child.
-                   This will be added to the mass of the mother */
+                 This will be added to the mass of the mother */
                 child_mass = (today_days - conception_days) * BIRTH_MASS / GESTATION_DAYS;
             }
         }
-
+        
         /** child follows the mother */
         if ((birth_days + WEANING_DAYS) > today_days)
         {
@@ -3199,11 +3011,11 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             {
                 /** orient towards the mother */
                 n_vect2    mother_vector;
-
+                
                 being_delta(mother, local, &mother_vector);
-
+                
                 being_facing_towards(local, &mother_vector);
-
+                
                 /** suckling */
                 if ((loc_state & BEING_STATE_HUNGRY) != 0)
                 {
@@ -3228,9 +3040,9 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
                             /** mother loses energy */
                             being_energy_delta(mother, 0 - SUCKLING_ENERGY);
                             /** child gains energy */
-
+                            
                             being_energy_delta(local, SUCKLING_ENERGY);
-
+                            
                             /** set child state to suckling */
                             loc_state |= BEING_STATE_SUCKLING;
                             /** child acquires immunity from mother */
@@ -3245,7 +3057,7 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             }
         }
     }
-
+    
     /** no longer carrying the child */
     if ((carrying_child==0) && (FIND_SEX(GET_I(local)) == SEX_FEMALE))
     {
@@ -3258,17 +3070,243 @@ void being_cycle_awake(noble_simulation * sim, noble_being * local)
             local->changes.inventory[BODY_BACK] -= INVENTORY_CHILD;
         }
     }
+    return child_mass;
+}
 
+n_byte being_state_find(noble_being * local, n_int az, n_int loc_s)
+{
+    n_byte        loc_state  = BEING_STATE_ASLEEP;
+    n_int         awake = local->delta.awake;
+
+#ifdef LAND_ON
+    /* TODO why not test_land here? */
+    if (WATER_TEST(az,land_tide_level()) != 0)
+    {
+        loc_state |= BEING_STATE_SWIMMING;
+    }
+#endif
+    
+    if (awake != FULLY_ASLEEP)
+    {
+        loc_state |= BEING_STATE_AWAKE;
+    }
+    
+    if (loc_s != 0)
+    {
+        loc_state |= BEING_STATE_MOVING;
+    }
+    
+    {
+        n_int   hungry = being_energy_less_than(local, BEING_HUNGRY);
+        
+        if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING | BEING_STATE_MOVING)) == BEING_STATE_AWAKE)
+        {
+            hungry = being_energy_less_than(local, BEING_FULL);
+        }
+        
+        if (hungry != 0)
+        {
+            loc_state |= BEING_STATE_HUNGRY;
+        }
+    }
+    return loc_state;
+}
+
+void being_not_swimming(noble_simulation * sim, noble_being * local, n_int * tmp_speed, being_nearest * nearest, n_int * loc_s, n_byte * loc_state)
+{
+    n_genetics *  genetics = being_genetics(local);
+
+    /** adjust speed using genetics */
+    *tmp_speed = (*tmp_speed * (GENE_SPEED(genetics)+8)) >> 3;
+    
+    /** is the being to which we are paying attention within view? */
+    being_follow(sim, local, nearest);
+    if (nearest->opposite_sex == 0L)
+    {
+        /** Find the closest beings */
+        being_closest(sim, local, nearest);
+    }
+    
+    /* TODO: SOCIAL_THRESHOLD should not be a macro, it should be a function returning n_int */
+    
+    if (being_drive(local, DRIVE_SOCIAL) > SOCIAL_THRESHOLD(local))
+    {
+        n_int  awake = local->delta.awake;
+        
+        being_interact(sim,
+                       local,
+                       nearest->same_sex, nearest->same_sex_distance,
+                       &awake, loc_state,
+                       loc_s, 0);
+        
+        being_interact(sim,
+                       local,
+                       nearest->opposite_sex, nearest->opposite_sex_distance,
+                       &awake, loc_state,
+                       loc_s, 1);
+    }
+}
+
+void being_swimming(noble_simulation * sim, noble_being * local, n_int * tmp_speed)
+{
+    n_uint          loop;
+    n_genetics *  genetics = being_genetics(local);
+
+    being_turn_away_from_water(local);
+    
+    /** horizontally oriented posture */
+    being_set_posture(local, 0);
+    
+    /** When swimming drop everything except what's on your head or back.
+     Note that the groomed flag is also cleared */
+    
+    for (loop=0; loop<INVENTORY_SIZE; loop++)
+    {
+        if (!((loop==BODY_HEAD) || (loop==BODY_BACK)))
+        {
+            local->changes.inventory[loop] = 0;
+        }
+    }
+    /** swimming proficiency */
+    *tmp_speed = (*tmp_speed * (GENE_SWIM(genetics)+8)) >> 4;
+    
+    /* TODO: affect_type should probably be used rather than energy? */
+#ifdef EPISODIC_ON
+    episodic_self(sim, local, EVENT_SWIM, (affect_type)being_energy(local), 0);
+#endif
+    /** bathing removes parasites */
+    being_remove_parasites(local, 1);
+}
+
+void being_mass_calculation(noble_simulation * sim, noble_being * local, n_byte  loc_state)
+{
+    n_int          loc_h      = being_height(local);
+    n_int child_mass = being_conception_child_mass(sim, local, loc_state);
+    /** amount of body fat in kg */
+    n_int fat_mass = GET_BODY_FAT(local);
+    if (fat_mass > BEING_MAX_MASS_FAT_G)
+    {
+        fat_mass = BEING_MAX_MASS_FAT_G;
+    }
+    GET_M(local) = (n_byte2)((BEING_MAX_MASS_G * loc_h / BEING_MAX_HEIGHT) + fat_mass + child_mass);
+}
+
+void being_genetic_wandering(noble_being * local, being_nearest * nearest)
+{
+    n_genetics *  genetics = being_genetics(local);
+    
+    if (being_check_goal(local, GOAL_NONE) &&
+        (nearest->opposite_sex == 0L) &&
+        (nearest->same_sex == 0L) &&
+        (being_random(local) < 1000 + 3600*GENE_STAGGER(genetics)))
+    {
+        n_int     wander = math_spread_byte(being_random(local) & 7);
+        being_wander(local, wander);
+    }
+}
+
+void being_calculate_speed(noble_being * local, n_int tmp_speed, n_byte loc_state)
+{
+    n_int          loc_s      = being_speed(local);
+
+    if (tmp_speed > 39) tmp_speed = 39;
+    if (tmp_speed < 0) tmp_speed = 0;
+    
+    if ((local->delta.awake != FULLY_AWAKE) || (loc_state & BEING_STATE_HUNGRY))
+    {
+        if ((loc_state & BEING_STATE_SWIMMING) != 0)
+        {
+            tmp_speed = (being_energy(local) >> 7);
+        }
+        else
+        {
+            tmp_speed = 0;
+        }
+    }
+    
+    if (tmp_speed > loc_s) loc_s++;
+    if (tmp_speed < loc_s) loc_s--;
+    if (tmp_speed < loc_s) loc_s--;
+    if (tmp_speed < loc_s) loc_s--;
+    
+    being_set_speed(local, (n_byte)loc_s);
+}
+
+void being_cycle_awake(noble_simulation * sim, noble_being * local)
+{
+    n_int	      loc_s      = being_speed(local);
+    n_int	      loc_h      = being_height(local);
+    n_int         birth_days = being_dob(local);
+    n_int         today_days = land_date();
+
+    /** tmp_speed is the optimum speed based on the gradient */
+    /** delta_energy is the energy required for movement */
+    n_int	az;
+    being_nearest nearest;
+    n_int   test_land = 1;
+    n_int   tmp_speed = being_temporary_speed(local, &test_land, &az);
+    n_byte  loc_state = being_state_find(local, az, loc_s);
+
+    nearest.opposite_sex = 0L;
+    nearest.same_sex = 0L;
+    
+    /** If it sees water in the distance then turn */
+    if (((loc_state & BEING_STATE_SWIMMING) != 0) || test_land)
+    {
+        being_swimming(sim, local, &tmp_speed);
+    }
+    else
+    {
+        being_not_swimming(sim, local, &tmp_speed, &nearest, &loc_s, &loc_state);
+    }
+    
+    if ((loc_state & (BEING_STATE_SWIMMING | BEING_STATE_GROOMING | BEING_STATE_ATTACK | BEING_STATE_SHOWFORCE)) == 0)
+    {
+        if ((loc_state & BEING_STATE_HUNGRY) != 0)
+        {
+            if (loc_s == 0)
+            {
+                /** eating when stopped */
+                n_byte  food_type;
+                n_int   energy = food_eat(being_location_x(local), being_location_y(local), az, &food_type, local);
+                
+#ifdef EPISODIC_ON
+                /** remember eating */
+                episodic_food(sim, local, energy, food_type);
+#endif
+
+                being_energy_delta(local, energy);
+                being_reset_drive(local, DRIVE_HUNGER);
+                loc_state |= BEING_STATE_EATING;
+                /** grow */
+                if (loc_h < BEING_MAX_HEIGHT)
+                {
+                    if ((birth_days+AGE_OF_MATURITY) > today_days)
+                    {
+                        loc_h += ENERGY_TO_GROWTH(local,energy);
+                    }
+                }
+            }
+        }
+        else
+        {
+            /** orient towards a goal */
+            social_goals(local);
+            if (loc_s==0)
+            {
+                loc_s = 10;
+            }
+        }
+    }
+    
+    being_set_height(local, loc_h);
+    being_set_state(local, loc_state);
+    being_calculate_speed(local, tmp_speed, loc_state);
+    being_genetic_wandering(local, &nearest);
 #ifdef TERRITORY_ON
     being_territory_index(local);
 #endif
-
-    being_set_speed(local, (n_byte)loc_s);
-
-    being_set_height(local, loc_h);
-
-    GET_M(local) = (n_byte2)((BEING_MAX_MASS_G*loc_h/BEING_MAX_HEIGHT)+fat_mass+child_mass);
-    being_set_state(local, loc_state);
+    being_mass_calculation(sim, local, loc_state);
 }
 
 #ifdef BRAINCODE_ON
@@ -3776,6 +3814,72 @@ n_int being_init(noble_being * beings, n_int number,
     return 0;
 }
 
+n_int being_move_energy(noble_being * local_being, n_int * conductance)
+{
+    n_int      local_s  = being_speed(local_being);
+    n_int      delta_e = 0;
+    n_vect2    location_vector;
+    n_vect2    facing_vector;
+    n_genetics  *genetics = being_genetics(local_being);
+
+    vect2_byte2(&location_vector, being_location(local_being));
+    
+    being_facing_vector(local_being, &facing_vector, 1);
+    
+    if (local_s > 0)
+    {
+        n_byte2 location[2];
+        vect2_d(&location_vector, &facing_vector, local_s, 512);
+        
+        /* vector to n_byte2 may do incorrect wrap around MUST be improved */
+        location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
+        location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
+        
+        being_set_location(local_being, location);
+    }
+    
+    {
+        n_int delta_z;
+        n_int delta_energy;
+        n_int local_z;
+        n_vect2 slope_vector;
+        
+        land_vect2(&slope_vector, &local_z, &location_vector);
+        
+        delta_z = vect2_dot(&slope_vector, &facing_vector, 1, 96);
+        delta_energy = ((512 - delta_z) * local_s)/80;
+        
+        if (WATER_TEST(local_z, land_tide_level()))
+        {
+            n_int insulation = 0;
+            /** the more body fat, the less energy is lost whilst swimming */
+            n_int fat_mass = GET_BODY_FAT(local_being);
+            delta_energy = ((delta_energy * delta_energy) >> 9);
+            if (fat_mass > BEING_MAX_MASS_FAT_G)
+            {
+                fat_mass = BEING_MAX_MASS_FAT_G;
+            }
+            insulation = fat_mass * 5 / BEING_MAX_MASS_FAT_G;
+            delta_e += (delta_energy + 10 - insulation) >> 3;
+            *conductance = 4;
+        }
+        else
+        {
+            if (delta_z > 0)
+            {
+                /** going uphill */
+                delta_energy += GENE_HILL_CLIMB(genetics);
+            }
+            
+            delta_energy = ((delta_energy * delta_energy) >> 9);
+            
+            /* the more massive the more energy consumed when moving */
+            delta_e += (delta_energy + 4 + (GET_M(local_being)*5/BEING_MAX_MASS_G)) >> 2;
+        }
+    }
+    return delta_e;
+}
+
 void being_tidy_loop_no_sim(noble_being * local_being, void * data)
 {
     n_genetics  *genetics = being_genetics(local_being);
@@ -3789,66 +3893,7 @@ void being_tidy_loop_no_sim(noble_being * local_being, void * data)
     }
     if (local_being->delta.awake != FULLY_ASLEEP)
     {
-        n_int	local_s  = being_speed(local_being);
-
-        n_vect2	location_vector;
-        n_vect2	facing_vector;
-
-        vect2_byte2(&location_vector, being_location(local_being));
-
-        being_facing_vector(local_being, &facing_vector, 1);
-
-        if (local_s > 0)
-        {
-            n_byte2 location[2];
-            vect2_d(&location_vector, &facing_vector, local_s, 512);
-
-            /* vector to n_byte2 may do incorrect wrap around MUST be improved */
-            location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
-            location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
-
-            being_set_location(local_being, location);
-        }
-
-        {
-            n_int delta_z;
-            n_int delta_energy;
-            n_int local_z;
-            n_vect2 slope_vector;
-
-            land_vect2(&slope_vector, &local_z, &location_vector);
-
-            delta_z = vect2_dot(&slope_vector,&facing_vector,1,96);
-            delta_energy = ((512 - delta_z) * local_s)/80;
-
-            if (WATER_TEST(local_z, land_tide_level()))
-            {
-                n_int insulation=0;
-                /** the more body fat, the less energy is lost whilst swimming */
-                n_int fat_mass = GET_BODY_FAT(local_being);
-                delta_energy = ((delta_energy * delta_energy) >> 9);
-                if (fat_mass > BEING_MAX_MASS_FAT_G)
-                {
-                    fat_mass = BEING_MAX_MASS_FAT_G;
-                }
-                insulation = fat_mass * 5 / BEING_MAX_MASS_FAT_G;
-                delta_e += (delta_energy + 10 - insulation) >> 3;
-                conductance = 4;
-            }
-            else
-            {
-                if (delta_z > 0)
-                {
-                    /** going uphill */
-                    delta_energy += GENE_HILL_CLIMB(genetics);
-                }
-
-                delta_energy = ((delta_energy * delta_energy) >> 9);
-
-                /* the more massive the more energy consumed when moving */
-                delta_e += (delta_energy + 4 + (GET_M(local_being)*5/BEING_MAX_MASS_G)) >> 2;
-            }
-        }
+        delta_e = being_move_energy(local_being, &conductance);
     }
     else
     {
@@ -3864,7 +3909,6 @@ void being_tidy_loop_no_sim(noble_being * local_being, void * data)
     }
 
     being_energy_delta(local_being, 0 - delta_e);
-
 
     if (land_time() == 0)
     {
