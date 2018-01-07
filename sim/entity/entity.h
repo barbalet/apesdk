@@ -427,4 +427,16 @@ void being_set_attention(noble_being * value, n_int index, n_int attention);
 
 n_byte being_attention(noble_being * value, n_int index);
 
+typedef n_byte (noble_being_can_move)(n_vect2 * location, n_vect2 * delta);
+typedef void   (noble_being_move)(n_vect2 * location);
+typedef void   (noble_being_range)(n_vect2 * top_left, n_vect2 * bottom_right);
+
+void being_override_can_move(noble_being_can_move * new_can_move);
+void being_override_move(noble_being_move * new_move);
+void being_override_range(noble_being_range * new_range);
+
+n_byte being_can_move(n_vect2 * location, n_vect2 * delta);
+void being_move_fn(n_vect2 * location);
+void being_range(n_vect2 * top_left, n_vect2 * bottom_right);
+
 #endif /* NOBLEAPE_ENTITY_H */

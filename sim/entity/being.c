@@ -46,7 +46,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define APESPACE_WRAP(num)            (n_byte2)((num + APESPACE_BOUNDS)&(APESPACE_BOUNDS-1))
+#define APESPACE_WRAP(num)            (n_byte2)((num + APESPACE_BOUNDS + 1)&APESPACE_BOUNDS)
 #define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
 
 /* worst case 1500 + 180 per step */
@@ -90,6 +90,82 @@ typedef	struct
     n_int       visibility_total;
 }
 being_draw;
+
+static noble_being_move * being_local_move_func = 0L;
+static noble_being_can_move * being_local_can_move_func = 0L;
+static noble_being_range * being_local_range_func = 0L;
+
+n_byte being_can_move(n_vect2 * location, n_vect2 * delta)
+{
+    if (being_local_can_move_func)
+    {
+        return being_local_can_move_func(location, delta);
+    }
+    return 1;
+}
+
+void being_move_fn(n_vect2 * location)
+{
+    if (being_local_move_func)
+    {
+        being_local_move_func(location);
+    }
+    else
+    {
+        n_int px = location->x;
+        n_int py = location->y;
+        
+        px = (px + APESPACE_BOUNDS + 1) & APESPACE_BOUNDS;
+        py = (py + APESPACE_BOUNDS + 1) & APESPACE_BOUNDS;
+        
+        location->x = px;
+        location->y = py;
+    }
+}
+
+void being_range(n_vect2 * top_left, n_vect2 * bottom_right)
+{
+    if (being_local_range_func)
+    {
+        being_local_range_func(top_left, bottom_right);
+    }
+    else
+    {
+        top_left->x = 0;
+        top_left->y = 0;
+        bottom_right->x = APESPACE_BOUNDS;
+        bottom_right->y = APESPACE_BOUNDS;
+    }
+}
+
+void being_override_can_move(noble_being_can_move * new_can_move)
+{
+    being_local_can_move_func = new_can_move;
+}
+
+void being_override_move(noble_being_move * new_move)
+{
+    being_local_move_func = new_move;
+}
+
+
+void being_override_range(noble_being_range * new_range)
+{
+    being_local_range_func = new_range;
+}
+
+typedef n_byte (noble_being_can_move)(n_vect2 * location, n_vect2 * delta);
+typedef void   (noble_being_move)(n_vect2 * location);
+typedef void   (noble_being_range)(n_vect2 * top_left, n_vect2 * bottom_right);
+
+void being_override_can_move(noble_being_can_move * new_can_move);
+void being_override_move(noble_being_move * new_move);
+void being_override_range(noble_being_range * new_range);
+
+n_byte being_can_move(n_vect2 * location, n_vect2 * delta);
+void being_move_fn(n_vect2 * location);
+void being_range(n_vect2 * top_left, n_vect2 * bottom_right);
+
 
 #ifdef BRAINCODE_ON
 
