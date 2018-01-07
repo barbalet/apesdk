@@ -46,7 +46,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define APESPACE_WRAP(num)            (n_byte2)((num + APESPACE_BOUNDS + 1)&APESPACE_BOUNDS)
 #define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
 
 /* worst case 1500 + 180 per step */
@@ -2244,8 +2243,11 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
             else
                 location_vector.x += 500-(rel_vel * 200);
         }
-        loc[0] = APESPACE_WRAP(location_vector.x);
-        loc[1] = APESPACE_WRAP(location_vector.y);
+        
+        being_move_fn(&location_vector);
+        
+        loc[0] = location_vector.x;
+        loc[1] = location_vector.y;
         being_set_location(local, loc);
     }
     else
@@ -3788,14 +3790,23 @@ n_int being_init(noble_being * beings, n_int number,
 
         do
         {
-            location[0] = (n_byte2)(being_random(local) & APESPACE_BOUNDS);
-            location[1] = (n_byte2)(being_random(local) & APESPACE_BOUNDS);
+            n_vect2 location_vector;
+            n_vect2 bottom_right;
+            
+            being_range(&location_vector, &bottom_right);
+            
+            location_vector.x = being_random(local) % bottom_right.x;
+            location_vector.y = being_random(local) % bottom_right.y;
+            
+            being_move_fn(&location_vector);
+            
+            location[0] = (n_byte2)location_vector.x;
+            location[1] = (n_byte2)location_vector.y;
             loop ++;
         }
-        while ((loop < 20) && (WATER_TEST(land_location(APESPACE_TO_MAPSPACE(location[0]), APESPACE_TO_MAPSPACE(location[1])),land_tide_level())));
-
+        while ((loop < 20) && (WATER_TEST( land_location(APESPACE_TO_MAPSPACE(location[0]),
+                                                         APESPACE_TO_MAPSPACE(location[1])), land_tide_level() )));
         being_set_location(local, location);
-
         {
             n_genetics mother_genetics[CHROMOSOMES];
             n_genetics father_genetics[CHROMOSOMES];
@@ -3908,8 +3919,11 @@ n_int being_move_energy(noble_being * local_being, n_int * conductance)
         vect2_d(&location_vector, &facing_vector, local_s, 512);
         
         /* vector to n_byte2 may do incorrect wrap around MUST be improved */
-        location[0] = (n_byte2)APESPACE_WRAP(location_vector.x);
-        location[1] = (n_byte2)APESPACE_WRAP(location_vector.y);
+        
+        being_move_fn(&location_vector);
+        
+        location[0] = location_vector.x;
+        location[1] = location_vector.y;
         
         being_set_location(local_being, location);
     }
