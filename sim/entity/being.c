@@ -1178,7 +1178,7 @@ void being_immune_transmit(noble_being * meeter_being, noble_being * met_being, 
 #endif
 }
 
-static void being_immune_response(noble_being * local)
+void being_immune_response(noble_being * local)
 {
 #ifdef IMMUNE_ON
     n_int min_antibodies;

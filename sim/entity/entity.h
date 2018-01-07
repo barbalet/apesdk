@@ -439,4 +439,7 @@ n_byte being_can_move(n_vect2 * location, n_vect2 * delta);
 void being_move_fn(n_vect2 * location);
 void being_range(n_vect2 * top_left, n_vect2 * bottom_right);
 
+void being_immune_response(noble_being * local);
+void being_reset_drive(noble_being * value, enum drives_definition drive);
+
 #endif /* NOBLEAPE_ENTITY_H */

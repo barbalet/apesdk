@@ -453,8 +453,6 @@ void  being_inc_drive(noble_being * value, enum drives_definition drive);
 
 void  being_dec_drive(noble_being * value, enum drives_definition drive);
 
-void  being_reset_drive(noble_being * value, enum drives_definition drive);
-
 enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location);
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location);
 void being_take(noble_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
