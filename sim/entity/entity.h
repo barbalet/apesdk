@@ -428,16 +428,16 @@ void being_set_attention(noble_being * value, n_int index, n_int attention);
 n_byte being_attention(noble_being * value, n_int index);
 
 typedef n_byte (noble_being_can_move)(n_vect2 * location, n_vect2 * delta);
-typedef void   (noble_being_move)(n_vect2 * location);
-typedef void   (noble_being_range)(n_vect2 * top_left, n_vect2 * bottom_right);
-
-void being_override_can_move(noble_being_can_move * new_can_move);
-void being_override_move(noble_being_move * new_move);
-void being_override_range(noble_being_range * new_range);
-
+void   being_can_move_override(noble_being_can_move * new_can_move);
 n_byte being_can_move(n_vect2 * location, n_vect2 * delta);
-void being_move_fn(n_vect2 * location);
-void being_range(n_vect2 * top_left, n_vect2 * bottom_right);
+
+typedef void   (noble_being_wrap)(n_vect2 * location);
+void being_wrap_override(noble_being_wrap * new_move);
+void being_wrap(n_vect2 * location);
+
+typedef void   (noble_being_initial_location)(n_vect2 * location, n_byte2 * seed);
+void being_initial_location_override(noble_being_initial_location * new_initial_location);
+void being_initial_location(n_vect2 * location, n_byte2 * seed);
 
 void being_immune_response(noble_being * local);
 void being_reset_drive(noble_being * value, enum drives_definition drive);

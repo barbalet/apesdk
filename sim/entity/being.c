@@ -90,24 +90,31 @@ typedef	struct
 }
 being_draw;
 
-static noble_being_move * being_local_move_func = 0L;
-static noble_being_can_move * being_local_can_move_func = 0L;
-static noble_being_range * being_local_range_func = 0L;
+
+static noble_being_can_move * being_can_move_local = 0L;
 
 n_byte being_can_move(n_vect2 * location, n_vect2 * delta)
 {
-    if (being_local_can_move_func)
+    if (being_can_move_local)
     {
-        return being_local_can_move_func(location, delta);
+        return being_can_move_local(location, delta);
     }
     return 1;
 }
 
-void being_move_fn(n_vect2 * location)
+void being_can_move_override(noble_being_can_move * new_can_move)
 {
-    if (being_local_move_func)
+    being_can_move_local = new_can_move;
+}
+
+
+static noble_being_wrap * being_wrap_local = 0L;
+
+void being_wrap(n_vect2 * location)
+{
+    if (being_wrap_local)
     {
-        being_local_move_func(location);
+        being_wrap_local(location);
     }
     else
     {
@@ -122,49 +129,45 @@ void being_move_fn(n_vect2 * location)
     }
 }
 
-void being_range(n_vect2 * top_left, n_vect2 * bottom_right)
+void being_wrap_override(noble_being_wrap * new_move)
 {
-    if (being_local_range_func)
+    being_wrap_local = new_move;
+}
+
+static noble_being_initial_location * being_local_initial_location_local = 0L;
+
+void being_initial_location(n_vect2 * location, n_byte2 * seed)
+{
+    if (being_local_initial_location_local)
     {
-        being_local_range_func(top_left, bottom_right);
+        being_local_initial_location_local(location, seed);
     }
     else
     {
-        top_left->x = 0;
-        top_left->y = 0;
-        bottom_right->x = APESPACE_BOUNDS;
-        bottom_right->y = APESPACE_BOUNDS;
+        n_int loop = 0;
+        
+        do
+        {
+            n_vect2 location_vector;
+            
+            location->x = math_random(seed) & APESPACE_BOUNDS;
+            location->y = math_random(seed) & APESPACE_BOUNDS;
+            
+            being_wrap(&location_vector);
+            
+            loop ++;
+        }
+        while ((loop < 20) && (WATER_TEST( land_location(APESPACE_TO_MAPSPACE(location->x),
+                                                         APESPACE_TO_MAPSPACE(location->y)), land_tide_level() )));
+
     }
 }
 
-void being_override_can_move(noble_being_can_move * new_can_move)
+
+void being_initial_location_override(noble_being_initial_location * new_initial_location)
 {
-    being_local_can_move_func = new_can_move;
+    being_local_initial_location_local = new_initial_location;
 }
-
-void being_override_move(noble_being_move * new_move)
-{
-    being_local_move_func = new_move;
-}
-
-
-void being_override_range(noble_being_range * new_range)
-{
-    being_local_range_func = new_range;
-}
-
-typedef n_byte (noble_being_can_move)(n_vect2 * location, n_vect2 * delta);
-typedef void   (noble_being_move)(n_vect2 * location);
-typedef void   (noble_being_range)(n_vect2 * top_left, n_vect2 * bottom_right);
-
-void being_override_can_move(noble_being_can_move * new_can_move);
-void being_override_move(noble_being_move * new_move);
-void being_override_range(noble_being_range * new_range);
-
-n_byte being_can_move(n_vect2 * location, n_vect2 * delta);
-void being_move_fn(n_vect2 * location);
-void being_range(n_vect2 * top_left, n_vect2 * bottom_right);
-
 
 #ifdef BRAINCODE_ON
 
@@ -2244,7 +2247,7 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
                 location_vector.x += 500-(rel_vel * 200);
         }
         
-        being_move_fn(&location_vector);
+        being_wrap(&location_vector);
         
         loc[0] = location_vector.x;
         loc[1] = location_vector.y;
@@ -3782,31 +3785,17 @@ n_int being_init(noble_being * beings, n_int number,
 
     if (random_factor)
     {
-        n_byte2  location[2];
-
-        n_int loop = 0;
-
+        n_byte2 location[2];
+        n_vect2 location_vector;
         being_random3(local);
 
-        do
-        {
-            n_vect2 location_vector;
-            n_vect2 bottom_right;
-            
-            being_range(&location_vector, &bottom_right);
-            
-            location_vector.x = being_random(local) % bottom_right.x;
-            location_vector.y = being_random(local) % bottom_right.y;
-            
-            being_move_fn(&location_vector);
-            
-            location[0] = (n_byte2)location_vector.x;
-            location[1] = (n_byte2)location_vector.y;
-            loop ++;
-        }
-        while ((loop < 20) && (WATER_TEST( land_location(APESPACE_TO_MAPSPACE(location[0]),
-                                                         APESPACE_TO_MAPSPACE(location[1])), land_tide_level() )));
+        being_initial_location(&location_vector, being_get_random(local));
+        
+        location[0] = location_vector.x;
+        location[1] = location_vector.y;
+
         being_set_location(local, location);
+        
         {
             n_genetics mother_genetics[CHROMOSOMES];
             n_genetics father_genetics[CHROMOSOMES];
@@ -3815,6 +3804,7 @@ n_int being_init(noble_being * beings, n_int number,
             being_random3(local);
 
             gene_random[0] = being_random(local);
+            
             being_random3(local);
             being_random3(local);
 
@@ -3920,7 +3910,7 @@ n_int being_move_energy(noble_being * local_being, n_int * conductance)
         
         /* vector to n_byte2 may do incorrect wrap around MUST be improved */
         
-        being_move_fn(&location_vector);
+        being_wrap(&location_vector);
         
         location[0] = location_vector.x;
         location[1] = location_vector.y;
