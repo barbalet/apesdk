@@ -46,6 +46,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#pragma mark - macros
+
 #define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
 
 /* worst case 1500 + 180 per step */
@@ -90,6 +92,7 @@ typedef	struct
 }
 being_draw;
 
+#pragma mark - can_move
 
 static noble_being_can_move * being_can_move_local = 0L;
 
@@ -107,6 +110,7 @@ void being_can_move_override(noble_being_can_move * new_can_move)
     being_can_move_local = new_can_move;
 }
 
+#pragma mark - wrap
 
 static noble_being_wrap * being_wrap_local = 0L;
 
@@ -133,6 +137,8 @@ void being_wrap_override(noble_being_wrap * new_move)
 {
     being_wrap_local = new_move;
 }
+
+#pragma mark - initial_location
 
 static noble_being_initial_location * being_local_initial_location_local = 0L;
 
@@ -163,11 +169,12 @@ void being_initial_location(n_vect2 * location, n_byte2 * seed)
     }
 }
 
-
 void being_initial_location_override(noble_being_initial_location * new_initial_location)
 {
     being_local_initial_location_local = new_initial_location;
 }
+
+#pragma mark - braincode
 
 #ifdef BRAINCODE_ON
 
@@ -216,6 +223,8 @@ n_byte being_attention(noble_being * value, n_int index)
 
 #endif
 
+#pragma mark - state
+
 void    being_set_state(noble_being * value, being_state_type state)
 {
     value->delta.macro_state = state;
@@ -230,6 +239,8 @@ n_byte2 being_state(noble_being * value)
 {
     return value->delta.macro_state;
 }
+
+#pragma mark - random
 
 static void being_random3(noble_being * value)
 {
@@ -256,6 +267,8 @@ static n_byte2 * being_get_random(noble_being * value)
 {
     return value->delta.seed;
 }
+
+#pragma mark - memory
 
 n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available)
 {
@@ -291,6 +304,8 @@ n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location,
     return 0;
 }
 
+#pragma mark - brainstates
+
 #ifdef BRAIN_ON
 
 static void being_set_brainstates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3)
@@ -315,10 +330,14 @@ n_int being_brainstates(noble_being * value, n_int asleep, n_byte2 * states)
     return ((states[0] != 0) || (states[1] != 1024) || (states[2] != 0));
 }
 
+#pragma mark - erase
+
 void being_erase(noble_being * value)
 {
     io_erase((n_byte*)value, sizeof(noble_being));
 }
+
+#pragma mark - honor
 
 void being_honor_delta(noble_being * value, n_int delta)
 {
@@ -389,6 +408,8 @@ static n_byte being_honor_immune(noble_being * value)
     return 2; /* IMMUNE_STRENGTH_ALPHA */
 }
 
+#pragma mark - posture
+
 n_byte being_posture(noble_being * value)
 {
     return value->delta.posture;
@@ -404,12 +425,16 @@ n_int being_posture_under(noble_being * value, enum posture_type post)
     return (value->delta.posture < post);
 }
 
+#pragma mark - brain
+
 #ifdef BRAIN_ON
 n_byte * being_brain(noble_being * value)
 {
     return value->braindata.brain;
 }
 #endif
+
+#pragma mark - misc
 
 noble_episodic * being_episodic(noble_being * value)
 {
@@ -471,6 +496,8 @@ void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta
     delta->y = primary->delta.location[1] - secondary->delta.location[1];
 }
 
+#pragma mark - parasites
+
 void being_add_parasites(noble_being * value)
 {
     /* maximum number of parasites in the range 0-255 */
@@ -501,6 +528,8 @@ void being_set_parasites(noble_being * value, n_byte parasites)
 {
     value->delta.parasites = parasites;
 }
+
+#pragma mark - misc part 2
 
 n_int being_dob(noble_being * value)
 {
