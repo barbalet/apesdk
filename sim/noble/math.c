@@ -1176,6 +1176,76 @@ n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i)
     return &bc1[BRAINCODE_ADDRESS(i) - BRAINCODE_SIZE];
 }
 
+
+static n_int math_max(n_int a, n_int b)
+{
+    return (a<b)?b:a;
+}
+
+static n_int math_min(n_int a, n_int b)
+{
+    return !(b<a)?a:b;
+}
+
+
+/*Given three colinear points p, q, r, the function checks if point q lies on line segment 'pr' */
+static n_byte  math_on_segment(n_vect2 * p, n_vect2 * q, n_vect2 * r)
+{
+    if ((q->x <= math_max(p->x, r->x)) &&
+        (q->x >= math_min(p->x, r->x)) &&
+        (q->y <= math_max(p->y, r->y)) &&
+        (q->y >= math_min(p->y, r->y)))
+        return 1;
+    return 0;
+}
+
+/* To find orientation of ordered triplet (p, q, r).
+   The function returns following values
+     0 --> p, q and r are colinear
+     1 --> Clockwise
+     2 --> Counterclockwise
+ */
+static n_int math_orientation(n_vect2 * p, n_vect2 * q, n_vect2 * r)
+{
+    n_int val = ((q->y - p->y) *
+                 (r->x - q->x)) -
+                ((q->x - p->x) *
+                 (r->y - q->y));
+    
+    if (val == 0) return 0;  /* colinear */
+    
+    return (val > 0)? 1: 2; /* clock or counterclock wise */
+}
+
+/* The main function that returns true if line segment 'p1q1'
+   and 'p2q2' intersect. */
+n_byte math_do_intersect(n_vect2 * p1, n_vect2 * q1, n_vect2 * p2, n_vect2 * q2)
+{
+    /* Find the four orientations needed for general and special cases */
+    n_int o1 = math_orientation(p1, q1, p2);
+    n_int o2 = math_orientation(p1, q1, q2);
+    n_int o3 = math_orientation(p2, q2, p1);
+    n_int o4 = math_orientation(p2, q2, q1);
+    
+    /* General case */
+    if (o1 != o2 && o3 != o4) return 1;
+    
+    /* Special Cases */
+    /* p1, q1 and p2 are colinear and p2 lies on segment p1q1 */
+    if (o1 == 0 && math_on_segment(p1, p2, q1)) return 1;
+    
+    /* p1, q1 and p2 are colinear and q2 lies on segment p1q1 */
+    if (o2 == 0 && math_on_segment(p1, q2, q1)) return 1;
+    
+    /* p2, q2 and p1 are colinear and p1 lies on segment p2q2 */
+    if (o3 == 0 && math_on_segment(p2, p1, q2)) return 1;
+    
+    /* p2, q2 and q1 are colinear and q1 lies on segment p2q2 */
+    if (o4 == 0 && math_on_segment(p2, q1, q2)) return 1;
+    
+    return 0; /* Doesn't fall in any of the above cases */
+}
+
 void math_general_execution(n_int instruction, n_int is_constant0, n_int is_constant1,
                             n_byte * addr0, n_byte * addr1, n_int value0, n_int * i,
                             n_int is_const0, n_int is_const1,

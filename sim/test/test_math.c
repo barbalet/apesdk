@@ -58,6 +58,69 @@ n_int check_root(n_uint value, n_uint squared)
     return 0;
 }
 
+
+void check_intersection(void)
+{
+    n_vect2 p1, p2, q1, q2;
+    
+    p1.x = 1;
+    p1.y = 1;
+
+    q1.x = 10;
+    q1.y = 1;
+    
+    p2.x = 1;
+    p2.y = 2;
+    
+    q2.x = 10;
+    q2.y = 2;
+    
+    if (math_do_intersect(&p1, &q1, &p2, &q2) != 0)
+    {
+        printf("first intersection should be 0\n");
+        return;
+    }
+    
+    p1.x = 10;
+    p1.y = 0;
+    
+    q1.x = 0;
+    q1.y = 10;
+    
+    p2.x = 0;
+    p2.y = 0;
+    
+    q2.x = 10;
+    q2.y = 10;
+    
+    if (math_do_intersect(&p1, &q1, &p2, &q2) != 1)
+    {
+        printf("second intersection should be 1\n");
+        return;
+
+    }
+    
+    p1.x = -5;
+    p1.y = -5;
+    
+    q1.x = 0;
+    q1.y = 0;
+    
+    p2.x = 1;
+    p2.y = 1;
+    
+    q2.x = 10;
+    q2.y = 10;
+    
+    if (math_do_intersect(&p1, &q1, &p2, &q2) != 0)
+    {
+        printf("third intersection should be 0\n");
+        return;
+
+    }
+    printf("Intersections passed fine!\n");
+}
+
 void check_math(void)
 {
     n_int   loop = 0;
@@ -69,7 +132,8 @@ void check_math(void)
     (void)check_root(4, 16);
     (void)check_root(3, 15);
     (void)check_root(3, 14);
-
+    check_intersection();
+    
     while (loop < 256)
     {
         n_vect2 each_vect;
