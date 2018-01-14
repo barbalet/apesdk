@@ -174,6 +174,27 @@ void being_initial_location_override(noble_being_initial_location * new_initial_
     being_local_initial_location_local = new_initial_location;
 }
 
+static noble_being_line_of_sight * being_line_of_sight_local = 0L;
+
+void being_line_of_sight_override(noble_being_line_of_sight * new_line_of_sight)
+{
+    being_line_of_sight_local = new_line_of_sight;
+}
+
+n_byte being_los(noble_being * local, n_byte2 * location);
+
+n_byte being_line_of_sight(noble_being * local, n_byte2 * location)
+{
+    if (being_line_of_sight_local)
+    {
+        return being_line_of_sight_local(local, location);
+    }
+    else
+    {
+         return being_los(local, location);
+    }
+}
+
 #pragma mark - braincode
 
 #ifdef BRAINCODE_ON
@@ -2668,7 +2689,7 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
          being_name_comparison(other, nearest->local->delta.goal[1], nearest->local->delta.goal[2]))
     {
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(nearest->local, being_location(other))) /* incorrect use of los */
+        if (being_line_of_sight(nearest->local, being_location(other))) /* incorrect use of los */
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (compare_distance < nearest->opposite_sex_distance)
@@ -2692,7 +2713,7 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
     {
         /** Is this being within sight? */
         being_delta(nearest->local, other, &difference_vector);
-        if (being_los(nearest->local, being_location(other)))
+        if (being_line_of_sight(nearest->local, being_location(other)))
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local)))
@@ -2823,7 +2844,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
         {
 
             /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
-            if (being_los(nearest->local, being_location(test_being)))
+            if (being_line_of_sight(nearest->local, being_location(test_being)))
             {
                 nearest->opposite_sex_distance = compare_distance;
                 nearest->opposite_sex = test_being;
@@ -2835,7 +2856,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
         if ( compare_distance < nearest->same_sex_distance )
         {
 
-            if (being_los(nearest->local, being_location(test_being)))
+            if (being_line_of_sight(nearest->local, being_location(test_being)))
             {
                 nearest->same_sex_distance = compare_distance;
                 nearest->same_sex = test_being;

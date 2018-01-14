@@ -1660,7 +1660,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     /* makes this use thread safe */
     io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
 
-    if (being_los(local_sim->select, being_location(bei)) == 1)
+    if (being_line_of_sight(local_sim->select, being_location(bei)) == 1)
     {
         local_col.color = COLOUR_RED;
     }
