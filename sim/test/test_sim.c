@@ -102,7 +102,7 @@ void test_sim_run(void)
             n_int inner_loop = 1 + outer_loop;
             while (inner_loop < number_beings)
             {
-                line_of_sight_count += being_los(&local_sim->beings[outer_loop],
+                line_of_sight_count += being_line_of_sight(&local_sim->beings[outer_loop],
                                                  being_location(&local_sim->beings[inner_loop]));
                 inner_loop++;
             }

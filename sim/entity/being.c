@@ -865,41 +865,43 @@ static n_byte	being_ground(n_int px, n_int py, n_int dx, n_int dy, void * params
     return 0;
 }
 
-static n_byte being_los_projection(noble_being * local, n_vect2 * extern_end)
+
+n_byte being_basic_line_of_sight(noble_being * local, n_vect2 * extern_end, n_vect2 * start, n_vect2 * delta, n_vect2 * end)
 {
-    n_vect2    start, delta, vector_facing, end;
-    
-    vect2_copy(&end, extern_end);
-    
+    n_vect2    vector_facing;
+    vect2_copy(end, extern_end);
     /* TODO: Check for being awake - need a land and being based awake check */
-
-    vect2_byte2(&start, being_location(local));
-
-    vect2_subtract(&delta, &end, &start);
-
+    vect2_byte2(start, being_location(local));
+    vect2_subtract(delta, end, start);
     {
-        n_int distance_squared = vect2_dot(&delta, &delta, 1, 1);
+        n_int distance_squared = vect2_dot(delta, delta, 1, 1);
         if (distance_squared > (VISIBILITY_SPAN * VISIBILITY_SPAN))
         {
             return 0;
         }
     }
-
-    
     /** check trivial case first - self aware */
-    
-    if ((delta.x == 0) && (delta.y == 0))
+    if ((delta->x == 0) && (delta->y == 0))
     {
         return 1;
     }
-    
     being_facing_vector(local, &vector_facing, 16);
-
-    
     /* if it is behind, it can't be in the line of sight */
-    if (vect2_dot(&vector_facing, &delta, 1, 64) < 0)
+    if (vect2_dot(&vector_facing, delta, 1, 64) < 0)
     {
         return 0;
+    }
+    return 2;
+}
+
+static n_byte being_los_projection(noble_being * local, n_vect2 * extern_end)
+{
+    n_vect2    start, delta, end;
+    n_byte     return_value = being_basic_line_of_sight(local, extern_end, &start, &delta, &end);
+    
+    if (return_value != 2)
+    {
+        return return_value;
     }
     
     /** move everything from being co-ordinates to map co-ordinates */
@@ -2842,7 +2844,6 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
     {
         if (compare_distance < nearest->opposite_sex_distance)
         {
-
             /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
             if (being_line_of_sight(nearest->local, being_location(test_being)))
             {

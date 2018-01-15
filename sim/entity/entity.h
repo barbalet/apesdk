@@ -425,6 +425,8 @@ void being_set_attention(noble_being * value, n_int index, n_int attention);
 
 n_byte being_attention(noble_being * value, n_int index);
 
+n_byte being_basic_line_of_sight(noble_being * local, n_vect2 * extern_end, n_vect2 * start, n_vect2 * delta, n_vect2 * end);
+
 typedef n_byte (noble_being_can_move)(n_vect2 * location, n_vect2 * delta);
 void   being_can_move_override(noble_being_can_move * new_can_move);
 n_byte being_can_move(n_vect2 * location, n_vect2 * delta);
