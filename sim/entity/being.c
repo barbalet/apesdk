@@ -181,9 +181,9 @@ void being_line_of_sight_override(noble_being_line_of_sight * new_line_of_sight)
     being_line_of_sight_local = new_line_of_sight;
 }
 
-n_byte being_los(noble_being * local, n_byte2 * location);
+n_byte being_los(noble_being * local, n_vect2 * location);
 
-n_byte being_line_of_sight(noble_being * local, n_byte2 * location)
+n_byte being_line_of_sight(noble_being * local, n_vect2 * location)
 {
     if (being_line_of_sight_local)
     {
@@ -676,8 +676,8 @@ static void being_turn_away_from_water(noble_being * value)
     n_int	it_water_turn = 0;
     n_vect2 location_vector;
 
-    vect2_byte2(&location_vector, being_location(value));
-
+    being_space(value, &location_vector);
+    
     while (it_water_turn < 7)
     {
         /* find higher land first */
@@ -871,7 +871,8 @@ n_byte being_basic_line_of_sight(noble_being * local, n_vect2 * extern_end, n_ve
     n_vect2    vector_facing;
     vect2_copy(end, extern_end);
     /* TODO: Check for being awake - need a land and being based awake check */
-    vect2_byte2(start, being_location(local));
+    being_space(local, start);
+
     vect2_subtract(delta, end, start);
     {
         n_int distance_squared = vect2_dot(delta, delta, 1, 1);
@@ -1035,13 +1036,13 @@ n_string being_get_select_name(noble_simulation * sim)
  @param ly The y location of the point to be seen.
  @return 1 can see, 0 can not see
  */
-n_byte being_los(noble_being * local, n_byte2 * location)
+n_byte being_los(noble_being * local, n_vect2 * location)
 {
     n_int   local_facing = ((being_facing(local))>>5);
     n_vect2 temp_location;
     
-    temp_location.x = (n_int)location[0];
-    temp_location.y = (n_int)location[1];
+    temp_location.x = location->x;
+    temp_location.y = location->y;
 
     /* There is probably a logical simplification of this
        as I can't think of it here is the brute force method.
@@ -1062,8 +1063,8 @@ n_byte being_los(noble_being * local, n_byte2 * location)
 
     if ((local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2))
     {
-        temp_location.x = (n_int)location[0] + MAP_APE_RESOLUTION_SIZE;
-        temp_location.y = (n_int)location[1];
+        temp_location.x = location->x + MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = location->y;
 
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
@@ -1071,50 +1072,50 @@ n_byte being_los(noble_being * local, n_byte2 * location)
 
     if ((local_facing == 7) || (local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3))
     {
-        temp_location.x = (n_int)location[0] + MAP_APE_RESOLUTION_SIZE;
-        temp_location.y = (n_int)location[1] + MAP_APE_RESOLUTION_SIZE;
+        temp_location.x = location->x + MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = location->y + MAP_APE_RESOLUTION_SIZE;
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
     if ((local_facing == 0) || (local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4))
     {
-        temp_location.x = (n_int)location[0];
-        temp_location.y = (n_int)location[1] + MAP_APE_RESOLUTION_SIZE;
+        temp_location.x = location->x;
+        temp_location.y = location->y+ MAP_APE_RESOLUTION_SIZE;
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
     if ((local_facing == 1) || (local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5))
     {
-        temp_location.x = (n_int)location[0] - MAP_APE_RESOLUTION_SIZE;
-        temp_location.y = (n_int)location[1] + MAP_APE_RESOLUTION_SIZE;
+        temp_location.x = location->x - MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = location->y + MAP_APE_RESOLUTION_SIZE;
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
     if ((local_facing == 2) || (local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6))
     {
-        temp_location.x = (n_int)location[0] - MAP_APE_RESOLUTION_SIZE;
-        temp_location.y = (n_int)location[1];
+        temp_location.x = location->x - MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = location->y;
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
     if ((local_facing == 3) || (local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7))
     {
-        temp_location.x = (n_int)location[0] - MAP_APE_RESOLUTION_SIZE;
-        temp_location.y = (n_int)location[1] - MAP_APE_RESOLUTION_SIZE;
+        temp_location.x = location->x - MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = location->y- MAP_APE_RESOLUTION_SIZE;
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
     if ((local_facing == 4) || (local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0))
     {
-        temp_location.x = (n_int)location[0];
-        temp_location.y = (n_int)location[1] - MAP_APE_RESOLUTION_SIZE;
+        temp_location.x = location->x;
+        temp_location.y = location->y - MAP_APE_RESOLUTION_SIZE;
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
     if ((local_facing == 5) || (local_facing == 6) || (local_facing == 7) || (local_facing == 0) || (local_facing == 1))
     {
-        temp_location.x = (n_int)location[0] + MAP_APE_RESOLUTION_SIZE;
-        temp_location.y = (n_int)location[1] - MAP_APE_RESOLUTION_SIZE;
+        temp_location.x = location->x + MAP_APE_RESOLUTION_SIZE;
+        temp_location.y = location->y - MAP_APE_RESOLUTION_SIZE;
         if (being_los_projection(local, &temp_location) == 1)
             return 1;
     }
@@ -2284,7 +2285,8 @@ void being_move(noble_being * local, n_int rel_vel, n_byte kind)
     {
         n_vect2 location_vector;
         n_byte2 loc[2];
-        vect2_byte2(&location_vector, being_location(local));
+        being_space(local, &location_vector);
+
         if (kind == 1)
         {
             n_vect2 facing_vector;
@@ -2690,8 +2692,11 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
     if ((FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local))) &&
          being_name_comparison(other, nearest->local->delta.goal[1], nearest->local->delta.goal[2]))
     {
+        n_vect2 other_location;
         being_delta(nearest->local, other, &difference_vector);
-        if (being_line_of_sight(nearest->local, being_location(other))) /* incorrect use of los */
+        being_space(other, &other_location);
+
+        if (being_line_of_sight(nearest->local, &other_location)) /* incorrect use of los */
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (compare_distance < nearest->opposite_sex_distance)
@@ -2714,8 +2719,11 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
                               nearest->local_social->family_name[BEING_MET]))
     {
         /** Is this being within sight? */
+        
+        n_vect2 other_location;
         being_delta(nearest->local, other, &difference_vector);
-        if (being_line_of_sight(nearest->local, being_location(other)))
+        being_space(other, &other_location);
+        if (being_line_of_sight(nearest->local, &other_location))
         {
             n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local)))
@@ -2837,6 +2845,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
     being_nearest * nearest = (being_nearest *)data;
     n_vect2       difference_vector;
     n_uint        compare_distance;
+    n_vect2       location_test;
     being_delta(nearest->local, test_being, &difference_vector);
     compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
     
@@ -2844,8 +2853,9 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
     {
         if (compare_distance < nearest->opposite_sex_distance)
         {
+            being_space(test_being, &location_test);
             /* 'function' : conversion from 'n_int' to 'n_byte2', possible loss of data x 2 */
-            if (being_line_of_sight(nearest->local, being_location(test_being)))
+            if (being_line_of_sight(nearest->local, &location_test))
             {
                 nearest->opposite_sex_distance = compare_distance;
                 nearest->opposite_sex = test_being;
@@ -2856,8 +2866,9 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
     {
         if ( compare_distance < nearest->same_sex_distance )
         {
+            being_space(test_being, &location_test);
 
-            if (being_line_of_sight(nearest->local, being_location(test_being)))
+            if (being_line_of_sight(nearest->local, &location_test))
             {
                 nearest->same_sex_distance = compare_distance;
                 nearest->same_sex = test_being;
@@ -3041,7 +3052,8 @@ n_int being_temporary_speed(noble_being* local, n_int * test_land, n_int *az)
     n_vect2 slope_vector;
     n_vect2 looking_vector;
     
-    vect2_byte2(&location_vector, being_location(local));
+    being_space(local, &location_vector);
+    
     being_facing_vector(local, &facing_vector, 4);
     land_vect2(&slope_vector, az, &location_vector);
     vect2_add(&looking_vector, &location_vector, &facing_vector);
@@ -3949,8 +3961,8 @@ n_int being_move_energy(noble_being * local_being, n_int * conductance)
     n_vect2    location_vector;
     n_vect2    facing_vector;
     n_genetics  *genetics = being_genetics(local_being);
-
-    vect2_byte2(&location_vector, being_location(local_being));
+    
+    being_space(local_being, &location_vector);
     
     being_facing_vector(local_being, &facing_vector, 1);
     

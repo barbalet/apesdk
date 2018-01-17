@@ -606,10 +606,10 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 {
                     /* range already checked */
                     noble_being * local_being = (noble_being *)individual->interpret_data;
-                    n_byte2 location[2];
-                    location[0] = (n_byte2)quick_x;
-                    location[1] = (n_byte2)quick_y;
-                    local_number = being_line_of_sight(local_being, location);
+                    n_vect2 location;
+                    location.x = (n_byte2)quick_x;
+                    location.y = (n_byte2)quick_y;
+                    local_number = being_line_of_sight(local_being, &location);
                 }
                 else
                 {
@@ -693,6 +693,7 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
                 noble_being	    *local_being = 0L;
                 noble_social    *local_social_graph = 0L;
                 noble_social     social_graph;
+                n_vect2          location_vect;
 #ifdef EPISODIC_ON
                 noble_episodic    *local_episodic = 0L;
                 noble_episodic    episodic;
@@ -729,7 +730,9 @@ n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * num
 
                 /* if the current being can't see the other being, it can't get this information */
 
-                if (being_line_of_sight(local_current, being_location(local_being)) == 0)
+                being_space(local_being, &location_vect);
+                
+                if (being_line_of_sight(local_current, &location_vect) == 0)
                 {
                     local_number = -1;
                 }

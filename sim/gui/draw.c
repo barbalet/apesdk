@@ -1656,11 +1656,12 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
 {
     n_join			local_8bit;
     n_color8        local_col;
-
+    n_vect2         location_vect;
     /* makes this use thread safe */
     io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
 
-    if (being_line_of_sight(local_sim->select, being_location(bei)) == 1)
+    being_space(bei, &location_vect);
+    if (being_line_of_sight(local_sim->select, &location_vect) == 1)
     {
         local_col.color = COLOUR_RED;
     }

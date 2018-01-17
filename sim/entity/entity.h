@@ -439,9 +439,9 @@ typedef void   (noble_being_initial_location)(n_vect2 * location, n_byte2 * seed
 void being_initial_location_override(noble_being_initial_location * new_initial_location);
 void being_initial_location(n_vect2 * location, n_byte2 * seed);
 
-typedef n_byte (noble_being_line_of_sight)(noble_being * local, n_byte2 * location);
+typedef n_byte (noble_being_line_of_sight)(noble_being * local, n_vect2 * location);
 void being_line_of_sight_override(noble_being_line_of_sight * new_line_of_sight);
-n_byte being_line_of_sight(noble_being * local, n_byte2 * location);
+n_byte being_line_of_sight(noble_being * local, n_vect2 * location);
 
 void being_immune_response(noble_being * local);
 void being_reset_drive(noble_being * value, enum drives_definition drive);

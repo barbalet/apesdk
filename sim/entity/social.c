@@ -1768,7 +1768,7 @@ void social_goals(noble_being * local)
         if ((being_state(local) & BEING_STATE_SWIMMING) == 0)
         {
             vect2_byte2(&delta_vector, (n_byte2 *)&(local->delta.goal[1]));
-            vect2_byte2(&location_vector, being_location(local));
+            being_space(local, &location_vector);
             vect2_subtract(&delta_vector, &location_vector, &delta_vector);
             being_facing_towards(local, &delta_vector);
         }

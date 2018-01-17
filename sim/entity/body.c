@@ -237,7 +237,8 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
         n_int az;
         n_vect2 location_vector,facing_vector,slope_vector;
 
-        vect2_byte2(&location_vector, being_location(local));
+        being_space(local, &location_vector);
+        
         being_facing_vector(local, &facing_vector, 4);
         land_vect2(&slope_vector, &az, &location_vector);
 
@@ -470,7 +471,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
     {
         n_int az;
         n_vect2 location_vector,facing_vector,slope_vector;
-        vect2_byte2(&location_vector, being_location(local));
+        being_space(local, &location_vector);
         being_facing_vector(local, &facing_vector, 4);
         land_vect2(&slope_vector,&az,&location_vector);
 
