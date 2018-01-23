@@ -692,6 +692,8 @@ n_int  math_seg14(n_int character);
 n_byte math_do_intersect(n_vect2 * p1, n_vect2 * q1, n_vect2 * p2, n_vect2 * q2);
 
 
+void io_number_to_string(n_string value, n_uint number);
+
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);
 n_int      io_command_line_execution(void);

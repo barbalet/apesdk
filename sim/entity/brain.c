@@ -38,8 +38,6 @@
 
 #include <stdio.h>
 
-#define _CRT_SECURE_NO_WARNINGS
-
 /* typical minimum spacing between MVB instructions */
 #define BRAINCODE_MIN_MVB_SPACING          2
 

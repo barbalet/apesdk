@@ -43,8 +43,6 @@
 
 #include <stdio.h>
 
-#define _CRT_SECURE_NO_WARNINGS
-
 /* the weather/time of day icons hard coded */
 
 static const n_byte	icns[896] =
@@ -1278,7 +1276,7 @@ static void draw_region(noble_being * local)
             n_int   value = local->events.territory[lx + (ly * TERRITORY_DIMENSION)].familiarity;
             if (value)
             {
-                sprintf(string_draw,"%ld",value);
+                io_number_to_string(string_draw, value);
                 draw_string(string_draw, (lx*32)+2 , (ly*32)+5, &local_draw);
             }
             lx++;

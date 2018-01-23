@@ -166,8 +166,10 @@ static void check_io(void)
 
 int main(int argc, const char * argv[])
 {
+    n_string_block string_block;
+    
     printf(" --- test io --- start ------------------------------------------------\n");
-
+    
     check_io();
     
     printf(" --- test io ---  end  ------------------------------------------------\n");

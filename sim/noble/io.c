@@ -44,8 +44,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define _CRT_SECURE_NO_WARNINGS
-
 static n_int command_line_execution;
 static n_int command_line_external_exit = 0;
 
@@ -1562,15 +1560,43 @@ void io_three_string_combination(n_string output, n_string first, n_string secon
     io_string_write(output, third, &position);
 }
 
+void io_number_to_string(n_string value, n_uint number)
+{
+    n_uint temp_number = number;
+    n_uint digits_in_number = 0;
+    n_uint multiplier = 1;
+    n_uint number_location = 0;
+    do{
+        temp_number = temp_number / 10;
+        digits_in_number++;
+        if (temp_number != 0)
+        {
+            multiplier = multiplier * 10;
+        }
+    }while (temp_number != 0);
+    do{
+        value[number_location++] = '0' + (number/multiplier) % 10;
+        multiplier = multiplier /10;
+        digits_in_number --;
+    }while (multiplier != 0);
+    value[number_location++] = 0;
+}
+
 void io_time_to_string(n_string value)
 {
     n_int minutes = land_time();
     n_int days = land_date();
-
     n_int military_time = (minutes % 60);
     n_int hours = (minutes/60);
     military_time += hours * 100;
-    sprintf(value,"%4ld:%ld", military_time, days);
+    
+    value[0] = '0' + (military_time / 1000) % 10;
+    value[1] = '0' + (military_time / 100) % 10;
+    value[2] = '0' + (military_time / 10) % 10;
+    value[3] = '0' + (military_time / 1) % 10;
+    value[4] = ':';
+    
+    io_number_to_string(&value[5], days);
 }
 
 void io_offset(n_byte * start, n_byte * point, n_string text)

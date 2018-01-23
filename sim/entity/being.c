@@ -46,8 +46,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #pragma mark - macros
 
 #define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
@@ -1762,8 +1760,9 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
         break;
     default:
     {
-        n_string_block  number_str;
-        sprintf(number_str,"%ld", event_type);
+        n_string_block  number_str;        
+        io_number_to_string(number_str, event_type);
+        
         io_string_write(string,"Some erroneous action (",location);
         io_string_write(string,number_str,location);
         io_string_write(string,") with ",location);

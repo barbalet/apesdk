@@ -43,8 +43,6 @@
 
 #include <stdio.h>
 
-#define _CRT_SECURE_NO_WARNINGS
-
 static n_int simulation_running = 1;
 static n_int simulation_executing = 0;
 
