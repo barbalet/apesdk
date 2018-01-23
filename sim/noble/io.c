@@ -44,9 +44,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
-#endif
 
 static n_int command_line_execution;
 static n_int command_line_external_exit = 0;
