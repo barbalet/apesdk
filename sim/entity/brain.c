@@ -183,13 +183,16 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
 /**     "XXX_#NNN_#NNN"*/
 /**     "0123456789012"*/
 
-#define BC_FORMAT_A      0
-#define BC_FORMAT_C      1
-#define BC_FORMAT_E      2
-#define BC_FORMAT_F      3
-#define BC_FORMAT_G      4
-#define BC_FORMAT_H      5
 
+ enum BC_FORMAT
+{
+    BC_FORMAT_A = 0,
+    BC_FORMAT_C,
+    BC_FORMAT_E,
+    BC_FORMAT_F,
+    BC_FORMAT_G,
+    BC_FORMAT_H
+};
 const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
 {
     /** data */
@@ -241,7 +244,7 @@ const n_string braincode_mnemonic[BRAINCODE_INSTRUCTIONS] =
  * @param value1 The second argument
  * @return The format type used to display a three byte instruction
  */
-static n_int brain_format(n_byte instruction, n_byte command, n_byte value0, n_byte value1)
+static enum BC_FORMAT brain_format(n_byte instruction, n_byte command, n_byte value0, n_byte value1)
 {
     n_byte is_constant0 = ((command & BRAINCODE_CONSTANT0_BIT) != 0);
     n_byte is_constant1 = ((command & BRAINCODE_CONSTANT1_BIT) != 0);
@@ -398,6 +401,50 @@ static void brain_longword(n_string output, n_byte value)
     output[4] = 0;
 }
 
+static void brain_four_character_byte(n_string value, n_byte star, n_byte dashes, n_byte number)
+{
+    if (star)
+    {
+        value[0] = '*';
+    }
+    else
+    {
+        value[0] = ' ';
+    }
+    if (dashes)
+    {
+        value[1] = '-';
+        value[2] = '-';
+        value[3] = '-';
+    }
+    else
+    {
+        value[1] = '0' + (number/100) % 10;
+        value[2] = '0' + (number/10) % 10;
+        value[3] = '0' + (number/1) % 10;
+        
+        if (value[1] == '0')
+        {
+            value[1] = ' ';
+            if (value[2] == '0')
+            {
+                value[2] = ' ';
+            }
+        }
+    }
+}
+
+static void brain_space_nstruction_space(n_string value, n_byte instruction)
+{
+    n_string instruction_string = braincode_mnemonic[instruction];
+    value[0] = ' ';
+    value[1] = instruction_string[0];
+    value[2] = instruction_string[1];
+    value[3] = instruction_string[2];
+    value[4] = instruction_string[3];
+    value[5] = ' ';
+}
+
 /**
  * @brief prints a three byte instruction in the appropriate format
  * @param string The returned string
@@ -409,29 +456,38 @@ void brain_three_byte_command(n_string string, n_byte * response)
     n_byte value0       = response[1];
     n_byte value1       = response[2];
     n_byte instruction  = (command & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS;
-    n_int  format       = brain_format(instruction, command, value0, value1);
+    enum BC_FORMAT format       = brain_format(instruction, command, value0, value1);
 
+    brain_space_nstruction_space(string, instruction);
+    
     switch(format)
     {
     case BC_FORMAT_A:
-        sprintf(string,"%s  %03d  %03d", braincode_mnemonic[instruction], value0, value1);
+        brain_four_character_byte(&string[6],  0, 0, value0);
+        brain_four_character_byte(&string[10], 0, 0, value1);
         break;
     case BC_FORMAT_C:
-        sprintf(string,"%s *%03d *%03d", braincode_mnemonic[instruction], value0, value1);
+        brain_four_character_byte(&string[6],  1, 0, value0);
+        brain_four_character_byte(&string[10], 1, 0, value1);
         break;
     case BC_FORMAT_E:
-        sprintf(string,"%s  %03d *%03d", braincode_mnemonic[instruction], value0, value1);
+        brain_four_character_byte(&string[6],  0, 0, value0);
+        brain_four_character_byte(&string[10], 1, 0, value1);
         break;
     case BC_FORMAT_F:
-        sprintf(string,"%s *%03d  %03d", braincode_mnemonic[instruction], value0, value1);
+        brain_four_character_byte(&string[6],  1, 0, value0);
+        brain_four_character_byte(&string[10], 0, 0, value1);
         break;
     case BC_FORMAT_G:
-        sprintf(string,"%s  %03d  ---", braincode_mnemonic[instruction], value0);
+        brain_four_character_byte(&string[6],  0, 0, value0);
+        brain_four_character_byte(&string[10], 0, 1, 0);
         break;
     default:
-        sprintf(string,"%s  ---  %03d", braincode_mnemonic[instruction], value1);
+        brain_four_character_byte(&string[6],  0, 1, 0);
+        brain_four_character_byte(&string[10], 0, 0, value1);
         break;
     }
+    string[14] = 0;
 }
 
 /**
@@ -445,7 +501,7 @@ void brain_sentence(n_string string, n_byte * response)
     n_byte value0       = response[1];
     n_byte value1       = response[2];
     n_byte instruction  = (command & (BRAINCODE_CONSTANT0_BIT-1)) % BRAINCODE_INSTRUCTIONS;
-    n_int  format       = brain_format(instruction, command, value0, value1);
+    enum BC_FORMAT  format = brain_format(instruction, command, value0, value1);
     n_string_block      first_word, second_word;
     n_int  position     = 0;
 
