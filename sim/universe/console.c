@@ -43,6 +43,10 @@
 
 #include <stdio.h>
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 static n_int simulation_running = 1;
 static n_int simulation_executing = 0;
 

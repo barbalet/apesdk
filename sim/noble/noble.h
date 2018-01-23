@@ -883,49 +883,6 @@ void  land_tide(void);
 n_int land_location(n_int px, n_int py);
 n_int land_location_vect(n_vect2 * value);
 
-void gldraw_string(n_constant_string str, n_int off_x, n_int off_y);
-
-void gldraw_background_green(void);
-void gldraw_background_black(void);
-
-void gldraw_start_display_list(void);
-void gldraw_end_display_list(void);
-void gldraw_display_list(void);
-
-void gldraw_start_active_list(void);
-void gldraw_end_active_list(void);
-void gldraw_active_list(void);
-
-n_int gldraw_scene_done(void);
-
-void gldraw_wide_line(void);
-void gldraw_thin_line(void);
-
-void gldraw_orange(void);
-void gldraw_blue(void);
-void gldraw_blue_clear(void);
-
-void gldraw_darkgrey(void);
-void gldraw_grey(void);
-void gldraw_lightgrey(void);
-void gldraw_lightgrey_clear(void);
-
-void gldraw_black(void);
-
-void gldraw_red(void);
-void gldraw_green(void);
-void gldraw_lightgreen(void);
-
-
-void gldraw_vertex(n_vect2 * point);
-void gldraw_line(n_vect2 * start, n_vect2 * end);
-void gldraw_quads(n_vect2 * quads, n_byte filled);
-
-void gldraw_delta_move(n_vect2 * center, n_vect2 * location, n_int turn, n_int scale);
-
-void gldraw_start_points(void);
-void gldraw_end_points(void);
-
 /*0*/
 
 enum PRIMARY_APESCRIPT

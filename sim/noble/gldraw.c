@@ -43,6 +43,7 @@
 #import <OpenGL/OpenGL.h>
 
 #include "noble.h"
+#include "gldraw.h"
 
 static n_int draw_scene_not_done = 0;
 static GLuint  terrain_display_list = 0;

@@ -43,6 +43,10 @@
 
 #include <stdio.h>
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 /* the weather/time of day icons hard coded */
 
 static const n_byte	icns[896] =

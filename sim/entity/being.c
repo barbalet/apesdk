@@ -46,6 +46,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #pragma mark - macros
 
 #define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
