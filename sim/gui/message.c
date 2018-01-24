@@ -91,19 +91,6 @@ n_int * message_find_spaces(n_string string, n_int * count)
     return return_value;
 }
 
-n_string message_string_copy(n_string string)
-{
-    n_string return_string = 0L;
-    n_uint    string_length = io_length(string, STRING_BLOCK_SIZE) + 1;
-    if (string_length > 0)
-    {
-        return_string = (n_string)io_new(string_length);
-        io_copy((n_byte *)string, (n_byte *)return_string, string_length-1);
-        return_string[string_length-1] = 0;
-    }
-    return return_string;
-}
-
 void message_remove(n_int remove)
 {
     n_message *value = &messages[remove];
@@ -176,7 +163,7 @@ void message_add(n_string message, n_int time_to_expire)
     {
         return;
     }
-    copied_message = message_string_copy(message);
+    copied_message = io_string_copy(message);
     if (copied_message == 0L)
     {
         io_free((void**)&(spaces));

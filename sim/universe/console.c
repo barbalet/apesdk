@@ -169,7 +169,6 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
             /** type of relationship */
 
             relationship_index = local_social_graph[i].relationship;
-            sprintf(relationship_str2," ");
 
             if (relationship_index > RELATIONSHIP_SELF)
             {
@@ -187,7 +186,11 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
                     sprintf(relationship_str2," (%s of %s)",relationship_str1,meeter_being_name);
                 }
             }
-
+            else
+            {
+                sprintf(relationship_str2," ");
+            }
+            
             if (i != being_attention(local_being,ATTENTION_ACTOR))
             {
                 /** Not the current focus of attention */

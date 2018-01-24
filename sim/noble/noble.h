@@ -691,8 +691,9 @@ n_int  math_seg14(n_int character);
 
 n_byte math_do_intersect(n_vect2 * p1, n_vect2 * q1, n_vect2 * p2, n_vect2 * q2);
 
-
-void io_number_to_string(n_string value, n_uint number);
+void       io_number_to_string(n_string value, n_uint number);
+void       io_string_number(n_string output_string, n_string input_string, n_uint number);
+void       io_string_string(n_string output_string, n_string first_string, n_string second_string);
 
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);
@@ -741,6 +742,8 @@ n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value,
 
 void       io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count);
 void       io_time_to_string(n_string value);
+n_string   io_string_copy(n_string string);
+
 n_int      io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char);
 n_int      io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line);
 n_int      io_command(n_file * fil, const noble_file_entry * commands);

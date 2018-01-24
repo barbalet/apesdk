@@ -1582,6 +1582,37 @@ void io_number_to_string(n_string value, n_uint number)
     value[number_location++] = 0;
 }
 
+void io_string_number(n_string output_string, n_string input_string,n_uint number)
+{
+    n_int input_length = io_length(input_string, STRING_BLOCK_SIZE);
+    if (input_length > 0)
+    {
+        io_copy((n_byte *)input_string, (n_byte *)output_string, input_length);
+        io_number_to_string(&output_string[input_length], number);
+        return ;
+    }
+    io_number_to_string(output_string, number);
+}
+
+void io_string_string(n_string output_string, n_string first_string, n_string second_string)
+{
+    n_int input_length = io_length(first_string, STRING_BLOCK_SIZE);
+    if (input_length > 0)
+    {
+        n_int second_input_length = io_length(second_string, STRING_BLOCK_SIZE);
+        io_copy((n_byte *)first_string, (n_byte *)output_string, input_length);
+        io_copy((n_byte *)second_string, (n_byte *)&output_string[input_length], second_input_length + 1);
+        return ;
+    }
+    input_length = io_length(first_string, STRING_BLOCK_SIZE);
+    if (input_length > 0)
+    {
+        io_copy((n_byte *)second_string, (n_byte *)output_string, input_length + 1);
+        return;
+    }
+    output_string[0] = 0;
+}
+
 void io_time_to_string(n_string value)
 {
     n_int minutes = land_time();
@@ -1597,6 +1628,19 @@ void io_time_to_string(n_string value)
     value[4] = ':';
     
     io_number_to_string(&value[5], days);
+}
+
+n_string io_string_copy(n_string string)
+{
+    n_string return_string = 0L;
+    n_uint    string_length = io_length(string, STRING_BLOCK_SIZE) + 1;
+    if (string_length > 0)
+    {
+        return_string = (n_string)io_new(string_length);
+        io_copy((n_byte *)string, (n_byte *)return_string, string_length-1);
+        return_string[string_length-1] = 0;
+    }
+    return return_string;
 }
 
 void io_offset(n_byte * start, n_byte * point, n_string text)
