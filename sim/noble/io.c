@@ -679,6 +679,10 @@ void io_file_reused(n_file * fil)
 n_int io_length(n_string value, n_int max)
 {
     n_int return_length = -1;
+    if (value == 0L)
+    {
+        return 0;
+    }
     if (max < 1)
     {
         return -1;
