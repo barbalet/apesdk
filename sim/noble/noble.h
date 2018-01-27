@@ -693,8 +693,7 @@ n_byte math_do_intersect(n_vect2 * p1, n_vect2 * q1, n_vect2 * p2, n_vect2 * q2)
 
 void       io_number_to_string(n_string value, n_uint number);
 void       io_string_number(n_string output_string, n_string input_string, n_uint number);
-void       io_string_string(n_string output_string, n_string first_string, n_string second_string);
-void       io_string_string_string(n_string output_string, n_string first_string, n_string second_string, n_string third_string);
+void       io_three_strings(n_string output_string, n_string first_string, n_string second_string, n_string third_string);
 
 void       io_entry_execution(n_int argc, n_string * argv);
 void       io_command_line_execution_set(void);

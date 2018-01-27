@@ -1598,44 +1598,29 @@ void io_string_number(n_string output_string, n_string input_string,n_uint numbe
     io_number_to_string(output_string, number);
 }
 
-void io_string_string(n_string output_string, n_string first_string, n_string second_string)
+void       io_three_strings(n_string output_string, n_string first_string, n_string second_string, n_string third_string)
 {
-    n_int input_length = io_length(first_string, STRING_BLOCK_SIZE);
-    if (input_length > 0)
+    n_int first_length = io_length(first_string, STRING_BLOCK_SIZE);
+    n_int second_length = io_length(second_string, STRING_BLOCK_SIZE);
+    n_int third_length = io_length(third_string, STRING_BLOCK_SIZE);
+    n_int carried_length = 0;
+        
+    if (first_length > 0)
     {
-        n_int second_input_length = io_length(second_string, STRING_BLOCK_SIZE);
-        io_copy((n_byte *)first_string, (n_byte *)output_string, input_length);
-        io_copy((n_byte *)second_string, (n_byte *)&output_string[input_length], second_input_length + 1);
-        return ;
+        io_copy((n_byte *)first_string, (n_byte *)output_string, first_length);
+        carried_length += first_length;
     }
-    input_length = io_length(first_string, STRING_BLOCK_SIZE);
-    if (input_length > 0)
+    if (second_length > 0)
     {
-        io_copy((n_byte *)second_string, (n_byte *)output_string, input_length + 1);
-        return;
+        io_copy((n_byte *)second_string, (n_byte *)&output_string[carried_length], second_length);
+        carried_length += second_length;
     }
-    output_string[0] = 0;
-}
-
-/* TODO: Add third and fiz second_string zero length case */
-
-void       io_string_string_string(n_string output_string, n_string first_string, n_string second_string, n_string third_string)
-{
-    n_int input_length = io_length(first_string, STRING_BLOCK_SIZE);
-    if (input_length > 0)
+    if (third_length > 0)
     {
-        n_int second_input_length = io_length(second_string, STRING_BLOCK_SIZE);
-        io_copy((n_byte *)first_string, (n_byte *)output_string, input_length);
-        io_copy((n_byte *)second_string, (n_byte *)&output_string[input_length], second_input_length + 1);
-        return ;
+        io_copy((n_byte *)third_string, (n_byte *)&output_string[carried_length], third_length);
+        carried_length += third_length;
     }
-    input_length = io_length(first_string, STRING_BLOCK_SIZE);
-    if (input_length > 0)
-    {
-        io_copy((n_byte *)second_string, (n_byte *)output_string, input_length + 1);
-        return;
-    }
-    output_string[0] = 0;
+    output_string[carried_length] = 0;
 }
 
 void io_time_to_string(n_string value)

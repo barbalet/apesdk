@@ -176,19 +176,21 @@ static void show_friends(void * ptr, n_string beingname, n_int friend_type, n_st
 
                 if (IS_FAMILY_MEMBER(local_social_graph,i))
                 {
-                    sprintf(relationship_str2," (%s)",relationship_str1);
+                    io_three_strings(relationship_str2, " (", relationship_str1, ")");
                 }
                 else
                 {
                     n_string_block meeter_being_name;
-                    sprintf(meeter_being_name," ");
+                    n_string_block string_of_strings;
+                    io_three_strings(meeter_being_name, " ", "", "");
                     social_graph_link_name(local_sim, local_being, i, BEING_MEETER, meeter_being_name);
-                    sprintf(relationship_str2," (%s of %s)",relationship_str1,meeter_being_name);
+                    io_three_strings(string_of_strings, relationship_str1, " of ", meeter_being_name);
+                    io_three_strings(relationship_str2, " (", string_of_strings, ")");
                 }
             }
             else
             {
-                sprintf(relationship_str2," ");
+                io_three_strings(relationship_str2, " ", "", "");
             }
             
             if (i != being_attention(local_being,ATTENTION_ACTOR))
@@ -1652,6 +1654,8 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 if (forever)
                 {
                     sprintf(output, "Running forever (type \"stop\" to end)");
+                    
+                    io_three_strings(output, "Running forever (type \"stop\" to end)", "", "");
                 }
                 else
                 {
