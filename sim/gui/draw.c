@@ -1348,10 +1348,10 @@ static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
     n_int offset_y = 100;
 
     n_string_block  bcps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
-                                   'B', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
+                                   'B', '/', 'S', ' ', ' ', ' ', ' ', ' ', ' ', 0
                                   };
     n_string_block  fps_string = {' ', ' ', ' ', ' ', ' ', ' ', 'X', ' ',
-                                  'F', 'P', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0
+                                  'F', '/', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 0
                                  };
 
     if (bcps)
