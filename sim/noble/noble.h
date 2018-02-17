@@ -480,8 +480,9 @@ typedef enum
 {
     KIND_LOAD_FILE = 0,
     KIND_NEW_SIMULATION,
+    KIND_NEW_APES,
     KIND_START_UP,
-    KIND_MEMORY_SETUP
+    KIND_MEMORY_SETUP,
 } KIND_OF_USE;
 
 typedef enum

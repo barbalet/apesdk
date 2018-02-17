@@ -97,14 +97,18 @@
     if ([self.shared cycleDebugOutput])
     {
         NSLog(@"Debug output");
-
         [self debugOutput];
     }
     if ([self.shared cycleQuit])
     {
         NSLog(@"Quit procedure initiated");
-
         [self quitProcedure];
+    }
+    
+    if ([self.shared cycleNewApes])
+    {
+        NSLog(@"New apes neede to continue simulation");
+        [self.shared newAgents];
     }
 
     /*[[self openGLContext] makeCurrentContext];*/
@@ -160,6 +164,12 @@
 {
     [self.shared newSimulation];
     NSLog(@"Finished new landscape");
+}
+
+- (IBAction) menuFileNewAgents:(id) sender
+{
+    [self.shared newAgents];
+    NSLog(@"Finished new agents");
 }
 
 - (IBAction) menuFileOpen:(id) sender

@@ -45,6 +45,7 @@
 - (void) menuCheckMark:(id)sender check:(int)value;
 
 - (IBAction) menuFileNew:(id) sender;
+- (IBAction) menuFileNewAgents:(id) sender;
 - (IBAction) menuFileOpen:(id) sender;
 - (IBAction) menuFileOpenScript:(id) sender;
 - (IBAction) menuFileSaveAs:(id) sender;

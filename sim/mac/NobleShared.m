@@ -67,20 +67,29 @@
     shared_about(cStringAboutName);
 }
 
-- (void) newSimulation
+
+- (void) updateRandomizingAgent
 {
     n_int loop = 0;
-    
     _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent();
-
     n_byte2 *ra_in_2_bytes = (n_byte2*)&_randomizing_agent;
-    
     while (loop < (sizeof(n_uint)/2))
     {
         math_random(&ra_in_2_bytes[loop*2]);
         loop++;
     }
+}
+
+- (void) newSimulation
+{
+    [self updateRandomizingAgent];
     (void)shared_new(_randomizing_agent);
+}
+
+- (void) newAgents
+{
+    [self updateRandomizingAgent];
+    (void)shared_new_agents(_randomizing_agent);
 }
 
 - (BOOL) start
@@ -206,6 +215,11 @@
 - (BOOL) cycleDebugOutput
 {
     return (_returned_value == SHARED_CYCLE_DEBUG_OUTPUT);
+}
+
+- (BOOL) cycleNewApes
+{
+    return (_returned_value == SHARED_CYCLE_NEW_APES);
 }
 
 - (BOOL) cycleQuit

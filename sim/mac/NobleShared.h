@@ -76,11 +76,15 @@
 
 - (void) newSimulation;
 
+- (void) newAgents;
+
 - (void) cycleWithWidth:(NSInteger)width height:(NSInteger)height;
 
 - (BOOL) cycleDebugOutput;
 
 - (BOOL) cycleQuit;
+
+- (BOOL) cycleNewApes;
 
 - (BOOL) menuPause;
 

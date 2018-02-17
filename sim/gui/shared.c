@@ -400,6 +400,12 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification, n_int 
         {
             sim_cycle();
         }
+        
+        if (sim_new_run_condition())
+        {
+            return_value = SHARED_CYCLE_NEW_APES;
+        }
+        
 #ifdef SCRIPT_DEBUG
         if (shared_script_debug_ready())
         {
@@ -482,17 +488,25 @@ void shared_clearErrors(void)
     (void)draw_error(0L, 0L, 0);
 }
 
-n_int shared_new(n_uint seed)
+
+static n_int shared_new_type(KIND_OF_USE type, n_uint seed)
 {
     static  n_int NewBlock = 0;
     if (NewBlock) return 0;
-
     NewBlock = 1;
-    (void)control_init(KIND_NEW_SIMULATION, seed);
-
+    (void)control_init(type, seed);
     NewBlock = 0;
-
     return 0;
+}
+
+n_int shared_new(n_uint seed)
+{
+    return shared_new_type(KIND_NEW_SIMULATION, seed);
+}
+
+n_int shared_new_agents(n_uint seed)
+{
+    return shared_new_type(KIND_NEW_APES, seed);
 }
 
 n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)

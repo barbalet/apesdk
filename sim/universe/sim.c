@@ -222,6 +222,8 @@ static n_interpret *interpret = 0L;
 
 static n_int        sim_new_progress = 0;
 
+static n_int        sim_new_run = 0;
+
 n_int sim_new(void)
 {
     return sim_new_progress;
@@ -236,6 +238,11 @@ static n_byte     threads_running[2] = {0};
 n_int sim_thread_console_quit(void)
 {
     return sim_quit_value;
+}
+
+n_int sim_new_run_condition(void)
+{
+    return sim_new_run;
 }
 
 static void sim_console_clean_up(void)
@@ -447,7 +454,11 @@ static void sim_being_remove_final(noble_simulation * local_sim, being_remove_lo
     
     if ((*brls)->count == 0)
     {
-        (void)SHOW_ERROR("No Apes remain start new run");
+        if (sim_new_run == 0)
+        {
+            (void)SHOW_ERROR("No Apes remain start new run");
+            sim_new_run = 1;
+        }
     }
     being_remove_internal_clear();
     io_free((void **)brls);
@@ -594,12 +605,15 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
     if (kind != KIND_MEMORY_SETUP)
     {
-        land_clear(kind, AGE_OF_MATURITY);
+        if (kind != KIND_NEW_APES)
+        {
+            land_clear(kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
-        land_init(&offbuffer[landbuffer_size], 0L);
-        land_init_high_def(1);
-        land_tide();
+            land_init(&offbuffer[landbuffer_size], 0L);
+            land_init_high_def(1);
+            land_tide();
 #endif
+        }
         if (kind != KIND_LOAD_FILE)
         {
 #ifdef WEATHER_ON

@@ -50,7 +50,8 @@ typedef enum
 {
     SHARED_CYCLE_OK = 0,
     SHARED_CYCLE_QUIT,
-    SHARED_CYCLE_DEBUG_OUTPUT
+    SHARED_CYCLE_DEBUG_OUTPUT,
+    SHARED_CYCLE_NEW_APES
 } shared_cycle_state;
 
 shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification, n_int dim_x, n_int dim_y);
@@ -81,12 +82,15 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 n_byte * shared_legacy_pointer(n_byte localIdentification);
 
 n_int shared_new(n_uint seed);
+n_int shared_new_agents(n_uint seed);
 
 n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
 
 void shared_saveFileName(n_string cStringFileName);
 
 void shared_script_debug_handle(n_string cStringFileName);
+
+n_int sim_new_run_condition(void);
 
 #ifndef	_WIN32
 
