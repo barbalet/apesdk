@@ -619,11 +619,8 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 #ifdef WEATHER_ON
             weather_init();
 #endif
-#if (MAP_BITS == 8)
+            /* Sets the number of Noble Apes initiaally created, and creates them */
             sim.num = being_init_group(sim.beings, local_random, sim.max >> 1, sim.max);
-#else
-            sim.num = being_init_group(sim.beings, local_random, sim.max >> 4, sim.max);
-#endif
         }
     }
 
