@@ -1988,7 +1988,7 @@ n_int episode_description(
                 {
                     n_string_block time_elapsed_string;
                     io_number_to_string(time_elapsed_string, time_elapsed);
-                    io_three_strings(str2, " ", time_elapsed_string, " minutes ago");
+                    io_three_strings(str2, " ", time_elapsed_string, " minutes ago", 0);
                     io_string_write(str,str2, &string_index);
                 }
             }
@@ -2002,7 +2002,7 @@ n_int episode_description(
                 {
                     n_string_block time_elapsed_string;
                     io_number_to_string(time_elapsed_string, time_elapsed/60);
-                    io_three_strings(str2, " ", time_elapsed_string, " hours ago");
+                    io_three_strings(str2, " ", time_elapsed_string, " hours ago", 0);
                     io_string_write(str,str2, &string_index);
                 }
             }
@@ -2017,7 +2017,7 @@ n_int episode_description(
             {
                 n_string_block days_elapsed_string;
                 io_number_to_string(days_elapsed_string, days_elapsed);
-                io_three_strings(str2, " ", days_elapsed_string, " days ago");
+                io_three_strings(str2, " ", days_elapsed_string, " days ago", 0);
                 io_string_write(str,str2, &string_index);
             }
         }
