@@ -1598,6 +1598,30 @@ void io_string_number(n_string output_string, n_string input_string,n_uint numbe
     io_number_to_string(output_string, number);
 }
 
+void        io_string_append(n_string output_string, n_string appending_string, n_byte new_line)
+{
+    n_int output_length = io_length(output_string, STRING_BLOCK_SIZE);
+    n_int appending_length = io_length(appending_string, STRING_BLOCK_SIZE);
+    n_int carried_length = 0;
+    if (output_length > 0)
+    {
+        carried_length += output_length;
+    }
+    if (appending_length > 0)
+    {
+        io_copy((n_byte *)appending_string, (n_byte *)&output_string[carried_length], appending_length);
+        carried_length += appending_length;
+    }
+    if (new_line)
+    {
+#ifdef    _WIN32
+        output_string[carried_length++] = 13;
+#endif
+        output_string[carried_length++] = 10;
+    }
+    output_string[carried_length] = 0;
+}
+
 void       io_three_strings(n_string output_string, n_string first_string, n_string second_string, n_string third_string)
 {
     n_int first_length = io_length(first_string, STRING_BLOCK_SIZE);
