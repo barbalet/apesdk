@@ -307,37 +307,68 @@ n_int console_simulation(void * ptr, n_string response, n_console_output output_
     n_string_block beingstr, time;
     n_int int_data[2];
     n_byte2 *local_land_genetics = land_genetics();
+    
+    n_string_block land_dimension, land_genetics0, land_genetics1, genetics, population;
+    n_string_block adults, juveniles, tide_level;
+    
     being_loop_no_thread(local_sim, 0L, console_simulation_loop, int_data);
 
-    sprintf(beingstr,"Map dimension: %ld\n", land_map_dimension());
-    sprintf(beingstr,"%sLand seed: %d %d\n",beingstr, (int)local_land_genetics[0], (int)local_land_genetics[1]);
-    sprintf(beingstr,"%sPopulation: %d   ", beingstr, (int)local_sim->num);
-    sprintf(beingstr,"%sAdults: %d   Juveniles: %d\n", beingstr, (int)(local_sim->num - int_data[1]),(int)int_data[1]);
+    io_number_to_string(land_dimension, land_map_dimension());
+    io_number_to_string(land_genetics0, local_land_genetics[0]);
+    io_number_to_string(land_genetics1, local_land_genetics[1]);
+    io_number_to_string(population, local_sim->num);
+    
+    io_number_to_string(adults, (local_sim->num - int_data[1]));
+    io_number_to_string(juveniles, int_data[1]);
+
+    io_number_to_string(tide_level, land_tide_level());
+
+    io_three_strings(beingstr, "Map dimension: ", land_dimension, "", 1);
+    
+    io_three_strings(genetics, land_genetics0, " ", land_genetics1, 0);
+    
+    io_three_strings(beingstr, beingstr, "Land seed: ", genetics, 1);
+    io_three_strings(beingstr, beingstr, "Population: ", population, 1);
+    io_three_strings(beingstr, beingstr, "Adults: ", adults, 0);
+    io_three_strings(beingstr, beingstr, "   Juveniles: ", juveniles, 1);
+
+    
     if (local_sim->num > 0)
     {
-        sprintf(beingstr,"%sFemales: %d (%.1f%%)   Males: %d (%.1f%%)\n", beingstr,
-                (int)int_data[0], int_data[0]*100.0f/local_sim->num,
-                (int)(local_sim->num - int_data[0]),(local_sim->num - int_data[0])*100.0f/local_sim->num);
+        n_string_block males, females, males_percent, females_percent;
+        io_number_to_string(males, (local_sim->num - int_data[0]));
+        io_number_to_string(females, int_data[0]);
+        
+        io_number_to_string(males_percent, ((local_sim->num - int_data[0])*100)/local_sim->num);
+        io_number_to_string(females_percent, (int_data[0] * 100)/local_sim->num);
+        
+        io_three_strings(beingstr, beingstr, "Females: ", females, 0);
+        io_three_strings(beingstr, beingstr, " (", females_percent, 0);
+        io_three_strings(beingstr, beingstr, "%)   Males: ", males, 0);
+        io_three_strings(beingstr, beingstr, " (", males_percent, 0);
+        io_three_strings(beingstr, beingstr, "%)", "", 1);
     }
-    sprintf(beingstr,"%sTide level: %d\n", beingstr, (int)land_tide_level());
+
+    io_three_strings(beingstr, beingstr, "Tide level: ", tide_level, 1);
 
     io_time_to_string(time);
 
     if (local_sim->delta_cycles)
     {
-        sprintf(beingstr,"%sBrain Cycles Per Second: %ld\n", beingstr, local_sim->delta_cycles);
+        n_string_block delta_cycles;
+        
+        io_number_to_string(delta_cycles, local_sim->delta_cycles);
+
+        io_three_strings(beingstr, beingstr, "Brain Cycles Per Second: ", delta_cycles, 1);
     }
-
-
-    sprintf(beingstr,"%s%s", beingstr, time);
 
     if (simulation_executing)
     {
-        sprintf(beingstr,"%s Simulation running", beingstr);
+        io_three_strings(beingstr, beingstr, time, " Simulation running", 0);
     }
     else
     {
-        sprintf(beingstr,"%s Simulation not running", beingstr);
+        io_three_strings(beingstr, beingstr, time, " Simulation not running", 0);
     }
 
     output_function(beingstr);

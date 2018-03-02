@@ -201,7 +201,7 @@ int command_line_run(void)
     io_command_line_execution_set();
     
     srand((unsigned int) time(NULL) );
-    sim_init(2,rand(),MAP_AREA,0);
+    sim_init(KIND_START_UP, rand(), MAP_AREA, 0);
     
     cle_load(local_sim, (n_string)simulation_filename, io_console_out);
     

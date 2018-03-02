@@ -1605,7 +1605,9 @@ void being_relationship_description(n_int index, n_string description)
     n_int position = 0;
     if (index >= RELATIONSHIPS)
     {
-        sprintf(description,"ERROR: relationship out of range %d\n",(int)index);
+        n_string_block index_string;
+        io_number_to_string(index_string, index);
+        io_three_strings(description, "ERROR: relationship out of range ", index_string, "", 1);
         return;
     }
     io_string_write(description, relationship_description[index], &position);
