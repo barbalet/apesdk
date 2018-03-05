@@ -1533,21 +1533,25 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
 
     if (interval_set == 0)
     {
+        n_string_block number_string;
         if (save_interval_steps < 60)
         {
-            sprintf(output,"Current time interval is %d min(s)", (int)save_interval_steps);
+            io_number_to_string(number_string, save_interval_steps);
+            io_three_strings(output, "Current time interval is ",number_string, " min(s)",0);
             output_function(output);
         }
         else
         {
             if (save_interval_steps < 60*24)
             {
-                sprintf(output,"Current time interval is %d hour(s)", (int)save_interval_steps/60);
+                io_number_to_string(number_string, save_interval_steps/60);
+                io_three_strings(output, "Current time interval is ",number_string, " hour(s)",0);
                 output_function(output);
             }
             else
             {
-                sprintf(output,"Current time interval is %d day(s)", (int)save_interval_steps/(60*24));
+                io_number_to_string(number_string, save_interval_steps/(60*24));
+                io_three_strings(output, "Current time interval is ",number_string, " day(s)",0);
                 output_function(output);
             }
         }
@@ -1683,9 +1687,7 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 save_interval_steps = 1;
 
                 if (forever)
-                {
-                    sprintf(output, "Running forever (type \"stop\" to end)");
-                    
+                {                    
                     io_three_strings(output, "Running forever (type \"stop\" to end)", "", "", 0);
                 }
                 else
@@ -2026,17 +2028,19 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 
         being_name_simple(b, str);
 
-        sprintf(output_value, "%s%s", output_value,str);
-
-        for (k=0; k<25-io_length(str,STRING_BLOCK_SIZE); k++) sprintf(output_value, "%s ", output_value);
-
+        io_three_strings(output_value, output_value, str, "", 0);
+        
+        for (k=0; k<25-io_length(str,STRING_BLOCK_SIZE); k++)
+        {
+            io_three_strings(output_value, output_value, " ", "", 0);
+        }
         if (FIND_SEX(GET_I(b)) == SEX_FEMALE)
         {
-            sprintf(output_value,"%sFemale\t",output_value);
+            io_three_strings(output_value, output_value, "Female\t", "", 0);
         }
         else
         {
-            sprintf(output_value,"%sMale\t",output_value);
+            io_three_strings(output_value, output_value, "Male\t", "", 0);
         }
 
         current_date = land_date();
