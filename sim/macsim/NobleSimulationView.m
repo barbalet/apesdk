@@ -80,7 +80,7 @@
 {
     NSInteger              dim_x = (NSInteger)rect.size.width;
     NSInteger              dim_y = (NSInteger)rect.size.height;
-    static unsigned char   outputBuffer[2048*1536*3];
+    static unsigned char   outputBuffer[TERRAIN_WINDOW_AREA*3];
     
     [[self openGLContext] makeCurrentContext];
     

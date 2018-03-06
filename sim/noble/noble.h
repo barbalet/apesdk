@@ -471,8 +471,8 @@ typedef enum
 
 enum window_information
 {
-    TERRAIN_WINDOW_WIDTH		= (2048),
-    TERRAIN_WINDOW_HEIGHT       = (1536),
+    TERRAIN_WINDOW_WIDTH		= (4096),
+    TERRAIN_WINDOW_HEIGHT       = (3072),
     TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT)
 };
 
