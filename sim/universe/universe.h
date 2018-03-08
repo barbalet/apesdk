@@ -327,7 +327,7 @@ enum
 
 static const n_int interval_steps[] =
 { 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
-static const n_constant_string interval_description[] = { "mins","hours","days","months","years" };
+static const n_constant_string interval_description[] = { " mins"," hours"," days"," months"," years" };
 
 #define FISHING_PROB  (1<<8)
 

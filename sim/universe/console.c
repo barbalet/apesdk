@@ -747,8 +747,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
     }
     io_string_write(result, "\n", &watch_string_length);
 
-    sprintf((n_string)type_str,"%s","Input ");
-
+    io_three_strings(type_str, "Input ", "", "", 0);
     for (i = 0; i < BRAINCODE_PROBES; i++)
     {
         if (local_being->braindata.brainprobe[i].type == INPUT_SENSOR)
@@ -764,7 +763,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, noble_being * local
         }
     }
 
-    sprintf((n_string)type_str,"%s","Output");
+    io_three_strings(type_str, "Output ", "", "", 0);
 
     for (i = 0; i < BRAINCODE_PROBES; i++)
     {
@@ -1051,9 +1050,7 @@ static void watch_being(void * ptr, n_console_output output_function)
 
         watch_string_length=0;
 
-        sprintf((n_string)str,"\nTime:        %02d:%02d\n\n",
-                (int)(land_time()/60),
-                (int)(land_time()%60));
+        io_time_to_string(str);
         io_string_write(beingstr,str,&watch_string_length);
         histogram_being_state(local_sim, (n_uint*)histogram, 1);
         for (i = 0; i < BEING_STATES; i++)
@@ -1335,9 +1332,6 @@ n_int console_idea(void * ptr, n_string response, n_console_output output_functi
                             {
                                 histogram[block_size-min_block_size]++;
                                 total_matches++;
-                                /* n_string_block output;
-                                sprintf(output, "%ld %ld, %ld",loop, loop2, block_size);
-                                output_function(output); */
                             }
                             total_tests++;
                             block_size++;
@@ -1511,7 +1505,6 @@ n_int console_watch(void * ptr, n_string response, n_console_output output_funct
  */
 n_int console_interval(void * ptr, n_string response, n_console_output output_function)
 {
-    n_string_block  output;
     n_int number=1,interval=INTERVAL_DAYS,interval_set=0;
 
     if (response != 0)
@@ -1522,8 +1515,10 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
             {
                 if (number > 0)
                 {
+                    n_string_block  output, number_string;
                     save_interval_steps = number * interval_steps[interval];
-                    sprintf(output, "Logging interval set to %u %s",(unsigned int)number, interval_description[interval]);
+                    io_number_to_string(number_string, number);
+                    io_three_strings(output, "Logging interval set to ", number_string, (n_string)interval_description[interval], 0);
                     output_function(output);
                     interval_set=1;
                 }
@@ -1536,6 +1531,7 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
         n_string_block number_string;
         if (save_interval_steps < 60)
         {
+            n_string_block  output, number_string;
             io_number_to_string(number_string, save_interval_steps);
             io_three_strings(output, "Current time interval is ",number_string, " min(s)",0);
             output_function(output);
@@ -1544,12 +1540,14 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
         {
             if (save_interval_steps < 60*24)
             {
+                n_string_block  output, number_string;
                 io_number_to_string(number_string, save_interval_steps/60);
                 io_three_strings(output, "Current time interval is ",number_string, " hour(s)",0);
                 output_function(output);
             }
             else
             {
+                n_string_block  output, number_string;
                 io_number_to_string(number_string, save_interval_steps/(60*24));
                 io_three_strings(output, "Current time interval is ",number_string, " day(s)",0);
                 output_function(output);
@@ -1692,7 +1690,9 @@ n_int console_run(void * ptr, n_string response, n_console_output output_functio
                 }
                 else
                 {
-                    sprintf(output, "Running for %d %s", (int)number, interval_description[interval]);
+                    n_string_block  number_string;
+                    io_number_to_string(number_string, number);
+                    io_three_strings(output, "Running for ", number_string, (n_string)interval_description[interval], 0);
                 }
 
                 output_function(output);
@@ -2051,14 +2051,21 @@ n_int console_top(void * ptr, n_string response, n_console_output output_functio
 
         if (age_in_years>0)
         {
-            sprintf(output_value, "%s%02d yrs ", output_value, (int)age_in_years);
+            n_string_block number;
+            io_number_to_string(number, age_in_years);
+            io_three_strings(output_value, output_value, number, " yrs ", 0 );
         }
         if (age_in_months>0)
         {
-            sprintf(output_value,"%s%02d mnths ", output_value,(int)age_in_months);
+            n_string_block number;
+            io_number_to_string(number, age_in_months);
+            io_three_strings(output_value, output_value, number, " mnths ", 0 );
         }
-        sprintf(output_value,"%s%02d days",output_value, (int)age_in_days);
-
+        {
+            n_string_block number;
+            io_number_to_string(number, age_in_days);
+            io_three_strings(output_value, output_value, number, "  days", 0 );
+        }
         output_function(output_value);
 
     }
