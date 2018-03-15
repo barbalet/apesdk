@@ -864,6 +864,12 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
 
     /*io_output_contents(fil);*/
 
+    printf("String length : %ld\n", io_length((n_string)fil->data, 0xffff));
+    printf("Actual size : %lu\n", fil->size);
+    printf("String location : %lu\n", fil->location);
+
+    NA_ASSERT(0, "Failed here");
+    
     return SHOW_ERROR((n_constant_string)found_text);
 }
 

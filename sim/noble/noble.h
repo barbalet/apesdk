@@ -42,6 +42,8 @@
 #define _NOBLEAPE_NOBLE_H_
 /*	Variable Definitions */
 
+#include <signal.h>
+
 #undef  NEW_OPENGL_ENVIRONMENT
 
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
@@ -134,7 +136,7 @@ typedef	short	n_audio;
 
 #ifdef NOBLE_APE_ASSERT
 
-#define NA_ASSERT(test, message) if(!(test))io_assert(message, __FILE__, __LINE__)
+#define NA_ASSERT(test, message) {if(!(test))io_assert(message, __FILE__, __LINE__); raise(SIGINT);}
 
 void io_assert(n_string message, n_string file_loc, n_int line);
 
