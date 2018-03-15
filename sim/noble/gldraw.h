@@ -60,6 +60,7 @@ void gldraw_thin_line(void);
 
 void gldraw_orange(void);
 void gldraw_blue(void);
+void gldraw_blue_strong(void);
 void gldraw_blue_clear(void);
 
 void gldraw_darkgrey(void);
@@ -70,6 +71,8 @@ void gldraw_lightgrey_clear(void);
 void gldraw_black(void);
 
 void gldraw_red(void);
+void gldraw_red_strong(void);
+
 void gldraw_green(void);
 void gldraw_lightgreen(void);
 

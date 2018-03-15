@@ -179,7 +179,17 @@ void gldraw_thin_line()
 
 void gldraw_red(void)
 {
-    glColor3f(1, 0, 0);
+    glColor3f(1.0, 0.0, 0.0);
+}
+
+void gldraw_red_strong()
+{
+    glColor3f(1.0, 0.3, 0.3);
+}
+
+void gldraw_blue_strong()
+{
+    glColor3f(0.5, 0.5, 1.0);
 }
 
 void gldraw_green(void)
