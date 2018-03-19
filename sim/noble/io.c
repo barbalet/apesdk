@@ -207,6 +207,14 @@ n_int io_bytes_to_int(n_byte * bytes)
     return return_value;
 }
 
+n_uint io_file_hash(n_file * local_file)
+{
+    n_uint hash = math_hash((n_byte *)&local_file->location, sizeof(n_uint));
+    hash ^= math_hash((n_byte *)&local_file->size, sizeof(n_uint));
+    hash ^= math_hash(local_file->data, local_file->size);
+    return hash;
+}
+
 /**
  * Reads a file from disk.
  * @param local_file the pointer to the n_file data that will have the file stored in it.
@@ -215,6 +223,7 @@ n_int io_bytes_to_int(n_byte * bytes)
  */
 n_int io_disk_read(n_file * local_file, n_string file_name)
 {
+    n_uint file_size;
 #ifndef _WIN32
     FILE * in_file = fopen(file_name,"rb");
 #else
@@ -225,6 +234,24 @@ n_int io_disk_read(n_file * local_file, n_string file_name)
     {
         return SHOW_ERROR("File does not exist");
     }
+    
+#if 1
+    fseek(in_file, 0L, SEEK_END);
+    file_size = ftell(in_file);
+    fseek(in_file, 0L, SEEK_SET);
+
+    io_free((void**)&local_file->data);
+    
+    local_file->data = io_new(file_size);
+    if (local_file->data == 0L)
+    {
+        return SHOW_ERROR("File data could not be allocated");
+    }
+    fread(local_file->data, 1, file_size, in_file);
+    
+    local_file->size = file_size;
+    local_file->location = 0;
+#else
     while (!feof(in_file))
     {
         n_byte local_char;
@@ -241,6 +268,7 @@ n_int io_disk_read(n_file * local_file, n_string file_name)
             }
         }
     }
+#endif
     fclose(in_file);
     return FILE_OKAY;
 }
@@ -571,10 +599,10 @@ void io_whitespace(n_file * input)
     n_uint	loop = 0, out_loop = 0;
     n_uint	end_loop = input->size;
     n_byte	*local_data = input->data;
-    while(loop<end_loop)
+    
+    while(loop < end_loop)
     {
         n_byte	temp = local_data[loop++];
-
         if((temp == '/') && (loop != end_loop))
         {
             n_byte	check_twice[2]= {'/', 0};
@@ -604,13 +632,14 @@ void io_whitespace(n_file * input)
             local_data[out_loop++] = temp;
         }
     }
+    
     loop = out_loop;
+    
     while (loop < end_loop)
     {
         local_data[loop++] = 0;
     }
     input->size = out_loop;
-
 }
 
 /**
@@ -867,6 +896,15 @@ n_int io_command(n_file * fil, const noble_file_entry * commands)
     printf("String length : %ld\n", io_length((n_string)fil->data, 0xffff));
     printf("Actual size : %lu\n", fil->size);
     printf("String location : %lu\n", fil->location);
+
+    printf("Failed text %s\n", found_text);
+
+    printf("Failed text %d\n", found_text[0]);
+    printf("Failed text %d\n", found_text[1]);
+    printf("Failed text %d\n", found_text[2]);
+    printf("Failed text %d\n", found_text[3]);
+    printf("Failed text %d\n", found_text[4]);
+    printf("Failed text %d\n", found_text[5]);
 
     NA_ASSERT(0, "Failed here");
     

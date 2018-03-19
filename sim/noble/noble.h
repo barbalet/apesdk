@@ -136,7 +136,7 @@ typedef	short	n_audio;
 
 #ifdef NOBLE_APE_ASSERT
 
-#define NA_ASSERT(test, message) {if(!(test))io_assert(message, __FILE__, __LINE__); raise(SIGINT);}
+#define NA_ASSERT(test, message) if(!(test)){io_assert(message, __FILE__, __LINE__); raise(SIGINT);}
 
 void io_assert(n_string message, n_string file_loc, n_int line);
 
@@ -756,6 +756,8 @@ void       io_help_line(noble_console_command * specific, n_console_output outpu
 void       io_console_quit(void);
 
 void       io_output_contents(n_file * file);
+
+n_uint     io_file_hash(n_file * file);
 
 n_file * io_file_ready(n_int entry, n_file * file);
 
