@@ -819,7 +819,8 @@ void compress_expand(n_file *input, n_file *output);
 #define	POSITIVE_LAND_COORD(num)       ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
 #define	POSITIVE_LAND_COORD_HIRES(num) ((num+(3*HI_RES_MAP_DIMENSION))&(HI_RES_MAP_DIMENSION-1))
 #define NUMBER_LAND_TILES              (MAP_DIMENSION/LAND_TILE_EDGE)
-#define WEATHER_TO_MAPSPACE(num)       ((num)*2)
+#define WEATHER_TO_MAPSPACE(num)       ((num))
+#define MAPSPACE_TO_WEATHER(num)       ((num))
 
 #define LAND_DITHER(x,y,z)             (((x+y+z)&15)-(((x&y)|z)&7)-((x|(y&z))&7))
 

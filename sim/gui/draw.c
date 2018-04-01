@@ -1288,7 +1288,7 @@ static void draw_region(noble_being * local)
 
 static void draw_weather(void)
 {
-    n_int map_dimensions2 = land_map_dimension()/2;
+    n_int map_dimensions = land_map_dimension();
     n_color8	 local_col;
     n_pixel	   * local_draw = &pixel_color8;
     void	   * local_info = &local_col;
@@ -1299,21 +1299,28 @@ static void draw_weather(void)
     {
         return;
     }
-    while(py < (map_dimensions2))
+    while(py < (map_dimensions))
     {
         n_int	px = 0;
-        n_int	scr_y = py << 1;
-        while(px < (map_dimensions2))
+        n_int	scr_y = py;
+        while(px < (map_dimensions))
         {
-            n_int	scr_x = px << 1;
+            n_int	scr_x = px;
             n_int	tmp = weather_pressure(WEATHER_TO_MAPSPACE(px), WEATHER_TO_MAPSPACE(py)); /* from weather dimension to map dimension */
-            if(tmp > WEATHER_CLOUD)
+            
+            if (((scr_x & 1) == 1) && ((scr_y & 1) == 1))
             {
-                (*local_draw)(scr_x+1, scr_y+1, 0, 0, local_info);
+                if(tmp > WEATHER_CLOUD)
+                {
+                    (*local_draw)(scr_x, scr_y, 0, 0, local_info);
+                }
             }
-            if(tmp > WEATHER_RAIN)
+            if (((scr_x & 1) == 0) && ((scr_y & 1) == 0))
             {
-                (*local_draw)(scr_x, scr_y , 0, 0, local_info);
+                if(tmp > WEATHER_RAIN)
+                {
+                    (*local_draw)(scr_x, scr_y , 0, 0, local_info);
+                }
             }
             px++;
         }

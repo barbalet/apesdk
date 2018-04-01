@@ -79,8 +79,8 @@ static n_byte2     m_time;                                  /* save-able */
 static n_byte      m_topology[MAP_AREA];                    /* generated */
 static n_byte      m_topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
 static n_byte4     m_highres_tide[HI_RES_MAP_AREA/32];      /* generated */
-static n_byte2     m_delta_pressure[ MAP_AREA / 4];         /* generated */
-static n_c_int	   m_atmosphere[ MAP_AREA / 4];             /* save-able and generate-able */
+static n_byte2     m_delta_pressure[ MAP_AREA];         /* generated */
+static n_c_int	   m_atmosphere[ MAP_AREA];             /* save-able and generate-able */
 static n_byte      m_tide_level;                            /* generated */
 
 void * land_ptr(void)
@@ -128,25 +128,22 @@ static n_int weather_delta(void)
 {
     n_int    lx = 0;
     n_int    average = 0;
-    n_int    map_dimensions2;
-    n_int    map_bits2;
+    n_int    map_dimensions = land_map_dimension();;
+    n_int    map_bits       = land_map_bits();
 
-    map_dimensions2 = land_map_dimension() / 2;
+    if (map_bits < 0) return 0;
 
-    map_bits2       = land_map_bits() - 1;
-    if (map_bits2 < 0) return 0;
-
-    while (lx < map_dimensions2)
+    while (lx < map_dimensions)
     {
         n_int ly = 0;
-        while (ly < map_dimensions2)
+        while (ly < map_dimensions)
         {
             average += weather_pressure(WEATHER_TO_MAPSPACE(lx), WEATHER_TO_MAPSPACE(ly));
             ly++;
         }
         lx++;
     }
-    average = average >> map_bits2;
+    average = average >> map_bits;
     return average;
 }
 
@@ -161,7 +158,7 @@ static void weather_wrap(n_c_int * section)
     n_int min = bits_pos;
     {
         n_int placement = 0;
-        while (placement < (MAP_AREA / 4))
+        while (placement < (MAP_AREA))
         {
             n_c_int value = section[placement++];
             if (value > max)
@@ -177,7 +174,7 @@ static void weather_wrap(n_c_int * section)
     if ((min < bits_neg) || (max > bits_pos))
     {
         n_int placement = 0;
-        while (placement < (MAP_AREA / 4))
+        while (placement < (MAP_AREA))
         {
             n_c_int value = section[placement];
             section[placement++] = (value * 253) / 256;
@@ -189,30 +186,30 @@ void weather_cycle(void)
 {
     n_int         local_delta;
     n_int         ly = 0;
-    n_int         map_dimensions2 = land_map_dimension()/ 2;
-    n_int         map_bits2 = land_map_bits() - 1;
+    n_int         map_dimensions = land_map_dimension();
+    n_int         map_bits = land_map_bits();
 
-    if (map_bits2 < 0) return;
+    if (map_bits < 0) return;
 
     local_delta = weather_delta();
 
-    while ( ly < map_dimensions2 )
+    while ( ly < map_dimensions )
     {
-        n_int	ly_min = ((ly + (map_dimensions2-1) ) & ((map_dimensions2)-1)) * map_dimensions2;
-        n_int	ly_plu = ((ly + 1 ) & (map_dimensions2-1)) * map_dimensions2;
-        n_int	ly_neu = ly * map_dimensions2;
+        n_int	ly_min = ((ly + (map_dimensions-1) ) & ((map_dimensions)-1)) * map_dimensions;
+        n_int	ly_plu = ((ly + 1 ) & (map_dimensions-1)) * map_dimensions;
+        n_int	ly_neu = ly * map_dimensions;
         n_int	lx = 0;
-        while ( lx < map_dimensions2 )
+        while ( lx < map_dimensions )
         {
             n_int	local_atm =
-                ((n_int)m_delta_pressure[ lx | ly_neu ] << map_bits2)
-                - (512 << map_bits2)
-                - m_atmosphere[ ((lx + 1 ) & (map_dimensions2-1)) | ly_neu ]
-                + m_atmosphere[ ((lx + (map_dimensions2-1) ) & ((map_dimensions2)-1)) | ly_neu ]
+                ((n_int)m_delta_pressure[ lx | ly_neu ] << map_bits)
+                - (512 << map_bits)
+                - m_atmosphere[ ((lx + 1 ) & (map_dimensions-1)) | ly_neu ]
+                + m_atmosphere[ ((lx + (map_dimensions-1) ) & ((map_dimensions)-1)) | ly_neu ]
                 - m_atmosphere[ lx | ly_plu ]
                 + m_atmosphere[ lx | ly_min ];
 
-            m_atmosphere[ lx | ly_neu ] += (local_atm - local_delta) >> map_bits2;
+            m_atmosphere[ lx | ly_neu ] += (local_atm - local_delta) >> map_bits;
             lx++;
         }
         ly++;
@@ -223,46 +220,37 @@ void weather_cycle(void)
 
 void weather_init(void)
 {
-    n_int map_dimension2 = land_map_dimension()/2;
-    n_int map_bits2      = land_map_bits() - 1;
+    n_int map_dimension = land_map_dimension();
+    n_int map_bits      = land_map_bits();
     n_int ly = 0;
-    n_int ly2 = 0;
 
-    if (map_bits2 < 0) return;
+    if (map_bits < 0) return;
 
-    io_erase((n_byte *)m_atmosphere, sizeof(n_c_int) * MAP_AREA / 4);
-    io_erase((n_byte *)m_delta_pressure, sizeof(n_byte2) * MAP_AREA / 4);
+    io_erase((n_byte *)m_atmosphere, sizeof(n_c_int) * MAP_AREA);
+    io_erase((n_byte *)m_delta_pressure, sizeof(n_byte2) * MAP_AREA);
 
-    while ( ly < map_dimension2 )
+    while ( ly < map_dimension )
     {
         n_int	lx = 0;
-        ly2 = ly << 1;
-        while ( lx < map_dimension2 )
+        while ( lx < map_dimension )
         {
-            n_int lx2 = lx << 1;
-            n_int     total_land =  land_location(lx2,     ly2)
-                                    + land_location(lx2 + 1, ly2)
-                                    + land_location(lx2,     ly2 + 1)
-                                    + land_location(lx2 + 1, ly2 + 1);
-
-
-            m_atmosphere[ (map_dimension2 * ly) + lx ] = (n_c_int)total_land;
+            m_atmosphere[ (map_dimension * ly) + lx ] = (n_c_int)(land_location(lx,ly)*4);
             lx++;
         }
         ly++;
     }
     ly=0;
-    while ( ly < (map_dimension2) )
+    while ( ly < (map_dimension) )
     {
         n_int		lx = 0;
-        n_uint		ly_plu = ((ly + 1 ) & ((map_dimension2)-1)) * map_dimension2;
-        n_uint		ly_min = ((ly + (map_dimension2-1)) & (map_dimension2-1)) * map_dimension2;
-        n_uint      ly_neu = (ly * map_dimension2);
-        while ( lx < (map_dimension2) )
+        n_uint		ly_plu = ((ly + 1 ) & ((map_dimension)-1)) * map_dimension;
+        n_uint		ly_min = ((ly + (map_dimension-1)) & (map_dimension-1)) * map_dimension;
+        n_uint      ly_neu = (ly * map_dimension);
+        while ( lx < (map_dimension) )
         {
             m_delta_pressure[ ly_neu + lx ]
-                = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension2)-1)) + ly_neu]
-                            - m_atmosphere[(( lx + ((map_dimension2)-1) ) & ((map_dimension2)-1)) + ly_neu]
+                = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension)-1)) + ly_neu]
+                            - m_atmosphere[(( lx + ((map_dimension)-1) ) & ((map_dimension)-1)) + ly_neu]
                             + m_atmosphere[ lx + ly_plu ]
                             - m_atmosphere[ lx + ly_min ]
                             + 512);
@@ -272,27 +260,22 @@ void weather_init(void)
     }
 
     ly = 0;
-    while( ly < (map_dimension2 * map_dimension2))
+    while( ly < (map_dimension * map_dimension))
     {
         m_atmosphere[ ly ] = 0;
         ly++;
     }
-    ly = 0;
-    while( ly < (map_dimension2 * 2))
-    {
-        weather_cycle();
-        ly++;
-    }
+
 }
 
 n_int weather_pressure(n_int px, n_int py)
 {
-    n_int   dimension2 = land_map_dimension()/2;
+    n_int   dimension = land_map_dimension();
 
-    n_int   tpx = ((px/2) + dimension2) % dimension2;
-    n_int   tpy = ((py/2) + dimension2) % dimension2;
+    n_int   tpx = (MAPSPACE_TO_WEATHER(px) + dimension) % dimension;
+    n_int   tpy = (MAPSPACE_TO_WEATHER(py) + dimension) % dimension;
 
-    return  m_atmosphere[(dimension2 * tpy) + tpx];
+    return  m_atmosphere[(dimension * tpy) + tpx];
 }
 
 void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind)
@@ -305,7 +288,7 @@ void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind)
     if (wind == 0L) return;
 
     local_pressure = weather_pressure(pos->x, pos->y);
-    wind->x = local_pressure - weather_pressure(pos->x - WEATHER_TO_MAPSPACE(1), (pos->y>>1));
+    wind->x = local_pressure - weather_pressure(pos->x - WEATHER_TO_MAPSPACE(1), pos->y);
     wind->y = local_pressure - weather_pressure(pos->x, pos->y  - WEATHER_TO_MAPSPACE(1));
 }
 
