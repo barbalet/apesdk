@@ -117,6 +117,8 @@ static const n_byte	icns[896] =
 static n_byte           number_errors;
 static n_string_block	error_array[MAX_NUMBER_ERRORS + 1];
 
+static n_byte           weather_grayscale[MAP_AREA];
+
 #ifdef BRAIN_ON
 static n_uint	tilt_y = 0;
 #endif
@@ -1286,13 +1288,48 @@ static void draw_region(noble_being * local)
 #endif
 }
 
-static void draw_weather(void)
+#if 1
+
+n_byte * draw_weather_grayscale(void)
+{
+    return weather_grayscale;
+}
+
+static void draw_weather(n_byte toggle)
+{
+    if (toggle)
+    {
+        n_c_int *local_pressure = land_weather();
+        n_int loop = 0;
+        while(loop < MAP_AREA)
+        {
+            n_int value = local_pressure[ loop ]>>9;
+            if (value < 0) value = 0;
+            if (value > 255) value = 255;
+            weather_grayscale[ loop ] = value;
+            loop++;
+        }
+    }
+    else
+    {
+        io_erase(weather_grayscale, MAP_AREA);
+    }
+}
+
+#else
+static void draw_weather(n_byte toggle)
 {
     n_int map_dimensions = land_map_dimension();
     n_color8	 local_col;
     n_pixel	   * local_draw = &pixel_color8;
     void	   * local_info = &local_col;
     n_int        py = 0;
+    
+    if (toggle == 0)
+    {
+        return;
+    }
+    
     local_col.color = COLOUR_GREY;
     local_col.screen = draw_pointer(NUM_VIEW);
     if (local_col.screen == 0L)
@@ -1327,6 +1364,7 @@ static void draw_weather(void)
         py++;
     }
 }
+#endif
 
 static void draw_count_number(n_uint count, n_string value)
 {
@@ -1830,10 +1868,7 @@ void  draw_cycle(n_byte size_changed)
 #endif
 
 #ifdef WEATHER_ON
-    if (toggle_weather)
-    {
-        draw_weather(); /* 10 */
-    }
+    draw_weather(toggle_weather); /* 10 */
 #endif
 
 #ifdef MULTITOUCH_CONTROLS

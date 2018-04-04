@@ -123,6 +123,10 @@ n_byte4 * land_highres_tide(void)
     return (n_byte4 *)m_highres_tide;
 }
 
+n_c_int * land_weather(void)
+{
+    return (n_c_int *)m_atmosphere;
+}
 
 static n_int weather_delta(void)
 {

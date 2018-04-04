@@ -605,15 +605,14 @@ n_byte * shared_legacy_pointer(n_byte fIdentification)
 
 void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed)
 {
+    n_byte           * index = draw_pointer(fIdentification);
 #ifdef	_WIN32
-	n_byte           * index = draw_pointer(fIdentification);
 	io_copy(index, outputBuffer, dim_x * dim_y);
 #else
     n_int           ly = 0;
     n_int           loop = 0;
     n_int			loopColors = 0;
     n_byte2         fit[256*3];
-    n_byte           * index = draw_pointer(fIdentification);
 #ifdef NOBLE_IOS
     n_byte4         * offscreenBuffer = (n_byte4 *) outputBuffer;
     n_byte4        colorLookUp[256];
@@ -677,30 +676,57 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 
             ly++;
         }
-
-
         return;
     }
 #endif
 #endif
 
-    loop = 0;
-    while(ly < dim_y)
+    if (fIdentification == NUM_VIEW)
     {
-        n_int    lx = 0;
-        n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
-        while(lx < dim_x)
+        n_byte * local_weather = draw_weather_grayscale();
+        loop = 0;
+        while(ly < dim_y)
         {
+            n_int    lx = 0;
+            n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
+            n_byte * weatherLocalX = &local_weather[(dim_y-ly-1)*dim_x];
+            while(lx < dim_x)
+            {
 #ifdef NOBLE_IOS
-            offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
+                offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
 #else
-            unsigned char value = indexLocalX[lx++] ;
-            outputBuffer[loop++] = colorLookUp[value][0];
-            outputBuffer[loop++] = colorLookUp[value][1];
-            outputBuffer[loop++] = colorLookUp[value][2];
+                n_byte value = indexLocalX[lx];
+                n_byte cloud = weatherLocalX[lx];
+                n_int negCloud = 256 - cloud;
+                lx++;
+                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][0])>>8);
+                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][1])>>8);
+                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][2])>>8);
 #endif
+            }
+            ly++;
         }
-        ly++;
+    }
+    else
+    {
+        loop = 0;
+        while(ly < dim_y)
+        {
+            n_int    lx = 0;
+            n_byte * indexLocalX = &index[(dim_y-ly-1)*dim_x];
+            while(lx < dim_x)
+            {
+#ifdef NOBLE_IOS
+                offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
+#else
+                n_byte value = indexLocalX[lx++] ;
+                outputBuffer[loop++] = colorLookUp[value][0];
+                outputBuffer[loop++] = colorLookUp[value][1];
+                outputBuffer[loop++] = colorLookUp[value][2];
+#endif
+            }
+            ly++;
+        }
     }
 #endif
 }

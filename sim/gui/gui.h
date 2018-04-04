@@ -142,6 +142,8 @@ void graph_vascular(noble_being * being,
 void graph_socialsim(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
 void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
 
+n_byte * draw_weather_grayscale(void);
+
 void draw_meters(noble_simulation * local_sim);
 
 n_int draw_toggle_weather(void);

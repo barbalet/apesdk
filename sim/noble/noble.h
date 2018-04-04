@@ -1084,6 +1084,7 @@ n_byte land_tide_level(void);
 n_byte * land_topology(void);
 n_byte * land_topology_highdef(void);
 n_byte4 * land_highres_tide(void);
+n_c_int * land_weather(void);
 
 #ifdef	SCRIPT_DEBUG
 
