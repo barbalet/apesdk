@@ -1,4 +1,4 @@
-[![Noble Ape on Emergence](//i.ytimg.com/vi/BdANrTDer9c/default.jpg)](//www.youtube.com/watch?v=BdANrTDer9c "Noble Ape on Emergence")
+[![Noble Ape on Emergence](http://i.ytimg.com/vi/BdANrTDer9c/default.jpg)](//www.youtube.com/watch?v=BdANrTDer9c "Noble Ape on Emergence")
 
 ## DESCRIPTION
 
@@ -12,7 +12,7 @@ The Noble Ape Simulation has been in development since 1996. It features a numbe
 
 [Noble Ape Simulation main page](http://www.nobleape.com/sim/).
 
-[![Noble Ape Philosophic](//i.ytimg.com/vi//vi/zXDenS8mO70/default.jpg)](//www.youtube.com/watch?v=zXDenS8mO70 "Noble Ape Philosophic")
+[![Noble Ape Philosophic](http://i.ytimg.com/vi//vi/zXDenS8mO70/default.jpg)](//www.youtube.com/watch?v=zXDenS8mO70 "Noble Ape Philosophic")
 
 [Noble Ape Simulation Manual](http://www.nobleape.com/man/).
 
@@ -20,7 +20,7 @@ The Noble Ape Simulation has been in development since 1996. It features a numbe
 
 Build instructions can be found in /sim/documentation/build.html
 
-[![Why Is Noble Ape Free?](//i.ytimg.com/vi/M8-BrQTYV20/default.jpg)](//www.youtube.com/watch?v=M8-BrQTYV20 "Why Is Noble Ape Free?")
+[![Why Is Noble Ape Free?](http://i.ytimg.com/vi/M8-BrQTYV20/hqdefault.jpg)](//www.youtube.com/watch?v=M8-BrQTYV20 "Why Is Noble Ape Free?")
 
 ## LICENSE
 
