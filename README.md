@@ -12,7 +12,7 @@ The Noble Ape Simulation has been in development since 1996. It features a numbe
 
 [Noble Ape Simulation main page](http://www.nobleape.com/sim/).
 
-[![Noble Ape Philosophic](http://i.ytimg.com/vi//vi/zXDenS8mO70/hqdefault.jpg)](//www.youtube.com/watch?v=zXDenS8mO70 "Noble Ape Philosophic")
+[![Noble Ape Philosophic](http://i.ytimg.com/vi/zXDenS8mO70/hqdefault.jpg)](//www.youtube.com/watch?v=zXDenS8mO70 "Noble Ape Philosophic")
 
 [Noble Ape Simulation Manual](http://www.nobleape.com/man/).
 
