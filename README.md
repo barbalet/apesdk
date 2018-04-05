@@ -1,10 +1,10 @@
-[![Noble Ape on Emergence](http://i.ytimg.com/vi/BdANrTDer9c/default.jpg)](//www.youtube.com/watch?v=BdANrTDer9c "Noble Ape on Emergence")
+[![Noble Ape on Emergence](http://i.ytimg.com/vi/BdANrTDer9c/hqdefault.jpg)](//www.youtube.com/watch?v=BdANrTDer9c "Noble Ape on Emergence")
 
 ## DESCRIPTION
 
 The Noble Ape Simulation has been in development since 1996. It features a number of autonomous simulation components including a landscape simulation, biological simulation, weather simulation, sentient creature (Noble Ape) simulation (including a number of internal biological simulations) and a simple intelligent-agent scripting language (ApeScript).
 
-[![Noble Ape - I've Been Working On It Since 1996...](//i.ytimg.com/vi/xmieOO623wY/default.jpg)](//www.youtube.com/watch?v=xmieOO623wY "Noble Ape - I've Been Working On It Since 1996...")
+[![Noble Ape - I've Been Working On It Since 1996...](http://i.ytimg.com/vi/xmieOO623wY/hqdefault.jpg)](//www.youtube.com/watch?v=xmieOO623wY "Noble Ape - I've Been Working On It Since 1996...")
 
 ## DETAILS and SUPPORT
 
@@ -12,7 +12,7 @@ The Noble Ape Simulation has been in development since 1996. It features a numbe
 
 [Noble Ape Simulation main page](http://www.nobleape.com/sim/).
 
-[![Noble Ape Philosophic](http://i.ytimg.com/vi//vi/zXDenS8mO70/default.jpg)](//www.youtube.com/watch?v=zXDenS8mO70 "Noble Ape Philosophic")
+[![Noble Ape Philosophic](http://i.ytimg.com/vi//vi/zXDenS8mO70/hqdefault.jpg)](//www.youtube.com/watch?v=zXDenS8mO70 "Noble Ape Philosophic")
 
 [Noble Ape Simulation Manual](http://www.nobleape.com/man/).
 
