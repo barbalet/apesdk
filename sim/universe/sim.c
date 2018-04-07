@@ -471,6 +471,10 @@ void sim_cycle(void)
     land_cycle();
 #ifdef WEATHER_ON
     weather_cycle();
+    weather_cycle();
+    weather_cycle();
+    weather_cycle();
+    weather_wind();
 #endif
 
     being_loop(&sim, sim_being_awake_loop, PROCESSING_LIGHT_WEIGHT);

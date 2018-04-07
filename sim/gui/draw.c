@@ -1303,7 +1303,7 @@ static void draw_weather(n_byte toggle)
         n_int loop = 0;
         while(loop < MAP_AREA)
         {
-            n_int value = local_pressure[ loop ]>>9;
+            n_int value = local_pressure[ loop ]>>7;
             if (value < 0) value = 0;
             if (value > 255) value = 255;
             weather_grayscale[ loop ] = value;

@@ -826,8 +826,8 @@ void compress_expand(n_file *input, n_file *output);
 
 #define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA)
 
-#define	WEATHER_CLOUD		(32768)
-#define	WEATHER_RAIN		(98304)
+#define	WEATHER_CLOUD		(32768>>4)
+#define	WEATHER_RAIN		(98304>>4)
 
 #define TIME_HOUR_MINUTES           (60)
 #define TIME_DAY_MINUTES            (TIME_HOUR_MINUTES * 24)
@@ -874,6 +874,7 @@ void  weather_init(void);
 void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind);
 n_int weather_pressure(n_int px, n_int py);
 void  weather_cycle(void);
+void  weather_wind(void);
 weather_values weather_seven_values(n_int px, n_int py);
 
 void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec);

@@ -134,15 +134,15 @@ static n_int weather_delta(void)
     n_int    average = 0;
     n_int    map_dimensions = land_map_dimension();;
     n_int    map_bits       = land_map_bits();
-
     if (map_bits < 0) return 0;
-
     while (lx < map_dimensions)
     {
+        n_int   tpx = MAPSPACE_TO_WEATHER(lx);
         n_int ly = 0;
         while (ly < map_dimensions)
         {
-            average += weather_pressure(WEATHER_TO_MAPSPACE(lx), WEATHER_TO_MAPSPACE(ly));
+            n_int   tpy = MAPSPACE_TO_WEATHER(ly);
+            average += m_atmosphere[(tpy << map_bits) | tpx];
             ly++;
         }
         lx++;
@@ -156,47 +156,28 @@ static n_int weather_delta(void)
  */
 static void weather_wrap(n_c_int * section)
 {
-    const n_int bits_neg = (-131072 * 254) / 256;
-    const n_int bits_pos = ( 131071 * 254) / 256;
-    n_int max = bits_neg;
-    n_int min = bits_pos;
+    n_int placement = 0;
+    while (placement < (MAP_AREA))
     {
-        n_int placement = 0;
-        while (placement < (MAP_AREA))
-        {
-            n_c_int value = section[placement++];
-            if (value > max)
-            {
-                max = value;
-            }
-            if (value < min)
-            {
-                min = value;
-            }
-        }
-    }
-    if ((min < bits_neg) || (max > bits_pos))
-    {
-        n_int placement = 0;
-        while (placement < (MAP_AREA))
-        {
-            n_c_int value = section[placement];
-            section[placement++] = (value * 253) / 256;
-        }
+        n_c_int value = section[placement];
+        section[placement++] = (value * 253) / 256;
     }
 }
 
 void weather_cycle(void)
 {
-    n_int         local_delta;
-    n_int         ly = 0;
+    const n_int bits_neg = (-131072 * 254) / 256;
+    const n_int bits_pos = ( 131071 * 254) / 256;
+    n_int max = bits_neg;
+    n_int min = bits_pos;
+    static n_int  local_delta = 0;
+    n_int         new_delta = 0;
     n_int         map_dimensions = land_map_dimension();
     n_int         map_bits = land_map_bits();
+    n_int         ly = 0;
 
     if (map_bits < 0) return;
-
-    local_delta = weather_delta();
-
+    
     while ( ly < map_dimensions )
     {
         n_int	ly_min = ((ly + (map_dimensions-1) ) & ((map_dimensions)-1)) * map_dimensions;
@@ -205,21 +186,69 @@ void weather_cycle(void)
         n_int	lx = 0;
         while ( lx < map_dimensions )
         {
+            n_int   simple_location = lx | ly_neu;
             n_int	local_atm =
-                ((n_int)m_delta_pressure[ lx | ly_neu ] << map_bits)
-                - (512 << map_bits)
-                - m_atmosphere[ ((lx + 1 ) & (map_dimensions-1)) | ly_neu ]
-                + m_atmosphere[ ((lx + (map_dimensions-1) ) & ((map_dimensions)-1)) | ly_neu ]
-                - m_atmosphere[ lx | ly_plu ]
-                + m_atmosphere[ lx | ly_min ];
+              (2 * m_atmosphere[ lx | ly_min ])
+            + (2 * m_atmosphere[ ((lx + (map_dimensions-1) ) & ((map_dimensions)-1)) | ly_neu ])
+            - (2 * m_atmosphere[ ((lx + 1 ) & (map_dimensions-1)) | ly_neu ])
+            - (2 * m_atmosphere[ lx | ly_plu ]);
+            n_c_int value = (n_c_int) ((local_atm - local_delta) >> map_bits) + m_delta_pressure[ simple_location];
+            
+            m_atmosphere[ simple_location ] += value;
+            value = m_atmosphere[ simple_location ];
+            new_delta += value;
+            if (value < min)
+            {
+                min = value;
+            }
+            else if (value > max)
+            {
+                max = value;
+            }
 
-            m_atmosphere[ lx | ly_neu ] += (local_atm - local_delta) >> map_bits;
             lx++;
         }
         ly++;
     }
+    
+    local_delta = new_delta >> map_bits;
+    
+    if ((min < bits_neg) || (max > bits_pos))
+    {
+        weather_wrap(m_atmosphere);
+    }
+}
 
-    weather_wrap(m_atmosphere);
+void weather_wind(void)
+{
+    /* Add dynamic wind */
+    const n_int   p01 = 50;
+    const n_int   p10 = 50;
+    const n_int   p00 = 256 - p01 - p10;
+    static n_c_int temp_atmosphere[MAP_AREA];
+    
+    n_int         ly = 0;
+    n_int         map_dimensions = land_map_dimension();
+    /*n_int         map_bits = land_map_bits();*/
+    
+    while ( ly < map_dimensions )
+    {
+        n_int    ly_plu = ((ly + 1 ) & (map_dimensions-1)) * map_dimensions;
+        n_int    ly_neu = ly * map_dimensions;
+        n_int    lx = 0;
+        while ( lx < map_dimensions )
+        {
+            n_int    lx_plu = (lx + 1 ) & (map_dimensions-1);
+            n_int    local_atm =
+            (p00 * m_atmosphere[ lx | ly_neu ]) +
+            (p10 * m_atmosphere[ lx | ly_plu ]) +
+            (p01 * m_atmosphere[ lx_plu | ly_neu ]);
+            temp_atmosphere[ lx | ly_neu ] = (n_c_int)local_atm >> 8;
+            lx++;
+        }
+        ly++;
+    }
+    io_copy((n_byte *)temp_atmosphere, (n_byte *)m_atmosphere, (sizeof(n_c_int) * MAP_AREA));
 }
 
 void weather_init(void)
@@ -323,11 +352,11 @@ weather_values	weather_seven_values(n_int px, n_int py)
         return WEATHER_SEVEN_ERROR; /* Error has already been shown */
     }
 
-    if(val > WEATHER_RAIN)
+    if (val > WEATHER_RAIN)
     {
         return ret_val+2;
     }
-    if(val > WEATHER_CLOUD)
+    if (val > WEATHER_CLOUD)
     {
         return ret_val+1;
     }

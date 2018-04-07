@@ -695,13 +695,21 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 #ifdef NOBLE_IOS
                 offscreenBuffer[loop++] = colorLookUp[ indexLocalX[ lx++ ] ];
 #else
-                n_byte value = indexLocalX[lx];
                 n_byte cloud = weatherLocalX[lx];
+#if 1
+                n_byte value = indexLocalX[lx];
                 n_int negCloud = 256 - cloud;
-                lx++;
                 outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][0])>>8);
                 outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][1])>>8);
                 outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][2])>>8);
+#else
+                outputBuffer[loop++] = cloud;
+                outputBuffer[loop++] = cloud;
+                outputBuffer[loop++] = cloud;
+#endif
+                
+                lx++;
+
 #endif
             }
             ly++;
