@@ -128,29 +128,6 @@ n_c_int * land_weather(void)
     return (n_c_int *)m_atmosphere;
 }
 
-static n_int weather_delta(void)
-{
-    n_int    lx = 0;
-    n_int    average = 0;
-    n_int    map_dimensions = land_map_dimension();;
-    n_int    map_bits       = land_map_bits();
-    if (map_bits < 0) return 0;
-    while (lx < map_dimensions)
-    {
-        n_int   tpx = MAPSPACE_TO_WEATHER(lx);
-        n_int ly = 0;
-        while (ly < map_dimensions)
-        {
-            n_int   tpy = MAPSPACE_TO_WEATHER(ly);
-            average += m_atmosphere[(tpy << map_bits) | tpx];
-            ly++;
-        }
-        lx++;
-    }
-    average = average >> map_bits;
-    return average;
-}
-
 /*
  * The weather is maintained in a 18-bit band from bits_neg
  */
