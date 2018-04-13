@@ -82,6 +82,10 @@ static n_byte4     m_highres_tide[HI_RES_MAP_AREA/32];      /* generated */
 static n_byte2     m_delta_pressure[ MAP_AREA];         /* generated */
 static n_c_int	   m_atmosphere[ MAP_AREA];             /* save-able and generate-able */
 static n_byte      m_tide_level;                            /* generated */
+static n_byte      m_wind_value_x; /* 6 to 96 */
+static n_byte      m_wind_value_y; /* 6 to 96 */
+static n_byte      m_wind_aim_x;  /* 6 to 96 */
+static n_byte      m_wind_aim_y;  /* 6 to 96 */
 
 void * land_ptr(void)
 {
@@ -126,6 +130,12 @@ n_byte4 * land_highres_tide(void)
 n_c_int * land_weather(void)
 {
     return (n_c_int *)m_atmosphere;
+}
+
+
+static n_byte weather_wind_aim(void)
+{
+    return 6 + math_random(m_genetics) % 91;
 }
 
 /*
@@ -198,24 +208,51 @@ void weather_cycle(void)
 
 void weather_wind(void)
 {
-    /* Add dynamic wind */
-    const n_int   p01 = 50;
-    const n_int   p10 = 50;
-    const n_int   p00 = 256 - p01 - p10;
-    static n_c_int temp_atmosphere[MAP_AREA];
-    
     n_int         ly = 0;
     n_int         map_dimensions = land_map_dimension();
-    /*n_int         map_bits = land_map_bits();*/
+    n_int         map_bits = land_map_bits();
+    
+    /* Add dynamic wind */
+    const n_int   p01 = m_wind_value_x;
+    const n_int   p10 = m_wind_value_y;
+    const n_int   p00 = 256 - p01 - p10;
+    const n_int   delta = 1;
+    static n_c_int temp_atmosphere[MAP_AREA];
+    
+
+    if ((math_random(m_genetics) & 31) == 0)
+    {
+        m_wind_aim_x = weather_wind_aim();
+        math_random3(m_genetics);
+        m_wind_aim_y = weather_wind_aim();
+    }
+
+    if (m_wind_aim_x > m_wind_value_x)
+    {
+        m_wind_value_x++;
+    }
+    if (m_wind_aim_x < m_wind_value_x)
+    {
+        m_wind_value_x--;
+    }
+    
+    if (m_wind_aim_y > m_wind_value_y)
+    {
+        m_wind_value_y++;
+    }
+    if (m_wind_aim_y < m_wind_value_y)
+    {
+        m_wind_value_y--;
+    }
     
     while ( ly < map_dimensions )
     {
-        n_int    ly_plu = ((ly + 1 ) & (map_dimensions-1)) * map_dimensions;
-        n_int    ly_neu = ly * map_dimensions;
+        n_int    ly_plu = ((ly + delta ) & (map_dimensions-1)) << map_bits;
+        n_int    ly_neu = ly << map_bits;
         n_int    lx = 0;
         while ( lx < map_dimensions )
         {
-            n_int    lx_plu = (lx + 1 ) & (map_dimensions-1);
+            n_int    lx_plu = (lx + delta ) & (map_dimensions-1);
             n_int    local_atm =
             (p00 * m_atmosphere[ lx | ly_neu ]) +
             (p10 * m_atmosphere[ lx | ly_plu ]) +
@@ -234,6 +271,14 @@ void weather_init(void)
     n_int map_bits      = land_map_bits();
     n_int ly = 0;
 
+    math_random3(m_genetics);
+    
+    m_wind_value_x = weather_wind_aim();
+    m_wind_aim_y = weather_wind_aim();
+    math_random3(m_genetics);
+    m_wind_value_y = weather_wind_aim();
+    m_wind_aim_x = weather_wind_aim();
+    
     if (map_bits < 0) return;
 
     io_erase((n_byte *)m_atmosphere, sizeof(n_c_int) * MAP_AREA);
