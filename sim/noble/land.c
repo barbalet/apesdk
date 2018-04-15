@@ -86,6 +86,8 @@ static n_byte      m_wind_value_x; /* 6 to 96 */
 static n_byte      m_wind_value_y; /* 6 to 96 */
 static n_byte      m_wind_aim_x;  /* 6 to 96 */
 static n_byte      m_wind_aim_y;  /* 6 to 96 */
+static n_byte2     m_delta_pressure_highest;
+static n_byte2     m_delta_pressure_lowest;
 
 void * land_ptr(void)
 {
@@ -215,7 +217,6 @@ void weather_wind(void)
     /* Add dynamic wind */
     const n_int   p01 = m_wind_value_x;
     const n_int   p10 = m_wind_value_y;
-    const n_int   p00 = 256 - p01 - p10;
     const n_int   delta = 1;
     static n_c_int temp_atmosphere[MAP_AREA];
     
@@ -252,12 +253,17 @@ void weather_wind(void)
         n_int    lx = 0;
         while ( lx < map_dimensions )
         {
+            n_int    calc_point = lx | ly_neu;
+            n_int    delta_pressure = m_delta_pressure[calc_point];
+            n_int    tp01 = (p01 * delta_pressure) / m_delta_pressure_highest;
+            n_int    tp10 = (p10 * delta_pressure) / m_delta_pressure_highest;
+            n_int    tp00 = 256 - tp01 - tp10;
             n_int    lx_plu = (lx + delta ) & (map_dimensions-1);
             n_int    local_atm =
-            (p00 * m_atmosphere[ lx | ly_neu ]) +
-            (p10 * m_atmosphere[ lx | ly_plu ]) +
-            (p01 * m_atmosphere[ lx_plu | ly_neu ]);
-            temp_atmosphere[ lx | ly_neu ] = (n_c_int)local_atm >> 8;
+            (tp00 * m_atmosphere[ calc_point]) +
+            (tp10 * m_atmosphere[ lx | ly_plu ]) +
+            (tp01 * m_atmosphere[ lx_plu | ly_neu ]);
+            temp_atmosphere[ calc_point ] = (n_c_int)local_atm >> 8;
             lx++;
         }
         ly++;
@@ -270,8 +276,11 @@ void weather_init(void)
     n_int map_dimension = land_map_dimension();
     n_int map_bits      = land_map_bits();
     n_int ly = 0;
-
+    
     math_random3(m_genetics);
+    
+    m_delta_pressure_lowest = 0xffff;
+    m_delta_pressure_highest = 0;
     
     m_wind_value_x = weather_wind_aim();
     m_wind_aim_y = weather_wind_aim();
@@ -303,17 +312,27 @@ void weather_init(void)
         n_uint      ly_neu = (ly * map_dimension);
         while ( lx < (map_dimension) )
         {
-            m_delta_pressure[ ly_neu + lx ]
-                = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension)-1)) + ly_neu]
+            n_byte2 value
+            = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension)-1)) + ly_neu]
                             - m_atmosphere[(( lx + ((map_dimension)-1) ) & ((map_dimension)-1)) + ly_neu]
                             + m_atmosphere[ lx + ly_plu ]
                             - m_atmosphere[ lx + ly_min ]
                             + 512);
+            m_delta_pressure[ ly_neu + lx ] = value;
+            
+            if (value > m_delta_pressure_highest)
+            {
+                m_delta_pressure_highest = value;
+            }
+            if (value < m_delta_pressure_lowest)
+            {
+                m_delta_pressure_lowest = value;
+            }
             lx++;
         }
         ly++;
     }
-
+    
     ly = 0;
     while( ly < (map_dimension * map_dimension))
     {
