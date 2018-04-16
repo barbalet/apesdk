@@ -648,10 +648,13 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
 #ifndef NOBLE_IOS
     if (fIdentification == NUM_VIEW)
     {
+        n_byte * local_weather = draw_weather_grayscale();
+
         loop = 0;
         while(ly < 512)
         {
             n_byte * indexLocalX = &index[(255-(ly>>1))*256];
+            n_byte * weatherLocalX = &local_weather[(255-(ly>>1))*256];
 
             if (ly&1)
             {
@@ -663,14 +666,16 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
                 n_int    lx = 0;
                 while(lx < 256)
                 {
-                    unsigned char value = indexLocalX[lx++] ;
-
-                    outputBuffer[loop++] = colorLookUp[value][0];
-                    outputBuffer[loop++] = colorLookUp[value][1];
-                    outputBuffer[loop++] = colorLookUp[value][2];
-                    outputBuffer[loop++] = colorLookUp[value][0];
-                    outputBuffer[loop++] = colorLookUp[value][1];
-                    outputBuffer[loop++] = colorLookUp[value][2];
+                    n_byte value = indexLocalX[lx] ;
+                    n_byte cloud = weatherLocalX[lx];
+                    n_int negCloud = 256 - cloud;
+                    outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][0])>>8);
+                    outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][1])>>8);
+                    outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][2])>>8);
+                    outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][0])>>8);
+                    outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][1])>>8);
+                    outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][2])>>8);
+                    lx++;                    
                 }
             }
 

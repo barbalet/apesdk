@@ -79,8 +79,8 @@ static n_byte2     m_time;                                  /* save-able */
 static n_byte      m_topology[MAP_AREA];                    /* generated */
 static n_byte      m_topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
 static n_byte4     m_highres_tide[HI_RES_MAP_AREA/32];      /* generated */
-static n_byte2     m_delta_pressure[ MAP_AREA];         /* generated */
-static n_c_int	   m_atmosphere[ MAP_AREA];             /* save-able and generate-able */
+static n_byte2     m_delta_pressure[ MAP_AREA];             /* generated */
+static n_c_int	   m_atmosphere[ MAP_AREA];                 /* save-able and generate-able */
 static n_byte      m_tide_level;                            /* generated */
 static n_byte      m_wind_value_x; /* 6 to 96 */
 static n_byte      m_wind_value_y; /* 6 to 96 */
