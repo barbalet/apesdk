@@ -131,8 +131,8 @@ static const noble_file_entry noble_file_format[]=
 #ifdef USE_FIL_LAN
     {"landd{", FIL_LAN,  0, 0, "land definition"},
     {"dated=", FIL_LAN | FILE_TYPE_BYTE4, 1, 0,  "Date in days and millenia"},
-    {"landg=", FIL_LAN | FILE_TYPE_BYTE2, 2, 4,  "Seed that created the land"},
-    {"timed=", FIL_LAN | FILE_TYPE_BYTE2, 1, 8,  "Time in minutes"},
+    {"timed=", FIL_LAN | FILE_TYPE_BYTE2, 1, 4,  "Time in minutes"},
+    {"landg=", FIL_LAN | FILE_TYPE_BYTE2, 2, 6,  "Seed that created the land"},
 
 #endif
     /* the line above is a substantial limit to the simulation space. The weather will limit the map area to;

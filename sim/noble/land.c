@@ -43,10 +43,37 @@
 
 #endif
 
+typedef struct
+{
+    n_byte2     genetics[2];                           /* save-able */
+
+    n_byte      topology[MAP_AREA];                    /* generated */
+    n_byte2     delta_pressure[ MAP_AREA];             /* generated */
+    n_c_int     atmosphere[ MAP_AREA];                 /* save-able and generate-able */
+    
+    n_byte      wind_value_x; /* 6 to 96 */
+    n_byte      wind_value_y; /* 6 to 96 */
+    n_byte      wind_aim_x;  /* 6 to 96 */
+    n_byte      wind_aim_y;  /* 6 to 96 */
+    
+    n_byte2     delta_pressure_highest;
+    n_byte2     delta_pressure_lowest;
+} n_land_tile;
+
+static n_byte4     m_date;                                  /* save-able */
+static n_byte2     m_time;                                  /* save-able */
+
+static n_land_tile m_tile;
+
+static n_byte      m_tide_level;                            /* generated */
+
+static n_byte      m_topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
+static n_byte4     m_highres_tide[HI_RES_MAP_AREA/32];      /* generated */
+
 /*
-
+ 
  Resources
-
+ 
  Wood
  Meat - Fish
  Meat - Animals
@@ -57,37 +84,20 @@
  Copper
  Stone
  Limestone
-
+ 
  Landscape Changes
-
+ 
  Path
  Road
  Hut
  Smelter/Blacksmith
  Boat Building
  Boat
-
+ 
  Posessions
-
+ 
  ?
  */
-
-static n_byte4     m_date;                                  /* save-able */
-static n_byte2     m_genetics[2];                           /* save-able */
-static n_byte2     m_time;                                  /* save-able */
-
-static n_byte      m_topology[MAP_AREA];                    /* generated */
-static n_byte      m_topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
-static n_byte4     m_highres_tide[HI_RES_MAP_AREA/32];      /* generated */
-static n_byte2     m_delta_pressure[ MAP_AREA];             /* generated */
-static n_c_int	   m_atmosphere[ MAP_AREA];                 /* save-able and generate-able */
-static n_byte      m_tide_level;                            /* generated */
-static n_byte      m_wind_value_x; /* 6 to 96 */
-static n_byte      m_wind_value_y; /* 6 to 96 */
-static n_byte      m_wind_aim_x;  /* 6 to 96 */
-static n_byte      m_wind_aim_y;  /* 6 to 96 */
-static n_byte2     m_delta_pressure_highest;
-static n_byte2     m_delta_pressure_lowest;
 
 void * land_ptr(void)
 {
@@ -106,7 +116,7 @@ n_byte4 land_time(void)
 
 n_byte2 * land_genetics(void)
 {
-    return (n_byte2 *)m_genetics;
+    return (n_byte2 *)m_tile.genetics;
 }
 
 n_byte land_tide_level(void)
@@ -121,7 +131,7 @@ n_byte * land_topology_highdef(void)
 
 n_byte * land_topology(void)
 {
-    return (n_byte *)m_topology;
+    return (n_byte *)m_tile.topology;
 }
 
 n_byte4 * land_highres_tide(void)
@@ -131,13 +141,13 @@ n_byte4 * land_highres_tide(void)
 
 n_c_int * land_weather(void)
 {
-    return (n_c_int *)m_atmosphere;
+    return (n_c_int *)m_tile.atmosphere;
 }
 
 
 static n_byte weather_wind_aim(void)
 {
-    return 6 + math_random(m_genetics) % 91;
+    return 6 + math_random(m_tile.genetics) % 91;
 }
 
 /*
@@ -177,14 +187,14 @@ void weather_cycle(void)
         {
             n_int   simple_location = lx | ly_neu;
             n_int	local_atm =
-              (2 * m_atmosphere[ lx | ly_min ])
-            + (2 * m_atmosphere[ ((lx + (map_dimensions-1) ) & ((map_dimensions)-1)) | ly_neu ])
-            - (2 * m_atmosphere[ ((lx + 1 ) & (map_dimensions-1)) | ly_neu ])
-            - (2 * m_atmosphere[ lx | ly_plu ]);
-            n_c_int value = (n_c_int) ((local_atm - local_delta) >> map_bits) + m_delta_pressure[ simple_location];
+              (2 * m_tile.atmosphere[ lx | ly_min ])
+            + (2 * m_tile.atmosphere[ ((lx + (map_dimensions-1) ) & ((map_dimensions)-1)) | ly_neu ])
+            - (2 * m_tile.atmosphere[ ((lx + 1 ) & (map_dimensions-1)) | ly_neu ])
+            - (2 * m_tile.atmosphere[ lx | ly_plu ]);
+            n_c_int value = (n_c_int) ((local_atm - local_delta) >> map_bits) + m_tile.delta_pressure[ simple_location];
             
-            m_atmosphere[ simple_location ] += value;
-            value = m_atmosphere[ simple_location ];
+            m_tile.atmosphere[ simple_location ] += value;
+            value = m_tile.atmosphere[ simple_location ];
             new_delta += value;
             if (value < min)
             {
@@ -204,7 +214,7 @@ void weather_cycle(void)
     
     if ((min < bits_neg) || (max > bits_pos))
     {
-        weather_wrap(m_atmosphere);
+        weather_wrap(m_tile.atmosphere);
     }
 }
 
@@ -215,35 +225,35 @@ void weather_wind(void)
     n_int         map_bits = land_map_bits();
     
     /* Add dynamic wind */
-    const n_int   p01 = m_wind_value_x;
-    const n_int   p10 = m_wind_value_y;
+    const n_int   p01 = m_tile.wind_value_x;
+    const n_int   p10 = m_tile.wind_value_y;
     const n_int   delta = 1;
     static n_c_int temp_atmosphere[MAP_AREA];
     
 
-    if ((math_random(m_genetics) & 31) == 0)
+    if ((math_random(m_tile.genetics) & 31) == 0)
     {
-        m_wind_aim_x = weather_wind_aim();
-        math_random3(m_genetics);
-        m_wind_aim_y = weather_wind_aim();
+        m_tile.wind_aim_x = weather_wind_aim();
+        math_random3(m_tile.genetics);
+        m_tile.wind_aim_y = weather_wind_aim();
     }
 
-    if (m_wind_aim_x > m_wind_value_x)
+    if (m_tile.wind_aim_x > m_tile.wind_value_x)
     {
-        m_wind_value_x++;
+        m_tile.wind_value_x++;
     }
-    if (m_wind_aim_x < m_wind_value_x)
+    if (m_tile.wind_aim_x < m_tile.wind_value_x)
     {
-        m_wind_value_x--;
+        m_tile.wind_value_x--;
     }
     
-    if (m_wind_aim_y > m_wind_value_y)
+    if (m_tile.wind_aim_y > m_tile.wind_value_y)
     {
-        m_wind_value_y++;
+        m_tile.wind_value_y++;
     }
-    if (m_wind_aim_y < m_wind_value_y)
+    if (m_tile.wind_aim_y < m_tile.wind_value_y)
     {
-        m_wind_value_y--;
+        m_tile.wind_value_y--;
     }
     
     while ( ly < map_dimensions )
@@ -254,21 +264,21 @@ void weather_wind(void)
         while ( lx < map_dimensions )
         {
             n_int    calc_point = lx | ly_neu;
-            n_int    delta_pressure = m_delta_pressure[calc_point];
-            n_int    tp01 = (p01 * delta_pressure) / m_delta_pressure_highest;
-            n_int    tp10 = (p10 * delta_pressure) / m_delta_pressure_highest;
+            n_int    delta_pressure = m_tile.delta_pressure[calc_point];
+            n_int    tp01 = (p01 * delta_pressure) / m_tile.delta_pressure_highest;
+            n_int    tp10 = (p10 * delta_pressure) / m_tile.delta_pressure_highest;
             n_int    tp00 = 256 - tp01 - tp10;
             n_int    lx_plu = (lx + delta ) & (map_dimensions-1);
             n_int    local_atm =
-            (tp00 * m_atmosphere[ calc_point]) +
-            (tp10 * m_atmosphere[ lx | ly_plu ]) +
-            (tp01 * m_atmosphere[ lx_plu | ly_neu ]);
+            (tp00 * m_tile.atmosphere[ calc_point]) +
+            (tp10 * m_tile.atmosphere[ lx | ly_plu ]) +
+            (tp01 * m_tile.atmosphere[ lx_plu | ly_neu ]);
             temp_atmosphere[ calc_point ] = (n_c_int)local_atm >> 8;
             lx++;
         }
         ly++;
     }
-    io_copy((n_byte *)temp_atmosphere, (n_byte *)m_atmosphere, (sizeof(n_c_int) * MAP_AREA));
+    io_copy((n_byte *)temp_atmosphere, (n_byte *)m_tile.atmosphere, (sizeof(n_c_int) * MAP_AREA));
 }
 
 void weather_init(void)
@@ -277,28 +287,28 @@ void weather_init(void)
     n_int map_bits      = land_map_bits();
     n_int ly = 0;
     
-    math_random3(m_genetics);
+    math_random3(m_tile.genetics);
     
-    m_delta_pressure_lowest = 0xffff;
-    m_delta_pressure_highest = 0;
+    m_tile.delta_pressure_lowest = 0xffff;
+    m_tile.delta_pressure_highest = 0;
     
-    m_wind_value_x = weather_wind_aim();
-    m_wind_aim_y = weather_wind_aim();
-    math_random3(m_genetics);
-    m_wind_value_y = weather_wind_aim();
-    m_wind_aim_x = weather_wind_aim();
+    m_tile.wind_value_x = weather_wind_aim();
+    m_tile.wind_aim_y = weather_wind_aim();
+    math_random3(m_tile.genetics);
+    m_tile.wind_value_y = weather_wind_aim();
+    m_tile.wind_aim_x = weather_wind_aim();
     
     if (map_bits < 0) return;
 
-    io_erase((n_byte *)m_atmosphere, sizeof(n_c_int) * MAP_AREA);
-    io_erase((n_byte *)m_delta_pressure, sizeof(n_byte2) * MAP_AREA);
+    io_erase((n_byte *)m_tile.atmosphere, sizeof(n_c_int) * MAP_AREA);
+    io_erase((n_byte *)m_tile.delta_pressure, sizeof(n_byte2) * MAP_AREA);
 
     while ( ly < map_dimension )
     {
         n_int	lx = 0;
         while ( lx < map_dimension )
         {
-            m_atmosphere[ (map_dimension * ly) + lx ] = (n_c_int)(land_location(lx,ly)*4);
+            m_tile.atmosphere[ (map_dimension * ly) + lx ] = (n_c_int)(land_location(lx,ly)*4);
             lx++;
         }
         ly++;
@@ -313,20 +323,20 @@ void weather_init(void)
         while ( lx < (map_dimension) )
         {
             n_byte2 value
-            = (n_byte2)(m_atmosphere[ (( lx + 1 ) & ((map_dimension)-1)) + ly_neu]
-                            - m_atmosphere[(( lx + ((map_dimension)-1) ) & ((map_dimension)-1)) + ly_neu]
-                            + m_atmosphere[ lx + ly_plu ]
-                            - m_atmosphere[ lx + ly_min ]
+            = (n_byte2)(m_tile.atmosphere[ (( lx + 1 ) & ((map_dimension)-1)) + ly_neu]
+                            - m_tile.atmosphere[(( lx + ((map_dimension)-1) ) & ((map_dimension)-1)) + ly_neu]
+                            + m_tile.atmosphere[ lx + ly_plu ]
+                            - m_tile.atmosphere[ lx + ly_min ]
                             + 512);
-            m_delta_pressure[ ly_neu + lx ] = value;
+            m_tile.delta_pressure[ ly_neu + lx ] = value;
             
-            if (value > m_delta_pressure_highest)
+            if (value > m_tile.delta_pressure_highest)
             {
-                m_delta_pressure_highest = value;
+                m_tile.delta_pressure_highest = value;
             }
-            if (value < m_delta_pressure_lowest)
+            if (value < m_tile.delta_pressure_lowest)
             {
-                m_delta_pressure_lowest = value;
+                m_tile.delta_pressure_lowest = value;
             }
             lx++;
         }
@@ -336,7 +346,7 @@ void weather_init(void)
     ly = 0;
     while( ly < (map_dimension * map_dimension))
     {
-        m_atmosphere[ ly ] = 0;
+        m_tile.atmosphere[ ly ] = 0;
         ly++;
     }
 
@@ -349,7 +359,7 @@ n_int weather_pressure(n_int px, n_int py)
     n_int   tpx = (MAPSPACE_TO_WEATHER(px) + dimension) % dimension;
     n_int   tpy = (MAPSPACE_TO_WEATHER(py) + dimension) % dimension;
 
-    return  m_atmosphere[(dimension * tpy) + tpx];
+    return  m_tile.atmosphere[(dimension * tpy) + tpx];
 }
 
 void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind)
@@ -418,7 +428,7 @@ n_int land_map_bits(void)
 
 n_int land_location(n_int px, n_int py)
 {
-    return m_topology[math_memory_location(px, py)];
+    return m_tile.topology[math_memory_location(px, py)];
 }
 
 n_int land_location_vect(n_vect2 * value)
@@ -588,7 +598,7 @@ void land_clear(KIND_OF_USE kind, n_byte4 start)
     n_uint	loop      = 0;
     while (loop < (MAP_AREA))
     {
-        m_topology[loop] = 128;
+        m_tile.topology[loop] = 128;
         loop++;
     }
     if (kind != KIND_LOAD_FILE)
@@ -621,14 +631,16 @@ void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute
 
 void land_seed_genetics(n_byte2 * local_random)
 {
-    m_genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
-    m_genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+    m_tile.genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+    m_tile.genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+    
+    
 }
 
 void land_init(n_byte * scratch, execute_thread_stub * exec)
 {
-    math_pack(m_topology, scratch);
-    land_creation(m_topology, scratch, m_genetics, exec);
+    math_pack(m_tile.topology, scratch);
+    land_creation(m_tile.topology, scratch, m_tile.genetics, exec);
 }
 
 void land_init_high_def(n_byte double_spread)
@@ -636,7 +648,7 @@ void land_init_high_def(n_byte double_spread)
     n_uint   lp = 0;
     n_byte4  value_setting = 0;
 
-    math_bilinear_8_times(m_topology, m_topology_highdef, double_spread);
+    math_bilinear_8_times(m_tile.topology, m_topology_highdef, double_spread);
     io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
 
     while (lp < HI_RES_MAP_AREA)
