@@ -49,13 +49,14 @@ static void tile_wrap(n_c_int * section)
 
 void tile_cycle(n_tile * tile)
 {
-    const n_int bits_neg = (-131072 * 254) / 256;
-    const n_int bits_pos = ( 131071 * 254) / 256;
-    n_int max = bits_neg;
-    n_int min = bits_pos;
-    static n_int  local_delta = 0;
-    n_int         new_delta = 0;
-    n_int         ly = 0;
+    const n_int    bits_neg = (-131072 * 254) / 256;
+    const n_int    bits_pos = ( 131071 * 254) / 256;
+    static n_c_int temp_atmosphere[MAP_AREA];
+    static n_int   local_delta = 0;
+    n_int          max = bits_neg;
+    n_int          min = bits_pos;
+    n_int          new_delta = 0;
+    n_int          ly = 0;
     
     while ( ly < MAP_DIMENSION )
     {
@@ -65,16 +66,18 @@ void tile_cycle(n_tile * tile)
         n_int    lx = 0;
         while ( lx < MAP_DIMENSION )
         {
-            n_int   simple_location = lx | ly_neu;
-            n_int    local_atm =
-            (2 * tile->atmosphere[ lx | ly_min ])
-            + (2 * tile->atmosphere[ ((lx + (MAP_DIMENSION-1) ) & ((MAP_DIMENSION)-1)) | ly_neu ])
-            - (2 * tile->atmosphere[ ((lx + 1 ) & (MAP_DIMENSION-1)) | ly_neu ])
-            - (2 * tile->atmosphere[ lx | ly_plu ]);
-            n_c_int value = (n_c_int) ((local_atm - local_delta) >> MAP_BITS) + tile->delta_pressure[ simple_location];
+            n_int    simple_location = lx | ly_neu;
+            n_c_int  value = tile->atmosphere[simple_location];
             
-            tile->atmosphere[ simple_location ] += value;
-            value = tile->atmosphere[ simple_location ];
+            n_int    local_atm =
+                       (2 * tile->atmosphere[ lx | ly_min ])
+                     + (2 * tile->atmosphere[ ((lx + (MAP_DIMENSION-1) ) & ((MAP_DIMENSION)-1)) | ly_neu ])
+                     - (2 * tile->atmosphere[ ((lx + 1 ) & (MAP_DIMENSION-1)) | ly_neu ])
+                     - (2 * tile->atmosphere[ lx | ly_plu ]);
+            
+            value += (n_c_int) ((local_atm - local_delta) >> MAP_BITS) + tile->delta_pressure[ simple_location];
+            
+            temp_atmosphere[ simple_location ] = value;
             new_delta += value;
             if (value < min)
             {
@@ -94,8 +97,11 @@ void tile_cycle(n_tile * tile)
     
     if ((min < bits_neg) || (max > bits_pos))
     {
-        tile_wrap(tile->atmosphere);
+        tile_wrap(temp_atmosphere);
     }
+    
+    io_copy((n_byte *)temp_atmosphere, (n_byte *)tile->atmosphere, (sizeof(n_c_int) * MAP_AREA));
+
 }
 
 void tile_wind(n_tile * tile)
