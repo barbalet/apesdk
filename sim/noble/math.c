@@ -515,22 +515,6 @@ n_int vect3_nonzero(n_vect3 * nonzero)
     return ((nonzero->x != 0) || (nonzero->y != 0) || (nonzero->z != 0));
 }
 
-void math_pack(n_byte * alloc1, n_byte *alloc2)
-{
-    n_int loop = 0;
-    while (loop < MAP_AREA)
-    {
-        alloc1[loop]=128;
-        loop++;
-    }
-    loop = 0;
-    while (loop < MAP_AREA)
-    {
-        alloc2[loop]=128;
-        loop++;
-    }
-}
-
 n_int math_memory_location(n_int px, n_int py)
 {
 #define	POSITIVE_TILE_COORD(num)	  ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
@@ -634,57 +618,6 @@ void math_round(n_byte * local_map, n_byte * scratch,
         span_minor ++;
     }
 }
-
-#if 0
-void math_round(n_byte * local_map, n_byte * scratch,
-                n_memory_location * mem_func, execute_thread_stub * exec)
-{
-    n_int span_minor = 0;
-
-    math_round_smarter_struct mrss;
-
-    mrss.local_tile_dimension = 1 << MAP_BITS;
-    mrss.mem_func = mem_func;
-    /** Perform four nearest neighbor blur runs */
-    while (span_minor < 6)
-    {
-        n_int	px = 0;
-        if ((span_minor&1) == 0)
-        {
-            mrss.front = local_map;
-            mrss.back = scratch;
-        }
-        else
-        {
-            mrss.front = scratch;
-            mrss.back = local_map;
-        }
-
-        while (px < mrss.local_tile_dimension)
-        {
-            n_int * xlocation = io_new(sizeof(n_int));
-            xlocation[0] = px;
-
-            if (exec)
-            {
-                (exec)(((execute_function*)math_round_smarter_scan), (void*)&mrss, (void*)xlocation, 0L);
-            }
-            else
-            {
-                math_round_smarter_scan((void*)&mrss, xlocation, 0L);
-            }
-            px ++;
-        }
-
-        if (exec)
-        {
-            (exec)(0L, 0L, 0L, 0L);
-        }
-
-        span_minor ++;
-    }
-}
-#endif
 
 /**
  * This function creates the fractal landscapes and the genetic fur patterns

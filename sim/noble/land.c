@@ -43,27 +43,10 @@
 
 #endif
 
-typedef struct
-{
-    n_byte2     genetics[2];                           /* save-able */
-
-    n_byte      topology[MAP_AREA];                    /* generated */
-    n_byte2     delta_pressure[ MAP_AREA];             /* generated */
-    n_c_int     atmosphere[ MAP_AREA];                 /* save-able and generate-able */
-    
-    n_byte      wind_value_x; /* 6 to 96 */
-    n_byte      wind_value_y; /* 6 to 96 */
-    n_byte      wind_aim_x;  /* 6 to 96 */
-    n_byte      wind_aim_y;  /* 6 to 96 */
-    
-    n_byte2     delta_pressure_highest;
-    n_byte2     delta_pressure_lowest;
-} n_land_tile;
-
 static n_byte4     m_date;                                  /* save-able */
 static n_byte2     m_time;                                  /* save-able */
 
-static n_land_tile m_tile;
+static n_tile      m_tile;
 
 static n_byte      m_tide_level;                            /* generated */
 
@@ -145,222 +128,33 @@ n_c_int * land_weather(void)
 }
 
 
-static n_byte weather_wind_aim(void)
-{
-    return 6 + math_random(m_tile.genetics) % 91;
-}
-
-/*
- * The weather is maintained in a 18-bit band from bits_neg
- */
-static void weather_wrap(n_c_int * section)
-{
-    n_int placement = 0;
-    while (placement < (MAP_AREA))
-    {
-        n_c_int value = section[placement];
-        section[placement++] = (value * 253) / 256;
-    }
-}
-
 void weather_cycle(void)
 {
-    const n_int bits_neg = (-131072 * 254) / 256;
-    const n_int bits_pos = ( 131071 * 254) / 256;
-    n_int max = bits_neg;
-    n_int min = bits_pos;
-    static n_int  local_delta = 0;
-    n_int         new_delta = 0;
-    n_int         map_dimensions = land_map_dimension();
-    n_int         map_bits = land_map_bits();
-    n_int         ly = 0;
-
-    if (map_bits < 0) return;
-    
-    while ( ly < map_dimensions )
-    {
-        n_int	ly_min = ((ly + (map_dimensions-1) ) & ((map_dimensions)-1)) * map_dimensions;
-        n_int	ly_plu = ((ly + 1 ) & (map_dimensions-1)) * map_dimensions;
-        n_int	ly_neu = ly * map_dimensions;
-        n_int	lx = 0;
-        while ( lx < map_dimensions )
-        {
-            n_int   simple_location = lx | ly_neu;
-            n_int	local_atm =
-              (2 * m_tile.atmosphere[ lx | ly_min ])
-            + (2 * m_tile.atmosphere[ ((lx + (map_dimensions-1) ) & ((map_dimensions)-1)) | ly_neu ])
-            - (2 * m_tile.atmosphere[ ((lx + 1 ) & (map_dimensions-1)) | ly_neu ])
-            - (2 * m_tile.atmosphere[ lx | ly_plu ]);
-            n_c_int value = (n_c_int) ((local_atm - local_delta) >> map_bits) + m_tile.delta_pressure[ simple_location];
-            
-            m_tile.atmosphere[ simple_location ] += value;
-            value = m_tile.atmosphere[ simple_location ];
-            new_delta += value;
-            if (value < min)
-            {
-                min = value;
-            }
-            else if (value > max)
-            {
-                max = value;
-            }
-
-            lx++;
-        }
-        ly++;
-    }
-    
-    local_delta = new_delta >> map_bits;
-    
-    if ((min < bits_neg) || (max > bits_pos))
-    {
-        weather_wrap(m_tile.atmosphere);
-    }
-}
-
-void weather_wind(void)
-{
-    n_int         ly = 0;
-    n_int         map_dimensions = land_map_dimension();
-    n_int         map_bits = land_map_bits();
-    
-    /* Add dynamic wind */
-    const n_int   p01 = m_tile.wind_value_x;
-    const n_int   p10 = m_tile.wind_value_y;
-    const n_int   delta = 1;
-    static n_c_int temp_atmosphere[MAP_AREA];
-    
-
-    if ((math_random(m_tile.genetics) & 31) == 0)
-    {
-        m_tile.wind_aim_x = weather_wind_aim();
-        math_random3(m_tile.genetics);
-        m_tile.wind_aim_y = weather_wind_aim();
-    }
-
-    if (m_tile.wind_aim_x > m_tile.wind_value_x)
-    {
-        m_tile.wind_value_x++;
-    }
-    if (m_tile.wind_aim_x < m_tile.wind_value_x)
-    {
-        m_tile.wind_value_x--;
-    }
-    
-    if (m_tile.wind_aim_y > m_tile.wind_value_y)
-    {
-        m_tile.wind_value_y++;
-    }
-    if (m_tile.wind_aim_y < m_tile.wind_value_y)
-    {
-        m_tile.wind_value_y--;
-    }
-    
-    while ( ly < map_dimensions )
-    {
-        n_int    ly_plu = ((ly + delta ) & (map_dimensions-1)) << map_bits;
-        n_int    ly_neu = ly << map_bits;
-        n_int    lx = 0;
-        while ( lx < map_dimensions )
-        {
-            n_int    calc_point = lx | ly_neu;
-            n_int    delta_pressure = m_tile.delta_pressure[calc_point];
-            n_int    tp01 = (p01 * delta_pressure) / m_tile.delta_pressure_highest;
-            n_int    tp10 = (p10 * delta_pressure) / m_tile.delta_pressure_highest;
-            n_int    tp00 = 256 - tp01 - tp10;
-            n_int    lx_plu = (lx + delta ) & (map_dimensions-1);
-            n_int    local_atm =
-            (tp00 * m_tile.atmosphere[ calc_point]) +
-            (tp10 * m_tile.atmosphere[ lx | ly_plu ]) +
-            (tp01 * m_tile.atmosphere[ lx_plu | ly_neu ]);
-            temp_atmosphere[ calc_point ] = (n_c_int)local_atm >> 8;
-            lx++;
-        }
-        ly++;
-    }
-    io_copy((n_byte *)temp_atmosphere, (n_byte *)m_tile.atmosphere, (sizeof(n_c_int) * MAP_AREA));
+    tile_cycle(&m_tile);
+    tile_cycle(&m_tile);
+    tile_cycle(&m_tile);
+    tile_wind(&m_tile);
 }
 
 void weather_init(void)
 {
-    n_int map_dimension = land_map_dimension();
-    n_int map_bits      = land_map_bits();
-    n_int ly = 0;
-    
-    math_random3(m_tile.genetics);
-    
-    m_tile.delta_pressure_lowest = 0xffff;
-    m_tile.delta_pressure_highest = 0;
-    
-    m_tile.wind_value_x = weather_wind_aim();
-    m_tile.wind_aim_y = weather_wind_aim();
-    math_random3(m_tile.genetics);
-    m_tile.wind_value_y = weather_wind_aim();
-    m_tile.wind_aim_x = weather_wind_aim();
-    
-    if (map_bits < 0) return;
-
-    io_erase((n_byte *)m_tile.atmosphere, sizeof(n_c_int) * MAP_AREA);
-    io_erase((n_byte *)m_tile.delta_pressure, sizeof(n_byte2) * MAP_AREA);
-
-    while ( ly < map_dimension )
-    {
-        n_int	lx = 0;
-        while ( lx < map_dimension )
-        {
-            m_tile.atmosphere[ (map_dimension * ly) + lx ] = (n_c_int)(land_location(lx,ly)*4);
-            lx++;
-        }
-        ly++;
-    }
-    ly=0;
-    while ( ly < (map_dimension) )
-    {
-        n_int		lx = 0;
-        n_uint		ly_plu = ((ly + 1 ) & ((map_dimension)-1)) * map_dimension;
-        n_uint		ly_min = ((ly + (map_dimension-1)) & (map_dimension-1)) * map_dimension;
-        n_uint      ly_neu = (ly * map_dimension);
-        while ( lx < (map_dimension) )
-        {
-            n_byte2 value
-            = (n_byte2)(m_tile.atmosphere[ (( lx + 1 ) & ((map_dimension)-1)) + ly_neu]
-                            - m_tile.atmosphere[(( lx + ((map_dimension)-1) ) & ((map_dimension)-1)) + ly_neu]
-                            + m_tile.atmosphere[ lx + ly_plu ]
-                            - m_tile.atmosphere[ lx + ly_min ]
-                            + 512);
-            m_tile.delta_pressure[ ly_neu + lx ] = value;
-            
-            if (value > m_tile.delta_pressure_highest)
-            {
-                m_tile.delta_pressure_highest = value;
-            }
-            if (value < m_tile.delta_pressure_lowest)
-            {
-                m_tile.delta_pressure_lowest = value;
-            }
-            lx++;
-        }
-        ly++;
-    }
-    
-    ly = 0;
-    while( ly < (map_dimension * map_dimension))
-    {
-        m_tile.atmosphere[ ly ] = 0;
-        ly++;
-    }
-
+    tile_weather_init(&m_tile);
 }
 
 n_int weather_pressure(n_int px, n_int py)
 {
     n_int   dimension = land_map_dimension();
-
+    
     n_int   tpx = (MAPSPACE_TO_WEATHER(px) + dimension) % dimension;
     n_int   tpy = (MAPSPACE_TO_WEATHER(py) + dimension) % dimension;
-
+    
     return  m_tile.atmosphere[(dimension * tpy) + tpx];
 }
+
+/*
+ * The weather is maintained in a 18-bit band from bits_neg
+ */
+
 
 void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind)
 {
@@ -439,20 +233,17 @@ n_int land_location_vect(n_vect2 * value)
 void land_tide(void)
 {
     n_int current_time    = m_time + (m_date * TIME_DAY_MINUTES);
+    n_int lunar_mins      = current_time % LUNAR_ORBIT_MINS;
+    n_int lunar_angle_256 = (((m_time * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
+    n_int solar_mins      =  current_time    % (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
+    n_int solar_angle_256 = (solar_mins * 255) / (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
 
-    {
-        n_int lunar_mins      = current_time % LUNAR_ORBIT_MINS;
-        n_int lunar_angle_256 = (((m_time * 255) / 720)+((lunar_mins * 255) / LUNAR_ORBIT_MINS));
-        n_int solar_mins      =  current_time    % (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
-        n_int solar_angle_256 = (solar_mins * 255) / (TIME_DAY_MINUTES * TIME_YEAR_DAYS);
+    n_int lunar = math_sine(lunar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_LUNAR);
+    n_int solar = math_sine(solar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_SOLAR);
 
-        n_int lunar = math_sine(lunar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_LUNAR);
-        n_int solar = math_sine(solar_angle_256, NEW_SD_MULTIPLE / TIDE_AMPLITUDE_SOLAR);
+    NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
 
-        NA_ASSERT((((WATER_MAP + lunar + solar) > -1) && ((WATER_MAP + lunar + solar) < 256)), "(WATER_MAP + lunar + solar) outside byte boundaries");
-
-        m_tide_level = (n_byte)(WATER_MAP + lunar + solar);
-    }
+    m_tide_level = (n_byte)(WATER_MAP + lunar + solar);
 }
 
 void land_cycle(void)
@@ -595,38 +386,13 @@ n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
 
 void land_clear(KIND_OF_USE kind, n_byte4 start)
 {
-    n_uint	loop      = 0;
-    while (loop < (MAP_AREA))
-    {
-        m_tile.topology[loop] = 128;
-        loop++;
-    }
+    tile_pack(&m_tile);
     if (kind != KIND_LOAD_FILE)
     {
         m_time = 0;
         m_date = start;
     }
 
-}
-
-void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec)
-{
-    n_byte2	local_random[2];
-    n_int   refine = 0;
-
-    local_random[0] = seed[0];
-    local_random[1] = seed[1];
-
-    while (refine < 7)
-    {
-        math_patch(local_map, &math_memory_location, &math_random, local_random, refine);
-#if 0
-        math_round(local_map, scratch, &math_memory_location, exec);
-#else
-        math_round(local_map, scratch, &math_memory_location);
-#endif
-        refine++;
-    }
 }
 
 void land_seed_genetics(n_byte2 * local_random)
@@ -637,10 +403,9 @@ void land_seed_genetics(n_byte2 * local_random)
     
 }
 
-void land_init(n_byte * scratch, execute_thread_stub * exec)
+void land_init(void)
 {
-    math_pack(m_tile.topology, scratch);
-    land_creation(m_tile.topology, scratch, m_tile.genetics, exec);
+    tile_land_init(&m_tile);
 }
 
 void land_init_high_def(n_byte double_spread)
@@ -668,7 +433,6 @@ void land_init_high_def(n_byte double_spread)
 
     }
 }
-
 
 void land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location)
 {

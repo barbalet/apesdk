@@ -670,16 +670,12 @@ n_byte2 math_random(n_byte2 * local);
 void    math_random3(n_byte2 * local);
 n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);
 n_int   math_spread_byte(n_byte val);
-void    math_pack(n_byte * alloc1, n_byte *alloc2);
 n_int   math_memory_location(n_int px, n_int py);
 void    math_patch(n_byte * local_map,
                    n_memory_location * mem_func,
                    n_patch * func, n_byte2 * arg,
                    n_int refine);
-/*
-void math_round(n_byte * local_map, n_byte * scratch,
-                n_memory_location * mem_func, execute_thread_stub * exec);
-*/
+
 
 void math_round(n_byte * local_map, n_byte * scratch,
                 n_memory_location * mem_func);
@@ -877,10 +873,9 @@ void  weather_cycle(void);
 void  weather_wind(void);
 weather_values weather_seven_values(n_int px, n_int py);
 
-void land_creation(n_byte * local_map, n_byte * scratch, n_byte2 * seed, execute_thread_stub * exec);
 void land_seed_genetics(n_byte2 * local_random);
 
-void land_init(n_byte * scratch, execute_thread_stub * exec);
+void land_init(void);
 void land_init_high_def(n_byte double_spread);
 
 void  land_clear(KIND_OF_USE kind, n_byte4 start);
@@ -1076,6 +1071,29 @@ void  interpret_cleanup(n_interpret ** to_clean);
 n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n_int exit_offset,
                       void * structure, void * data,
                       script_external * start, script_external * end);
+
+typedef struct
+{
+    n_byte2     genetics[2];                           /* save-able */
+    
+    n_byte      topology[MAP_AREA];                    /* generated */
+    n_byte2     delta_pressure[ MAP_AREA];             /* generated */
+    n_c_int     atmosphere[ MAP_AREA];                 /* save-able and generate-able */
+    
+    n_byte      wind_value_x; /* 6 to 96 */
+    n_byte      wind_value_y; /* 6 to 96 */
+    n_byte      wind_aim_x;  /* 6 to 96 */
+    n_byte      wind_aim_y;  /* 6 to 96 */
+    
+    n_byte2     delta_pressure_highest;
+    n_byte2     delta_pressure_lowest;
+} n_tile;
+
+void tile_wind(n_tile * tile);
+void tile_cycle(n_tile * tile);
+void tile_weather_init(n_tile * tile);
+void tile_land_init(n_tile * tile);
+void tile_pack(n_tile * tile);
 
 void * land_ptr(void);
 n_byte4 land_date(void);

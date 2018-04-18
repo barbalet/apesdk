@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4A3B24681D7E0A1A009CC9E9 /* territory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3B24671D7E0A1A009CC9E9 /* territory.c */; };
+		4A4BA0FC2087004B003FD46A /* tile.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A4BA0FB2087004B003FD46A /* tile.c */; };
 		4A5E3DA21DC6A1250054942F /* polygonal.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A5E3DA01DC6A1250054942F /* polygonal.c */; };
 		5AD6CA751B27582F00230534 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5AD6CA741B27582F00230534 /* Assets.xcassets */; };
 		5AD6CA831B27582F00230534 /* Noble_ApeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6CA821B27582F00230534 /* Noble_ApeTests.m */; };
@@ -62,6 +63,7 @@
 
 /* Begin PBXFileReference section */
 		4A3B24671D7E0A1A009CC9E9 /* territory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = territory.c; path = ../sim/noble/territory.c; sourceTree = "<group>"; };
+		4A4BA0FB2087004B003FD46A /* tile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tile.c; path = ../sim/noble/tile.c; sourceTree = "<group>"; };
 		4A5E3DA01DC6A1250054942F /* polygonal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = polygonal.c; path = ../sim/ogl/polygonal.c; sourceTree = "<group>"; };
 		4A5E3DA11DC6A1250054942F /* ogl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ogl.h; path = ../sim/ogl/ogl.h; sourceTree = "<group>"; };
 		5AD6CA6B1B27582F00230534 /* Noble Ape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Noble Ape.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -268,6 +270,7 @@
 		5AD6CB051B275C0800230534 /* noble */ = {
 			isa = PBXGroup;
 			children = (
+				4A4BA0FB2087004B003FD46A /* tile.c */,
 				5AD6CACA1B27598400230534 /* audio.c */,
 				5AD6CACB1B27598400230534 /* compress.c */,
 				5AD6CACD1B27598400230534 /* interpret.c */,
@@ -427,6 +430,7 @@
 				5AD6CADA1B27598400230534 /* being.c in Sources */,
 				5AD6CADB1B27598400230534 /* body.c in Sources */,
 				5AD6CADC1B27598400230534 /* brain.c in Sources */,
+				4A4BA0FC2087004B003FD46A /* tile.c in Sources */,
 				5AD6CADD1B27598400230534 /* drives.c in Sources */,
 				5AD6CAE01B27598400230534 /* episodic.c in Sources */,
 				5AD6CAE11B27598400230534 /* food.c in Sources */,

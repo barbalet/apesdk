@@ -1528,7 +1528,6 @@ n_int console_interval(void * ptr, n_string response, n_console_output output_fu
 
     if (interval_set == 0)
     {
-        n_string_block number_string;
         if (save_interval_steps < 60)
         {
             n_string_block  output, number_string;

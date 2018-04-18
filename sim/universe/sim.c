@@ -471,10 +471,6 @@ void sim_cycle(void)
     land_cycle();
 #ifdef WEATHER_ON
     weather_cycle();
-    weather_cycle();
-    weather_cycle();
-    weather_cycle();
-    weather_wind();
 #endif
 
     being_loop(&sim, sim_being_awake_loop, PROCESSING_LIGHT_WEIGHT);
@@ -613,7 +609,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         {
             land_clear(kind, AGE_OF_MATURITY);
 #ifdef LAND_ON
-            land_init(&offbuffer[landbuffer_size], 0L);
+            land_init();
             land_init_high_def(1);
             land_tide();
 #endif
