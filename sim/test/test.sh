@@ -47,6 +47,7 @@ gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/object.c -o object.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/territory.c -o territory.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/tile.c -o tile.o
 
 gcc ${CFLAGS} -c test_math.c -o test_math.o
 
