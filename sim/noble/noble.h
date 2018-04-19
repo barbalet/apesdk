@@ -1087,6 +1087,9 @@ typedef struct
     
     n_byte2     delta_pressure_highest;
     n_byte2     delta_pressure_lowest;
+    
+    n_c_int     atmosphere_highest;
+    n_c_int     atmosphere_lowest;
 } n_tile;
 
 void tile_wind(n_tile * tile);

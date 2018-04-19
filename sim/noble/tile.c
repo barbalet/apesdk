@@ -47,16 +47,41 @@ static void tile_wrap(n_c_int * section)
     }
 }
 
+static void tile_pressure_range(n_tile * tile, n_byte2 value)
+{
+    if (value > tile->delta_pressure_highest)
+    {
+        tile->delta_pressure_highest = value;
+    }
+    if (value < tile->delta_pressure_lowest)
+    {
+        tile->delta_pressure_lowest = value;
+    }
+}
+
+static void tile_atomosphere_range(n_tile * tile, n_c_int value)
+{
+    if (value > tile->atmosphere_highest)
+    {
+        tile->atmosphere_highest = value;
+    }
+    if (value < tile->atmosphere_lowest)
+    {
+        tile->atmosphere_lowest = value;
+    }
+}
+
 void tile_cycle(n_tile * tile)
 {
     const n_int    bits_neg = (-131072 * 254) / 256;
     const n_int    bits_pos = ( 131071 * 254) / 256;
     static n_c_int temp_atmosphere[MAP_AREA];
     static n_int   local_delta = 0;
-    n_int          max = bits_neg;
-    n_int          min = bits_pos;
     n_int          new_delta = 0;
     n_int          ly = 0;
+    
+    tile->atmosphere_lowest = bits_pos;
+    tile->atmosphere_highest = bits_neg;
     
     while ( ly < MAP_DIMENSION )
     {
@@ -76,18 +101,9 @@ void tile_cycle(n_tile * tile)
                      - (2 * tile->atmosphere[ lx | ly_plu ]);
             
             value += (n_c_int) ((local_atm - local_delta) >> MAP_BITS) + tile->delta_pressure[ simple_location];
-            
             temp_atmosphere[ simple_location ] = value;
             new_delta += value;
-            if (value < min)
-            {
-                min = value;
-            }
-            else if (value > max)
-            {
-                max = value;
-            }
-            
+            tile_atomosphere_range(tile, value);
             lx++;
         }
         ly++;
@@ -95,7 +111,7 @@ void tile_cycle(n_tile * tile)
     
     local_delta = new_delta >> MAP_BITS;
     
-    if ((min < bits_neg) || (max > bits_pos))
+    if ((tile->atmosphere_lowest < bits_neg) || (tile->atmosphere_highest > bits_pos))
     {
         tile_wrap(temp_atmosphere);
     }
@@ -104,15 +120,8 @@ void tile_cycle(n_tile * tile)
 
 }
 
-void tile_wind(n_tile * tile)
+static void title_wind_calculation(n_tile * tile)
 {
-    /* Add dynamic wind */
-    const n_int   p01 = tile->wind_value_x;
-    const n_int   p10 = tile->wind_value_y;
-    const n_int   delta = 1;
-    static n_c_int temp_atmosphere[MAP_AREA];
-    n_int         ly = 0;
-
     if ((math_random(tile->genetics) & 31) == 0)
     {
         tile->wind_aim_x = tile_wind_aim;
@@ -137,6 +146,18 @@ void tile_wind(n_tile * tile)
     {
         tile->wind_value_y--;
     }
+}
+
+void tile_wind(n_tile * tile)
+{
+    /* Add dynamic wind */
+    const n_int   p01 = tile->wind_value_x;
+    const n_int   p10 = tile->wind_value_y;
+    const n_int   delta = 1;
+    static n_c_int temp_atmosphere[MAP_AREA];
+    n_int         ly = 0;
+
+    title_wind_calculation(tile);
     
     while ( ly < MAP_DIMENSION )
     {
@@ -202,15 +223,9 @@ void tile_weather_init(n_tile * tile)
                         - tile->atmosphere[ lx + ly_min ]
                         + 512);
             tile->delta_pressure[ ly_neu + lx ] = value;
+        
+            tile_pressure_range(tile, value);
             
-            if (value > tile->delta_pressure_highest)
-            {
-                tile->delta_pressure_highest = value;
-            }
-            if (value < tile->delta_pressure_lowest)
-            {
-                tile->delta_pressure_lowest = value;
-            }
             lx++;
         }
         ly++;
