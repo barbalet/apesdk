@@ -1092,11 +1092,16 @@ typedef struct
     n_c_int     atmosphere_lowest;
 } n_tile;
 
-void tile_wind(n_tile * tile);
-void tile_cycle(n_tile * tile);
-void tile_weather_init(n_tile * tile);
-void tile_land_init(n_tile * tile);
-void tile_pack(n_tile * tile);
+typedef struct
+{
+    n_tile tiles[1];
+} n_land;
+
+void tile_wind(n_land * land);
+void tile_cycle(n_land * land);
+void tile_weather_init(n_land * land);
+void tile_land_init(n_land * land);
+void tile_pack(n_land * land);
 
 void * land_ptr(void);
 n_byte4 land_date(void);

@@ -242,17 +242,17 @@ n_int io_disk_read(n_file * local_file, n_string file_name)
 
     io_free((void**)&local_file->data);
     
-    local_file->data = io_new(file_size * 4);
+    local_file->data = io_new(file_size * 2);
     if (local_file->data == 0L)
     {
         return SHOW_ERROR("File data could not be allocated");
     }
     
-    io_erase(local_file->data, file_size * 4);
+    io_erase(local_file->data, file_size * 2);
     
     fread(local_file->data, 1, file_size, in_file);
     
-    local_file->size = file_size * 4;
+    local_file->size = file_size * 2;
     local_file->location = file_size;
 
 #else

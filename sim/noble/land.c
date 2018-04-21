@@ -46,7 +46,7 @@
 static n_byte4     m_date;                                  /* save-able */
 static n_byte2     m_time;                                  /* save-able */
 
-static n_tile      m_tile;
+static n_land      m_land;
 
 static n_byte      m_tide_level;                            /* generated */
 
@@ -99,7 +99,7 @@ n_byte4 land_time(void)
 
 n_byte2 * land_genetics(void)
 {
-    return (n_byte2 *)m_tile.genetics;
+    return (n_byte2 *)m_land.tiles[0].genetics;
 }
 
 n_byte land_tide_level(void)
@@ -114,7 +114,7 @@ n_byte * land_topology_highdef(void)
 
 n_byte * land_topology(void)
 {
-    return (n_byte *)m_tile.topology;
+    return (n_byte *)m_land.tiles[0].topology;
 }
 
 n_byte4 * land_highres_tide(void)
@@ -124,21 +124,21 @@ n_byte4 * land_highres_tide(void)
 
 n_c_int * land_weather(void)
 {
-    return (n_c_int *)m_tile.atmosphere;
+    return (n_c_int *)m_land.tiles[0].atmosphere;
 }
 
 
 void weather_cycle(void)
 {
-    tile_cycle(&m_tile);
-    tile_cycle(&m_tile);
-    tile_cycle(&m_tile);
-    tile_wind(&m_tile);
+    tile_cycle(&m_land);
+    tile_cycle(&m_land);
+    tile_cycle(&m_land);
+    tile_wind(&m_land);
 }
 
 void weather_init(void)
 {
-    tile_weather_init(&m_tile);
+    tile_weather_init(&m_land);
 }
 
 n_int weather_pressure(n_int px, n_int py)
@@ -148,7 +148,7 @@ n_int weather_pressure(n_int px, n_int py)
     n_int   tpx = (MAPSPACE_TO_WEATHER(px) + dimension) % dimension;
     n_int   tpy = (MAPSPACE_TO_WEATHER(py) + dimension) % dimension;
     
-    return  m_tile.atmosphere[(dimension * tpy) + tpx];
+    return  m_land.tiles[0].atmosphere[(dimension * tpy) + tpx];
 }
 
 /*
@@ -222,7 +222,7 @@ n_int land_map_bits(void)
 
 n_int land_location(n_int px, n_int py)
 {
-    return m_tile.topology[math_memory_location(px, py)];
+    return m_land.tiles[0].topology[math_memory_location(px, py)];
 }
 
 n_int land_location_vect(n_vect2 * value)
@@ -386,7 +386,7 @@ n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
 
 void land_clear(KIND_OF_USE kind, n_byte4 start)
 {
-    tile_pack(&m_tile);
+    tile_pack(&m_land);
     if (kind != KIND_LOAD_FILE)
     {
         m_time = 0;
@@ -397,15 +397,15 @@ void land_clear(KIND_OF_USE kind, n_byte4 start)
 
 void land_seed_genetics(n_byte2 * local_random)
 {
-    m_tile.genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
-    m_tile.genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+    m_land.tiles[0].genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
+     m_land.tiles[0].genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
     
     
 }
 
 void land_init(void)
 {
-    tile_land_init(&m_tile);
+    tile_land_init(&m_land);
 }
 
 void land_init_high_def(n_byte double_spread)
@@ -413,7 +413,7 @@ void land_init_high_def(n_byte double_spread)
     n_uint   lp = 0;
     n_byte4  value_setting = 0;
 
-    math_bilinear_8_times(m_tile.topology, m_topology_highdef, double_spread);
+    math_bilinear_8_times(m_land.tiles[0].topology, m_topology_highdef, double_spread);
     io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
 
     while (lp < HI_RES_MAP_AREA)

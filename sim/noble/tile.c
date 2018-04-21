@@ -35,7 +35,7 @@
 
 #include "noble.h"
 
-#define tile_wind_aim (6 + math_random(tile->genetics) % 91)
+#define tile_wind_aim (6 + math_random(land->tiles->genetics) % 91)
 
 static void tile_wrap(n_c_int * section)
 {
@@ -47,31 +47,31 @@ static void tile_wrap(n_c_int * section)
     }
 }
 
-static void title_wind_calculation(n_tile * tile)
+static void title_wind_calculation(n_land * land)
 {
-    if ((math_random(tile->genetics) & 31) == 0)
+    if ((math_random(land->tiles->genetics) & 31) == 0)
     {
-        tile->wind_aim_x = tile_wind_aim;
-        math_random3(tile->genetics);
-        tile->wind_aim_y = tile_wind_aim;
+        land->tiles->wind_aim_x = tile_wind_aim;
+        math_random3(land->tiles->genetics);
+        land->tiles->wind_aim_y = tile_wind_aim;
     }
     
-    if (tile->wind_aim_x > tile->wind_value_x)
+    if (land->tiles->wind_aim_x > land->tiles->wind_value_x)
     {
-        tile->wind_value_x++;
+        land->tiles->wind_value_x++;
     }
-    if (tile->wind_aim_x < tile->wind_value_x)
+    if (land->tiles->wind_aim_x < land->tiles->wind_value_x)
     {
-        tile->wind_value_x--;
+        land->tiles->wind_value_x--;
     }
     
-    if (tile->wind_aim_y > tile->wind_value_y)
+    if (land->tiles->wind_aim_y > land->tiles->wind_value_y)
     {
-        tile->wind_value_y++;
+        land->tiles->wind_value_y++;
     }
-    if (tile->wind_aim_y < tile->wind_value_y)
+    if (land->tiles->wind_aim_y < land->tiles->wind_value_y)
     {
-        tile->wind_value_y--;
+        land->tiles->wind_value_y--;
     }
 }
 
@@ -99,7 +99,7 @@ static void tile_atomosphere_range(n_tile * tile, n_c_int value)
     }
 }
 
-void tile_cycle(n_tile * tile)
+void tile_cycle(n_land * land)
 {
     const n_int    bits_neg = (-131072 * 254) / 256;
     const n_int    bits_pos = ( 131071 * 254) / 256;
@@ -108,8 +108,8 @@ void tile_cycle(n_tile * tile)
     n_int          new_delta = 0;
     n_int          ly = 0;
     
-    tile->atmosphere_lowest = bits_pos;
-    tile->atmosphere_highest = bits_neg;
+    land->tiles->atmosphere_lowest = bits_pos;
+    land->tiles->atmosphere_highest = bits_neg;
     
     while ( ly < MAP_DIMENSION )
     {
@@ -120,18 +120,18 @@ void tile_cycle(n_tile * tile)
         while ( lx < MAP_DIMENSION )
         {
             n_int    simple_location = lx | ly_neu;
-            n_c_int  value = tile->atmosphere[simple_location];
+            n_c_int  value = land->tiles->atmosphere[simple_location];
             
             n_int    local_atm =
-                       (2 * tile->atmosphere[ lx | ly_min ])
-                     + (2 * tile->atmosphere[ ((lx + (MAP_DIMENSION-1) ) & ((MAP_DIMENSION)-1)) | ly_neu ])
-                     - (2 * tile->atmosphere[ ((lx + 1 ) & (MAP_DIMENSION-1)) | ly_neu ])
-                     - (2 * tile->atmosphere[ lx | ly_plu ]);
+                       (2 * land->tiles->atmosphere[ lx | ly_min ])
+                     + (2 * land->tiles->atmosphere[ ((lx + (MAP_DIMENSION-1) ) & ((MAP_DIMENSION)-1)) | ly_neu ])
+                     - (2 * land->tiles->atmosphere[ ((lx + 1 ) & (MAP_DIMENSION-1)) | ly_neu ])
+                     - (2 * land->tiles->atmosphere[ lx | ly_plu ]);
             
-            value += (n_c_int) ((local_atm - local_delta) >> MAP_BITS) + tile->delta_pressure[simple_location];
+            value += (n_c_int) ((local_atm - local_delta) >> MAP_BITS) + land->tiles->delta_pressure[simple_location];
             temp_atmosphere[ simple_location ] = value;
             new_delta += value;
-            tile_atomosphere_range(tile, value);
+            tile_atomosphere_range(land->tiles, value);
             lx++;
         }
         ly++;
@@ -139,25 +139,25 @@ void tile_cycle(n_tile * tile)
     
     local_delta = new_delta >> MAP_BITS;
     
-    if ((tile->atmosphere_lowest < bits_neg) || (tile->atmosphere_highest > bits_pos))
+    if ((land->tiles->atmosphere_lowest < bits_neg) || (land->tiles->atmosphere_highest > bits_pos))
     {
         tile_wrap(temp_atmosphere);
     }
     
-    io_copy((n_byte *)temp_atmosphere, (n_byte *)tile->atmosphere, (sizeof(n_c_int) * MAP_AREA));
+    io_copy((n_byte *)temp_atmosphere, (n_byte *)land->tiles->atmosphere, (sizeof(n_c_int) * MAP_AREA));
 
 }
 
-void tile_wind(n_tile * tile)
+void tile_wind(n_land * land)
 {
     /* Add dynamic wind */
-    const n_int   p01 = tile->wind_value_x;
-    const n_int   p10 = tile->wind_value_y;
+    const n_int   p01 = land->tiles->wind_value_x;
+    const n_int   p10 = land->tiles->wind_value_y;
     const n_int   delta = 1;
     static n_c_int temp_atmosphere[MAP_AREA];
     n_int         ly = 0;
 
-    title_wind_calculation(tile);
+    title_wind_calculation(land);
     
     while ( ly < MAP_DIMENSION )
     {
@@ -167,44 +167,44 @@ void tile_wind(n_tile * tile)
         while ( lx < MAP_DIMENSION )
         {
             n_int    calc_point = lx | ly_neu;
-            n_int    delta_pressure = tile->delta_pressure[calc_point];
-            n_int    tp01 = (p01 * delta_pressure) / tile->delta_pressure_highest;
-            n_int    tp10 = (p10 * delta_pressure) / tile->delta_pressure_highest;
+            n_int    delta_pressure = land->tiles->delta_pressure[calc_point];
+            n_int    tp01 = (p01 * delta_pressure) / land->tiles->delta_pressure_highest;
+            n_int    tp10 = (p10 * delta_pressure) / land->tiles->delta_pressure_highest;
             n_int    tp00 = 256 - tp01 - tp10;
             n_int    lx_plu = (lx + delta ) & (MAP_DIMENSION-1);
             n_int    local_atm =
-                        (tp00 * tile->atmosphere[ calc_point]) +
-                        (tp10 * tile->atmosphere[ lx | ly_plu ]) +
-                        (tp01 * tile->atmosphere[ lx_plu | ly_neu ]);
+                        (tp00 * land->tiles->atmosphere[ calc_point]) +
+                        (tp10 * land->tiles->atmosphere[ lx | ly_plu ]) +
+                        (tp01 * land->tiles->atmosphere[ lx_plu | ly_neu ]);
             temp_atmosphere[ calc_point ] = (n_c_int)local_atm >> 8;
             lx++;
         }
         ly++;
     }
-    io_copy((n_byte *)temp_atmosphere, (n_byte *)tile->atmosphere, (sizeof(n_c_int) * MAP_AREA));
+    io_copy((n_byte *)temp_atmosphere, (n_byte *)land->tiles->atmosphere, (sizeof(n_c_int) * MAP_AREA));
 }
 
-void tile_weather_init(n_tile * tile)
+void tile_weather_init(n_land * land)
 {
     n_int ly = 0;
     
-    math_random3(tile->genetics);
+    math_random3(land->tiles->genetics);
     
-    tile->delta_pressure_lowest = 0xffff;
-    tile->delta_pressure_highest = 0;
+    land->tiles->delta_pressure_lowest = 0xffff;
+    land->tiles->delta_pressure_highest = 0;
     
-    tile->wind_value_x = tile_wind_aim;
-    tile->wind_aim_y = tile_wind_aim;
-    math_random3(tile->genetics);
-    tile->wind_value_y = tile_wind_aim;
-    tile->wind_aim_x = tile_wind_aim;
+    land->tiles->wind_value_x = tile_wind_aim;
+    land->tiles->wind_aim_y = tile_wind_aim;
+    math_random3(land->tiles->genetics);
+    land->tiles->wind_value_y = tile_wind_aim;
+    land->tiles->wind_aim_x = tile_wind_aim;
     
-    io_erase((n_byte *)tile->atmosphere, sizeof(n_c_int) * MAP_AREA);
-    io_erase((n_byte *)tile->delta_pressure, sizeof(n_byte2) * MAP_AREA);
+    io_erase((n_byte *)land->tiles->atmosphere, sizeof(n_c_int) * MAP_AREA);
+    io_erase((n_byte *)land->tiles->delta_pressure, sizeof(n_byte2) * MAP_AREA);
     
     while ( ly < MAP_AREA )
     {
-        tile->atmosphere[ ly ] = (n_c_int)(tile->topology[ ly ] * 4);
+        land->tiles->atmosphere[ ly ] = (n_c_int)(land->tiles->topology[ ly ] * 4);
         ly++;
     }
     ly=0;
@@ -217,14 +217,14 @@ void tile_weather_init(n_tile * tile)
         while ( lx < MAP_DIMENSION )
         {
             n_byte2 value
-            = (n_byte2)(tile->atmosphere[ (( lx + 1 ) & ((MAP_DIMENSION)-1)) + ly_neu]
-                        - tile->atmosphere[(( lx + ((MAP_DIMENSION)-1) ) & ((MAP_DIMENSION)-1)) + ly_neu]
-                        + tile->atmosphere[ lx + ly_plu ]
-                        - tile->atmosphere[ lx + ly_min ]
+            = (n_byte2)(land->tiles->atmosphere[ (( lx + 1 ) & ((MAP_DIMENSION)-1)) + ly_neu]
+                        - land->tiles->atmosphere[(( lx + ((MAP_DIMENSION)-1) ) & ((MAP_DIMENSION)-1)) + ly_neu]
+                        + land->tiles->atmosphere[ lx + ly_plu ]
+                        - land->tiles->atmosphere[ lx + ly_min ]
                         + 512);
-            tile->delta_pressure[ ly_neu + lx ] = value;
+            land->tiles->delta_pressure[ ly_neu + lx ] = value;
         
-            tile_pressure_range(tile, value);
+            tile_pressure_range(land->tiles, value);
             
             lx++;
         }
@@ -234,35 +234,35 @@ void tile_weather_init(n_tile * tile)
     ly = 0;
     while( ly < MAP_AREA)
     {
-        tile->atmosphere[ ly ] = 0;
+        land->tiles->atmosphere[ ly ] = 0;
         ly++;
     }
 }
 
-void tile_pack(n_tile * tile)
+void tile_pack(n_land * land)
 {
     n_int loop = 0;
     while (loop < MAP_AREA)
     {
-        tile->topology[loop] = 128;
+        land->tiles->topology[loop] = 128;
         loop++;
     }
 }
 
-void tile_land_init(n_tile * tile)
+void tile_land_init(n_land * land)
 {
     static n_byte scratch[MAP_AREA];
     n_byte2    local_random[2];
     n_int      refine = 0;
-    local_random[0] = tile->genetics[0];
-    local_random[1] = tile->genetics[1];
+    local_random[0] = land->tiles->genetics[0];
+    local_random[1] = land->tiles->genetics[1];
     
-    tile_pack(tile);
+    tile_pack(land);
 
     while (refine < 7)
     {
-        math_patch(tile->topology, &math_memory_location, &math_random, local_random, refine);
-        math_round(tile->topology, scratch, &math_memory_location);
+        math_patch(land->tiles->topology, &math_memory_location, &math_random, local_random, refine);
+        math_round(land->tiles->topology, scratch, &math_memory_location);
         refine++;
     }
 }
