@@ -222,7 +222,7 @@ n_int land_map_bits(void)
 
 n_int land_location(n_int px, n_int py)
 {
-    return m_land.tiles[0].topology[math_memory_location(px, py)];
+    return m_land.tiles[0].topology[tile_memory_location(px, py)];
 }
 
 n_int land_location_vect(n_vect2 * value)

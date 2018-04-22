@@ -670,15 +670,6 @@ n_byte2 math_random(n_byte2 * local);
 void    math_random3(n_byte2 * local);
 n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);
 n_int   math_spread_byte(n_byte val);
-n_int   math_memory_location(n_int px, n_int py);
-void    math_patch(n_byte * local_map,
-                   n_memory_location * mem_func,
-                   n_patch * func, n_byte2 * arg,
-                   n_int refine);
-
-
-void math_round(n_byte * local_map, n_byte * scratch,
-                n_memory_location * mem_func);
 
 n_int  math_sine(n_int direction, n_int divisor);
 
@@ -1102,6 +1093,8 @@ void tile_cycle(n_land * land);
 void tile_weather_init(n_land * land);
 void tile_land_init(n_land * land);
 void tile_pack(n_land * land);
+n_int tile_memory_location(n_int px, n_int py);
+void tile_creation(n_byte * map, n_byte * scratch, n_byte2 * random);
 
 void * land_ptr(void);
 n_byte4 land_date(void);

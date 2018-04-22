@@ -244,30 +244,188 @@ void tile_weather_init(n_land * land)
     }
 }
 
-void tile_pack(n_land * land)
+static void title_pack_static(n_byte * buffer)
 {
     n_int loop = 0;
     while (loop < MAP_AREA)
     {
-        land->tiles->topology[loop] = 128;
+        buffer[loop] = 128;
         loop++;
+    }
+}
+
+void tile_pack(n_land * land)
+{
+    title_pack_static(land->tiles->topology);
+}
+
+static void tile_round(n_byte * local_map, n_byte * scratch,
+                n_memory_location * mem_func)
+{
+    n_int    local_tile_dimension = 1 << MAP_BITS;
+    n_int span_minor = 0;
+    /** Perform four nearest neighbor blur runs */
+    while (span_minor < 6)
+    {
+        n_byte    *front, *back;
+        n_int    py = 0;
+        
+        if ((span_minor&1) == 0)
+        {
+            front = local_map;
+            back = scratch;
+        }
+        else
+        {
+            front = scratch;
+            back = local_map;
+        }
+        while (py < local_tile_dimension)
+        {
+            n_int    px = 0;
+            while (px < local_tile_dimension)
+            {
+                n_int    sum = 0;
+                n_int    ty = -1;
+                while (ty < 2)
+                {
+                    n_int    tx = -1;
+                    while (tx < 2)
+                    {
+                        sum += front[(*mem_func)((px+tx),(py+ty))];
+                        tx++;
+                    }
+                    ty++;
+                }
+                back[(*mem_func)((px),(py))] = (n_byte)(sum / 9);
+                px ++;
+            }
+            py ++;
+        }
+        span_minor ++;
+    }
+}
+
+/**
+ * This function creates the fractal landscapes and the genetic fur patterns
+ * currently.
+ * @param local_map       pointer to the map array
+ * @param func            the n_patch function that takes the form n_byte2 (n_patch)(n_byte2 * local)
+ * @param arg             the pointer that is passed into the patch function */
+static void tile_patch(n_byte * local_map,
+                n_memory_location * mem_func,
+                n_patch * func, n_byte2 * arg,
+                n_int refine)
+{
+    /** size of the local tiles */
+    /** number of 256 x 256 tiles in each dimension */
+    const n_int local_tiles = 1 << (MAP_BITS-8);
+    const n_int span_minor = (64 >> ((refine&7)^7));
+    const n_int span_major = (1 << ((refine&7)^7));
+    n_int tile_y = 0;
+    
+    NA_ASSERT(local_map, "local_map NULL");
+    NA_ASSERT(func, "func NULL");
+    NA_ASSERT(arg, "arg NULL");
+    
+    /** begin the tile traversal in the y dimension */
+    while (tile_y < local_tiles)
+    {
+        /** begin the tile traversal in the x dimension */
+        n_int tile_x = 0;
+        while (tile_x < local_tiles)
+        {
+            /** scan through the span_minor values */
+            n_int    py = 0;
+            while (py < span_minor)
+            {
+                n_int    px = 0;
+                while (px < span_minor)
+                {
+                    /** each of the smaller tiles are based on 256 * 256 tiles */
+                    n_int    val1 = ((px << 2) + (py << 10));
+                    n_int    ty = 0;
+                    n_int    tseed = (*func)(arg);
+                    
+                    while (ty < 4)
+                    {
+                        n_int    tx = 0;
+                        while (tx < 4)
+                        {
+                            n_int    val2 = (tseed >> (tx | (ty << 2)));
+                            n_int    val3 = ((((val2 & 1) << 1)-1) * 20);
+                            n_int    my = 0;
+                            
+                            val2 = (tx | (ty << 8));
+                            
+                            while (my < span_major)
+                            {
+                                n_int    mx = 0;
+                                while (mx < span_major)
+                                {
+                                    n_int    point = ((mx | (my << 8)) + (span_major * (val1 + val2)));
+                                    n_int    pointx = (point & 255);
+                                    n_int    pointy = (point >> 8);
+                                    /** perform rotation on 2,3,6,7,10,11 etc */
+                                    if (refine&2)
+                                    {
+                                        n_int pointx_tmp = pointx + pointy;
+                                        pointy = pointx - pointy;
+                                        pointx = pointx_tmp;
+                                    }
+                                    {
+                                        /** include the wrap around for the 45 degree rotation cases in particular */
+                                        n_uint newloc = (*mem_func)((pointx + (tile_x<<8)) ,(pointy + (tile_y<<8)));
+                                        n_int    local_map_point = local_map[newloc] + val3;
+                                        if (local_map_point < 0) local_map_point = 0;
+                                        if (local_map_point > 255) local_map_point = 255;
+                                        local_map[newloc] = (n_byte)local_map_point;
+                                    }
+                                    mx++;
+                                }
+                                my++;
+                            }
+                            tx++;
+                        }
+                        ty++;
+                    }
+                    px++;
+                }
+                py++;
+            }
+            tile_x++;
+        }
+        tile_y++;
+    }
+}
+
+
+n_int tile_memory_location(n_int px, n_int py)
+{
+#define    POSITIVE_TILE_COORD(num)      ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
+    
+    return POSITIVE_TILE_COORD(px) + (POSITIVE_TILE_COORD(py) << MAP_BITS);
+}
+
+void tile_creation(n_byte * map, n_byte * scratch, n_byte2 * random)
+{
+    n_byte2    local_random[2];
+    n_int      refine = 0;
+    local_random[0] = random[0];
+    local_random[1] = random[1];
+    
+    title_pack_static(map);
+    
+    while (refine < 7)
+    {
+        tile_patch(map, &tile_memory_location, &math_random, local_random, refine);
+        tile_round(map, scratch, &tile_memory_location);
+        refine++;
     }
 }
 
 void tile_land_init(n_land * land)
 {
     static n_byte scratch[MAP_AREA];
-    n_byte2    local_random[2];
-    n_int      refine = 0;
-    local_random[0] = land->tiles->genetics[0];
-    local_random[1] = land->tiles->genetics[1];
-    
-    tile_pack(land);
-
-    while (refine < 7)
-    {
-        math_patch(land->tiles->topology, &math_memory_location, &math_random, local_random, refine);
-        math_round(land->tiles->topology, scratch, &math_memory_location);
-        refine++;
-    }
+    tile_creation(land->tiles->topology, scratch, land->tiles->genetics);
 }
