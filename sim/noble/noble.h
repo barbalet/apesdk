@@ -1093,8 +1093,8 @@ void tile_cycle(n_land * land);
 void tile_weather_init(n_land * land);
 void tile_land_init(n_land * land);
 void tile_pack(n_land * land);
-n_int tile_memory_location(n_int px, n_int py);
-void tile_creation(n_byte * map, n_byte * scratch, n_byte2 * random);
+void tile_creation(n_byte * map, n_byte2 * random);
+n_byte tiles_topology(n_land * land, n_int tile, n_int lx, n_int ly);
 
 void * land_ptr(void);
 n_byte4 land_date(void);
