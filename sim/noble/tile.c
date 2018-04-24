@@ -113,6 +113,13 @@ static n_byte2 tiles_pressure(n_land * land, n_int tile, n_int lx, n_int ly)
     return land->tiles->delta_pressure[converted_x | (converted_y * MAP_DIMENSION)];
 }
 
+static n_byte tile_topology(n_land * land, n_int tile, n_int lx, n_int ly)
+{
+    n_int converted_x = (lx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
+    n_int converted_y = (ly + MAP_DIMENSION) & (MAP_DIMENSION - 1);
+    return land->tiles->topology[converted_x | (converted_y * MAP_DIMENSION)];
+}
+                            
 void tile_cycle(n_land * land)
 {
     const n_int    bits_neg = (-131072 * 254) / 256;
@@ -216,18 +223,17 @@ void tile_weather_init(n_land * land)
     while ( ly < MAP_DIMENSION )
     {
         n_int       lx = 0;
-        n_uint      ly_plu = ((ly + 1 ) & ((MAP_DIMENSION)-1)) * MAP_DIMENSION;
-        n_uint      ly_min = ((ly + (MAP_DIMENSION-1)) & (MAP_DIMENSION-1)) * MAP_DIMENSION;
-        n_uint      ly_neu = (ly * MAP_DIMENSION);
+
         while ( lx < MAP_DIMENSION )
         {
             n_byte2 value
-            = (n_byte2)(land->tiles->atmosphere[ (( lx + 1 ) & ((MAP_DIMENSION)-1)) + ly_neu]
-                        - land->tiles->atmosphere[(( lx + ((MAP_DIMENSION)-1) ) & ((MAP_DIMENSION)-1)) + ly_neu]
-                        + land->tiles->atmosphere[ lx + ly_plu ]
-                        - land->tiles->atmosphere[ lx + ly_min ]
+            = (n_byte2)(
+                        tiles_atomosphere(land, 0, lx + 1, ly)
+                        - tiles_atomosphere(land, 0, lx - 1, ly)
+                        + tiles_atomosphere(land, 0, lx, ly + 1)
+                        - tiles_atomosphere(land, 0, lx, ly - 1)
                         + 512);
-            land->tiles->delta_pressure[ ly_neu + lx ] = value;
+            land->tiles->delta_pressure[ lx | (ly * MAP_DIMENSION) ] = value;
         
             tile_pressure_range(land->tiles, value);
             
@@ -259,8 +265,7 @@ void tile_pack(n_land * land)
     title_pack_static(land->tiles->topology);
 }
 
-static void tile_round(n_byte * local_map, n_byte * scratch,
-                n_memory_location * mem_func)
+static void tile_round(n_byte * local_map, n_byte * scratch, n_memory_location * mem_func)
 {
     n_int    local_tile_dimension = 1 << MAP_BITS;
     n_int span_minor = 0;
