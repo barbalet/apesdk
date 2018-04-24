@@ -96,6 +96,48 @@
 
 - (void) drawRect:(NSRect)rect
 {
+#ifdef NOBLE_PLANET
+    NSInteger              dim_x = (NSInteger)rect.size.width;
+    NSInteger              dim_y = (NSInteger)rect.size.height;
+    static unsigned char   outputBuffer[TERRAIN_WINDOW_AREA*3];
+    
+    [[self openGLContext] makeCurrentContext];
+/*
+#ifdef NEW_OPENGL_ENVIRONMENT
+    if (!polygonal_entry([self.shared identification]))
+    {
+        [[self openGLContext] flushBuffer];
+        return;
+    }
+#endif
+*/
+    [self.shared cycleWithWidth:dim_x height:dim_y];
+    /*
+    if ([self.shared cycleDebugOutput])
+    {
+        NSLog(@"Debug output");
+        [self debugOutput];
+    }
+    if ([self.shared cycleQuit])
+    {
+        NSLog(@"Quit procedure initiated");
+        [self quitProcedure];
+    }
+    
+    if ([self.shared cycleNewApes])
+    {
+        NSLog(@"New apes neede to continue simulation");
+        [self.shared newAgents];
+    }
+    
+   [[self openGLContext] makeCurrentContext];*/
+    
+    [self.shared draw:outputBuffer width:dim_x height:dim_y];
+    
+    glDrawPixels((GLsizei)dim_x, (GLsizei)dim_y,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
+    [[self openGLContext] flushBuffer];
+#else
+    
     NSSize size = rect.size;
 
     glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
@@ -111,6 +153,7 @@
     [[self openGLContext] makeCurrentContext];
     [_shared draw:size];
     [[self openGLContext] flushBuffer];
+#endif
 }
 
 - (void) quitProcedure

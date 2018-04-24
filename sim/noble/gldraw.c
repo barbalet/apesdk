@@ -71,7 +71,6 @@ static void gldraw_character_line(n_int px, n_int py, n_int dx, n_int dy)
  @param str The string to be drawn.
  @param off_x The starting x location for the string to be drawn.
  @param off_y The starting y location for the string to be drawn.
- @param draw The generic draw function used to draw the character.
  */
 void gldraw_string(n_constant_string str, n_int off_x, n_int off_y)
 {
