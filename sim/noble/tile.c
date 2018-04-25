@@ -274,25 +274,18 @@ void tile_pack(n_land * land)
 
 static void tile_round(n_land * land)
 {
-    static n_byte scratch[MAP_AREA];
+    static n_byte scratch[2][MAP_AREA];
     n_int    local_tile_dimension = 1 << MAP_BITS;
     n_int span_minor = 0;
     /** Perform four nearest neighbor blur runs */
+    
+    io_copy(land->tiles->topology, (n_byte*)&scratch[0], MAP_AREA);
+    
     while (span_minor < 6)
     {
-        n_byte    *front, *back;
+        n_byte    *front = (n_byte*)&scratch[(span_minor&1)], *back = (n_byte*)&scratch[(span_minor&1)^1];
         n_int    py = 0;
         
-        if ((span_minor&1) == 0)
-        {
-            front = land->tiles->topology;
-            back = scratch;
-        }
-        else
-        {
-            front = scratch;
-            back = land->tiles->topology;
-        }
         while (py < local_tile_dimension)
         {
             n_int    px = 0;
@@ -323,6 +316,8 @@ static void tile_round(n_land * land)
         }
         span_minor ++;
     }
+    io_copy((n_byte*)&scratch[1], land->tiles->topology, MAP_AREA);
+
 }
 
 static void tile_patch(n_land * land, n_int refine)
