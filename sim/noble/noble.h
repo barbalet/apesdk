@@ -1088,6 +1088,13 @@ typedef struct
     n_tile tiles[1];
 } n_land;
 
+typedef struct
+{
+    n_int  x, y;
+    n_uint tile;
+    n_uint facing;
+} n_tile_coordinates;
+
 void tile_wind(n_land * land);
 void tile_cycle(n_land * land);
 void tile_weather_init(n_land * land);

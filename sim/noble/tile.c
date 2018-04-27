@@ -37,6 +37,34 @@
 
 #define tile_wind_aim (6 + math_random(land->tiles->genetics) % 91)
 
+
+/*
+           +---------+
+           |         |
+           |    0    |
+           |         |
+ +---------+---------+---------+---------+
+ |         |         |         |         |
+ |    1    |    2    |    3    |    4    |
+ |         |         |         |         |
+ +---------+---------+---------+---------+
+           |         |
+           |    5    |
+           |         |
+           +---------+
+ */
+
+static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
+{
+    if ((coordinates->x > -1) && (coordinates->x < MAP_AREA) && (coordinates->y > -1) && (coordinates->y < MAP_AREA))
+    {
+        return;
+    }
+    
+    
+}
+
+
 static void tile_wrap(n_c_int * section)
 {
     n_int placement = 0;
