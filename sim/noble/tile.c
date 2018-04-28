@@ -56,12 +56,28 @@
 
 static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
 {
-    if ((coordinates->x > -1) && (coordinates->x < MAP_AREA) && (coordinates->y > -1) && (coordinates->y < MAP_AREA))
+    n_int pos_x = (coordinates->x >= MAP_DIMENSION) - (coordinates->x < 0);
+    n_int pos_y = (coordinates->y >= MAP_DIMENSION) - (coordinates->y < 0);
+    
+    if ((pos_x == 0) && (pos_y == 0))
     {
         return;
     }
-    
-    
+    {
+        n_int new_x = coordinates->x & (MAP_DIMENSION - 1);
+        n_int new_y = coordinates->y & (MAP_DIMENSION - 1);
+
+        if (pos_x == 0)
+        {
+            
+        } else if (pos_y == 0)
+        {
+            
+        } else
+        {
+            
+        }
+    }
 }
 
 
