@@ -38,21 +38,20 @@
 #define tile_wind_aim (6 + math_random(land->tiles->genetics) % 91)
 
 
-/*
-           +---------+
-           |         |
-           |    0    |
-           |         |
+
+/*         +---------+
+           |    C    |
+           |A   0   B|
+      A    |         |    B         C
  +---------+---------+---------+---------+
  |         |         |         |         |
  |    1    |    2    |    3    |    4    |
  |         |         |         |         |
  +---------+---------+---------+---------+
-           |         |
-           |    5    |
-           |         |
-           +---------+
- */
+      D    |         |    E         F
+           |D   5   E|
+           |    F    |
+           +---------+                       */
 
 static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
 {
@@ -96,7 +95,46 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
         }
         else
         {
-            /* need code */
+            n_int new_tile = coordinates->tile;
+            n_int new_facing = coordinates->facing;
+            n_int new_x = (coordinates->x + MAP_DIMENSION) & (MAP_DIMENSION - 1);
+            n_int new_y = (coordinates->y + MAP_DIMENSION) & (MAP_DIMENSION - 1);
+
+            if (coordinates->tile == 0)
+            {
+                if (pos_x < 0)
+                {
+                    /* A */
+                }
+                else
+                {
+                    /* B */
+                }
+            }
+            else /* coordinates->tile == 5 */
+            {
+                if (pos_x < 0)
+                {
+                    /* D */
+                }
+                else
+                {
+                    /* E */
+                }
+            }
+/*         +---------+
+           |    C    |
+           |A   0   B|
+      A    |         |    B         C
+ +---------+---------+---------+---------+
+ |         |         |         |         |
+ |    1    |    2    |    3    |    4    |
+ |         |         |         |         |
+ +---------+---------+---------+---------+
+      D    |         |    E         F
+           |D   5   E|
+           |    F    |
+           +---------+                       */
         }
     }
     else if (pos_x == 0)
@@ -109,7 +147,7 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
             {
                 if (coordinates->tile == 0)
                 {
-                    new_tile = 5;
+                    /* C */
                 }
                 if (coordinates->tile == 2)
                 {
@@ -132,7 +170,7 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
                 }
                 if (coordinates->tile == 5)
                 {
-                    new_tile = 0;
+                    /* F */
                 }
             }
             coordinates->tile = new_tile;
@@ -140,12 +178,68 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
         }
         else
         {
-            /* need code */
+/*         +---------+
+           |    C    |
+           |A   0   B|
+      A    |         |    B         C
+ +---------+---------+---------+---------+
+ |         |         |         |         |
+ |    1    |    2    |    3    |    4    |
+ |         |         |         |         |
+ +---------+---------+---------+---------+
+      D    |         |    E         F
+           |D   5   E|
+           |    F    |
+           +---------+                       */
+            
+            if (pos_y < 0)
+            {
+                if (coordinates->tile == 1)
+                {
+                    /* A */
+                }
+                if (coordinates->tile == 3)
+                {
+                    /* B */
+                }
+                if (coordinates->tile == 4)
+                {
+                    /* C */
+                }
+            }
+            else
+            {
+                if (coordinates->tile == 1)
+                {
+                    /* D */
+                }
+                if (coordinates->tile == 3)
+                {
+                    /* E */
+                }
+                if (coordinates->tile == 4)
+                {
+                    /* F */
+                }
+            }
+            
         }
     }
     else
     {
-        /* need code */
+/*         +---------+
+           |    C    |
+           |A   0   B|
+      A    |         |    B         C
+ +---------+---------+---------+---------+
+ |         |         |         |         |
+ |    1    |    2    |    3    |    4    |
+ |         |         |         |         |
+ +---------+---------+---------+---------+
+      D    |         |    E         F
+           |D   5   E|
+           |    F    |
+           +---------+                       */
     }
 }
 
