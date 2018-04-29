@@ -63,20 +63,89 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
     {
         return;
     }
+    if (pos_y == 0)
     {
-        n_int new_x = coordinates->x & (MAP_DIMENSION - 1);
-        n_int new_y = coordinates->y & (MAP_DIMENSION - 1);
-
-        if (pos_x == 0)
+        if ((coordinates->tile > 0) && (coordinates->tile < 5))
         {
-            
-        } else if (pos_y == 0)
-        {
-            
-        } else
-        {
-            
+            n_int new_x = (coordinates->x + MAP_DIMENSION) & (MAP_DIMENSION - 1);
+            n_int new_tile = coordinates->tile;
+            if (pos_x < 0)
+            {
+                if (new_tile == 1) /* moving leftwards */
+                {
+                    new_tile = 4;
+                }
+                else
+                {
+                    new_tile--;
+                }
+            }
+            else
+            {
+                if (new_tile == 4) /* moving rightwards */
+                {
+                    new_tile = 1;
+                }
+                else
+                {
+                    new_tile++;
+                }
+            }
+            coordinates->tile = new_tile;
+            coordinates->x = new_x;
         }
+        else
+        {
+            /* need code */
+        }
+    }
+    else if (pos_x == 0)
+    {
+        if ((coordinates->tile == 0) || (coordinates->tile == 2) || (coordinates->tile == 5))
+        {
+            n_int new_y = (coordinates->y + MAP_DIMENSION) & (MAP_DIMENSION - 1);
+            n_int new_tile = -1;
+            if (pos_y < 0)
+            {
+                if (coordinates->tile == 0)
+                {
+                    new_tile = 5;
+                }
+                if (coordinates->tile == 2)
+                {
+                    new_tile = 0;
+                }
+                if (coordinates->tile == 5)
+                {
+                    new_tile = 2;
+                }
+            }
+            else
+            {
+                if (coordinates->tile == 0)
+                {
+                    new_tile = 2;
+                }
+                if (coordinates->tile == 2)
+                {
+                    new_tile = 5;
+                }
+                if (coordinates->tile == 5)
+                {
+                    new_tile = 0;
+                }
+            }
+            coordinates->tile = new_tile;
+            coordinates->y = new_y;
+        }
+        else
+        {
+            /* need code */
+        }
+    }
+    else
+    {
+        /* need code */
     }
 }
 
