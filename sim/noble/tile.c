@@ -53,6 +53,38 @@
            |    F    |
            +---------+                       */
 
+static void tile_coordinate_rotate(n_tile_coordinates * coordinates, n_int rotate90, n_int tile)
+{
+    n_int pos_x = (coordinates->x + MAP_DIMENSION) & (MAP_DIMENSION-1);
+    n_int pos_y = (coordinates->y + MAP_DIMENSION) & (MAP_DIMENSION-1);
+    n_int pos_facing = coordinates->facing;
+    
+    if (rotate90 == 0)
+    {
+        coordinates->x = pos_x;
+        coordinates->y = pos_y;
+    }
+    if (rotate90 == 1)
+    {
+        coordinates->facing = (pos_facing + 64) & 255;
+        coordinates->x = pos_y;
+        coordinates->y = MAP_DIMENSION - 1 - pos_x;
+    }
+    if (rotate90 == 2)
+    {
+        coordinates->facing = (pos_facing + 128) & 255;
+        coordinates->x = MAP_DIMENSION - 1 - pos_x;
+        coordinates->y = MAP_DIMENSION - 1 - pos_y;
+    }
+    if (rotate90 == 3)
+    {
+        coordinates->facing = (pos_facing + 64 + 128) & 255;
+        coordinates->x = MAP_DIMENSION - 1 - pos_y;
+        coordinates->y = pos_x;
+    }
+    coordinates->tile = tile;
+}
+
 static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
 {
     n_int pos_x = (coordinates->x >= MAP_DIMENSION) - (coordinates->x < 0);
@@ -95,11 +127,6 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
         }
         else
         {
-            n_int new_tile = coordinates->tile;
-            n_int new_facing = coordinates->facing;
-            n_int new_x = (coordinates->x + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-            n_int new_y = (coordinates->y + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-
             if (coordinates->tile == 0)
             {
                 if (pos_x < 0)
