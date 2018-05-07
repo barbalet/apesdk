@@ -131,22 +131,22 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
             {
                 if (pos_x < 0)
                 {
-                    /* A */
+                    /* A */ tile_coordinate_rotate(coordinates, 3, 1);
                 }
                 else
                 {
-                    /* B */
+                    /* B */ tile_coordinate_rotate(coordinates, 1, 3);
                 }
             }
             else /* coordinates->tile == 5 */
             {
                 if (pos_x < 0)
                 {
-                    /* D */
+                    /* D */ tile_coordinate_rotate(coordinates, 3, 1);
                 }
                 else
                 {
-                    /* E */
+                    /* E */ tile_coordinate_rotate(coordinates, 1, 3);
                 }
             }
 /*         +---------+
@@ -174,7 +174,7 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
             {
                 if (coordinates->tile == 0)
                 {
-                    /* C */
+                    /* C */ tile_coordinate_rotate(coordinates, 2, 4);
                 }
                 if (coordinates->tile == 2)
                 {
@@ -197,7 +197,7 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
                 }
                 if (coordinates->tile == 5)
                 {
-                    /* F */
+                    /* F */ tile_coordinate_rotate(coordinates, 2, 4);
                 }
             }
             coordinates->tile = new_tile;
@@ -223,30 +223,30 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
             {
                 if (coordinates->tile == 1)
                 {
-                    /* A */
+                    /* A */ tile_coordinate_rotate(coordinates, 1, 0);
                 }
                 if (coordinates->tile == 3)
                 {
-                    /* B */
+                    /* B */ tile_coordinate_rotate(coordinates, 3, 0);
                 }
                 if (coordinates->tile == 4)
                 {
-                    /* C */
+                    /* C */ tile_coordinate_rotate(coordinates, 2, 0);
                 }
             }
             else
             {
                 if (coordinates->tile == 1)
                 {
-                    /* D */
+                    /* D */ tile_coordinate_rotate(coordinates, 3, 5);
                 }
                 if (coordinates->tile == 3)
                 {
-                    /* E */
+                    /* E */ tile_coordinate_rotate(coordinates, 1, 5);
                 }
                 if (coordinates->tile == 4)
                 {
-                    /* F */
+                    /* F */ tile_coordinate_rotate(coordinates, 2, 5);
                 }
             }
             
@@ -254,19 +254,7 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
     }
     else
     {
-/*         +---------+
-           |    C    |
-           |A   0   B|
-      A    |         |    B         C
- +---------+---------+---------+---------+
- |         |         |         |         |
- |    1    |    2    |    3    |    4    |
- |         |         |         |         |
- +---------+---------+---------+---------+
-      D    |         |    E         F
-           |D   5   E|
-           |    F    |
-           +---------+                       */
+        SHOW_ERROR("Shouldn't be needed for landscape creation");
     }
 }
 
@@ -639,7 +627,6 @@ static void tile_patch(n_land * land, n_int refine)
 n_int tile_memory_location(n_int px, n_int py)
 {
 #define    POSITIVE_TILE_COORD(num)      ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
-    
     return POSITIVE_TILE_COORD(px) + (POSITIVE_TILE_COORD(py) << MAP_BITS);
 }
 
