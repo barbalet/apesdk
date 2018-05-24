@@ -1085,7 +1085,11 @@ typedef struct
 
 typedef struct
 {
+#ifdef NOBLE_PLANET
+    n_tile tiles[6];
+#else
     n_tile tiles[1];
+#endif
 } n_land;
 
 typedef struct
