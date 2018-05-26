@@ -331,46 +331,41 @@ static void tile_atomosphere_range(n_tile * tile, n_c_int value)
     }
 }
 
-static n_c_int tiles_atomosphere(n_land * land, n_int tile, n_int lx, n_int ly)
+static n_uint tiles_non_planet(n_int lx, n_int ly)
 {
     n_int converted_x = (lx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
     n_int converted_y = (ly + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    return land->tiles->atmosphere[converted_x | (converted_y * MAP_DIMENSION)];
+    return converted_x | (converted_y * MAP_DIMENSION);
+}
+
+static n_c_int tiles_atomosphere(n_land * land, n_int tile, n_int lx, n_int ly)
+{
+    return land->tiles->atmosphere[tiles_non_planet(lx, ly)];
 }
 
 static void tiles_set_atmosphere(n_land * land, n_int tile, n_int lx, n_int ly, n_c_int value)
 {
-    n_int converted_x = (lx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    n_int converted_y = (ly + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    land->tiles->atmosphere[converted_x | (converted_y * MAP_DIMENSION)] = value;
+    land->tiles->atmosphere[tiles_non_planet(lx, ly)] = value;
 }
 
 static n_byte2 tiles_pressure(n_land * land, n_int tile, n_int lx, n_int ly)
 {
-    n_int converted_x = (lx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    n_int converted_y = (ly + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    return land->tiles->delta_pressure[converted_x | (converted_y * MAP_DIMENSION)];
+    return land->tiles->delta_pressure[tiles_non_planet(lx, ly)];
 }
 
 static void tiles_set_pressure(n_land * land, n_int tile, n_int lx, n_int ly, n_byte2 value)
 {
-    n_int converted_x = (lx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    n_int converted_y = (ly + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    land->tiles->delta_pressure[converted_x | (converted_y * MAP_DIMENSION)] = value;
+    land->tiles->delta_pressure[tiles_non_planet(lx, ly)] = value;
 }
 
 n_byte tiles_topology(n_land * land, n_int tile, n_int lx, n_int ly)
 {
-    n_int converted_x = (lx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    n_int converted_y = (ly + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    return land->tiles->topology[converted_x | (converted_y * MAP_DIMENSION)];
+    return land->tiles->topology[tiles_non_planet(lx, ly)];
 }
 
 static void tiles_set_topology(n_land * land, n_int tile, n_int lx, n_int ly, n_byte value)
 {
-    n_int converted_x = (lx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    n_int converted_y = (ly + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-    land->tiles->topology[converted_x | (converted_y * MAP_DIMENSION)] = value;
+    land->tiles->topology[tiles_non_planet(lx, ly)] = value;
 }
                             
 void tile_cycle(n_land * land)
