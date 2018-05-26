@@ -358,14 +358,19 @@ static void tiles_set_pressure(n_land * land, n_int tile, n_int lx, n_int ly, n_
     land->tiles->delta_pressure[tiles_non_planet(lx, ly)] = value;
 }
 
-n_byte tiles_topology(n_land * land, n_int tile, n_int lx, n_int ly)
+n_byte tiles_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly)
 {
-    return land->tiles->topology[tiles_non_planet(lx, ly)];
+    return land->tiles[tile].topology[0][tiles_non_planet(lx, ly)];
 }
 
-static void tiles_set_topology(n_land * land, n_int tile, n_int lx, n_int ly, n_byte value)
+static void tiles_set_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly, n_byte value)
 {
-    land->tiles->topology[tiles_non_planet(lx, ly)] = value;
+    land->tiles[tile].topology[buffer][tiles_non_planet(lx, ly)] = value;
+}
+
+static void tiles_swap_topology(n_land * land, n_int tile)
+{
+    io_copy((n_byte *)&land->tiles[tile].topology[0], (n_byte *)&land->tiles[tile].topology[1], MAP_AREA);
 }
                             
 void tile_cycle(n_land * land)
@@ -464,7 +469,7 @@ void tile_weather_init(n_land * land)
     
     while ( ly < MAP_AREA )
     {
-        land->tiles->atmosphere[ ly ] = (n_c_int)(land->tiles->topology[ ly ] * 4);
+        land->tiles->atmosphere[ ly ] = (n_c_int)(land->tiles->topology[0][ ly ] * 4);
         ly++;
     }
     ly=0;
@@ -510,21 +515,17 @@ static void title_pack_static(n_byte * buffer)
 
 void tile_pack(n_land * land)
 {
-    title_pack_static(land->tiles->topology);
+    title_pack_static(land->tiles->topology[0]);
 }
 
 static void tile_round(n_land * land)
 {
-    static n_byte scratch[2][MAP_AREA];
     n_int    local_tile_dimension = 1 << MAP_BITS;
     n_int    span_minor = 0;
     /** Perform four nearest neighbor blur runs */
     
-    io_copy(land->tiles->topology, (n_byte*)&scratch[0], MAP_AREA);
-    
     while (span_minor < 6)
     {
-        n_byte    *front = (n_byte*)&scratch[(span_minor&1)], *back = (n_byte*)&scratch[(span_minor&1)^1];
         n_int    py = 0;
         
         while (py < local_tile_dimension)
@@ -539,26 +540,19 @@ static void tile_round(n_land * land)
                     n_int    tx = -1;
                     while (tx < 2)
                     {
-                        n_int converted_x = (px + tx + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-                        n_int converted_y = (py + ty + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-                        sum += front[ converted_x | (converted_y * MAP_DIMENSION)];
+                        sum += tiles_topology(land, 0, (span_minor&1), px + tx, py + ty);
                         tx++;
                     }
                     ty++;
                 }
-                {
-                    n_int converted_x = (px + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-                    n_int converted_y = (py + MAP_DIMENSION) & (MAP_DIMENSION - 1);
-                    back[ converted_x | (converted_y * MAP_DIMENSION)] = (n_byte)(sum / 9);
-                }
+                tiles_set_topology(land, 0, (span_minor&1)^1, px, py, (n_byte)(sum / 9));
                 px ++;
             }
             py ++;
         }
         span_minor ++;
     }
-    io_copy((n_byte*)&scratch[1], land->tiles->topology, MAP_AREA);
-
+    tiles_swap_topology(land, 0);
 }
 
 static void tile_patch(n_land * land, n_int refine)
@@ -622,12 +616,12 @@ static void tile_patch(n_land * land, n_int refine)
                                         }
                                         {
                                             /** include the wrap around for the 45 degree rotation cases in particular */
-                                            n_int    local_map_point = tiles_topology(land, tiles, pointx + (tile_x<<8), pointy + (tile_y<<8)) + val3;
+                                            n_int    local_map_point = tiles_topology(land, tiles, 0, pointx + (tile_x<<8), pointy + (tile_y<<8)) + val3;
                                             
                                             if (local_map_point < 0) local_map_point = 0;
                                             if (local_map_point > 255) local_map_point = 255;
                                             
-                                            tiles_set_topology(land, tiles, pointx + (tile_x<<8), pointy + (tile_y<<8), (n_byte)local_map_point);
+                                            tiles_set_topology(land, tiles, 0, pointx + (tile_x<<8), pointy + (tile_y<<8), (n_byte)local_map_point);
                                         }
                                         mx++;
                                     }

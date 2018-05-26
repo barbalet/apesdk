@@ -222,7 +222,7 @@ n_int land_map_bits(void)
 
 n_int land_location(n_int px, n_int py)
 {
-    return tiles_topology(&m_land, 0, px, py);
+    return tiles_topology(&m_land, 0, 0, px, py);
 }
 
 n_int land_location_vect(n_vect2 * value)
@@ -413,7 +413,7 @@ void land_init_high_def(n_byte double_spread)
     n_uint   lp = 0;
     n_byte4  value_setting = 0;
 
-    math_bilinear_8_times(m_land.tiles[0].topology, m_topology_highdef, double_spread);
+    math_bilinear_8_times((n_byte *)m_land.tiles[0].topology[0], m_topology_highdef, double_spread);
     io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
 
     while (lp < HI_RES_MAP_AREA)
