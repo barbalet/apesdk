@@ -338,14 +338,19 @@ static n_uint tiles_non_planet(n_int lx, n_int ly)
     return converted_x | (converted_y * MAP_DIMENSION);
 }
 
-static n_c_int tiles_atomosphere(n_land * land, n_int tile, n_int lx, n_int ly)
+n_c_int tiles_atomosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly)
 {
-    return land->tiles->atmosphere[tiles_non_planet(lx, ly)];
+    return land->tiles[tile].atmosphere[buffer][tiles_non_planet(lx, ly)];
 }
 
-static void tiles_set_atmosphere(n_land * land, n_int tile, n_int lx, n_int ly, n_c_int value)
+static void tiles_set_atmosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly, n_c_int value)
 {
-    land->tiles->atmosphere[tiles_non_planet(lx, ly)] = value;
+    land->tiles[tile].atmosphere[buffer][tiles_non_planet(lx, ly)] = value;
+}
+
+static void tiles_swap_atmosphere(n_land * land, n_int tile)
+{
+    io_copy((n_byte *)land->tiles[tile].atmosphere[1], (n_byte *)land->tiles[tile].atmosphere[0], (sizeof(n_c_int) * MAP_AREA));
 }
 
 static n_byte2 tiles_pressure(n_land * land, n_int tile, n_int lx, n_int ly)
@@ -377,7 +382,6 @@ void tile_cycle(n_land * land)
 {
     const n_int    bits_neg = (-131072 * 254) / 256;
     const n_int    bits_pos = ( 131071 * 254) / 256;
-    static n_c_int temp_atmosphere[1][MAP_AREA];
     static n_int   local_delta = 0;
     n_int          new_delta = 0;
     n_int          ly = 0;
@@ -390,16 +394,17 @@ void tile_cycle(n_land * land)
         n_int    lx = 0;
         while ( lx < MAP_DIMENSION )
         {
-            n_c_int  value = tiles_atomosphere(land, 0, lx, ly);
+            n_c_int  value = tiles_atomosphere(land, 0, 0, lx, ly);
             
             n_int    local_atm =
-                       (2 * tiles_atomosphere(land, 0, lx, ly-1))
-                     + (2 * tiles_atomosphere(land, 0, lx-1, ly))
-                     - (2 * tiles_atomosphere(land, 0, lx+1, ly))
-                     - (2 * tiles_atomosphere(land, 0, lx, ly+1));
+                       (2 * tiles_atomosphere(land, 0, 0, lx, ly-1))
+                     + (2 * tiles_atomosphere(land, 0, 0, lx-1, ly))
+                     - (2 * tiles_atomosphere(land, 0, 0, lx+1, ly))
+                     - (2 * tiles_atomosphere(land, 0, 0, lx, ly+1));
             
             value += (n_c_int) ((local_atm - local_delta) >> MAP_BITS) + tiles_pressure(land, 0, lx, ly);
-            temp_atmosphere[0][ lx | (ly * MAP_DIMENSION) ] = value;
+            
+            tiles_set_atmosphere(land, 0, 1, lx, ly, value);
             new_delta += value;
             tile_atomosphere_range(land->tiles, value);
             lx++;
@@ -411,11 +416,10 @@ void tile_cycle(n_land * land)
     
     if ((land->tiles->atmosphere_lowest < bits_neg) || (land->tiles->atmosphere_highest > bits_pos))
     {
-        tile_wrap(temp_atmosphere[0]);
+        tile_wrap(land->tiles[0].atmosphere[1]);
     }
     
-    io_copy((n_byte *)&temp_atmosphere[0], (n_byte *)land->tiles->atmosphere, (sizeof(n_c_int) * MAP_AREA));
-
+    tiles_swap_atmosphere(land, 0);
 }
 
 void tile_wind(n_land * land)
@@ -423,7 +427,6 @@ void tile_wind(n_land * land)
     /* Add dynamic wind */
     const n_int   p01 = land->tiles->wind_value_x;
     const n_int   p10 = land->tiles->wind_value_y;
-    static n_c_int temp_atmosphere[1][MAP_AREA];
     n_int         ly = 0;
 
     title_wind_calculation(land);
@@ -438,15 +441,17 @@ void tile_wind(n_land * land)
             n_int    tp10 = (p10 * delta_pressure) / land->tiles->delta_pressure_highest;
             n_int    tp00 = 256 - tp01 - tp10;
             n_int    local_atm =
-                        (tp00 * tiles_atomosphere(land, 0, lx, ly)) +
-                        (tp10 * tiles_atomosphere(land, 0, lx, ly+1)) +
-                        (tp01 * tiles_atomosphere(land, 0, lx+1, ly));
-            temp_atmosphere[0][  lx | (ly * MAP_DIMENSION) ] = (n_c_int)local_atm >> 8;
+                        (tp00 * tiles_atomosphere(land, 0, 0,lx, ly)) +
+                        (tp10 * tiles_atomosphere(land, 0, 0,lx, ly+1)) +
+                        (tp01 * tiles_atomosphere(land, 0, 0,lx+1, ly));
+            
+            tiles_set_atmosphere(land, 0, 1, lx, ly, (n_c_int)local_atm >> 8);
+            
             lx++;
         }
         ly++;
     }
-    io_copy((n_byte *)(temp_atmosphere[0]), (n_byte *)land->tiles->atmosphere, (sizeof(n_c_int) * MAP_AREA));
+    tiles_swap_atmosphere(land, 0);
 }
 
 void tile_weather_init(n_land * land)
@@ -469,7 +474,7 @@ void tile_weather_init(n_land * land)
     
     while ( ly < MAP_AREA )
     {
-        land->tiles->atmosphere[ ly ] = (n_c_int)(land->tiles->topology[0][ ly ] * 4);
+        land->tiles->atmosphere[0][ ly ] = (n_c_int)(land->tiles->topology[0][ ly ] * 4);
         ly++;
     }
     ly=0;
@@ -481,13 +486,13 @@ void tile_weather_init(n_land * land)
         {
             n_byte2 value
             = (n_byte2)(
-                        tiles_atomosphere(land, 0, lx + 1, ly)
-                        - tiles_atomosphere(land, 0, lx - 1, ly)
-                        + tiles_atomosphere(land, 0, lx, ly + 1)
-                        - tiles_atomosphere(land, 0, lx, ly - 1)
+                        tiles_atomosphere(land, 0, 0, lx + 1, ly)
+                        - tiles_atomosphere(land, 0, 0, lx - 1, ly)
+                        + tiles_atomosphere(land, 0, 0, lx, ly + 1)
+                        - tiles_atomosphere(land, 0, 0, lx, ly - 1)
                         + 512);
-            land->tiles->delta_pressure[ lx | (ly * MAP_DIMENSION) ] = value;
-        
+            tiles_set_pressure(land, 0, lx, ly, value);
+            
             tile_pressure_range(land->tiles, value);
             
             lx++;
@@ -498,7 +503,7 @@ void tile_weather_init(n_land * land)
     ly = 0;
     while( ly < MAP_AREA)
     {
-        land->tiles->atmosphere[ ly ] = 0;
+        land->tiles->atmosphere[0][ ly ] = 0;
         ly++;
     }
 }

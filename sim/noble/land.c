@@ -143,12 +143,7 @@ void weather_init(void)
 
 n_int weather_pressure(n_int px, n_int py)
 {
-    n_int   dimension = land_map_dimension();
-    
-    n_int   tpx = (MAPSPACE_TO_WEATHER(px) + dimension) % dimension;
-    n_int   tpy = (MAPSPACE_TO_WEATHER(py) + dimension) % dimension;
-    
-    return  m_land.tiles[0].atmosphere[(dimension * tpy) + tpx];
+    return tiles_atomosphere(&m_land, 0, 0, px, py);
 }
 
 /*
