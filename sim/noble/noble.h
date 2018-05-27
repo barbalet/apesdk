@@ -1081,6 +1081,7 @@ typedef struct
     
     n_c_int     atmosphere_highest;
     n_c_int     atmosphere_lowest;
+    n_int       local_delta;
 } n_tile;
 
 typedef struct
@@ -1099,14 +1100,17 @@ typedef struct
     n_uint facing;
 } n_tile_coordinates;
 
-void tile_wind(n_land * land);
-void tile_cycle(n_land * land);
-void tile_weather_init(n_land * land);
-void tile_land_init(n_land * land);
-void tile_pack(n_land * land);
+void tile_wind(n_land * land, n_int tile);
+void tile_cycle(n_land * land, n_int tile);
+void tile_cycle_cleanup(n_land * land, n_int tile, n_int wind);
+void tile_weather_init(n_land * land, n_int tile);
+
+void tile_land_init(n_land * land, n_int tile);
+void tile_pack(n_land * land, n_int tile);
 void tile_creation(n_byte * map, n_byte2 * random);
+
 n_byte tiles_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
-n_c_int tiles_atomosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
+n_c_int tiles_atmosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
 
 void * land_ptr(void);
 n_byte4 land_date(void);

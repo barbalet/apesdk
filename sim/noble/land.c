@@ -130,20 +130,24 @@ n_c_int * land_weather(void)
 
 void weather_cycle(void)
 {
-    tile_cycle(&m_land);
-    tile_cycle(&m_land);
-    tile_cycle(&m_land);
-    tile_wind(&m_land);
+    tile_cycle(&m_land, 0);
+    tile_cycle_cleanup(&m_land, 0, 0);
+    tile_cycle(&m_land, 0);
+    tile_cycle_cleanup(&m_land, 0, 0);
+    tile_cycle(&m_land, 0);
+    tile_cycle_cleanup(&m_land, 0, 0);
+    tile_wind(&m_land, 0);
+    tile_cycle_cleanup(&m_land, 0, 1);
 }
 
 void weather_init(void)
 {
-    tile_weather_init(&m_land);
+    tile_weather_init(&m_land, 0);
 }
 
 n_int weather_pressure(n_int px, n_int py)
 {
-    return tiles_atomosphere(&m_land, 0, 0, px, py);
+    return tiles_atmosphere(&m_land, 0, 0, px, py);
 }
 
 /*
@@ -381,7 +385,7 @@ n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
 
 void land_clear(KIND_OF_USE kind, n_byte4 start)
 {
-    tile_pack(&m_land);
+    tile_pack(&m_land, 0);
     if (kind != KIND_LOAD_FILE)
     {
         m_time = 0;
@@ -400,7 +404,7 @@ void land_seed_genetics(n_byte2 * local_random)
 
 void land_init(void)
 {
-    tile_land_init(&m_land);
+    tile_land_init(&m_land, 0);
 }
 
 void land_init_high_def(n_byte double_spread)

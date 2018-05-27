@@ -37,7 +37,8 @@
 
 #define tile_wind_aim (6 + math_random(land->tiles->genetics) % 91)
 
-
+#define bits_neg ((-131072 * 254) / 256)
+#define bits_pos (( 131071 * 254) / 256)
 
 /*         +---------+
            |    C    |
@@ -259,8 +260,9 @@ static void tile_resolve_coordinates(n_tile_coordinates * coordinates)
 }
 
 
-static void tile_wrap(n_c_int * section)
+static void tile_wrap(n_land * land, n_int tile)
 {
+    n_c_int * section = land->tiles[tile].atmosphere[1];
     n_int placement = 0;
     while (placement < (MAP_AREA))
     {
@@ -269,36 +271,31 @@ static void tile_wrap(n_c_int * section)
     }
 }
 
-static void title_wind_calculation(n_land * land)
+static void title_wind_calculation(n_land * land, n_int tile)
 {
-    n_int tiles = 0;
-    while (tiles < 1)
+    if ((math_random(land->tiles[tile].genetics) & 31) == 0)
     {
-        if ((math_random(land->tiles[tiles].genetics) & 31) == 0)
-        {
-            land->tiles[tiles].wind_aim_x = tile_wind_aim;
-            math_random3(land->tiles[tiles].genetics);
-            land->tiles[tiles].wind_aim_y = tile_wind_aim;
-        }
-        
-        if (land->tiles[tiles].wind_aim_x > land->tiles[tiles].wind_value_x)
-        {
-            land->tiles[tiles].wind_value_x++;
-        }
-        if (land->tiles[tiles].wind_aim_x < land->tiles[tiles].wind_value_x)
-        {
-            land->tiles[tiles].wind_value_x--;
-        }
-        
-        if (land->tiles[tiles].wind_aim_y > land->tiles[tiles].wind_value_y)
-        {
-            land->tiles[tiles].wind_value_y++;
-        }
-        if (land->tiles[tiles].wind_aim_y < land->tiles[tiles].wind_value_y)
-        {
-            land->tiles[tiles].wind_value_y--;
-        }
-        tiles++;
+        land->tiles[tile].wind_aim_x = tile_wind_aim;
+        math_random3(land->tiles[tile].genetics);
+        land->tiles[tile].wind_aim_y = tile_wind_aim;
+    }
+    
+    if (land->tiles[tile].wind_aim_x > land->tiles[tile].wind_value_x)
+    {
+        land->tiles[tile].wind_value_x++;
+    }
+    if (land->tiles[tile].wind_aim_x < land->tiles[tile].wind_value_x)
+    {
+        land->tiles[tile].wind_value_x--;
+    }
+    
+    if (land->tiles[tile].wind_aim_y > land->tiles[tile].wind_value_y)
+    {
+        land->tiles[tile].wind_value_y++;
+    }
+    if (land->tiles[tile].wind_aim_y < land->tiles[tile].wind_value_y)
+    {
+        land->tiles[tile].wind_value_y--;
     }
 }
 
@@ -319,15 +316,17 @@ static void tile_pressure_range(n_tile * tile, n_byte2 value)
     }
 }
 
-static void tile_atomosphere_range(n_tile * tile, n_c_int value)
+static void tile_atmosphere_range(n_land * land, n_int tile, n_c_int value)
 {
-    if (value > tile->atmosphere_highest)
+    n_tile * tilePtr = &land->tiles[tile];
+    
+    if (value > tilePtr->atmosphere_highest)
     {
-        tile->atmosphere_highest = value;
+        tilePtr->atmosphere_highest = value;
     }
-    if (value < tile->atmosphere_lowest)
+    if (value < tilePtr->atmosphere_lowest)
     {
-        tile->atmosphere_lowest = value;
+        tilePtr->atmosphere_lowest = value;
     }
 }
 
@@ -338,7 +337,7 @@ static n_uint tiles_non_planet(n_int lx, n_int ly)
     return converted_x | (converted_y * MAP_DIMENSION);
 }
 
-n_c_int tiles_atomosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly)
+n_c_int tiles_atmosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly)
 {
     return land->tiles[tile].atmosphere[buffer][tiles_non_planet(lx, ly)];
 }
@@ -355,12 +354,12 @@ static void tiles_swap_atmosphere(n_land * land, n_int tile)
 
 static n_byte2 tiles_pressure(n_land * land, n_int tile, n_int lx, n_int ly)
 {
-    return land->tiles->delta_pressure[tiles_non_planet(lx, ly)];
+    return land->tiles[tile].delta_pressure[tiles_non_planet(lx, ly)];
 }
 
 static void tiles_set_pressure(n_land * land, n_int tile, n_int lx, n_int ly, n_byte2 value)
 {
-    land->tiles->delta_pressure[tiles_non_planet(lx, ly)] = value;
+    land->tiles[tile].delta_pressure[tiles_non_planet(lx, ly)] = value;
 }
 
 n_byte tiles_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly)
@@ -377,106 +376,139 @@ static void tiles_swap_topology(n_land * land, n_int tile)
 {
     io_copy((n_byte *)&land->tiles[tile].topology[0], (n_byte *)&land->tiles[tile].topology[1], MAP_AREA);
 }
-                            
-void tile_cycle(n_land * land)
+
+static void title_pack_atmosphere(n_land * land, n_int tile)
 {
-    const n_int    bits_neg = (-131072 * 254) / 256;
-    const n_int    bits_pos = ( 131071 * 254) / 256;
-    static n_int   local_delta = 0;
+    n_int loop = 0;
+    while (loop < MAP_AREA)
+    {
+        land->tiles[tile].atmosphere[0][loop] = 0;
+        loop++;
+    }
+}
+
+static void title_pack_topology(n_land * land, n_int tile)
+{
+    n_int loop = 0;
+    while (loop < MAP_AREA)
+    {
+        land->tiles[tile].topology[0][loop] = 128;
+        loop++;
+    }
+}
+
+static void tile_atmosphere_topology(n_land * land, n_int tile)
+{
+    n_int loop = 0;
+
+    while ( loop < MAP_AREA )
+    {
+        land->tiles[tile].atmosphere[0][ loop ] = (n_c_int)(land->tiles[tile].topology[0][ loop ] * 4);
+        loop++;
+    }
+}
+
+void tile_cycle(n_land * land, n_int tile)
+{
     n_int          new_delta = 0;
     n_int          ly = 0;
     
-    land->tiles->atmosphere_lowest = bits_pos;
-    land->tiles->atmosphere_highest = bits_neg;
+    land->tiles[tile].atmosphere_lowest = bits_pos;
+    land->tiles[tile].atmosphere_highest = bits_neg;
     
     while ( ly < MAP_DIMENSION )
     {
         n_int    lx = 0;
         while ( lx < MAP_DIMENSION )
         {
-            n_c_int  value = tiles_atomosphere(land, 0, 0, lx, ly);
+            n_c_int  value = tiles_atmosphere(land, tile, 0, lx, ly);
             
             n_int    local_atm =
-                       (2 * tiles_atomosphere(land, 0, 0, lx, ly-1))
-                     + (2 * tiles_atomosphere(land, 0, 0, lx-1, ly))
-                     - (2 * tiles_atomosphere(land, 0, 0, lx+1, ly))
-                     - (2 * tiles_atomosphere(land, 0, 0, lx, ly+1));
+                       (2 * tiles_atmosphere(land, tile, 0, lx, ly-1))
+                     + (2 * tiles_atmosphere(land, tile, 0, lx-1, ly))
+                     - (2 * tiles_atmosphere(land, tile, 0, lx+1, ly))
+                     - (2 * tiles_atmosphere(land, tile, 0, lx, ly+1));
             
-            value += (n_c_int) ((local_atm - local_delta) >> MAP_BITS) + tiles_pressure(land, 0, lx, ly);
+            value += (n_c_int) ((local_atm - land->tiles[tile].local_delta) >> MAP_BITS) + tiles_pressure(land, 0, lx, ly);
             
-            tiles_set_atmosphere(land, 0, 1, lx, ly, value);
+            tiles_set_atmosphere(land, tile, 1, lx, ly, value);
             new_delta += value;
-            tile_atomosphere_range(land->tiles, value);
+            tile_atmosphere_range(land, tile, value);
             lx++;
         }
         ly++;
     }
     
-    local_delta = new_delta >> MAP_BITS;
-    
-    if ((land->tiles->atmosphere_lowest < bits_neg) || (land->tiles->atmosphere_highest > bits_pos))
-    {
-        tile_wrap(land->tiles[0].atmosphere[1]);
-    }
-    
-    tiles_swap_atmosphere(land, 0);
+    land->tiles[tile].local_delta = new_delta >> MAP_BITS;
 }
 
-void tile_wind(n_land * land)
+void tile_cycle_cleanup(n_land * land, n_int tile, n_int wind)
+{
+    if (wind != 0)
+    {
+        if ((land->tiles[tile].atmosphere_lowest < bits_neg) || (land->tiles[tile].atmosphere_highest > bits_pos))
+        {
+            tile_wrap(land, tile);
+        }
+    }
+    tiles_swap_atmosphere(land, tile);
+}
+
+void tile_wind(n_land * land, n_int tile)
 {
     /* Add dynamic wind */
-    const n_int   p01 = land->tiles->wind_value_x;
-    const n_int   p10 = land->tiles->wind_value_y;
+    const n_int   p01 = land->tiles[tile].wind_value_x;
+    const n_int   p10 = land->tiles[tile].wind_value_y;
     n_int         ly = 0;
 
-    title_wind_calculation(land);
+    title_wind_calculation(land, tile);
     
     while ( ly < MAP_DIMENSION )
     {
         n_int    lx = 0;
         while ( lx < MAP_DIMENSION )
         {
-            n_int    delta_pressure = tiles_pressure(land, 0, lx, ly);
+            n_int    delta_pressure = tiles_pressure(land, tile, lx, ly);
             n_int    tp01 = (p01 * delta_pressure) / land->tiles->delta_pressure_highest;
             n_int    tp10 = (p10 * delta_pressure) / land->tiles->delta_pressure_highest;
             n_int    tp00 = 256 - tp01 - tp10;
             n_int    local_atm =
-                        (tp00 * tiles_atomosphere(land, 0, 0,lx, ly)) +
-                        (tp10 * tiles_atomosphere(land, 0, 0,lx, ly+1)) +
-                        (tp01 * tiles_atomosphere(land, 0, 0,lx+1, ly));
+                        (tp00 * tiles_atmosphere(land, tile, 0,lx, ly)) +
+                        (tp10 * tiles_atmosphere(land, tile, 0,lx, ly+1)) +
+                        (tp01 * tiles_atmosphere(land, tile, 0,lx+1, ly));
             
-            tiles_set_atmosphere(land, 0, 1, lx, ly, (n_c_int)local_atm >> 8);
+            tiles_set_atmosphere(land, tile, 1, lx, ly, (n_c_int)local_atm >> 8);
             
             lx++;
         }
         ly++;
     }
-    tiles_swap_atmosphere(land, 0);
 }
 
-void tile_weather_init(n_land * land)
+void tile_weather_init(n_land * land, n_int tile)
 {
+    n_tile * tilePtr = &land->tiles[tile];
+    
     n_int ly = 0;
     
-    math_random3(land->tiles->genetics);
+    math_random3(tilePtr->genetics);
     
-    land->tiles->delta_pressure_lowest = 0xffff;
-    land->tiles->delta_pressure_highest = 0;
+    tilePtr->local_delta = 0;
     
-    land->tiles->wind_value_x = tile_wind_aim;
-    land->tiles->wind_aim_y = tile_wind_aim;
-    math_random3(land->tiles->genetics);
-    land->tiles->wind_value_y = tile_wind_aim;
-    land->tiles->wind_aim_x = tile_wind_aim;
+    tilePtr->delta_pressure_lowest = 0xffff;
+    tilePtr->delta_pressure_highest = 0;
     
-    io_erase((n_byte *)land->tiles->atmosphere, sizeof(n_c_int) * MAP_AREA);
-    io_erase((n_byte *)land->tiles->delta_pressure, sizeof(n_byte2) * MAP_AREA);
+    tilePtr->wind_value_x = tile_wind_aim;
+    tilePtr->wind_aim_y = tile_wind_aim;
+    math_random3(tilePtr->genetics);
+    tilePtr->wind_value_y = tile_wind_aim;
+    tilePtr->wind_aim_x = tile_wind_aim;
     
-    while ( ly < MAP_AREA )
-    {
-        land->tiles->atmosphere[0][ ly ] = (n_c_int)(land->tiles->topology[0][ ly ] * 4);
-        ly++;
-    }
+    io_erase((n_byte *)tilePtr->atmosphere, sizeof(n_c_int) * MAP_AREA);
+    io_erase((n_byte *)tilePtr->delta_pressure, sizeof(n_byte2) * MAP_AREA);
+
+    tile_atmosphere_topology(land, tile);
+
     ly=0;
     while ( ly < MAP_DIMENSION )
     {
@@ -486,12 +518,12 @@ void tile_weather_init(n_land * land)
         {
             n_byte2 value
             = (n_byte2)(
-                        tiles_atomosphere(land, 0, 0, lx + 1, ly)
-                        - tiles_atomosphere(land, 0, 0, lx - 1, ly)
-                        + tiles_atomosphere(land, 0, 0, lx, ly + 1)
-                        - tiles_atomosphere(land, 0, 0, lx, ly - 1)
+                        tiles_atmosphere(land, tile, 0, lx + 1, ly)
+                        - tiles_atmosphere(land, tile, 0, lx - 1, ly)
+                        + tiles_atmosphere(land, tile, 0, lx, ly + 1)
+                        - tiles_atmosphere(land, tile, 0, lx, ly - 1)
                         + 512);
-            tiles_set_pressure(land, 0, lx, ly, value);
+            tiles_set_pressure(land, tile, lx, ly, value);
             
             tile_pressure_range(land->tiles, value);
             
@@ -499,31 +531,16 @@ void tile_weather_init(n_land * land)
         }
         ly++;
     }
-    
-    ly = 0;
-    while( ly < MAP_AREA)
-    {
-        land->tiles->atmosphere[0][ ly ] = 0;
-        ly++;
-    }
+    title_pack_atmosphere(land, tile);
 }
 
-static void title_pack_static(n_byte * buffer)
+
+void tile_pack(n_land * land, n_int tile)
 {
-    n_int loop = 0;
-    while (loop < MAP_AREA)
-    {
-        buffer[loop] = 128;
-        loop++;
-    }
+    title_pack_topology(land, tile);
 }
 
-void tile_pack(n_land * land)
-{
-    title_pack_static(land->tiles->topology[0]);
-}
-
-static void tile_round(n_land * land)
+static void tile_round(n_land * land, n_int tile)
 {
     n_int    local_tile_dimension = 1 << MAP_BITS;
     n_int    span_minor = 0;
@@ -545,107 +562,100 @@ static void tile_round(n_land * land)
                     n_int    tx = -1;
                     while (tx < 2)
                     {
-                        sum += tiles_topology(land, 0, (span_minor&1), px + tx, py + ty);
+                        sum += tiles_topology(land, tile, (span_minor&1), px + tx, py + ty);
                         tx++;
                     }
                     ty++;
                 }
-                tiles_set_topology(land, 0, (span_minor&1)^1, px, py, (n_byte)(sum / 9));
+                tiles_set_topology(land, tile, (span_minor&1)^1, px, py, (n_byte)(sum / 9));
                 px ++;
             }
             py ++;
         }
         span_minor ++;
     }
-    tiles_swap_topology(land, 0);
 }
 
-static void tile_patch(n_land * land, n_int refine)
+static void tile_patch(n_land * land, n_int tile, n_int refine)
 {
     /** size of the local tiles */
     /** number of 256 x 256 tiles in each dimension */
     const n_int local_tiles = 1 << (MAP_BITS-8);
     const n_int span_minor = (64 >> ((refine&7)^7));
     const n_int span_major = (1 << ((refine&7)^7));
+    n_int tile_y = 0;
     
-    n_int tiles = 0;
-    
-    while (tiles < 1)
+    /** begin the tile traversal in the y dimension */
+    while (tile_y < local_tiles)
     {
-        n_int tile_y = 0;
-        
-        /** begin the tile traversal in the y dimension */
-        while (tile_y < local_tiles)
+        /** begin the tile traversal in the x dimension */
+        n_int tile_x = 0;
+        while (tile_x < local_tiles)
         {
-            /** begin the tile traversal in the x dimension */
-            n_int tile_x = 0;
-            while (tile_x < local_tiles)
+            /** scan through the span_minor values */
+            n_int    py = 0;
+            while (py < span_minor)
             {
-                /** scan through the span_minor values */
-                n_int    py = 0;
-                while (py < span_minor)
+                n_int    px = 0;
+                while (px < span_minor)
                 {
-                    n_int    px = 0;
-                    while (px < span_minor)
+                    /** each of the smaller tiles are based on 256 * 256 tiles */
+                    n_int    val1 = ((px << 2) + (py << 10));
+                    n_int    ty = 0;
+                    n_int    tseed = math_random(land->tiles[tile].genetics);
+                    
+                    while (ty < 4)
                     {
-                        /** each of the smaller tiles are based on 256 * 256 tiles */
-                        n_int    val1 = ((px << 2) + (py << 10));
-                        n_int    ty = 0;
-                        n_int    tseed = math_random(land->tiles->genetics);
-                        
-                        while (ty < 4)
+                        n_int    tx = 0;
+                        while (tx < 4)
                         {
-                            n_int    tx = 0;
-                            while (tx < 4)
+                            n_int    val2 = (tseed >> (tx | (ty << 2)));
+                            n_int    val3 = ((((val2 & 1) << 1)-1) * 20);
+                            n_int    my = 0;
+                            
+                            val2 = (tx | (ty << 8));
+                            
+                            while (my < span_major)
                             {
-                                n_int    val2 = (tseed >> (tx | (ty << 2)));
-                                n_int    val3 = ((((val2 & 1) << 1)-1) * 20);
-                                n_int    my = 0;
-                                
-                                val2 = (tx | (ty << 8));
-                                
-                                while (my < span_major)
+                                n_int    mx = 0;
+                                while (mx < span_major)
                                 {
-                                    n_int    mx = 0;
-                                    while (mx < span_major)
+                                    n_int    point = ((mx | (my << 8)) + (span_major * (val1 + val2)));
+                                    n_int    pointx = (point & 255);
+                                    n_int    pointy = (point >> 8);
+                                    /** perform rotation on 2,3,6,7,10,11 etc */
+                                    if (refine&2)
                                     {
-                                        n_int    point = ((mx | (my << 8)) + (span_major * (val1 + val2)));
-                                        n_int    pointx = (point & 255);
-                                        n_int    pointy = (point >> 8);
-                                        /** perform rotation on 2,3,6,7,10,11 etc */
-                                        if (refine&2)
-                                        {
-                                            n_int pointx_tmp = pointx + pointy;
-                                            pointy = pointx - pointy;
-                                            pointx = pointx_tmp;
-                                        }
-                                        {
-                                            /** include the wrap around for the 45 degree rotation cases in particular */
-                                            n_int    local_map_point = tiles_topology(land, tiles, 0, pointx + (tile_x<<8), pointy + (tile_y<<8)) + val3;
-                                            
-                                            if (local_map_point < 0) local_map_point = 0;
-                                            if (local_map_point > 255) local_map_point = 255;
-                                            
-                                            tiles_set_topology(land, tiles, 0, pointx + (tile_x<<8), pointy + (tile_y<<8), (n_byte)local_map_point);
-                                        }
-                                        mx++;
+                                        n_int pointx_tmp = pointx + pointy;
+                                        pointy = pointx - pointy;
+                                        pointx = pointx_tmp;
                                     }
-                                    my++;
+                                    {
+                                        /** include the wrap around for the 45 degree rotation cases in particular */
+                                        n_int    local_map_point = tiles_topology(land, tile, 0, pointx + (tile_x<<8), pointy + (tile_y<<8)) + val3;
+                                        
+                                        if (local_map_point < 0) local_map_point = 0;
+                                        if (local_map_point > 255) local_map_point = 255;
+                                        
+                                        tiles_set_topology(land, tile, 0, pointx + (tile_x<<8), pointy + (tile_y<<8), (n_byte)local_map_point);
+                                    }
+                                    mx++;
                                 }
-                                tx++;
+                                my++;
                             }
-                            ty++;
+                            tx++;
                         }
-                        px++;
+                        ty++;
                     }
-                    py++;
+                    px++;
                 }
-                tile_x++;
+                py++;
             }
-            tile_y++;
+            tile_x++;
         }
-        tiles ++;
+        tile_y++;
     }
+
 }
 
 
@@ -655,14 +665,15 @@ n_int tile_memory_location(n_int px, n_int py)
     return POSITIVE_TILE_COORD(px) + (POSITIVE_TILE_COORD(py) << MAP_BITS);
 }
 
-void tile_land_init(n_land * land)
+void tile_land_init(n_land * land, n_int tile)
 {
     n_int      refine = 0;
-    tile_pack(land);
+    tile_pack(land, tile);
     while (refine < 7)
     {
-        tile_patch(land, refine);
-        tile_round(land);
+        tile_patch(land, tile, refine);
+        tile_round(land, tile);
+        tiles_swap_topology(land, tile);
         refine++;
     }
 }
