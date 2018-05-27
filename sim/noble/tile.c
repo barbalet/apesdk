@@ -535,7 +535,7 @@ void tile_weather_init(n_land * land, n_int tile)
 }
 
 
-void tile_pack(n_land * land, n_int tile)
+void tile_land_erase(n_land * land, n_int tile)
 {
     title_pack_topology(land, tile);
 }
@@ -667,8 +667,7 @@ n_int tile_memory_location(n_int px, n_int py)
 
 void tile_land_init(n_land * land, n_int tile)
 {
-    n_int      refine = 0;
-    tile_pack(land, tile);
+    n_int refine = 0;
     while (refine < 7)
     {
         tile_patch(land, tile, refine);

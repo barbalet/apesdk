@@ -385,7 +385,7 @@ n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind)
 
 void land_clear(KIND_OF_USE kind, n_byte4 start)
 {
-    tile_pack(&m_land, 0);
+    tile_land_erase(&m_land, 0);
     if (kind != KIND_LOAD_FILE)
     {
         m_time = 0;
@@ -398,12 +398,11 @@ void land_seed_genetics(n_byte2 * local_random)
 {
     m_land.tiles[0].genetics[0] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
      m_land.tiles[0].genetics[1] = (n_byte2)(((math_random(local_random) & 255) << 8) | (math_random(local_random) & 255));
-    
-    
 }
 
 void land_init(void)
 {
+    tile_land_erase(&m_land, 0);
     tile_land_init(&m_land, 0);
 }
 

@@ -1103,10 +1103,12 @@ typedef struct
 void tile_wind(n_land * land, n_int tile);
 void tile_cycle(n_land * land, n_int tile);
 void tile_cycle_cleanup(n_land * land, n_int tile, n_int wind);
+
 void tile_weather_init(n_land * land, n_int tile);
 
 void tile_land_init(n_land * land, n_int tile);
-void tile_pack(n_land * land, n_int tile);
+void tile_land_erase(n_land * land, n_int tile);
+
 void tile_creation(n_byte * map, n_byte2 * random);
 
 n_byte tiles_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
