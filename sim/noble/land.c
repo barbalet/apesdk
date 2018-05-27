@@ -50,7 +50,7 @@ static n_land      m_land;
 
 static n_byte      m_tide_level;                            /* generated */
 
-static n_byte      m_topology_highdef[HI_RES_MAP_AREA * 2]; /* generated */
+static n_byte      m_topography_highdef[HI_RES_MAP_AREA * 2]; /* generated */
 static n_byte4     m_highres_tide[HI_RES_MAP_AREA/32];      /* generated */
 
 /*
@@ -107,14 +107,14 @@ n_byte land_tide_level(void)
     return m_tide_level;
 }
 
-n_byte * land_topology_highdef(void)
+n_byte * land_topography_highdef(void)
 {
-    return (n_byte *)m_topology_highdef;
+    return (n_byte *)m_topography_highdef;
 }
 
-n_byte * land_topology(void)
+n_byte * land_topography(void)
 {
-    return (n_byte *)m_land.tiles[0].topology;
+    return (n_byte *)m_land.tiles[0].topography;
 }
 
 n_byte4 * land_highres_tide(void)
@@ -221,7 +221,7 @@ n_int land_map_bits(void)
 
 n_int land_location(n_int px, n_int py)
 {
-    return tiles_topology(&m_land, 0, 0, px, py);
+    return tiles_topography(&m_land, 0, 0, px, py);
 }
 
 n_int land_location_vect(n_vect2 * value)
@@ -411,12 +411,12 @@ void land_init_high_def(n_byte double_spread)
     n_uint   lp = 0;
     n_byte4  value_setting = 0;
 
-    math_bilinear_8_times((n_byte *)m_land.tiles[0].topology[0], m_topology_highdef, double_spread);
+    math_bilinear_8_times((n_byte *)m_land.tiles[0].topography[0], m_topography_highdef, double_spread);
     io_erase((n_byte *)m_highres_tide, sizeof(n_byte4) * HI_RES_MAP_AREA/32);
 
     while (lp < HI_RES_MAP_AREA)
     {
-        n_byte val = m_topology_highdef[lp<<1];
+        n_byte val = m_topography_highdef[lp<<1];
         if ((val > 105) && (val < 151))
         {
             value_setting |= 1 << (lp & 31);

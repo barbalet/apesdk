@@ -278,7 +278,7 @@ n_int polygonal_entry(n_int value)
             n_vect2 co;
             being_high_res(loc_being, &co);
             glRotated(rotating_angle, 0.0f, 1.0f, 0.0f);
-            polygonal_render_terrain(land_topology_highdef(), co.x, co.y);
+            polygonal_render_terrain(land_topography_highdef(), co.x, co.y);
             glRotated(45-rotating_angle, 0.0f, 1.0f, 0.0f);
 
         }

@@ -1067,7 +1067,7 @@ typedef struct
 {
     n_byte2     genetics[2];                           /* save-able */
     
-    n_byte      topology[2][MAP_AREA];                    /* generated */
+    n_byte      topography[2][MAP_AREA];                    /* generated */
     n_c_int     atmosphere[2][ MAP_AREA];                 /* save-able and generate-able */
     n_byte2     delta_pressure[ MAP_AREA];             /* generated */
 
@@ -1111,7 +1111,7 @@ void tile_land_erase(n_land * land, n_int tile);
 
 void tile_creation(n_byte * map, n_byte2 * random);
 
-n_byte tiles_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
+n_byte tiles_topography(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
 n_c_int tiles_atmosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
 
 void * land_ptr(void);
@@ -1119,8 +1119,8 @@ n_byte4 land_date(void);
 n_byte4 land_time(void);
 n_byte2 * land_genetics(void);
 n_byte land_tide_level(void);
-n_byte * land_topology(void);
-n_byte * land_topology_highdef(void);
+n_byte * land_topography(void);
+n_byte * land_topography_highdef(void);
 n_byte4 * land_highres_tide(void);
 n_c_int * land_weather(void);
 

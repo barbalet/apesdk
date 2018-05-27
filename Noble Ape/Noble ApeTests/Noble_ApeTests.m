@@ -83,7 +83,7 @@ noble_being      * being = 0L;
 
 - (void)testMapCheckSum
 {
-    n_uint hash = math_hash((n_byte *)land_topology(), MAP_AREA);
+    n_uint hash = math_hash((n_byte *)land_topography(), MAP_AREA);
     XCTAssertTrue(hash == 0xc4ccc927a99055cf, @"Hash doesn't comply with prior map hashes (%lx)", hash);
 }
 /*

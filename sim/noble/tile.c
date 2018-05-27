@@ -362,19 +362,19 @@ static void tiles_set_pressure(n_land * land, n_int tile, n_int lx, n_int ly, n_
     land->tiles[tile].delta_pressure[tiles_non_planet(lx, ly)] = value;
 }
 
-n_byte tiles_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly)
+n_byte tiles_topography(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly)
 {
-    return land->tiles[tile].topology[0][tiles_non_planet(lx, ly)];
+    return land->tiles[tile].topography[0][tiles_non_planet(lx, ly)];
 }
 
-static void tiles_set_topology(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly, n_byte value)
+static void tiles_set_topography(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly, n_byte value)
 {
-    land->tiles[tile].topology[buffer][tiles_non_planet(lx, ly)] = value;
+    land->tiles[tile].topography[buffer][tiles_non_planet(lx, ly)] = value;
 }
 
-static void tiles_swap_topology(n_land * land, n_int tile)
+static void tiles_swap_topography(n_land * land, n_int tile)
 {
-    io_copy((n_byte *)&land->tiles[tile].topology[0], (n_byte *)&land->tiles[tile].topology[1], MAP_AREA);
+    io_copy((n_byte *)&land->tiles[tile].topography[0], (n_byte *)&land->tiles[tile].topography[1], MAP_AREA);
 }
 
 static void title_pack_atmosphere(n_land * land, n_int tile)
@@ -387,23 +387,23 @@ static void title_pack_atmosphere(n_land * land, n_int tile)
     }
 }
 
-static void title_pack_topology(n_land * land, n_int tile)
+static void title_pack_topography(n_land * land, n_int tile)
 {
     n_int loop = 0;
     while (loop < MAP_AREA)
     {
-        land->tiles[tile].topology[0][loop] = 128;
+        land->tiles[tile].topography[0][loop] = 128;
         loop++;
     }
 }
 
-static void tile_atmosphere_topology(n_land * land, n_int tile)
+static void tile_atmosphere_topography(n_land * land, n_int tile)
 {
     n_int loop = 0;
 
     while ( loop < MAP_AREA )
     {
-        land->tiles[tile].atmosphere[0][ loop ] = (n_c_int)(land->tiles[tile].topology[0][ loop ] * 4);
+        land->tiles[tile].atmosphere[0][ loop ] = (n_c_int)(land->tiles[tile].topography[0][ loop ] * 4);
         loop++;
     }
 }
@@ -507,7 +507,7 @@ void tile_weather_init(n_land * land, n_int tile)
     io_erase((n_byte *)tilePtr->atmosphere, sizeof(n_c_int) * MAP_AREA);
     io_erase((n_byte *)tilePtr->delta_pressure, sizeof(n_byte2) * MAP_AREA);
 
-    tile_atmosphere_topology(land, tile);
+    tile_atmosphere_topography(land, tile);
 
     ly=0;
     while ( ly < MAP_DIMENSION )
@@ -537,7 +537,7 @@ void tile_weather_init(n_land * land, n_int tile)
 
 void tile_land_erase(n_land * land, n_int tile)
 {
-    title_pack_topology(land, tile);
+    title_pack_topography(land, tile);
 }
 
 static void tile_round(n_land * land, n_int tile)
@@ -562,12 +562,12 @@ static void tile_round(n_land * land, n_int tile)
                     n_int    tx = -1;
                     while (tx < 2)
                     {
-                        sum += tiles_topology(land, tile, (span_minor&1), px + tx, py + ty);
+                        sum += tiles_topography(land, tile, (span_minor&1), px + tx, py + ty);
                         tx++;
                     }
                     ty++;
                 }
-                tiles_set_topology(land, tile, (span_minor&1)^1, px, py, (n_byte)(sum / 9));
+                tiles_set_topography(land, tile, (span_minor&1)^1, px, py, (n_byte)(sum / 9));
                 px ++;
             }
             py ++;
@@ -632,12 +632,12 @@ static void tile_patch(n_land * land, n_int tile, n_int refine)
                                     }
                                     {
                                         /** include the wrap around for the 45 degree rotation cases in particular */
-                                        n_int    local_map_point = tiles_topology(land, tile, 0, pointx + (tile_x<<8), pointy + (tile_y<<8)) + val3;
+                                        n_int    local_map_point = tiles_topography(land, tile, 0, pointx + (tile_x<<8), pointy + (tile_y<<8)) + val3;
                                         
                                         if (local_map_point < 0) local_map_point = 0;
                                         if (local_map_point > 255) local_map_point = 255;
                                         
-                                        tiles_set_topology(land, tile, 0, pointx + (tile_x<<8), pointy + (tile_y<<8), (n_byte)local_map_point);
+                                        tiles_set_topography(land, tile, 0, pointx + (tile_x<<8), pointy + (tile_y<<8), (n_byte)local_map_point);
                                     }
                                     mx++;
                                 }
@@ -672,7 +672,7 @@ void tile_land_init(n_land * land, n_int tile)
     {
         tile_patch(land, tile, refine);
         tile_round(land, tile);
-        tiles_swap_topology(land, tile);
+        tiles_swap_topography(land, tile);
         refine++;
     }
 }

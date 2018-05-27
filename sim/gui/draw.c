@@ -654,7 +654,7 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
     n_int     big_x = dtss->lowest_s + (scrx * dtss->value_vector.y);
     /* rotated and sub offset (subtracted further down) */
     n_int     big_y = dtss->lowest_c - (scrx * dtss->value_vector.x);
-    n_byte2 * combined = (n_byte2 *)land_topology_highdef();
+    n_byte2 * combined = (n_byte2 *)land_topography_highdef();
     n_int     co_x = dtss->co.x;
     n_int     co_y = dtss->co.y;
     n_int     valc2 = dtss->value_vector.y << 1;
@@ -703,7 +703,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
         noble_being * loc_being = local_sim->select;
         draw_terrain_scan_struct dtss;
 
-        n_byte2 *  local_combined = (n_byte2 *)land_topology_highdef();
+        n_byte2 *  local_combined = (n_byte2 *)land_topography_highdef();
 
         /* start at the left-most row */
         n_int scrx = (0 - (dimensions->x >> 1));
@@ -1715,7 +1715,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
         local_col.color = COLOUR_RED_DARK;
     }
 
-    if (local_col.screen == land_topology_highdef())
+    if (local_col.screen == land_topography_highdef())
     {
         local_8bit.pixel_draw = &pixel_color8_hires;
     }
@@ -1726,7 +1726,7 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
 
     local_8bit.information = &local_col;
 
-    if (local_col.screen == land_topology_highdef())
+    if (local_col.screen == land_topography_highdef())
     {
         draw_apeloc_hires(local_sim, bei, &local_8bit);
     }
@@ -1744,15 +1744,15 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
     if (lores) /* set up drawing environ */
     {
         local_col.screen = draw_pointer(NUM_VIEW);
-        io_copy(land_topology(), local_col.screen, MAP_AREA);
+        io_copy(land_topography(), local_col.screen, MAP_AREA);
     }
     else
     {
         draw_undraw();
-        local_col.screen = land_topology_highdef();
+        local_col.screen = land_topography_highdef();
     }
     if (lores)    {
-        draw_tides(land_topology(), local_col.screen, land_tide_level());
+        draw_tides(land_topography(), local_col.screen, land_tide_level());
         if (toggle_territory)
         {
             draw_region(local_sim->select);
@@ -1765,7 +1765,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
         if (local_tide != land_tide_level())
         {
             local_tide = land_tide_level();
-            draw_tides_hi_res(land_topology_highdef(), land_highres_tide(), local_tide);
+            draw_tides_hi_res(land_topography_highdef(), land_highres_tide(), local_tide);
         }
         if (toggle_territory)
         {
