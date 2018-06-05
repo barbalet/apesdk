@@ -1,5 +1,13 @@
 [![Noble Ape on Emergence](http://i.ytimg.com/vi/BdANrTDer9c/hqdefault.jpg)](//www.youtube.com/watch?v=BdANrTDer9c "Noble Ape on Emergence")
 
+## NOTICE
+
+All the active development of Noble Ape is now undertaken here:
+
+https://gitlab.com/barbalet/nobleape
+
+This archive is maintained for historical purposes.
+
 ## DESCRIPTION
 
 The Noble Ape Simulation has been in development since 1996. It features a number of autonomous simulation components including a landscape simulation, biological simulation, weather simulation, sentient creature (Noble Ape) simulation (including a number of internal biological simulations) and a simple intelligent-agent scripting language (ApeScript).
