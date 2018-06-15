@@ -1,3 +1,5 @@
+[June 13 This is Noble Ape provides a musical account of the Noble Ape development!](https://www.amazon.com/June-13-This-Noble-Ape/dp/B07DPKG9YP/)
+
 [![Noble Ape on Emergence](http://i.ytimg.com/vi/BdANrTDer9c/hqdefault.jpg)](//www.youtube.com/watch?v=BdANrTDer9c "Noble Ape on Emergence")
 
 ## NOTICE
