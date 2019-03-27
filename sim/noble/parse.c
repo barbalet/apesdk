@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -450,14 +450,14 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
 
     /* perform the initial allocations */
 
-    if((final_prog = io_new(sizeof(n_interpret))) == 0L)
+    if((final_prog = memory_new(sizeof(n_interpret))) == 0L)
     {
         return 0L;
     }
 
     if((final_prog->binary_code = io_file_new())== 0L)
     {
-        io_free((void **)&final_prog);
+        memory_free((void **)&final_prog);
         return 0L;
     }
 
@@ -490,7 +490,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
         local_number[ loop++ ] = 0;
     }
     loop = 0;
-    io_erase(buffer, VARIABLE_WIDTH);
+    memory_erase(buffer, VARIABLE_WIDTH);
 
     local_data = input->data;
     end_loop = input->size;
@@ -520,7 +520,7 @@ n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * 
 
             /* clear the buffer for new characters coming in */
             buffer_size = 0;
-            io_erase(buffer, VARIABLE_WIDTH);
+            memory_erase(buffer, VARIABLE_WIDTH);
         }
 
         /* add the character to the buffer */

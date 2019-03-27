@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -99,7 +99,7 @@ static void noble_feature_set(noble_feature * to, n_byte feature_type, n_byte2 f
 /**
  * @brief Returns the array index of a given feature type within a set
  * @param s A set of features
- * @param feature_type
+ * @param feature_type the feature type
  * @return array index of a given feature type within a set
  */
 static n_int noble_featureset_feature_index(noble_featureset * s,
@@ -240,12 +240,6 @@ static n_int noble_featureset_update(noble_featureset * s,
     return -1;
 }
 
-/**
- * @brief returns a threshold which is used to determine
- *        whether two features of the same type have a matching value
- * @param feature_type
- * @return
- */
 static n_int featureset_match_threshold(n_byte feature_type)
 {
     if (feature_type == FEATURESET_TERRITORY) return 1;
@@ -399,7 +393,7 @@ static void social_meet_update_features(
 {
     noble_social * meeter_social_graph;
 #ifdef TERRITORY_ON
-    n_uint idx;
+    n_int idx;
 #endif
 
     /** Get the social graph for the being doing the meeting */
@@ -471,7 +465,7 @@ static void social_meet_update_features(
 /**
  * @brief Returns a string for the name of the ape in the given social graph array index.
  * @param local_sim Pointer to the simulation
- * @param localbeing Pinter to the ape
+ * @param local_being Pinter to the ape
  * @param social_graph_index Array index within the social graph
  * @param met BEING_MEETER=return name for the meeter, BEING_MET=return name for the met
  * @param name Returned ape name
@@ -572,8 +566,8 @@ static void social_group_align_preferences(
 
 /**
  * @brief What is the pigmentation attractiveness of met ape to the meeter being ?
- * @param meeter_being Pointer to the ape doing the meeting
- * @param met_being Pointer to the ape being met
+ * @param being_meeter Pointer to the ape doing the meeting
+ * @param being_met Pointer to the ape being met
  * @return Attractiveness value
  */
 static n_int social_attraction_pigmentation(
@@ -751,8 +745,7 @@ static n_int social_attraction_pheromone(
  */
 n_int get_noble_social(
     noble_being * meeter_being,
-    noble_being * met_being,
-    noble_simulation * sim)
+    noble_being * met_being)
 {
     n_byte2 i;
     noble_social * graph = being_social(meeter_being);
@@ -784,8 +777,7 @@ n_int get_noble_social(
  */
 static n_int get_stranger_link(
     noble_being * meeter_being,
-    noble_being * met_being,
-    noble_simulation * sim)
+    noble_being * met_being)
 {
     n_byte2 i=1;
     n_int stranger_index=-1;
@@ -838,7 +830,6 @@ static n_int get_stranger_link(
 static n_int social_meet(
     noble_being * meeter_being,
     noble_being * met_being,
-    noble_simulation * sim,
     n_byte location_type)
 {
     n_int friend_or_foe, index = -1, stereotype_index = -1;
@@ -853,7 +844,7 @@ static n_int social_meet(
     being_immune_transmit(meeter_being, met_being, PATHOGEN_TRANSMISSION_AIR);
 
     /** get the social graph index which will be used to represent this relation */
-    index = get_noble_social(meeter_being,met_being,sim);
+    index = get_noble_social(meeter_being, met_being);
     if (index > 0)
     {
         familiarity = graph[index].familiarity;
@@ -863,7 +854,7 @@ static n_int social_meet(
     {
         /** get the index of an existing social graph entry
         which can be overwritten */
-        index = get_stranger_link(meeter_being,met_being,sim);
+        index = get_stranger_link(meeter_being, met_being);
     }
 
     if ((met == 1) || ((met == 0) && (index > 0)))
@@ -900,7 +891,7 @@ static n_int social_meet(
                     social_attraction_frame(meeter_being,met_being) +
                     social_attraction_hair(meeter_being,met_being)
 #ifdef EPISODIC_ON
-                    + episodic_met_being_celebrity(sim,meeter_being,met_being)
+                    + episodic_met_being_celebrity(meeter_being, met_being)
 #endif
                     ;
 
@@ -975,7 +966,6 @@ static n_int social_meet(
  * @return Array index of the social graph for the given type of relationship, -1 if not found
  */
 n_int social_get_relationship(
-    noble_simulation * sim,
     noble_being * meeter_being,
     n_byte relationship)
 {
@@ -1022,7 +1012,7 @@ n_int social_set_relationship(noble_simulation * sim,
     if (relationship == 0) return -1;
 
     /** create the social graph entry if necessary and return its array index */
-    index = social_meet(meeter_being,met_being,sim, LOCATION_UNKNOWN);
+    index = social_meet(meeter_being, met_being, LOCATION_UNKNOWN);
     if (index > -1)
     {
         /** get the social graph */
@@ -1051,12 +1041,12 @@ n_int social_set_relationship(noble_simulation * sim,
 n_int social_network(noble_simulation *sim,
                      noble_being * meeter_being,
                      noble_being * met_being,
-                     n_int distance)
+                     n_uint distance)
 {
     n_int being_index = -1;
     if (distance < SOCIAL_RANGE)
     {
-        being_index = social_meet(meeter_being, met_being, sim, LOCATION_KNOWN);
+        being_index = social_meet(meeter_being, met_being, LOCATION_KNOWN);
     }
     return being_index;
 }
@@ -1101,7 +1091,7 @@ n_byte social_groom(
     noble_simulation * sim,
     noble_being * meeter_being,
     noble_being * met_being,
-    n_int distance,
+    n_uint distance,
     n_int awake,
     n_byte2 familiarity)
 {
@@ -1154,14 +1144,14 @@ n_byte social_groom(
             /** grooming location becomes the new focus of attention */
             being_set_attention(meeter_being, ATTENTION_BODY, groomloc);
 
-            episodic_interaction(sim, meeter_being, met_being, EVENT_GROOM, AFFECT_GROOM, groomloc);
-            episodic_interaction(sim, met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);
+            episodic_interaction(meeter_being, met_being, EVENT_GROOM, AFFECT_GROOM, groomloc);
+            episodic_interaction(met_being, meeter_being, EVENT_GROOMED, AFFECT_GROOM, groomloc);
 
             /** the two beings meet and become more friendly */
-            meeter_index = social_meet(meeter_being, met_being, sim, LOCATION_KNOWN);
+            meeter_index = social_meet(meeter_being, met_being, LOCATION_KNOWN);
             if (meeter_index > -1)
             {
-                met_index = social_meet(met_being, meeter_being, sim, LOCATION_KNOWN);
+                met_index = social_meet(met_being, meeter_being, LOCATION_KNOWN);
                 if (met_index > -1)
                 {
                     noble_social * graph = being_social(meeter_being);
@@ -1240,10 +1230,10 @@ n_byte2 social_squabble(
                 vanquished = meeter_being;
             }
 
-            vanquished_index = social_meet(victor, vanquished, sim, LOCATION_KNOWN);
+            vanquished_index = social_meet(victor, vanquished, LOCATION_KNOWN);
             if (vanquished_index > -1)
             {
-                victor_index = social_meet(vanquished, victor, sim, LOCATION_KNOWN);
+                victor_index = social_meet(vanquished, victor, LOCATION_KNOWN);
                 if (victor_index > -1)
                 {
                     noble_social * victor_social_graph = being_social(victor);
@@ -1296,8 +1286,8 @@ n_byte2 social_squabble(
 
             /** remember the fight */
 
-            episodic_interaction(sim, victor, vanquished, EVENT_HIT, AFFECT_SQUABBLE_VICTOR, punchloc);
-            episodic_interaction(sim, vanquished, victor, EVENT_HIT_BY, AFFECT_SQUABBLE_VANQUISHED, punchloc);
+            episodic_interaction(victor, vanquished, EVENT_HIT, AFFECT_SQUABBLE_VICTOR, punchloc);
+            episodic_interaction(vanquished, victor, EVENT_HIT_BY, AFFECT_SQUABBLE_VANQUISHED, punchloc);
 
             /** vanquished turns away */
             if (meeter_being == vanquished)
@@ -1323,7 +1313,6 @@ n_byte2 social_squabble(
 
 /**
  * @brief Returns the average friend or foe value
- * @param sim Pointer to the simulation
  * @param local_being Pointer to the ape
  * @return The average friend or foe value for all social graph entries
  */
@@ -1358,7 +1347,6 @@ n_uint social_respect_mean(
  * details of the father and resets drives and goals.
  * @param female Pointer to the mother
  * @param male Pointer to the father
- * @param today The current date
  * @param sim Pointer to the simulation
  */
 /*static*/ void social_conception(
@@ -1405,15 +1393,14 @@ n_uint social_respect_mean(
     being_set_goal_none(male);
     
     /** remember the event */
-    episodic_interaction(sim, female, male, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(female))*AFFECT_MATE), 0);
-    episodic_interaction(sim, male, female, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(male))*AFFECT_MATE), 0);
+    episodic_interaction(female, male, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(female))*AFFECT_MATE), 0);
+    episodic_interaction(male, female, EVENT_MATE,  (GENE_MATE_BOND(being_genetics(male))*AFFECT_MATE), 0);
 }
 
 /**
  * @brief Mating behavior
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape whi is being met
- * @param today The current date
  * @param being_index Array index for the met individual within the social graph of the meeter
  * @param distance The Distance between the two apes
  * @param sim Pointer to the simulation
@@ -1423,7 +1410,7 @@ n_int social_mate(
     noble_being * meeter_being,
     noble_being * met_being,
     n_int being_index,
-    n_int distance,
+    n_uint distance,
     noble_simulation * sim)
 {
     n_int loc_state = 0;
@@ -1458,7 +1445,7 @@ n_int social_mate(
                          social_attraction_frame(meeter_being,met_being) +
                          social_attraction_hair(meeter_being,met_being)
 #ifdef EPISODIC_ON
-                         + episodic_met_being_celebrity(sim,meeter_being,met_being)
+                         + episodic_met_being_celebrity(meeter_being, met_being)
 #endif
                          ;
 
@@ -1610,9 +1597,16 @@ n_int social_chat(
     noble_social * met_graph = being_social(met_being);
     n_uint respect_mean = social_respect_mean(meeter_being);
 
-    if (!meeter_graph) return 0;
+    
+    if (!meeter_graph)
+    {
+        return 0;
+    }
 
-    if (!met_graph) return 0;
+    if (!met_graph)
+    {
+        return 0;
+    }
 
     /** agree upon terrirory */
     social_chat_territory(meeter_being, met_being,being_index,meeter_graph,respect_mean);
@@ -1620,7 +1614,7 @@ n_int social_chat(
     /** do I respect their views ? */
     if ((meeter_graph[being_index].friend_foe) >= respect_mean)
     {
-        episodic_interaction(sim, meeter_being, met_being, EVENT_CHAT, AFFECT_CHAT, 0);
+        episodic_interaction(meeter_being, met_being, EVENT_CHAT, AFFECT_CHAT, 0);
         /** pick one of the individuals from their graph */
         idx=-1;
         
@@ -1646,7 +1640,7 @@ n_int social_chat(
             relationship_index = being_attention(meeter_being,ATTENTION_RELATIONSHIP);
             if (relationship_index>0)
             {
-                idx = social_get_relationship(sim, meeter_being, relationship_index);
+                idx = social_get_relationship(meeter_being, relationship_index);
             }
             else
             {
@@ -1704,10 +1698,10 @@ n_int social_chat(
                     "heard of". This is like a prior expectation or second
                     hand information.
                     The least familiar relationship is replaced */
-                    replace = get_stranger_link(meeter_being,met_being,sim);
+                    replace = get_stranger_link(meeter_being, met_being);
                     if (replace > -1)
                     {
-                        io_copy((n_byte *)&met_graph[idx], (n_byte *)&meeter_graph[replace], sizeof(noble_social));
+                        memory_copy((n_byte *)&met_graph[idx], (n_byte *)&meeter_graph[replace], sizeof(noble_social));
                         meeter_graph[replace].attraction = 0;
                         speaking |= BEING_STATE_SPEAKING;
 
@@ -1754,8 +1748,6 @@ n_int social_chat(
 /**
  * @brief Goal oriented behavior
  * @param local Pointer to the ape
- * @param loc_f The direction facing
- * @return The new direction facing
  */
 void social_goals(noble_being * local)
 {
@@ -1837,12 +1829,7 @@ void social_initial_loop(noble_simulation * local, noble_being * local_being, vo
     vect2_back_byte2(&location,(n_byte2 *)&(local_being->delta.social_coord_nx));
 }
 
-/**
- * @brief
- * @param local Pointer to the simulation object
- * @param local_being Pointer to the being
- */
-void social_secondary_loop(noble_simulation * local, noble_being * local_being, void * data)
+void social_secondary_loop_no_sim(noble_being * local_being, void * data)
 {
     local_being->delta.social_coord_x = local_being->delta.social_coord_nx;
     local_being->delta.social_coord_y = local_being->delta.social_coord_ny;

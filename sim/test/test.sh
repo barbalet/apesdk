@@ -3,7 +3,7 @@
 #
 #	=============================================================
 #
-#   Copyright 1996-2018 Tom Barbalet. All rights reserved.
+#   Copyright 1996-2019 Tom Barbalet. All rights reserved.
 #
 #   Permission is hereby granted, free of charge, to any person
 #   obtaining a copy of this software and associated documentation
@@ -39,35 +39,117 @@ else
     CFLAGS=-O2 
 fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/land.c -o land.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/object.c -o object.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/territory.c -o territory.o
-gcc ${CFLAGS} -c $SOURCEDIR/noble/tile.c -o tile.o
+if [ $# -ge 1 -a "$1" == "--additional" ]
+then
+COMMANDLINEE=-DNOTHING_NEEDED_HERE
+else
+COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
+fi
 
-gcc ${CFLAGS} -c test_math.c -o test_math.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/console.c -o console.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/file.c -o file.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/memory.c -o memory.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/io.c -o io.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/math.c -o math.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/parse.c -o parse.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/interpret.c -o interpret.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/land.c -o land.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/object.c -o object.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/audio.c -o audio.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/tile.c -o tile.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/territory.c -o territory.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-gcc ${CFLAGS} -I/usr/include -o test_math *.o -lz -lm -lpthread
+gcc ${CFLAGS} -c test_math.c -o test_math.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+
+gcc ${CFLAGS} -I/usr/include -o test_math *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
 ./test_math
 
 rm test_math
 rm test_math.o
 
-gcc ${CFLAGS} -c test_object.c -o test_object.o
-gcc ${CFLAGS} -I/usr/include -o test_object *.o -lz -lm -lpthread
+gcc ${CFLAGS} -c test_object.c -o test_object.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -I/usr/include -o test_object *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
 ./test_object
 
 rm test_object
 rm test_object.o
 
-gcc ${CFLAGS} -c test_io.c -o test_io.o
-gcc ${CFLAGS} -I/usr/include -o test_io *.o -lz -lm -lpthread
+gcc ${CFLAGS} -c test_io.c -o test_io.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -I/usr/include -o test_io *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
 ./test_io
 
@@ -77,33 +159,98 @@ rm test_io.o
 rm test_io
 rm compare_file.txt
 
-gcc ${CFLAGS} -c test_apescript.c -o test_apescript.o
+gcc ${CFLAGS} -c test_apescript.c -o test_apescript.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-gcc ${CFLAGS} -I/usr/include -o test_apescript *.o
+gcc ${CFLAGS} -I/usr/include -o test_apescript *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
 ./test_apescript check_apescript.txt
 
 rm test_apescript
 rm test_apescript.o
 
-gcc ${CFLAGS} -c $SOURCEDIR/entity/being.c -o being.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/body.c -o body.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/brain.c -o brain.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/being.c -o being.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/entity/body.c -o body.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/entity/brain.c -o brain.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/entity/drives.c -o drives.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/social.c -o social.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/speak.c -o speak.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/drives.c -o drives.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/entity/social.c -o social.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/entity/speak.c -o speak.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/entity/episodic.c -o episodic.o
-gcc ${CFLAGS} -c $SOURCEDIR/entity/food.c -o food.o
+gcc ${CFLAGS} -c $SOURCEDIR/entity/episodic.c -o episodic.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/entity/food.c -o food.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-gcc ${CFLAGS} -c $SOURCEDIR/universe/console.c -o console.o
-gcc ${CFLAGS} -c $SOURCEDIR/universe/file.c -o file.o
-gcc ${CFLAGS} -c $SOURCEDIR/universe/sim.c -o sim.o
+gcc ${CFLAGS} -c $SOURCEDIR/universe/loop.c -o loop.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/universe/command.c -o command.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/universe/transfer.c -o transfer.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} -c $SOURCEDIR/universe/sim.c -o sim.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-gcc ${CFLAGS} -c test_sim.c -o test_sim.o
+gcc ${CFLAGS} -c test_sim.c -o test_sim.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-gcc ${CFLAGS} -I/usr/include -o test_sim *.o
+gcc ${CFLAGS} -I/usr/include -o test_sim *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
 ./test_sim
 

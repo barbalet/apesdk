@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -379,7 +379,7 @@ static n_int interpret_syntax(n_interpret * code, n_individual_interpret * indiv
         {
             n_int	loop = return_value + 4;
             n_int	braces_open = 1;
-            n_int   remaining_bytes = code->binary_code->location;
+            n_int   remaining_bytes = (n_int)code->binary_code->location;
             do
             {
                 n_byte	actual_value = value[loop++];
@@ -472,7 +472,7 @@ static void interpret_start(n_interpret * interp, n_individual_interpret * indiv
     local_number[0] = 0;
     while(loop < local_number_num)
     {
-        local_number[loop] = io_bytes_to_int(&start_numbers[loop*SIZEOF_NUMBER_WRITE]);
+        local_number[loop] = (n_int)io_bytes_to_int(&start_numbers[loop*(n_int)SIZEOF_NUMBER_WRITE]);
         loop++;
     }
     loop = 0;
@@ -614,7 +614,7 @@ void interpret_cleanup(n_interpret ** to_clean)
     {
         io_file_free(&((*to_clean)->binary_code));
     }
-    io_free((void**)to_clean);
+    memory_free((void**)to_clean);
 }
 
 /**

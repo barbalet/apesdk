@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -62,7 +62,7 @@ typedef enum
     NAME_TOTAL
 }territory_name;
 
-n_string territory_description(territory_name value)
+static n_string territory_description(territory_name value)
 {
     n_string territory_names[NAME_TOTAL]={
         " ",
@@ -90,7 +90,7 @@ n_string territory_description(territory_name value)
     return territory_names[value];
 }
 
-void territory_description_init(n_byte * land, territory_name * set_names)
+static void territory_description_init(n_byte * land, territory_name * set_names)
 {
     n_int tx = 0;
     while (tx < TERRITORY_DIMENSION)

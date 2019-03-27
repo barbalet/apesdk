@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -45,6 +45,8 @@
 #define  BRAIN_ON
 
 #define  FEATURE_SET
+
+#undef  DEBUG_LACK_OF_MOVEMENT
 
 #define SINGLE_BRAIN			(32768)
 #define DOUBLE_BRAIN			(SINGLE_BRAIN*2)
@@ -383,7 +385,7 @@ enum being_interaction_social
 #define MATING_RANGE            METRES_TO_APESPACE(5)
 
 /* Tollerance within which social drive continues to increase */
-#define SOCIAL_TOLLERANCE       0
+#define SOCIAL_TOLLERANCE       1
 
 /* Minimum expected neighbours within the social range */
 #define MIN_CROWDING            1
@@ -758,6 +760,90 @@ typedef struct
     n_genetics  genetics[CHROMOSOMES];           /* constant */
 } noble_being_constant;
 
+#define IMMUNE_FIT                            5
+#define MIN_ANTIBODIES                        16
+#define MIN_ANTIGENS                          8
+#define IMMUNE_ANTIGENS                       8
+#define IMMUNE_POPULATION                     16
+#define PATHOGEN_TRANSMISSION_PROB            1000
+#define PATHOGEN_ENVIRONMENT_PROB             100
+#define PATHOGEN_MUTATION_PROB                100
+#define ANTIBODY_DEPLETION_PROB               100
+#define ANTIBODY_GENERATION_PROB(bei)         (being_energy(bei))
+
+enum PATHOGEN_TRANSMISSION_METHOD
+{
+    PATHOGEN_TRANSMISSION_AIR = 0,
+    PATHOGEN_TRANSMISSION_SOIL,
+    PATHOGEN_TRANSMISSION_SEX,
+    PATHOGEN_TRANSMISSION_TOUCH,
+    PATHOGEN_TRANSMISSION_FOOD_VEGETABLE,
+    PATHOGEN_TRANSMISSION_FOOD_FRUIT,
+    PATHOGEN_TRANSMISSION_FOOD_SHELLFISH,
+    PATHOGEN_TRANSMISSION_FOOD_SEAWEED,
+    PATHOGEN_TRANSMISSION_TOTAL
+};
+
+
+#define RANDOM_PATHOGEN(seed,pathogen_type)   (((seed%(255/PATHOGEN_TRANSMISSION_TOTAL))*PATHOGEN_TRANSMISSION_TOTAL)+pathogen_type)
+#define PATHOGEN_SEVERITY(pathogen)           (((pathogen)*(pathogen))>>11)
+#define PATHOGEN_TRANSMISSION(pathogen)       ((pathogen)&7)
+
+enum
+{
+    METABOLISM_STATE=0,
+    METABOLISM_PROTEIN,
+    METABOLISM_STARCH,
+    METABOLISM_FAT,
+    METABOLISM_SUGAR,
+    METABOLISM_WATER,
+    METABOLISM_BILE,
+    METABOLISM_GLUCOSE,
+    METABOLISM_MUSCLE,
+    METABOLISM_AMINO_ACIDS,
+    METABOLISM_GLUCOGEN,
+    METABOLISM_ADRENALIN,
+    METABOLISM_GLYCOGEN,
+    METABOLISM_AMMONIA,
+    METABOLISM_UREA,
+    METABOLISM_LACTATE,
+    METABOLISM_OXYGEN,
+    METABOLISM_CO2,
+    METABOLISM_FATTY_ACIDS,
+    METABOLISM_TRIGLYCERIDE,
+    METABOLISM_ADIPOSE,
+    METABOLISM_INSULIN,
+    METABOLISM_ADP,
+    METABOLISM_ATP,
+    METABOLISM_ENERGY,
+    METABOLISM_HEAT,
+    METABOLISM_PYRUVATE,
+    METABOLISM_WASTE,
+    METABOLISM_LEPTIN,
+    METABOLISM_GHRELIN,
+    METABOLISM_PROLACTIN,
+    METABOLISM_MILK,
+    METABOLISM_HEART_RATE,
+    METABOLISM_BREATHING_RATE,
+    METABOLISM_THERMOREGULATOR,
+    METABOLISM_LUNG_CAPACITY,
+    METABOLISM_SIZE
+};
+
+enum
+{
+    ORGAN_STOMACH=1,
+    ORGAN_MUSCLES,
+    ORGAN_LIVER,
+    ORGAN_KIDNEYS,
+    ORGAN_LUNGS,
+    ORGAN_PANCREAS_A,
+    ORGAN_PANCREAS_B,
+    ORGAN_TISSUE,
+    ORGANS
+};
+
+
 typedef enum
 {
     FULLY_ASLEEP   =   0,
@@ -780,7 +866,9 @@ typedef struct
     n_byte2     mass;
     n_byte      posture;
     n_byte2     goal[4];
-    
+#ifdef DEBUG_LACK_OF_MOVEMENT
+    n_int       total_movement;
+#endif
     n_byte2     social_coord_x;
     n_byte2     social_coord_y;
     n_byte2     social_coord_nx; /* why is this needed? */
@@ -801,7 +889,6 @@ typedef struct
 typedef struct
 {
     n_byte      drives[DRIVES];
-    
     n_byte      shout[SHOUT_BYTES];
     n_byte2     inventory[INVENTORY_SIZE];
     n_byte      learned_preference[PREFERENCES];
@@ -834,7 +921,10 @@ typedef struct
     n_byte4     date_of_conception;
 
     n_genetics  fetal_genetics[CHROMOSOMES];     /* constant */
-    n_byte2     father_name[2];                  /* why is this needed? */
+    
+    n_byte2     father_name[2];
+    n_byte2     mother_name[2];
+    n_byte2     name[2];
 
     n_byte2     child_generation_min;
     n_byte2     child_generation_max;
@@ -890,6 +980,15 @@ typedef struct
 
 #define	BRAIN_OFFSET(num)	(num)
 
+
+typedef void (loop_fn)(noble_simulation * sim, noble_being * actual, void * data);
+typedef void (loop_no_sim_fn)(noble_being * actual, void * data);
+
+void loop_no_thread(noble_simulation * sim, noble_being * being_not, loop_fn bf_func, void * data);
+void loop_being_no_sim(noble_being * beings, n_uint number_beings, loop_no_sim_fn bf_func, void * data);
+
+void loop_being(noble_simulation * sim, loop_fn bf_func, n_int beings_per_thread);
+
 n_int being_location_x(noble_being * value);
 n_int being_location_y(noble_being * value);
 n_int being_energy(noble_being * value);
@@ -901,7 +1000,7 @@ typedef void (console_generic)(void *ptr, n_string ape_name, noble_being * local
 typedef void (line_braincode)(n_string pointer, n_int line);
 
 #ifdef BRAINCODE_ON
-void console_populate_braincode(noble_simulation * local_sim, line_braincode function);
+void command_populate_braincode(noble_simulation * local_sim, line_braincode function);
 #endif
 
 n_file * death_record_file_ready(void);
@@ -913,11 +1012,11 @@ void *    sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_
 void      sim_cycle(void);
 
 /* This is the new way. Please continue forwards. */
-n_file *  file_out(void);
-n_file *  file_out_json(void);
-n_int     file_in(n_file * input_file);
-n_int     file_interpret(n_file * input_file);
+n_file *  tranfer_out(void);
+n_file *  tranfer_out_json(void);
+n_int     tranfer_in(n_file * input_file);
 
+n_int     sim_interpret(n_file * input_file);
 void	  sim_close(void);
 
 n_int sim_new(void);
@@ -932,54 +1031,56 @@ void sim_realtime(n_uint time);
 
 void sim_set_select(noble_being * select);
 
-void sim_debug_csv(n_file * fil, n_byte initial);
+void transfer_debug_csv(n_file * fil, n_byte initial);
+
+n_int sim_new_run_condition(void);
 
 n_int get_time_interval(n_string str, n_int * number, n_int * interval);
 
 void watch_ape(void * ptr, n_console_output output_function);
 
-n_int console_speak(void * ptr, n_string response, n_console_output output_function);
-n_int console_alphabet(void * ptr, n_string response, n_console_output output_function);
+n_int command_speak(void * ptr, n_string response, n_console_output output_function);
+n_int command_alphabet(void * ptr, n_string response, n_console_output output_function);
 
-void console_change_selected(noble_simulation * sim, n_byte forwards);
+void command_change_selected(noble_simulation * sim, n_byte forwards);
 
-n_int console_stop(void * ptr, n_string response, n_console_output output_function);
-n_int console_idea(void * ptr, n_string response, n_console_output output_function);
-n_int console_being(void * ptr, n_string response, n_console_output output_function);
-n_int console_braincode(void * ptr, n_string response, n_console_output output_function);
-n_int console_speech(void * ptr, n_string response, n_console_output output_function);
+n_int command_stop(void * ptr, n_string response, n_console_output output_function);
+n_int command_idea(void * ptr, n_string response, n_console_output output_function);
+n_int command_being(void * ptr, n_string response, n_console_output output_function);
+n_int command_braincode(void * ptr, n_string response, n_console_output output_function);
+n_int command_speech(void * ptr, n_string response, n_console_output output_function);
 
-n_int console_social_graph(void * ptr, n_string response, n_console_output output_function);
-n_int console_genome(void * ptr, n_string response, n_console_output output_function);
-n_int console_appearance(void * ptr, n_string response, n_console_output output_function);
-n_int console_stats(void * ptr, n_string response, n_console_output output_function);
-n_int console_episodic(void * ptr, n_string response, n_console_output output_function);
-n_int console_probes(void * ptr, n_string response, n_console_output output_function);
-n_int console_watch(void * ptr, n_string response, n_console_output output_function);
-n_int console_logging(void * ptr, n_string response, n_console_output output_function);
-n_int console_list(void * ptr, n_string response, n_console_output output_function);
-n_int console_next(void * ptr, n_string response, n_console_output output_function);
-n_int console_previous(void * ptr, n_string response, n_console_output output_function);
-n_int console_simulation(void * ptr, n_string response, n_console_output output_function);
-n_int console_step(void * ptr, n_string response, n_console_output output_function);
-n_int console_run(void * ptr, n_string response, n_console_output output_function);
-n_int console_interval(void * ptr, n_string response, n_console_output output_function);
-n_int console_reset(void * ptr, n_string response, n_console_output output_function);
-n_int console_top(void * ptr, n_string response, n_console_output output_function);
-n_int console_epic(void * ptr, n_string response, n_console_output output_function);
-n_int console_file(void * ptr, n_string response, n_console_output output_function);
-n_int console_event(void * ptr, n_string response, n_console_output output_function);
-n_int console_epic(void * ptr, n_string response, n_console_output output_function);
+n_int command_social_graph(void * ptr, n_string response, n_console_output output_function);
+n_int command_genome(void * ptr, n_string response, n_console_output output_function);
+n_int command_appearance(void * ptr, n_string response, n_console_output output_function);
+n_int command_stats(void * ptr, n_string response, n_console_output output_function);
+n_int command_episodic(void * ptr, n_string response, n_console_output output_function);
+n_int command_probes(void * ptr, n_string response, n_console_output output_function);
+n_int command_watch(void * ptr, n_string response, n_console_output output_function);
+n_int command_logging(void * ptr, n_string response, n_console_output output_function);
+n_int command_list(void * ptr, n_string response, n_console_output output_function);
+n_int command_next(void * ptr, n_string response, n_console_output output_function);
+n_int command_previous(void * ptr, n_string response, n_console_output output_function);
+n_int command_simulation(void * ptr, n_string response, n_console_output output_function);
+n_int command_step(void * ptr, n_string response, n_console_output output_function);
+n_int command_run(void * ptr, n_string response, n_console_output output_function);
+n_int command_interval(void * ptr, n_string response, n_console_output output_function);
+n_int command_reset(void * ptr, n_string response, n_console_output output_function);
+n_int command_top(void * ptr, n_string response, n_console_output output_function);
+n_int command_epic(void * ptr, n_string response, n_console_output output_function);
+n_int command_file(void * ptr, n_string response, n_console_output output_function);
+n_int command_event(void * ptr, n_string response, n_console_output output_function);
+n_int command_epic(void * ptr, n_string response, n_console_output output_function);
 
-n_int console_debug(void * ptr, n_string response, n_console_output output_function);
+n_int command_debug(void * ptr, n_string response, n_console_output output_function);
 
 n_int console_death(void * ptr, n_string response, n_console_output output_function);
 
-n_int console_save(void * ptr, n_string response, n_console_output output_function);
-n_int console_open(void * ptr, n_string response, n_console_output output_function);
-n_int console_script(void * ptr, n_string response, n_console_output output_function);
+n_int command_save(void * ptr, n_string response, n_console_output output_function);
+n_int command_open(void * ptr, n_string response, n_console_output output_function);
+n_int command_script(void * ptr, n_string response, n_console_output output_function);
 
-n_int console_quit(void * ptr, n_string response, n_console_output output_function);
+n_int command_quit(void * ptr, n_string response, n_console_output output_function);
 
 #ifndef	_WIN32
 n_int sim_thread_console_quit(void);
@@ -992,65 +1093,65 @@ const static noble_console_command control_commands[] =
 {
     {&io_help,               "help",           "[(command)]",          "Displays a list of all the commands"},
 #ifdef COMMAND_LINE_EXPLICIT
-    {&console_reset,         "reset",          "",                     "Reset the simulation"},
-    {&console_reset,         "clear"           "",                     ""},
+    {&command_reset,         "reset",          "",                     "Reset the simulation"},
+    {&command_reset,         "clear"           "",                     ""},
 
-    {&console_open,          "open",           "[file]",               "Load a simulation file"},
-    {&console_open,          "load",           "",                     ""},
+    {&command_open,          "open",           "[file]",               "Load a simulation file"},
+    {&command_open,          "load",           "",                     ""},
 #endif
-    {&console_script,        "script",         "[file]",               "Load an ApeScript simulation file"},
-    {&console_save,          "save",           "[file]",               "Save a simulation file"},
+    {&command_script,        "script",         "[file]",               "Load an ApeScript simulation file"},
+    {&command_save,          "save",           "[file]",               "Save a simulation file"},
 
-    {&console_quit,           "quit",           "",                     "Quits the console"},
-    {&console_quit,           "exit",           "",                     ""},
-    {&console_quit,           "close",          "",                     ""},
+    {&command_quit,           "quit",           "",                     "Quits the console"},
+    {&command_quit,           "exit",           "",                     ""},
+    {&command_quit,           "close",          "",                     ""},
 
-    {&console_stop,          "stop",           "",                     "Stop the simulation during step or run"},
+    {&command_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 
-    {&console_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
-    {&console_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Noble Ape alphabet"},
-    {&console_file,          "file",           "[(component)]",        "Information on the file format"},
-    {&console_run,           "run",            "(time format)|forever","Simulate for a given number of days or forever"},
-    {&console_step,          "step",           "",                     "Run for a single logging interval"},
-    {&console_top,           "top",            "",                     "List the top apes"},
-    {&console_epic,          "epic",           "",                     "List the most talked about apes"},
-    {&console_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
-    {&console_event,         "event",          "on|social|off",        "Episodic events (all) on, social on or all off"},
-    {&console_logging,       "logging",        "on|off",               "Turn logging of images and data on or off"},
-    {&console_logging,       "log",            "",                     ""},
-    {&console_simulation,    "simulation",     "",                     ""},
-    {&console_simulation,    "sim",            "",                     "Show simulation parameters"},
-    {&console_watch,         "watch",          "(ape name)|all|off|*", "Watch (specific *) for the current ape"},
-    {&console_watch,         "monitor",        "",                     ""},
-    {&console_idea,          "idea",           "",                     "Track shared braincode between apes"},
-    {&console_being,         "ape",            "",                     "Name of the currently watched ape"},
-    {&console_being,         "pwd",            "",                     ""},
-    {&console_social_graph,  "friends",        "",                     ""},
-    {&console_social_graph,  "social",         "",                     ""},
-    {&console_social_graph,  "socialgraph",    "",                     ""},
-    {&console_social_graph,  "graph",          "(ape name)",           "* Show social graph for a named ape"},
-    {&console_braincode,     "braincode",      "(ape name)",           "* Show braincode for a named ape"},
-    {&console_speech,        "speech",         "(ape name)",           "* Show speech for a named ape"},
+    {&command_speak,         "speak",          "[file]",               "Create an AIFF file of Noble Ape speech"},
+    {&command_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Noble Ape alphabet"},
+    {&command_file,          "file",           "[(component)]",        "Information on the file format"},
+    {&command_run,           "run",            "(time format)|forever","Simulate for a given number of days or forever"},
+    {&command_step,          "step",           "",                     "Run for a single logging interval"},
+    {&command_top,           "top",            "",                     "List the top apes"},
+    {&command_epic,          "epic",           "",                     "List the most talked about apes"},
+    {&command_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
+    {&command_event,         "event",          "on|social|off",        "Episodic events (all) on, social on or all off"},
+    {&command_logging,       "logging",        "on|off",               "Turn logging of images and data on or off"},
+    {&command_logging,       "log",            "",                     ""},
+    {&command_simulation,    "simulation",     "",                     ""},
+    {&command_simulation,    "sim",            "",                     "Show simulation parameters"},
+    {&command_watch,         "watch",          "(ape name)|all|off|*", "Watch (specific *) for the current ape"},
+    {&command_watch,         "monitor",        "",                     ""},
+    {&command_idea,          "idea",           "",                     "Track shared braincode between apes"},
+    {&command_being,         "ape",            "",                     "Name of the currently watched ape"},
+    {&command_being,         "pwd",            "",                     ""},
+    {&command_social_graph,  "friends",        "",                     ""},
+    {&command_social_graph,  "social",         "",                     ""},
+    {&command_social_graph,  "socialgraph",    "",                     ""},
+    {&command_social_graph,  "graph",          "(ape name)",           "* Show social graph for a named ape"},
+    {&command_braincode,     "braincode",      "(ape name)",           "* Show braincode for a named ape"},
+    {&command_speech,        "speech",         "(ape name)",           "* Show speech for a named ape"},
 
-    {&console_episodic,      "episodic",       "(ape name)",           "* Show episodic memory for a named ape"},
-    {&console_probes,        "probes",         "(ape name)",           "* Show brain probes for a named ape"},
-    {&console_stats,         "stats",          "(ape name)",           "* Show parameters for a named ape"},
-    {&console_stats,         "status",         "",                     ""},
-    {&console_appearance,    "appearance",     "(ape name)",           "* Show appearance values for a named ape"},
-    {&console_appearance,    "physical",       "",                     ""},
-    {&console_genome,        "genome",         "(ape name)",           "Show genome for a named ape"},
-    {&console_genome,        "genetics",       "",                     ""},
-    {&console_list,          "list",           "",                     "List all ape names"},
-    {&console_list,          "ls",             "",                     ""},
-    {&console_list,          "dir",            "",                     ""},
+    {&command_episodic,      "episodic",       "(ape name)",           "* Show episodic memory for a named ape"},
+    {&command_probes,        "probes",         "(ape name)",           "* Show brain probes for a named ape"},
+    {&command_stats,         "stats",          "(ape name)",           "* Show parameters for a named ape"},
+    {&command_stats,         "status",         "",                     ""},
+    {&command_appearance,    "appearance",     "(ape name)",           "* Show appearance values for a named ape"},
+    {&command_appearance,    "physical",       "",                     ""},
+    {&command_genome,        "genome",         "(ape name)",           "Show genome for a named ape"},
+    {&command_genome,        "genetics",       "",                     ""},
+    {&command_list,          "list",           "",                     "List all ape names"},
+    {&command_list,          "ls",             "",                     ""},
+    {&command_list,          "dir",            "",                     ""},
 
-    {&console_next,          "next",           "",                     "Next ape"},
+    {&command_next,          "next",           "",                     "Next ape"},
 
-    {&console_previous,      "previous",       "",                     "Previous ape"},
-    {&console_previous,      "prev",           "",                     ""},
+    {&command_previous,      "previous",       "",                     "Previous ape"},
+    {&command_previous,      "prev",           "",                     ""},
 
 
-    {&console_debug,         "debug",           "",                    "Run debug check"},
+    {&command_debug,         "debug",           "",                    "Run debug check"},
 
     {0L, 0L},
 };

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -53,7 +53,7 @@ static n_int number_messages = 0;
 
 n_message messages[MAXIMUM_NUMBER_MESSAGE];
 
-n_int * message_find_spaces(n_string string, n_int * count)
+static n_int * message_find_spaces(n_string string, n_int * count)
 {
     n_int local_count = 0;
     n_int loop = 0;
@@ -61,7 +61,7 @@ n_int * message_find_spaces(n_string string, n_int * count)
 
     if (*count)
     {
-        return_value = io_new(*count * sizeof(n_int));
+        return_value = memory_new((n_uint)(*count) * sizeof(n_int));
     }
 
     if (string == 0L)
@@ -91,7 +91,7 @@ n_int * message_find_spaces(n_string string, n_int * count)
     return return_value;
 }
 
-void message_remove(n_int remove)
+static void message_remove(n_int remove)
 {
     n_message *value = &messages[remove];
 
@@ -99,11 +99,11 @@ void message_remove(n_int remove)
     {
         if (value->message)
         {
-            io_free((void**)&(value->message));
+            memory_free((void**)&(value->message));
         }
         if (value->spaces)
         {
-            io_free((void**)&(value->spaces));
+            memory_free((void**)&(value->spaces));
         }
     }
     if (remove != (number_messages-1))
@@ -121,7 +121,7 @@ void message_remove(n_int remove)
     number_messages--;
 }
 
-void message_add(n_string message, n_int time_to_expire)
+static void message_add(n_string message, n_int time_to_expire)
 {
     n_int *  spaces;
     n_string copied_message;
@@ -166,7 +166,7 @@ void message_add(n_string message, n_int time_to_expire)
     copied_message = io_string_copy(message);
     if (copied_message == 0L)
     {
-        io_free((void**)&(spaces));
+        memory_free((void**)&(spaces));
         return;
     }
     messages[number_messages].time_to_expire = time_to_expire;

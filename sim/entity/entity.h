@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -55,8 +55,6 @@
 #undef	FIXED_RANDOM_SIM
 #define	LARGE_SIM   200
 
-#define EPISODIC_AFFECT_ZERO (16384)
-
 enum being_energy
 {
     BEING_DEAD   = 0,
@@ -98,7 +96,8 @@ typedef enum
     BEING_STATE_SUCKLING = 256,
     BEING_STATE_SHOWFORCE = 512,
     BEING_STATE_ATTACK = 1024,
-    BEING_STATES = 12
+    BEING_STATE_NO_FOOD = 2048,
+    BEING_STATES = 13
 } being_state_type;
 
 typedef enum
@@ -148,6 +147,160 @@ typedef enum
     EVENTS
 } being_episodic_event_type;
 
+
+/* affect (how many cycles it takes to forget particular episodic memory events) */
+
+#define COMPOSITE_AFFECT(enjoyment,interest,surprise, \
+anger,disgust,dissmell, \
+distress,fear,shame) \
+((enjoyment)+(interest)-(anger)-(disgust)-(dissmell)-(distress)-(fear)-(shame))
+
+typedef enum
+{
+    AFFECT_MATE                 = COMPOSITE_AFFECT(1000,0,0,      0,0,0,       0,0,0),
+    AFFECT_BIRTH                = COMPOSITE_AFFECT(1500,0,1000,   0,100,100,   200,200,50),
+    AFFECT_CARRYING             = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
+    AFFECT_CARRIED              = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
+    AFFECT_SUCKLING             = COMPOSITE_AFFECT(500,0,0,       0,0,0,       0,0,0),
+    AFFECT_CHAT                 = COMPOSITE_AFFECT(0,100,0,       0,0,0,       0,0,0),
+    AFFECT_GROOM                = COMPOSITE_AFFECT(50,50,0,       0,0,0,       0,0,0),
+    AFFECT_SEEK_MATE            = COMPOSITE_AFFECT(0,600,0,       0,0,0,       0,0,0),
+    AFFECT_SQUABBLE_VICTOR      = COMPOSITE_AFFECT(1100,0,100,    0,0,0,       100,0,0),
+    AFFECT_SQUABBLE_VANQUISHED  = COMPOSITE_AFFECT(0,0,100,       200,0,0,     600,100,100),
+    AFFECT_WHACKED              = COMPOSITE_AFFECT(0,0,100,       20,0,0,      20,20,40),
+    AFFECT_HURL                 = COMPOSITE_AFFECT(0,0,0,         100,0,0,     0,0,0),
+    AFFECT_HUGGED               = COMPOSITE_AFFECT(100,0,0,       0,0,0,       0,0,0),
+    AFFECT_PRODDED              = COMPOSITE_AFFECT(0,0,0,         0,0,0,       5,0,5),
+    AFFECT_RECEIVE              = COMPOSITE_AFFECT(25,25,0,       0,0,0,       0,0,0),
+    AFFECT_FISH                 = COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0),
+    AFFECT_SMILED               = COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0),
+    AFFECT_GLOWER               = COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0),
+    EPISODIC_AFFECT_ZERO = (16384)
+
+} AFFECT_TYPE;
+
+enum inventory_type
+{
+    INVENTORY_CHILD = 1,
+    INVENTORY_WOUND = 2,
+    INVENTORY_GROOMED = 4,
+    INVENTORY_BRANCH = 8,
+    INVENTORY_ROCK = 16,
+    INVENTORY_SHELL = 32,
+    INVENTORY_TWIG = 64,
+    INVENTORY_NUT = 128,
+    INVENTORY_NUT_CRACKED = 256,
+    INVENTORY_GRASS = 512,
+    INVENTORY_SCRAPER = 1024,
+    INVENTORY_SPEAR = 2048,
+    INVENTORY_FISH = 4096,
+    INVENTORY_BIRD_EGGS = 8192,
+    INVENTORY_LIZARD_EGGS = 16384
+};
+
+
+/* energy values for different foods */
+/* TODO: add EGGS and potentially INSECTS  to food groups */
+
+enum FOOD_KINDS
+{
+    FOOD_VEGETABLE = 0,
+    FOOD_FRUIT,
+    FOOD_SHELLFISH,
+    FOOD_SEAWEED,
+    FOOD_BIRD_EGGS,
+    FOOD_LIZARD_EGGS,
+    FOOD_TYPES
+};
+
+/* maximum energy obtainable from different types of food */
+
+enum energy_types
+{
+    ENERGY_GRASS               = 50,
+    ENERGY_BUSH                = 100,
+    ENERGY_FRUIT               = 100,
+    ENERGY_SEAWEED             = 30,
+    ENERGY_SHELLFISH           = 300,
+    ENERGY_NUT                 = 200,
+    ENERGY_FISH                = 600,
+    ENERGY_BIRD_EGGS           = 800,
+    ENERGY_LIZARD_EGGS         = 1000
+};
+
+/* gestation period in days */
+#define GESTATION_DAYS      1
+
+/* energy gained by the child when suckling from the mother per time step */
+#define SUCKLING_ENERGY     2
+
+/* maximum separation between mother and child when suckling */
+#define SUCKLING_MAX_SEPARATION     METRES_TO_APESPACE(2)
+
+/* number of days after birth that weaning takes place */
+#define WEANING_DAYS        14
+
+/* time during which the mother is able to carry a child on her back */
+#define CARRYING_DAYS       3
+
+/* after a new ape is born how soon can the mother conceive */
+#define CONCEPTION_INHIBITION_DAYS  5
+
+#define APESPACE_TO_HR_MAPSPACE(num)  ((num)>>3)
+
+/* nature in the range 0-15 from the genetics
+ nurture in the range 0-255 from learned preferences.
+ Resulting value is in the range 0-15 */
+#define NATURE_NURTURE(nature,nurture)      (((nature) + ((nurture)>>4))>>1)
+
+
+/* A social drive threshold value above which beings interact */
+#define SOCIAL_THRESHOLD(bei)               ((NATURE_NURTURE(GENE_SOCIAL(being_genetics(bei)),bei->changes.learned_preference[PREFERENCE_SOCIAL]))>>1)
+
+
+
+/* Defines initial braincode instruction type probability*/
+#define GENE_BRAINCODE_SENSORS(gene)        GENE_VAL_REG(gene, 11, 14, 4, 7)
+#define GENE_BRAINCODE_ACTUATORS(gene)      GENE_VAL_REG(gene, 15, 10, 10, 0)
+#define GENE_BRAINCODE_CONDITIONALS(gene)   GENE_VAL_REG(gene, 4, 9, 0, 2)
+#define GENE_BRAINCODE_OPERATORS(gene)      GENE_VAL_REG(gene, 12, 1, 6, 12)
+#define GENE_BRAINCODE_DATA(gene)           GENE_VAL_REG(gene, 8, 15, 7, 12)
+
+/* Rates at which the affect associated with episodic memories fade over time.
+ This makes dysphoria-like memory effects possible, and also regulate how
+ long events remain in episodic memory */
+#define GENE_NEGATIVE_AFFECT_FADE(gene)     GENE_VAL_REG(gene, 9, 15, 13, 2)
+#define GENE_POSITIVE_AFFECT_FADE(gene)     GENE_VAL_REG(gene, 11, 4, 3, 12)
+
+/* preference for social activity, similar to flocking */
+#define GENE_SOCIAL(gene)                   GENE_VAL_REG(gene, 22, 2, 13, 9)
+
+
+/* worst case 1500 + 180 per step */
+
+#define VISIBILITY_MAXIMUM      (2000)
+
+#define VISIBILITY_SPAN    VISIBILITY_MAXIMUM /*(VISIBILITY_MAXIMUM / ((15+16) >> 1))*/
+
+#define    WALK_ON_WATER(pz,w)    (((pz)<w) ? w : (pz))
+
+/** Swim - better or worse at swimming both speed and energy use */
+
+#define GENE_SWIM(gene)                     GENE_VAL_REG(gene, 9, 11, 13, 7)
+
+/** Speed on land - faster v. slower */
+
+#define GENE_SPEED(gene)                    GENE_VAL_REG(gene, 14, 5, 12, 10)
+
+/** Control on random wander - more or less random wander */
+
+#define GENE_STAGGER(gene)                  GENE_VAL_REG(gene, 12, 14, 3, 11)
+
+/** Hill climbing - improved energy use for climbing */
+
+#define GENE_HILL_CLIMB(gene)               GENE_VAL_REG(gene, 4, 6, 5, 2)
+
+
 /* different types of goal */
 typedef enum
 {
@@ -167,7 +320,73 @@ typedef struct
     noble_being  * same_sex;
 } being_nearest;
 
-n_int being_memory(noble_simulation * local, n_byte * buffer, n_uint * location, n_int memory_available);
+void  being_living(noble_being * value);
+
+void  being_inc_drive(noble_being * value, enum drives_definition drive);
+void  being_dec_drive(noble_being * value, enum drives_definition drive);
+
+n_int being_energy_less_than(noble_being * value, n_int less_than);
+
+void being_turn_away_from_water(noble_being * value);
+void being_facing_init(noble_being * value);
+n_byte being_honor_immune(noble_being * value);
+void being_set_brainstates(noble_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3);
+
+
+void being_delta(noble_being * primary, noble_being * secondary, n_vect2 * delta);
+void being_facing_towards(noble_being * value, n_vect2 * vector);
+n_int being_pregnant(noble_being * value);
+n_genetics * being_fetal_genetics(noble_being * value);
+
+
+n_int social_set_relationship(noble_simulation * sim, noble_being * meeter_being, n_byte relationship,noble_being * met_being);
+
+n_int social_get_relationship(noble_being * meeter_being,
+                              n_byte relationship);
+
+n_int social_network(noble_simulation *sim, noble_being * meeter_being, noble_being * met_being, n_uint distance);
+
+n_byte social_groom(noble_simulation * sim,
+                    noble_being * meeter_being,
+                    noble_being * met_being,
+                    n_uint distance,
+                    n_int awake,
+                    n_byte2 familiarity);
+
+n_byte2 social_squabble(noble_being * meeter_being, noble_being * met_being, n_uint distance, n_int is_female, noble_simulation * sim);
+n_int social_mate(noble_being * meeter_being, noble_being * met_being, n_int being_index, n_uint distance, noble_simulation * sim);
+n_int social_chat(noble_being * meeter_being, noble_being * met_being, n_int being_index, noble_simulation * sim);
+
+
+void episodic_food(noble_being * local, n_int energy, n_byte food_type);
+
+void being_immune_seed(noble_being * mother, noble_being * child);
+
+void body_genetics(noble_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);
+
+n_int food_eat(
+               n_int loc_x,
+               n_int loc_y,
+               n_int az,
+               n_byte * food_type,
+               noble_being * local_being);
+
+void  genetics_set(n_genetics * genetics_a, n_genetics * n_genetics);
+
+void episodic_self(
+                   noble_being * local,
+                   being_episodic_event_type event,
+                   AFFECT_TYPE affect,
+                   n_byte2 arg);
+
+void episodic_close(
+                    noble_being * local,
+                    noble_being * other,
+                    being_episodic_event_type event,
+                    AFFECT_TYPE affect,
+                    n_byte2 arg);
+
+n_byte being_los_projection(noble_being * local, n_vect2 * extern_end);
 
 #ifdef BRAIN_ON
 n_byte * being_brain(noble_being * value);
@@ -207,6 +426,15 @@ n_int being_location_y(noble_being * value);
 n_byte2 * being_location(noble_being * value);
 
 void being_set_location(noble_being * value, n_byte2 * from);
+
+#ifdef DEBUG_LACK_OF_MOVEMENT
+
+n_int being_total_movement(noble_being * value);
+void being_add_total_movement(noble_being * value);
+void being_zero_total_movement(noble_being * value);
+void being_register_movement(noble_being * value, n_string comment_string);
+
+#endif
 
 n_int being_dob(noble_being * value);
 
@@ -259,13 +487,6 @@ n_byte * being_braincode_external(noble_being * value);
 n_byte * being_braincode_internal(noble_being * value);
 #endif
 
-typedef void (being_loop_fn)(noble_simulation * sim, noble_being * actual, void * data);
-typedef void (being_loop_no_sim_fn)(noble_being * beings, n_uint number_beings, noble_being * actual, void * data);
-
-void being_loop_no_thread(noble_simulation * sim, noble_being * being_not, being_loop_fn bf_func, void * data);
-void being_loop(noble_simulation * sim, being_loop_fn bf_func, n_int beings_per_thread);
-void being_loop_no_sim(noble_being * beings, n_uint number_beings, being_loop_no_sim_fn bf_func, void * data);
-
 void  being_remove_external_set(n_int value);
 n_int being_remove_internal(void);
 void being_remove_internal_clear(void);
@@ -285,7 +506,7 @@ void being_erase(noble_being * value);
 n_uint being_affect(noble_being * local, n_byte is_positive);
 
 void   episodic_cycle(noble_simulation * local_sim, noble_being * local, void * data);
-void   episodic_cycle_no_sim(noble_being * local_being);
+void   episodic_cycle_no_sim(noble_being * local_being, void * data);
 
 void   being_cycle_awake(noble_simulation * sim, noble_being * local);
 void   being_cycle_universal(noble_being * local);
@@ -330,7 +551,6 @@ void social_graph_link_name(
     n_byte met, n_string name);
 
 n_int episodic_first_person_memories_percent(
-    noble_simulation * local_sim,
     noble_being * local,
     n_byte intention);
 
@@ -349,7 +569,6 @@ void brain_dialogue(
     n_byte		* bc1,
     n_int being_index);
 
-void brain_cycle(n_byte * local, n_byte2 * constants);
 noble_being * being_from_name(noble_simulation * sim, n_string name);
 
 void being_remove(noble_simulation * local_sim);
@@ -358,8 +577,7 @@ void brain_three_byte_command(n_string string, n_byte * response);
 
 void brain_sentence(n_string string, n_byte * response);
 
-n_int episode_description(noble_simulation * sim,
-                          noble_being * local_being,
+n_int episode_description(noble_being * local_being,
                           n_int index,
                           n_string description);
 
@@ -372,11 +590,11 @@ void social_goals(noble_being * local);
 void being_genetic_wandering(noble_being * local, being_nearest * nearest);
 
 void being_territory_index(noble_being * local);
-void being_calculate_speed(noble_being * local, n_int tmp_speed, n_byte loc_state);
+void being_calculate_speed(noble_being * local, n_int tmp_speed, n_byte2 loc_state);
 
 noble_being * being_find_name(noble_simulation * sim, n_byte2 first_gender, n_byte2 family);
 void          being_move(noble_being * local, n_int vel, n_byte kind);
-n_byte        being_awake(noble_simulation * sim, noble_being * local);
+n_byte        being_awake(noble_being * local);
 
 n_byte being_crowding(noble_being * value);
 void being_crowding_cycle(noble_being * value, n_int beings_in_vacinity);
@@ -389,13 +607,11 @@ void social_conception(noble_being * female,
 
 void social_initial_loop(noble_simulation * local, noble_being * local_being, void * data);
 
-void social_secondary_loop(noble_simulation * local, noble_being * local_being, void * data);
+void social_secondary_loop_no_sim(noble_being * local_being, void * data);
 
-void being_tidy_loop(noble_simulation * local_sim, noble_being * local_being, void * data);
 void being_tidy_loop_no_sim(noble_being * local_being, void * data);
 
-void being_recalibrate_honor_loop(noble_simulation * local, noble_being * value, void * data);
-void being_recalibrate_honor_loop_no_sim(noble_being * value);
+void being_recalibrate_honor_loop_no_sim(noble_being * value, void * data);
 
 void being_remove_loop1(noble_simulation * local_sim, noble_being * local_being, void * data);
 
@@ -443,7 +659,15 @@ typedef n_byte (noble_being_line_of_sight)(noble_being * local, n_vect2 * locati
 void being_line_of_sight_override(noble_being_line_of_sight * new_line_of_sight);
 n_byte being_line_of_sight(noble_being * local, n_vect2 * location);
 
+typedef void (noble_being_brain_cycle)(n_byte * local, n_byte2 * constants);
+void being_brain_cycle_override(noble_being_brain_cycle * new_brain_cycle);
+void being_brain_cycle(n_byte * local, n_byte2 * constants);
+
+
+
 void being_immune_response(noble_being * local);
 void being_reset_drive(noble_being * value, enum drives_definition drive);
+n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_int parse_requirements);
+n_int being_move_energy(noble_being * local_being, n_int * conductance);
 
 #endif /* NOBLEAPE_ENTITY_H */

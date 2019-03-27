@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -11,57 +11,63 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\sim\entity\being.c" />
-    <ClCompile Include="..\..\sim\entity\body.c" />
-    <ClCompile Include="..\..\sim\entity\brain.c" />
-    <ClCompile Include="..\..\sim\entity\drives.c" />
-    <ClCompile Include="..\..\sim\entity\episodic.c" />
-    <ClCompile Include="..\..\sim\entity\food.c" />
-    <ClCompile Include="..\..\sim\entity\social.c" />
-    <ClCompile Include="..\..\sim\entity\speak.c" />
-    <ClCompile Include="..\..\sim\gui\draw.c" />
-    <ClCompile Include="..\..\sim\gui\message.c" />
-    <ClCompile Include="..\..\sim\gui\shared.c" />
-    <ClCompile Include="..\..\sim\noble\audio.c" />
-    <ClCompile Include="..\..\sim\noble\compress.c" />
-    <ClCompile Include="..\..\sim\noble\execute.c" />
-    <ClCompile Include="..\..\sim\noble\interpret.c" />
-    <ClCompile Include="..\..\sim\noble\io.c" />
-    <ClCompile Include="..\..\sim\noble\land.c" />
-    <ClCompile Include="..\..\sim\noble\math.c" />
-    <ClCompile Include="..\..\sim\noble\network.c" />
-    <ClCompile Include="..\..\sim\noble\parse.c" />
-    <ClCompile Include="..\..\sim\universe\console.c" />
-    <ClCompile Include="..\..\sim\universe\file.c" />
-    <ClCompile Include="..\..\sim\universe\sim.c" />
-    <ClCompile Include="..\..\sim\win\platform.c" />
+    <ClCompile Include="..\..\nobleape\entity\being.c" />
+    <ClCompile Include="..\..\nobleape\entity\body.c" />
+    <ClCompile Include="..\..\nobleape\entity\brain.c" />
+    <ClCompile Include="..\..\nobleape\entity\drives.c" />
+    <ClCompile Include="..\..\nobleape\entity\episodic.c" />
+    <ClCompile Include="..\..\nobleape\entity\food.c" />
+    <ClCompile Include="..\..\nobleape\entity\social.c" />
+    <ClCompile Include="..\..\nobleape\entity\speak.c" />
+    <ClCompile Include="..\..\nobleape\gui\draw.c" />
+    <ClCompile Include="..\..\nobleape\gui\message.c" />
+    <ClCompile Include="..\..\nobleape\gui\shared.c" />
+    <ClCompile Include="..\..\nobleape\noble\audio.c" />
+    <ClCompile Include="..\..\nobleape\noble\compress.c" />
+    <ClCompile Include="..\..\nobleape\noble\interpret.c" />
+    <ClCompile Include="..\..\nobleape\noble\io.c" />
+    <ClCompile Include="..\..\nobleape\noble\land.c" />
+    <ClCompile Include="..\..\nobleape\noble\math.c" />
+    <ClCompile Include="..\..\nobleape\noble\network.c" />
+    <ClCompile Include="..\..\nobleape\noble\object.c" />
+    <ClCompile Include="..\..\nobleape\noble\parse.c" />
+    <ClCompile Include="..\..\nobleape\noble\territory.c" />
+    <ClCompile Include="..\..\nobleape\noble\tile.c" />
+    <ClCompile Include="..\..\nobleape\universe\console.c" />
+    <ClCompile Include="..\..\nobleape\universe\file.c" />
+    <ClCompile Include="..\..\nobleape\universe\loop.c" />
+    <ClCompile Include="..\..\nobleape\universe\sim.c" />
+    <ClCompile Include="..\..\nobleape\win\platform.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\sim\entity\entity.h" />
-    <ClInclude Include="..\..\sim\entity\entity_internal.h" />
-    <ClInclude Include="..\..\sim\gui\gui.h" />
-    <ClInclude Include="..\..\sim\noble\noble.h" />
-    <ClInclude Include="..\..\sim\noble\shared.h" />
-    <ClInclude Include="..\..\sim\universe\universe.h" />
-    <ClInclude Include="..\..\sim\universe\universe_internal.h" />
-    <ClInclude Include="..\..\sim\win\platform.h" />
+    <ClInclude Include="..\..\nobleape\entity\entity.h" />
+    <ClInclude Include="..\..\nobleape\entity\entity_internal.h" />
+    <ClInclude Include="..\..\nobleape\gui\gui.h" />
+    <ClInclude Include="..\..\nobleape\noble\noble.h" />
+    <ClInclude Include="..\..\nobleape\noble\shared.h" />
+    <ClInclude Include="..\..\nobleape\universe\universe.h" />
+    <ClInclude Include="..\..\nobleape\universe\universe_internal.h" />
+    <ClInclude Include="..\..\nobleape\win\platform.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7E6B974B-976B-4A58-981C-F7F2965C9832}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>WinSimulation</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

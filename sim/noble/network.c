@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -59,7 +59,7 @@ n_int network_open(n_string ip, n_byte2 port, n_c_int * network_connection)
         return SHOW_ERROR("Failed to set up socket");
     }
     /* Construct local address structure */
-    io_erase((n_byte *)&addr, sizeof(addr));
+    memory_erase((n_byte *)&addr, sizeof(addr));
     addr.sin_family = AF_INET;                /* Internet address family */
     if (ip)
     {

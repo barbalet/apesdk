@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -46,6 +46,53 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     return -1;
 }
 
+n_uint test_distance_moved(noble_simulation * local, n_int show_stopped)
+{
+    n_int loop = 0;
+    n_uint total_moved = 0;
+    while (loop < local->num)
+    {
+        noble_being * being = &local->beings[loop];
+        n_byte        speed = being_speed(being);
+        if(IS_NIGHT(land_time()) == 0)
+        {
+            if ((speed == 0) && show_stopped)
+            {
+                n_string_block name_string;
+                n_string_block time_string;
+                io_time_to_string(time_string);
+                being_name_simple(being, name_string);
+                printf("%s %s stopped\n", time_string, name_string);
+            }
+        }
+        total_moved += speed;
+        loop++;
+    }
+    return total_moved;
+}
+
+void test_total_moved(noble_simulation * local)
+{
+#ifdef DEBUG_LACK_OF_MOVEMENT
+    n_int loop = 0;
+    while (loop < local->num)
+    {
+        noble_being * being = &local->beings[loop];
+        n_int        total_moved = being_total_movement(being);
+        if(total_moved == 0)
+        {
+            n_string_block name_string;
+            n_file *description = obj_json(file_being(being));
+            being_name_simple(being, name_string);
+            printf("%s stopped\n", name_string);
+            io_file_debug(description);
+            
+        }
+        loop++;
+    }
+#endif
+}
+
 void test_sim_run(void)
 {
     n_int   counter = 0;
@@ -68,12 +115,24 @@ void test_sim_run(void)
     n_uint being_immune_hash1 = math_hash((n_byte*)first_being_immune, sizeof(noble_immune_system));
     n_uint being_volatile_hash1 = math_hash((n_byte*)first_being_volatile, sizeof(noble_being_volatile));
     
-    while (counter < 1000)
+    n_uint distance_moved = 0;
+    
+    while (counter < 2048)
     {
+        n_uint distance_delta;
         sim_cycle();
+        distance_delta = test_distance_moved(local_sim, 0);
+        
+        distance_moved += distance_delta;
+        if ((counter & 511) == 0)
+        {
+            printf("%ld distance moved %ld running total %ld\n", counter, distance_delta, distance_moved);
+
+        }
         counter ++;
     }
-    
+    printf("total distance moved %ld\n", distance_moved);
+
     n_uint being_hash2 = math_hash((n_byte *)first_being, sizeof(noble_being));
     n_uint being_constant_hash2 = math_hash((n_byte *)first_being_constant, sizeof(noble_being_constant));
     n_uint being_delta_hash2 = math_hash((n_byte *)first_being_delta, sizeof(noble_being_delta));
@@ -112,6 +171,8 @@ void test_sim_run(void)
         }
         printf("line-of-sight count %ld for %ld\n", line_of_sight_count, number_beings);
     }
+    
+    test_total_moved(local_sim);
 }
 
 int main(int argc, const char * argv[])

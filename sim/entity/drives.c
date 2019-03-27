@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -81,15 +81,11 @@ void drives_sociability_loop_no_sim(noble_being * other, void * data)
     }
 }
 
-static void drives_sociability_loop(noble_simulation * local_sim, noble_being * other, void * data)
-{
-    drives_sociability_loop_no_sim(other, data);
-}
 /**
  * @brief Social drive governs how likely the being is to interact with others.
  * This affects behaviors such as grooming, chatting and mating
  * @param local Pointer to the ape
- * @param beings_in_vicinity The number of other apes in the vicinity
+ * @param sim Pointer to the simulation
  */
 static void drives_sociability(
     noble_being * local,
@@ -98,7 +94,7 @@ static void drives_sociability(
     drives_sociability_data dsd;
     dsd.beings_in_vacinity = 0;
     dsd.being = local;
-    being_loop_no_thread(sim, local, drives_sociability_loop, &dsd);
+    loop_being_no_sim(sim->beings, sim->num, drives_sociability_loop_no_sim, &dsd);
 
     being_crowding_cycle(local, dsd.beings_in_vacinity);
 }
@@ -158,7 +154,6 @@ static void drives_sex(
                                 
                                 /** remember seeking a mate */
                                 episodic_store_memory(
-                                    local_sim,
                                     local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                     being_gender_name(local), being_family_name(local),
                                     local->delta.goal[1], local->delta.goal[2],0);
@@ -192,7 +187,6 @@ static void drives_sex(
                         if (being_check_goal(local, GOAL_MATE))
                         {
                             episodic_store_memory(
-                                local_sim,
                                 local, EVENT_SEEK_MATE, AFFECT_SEEK_MATE,
                                 being_gender_name(local), being_family_name(local),
                                 local->delta.goal[1], local->delta.goal[2],0);
@@ -251,13 +245,6 @@ void drives_fatigue(
     }
 }
 
-/**
- * @brief Update biological drives
- * @param local Pointer to the ape
- * @param beings_in_vicinity The number of other apes within the vicinity
- * @param awake Whether the ape is awake
- * @param sim Pointer to the simulation
- */
 void drives_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
 {
     drives_hunger(local_being);

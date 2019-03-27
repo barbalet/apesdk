@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -253,19 +253,10 @@ static const noble_file_entry noble_file_format[]=
 
 /* functions */
 
-n_int sketch_input(void *code, n_byte kind, n_int value);
-n_int sketch_output(void * vcode, void * vindividual, n_byte * kind, n_int * number);
+void command_external_watch(void);
 
-void sim_end_conditions(void * individual, void * structure, void * data);
-void sim_start_conditions(void * individual, void * structure, void * data);
+n_int command_executing(void);
 
-void console_external_watch(void);
-
-n_int console_executing(void);
-
-void  console_change_selected(noble_simulation * sim, n_byte forwards);
-
-
-void file_audit(void);
+void  command_change_selected(noble_simulation * sim, n_byte forwards);
 
 #endif /* NOBLEAPE_UNIVERSE_INTERNAL_H */

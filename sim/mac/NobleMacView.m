@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,136 +35,35 @@
 
 #include "../noble/noble.h"
 
-#ifdef NEW_OPENGL_ENVIRONMENT
-#include "../ogl/ogl.h"
-#endif
-
 #import "NobleMacView.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#pragma mark ---- OpenGL Utils ----
-
 @interface NobleMacView()
 
-@property (nonatomic, strong) NSTimer* timerAnimation;
-@property (nonatomic, strong, readwrite) NobleShared* shared;
-@property (nonatomic, strong) NSSound* timedAudio;
 
 @end
 
 @implementation NobleMacView
 
-/* pixel format definition */
-+ (NSOpenGLPixelFormat*) basicPixelFormat
-{
-    
-#ifndef NEW_OPENGL_ENVIRONMENT
-    NSOpenGLPixelFormatAttribute attributes [] = {
-        NSOpenGLPFADoubleBuffer,	/* double buffered */
-        NSOpenGLPFADepthSize,
-        (NSOpenGLPixelFormatAttribute)16, /* 16 bit depth buffer */
-        (NSOpenGLPixelFormatAttribute)0 /*nil*/
-    };
-#else
-    NSOpenGLPixelFormatAttribute attributes [] = {
-        NSOpenGLPFANoRecovery,
-        NSOpenGLPFAColorSize, 32,
-        NSOpenGLPFADepthSize, 32,
-        NSOpenGLPFAMaximumPolicy,
-        NSOpenGLPFADoubleBuffer,
-        NSOpenGLPFAAccelerated,
-        0
-    };
-#endif
-
-    return [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
-}
-
-/* per-window timer function, basic time based animation preformed here */
-- (void) animationTimer:(NSTimer *)localTimer
-{
-	[self drawRect:[self bounds]]; /* redraw now instead dirty to enable updates during live resize */
-}
-
 - (void) awakeFromNib
 {    
     NSLog(@"Starting up");
+    [self startView];
     [self startEverything:YES];
+    [self sharedReady];
 }
 
-- (void) drawRect:(NSRect)rect
-{
-#ifdef NOBLE_PLANET
-    NSInteger              dim_x = (NSInteger)rect.size.width;
-    NSInteger              dim_y = (NSInteger)rect.size.height;
-    static unsigned char   outputBuffer[TERRAIN_WINDOW_AREA*3];
-    
-    [[self openGLContext] makeCurrentContext];
-/*
-#ifdef NEW_OPENGL_ENVIRONMENT
-    if (!polygonal_entry([self.shared identification]))
-    {
-        [[self openGLContext] flushBuffer];
-        return;
-    }
-#endif
-*/
-    [self.shared cycleWithWidth:dim_x height:dim_y];
-    /*
-    if ([self.shared cycleDebugOutput])
-    {
-        NSLog(@"Debug output");
-        [self debugOutput];
-    }
-    if ([self.shared cycleQuit])
-    {
-        NSLog(@"Quit procedure initiated");
-        [self quitProcedure];
-    }
-    
-    if ([self.shared cycleNewApes])
-    {
-        NSLog(@"New apes neede to continue simulation");
-        [self.shared newAgents];
-    }
-    
-   [[self openGLContext] makeCurrentContext];*/
-    
-    [self.shared draw:outputBuffer width:dim_x height:dim_y];
-    
-    glDrawPixels((GLsizei)dim_x, (GLsizei)dim_y,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
-    [[self openGLContext] flushBuffer];
-#else
-    
-    NSSize size = rect.size;
 
-    glViewport(0, 0, (GLsizei)size.width, (GLsizei)size.height);
-    
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, size.width, 0, size.height, -1, 1);
-    
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glEnable(GL_LINE_SMOOTH);
-
-    [[self openGLContext] makeCurrentContext];
-    [_shared draw:size];
-    [[self openGLContext] flushBuffer];
-#endif
-}
 
 - (void) quitProcedure
 {
-#ifdef NEW_OPENGL_ENVIRONMENT
-    polygonal_close();
-#endif
-    
+    CVDisplayLinkStop(displayLink);
+
     NSLog(@"Quitting");
 
-    [_shared close];
+    [self.shared close];
     
     NSLog(@"Quit");
 
@@ -174,14 +73,6 @@
 - (IBAction) aboutDialog:(id) sender
 {
     [self.shared about:@"Macintosh INTEL Cocoa"];
-}
-
-- (id) initWithFrame:(NSRect) frameRect
-{
-    NSOpenGLPixelFormat * pf = [NobleMacView basicPixelFormat];
-	self = [super initWithFrame:frameRect pixelFormat: pf];
-    _shared = [[NobleShared alloc] initWithFrame:frameRect];
-    return self;
 }
 
 - (BOOL) acceptsFirstResponder
@@ -202,25 +93,18 @@
 - (void) startEverything:(BOOL)headyLifting
 {
     NSSize increments;
-    
     increments.height = 4;
     increments.width = 4;
     [[self window] setContentResizeIncrements:increments];
-
     if (headyLifting)
     {
-        if ([_shared start] == NO)
+        if ([self.shared start] == NO)
         {
             NSLog(@"Simulation initialization failed");
             [self quitProcedure];
             return;
         }
     }
-    /* start animation timer */
-    _timerAnimation = [NSTimer timerWithTimeInterval:[_shared timeInterval] target:self selector:@selector(animationTimer:) userInfo:nil repeats:YES];
-    
-    [[NSRunLoop currentRunLoop] addTimer:_timerAnimation forMode:NSDefaultRunLoopMode];
-    
     [[self window] makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
 }
@@ -229,7 +113,7 @@
 
 - (void) keyUp:(NSEvent *)theEvent
 {
-    [_shared keyUp];
+    [self.shared keyUp];
 }
 
 - (void) keyDown:(NSEvent *)theEvent
@@ -239,6 +123,7 @@
     {
         local_key = 2048;
     }
+    
     if ([theEvent modifierFlags] & NSEventModifierFlagNumericPad)
     {
         /* arrow keys have this mask */
@@ -266,7 +151,20 @@
                 local_key += 31;
             }
             
-            [_shared keyReceived:local_key];
+            [self.shared keyReceived:local_key];
+        }
+    }
+    if ([theEvent characters])
+    {
+        NSRange first = [[theEvent characters] rangeOfComposedCharacterSequenceAtIndex:0];
+        NSRange match = [[theEvent characters] rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet] options:0 range:first];
+        if (match.location != NSNotFound) {
+            unichar firstChar = [[theEvent characters] characterAtIndex:0];
+            NSCharacterSet *letters = [NSCharacterSet letterCharacterSet];
+            if ([letters characterIsMember:firstChar]) {
+                // The first character is a letter in some alphabet
+                [self.shared keyReceived:firstChar];
+            }
         }
     }
 }
@@ -282,14 +180,14 @@
     NSInteger location_x = (NSInteger)location.x;
     NSInteger location_y = (NSInteger)([self bounds].size.height - location.y);
     
-    [_shared mouseOption:(([theEvent modifierFlags] & NSEventModifierFlagControl) || ([theEvent modifierFlags] & NSEventModifierFlagOption))];
-    [_shared mouseReceivedWithXLocation:location_x YLocation:location_y];
+    [self.shared mouseOption:(([theEvent modifierFlags] & NSEventModifierFlagControl) || ([theEvent modifierFlags] & NSEventModifierFlagOption))];
+    [self.shared mouseReceivedWithXLocation:location_x YLocation:location_y];
 }
 
 - (void) rightMouseDown:(NSEvent *)theEvent
 {
 	[self mouseDown:theEvent];
-    [_shared mouseOption:YES];
+    [self.shared mouseOption:YES];
 }
 
 - (void) otherMouseDown:(NSEvent *)theEvent
@@ -299,7 +197,7 @@
 
 - (void) mouseUp:(NSEvent *)theEvent
 {
-    [_shared mouseUp];
+    [self.shared mouseUp];
 }
 
 - (void) rightMouseUp:(NSEvent *)theEvent
@@ -329,17 +227,17 @@
 
 - (void) scrollWheel:(NSEvent *)theEvent
 {
-    [_shared delta_x:[theEvent deltaX] delta_y:[theEvent deltaY]];
+    [self.shared delta_x:[theEvent deltaX] delta_y:[theEvent deltaY]];
 }
 
 - (void) magnifyWithEvent:(NSEvent *)event
 {
-    [_shared zoom:[event magnification]];
+    [self.shared zoom:[event magnification]];
 }
 
 - (void) rotateWithEvent:(NSEvent *)event
 {
-    [_shared rotation:[event rotation]];
+    [self.shared rotation:[event rotation]];
 }
 
 @end

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -82,9 +82,11 @@ static void plat_file_open(n_byte script);
 static unsigned char plat_file_save();
 static unsigned char plat_file_save_as();
 
-#define	WINDOW_OFFSET_X		6
-#define	WINDOW_OFFSET_Y		(25) //(10+22)
-#define WINDOW_MENU_OFFSET	(19)
+static unsigned char plat_initialized = 0;
+
+#define	WINDOW_OFFSET_X		16 //6
+#define	WINDOW_OFFSET_Y		(38) //(10+22)
+#define WINDOW_MENU_OFFSET	(21)
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PSTR szCmdLine, int iCmdShow)
@@ -116,7 +118,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     tmpres = ft.dwHighDateTime;
     tmpres ^= ft.dwLowDateTime;
 
-    draw_fit(land_points, fit);
+    land_color_time(fit, 1);
 
     wndclass.style = CS_HREDRAW | CS_VREDRAW ;
     wndclass.lpfnWndProc = WndProc ;
@@ -161,15 +163,17 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     hMenuPopup[2] = CreateMenu();
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PAUSE_HANDLE, TEXT("&Pause"));
-
-
     AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PREV_HANDLE, TEXT("P&revious Ape"));
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NEXT_HANDLE, TEXT ("&Next Ape"));
     AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_CLEAR_ERRORS, TEXT ("Clear Errors"));
     AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NO_WEATHER_HANDLE, TEXT("No &Weather"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_WEATHER_HANDLE, TEXT("Draw &Weather"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_BRAIN_HANDLE, TEXT("Draw Brain"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_BRAINCODE_HANDLE, TEXT("Draw Brain Code"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_TERRITORY_HANDLE, TEXT("Draw Territory"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_DAYLIGHT_TIDES_HANDLE, TEXT("Draw Daylight Tides"));
 
     AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[2], TEXT("&Control"));
 
@@ -202,7 +206,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     /* can't close the meters window, it's also the menu window */
     EnableMenuItem(hMenuPopup[0], FILE_CLOSE_HANDLE, MF_DISABLED | MF_GRAYED);
 
-
+	CheckMenuItem(hMenuPopup[2], CONTROL_WEATHER_HANDLE, MF_CHECKED);
+	CheckMenuItem(hMenuPopup[2], CONTROL_BRAIN_HANDLE, MF_CHECKED);
 
     loop = 0;
 
@@ -247,7 +252,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
         InvalidateRect(global_hwnd[loop], NULL, TRUE);
         loop++;
     }
-
+	plat_initialized = 1;
     while ( 1 )
     {
         if ( (bReturn = PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) != 0)
@@ -259,6 +264,15 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
         }
     }
     return msg.wParam ;
+}
+
+static int platform_check(int na_menu, int win_menu)
+{
+    if (shared_menu(na_menu))
+            CheckMenuItem(hMenuPopup[2], win_menu, MF_CHECKED);
+        else
+            CheckMenuItem(hMenuPopup[2], win_menu, MF_UNCHECKED);
+    return 0;
 }
 
 LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
@@ -345,7 +359,6 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             firecontrol = 0;
         }
          */
-
         shared_keyUp();
         return 0;
     case WM_CLOSE:
@@ -366,11 +379,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
             /** Control Menu... **/
         case CONTROL_PAUSE_HANDLE:
-            if (shared_menu(NA_MENU_PAUSE))
-                CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_CHECKED);
-            else
-                CheckMenuItem(hMenuPopup[2], CONTROL_PAUSE_HANDLE, MF_UNCHECKED);
-            return 0;
+            return platform_check(NA_MENU_PAUSE, CONTROL_PAUSE_HANDLE);
 
         case CONTROL_PREV_HANDLE:
             (void) shared_menu(NA_MENU_PREVIOUS_APE);
@@ -383,15 +392,21 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             (void) shared_menu(NA_MENU_CLEAR_ERRORS);
             return 0;
 
+        case CONTROL_WEATHER_HANDLE:
+            return platform_check(NA_MENU_WEATHER, CONTROL_WEATHER_HANDLE);
 
-        case CONTROL_NO_WEATHER_HANDLE:
-            if (shared_menu(NA_MENU_WEATHER))
-                CheckMenuItem(hMenuPopup[2], CONTROL_NO_WEATHER_HANDLE, MF_UNCHECKED);
-            else
-                CheckMenuItem(hMenuPopup[2], CONTROL_NO_WEATHER_HANDLE, MF_CHECKED);
-
-            return 0;
-
+        case CONTROL_BRAIN_HANDLE:
+            return platform_check(NA_MENU_BRAIN, CONTROL_BRAIN_HANDLE);
+            
+        case CONTROL_BRAINCODE_HANDLE:
+            return platform_check(NA_MENU_BRAINCODE, CONTROL_BRAINCODE_HANDLE);
+            
+        case CONTROL_TERRITORY_HANDLE:
+            return platform_check(NA_MENU_TERRITORY, CONTROL_TERRITORY_HANDLE);
+            
+        case CONTROL_DAYLIGHT_TIDES_HANDLE:
+            return platform_check(NA_MENU_TIDEDAYLIGHT, CONTROL_DAYLIGHT_TIDES_HANDLE);
+                
             /** File Menu... **/
         case FILE_NEW_HANDLE:
         {
@@ -451,20 +466,21 @@ static void plat_update()
     PAINTSTRUCT ps[NUMBER_WINDOWS];
     HDC         hdc[NUMBER_WINDOWS];
     unsigned char lp = 0;
-
-    shared_legacy_draw(512, 512);
-    
+	if (plat_initialized == 0)
+	{
+		return;
+	}
     while (lp < NUMBER_WINDOWS)
     {
         SIZE            sz;
         HDC             hdcMem;
-        unsigned char   * value = shared_legacy_pointer(lp);
+        unsigned char   * value = shared_legacy_draw(lp, 512, 512);
 
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);
         hdcMem = CreateCompatibleDC(hdc[lp]);
 
-        shared_draw(value, window_definition[lp], 512, 512);
+        shared_draw(value, window_definition[lp], 512, 512, 0);
         
         SetDIBits(hdcMem, offscreen[lp], 0, 512/*-lp*/, value, bmp_info[lp], DIB_RGB_COLORS);
 

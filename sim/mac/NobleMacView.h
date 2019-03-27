@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,28 +35,14 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import <OpenGL/gl.h>
-#import <OpenGL/glext.h>
-#import <OpenGL/glu.h>
-#import <OpenGL/OpenGL.h>
+#import "NobleMTKView.h"
 
-#import "NobleShared.h"
-
-@interface NobleMacView : NSOpenGLView
-
-@property (nonatomic, strong, readonly) NobleShared* shared;
-
-+ (NSOpenGLPixelFormat*) basicPixelFormat;
-
-- (void) animationTimer:(NSTimer *)localTimer;
-
-- (void) drawRect:(NSRect)rect;
+@interface NobleMacView : NobleMTKView //NobleMacCG
 
 - (BOOL) acceptsFirstResponder;
 - (BOOL) becomeFirstResponder;
 - (BOOL) resignFirstResponder;
 
-- (id)   initWithFrame:(NSRect) frameRect;
 - (void) awakeFromNib;
 
 - (void) startEverything:(BOOL)headyLifting;

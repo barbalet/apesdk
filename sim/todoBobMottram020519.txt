@@ -1,0 +1,26 @@
+Projects discussed with Bob Mottram:
+
+Add 1000 words spoken phonemes to the simulation.
+
+Programmable notion of beauty.
+
+Regional terms referencing places.
+
+JSON server originally written in C then perhaps node.js with a Noble Ape Client.
+
+Notions of grooming in the city - what do some of the Noble Ape primate skills become.
+
+The newspapers from the Mushroom Boy creating political narrative.
+
+Ghosts as a representation of dark age religion.
+
+Abstracting the components:
+	Noble Being -> Noble Ape, 
+	Noble Being -> Noble Schmuck, 
+	Noble Being -> Fierce Feline,
+	Noble Being -> Noble Ghost
+
+Meaning in language being imprecise. Just as much about happy agreement of someone talking than meaning.
+
+
+

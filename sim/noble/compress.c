@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -82,8 +82,8 @@ n_byte    append_character[TABLE_SIZE];              /* This array holds the app
 static n_c_int find_match(n_byte4 hash_prefix, n_byte4 hash_character)
 {
     n_c_int offset;
-    n_c_int index=(hash_character<<HASHING_SHIFT) ^ hash_prefix;
-    if (index==0)
+    n_c_int index = (n_c_int)((hash_character << HASHING_SHIFT) ^ hash_prefix);
+    if (index == 0)
     {
         offset=1;
     }
@@ -133,7 +133,7 @@ static n_byte * decode_string(n_byte *buffer, n_byte4 code)
  ** codes. They are written strivtly for clarity and are not
  ** particularly efficent.
  */
-unsigned int input_code(n_file *input)
+static unsigned int input_code(n_file *input)
 {
     n_byte4 return_value;
     static n_c_int input_bit_count=0;
@@ -152,7 +152,7 @@ unsigned int input_code(n_file *input)
     return return_value;
 }
 
-void output_code(n_file *output, n_byte4 code)
+static void output_code(n_file *output, n_byte4 code)
 {
     static n_c_int output_bit_count=0;
     static n_byte4 output_bit_buffer=0L;
@@ -173,16 +173,16 @@ void output_code(n_file *output, n_byte4 code)
  ** This is the compression routine. The code should be a fairly close
  ** match to the algorithm accompanying the article.
  */
-void compress_compress(n_file *input,n_file *output)
+void compress_compress(n_file *input, n_file *output)
 {
-    n_byte4 next_code = 256;                 /* next available string code */
-    n_byte4 string_code;
-    n_byte4 index = 0;
+    n_byte4  next_code = 256;                 /* next available string code */
+    n_byte4  string_code;
+    n_byte4  index = 0;
     n_byte   byte_character;
 
     while(index<TABLE_SIZE)     /* clear string table */
     {
-        code_value[index++]=-1;
+        code_value[index++] = -1;
     }
 
     (void)io_read_bin(input, &byte_character);
@@ -198,17 +198,17 @@ void compress_compress(n_file *input,n_file *output)
     {
         n_byte4 character = byte_character;
 
-        index = find_match(string_code, character);
+        index = (n_byte4) find_match(string_code, character);
 
         if (code_value[index]!=-1)
         {
-            string_code = code_value[index];
+            string_code = (n_byte4)code_value[index];
         }
         else
         {
             if (next_code<=MAX_CODE)
             {
-                code_value[index] = next_code++;
+                code_value[index] = (n_c_int) (next_code++);
                 prefix_code[index] = string_code;
                 append_character[index] = (n_byte)character;
             }
@@ -230,8 +230,8 @@ void compress_expand(n_file *input,n_file *output)
 {
     n_byte4 next_code =  256;
     n_byte4 new_code;
-    n_byte4 old_code=input_code(input);
-    n_c_int  character=old_code;
+    n_byte4 old_code = input_code(input);
+    n_c_int  character = (n_c_int)old_code;
     n_byte   *string;
 
     n_byte    decode_stack[4000];             /* This array holds the decoded string */

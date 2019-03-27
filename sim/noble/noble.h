@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -44,11 +44,24 @@
 
 #include <signal.h>
 
-#undef  NEW_OPENGL_ENVIRONMENT
-
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
+#define  NEW_LAND_METHOD
+#undef   SKELETON_RENDER
+
+#ifndef    _WIN32
+#define   ALPHA_WEATHER_DRAW
+#define   METAL_RENDER
+#else
+#undef   ALPHA_WEATHER_DRAW
+#endif
+
+#define  FAST_START_UNREALISTIC_INITIAL_WEATHER
+
+#define CHAR_SPACE               (32)
+#define IS_RETURN(val)            (((val) == 10) || ((val) == 13))
+#define IS_SPACE(val)             ((val) == CHAR_SPACE)
 
 #ifdef AUTOMATED
 
@@ -72,9 +85,9 @@
 
 /*! @define */
 #define	VERSION_NUMBER		     699
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2018 "
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2019 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2018."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2019."
 
 /*! @define */
 #define	NOBLE_APE_SIGNATURE		    (('N'<< 8) | 'A')
@@ -150,6 +163,12 @@ void io_assert(n_string message, n_string file_loc, n_int line);
 #define AUDIO_FFT_MAX_BUFFER    (1<<AUDIO_FFT_MAX_BITS)
 
 void   audio_fft(n_byte inverse, n_uint power_sample);
+void audio_new_fft(n_uint       power_sample,
+                   n_int      InverseTransform,
+                   n_double    *RealIn,
+                   n_double    *ImagIn,
+                   n_double    *RealOut,
+                   n_double    *ImagOut );
 void   audio_clear_buffers(n_uint length);
 void   audio_clear_output(n_audio * audio, n_uint length);
 
@@ -157,6 +176,18 @@ void   audio_equal_output(n_audio * audio, n_uint length);
 
 void   audio_multiply_output(n_audio * audio, n_uint length);
 void   audio_set_frequency(n_uint entry, n_uint value);
+
+void   audio_low_frequency(n_audio * buffer, n_int number_freq, n_int debug);
+
+void audio_buffer_clear(n_audio * buffer, n_int size);
+void audio_buffer_double_clear(n_double * buffer, n_int size);
+
+void audio_buffer_copy_to_audio(n_double * buffer_double, n_audio * buffer_audio, n_int size);
+void audio_buffer_copy_to_double(n_audio * buffer_audio, n_double * buffer_double, n_int size);
+void audio_buffer_copy_to_double_double(n_double * buffer_double1, n_double * buffer_double2, n_int size);
+void audio_buffer_copy_to_double_double(n_double * buffer_double_to, n_double * buffer_double_from, n_int size);
+
+
 
 /*! @struct
 @field signature The program signature defined as NOBLE_APE_SIGNATURE
@@ -188,10 +219,35 @@ typedef struct
 
 typedef struct
 {
+    n_vect2 top_left;
+    n_vect2 bottom_right;
+} n_area2;
+
+typedef struct
+{
     n_double x;
     n_double y;
     n_double z;
 } n_vect3;
+
+typedef struct {
+    n_byte r;
+    n_byte g;
+    n_byte b;
+    n_byte a;
+}n_rgba;
+
+typedef union
+{
+    n_rgba  rgba;
+    n_byte4 thirtytwo;
+}n_rgba32;
+
+typedef struct {
+    n_vect2 * points;
+    n_int no_of_points;
+    n_int max_points;
+}n_points;
 
 typedef struct
 {
@@ -224,14 +280,22 @@ typedef	struct
 
 #define FILE_COPYRIGHT      0x00
 
-enum file_element_type
+typedef enum
 {
     FILE_TYPE_BYTE		= 0x01,
     FILE_TYPE_BYTE2		= 0x02,
     FILE_TYPE_BYTE_EXT	= 0x03,
     FILE_TYPE_PACKED	= 0x05,
     FILE_TYPE_BYTE4     = 0x06
-};
+} file_element_type;
+
+typedef enum
+{
+    ET_NOBLE_APE,
+    ET_NOBLE_APE_GHOST,
+    ET_FIERCE_FELINE,
+    ET_FIERCE_BIRD_OF_PREY,
+}entity_type;
 
 #define FILE_INCL(num)      ((num) & 0xf0)
 #define FILE_KIND(num)      ((num) & 0x0f)
@@ -337,6 +401,19 @@ typedef enum
     OBJECT_ARRAY = 4,
 }n_object_type;
 
+typedef enum
+{
+    OBJ_TYPE_EMPTY = 0,
+    OBJ_TYPE_STRING_NOTATION,
+    OBJ_TYPE_NUMBER,
+    OBJ_TYPE_COLON,
+    OBJ_TYPE_COMMA,
+    OBJ_TYPE_OBJECT_OPEN,
+    OBJ_TYPE_OBJECT_CLOSE,
+    OBJ_TYPE_ARRAY_OPEN,
+    OBJ_TYPE_ARRAY_CLOSE
+}n_object_stream_type;
+
 
 typedef struct
 {
@@ -366,6 +443,10 @@ n_object * obj_string(n_object * obj, n_string name, n_string string);
 n_object * obj_object(n_object * obj, n_string name, n_object * object);
 n_object * obj_array(n_object * obj, n_string name, n_array * array);
 
+void object_top_object(n_file * file, n_object * top_level);
+n_object * object_file_to_tree(n_file * file);
+
+
 void obj_free(n_array ** array);
 
 /** \brief sine and cosine conversation */
@@ -377,15 +458,7 @@ enum window_num
     NUM_TERRAIN	= (1)
 };
 
-#ifdef NEW_OPENGL_ENVIRONMENT
-
-#define WINDOW_PROCESSING NUM_VIEW
-
-#else
-
 #define WINDOW_PROCESSING NUM_TERRAIN
-
-#endif
 
 /* maximum bytes in a braincode program */
 #define BRAINCODE_SIZE                    128
@@ -607,6 +680,11 @@ typedef void (execute_thread_stub)(execute_function function, void * general_dat
 
 void  execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size);
 
+void area2_add(n_area2 * area, n_vect2 * vect, n_byte first);
+
+
+n_int vect2_distance_under(n_vect2 * first, n_vect2 * second, n_int distance);
+
 void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
 void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
 void  vect2_center(n_vect2 * center, n_vect2 * initial, n_vect2 * second);
@@ -630,9 +708,15 @@ void vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
 void vect2_copy(n_vect2 * to, n_vect2 * from);
 void vect2_populate(n_vect2 * value, n_int x, n_int y);
 void vect2_rotation(n_vect2 * location, n_vect2 * rotation);
+void vect2_rotation_bitshift(n_vect2 * location, n_vect2 * rotation);
+
 n_int vect2_nonzero(n_vect2 * nonzero);
 n_vect2 * vect2_min_max_init(void);
 void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin);
+
+void vect2_scalar_multiply(n_vect2 * value, n_int multiplier);
+void vect2_scalar_divide(n_vect2 * value, n_int divisor);
+void vect2_scalar_bitshiftdown(n_vect2 * value, n_int bitshiftdown);
 
 void vect3_double(n_vect3 * converter, n_double * input);
 void vect3_add(n_vect3 * equals, n_vect3 * initial, n_vect3 * second);
@@ -691,6 +775,7 @@ n_int      io_command_line_execution(void);
 
 void       io_lower(n_string value, n_int length);
 void       io_whitespace(n_file * input);
+void       io_whitespace_json(n_file * input);
 void       io_audit_file(const noble_file_entry * format, n_byte section_to_audit);
 void       io_search_file_format(const noble_file_entry * format, n_string compare);
 void       io_string_write(n_string dest, n_string insert, n_int * pos);
@@ -704,10 +789,12 @@ n_int      io_find(n_string check, n_int from, n_int max, n_string value_find, n
 n_int      io_read_buff(n_file * fil, n_byte * data, const noble_file_entry * commands);
 n_int      io_write_buff(n_file * fil, void * data, const noble_file_entry * commands, n_byte command_num, n_file_specific * func);
 n_int      io_write_csv(n_file * fil, n_byte * data, const noble_file_entry * commands, n_byte command_num, n_byte initial) ;
-void       io_copy(n_byte * from, n_byte * to, n_uint number);
-void *     io_new(n_uint bytes);
-void       io_free(void ** ptr);
-void *     io_new_range(n_uint memory_min, n_uint *memory_allocated);
+
+void       memory_copy(n_byte * from, n_byte * to, n_uint number);
+void *     memory_new(n_uint bytes);
+void       memory_free(void ** ptr);
+void *     memory_new_range(n_uint memory_min, n_uint *memory_allocated);
+
 n_file *   io_file_new(void);
 void       io_file_free(n_file ** file);
 void       io_file_debug(n_file * file);
@@ -724,8 +811,10 @@ n_string   io_console_entry_clean(n_string string, n_int length);
 n_string   io_console_entry(n_string string, n_int length);
 void       io_console_out(n_constant_string value);
 n_int      io_console(void * ptr, noble_console_command * commands, n_console_input input_function, n_console_output output_function);
-void       io_erase(n_byte * buf_offscr, n_uint nestop);
+void       memory_erase(n_byte * buf_offscr, n_uint nestop);
 n_int      io_disk_read(n_file * local_file, n_string file_name);
+n_int      io_disk_read_no_error(n_file * local_file, n_string file_name);
+
 n_int      io_disk_write(n_file * local_file, n_string file_name);
 n_int      io_disk_check(n_constant_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
@@ -756,20 +845,38 @@ void io_file_writeoff(n_int * entry, n_file * file);
 
 void io_file_string(n_int entry, n_file * file, n_constant_string string);
 
-void io_offset(n_byte * start, n_byte * point, n_string text);
-
-n_int io_find_size_data(noble_file_entry * commands);
+n_uint io_find_size_data(noble_file_entry * commands);
 
 void compress_compress(n_file *input, n_file *output);
 void compress_expand(n_file *input, n_file *output);
 
+enum color_type
+{
+    COLOR_BLACK     =   (0),
+    COLOR_GREY      =   (252),
+    COLOR_YELLOW    =   (253),
+    COLOR_RED_DARK  =   (254),
+    COLOR_RED       =   (255)
+};
+
 #ifdef NOBLE_IOS
 
 #define MAP_BITS                      (8)
+#define MAP_TITLES                    (1)
+
+#else
+
+#ifdef NOBLE_PLANET
+
+#define MAP_BITS                      (8)
+#define MAP_TITLES                    (6)
 
 #else
 
 #define MAP_BITS                      (9)
+#define MAP_TITLES                    (1)
+
+#endif
 
 #endif
 
@@ -813,8 +920,13 @@ void compress_expand(n_file *input, n_file *output);
 
 #define	OFFSCREENSIZE                  (MAP_AREA + TERRAIN_WINDOW_AREA)
 
-#define	WEATHER_CLOUD		(32768>>4)
-#define	WEATHER_RAIN		(98304>>4)
+#ifdef NEW_LAND_METHOD
+#define WEATHER_CLOUD       (32768>>4)
+#else
+#define	WEATHER_CLOUD		(32768>>1)
+#endif
+
+#define	WEATHER_RAIN		(WEATHER_CLOUD * 3)
 
 #define TIME_HOUR_MINUTES           (60)
 #define TIME_DAY_MINUTES            (TIME_HOUR_MINUTES * 24)
@@ -879,7 +991,34 @@ n_int land_map_bits(void);
 
 void  land_tide(void);
 n_int land_location(n_int px, n_int py);
+n_byte * land_location_tile(n_int tile);
 n_int land_location_vect(n_vect2 * value);
+
+
+void graph_erase(n_byte * buffer, n_vect2 * img, n_rgba32 * color);
+
+/* draws a line */
+void graph_line(n_byte * buffer,
+                n_vect2 * img,
+                n_vect2 * previous,
+                n_vect2 * current,
+                n_rgba32 * color,
+                n_byte thickness);
+
+void graph_curve(n_byte * buffer,
+                 n_vect2 * img,
+                 n_vect2 * pt0,
+                 n_vect2 * pt1,
+                 n_vect2 * pt2,
+                 n_rgba32 * color,
+                 n_byte radius_percent,
+                 n_uint start_thickness,
+                 n_uint end_thickness);
+
+void graph_fill_polygon(n_vect2 * points, n_int no_of_points,
+                        n_rgba32 * color, n_byte transparency,
+                        n_byte * buffer, n_vect2 * img);
+
 
 /*0*/
 
@@ -947,7 +1086,10 @@ enum APESCRIPT_INTERPRET_TYPES
 
 #define ASCII_TEXT(num)		  ((ASCII_UPPERCASE(num) || ASCII_LOWERCASE(num)) || ((num) == '_'))
 
-#define	ASCII_SEMICOLON(num)  ((num) == ';')
+#define ASCII_SEMICOLON(num)  ((num) == ';')
+#define ASCII_COLON(num)      ((num) == ':')
+
+#define ASCII_COMMA(num)      ((num) == ',')
 
 #define	ASCII_EQUAL(num)	  ((num) == '=')
 
@@ -1070,11 +1212,6 @@ typedef struct
     n_byte      topography[2][MAP_AREA];                    /* generated */
     n_c_int     atmosphere[2][ MAP_AREA];                 /* save-able and generate-able */
     n_byte2     delta_pressure[ MAP_AREA];             /* generated */
-
-    n_byte      wind_value_x; /* 6 to 96 */
-    n_byte      wind_value_y; /* 6 to 96 */
-    n_byte      wind_aim_x;  /* 6 to 96 */
-    n_byte      wind_aim_y;  /* 6 to 96 */
     
     n_byte2     delta_pressure_highest;
     n_byte2     delta_pressure_lowest;
@@ -1091,28 +1228,43 @@ typedef struct
 #else
     n_tile tiles[1];
 #endif
+    n_byte2     genetics[2];                           /* save-able */
+
+    n_int      wind_value_x; /* 6 to 96 */
+    n_int      wind_value_y; /* 6 to 96 */
+    n_int      wind_aim_x;  /* 6 to 96 */
+    n_int      wind_aim_y;  /* 6 to 96 */
+    
+    n_int      wind_dissipation;
 } n_land;
 
 typedef struct
 {
     n_int  x, y;
-    n_uint tile;
+    n_int  tile;
     n_uint facing;
 } n_tile_coordinates;
 
-void tile_wind(n_land * land, n_int tile);
-void tile_cycle(n_land * land, n_int tile);
-void tile_cycle_cleanup(n_land * land, n_int tile, n_int wind);
+void tile_wind(n_land * land);
+void tile_cycle(n_land * land);
 
-void tile_weather_init(n_land * land, n_int tile);
+void tile_weather_init(n_land * land);
 
-void tile_land_init(n_land * land, n_int tile);
-void tile_land_erase(n_land * land, n_int tile);
+void tile_land_init(n_land * land);
+void tile_land_erase(n_land * land);
+void tile_land_random(n_land * land, n_byte2 * random);
+
 
 void tile_creation(n_byte * map, n_byte2 * random);
 
 n_byte tiles_topography(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
+n_byte * tiles_topography_map(n_land * land, n_int tile, n_int buffer);
+
 n_c_int tiles_atmosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
+void tile_resolve_coordinates(n_tile_coordinates * coordinates);
+
+void land_color_init(void);
+void land_color_time(n_byte2 * color_fit, n_int toggle_tidedaylight);
 
 void * land_ptr(void);
 n_byte4 land_date(void);
@@ -1122,7 +1274,7 @@ n_byte land_tide_level(void);
 n_byte * land_topography(void);
 n_byte * land_topography_highdef(void);
 n_byte4 * land_highres_tide(void);
-n_c_int * land_weather(void);
+n_c_int * land_weather(n_int tile);
 
 #ifdef	SCRIPT_DEBUG
 

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -46,9 +46,25 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     return -1;
 }
 
+static n_object * check_element(n_int value)
+{
+    n_string_block string_value = "0 The good ship";
+    
+    string_value[0] += value;
+    
+    {
+        n_object * element_obj = obj_string(0L, "name", string_value);
+        obj_number(element_obj, "number", value);
+        obj_number(element_obj, "constant", 4321);
+
+        return element_obj;
+    }
+}
+
 static void check_object(void)
 {
     n_object * new_object = obj_number(0L, "index", 1);
+
     n_object * sub_object = obj_number(0L, "index", 2);
     n_array  * new_array = array_number(-1);
     
@@ -83,6 +99,20 @@ static void check_object(void)
     io_file_debug(obj_json(sub_object));
     io_file_debug(obj_json(new_object));
 
+    {
+        n_uint        count = 1;
+        n_object    *being_object = check_element(0);
+        n_array     *beings = array_object(being_object);
+        while (count < 9)
+        {
+            being_object = check_element(count++);
+            array_add(beings, array_object(being_object));
+        }
+        obj_array(new_object, "beings", beings);
+    }
+    
+    io_file_debug(obj_json(new_object));
+    
     obj_object(new_object, "example", sub_object);
 
     io_file_debug(obj_json(new_object));
@@ -91,6 +121,7 @@ static void check_object(void)
 
     io_file_debug(obj_json(new_object));
     io_file_debug(obj_json(sub_object));
+
     obj_free((n_array**)&new_object);
 }
 

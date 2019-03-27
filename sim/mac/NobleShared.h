@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -60,11 +60,11 @@
 
 - (void) mouseUp;
 
-- (void) rotation:(float)rotationAmount;
+- (void) rotation:(double)rotationAmount;
 
 - (void) delta_x:(double)delta_x delta_y:(double)delta_y;
 
-- (void) zoom:(float)zoomAmount;
+- (void) zoom:(double)zoomAmount;
 
 - (NSTimeInterval) timeInterval;
 
@@ -78,7 +78,7 @@
 
 - (void) newAgents;
 
-- (void) cycleWithWidth:(NSInteger)width height:(NSInteger)height;
+- (void) cycle;
 
 - (BOOL) cycleDebugOutput;
 

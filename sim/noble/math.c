@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -62,6 +62,37 @@ static const n_int	new_sd[256] =
     -10286, -9673, -9055, -8431, -7802, -7169, -6531, -5889, -5244, -4595, -3944, -3290, -2634, -1977, -1318, -659
 };
 
+void area2_add(n_area2 * area, n_vect2 * vect, n_byte first)
+{
+    if (first)
+    {
+        area->bottom_right.x = vect->x;
+        area->bottom_right.y = vect->y;
+        
+        area->top_left.x = vect->x;
+        area->top_left.y = vect->y;
+        return;
+    }
+    
+    if (vect->x < area->top_left.x)
+    {
+        area->top_left.x = vect->x;
+    }
+    if (vect->y < area->top_left.y)
+    {
+        area->top_left.y = vect->y;
+    }
+
+    if (vect->x > area->bottom_right.x)
+    {
+        area->bottom_right.x = vect->x;
+    }
+    if (vect->y > area->bottom_right.y)
+    {
+        area->bottom_right.y = vect->y;
+    }   
+}
+
 /**
  * Converts an array of n_byte2 to a 2d vector (n_vect2)
  * @param converter the vector to hold the information.
@@ -105,6 +136,24 @@ void vect2_center(n_vect2 * center, n_vect2 * initial, n_vect2 * second)
     vect2_add(center, initial, second);
     center->x = center->x / 2;
     center->y = center->y / 2;
+}
+
+void vect2_scalar_multiply(n_vect2 * value, n_int multiplier)
+{
+    value->x = value->x * multiplier;
+    value->y = value->y * multiplier;
+}
+
+void vect2_scalar_divide(n_vect2 * value, n_int divisor)
+{
+    value->x = value->x / divisor;
+    value->y = value->y / divisor;
+}
+
+void vect2_scalar_bitshiftdown(n_vect2 * value, n_int bitshiftdown)
+{
+    value->x = value->x >> bitshiftdown;
+    value->y = value->y >> bitshiftdown;
 }
 
 /**
@@ -207,6 +256,15 @@ n_int vect2_dot(n_vect2 * initial, n_vect2 * second,
     return (multiplier * ((initial->x * second->x) + (initial->y * second->y))) / divisor;
 }
 
+n_int vect2_distance_under(n_vect2 * first, n_vect2 * second, n_int distance)
+{
+    n_vect2 difference;
+    n_int   distance_squ;
+    vect2_subtract(&difference, first, second);
+    distance_squ = (difference.x * difference.x) + (difference.y * difference.y);
+    return (distance * distance) > distance_squ;
+}
+
 /**
  This produces a sine value
  @param direction 256 units per rotation
@@ -302,6 +360,17 @@ void vect2_rotation(n_vect2 * location, n_vect2 * rotation)
     location->y = temp.y;
 }
 
+void vect2_rotation_bitshift(n_vect2 * location, n_vect2 * rotation)
+{
+    n_vect2 temp;
+    
+    temp.x = ((location->x * rotation->x) + (location->y * rotation->y)) >> 15;
+    temp.y = ((location->x * rotation->y) - (location->y * rotation->x)) >> 15;
+    
+    location->x = temp.x;
+    location->y = temp.y;
+}
+
 n_int vect2_nonzero(n_vect2 * nonzero)
 {
     return ((nonzero->x != 0) || (nonzero->y != 0));
@@ -309,7 +378,7 @@ n_int vect2_nonzero(n_vect2 * nonzero)
 
 n_vect2 * vect2_min_max_init(void)
 {
-    n_vect2 * min_max = io_new(2 * sizeof(n_vect2));
+    n_vect2 * min_max = memory_new(2 * sizeof(n_vect2));
     if (min_max == 0L)
     {
         return 0L;
@@ -419,7 +488,7 @@ void vect3_multiplier(n_vect3 * equals, n_vect3 * initial, n_vect3 * second,
     NA_ASSERT(equals, "equals NULL");
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor, "divisor ZERO");
+    NA_ASSERT(divisor != 0, "divisor ZERO");
     
     if (equals == 0L) return;
     if (initial == 0L) return;
@@ -435,7 +504,7 @@ void vect3_d(n_vect3 * initial, n_vect3 * second, n_double multiplier, n_double 
 {
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor, "divisor ZERO");
+    NA_ASSERT(divisor != 0, "divisor ZERO");
     
     if (initial == 0L) return;
     if (second == 0L) return;
@@ -451,7 +520,7 @@ n_double vect3_dot(n_vect3 * initial, n_vect3 * second,
 {
     NA_ASSERT(initial, "initial NULL");
     NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor, "divisor ZERO");
+    NA_ASSERT(divisor != 0, "divisor ZERO");
     
     if (initial == 0L) return 0;
     if (second == 0L) return 0;
@@ -630,7 +699,7 @@ n_byte4 math_hash_fnv1(n_constant_string key)
 {
     n_byte4 hash = 2166136261;
     while(*key)
-        hash = (16777619 * hash) ^ (*key++);
+        hash = (16777619 * hash) ^ (n_byte4)(*key++);
     return hash;
 }
 
@@ -1326,4 +1395,265 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
     }
 }
 
+/* graph code for 3 byte color drawing */
 
+void graph_erase(n_byte * buffer, n_vect2 * img, n_rgba32 * color)
+{
+#ifdef FOUR_BYTE_COLOR
+    n_byte4 * buffer4 = (n_byte4 *)buffer;
+    n_int i = 0;
+    while (i < img->x)
+    {
+        buffer4[i++] = color->thirtytwo;
+    }
+    i = 1;
+    while (i < img->y)
+    {
+        memory_copy((n_byte *)buffer4, (n_byte *)&buffer4[ i++ * img->x], img->x * 4);
+    }
+#endif
+}
+
+/* draws a line */
+void graph_line(n_byte * buffer,
+                n_vect2 * img,
+                n_vect2 * previous,
+                n_vect2 * current,
+                n_rgba32 * color,
+                n_byte thickness)
+{
+#ifdef FOUR_BYTE_COLOR
+    n_byte4 * buffer4 = (n_byte4*)buffer;
+#endif
+    n_int i,max;
+    n_vect2 delta;
+    n_vect2 absdelta;
+    
+    vect2_subtract(&delta, current, previous);
+    
+    vect2_copy(&absdelta, &delta);
+    
+    if (absdelta.x < 0) absdelta.x = -delta.x;
+    if (absdelta.y < 0) absdelta.y = -delta.y;
+    
+    max = absdelta.x;
+    if (absdelta.y > max) max = absdelta.y;
+    
+    for (i=0; i<max; i++)
+    {
+        n_int xx = previous->x + (i*(current->x - previous->x)/max);
+        if ((xx > -1) && (xx < img->x))
+        {
+            n_int yy = previous->y + (i*(current->y-previous->y)/max);
+            if ((yy > -1) && (yy < img->y))
+            {
+#ifdef FOUR_BYTE_COLOR
+                n_int n = (yy*img->x + xx);
+                buffer4[n] = color->thirtytwo;
+#else
+                n_int n = (yy*img->x + xx);
+                buffer[n] = color->rgba.r;
+#endif
+            }
+        }
+    }
+}
+
+
+/**
+ * @brief Draws a curve using three points
+ * @param buffer Image buffer (three bytes per pixel)
+ * @param img_width Width of the image
+ * @param img_height Height of the image
+ * @param x0 x coordinate of the start point
+ * @param y0 y coordinate of the start point
+ * @param x1 x coordinate of the middle point
+ * @param y1 y coordinate of the middle point
+ * @param x0 x coordinate of the end point
+ * @param y0 y coordinate of the end point
+ * @param r red
+ * @param g green
+ * @param b blue
+ * @param radius_percent Radius of the curve as a percentage
+ * @param start_thickness Thickness of the curve at the start point
+ * @param end_thickness Thickness of the curve at the end point
+ */
+void graph_curve(n_byte * buffer,
+                 n_vect2 * img,
+                 n_vect2 * pt0,
+                 n_vect2 * pt1,
+                 n_vect2 * pt2,
+                 n_rgba32 * color,
+                 n_byte radius_percent,
+                 n_uint start_thickness,
+                 n_uint end_thickness)
+{
+    n_int pts[8];
+    
+    n_vect2 current;
+    n_vect2 previous = {0, 0};
+    
+    n_uint i;
+    const n_uint divisions = 20;
+    n_double c[5],d[5],f;
+    
+    /** turn three points into four using the curve radius */
+    pts[0] = pt0->x;
+    pts[1] = pt0->y;
+    
+    pts[2] = pt1->x + ((pt0->x - pt1->x)*radius_percent/100);
+    pts[3] = pt1->y + ((pt0->y - pt1->y)*radius_percent/100);
+    
+    pts[4] = pt1->x + ((pt2->x - pt1->x)*radius_percent/100);
+    pts[5] = pt1->y + ((pt2->y - pt1->y)*radius_percent/100);
+    
+    pts[6] = pt2->x;
+    pts[7] = pt2->y;
+    
+    c[0] = (-pts[0*2] + 3 * pts[1*2] - 3 * pts[2*2] + pts[3*2]) / 6.0;
+    c[1] = (3 * pts[0*2] - 6 * pts[1*2] + 3 * pts[2*2]) / 6.0;
+    c[2] = (-3 * pts[0*2] + 3 * pts[2*2]) / 6.0;
+    c[3] = (pts[0*2] + 4 * pts[1*2] + pts[2*2]) / 6.0;
+    
+    d[0] = (-pts[(0*2)+1] + 3 * pts[(1*2)+1] - 3 * pts[(2*2)+1] + pts[(3*2)+1]) / 6.0;
+    d[1] = (3 * pts[(0*2)+1] - 6 * pts[(1*2)+1] + 3 * pts[(2*2)+1]) / 6.0;
+    d[2] = (-3 * pts[(0*2)+1] + 3 * pts[(2*2)+1]) / 6.0;
+    d[3] = (pts[(0*2)+1] + 4 * pts[(1*2)+1] + pts[(2*2)+1]) / 6.0;
+    
+    for (i = 0; i < divisions; i++)
+    {
+        f = (n_double)i / (n_double)divisions;
+        current.x = (n_int)((c[2] + f * (c[1] + f * c[0])) * f + c[3]);
+        current.y = (n_int)((d[2] + f * (d[1] + f * d[0])) * f + d[3]);
+        
+        if (i > 0)
+        {
+            graph_line(buffer, img,
+                       &previous, &current,
+                       color,
+                       (n_byte)(start_thickness +
+                       ((end_thickness - start_thickness) * i / divisions)));
+        }
+        vect2_copy(&previous, &current);
+    }
+}
+
+#define  MAX_POLYGON_CORNERS 1000
+
+/**
+ * @brief Draw a filled polygon
+ * @param points Array containing 2D points
+ * @param no_of_points The number of 2D points
+ * @param r Red
+ * @param g Green
+ * @param b Blue
+ * @param transparency Degree of transparency
+ * @param buffer Image buffer (3 bytes per pixel)
+ * @param img_width Image width
+ * @param img_height Image height
+ */
+void graph_fill_polygon(n_vect2 * points, n_int no_of_points,
+                        n_rgba32 * color, n_byte transparency,
+                        n_byte * buffer, n_vect2 * img)
+{
+#ifdef FOUR_BYTE_COLOR
+    n_byte4 * buffer4 = (n_byte4*) buffer;
+#endif
+    n_int nodes, nodeX[MAX_POLYGON_CORNERS], i, j, swap, n, x, y;
+    n_int min_x = 99999, min_y = 99999;
+    n_int max_x = -99999, max_y = -99999;
+    
+    for (i = 0; i < no_of_points; i++)
+    {
+        x = points[i].x;
+        y = points[i].y;
+        if ((x==9999) || (y==9999)) continue;
+        if (x < min_x) min_x = x;
+        if (y < min_y) min_y = y;
+        if (x > max_x) max_x = x;
+        if (y > max_y) max_y = y;
+    }
+    
+    if (min_x < 0) min_x = 0;
+    if (min_y < 0) min_y = 0;
+    if (max_x >= img->x) max_x = img->x - 1;
+    if (max_y >= img->y) max_y = img->y - 1;
+    
+    for (y = min_y; y <= max_y; y++)
+    {
+        /**  Build a list of nodes */
+        nodes = 0;
+        j = no_of_points-1;
+        for (i = 0; i < no_of_points; i++)
+        {
+            if (((points[i].y < y) && (points[j].y >= y)) ||
+                ((points[j].y < y) && (points[i].y >= y)))
+            {
+                nodeX[nodes++] =
+                points[i].x + (y - points[i].y) *
+                (points[j].x - points[i].x) /
+                (points[j].y - points[i].y);
+            }
+            j = i;
+            if (nodes == MAX_POLYGON_CORNERS) break;
+        }
+        
+        /**  Sort the nodes, via a simple “Bubble” sort */
+        i = 0;
+        while (i < nodes-1)
+        {
+            if (nodeX[i] > nodeX[i+1])
+            {
+                swap = nodeX[i];
+                nodeX[i] = nodeX[i+1];
+                nodeX[i+1] = swap;
+                if (i) i--;
+            }
+            else
+            {
+                i++;
+            }
+        }
+        
+        /**  Fill the pixels between node pairs */
+        for (i = 0; i < nodes; i += 2)
+        {
+            if (nodeX[i] >= max_x) break;
+            if (nodeX[i+1] > min_x)
+            {
+                /** range check */
+                if (nodeX[i] <= min_x) nodeX[i] = min_x+1;
+                if (nodeX[i+1] >= max_x) nodeX[i+1] = max_x-1;
+                
+                for (x = nodeX[i]; x < nodeX[i+1]; x++)
+                {
+#ifdef FOUR_BYTE_COLOR
+                    if (transparency == 0)
+                    {
+                        n = ((y*img->x)+x);
+                        buffer4[n] = color->thirtytwo;
+                    }
+                    else
+                    {
+                        n = ((y*img->x)+x) * 4;
+                        buffer[n]   = ((color->rgba.b*(255-transparency)) + (buffer[n]*transparency))/256;
+                        buffer[n+1] = ((color->rgba.g*(255-transparency)) + (buffer[n+1]*transparency))/256;
+                        buffer[n+2] = ((color->rgba.r*(255-transparency)) + (buffer[n+2]*transparency))/256;
+                        buffer[n+3] = 0;
+                    }
+#else
+                    n = ((y*img->x)+x);
+                    if (transparency == 0)
+                    {
+                        buffer[n] = color->rgba.b;
+                    }
+                    else
+                    {
+                        buffer[n]   = ((color->rgba.b*(255-transparency)) + (buffer[n]*transparency))/256;
+                    }
+#endif
+                }
+            }
+        }
+    }
+}

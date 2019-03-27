@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -113,7 +113,7 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
     n_int  br_tmp;
     n_int  count = F_Z;
     
-    io_copy(bract, br, B_SIZE);
+    memory_copy(bract, br, B_SIZE);
 
     do
     {
@@ -175,8 +175,8 @@ void brain_cycle(n_byte * local, n_byte2 * constants)
     }
     while (count);
 
-    io_copy(bract, obr, B_SIZE);
-    io_copy(br, bract, B_SIZE);
+    memory_copy(bract, obr, B_SIZE);
+    memory_copy(br, bract, B_SIZE);
 
 }
 
@@ -395,9 +395,9 @@ static n_byte brain_vc(n_byte value, n_byte vowel)
 
 static void brain_longword(n_string output, n_byte value)
 {
-    output[0] = brain_vc((value >> 0) & 7,0);
-    output[1] = brain_vc((value >> 3) & 3,1);
-    output[2] = brain_vc((value >> 5) & 7,0);
+    output[0] = (char)brain_vc((value >> 0) & 7,0);
+    output[1] = (char)brain_vc((value >> 3) & 3,1);
+    output[2] = (char)brain_vc((value >> 5) & 7,0);
     output[4] = 0;
 }
 
@@ -539,7 +539,7 @@ void brain_sentence(n_string string, n_byte * response)
  * @param instruction_type Number indicating the type of instruction
  * @return braincode instruction
  */
-n_byte get_braincode_instruction_type(n_byte instruction_type)
+static n_byte get_braincode_instruction_type(n_byte instruction_type)
 {
     n_byte2 local_random[2];
 
@@ -603,12 +603,6 @@ n_byte get_braincode_instruction(noble_being * local_being)
     return get_braincode_instruction_type(4);
 }
 
-/**
- * @brief
- * @param social_graph
- * @param value
- * @return
- */
 static n_int get_actor_index(noble_social * social_graph, n_int value)
 {
     n_int i;
@@ -1234,7 +1228,7 @@ static void being_second_sense(noble_simulation * local_sim, n_byte addr00, n_by
     case 23:
     {
         /** shift attention to a given social graph entry based on relationship */
-        n_int idx = social_get_relationship(local_sim, meeter_being, (n_byte)relationship_index);
+        n_int idx = social_get_relationship(meeter_being, (n_byte)relationship_index);
         if (idx > -1)
         {
             actor_index = idx;
@@ -1369,11 +1363,11 @@ static void brain_first_action(noble_simulation * local_sim, n_byte awake,
         {
             if (meeter_being == met_being)
             {
-                social_action(local_sim, meeter_being, 0L, *local_addr10);
+                social_action(meeter_being, 0L, *local_addr10);
             }
             else
             {
-                social_action(local_sim, meeter_being, met_being, *local_addr10);
+                social_action(meeter_being, met_being, *local_addr10);
             }
 
             *local_addr00 = 0;
@@ -1609,7 +1603,7 @@ void brain_dialogue(
                 {
                     n_byte v0 = pspace[0];
                     n_byte v1 = IS_CONST1;
-                    if (episodic_intention(sim,meeter_being,episode_index,(n_byte2)(v0*10),v1)!=0)
+                    if (episodic_intention(meeter_being, episode_index, (n_byte2)(v0*10), v1)!=0)
                     {
                         intention_episode_index = episode_index;
                     }
@@ -1680,7 +1674,7 @@ void brain_dialogue(
                 /** avoid repeated anecdotes in the same conversation */
                 if (anecdote_episode_index != episode_index)
                 {
-                    if (episodic_anecdote(sim, meeter_being, met_being) != 0)
+                    if (episodic_anecdote(meeter_being, met_being) != 0)
                     {
                         anecdote_episode_index = episode_index;
                     }

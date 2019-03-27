@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -60,7 +60,6 @@ void episodic_logging(n_console_output * output_function, n_int social)
  * then update the learned preferences based upon the intention type.
  * For example, if the ape intends to chat then the chatting preference
  * may be increased which makes chatting more likely.
- * @param local_sim pointer to simulation
  * @param local pointer to the particular ape
  * @param episode_index array index of the episodic memory representing the intention
  */
@@ -128,10 +127,9 @@ static void episodic_intention_update(noble_being * local, n_int episode_index)
  *
  * The fading memory model may not be strictly realistic, and might
  * be replaced by something else in future.
- * @param local_sim pointer to the simulation
- * @param local pointer to the ape
+ * @param local_being pointer to the ape
  */
-void episodic_cycle_no_sim(noble_being * local_being)
+void episodic_cycle_no_sim(noble_being * local_being, void * data)
 {
     if (local_being->delta.awake == 0) return;
     {
@@ -192,11 +190,6 @@ void episodic_cycle_no_sim(noble_being * local_being)
     }
 }
 
-void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, void * data)
-{
-    episodic_cycle_no_sim(local_being);
-}
-
 /**
  * @brief Returns a celebrity factor based upon how many apes within
  * the episodic memory of the given ape have a similar name to the
@@ -209,7 +202,6 @@ void episodic_cycle(noble_simulation * local_sim, noble_being * local_being, voi
  * @return celebrity value of the met ape
  */
 n_int episodic_met_being_celebrity(
-    noble_simulation * local_sim,
     noble_being * meeter_being,
     noble_being * met_being)
 {
@@ -263,11 +255,10 @@ n_int episodic_met_being_celebrity(
  * Some memories originate from the self and others are acquired from others via chatting.
  * @param local_sim pointer to the simulation
  * @param local pointer to the ape
- * @param intention: 0=episodic memories, 1=intentions
+ * @param intention 0=episodic memories, 1=intentions
  * @return percentage in the range 0-100
  */
 n_int episodic_first_person_memories_percent(
-    noble_simulation * local_sim,
     noble_being * local,
     n_byte intention)
 {
@@ -333,8 +324,7 @@ static n_int noble_episodic_replace_index(
     n_int affect,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2,
-    noble_being * local,
-    noble_simulation * local_sim)
+    noble_being * local)
 {
     /** absolute affect value */
     n_int abs_aff = affect;
@@ -419,7 +409,6 @@ static void episodic_store_full(
     noble_being * local,
     being_episodic_event_type event,
     n_int affect,
-    noble_simulation * local_sim,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2,
     n_byte2 arg,
@@ -438,7 +427,7 @@ static void episodic_store_full(
 
     if (local->delta.awake == FULLY_ASLEEP) return;
 
-    replace = noble_episodic_replace_index(event,affect,name1,family1,name2,family2,local,local_sim);
+    replace = noble_episodic_replace_index(event,affect,name1,family1,name2,family2,local);
 
     if (replace == -1) return;
 
@@ -475,7 +464,7 @@ static void episodic_store_full(
             n_string_block combination = {0};
             n_int social_event;
 
-            social_event = episode_description(local_sim, local, replace, description);
+            social_event = episode_description(local, replace, description);
 
             if ((local_social == 1) && (social_event == 0))
             {
@@ -497,9 +486,9 @@ static void episodic_store_full(
  * @param energy Energy obtained from food
  * @param food_type The type of food
  */
-void episodic_food(noble_simulation * local_sim, noble_being * local, n_int energy, n_byte food_type)
+void episodic_food(noble_being * local, n_int energy, n_byte food_type)
 {
-    episodic_store_full(local, EVENT_EAT, energy, local_sim,
+    episodic_store_full(local, EVENT_EAT, energy,
                         being_gender_name(local), being_family_name(local),
                         0, 0, 0, food_type);
 }
@@ -517,15 +506,14 @@ void episodic_food(noble_simulation * local_sim, noble_being * local, n_int ener
  * @param arg Any additional arguments
  */
 void episodic_store_memory(
-    noble_simulation * local_sim,
     noble_being * local,
     being_episodic_event_type event,
-    affect_type affect,
+    AFFECT_TYPE affect,
     n_byte2 name1, n_byte2 family1,
     n_byte2 name2, n_byte2 family2,
     n_byte2 arg)
 {
-    episodic_store_full(local,event,affect,local_sim,name1,family1,name2,family2, arg, 0);
+    episodic_store_full(local, event,affect,name1,family1,name2,family2, arg, 0);
 }
 /**
  * @brief Store an episodic memory about the self
@@ -536,13 +524,12 @@ void episodic_store_memory(
  * @param arg Any additional argument
  */
 void episodic_self(
-    noble_simulation * local_sim,
     noble_being * local,
     being_episodic_event_type event,
-    affect_type affect,
+    AFFECT_TYPE affect,
     n_byte2 arg)
 {
-    episodic_store_memory(local_sim, local, event, affect,
+    episodic_store_memory(local, event, affect,
                           being_gender_name(local), being_family_name(local),
                           0, 0, arg);
 }
@@ -556,15 +543,14 @@ void episodic_self(
  * @param arg Any additional argument
  */
 void episodic_close(
-    noble_simulation * local_sim,
     noble_being * local,
     noble_being * other,
     being_episodic_event_type event,
-    affect_type affect,
+    AFFECT_TYPE affect,
     n_byte2 arg)
 {
     episodic_store_memory(
-        local_sim, local, event, affect,
+        local, event, affect,
         being_gender_name(other), being_family_name(other),
         0, 0, arg);
 }
@@ -578,15 +564,14 @@ void episodic_close(
  * @param arg Any additional argument
  */
 void episodic_interaction(
-    noble_simulation * local_sim,
     noble_being * local,
     noble_being * other,
     being_episodic_event_type event,
-    affect_type affect,
+    AFFECT_TYPE affect,
     n_byte2 arg)
 {
     episodic_store_memory(
-        local_sim, local, event, affect,
+        local, event, affect,
         being_gender_name(local),being_family_name(local),
         being_gender_name(other),being_family_name(other), arg);
 }
@@ -604,7 +589,6 @@ void episodic_interaction(
  * @return Returns 1 if the update was successful, or 0 otherwise.
  */
 n_byte episodic_intention(
-    noble_simulation * local_sim,
     noble_being * local,
     n_int episode_index,
     n_byte2 mins_ahead,
@@ -661,7 +645,7 @@ n_byte episodic_intention(
                   being_family_name(local),
                   local_episodic[episode_index].first_name[BEING_MET],
                   local_episodic[episode_index].family_name[BEING_MET],
-                  local, local_sim);
+                  local);
 
     if (replace == -1)
     {
@@ -673,7 +657,7 @@ n_byte episodic_intention(
         return 0;
     }
 
-    io_copy((n_byte*)&local_episodic[episode_index], (n_byte*)&local_episodic[replace], sizeof(noble_episodic));
+    memory_copy((n_byte*)&local_episodic[episode_index], (n_byte*)&local_episodic[replace], sizeof(noble_episodic));
 
     local_episodic[replace].event = EVENT_INTENTION + event;
 
@@ -696,7 +680,6 @@ n_byte episodic_intention(
  * @return Returns 1 if the copy was successful, 0 otherwise
  */
 n_byte episodic_anecdote(
-    noble_simulation * local_sim,
     noble_being * local,
     noble_being * other)
 {
@@ -753,7 +736,7 @@ n_byte episodic_anecdote(
                   local_episodic[being_attention(local,ATTENTION_EPISODE)].family_name[BEING_MEETER],
                   local_episodic[being_attention(local,ATTENTION_EPISODE)].first_name[BEING_MET],
                   local_episodic[being_attention(local,ATTENTION_EPISODE)].family_name[BEING_MET],
-                  local,local_sim);
+                  local);
 
     if (replace==-1) return 0;
 
@@ -773,11 +756,10 @@ n_byte episodic_anecdote(
  * An empty function
  */
 void episodic_interaction(
-                          noble_simulation * local_sim,
                           noble_being * local,
                           noble_being * other,
                           being_episodic_event_type event,
-                          affect_type affect,
+                          AFFECT_TYPE affect,
                           n_byte2 arg)
 {
 
@@ -787,10 +769,9 @@ void episodic_interaction(
  * An empty function
  */
 void episodic_store_memory(
-                           noble_simulation * local_sim,
                            noble_being * local,
                            being_episodic_event_type event,
-                           affect_type affect,
+                           AFFECT_TYPE affect,
                            n_byte2 name1, n_byte2 family1,
                            n_byte2 name2, n_byte2 family2,
                            n_byte2 arg)

@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,19 +35,16 @@
 
 #import <XCTest/XCTest.h>
 
+#include "noble.h"
+#include "entity.h"
+#include "universe.h"
+#include "shared.h"
+
 @interface Noble_ApeTests : XCTestCase
 
 @end
 
 @implementation Noble_ApeTests
-
-//#ifdef EXPLICIT_DEBUG
-
-#include "../../sim/noble/noble.h"
-#include "../../sim/entity/entity.h"
-#include "../../sim/universe/universe.h"
-
-#include "../../sim/noble/shared.h"
 
 noble_simulation * value = 0L;
 noble_being      * being = 0L;
@@ -55,12 +52,7 @@ noble_being      * being = 0L;
 - (void)setUp
 {
     [super setUp];
-    
-    (void)shared_new(0x1382);
-    
-    value = sim_sim();
-    
-    being = &(value->beings[2]);
+    shared_new(12345);
 }
 
 - (void)tearDown
@@ -69,13 +61,13 @@ noble_being      * being = 0L;
     // Tear-down code here.
     [super tearDown];
 }
-
+/*
 - (void) testTime
 {
     n_byte4 time_value = land_time();
     XCTAssertTrue(land_time() == 2, @"Time is %u", time_value);
 }
-
+*/
 - (void)testCheckInitialDate
 {
     XCTAssertTrue(land_date() == AGE_OF_MATURITY, @"Days is not initially AGE_OF_MATURITY (%ld)", (n_int)AGE_OF_MATURITY);
@@ -84,42 +76,71 @@ noble_being      * being = 0L;
 - (void)testMapCheckSum
 {
     n_uint hash = math_hash((n_byte *)land_topography(), MAP_AREA);
-    XCTAssertTrue(hash == 0xc4ccc927a99055cf, @"Hash doesn't comply with prior map hashes (%lx)", hash);
+    XCTAssertTrue(hash == 0x4c2cc85376bf6e3e, @"Hash doesn't comply with prior map hashes (%lx)", hash);
 }
 /*
 - (void)testBeingCheckSum
 {
     
     n_int length = sizeof(noble_being) - sizeof(n_byte *) - sizeof(noble_social *) - sizeof(noble_episodic *);
-    n_uint hash = math_hash((n_byte *)being, length);
-    XCTAssertTrue(length == 69480, @"Length doesn't comply with prior length (%ld)", length);
+    n_uint hash;
     
-    XCTAssertTrue(hash == 0xff94a67f7d05521, @"Hash doesn't comply with prior being hashes (%lx)", hash);
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
+    hash = math_hash((n_byte *)being, length);
+    XCTAssertTrue(length == 70248, @"Length doesn't comply with prior length (%ld)", length);
+    
+    XCTAssertTrue(hash == 0x25d693ac3c13b59d, @"Hash doesn't comply with prior being hashes (%lx)", hash);
 }
 */
+
 - (void)testBrainCheckSum
 {
-    n_uint hash = math_hash(being->braindata.brain, DOUBLE_BRAIN);
-    XCTAssertTrue(hash == 0xaa29b750cca6b7b3, @"Hash doesn't comply with prior brain hashes (%lx)", hash);
+    n_uint hash;
+    
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
+    hash = math_hash(being->braindata.brain, DOUBLE_BRAIN);
+    XCTAssertTrue(hash == 0xecbf7d37c888ada0, @"Hash doesn't comply with prior brain hashes (%lx)", hash);
 }
 
 - (void)testSocialCheckSum
 {
-    n_uint hash = math_hash((n_byte *)being->events.social, SOCIAL_SIZE * sizeof(noble_social));
-    XCTAssertTrue(hash == 0x31e53c3a9172cf66, @"Hash doesn't comply with prior social hashes (%lx)", hash);
+    n_uint hash;
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    hash = math_hash((n_byte *)being->events.social, SOCIAL_SIZE * sizeof(noble_social));
+    XCTAssertTrue(hash == 0x7f0aee9728e122b6, @"Hash doesn't comply with prior social hashes (%lx)", hash);
 }
 
 - (void)testEpisodicCheckSum
 {
-    n_uint hash = math_hash((n_byte *)being->events.episodic, EPISODIC_SIZE * sizeof(noble_episodic));
+    n_uint hash;
+    
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
+    hash = math_hash((n_byte *)being->events.episodic, EPISODIC_SIZE * sizeof(noble_episodic));
     XCTAssertTrue(hash == 0xe9e6c3c12d7a37ce, @"Hash doesn't comply with prior episodic hashes (%lx)", hash);
 }
 
 
 - (void)actionMouseClick
 {
-    n_int   map_x = APESPACE_TO_MAPSPACE(being->delta.location[0]);
-    n_int   map_y = APESPACE_TO_MAPSPACE(being->delta.location[1]);
+    n_int   map_x, map_y;
+    
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
+    map_x = APESPACE_TO_MAPSPACE(being->delta.location[0]);
+    map_y = APESPACE_TO_MAPSPACE(being->delta.location[1]);
     
     shared_mouseReceived(map_x, map_y, NUM_VIEW);
 }
@@ -127,11 +148,17 @@ noble_being      * being = 0L;
 - (void)testMouseClick
 {
     [self actionMouseClick];
-    shared_cycle(1000, NUM_VIEW, 512, 512);
-    shared_cycle(1000, NUM_TERRAIN, 512, 512);
     shared_mouseUp();
-    shared_cycle(1000, NUM_VIEW, 512, 512);
-    shared_cycle(1000, NUM_TERRAIN, 512, 512);
+
+    shared_cycle(1000, NUM_VIEW);
+    shared_cycle(1001, NUM_TERRAIN);
+    shared_cycle(1002, NUM_VIEW);
+    shared_cycle(1003, NUM_TERRAIN);
+    /*
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    */
     XCTAssertTrue(value->select == being, @"Selected being is found");
 }
 
@@ -145,55 +172,84 @@ noble_being      * being = 0L;
     shared_mouseOption(0);
     shared_mouseUp();
 
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
     NSLog(@"Location %d %d", being->delta.location[0], being->delta.location[1]);
     
     XCTAssertTrue(being->delta.location[0] == 7131, @"X value is wrong (%d)", being->delta.location[0]);
     XCTAssertTrue(being->delta.location[1] == 13627, @"Y value is wrong (%d)", being->delta.location[1]);
 }
 
+
 - (void)testShorttermSimulationCompare
 {
     n_int  time = 3;
-    n_uint  hash = math_hash((n_byte *)being, 60);
+    n_uint  hash;
+    
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
+    hash = math_hash((n_byte *)&being->constant, 60);
     
     XCTAssertTrue(hash == 0xe55d6cfddcc974c8, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
     
-    shared_cycle(2, NUM_VIEW, 512, 512);
-    shared_cycle(2, NUM_TERRAIN, 512, 512);
+    shared_cycle(2, NUM_VIEW);
+    shared_cycle(2, NUM_TERRAIN);
     
-    hash = math_hash((n_byte *)being, 60);
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
+    hash = math_hash((n_byte *)&being->constant, 60);
     XCTAssertTrue(hash == 0x4dab5dbc442674b4, @"Short-term hash doesn't comply with prior being hashes (%lx)", hash);
     
     while (time < 1023)
     {
-        shared_cycle(2+time, NUM_VIEW, 512, 512);
-        shared_cycle(2+time, NUM_TERRAIN, 512, 512);
+        shared_cycle(2+time, NUM_VIEW);
+        shared_cycle(2+time, NUM_TERRAIN);
         time++;
     }
     
-    hash = math_hash((n_byte *)being, 60);
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    
+    hash = math_hash((n_byte *)&being->constant, 60);
     XCTAssertTrue(hash == 0x4dab5dbc442674b4, @"Short-term hash doesn't comply with prior being hashes (%lx)", hash);
 }
 
 
 - (void)testLongtermSimulationCompare
 {
-    /*n_int  time = 3;*/
-    n_uint  hash = math_hash((n_byte *)being, sizeof(noble_being));
+
+    n_uint  hash;
+    
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
+    hash = math_hash((n_byte *)being, sizeof(noble_being));
     
     XCTAssertTrue(hash == 0x4339aa2ef072a1d5, @"Starting hash doesn't comply with prior being hashes (%lx)", hash);
     
-    shared_cycle(2, NUM_VIEW, 512, 512);
-    shared_cycle(2, NUM_TERRAIN, 512, 512);
+    shared_cycle(2, NUM_VIEW);
+    shared_cycle(2, NUM_TERRAIN);
 
+    
+    value = sim_sim();
+    
+    being = &(value->beings[2]);
     hash = math_hash((n_byte *)being, 60);
     XCTAssertTrue(hash == 0xfd9f28ee82fa76bc, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
 
-    shared_cycle(998, NUM_VIEW, 512, 512);
-    shared_cycle(998, NUM_TERRAIN, 512, 512);
+    shared_cycle(998, NUM_VIEW);
+    shared_cycle(998, NUM_TERRAIN);
 
-    /*hash = math_hash((n_byte *)being, sizeof(noble_being));*/
+    value = sim_sim();
     
+    being = &(value->beings[2]);
     hash = math_hash((n_byte *)being, 60);
     XCTAssertTrue(hash == 0xfd9f28ee82fa76bc, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
     
@@ -201,8 +257,5 @@ noble_being      * being = 0L;
     
     XCTAssertTrue(hash == 0xe0db608ca1e3f505, @"Longterm hash doesn't comply with prior being hashes (%lx)", hash);
 }
-
-//#endif
-
 
 @end

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -57,15 +57,6 @@
 
 #define IS_WINDOW_KIND(x,y)			(((x)>>(y))&1)
 
-enum colour_type
-{
-    COLOUR_BLACK     =   (0),
-    COLOUR_GREY      =   (252),
-    COLOUR_YELLOW    =   (253),
-    COLOUR_RED_DARK  =   (254),
-    COLOUR_RED       =   (255)
-};
-
 enum
 {
     NA_MENU_PAUSE = 0,
@@ -81,9 +72,9 @@ enum
     NA_MENU_HEALTHY_CARRIER
 };
 
-#define	NON_INTERPOLATED COLOUR_GREY
+#define	NON_INTERPOLATED COLOR_GREY
 
-#define	spot_colour(alpha,spx,spy,col)	alpha[((spx)|((spy)<<8))]=(col)
+#define	spot_color(alpha,spx,spy,col)	alpha[((spx)|((spy)<<8))]=(col)
 
 /*	Graphics Metrics */
 
@@ -107,44 +98,19 @@ typedef enum
 
 #endif
 
-/*
- n_uint braincode_standard_deviation(noble_being * local_being);
- void braincode_number_of_instructions(
- noble_being * local_being,
- n_int * no_of_sensors,
- n_int * no_of_actuators,
- n_int * no_of_operators,
- n_int * no_of_conditionals,
- n_int * no_of_data);
- */
-/* graph functions */
-/*void graph_line(n_byte * buffer, n_int img_width, n_int img_height, n_int prev_x, n_int prev_y, n_int x, n_int y, n_byte r,n_byte g,n_byte b,n_byte thickness);*/
-void graph_honor_distribution(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_ideosphere(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_genepool(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_relationship_matrix(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_pathogens(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_age_demographic(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_heights(noble_simulation * sim, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_phasespace(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height, n_byte graph_type, n_byte data_type);
-void graph_braincode(noble_simulation * sim, noble_being * local_being, n_byte * buffer, n_int img_width, n_int img_height, n_byte clear);
-
-void graph_preferences(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_vascular(noble_being * being,
-                    n_byte * buffer,
-                    n_int img_width, n_int img_height,
-                    n_int tx, n_int ty, n_int bx, n_int by,
-                    n_byte thickness,
-                    n_byte clear,
-                    n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
-                    n_int hip_angle, n_int knee_angle,
-                    n_byte show_skeleton_keypoints);
-void graph_socialsim(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
-void graph_meet_places(noble_simulation * sim, n_byte update_type, n_byte * buffer, n_int img_width, n_int img_height);
-
 n_byte * draw_weather_grayscale(void);
 
 void draw_meters(noble_simulation * local_sim);
+
+void vascular_draw(n_genetics * being,
+                   n_byte * buffer,
+                   n_vect2* img,
+                   n_vect2 *tp, n_vect2 * bp,
+                   n_byte thickness,
+                   n_byte clear,
+                   n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
+                   n_int hip_angle, n_int knee_angle,
+                   n_byte show_skeleton_keypoints);
 
 n_int draw_toggle_weather(void);
 
@@ -155,16 +121,9 @@ n_int draw_toggle_braincode(void);
 n_int draw_toggle_territory(void);
 
 n_int draw_toggle_tide_daylight(void);
-
-void draw_fit(n_byte * points, n_byte2 * color_fit);
+n_int draw_toggle_tide_daylight_value(void);
 
 void  draw_terrain_coord(n_int * co_x, n_int * co_y);
-
-extern n_byte land_points[];
-
-void draw_color_time(n_byte2 * color_fit);
-
-void draw_color_group_update(n_byte2 * color_fit);
 
 void draw_undraw_clear(void);
 

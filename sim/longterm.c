@@ -4,7 +4,7 @@
 
 	=============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -179,7 +179,7 @@ static n_int cle_load(void * ptr, n_string response, n_console_output output_fun
 {
     if (io_disk_check(response)!=0)
     {
-        console_open(ptr, response, output_function);
+        command_open(ptr, response, output_function);
         sprintf(simulation_filename,"%s",response);
         printf("Simulation file %s loaded\n",response);
     }

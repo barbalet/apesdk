@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -94,24 +94,49 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
     switch (food_type)
     {
     case FOOD_VEGETABLE:
+#ifdef DEBUG_LACK_OF_MOVEMENT
+        {
+            n_string_block information_string;
+            sprintf(information_string, "vegetable %ld absorbtion %ld food", vegetable, absorb_denom);
+            being_register_movement(local, information_string);
+        }
+#endif
         return_value = (vegetable << 4) / absorb_denom;
         break;
     case FOOD_FRUIT:
+#ifdef DEBUG_LACK_OF_MOVEMENT
+        being_register_movement(local, "fruit food");
+#endif
         return_value = (fruit << 4) / absorb_denom;
         break;
     case FOOD_SHELLFISH:
+#ifdef DEBUG_LACK_OF_MOVEMENT
+        being_register_movement(local, "shellfish food");
+#endif
         return_value = (shellfish << 4) / absorb_denom;
         break;
     case FOOD_SEAWEED:
+#ifdef DEBUG_LACK_OF_MOVEMENT
+        being_register_movement(local, "seaweed food");
+#endif
         return_value = (seawood << 4) / absorb_denom;
         break;
     case FOOD_BIRD_EGGS:
+#ifdef DEBUG_LACK_OF_MOVEMENT
+        being_register_movement(local, "bird egg food");
+#endif
         return_value = (seawood << 4) / absorb_denom;
         break;
     case FOOD_LIZARD_EGGS:
+#ifdef DEBUG_LACK_OF_MOVEMENT
+        being_register_movement(local, "lizard egg food");
+#endif
         return_value = (seawood << 4) / absorb_denom;
         break;
     default:
+#ifdef DEBUG_LACK_OF_MOVEMENT
+        being_register_movement(local, "no food");
+#endif
         return 0;
     }
 
@@ -126,8 +151,6 @@ n_int food_absorption(noble_being * local, n_int max_energy, n_byte food_type)
 
 /**
  * @brief Returns the amount of food of the given type at the given location
- * @param local_land Pointer to the land
- * @param local_weather Pointer to the weather
  * @param loc_x x coordinate
  * @param loc_y y coordinate
  * @param kind The type of food
@@ -143,8 +166,6 @@ static n_int food_location(n_int loc_x,
 
 /**
  * @brief Returns the values for grass, trees and bushes at the given location
- * @param local_land Pointer to the land
- * @param local_weather Pointer to the weather
  * @param loc_x X ape coordinate on the map
  * @param loc_y Y ape coordinate on the lap
  * @param grass Returned value for grass
@@ -174,7 +195,6 @@ void food_values(n_int loc_x,
 
 /**
  * @brief Returns the dominant food type on land and its associated maximum energy value
- * @param sim Pointer to the simulation
  * @param loc_x X ape coordinate
  * @param loc_y Y ape coordinate
  * @param energy Returned maximum energy value for the food type
@@ -214,7 +234,6 @@ static n_byte food_eat_land(
 
 /**
  * @brief Returns the dominant food type in the intertidal zone and its associated maximum energy value
- * @param sim Pointer to the simulation
  * @param loc_x X ape coordinate
  * @param loc_y Y ape coordinate
  * @param energy Returned maximum energy value for the food type
@@ -261,7 +280,6 @@ static n_byte food_intertidal(
 
 /**
  * @brief Eat food at the given location and return the energy increase
- * @param sim Pointer to the simulation
  * @param loc_x X ape coordinate
  * @param loc_y Y ape coordinate
  * @param az Z ape coordinate

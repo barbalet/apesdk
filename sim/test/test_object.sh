@@ -3,7 +3,7 @@
 #
 #	=============================================================
 #
-#   Copyright 1996-2018 Tom Barbalet. All rights reserved.
+#   Copyright 1996-2019 Tom Barbalet. All rights reserved.
 #
 #   Permission is hereby granted, free of charge, to any person
 #   obtaining a copy of this software and associated documentation
@@ -39,7 +39,10 @@ else
     CFLAGS=-O2 
 fi
 
+gcc ${CFLAGS} -c $SOURCEDIR/noble/memory.c -o memory.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/file.c -o file.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/console.c -o console.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/math.c -o math.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/parse.c -o parse.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/interpret.c -o interpret.o

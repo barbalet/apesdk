@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -43,7 +43,7 @@
  * @param other The being receiving
  * @param carrying objects being carried
  */
-static void body_action_give(noble_simulation * sim, noble_being * local, noble_being * other, n_byte2 carrying)
+static void body_action_give(noble_being * local, noble_being * other, n_byte2 carrying)
 {
     n_byte hand = BODY_RIGHT_HAND;
 
@@ -59,8 +59,8 @@ static void body_action_give(noble_simulation * sim, noble_being * local, noble_
         being_set_attention(local,ATTENTION_BODY, BODY_RIGHT_HAND);
         being_set_attention(other,ATTENTION_BODY, BODY_RIGHT_HAND);
 
-        episodic_interaction(sim, local, other, EVENT_GIVEN, EPISODIC_AFFECT_ZERO, carrying);
-        episodic_interaction(sim, other, local, EVENT_GIVEN_BY, AFFECT_RECEIVE, carrying);
+        episodic_interaction(local, other, EVENT_GIVEN, EPISODIC_AFFECT_ZERO, carrying);
+        episodic_interaction(other, local, EVENT_GIVEN_BY, AFFECT_RECEIVE, carrying);
 
         being_drop(local,hand);
         if (being_carried(other,BODY_RIGHT_HAND)==0)
@@ -81,7 +81,7 @@ static void body_action_give(noble_simulation * sim, noble_being * local, noble_
  * @param other The being being bashed
  * @param carrying Objects being carried
  */
-static void body_action_bash(noble_simulation * sim, noble_being * local, noble_being * other, n_byte2 carrying)
+static void body_action_bash(noble_being * local, noble_being * other, n_byte2 carrying)
 {
     n_byte hand = BODY_RIGHT_HAND;
     n_int  index, hit = 0;
@@ -98,7 +98,7 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
         {
             being_set_attention(local,ATTENTION_BODY, BODY_RIGHT_HAND);
             being_set_attention(other,ATTENTION_BODY, BODY_BACK);
-            index = get_noble_social(other,local,sim);
+            index = get_noble_social(other, local);
             if (index>-1)
             {
                 graph = being_social(other);
@@ -120,16 +120,16 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
         {
             if (hit != 0)
             {
-                episodic_interaction(sim, local, other, EVENT_WHACKED, EPISODIC_AFFECT_ZERO, 0);
-                episodic_interaction(sim, other, local, EVENT_WHACKED_BY, AFFECT_WHACKED, 0);
+                episodic_interaction(local, other, EVENT_WHACKED, EPISODIC_AFFECT_ZERO, 0);
+                episodic_interaction(other, local, EVENT_WHACKED_BY, AFFECT_WHACKED, 0);
             }
         }
         if (carrying & INVENTORY_ROCK)
         {
-            episodic_interaction(sim, local, other, EVENT_HURLED, EPISODIC_AFFECT_ZERO, 0);
+            episodic_interaction(local, other, EVENT_HURLED, EPISODIC_AFFECT_ZERO, 0);
             if (hit != 0)
             {
-                episodic_interaction(sim, other, local, EVENT_HURLED_BY, AFFECT_HURL, 0);
+                episodic_interaction(other, local, EVENT_HURLED_BY, AFFECT_HURL, 0);
             }
         }
     }
@@ -145,24 +145,24 @@ static void body_action_bash(noble_simulation * sim, noble_being * local, noble_
  * @param other_attention Focus of attention for the second being
  * @param kind The type of event
  */
-static void body_action_interactive(noble_simulation * sim, noble_being * local, noble_being * other,
+static void body_action_interactive(noble_being * local, noble_being * other,
                                     n_byte local_attention, n_byte other_attention, n_byte kind)
 {
-    being_set_attention(local,ATTENTION_BODY, local_attention);
-    being_set_attention(other,ATTENTION_BODY, other_attention);
-    episodic_interaction(sim, local, other, kind, EPISODIC_AFFECT_ZERO, 0);
-    episodic_interaction(sim, other, local, kind+1, EPISODIC_AFFECT_ZERO, 0);
+    being_set_attention(local, ATTENTION_BODY, local_attention);
+    being_set_attention(other, ATTENTION_BODY, other_attention);
+    episodic_interaction(local, other, kind, EPISODIC_AFFECT_ZERO, 0);
+    episodic_interaction(other, local, kind+1, EPISODIC_AFFECT_ZERO, 0);
 }
 
 /*** This block should also be the same function ***/
 
-static void body_action_interactive_change(noble_simulation * sim, noble_being * local, noble_being * other,
-        n_byte local_attention, n_byte other_attention, n_byte kind, n_byte positive, affect_type affect)
+static void body_action_interactive_change(noble_being * local, noble_being * other,
+        n_byte local_attention, n_byte other_attention, n_byte kind, n_byte positive, AFFECT_TYPE affect)
 {
     n_int index;
-    being_set_attention(local,ATTENTION_BODY, local_attention);
-    being_set_attention(other,ATTENTION_BODY, other_attention);
-    index = get_noble_social(other,local,sim);
+    being_set_attention(local, ATTENTION_BODY, local_attention);
+    being_set_attention(other, ATTENTION_BODY, other_attention);
+    index = get_noble_social(other, local);
     if (index>-1)
     {
         noble_social * graph = being_social(other);
@@ -177,8 +177,8 @@ static void body_action_interactive_change(noble_simulation * sim, noble_being *
         }
     }
 
-    episodic_interaction(sim, local, other, kind, EPISODIC_AFFECT_ZERO, 0);
-    episodic_interaction(sim, other, local, kind+1, affect, 0);
+    episodic_interaction(local, other, kind, EPISODIC_AFFECT_ZERO, 0);
+    episodic_interaction(other, local, kind+1, affect, 0);
 }
 
 /**
@@ -189,7 +189,7 @@ static void body_action_interactive_change(noble_simulation * sim, noble_being *
  * @param hand left or right hand
  * @param kind The kind of object
  */
-static void body_action_hand_object(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand, n_byte kind)
+static void body_action_hand_object(noble_being * local, n_byte2 carrying, n_byte hand, n_byte kind)
 {
     if (carrying == 0)
     {
@@ -201,19 +201,19 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
     {
         if (carrying & INVENTORY_BRANCH)
         {
-            episodic_self(sim, local, kind, EPISODIC_AFFECT_ZERO, INVENTORY_BRANCH);
+            episodic_self(local, kind, EPISODIC_AFFECT_ZERO, INVENTORY_BRANCH);
         }
         else
         {
             if (carrying & INVENTORY_TWIG)
             {
-                episodic_self(sim, local, kind, EPISODIC_AFFECT_ZERO, INVENTORY_TWIG);
+                episodic_self(local, kind, EPISODIC_AFFECT_ZERO, INVENTORY_TWIG);
             }
             else
             {
                 if (carrying & INVENTORY_SPEAR)
                 {
-                    episodic_self(sim, local, kind, EPISODIC_AFFECT_ZERO, INVENTORY_SPEAR);
+                    episodic_self(local, kind, EPISODIC_AFFECT_ZERO, INVENTORY_SPEAR);
                 }
             }
         }
@@ -228,7 +228,7 @@ static void body_action_hand_object(noble_simulation * sim, noble_being * local,
  * @param carrying Objects which are carried
  * @param hand Left or right hand
  */
-static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
+static void body_action_jab(noble_being * local, n_byte2 carrying, n_byte hand)
 {
     enum inventory_type carrying2 = being_carried(local,BODY_LEFT_HAND);
     if ((carrying & INVENTORY_SPEAR) ||
@@ -257,7 +257,7 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
                     being_take(local,hand, INVENTORY_FISH);
                 }
 #ifdef EPISODIC_ON
-                episodic_self(sim, local, EVENT_FISH, AFFECT_FISH, 0);
+                episodic_self(local, EVENT_FISH, AFFECT_FISH, 0);
 #endif
             }
         }
@@ -271,7 +271,7 @@ static void body_action_jab(noble_simulation * sim, noble_being * local, n_byte2
  * @param carrying Things which are carried
  * @param hand left or right hand
  */
-static void body_action_bash_objects(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
+static void body_action_bash_objects(noble_being * local, n_byte2 carrying, n_byte hand)
 {
     enum inventory_type carrying2 = being_carried(local,BODY_LEFT_HAND);
     if ((carrying & INVENTORY_ROCK) && (carrying2 & INVENTORY_ROCK))
@@ -335,7 +335,7 @@ static void body_action_bash_objects(noble_simulation * sim, noble_being * local
  * @param hand left or right hand
  */
 
-static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
+static void body_action_chew(noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if (!((carrying & INVENTORY_GRASS) ||
             (carrying & INVENTORY_TWIG) ||
@@ -359,7 +359,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
             carrying |= 1;
         }
 #ifdef EPISODIC_ON
-        episodic_self(sim, local,EVENT_CHEW, EPISODIC_AFFECT_ZERO, carrying);
+        episodic_self(local,EVENT_CHEW, EPISODIC_AFFECT_ZERO, carrying);
 #endif
     }
     if (carrying & INVENTORY_GRASS)
@@ -412,7 +412,7 @@ static void body_action_chew(noble_simulation * sim, noble_being * local, n_byte
  * @param carrying Things which are carried
  * @param hand left or right hand
  */
-static void body_action_swap_hands(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
+static void body_action_swap_hands(noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if ((carrying != 0) && (being_carried(local,BODY_LEFT_HAND)==0))
     {
@@ -437,7 +437,7 @@ static void body_action_swap_hands(noble_simulation * sim, noble_being * local, 
  * @param carrying Things which are carried
  * @param hand left or right hand
  */
-static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
+static void body_action_drop(noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if (carrying == 0)
     {
@@ -448,7 +448,7 @@ static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte
     {
         being_drop(local,hand);
 #ifdef EPISODIC_ON
-        episodic_self(sim, local, EVENT_DROP, EPISODIC_AFFECT_ZERO, carrying);
+        episodic_self(local, EVENT_DROP, EPISODIC_AFFECT_ZERO, carrying);
 #endif
     }
 }
@@ -460,7 +460,7 @@ static void body_action_drop(noble_simulation * sim, noble_being * local, n_byte
  * @param carrying Things being carried by the being
  * @param hand left or right hand
  */
-static void body_action_pickup(noble_simulation * sim, noble_being * local, n_byte2 carrying, n_byte hand)
+static void body_action_pickup(noble_being * local, n_byte2 carrying, n_byte hand)
 {
     if ((carrying != 0) && (!being_posture_under(local,POSTURE_CROUCHING)))
     {
@@ -489,7 +489,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                 {
                     being_take(local,hand, INVENTORY_GRASS);
 #ifdef EPISODIC_ON
-                    episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_GRASS);
+                    episodic_self(local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_GRASS);
 #endif
                 }
                 if ((trees>grass) && (trees>bush))
@@ -498,14 +498,14 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                     {
                         being_take(local,hand, INVENTORY_BRANCH);
 #ifdef EPISODIC_ON
-                        episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_BRANCH);
+                        episodic_self(local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_BRANCH);
 #endif
                     }
                     else
                     {
                         being_take(local,hand, INVENTORY_NUT);
 #ifdef EPISODIC_ON
-                        episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_NUT);
+                        episodic_self(local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_NUT);
 #endif
                     }
                 }
@@ -513,7 +513,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
                 {
                     being_take(local,hand, INVENTORY_TWIG);
 #ifdef EPISODIC_ON
-                    episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_TWIG);
+                    episodic_self(local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_TWIG);
 #endif
                 }
             }
@@ -521,7 +521,7 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
             {
                 being_take(local,hand, INVENTORY_ROCK);
 #ifdef EPISODIC_ON
-                episodic_self(sim, local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_ROCK);
+                episodic_self(local, EVENT_PICKUP,EPISODIC_AFFECT_ZERO, INVENTORY_ROCK);
 #endif
             }
         }
@@ -536,7 +536,6 @@ static void body_action_pickup(noble_simulation * sim, noble_being * local, n_by
  * @param action The type of action
  */
 void social_action(
-    noble_simulation * sim,
     noble_being * local,
     noble_being * other,
     n_byte action)
@@ -556,28 +555,28 @@ void social_action(
         switch(action % INDIVIDUAL_ACTIONS)
         {
         case ACTION_JAB:
-            body_action_jab(sim, local, carrying, hand);
+            body_action_jab(local, carrying, hand);
             break;
         case ACTION_BASH_OBJECTS:
-            body_action_bash_objects(sim, local, carrying, hand);
+            body_action_bash_objects(local, carrying, hand);
             break;
         case ACTION_CHEW:
-            body_action_chew(sim, local, carrying, hand);
+            body_action_chew(local, carrying, hand);
             break;
         case ACTION_BRANDISH:
-            body_action_hand_object(sim, local, carrying, hand, EVENT_BRANDISH);
+            body_action_hand_object(local, carrying, hand, EVENT_BRANDISH);
             break;
         case ACTION_DRAG:
-            body_action_hand_object(sim, local, carrying, hand, EVENT_DRAG);
+            body_action_hand_object(local, carrying, hand, EVENT_DRAG);
             break;
         case ACTION_SWAP_HANDS:
-            body_action_swap_hands(sim, local, carrying, hand);
+            body_action_swap_hands(local, carrying, hand);
             break;
         case ACTION_DROP:
-            body_action_drop(sim, local, carrying, hand);
+            body_action_drop(local, carrying, hand);
             break;
         case ACTION_PICKUP:
-            body_action_pickup(sim, local, carrying, hand);
+            body_action_pickup(local, carrying, hand);
             break;
         }
     }
@@ -587,35 +586,35 @@ void social_action(
         switch(action % SOCIAL_ACTIONS)
         {
         case ACTION_PROD:
-            body_action_interactive_change(sim, local, other, BODY_RIGHT_HAND, BODY_FRONT,
+            body_action_interactive_change(local, other, BODY_RIGHT_HAND, BODY_FRONT,
                                            EVENT_PRODDED, 0, AFFECT_PRODDED);
             break;
         case ACTION_HUG:
-            body_action_interactive_change(sim, local, other, BODY_FRONT, BODY_FRONT,
+            body_action_interactive_change(local, other, BODY_FRONT, BODY_FRONT,
                                            EVENT_HUGGED, 1, AFFECT_HUGGED);
             break;
         case ACTION_SMILE:
-            body_action_interactive_change(sim, local, other, BODY_TEETH, BODY_TEETH,
+            body_action_interactive_change(local, other, BODY_TEETH, BODY_TEETH,
                                            EVENT_SMILED, 1, AFFECT_SMILED);
             break;
         case ACTION_GLOWER:
-            body_action_interactive_change(sim, local, other, BODY_HEAD, BODY_HEAD,
+            body_action_interactive_change(local, other, BODY_HEAD, BODY_HEAD,
                                            EVENT_GLOWERED, 0, AFFECT_GLOWER);
             break;
         case ACTION_TICKLE:
-            body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_FRONT, EVENT_TICKLED);
+            body_action_interactive(local, other, BODY_RIGHT_HAND, BODY_FRONT, EVENT_TICKLED);
             break;
         case ACTION_POINT:
-            body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_RIGHT_HAND, EVENT_POINT);
+            body_action_interactive(local, other, BODY_RIGHT_HAND, BODY_RIGHT_HAND, EVENT_POINT);
             break;
         case ACTION_PAT:
-            body_action_interactive(sim, local, other, BODY_RIGHT_HAND, BODY_BACK, EVENT_PATTED);
+            body_action_interactive(local, other, BODY_RIGHT_HAND, BODY_BACK, EVENT_PATTED);
             break;
         case ACTION_BASH:
-            body_action_bash(sim, local, other, carrying);
+            body_action_bash(local, other, carrying);
             break;
         case ACTION_GIVE:
-            body_action_give(sim, local, other, carrying);
+            body_action_give(local, other, carrying);
             break;
         }
     }
@@ -702,7 +701,7 @@ static n_int genetics_unique(noble_being * local, n_int number, n_genetics * gen
  * @param chromosome The chromosome as a 32 bit value.  Lower 16 bits are from father, upper 16 bits from mother
  * @param point The index within the chromosome
  * @param mutation_prob The probability of mutation
- * @param random Random number generator seed
+ * @param local Random number generator seed
  * @return 2 bit gene value
  */
 static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mutation_prob, n_byte2 * local)
@@ -770,7 +769,7 @@ static n_int genetics_child_gene(n_genetics chromosome, n_int point, n_byte2 mut
  * @brief Performs crossover and mutation
  * @param mother Chromosome of the mother (first 16 bits from maternal grandfather, second 16 bits from maternal grandmother)
  * @param father Chromosome of the father (first 16 bits from paternal grandfather, second 16 bits from paternal grandmother)
- * @param random Random number generator seed
+ * @param local Random number generator seed
  * @return Child chromosome
  */
 static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byte2 * local)
@@ -830,7 +829,7 @@ static n_genetics	genetics_crossover(n_genetics mother, n_genetics father, n_byt
 /**
  * @brief Mutates a single chromosome, without crossover
  * @param chromosome The chromosome to be mutated
- * @param random Random number generator seed
+ * @param local Random number generator seed
  * @return The mutated chromosome
  */
 static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * local)
@@ -870,8 +869,8 @@ static n_genetics	genetics_mutate(n_genetics chromosome, n_byte2 * local)
 /**
  * @brief Transposes segments of the genome between chromosomes or within the same chromosome.
  This is the main cause of variation between siblings.
- * @param local Pointer to the being
- * @param local_random Random number generator seed
+ * @param genetics Pointer to the genetics
+ * @param local Random number generator seed
  */
 static void genetics_transpose(n_genetics * genetics, n_byte2 * local)
 {

@@ -3,7 +3,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -34,26 +34,40 @@
 #ifndef _NOBLEAPE_PLATFORM_H_
 #define _NOBLEAPE_PLATFORM_H_
 
-#define FILE_NEW_HANDLE				40101
-#define FILE_OPEN_HANDLE			40102
-#define FILE_OPEN_SCRIPT_HANDLE		40103
-#define SCRIPT_ADDITION				1
-#define FILE_CLOSE_HANDLE			(40103 + SCRIPT_ADDITION)
-#define FILE_SAVE_AS_HANDLE			(40104 + SCRIPT_ADDITION)
-#define FILE_EXIT_HANDLE			(40105 + SCRIPT_ADDITION)
-#define EDIT_UNDO_HANDLE			40256
-#define EDIT_CUT_HANDLE				40257
-#define EDIT_COPY_HANDLE			40258
-#define EDIT_PASTE_HANDLE			40259
-#define EDIT_CLEAR_HANDLE			40260
-#define CONTROL_PAUSE_HANDLE		40017
-#define CONTROL_TIMED_HANDLE		40018
-#define CONTROL_PREV_HANDLE			40019
-#define CONTROL_NEXT_HANDLE			40020
+#define FILE_NEW_HANDLE				  40101
+#define FILE_OPEN_HANDLE			  40102
+#define FILE_OPEN_SCRIPT_HANDLE		  40103
+#define SCRIPT_ADDITION				  1
+#define FILE_CLOSE_HANDLE			  (40103 + SCRIPT_ADDITION)
+#define FILE_SAVE_AS_HANDLE			  (40104 + SCRIPT_ADDITION)
+#define FILE_EXIT_HANDLE			  (40105 + SCRIPT_ADDITION)
 
-#define CONTROL_CLEAR_ERRORS		40021
+#define EDIT_UNDO_HANDLE			  40256
+#define EDIT_CUT_HANDLE				  40257
+#define EDIT_COPY_HANDLE			  40258
+#define EDIT_PASTE_HANDLE			  40259
+#define EDIT_CLEAR_HANDLE			  40260
 
-#define CONTROL_NO_WEATHER_HANDLE	40022
+#define CONTROL_PAUSE_HANDLE		  40017
+
+#define CONTROL_CLEAR_ERRORS          40018
+
+#define CONTROL_PREV_HANDLE			  40019
+#define CONTROL_NEXT_HANDLE			  40020
+
+#define CONTROL_CLEAR_ERRORS		  40021
+
+#define CONTROL_WEATHER_HANDLE        40022
+#define CONTROL_BRAIN_HANDLE          40023
+#define CONTROL_BRAINCODE_HANDLE      40024
+#define CONTROL_TERRITORY_HANDLE      40025
+#define CONTROL_DAYLIGHT_TIDES_HANDLE 40026
+
+#define CONTROL_WEATHER_HANDLE        40022
+#define CONTROL_WEATHER_HANDLE        40022
+
+
+
 
 #define HELP_ABOUT_HANDLE			40254
 

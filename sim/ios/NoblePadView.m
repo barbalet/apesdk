@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -70,7 +70,7 @@
     if (drawRef == nil || (oldDimensionX != dimensionX))
     {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width * scaleFactor, rect.size.height * scaleFactor, 8, rect.size.width * 4 * scaleFactor, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGBitmapByteOrder32Little|kCGImageAlphaNoneSkipFirst);
+        drawRef = CGBitmapContextCreate(offscreenBuffer, rect.size.width * scaleFactor, rect.size.height * scaleFactor, 8, rect.size.width * 4 * scaleFactor, colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGBitmapByteOrder32Big|kCGImageAlphaNoneSkipFirst);
         CGColorSpaceRelease( colorSpace );
         
         oldDimensionX = dimensionX;
@@ -165,7 +165,7 @@
         
 	displayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(animationTimer)];
 	[displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-
+    [super awakeFromNib];
 }
 
 

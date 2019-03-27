@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -34,10 +34,6 @@
  ****************************************************************/
 
 #include "../noble/noble.h"
-
-#ifdef NEW_OPENGL_ENVIRONMENT
-#include "../ogl/ogl.h"
-#endif
 
 #include "gui.h"
 
@@ -164,6 +160,11 @@ n_int draw_toggle_tide_daylight(void)
     return toggle_tidedaylight;
 }
 
+n_int draw_toggle_tide_daylight_value(void)
+{
+    return toggle_tidedaylight;
+}
+
 /* this needs to be grouped eventually, it is here as a test */
 
 #define UNDRAW_MAX          (100000+ (HI_RES_MAP_DIMENSION * HI_RES_MAP_DIMENSION / 16))
@@ -227,7 +228,7 @@ static n_int terrain_dim_y = 511;
 static n_byte pixel_map(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_color8 local_color;
-    local_color.color = COLOUR_YELLOW;
+    local_color.color = COLOR_YELLOW;
     local_color.screen = information;
     return pixel_color8(px, py, dx, dy, &local_color);
 }
@@ -235,7 +236,7 @@ static n_byte pixel_map(n_int px, n_int py, n_int dx, n_int dy, void * informati
 static n_byte pixel_map_hires(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_color8 local_color;
-    local_color.color = COLOUR_YELLOW;
+    local_color.color = COLOR_YELLOW;
     local_color.screen = information;
     return pixel_color8_hires(px, py, dx, dy, &local_color);
 }
@@ -252,7 +253,7 @@ static n_byte pixel_map_checker(n_int px, n_int py, n_int dx, n_int dy, void * i
 static n_byte pixel_yellow(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
-    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
+    byte_info[ px + (py * terrain_dim_x) ] = COLOR_YELLOW;
     return 0;
 }
 
@@ -261,7 +262,7 @@ static n_byte pixel_yellow_checker(n_int px, n_int py, n_int dx, n_int dy, void 
     if ((px + py) & 1)
     {
         n_byte *byte_info = information;
-        byte_info[ px + (py * terrain_dim_x) ] = COLOUR_YELLOW;
+        byte_info[ px + (py * terrain_dim_x) ] = COLOR_YELLOW;
     }
     return 0;
 }
@@ -269,7 +270,7 @@ static n_byte pixel_yellow_checker(n_int px, n_int py, n_int dx, n_int dy, void 
 static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * information)
 {
     n_byte *byte_info = information;
-    byte_info[ px + (py * terrain_dim_x) ] = COLOUR_BLACK;
+    byte_info[ px + (py * terrain_dim_x) ] = COLOR_BLACK;
     return 0;
 }
 
@@ -373,7 +374,7 @@ void draw_about(n_constant_string platform)
             n_int  py = (MAP_DIMENSION/2) - 128 + loop;
             const n_int px = (MAP_DIMENSION/2) - 200;
             n_byte * from_point = &buffer[(py*MAP_DIMENSION) + px];
-            io_erase(from_point, 400);
+            memory_erase(from_point, 400);
             loop++;
         }
     }
@@ -432,7 +433,7 @@ void draw_about(n_constant_string platform)
  @param off_y The starting y location for the string to be drawn.
  @param draw The generic draw function used to draw the character.
  */
-void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
+static void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 {
     n_pixel	* local_draw = draw->pixel_draw;
     void	* local_info = draw->information;
@@ -503,128 +504,6 @@ void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 
 #define CONVERT_XY(x,y)   (CONVERT_X(x) | CONVERT_Y(y))
 
-#define	SUBSTA(c)	((c<<8)|c)
-
-static n_byte2	color_group[256*3];
-
-n_byte	land_points[] =
-{
-    0, 0, 0, 0,
-    106, 43, 70, 120,
-    125, 107, 201, 202,
-    128, 255, 255, 239,
-    150, 88, 169, 79,
-    190, 8, 15, 7,
-    208, 208, 216, 206,
-    255, 255, 255, 255
-};
-
-void draw_fit(n_byte * points, n_byte2 * color_fit)
-{
-    /* performs a linear interpolation of n 8-bit points to 256 16-bit blend values */
-    n_int	lp = 0, lp2 = 0;
-    n_int	dr = 0, dg = 0, db = 0;
-    n_int	ar = 0, ag = 0, ab = 0, cntr = 0;
-    n_int	fp = 0, fl = 0, del_c = 0;
-    while (lp < 256)
-    {
-        if (lp == points[cntr])
-        {
-            ar = SUBSTA(points[(cntr) | 1]);
-            ag = SUBSTA(points[(cntr) | 2]);
-            ab = SUBSTA(points[(cntr) | 3]);
-            fp = lp;
-            cntr += 4;
-
-            if (lp != 255)
-            {
-                fl = points[cntr];
-                del_c = (fl - fp);
-                dr = SUBSTA(points[(cntr) | 1]);
-                dg = SUBSTA(points[(cntr) | 2]);
-                db = SUBSTA(points[(cntr) | 3]);
-            }
-        }
-
-        if (del_c == 0)
-        {
-            return;
-        }
-
-        if (lp != 255)
-        {
-            n_int	del_a = (fl - lp), del_b = (lp - fp);
-
-            color_fit[lp2++] = (n_byte2)(((ar * del_a) + (dr * del_b)) / del_c);
-            color_fit[lp2++] = (n_byte2)(((ag * del_a) + (dg * del_b)) / del_c);
-            color_fit[lp2++] = (n_byte2)(((ab * del_a) + (db * del_b)) / del_c);
-        }
-        else
-        {
-            color_fit[lp2++] = (n_byte2)(ar);
-            color_fit[lp2++] = (n_byte2)(ag);
-            color_fit[lp2++] = (n_byte2)(ab);
-        }
-        lp ++;
-    }
-    if (points == land_points)
-    {
-        color_fit[(COLOUR_GREY*3)    ] = 0xcccc;
-        color_fit[(COLOUR_GREY*3) + 1] = 0xcccc;
-        color_fit[(COLOUR_GREY*3) + 2] = 0xcccc;
-
-        color_fit[(COLOUR_YELLOW*3)    ] = 0xeeff;
-        color_fit[(COLOUR_YELLOW*3) + 1] = 0xeeff;
-        color_fit[(COLOUR_YELLOW*3) + 2] = 0x2222;
-
-        color_fit[(COLOUR_RED_DARK*3)    ] = (0xeeff * 2) >> 2; /* return to * 3 following debugging */
-        color_fit[(COLOUR_RED_DARK*3) + 1] = 0x0000;
-        color_fit[(COLOUR_RED_DARK*3) + 2] = 0x0000;
-
-        color_fit[(COLOUR_RED*3)    ] = 0xeeff;
-        color_fit[(COLOUR_RED*3) + 1] = 0x0000;
-        color_fit[(COLOUR_RED*3) + 2] = 0x0000;
-
-    }
-}
-
-void draw_color_group_update(n_byte2 * color_fit)
-{
-    io_copy((n_byte *)color_fit, (n_byte *)color_group, sizeof(n_byte2) * 3 * 256);
-}
-
-void draw_color_time(n_byte2 * color_fit)
-{
-    n_int   day_rotation =((land_time()*255)/TIME_DAY_MINUTES);
-    n_int   darken =  math_sine(day_rotation + 64 + 128, NEW_SD_MULTIPLE/400);
-    n_int	loop = 0;
-    n_int	sign = 1;
-
-    if (!toggle_tidedaylight)
-    {
-        if (darken < 1)
-            sign = -1;
-
-        darken = (darken * darken) / 402;
-        darken = (sign * darken) + 624;
-
-        while(loop < (COLOUR_GREY * 3))
-        {
-            n_int cg_val = color_group[loop];
-            n_int response = (cg_val * darken) >> 10;
-
-            color_fit[loop] = (n_byte2)response;
-
-            loop++;
-        }
-    }
-    while(loop < (256 * 3))
-    {
-        color_fit[loop] = color_group[loop];
-        loop++;
-    }
-}
-
 typedef struct
 {
     n_int     const_lowdiv2;
@@ -680,8 +559,8 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
             actual--;
         }
     }
-    io_free(&xlocation);
-    io_free(&void_dtss);
+    memory_free(&xlocation);
+    memory_free(&void_dtss);
 }
 
 static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
@@ -695,7 +574,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
 
     if (local_sim->select == 0L)
     {
-        io_erase(buf_offscr, dimensions->x * dimensions->y);
+        memory_erase(buf_offscr, dimensions->x * dimensions->y);
         return;
     }
     {
@@ -736,11 +615,11 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
         /* repeat until the right-most row is reached */
         while (scrx < (dimensions->x - (dimensions->x >> 1)))
         {
-            n_int * screen_x_location = io_new(sizeof(n_int));
+            n_int * screen_x_location = memory_new(sizeof(n_int));
 
-            draw_terrain_scan_struct * local_dtss = (draw_terrain_scan_struct *)io_new(sizeof(draw_terrain_scan_struct));
+            draw_terrain_scan_struct * local_dtss = (draw_terrain_scan_struct *)memory_new(sizeof(draw_terrain_scan_struct));
 
-            io_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
+            memory_copy((n_byte *)&dtss, (n_byte *)local_dtss, sizeof(draw_terrain_scan_struct));
 
             screen_x_location[0] = scrx;
 
@@ -756,36 +635,10 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
 #define mndivmonth		7
 #define mndivyear		91
 
-#ifdef NEW_OPENGL_ENVIRONMENT
-
-#define YELLOW_CHECKER_LINE(px, py, dx, dy) polygonal_line(px, py, dx, dy, COLOUR_YELLOW)
-#define YELLOW_LINE(px, py, dx, dy) polygonal_line(px, py, dx, dy, COLOUR_YELLOW)
-#define BLACK_LINE(px, py, dx, dy) polygonal_line(px, py, dx, dy, COLOUR_BLACK)
-#define YELLOW_VECT_LINE(px, py, vector)  polygonal_line_vect(px, py, vector, COLOUR_YELLOW)
-
-#define COLOR_BLACK /* COLOR_BLACK */
-#define COLOR_YELLOW /* COLOR_YELLOW */
-#define COLOR_YELLOW_CHECKER /* COLOR_YELLOW_CHECKER */
-
-#define FACING_OFFSIDE  (280-101)
-#define SP_EN_OFFSIDE   (280-187)
-
-#define GENETICS_X      (280-69)
-#define GENETICS_Y      (55)
-
-#define GENDER_X        170
-#define GENDER_Y        10
-
-#else
-
 #define YELLOW_CHECKER_LINE(px, py, dx, dy) math_join(px, py, dx, dy, &local_kind_yellow_checker)
 #define YELLOW_LINE(px, py, dx, dy) math_join(px, py, dx, dy, &local_kind_yellow)
 #define BLACK_LINE(px, py, dx, dy) math_join(px, py, dx, dy, &local_kind_black)
 #define YELLOW_VECT_LINE(px, py, vector)    math_join_vect2(px, py, vector, &local_kind_yellow)
-
-#define COLOR_BLACK /* COLOR_BLACK */
-#define COLOR_YELLOW /* COLOR_YELLOW */
-#define COLOR_YELLOW_CHECKER /* COLOR_YELLOW_CHECKER */
 
 #define FACING_OFFSIDE  (terrain_dim_x-101)
 #define SP_EN_OFFSIDE   (terrain_dim_x-187)
@@ -796,11 +649,8 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
 #define GENDER_X        (terrain_dim_x-110)
 #define GENDER_Y        (10)
 
-#endif
-
 void draw_meters(noble_simulation * local_sim)
 {
-#ifndef NEW_OPENGL_ENVIRONMENT
     n_pixel 	 * local_draw_yellow = &pixel_yellow;
     n_pixel 	 * local_draw_yellow_checker = &pixel_yellow_checker;
     n_pixel      * local_draw_black = &pixel_black;
@@ -809,12 +659,10 @@ void draw_meters(noble_simulation * local_sim)
     n_join		   local_kind_yellow;
     n_join		   local_kind_yellow_checker;
     n_join		   local_kind_black;
-#endif
     const n_byte * local_icon;
     n_int		   ha1 = 6;
     n_int		   ha2 = 0;
     n_int		   hr = 0;
-#ifndef NEW_OPENGL_ENVIRONMENT
     if (local_info == 0L)
     {
         return;
@@ -826,9 +674,6 @@ void draw_meters(noble_simulation * local_sim)
     local_kind_yellow_checker.information = local_info;
     local_kind_black.pixel_draw = local_draw_black;
     local_kind_black.information = local_info;
-#endif
-    
-    COLOR_BLACK;
     
     while (hr < 41)
     {
@@ -838,8 +683,6 @@ void draw_meters(noble_simulation * local_sim)
         }
         hr ++;
     }
-
-    COLOR_YELLOW;
     
     YELLOW_CHECKER_LINE(5, 5, 40, 0);
     YELLOW_CHECKER_LINE(5, 5, 0, 40);
@@ -861,8 +704,6 @@ void draw_meters(noble_simulation * local_sim)
     {
         noble_being  * loc_being =   local_sim->select;
         
-        COLOR_BLACK;
-        
         hr = 0;
         while (hr < 41)
         {
@@ -875,8 +716,6 @@ void draw_meters(noble_simulation * local_sim)
             }
             hr ++;
         }
-        
-        COLOR_YELLOW;
         
         YELLOW_CHECKER_LINE(50 + 5 + FACING_OFFSIDE, 5, 0, 40);
         YELLOW_CHECKER_LINE(50 + 45+ FACING_OFFSIDE, 5, 0, 40);
@@ -1048,7 +887,142 @@ void draw_meters(noble_simulation * local_sim)
 
 }
 
-#define	ACTIVE_PIXEL(px,py)		sketch_psetc(POSITIVE_LAND_COORD(px),POSITIVE_LAND_COORD(py),COLOUR_RED)
+
+static void draw_feelers(noble_being * bei, n_color8 * local_info, n_vect2 * location, n_int start_point, n_pixel *local_draw, n_byte hires)
+{
+    n_int    local_facing = ((((being_facing(bei))>>2) + 4) & 63) >> 3;
+    /* D  C
+     G       F
+     
+     H       E
+     B  A */
+    n_color8    *local_col = local_info;
+    local_col->color = COLOR_YELLOW;
+    if(local_facing == 0 || local_facing == 7)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x + start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location->y - 2 ),
+                          0, 0, local_info); /* F */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x + start_point ),
+                          POSITIVE_LAND_COORD(location->y - 2 ),
+                          0, 0, local_info); /* F */
+        }
+    }
+    if(local_facing == 1 || local_facing == 0)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x + start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location->y + 2 ),
+                          0, 0, local_info); /* E */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x + start_point ),
+                          POSITIVE_LAND_COORD(location->y + 2 ),
+                          0, 0, local_info); /* E */
+        }
+    }
+    if(local_facing == 2 || local_facing == 1)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x + 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location->y + start_point ),
+                          0, 0, local_info); /* A */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x + 2 ),
+                          POSITIVE_LAND_COORD(location->y + start_point ),
+                          0, 0, local_info); /* A */
+        }
+    }
+    if(local_facing == 3 || local_facing == 2)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x - 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location->y + start_point ),
+                          0, 0, local_info); /* B */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x - 2 ),
+                          POSITIVE_LAND_COORD(location->y + start_point ),
+                          0, 0, local_info); /* B */
+        }
+    }
+    if(local_facing == 4 || local_facing == 3)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x - start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location->y + 2 ),
+                          0, 0, local_info); /* H */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x - start_point ),
+                          POSITIVE_LAND_COORD(location->y + 2 ),
+                          0, 0, local_info); /* H */
+        }
+    }
+    if(local_facing == 5 || local_facing == 4)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x - start_point ),
+                          POSITIVE_LAND_COORD_HIRES(location->y - 2 ),
+                          0, 0, local_info); /* G */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x - start_point ),
+                          POSITIVE_LAND_COORD(location->y - 2 ),
+                          0, 0, local_info); /* G */
+        }
+    }
+    if(local_facing == 6 || local_facing == 5)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x - 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location->y - start_point ),
+                          0, 0, local_info); /* D */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x - 2 ),
+                          POSITIVE_LAND_COORD(location->y - start_point ),
+                          0, 0, local_info); /* D */
+            
+        }
+    }
+    if(local_facing == 7 || local_facing == 6)
+    {
+        if (hires)
+        {
+            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location->x + 2 ),
+                          POSITIVE_LAND_COORD_HIRES(location->y - start_point ),
+                          0, 0, local_info); /* C */
+        }
+        else
+        {
+            (*local_draw)(POSITIVE_LAND_COORD(location->x + 2 ),
+                          POSITIVE_LAND_COORD(location->y - start_point ),
+                          0, 0, local_info); /* C */
+        }
+    }
+}
+
+
+#define	ACTIVE_PIXEL(px,py)		sketch_psetc(POSITIVE_LAND_COORD(px),POSITIVE_LAND_COORD(py),COLOR_RED)
 #define	ERASER_PIXEL(px,py)		sketch_psetc(POSITIVE_LAND_COORD(px),POSITIVE_LAND_COORD(py), \
                                               (n_byte)local_val)
 
@@ -1101,38 +1075,7 @@ static void draw_apeloc(noble_simulation * sim, noble_being  *bei, n_join * draw
     }
     if (bei->delta.awake && (being_state(bei) & BEING_STATE_SPEAKING))
     {
-        n_int	local_facing = ((((being_facing(bei))>>2) + 4) & 63) >> 3;
-        /* D  C
-        G       F
-
-        H       E
-           B  A */
-        n_color8	*local_col = local_info;
-        local_col->color = COLOUR_BLACK;
-        if(local_facing == 0 || local_facing == 7)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x + start_point ), POSITIVE_LAND_COORD(location.y - 2 ),
-                          0, 0, local_info); /* F */
-        if(local_facing == 1 || local_facing == 0)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x + start_point ), POSITIVE_LAND_COORD(location.y + 2 ),
-                          0, 0, local_info); /* E */
-        if(local_facing == 2 || local_facing == 1)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x + 2 ), POSITIVE_LAND_COORD(location.y + start_point ),
-                          0, 0, local_info); /* A */
-        if(local_facing == 3 || local_facing == 2)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x - 2 ), POSITIVE_LAND_COORD(location.y + start_point ),
-                          0, 0, local_info); /* B */
-        if(local_facing == 4 || local_facing == 3)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x - start_point ), POSITIVE_LAND_COORD(location.y + 2 ),
-                          0, 0, local_info); /* H */
-        if(local_facing == 5 || local_facing == 4)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x - start_point ), POSITIVE_LAND_COORD(location.y - 2 ),
-                          0, 0, local_info); /* G */
-        if(local_facing == 6 || local_facing == 5)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x - 2 ), POSITIVE_LAND_COORD(location.y - start_point ),
-                          0, 0, local_info); /* D */
-        if(local_facing == 7 || local_facing == 6)
-            (*local_draw)(POSITIVE_LAND_COORD(location.x + 2 ), POSITIVE_LAND_COORD(location.y - start_point ),
-                          0, 0, local_info); /* C */
+        draw_feelers(bei, local_info, &location, start_point, local_draw, 0);
     }
 }
 
@@ -1184,46 +1127,7 @@ static void draw_apeloc_hires(noble_simulation * sim, noble_being  *bei, n_join 
     }
     if (bei->delta.awake && (being_state(bei) & BEING_STATE_SPEAKING))
     {
-        n_int	local_facing = ((((being_facing(bei))>>2) + 4) & 63) >> 3;
-        /* D  C
-         G       F
-
-         H       E
-         B  A */
-        n_color8	*local_col = local_info;
-        local_col->color = COLOUR_GREY;
-        if(local_facing == 0 || local_facing == 7)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + start_point ),
-                          POSITIVE_LAND_COORD_HIRES(location.y - 2 ),
-                          0, 0, local_info); /* F */
-        if(local_facing == 1 || local_facing == 0)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + start_point ),
-                          POSITIVE_LAND_COORD_HIRES(location.y + 2 ),
-                          0, 0, local_info); /* E */
-        if(local_facing == 2 || local_facing == 1)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + 2 ),
-                          POSITIVE_LAND_COORD_HIRES(location.y + start_point ),
-                          0, 0, local_info); /* A */
-        if(local_facing == 3 || local_facing == 2)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - 2 ),
-                          POSITIVE_LAND_COORD_HIRES(location.y + start_point ),
-                          0, 0, local_info); /* B */
-        if(local_facing == 4 || local_facing == 3)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - start_point ),
-                          POSITIVE_LAND_COORD_HIRES(location.y + 2 ),
-                          0, 0, local_info); /* H */
-        if(local_facing == 5 || local_facing == 4)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - start_point ),
-                          POSITIVE_LAND_COORD_HIRES(location.y - 2 ),
-                          0, 0, local_info); /* G */
-        if(local_facing == 6 || local_facing == 5)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x - 2 ),
-                          POSITIVE_LAND_COORD_HIRES(location.y - start_point ),
-                          0, 0, local_info); /* D */
-        if(local_facing == 7 || local_facing == 6)
-            (*local_draw)(POSITIVE_LAND_COORD_HIRES(location.x + 2 ),
-                          POSITIVE_LAND_COORD_HIRES(location.y - start_point ),
-                          0, 0, local_info); /* C */
+        draw_feelers(bei, local_info, &location, start_point, local_draw, 1);
     }
 }
 
@@ -1288,36 +1192,46 @@ static void draw_region(noble_being * local)
 #endif
 }
 
-#if 1
+#ifdef ALPHA_WEATHER_DRAW
 
 n_byte * draw_weather_grayscale(void)
 {
     return weather_grayscale;
 }
 
-static void draw_weather(n_byte toggle)
+static void draw_weather(n_int toggle)
 {
     if (toggle)
     {
-        n_c_int *local_pressure = land_weather();
+        n_c_int *local_pressure = land_weather(0);
         n_int loop = 0;
         while(loop < MAP_AREA)
         {
+#ifdef NEW_LAND_METHOD
             n_int value = local_pressure[ loop ]>>7;
+#else
+            n_int value = local_pressure[ loop ]>>9;
+#endif
             if (value < 0) value = 0;
             if (value > 255) value = 255;
-            weather_grayscale[ loop ] = value;
+            weather_grayscale[ loop ] = (n_byte)value;
             loop++;
         }
     }
     else
     {
-        io_erase(weather_grayscale, MAP_AREA);
+        memory_erase(weather_grayscale, MAP_AREA);
     }
 }
 
 #else
-static void draw_weather(n_byte toggle)
+
+n_byte * draw_weather_grayscale(void)
+{
+    return 0L;
+}
+
+static void draw_weather(n_int toggle)
 {
     n_int map_dimensions = land_map_dimension();
     n_color8	 local_col;
@@ -1330,7 +1244,7 @@ static void draw_weather(n_byte toggle)
         return;
     }
     
-    local_col.color = COLOUR_GREY;
+    local_col.color = COLOR_GREY;
     local_col.screen = draw_pointer(NUM_VIEW);
     if (local_col.screen == 0L)
     {
@@ -1427,8 +1341,8 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
     {
         n_byte      * local       = being_brain(local_sim->select);
         n_join	      local_mono;
-        n_uint        turn_y = tilt_z;
-        n_uint        turn_z = tilt_y;
+        n_int        turn_y = (n_int)tilt_z;
+        n_int        turn_z = (n_int)tilt_y;
         n_pixel	    * local_draw_brain = &pixel_yellow;
         void	    * local_info_brain = draw_pointer(NUM_TERRAIN);
         n_int	      lpx  = 0;
@@ -1523,7 +1437,7 @@ static void draw_brain(noble_simulation *local_sim, n_vect2 * dimensions)
 n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
     n_int	           loop = 0;
-    n_byte	           error_char_copy;
+    n_int	           error_char_copy;
     n_string_block     simulation_date_time = {0};
     n_string_block     simulation_date_time_error = {0};
     n_int              position = 0;
@@ -1597,8 +1511,8 @@ static void draw_remains(noble_simulation * sim, n_byte * screen)
 
         while (lx < 515)
         {
-            screen[((location.x + lx)&(MAP_DIMENSION-1)) + (((location.y)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
-            screen[((location.x)&(MAP_DIMENSION-1)) + (((location.y + lx)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOUR_YELLOW;
+            screen[((location.x + lx)&(MAP_DIMENSION-1)) + (((location.y)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOR_YELLOW;
+            screen[((location.x)&(MAP_DIMENSION-1)) + (((location.y + lx)&(MAP_DIMENSION-1)) * MAP_DIMENSION)] = COLOR_YELLOW;
             lx++;
         }
         loop++;
@@ -1648,7 +1562,7 @@ static void draw_tides(n_byte * map, n_byte * screen, n_byte tide)
 static void draw_tides_hi_res(n_byte * data, n_byte4 * block, n_byte tide)
 {
     n_byte	tide_compress[45];
-    n_uint  lp = 0;
+    n_int  lp = 0;
     n_byte	tide_point = tide - 106;
     n_int	ar = 106;
     n_int	dr = 128;
@@ -1662,7 +1576,7 @@ static void draw_tides_hi_res(n_byte * data, n_byte4 * block, n_byte tide)
 
     while (lp < 45)
     {
-        tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl-fp));
+        tide_compress[lp] = (n_byte)(((ar * (fl - lp)) + (dr * (lp - fp))) / (fl - fp));
         if (lp == tide_point)
         {
             ar = 128;
@@ -1679,7 +1593,7 @@ static void draw_tides_hi_res(n_byte * data, n_byte4 * block, n_byte tide)
 
         if (block_group != 0)
         {
-            n_int local_loop = lp<<1;
+            n_int local_loop = lp << 1;
             n_int local_loop_end = local_loop+64;
             n_int lp = 0;
             while (local_loop < local_loop_end)
@@ -1703,16 +1617,16 @@ static void draw_apes_loop(noble_simulation * local_sim, noble_being * bei, void
     n_color8        local_col;
     n_vect2         location_vect;
     /* makes this use thread safe */
-    io_copy(data, (n_byte*)&local_col, sizeof(n_color8));
+    memory_copy(data, (n_byte*)&local_col, sizeof(n_color8));
 
     being_space(bei, &location_vect);
     if (being_line_of_sight(local_sim->select, &location_vect) == 1)
     {
-        local_col.color = COLOUR_RED;
+        local_col.color = COLOR_RED;
     }
     else
     {
-        local_col.color = COLOUR_RED_DARK;
+        local_col.color = COLOR_RED_DARK;
     }
 
     if (local_col.screen == land_topography_highdef())
@@ -1744,7 +1658,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
     if (lores) /* set up drawing environ */
     {
         local_col.screen = draw_pointer(NUM_VIEW);
-        io_copy(land_topography(), local_col.screen, MAP_AREA);
+        memory_copy(land_topography(), local_col.screen, MAP_AREA);
     }
     else
     {
@@ -1775,7 +1689,7 @@ static void draw_apes(noble_simulation * local_sim, n_byte lores)
 
     if (local_sim->select)
     {
-        being_loop_no_thread(local_sim, 0L, draw_apes_loop, &local_col);
+        loop_no_thread(local_sim, 0L, draw_apes_loop, &local_col);
     }
 
 }
@@ -1825,6 +1739,54 @@ void  draw_window(n_int dim_x, n_int dim_y)
     terrain_dim_y = dim_y;
 }
 
+static void  draw_skeleton(noble_simulation * local_sim)
+{
+    n_genetics * genetics = 0L;
+    
+    if (local_sim->select)
+    {
+        genetics = local_sim->select->constant.genetics;
+    }
+    
+    
+    if (genetics != 0L)
+    {
+        
+        n_int dim_x = terrain_dim_x;
+        n_int dim_y = terrain_dim_y;
+
+        /** set this to a non-zero value to show key points on the skeleton
+         which may be useful for debugging */
+        /* doesn't work with Ofast optimization */
+        n_vect2 dim;
+        n_vect2 tp;
+        n_vect2 bp;
+        
+        n_byte  show_skeleton_keypoints = 0;
+        
+        dim.x = dim_x;
+        dim.y = dim_y;
+        
+        tp.x = dim_x * 10/100;
+        tp.y = dim_y * 10/100;
+        
+        bp.x = dim_x * 40/100;
+        bp.y = dim_y * 90/100;
+
+        
+        vascular_draw(genetics, draw_pointer(NUM_TERRAIN),
+                      &dim,
+                      
+                      &tp,
+                      &bp,
+                      
+                      1, 1,
+                      30, 0, 20, 20, 0,
+                      
+                      show_skeleton_keypoints);
+    }
+}
+
 void  draw_cycle(n_byte size_changed)
 {
     noble_simulation * local_sim = sim_sim();
@@ -1851,6 +1813,13 @@ void  draw_cycle(n_byte size_changed)
     draw_meters(local_sim);
     draw_errors(local_sim); /* 12 */
 
+#ifdef SKELETON_RENDER
+    if (local_sim->select != 0L)
+    {
+        draw_skeleton(local_sim);
+    }
+#endif
+    
 #ifdef BRAIN_ON
     if (toggle_brain)
     {
@@ -1863,7 +1832,7 @@ void  draw_cycle(n_byte size_changed)
 #ifdef BRAINCODE_ON
     if (toggle_braincode)
     {
-        console_populate_braincode(local_sim, draw_line_braincode);
+        command_populate_braincode(local_sim, draw_line_braincode);
     }
 #endif
 

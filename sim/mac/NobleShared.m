@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -50,14 +50,12 @@
 
 - (id) initWithFrame:(NSRect)frameRect
 {
-    self = [super init];
     if (self)
     {
         _identification = 0;
-        _old_size_width = frameRect.size.width;
-        _old_size_height = frameRect.size.height;
+        _old_size_width = (NSInteger)frameRect.size.width;
+        _old_size_height = (NSInteger)frameRect.size.height;
     }
-    
     return self;
 }
 
@@ -70,7 +68,7 @@
 
 - (void) updateRandomizingAgent
 {
-    n_int loop = 0;
+    n_uint loop = 0;
     _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent();
     n_byte2 *ra_in_2_bytes = (n_byte2*)&_randomizing_agent;
     while (loop < (sizeof(n_uint)/2))
@@ -100,7 +98,7 @@
     _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>16;
     _randomizing_agent ^= (n_uint)CFAbsoluteTimeGetCurrent()>>24;
     
-    n_int shared_response = shared_init(_identification, _randomizing_agent);
+    n_int shared_response = shared_init((n_byte)_identification, _randomizing_agent);
     if (shared_response == -1)
     {
         return NO;
@@ -121,15 +119,7 @@
 
 - (void) draw:(NSSize)size
 {
-    NSInteger local_width = size.width;
-    NSInteger local_height = size.height;
-    
-    BOOL size_changed = (local_width != _old_size_width) || (local_height != _old_size_height);
-    
-    _old_size_width = local_width;
-    _old_size_height = local_height;
-    
-    shared_draw(0L, _identification, (n_int)size.width, (n_int)size.height, (n_byte)size_changed);
+    [self draw:0L width:(NSInteger)size.width height:(NSInteger)size.height];
 }
 
 - (void) draw:(unsigned char *)buffer width:(NSInteger)width height:(NSInteger)height
@@ -137,12 +127,12 @@
     BOOL size_changed = (width != _old_size_width) || (height != _old_size_height);
     _old_size_width = width;
     _old_size_height = height;
-    shared_draw(buffer, self.identification, width, height, (n_byte)size_changed);
+    shared_draw(buffer, (n_byte)_identification, width, height, (n_byte)size_changed);
 }
 
 - (void) keyReceived:(NSUInteger)key
 {
-    shared_keyReceived((n_byte2)key, _identification);
+    shared_keyReceived((n_byte2)key, (n_byte)_identification);
 }
 
 - (void) keyUp
@@ -155,19 +145,19 @@
     shared_mouseUp();
 }
 
-- (void) rotation:(float)rotationAmount
+- (void) rotation:(double)rotationAmount
 {
-    shared_rotate((n_double)rotationAmount, _identification);
+    shared_rotate((n_double)rotationAmount, (n_byte)_identification);
 }
 
 - (void) delta_x:(double)delta_x delta_y:(double)delta_y
 {
-    shared_delta(delta_x, delta_y, _identification);
+    shared_delta(delta_x, delta_y, (n_byte)_identification);
 }
 
-- (void) zoom:(float)zoomAmount;
+- (void) zoom:(double)zoomAmount;
 {
-    shared_zoom((n_double)zoomAmount, _identification);
+    shared_zoom((n_double)zoomAmount, (n_byte)_identification);
 }
 
 - (NSTimeInterval) timeInterval
@@ -177,7 +167,7 @@
 
 - (void) mouseReceivedWithXLocation:(NSInteger)xLocation YLocation:(NSInteger)yLocation
 {
-    shared_mouseReceived((n_int)xLocation, (n_int)yLocation, _identification);;
+    shared_mouseReceived((n_int)xLocation, (n_int)yLocation, (n_byte)_identification);;
 }
 
 - (void) mouseOption:(BOOL)mouseOption
@@ -207,9 +197,9 @@
     }
 }
 
-- (void) cycleWithWidth:(NSInteger)width height:(NSInteger)height
+- (void) cycle
 {
-    _returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent (), _identification, width, height);
+    _returned_value = shared_cycle((n_uint)CFAbsoluteTimeGetCurrent(), (n_byte)_identification);
 }
 
 - (BOOL) cycleDebugOutput
@@ -291,7 +281,7 @@
 - (BOOL) openFileName:(NSString*)name isScript:(BOOL)scriptFile
 {
     char * cStringFileName = (char *)[name UTF8String];
-    return shared_openFileName(cStringFileName,(unsigned char)scriptFile);
+    return shared_openFileName(cStringFileName,(unsigned char)scriptFile) != 0;
 }
 
 + (void) starting:(int)argc withValues:(char **)argv

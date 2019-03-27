@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -34,10 +34,6 @@
  ****************************************************************/
 
 #include "../noble/noble.h"
-
-#ifdef NEW_OPENGL_ENVIRONMENT
-#include "../ogl/ogl.h"
-#endif
 #import "NobleSimulationView.h"
 
 @implementation NobleSimulationView
@@ -69,54 +65,38 @@
 
 - (void) awakeFromNib
 {
+    [self startView];
     [self.shared identificationBasedOnName:[[self window] title]];
     [self startEverything:(self.shared.identification == WINDOW_PROCESSING)];
-#ifdef NEW_OPENGL_ENVIRONMENT
-    polygonal_init(self.shared.identification);
-#endif
+    [self sharedReady];
 }
 
-- (void) drawRect:(NSRect)rect
+- (CVReturn) renderTime:(const CVTimeStamp *)inOutputTime
 {
-    NSInteger              dim_x = (NSInteger)rect.size.width;
-    NSInteger              dim_y = (NSInteger)rect.size.height;
-    static unsigned char   outputBuffer[TERRAIN_WINDOW_AREA*3];
-    
-    [[self openGLContext] makeCurrentContext];
-    
-#ifdef NEW_OPENGL_ENVIRONMENT
-    if (!polygonal_entry([self.shared identification]))
-    {
-        [[self openGLContext] flushBuffer];
-        return;
-    }
-#endif
-    
-    [self.shared cycleWithWidth:dim_x height:dim_y];
-    
-    if ([self.shared cycleDebugOutput])
-    {
-        NSLog(@"Debug output");
-        [self debugOutput];
-    }
-    if ([self.shared cycleQuit])
-    {
-        NSLog(@"Quit procedure initiated");
-        [self quitProcedure];
-    }
-    
-    if ([self.shared cycleNewApes])
-    {
-        NSLog(@"New apes neede to continue simulation");
-        [self.shared newAgents];
-    }
-
-    /*[[self openGLContext] makeCurrentContext];*/
-    
-    [self.shared draw:outputBuffer width:dim_x height:dim_y];
-    
-    glDrawPixels((GLsizei)dim_x, (GLsizei)dim_y,GL_RGB,GL_UNSIGNED_BYTE, (const GLvoid *)outputBuffer);
-    [[self openGLContext] flushBuffer];
+    /*dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{*/
+        [self.shared cycle];
+        
+        if ([self.shared cycleDebugOutput])
+        {
+            NSLog(@"Debug output");
+            [self debugOutput];
+        }
+        if ([self.shared cycleQuit])
+        {
+            NSLog(@"Quit procedure initiated");
+            [self quitProcedure];
+        }
+        
+        if ([self.shared cycleNewApes])
+        {
+            NSLog(@"New apes neede to continue simulation");
+            [self.shared newAgents];
+        }
+    /*});*/
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.needsDisplay = YES;
+    });
+    return kCVReturnSuccess;
 }
 
 - (void) loadUrlString:(NSString*) urlString
@@ -133,7 +113,7 @@
     
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
-         if (result == NSFileHandlingPanelOKButton)
+         if (result == NSModalResponseOK)
          {
              [self.shared scriptDebugHandle:[panel.URL path]];
          }
@@ -177,7 +157,7 @@
     NSOpenPanel *panel = [self uniformOpenPanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
-         if (result == NSFileHandlingPanelOKButton)
+         if (result == NSModalResponseOK)
          {
              if (![self.shared openFileName:[panel.URL path] isScript:NO])
              {
@@ -194,7 +174,7 @@
     NSOpenPanel *panel = [self uniformOpenPanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
-         if (result == NSFileHandlingPanelOKButton)
+         if (result == NSModalResponseOK)
          {
              if (![self.shared openFileName:[panel.URL path] isScript:YES])
              {
@@ -209,7 +189,7 @@
     NSSavePanel *panel = [self uniformSavePanel];
     [panel  beginWithCompletionHandler:^(NSInteger result)
      {
-         if (result == NSFileHandlingPanelOKButton)
+         if (result == NSModalResponseOK)
          {
              [self.shared savedFileName:[panel.URL path]];
          }

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -74,18 +74,18 @@ static n_uint speak_length(n_byte character)
 static n_uint speak_length_total(n_string paragraph)
 {
     n_int  loop = 0;
-    n_byte character;
-    n_uint length = 0;
+    n_int character;
+    n_int length = 0;
     do
     {
         character = paragraph[loop++];
         if (character != '\n' && character != 0)
         {
-            length += 1 << speak_length(character);
+            length += 1 << speak_length((n_byte)character);
         }
     }
     while (character != '\n' && character != 0);
-    return length;
+    return (n_uint)length;
 }
 
 static const n_int set_frequencies[24] =
@@ -203,7 +203,7 @@ void speak_out(n_string filename, n_string paragraph)
     audio_aiff_header(out_file, total_length);
     do
     {
-        n_uint    power_sample = (speak_length(found_character = paragraph[loop++]) + AUDIO_FFT_MAX_BITS - 2);
+        n_uint    power_sample = (speak_length(found_character = (n_byte)paragraph[loop++]) + AUDIO_FFT_MAX_BITS - 2);
         n_uint    length = 1 << power_sample;
         n_int     division = AUDIO_FFT_MAX_BUFFER / length;
 
@@ -217,10 +217,10 @@ void speak_out(n_string filename, n_string paragraph)
 
                 speak_freq(local_high, local_low,found_character);
 
-                audio_set_frequency(local_high[0]/division, local_high[1]/division);
-                audio_set_frequency(local_high[2]/division, local_high[3]/division);
-                audio_set_frequency(local_high[4]/division, local_high[5]/division);
-                audio_set_frequency(local_high[6]/division, local_high[7]/division);
+                audio_set_frequency((n_uint)(local_high[0]/division), (n_uint)(local_high[1]/division));
+                audio_set_frequency((n_uint)(local_high[2]/division), (n_uint)(local_high[3]/division));
+                audio_set_frequency((n_uint)(local_high[4]/division), (n_uint)(local_high[5]/division));
+                audio_set_frequency((n_uint)(local_high[6]/division), (n_uint)(local_high[7]/division));
 
                 audio_fft(1, power_sample);
 
@@ -228,8 +228,8 @@ void speak_out(n_string filename, n_string paragraph)
 
                 audio_clear_buffers(length);
 
-                audio_set_frequency(local_low[0], local_low[1]/division);
-                audio_set_frequency(local_low[2], local_low[3]/division);
+                audio_set_frequency((n_uint)(local_low[0]), (n_uint)(local_low[1]/division));
+                audio_set_frequency((n_uint)(local_low[2]), (n_uint)(local_low[3]/division));
 
                 audio_fft(1, power_sample);
 

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -47,6 +47,74 @@ static n_double timedomain[AUDIO_FFT_MAX_BUFFER];
 static n_double frequencyi[AUDIO_FFT_MAX_BUFFER];
 static n_double timedomaini[AUDIO_FFT_MAX_BUFFER];
 
+void bsort(n_double * A, n_int *B, n_int size)
+{
+    for(n_int i=0; i<size; i++)
+    {
+        for(n_int j=0; j<size-1; j++)
+        {
+            if( A[j] < A[j+1] )
+            {
+                n_double temp = A[j];
+                n_int    tempi = B[j];
+                A[j] = A[j+1];
+                B[j] = B[j+1];
+                A[j+1] = temp;
+                B[j+1] = tempi;
+            }
+        }
+    }
+}
+
+void audio_buffer_clear(n_audio * buffer, n_int size)
+{
+    n_int loop = 0;
+    while (loop < size)
+    {
+        buffer[loop++] = 0;
+    }
+}
+
+void audio_buffer_double_clear(n_double * buffer, n_int size)
+{
+    n_int loop = 0;
+    while (loop < size)
+    {
+        buffer[loop++] = 0E+00;
+    }
+}
+
+void audio_buffer_copy_to_audio(n_double * buffer_double, n_audio * buffer_audio, n_int size)
+{
+    n_int loop = 0;
+    while (loop < size)
+    {
+        buffer_audio[loop] = (n_audio)buffer_double[loop];
+        loop++;
+    }
+}
+
+void audio_buffer_copy_to_double(n_audio * buffer_audio, n_double * buffer_double, n_int size)
+{
+    n_int loop = 0;
+    while (loop < size)
+    {
+        buffer_double[loop] = (n_double)buffer_audio[loop] ;
+        loop++;
+    }
+}
+
+void audio_buffer_copy_to_double_double(n_double * buffer_double_to, n_double * buffer_double_from, n_int size)
+{
+    n_int loop = 0;
+    while (loop < size)
+    {
+        buffer_double_to[loop] = buffer_double_from[loop];
+        loop++;
+    }
+}
+
+
 /**
  * Creates a bit reversed value of a particular index value.
  * @param index value to be bit reversed.
@@ -64,6 +132,100 @@ static n_uint	audio_reverse_bits (n_uint index, n_uint power_sample)
         i++;
     }
     return rev;
+}
+
+/*
+ * Complex Fast Fourier Transform
+ */
+
+void audio_new_fft(
+                   n_uint     NumBits,
+                   n_int      InverseTransform,
+                   n_double    *RealIn,
+                   n_double    *ImagIn,
+                   n_double    *RealOut,
+                   n_double    *ImagOut )
+{
+    n_uint NumSamples = 1 << NumBits;
+    n_uint i, j;
+    n_uint k, n;
+    n_uint BlockSize, BlockEnd;
+    
+    n_double angle_numerator = TWO_PI;
+    n_double tr, ti;     /* temp real, temp imaginary */
+    
+    if ( InverseTransform )
+    {
+        angle_numerator = -angle_numerator;
+    }
+    
+    /*
+     **   Do simultaneous data copy and bit-reversal ordering into outputs...
+     */
+    
+    for ( i=0; i < NumSamples; i++ ) {
+        j = audio_reverse_bits ( i, NumBits );
+        RealOut[j] = RealIn[i];
+        ImagOut[j] = ImagIn[i];
+    }
+    
+    /*
+     **   Do the FFT itself...
+     */
+    
+    BlockEnd = 1;
+    for ( BlockSize = 2; BlockSize <= NumSamples; BlockSize <<= 1 ) {
+        
+        n_double delta_angle = angle_numerator / (double)BlockSize;
+        
+        n_double sm2 = sin ( -2 * delta_angle );
+        n_double sm1 = sin ( -delta_angle );
+        n_double cm2 = cos ( -2 * delta_angle );
+        n_double cm1 = cos ( -delta_angle );
+        n_double w = 2 * cm1;
+        n_double ar0, ar1, ar2, ai0, ai1, ai2;
+        
+        for ( i=0; i < NumSamples; i += BlockSize ) {
+            ar2 = cm2;
+            ar1 = cm1;
+            
+            ai2 = sm2;
+            ai1 = sm1;
+            
+            for ( j=i, n=0; n < BlockEnd; j++, n++ ) {
+                ar0 = w*ar1 - ar2;
+                ar2 = ar1;
+                ar1 = ar0;
+                
+                ai0 = w*ai1 - ai2;
+                ai2 = ai1;
+                ai1 = ai0;
+                
+                k = j + BlockEnd;
+                tr = ar0*RealOut[k] - ai0*ImagOut[k];
+                ti = ar0*ImagOut[k] + ai0*RealOut[k];
+                
+                RealOut[k] = RealOut[j] - tr;
+                ImagOut[k] = ImagOut[j] - ti;
+                
+                RealOut[j] += tr;
+                ImagOut[j] += ti;
+            }
+        }
+        BlockEnd = BlockSize;
+    }
+    
+    /*
+     **   Need to normalize if inverse transform...
+     */
+    
+    if ( InverseTransform ) {
+        float denom = (float)NumSamples;
+        for ( i=0; i < NumSamples; i++ ) {
+            RealOut[i] /= denom;
+            ImagOut[i] /= denom;
+        }
+    }
 }
 
 /**
@@ -122,10 +284,10 @@ void audio_fft(n_byte inverse, n_uint power_sample)
     while (BlockSize <= NumSamples)
     {
         n_double delta_angle = angle_numerator / (n_double)BlockSize;
-        n_double sm2 = sin ( -2 * delta_angle );
-        n_double sm1 = sin ( -delta_angle );
-        n_double cm2 = cos ( -2 * delta_angle );
-        n_double cm1 = cos ( -delta_angle );
+        n_double sm2 = sin ((n_double) -2.0f * delta_angle );
+        n_double sm1 = sin ((n_double) -delta_angle );
+        n_double cm2 = cos ((n_double) -2.0f * delta_angle );
+        n_double cm1 = cos ((n_double) -delta_angle );
         n_double w = 2 * cm1;
 
         i=0;
@@ -237,6 +399,21 @@ void audio_equal_output(n_audio * audio, n_uint length)
 }
 
 /**
+ * Sets an audio ouput buffer to the FFT time-domain buffer.
+ * @param audio the audio buffer to be set.
+ * @param length the length of the buffer to be set.
+ */
+void audio_equal_input(n_audio * audio, n_uint length)
+{
+    n_uint     loop = 0;
+    while (loop < length)
+    {
+        timedomain[loop] = (n_double)audio[loop];
+        loop++;
+    }
+}
+
+/**
  * Multiplies an audio ouput buffer to the FFT time-domain buffer.
  * @param audio the audio buffer to be multiplied.
  * @param length the length of the buffer to be multiplied.
@@ -260,7 +437,16 @@ void audio_set_frequency(n_uint entry, n_uint value)
 {
     frequency[entry] = value/1E+00;
     frequencyi[entry] = 0E+00;
+}
 
+
+void audio_low_frequency(n_audio * buffer, n_int number_freq, n_int debug)
+{
+    audio_equal_input(buffer, AUDIO_FFT_MAX_BUFFER);
+    audio_fft(0, 15);
+
+    audio_fft(1, 15);
+    audio_equal_output(buffer, AUDIO_FFT_MAX_BUFFER);
 }
 
 static void audio_aiff_uint(n_byte * buffer, n_uint value)

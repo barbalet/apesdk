@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2018 Tom Barbalet. All rights reserved.
+ Copyright 1996-2019 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -45,6 +45,24 @@
 static void object_write_object(n_file * file, n_object *start);
 static void object_write_array(n_file * file, n_array *start);
 
+#undef OBJECT_DEBUG
+
+#ifdef OBJECT_DEBUG
+
+#define OBJ_DBG( test, string ) if (test == 0L) printf("%s\n", string)
+
+#define OBJ_NEW(size) memory_new(size)
+
+#else
+
+#define OBJ_DBG( test, string ) /* test string */
+
+#define OBJ_NEW(size) memory_new(size)
+
+#endif
+
+static n_object * object_file_base(n_file * file);
+
 static n_object_type object_type(n_array * array)
 {
     return array->type;
@@ -52,12 +70,12 @@ static n_object_type object_type(n_array * array)
 
 static void object_erase(n_object * object)
 {
-    io_erase((n_byte*)object, sizeof(n_object));
+    memory_erase((n_byte*)object, sizeof(n_object));
 }
 
 static n_object * object_new(void)
 {
-    n_object * return_object = (n_object *)io_new(sizeof(n_object));
+    n_object * return_object = (n_object *)memory_new(sizeof(n_object));
     if (return_object)
     {
         object_erase(return_object);
@@ -77,7 +95,7 @@ static void object_primitive_free(n_array ** array)
             obj_free(&child);
         }
         default:
-            io_free((void **)array);
+            memory_free((void **)array);
             break;
     }
 }
@@ -95,7 +113,7 @@ void obj_free(n_array ** array)
     }
 }
 
-static void object_top_object(n_file * file, n_object * top_level)
+void object_top_object(n_file * file, n_object * top_level)
 {
     io_write(file, "{", 0);
     object_write_object(file, top_level);
@@ -247,10 +265,10 @@ static void * ar_pass_through(void * ptr)
 {
     if (ptr == 0L)
     {
-        ptr = io_new(sizeof(n_array));
+        ptr = memory_new(sizeof(n_array));
         if (ptr)
         {
-            io_erase((n_byte *)ptr, sizeof(n_array));
+            memory_erase((n_byte *)ptr, sizeof(n_array));
         }
     }
     return ptr;
@@ -275,7 +293,7 @@ static void * ar_string(void * ptr, n_string set_string)
     if (cleaned)
     {
         cleaned->type = OBJECT_STRING;
-        cleaned->data = set_string;
+        cleaned->data = io_string_copy(set_string);
     }
     return (void *)cleaned;
 }
@@ -340,4 +358,439 @@ n_object * obj_object(n_object * obj, n_string name, n_object * object)
 n_object * obj_array(n_object * obj, n_string name, n_array * array)
 {
     return ar_array(obj_get(obj, name), array);
+}
+
+static n_int tracking_array_open;
+static n_int tracking_object_open;
+static n_int tracking_string_quote;
+
+#define CHECK_FILE_SIZE(error_string)   if (file->location >= file->size) \
+                                        { \
+                                            (void)SHOW_ERROR(error_string); \
+                                            return 0L; \
+                                        }
+
+static n_string object_file_read_string(n_file * file)
+{
+    n_string return_string = 0L;
+    n_string_block block_string = {0};
+    n_int          location = 0;
+    if (file->data[file->location] != '"')  // TODO: Replace with smart char handling
+    {
+        (void)SHOW_ERROR("json not string as expected");
+        return return_string;
+    }
+    
+    tracking_string_quote = 1;
+    
+    file->location ++;
+    do{
+        CHECK_FILE_SIZE("end of json file reach unexpectedly");
+        if(file->data[file->location] != '"')
+        {
+            block_string[location] = (char)file->data[file->location];
+            location++;
+            file->location++;
+        }
+    }while (file->data[file->location] != '"');
+    if (location == 0)
+    {
+        (void)SHOW_ERROR("blank string in json file");
+        return 0L;
+    }
+    tracking_string_quote = 0;
+    file->location++;
+    CHECK_FILE_SIZE("end of json file reach unexpectedly");
+    return_string = io_string_copy(block_string);
+    return return_string;
+}
+
+
+static n_int object_file_read_number(n_file * file, n_int * with_error)
+{
+    n_int return_number = 0;
+    n_string_block block_string = {0};
+    n_int          location = 0;
+    n_byte         read_char = file->data[file->location];
+    n_int          char_okay = (ASCII_NUMBER(read_char) || (read_char == '-'));
+    *with_error = 1;
+
+    if (!char_okay)
+    {
+        (void)SHOW_ERROR("first character not number or minus");
+        return 0;
+    }
+    
+    CHECK_FILE_SIZE("end of json file reach unexpectedly for number");
+    
+    block_string[location] = (char)read_char;
+    file->location++;
+    location++;
+    
+    
+    do{
+        read_char = file->data[file->location];
+        char_okay = ASCII_NUMBER(read_char);
+        
+        CHECK_FILE_SIZE("end of json file reach unexpectedly for number");
+
+        if(char_okay)
+        {
+            block_string[location] = (char)read_char;
+            location++;
+            file->location++;
+        }
+
+    }while (char_okay);
+    
+    {
+        n_int actual_value = 1;
+        n_int decimal_divisor = 1;
+        n_int error_number = io_number((n_string)block_string, &actual_value, &decimal_divisor);
+
+        
+        if (error_number == -1)
+        {
+            return 0;
+        }
+        
+        if (decimal_divisor != 0)
+        {
+            (void)SHOW_ERROR("decimal number in json file");
+            return 0;
+        }
+        return_number = actual_value;
+    }
+    *with_error = 0;
+    return return_number;
+}
+
+static n_object_stream_type object_stream_char(n_byte value)
+{
+    if (value == '{')
+    {
+        return OBJ_TYPE_OBJECT_OPEN;
+    }
+    if (value == '}')
+    {
+        return OBJ_TYPE_OBJECT_CLOSE;
+    }
+    if (value == '[')
+    {
+        return OBJ_TYPE_ARRAY_OPEN;
+    }
+    if (value == ']')
+    {
+        return OBJ_TYPE_ARRAY_CLOSE;
+    }
+    if (ASCII_NUMBER(value) || (value == '-'))
+    {
+        return OBJ_TYPE_NUMBER;
+    }
+    if (ASCII_COMMA(value))
+    {
+        return OBJ_TYPE_COMMA;
+    }
+    if (ASCII_COLON(value))
+    {
+        return OBJ_TYPE_COLON;
+    }
+    if (ASCII_QUOTE(value))
+    {
+        return OBJ_TYPE_STRING_NOTATION;
+    }
+    return OBJ_TYPE_EMPTY;
+}
+
+static n_array * object_file_array(n_file * file)
+{
+    n_array * base_array = 0L;
+    
+    n_object_stream_type stream_type;
+    n_object_stream_type stream_type_in_this_array = OBJ_TYPE_EMPTY;
+    if (file->data[file->location] != '[') // TODO: Replace with smart char handling
+    {
+        (void)SHOW_ERROR("json not array as expected");
+        return base_array;
+    }
+    
+    tracking_array_open ++;
+    
+    file->location ++;
+    do{
+        CHECK_FILE_SIZE("end of json file reach unexpectedly");
+        stream_type = object_stream_char(file->data[file->location]);
+        
+        if (stream_type_in_this_array == OBJ_TYPE_EMPTY)
+        {
+            stream_type_in_this_array = stream_type;
+        }
+        else if (stream_type_in_this_array != stream_type)
+        {
+            obj_free(&base_array);
+            (void)SHOW_ERROR("array contains mutliple types");
+            return 0L;
+        }
+        
+        if (stream_type == OBJ_TYPE_ARRAY_OPEN)
+        {
+            n_array * array_value = object_file_array(file);
+            if (array_value)
+            {
+                stream_type = object_stream_char(file->data[file->location]);
+                
+                if ((stream_type == OBJ_TYPE_ARRAY_CLOSE) || (stream_type == OBJ_TYPE_COMMA))
+                {
+                    if (base_array == 0L)
+                    {
+                        base_array = array_array(array_value);
+                    }
+                    else
+                    {
+                        array_add(base_array, array_array(array_value));
+                    }
+                }
+            }
+            stream_type = object_stream_char(file->data[file->location]);
+        }
+        if (stream_type == OBJ_TYPE_OBJECT_OPEN)
+        {
+            n_object * object_value = object_file_base(file);
+            OBJ_DBG(object_value, "object value is nil?");
+            if (object_value)
+            {
+                file->location++;
+                CHECK_FILE_SIZE("end of json file reach unexpectedly");
+                stream_type = object_stream_char(file->data[file->location]);
+                
+                if ((stream_type == OBJ_TYPE_ARRAY_CLOSE) || (stream_type == OBJ_TYPE_COMMA))
+                {
+                    if (base_array == 0L)
+                    {
+                        base_array = array_object(object_value);
+                    }
+                    else
+                    {
+                        array_add(base_array, array_object(object_value));
+                    }
+                }
+            }
+            
+            OBJ_DBG(base_array, "base array still nil?");
+
+            CHECK_FILE_SIZE("end of json file reach unexpectedly");
+            stream_type = object_stream_char(file->data[file->location]);
+        }
+        if (stream_type == OBJ_TYPE_STRING_NOTATION)
+        {
+            n_string string_value = object_file_read_string(file);
+            if (string_value)
+            {
+                stream_type = object_stream_char(file->data[file->location]);
+                
+                if ((stream_type == OBJ_TYPE_ARRAY_CLOSE) || (stream_type == OBJ_TYPE_COMMA))
+                {
+                    if (base_array == 0L)
+                    {
+                        base_array = array_string(string_value);
+                    }
+                    else
+                    {
+                        array_add(base_array, array_string(string_value));
+                    }
+                }
+            }
+            stream_type = object_stream_char(file->data[file->location]);
+        }
+        if (stream_type == OBJ_TYPE_NUMBER)
+        {
+            n_int with_error;
+            n_int number_value = object_file_read_number(file, &with_error);
+            
+            if (with_error == 0)
+            {
+                stream_type = object_stream_char(file->data[file->location]);
+                
+                if ((stream_type == OBJ_TYPE_ARRAY_CLOSE) || (stream_type == OBJ_TYPE_COMMA))
+                {
+                    if (base_array == 0L)
+                    {
+                        base_array = array_number(number_value);
+                    }
+                    else
+                    {
+                        array_add(base_array, array_number(number_value));
+                    }
+                }
+            }
+            stream_type = object_stream_char(file->data[file->location]);
+        }
+        if (stream_type == OBJ_TYPE_ARRAY_CLOSE)
+        {
+            tracking_array_open --;
+        }
+        file->location ++;
+        
+        OBJ_DBG(base_array, "base array nil check?");
+    }while (stream_type == OBJ_TYPE_COMMA);
+    
+    OBJ_DBG(base_array, "base array really nil?");
+    
+    return base_array;
+}
+
+static n_object * object_file_base(n_file * file)
+{
+    n_object * base_object = 0L;
+    n_object_stream_type stream_type;
+    CHECK_FILE_SIZE("file read outside end of file");
+    
+    stream_type = object_stream_char(file->data[file->location]);
+    
+    if (stream_type == OBJ_TYPE_OBJECT_OPEN)
+    {
+        tracking_object_open++;
+        do{
+            file->location++;
+            CHECK_FILE_SIZE("file read outside end of file");
+            stream_type = object_stream_char(file->data[file->location]);
+            if (stream_type == OBJ_TYPE_STRING_NOTATION)
+            {
+                n_string string_key = object_file_read_string(file);
+                if (string_key)
+                {
+                    stream_type = object_stream_char(file->data[file->location]);
+                    if (stream_type == OBJ_TYPE_COLON)
+                    {
+                        file->location++;
+                        CHECK_FILE_SIZE("file read outside end of file");
+                        stream_type = object_stream_char(file->data[file->location]);
+                        
+                        if (stream_type == OBJ_TYPE_OBJECT_OPEN)
+                        {
+                            n_object * insert_object = object_file_base(file);
+                            if (insert_object)
+                            {
+                                if (base_object)
+                                {
+                                    obj_object(base_object, string_key, insert_object);
+                                }
+                                else
+                                {
+                                    base_object = obj_object(base_object, string_key, insert_object);
+                                }
+                                file->location++;
+                                CHECK_FILE_SIZE("file read outside end of file");
+                                stream_type = object_stream_char(file->data[file->location]);
+                            }
+                        }
+                        if (stream_type == OBJ_TYPE_NUMBER)
+                        {
+                            n_int number_error;
+                            n_int number_value = object_file_read_number(file, &number_error);
+                            if (number_error == 0)
+                            {
+                                stream_type = object_stream_char(file->data[file->location]);
+                                if ((stream_type == OBJ_TYPE_OBJECT_CLOSE) || (stream_type == OBJ_TYPE_COMMA))
+                                {
+                                    if (base_object)
+                                    {
+                                        obj_number(base_object, string_key, number_value);
+                                    }
+                                    else
+                                    {
+                                        base_object = obj_number(base_object, string_key, number_value);
+                                    }
+                                }
+                            }
+                        }
+                        if (stream_type == OBJ_TYPE_STRING_NOTATION)
+                        {
+                            n_string string_value = object_file_read_string(file);
+                            if (string_value)
+                            {
+                                stream_type = object_stream_char(file->data[file->location]);
+                                if ((stream_type == OBJ_TYPE_OBJECT_CLOSE) || (stream_type == OBJ_TYPE_COMMA))
+                                {
+                                    if (base_object)
+                                    {
+                                        obj_string(base_object, string_key, string_value);
+                                    }
+                                    else
+                                    {
+                                        base_object = obj_string(base_object, string_key, string_value);
+                                    }
+                                }
+                            }
+                        }
+                        if (stream_type == OBJ_TYPE_ARRAY_OPEN)
+                        {
+                            n_array * array_value = object_file_array(file); // TODO: rename object_file_read_array
+                            if (array_value)
+                            {
+                                stream_type = object_stream_char(file->data[file->location]);
+                                if ((stream_type == OBJ_TYPE_OBJECT_CLOSE) || (stream_type == OBJ_TYPE_COMMA))
+                                {
+                                    if (base_object)
+                                    {
+                                        obj_array(base_object, string_key, array_value);
+                                    }
+                                    else
+                                    {
+                                        base_object = obj_array(base_object, string_key, array_value);
+                                    }
+                                }
+                                CHECK_FILE_SIZE("file read outside end of file");
+                                stream_type = object_stream_char(file->data[file->location]);
+                            }
+                            
+                            OBJ_DBG(array_value, "array value nil?");
+                        }
+                    }
+                }
+            }
+            if (stream_type == OBJ_TYPE_OBJECT_CLOSE)
+            {
+                tracking_object_open--;
+            }
+        } while (stream_type == OBJ_TYPE_COMMA);
+    }
+    return base_object;
+}
+
+n_object * object_file_to_tree(n_file * file)
+{
+    n_object * base_object = 0L;
+    n_int      something_wrong = 0;
+    
+    tracking_array_open = 0;
+    tracking_object_open = 0;
+    tracking_string_quote = 0;
+    io_whitespace_json(file);
+    file->location = 0;
+
+    base_object = object_file_base(file);
+    
+    if (tracking_array_open != 0)
+    {
+        (void)SHOW_ERROR("Array json does not match up");
+        something_wrong = 1;
+    }
+    if (tracking_object_open != 0)
+    {
+        (void)SHOW_ERROR("Object json does not match up");
+        something_wrong = 1;
+    }
+    if (tracking_string_quote != 0)
+    {
+        (void)SHOW_ERROR("String quote json does not match up");
+        something_wrong = 1;
+    }
+    if (something_wrong)
+    {
+        obj_free((n_array **) &base_object);
+        return 0L;
+    }
+    
+    return base_object;
 }
