@@ -1,5 +1,5 @@
 #!/bin/bash
-#	test.sh
+#	test_object_string.sh
 #
 #	=============================================================
 #
@@ -38,8 +38,9 @@ then
 else
     CFLAGS=-O2 
 fi
-gcc ${CFLAGS} -c $SOURCEDIR/noble/vect.c -o vect.o
+
 gcc ${CFLAGS} -c $SOURCEDIR/noble/graph.c -o graph.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/vect.c -o vect.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/memory.c -o memory.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/file.c -o file.o
@@ -53,11 +54,11 @@ gcc ${CFLAGS} -c $SOURCEDIR/noble/audio.c -o audio.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/territory.c -o territory.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/tile.c -o tile.o
 
-gcc ${CFLAGS} -c test_object.c -o test_object.o
-gcc ${CFLAGS} -I/usr/include -o test_object *.o -lz -lm -lpthread
+gcc ${CFLAGS} -c test_object_string.c -o test_object_string.o
+gcc ${CFLAGS} -I/usr/include -o test_object_string *.o -lz -lm -lpthread
 
-./test_object
+./test_object_string
 
-rm test_object
+rm test_object_string
 
 rm *.o

@@ -635,7 +635,7 @@ void being_clear_attention(noble_being * value)
 
 void being_set_attention(noble_being * value, n_int index, n_int attention)
 {
-    value->braindata.attention[index] = attention;
+    value->braindata.attention[index] = (n_byte)attention;
 }
 
 n_byte being_attention(noble_being * value, n_int index)
@@ -1417,7 +1417,7 @@ void being_turn_away_from_water(noble_being * value)
 
 enum inventory_type being_carried(noble_being * value, enum BODY_INVENTORY_TYPES location)
 {
-    return ((value)->changes.inventory[location]>>3)<<3;
+    return (value)->changes.inventory[location] & 0xfffff8;
 }
 
 void being_drop(noble_being * value, enum BODY_INVENTORY_TYPES location)
@@ -1803,7 +1803,7 @@ static void being_random_genetics(n_genetics * value, n_byte2 * random, n_int ma
         }
         loop++;
     }
-    value[CHROMOSOME_Y] &= ~1;
+    value[CHROMOSOME_Y] = (n_genetics)(value[CHROMOSOME_Y] & 0xfffffffe);
     value[CHROMOSOME_Y] |= (male ? 2 : 3);
 }
 

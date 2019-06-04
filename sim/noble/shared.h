@@ -54,9 +54,14 @@ typedef enum
     SHARED_CYCLE_NEW_APES
 } shared_cycle_state;
 
-shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification);
 
-n_int shared_init(n_byte view, n_uint random);
+void shared_color_8_bit_to_48_bit(n_byte2 * fit);
+
+void shared_dimensions(n_int * dimensions);
+
+shared_cycle_state shared_cycle(n_uint ticks, n_int localIdentification);
+
+n_int shared_init(n_int view, n_uint random);
 
 void shared_close(void);
 
@@ -64,33 +69,31 @@ n_int shared_menu(n_int menuValue);
 
 n_uint shared_max_fps(void);
 
-void shared_rotate(n_double num, n_byte wwind);
-void shared_delta(n_double delta_x, n_double delta_y, n_byte wwind);
-void shared_zoom(n_double num, n_byte wwind);
+void shared_rotate(n_double num, n_int wwind);
+void shared_delta(n_double delta_x, n_double delta_y, n_int wwind);
+void shared_zoom(n_double num, n_int wwind);
 
-void shared_keyReceived(n_byte2 value, n_byte localIdentification);
+void shared_keyReceived(n_int value, n_int localIdentification);
 void shared_keyUp(void);
 
 void shared_mouseOption(n_byte option);
-void shared_mouseReceived(n_int valX, n_int valY, n_byte localIdentification);
+void shared_mouseReceived(n_double valX, n_double valY, n_int localIdentification);
 void shared_mouseUp(void);
 
 void shared_about(n_constant_string value);
 
-void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed);
-
-n_byte * shared_legacy_pointer(n_byte localIdentification);
+void shared_draw(n_byte * outputBuffer, n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed);
 
 n_byte * shared_legacy_draw(n_byte fIdentification, n_int dim_x, n_int dim_y);
 
 n_int shared_new(n_uint seed);
 n_int shared_new_agents(n_uint seed);
 
-n_byte shared_openFileName(n_string cStringFileName,n_byte isScript);
+n_byte shared_openFileName(n_constant_string cStringFileName, n_int isScript);
 
-void shared_saveFileName(n_string cStringFileName);
+void shared_saveFileName(n_constant_string cStringFileName);
 
-void shared_script_debug_handle(n_string cStringFileName);
+void shared_script_debug_handle(n_constant_string cStringFileName);
 
 #ifndef	_WIN32
 

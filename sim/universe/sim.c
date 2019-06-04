@@ -224,6 +224,8 @@ static n_int        sim_new_progress = 0;
 
 static n_int        sim_new_run = 0;
 
+static n_uint       initial_memory_allocated;
+
 n_int sim_new(void)
 {
     return sim_new_progress;
@@ -320,7 +322,7 @@ static n_int sim_input(void *vcode, n_byte kind, n_int value)
         return APESCRIPT_ERROR(code, AE_SELECTED_ENTITY_OUT_OF_RANGE);
     }
     {
-        n_uint local_select = temp_select;
+        n_uint local_select = (n_uint)temp_select;
         if( local_select >= local_sim->num)
         {
             return APESCRIPT_ERROR(code, AE_SELECTED_ENTITY_OUT_OF_RANGE);
@@ -588,7 +590,7 @@ static n_int sim_output(void * vcode, void * vindividual, n_byte * kind, n_int *
                     local_number = being_index(local_sim, (noble_being *)individual->interpret_data);
                     break;
                 case VARIABLE_NUMBER_BEINGS:
-                    local_number = local_sim->num;
+                    local_number = (n_int)local_sim->num;
                     break;
                     
                 case VARIABLE_IS_ERROR:
@@ -651,7 +653,7 @@ static n_int sim_output(void * vcode, void * vindividual, n_byte * kind, n_int *
                         return APESCRIPT_ERROR(individual, AE_SELECTED_ENTITY_OUT_OF_RANGE);
                     }
                     {
-                        n_uint local_select = temp_select;
+                        n_uint local_select = (n_uint)temp_select;
                         if( local_select >= local_sim->num)
                         {
                             return APESCRIPT_ERROR(individual, AE_SELECTED_ENTITY_OUT_OF_RANGE);
@@ -1239,6 +1241,16 @@ void sim_cycle(void)
 
 #define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(noble_being) * 400))
 
+n_uint sim_memory_allocated(n_int max)
+{
+    if (max)
+    {
+        return MAXIMUM_ALLOCATION;
+    }else{
+        return initial_memory_allocated;
+    }
+}
+
 static void sim_memory_remains(noble_simulation * local, n_byte * buffer, n_uint * location)
 {
     local->remains = (noble_remains *) & buffer[ *location ];
@@ -1286,6 +1298,8 @@ static n_int sim_memory(n_uint offscreen_size)
         
     offbuffer = memory_new_range(offscreen_size + MINIMAL_ALLOCATION, &memory_allocated);
     
+    initial_memory_allocated = memory_allocated;
+
     current_location = offscreen_size;
     
     sim_memory_remains(&sim, offbuffer, &current_location);

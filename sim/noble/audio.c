@@ -47,7 +47,7 @@ static n_double timedomain[AUDIO_FFT_MAX_BUFFER];
 static n_double frequencyi[AUDIO_FFT_MAX_BUFFER];
 static n_double timedomaini[AUDIO_FFT_MAX_BUFFER];
 
-void bsort(n_double * A, n_int *B, n_int size)
+static void bsort(n_double * A, n_int *B, n_int size)
 {
     for(n_int i=0; i<size; i++)
     {
@@ -403,7 +403,7 @@ void audio_equal_output(n_audio * audio, n_uint length)
  * @param audio the audio buffer to be set.
  * @param length the length of the buffer to be set.
  */
-void audio_equal_input(n_audio * audio, n_uint length)
+static void audio_equal_input(n_audio * audio, n_uint length)
 {
     n_uint     loop = 0;
     while (loop < length)

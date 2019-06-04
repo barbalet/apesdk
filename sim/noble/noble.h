@@ -47,7 +47,11 @@
 #define	 SCRIPT_DEBUG             /* Add all the runtime debug */
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
+
+#ifndef _WIN32
 #define  NEW_LAND_METHOD
+#endif
+
 #undef   SKELETON_RENDER
 
 #ifndef    _WIN32
@@ -104,15 +108,18 @@ typedef	double	n_double;
 
 #define SINE_MAXIMUM (26880)
 
+
+typedef char n_char;
+
 /*! @typedef n_string
  @discussion This is the string format for the Noble Ape development */
-typedef char *          n_string;
+typedef n_char *          n_string;
 
-typedef const char *    n_constant_string;
+typedef const n_char *    n_constant_string;
 
 #define STRING_BLOCK_SIZE (2048)
 
-typedef char       n_string_block[STRING_BLOCK_SIZE];
+typedef n_char       n_string_block[STRING_BLOCK_SIZE];
 
 /*! @typedef n_byte
 @discussion This is a single byte data unit. */
@@ -162,7 +169,7 @@ void io_assert(n_string message, n_string file_loc, n_int line);
 #define AUDIO_FFT_MAX_BITS      (15)
 #define AUDIO_FFT_MAX_BUFFER    (1<<AUDIO_FFT_MAX_BITS)
 
-void   audio_fft(n_byte inverse, n_uint power_sample);
+void audio_fft(n_byte inverse, n_uint power_sample);
 void audio_new_fft(n_uint       power_sample,
                    n_int      InverseTransform,
                    n_double    *RealIn,
@@ -211,23 +218,39 @@ typedef	struct
  @field y     Y value in the 2d vector.
  @discussion  This is the bases of two dimensional vectors in the simulation.
  */
-typedef struct
-{
-    n_int x;
-    n_int y;
-} n_vect2;
 
-typedef struct
+
+typedef union
 {
-    n_vect2 top_left;
-    n_vect2 bottom_right;
+    struct
+    {
+        n_int x;
+        n_int y;
+    };
+    n_int data[2];
+}n_vect2;
+
+
+typedef union
+{
+    struct
+    {
+        n_vect2 top_left;
+        n_vect2 bottom_right;
+    };
+    n_int data[4];
 } n_area2;
 
-typedef struct
+
+typedef union
 {
-    n_double x;
-    n_double y;
-    n_double z;
+    struct
+    {
+        n_double x;
+        n_double y;
+        n_double z;
+    };
+    n_double data[3];
 } n_vect3;
 
 typedef struct {
@@ -446,17 +469,24 @@ n_object * obj_array(n_object * obj, n_string name, n_array * array);
 void object_top_object(n_file * file, n_object * top_level);
 n_object * object_file_to_tree(n_file * file);
 
+void obj_free(n_object ** object);
 
-void obj_free(n_array ** array);
+n_string obj_contains(n_object* base, n_string name, n_object_type type);
+n_int    obj_contains_number(n_object* base, n_string name, n_int *number);
+
+n_array *  obj_get_array(n_string array);
+n_object * obj_get_object(n_string object);
+n_int      obj_get_number(n_string object);
+
+n_array * obj_array_next(n_array * array, n_array * element);
+n_int     obj_array_count(n_array * array_obj);
 
 /** \brief sine and cosine conversation */
 #define	NEW_SD_MULTIPLE			26880
 
-enum window_num
-{
-    NUM_VIEW    = (0),
-    NUM_TERRAIN	= (1)
-};
+
+#define    NUM_VIEW    (0)
+#define    NUM_TERRAIN (1)
 
 #define WINDOW_PROCESSING NUM_TERRAIN
 
@@ -711,7 +741,9 @@ void vect2_rotation(n_vect2 * location, n_vect2 * rotation);
 void vect2_rotation_bitshift(n_vect2 * location, n_vect2 * rotation);
 
 n_int vect2_nonzero(n_vect2 * nonzero);
+#ifndef _WIN32
 n_vect2 * vect2_min_max_init(void);
+#endif
 void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin);
 
 void vect2_scalar_multiply(n_vect2 * value, n_int multiplier);
@@ -815,7 +847,7 @@ void       memory_erase(n_byte * buf_offscr, n_uint nestop);
 n_int      io_disk_read(n_file * local_file, n_string file_name);
 n_int      io_disk_read_no_error(n_file * local_file, n_string file_name);
 
-n_int      io_disk_write(n_file * local_file, n_string file_name);
+n_int      io_disk_write(n_file * local_file, n_constant_string file_name);
 n_int      io_disk_check(n_constant_string file_name);
 n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
 
@@ -847,8 +879,11 @@ void io_file_string(n_int entry, n_file * file, n_constant_string string);
 
 n_uint io_find_size_data(noble_file_entry * commands);
 
-void compress_compress(n_file *input, n_file *output);
-void compress_expand(n_file *input, n_file *output);
+void compress_buffer(n_byte * input, n_byte * output, n_int n, n_int compressed);
+void compress_buffer_run(n_byte * input, n_byte * output, n_int n, n_int compressed, n_int number);
+
+void compress_brain_compressed(n_byte * brain);
+void compress_brain_expand(n_byte * brain);
 
 enum color_type
 {
@@ -994,6 +1029,7 @@ n_int land_location(n_int px, n_int py);
 n_byte * land_location_tile(n_int tile);
 n_int land_location_vect(n_vect2 * value);
 
+void graph_init(n_int four_byte_factory);
 
 void graph_erase(n_byte * buffer, n_vect2 * img, n_rgba32 * color);
 
@@ -1275,6 +1311,15 @@ n_byte * land_topography(void);
 n_byte * land_topography_highdef(void);
 n_byte4 * land_highres_tide(void);
 n_c_int * land_weather(n_int tile);
+
+#define BASH_COLOR_DEFAULT "\033[0m"
+
+#define BASH_COLOR_LIGHT_GREEN "\033[92m"
+#define BASH_COLOR_LIGHT_YELLOW "\033[93m"
+#define BASH_COLOR_LIGHT_RED "\033[91m"
+
+#define BASH_COLOR_LIGHT_GREY "\033[37m"
+#define BASH_COLOR_DARK_GREY "\033[90m"
 
 #ifdef	SCRIPT_DEBUG
 

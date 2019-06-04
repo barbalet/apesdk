@@ -143,7 +143,7 @@ static void control_mouse(n_byte wwind, n_int px, n_int py, n_byte option)
                 n_int	screen_x = APESPACE_TO_MAPSPACE(being_location_x(current_ape)) - px;
                 n_int	screen_y = APESPACE_TO_MAPSPACE(being_location_y(current_ape)) - py;
 
-                n_uint	current_squ = (screen_x * screen_x) + (screen_y * screen_y);
+                n_uint	current_squ = (n_uint)((screen_x * screen_x) + (screen_y * screen_y));
 
                 if (high_squ > current_squ)
                 {
@@ -280,6 +280,10 @@ static void control_key(n_byte wwind, n_byte2 num)
     {
         command_change_selected(local_sim, (num == 2078));
     }
+    if (num == 'c' || num == 'C')
+    {
+        compress_brain_compressed(local->braindata.brain);
+    }
 }
 
 #ifdef SCRIPT_DEBUG
@@ -300,11 +304,11 @@ static n_int shared_script_debug_ready(void)
     return 0;
 }
 
-void shared_script_debug_handle(n_string cStringFileName)
+void shared_script_debug_handle(n_constant_string cStringFileName)
 {
     if (cStringFileName)
     {
-        n_file          * outputfile = scdebug_file_ready();
+        n_file  * outputfile = scdebug_file_ready();
         io_disk_write(outputfile, cStringFileName);
     }
     scdebug_file_cleanup();
@@ -336,7 +340,15 @@ static void * control_init(KIND_OF_USE kind, n_uint randomise)
     return 0;
 }
 
-shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification)
+void shared_dimensions(n_int* dimensions)
+{
+	dimensions[0] = 2;
+	dimensions[1] = 512;
+	dimensions[2] = 512;
+    dimensions[3] = 1;
+}
+
+shared_cycle_state shared_cycle(n_uint ticks, n_int localIdentification)
 {
     shared_cycle_state return_value = SHARED_CYCLE_OK;
     
@@ -429,7 +441,7 @@ shared_cycle_state shared_cycle(n_uint ticks, n_byte localIdentification)
     return return_value;
 }
 
-n_int shared_init(n_byte view, n_uint random)
+n_int shared_init(n_int view, n_uint random)
 {
     key_down = 0;
     mouse_down = 0;
@@ -450,7 +462,7 @@ void shared_close(void)
     sim_close();
 }
 
-void shared_keyReceived(n_byte2 value, n_byte fIdentification)
+void shared_keyReceived(n_int value, n_int fIdentification)
 {
     key_down = 1;
     key_value = value;
@@ -467,12 +479,12 @@ void shared_mouseOption(n_byte option)
     mouse_option = option;
 }
 
-void shared_mouseReceived(n_int valX, n_int valY, n_byte fIdentification)
+void shared_mouseReceived(n_double valX, n_double valY, n_int fIdentification)
 {
     mouse_down = 1;
     mouse_identification = fIdentification;
-    mouse_x = valX;
-    mouse_y = valY;
+    mouse_x = (n_int)valX;
+    mouse_y = (n_int)valY;
 }
 
 void shared_mouseUp(void)
@@ -513,7 +525,7 @@ n_int shared_new_agents(n_uint seed)
     return shared_new_type(KIND_NEW_APES, seed);
 }
 
-n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
+n_byte shared_openFileName(n_constant_string cStringFileName, n_int isScript)
 {
     (void)control_toggle_pause(0);
 
@@ -524,23 +536,23 @@ n_byte shared_openFileName(n_string cStringFileName, n_byte isScript)
     return (command_open(0L, cStringFileName, 0L) == 0);
 }
 
-void shared_saveFileName(n_string cStringFileName)
+void shared_saveFileName(n_constant_string cStringFileName)
 {
     (void)control_toggle_pause(0);
     (void)command_save(0L, cStringFileName, 0L);
 }
 
-void shared_delta(n_double delta_x, n_double delta_y, n_byte wwind)
+void shared_delta(n_double delta_x, n_double delta_y, n_int wwind)
 {
     
 }
 
-void shared_zoom(n_double num, n_byte wwind)
+void shared_zoom(n_double num, n_int wwind)
 {
     
 }
 
-void shared_rotate(n_double num, n_byte wwind)
+void shared_rotate(n_double num, n_int wwind)
 {
     if (wwind == NUM_TERRAIN)
     {
@@ -602,11 +614,6 @@ n_int shared_menu(n_int menuVal)
     return -1;
 }
 
-n_byte * shared_legacy_pointer(n_byte fIdentification)
-{
-    return draw_pointer(fIdentification);
-}
-
 n_byte * shared_legacy_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
 {
     if (fIdentification == NUM_TERRAIN)
@@ -618,7 +625,12 @@ n_byte * shared_legacy_draw(n_byte fIdentification, n_int dim_x, n_int dim_y)
     return draw_pointer(fIdentification);
 }
 
-void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed)
+void shared_color_8_bit_to_48_bit(n_byte2 * fit)
+{
+    land_color_time(fit, 1);
+}
+
+void shared_draw(n_byte * outputBuffer, n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed)
 {
     if (simulation_started == 0)
     {
@@ -718,15 +730,15 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
                 n_int negCloud = 256 - cloud;
                 
 #ifdef METAL_RENDER
-                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][2])>>8);
-                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][1])>>8);
-                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][0])>>8);
+                outputBuffer[loop++] = (n_byte)(cloud + ((negCloud*colorLookUp[value][2])>>8));
+                outputBuffer[loop++] = (n_byte)(cloud + ((negCloud*colorLookUp[value][1])>>8));
+                outputBuffer[loop++] = (n_byte)(cloud + ((negCloud*colorLookUp[value][0])>>8));
                 outputBuffer[loop++] = 0;
 #else
                 outputBuffer[loop++] = 0;
-                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][0])>>8);
-                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][1])>>8);
-                outputBuffer[loop++] = cloud + ((negCloud*colorLookUp[value][2])>>8);
+                outputBuffer[loop++] = (n_byte)(cloud + ((negCloud*colorLookUp[value][0])>>8));
+                outputBuffer[loop++] = (n_byte)(cloud + ((negCloud*colorLookUp[value][1])>>8));
+                outputBuffer[loop++] = (n_byte)(cloud + ((negCloud*colorLookUp[value][2])>>8));
 #endif
                 lx++;
 
@@ -756,9 +768,7 @@ void shared_draw(n_byte * outputBuffer, n_byte fIdentification, n_int dim_x, n_i
                 outputBuffer[loop++] = colorLookUp[value][0];
                 outputBuffer[loop++] = 0;
 #else
-//#ifdef NOBLE_IOS
                 outputBuffer[loop++] = 0;
-//#endif
                 outputBuffer[loop++] = colorLookUp[value][0];
                 outputBuffer[loop++] = colorLookUp[value][1];
                 outputBuffer[loop++] = colorLookUp[value][2];

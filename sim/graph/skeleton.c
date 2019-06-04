@@ -249,15 +249,15 @@ const n_vect2 bone_ribs[] =
  * @param scale_width The returned width scale for the bone x1000
  * @param scale_length The returned length scale for the bone x1000
  */
-void body_skeleton_gene(n_genetics * genetics, n_byte keypoint, n_vect2* scale)
+static void body_skeleton_gene(n_genetics * genetics, n_byte keypoint, n_vect2* scale)
 {
     /** the maximum variation in body segment proportions,
      typically in the range 0-500 */
     const n_int MAX_SEGMENT_VARIANCE = 200;
     
     /** these are 4 bit gene values in the range 0-15 */
-    n_byte gene_val1 = GENE_HOX(genetics,keypoint);
-    n_byte gene_val2 = GENE_HOX(genetics,20-keypoint);
+    n_byte gene_val1 = (n_byte)GENE_HOX(genetics,keypoint);
+    n_byte gene_val2 = (n_byte)GENE_HOX(genetics,20-keypoint);
     
     /** convert the gene values into scaling values */
     scale->x = 1000 - MAX_SEGMENT_VARIANCE + (((n_int)gene_val1)*MAX_SEGMENT_VARIANCE*2/15);
@@ -276,7 +276,7 @@ void body_skeleton_gene(n_genetics * genetics, n_byte keypoint, n_vect2* scale)
  * @param knee_angle Angle of the knees in degrees
  * @return Number of 2D points within the skeleton diagram
  */
-n_int graph_skeleton_points(n_genetics * genetics, n_vect2 * keypoints, n_points * collection,
+static n_int graph_skeleton_points(n_genetics * genetics, n_vect2 * keypoints, n_points * collection,
                             n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
                             n_int hip_angle, n_int knee_angle)
 {

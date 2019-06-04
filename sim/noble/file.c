@@ -89,7 +89,10 @@ void io_file_free(n_file ** file)
 {
     if (file != 0L)
     {
-        memory_free((void **)&((*file)->data));
+        if ((*file)->data)
+        {
+            memory_free((void **)&((*file)->data));
+        }
     }
     memory_free((void **)file);
 }
@@ -209,7 +212,7 @@ n_int io_disk_read_no_error(n_file * local_file, n_string file_name)
  * @param file_name the name of the file to be written.
  * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
  */
-n_int io_disk_write(n_file * local_file, n_string file_name)
+n_int io_disk_write(n_file * local_file, n_constant_string file_name)
 {
     n_uint written_length;
     FILE * out_file = 0L;
@@ -690,12 +693,12 @@ n_int io_writenumber(n_file * fil, n_int loc_val, n_uint numer, n_uint denom)
     if(loc_val < 0)
     {
         negative = 1;
-        positive_number = 0 - loc_val;
+        positive_number = (n_uint)(0 - loc_val);
     }
     else
     {
         negative = 0;
-        positive_number = loc_val;
+        positive_number = (n_uint)(loc_val);
     }
     
     if(denom != 0)
@@ -1445,12 +1448,12 @@ void io_audit_file(const noble_file_entry * format, n_byte section_to_audit)
             
             if ((local_type == FILE_TYPE_BYTE) || (local_type == FILE_TYPE_BYTE2) || (local_type == FILE_TYPE_BYTE4))
             {
-                printout_characters[0] = (char)local_characters[0];
-                printout_characters[1] = (char)local_characters[1];
-                printout_characters[2] = (char)local_characters[2];
-                printout_characters[3] = (char)local_characters[3];
-                printout_characters[4] = (char)local_characters[4];
-                printout_characters[5] = (char)local_characters[5];
+                printout_characters[0] = (n_char)local_characters[0];
+                printout_characters[1] = (n_char)local_characters[1];
+                printout_characters[2] = (n_char)local_characters[2];
+                printout_characters[3] = (n_char)local_characters[3];
+                printout_characters[4] = (n_char)local_characters[4];
+                printout_characters[5] = (n_char)local_characters[5];
                 
                 printf("%s \t %lu * %lu = %lu bytes \t reported/actual/diff offset %d / %d / %d\n", printout_characters,
                        local_number, local_type, (local_number * local_type), (int)local_location, (int)being_counter, ((int)local_location - (int)being_counter));

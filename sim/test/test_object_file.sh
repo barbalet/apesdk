@@ -39,6 +39,8 @@ else
     CFLAGS=-O2 
 fi
 
+gcc ${CFLAGS} -c $SOURCEDIR/noble/graph.c -o graph.o
+gcc ${CFLAGS} -c $SOURCEDIR/noble/vect.c -o vect.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/memory.c -o memory.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/io.c -o io.o
 gcc ${CFLAGS} -c $SOURCEDIR/noble/file.c -o file.o

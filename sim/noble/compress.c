@@ -1,11 +1,11 @@
 /****************************************************************
-
+ 
  compress.c
-
+ 
  =============================================================
-
+ 
  Copyright 1996-2019 Tom Barbalet. All rights reserved.
-
+ 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
@@ -14,10 +14,10 @@
  sell copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
  conditions:
-
+ 
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
-
+ 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,251 +26,301 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
+ 
  This software and Noble Ape are a continuing work of Tom Barbalet,
  begun on 13 June 1996. No apes or cats were harmed in the writing
  of this software.
-
+ 
  ****************************************************************/
 
-/*
-
- This codes is based on a modified version of:
-
- **
- ** Copyright (c) 1989 Mark R. Nelson
- **
- ** LZW data compression/expansion demonstration program.
- **
- ** April 13, 1989
- **
-
- Now in the public domain.
-
- */
-
+#include <stdio.h>
 #include "noble.h"
 
-#define BITS 16
-#define HASHING_SHIFT (BITS-8)
-#define MAX_VALUE     ((1<<BITS)-1)
-#define MAX_CODE      (MAX_VALUE-1)
+static n_byte brain_index_compressed[384];
+static n_byte brain_index[1024];
+static n_byte brain_compressed[ 32 * 32 * 32 * 2];
+static n_uint brain_location;
 
-#if BITS == 16
-#define TABLE_SIZE 99991
-#endif
-#if BITS==14
-#define TABLE_SIZE 18041
-#endif
-#if BITS==13
-#define TABLE_SIZE 9029
-#endif
-#if BITS==12
-#define TABLE_SIZE 5021
-#endif
+/*static n_byte brain_base85[ (((32 * 32 * 32 * 2) + 384) * 5) / 4 ];
+static n_uint brain_base85_location;*/
 
-n_c_int   code_value[TABLE_SIZE];         /* This is code value array            */
-n_byte4  prefix_code[TABLE_SIZE];        /* This array holds the prefix codes   */
-n_byte    append_character[TABLE_SIZE];              /* This array holds the appended chars */
 
-/*
- ** This is the hashing routine. It tries to find a match for the prefix+char
- ** string in the string table. If it finds it, the index is returned. If
- ** the string is not found, the first available index in the string table is
- ** returned instead.
- */
-static n_c_int find_match(n_byte4 hash_prefix, n_byte4 hash_character)
+static void compress_bytes_to_base85(n_byte * bytes, n_byte * base85)
 {
-    n_c_int offset;
-    n_c_int index = (n_c_int)((hash_character << HASHING_SHIFT) ^ hash_prefix);
-    if (index == 0)
+    n_uint combined = bytes[0] + (bytes[1] * 256) + (bytes[2] * 256 * 256) + (bytes[3] * 256 * 256 * 256);
+    base85[0] = 33 + (combined % 83);
+    base85[1] = 33 + (combined / 83) % 83;
+    base85[2] = 33 + (combined / (83 * 83)) % 83;
+    base85[3] = 33 + (combined / (83 * 83 * 83)) % 83;
+    base85[4] = 33 + (combined / (83 * 83 * 83 * 83)) % 83;
+}
+
+
+static void compress_base85_to_bytes(n_byte * base85, n_byte * bytes)
+{
+    n_uint combined;
+    n_byte delta[5];
+    
+    delta[0] = base85[0] - 33;
+    delta[1] = base85[1] - 33;
+    delta[2] = base85[2] - 33;
+    delta[3] = base85[3] - 33;
+    delta[4] = base85[4] - 33;
+
+    combined = delta[0] + (delta[1] * 83) + (delta[2] * 83 * 83) + (delta[3] * 83 * 83 * 83) + (delta[3] * 83 * 83 * 83 * 83);
+    
+    bytes[0] =  combined & 255;
+    bytes[1] = (combined >> 8) & 255;
+    bytes[2] = (combined >> 16) & 255;
+    bytes[3] = (combined >> 24) & 255;
+}
+
+void compress_buffer(n_byte * input, n_byte * output, n_int n, n_int compressed)
+{
+    n_int total_bits = n * 8;
+    n_int loop = 0;
+    
+    n_int a_result, b_result, c_result, d_result;
+    
+    while (loop < total_bits)
     {
-        offset=1;
+        if (compressed)
+        {
+            a_result = loop & 7;
+            b_result = loop >> 3;
+            c_result = loop % n;
+            d_result = loop / n;
+        }
+        else
+        {
+            a_result = loop % n;
+            b_result = loop / n;
+            c_result = loop & 7;
+            d_result = loop >> 3;
+        }
+
+        if (c_result == 0)
+        {
+            output[d_result] = 0;
+        }
+        output[d_result] += ((input[b_result] >> a_result) & 1) << c_result;
+        loop++;
+    }
+}
+
+void compress_buffer_run(n_byte * input, n_byte * output, n_int n, n_int compressed, n_int number)
+{
+    n_int input_add, output_add;
+    n_int input_loop_end, input_loop = 0, output_loop = 0;
+    
+    if (compressed)
+    {
+        input_add = n;
+        output_add = 8;
     }
     else
     {
-        offset=TABLE_SIZE-index;
+        input_add = 8;
+        output_add = n;
     }
-    while (1)
+    input_loop_end = input_add * number;
+    
+    while (input_loop < input_loop_end)
     {
-        if (code_value[index] == -1)
-            return index;
+        compress_buffer(&input[input_loop], &output[output_loop], n, compressed);
+        input_loop += input_add;
+        output_loop += output_add;
+    }
+    
+}
 
-        if (prefix_code[index] == hash_prefix && append_character[index] == hash_character)
-            return index;
 
-        index-=offset;
-        if (index<0)
-        {
-            index+=TABLE_SIZE;
-        }
+static void compress_brain_index_compress(void)
+{
+    n_int three_loop = 0;
+    n_int eight_loop = 0;
+    while (three_loop < 384)
+    {
+        compress_buffer(&brain_index[eight_loop], &brain_index_compressed[three_loop], 3, 1);
+        eight_loop += 8;
+        three_loop += 3;
     }
 }
 
-/*
- ** This routine simply decodes a string from the string table, storing
- ** it in buffer. The buffer can then be output in reverse order by
- ** the expansion program.
- */
-static n_byte * decode_string(n_byte *buffer, n_byte4 code)
+
+static void compress_brain_index_expand(void)
 {
-    n_c_int i;
-    i=0;
-    while (code>255)
+    n_int three_loop = 0;
+    n_int eight_loop = 0;
+    while (three_loop < 384)
     {
-        *buffer++=append_character[code];
-        code = prefix_code[code];
-        if (i++>4000)
-        {
-            (void)SHOW_ERROR("Fatal error during code expansion.\n");
-        }
-    }
-    *buffer = (n_byte)code;
-    return buffer;
-}
-/*
- ** The following two routines are used to output variable negth
- ** codes. They are written strivtly for clarity and are not
- ** particularly efficent.
- */
-static unsigned int input_code(n_file *input)
-{
-    n_byte4 return_value;
-    static n_c_int input_bit_count=0;
-    static n_byte4 input_bit_buffer=0L;
-    while (input_bit_count<=24)
-    {
-        n_byte byte_character;
-        (void) io_read_bin(input, &byte_character);
-
-        input_bit_buffer |= ((unsigned long) byte_character) << (24-input_bit_count);
-        input_bit_count+=8;
-    }
-    return_value = input_bit_buffer>>(32-BITS);
-    input_bit_buffer<<=BITS;
-    input_bit_count-=BITS;
-    return return_value;
-}
-
-static void output_code(n_file *output, n_byte4 code)
-{
-    static n_c_int output_bit_count=0;
-    static n_byte4 output_bit_buffer=0L;
-    output_bit_buffer|=(n_byte4) code << (32-BITS-output_bit_count);
-    output_bit_count += BITS;
-    while (output_bit_count>=8)
-    {
-        /* putc(output_bit_buffer>>24,output);*/
-
-        (void)io_file_write(output, output_bit_buffer>>24);
-
-        output_bit_buffer<<=8;
-        output_bit_count-=8;
+        compress_buffer(&brain_index_compressed[three_loop], &brain_index[eight_loop], 3, 0);
+        eight_loop += 8;
+        three_loop += 3;
     }
 }
 
-/*
- ** This is the compression routine. The code should be a fairly close
- ** match to the algorithm accompanying the article.
- */
-void compress_compress(n_file *input, n_file *output)
+
+static n_byte compresed_find_level(n_byte value)
 {
-    n_byte4  next_code = 256;                 /* next available string code */
-    n_byte4  string_code;
-    n_byte4  index = 0;
-    n_byte   byte_character;
-
-    while(index<TABLE_SIZE)     /* clear string table */
+    if (value < 2)
     {
-        code_value[index++] = -1;
+        return 0;
     }
-
-    (void)io_read_bin(input, &byte_character);
-
-    string_code = byte_character;      /* get the first code */
-    /*
-     ** This is the main loop where it all happens. This loop runs until all of
-     ** the input has been exhausted. Note that it stops adding codes to the
-     ** table after all of the possible codes have been defined.
-     */
-
-    while (io_read_bin(input, &byte_character) != -1)
+    if (value < 4)
     {
-        n_byte4 character = byte_character;
+        return 1;
+    }
+    if (value < 8)
+    {
+        return 2;
+    }
+    if (value < 16)
+    {
+        return 3;
+    }
+    if (value < 32)
+    {
+        return 4;
+    }
+    if (value < 64)
+    {
+        return 5;
+    }
+    if (value < 128)
+    {
+        return 6;
+    }
+    return 7;
+}
 
-        index = (n_byte4) find_match(string_code, character);
 
-        if (code_value[index]!=-1)
+void compress_brain_compressed(n_byte * brain)
+{
+    n_int pz = 0;
+    brain_location = 0;
+    while (pz < 8)
+    {
+        n_int py = 0;
+        while (py < 8)
         {
-            string_code = (n_byte4)code_value[index];
-        }
-        else
-        {
-            if (next_code<=MAX_CODE)
+            n_int px = 0;
+            while (px < 8)
             {
-                code_value[index] = (n_c_int) (next_code++);
-                prefix_code[index] = string_code;
-                append_character[index] = (n_byte)character;
+                n_int old = 0;
+                while (old < 2)
+                {
+                    n_byte array[4 * 4 * 4] = {0};
+                    n_byte min = 255;
+                    n_byte max = 0;
+                    
+                    n_int sz = 0;
+                    while (sz < 4)
+                    {
+                        n_int lz = (pz * 4) + sz;
+                        n_int sy = 0;
+                        while (sy < 4)
+                        {
+                            n_int ly = (py * 4) + sy;
+                            n_int sx = 0;
+                            while (sx < 4)
+                            {
+                                n_int lx = (px * 4) + sx;
+                                n_byte value = brain[lx + (ly * 32) + (lz * 1024) + (old * 32768)];
+                                array[sx + (sy * 4) + (sz * 4 * 4)] = value;
+                                
+                                if (value > max)
+                                {
+                                    max = value;
+                                }
+                                if (value < min)
+                                {
+                                    min = value;
+                                }
+                                sx++;
+                            }
+                            sy++;
+                        }
+                        sz++;
+                    }
+                    
+                    {
+                        n_byte bits_minus_one = compresed_find_level(max);
+                        compress_buffer_run(array, &brain_compressed[brain_location], bits_minus_one + 1, 1, 4 * 2);
+                        brain_location += 8 * (bits_minus_one + 1);
+                        brain_index[px + (py * 8) + (pz * 8 * 8)] = bits_minus_one;
+                        
+                    }
+                    old++;
+                }
+                px++;
             }
-            output_code(output,string_code);
-            string_code=character;
+            py++;
         }
+        pz++;
     }
-    output_code(output,string_code);
-    output_code(output,MAX_VALUE);
-    output_code(output,0);
+    compress_brain_index_compress();
+    printf("percent %ld\n", (brain_location * 100)/(64*1024));
 }
 
-/*
- ** This is expansion routine. It takes an LZW format file, and expands
- ** it to an output file. The code here should be a faitly close match to
- ** the algorithm in the accompaning article.
- */
-void compress_expand(n_file *input,n_file *output)
+void compress_brain_expand(n_byte * brain)
 {
-    n_byte4 next_code =  256;
-    n_byte4 new_code;
-    n_byte4 old_code = input_code(input);
-    n_c_int  character = (n_c_int)old_code;
-    n_byte   *string;
-
-    n_byte    decode_stack[4000];             /* This array holds the decoded string */
-
-
-    (void)io_file_write(output, (n_byte)old_code);
-
-    while ((new_code=input_code(input)) != (MAX_VALUE))
+    n_int count = 0;
+    n_int pz = 0;
+    while (pz < 8)
     {
-
-        /*
-         ** This code checks for the special STRING+CHARACTER+STRING+CHARACTER+STRING
-         ** case which generates an undefined code. It handles it by decoding
-         ** the last code, adding a single character to the end of the decode string.
-         */
-
-        if (new_code >= next_code)
+        n_int py = 0;
+        while (py < 8)
         {
-            *decode_stack = (n_byte)character;
-            string = decode_string(decode_stack+1,old_code);
+            n_int px = 0;
+            while (px < 8)
+            {
+                n_int old = 0;
+                while (old < 2)
+                {
+                    n_byte array[4 * 4 * 4] = {0};
+                    n_byte min = 255;
+                    n_byte max = 0;
+                    
+                    n_int sz = 0;
+                    while (sz < 4)
+                    {
+                        n_int lz = (pz * 4) + sz;
+                        n_int sy = 0;
+                        while (sy < 4)
+                        {
+                            n_int ly = (py * 4) + sy;
+                            n_int sx = 0;
+                            while (sx < 4)
+                            {
+                                n_int lx = (px * 4) + sx;
+                                n_byte value = brain[lx + (ly * 32) + (lz * 1024) + (old * 32768)];
+                                array[sx + (sy * 4) + (sz * 4 * 4)] = value;
+                                
+                                if (value > max)
+                                {
+                                    max = value;
+                                }
+                                if (value < min)
+                                {
+                                    min = value;
+                                }
+                                sx++;
+                            }
+                            sy++;
+                        }
+                        sz++;
+                    }
+                    if ( min !=0 || max !=0 )
+                    {
+                        printf("%ld (%ld, %ld , %ld, %ld) %d - %d\n", count++, old, px, py, pz, min, max);
+                    }
+                    old++;
+                }
+                px++;
+            }
+            py++;
         }
-        /*
-         ** Otherwise we do a straight decode of the new code.
-         */
-        else
-        {
-            string = decode_string(decode_stack, new_code);
-        }
-        character = *string;
-        while(string >= decode_stack)
-        {
-            (void)io_file_write(output, *string--);
-        }
-        if (next_code <= MAX_CODE)
-        {
-            prefix_code[next_code] = old_code;
-            append_character[next_code] = (n_byte)character;
-            next_code++;
-        }
-        old_code = new_code;
+        pz++;
     }
 }

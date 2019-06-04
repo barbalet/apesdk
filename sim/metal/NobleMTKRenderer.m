@@ -37,6 +37,18 @@
 @import simd;
 @import MetalKit;
 
+#include "noble.h"
+
+#ifdef MUSHROOM
+#import "NobleShared.h"
+#else
+#ifdef WARFARE
+#import "Noble_Warfare-Swift.h"
+#else
+#import "Noble_Ape-Swift.h"
+#endif
+#endif
+
 #import "NobleMTKRenderer.h"
 
 // Header shared between C code here, which executes Metal API commands, and .metal files, which

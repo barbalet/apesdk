@@ -395,9 +395,9 @@ static n_byte brain_vc(n_byte value, n_byte vowel)
 
 static void brain_longword(n_string output, n_byte value)
 {
-    output[0] = (char)brain_vc((value >> 0) & 7,0);
-    output[1] = (char)brain_vc((value >> 3) & 3,1);
-    output[2] = (char)brain_vc((value >> 5) & 7,0);
+    output[0] = (n_char)brain_vc((value >> 0) & 7,0);
+    output[1] = (n_char)brain_vc((value >> 3) & 3,1);
+    output[2] = (n_char)brain_vc((value >> 5) & 7,0);
     output[4] = 0;
 }
 
@@ -888,9 +888,9 @@ static n_byte brain_first_sense(noble_simulation * sim, noble_being * meeter_bei
     case 1:
         return being_honor(met_being);
     case 2:
-        return being_parasites(meeter_being);
+        return (n_byte)being_parasites(meeter_being);
     case 3:
-        return being_parasites(met_being);
+        return (n_byte)being_parasites(met_being);
     case 4:
         return being_crowding(meeter_being);
     case 5:

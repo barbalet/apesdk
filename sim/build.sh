@@ -47,6 +47,16 @@ COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
 
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/vect.c -o vect.o
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/graph.c -o graph.o
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/file.c -o file.o
 if [ $? -ne 0 ]
 then

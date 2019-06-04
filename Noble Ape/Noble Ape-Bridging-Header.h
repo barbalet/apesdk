@@ -1,6 +1,6 @@
 /****************************************************************
  
- NobleMacUpdate.h
+ Noble Ape-Bridging-Header.h
  
  =============================================================
  
@@ -33,23 +33,8 @@
  
  ****************************************************************/
 
-@import MetalKit;
-
-
-#import <Cocoa/Cocoa.h>
-
-#import "NobleShared.h"
-
-//@interface NobleMacUpdate : NSView
-@interface NobleMacUpdate : MTKView
-{
-    CGContextRef     drawRef;
-    CVDisplayLinkRef displayLink;
-}
-
-@property (nonatomic, strong) NobleShared* shared;
-
-- (void) startView;
-- (void) sharedReady;
-
-@end
+#include "../nobleape/noble/noble.h"
+#include "../nobleape/noble/shared.h"
+#include "../nobleape/gui/gui.h"
+#include "../nobleape/universe/universe.h"
+#include "../nobleape/entity/entity.h"

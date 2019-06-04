@@ -86,7 +86,7 @@ n_int io_number(n_string number_string, n_int * actual_value, n_int * decimal_di
     
     while (1)
     {
-        n_byte  value = number_string[string_point++];
+        n_char value = number_string[string_point++];
         n_uint mod_ten;
         if (value == 0)
         {
@@ -157,6 +157,7 @@ n_int io_number(n_string number_string, n_int * actual_value, n_int * decimal_di
         }
     }
 }
+
 
 
 /*
@@ -234,7 +235,7 @@ n_int io_find(n_string check, n_int from, n_int max, n_string value_find, n_int 
 void io_string_write(n_string dest, n_string insert, n_int * pos)
 {
     n_int  loop = 0;
-    n_byte character = 127;
+    n_char character = 127;
     do
     {
         character = insert [loop++];
@@ -296,7 +297,7 @@ void io_string_number(n_string output_string, n_string input_string,n_uint numbe
     n_int input_length = io_length(input_string, STRING_BLOCK_SIZE);
     if (input_length > 0)
     {
-        memory_copy((n_byte *)input_string, (n_byte *)output_string, input_length);
+        memory_copy((n_byte *)input_string, (n_byte *)output_string, (n_uint)input_length);
         io_number_to_string(&output_string[input_length], number);
         return ;
     }
@@ -314,18 +315,18 @@ void       io_three_strings(n_string output_string, n_string first_string, n_str
     {
         if (first_string != output_string)
         {
-            memory_copy((n_byte *)first_string, (n_byte *)output_string, first_length);
+            memory_copy((n_byte *)first_string, (n_byte *)output_string, (n_uint)first_length);
         }
         carried_length += first_length;
     }
     if (second_length > 0)
     {
-        memory_copy((n_byte *)second_string, (n_byte *)&output_string[carried_length], second_length);
+        memory_copy((n_byte *)second_string, (n_byte *)&output_string[carried_length], (n_uint)second_length);
         carried_length += second_length;
     }
     if (third_length > 0)
     {
-        memory_copy((n_byte *)third_string, (n_byte *)&output_string[carried_length], third_length);
+        memory_copy((n_byte *)third_string, (n_byte *)&output_string[carried_length], (n_uint)third_length);
         carried_length += third_length;
     }
     if (new_line)
@@ -352,13 +353,13 @@ void io_time_to_string(n_string value)
     value[3] = '0' + (military_time / 1) % 10;
     value[4] = ':';
     
-    io_number_to_string(&value[5], days);
+    io_number_to_string(&value[5], (n_uint)days);
 }
 
 n_string io_string_copy(n_string string)
 {
     n_string return_string = 0L;
-    n_uint    string_length = io_length(string, STRING_BLOCK_SIZE) + 1;
+    n_uint    string_length = (n_uint)(io_length(string, STRING_BLOCK_SIZE) + 1);
     if (string_length > 0)
     {
         return_string = (n_string)memory_new(string_length);

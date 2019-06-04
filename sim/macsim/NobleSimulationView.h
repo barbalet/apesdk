@@ -50,8 +50,6 @@
 - (IBAction) menuFileOpenScript:(id) sender;
 - (IBAction) menuFileSaveAs:(id) sender;
 
-- (IBAction) menuQuit:(id) sender;
-
 - (void) debugOutput;
 
 -(IBAction) menuControlNoTerritory:(id) sender;

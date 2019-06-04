@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="noble">
+      <UniqueIdentifier>{a57efad7-9acc-4b00-85f1-1ee2aaa390ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="entity">
+      <UniqueIdentifier>{a9c794b6-4a14-4c66-b3c6-3a963de7a5bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universe">
+      <UniqueIdentifier>{d2f6d7fc-58e4-41a8-ac6c-14ed9c369476}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{08c15510-6dea-413a-affc-e89dc422b776}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\nobleape\entity\speak.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\entity\being.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\entity\body.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\entity\brain.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\entity\drives.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\entity\episodic.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\entity\food.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\entity\social.c">
+      <Filter>entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\longterm.c">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\universe\command.c">
+      <Filter>universe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\universe\httpd.c">
+      <Filter>universe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\universe\loop.c">
+      <Filter>universe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\universe\sim.c">
+      <Filter>universe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\universe\transfer.c">
+      <Filter>universe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\territory.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\tile.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\graph.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\math.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\vect.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\audio.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\compress.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\console.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\file.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\interpret.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\io.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\land.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\memory.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\network.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\object.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nobleape\noble\parse.c">
+      <Filter>noble</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\nobleape\entity\entity.h">
+      <Filter>entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nobleape\entity\entity_internal.h">
+      <Filter>entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nobleape\universe\universe_internal.h">
+      <Filter>universe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nobleape\universe\universe.h">
+      <Filter>universe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nobleape\noble\noble.h">
+      <Filter>noble</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\nobleape\noble\shared.h">
+      <Filter>noble</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

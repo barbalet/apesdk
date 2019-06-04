@@ -224,7 +224,7 @@ n_file * tranfer_out_json(void)
     
     output_file = obj_json(simulation_object);
     
-    obj_free((n_array **) &simulation_object);
+    obj_free(&simulation_object);
     
     return output_file;
 }

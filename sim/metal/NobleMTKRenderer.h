@@ -33,7 +33,15 @@
  
  ****************************************************************/
 
+#ifdef MUSHROOM
 #import "NobleShared.h"
+#else
+#ifdef WARFARE
+#import "Noble_Warfare-Swift.h"
+#else
+#import "Noble_Ape-Swift.h"
+#endif
+#endif
 
 @import MetalKit;
 

@@ -37,6 +37,17 @@
 
 #import "NobleMacView.h"
 
+#ifdef MUSHROOM
+#import "NobleShared.h"
+#else
+#ifdef WARFARE
+#import "Noble_Warfare-Swift.h"
+#else
+#import "Noble_Ape-Swift.h"
+#endif
+#endif
+
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -46,6 +57,73 @@
 @end
 
 @implementation NobleMacView
+{
+    NobleMTKRenderer *_renderer;
+}
+
+
+- (void) sharedReady
+{
+    // Set the view to use the default device
+    self.device = MTLCreateSystemDefaultDevice();
+    
+    if(!self.device)
+    {
+        NSLog(@"Metal is not supported on this device");
+        return;
+    }
+    
+    _renderer = [[NobleMTKRenderer alloc] initWithMetalKitView:self NobleShared:self.shared];
+    
+    if(!_renderer)
+    {
+        NSLog(@"Renderer failed initialization");
+        return;
+    }
+    
+    // Initialize our renderer with the view size
+    [_renderer mtkView:self drawableSizeWillChange:self.drawableSize];
+    
+    self.delegate = _renderer;
+}
+
+static CVReturn renderCallback(CVDisplayLinkRef displayLink,
+                               const CVTimeStamp *inNow,
+                               const CVTimeStamp *inOutputTime,
+                               CVOptionFlags flagsIn,
+                               CVOptionFlags *flagsOut,
+                               void *displayLinkContext)
+{
+    return [(__bridge NobleMacView *)displayLinkContext renderTime:inOutputTime];
+}
+
+- (CVReturn) renderTime:(const CVTimeStamp *)inOutputTime
+{
+    [self.shared cycle];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.needsDisplay = YES;
+    });
+    return kCVReturnSuccess;
+}
+
+- (void) startView
+{
+    self.shared = [[NobleShared alloc] initWithFrame:[self bounds]];
+    
+    NSLog(@"NobleMacUpdate startView %@", self.shared);
+    
+    CGDirectDisplayID   displayID = CGMainDisplayID();
+    CVReturn            error = kCVReturnSuccess;
+    error = CVDisplayLinkCreateWithCGDisplay(displayID, &displayLink);
+    if (error)
+    {
+        NSLog(@"DisplayLink created with error:%d", error);
+        displayLink = NULL;
+    }
+    CVDisplayLinkSetOutputCallback(displayLink, renderCallback, (__bridge void *)self);
+    CVDisplayLinkStart(displayLink);
+}
 
 - (void) awakeFromNib
 {    
@@ -68,6 +146,12 @@
     NSLog(@"Quit");
 
     exit(0);
+}
+
+- (IBAction) menuQuit:(id) sender
+{
+    NSLog(@"Quit from menu");
+    [self quitProcedure];
 }
 
 - (IBAction) aboutDialog:(id) sender
@@ -177,11 +261,8 @@
 - (void) mouseDown:(NSEvent *)theEvent
 {
 	NSPoint location = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    NSInteger location_x = (NSInteger)location.x;
-    NSInteger location_y = (NSInteger)([self bounds].size.height - location.y);
-    
     [self.shared mouseOption:(([theEvent modifierFlags] & NSEventModifierFlagControl) || ([theEvent modifierFlags] & NSEventModifierFlagOption))];
-    [self.shared mouseReceivedWithXLocation:location_x YLocation:location_y];
+    [self.shared mouseReceivedWithXLocation:location.x yLocation:[self bounds].size.height - location.y];
 }
 
 - (void) rightMouseDown:(NSEvent *)theEvent

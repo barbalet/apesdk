@@ -122,7 +122,7 @@ static void check_object(void)
     io_file_debug(obj_json(new_object));
     io_file_debug(obj_json(sub_object));
 
-    obj_free((n_array**)&new_object);
+    obj_free(&new_object);
 }
 
 int main(int argc, const char * argv[])

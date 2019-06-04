@@ -46,6 +46,22 @@ else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
+
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/vect.c -o vect.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/graph.c -o graph.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/compress.c -o compress.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 gcc ${CFLAGS} ${COMMANDLINEE} -c $SOURCEDIR/noble/console.c -o console.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]
 then
@@ -158,6 +174,8 @@ diff check_file.txt compare_file.txt
 rm test_io.o
 rm test_io
 rm compare_file.txt
+
+###
 
 gcc ${CFLAGS} -c test_apescript.c -o test_apescript.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]

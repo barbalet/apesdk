@@ -1019,6 +1019,8 @@ n_int     tranfer_in(n_file * input_file);
 n_int     sim_interpret(n_file * input_file);
 void	  sim_close(void);
 
+n_uint sim_memory_allocated(n_int max);
+
 n_int sim_new(void);
 
 noble_simulation * sim_sim(void);
@@ -1031,9 +1033,15 @@ void sim_realtime(n_uint time);
 
 void sim_set_select(noble_being * select);
 
+n_int sim_new_run_condition(void);
+
+
 void transfer_debug_csv(n_file * fil, n_byte initial);
 
-n_int sim_new_run_condition(void);
+
+void  httpd_for_now(n_string port);
+n_int httpd_qs(n_string compare);
+
 
 n_int get_time_interval(n_string str, n_int * number, n_int * interval);
 
@@ -1059,6 +1067,7 @@ n_int command_probes(void * ptr, n_string response, n_console_output output_func
 n_int command_watch(void * ptr, n_string response, n_console_output output_function);
 n_int command_logging(void * ptr, n_string response, n_console_output output_function);
 n_int command_list(void * ptr, n_string response, n_console_output output_function);
+n_int command_memory(void * ptr, n_string response, n_console_output output_function);
 n_int command_next(void * ptr, n_string response, n_console_output output_function);
 n_int command_previous(void * ptr, n_string response, n_console_output output_function);
 n_int command_simulation(void * ptr, n_string response, n_console_output output_function);
@@ -1151,7 +1160,9 @@ const static noble_console_command control_commands[] =
     {&command_previous,      "prev",           "",                     ""},
 
 
-    {&command_debug,         "debug",           "",                    "Run debug check"},
+    {&command_debug,         "debug",          "",                    "Run debug check"},
+    
+    {&command_memory,        "memory",         "",                    "Memory information for the simulation"},
 
     {0L, 0L},
 };

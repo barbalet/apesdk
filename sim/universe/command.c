@@ -33,6 +33,8 @@
 
  ****************************************************************/
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #ifndef	_WIN32
 #include "../entity/entity.h"
 #else
@@ -411,19 +413,18 @@ n_int command_simulation(void * ptr, n_string response, n_console_output output_
     n_string_block beingstr, time;
     n_int int_data[2];
     n_byte2 *local_land_genetics = land_genetics();
-    
     n_string_block land_dimension, land_genetics0, land_genetics1, genetics, population;
     n_string_block adults, juveniles, tide_level;
     
     loop_no_thread(local_sim, 0L, command_simulation_loop, int_data);
 
-    io_number_to_string(land_dimension, land_map_dimension());
+    io_number_to_string(land_dimension, (n_uint)land_map_dimension());
     io_number_to_string(land_genetics0, local_land_genetics[0]);
     io_number_to_string(land_genetics1, local_land_genetics[1]);
     io_number_to_string(population, local_sim->num);
     
-    io_number_to_string(adults, (local_sim->num - int_data[1]));
-    io_number_to_string(juveniles, int_data[1]);
+    io_number_to_string(adults, (n_uint)((n_int)(local_sim->num) - int_data[1]));
+    io_number_to_string(juveniles, (n_uint)int_data[1]);
 
     io_number_to_string(tide_level, land_tide_level());
 
@@ -710,7 +711,7 @@ static void watch_braincode(void *ptr, n_string beingname, noble_being * local_b
     io_string_write(result, "\nRegisters:\n", &watch_string_length);
     for (i=0; i<BRAINCODE_PSPACE_REGISTERS; i++)
     {
-        result[watch_string_length++]=(char)(65+(local_being->braindata.braincode_register[i]%60));
+        result[watch_string_length++]=(n_char)(65+(local_being->braindata.braincode_register[i]%60));
     }
     result[watch_string_length++]='\n';
     result[watch_string_length++]='\n';
@@ -1301,6 +1302,15 @@ n_int command_event(void * ptr, n_string response, n_console_output output_funct
     return 0;
 }
 
+n_int command_memory(void * ptr, n_string response, n_console_output output_function)
+{
+    noble_simulation * local_sim = (noble_simulation *) ptr;
+    n_string_block str2;
+    sprintf(str2, "maximum memory %ld\nallocated memory %ld\nmaximum apes %ld",
+            sim_memory_allocated(1), sim_memory_allocated(0), local_sim->max);
+    output_function(str2);
+    return 0;
+}
 
 /**
  * Enable or disable logging
@@ -2112,7 +2122,7 @@ n_int command_top(void * ptr, n_string response, n_console_output output_functio
 
                     if (passed!=0)
                     {
-                        winner = j;
+                        winner = (n_int)j;
                         max_honor = honor;
                     }
                 }
@@ -2144,8 +2154,8 @@ n_int command_top(void * ptr, n_string response, n_console_output output_functio
         }
 
         current_date = land_date();
-        local_dob = being_dob(b);
-        age_in_years = AGE_IN_YEARS(b);
+        local_dob = (n_uint)being_dob(b);
+        age_in_years = (n_uint)AGE_IN_YEARS(b);
         age_in_months = ((current_date - local_dob) - (age_in_years * TIME_YEAR_DAYS)) / (TIME_YEAR_DAYS/12);
         age_in_days = (current_date - local_dob) - ((TIME_YEAR_DAYS/12) * age_in_months) - (age_in_years * TIME_YEAR_DAYS);
 

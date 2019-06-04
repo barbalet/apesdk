@@ -58,6 +58,10 @@
 #endif
 #undef EARLIER_VERSION_STUDIO
 
+static n_int          practical_number_windows;
+static n_int          practical_window_dimension_x;
+static n_int          practical_window_dimension_y;
+
 static HWND           global_hwnd[NUMBER_WINDOWS];
 static HBITMAP        offscreen[NUMBER_WINDOWS];
 static BITMAPINFO	* bmp_info[NUMBER_WINDOWS];
@@ -88,6 +92,60 @@ static unsigned char plat_initialized = 0;
 #define	WINDOW_OFFSET_Y		(38) //(10+22)
 #define WINDOW_MENU_OFFSET	(21)
 
+
+static void platform_menus(void)
+{
+    hMenu = CreateMenu();
+    hMenuPopup[0] = CreateMenu();
+    AppendMenu(hMenuPopup[0], MF_STRING, FILE_NEW_HANDLE, TEXT("&New"));
+    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[0], MF_STRING, FILE_OPEN_HANDLE, TEXT("&Open..."));
+    AppendMenu(hMenuPopup[0], MF_STRING, FILE_OPEN_SCRIPT_HANDLE, TEXT("Open Script..."));
+    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[0], MF_STRING, FILE_CLOSE_HANDLE, TEXT("&Close"));
+    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[0], MF_STRING, FILE_SAVE_AS_HANDLE, TEXT("&Save As..."));
+    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[0], MF_STRING, FILE_EXIT_HANDLE, TEXT("E&xit"));
+    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[0], TEXT("&File"));
+    
+    hMenuPopup[1] = CreateMenu();
+    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_UNDO_HANDLE, TEXT("&Undo"));
+    AppendMenu(hMenuPopup[1], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_CUT_HANDLE, TEXT("Cu&t"));
+    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_COPY_HANDLE, TEXT("&Copy"));
+    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_PASTE_HANDLE, TEXT("&Paste"));
+    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_CLEAR_HANDLE, TEXT("C&lear"));
+    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[1], TEXT("&Edit"));
+    
+    hMenuPopup[2] = CreateMenu();
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PAUSE_HANDLE, TEXT("&Pause"));
+    AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PREV_HANDLE, TEXT("P&revious Ape"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NEXT_HANDLE, TEXT ("&Next Ape"));
+    AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_CLEAR_ERRORS, TEXT ("Clear Errors"));
+    AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_WEATHER_HANDLE, TEXT("Draw &Weather"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_BRAIN_HANDLE, TEXT("Draw Brain"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_BRAINCODE_HANDLE, TEXT("Draw Brain Code"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_TERRITORY_HANDLE, TEXT("Draw Territory"));
+    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_DAYLIGHT_TIDES_HANDLE, TEXT("Draw Daylight Tides"));
+    
+    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[2], TEXT("&Control"));
+    
+    hMenuPopup[3] = CreateMenu();
+    AppendMenu(hMenuPopup[3], MF_STRING, HELP_ABOUT_HANDLE, TEXT("&About Noble Ape..."));
+    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[3], TEXT("&Help"));
+    
+    /* can't close the meters window, it's also the menu window */
+    EnableMenuItem(hMenuPopup[0], FILE_CLOSE_HANDLE, MF_DISABLED | MF_GRAYED);
+    
+    CheckMenuItem(hMenuPopup[2], CONTROL_WEATHER_HANDLE, MF_CHECKED);
+    CheckMenuItem(hMenuPopup[2], CONTROL_BRAIN_HANDLE, MF_CHECKED);
+}
+
+
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PSTR szCmdLine, int iCmdShow)
 {
@@ -97,10 +155,22 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     static TCHAR szAppName[] = TEXT ( "NobleApe" ) ;
     unsigned short i = 0;
     unsigned short	fit[256*3];
-
+    
 #define	Y_DELTA	36
 #define	X_DELTA	20
     int	window_value[4] = {0, -300, 512, 512};
+
+	n_int dimensions[4];
+
+	shared_dimensions(dimensions);
+
+	practical_number_windows = dimensions[0];
+	
+	practical_window_dimension_x = dimensions[1];
+	practical_window_dimension_y = dimensions[2];
+
+    window_value[2] = practical_window_dimension_x;
+    window_value[3] = practical_window_dimension_y;
 
     /** Locals specific to Windows... **/
     MSG msg ;
@@ -118,7 +188,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
     tmpres = ft.dwHighDateTime;
     tmpres ^= ft.dwLowDateTime;
 
-    land_color_time(fit, 1);
+    shared_color_8_bit_to_48_bit(fit);
 
     wndclass.style = CS_HREDRAW | CS_VREDRAW ;
     wndclass.lpfnWndProc = WndProc ;
@@ -138,80 +208,43 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
         return 0 ;
     }
 
-    hMenu = CreateMenu();
-    hMenuPopup[0] = CreateMenu();
-    AppendMenu(hMenuPopup[0], MF_STRING, FILE_NEW_HANDLE, TEXT("&New"));
-    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[0], MF_STRING, FILE_OPEN_HANDLE, TEXT("&Open..."));
-    AppendMenu(hMenuPopup[0], MF_STRING, FILE_OPEN_SCRIPT_HANDLE, TEXT("Open Script..."));
-    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[0], MF_STRING, FILE_CLOSE_HANDLE, TEXT("&Close"));
-    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[0], MF_STRING, FILE_SAVE_AS_HANDLE, TEXT("&Save As..."));
-    AppendMenu(hMenuPopup[0], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[0], MF_STRING, FILE_EXIT_HANDLE, TEXT("E&xit"));
-    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[0], TEXT("&File"));
-
-    hMenuPopup[1] = CreateMenu();
-    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_UNDO_HANDLE, TEXT("&Undo"));
-    AppendMenu(hMenuPopup[1], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_CUT_HANDLE, TEXT("Cu&t"));
-    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_COPY_HANDLE, TEXT("&Copy"));
-    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_PASTE_HANDLE, TEXT("&Paste"));
-    AppendMenu(hMenuPopup[1], MF_STRING, EDIT_CLEAR_HANDLE, TEXT("C&lear"));
-    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[1], TEXT("&Edit"));
-
-    hMenuPopup[2] = CreateMenu();
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PAUSE_HANDLE, TEXT("&Pause"));
-    AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_PREV_HANDLE, TEXT("P&revious Ape"));
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_NEXT_HANDLE, TEXT ("&Next Ape"));
-    AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_CLEAR_ERRORS, TEXT ("Clear Errors"));
-    AppendMenu(hMenuPopup[2], MF_SEPARATOR, 0, NULL);
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_WEATHER_HANDLE, TEXT("Draw &Weather"));
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_BRAIN_HANDLE, TEXT("Draw Brain"));
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_BRAINCODE_HANDLE, TEXT("Draw Brain Code"));
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_TERRITORY_HANDLE, TEXT("Draw Territory"));
-    AppendMenu(hMenuPopup[2], MF_STRING, CONTROL_DAYLIGHT_TIDES_HANDLE, TEXT("Draw Daylight Tides"));
-
-    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[2], TEXT("&Control"));
-
-    hMenuPopup[3] = CreateMenu();
-    AppendMenu(hMenuPopup[3], MF_STRING, HELP_ABOUT_HANDLE, TEXT("&About Noble Ape..."));
-    AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)hMenuPopup[3], TEXT("&Help"));
+    if (dimensions[3])
+    {
+        platform_menus();
+    }
+    else
+    {
+        hMenu = NULL;
+    }
 
     window_value[1] += window_value[3] + Y_DELTA + 19 + 10;
-    window_value[3] = MAP_DIMENSION;
+    window_value[3] = practical_window_dimension_y;
 
-    global_hwnd[WINDOW_ONE] = CreateWindow(szAppName, TEXT ( "Noble Ape: Map" ),
+    global_hwnd[WINDOW_ONE] = CreateWindow(szAppName, dimensions[3] ? TEXT ( "Noble Ape: Map" ) : TEXT ( "Mushroom Boy" ),
                                            WS_OVERLAPPED + WS_SYSMENU,
                                            window_value[0], window_value[1],
                                            window_value[2] + WINDOW_OFFSET_X,
                                            window_value[3] + WINDOW_OFFSET_Y + WINDOW_MENU_OFFSET,
                                            NULL, hMenu, hInstance, NULL) ;
 
-    window_value[0] += MAP_DIMENSION + X_DELTA;
+    if (practical_number_windows > 1)
+    {
+        window_value[0] += practical_window_dimension_x + X_DELTA;
 
-    window_value[2] = 512;
-    window_value[3] = 512;
+        window_value[2] = practical_window_dimension_x;
+        window_value[3] = practical_window_dimension_y;
 
-    global_hwnd[WINDOW_TWO] = CreateWindow(szAppName, TEXT ( "Noble Ape: Terrain" ),
-                                           WS_OVERLAPPED,
-                                           window_value[0], window_value[1],
-                                           window_value[2] + WINDOW_OFFSET_X,
-                                           window_value[3] + WINDOW_OFFSET_Y,
-                                           NULL, NULL, hInstance, NULL) ;
-
-    /* can't close the meters window, it's also the menu window */
-    EnableMenuItem(hMenuPopup[0], FILE_CLOSE_HANDLE, MF_DISABLED | MF_GRAYED);
-
-	CheckMenuItem(hMenuPopup[2], CONTROL_WEATHER_HANDLE, MF_CHECKED);
-	CheckMenuItem(hMenuPopup[2], CONTROL_BRAIN_HANDLE, MF_CHECKED);
+        global_hwnd[WINDOW_TWO] = CreateWindow(szAppName, TEXT ( "Noble Ape: Terrain" ),
+                                               WS_OVERLAPPED,
+                                               window_value[0], window_value[1],
+                                               window_value[2] + WINDOW_OFFSET_X,
+                                               window_value[3] + WINDOW_OFFSET_Y,
+                                               NULL, NULL, hInstance, NULL) ;
+    }
 
     loop = 0;
 
-    while (loop < NUMBER_WINDOWS)
+    while (loop < practical_number_windows)
     {
         window_definition[loop] = (n_byte)shared_init(window_definition[loop], tmpres);
 
@@ -220,8 +253,8 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
                                                + (256 * sizeof(RGBQUAD))));
 
         bmp_info[loop]->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        bmp_info[loop]->bmiHeader.biWidth = 512;
-        bmp_info[loop]->bmiHeader.biHeight = -512 + loop;
+        bmp_info[loop]->bmiHeader.biWidth = practical_window_dimension_x;
+        bmp_info[loop]->bmiHeader.biHeight = (0 - practical_window_dimension_y) + loop;
         bmp_info[loop]->bmiHeader.biPlanes = 1;
         bmp_info[loop]->bmiHeader.biBitCount = 8;
         bmp_info[loop]->bmiHeader.biCompression = BI_RGB;
@@ -245,7 +278,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
         offscreen[loop] = CreateDIBitmap(hdc[loop], (const struct tagBITMAPINFOHEADER *)bmp_info[loop], 0, NULL, NULL, DIB_RGB_COLORS);
 
-        SetBitmapDimensionEx(offscreen[loop], 512, 512 /*-loop*/, NULL);
+        SetBitmapDimensionEx(offscreen[loop], practical_window_dimension_x, practical_window_dimension_y /*-loop*/, NULL);
 
         ShowWindow (global_hwnd[loop], iCmdShow) ;
         UpdateWindow (global_hwnd[loop]) ;
@@ -287,18 +320,22 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         return 1;
 
     case WM_PAINT:
-    {
-        n_uint  local_time = (n_uint)time(0L);
-        shared_cycle(local_time, NUM_VIEW, 512, 512);
-        shared_cycle(local_time, NUM_TERRAIN, 512, 512);
+        {
+            n_uint  local_time = (n_uint)time(0L);
+            shared_cycle(local_time, NUM_VIEW);
+            if (practical_number_windows > 1)
+            {
+                shared_cycle(local_time, NUM_TERRAIN);
+            }
+        }
+        plat_update();
 
-    }
-    plat_update();
-
-    InvalidateRect(global_hwnd[0], NULL, TRUE);
-    InvalidateRect(global_hwnd[1], NULL, TRUE);
-
-    return 0;
+        InvalidateRect(global_hwnd[0], NULL, TRUE);
+        if (practical_number_windows > 1)
+        {
+            InvalidateRect(global_hwnd[1], NULL, TRUE);
+        }
+        return 0;
 
     case WM_LBUTTONUP:
         firedown = -1;
@@ -353,6 +390,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     }
     return 0;
     case WM_KEYUP:
+        firecontrol = 0;
+
         /*
             if(wParam == VK_CONTROL)
         {
@@ -451,8 +490,11 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
     case WM_DESTROY:
         DeleteObject(offscreen[0]);
-        DeleteObject(offscreen[1]);
-        sim_close();
+        if (practical_number_windows > 1)
+        {
+            DeleteObject(offscreen[1]);
+        }
+        shared_close();
 
         PostQuitMessage (0) ;
         return 0 ;
@@ -470,19 +512,17 @@ static void plat_update()
 	{
 		return;
 	}
-    while (lp < NUMBER_WINDOWS)
+    while (lp < practical_number_windows)
     {
         SIZE            sz;
         HDC             hdcMem;
-        unsigned char   * value = shared_legacy_draw(lp, 512, 512);
+        unsigned char   * value = shared_legacy_draw(lp, practical_window_dimension_x, practical_window_dimension_y);
 
         hdc[lp] = BeginPaint(global_hwnd[lp], &ps[lp]);
         GetBitmapDimensionEx(offscreen[lp], &sz);
         hdcMem = CreateCompatibleDC(hdc[lp]);
-
-        shared_draw(value, window_definition[lp], 512, 512, 0);
         
-        SetDIBits(hdcMem, offscreen[lp], 0, 512/*-lp*/, value, bmp_info[lp], DIB_RGB_COLORS);
+        SetDIBits(hdcMem, offscreen[lp], 0, practical_window_dimension_x/*-lp*/, value, bmp_info[lp], DIB_RGB_COLORS);
 
         SelectObject(hdcMem, offscreen[lp]);
         BitBlt(hdc[lp], 0, 0, sz.cx, sz.cy, hdcMem, 0, 0, SRCCOPY);
@@ -495,7 +535,7 @@ static void plat_update()
 static n_int plat_ourwind(HWND hwnd)
 {
     unsigned char	lp = 0;
-    while (lp < NUMBER_WINDOWS)
+    while (lp < practical_number_windows)
     {
         if (hwnd == global_hwnd[lp])
             return window_definition[lp];
@@ -573,7 +613,7 @@ static unsigned char plat_file_save(n_file_out cfo)
         CloseHandle(current_file);
         return 0;
     }
-    io_free(&buff);
+    memory_free(&buff);
     CloseHandle(current_file);
     return 1;
 }

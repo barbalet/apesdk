@@ -46,13 +46,11 @@
 
 - (void) about:(NSString *)aboutName;
 
-- (void) draw:(NSSize)size;
-
 - (void) draw:(unsigned char *)buffer width:(NSInteger)width height:(NSInteger)height;
 
 - (void) keyReceived:(NSUInteger)key;
 
-- (void) mouseReceivedWithXLocation:(NSInteger)xLocation YLocation:(NSInteger)yLocation;
+- (void) mouseReceivedWithXLocation:(n_double)xLocation yLocation:(n_double)yLocation;
 
 - (void) mouseOption:(BOOL)mouseOption;
 

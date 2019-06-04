@@ -274,7 +274,7 @@ static n_byte pixel_black(n_int px, n_int py, n_int dx, n_int dy, void * informa
     return 0;
 }
 
-n_byte * draw_pointer(n_byte which_one)
+n_byte * draw_pointer(n_int which_one)
 {
     if (local_offscreen)
     {
@@ -574,7 +574,7 @@ static void draw_terrain(noble_simulation * local_sim, n_vect2 * dimensions)
 
     if (local_sim->select == 0L)
     {
-        memory_erase(buf_offscr, dimensions->x * dimensions->y);
+        memory_erase(buf_offscr, (n_uint)(dimensions->x * dimensions->y));
         return;
     }
     {
@@ -851,10 +851,10 @@ void draw_meters(noble_simulation * local_sim)
     ha1 = 0;
     while (ha1 < 32)
     {
-        n_uint icon_stripe = (local_icon[(ha1<<2)|3] << 0) |
+        n_uint icon_stripe = (n_uint)((local_icon[(ha1<<2)|3] << 0) |
                              (local_icon[(ha1<<2)|2] << 8) |
                              (local_icon[(ha1<<2)|1] << 16) |
-                             (local_icon[(ha1<<2)|0] << 24);
+                             (local_icon[(ha1<<2)|0] << 24));
         n_int startRun = -1;
         n_int stopRun = -1;
         ha2 = 0;
@@ -1182,7 +1182,7 @@ static void draw_region(noble_being * local)
             n_int   value = local->events.territory[lx + (ly * TERRITORY_DIMENSION)].familiarity;
             if (value)
             {
-                io_number_to_string(string_draw, value);
+                io_number_to_string(string_draw, (n_uint)value);
                 draw_string(string_draw, (lx*32)+2 , (ly*32)+5, &local_draw);
             }
             lx++;
@@ -1289,11 +1289,11 @@ static void draw_count_number(n_uint count, n_string value)
         {
             if (division != 0)
             {
-                value[lp] = (n_byte)('0' + ((count / division) % 10));
+                value[lp] = (n_char)('0' + ((count / division) % 10));
             }
             else
             {
-                value[lp] = (n_byte)('0');
+                value[lp] = (n_char)('0');
             }
         }
         division /= 10;
@@ -1780,7 +1780,7 @@ static void  draw_skeleton(noble_simulation * local_sim)
                       &tp,
                       &bp,
                       
-                      1, 1,
+                      1, 0, /* don't erase here */
                       30, 0, 20, 20, 0,
                       
                       show_skeleton_keypoints);

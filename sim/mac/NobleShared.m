@@ -117,11 +117,6 @@
     shared_script_debug_handle(cStringFileName);
 }
 
-- (void) draw:(NSSize)size
-{
-    [self draw:0L width:(NSInteger)size.width height:(NSInteger)size.height];
-}
-
 - (void) draw:(unsigned char *)buffer width:(NSInteger)width height:(NSInteger)height
 {
     BOOL size_changed = (width != _old_size_width) || (height != _old_size_height);
@@ -165,9 +160,9 @@
     return 1.0f/((NSTimeInterval)shared_max_fps());
 }
 
-- (void) mouseReceivedWithXLocation:(NSInteger)xLocation YLocation:(NSInteger)yLocation
+- (void) mouseReceivedWithXLocation:(n_double)xLocation yLocation:(n_double)yLocation
 {
-    shared_mouseReceived((n_int)xLocation, (n_int)yLocation, (n_byte)_identification);;
+    shared_mouseReceived(xLocation, yLocation, (n_byte)_identification);;
 }
 
 - (void) mouseOption:(BOOL)mouseOption

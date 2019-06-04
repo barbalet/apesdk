@@ -152,7 +152,26 @@ static void check_io(void)
 {
     n_byte4 hash_write = 0;
     n_byte4 hash_read = 0;
-
+    n_int actual_value = 1;
+    n_int decimal_divisor = 1;
+    n_int error_number = io_number("-9223372036854775808", &actual_value, &decimal_divisor);
+    printf("characters %ld number %ld, decimal %ld\n",error_number, actual_value, decimal_divisor);
+    
+    error_number = io_number("9223372036854775807", &actual_value, &decimal_divisor);
+    printf("characters %ld number %ld, decimal %ld\n",error_number, actual_value, decimal_divisor);
+    
+    error_number = io_number("-9223372036854775809", &actual_value, &decimal_divisor);
+    printf("characters %ld number %ld, decimal %ld\n",error_number, actual_value, decimal_divisor);
+    
+    error_number = io_number("9223372036854775808", &actual_value, &decimal_divisor);
+    printf("characters %ld number %ld, decimal %ld\n",error_number, actual_value, decimal_divisor);
+    
+    error_number = io_number("-92233.72036854775808", &actual_value, &decimal_divisor);
+    printf("characters %ld number %ld, decimal %ld\n",error_number, actual_value, decimal_divisor);
+    
+    error_number = io_number("92.23372036854775807", &actual_value, &decimal_divisor);
+    printf("characters %ld number %ld, decimal %ld\n",error_number, actual_value, decimal_divisor);
+    
     test_file_write("compare_file.txt", 0xf7283da, &hash_write);
 
     (void)test_file_read("compare_file.txt", &hash_read);

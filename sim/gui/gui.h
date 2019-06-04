@@ -102,7 +102,7 @@ n_byte * draw_weather_grayscale(void);
 
 void draw_meters(noble_simulation * local_sim);
 
-void vascular_draw(n_genetics * being,
+void vascular_draw(n_genetics * genetics,
                    n_byte * buffer,
                    n_vect2* img,
                    n_vect2 *tp, n_vect2 * bp,
@@ -127,7 +127,7 @@ void  draw_terrain_coord(n_int * co_x, n_int * co_y);
 
 void draw_undraw_clear(void);
 
-n_byte * draw_pointer(n_byte which_one);
+n_byte * draw_pointer(n_int which_one);
 
 n_byte * draw_color_fit(void);
 

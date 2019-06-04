@@ -35,9 +35,34 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "NobleMTKView.h"
 
-@interface NobleMacView : NobleMTKView //NobleMacCG
+@import MetalKit;
+
+
+#ifdef MUSHROOM
+#import "NobleShared.h"
+#else
+#ifdef WARFARE
+#import "Noble_Warfare-Swift.h"
+#else
+#import "Noble_Ape-Swift.h"
+#endif
+#endif
+
+#import "NobleMTKRenderer.h"
+
+@interface NobleMacView : MTKView
+{
+    CGContextRef     drawRef;
+    CVDisplayLinkRef displayLink;
+}
+
+@property (nonatomic, strong) NobleShared* shared;
+
+- (void) startView;
+- (void) sharedReady;
+
+
 
 - (BOOL) acceptsFirstResponder;
 - (BOOL) becomeFirstResponder;
@@ -49,6 +74,7 @@
 
 - (void) quitProcedure;
 
+- (IBAction) menuQuit:(id) sender;
 - (IBAction) aboutDialog:(id) sender;
 
 - (void) keyUp:(NSEvent *)theEvent;

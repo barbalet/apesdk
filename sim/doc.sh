@@ -29,7 +29,7 @@
 #    begun on 13 June 1996. No apes or cats were harmed in the writing
 #    of this software.
 
-./linux.sh --additional
+./build.sh --additional
 
 rm longterm.o
 rm draw.o

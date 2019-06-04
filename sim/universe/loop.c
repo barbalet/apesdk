@@ -364,7 +364,7 @@ void being_relationship_description(n_int index, n_string description)
     if (index >= RELATIONSHIPS)
     {
         n_string_block index_string;
-        io_number_to_string(index_string, index);
+        io_number_to_string(index_string, (n_uint)index);
         io_three_strings(description, "ERROR: relationship out of range ", index_string, "", 1);
         return;
     }
@@ -521,7 +521,7 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
         default:
         {
             n_string_block  number_str;
-            io_number_to_string(number_str, event_type);
+            io_number_to_string(number_str, (n_uint)event_type);
             
             io_string_write(string,"Some erroneous action (",location);
             io_string_write(string,number_str,location);
@@ -1146,7 +1146,7 @@ static void being_follow_loop1(noble_simulation * sim, noble_being * other, void
         
         if (being_line_of_sight(nearest->local, &other_location)) /* incorrect use of los */
         {
-            n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+            n_uint compare_distance = (n_uint)vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (compare_distance < nearest->opposite_sex_distance)
             {
                 nearest->opposite_sex = other;
@@ -1173,7 +1173,7 @@ static void being_follow_loop2(noble_simulation * sim, noble_being * other, void
         being_space(other, &other_location);
         if (being_line_of_sight(nearest->local, &other_location))
         {
-            n_uint compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+            n_uint compare_distance = (n_uint)vect2_dot(&difference_vector, &difference_vector, 1, 1);
             if (FIND_SEX(GET_I(other))!=FIND_SEX(GET_I(nearest->local)))
             {
                 if (compare_distance < nearest->opposite_sex_distance)
@@ -1249,7 +1249,7 @@ void being_listen_loop_no_sim(noble_being * other, void * data)
     n_uint        compare_distance;
     
     being_delta(bls->local, other, &difference_vector);
-    compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+    compare_distance = (n_uint)vect2_dot(&difference_vector, &difference_vector, 1, 1);
     /** listen for the nearest shout out */
     if ((being_state(other)&BEING_STATE_SHOUTING) &&
         (compare_distance < SHOUT_RANGE) &&
@@ -1290,7 +1290,7 @@ static void being_closest_loop(noble_simulation * sim, noble_being * test_being,
     n_uint        compare_distance;
     n_vect2       location_test;
     being_delta(nearest->local, test_being, &difference_vector);
-    compare_distance = vect2_dot(&difference_vector, &difference_vector, 1, 1);
+    compare_distance = (n_uint)vect2_dot(&difference_vector, &difference_vector, 1, 1);
     
     if (FIND_SEX(GET_I(test_being)) != FIND_SEX(GET_I(nearest->local)))
     {
@@ -1541,7 +1541,7 @@ static n_int being_conception_child_mass(noble_simulation * sim, noble_being * l
     
     if ((loc_state & (BEING_STATE_AWAKE | BEING_STATE_SWIMMING)) == BEING_STATE_AWAKE)
     {
-        n_uint conception_days = being_pregnant(local) ;
+        n_int conception_days = being_pregnant(local) ;
         if (conception_days > 0)
         {
             n_int gestation_days = conception_days + GESTATION_DAYS;
@@ -1557,7 +1557,7 @@ static n_int being_conception_child_mass(noble_simulation * sim, noble_being * l
                     {
                         being_child = &(sim->beings[sim->num]);
                         
-                        if (being_init(sim->beings, sim->num, being_child, local, 0L) == 0)
+                        if (being_init(sim->beings, (n_int)sim->num, being_child, local, 0L) == 0)
                         {
 #ifdef EPISODIC_ON
                             episodic_close(local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
@@ -1777,7 +1777,7 @@ static void being_swimming(noble_simulation * sim, noble_being * local, n_int * 
     
     /* TODO: affect_type should probably be used rather than energy? */
 #ifdef EPISODIC_ON
-    episodic_self(local, EVENT_SWIM, AFFECT_GROOM, being_energy(local));
+    episodic_self(local, EVENT_SWIM, AFFECT_GROOM, (n_byte2)being_energy(local));
 #endif
     /** bathing removes parasites */
     being_remove_parasites(local, 1);

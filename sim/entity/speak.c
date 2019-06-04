@@ -33,6 +33,8 @@
 
  ****************************************************************/
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "entity.h"
 #include "entity_internal.h"
 

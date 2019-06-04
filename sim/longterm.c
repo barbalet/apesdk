@@ -43,10 +43,17 @@
 #include <stdlib.h>
 #include <time.h>
 
+#ifdef _WIN32
+#define SIMPLE_LONGTERM_CLE
+#endif
+
+#ifndef SIMPLE_LONGTERM_CLE
 #include <pthread.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/time.h>
+#endif
+
 
 /*NOBLEMAKE DIR=""*/
 /*NOBLEMAKE DIR="noble/"*/
@@ -205,7 +212,7 @@ int command_line_run(void)
     
     cle_load(local_sim, (n_string)simulation_filename, io_console_out);
     
-#ifndef    _WIN32
+#ifndef    SIMPLE_LONGTERM_CLE
     do
     {
         sim_thread_console();
@@ -229,6 +236,8 @@ int command_line_run(void)
     
     return(1);
 }
+
+#ifndef SIMPLE_LONGTERM_CLE
 
 static int make_periodic(unsigned int period, sigset_t * alarm_sig)
 {
@@ -291,6 +300,9 @@ static void *periodic_thread(void *arg)
     return NULL;
 }
 
+#endif
+
+#if 0
 int cycle_run(void)
 {
     pthread_t t_1;
@@ -313,9 +325,20 @@ int cycle_run(void)
     }
     return 0;
 }
+#endif
+
+#if 1
 
 int main(int argc, n_string argv[])
 {
     return command_line_run();
 }
 
+#else
+
+int main(int c, char **v) {
+    httpd_for_now("8001");
+    return 0;
+}
+
+#endif

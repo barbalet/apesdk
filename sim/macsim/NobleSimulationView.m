@@ -35,6 +35,9 @@
 
 #include "../noble/noble.h"
 #import "NobleSimulationView.h"
+#import "Noble_Ape-Swift.h"
+
+
 
 @implementation NobleSimulationView
 
@@ -107,21 +110,17 @@
 
 - (void) debugOutput
 {
-    NSSavePanel *panel = [self uniformSavePanel];
-    
-    NSLog(@"Abtaining debug output");
-    
-    [panel  beginWithCompletionHandler:^(NSInteger result)
-     {
-         if (result == NSModalResponseOK)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSSavePanel *panel = [self uniformSavePanel];
+        NSLog(@"Abtaining debug output");
+        [panel  beginWithCompletionHandler:^(NSInteger result)
          {
-             [self.shared scriptDebugHandle:[panel.URL path]];
-         }
-         else
-         {
-             [self.shared scriptDebugHandle:nil];
-         }
-     }];
+             if (result == NSModalResponseOK)
+             {
+                 [self.shared scriptDebugHandle:[panel.URL path]];
+             }
+         }];
+    });
 }
 
 #pragma mark ---- IB Actions ----
@@ -132,12 +131,6 @@
     {
         [sender setState:(value ? NSOnState : NSOffState)];
     }
-}
-
-- (IBAction) menuQuit:(id) sender
-{
-    NSLog(@"Quit from menu");
-    [self quitProcedure];
 }
 
 - (IBAction) menuFileNew:(id) sender
@@ -252,6 +245,11 @@
     [self.shared menuHealthyCarrier];
 }
 
+-(IBAction) menuCommandLine:(id) sender
+{
+    [self.shared menuCommandLineExecute];
+}
+    
 -(IBAction) loadManual:(id) sender
 {
     [self loadUrlString:@"http://www.nobleape.com/man/"];

@@ -51,13 +51,9 @@ static void object_write_array(n_file * file, n_array *start);
 
 #define OBJ_DBG( test, string ) if (test == 0L) printf("%s\n", string)
 
-#define OBJ_NEW(size) memory_new(size)
-
 #else
 
 #define OBJ_DBG( test, string ) /* test string */
-
-#define OBJ_NEW(size) memory_new(size)
 
 #endif
 
@@ -83,34 +79,63 @@ static n_object * object_new(void)
     return return_object;
 }
 
-static void object_primitive_free(n_array ** array)
+void obj_free(n_object ** object);
+
+static void obj_free_array(n_int is_array, void ** payload, n_object_type type)
 {
-    n_array * referenced_array = * array;
-    switch(object_type(referenced_array))
+    n_array *array = 0L;
+    
+    if (is_array)
     {
-        case OBJECT_ARRAY:
-        case OBJECT_OBJECT:
-        {
-            n_array * child = (n_array *)referenced_array->data;
-            obj_free(&child);
-        }
-        default:
-            memory_free((void **)array);
-            break;
+        array = (n_array *)(*payload);
     }
+    else
+    {
+        n_object * array_object =  (n_object *)(*payload);
+        array = (n_array *)&(array_object->primitive);
+    }
+    
+    
+    if (type == OBJECT_NUMBER)
+    {
+        
+    }
+    if (type == OBJECT_STRING)
+    {
+        n_string local_string = array->data;
+        memory_free((void**)&local_string);
+    }
+    if (type == OBJECT_ARRAY)
+    {
+        n_array *local_array = obj_get_array(array->data);
+        obj_free_array(1, (void**)&local_array, local_array->type);
+    }
+    if (type == OBJECT_OBJECT)
+    {
+        n_object *object = obj_get_object(array->data);
+        obj_free(&object);
+    }
+    if (array->next)
+    {
+        if (is_array)
+        {
+            n_array * next_array = (n_array *)array->next;
+            obj_free_array(1, (void **)&next_array, next_array->type);
+        }
+        else
+        {
+            obj_free((n_object **)&array->next);
+        }
+    }
+    memory_free(payload);
 }
 
-void obj_free(n_array ** array)
+void obj_free(n_object ** object)
 {
-    if (*array)
-    {
-        n_array * next = (n_array *)((*array)->next);
-        if (next)
-        {
-            obj_free(&next);
-        }
-        object_primitive_free(array);
-    }
+    n_array *string_primitive = &((*object)->primitive);
+    n_string local_name = (*object)->name;
+    memory_free((void**)&local_name);
+    obj_free_array(0, (void **) object, string_primitive->type);
 }
 
 void object_top_object(n_file * file, n_object * top_level)
@@ -159,6 +184,22 @@ static void * object_write_primitive(n_file * file, n_array * primitive)
     return primitive->next;
 }
 
+n_array * obj_get_array(n_string array)
+{
+    return (n_array *)array;
+}
+
+n_object * obj_get_object(n_string object)
+{
+    return (n_object *)object;
+}
+
+n_int obj_get_number(n_string object)
+{
+    n_int * data = (n_int *)&object;
+    return data[0];
+}
+
 static void object_write_object(n_file * file, n_object *start)
 {
     n_object * current = start;
@@ -188,21 +229,24 @@ n_file * obj_json(n_object * object)
 static n_object * object_end_or_find(n_object * object, n_string name)
 {
     n_object * previous_object = 0L;
-    n_uint     hash = math_hash((n_byte *)name, io_length(name, STRING_BLOCK_SIZE));
-    if (object == 0L)
+    n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
+    if (string_length > 0)
     {
-        return 0L;
-    }
-    
-    do
-    {
-        if (hash == object->name_hash)
+        n_uint     hash = math_hash((n_byte *)name, (n_uint) string_length);
+        if (object == 0L)
         {
-            return previous_object;
+            return 0L;
         }
-        previous_object = object;
-        object = object->primitive.next;
-    }while (object);
+        do
+        {
+            if (hash == object->name_hash)
+            {
+                return previous_object;
+            }
+            previous_object = object;
+            object = object->primitive.next;
+        }while (object);
+    }
     return previous_object;
 }
 
@@ -210,38 +254,42 @@ static n_object * obj_get(n_object * object, n_string name)
 {
     n_object * set_object;
     n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
-    n_uint     hash = math_hash((n_byte *)name, string_length);
     
-    if (object == 0L)
+    if (string_length > 0)
     {
-        object = object_new();
-    }
-    if (object_type(&object->primitive) == OBJECT_EMPTY)
-    {
-        set_object = object;
-    }
-    else
-    {
-        n_object * previous_object = object_end_or_find(object, name);
-        if (previous_object == 0L)
+        n_uint     hash = math_hash((n_byte *)name, (n_uint)string_length);
+        if (object == 0L)
+        {
+            object = object_new();
+        }
+        if (object_type(&object->primitive) == OBJECT_EMPTY)
         {
             set_object = object;
         }
         else
         {
-            set_object = previous_object->primitive.next;
-            if (set_object == 0L)
+            n_object * previous_object = object_end_or_find(object, name);
+            if (previous_object == 0L)
             {
-                set_object = object_new();
+                set_object = object;
             }
-            previous_object->primitive.next = set_object;
+            else
+            {
+                set_object = previous_object->primitive.next;
+                if (set_object == 0L)
+                {
+                    set_object = object_new();
+                }
+                previous_object->primitive.next = set_object;
+            }
         }
+        
+        set_object->name = io_string_copy(name);
+        set_object->name_hash = hash;
+        
+        return set_object;
     }
-    
-    set_object->name = name;
-    set_object->name_hash = hash;
-    
-    return set_object;
+    return 0L;
 }
 
 n_array * array_add(n_array * array, n_array * element)
@@ -388,7 +436,7 @@ static n_string object_file_read_string(n_file * file)
         CHECK_FILE_SIZE("end of json file reach unexpectedly");
         if(file->data[file->location] != '"')
         {
-            block_string[location] = (char)file->data[file->location];
+            block_string[location] = (n_char)file->data[file->location];
             location++;
             file->location++;
         }
@@ -423,7 +471,7 @@ static n_int object_file_read_number(n_file * file, n_int * with_error)
     
     CHECK_FILE_SIZE("end of json file reach unexpectedly for number");
     
-    block_string[location] = (char)read_char;
+    block_string[location] = (n_char)read_char;
     file->location++;
     location++;
     
@@ -436,7 +484,7 @@ static n_int object_file_read_number(n_file * file, n_int * with_error)
 
         if(char_okay)
         {
-            block_string[location] = (char)read_char;
+            block_string[location] = (n_char)read_char;
             location++;
             file->location++;
         }
@@ -527,7 +575,6 @@ static n_array * object_file_array(n_file * file)
         }
         else if (stream_type_in_this_array != stream_type)
         {
-            obj_free(&base_array);
             (void)SHOW_ERROR("array contains mutliple types");
             return 0L;
         }
@@ -788,9 +835,80 @@ n_object * object_file_to_tree(n_file * file)
     }
     if (something_wrong)
     {
-        obj_free((n_array **) &base_object);
+        obj_free(&base_object);
         return 0L;
     }
     
     return base_object;
+}
+
+n_string obj_contains(n_object* base, n_string name, n_object_type type)
+{
+    n_object * return_object = base;
+    n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
+    if (string_length > 0)
+    {
+        n_uint     hash = math_hash((n_byte *)name, (n_uint)string_length);
+        if (return_object == 0L)
+        {
+            return 0L;
+        }
+        do
+        {
+            if ((hash == return_object->name_hash) && (type == object_type(&return_object->primitive)))
+            {
+                return return_object->primitive.data;
+            }
+            return_object = return_object->primitive.next;
+        }while (return_object);
+    }
+    return 0L;
+}
+
+n_int obj_contains_number(n_object* base, n_string name, n_int *number)
+{
+    n_object * return_object = base;
+    n_int      string_length = io_length(name, STRING_BLOCK_SIZE);
+    if (string_length > 0)
+    {
+        n_uint     hash = math_hash((n_byte *)name, (n_uint)string_length);
+        if (return_object == 0L)
+        {
+            return 0L;
+        }
+        do
+        {
+            if ((hash == return_object->name_hash) && (OBJECT_NUMBER == object_type(&return_object->primitive)))
+            {
+                n_int * data = (n_int *)&return_object->primitive.data;
+                number[0] = data[0];
+                return 1;
+            }
+            return_object = return_object->primitive.next;
+        }while (return_object);
+    }
+    return 0;
+}
+
+n_array * obj_array_next(n_array * array, n_array * element)
+{
+    if (element == 0L)
+    {
+        return array;
+    }
+    return (n_array *)element->next;
+}
+
+n_int obj_array_count(n_array * array_obj)
+{
+    n_array * arr_second_follow = 0L;
+    n_int     count = 0;
+    if (array_obj)
+    {
+        while ((arr_second_follow = obj_array_next(array_obj, arr_second_follow)))
+        {
+            count++;
+        }
+    }
+    return count;
 }

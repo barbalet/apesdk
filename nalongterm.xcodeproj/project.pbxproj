@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		4A3D24B82116D87A00766662 /* loop.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A3D24B72116D87A00766662 /* loop.c */; };
 		4A4E397717D756B700780335 /* nalongterm.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4A4E397617D756B700780335 /* nalongterm.1 */; };
+		4A602F9A22A6074500D4BE82 /* vect.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A602F9822A6074500D4BE82 /* vect.c */; };
+		4A602F9B22A6074500D4BE82 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A602F9922A6074500D4BE82 /* graph.c */; };
+		4AB7AA392275575F000264BF /* httpd.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB7AA382275575E000264BF /* httpd.c */; };
+		4AE59A6C227169AA0093904F /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE59A69227169AA0093904F /* console.c */; };
+		4AE59A6D227169AA0093904F /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE59A6A227169AA0093904F /* memory.c */; };
+		4AE59A6E227169AA0093904F /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE59A6B227169AA0093904F /* file.c */; };
+		4AE59A71227169FA0093904F /* transfer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE59A6F227169FA0093904F /* transfer.c */; };
+		4AE59A72227169FA0093904F /* command.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE59A70227169FA0093904F /* command.c */; };
 		4AE8592A20F07D610048F935 /* longterm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8592920F07D610048F935 /* longterm.c */; };
 		4AE8593820F07D760048F935 /* object.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8592B20F07D750048F935 /* object.c */; };
 		4AE8593920F07D760048F935 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8592C20F07D750048F935 /* io.c */; };
@@ -22,8 +30,6 @@
 		4AE8594120F07D760048F935 /* territory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8593620F07D760048F935 /* territory.c */; };
 		4AE8594220F07D760048F935 /* tile.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8593720F07D760048F935 /* tile.c */; };
 		4AE8594820F07D890048F935 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8594320F07D880048F935 /* sim.c */; };
-		4AE8594920F07D890048F935 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8594420F07D880048F935 /* file.c */; };
-		4AE8594A20F07D890048F935 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8594620F07D890048F935 /* console.c */; };
 		4AE8595520F07D9E0048F935 /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8594D20F07D9E0048F935 /* episodic.c */; };
 		4AE8595620F07D9E0048F935 /* being.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8594E20F07D9E0048F935 /* being.c */; };
 		4AE8595720F07D9E0048F935 /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8594F20F07D9E0048F935 /* social.c */; };
@@ -51,6 +57,14 @@
 		4A3D24B72116D87A00766662 /* loop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = loop.c; path = nobleape/universe/loop.c; sourceTree = SOURCE_ROOT; };
 		4A4E397117D756B700780335 /* nalongterm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = nalongterm; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A4E397617D756B700780335 /* nalongterm.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = nalongterm.1; sourceTree = "<group>"; };
+		4A602F9822A6074500D4BE82 /* vect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vect.c; path = nobleape/noble/vect.c; sourceTree = SOURCE_ROOT; };
+		4A602F9922A6074500D4BE82 /* graph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = graph.c; path = nobleape/noble/graph.c; sourceTree = SOURCE_ROOT; };
+		4AB7AA382275575E000264BF /* httpd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = httpd.c; path = nobleape/universe/httpd.c; sourceTree = SOURCE_ROOT; };
+		4AE59A69227169AA0093904F /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = console.c; path = nobleape/noble/console.c; sourceTree = SOURCE_ROOT; };
+		4AE59A6A227169AA0093904F /* memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = memory.c; path = nobleape/noble/memory.c; sourceTree = SOURCE_ROOT; };
+		4AE59A6B227169AA0093904F /* file.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = file.c; path = nobleape/noble/file.c; sourceTree = SOURCE_ROOT; };
+		4AE59A6F227169FA0093904F /* transfer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = transfer.c; path = nobleape/universe/transfer.c; sourceTree = SOURCE_ROOT; };
+		4AE59A70227169FA0093904F /* command.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = command.c; path = nobleape/universe/command.c; sourceTree = SOURCE_ROOT; };
 		4AE8592920F07D610048F935 /* longterm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = longterm.c; path = nobleape/longterm.c; sourceTree = SOURCE_ROOT; };
 		4AE8592B20F07D750048F935 /* object.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = object.c; path = nobleape/noble/object.c; sourceTree = SOURCE_ROOT; };
 		4AE8592C20F07D750048F935 /* io.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = io.c; path = nobleape/noble/io.c; sourceTree = SOURCE_ROOT; };
@@ -66,9 +80,7 @@
 		4AE8593620F07D760048F935 /* territory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = territory.c; path = nobleape/noble/territory.c; sourceTree = SOURCE_ROOT; };
 		4AE8593720F07D760048F935 /* tile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tile.c; path = nobleape/noble/tile.c; sourceTree = SOURCE_ROOT; };
 		4AE8594320F07D880048F935 /* sim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sim.c; path = nobleape/universe/sim.c; sourceTree = SOURCE_ROOT; };
-		4AE8594420F07D880048F935 /* file.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = file.c; path = nobleape/universe/file.c; sourceTree = SOURCE_ROOT; };
 		4AE8594520F07D880048F935 /* universe_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = universe_internal.h; path = nobleape/universe/universe_internal.h; sourceTree = SOURCE_ROOT; };
-		4AE8594620F07D890048F935 /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = console.c; path = nobleape/universe/console.c; sourceTree = SOURCE_ROOT; };
 		4AE8594720F07D890048F935 /* universe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = universe.h; path = nobleape/universe/universe.h; sourceTree = SOURCE_ROOT; };
 		4AE8594B20F07D9E0048F935 /* entity_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = entity_internal.h; path = nobleape/entity/entity_internal.h; sourceTree = SOURCE_ROOT; };
 		4AE8594C20F07D9E0048F935 /* entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = entity.h; path = nobleape/entity/entity.h; sourceTree = SOURCE_ROOT; };
@@ -141,9 +153,10 @@
 		4AE8592720F07D450048F935 /* universe */ = {
 			isa = PBXGroup;
 			children = (
+				4AB7AA382275575E000264BF /* httpd.c */,
+				4AE59A70227169FA0093904F /* command.c */,
+				4AE59A6F227169FA0093904F /* transfer.c */,
 				4A3D24B72116D87A00766662 /* loop.c */,
-				4AE8594620F07D890048F935 /* console.c */,
-				4AE8594420F07D880048F935 /* file.c */,
 				4AE8594320F07D880048F935 /* sim.c */,
 				4AE8594520F07D880048F935 /* universe_internal.h */,
 				4AE8594720F07D890048F935 /* universe.h */,
@@ -154,6 +167,11 @@
 		4AE8592820F07D4F0048F935 /* noble */ = {
 			isa = PBXGroup;
 			children = (
+				4A602F9922A6074500D4BE82 /* graph.c */,
+				4A602F9822A6074500D4BE82 /* vect.c */,
+				4AE59A69227169AA0093904F /* console.c */,
+				4AE59A6B227169AA0093904F /* file.c */,
+				4AE59A6A227169AA0093904F /* memory.c */,
 				4AE8593520F07D760048F935 /* audio.c */,
 				4AE8593120F07D760048F935 /* compress.c */,
 				4AE8592F20F07D760048F935 /* interpret.c */,
@@ -205,6 +223,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 4A4E396817D756B600780335;
@@ -222,13 +241,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A602F9B22A6074500D4BE82 /* graph.c in Sources */,
 				4AE8595920F07D9E0048F935 /* speak.c in Sources */,
+				4AE59A72227169FA0093904F /* command.c in Sources */,
 				4AE8593F20F07D760048F935 /* network.c in Sources */,
 				4AE8594220F07D760048F935 /* tile.c in Sources */,
+				4AB7AA392275575F000264BF /* httpd.c in Sources */,
 				4AE8595A20F07D9E0048F935 /* body.c in Sources */,
 				4AE8595B20F07D9E0048F935 /* drives.c in Sources */,
+				4A602F9A22A6074500D4BE82 /* vect.c in Sources */,
 				4AE8593820F07D760048F935 /* object.c in Sources */,
-				4AE8594A20F07D890048F935 /* console.c in Sources */,
 				4AE8593E20F07D760048F935 /* math.c in Sources */,
 				4AE8595620F07D9E0048F935 /* being.c in Sources */,
 				4A3D24B82116D87A00766662 /* loop.c in Sources */,
@@ -238,14 +260,17 @@
 				4AE8595C20F07D9E0048F935 /* food.c in Sources */,
 				4AE8593A20F07D760048F935 /* land.c in Sources */,
 				4AE8592A20F07D610048F935 /* longterm.c in Sources */,
-				4AE8594920F07D890048F935 /* file.c in Sources */,
+				4AE59A71227169FA0093904F /* transfer.c in Sources */,
 				4AE8595720F07D9E0048F935 /* social.c in Sources */,
+				4AE59A6C227169AA0093904F /* console.c in Sources */,
 				4AE8595520F07D9E0048F935 /* episodic.c in Sources */,
 				4AE8593B20F07D760048F935 /* parse.c in Sources */,
 				4AE8595820F07D9E0048F935 /* brain.c in Sources */,
+				4AE59A6D227169AA0093904F /* memory.c in Sources */,
 				4AE8594020F07D760048F935 /* audio.c in Sources */,
 				4AE8593D20F07D760048F935 /* compress.c in Sources */,
 				4AE8594820F07D890048F935 /* sim.c in Sources */,
+				4AE59A6E227169AA0093904F /* file.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

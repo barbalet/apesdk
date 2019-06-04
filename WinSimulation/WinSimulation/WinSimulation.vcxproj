@@ -11,6 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\nobleape\entity\entity.h" />
+    <ClInclude Include="..\..\nobleape\entity\entity_internal.h" />
+    <ClInclude Include="..\..\nobleape\gui\gui.h" />
+    <ClInclude Include="..\..\nobleape\noble\noble.h" />
+    <ClInclude Include="..\..\nobleape\noble\shared.h" />
+    <ClInclude Include="..\..\nobleape\universe\universe.h" />
+    <ClInclude Include="..\..\nobleape\universe\universe_internal.h" />
+    <ClInclude Include="..\..\nobleape\win\platform.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="..\..\nobleape\entity\being.c" />
     <ClCompile Include="..\..\nobleape\entity\body.c" />
     <ClCompile Include="..\..\nobleape\entity\brain.c" />
@@ -24,50 +34,46 @@
     <ClCompile Include="..\..\nobleape\gui\shared.c" />
     <ClCompile Include="..\..\nobleape\noble\audio.c" />
     <ClCompile Include="..\..\nobleape\noble\compress.c" />
+    <ClCompile Include="..\..\nobleape\noble\console.c" />
+    <ClCompile Include="..\..\nobleape\noble\file.c" />
+    <ClCompile Include="..\..\nobleape\noble\graph.c" />
     <ClCompile Include="..\..\nobleape\noble\interpret.c" />
     <ClCompile Include="..\..\nobleape\noble\io.c" />
     <ClCompile Include="..\..\nobleape\noble\land.c" />
     <ClCompile Include="..\..\nobleape\noble\math.c" />
+    <ClCompile Include="..\..\nobleape\noble\memory.c" />
     <ClCompile Include="..\..\nobleape\noble\network.c" />
     <ClCompile Include="..\..\nobleape\noble\object.c" />
     <ClCompile Include="..\..\nobleape\noble\parse.c" />
     <ClCompile Include="..\..\nobleape\noble\territory.c" />
     <ClCompile Include="..\..\nobleape\noble\tile.c" />
-    <ClCompile Include="..\..\nobleape\universe\console.c" />
-    <ClCompile Include="..\..\nobleape\universe\file.c" />
+    <ClCompile Include="..\..\nobleape\noble\vect.c" />
+    <ClCompile Include="..\..\nobleape\universe\command.c" />
+    <ClCompile Include="..\..\nobleape\universe\httpd.c" />
     <ClCompile Include="..\..\nobleape\universe\loop.c" />
     <ClCompile Include="..\..\nobleape\universe\sim.c" />
+    <ClCompile Include="..\..\nobleape\universe\transfer.c" />
     <ClCompile Include="..\..\nobleape\win\platform.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\nobleape\entity\entity.h" />
-    <ClInclude Include="..\..\nobleape\entity\entity_internal.h" />
-    <ClInclude Include="..\..\nobleape\gui\gui.h" />
-    <ClInclude Include="..\..\nobleape\noble\noble.h" />
-    <ClInclude Include="..\..\nobleape\noble\shared.h" />
-    <ClInclude Include="..\..\nobleape\universe\universe.h" />
-    <ClInclude Include="..\..\nobleape\universe\universe_internal.h" />
-    <ClInclude Include="..\..\nobleape\win\platform.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7E6B974B-976B-4A58-981C-F7F2965C9832}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>WinSimulation</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

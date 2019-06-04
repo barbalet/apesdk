@@ -9,9 +9,10 @@
 /* Begin PBXBuildFile section */
 		4A06BF6321CDBC7E00A5CF56 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A06BF5F21CDBC7E00A5CF56 /* graph.c */; };
 		4A06BF6521CDBC7E00A5CF56 /* skeleton.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A06BF6121CDBC7E00A5CF56 /* skeleton.c */; };
-		4A10137321900BF20069A435 /* NobleMTKView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A10136C21900BF20069A435 /* NobleMTKView.m */; };
 		4A10137421900BF20069A435 /* NobleMTKRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A10136E21900BF20069A435 /* NobleMTKRenderer.m */; };
 		4A10137521900BF20069A435 /* NobleMTKShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 4A10136F21900BF20069A435 /* NobleMTKShaders.metal */; };
+		4A156047229B949400AAF8B3 /* vect.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A156045229B949400AAF8B3 /* vect.c */; };
+		4A156048229B949400AAF8B3 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A156046229B949400AAF8B3 /* graph.c */; };
 		4A34105921F8358800F9FAF0 /* insect.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A34104D21F8358800F9FAF0 /* insect.c */; };
 		4A34105A21F8358900F9FAF0 /* warrior.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A34104E21F8358800F9FAF0 /* warrior.c */; };
 		4A34105B21F8358900F9FAF0 /* horse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A34104F21F8358800F9FAF0 /* horse.c */; };
@@ -24,8 +25,9 @@
 		4A34106221F8358900F9FAF0 /* ghost.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A34105721F8358800F9FAF0 /* ghost.c */; };
 		4A34106321F8358900F9FAF0 /* ape.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A34105821F8358800F9FAF0 /* ape.c */; };
 		4A882076218BFFD500174645 /* nobleape.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4A882075218BFFD500174645 /* nobleape.xib */; };
+		4A907CBD2287A462007F81C3 /* NobleShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A907CBC2287A462007F81C3 /* NobleShared.swift */; };
 		4AC98B5C20F9FB4C0007DE08 /* loop.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AC98B5B20F9FB4C0007DE08 /* loop.c */; };
-		4AE0E45321906190002974AE /* NobleMacUpdate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AE0E45221906190002974AE /* NobleMacUpdate.m */; };
+		4AD700242286A14200B189BE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD700232286A14200B189BE /* AppDelegate.swift */; };
 		4AE858DF20F07B870048F935 /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE858D720F07B870048F935 /* episodic.c */; };
 		4AE858E020F07B870048F935 /* being.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE858D820F07B870048F935 /* being.c */; };
 		4AE858E120F07B870048F935 /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE858D920F07B870048F935 /* social.c */; };
@@ -46,9 +48,6 @@
 		4AE858FD20F07BA50048F935 /* territory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE858F220F07BA50048F935 /* territory.c */; };
 		4AE858FE20F07BA50048F935 /* tile.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE858F320F07BA50048F935 /* tile.c */; };
 		4AE8590720F07BC20048F935 /* NobleMacView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AE858FF20F07BC20048F935 /* NobleMacView.m */; };
-		4AE8590820F07BC20048F935 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8590120F07BC20048F935 /* AppDelegate.m */; };
-		4AE8590A20F07BC20048F935 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8590320F07BC20048F935 /* main.m */; };
-		4AE8590B20F07BC20048F935 /* NobleShared.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8590420F07BC20048F935 /* NobleShared.m */; };
 		4AE8591020F07BDB0048F935 /* NobleSimulationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8590C20F07BDB0048F935 /* NobleSimulationView.m */; };
 		4AE8591820F07C010048F935 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8591320F07C010048F935 /* sim.c */; };
 		4AE8591920F07C010048F935 /* transfer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AE8591420F07C010048F935 /* transfer.c */; };
@@ -86,11 +85,11 @@
 		4A06BF6121CDBC7E00A5CF56 /* skeleton.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = skeleton.c; path = ../nobleape/graph/skeleton.c; sourceTree = "<group>"; };
 		4A06BF6221CDBC7E00A5CF56 /* graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = graph.h; path = ../nobleape/graph/graph.h; sourceTree = "<group>"; };
 		4A10136B21900BF20069A435 /* NobleMTKRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleMTKRenderer.h; path = ../nobleape/metal/NobleMTKRenderer.h; sourceTree = "<group>"; };
-		4A10136C21900BF20069A435 /* NobleMTKView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleMTKView.m; path = ../nobleape/metal/NobleMTKView.m; sourceTree = "<group>"; };
 		4A10136E21900BF20069A435 /* NobleMTKRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleMTKRenderer.m; path = ../nobleape/metal/NobleMTKRenderer.m; sourceTree = "<group>"; };
 		4A10136F21900BF20069A435 /* NobleMTKShaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; name = NobleMTKShaders.metal; path = ../nobleape/metal/NobleMTKShaders.metal; sourceTree = "<group>"; };
-		4A10137021900BF20069A435 /* NobleMTKView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleMTKView.h; path = ../nobleape/metal/NobleMTKView.h; sourceTree = "<group>"; };
 		4A10137221900BF20069A435 /* NobleMTKShaderTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleMTKShaderTypes.h; path = ../nobleape/metal/NobleMTKShaderTypes.h; sourceTree = "<group>"; };
+		4A156045229B949400AAF8B3 /* vect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vect.c; path = ../nobleape/noble/vect.c; sourceTree = "<group>"; };
+		4A156046229B949400AAF8B3 /* graph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = graph.c; path = ../nobleape/noble/graph.c; sourceTree = "<group>"; };
 		4A34104D21F8358800F9FAF0 /* insect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = insect.c; path = ../nobleape/species/insect.c; sourceTree = "<group>"; };
 		4A34104E21F8358800F9FAF0 /* warrior.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = warrior.c; path = ../nobleape/species/warrior.c; sourceTree = "<group>"; };
 		4A34104F21F8358800F9FAF0 /* horse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = horse.c; path = ../nobleape/species/horse.c; sourceTree = "<group>"; };
@@ -104,9 +103,10 @@
 		4A34105721F8358800F9FAF0 /* ghost.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ghost.c; path = ../nobleape/species/ghost.c; sourceTree = "<group>"; };
 		4A34105821F8358800F9FAF0 /* ape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ape.c; path = ../nobleape/species/ape.c; sourceTree = "<group>"; };
 		4A882075218BFFD500174645 /* nobleape.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = nobleape.xib; path = ../nobleape/macsim/nobleape.xib; sourceTree = "<group>"; };
+		4A907CBC2287A462007F81C3 /* NobleShared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NobleShared.swift; path = ../nobleape/mac/NobleShared.swift; sourceTree = "<group>"; };
 		4AC98B5B20F9FB4C0007DE08 /* loop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = loop.c; path = ../nobleape/universe/loop.c; sourceTree = "<group>"; };
-		4AE0E45121906190002974AE /* NobleMacUpdate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleMacUpdate.h; path = ../nobleape/mac/NobleMacUpdate.h; sourceTree = "<group>"; };
-		4AE0E45221906190002974AE /* NobleMacUpdate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleMacUpdate.m; path = ../nobleape/mac/NobleMacUpdate.m; sourceTree = "<group>"; };
+		4AD700222286A14100B189BE /* Noble Ape-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Noble Ape-Bridging-Header.h"; sourceTree = "<group>"; };
+		4AD700232286A14200B189BE /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = ../nobleape/mac/AppDelegate.swift; sourceTree = "<group>"; };
 		4AE858D520F07B870048F935 /* entity_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = entity_internal.h; path = ../nobleape/entity/entity_internal.h; sourceTree = "<group>"; };
 		4AE858D620F07B870048F935 /* entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = entity.h; path = ../nobleape/entity/entity.h; sourceTree = "<group>"; };
 		4AE858D720F07B870048F935 /* episodic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = episodic.c; path = ../nobleape/entity/episodic.c; sourceTree = "<group>"; };
@@ -131,12 +131,7 @@
 		4AE858F220F07BA50048F935 /* territory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = territory.c; path = ../nobleape/noble/territory.c; sourceTree = "<group>"; };
 		4AE858F320F07BA50048F935 /* tile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tile.c; path = ../nobleape/noble/tile.c; sourceTree = "<group>"; };
 		4AE858FF20F07BC20048F935 /* NobleMacView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleMacView.m; path = ../nobleape/mac/NobleMacView.m; sourceTree = "<group>"; };
-		4AE8590020F07BC20048F935 /* NobleShared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleShared.h; path = ../nobleape/mac/NobleShared.h; sourceTree = "<group>"; };
-		4AE8590120F07BC20048F935 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = ../nobleape/mac/AppDelegate.m; sourceTree = "<group>"; };
-		4AE8590320F07BC20048F935 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ../nobleape/mac/main.m; sourceTree = "<group>"; };
-		4AE8590420F07BC20048F935 /* NobleShared.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleShared.m; path = ../nobleape/mac/NobleShared.m; sourceTree = "<group>"; };
 		4AE8590520F07BC20048F935 /* NobleMacView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleMacView.h; path = ../nobleape/mac/NobleMacView.h; sourceTree = "<group>"; };
-		4AE8590620F07BC20048F935 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = ../nobleape/mac/AppDelegate.h; sourceTree = "<group>"; };
 		4AE8590C20F07BDB0048F935 /* NobleSimulationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NobleSimulationView.m; path = ../nobleape/macsim/NobleSimulationView.m; sourceTree = "<group>"; };
 		4AE8590E20F07BDB0048F935 /* NobleSimulationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NobleSimulationView.h; path = ../nobleape/macsim/NobleSimulationView.h; sourceTree = "<group>"; };
 		4AE8591320F07C010048F935 /* sim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sim.c; path = ../nobleape/universe/sim.c; sourceTree = "<group>"; };
@@ -204,8 +199,6 @@
 				4A10136E21900BF20069A435 /* NobleMTKRenderer.m */,
 				4A10136F21900BF20069A435 /* NobleMTKShaders.metal */,
 				4A10137221900BF20069A435 /* NobleMTKShaderTypes.h */,
-				4A10137021900BF20069A435 /* NobleMTKView.h */,
-				4A10136C21900BF20069A435 /* NobleMTKView.m */,
 			);
 			name = metal;
 			sourceTree = "<group>";
@@ -232,6 +225,7 @@
 		5AD6CA621B27582F00230534 = {
 			isa = PBXGroup;
 			children = (
+				4AD700222286A14100B189BE /* Noble Ape-Bridging-Header.h */,
 				4A34104C21F8352D00F9FAF0 /* species */,
 				4A06BF5D21CDBC6100A5CF56 /* graph */,
 				4A10136A21900BD80069A435 /* metal */,
@@ -296,15 +290,10 @@
 		5AD6CB011B275B6200230534 /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				4AE0E45121906190002974AE /* NobleMacUpdate.h */,
-				4AE0E45221906190002974AE /* NobleMacUpdate.m */,
-				4AE8590620F07BC20048F935 /* AppDelegate.h */,
-				4AE8590120F07BC20048F935 /* AppDelegate.m */,
-				4AE8590320F07BC20048F935 /* main.m */,
+				4A907CBC2287A462007F81C3 /* NobleShared.swift */,
+				4AD700232286A14200B189BE /* AppDelegate.swift */,
 				4AE8590520F07BC20048F935 /* NobleMacView.h */,
 				4AE858FF20F07BC20048F935 /* NobleMacView.m */,
-				4AE8590020F07BC20048F935 /* NobleShared.h */,
-				4AE8590420F07BC20048F935 /* NobleShared.m */,
 			);
 			name = mac;
 			sourceTree = "<group>";
@@ -356,6 +345,8 @@
 				4AE858F120F07BA50048F935 /* audio.c */,
 				4AE858ED20F07BA50048F935 /* compress.c */,
 				5AB5BEA4223226D300F426A6 /* console.c */,
+				5AB5BEA2223226D200F426A6 /* file.c */,
+				4A156046229B949400AAF8B3 /* graph.c */,
 				4AE858EB20F07BA40048F935 /* interpret.c */,
 				4AE858E820F07BA40048F935 /* io.c */,
 				4AE858E920F07BA40048F935 /* land.c */,
@@ -363,12 +354,12 @@
 				5A7C5AF12231EA96002F513C /* memory.c */,
 				4AE858EF20F07BA50048F935 /* network.c */,
 				4AE858F020F07BA50048F935 /* noble.h */,
-				5AB5BEA2223226D200F426A6 /* file.c */,
 				4AE858E720F07BA40048F935 /* object.c */,
 				4AE858EA20F07BA40048F935 /* parse.c */,
 				4AE858EC20F07BA50048F935 /* shared.h */,
 				4AE858F220F07BA50048F935 /* territory.c */,
 				4AE858F320F07BA50048F935 /* tile.c */,
+				4A156045229B949400AAF8B3 /* vect.c */,
 			);
 			name = noble;
 			sourceTree = "<group>";
@@ -450,6 +441,7 @@
 				TargetAttributes = {
 					5AD6CA6A1B27582F00230534 = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 1020;
 					};
 					5AD6CA7D1B27582F00230534 = {
 						CreatedOnToolsVersion = 7.0;
@@ -466,6 +458,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -512,7 +505,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A10137321900BF20069A435 /* NobleMTKView.m in Sources */,
 				4AE858DF20F07B870048F935 /* episodic.c in Sources */,
 				4AE858F820F07BA50048F935 /* interpret.c in Sources */,
 				4AE858F920F07BA50048F935 /* compress.c in Sources */,
@@ -520,9 +512,9 @@
 				4AE858E120F07B870048F935 /* social.c in Sources */,
 				5AB5BEA5223226D300F426A6 /* file.c in Sources */,
 				4A06BF6321CDBC7E00A5CF56 /* graph.c in Sources */,
+				4AD700242286A14200B189BE /* AppDelegate.swift in Sources */,
 				4AE8591920F07C010048F935 /* transfer.c in Sources */,
 				4A34106121F8358900F9FAF0 /* mammal.c in Sources */,
-				4AE0E45321906190002974AE /* NobleMacUpdate.m in Sources */,
 				4AE8590720F07BC20048F935 /* NobleMacView.m in Sources */,
 				4A10137421900BF20069A435 /* NobleMTKRenderer.m in Sources */,
 				4A34106321F8358900F9FAF0 /* ape.c in Sources */,
@@ -531,9 +523,9 @@
 				4AE8592120F07C190048F935 /* message.c in Sources */,
 				4AE858FC20F07BA50048F935 /* audio.c in Sources */,
 				4AE858FD20F07BA50048F935 /* territory.c in Sources */,
-				4AE8590A20F07BC20048F935 /* main.m in Sources */,
 				4AE858E520F07B870048F935 /* drives.c in Sources */,
 				4AE858F620F07BA50048F935 /* land.c in Sources */,
+				4A156048229B949400AAF8B3 /* graph.c in Sources */,
 				4A10137521900BF20069A435 /* NobleMTKShaders.metal in Sources */,
 				5AB5BEA7223226D300F426A6 /* console.c in Sources */,
 				4A06BF6521CDBC7E00A5CF56 /* skeleton.c in Sources */,
@@ -544,9 +536,8 @@
 				4AE858E220F07B870048F935 /* brain.c in Sources */,
 				4AE858FA20F07BA50048F935 /* math.c in Sources */,
 				4AE858E420F07B870048F935 /* body.c in Sources */,
-				4AE8590820F07BC20048F935 /* AppDelegate.m in Sources */,
 				4AE858E620F07B870048F935 /* food.c in Sources */,
-				4AE8590B20F07BC20048F935 /* NobleShared.m in Sources */,
+				4A156047229B949400AAF8B3 /* vect.c in Sources */,
 				4A34105C21F8358900F9FAF0 /* bird.c in Sources */,
 				4AE858F520F07BA50048F935 /* io.c in Sources */,
 				4AE858F420F07BA50048F935 /* object.c in Sources */,
@@ -559,6 +550,7 @@
 				5A7C5AF22231EA96002F513C /* memory.c in Sources */,
 				4AE858FB20F07BA50048F935 /* network.c in Sources */,
 				4AE8591A20F07C010048F935 /* command.c in Sources */,
+				4A907CBD2287A462007F81C3 /* NobleShared.swift in Sources */,
 				4AE8591F20F07C190048F935 /* shared.c in Sources */,
 				4A34106021F8358900F9FAF0 /* snake.c in Sources */,
 				4AE858FE20F07BA50048F935 /* tile.c in Sources */,
@@ -630,7 +622,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -683,7 +675,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -701,6 +693,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_ASSIGN_ENUM = YES;
 				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
 				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
@@ -713,6 +706,9 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-Ape";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Noble Ape-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -720,6 +716,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_ASSIGN_ENUM = YES;
 				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
 				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
@@ -732,12 +729,15 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Noble-Ape";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Noble Ape-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
 		5AD6CA961B27582F00230534 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -757,6 +757,7 @@
 		5AD6CA971B27582F00230534 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Noble ApeTests/Info.plist";
@@ -771,6 +772,7 @@
 		5AD6CA991B27582F00230534 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Noble ApeUITests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
@@ -784,6 +786,7 @@
 		5AD6CA9A1B27582F00230534 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Noble ApeUITests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
