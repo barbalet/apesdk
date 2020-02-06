@@ -1,0 +1,139 @@
+# This file is a template, and might need editing before it works on your project.
+# use the official gcc image, based on debian
+# can use verions as well, like gcc:5.2
+# see https://hub.docker.com/_/gcc/
+image: gcc
+
+build:
+  stage: build
+  # instead of calling g++ directly you can also use some build toolkit like make
+  # install the necessary build tools when needed
+  # before_script: 
+  #   - apt update && apt -y install make autoconf 
+  script: 
+    - ./build.sh
+  # artifacts:
+  #   paths:
+  #     - mybinary
+  # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
+  # cache:
+  #   paths:
+  #     - "*.o"
+
+coverage_math:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh --coverage
+    - ./test_math
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_math
+    - rm *.o
+
+coverage_io:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh --coverage
+    - ./test_io
+    - diff check_file.txt compare_file.txt
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_io
+    - rm compare_file.txt
+    - rm *.o
+
+coverage_apescript:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh --coverage
+    - ./test_apescript check_apescript.txt
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_apescript
+    - rm *.o
+
+coverage_sim_time:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh --coverage
+    - ./test_sim_time talesOfAnUnknownSimulator
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_sim_time
+    - rm *.o
+
+test_object:
+  stage: test
+  script:
+    - cd test
+    - ./test_object.sh
+    
+test_object_file:
+  stage: test
+  script:
+    - cd test
+    - ./test_object_file.sh
+    
+test_object_string:
+  stage: test
+  script:
+    - cd test
+    - ./test_object_string.sh
+
+test_sim:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh
+    - ./test_sim
+    - rm test_sim
+    - rm *.o
+
+test_sim_time_a:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh
+    - ./test_sim_time talesOfAnUnknownSimulator
+    - rm test_sim_time
+    - rm *.o
+
+test_sim_time_b:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh
+    - ./test_sim_time unknownStikesBack
+    - rm test_sim_time
+    - rm *.o
+
+test_sim_time_c:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh
+    - ./test_sim_time workingThroughAllValues
+    - rm test_sim_time
+    - rm *.o
+
+test_sim_time_d:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh
+    - ./test_sim_time quizMeAboutThisMethod
+    - rm test_sim_time
+    - rm *.o
+
+test_sim_time_e:
+  stage: test
+  script:
+    - cd test
+    - ./test_wo_exec.sh
+    - ./test_sim_time maybeThisWillWork
+    - rm test_sim_time
+    - rm *.o

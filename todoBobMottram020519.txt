@@ -1,0 +1,26 @@
+Projects discussed with Bob Mottram:
+
+Add 1000 words spoken phonemes to the simulation.
+
+Programmable notion of beauty.
+
+Regional terms referencing places.
+
+JSON server originally written in C then perhaps node.js with a Simulated Ape Client.
+
+Notions of grooming in the city - what do some of the Simulated Ape primate skills become.
+
+The newspapers from the Mushroom Boy creating political narrative.
+
+Ghosts as a representation of dark age religion.
+
+Abstracting the components:
+	Simulated Being -> Simulated Ape, 
+	Simulated Being -> Simulated Schmuck, 
+	Simulated Being -> Fierce Feline,
+	Simulated Being -> Simulated Ghost
+
+Meaning in language being imprecise. Just as much about happy agreement of someone talking than meaning.
+
+
+
