@@ -1,3 +1,5 @@
+[![Open Source Helpers](https://www.codetriage.com/barbalet/apesdk/badges/users.svg)](https://www.codetriage.com/barbalet/apesdk)
+
 The ApeSDK is a series of simulations that work together. It is primarily written in C and can be built with Mac, Window, Linux and iOS GUIs.
 
 ### History
