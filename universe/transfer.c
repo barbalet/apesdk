@@ -33,11 +33,7 @@
 
  ****************************************************************/
 
-#ifndef	_WIN32
 #include "../entity/entity.h"
-#else
-#include "..\entity\entity.h"
-#endif
 
 #include "universe_internal.h"
 #include "universe.h"
@@ -46,12 +42,13 @@
 
 void transfer_debug_csv(n_file * fil, n_byte initial)
 {
-    ape_simulation * local_sim = sim_sim();
-    io_write_csv(fil, (n_byte *)(&(local_sim->beings[0])), simulated_file_format, FIL_BEI, initial);
+    simulated_group * group = sim_group();
+
+    io_write_csv(fil, (n_byte *)(&(group->beings[0])), simulated_file_format, FIL_BEI, initial);
 }
 
 /* provide an output file buffer to be written */
-static void transfer_land(n_file * tranfer_out, ape_simulation * value, simulated_file_entry * format)
+static void transfer_land(n_file * tranfer_out, simulated_group * group, simulated_file_entry * format)
 {
     n_byte2	loc_signature[2] = {(n_byte2)SIMULATED_APE_SIGNATURE, (n_byte2)VERSION_NUMBER};
 
@@ -66,7 +63,7 @@ static void transfer_land(n_file * tranfer_out, ape_simulation * value, simulate
 #endif
 }
 
-static void transfer_being(n_file * tranfer_out, ape_simulation * value, n_int being, simulated_file_entry * format)
+static void transfer_being(n_file * tranfer_out, simulated_group * group, n_int being, simulated_file_entry * format)
 {
 #ifdef USE_FIL_SOE
     n_int loop = (SOCIAL_SIZE * being);
@@ -78,7 +75,7 @@ static void transfer_being(n_file * tranfer_out, ape_simulation * value, n_int b
 #endif
 
 #ifdef USE_FIL_BEI
-    io_write_buff(tranfer_out, &(value->beings[being]), format, FIL_BEI, 0L);
+    io_write_buff(tranfer_out, &(group->beings[being]), format, FIL_BEI, 0L);
 #endif
 #ifdef USE_FIL_SOE
     while (loop < loop_end)
@@ -203,19 +200,19 @@ static n_object * transfer_sim_obj(void)
 n_file * tranfer_out_json(void)
 {
     n_file *output_file = 0L;
-    ape_simulation *local_sim = sim_sim();
-    
+    simulated_group * group = sim_group();
+
     n_object * simulation_object = object_object(0L, "information", transfer_sim_obj());
     
     object_object(simulation_object, "land", transfer_land_obj());
     
-    if (local_sim->num > 0)
+    if (group->num > 0)
     {
         n_uint        count = 1;
-        simulated_being *local_beings = local_sim->beings;
+        simulated_being *local_beings = group->beings;
         n_object    *being_object = transfer_being_obj(&(local_beings[0]));
         n_array     *beings = array_object(being_object);
-        while (count < local_sim->num)
+        while (count < group->num)
         {
             being_object = transfer_being_obj(&(local_beings[count++]));
             array_add(beings, array_object(being_object));
@@ -232,7 +229,8 @@ n_file * tranfer_out_json(void)
 
 n_file * tranfer_out(void)
 {
-    ape_simulation *local_sim = sim_sim();
+    simulated_group * group = sim_group();
+
     n_file           *returnFile = io_file_new();
     n_int	          loop = 0;
     n_string fluff[5] = {SHORT_VERSION_NAME, FULL_DATE, COPYRIGHT_DATE, COPYRIGHT_NAME, COPYRIGHT_FOLLOW };
@@ -249,11 +247,11 @@ n_file * tranfer_out(void)
 
     io_write_buff(returnFile, fluff, 0L, FILE_COPYRIGHT, 0L);
 
-    transfer_land(returnFile, local_sim, (simulated_file_entry *)simulated_file_format);
+    transfer_land(returnFile, group, (simulated_file_entry *)simulated_file_format);
 
-    while (loop < (n_int)local_sim->num)
+    while (loop < (n_int)(group->num))
     {
-        transfer_being(returnFile, local_sim, loop, (simulated_file_entry *)simulated_file_format);
+        transfer_being(returnFile, group, loop, (simulated_file_entry *)simulated_file_format);
         loop++;
     }
 
@@ -269,7 +267,7 @@ n_int	tranfer_in(n_file * input_file)
     n_uint social_count = 0;
     n_uint episodic_count = 0;
 
-    ape_simulation * local_sim = sim_sim();
+    simulated_group * group = sim_group();
     n_uint  size_buffer = io_find_size_data((simulated_file_entry *)simulated_file_format);
 
     temp_store = (n_byte *)memory_new(size_buffer);
@@ -307,6 +305,7 @@ n_int	tranfer_in(n_file * input_file)
         if (ret_val < FILE_EOF)
         {
             n_uint	loop_end = 0;
+
             switch (ret_val)
             {
             case FIL_LAN:
@@ -314,19 +313,19 @@ n_int	tranfer_in(n_file * input_file)
                 loop_end = 11; /* Needs to be fixed */
                 break;
             case FIL_BEI:
-                temp = (n_byte*) &(local_sim->beings[ape_count]);
+                temp = (n_byte*) &(group->beings[ape_count]);
                 loop_end = sizeof(simulated_being);
                 break;
             case FIL_SOE:
             {
-                simulated_isocial * local_social = being_social(&(local_sim->beings[ape_count]));
+                simulated_isocial * local_social = being_social(&(group->beings[ape_count]));
                 temp = (n_byte*)(&local_social[social_count]);
                 loop_end = sizeof(simulated_isocial);
             }
             break;
             case FIL_EPI:
             {
-                simulated_iepisodic * local_episodic = being_episodic(&(local_sim->beings[ape_count]));
+                simulated_iepisodic * local_episodic = being_episodic(&(group->beings[ape_count]));
                 temp = (n_byte*)(&local_episodic[episodic_count]);
                 loop_end = sizeof(simulated_iepisodic);
             }
@@ -344,27 +343,27 @@ n_int	tranfer_in(n_file * input_file)
             if (ret_val == FIL_BEI)
             {
                 ape_count ++;
-                if (ape_count == local_sim->max)
+                if (ape_count == group->max)
                 {
-                    local_sim->num = ape_count;
+                    group->num = ape_count;
                     return SHOW_ERROR("Too many apes for memory");
                 }
             }
             if (ret_val == FIL_SOE)
             {
                 social_count ++;
-                if (social_count == (local_sim->max * SOCIAL_SIZE))
+                if (social_count == (group->max * SOCIAL_SIZE))
                 {
-                    local_sim->num = ape_count;
+                    group->num = ape_count;
                     return SHOW_ERROR("Too many social graph events for memory");
                 }
             }
             if (ret_val == FIL_EPI)
             {
                 episodic_count ++;
-                if (episodic_count == (local_sim->max * EPISODIC_SIZE))
+                if (episodic_count == (group->max * EPISODIC_SIZE))
                 {
-                    local_sim->num = ape_count;
+                    group->num = ape_count;
                     return SHOW_ERROR("Too many episodic events for memory");
                 }
             }
@@ -376,7 +375,7 @@ n_int	tranfer_in(n_file * input_file)
 
     if (ret_val == FILE_EOF)
     {
-        local_sim->num = ape_count;
+        group->num = ape_count;
         return 0;
     }
     return SHOW_ERROR("Process file failed");

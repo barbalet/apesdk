@@ -1,6 +1,6 @@
 /****************************************************************
 
- common.h
+ test_gui.c
 
  =============================================================
 
@@ -33,32 +33,57 @@
 
  ****************************************************************/
 
-#ifndef SIMULATED_COMMON_H
-#define SIMULATED_COMMON_H
+#include <stdio.h>
+#include <time.h>
 
-#define SERVER_LAND_DATE            "date"
-#define SERVER_LAND_GENETICS        "genetics"
-#define SERVER_LAND_TIME            "time"
+#include "../toolkit/toolkit.h"
+#include "../toolkit/shared.h"
+#include "../script/script.h"
+#include "../sim/sim.h"
+#include "../entity/entity.h"
+#include "../universe/universe.h"
+#include "../gui/gui.h"
 
-#define SERVER_BEING_NAME           "name"
-#define SERVER_BEING_FACING         "facing"
-#define SERVER_BEING_LOCATION       "location"
-#define SERVER_BEING_VELOCITY       "velocity"
-#define SERVER_BEING_ENERGY         "energy"
-#define SERVER_BEING_ENERGY         "energy"
-#define SERVER_BEING_STATE          "state"
-#define SERVER_BEING_GENETICS       "genetics"
-#define SERVER_BEING_IDENTIFICATION "identification"
+void test_gui_run(void)
+{
+    n_int   counter = 0;
+    n_int   tickCounter = 0x12738291;
+    n_byte  drawBuffer[512 * 512 * 4];
+    
+    shared_init(0,tickCounter);
+    tickCounter += 2601;
+    shared_init(1,tickCounter);
+    tickCounter += 2601;
+    shared_init(2,tickCounter);
+    tickCounter += 2601;
+    
+    while (counter < (512*4))
+    {
+        (void) shared_cycle(tickCounter, 0);
+        tickCounter += 2601;
+        (void) shared_cycle(tickCounter, 1);
+        tickCounter += 2601;
+        (void) shared_cycle(tickCounter, 2);
+        tickCounter += 2601;
+        
+        shared_draw(drawBuffer, 0, 512, 512, 0);
+        tickCounter += 2601;
+        shared_draw(drawBuffer, 0, 512, 512, 1);
+        tickCounter += 2601;
+        shared_draw(drawBuffer, 0, 512, 512, 2);
+        tickCounter += 2601;
+        
+        counter ++;
+    }
+    
+    shared_close();
+}
 
-#define SERVER_SIM_SIGNATURE        "signature"
-#define SERVER_SIM_VERSION          "version"
-#define SERVER_SIM_COPYRIGHT        "copyright"
-#define SERVER_SIM_DATE             "date"
+int main(int argc, const char * argv[])
+{
+    printf(" --- test gui --- start -----------------------------------------------\n");
+    test_gui_run();
+    printf(" --- test gui ---  end  -----------------------------------------------\n");
+    return 0;
+}
 
-#define SERVER_OUT_INFORMATION      "information"
-#define SERVER_OUT_LAND             "land"
-#define SERVER_OUT_BEINGS           "beings"
-
-extern n_string example_json;
-
-#endif /* SIMULATED_COMMON_H */

@@ -37,11 +37,7 @@
 
 #define REMOVE_BOLDING_TEXT
 
-#ifndef	_WIN32
 #include "../entity/entity.h"
-#else
-#include "..\entity\entity.h"
-#endif
 
 #include "universe_internal.h"
 
@@ -181,16 +177,14 @@ n_int command_executing(void)
 
 /**
  *
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function the output function
  */
 n_int command_being(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
-
-    output_function(being_get_select_name(local_sim));
-
+    simulated_group * group = (simulated_group *) ptr;
+    output_function(being_get_select_name(group));
     return 0;
 }
 
@@ -220,7 +214,7 @@ n_int command_relationship_count(n_int friend_type)
     return 0;
 }
 
-simulated_being * command_relationship_being(ape_simulation * sim, n_int friend_type, n_int location)
+simulated_being * command_relationship_being(simulated_group * group, n_int friend_type, n_int location)
 {
     n_byte2 first_name_look_up;
     n_byte2 family_name_look_up;
@@ -242,9 +236,9 @@ simulated_being * command_relationship_being(ape_simulation * sim, n_int friend_
         default:
             return 0L;
     }
-    while (loop < sim->num)
+    while (loop < group->num)
     {
-        simulated_being * local = &sim->beings[loop];
+        simulated_being * local = &group->beings[loop];
         if ((being_gender_name(local) == first_name_look_up) && (being_family_name(local) == family_name_look_up))
         {
             return local;
@@ -257,7 +251,7 @@ simulated_being * command_relationship_being(ape_simulation * sim, n_int friend_
 static void command_show_friends_being(void * ptr, simulated_being * local_being,
                                        n_int friend_type, n_string result, n_string eight_characters)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
     n_int i,found;
     simulated_isocial * local_social_graph;
     n_int first = 1;
@@ -343,7 +337,7 @@ static void command_show_friends_being(void * ptr, simulated_being * local_being
             n_string_block result_str;
             
             /** Print the name and familiarity */
-            social_graph_link_name(local_sim, local_being, i, BEING_MET, met_being_name);
+            social_graph_link_name(group, local_being, i, BEING_MET, met_being_name);
             
             /** type of relationship */
             
@@ -362,7 +356,7 @@ static void command_show_friends_being(void * ptr, simulated_being * local_being
                     n_string_block meeter_being_name;
                     n_string_block string_of_strings;
                     io_three_strings(meeter_being_name, " ", "", "", 0);
-                    social_graph_link_name(local_sim, local_being, i, BEING_MEETER, meeter_being_name);
+                    social_graph_link_name(group, local_being, i, BEING_MEETER, meeter_being_name);
                     io_three_strings(string_of_strings, relationship_str1, " of *", meeter_being_name, 0);
 #ifdef REMOVE_BOLDING_TEXT
                     io_three_strings(relationship_str2, " ", string_of_strings, "*", 0);
@@ -419,18 +413,18 @@ static void command_show_friends_being(void * ptr, simulated_being * local_being
 
 /**
  * Show the friends of the given being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname name of the being
  * @param friend_type 0=friends, 1=enemies, 2=mates
  * @param result returned text
  */
 static void command_show_friends(void * ptr, n_string beingname, n_int friend_type, n_string result)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
     simulated_being * local_being;
     n_string local_being_name = io_string_copy(beingname);
     /** Get the being object from its name */
-    local_being = being_from_name(local_sim, local_being_name);
+    local_being = being_from_name(group, local_being_name);
     memory_free((void**)&local_being_name);
     
     if (local_being == 0) return;
@@ -510,7 +504,7 @@ n_int get_time_interval(n_string str, n_int * number, n_int * interval)
     return retval;
 }
 
-static void command_simulation_loop(ape_simulation * local_sim, simulated_being * local_being, void * data)
+static void command_simulation_loop(simulated_group * group, simulated_being * local_being, void * data)
 {
     n_int   *int_data = data;
     if (FIND_SEX(GET_I(local_being)) == SEX_FEMALE)
@@ -525,28 +519,29 @@ static void command_simulation_loop(ape_simulation * local_sim, simulated_being 
 
 /**
  * Show details of the overall simulation
- * @param ptr pointer to a ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response parameters of the command
  * @param output_function function to be used to display the result
  * @return 0
  */
 n_int command_simulation(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
+    simulated_timing * timing = sim_timing();
     n_string_block beingstr, time;
     n_int int_data[2];
     n_byte2 *local_land_genetics = land_genetics();
     n_string_block land_dimension, land_genetics0, land_genetics1, genetics, population;
     n_string_block adults, juveniles, tide_level;
     
-    loop_no_thread(local_sim, 0L, command_simulation_loop, int_data);
+    loop_no_thread(group, 0L, command_simulation_loop, int_data);
 
     io_number_to_string(land_dimension, (n_uint)land_map_dimension());
     io_number_to_string(land_genetics0, local_land_genetics[0]);
     io_number_to_string(land_genetics1, local_land_genetics[1]);
-    io_number_to_string(population, local_sim->num);
+    io_number_to_string(population, group->num);
     
-    io_number_to_string(adults, (n_uint)((n_int)(local_sim->num) - int_data[1]));
+    io_number_to_string(adults, (n_uint)((n_int)(group->num) - int_data[1]));
     io_number_to_string(juveniles, (n_uint)int_data[1]);
 
     io_number_to_string(tide_level, land_tide_level());
@@ -561,14 +556,14 @@ n_int command_simulation(void * ptr, n_string response, n_console_output output_
     io_three_strings(beingstr, beingstr, "   Juveniles: ", juveniles, 1);
 
     
-    if (local_sim->num > 0)
+    if (group->num > 0)
     {
         n_string_block males, females, males_percent, females_percent;
-        io_number_to_string(males, (local_sim->num - int_data[0]));
+        io_number_to_string(males, (group->num - int_data[0]));
         io_number_to_string(females, int_data[0]);
         
-        io_number_to_string(males_percent, ((local_sim->num - int_data[0])*100)/local_sim->num);
-        io_number_to_string(females_percent, (int_data[0] * 100)/local_sim->num);
+        io_number_to_string(males_percent, ((group->num - int_data[0])*100)/group->num);
+        io_number_to_string(females_percent, (int_data[0] * 100)/group->num);
         
         io_three_strings(beingstr, beingstr, "Females: ", females, 0);
         io_three_strings(beingstr, beingstr, " (", females_percent, 0);
@@ -581,11 +576,11 @@ n_int command_simulation(void * ptr, n_string response, n_console_output output_
 
     io_time_to_string(time);
 
-    if (local_sim->delta_cycles)
+    if (timing->delta_cycles)
     {
         n_string_block delta_cycles;
         
-        io_number_to_string(delta_cycles, local_sim->delta_cycles);
+        io_number_to_string(delta_cycles, timing->delta_cycles);
 
         io_three_strings(beingstr, beingstr, "Brain Cycles Per Second: ", delta_cycles, 1);
     }
@@ -606,32 +601,33 @@ n_int command_simulation(void * ptr, n_string response, n_console_output output_
 
 /**
  * Shows the names of all beings
- * @param ptr pointer to ape_simulation
+ * @param ptr pointer to simulated_group
  * @param response parameters of the command
  * @param output_function function used to display the result
  * @return 0
  */
 n_int command_list(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
+
     simulated_being * local_being;
     n_string_block line_text;
     n_int          location = 0;
     n_uint          loop = 0;
 
-    if (local_sim->num == 0)
+    if (group->num == 0)
     {
         output_function("No apes present. Trying (re)running the Simulation");
         return 0;
     }
     
     /** show names in index order */
-    while (loop < local_sim->num)
+    while (loop < group->num)
     {
         n_string_block name;
         n_int          length;
         /** get the being */
-        local_being = &local_sim->beings[loop];
+        local_being = &group->beings[loop];
 
         /** get the name of the being */
         being_name_simple(local_being, name);
@@ -662,14 +658,14 @@ n_int command_list(void * ptr, n_string response, n_console_output output_functi
     return 0;
 }
 
-void command_change_selected(ape_simulation * sim, n_byte forwards)
+void command_change_selected(simulated_group * group, n_byte forwards)
 {
-    simulated_being * local_select = sim->select;
-    simulated_being * first = sim->beings;
-    simulated_being * last = &(sim->beings[sim->num - 1]);
+    simulated_being * local_select = group->select;
+    simulated_being * first = group->beings;
+    simulated_being * last = &(group->beings[group->num - 1]);
     if (forwards)
     {
-        if (sim->select != last)
+        if (group->select != last)
         {
             local_select++;
         }
@@ -680,7 +676,7 @@ void command_change_selected(ape_simulation * sim, n_byte forwards)
     }
     else
     {
-        if (sim->select != first)
+        if (group->select != first)
         {
             local_select--;
         }
@@ -694,12 +690,13 @@ void command_change_selected(ape_simulation * sim, n_byte forwards)
 
 static n_int command_check_ape_present(void * ptr, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
-    if (local_sim->select)
+    simulated_group * group = (simulated_group *) ptr;
+
+    if (group->select)
     {
         return 1;
     }
-    if (local_sim->num)
+    if (group->num)
     {
         output_function("No apes selected.");
     }
@@ -714,7 +711,7 @@ n_int command_next(void * ptr, n_string response, n_console_output output_functi
 {
     if (command_check_ape_present(ptr, output_function))
     {
-        command_change_selected((ape_simulation *) ptr, 1);
+        command_change_selected((simulated_group *) ptr, 1);
     }
     return 0;
 }
@@ -723,17 +720,17 @@ n_int command_previous(void * ptr, n_string response, n_console_output output_fu
 {
     if (command_check_ape_present(ptr, output_function))
     {
-        command_change_selected((ape_simulation *) ptr, 0);
+        command_change_selected((simulated_group *) ptr, 0);
     }
     return 0;
 }
 
 #ifdef BRAINCODE_ON
-void command_populate_braincode(ape_simulation * local_sim, line_braincode function)
+void command_populate_braincode(simulated_group * group, line_braincode function)
 {
-    if (local_sim->select)
+    if (group->select)
     {
-        simulated_being * local_being = local_sim->select;
+        simulated_being * local_being = group->select;
         n_byte      * internal_bc = being_braincode_internal(local_being);
         n_byte      * external_bc = being_braincode_external(local_being);
         n_int         loop = 0;
@@ -789,7 +786,7 @@ void command_populate_braincode(ape_simulation * local_sim, line_braincode funct
 
 /**
  * Show the appearance parameters for a being
- * @param ptr pointer to a ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname name of the being
  * @param local_being being to be shown
  * @param result resulting text containing appearance
@@ -852,7 +849,7 @@ static void watch_line_braincode(n_string string, n_int line)
 
 /**
  * Shows braincode for the given being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname Name of the being
  * @param local_being being to be viewed
  * @param result returned text
@@ -908,7 +905,7 @@ static void watch_speech(void *ptr, n_string beingname, simulated_being * local,
 
 /**
  * Shows the social graph for the given being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname Name of the being
  * @param local_being being to be viewed
  * @param result returned text
@@ -923,7 +920,7 @@ static void watch_social_graph(void *ptr, n_string beingname, simulated_being * 
 
 /**
  * Shows the episodic memory for the given being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname Name of the being
  * @param local_being being to be viewed
  * @param result returned text
@@ -964,7 +961,7 @@ static void watch_episodic(void *ptr, n_string beingname, simulated_being * loca
 
 /**
  * Shows the genome for the given being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname Name of the being
  * @param local_being being to be viewed
  * @param result returned text
@@ -991,7 +988,7 @@ static void watch_genome(void *ptr, n_string beingname, simulated_being * local_
 
 /**
  * Shows brainprobes for the given being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname Name of the being
  * @param local_being being to be viewed
  * @param result returned text
@@ -1046,7 +1043,7 @@ static void watch_brainprobes(void *ptr, n_string beingname, simulated_being * l
 
 /**
  * Shows the main parameters for the given being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param beingname Name of the being
  * @param local_being being to be viewed
  * @param result returned text
@@ -1115,7 +1112,7 @@ void watch_control(void *ptr, n_string beingname, simulated_being * local_being,
 
 /**
  * This should duplicate all console for watch functions
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function used to show the output
  * @param title title
@@ -1124,15 +1121,16 @@ void watch_control(void *ptr, n_string beingname, simulated_being * local_being,
  */
 static n_int command_duplicate(void * ptr, n_string response, n_console_output output_function, n_string title, console_generic watch_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
+
     simulated_being * local_being = 0L;
     n_string_block beingstr;
 
     watch_string_length=0;
 
-    if ((response == 0) && (local_sim->select))
+    if ((response == 0) && (group->select))
     {
-        response = being_get_select_name(local_sim);
+        response = being_get_select_name(group);
         if (title != 0L)
         {
             io_string_write((n_string)beingstr, "\n", &watch_string_length);
@@ -1145,15 +1143,15 @@ static n_int command_duplicate(void * ptr, n_string response, n_console_output o
 
     if (response != 0L)
     {
-        local_being = being_from_name(local_sim, response);
+        local_being = being_from_name(group, response);
         if (local_being == 0L)
         {
             (void)SHOW_ERROR("Being not found");
             return 0;
         }
-        being_set_select_name(local_sim, response);
+        being_set_select_name(group, response);
 
-        watch_function(ptr, being_get_select_name(local_sim), local_being, (n_string)beingstr);
+        watch_function(ptr, being_get_select_name(group), local_being, (n_string)beingstr);
         beingstr[watch_string_length] = 0;
         output_function(beingstr);
         return 0;
@@ -1165,7 +1163,7 @@ static n_int command_duplicate(void * ptr, n_string response, n_console_output o
 
 /**
  *
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response response string
  * @param output_function output function
  * @return 0
@@ -1177,7 +1175,7 @@ n_int command_genome(void * ptr, n_string response, n_console_output output_func
 
 /**
  *
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response response string
  * @param output_function output function
  * @return 0
@@ -1189,7 +1187,7 @@ n_int command_stats(void * ptr, n_string response, n_console_output output_funct
 
 /**
  *
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response response string
  * @param output_function output function
  * @return 0
@@ -1201,7 +1199,7 @@ n_int command_probes(void * ptr, n_string response, n_console_output output_func
 
 /**
  * Show the episodic memory
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response response string
  * @param output_function output function
  * @return 0
@@ -1213,7 +1211,7 @@ n_int command_episodic(void * ptr, n_string response, n_console_output output_fu
 
 /**
  * Show the social graph
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response response string
  * @param output_function output function
  * @return 0
@@ -1225,7 +1223,7 @@ n_int command_social_graph(void * ptr, n_string response, n_console_output outpu
 
 /**
  * Show the braincode
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response response string
  * @param output_function output function
  * @return 0
@@ -1243,7 +1241,7 @@ n_int command_speech(void * ptr, n_string response, n_console_output output_func
 
 /**
  * Show appearance values
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response response string
  * @param output_function output function
  * @return 0
@@ -1253,7 +1251,7 @@ n_int command_appearance(void * ptr, n_string response, n_console_output output_
     return command_duplicate(ptr, response, output_function, "Appearance", watch_appearance);
 }
 
-static void histogram_being_state_loop(ape_simulation * local_sim, simulated_being * local_being, void * data)
+static void histogram_being_state_loop(simulated_group * group, simulated_being * local_being, void * data)
 {
     n_uint * histogram = data;
     n_uint n = 2;
@@ -1276,17 +1274,17 @@ static void histogram_being_state_loop(ape_simulation * local_sim, simulated_bei
 
 /**
  * Update a histogram of being states
- * @param local_sim pointer to the simulation object
+ * @param group pointer to simulated_group object
  * @param histogram histogram array to be updated
  * @param normalize whether to normalize the histogram
  */
-static void histogram_being_state(ape_simulation * local_sim, n_uint * histogram, n_byte normalize)
+static void histogram_being_state(simulated_group * group, n_uint * histogram, n_byte normalize)
 {
     n_uint i;
 
     for (i = 0; i < BEING_STATES; i++) histogram[i] = 0;
 
-    loop_no_thread(local_sim, 0L, histogram_being_state_loop, histogram);
+    loop_no_thread(group, 0L, histogram_being_state_loop, histogram);
 
     if (normalize)
     {
@@ -1301,13 +1299,12 @@ static void histogram_being_state(ape_simulation * local_sim, n_uint * histogram
 
 /**
  * Watch a particular being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param output_function output function to be used
  */
 static void watch_being(void * ptr, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
-
+    simulated_group * group = (simulated_group *) ptr;
     simulated_being * local_being;
     n_string_block beingstr;
     n_uint i;
@@ -1332,7 +1329,7 @@ static void watch_being(void * ptr, n_console_output output_function)
 
         io_time_to_string(str);
         io_string_write(beingstr,str,&watch_string_length);
-        histogram_being_state(local_sim, (n_uint*)histogram, 1);
+        histogram_being_state(group, (n_uint*)histogram, 1);
         for (i = 0; i < BEING_STATES; i++)
         {
             if (i == 1) continue; /**< skip the awake state */
@@ -1368,9 +1365,9 @@ static void watch_being(void * ptr, n_console_output output_function)
         return;
     }
 
-    if (local_sim->select)
+    if (group->select)
     {
-        local_being = local_sim->select;
+        local_being = group->select;
 
         watch_string_length = 0;
 
@@ -1378,38 +1375,38 @@ static void watch_being(void * ptr, n_console_output output_function)
         {
         case WATCH_ALL:
         {
-            watch_stats(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_stats(ptr, being_get_select_name(group), local_being, beingstr);
             break;
         }
         case WATCH_SOCIAL_GRAPH:
         {
-            watch_social_graph(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_social_graph(ptr, being_get_select_name(group), local_being, beingstr);
             break;
         }
         case WATCH_EPISODIC:
         {
-            watch_episodic(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_episodic(ptr, being_get_select_name(group), local_being, beingstr);
             break;
         }
         case WATCH_BRAINCODE:
         {
-            watch_braincode(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_braincode(ptr, being_get_select_name(group), local_being, beingstr);
             break;
         }
         case WATCH_BRAINPROBES:
         {
-            watch_brainprobes(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_brainprobes(ptr, being_get_select_name(group), local_being, beingstr);
             break;
         }
 
         case WATCH_APPEARANCE:
         {
-            watch_appearance(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_appearance(ptr, being_get_select_name(group), local_being, beingstr);
             break;
         }
         case WATCH_SPEECH:
         {
-            watch_speech(ptr, being_get_select_name(local_sim), local_being, beingstr);
+            watch_speech(ptr, being_get_select_name(group), local_being, beingstr);
             break;
         }
         }
@@ -1481,17 +1478,17 @@ n_int command_event(void * ptr, n_string response, n_console_output output_funct
 
 n_int command_memory(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
     n_string_block str2;
     sprintf(str2, "maximum memory %ld\nallocated memory %ld\nmaximum apes %ld",
-            sim_memory_allocated(1), sim_memory_allocated(0), local_sim->max);
+            sim_memory_allocated(1), sim_memory_allocated(0), group->max);
     output_function(str2);
     return 0;
 }
 
 /**
  * Enable or disable logging
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters - off/on/0/1/yes/no
  * @param output_function function to be used to display output
  * @return 0
@@ -1566,7 +1563,7 @@ static n_int command_compare_brain(n_byte * braincode0, n_byte * braincode1, n_i
 
 /**
  * Shows repeated sections of braincode
- * @param ptr ape_simulation value
+ * @param ptr pointer to simulated_group
  * @param response response string
  * @param output_function output function
  * @returns 0
@@ -1582,28 +1579,27 @@ n_int command_idea(void * ptr, n_string response, n_console_output output_functi
     const n_int max_block_size = 8;
     n_uint i, total_matches=0, total_tests=0;
     n_uint histogram[5 + 1];
-    ape_simulation * local_sim = (ape_simulation *) ptr;
-
+    simulated_group * group = (simulated_group *) ptr;
     /* clear the histogram */
     for (i = 0; i <= (n_uint)(max_block_size - min_block_size); i++)
     {
         histogram[i]=0;
     }
 
-    if (local_sim->select)
+    if (group->select)
     {
         n_uint loop = 0;
-        while (loop < local_sim->num)
+        while (loop < group->num)
         {
-            simulated_being * local_being = &(local_sim->beings[loop]);
+            simulated_being * local_being = &(group->beings[loop]);
             n_byte * bc_external = being_braincode_external(local_being);
             if (bc_external)
             {
 
                 n_uint loop2 = loop + 1;
-                while (loop2 < local_sim->num)
+                while (loop2 < group->num)
                 {
-                    simulated_being * local_being2 = &(local_sim->beings[loop2]);
+                    simulated_being * local_being2 = &(group->beings[loop2]);
                     n_byte * bc_external2 = being_braincode_external(local_being2);
 
                     if (bc_external2)
@@ -1664,14 +1660,14 @@ n_int command_idea(void * ptr, n_string response, n_console_output output_functi
 
 /**
  * Watch a particular being
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function to be used to display output
  * @return 0
  */
 n_int command_watch(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
     n_int          length;
     n_string_block output;
     n_int          position = 0;
@@ -1704,24 +1700,24 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
         return 0;
     }
 
-    if (being_from_name(local_sim, response) != 0)
+    if (being_from_name(group, response) != 0)
     {
-        being_set_select_name(local_sim, response);
+        being_set_select_name(group, response);
         io_string_write(output, "Watching ", &position);
-        io_string_write(output, being_get_select_name(local_sim), &position);
+        io_string_write(output, being_get_select_name(group), &position);
         output_function(output);
         position = 0;
         watch_type = WATCH_ALL;
     }
     else
     {
-        if (local_sim->select)
+        if (group->select)
         {
             if (io_find(response,0,length,"braincode",9)>-1)
             {
                 watch_type = WATCH_BRAINCODE;
                 io_string_write(output, "Watching braincode for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
+                io_string_write(output, being_get_select_name(group), &position);
                 output_function(output);
                 return 0;
             }
@@ -1731,7 +1727,7 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
             {
                 watch_type = WATCH_BRAINPROBES;
                 io_string_write(output, "Watching brain probes for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
+                io_string_write(output, being_get_select_name(group), &position);
                 output_function(output);
                 return 0;
             }
@@ -1741,7 +1737,7 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_SOCIAL_GRAPH;
 
                 io_string_write(output, "Watching social graph for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
+                io_string_write(output, being_get_select_name(group), &position);
                 output_function(output);
                 return 0;
             }
@@ -1752,7 +1748,7 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_EPISODIC;
 
                 io_string_write(output, "Watching episodic memory for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
+                io_string_write(output, being_get_select_name(group), &position);
                 output_function(output);
                 return 0;
             }
@@ -1761,7 +1757,7 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_SPEECH;
 
                 io_string_write(output, "Watching speech for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
+                io_string_write(output, being_get_select_name(group), &position);
                 output_function(output);
                 return 0;
             }
@@ -1770,7 +1766,7 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
                 watch_type = WATCH_ALL;
 
                 io_string_write(output, "Watching ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
+                io_string_write(output, being_get_select_name(group), &position);
                 output_function(output);
                 return 0;
             }
@@ -1779,7 +1775,7 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
             {
                 watch_type = WATCH_APPEARANCE;
                 io_string_write(output, "Watching appearance for ", &position);
-                io_string_write(output, being_get_select_name(local_sim), &position);
+                io_string_write(output, being_get_select_name(group), &position);
                 output_function(output);
                 return 0;
             }
@@ -1792,7 +1788,7 @@ n_int command_watch(void * ptr, n_string response, n_console_output output_funct
 
 /**
  * Set the time interval for simulation
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function used to display the output
  * @return 0
@@ -1862,7 +1858,7 @@ n_int command_stop(void * ptr, n_string response, n_console_output output_functi
 
 /**
  *
- * @param ptr ape_simulation pointer
+ * @param ptr pointer to simulated_group
  * @param response response string
  * @param output_function output function
  */
@@ -1874,14 +1870,14 @@ n_int command_file(void * ptr, n_string response, n_console_output output_functi
 
 /**
  * Run the simulation for a single time interval
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function used to display the output
  * @return 0
  */
 n_int command_step(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
     n_uint loop = 0;
 
     if (response != RUN_STEP_CONST)
@@ -1905,7 +1901,7 @@ n_int command_step(void * ptr, n_string response, n_console_output output_functi
     while ((loop < save_interval_steps) && simulation_running)
     {
         sim_cycle();
-        if (local_sim->num == 0)
+        if (group->num == 0)
         {
             simulation_running = 0;
         }
@@ -1913,7 +1909,7 @@ n_int command_step(void * ptr, n_string response, n_console_output output_functi
     }
     if (response != RUN_STEP_CONST)
     {
-        watch_being(local_sim, output_function);
+        watch_being(group, output_function);
     }
 
     if (response != RUN_STEP_CONST)
@@ -1926,7 +1922,7 @@ n_int command_step(void * ptr, n_string response, n_console_output output_functi
 
 /**
  * Run the simulation
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function used to display the output
  * @return 0
@@ -2031,7 +2027,7 @@ n_int command_run(void * ptr, n_string response, n_console_output output_functio
 
 /**
  * Reset the simulation
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function used to display the output
  * @return 0
@@ -2090,8 +2086,8 @@ static n_byte command_get_response_mode(n_string response)
 n_int command_speak(void * ptr, n_string response, n_console_output output_function)
 {
     n_string_block paragraph = {0};
-    ape_simulation * local_sim = (ape_simulation*) ptr;
-    simulated_being * local = local_sim->select;
+    simulated_group * group = (simulated_group *) ptr;
+    simulated_being * local = group->select;
     watch_speech(ptr, 0L, local, paragraph);
     watch_string_length = 0;
     speak_out(response, paragraph);
@@ -2235,14 +2231,15 @@ n_int command_script(void * ptr, n_string response, n_console_output output_func
 
 /**
  * Displays beings in descending order of honor value
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function used to display the output
  * @return 0
  */
 n_int command_top(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
+
     n_uint i,j;
     n_int  k;
     n_uint max=10;
@@ -2255,10 +2252,10 @@ n_int command_top(void * ptr, n_string response, n_console_output output_functio
     output_function("Honor Name                     Sex\tAge");
     output_function("-----------------------------------------------------------------");
 
-    eliminated = (n_byte *)memory_new(local_sim->num*sizeof(n_byte));
-    for (i = 0; i < local_sim->num; i++) eliminated[i] = 0;
+    eliminated = (n_byte *)memory_new(group->num*sizeof(n_byte));
+    for (i = 0; i < group->num; i++) eliminated[i] = 0;
 
-    if (local_sim->num < max) max = local_sim->num;
+    if (group->num < max) max = group->num;
     for (i = 0; i < max; i++)
     {
         n_int winner = -1;
@@ -2266,12 +2263,12 @@ n_int command_top(void * ptr, n_string response, n_console_output output_functio
         n_byte passed;
         n_string_block output_value;
 
-        for (j = 0; j < local_sim->num; j++)
+        for (j = 0; j < group->num; j++)
         {
             if (eliminated[j] == 0)
             {
                 n_int honor;
-                b = &local_sim->beings[j];
+                b = &group->beings[j];
 
                 honor = being_honor(b);
 
@@ -2314,7 +2311,7 @@ n_int command_top(void * ptr, n_string response, n_console_output output_functio
         if (winner==-1) break;
 
         eliminated[winner] = 1;
-        b = &local_sim->beings[winner];
+        b = &group->beings[winner];
 
         sprintf(output_value, "%03d   ", (int)(being_honor(b)));
 
@@ -2375,14 +2372,15 @@ n_int command_debug(void * ptr, n_string response, n_console_output output_funct
 
 /**
  * Lists the most talked about beings, based upon episodic memories
- * @param ptr pointer to ape_simulation object
+ * @param ptr pointer to simulated_group object
  * @param response command parameters
  * @param output_function function used to display the output
  * @return 0
  */
 n_int command_epic(void * ptr, n_string response, n_console_output output_function)
 {
-    ape_simulation * local_sim = (ape_simulation *) ptr;
+    simulated_group * group = (simulated_group *) ptr;
+
     n_uint i, j, k, e;
     simulated_being * local_being;
     simulated_iepisodic * local_episodic;
@@ -2402,10 +2400,10 @@ n_int command_epic(void * ptr, n_string response, n_console_output output_functi
         hits[i] = 0;
     }
 
-    for (i = 0; i < local_sim->num; i++)
+    for (i = 0; i < group->num; i++)
     {
         /** get the being */
-        local_being = &local_sim->beings[i];
+        local_being = &group->beings[i];
 
         /** get the episodic memories for the being */
         local_episodic = being_episodic(local_being);
@@ -2452,7 +2450,7 @@ n_int command_epic(void * ptr, n_string response, n_console_output output_functi
 
                             being_name_byte2(local_episodic[e].first_name[j], local_episodic[e].family_name[j], name);
 
-                            b = being_from_name(local_sim, name);
+                            b = being_from_name(group, name);
                             if (b!=0L)
                             {
                                 if (AGE_IN_DAYS(b)<AGE_OF_MATURITY) passed=1;

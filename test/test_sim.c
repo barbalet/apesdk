@@ -48,13 +48,13 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     return -1;
 }
 
-n_uint test_distance_moved(ape_simulation * local, n_int show_stopped)
+n_uint test_distance_moved(simulated_group * group, n_int show_stopped)
 {
     n_int loop = 0;
     n_uint total_moved = 0;
-    while (loop < local->num)
+    while (loop < group->num)
     {
-        simulated_being * being = &local->beings[loop];
+        simulated_being * being = &group->beings[loop];
         n_byte        speed = being_speed(being);
         if(IS_NIGHT(land_time()) == 0)
         {
@@ -73,13 +73,13 @@ n_uint test_distance_moved(ape_simulation * local, n_int show_stopped)
     return total_moved;
 }
 
-void test_total_moved(ape_simulation * local)
+void test_total_moved(simulated_group * group)
 {
 #ifdef DEBUG_LACK_OF_MOVEMENT
     n_int loop = 0;
-    while (loop < local->num)
+    while (loop < group->num)
     {
-        simulated_being * being = &local->beings[loop];
+        simulated_being * being = &group->beings[loop];
         n_int        total_moved = being_total_movement(being);
         if(total_moved == 0)
         {
@@ -97,8 +97,8 @@ void test_total_moved(ape_simulation * local)
 
 n_int test_hash(void)
 {
-    ape_simulation * local_sim = sim_sim();
-    simulated_being      * first_being = &(local_sim->beings[0]);
+    simulated_group * group = sim_group();
+    simulated_being      * first_being = &(group->beings[0]);
     simulated_being_constant * first_being_constant = &(first_being->constant);
     simulated_being_delta * first_being_delta = &(first_being->delta);
     simulated_being_events * first_being_events = &(first_being->events);
@@ -138,14 +138,14 @@ n_int test_sim_run(void)
 {
     n_int   counter = 0;
 
-    ape_simulation * local_sim = sim_sim();
+    simulated_group * group = sim_group();
     n_uint distance_moved = 0;
     
     while (counter < (512*4))
     {
         n_uint distance_delta;
         sim_cycle();
-        distance_delta = test_distance_moved(local_sim, 0);
+        distance_delta = test_distance_moved(group, 0);
 
         distance_moved += distance_delta;
         if ((counter & 511) == 0)
@@ -192,7 +192,7 @@ n_int test_sim_run(void)
     }
     
     {
-        n_int number_beings = local_sim->num;
+        n_int number_beings = group->num;
         n_int outer_loop = 0;
         n_int line_of_sight_count = 0;
         while (outer_loop < (number_beings-1))
@@ -201,8 +201,8 @@ n_int test_sim_run(void)
             while (inner_loop < number_beings)
             {
                 n_vect2 location_vect;
-                being_space(&local_sim->beings[inner_loop], &location_vect);
-                line_of_sight_count += being_line_of_sight(&local_sim->beings[outer_loop],
+                being_space(&group->beings[inner_loop], &location_vect);
+                line_of_sight_count += being_line_of_sight(&group->beings[outer_loop],
                                                  &location_vect);
                 inner_loop++;
             }
@@ -216,7 +216,7 @@ n_int test_sim_run(void)
         }
     }
     
-    test_total_moved(local_sim);
+    test_total_moved(group);
     return 0;
 }
 

@@ -85,16 +85,16 @@ void drives_sociability_loop_no_sim(simulated_being * other, void * data)
  * @brief Social drive governs how likely the being is to interact with others.
  * This affects behaviors such as grooming, chatting and mating
  * @param local Pointer to the ape
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  */
 static void drives_sociability(
     simulated_being * local,
-    ape_simulation * sim)
+    simulated_group * group)
 {
     drives_sociability_data dsd;
     dsd.beings_in_vacinity = 0;
     dsd.being = local;
-    loop_being_no_sim(sim->beings, sim->num, drives_sociability_loop_no_sim, &dsd);
+    loop_being_no_sim(group->beings, group->num, drives_sociability_loop_no_sim, &dsd);
 
     being_crowding_cycle(local, dsd.beings_in_vacinity);
 }
@@ -103,12 +103,10 @@ static void drives_sociability(
  * @brief Updates the sex drive
  * @param local Pointer to the ape
  * @param awake whether the ape is awake
- * @param local_sim Pointer to the simulation
  */
 static void drives_sex(
     simulated_being * local,
-    n_int awake,
-    ape_simulation * local_sim)
+    n_int awake)
 {
     n_int i,max;
     simulated_isocial * local_social_graph = being_social(local);
@@ -245,10 +243,10 @@ void drives_fatigue(
     }
 }
 
-void drives_cycle(ape_simulation * local_sim, simulated_being * local_being, void * data)
+void drives_cycle(simulated_group * group, simulated_being * local_being, void * data)
 {
     drives_hunger(local_being);
-    drives_sociability(local_being, local_sim);
-    drives_sex(local_being, local_being->delta.awake, local_sim);
+    drives_sociability(local_being, group);
+    drives_sex(local_being, local_being->delta.awake);
     drives_fatigue(local_being);
 }

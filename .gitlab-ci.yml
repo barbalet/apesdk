@@ -4,6 +4,13 @@
 # see https://hub.docker.com/_/gcc/
 image: gcc
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+before_script:
+  - git submodule sync --recursive
+  - git submodule update --init --recursive
+  
 build:
   stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
@@ -24,7 +31,7 @@ coverage_math:
   stage: test
   script:
     - cd test
-    - ./test_wo_exec.sh --coverage
+    - ./test_toolkit_wo_exec.sh --coverage
     - ./test_math
     - gcov -n -w *.gcda
     - rm *.gc*
@@ -35,7 +42,7 @@ coverage_io:
   stage: test
   script:
     - cd test
-    - ./test_wo_exec.sh --coverage
+    - ./test_toolkit_wo_exec.sh --coverage
     - ./test_io
     - diff check_file.txt compare_file.txt
     - gcov -n -w *.gcda
@@ -48,7 +55,7 @@ coverage_apescript:
   stage: test
   script:
     - cd test
-    - ./test_wo_exec.sh --coverage
+    - ./test_script_wo_exec.sh --coverage
     - ./test_apescript check_apescript.txt
     - gcov -n -w *.gcda
     - rm *.gc*
@@ -66,24 +73,51 @@ coverage_sim_time:
     - rm test_sim_time
     - rm *.o
 
-test_object:
+coverage_object:
   stage: test
   script:
     - cd test
-    - ./test_object.sh
+    - ./test_toolkit_wo_exec.sh --coverage
+    - ./test_object
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_object
+    - rm *.o
     
-test_object_file:
+coverage_object_file:
   stage: test
   script:
     - cd test
+    - ./test_toolkit_wo_exec.sh --coverage
     - ./test_object_file.sh
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_object_file
+    - rm *.o
     
-test_object_string:
+coverage_object_string:
   stage: test
   script:
     - cd test
-    - ./test_object_string.sh
+    - ./test_toolkit_wo_exec.sh --coverage
+    - ./test_object_string
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_object_string
+    - rm *.o
 
+coverage_gui:
+  stage: test
+  script:
+    - cd test
+    - ./test_gui_wo_exec.sh --coverage
+    - ./test_gui
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_gui
+    - rm *.o
+
+    
 test_sim:
   stage: test
   script:

@@ -39,15 +39,15 @@ else
     CFLAGS=-O2 
 fi
 
-if [ $# -ge 1 -a "$1" == "--additional" ]
+if [ $# -ge 1 -a "$1" == "--coverage" ]
 then
-COMMANDLINEE=-DNOTHING_NEEDED_HERE
+COMMANDLINEE="-ftest-coverage -fprofile-arcs"
 else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../toolkit/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../script/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ../toolkit/*.c -lz -lm -lpthread -w
+
 
 gcc ${CFLAGS} ${COMMANDLINEE} -c test_math.c -o test_math.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]
@@ -61,10 +61,8 @@ then
 exit 1
 fi
 
-./test_math
-
-rm test_math
 rm test_math.o
+
 
 gcc ${CFLAGS} ${COMMANDLINEE} -c test_io.c -o test_io.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]
@@ -77,51 +75,47 @@ then
 exit 1
 fi
 
-./test_io
-
-diff check_file.txt compare_file.txt
-
 rm test_io.o
-rm test_io
-rm compare_file.txt
 
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c test_apescript.c -o test_apescript.o -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c test_object_string.c -o test_object_string.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]
 then
 exit 1
 fi
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_apescript *.o -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_object_string *.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]
 then
 exit 1
 fi
 
-./test_apescript check_apescript.txt
+rm test_object_string.o
 
-rm test_apescript
-rm test_apescript.o
-
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../sim/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../entity/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../universe/*.c -lz -lm -lpthread -w
-
-gcc ${CFLAGS} ${COMMANDLINEE} -c test_sim.c -o test_sim.o -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c test_object_file.c -o test_object_file.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]
 then
 exit 1
 fi
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_sim *.o -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_object_file *.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]
 then
 exit 1
 fi
 
-./test_sim
+rm test_object_file.o
 
-rm test_sim
-rm test_sim.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c test_object.c -o test_object.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-rm *.o
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_object *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+
+rm test_object.o

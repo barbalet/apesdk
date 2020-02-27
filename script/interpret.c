@@ -40,15 +40,7 @@
     more care must be taken in optimizing the interpret code.
  */
 
-#ifndef    _WIN32
-
 #include "../toolkit/toolkit.h"
-
-#else
-
-#include "..\toolkit\toolkit.h"
-
-#endif
 
 #include "script.h"
 

@@ -47,6 +47,7 @@ static n_double timedomain[AUDIO_FFT_MAX_BUFFER];
 static n_double frequencyi[AUDIO_FFT_MAX_BUFFER];
 static n_double timedomaini[AUDIO_FFT_MAX_BUFFER];
 
+/*
 static void bsort(n_double * A, n_int *B, n_int size)
 {
     for(n_int i=0; i<size; i++)
@@ -65,6 +66,7 @@ static void bsort(n_double * A, n_int *B, n_int size)
         }
     }
 }
+*/
 
 void audio_buffer_clear(n_audio * buffer, n_int size)
 {

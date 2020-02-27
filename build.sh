@@ -44,14 +44,22 @@ else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ./toolkit/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ./script/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ./sim/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ./entity/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ./universe/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ./toolkit/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ./script/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ./sim/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ./entity/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ./universe/*.c -lz -lm -lpthread -w
 
 gcc ${CFLAGS} ${COMMANDLINEE} -c ./longterm.c -o longterm.o
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
 gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o ./../../simape *.o -lz -lm -lpthread
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
 rm *.o

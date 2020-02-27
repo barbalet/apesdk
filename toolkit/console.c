@@ -37,11 +37,11 @@
  *  \brief  Covers the low level input and output relating to console.
  */
 
-#include "toolkit.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "toolkit.h"
 
 simulated_console_command * local_commands = 0L;
 

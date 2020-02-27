@@ -33,15 +33,6 @@
 
  ****************************************************************/
 
-//#import <Cocoa/Cocoa.h>
-//#import "ASShared.h"
-//
-//int main(int argc, char *argv[])
-//{
-//    [ASShared starting:argc withValues:(char **)argv];
-//    return NSApplicationMain(argc,  (const char **) argv);
-//}
-
 #import <Cocoa/Cocoa.h>
 
 int main(int argc, const char * argv[]) {

@@ -254,7 +254,7 @@ enum inventory_type being_carried(simulated_being * value, enum BODY_INVENTORY_T
 void being_drop(simulated_being * value, enum BODY_INVENTORY_TYPES location);
 void being_take(simulated_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
 
-void being_remains(ape_simulation * sim, simulated_being * dead);
+void being_remains(simulated_group * group, simulated_being * dead);
 
 void brain_cycle(n_byte * local, n_byte2 * constants);
 

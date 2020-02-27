@@ -1,5 +1,5 @@
 #!/bin/bash
-#	server.sh
+#	test.sh
 #
 #	=============================================================
 #
@@ -39,23 +39,33 @@ else
     CFLAGS=-O2 
 fi
 
-if [ $# -ge 1 -a "$1" == "--additional" ]
+if [ $# -ge 1 -a "$1" == "--coverage" ]
 then
-COMMANDLINEE=-DNOTHING_NEEDED_HERE
+COMMANDLINEE="-ftest-coverage -fprofile-arcs"
 else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../toolkit/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../script/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ../toolkit/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ../script/*.c -lz -lm -lpthread -w
+
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../sim/*.c -lz -lm -lpthread -w
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../entity/*.c -lz -lm -lpthread -w
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../universe/*.c -lz -lm -lpthread -w
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c server.c -o server.o
-gcc ${CFLAGS} ${COMMANDLINEE} -c httpd.c -o httpd.o
+gcc  ${CFLAGS} ${COMMANDLINEE} -c ../gui/*.c -lz -lm -lpthread -w
+gcc  ${CFLAGS} ${COMMANDLINEE} -c ../gui/shared.c -lz -lm -lpthread -w
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o apesimserver *.o -lz -lm -lpthread
+gcc ${CFLAGS} ${COMMANDLINEE} -c test_gui.c -o test_gui.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_gui *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-rm *.o
+rm test_gui.o

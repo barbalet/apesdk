@@ -67,8 +67,6 @@
 
 n_string_block simulation_filename;
 
-ape_simulation *local_sim;
-
 #ifdef AUDIT_FILE
 
 static void audit_print_offset(n_byte * start, n_byte * point, char * text)
@@ -182,6 +180,8 @@ static n_int cle_load(void * ptr, n_string response, n_console_output output_fun
 
 int command_line_run(void)
 {
+    simulated_group * group = sim_group();
+    
     printf("\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE);
     printf("      For a list of commands type 'help'\n\n");
     
@@ -191,13 +191,12 @@ int command_line_run(void)
     audit();
 #endif
     
-    local_sim = sim_sim();
     io_command_line_execution_set();
     
     srand((unsigned int) time(NULL) );
     sim_init(KIND_START_UP, rand(), MAP_AREA, 0);
     
-    cle_load(local_sim, (n_string)simulation_filename, io_console_out);
+    cle_load(group, (n_string)simulation_filename, io_console_out);
     
 #ifndef    SIMPLE_LONGTERM_CLE
     do
@@ -210,7 +209,7 @@ int command_line_run(void)
         n_int return_value = 0;
         do
         {
-            return_value = io_console(local_sim,
+            return_value = io_console(group,
                                       (simulated_console_command *)control_commands,
                                       io_console_entry,
                                       io_console_out);
@@ -262,20 +261,17 @@ static n_uint count = 0;
 static void *periodic_thread(void *arg)
 {
     sigset_t alarm_sig;
-    ape_simulation * sim;
+    simulated_group * group;
     make_periodic(1000 * TIMING_CONST_MS, &alarm_sig);
     while (1) {
-        
-        sim = sim_sim();
-
-
+        group = sim_group();
         sim_cycle();
         count++;
         if ((count & 2047) == 0)
         {
             printf("count is %ld\n", count);
         }
-        if (sim->num == 0)
+        if (group->num == 0)
         {
             printf("new run at %ld\n", count);
             

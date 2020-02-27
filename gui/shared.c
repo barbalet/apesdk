@@ -42,7 +42,7 @@
 
 #ifndef	_WIN32
 
-#include "shared.h"
+#include "../toolkit/shared.h"
 
 #else
 

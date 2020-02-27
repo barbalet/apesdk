@@ -1,5 +1,5 @@
 #!/bin/bash
-#	test_object_string.sh
+#	test.sh
 #
 #	=============================================================
 #
@@ -39,13 +39,28 @@ else
     CFLAGS=-O2 
 fi
 
-gcc  ${CFLAGS} -c ../toolkit/*.c -lz -lm -lpthread -w
+if [ $# -ge 1 -a "$1" == "--coverage" ]
+then
+COMMANDLINEE="-ftest-coverage -fprofile-arcs"
+else
+COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
+fi
 
-gcc ${CFLAGS} -c test_object_string.c -o test_object_string.o
-gcc ${CFLAGS} -I/usr/include -o test_object_string *.o -lz -lm -lpthread
+gcc ${CFLAGS} ${COMMANDLINEE} -c ../toolkit/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -c ../script/*.c -lz -lm -lpthread -w
 
-./test_object_string
 
-rm test_object_string
+gcc ${CFLAGS} ${COMMANDLINEE} -c test_apescript.c -o test_apescript.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
 
-rm *.o
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_apescript *.o -lz -lm -lpthread -w
+if [ $? -ne 0 ]
+then
+exit 1
+fi
+
+rm test_apescript.o
+

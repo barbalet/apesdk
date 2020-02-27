@@ -1,278 +1,0 @@
-<HTML><TITLE>File Format</TITLE><BODY bgcolor="#ffffff"><FONT FACE="Arial,Geneva,Helvetica" SIZE=3><CENTER><A HREF="philosophic.html">Noble Ape Philosophic</A> - <A HREF="index.html">Contents</A> - <A HREF="apescript_intro.html">Introduction to ApeScript</A></CENTER><HR><H2>File Format</H2>The file format for the Noble Ape Simulation is text based and allows users to create their own Noble Ape Simulation environments. The following section explains the syntax of the Noble Ape Simulation's file format.<P><B>Comments</B><P>Comments allow users (or the Simulation) to add human read-able comments to the files which won't be read by the Simulation.<BR><CENTER><TABLE WIDTH=90%><TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee"><FONT FACE="Courier, Courier New" SIZE=4>&nbsp;&nbsp;&nbsp;/*&nbsp;This is a comment&nbsp;*/<P>&nbsp;&nbsp;&nbsp;/*<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is also a comment<BR>&nbsp;&nbsp;&nbsp;*/</TABLE></CENTER><P><FONT FACE="Arial,Geneva,Helvetica" SIZE=3>Comments also allow users to remove sections of the file to test particular functionality or for temporary changes.<P><B>Objects and Variables</B><P>The Noble Ape file format is based on objects and variables. The central elements are five letters that identify both objects and variables. An object includes a number of variables. The example definition of object 'objec' and variable 'varia', is as follows;<CENTER><TABLE WIDTH=90%><TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee"><FONT FACE="Courier, Courier New" SIZE=4>&nbsp;&nbsp;&nbsp;objec{<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;varia = 123;<BR>&nbsp;&nbsp;&nbsp;};</TABLE></CENTER><P><FONT FACE="Arial,Geneva,Helvetica" SIZE=3>Multiple values can be given for particular variables too. For example;<CENTER><TABLE WIDTH=90%><TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee"><FONT FACE="Courier, Courier New" SIZE=4>&nbsp;&nbsp;&nbsp;airav = 123, 222, 111;</TABLE></CENTER><P><FONT FACE="Arial,Geneva,Helvetica" SIZE=3>The Noble Ape Simulation supports two kinds of variables. One byte integers with values between 0 and 255 (inclusive), and two byte integers with values between 0 and 65535 (inclusive). Some variables will only accept one byte integers. In the file format variable definitions below, one_byte denotes a one byte value expected two_bytes denotes a two byte value expected.
-<P><HR><B>Simulation Version Definition</B>, <B>simul</B><P>
-<P><B>Simulation signature</B>, signa<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;signa = 16807;<BR>
-</TABLE></CENTER>
-<P><B>Simulation version number</B>, verio<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;verio = 15089;<BR>
-</TABLE></CENTER>
-<HR><B>land definition</B>, <B>landd</B><P>
-<P><B>Date in days and millenia</B>, dated<BR>
-<CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;dated = 217;<BR>
-</TABLE></CENTER>
-<P><B>Seed that created the land</B>, landg<BR>
-2 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;landg = 3114, 46978;<BR>
-</TABLE></CENTER>
-<P><B>Time in minutes</B>, timed<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;timed = 56008;<BR>
-</TABLE></CENTER>
-<HR><B>Being Definition</B>, <B>being</B><P>
-<P><B>Location in x and y coordinates</B>, locat<BR>
-2 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;locat = 36568, 2558;<BR>
-</TABLE></CENTER>
-<P><B>Direction facing</B>, facin<BR>
-1 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;facin = 67;<BR>
-</TABLE></CENTER>
-<P><B>Speed traveling</B>, speed<BR>
-1 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;speed = 77;<BR>
-</TABLE></CENTER>
-<P><B>Energy within</B>, energ<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;energ = 39064;<BR>
-</TABLE></CENTER>
-<P><B>Date of birth in days and millenia</B>, datob<BR>
-<CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;datob = 85;<BR>
-</TABLE></CENTER>
-<P><B>Random within</B>, rando<BR>
-2 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;rando = 4748, 56290;<BR>
-</TABLE></CENTER>
-<P><B>State description</B>, state<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;state = 54451;<BR>
-</TABLE></CENTER>
-<P><B>Brain state values</B>, brast<BR>
-6 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;brast = 14151, 14615, 16657, 50072, 18772, 11823;<BR>
-</TABLE></CENTER>
-<P><B>Height</B>, heigt<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;heigt = 11025;<BR>
-</TABLE></CENTER>
-<P><B>Mass</B>, masss<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;masss = 38445;<BR>
-</TABLE></CENTER>
-<P><B>ApeScript overrides</B>, overr<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;overr = 35589;<BR>
-</TABLE></CENTER>
-<P><B>Shouting values</B>, shout<BR>
-6 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;shout = 88, 245, 107, 214, 136, 7;<BR>
-</TABLE></CENTER>
-<P><B>Crowding</B>, crowd<BR>
-1 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;crowd = 153;<BR>
-</TABLE></CENTER>
-<P><B>Posture</B>, postu<BR>
-1 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;postu = 146;<BR>
-</TABLE></CENTER>
-<P><B>Inventory</B>, inven<BR>
-8 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;inven = 3912, 20787, 61026, 37953, 19699, 3853, 20515, 27365;<BR>
-</TABLE></CENTER>
-<P><B>Number of parasites</B>, paras<BR>
-1 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;paras = 95;<BR>
-</TABLE></CENTER>
-<P><B>Honor</B>, honor<BR>
-1 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;honor = 48;<BR>
-</TABLE></CENTER>
-<P><B>Date of conception in days and millenia</B>, conce<BR>
-<CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;conce = 209;<BR>
-</TABLE></CENTER>
-<P><B>Attention group</B>, atten<BR>
-6 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;atten = 200, 237, 97, 12, 75, 2;<BR>
-</TABLE></CENTER>
-<P><B>Genetics</B>, genet<BR>
-8 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;genet = 21557, 32825, 20609, 25732, 9656, 25876, 7074, 13212;<BR>
-</TABLE></CENTER>
-<P><B>Father genetics</B>, fetag<BR>
-8 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;fetag = 26292, 61018, 37479, 44074, 13514, 56037, 4680, 18921;<BR>
-</TABLE></CENTER>
-<P><B>Father family names</B>, fathn<BR>
-2 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;fathn = 197, 241;<BR>
-</TABLE></CENTER>
-<P><B>Social simulation values</B>, sosim<BR>
-4 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;sosim = 8880, 22212, 39957, 11146;<BR>
-</TABLE></CENTER>
-<P><B>Drives</B>, drive<BR>
-4 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;drive = 229, 155, 77, 57;<BR>
-</TABLE></CENTER>
-<P><B>Goals</B>, goals<BR>
-4 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;goals = 62966, 2039, 9960, 19617;<BR>
-</TABLE></CENTER>
-<P><B>Preferences</B>, prefe<BR>
-14 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;prefe = 5, 211, 254, 237, 165, 213, 243, 217, 228, 91, 250, 108, 195, 81;<BR>
-</TABLE></CENTER>
-<P><B>Generation Max</B>, genex<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;genex = 62434;<BR>
-</TABLE></CENTER>
-<P><B>Generation Min</B>, genen<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;genen = 39968;<BR>
-</TABLE></CENTER>
-<P><B>Child Generation Max</B>, chigx<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;chigx = 8110;<BR>
-</TABLE></CENTER>
-<P><B>Child Generation Min</B>, chign<BR>
-1 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;chign = 4108;<BR>
-</TABLE></CENTER>
-<P><B>Territory information</B>, terit<BR>
-0 x two_bytes<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;terit = </TABLE></CENTER>
-<P><B>Immune system information</B>, immun<BR>
-48 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;immun = 225, 6, 152, 109, 97, 255, 52, 161, 30, 25, 253, 54, 80, 233, 183, 129, 143, 195, 58, 30, 15, 192, 44, 68, 85, 122, 200, 171, 80, 201, 178, 222, 178, 246, 181, 226, 76, 79, 221, 159, 136, 103, 189, 206, 31, 242, 97, 0;<BR>
-</TABLE></CENTER>
-<P><B>Brain code register</B>, brreg<BR>
-3 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;brreg = 142, 120, 151;<BR>
-</TABLE></CENTER>
-<P><B>Brain code probe</B>, brpro<BR>
-96 x one_byte<P><CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;brpro = 151, 14, 52, 98, 7, 215, 94, 71, 161, 88, 41, 142, 91, 162, 245, 98, 70, 134, 156, 196, 46, 54, 42, 2, 115, 18, 100, 230, 6, 135, 239, 83, 9, 209, 8, 83, 79, 81, 248, 101, 143, 180, 240, 128, 183, 203, 25, 238, 154, 235, 215, 24, 204, 79, 162, 124, 140, 55, 223, 193, 173, 165, 209, 51, 209, 58, 190, 3, 240, 33, 233, 177, 183, 140, 203, 216, 47, 127, 242, 179, 140, 109, 72, 208, 30, 72, 27, 45, 79, 175, 113, 113, 128, 95, 215, 242;<BR>
-</TABLE></CENTER>
-<HR>
-<H2>Partial Files</H2>The file format supports partial files. If the user wants to change just the landscape characteristics or the time etc, they can create files that only change those variables.<HR><CENTER><A HREF="philosophic.html">Noble Ape Philosophic</A> - <A HREF="index.html">Contents</A> - <A HREF="apescript_intro.html">Introduction to ApeScript</A></CENTER></BODY></HTML>

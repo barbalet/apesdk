@@ -39,19 +39,10 @@
 #ifndef	_WIN32
 
 
-#ifndef    _WIN32
-
 #include "../toolkit/toolkit.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 
-#else
-
-#include "..\toolkit\toolkit.h"
-#include "..\script\script.h"
-#include "..\sim\sim.h"
-
-#endif
 
 #ifdef SIMULATED_APE_CLIENT
 #include "client.h"
@@ -61,11 +52,6 @@
 #endif
 
 #else
-
-
-#include "..\toolkit\toolkit.h"
-#include "..\script\script.h"
-#include "..\sim\sim.h"
 
 #ifdef SIMULATED_APE_CLIENT
 #include "client.h"
@@ -83,23 +69,6 @@
 #define    VIEWWINDOW(alpha)      (alpha + TERRAIN_WINDOW_AREA + CONTROL_WINDOW_AREA)
 
 #define IS_WINDOW_KIND(x,y)			(((x)>>(y))&1)
-
-enum
-{
-    NA_MENU_PAUSE = 0,
-    NA_MENU_WEATHER,
-    NA_MENU_BRAIN,
-    NA_MENU_BRAINCODE,
-    NA_MENU_TIDEDAYLIGHT,
-    NA_MENU_TERRITORY,
-    NA_MENU_PREVIOUS_APE,
-    NA_MENU_NEXT_APE,
-    NA_MENU_CLEAR_ERRORS,
-    NA_MENU_FLOOD,
-    NA_MENU_HEALTHY_CARRIER,
-    NA_MENU_FOLLOW,
-    NA_MENU_SOCIAL_WEB
-};
 
 #define	spot_color(alpha,spx,spy,col)	alpha[((spx)|((spy)<<8))]=(col)
 
@@ -126,8 +95,6 @@ typedef enum
 #endif
 
 n_byte * draw_weather_grayscale(void);
-
-void draw_meters(ape_simulation * local_sim);
 
 void vascular_draw(n_genetics * genetics,
                    n_byte * buffer,

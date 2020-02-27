@@ -1,347 +1,0 @@
-<html><title>Getting Started</title><body bgcolor="#ffffff"><font FACE="Arial,Geneva,Helvetica" SIZE=3><CENTER><a HREF="legal.html">Legal Notice</a> - <a HREF="index.html">Contents</a> - <A HREF="philosophic.html">Noble Ape Philosophic</A></CENTER><HR><H2>Getting Started</H2>When you run the Noble Ape Simulation, you will be presented with four windows. These windows show the main aspects of the Simulation. The Simulation creates a random environment for the Noble Apes (the red dots) to wander over. The Simulation shows the terrain the Noble Ape is moving over, the cognitive (brain) model of the Noble Ape and other information like the time and weather conditions.<P><H2>Menus</H2>The menus associated with controlling the Noble Ape Simulation have been progressively refined over the years. The current interface is as much driven by user mouse clicks on windows as it is by menus. The <I>File</I> menu allows you to create new environments, open and save environments and open ApeScript files. The <I>Control</I> menu allows you to pause the simulation, to hide and show windows, to cycle between selected apes and update the graphics only 15 times per second (through the <I>Timed</I> menu item). You will see substantial speed improvements by setting the <i>Timed</I> menu command or hiding the Brain and/or Terrain windows.<P><CENTER><img SRC="img/map.gif"></CENTER><H2>Map</H2>The map shows the environment from a top-down view. It enables the user to select a specific ape to view and control. This view is linked to the Terrain and Brain views by the selected ape. If the selected ape can see another ape, it is highlighted in bright red.<p>arrow keys - Move the ape around<p>option (Mac) / ctrl (Win) - up/down arrow - Change selected ape<br>option (Mac) / ctrl (Win) - right/left arrow - Turn selected ape<p>Clicking the mouse on an ape selects that ape.<p>Holding the option key (Mac) or the ctrl key (Win) down, and clicking the mouse on the map, moves the selected ape to the clicked location.<p>The weather information is show both as clouds and also rain (in particularly dense clouds).<H2>Terrain</H2>The terrain gives the user a third-person-perspective of the selected ape's view of the  environment. In this view, the ape selected ape can be seen in the centre of the window. The user has a 360 degree radial view of the surroundings of the ape (including other apes).<P>up/down arrow - Move ape forward/backward<br>right/left arrow - Turn ape left/right<br>option (Mac) / ctrl (Win)  - up/down arrow - Change selected ape<p>Clicking the mouse in the terrain window moves the selected ape around.<p><CENTER><img SRC="img/terrain.gif"></CENTER><B>Brain</B>The brain rotates to show the 3D changes that occur in the structure of the ape's brain. The dots represent the large changes occurring in the ape's brain. The darker dots are those closer to the viewer, whilst the lighter dots are further from the viewer. This window also displays the brain cycles per second (BCPS). The brain can be rotated by clicking above and below the brain image. You will note that the ape's brain patterns change when it is asleep or awake.<P>Clicking the mouse and hold down option (Mac) / ctrl (Win) on the screen rotates the brain along the z-axis.<P><B>Clock</B><p>The clock contains three pieces of information - the twelve hour time, the year clock (left small dial) and season clock (right small dial). Twenty-four hour time can be gauged through the weather information (which also shows day and night).<p><B>Ape's Information</B><p>The terrain window also shows the selected Noble Ape's Information. From right to left, it shows the direction facing (pointing in the direction of movement on the Map Window), the Noble Ape's current energy and the Noble Ape's current speed. The small side markers (a good indication for the energy meter) show the rough maximum energy, the middle point and the hunger point for energy. The Ape will die with no energy (possibly caused by drowning). It is possible for the Simulation to run with no living apes.<P>It is possible for Apes to be born too. They will inherit genetics (shown as genetic bars in the window below the Noble Ape's energy). It is possible to track Ape families through their genetics. The second block of information below the direction facing and the Noble Ape's energy shows the Noble Ape's sex. Female is shown with a cross below the triangle and male with the arrow pointing to the right.<P>The Apes' communications can be viewed through the Map and Terrain windows as moving communications blocks.<p><B>Weather</B><p>The weather is shown by an iconic representation in the top right corner. There are three basic weather conditions which can be applied to day or night - clear, cloudy or raining. The method of simulating the weather has changed in recent versions. The new method creates a weather system simulation also encoding the time of day in the output.<P>
-<B>Console</B>
-<P>
-There is a console command line that enables a greater interface into the simulation. The commands that drive this interface change periodically. These commands are updated automatically into the table below.
-<P>
-<CENTER>
-<TABLE WIDTH=90%>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>Command</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>Addition</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>Help Information</B>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>help</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-[(command)]
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Displays a list of all the commands</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>script</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-[file]
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Load an ApeScript simulation file</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>save</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-[file]
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Save a simulation file</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>quit</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Quits the console</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>stop</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Stop the simulation during step or run</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>speak</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-[file]
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Create an AIFF file of Noble Ape speech</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>alpha</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-[file]
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Create an AIFF file of Noble Ape alphabet</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>file</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-[(component)]
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Information on the file format</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>run</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(time format)|forever
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Simulate for a given number of days or forever</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>step</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Run for a single logging interval</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>top</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>List the top apes</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>epic</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>List the most talked about apes</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>interval</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(days)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Set the simulation logging interval in days</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>event</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-on|social|off
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Episodic events (all) on, social on or all off</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>logging</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-on|off
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Turn logging of images and data on or off</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>sim</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Show simulation parameters</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>watch</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)|all|off|*
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Watch (specific *) for the current ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>idea</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Track shared braincode between apes</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>ape</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Name of the currently watched ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>graph</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>* Show social graph for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>braincode</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>* Show braincode for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>speech</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>* Show speech for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>episodic</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>* Show episodic memory for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>probes</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>* Show brain probes for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>stats</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>* Show parameters for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>appearance</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>* Show appearance values for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>genome</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-(ape name)
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Show genome for a named ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>list</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>List all ape names</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>next</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Next ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>previous</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Previous ape</I>
-<TR>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<B>debug</B>
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-
-<TD ALIGN=LEFT VALIGN=TOP BGCOLOR="#eeeeee">
-<FONT FACE="Courier, Courier New" SIZE=4>
-<I>Run debug check</I>
-<TR>
-</TABLE>
-</CENTER>
-
-<P>
-In order to run the command line version of the Simulation open the Terminal application. It can be found in /Applications/Utilities
-<P>
-Open a Terminal window and type:
-<P><FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;cd
-<P><FONT FACE="Arial,Geneva,Helvetica" SIZE=3>
-With a space after the cd and drag the Noble Ape application into the Terminal window. Press enter/return. Type:
-<P><FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;cd Contents/MacOS/
-<FONT FACE="Arial,Geneva,Helvetica" SIZE=3><P>
-Press enter/return. Type:
-<P><FONT FACE="Courier, Courier New" SIZE=4>
-&nbsp;&nbsp;&nbsp;./NobleApe695 c
-<FONT FACE="Arial,Geneva,Helvetica" SIZE=3><P>
-Press enter/return. You are now running the Noble Ape Simulation through the command line. The commands in the table above provide all the commands available. The menu of the Simulation is also usable. There are YouTube videos periodically recorded on the command line version of the Simulation via <A HREF="http://www.youtube.com/barbalet/">Tom Barbalet's YouTube channel</A>.
-<P>For more information about the console implementation of the Noble Ape Simulation please contact <A HREF="http://www.nobleape.com/tom/">Tom Barbalet</A>.<HR><CENTER><a HREF="legal.html">Legal Notice</a> - <a HREF="index.html">Contents</a> - <A HREF="philosophic.html">Noble Ape Philosophic</A></CENTER></body></html>

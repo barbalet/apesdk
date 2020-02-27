@@ -36,12 +36,14 @@
 #ifndef    _WIN32
 
 #include "../toolkit/toolkit.h"
+#include "../toolkit/shared.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 
 #else
 
 #include "..\toolkit\toolkit.h"
+#include "..\toolkit\shared.h"
 #include "..\script\script.h"
 #include "..\sim\sim.h"
 
@@ -424,7 +426,6 @@ static void draw_about_information(n_byte terrain)
     
     if (buffer == 0L)
     {
-        printf("return here\n");
         check_about = 0;
         return;
     }
@@ -560,10 +561,10 @@ static void draw_string_line(n_constant_string str, n_int off_x, n_int off_y, n_
 
 static void draw_smart_string_line(n_constant_string str, n_int off_x, n_int off_y, n_join * draw)
 {
-    n_pixel    * local_draw = draw->pixel_draw;
+    n_pixel * local_draw = draw->pixel_draw;
     void    * local_info = draw->information;
-    n_int    char_loop = 0;
-    n_int    char_location = 0;
+    n_int     char_loop = 0;
+    n_int     char_location = 0;
 
     while (str[char_loop] > 31)
     {
@@ -693,7 +694,7 @@ static void draw_terrain_scan(void * void_dtss, void * xlocation, void * unused)
     memory_free(&void_dtss);
 }
 
-static void draw_terrain(ape_simulation * local_sim, n_vect2 * dimensions)
+static void draw_terrain(simulated_group * group, n_vect2 * dimensions)
 {
     n_byte   * buf_offscr = draw_pointer(NUM_TERRAIN);    
     if (buf_offscr == 0L)
@@ -701,14 +702,14 @@ static void draw_terrain(ape_simulation * local_sim, n_vect2 * dimensions)
         return;
     }
 
-    if (local_sim->select == 0L)
+    if (group->select == 0L)
     {
         memory_erase(buf_offscr, (n_uint)(dimensions->x * dimensions->y));
         return;
     }
     {
         const n_int    lowest_y = ((dimensions->y + 256) * dimensions->y)/256;
-        simulated_being * loc_being = local_sim->select;
+        simulated_being * loc_being = group->select;
         draw_terrain_scan_struct dtss;
 
         n_byte2 *  local_combined = (n_byte2 *)land_topography_highdef();
@@ -778,7 +779,7 @@ static void draw_terrain(ape_simulation * local_sim, n_vect2 * dimensions)
 #define GENDER_X        (window_dim_x-110)
 #define GENDER_Y        (10)
 
-void draw_meters(ape_simulation * local_sim)
+static void draw_meters(simulated_group * group)
 {
     n_pixel 	 * local_draw_yellow = &pixel_white;
     n_pixel 	 * local_draw_yellow_checker = &pixel_white_checker;
@@ -829,9 +830,9 @@ void draw_meters(ape_simulation * local_sim)
         hr++;
     }
 
-    if (local_sim->select)
+    if (group->select)
     {
-        simulated_being  * loc_being =   local_sim->select;
+        simulated_being  * loc_being = group->select;
         
         hr = 0;
         while (hr < 41)
@@ -1164,12 +1165,13 @@ static void draw_feelers(simulated_being * bei, n_color8 * local_info, n_vect2 *
  * kind = 2, erase normal ape
  * kind = 3, erase selected ape
  */
-static void draw_apeloc(ape_simulation * sim, simulated_being  *bei, n_join * draw)
+static void draw_apeloc(simulated_group * group, simulated_being  *bei, n_join * draw)
 {
+    simulated_timing * timing = sim_timing();
     n_pixel     *local_draw = draw->pixel_draw;
     void	    *local_info = draw->information;
     n_int		start = -1, stop = 2;
-    n_int		time_coef = sim->real_time >> 4;
+    n_int		time_coef = timing->real_time >> 4;
     n_int	    start_point = ((time_coef &3 )) + 3;
     n_vect2     location;
     n_vect2     delta;
@@ -1190,7 +1192,7 @@ static void draw_apeloc(ape_simulation * sim, simulated_being  *bei, n_join * dr
         }
         delta.y++;
     }
-    if (bei == sim->select)
+    if (bei == group->select)
     {
         n_int ty = -1;
         
@@ -1223,12 +1225,14 @@ static void draw_apeloc(ape_simulation * sim, simulated_being  *bei, n_join * dr
  * kind = 2, erase normal ape
  * kind = 3, erase selected ape
  */
-static void draw_apeloc_hires(ape_simulation * sim, simulated_being  *bei, n_join * draw)
+static void draw_apeloc_hires(simulated_group * group, simulated_being  *bei, n_join * draw)
 {
+    simulated_timing * timing = sim_timing();
+
     n_pixel     *local_draw = draw->pixel_draw;
     void	    *local_info = draw->information;
     n_int		 start = -1, stop = 2;
-    n_int		 time_coef = sim->real_time >> 4;
+    n_int		 time_coef = timing->real_time >> 4;
     n_int	     start_point = ((time_coef &3 )) + 3;
 
     n_vect2      location;
@@ -1249,7 +1253,7 @@ static void draw_apeloc_hires(ape_simulation * sim, simulated_being  *bei, n_joi
         }
         delta.y++;
     }
-    if (bei == sim->select)
+    if (bei == group->select)
     {
         n_int ty = -1;
         while (ty < 2)
@@ -1464,16 +1468,16 @@ static void draw_metrics(n_uint bcps, n_uint fps, n_join * local_mono)
 #ifdef BRAIN_ON
 #ifndef SIMULATED_APE_CLIENT
 
-static void draw_brain(ape_simulation *local_sim, n_vect2 * dimensions)
+static void draw_brain(simulated_group * group, n_vect2 * dimensions)
 {
     n_byte  draw_big = 1;
-    if ((local_sim->select == 0L) || (number_errors != 0) || changing_size)
+    if ((group->select == 0L) || (number_errors != 0) || changing_size)
     {
         return;
     }
 
     {
-        n_byte      * local       = being_brain(local_sim->select);
+        n_byte      * local       = being_brain(group->select);
         n_join	      local_mono;
         n_int         turn_y = (n_int)tilt_z;
         n_int         turn_z = (n_int)tilt_y;
@@ -1627,9 +1631,9 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
 }
 
 #ifndef SIMULATED_APE_CLIENT
-static void draw_remains(ape_simulation * sim, n_byte * screen)
+static void draw_remains(simulated_group * group, n_byte * screen)
 {
-    simulated_iremains * remains = sim->remains;
+    simulated_remains * remains = group->remains;
     n_int           loop = 0;
     while(loop < remains->count)
     {
@@ -1742,7 +1746,7 @@ static void draw_tides_hi_res(n_byte * data, n_byte4 * block, n_byte tide)
     }
 }
 
-static void draw_ape(ape_simulation * sim, simulated_being * being, n_byte color, n_color8 * col8)
+static void draw_ape(simulated_group * group, simulated_being * being, n_byte color, n_color8 * col8)
 {
     n_vect2         location_vect;
     n_join          local_8bit;
@@ -1761,15 +1765,15 @@ static void draw_ape(ape_simulation * sim, simulated_being * being, n_byte color
     local_8bit.information = col8;
     if (col8->screen == land_topography_highdef())
     {
-        draw_apeloc_hires(sim, being, &local_8bit);
+        draw_apeloc_hires(group, being, &local_8bit);
     }
     else
     {
-        draw_apeloc(sim, being, &local_8bit);
+        draw_apeloc(group, being, &local_8bit);
     }
 }
 
-static void draw_apes_loop(ape_simulation * local_sim, simulated_being * bei, void * data)
+static void draw_apes_loop(simulated_group * group, simulated_being * bei, void * data)
 {
     n_join			local_8bit;
     n_color8        local_col;
@@ -1778,7 +1782,7 @@ static void draw_apes_loop(ape_simulation * local_sim, simulated_being * bei, vo
     memory_copy(data, (n_byte*)&local_col, sizeof(n_color8));
 
     being_space(bei, &location_vect);
-    if (being_line_of_sight(local_sim->select, &location_vect) == 1)
+    if (being_line_of_sight(group->select, &location_vect) == 1)
     {
         local_col.color = COLOR_RED;
     }
@@ -1800,16 +1804,16 @@ static void draw_apes_loop(ape_simulation * local_sim, simulated_being * bei, vo
 
     if (local_col.screen == land_topography_highdef())
     {
-        draw_apeloc_hires(local_sim, bei, &local_8bit);
+        draw_apeloc_hires(group, bei, &local_8bit);
     }
     else
     {
-        draw_apeloc(local_sim, bei, &local_8bit);
+        draw_apeloc(group, bei, &local_8bit);
     }
 
 }
 
-static void draw_apes(ape_simulation * local_sim, n_byte lores)
+static void draw_apes(simulated_group * group, n_byte lores)
 {
     n_color8		local_col;
 
@@ -1827,10 +1831,10 @@ static void draw_apes(ape_simulation * local_sim, n_byte lores)
         draw_tides(land_topography(), local_col.screen, land_tide_level());
         if (toggle_territory)
         {
-            draw_region(local_sim->select);
+            draw_region(group->select);
         }
 #ifndef SIMULATED_APE_CLIENT
-        draw_remains(local_sim, local_col.screen);
+        draw_remains(group, local_col.screen);
 #endif
     }
     else
@@ -1847,13 +1851,13 @@ static void draw_apes(ape_simulation * local_sim, n_byte lores)
         }
     }
 
-    if (local_sim->select)
+    if (group->select)
     {
-        loop_no_thread(local_sim, 0L, draw_apes_loop, &local_col);
+        loop_no_thread(group, 0L, draw_apes_loop, &local_col);
     }
 }
 
-static void draw_social_web(ape_simulation * sim, n_byte lores)
+static void draw_social_web(simulated_group * group, n_byte lores)
 {
     n_int loop = 0;
     n_int friends_count = command_relationship_count(0);
@@ -1874,36 +1878,36 @@ static void draw_social_web(ape_simulation * sim, n_byte lores)
     loop = 0;
     while (loop < attract_count)
     {
-        simulated_being * attract = command_relationship_being(sim, 2, loop);
+        simulated_being * attract = command_relationship_being(group, 2, loop);
         if (attract)
         {
-            draw_ape(sim, attract, COLOR_BLUE, &local_col);
+            draw_ape(group, attract, COLOR_BLUE, &local_col);
         }
         loop++;
     }
     loop = 0;
     while (loop < friends_count)
     {
-        simulated_being * friend = command_relationship_being(sim, 0, loop);
+        simulated_being * friend = command_relationship_being(group, 0, loop);
         if (friend)
         {
-            draw_ape(sim, friend, COLOR_WHITE, &local_col);
+            draw_ape(group, friend, COLOR_WHITE, &local_col);
         }
         loop++;
     }
     loop = 0;
     while (loop < enemies_count)
     {
-        simulated_being * enemy = command_relationship_being(sim, 1, loop);
+        simulated_being * enemy = command_relationship_being(group, 1, loop);
         if (enemy)
         {
-            draw_ape(sim, enemy, COLOR_BLACK, &local_col);
+            draw_ape(group, enemy, COLOR_BLACK, &local_col);
         }
         loop++;
     }
 }
 
-static void draw_errors(ape_simulation * local_sim)
+static void draw_errors(void)
 {
     n_join			local_mono;
     local_mono.pixel_draw  = &pixel_white;
@@ -1928,7 +1932,7 @@ n_int draw_control_font_scaling(void)
 static n_uint debug_hash_old = 0;
 #endif
 
-static void draw_control(ape_simulation * local_sim, n_int window_dim_x, n_int window_dim_y)
+static void draw_control(simulated_group * group, n_int window_dim_x, n_int window_dim_y)
 {
     n_string       string_stats;
     n_join         local_mono;
@@ -1941,7 +1945,7 @@ static void draw_control(ape_simulation * local_sim, n_int window_dim_x, n_int w
     
     max_characters = (window_dim_x - 16) * 10 / (control_font_scaling * 8);
     
-    if (local_sim == 0L)
+    if (group == 0L)
     {
         return;
     }
@@ -2052,13 +2056,13 @@ void  draw_window(n_int dim_x, n_int dim_y)
 }
 
 #ifdef SKELETON_RENDER
-static void  draw_skeleton(ape_simulation * local_sim)
+static void  draw_skeleton(simulated_group * group)
 {
     n_genetics * genetics = 0L;
     
-    if (local_sim->select)
+    if (group->select)
     {
-        genetics = local_sim->select->constant.genetics;
+        genetics = group->select->constant.genetics;
     }
     
     
@@ -2102,7 +2106,7 @@ static void  draw_skeleton(ape_simulation * local_sim)
 
 void  draw_cycle(n_byte size_changed, n_byte kind)
 {
-    ape_simulation * local_sim = sim_sim();
+    simulated_group * group = sim_group();
 
     if (sim_new())
     {
@@ -2121,32 +2125,34 @@ void  draw_cycle(n_byte size_changed, n_byte kind)
     changing_size = size_changed;
     if (CHECK_DRAW_WINDOW(kind, DRAW_WINDOW_CONTROL))
     {
-        draw_control(local_sim, window_dim_x, window_dim_y);
+        draw_control(group, window_dim_x, window_dim_y);
     }
     
     if (CHECK_DRAW_WINDOW(kind, DRAW_WINDOW_VIEW))
     {
-        draw_apes(local_sim, 1);    /* lo res */
+        draw_apes(group, 1);    /* lo res */
     }
     if (CHECK_DRAW_WINDOW(kind, DRAW_WINDOW_TERRAIN))
     {
-        draw_apes(local_sim, 0);    /* hi res */
+        draw_apes(group, 0);    /* hi res */
     }
     
     if (toggle_social_web)
     {
         if (CHECK_DRAW_WINDOW(kind, DRAW_WINDOW_VIEW))
         {
-            draw_social_web(local_sim, 1);
+            draw_social_web(group, 1);
         }
         if (CHECK_DRAW_WINDOW(kind, DRAW_WINDOW_TERRAIN))
         {
-            draw_social_web(local_sim, 0);
+            draw_social_web(group, 0);
         }
     }
     
     if (CHECK_DRAW_WINDOW(kind, DRAW_WINDOW_TERRAIN))
     {
+        simulated_timing * timing = sim_timing();
+
         n_vect2            local_vect;
         n_join             local_mono;
         
@@ -2156,29 +2162,29 @@ void  draw_cycle(n_byte size_changed, n_byte kind)
         local_vect.x = window_dim_x;
         local_vect.y = window_dim_y;
         
-        draw_terrain(local_sim, &local_vect);
+        draw_terrain(group, &local_vect);
 #ifdef BRAIN_ON
         if (toggle_brain)
         {
-            draw_brain(local_sim, &local_vect);
+            draw_brain(group, &local_vect);
         }
 #endif
 #ifdef BRAINCODE_ON
         if (toggle_braincode)
         {
-            command_populate_braincode(local_sim, draw_line_braincode);
+            command_populate_braincode(group, draw_line_braincode);
         }
 #endif
-        draw_meters(local_sim);
-        draw_errors(local_sim); /* 12 */
+        draw_meters(group);
+        draw_errors(); /* 12 */
 #ifndef SIMULATED_APE_CLIENT
-        draw_metrics(0, local_sim->delta_frames, &local_mono);
+        draw_metrics(0, timing->delta_frames, &local_mono);
 #endif
 
 #ifdef SKELETON_RENDER
-        if (local_sim->select != 0L)
+        if (group->select != 0L)
         {
-            draw_skeleton(local_sim);
+            draw_skeleton(group);
         }
 #endif
     }

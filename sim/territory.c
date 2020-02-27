@@ -33,15 +33,7 @@
 
  ****************************************************************/
 
-#ifndef    _WIN32
-
 #include "../toolkit/toolkit.h"
-
-#else
-
-#include "..\toolkit\toolkit.h"
-
-#endif
 
 #include "sim.h"
 

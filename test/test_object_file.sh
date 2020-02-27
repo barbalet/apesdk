@@ -30,21 +30,6 @@
 #   13 June 1996. No apes or cats were harmed in the writing of
 #   this software.
 
-SOURCEDIR=..
-
-if [ $# -ge 1 -a "$1" == "--debug" ]
-then
-    CFLAGS=-g
-else
-    CFLAGS=-O2 
-fi
-
-gcc  ${CFLAGS} -c ../toolkit/*.c -lz -lm -lpthread -w
-
-gcc ${CFLAGS} -c test_object_file.c -o test_object_file.o
-gcc ${CFLAGS} -I/usr/include -o test_object_file *.o -lz -lm -lpthread
-
-
 ./test_object_file example0c.json
 diff example0c.json 2xample0c.json
 
@@ -94,7 +79,3 @@ diff sim.json 2im.json
 diff example6.json 2xample6.json
 
 rm 2*.json
-
-rm test_object_file
-
-rm *.o

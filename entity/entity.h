@@ -36,21 +36,10 @@
 #ifndef SIMULATEDAPE_ENTITY_H
 #define SIMULATEDAPE_ENTITY_H
 
-#ifndef	_WIN32
-
 #include "../toolkit/toolkit.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 #include "../universe/universe.h"
-
-#else
-
-#include "..\toolkit\toolkit.h"
-#include "..\script\script.h"
-#include "..\sim\sim.h"
-#include "..\universe\universe.h"
-
-#endif
 
 #define	LAND_ON
 #define	WEATHER_ON
@@ -346,23 +335,23 @@ n_int being_speaking(simulated_being * value);
 n_genetics * being_fetal_genetics(simulated_being * value);
 
 
-n_int social_set_relationship(ape_simulation * sim, simulated_being * meeter_being, n_byte relationship,simulated_being * met_being);
+n_int social_set_relationship(simulated_group * group, simulated_being * meeter_being, n_byte relationship,simulated_being * met_being);
 
 n_int social_get_relationship(simulated_being * meeter_being,
                               n_byte relationship);
 
-n_int social_network(ape_simulation *sim, simulated_being * meeter_being, simulated_being * met_being, n_uint distance);
+n_int social_network(simulated_group * group, simulated_being * meeter_being, simulated_being * met_being, n_uint distance);
 
-n_byte social_groom(ape_simulation * sim,
+n_byte social_groom(simulated_group * group,
                     simulated_being * meeter_being,
                     simulated_being * met_being,
                     n_uint distance,
                     n_int awake,
                     n_byte2 familiarity);
 
-n_byte2 social_squabble(simulated_being * meeter_being, simulated_being * met_being, n_uint distance, n_int is_female, ape_simulation * sim);
-n_int social_mate(simulated_being * meeter_being, simulated_being * met_being, n_int being_index, n_uint distance, ape_simulation * sim);
-n_int social_chat(simulated_being * meeter_being, simulated_being * met_being, n_int being_index, ape_simulation * sim);
+n_byte2 social_squabble(simulated_being * meeter_being, simulated_being * met_being, n_uint distance, n_int is_female, simulated_group * group);
+n_int social_mate(simulated_being * meeter_being, simulated_being * met_being, n_int being_index, n_uint distance, simulated_group * group);
+n_int social_chat(simulated_being * meeter_being, simulated_being * met_being, n_int being_index, simulated_group * group);
 
 
 void episodic_food(simulated_being * local, n_int energy, n_byte food_type);
@@ -485,7 +474,7 @@ typedef struct
     simulated_being * local;
 } being_listen_struct;
 
-void being_listen(ape_simulation * sim, simulated_being * local, void * data);
+void being_listen(simulated_group * group, simulated_being * local, void * data);
 
 void being_listen_loop_no_sim(simulated_being * other, void * data);
 
@@ -512,10 +501,10 @@ void being_erase(simulated_being * value);
 
 n_uint being_affect(simulated_being * local, n_byte is_positive);
 
-void   episodic_cycle(ape_simulation * local_sim, simulated_being * local, void * data);
+void   episodic_cycle(simulated_group * group, simulated_being * local, void * data);
 void   episodic_cycle_no_sim(simulated_being * local_being, void * data);
 
-void   being_cycle_awake(ape_simulation * sim, simulated_being * local);
+void   being_cycle_awake(simulated_group * group, simulated_being * local);
 void   being_cycle_universal(simulated_being * local);
 
 typedef struct
@@ -526,7 +515,7 @@ typedef struct
 
 void drives_sociability_loop_no_sim(simulated_being * other, void * data);
 
-void   drives_cycle(ape_simulation * local_sim, simulated_being * local_being, void * data);
+void drives_cycle(simulated_group * group, simulated_being * local_being, void * data);
 
 void drives_fatigue(simulated_being * local);
 void drives_hunger(simulated_being * local);
@@ -546,13 +535,13 @@ void being_set_goal_location(simulated_being * local, n_byte2 lx, n_byte2 ly);
 n_int being_check_goal(simulated_being * local, goal_types goal);
 void being_goal_cycle(simulated_being * local);
 
-void being_set_select_name(ape_simulation * sim, n_string name);
-n_string being_get_select_name(ape_simulation * sim);
+void being_set_select_name(simulated_group * group, n_string name);
+n_string being_get_select_name(simulated_group * group);
 
 n_int being_name_comparison(simulated_being * value, n_byte2 gender_name, n_byte2 family_name);
 
 void social_graph_link_name(
-    ape_simulation * local_sim,
+    simulated_group * group,
     simulated_being * local_being,
     n_int social_graph_index,
     n_byte met, n_string name);
@@ -568,7 +557,7 @@ void being_relationship_description(n_int index, n_string description);
 n_string being_body_inventory_description(n_int index);
 
 void brain_dialogue(
-    ape_simulation * sim,
+    simulated_group * group,
     n_byte awake,
     simulated_being * meeter_being,
     simulated_being * met_being,
@@ -576,9 +565,9 @@ void brain_dialogue(
     n_byte		* bc1,
     n_int being_index);
 
-simulated_being * being_from_name(ape_simulation * sim, n_string name);
+simulated_being * being_from_name(simulated_group * group, n_string name);
 
-void being_remove(ape_simulation * local_sim);
+void being_remove(simulated_group * group);
 
 void brain_three_byte_command(n_string string, n_byte * response);
 
@@ -599,20 +588,20 @@ void being_genetic_wandering(simulated_being * local, being_nearest * nearest);
 void being_territory_index(simulated_being * local);
 void being_calculate_speed(simulated_being * local, n_int tmp_speed, n_byte2 loc_state);
 
-simulated_being * being_find_name(ape_simulation * sim, n_byte2 first_gender, n_byte2 family);
+simulated_being * being_find_name(simulated_group * group, n_byte2 first_gender, n_byte2 family);
 void          being_move(simulated_being * local, n_int vel, n_byte kind);
 n_byte        being_awake(simulated_being * local);
 
 n_byte being_crowding(simulated_being * value);
 void being_crowding_cycle(simulated_being * value, n_int beings_in_vacinity);
 
-void          speak_out(n_string filename, n_string paragraph);
+void speak_out(n_string filename, n_string paragraph);
 
 void social_conception(simulated_being * female,
                        simulated_being * male,
-                       ape_simulation * sim);
+                       simulated_group * group);
 
-void social_initial_loop(ape_simulation * local, simulated_being * local_being, void * data);
+void social_initial_loop(simulated_group * group, simulated_being * local_being, void * data);
 
 void social_secondary_loop_no_sim(simulated_being * local_being, void * data);
 
@@ -620,7 +609,7 @@ void being_tidy_loop_no_sim(simulated_being * local_being, void * data);
 
 void being_recalibrate_honor_loop_no_sim(simulated_being * value, void * data);
 
-void being_remove_loop1(ape_simulation * local_sim, simulated_being * local_being, void * data);
+void being_remove_loop1(simulated_group * group, simulated_being * local_being, void * data);
 
 typedef struct
 {
@@ -630,13 +619,13 @@ typedef struct
     n_uint        count;
 } being_remove_loop2_struct;
 
-void being_remove_loop2(ape_simulation * local_sim, simulated_being * local, void * data);
+void being_remove_loop2(simulated_group * group, simulated_being * local, void * data);
 
-being_remove_loop2_struct * being_remove_initial(ape_simulation * local_sim);
+being_remove_loop2_struct * being_remove_initial(simulated_group * group);
 
-void being_remains_init(simulated_iremains * remains);
+void being_remains_init(simulated_remains * remains);
 
-n_int being_index(ape_simulation * sim, simulated_being * local);
+n_int being_index(simulated_group * group, simulated_being * local);
 
 void being_high_res(simulated_being * value, n_vect2 * vector);
 

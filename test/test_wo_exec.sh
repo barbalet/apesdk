@@ -51,48 +51,6 @@ gcc ${CFLAGS} ${COMMANDLINEE} -c ../script/*.c -lz -lm -lpthread -w
 
 
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c test_math.c -o test_math.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
-
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_math *.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
-
-rm test_math.o
-
-
-gcc ${CFLAGS} ${COMMANDLINEE} -c test_io.c -o test_io.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_io *.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
-
-rm test_io.o
-
-gcc ${CFLAGS} ${COMMANDLINEE} -c test_apescript.c -o test_apescript.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
-
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_apescript *.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
-
-rm test_apescript.o
-
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../sim/*.c -lz -lm -lpthread -w
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../entity/*.c -lz -lm -lpthread -w
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../universe/*.c -lz -lm -lpthread -w
@@ -102,7 +60,6 @@ if [ $? -ne 0 ]
 then
 exit 1
 fi
-
 
 
 gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_sim *.o -lz -lm -lpthread -w
@@ -118,8 +75,6 @@ if [ $? -ne 0 ]
 then
 exit 1
 fi
-
-
 
 gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_sim_time *.o -lz -lm -lpthread -w
 if [ $? -ne 0 ]

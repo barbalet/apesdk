@@ -37,12 +37,14 @@
 #ifndef    _WIN32
 
 #include "../toolkit/toolkit.h"
+#include "../toolkit/shared.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 
 #else
 
 #include "..\toolkit\toolkit.h"
+#include "..\toolkit\shared.h"
 #include "..\script\script.h"
 #include "..\sim\sim.h"
 

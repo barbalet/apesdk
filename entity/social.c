@@ -464,14 +464,14 @@ static void social_meet_update_features(
 
 /**
  * @brief Returns a string for the name of the ape in the given social graph array index.
- * @param local_sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @param local_being Pinter to the ape
  * @param social_graph_index Array index within the social graph
  * @param met BEING_MEETER=return name for the meeter, BEING_MET=return name for the met
  * @param name Returned ape name
  */
 void social_graph_link_name(
-    ape_simulation * local_sim,
+    simulated_group * group,
     simulated_being * local_being,
     n_int social_graph_index,
     n_byte met,
@@ -509,13 +509,13 @@ void social_graph_link_name(
 /**
  * @brief Align learned preferences with another ape, depending upon
  * whether it is part of the ingroup or outgroup.
- * @param local_sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @param social_graph_index Array index within the meeter social graph for the met ape
  */
 static void social_group_align_preferences(
-    ape_simulation * local_sim,
+    simulated_group * group,
     simulated_being * meeter_being,
     simulated_being * met_being,
     n_int social_graph_index)
@@ -994,10 +994,10 @@ n_int social_get_relationship(
  * @param meeter_being Pointer to the ape doing the meeting
  * @param relationship The type of relationship
  * @param met_being Pointer to the ape being met
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @return Array index of the meeter social graph, -1 if not met
  */
-n_int social_set_relationship(ape_simulation * sim,
+n_int social_set_relationship(simulated_group * group,
                               simulated_being * meeter_being,
                               n_byte relationship,
                               simulated_being * met_being)
@@ -1032,10 +1032,10 @@ n_int social_set_relationship(ape_simulation * sim,
  * @param meeter_being Pointer to the ape doing the meeting
  * @param met_being Pointer to the ape being met
  * @param distance Distance between the apes
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @return Array index of the meeter social graph, -1 if not met
  */
-n_int social_network(ape_simulation *sim,
+n_int social_network(simulated_group * group,
                      simulated_being * meeter_being,
                      simulated_being * met_being,
                      n_uint distance)
@@ -1081,11 +1081,11 @@ static void social_parasite_cycle(simulated_being * meeter_being, simulated_bein
  * @param distance Distance between the apes
  * @param awake Whether the met being is awake
  * @param familiarity Familiarity with the met ape
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @return 1 if grooming, 0 otherwise
  */
 n_byte social_groom(
-    ape_simulation * sim,
+    simulated_group * group,
     simulated_being * meeter_being,
     simulated_being * met_being,
     n_uint distance,
@@ -1185,7 +1185,7 @@ n_byte social_groom(
  * @param met_being Pointer to the ape being met
  * @param distance Distance between the apes
  * @param is_female Whether the met being is female
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @return The new being state: showforce/attack
  */
 n_byte2 social_squabble(
@@ -1193,7 +1193,7 @@ n_byte2 social_squabble(
     simulated_being * met_being,
     n_uint distance,
     n_int is_female,
-    ape_simulation * sim)
+    simulated_group * group)
 {
     n_uint agro;
     n_byte2 ret_val = 0;
@@ -1344,19 +1344,20 @@ n_uint social_respect_mean(
  * details of the father and resets drives and goals.
  * @param female Pointer to the mother
  * @param male Pointer to the father
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  */
 /*static*/ void social_conception(
     simulated_being * female,
     simulated_being * male,
-    ape_simulation * sim)
+    simulated_group * group)
 {
+
     if ((male == 0L) || (female == 0L))
     {
         return;
     }
 
-    body_genetics(sim->beings, sim->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->delta.seed);
+    body_genetics(group->beings, group->num, being_fetal_genetics(female), being_genetics(female), being_genetics(male), female->delta.seed);
 
     /** store the date of conception */
     female->changes.date_of_conception = land_date();
@@ -1400,7 +1401,7 @@ n_uint social_respect_mean(
  * @param met_being Pointer to the ape whi is being met
  * @param being_index Array index for the met individual within the social graph of the meeter
  * @param distance The Distance between the two apes
- * @param sim Pointer to the simulation
+ * @param group Pointer to simulated_group
  * @return The being state: reproducing or not
  */
 n_int social_mate(
@@ -1408,7 +1409,7 @@ n_int social_mate(
     simulated_being * met_being,
     n_int being_index,
     n_uint distance,
-    ape_simulation * sim)
+    simulated_group * group)
 {
     n_int loc_state = 0;
     n_int attraction = 0;
@@ -1462,7 +1463,7 @@ n_int social_mate(
                 {
                     if (being_pregnant(meeter_being) == 0)
                     {
-                        social_conception(meeter_being, met_being, sim);
+                        social_conception(meeter_being, met_being, group);
                     }
                 }
             }
@@ -1576,14 +1577,14 @@ static void social_chat_territory(
  * @param meeter_being Pointer to the being doing the meeting
  * @param met_being Pointer to the being which is being met
  * @param being_index Array index for the met individual within the social graph of the meeter
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @return A non-zero value if speaking
  */
 n_int social_chat(
     simulated_being * meeter_being,
     simulated_being * met_being,
     n_int being_index,
-    ape_simulation * sim)
+    simulated_group * group)
 {
     n_int idx,i=0;
     n_byte relationship_index;
@@ -1724,7 +1725,7 @@ n_int social_chat(
 
 #ifdef BRAINCODE_ON
     brain_dialogue(
-        sim,1,meeter_being,met_being,
+        group,1,meeter_being,met_being,
         being_braincode_external(meeter_being),
         being_braincode_external(met_being),
         being_index);
@@ -1732,7 +1733,7 @@ n_int social_chat(
 #endif
 #ifdef EPISODIC_ON
     social_group_align_preferences(
-        sim,meeter_being,met_being,being_index);
+        group,meeter_being,met_being,being_index);
 #endif
     if (speaking != 0)
     {
@@ -1774,7 +1775,7 @@ void social_goals(simulated_being * local)
     being_goal_cycle(local);
 }
 
-void social_initial_loop(ape_simulation * local, simulated_being * local_being, void * data)
+void social_initial_loop(simulated_group * group, simulated_being * local_being, void * data)
 {
     n_uint respect_mean = social_respect_mean(local_being);
     n_uint social_loop = 0;
@@ -1790,7 +1791,7 @@ void social_initial_loop(ape_simulation * local, simulated_being * local_being, 
 
         if (!SOCIAL_GRAPH_ENTRY_EMPTY(being_social(local_being),social_loop))
         {
-            specific_being = being_find_name(local, specific_individual->first_name[BEING_MET], specific_individual->family_name[BEING_MET]);
+            specific_being = being_find_name(group, specific_individual->first_name[BEING_MET], specific_individual->family_name[BEING_MET]);
 
             if (specific_being != 0L)
             {

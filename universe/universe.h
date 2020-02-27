@@ -757,7 +757,7 @@ typedef struct
     simulated_idead_body bodies[NUMBER_OF_BODIES];
     n_byte2         count;
     n_byte2         location;
-} simulated_iremains;
+} simulated_remains;
 
 typedef struct
 {
@@ -940,28 +940,21 @@ typedef struct
 typedef void (being_birth_event)(simulated_being * born, simulated_being * mother, void * sim);
 typedef void (being_death_event)(simulated_being * deceased, void * sim);
 
-/*! @struct
- @field land The n_land pointer.
- @field weather The n_weather pointer.
- @field beings The simulated_being pointer.
- @field num The number of beings currently active.
- @field max The maximum number of beings that could be active.
- @field select The current selected ape being shown through the GUI.
- @field someone_speaking Is a Simulated Ape speaking?
- @discussion This is the highest level of collected Simulated Ape stuff.
- It is primarily used by the GUI layer to address down into the Core layer.
- */
+
 typedef struct
 {
-    simulated_iremains * remains;
-
+    simulated_remains * remains;
     simulated_being   * beings;
-
     simulated_being   * select; /* used by gui */
+    being_birth_event * ext_birth;
+    being_death_event * ext_death;
+    
+    n_uint            num;
+    n_uint            max;
+} simulated_group;
 
-    n_uint	        num;
-    n_uint	        max;
-
+typedef struct
+{
     n_uint          real_time;
     n_uint          last_time;
     n_uint          delta_cycles;
@@ -969,10 +962,7 @@ typedef struct
 
     n_uint          delta_frames;
     n_uint          count_frames;
-
-    being_birth_event * ext_birth;
-    being_death_event * ext_death;
-} ape_simulation;
+} simulated_timing;
 
 /* macros defined to ease in the vectorised code */
 
@@ -987,13 +977,13 @@ typedef struct
 #define	BRAIN_OFFSET(num)	(num)
 
 
-typedef void (loop_fn)(ape_simulation * sim, simulated_being * actual, void * data);
+typedef void (loop_fn)(simulated_group * group, simulated_being * actual, void * data);
 typedef void (loop_no_sim_fn)(simulated_being * actual, void * data);
 
-void loop_no_thread(ape_simulation * sim, simulated_being * being_not, loop_fn bf_func, void * data);
+void loop_no_thread(simulated_group * group, simulated_being * being_not, loop_fn bf_func, void * data);
 void loop_being_no_sim(simulated_being * beings, n_uint number_beings, loop_no_sim_fn bf_func, void * data);
 
-void loop_being(ape_simulation * sim, loop_fn bf_func, n_int beings_per_thread);
+void loop_being(simulated_group * group, loop_fn bf_func, n_int beings_per_thread);
 
 n_int being_location_x(simulated_being * value);
 n_int being_location_y(simulated_being * value);
@@ -1006,7 +996,7 @@ typedef void (console_generic)(void *ptr, n_string ape_name, simulated_being * l
 typedef void (line_braincode)(n_string pointer, n_int line);
 
 #ifdef BRAINCODE_ON
-void command_populate_braincode(ape_simulation * local_sim, line_braincode function);
+void command_populate_braincode(simulated_group * group, line_braincode function);
 #endif
 
 n_file * death_record_file_ready(void);
@@ -1026,9 +1016,10 @@ n_int     tranfer_in(n_file * input_file);
 n_int     sim_interpret(n_file * input_file);
 void	  sim_close(void);
 
-n_uint sim_memory_allocated(n_int max);
+simulated_timing * sim_timing(void);
+simulated_group  * sim_group(void);
 
-ape_simulation * sim_sim(void);
+n_uint sim_memory_allocated(n_int max);
 
 void sim_flood(void);
 
@@ -1071,7 +1062,7 @@ void watch_control(void *ptr, n_string beingname, simulated_being * local_being,
 n_int command_speak(void * ptr, n_string response, n_console_output output_function);
 n_int command_alphabet(void * ptr, n_string response, n_console_output output_function);
 
-void command_change_selected(ape_simulation * sim, n_byte forwards);
+void command_change_selected(simulated_group * group, n_byte forwards);
 
 n_int command_stop(void * ptr, n_string response, n_console_output output_function);
 n_int command_idea(void * ptr, n_string response, n_console_output output_function);
@@ -1080,7 +1071,7 @@ n_int command_braincode(void * ptr, n_string response, n_console_output output_f
 n_int command_speech(void * ptr, n_string response, n_console_output output_function);
 
 n_int command_relationship_count(n_int friend_type);
-simulated_being * command_relationship_being(ape_simulation * sim, n_int friend_type, n_int location);
+simulated_being * command_relationship_being(simulated_group * group, n_int friend_type, n_int location);
 
 n_int command_social_graph(void * ptr, n_string response, n_console_output output_function);
 n_int command_genome(void * ptr, n_string response, n_console_output output_function);

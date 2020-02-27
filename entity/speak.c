@@ -33,15 +33,17 @@
 
  ****************************************************************/
 
-#define _CRT_SECURE_NO_WARNINGS
 
-#include "entity.h"
-#include "entity_internal.h"
+
+#define _CRT_SECURE_NO_WARNINGS
 
 /** working on the real solution */
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "entity.h"
+#include "entity_internal.h"
 
 /** the sound lengths vary from:
 

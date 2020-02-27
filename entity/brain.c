@@ -1228,7 +1228,7 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
 
 /**
  * @brief Returns a sensor value
- * @param sim Pointer to the simulation object
+ * @param group Pointer to the simulated_group object
  * @param meeter_being Pointer to the being doing the meeting
  * @param met_being Pointer to the being which was met
  * @param meeter_social_graph Pointer to the meeter being's social graph
@@ -1236,7 +1236,7 @@ void math_general_execution(n_int instruction, n_int is_constant0, n_int is_cons
  * @param switcher The type of sensor
  * @return Sensor value
  */
-static n_byte brain_first_sense(ape_simulation * sim, simulated_being * meeter_being, simulated_being * met_being, simulated_isocial * meeter_social_graph, n_int actor_index, n_byte switcher)
+static n_byte brain_first_sense(simulated_group * group, simulated_being * meeter_being, simulated_being * met_being, simulated_isocial * meeter_social_graph, n_int actor_index, n_byte switcher)
 {
     switch (switcher % 32)
     {
@@ -1403,7 +1403,7 @@ static n_byte territory_familiarity(simulated_being * local_being,
     return result;
 }
 
-static void being_second_sense(ape_simulation * local_sim, n_byte addr00, n_byte * local_addr10, simulated_being * meeter_being, simulated_being * met_being, n_int actor_index, n_byte is_const1, n_int episode_index, simulated_iepisodic * episodic)
+static void being_second_sense(simulated_group * group, n_byte addr00, n_byte * local_addr10, simulated_being * meeter_being, simulated_being * met_being, n_int actor_index, n_byte is_const1, n_int episode_index, simulated_iepisodic * episodic)
 {
     n_int new_episode_index=-1;
     n_int switcher = addr00%25;
@@ -1627,7 +1627,7 @@ static void being_second_sense(ape_simulation * local_sim, n_byte addr00, n_byte
 
 /**
  * @brief Returns a sensor value
- * @param sim Pointer to the simulation object
+ * @param group Pointer to the simulated_group object
  * @param meeter_being Pointer to the being doing the meeting
  * @param met_being Pointer to the being which was met
  * @param internal Non-zero if this is an internal dialogue
@@ -1635,7 +1635,7 @@ static void being_second_sense(ape_simulation * local_sim, n_byte addr00, n_byte
  * @param additional_write No operation value
  * @return Sensor value
  */
-static n_byte brain_third_sense(ape_simulation * sim, simulated_being * meeter_being, simulated_being * met_being, n_byte internal, n_byte switcher, n_byte * additional_write)
+static n_byte brain_third_sense(simulated_group * group, simulated_being * meeter_being, simulated_being * met_being, n_byte internal, n_byte switcher, n_byte * additional_write)
 {
     n_byte half_switcher = switcher >> 1;
     simulated_being * important_being = ((switcher & 1) ? met_being : meeter_being);
@@ -1706,7 +1706,7 @@ static n_byte brain_third_sense(ape_simulation * sim, simulated_being * meeter_b
     return additional_write[0]; /** no op case. Not sure if the compiler will recognize that though */
 }
 
-static void brain_first_action(ape_simulation * local_sim, n_byte awake,
+static void brain_first_action(simulated_group * group, n_byte awake,
                                n_byte * local_addr00, n_byte * local_addr10,
                                simulated_being * meeter_being, simulated_being * met_being, n_int episode_index,
                                simulated_iepisodic * episodic, n_byte pspace0, n_int actor_index,
@@ -1820,7 +1820,7 @@ static void brain_first_action(ape_simulation * local_sim, n_byte awake,
 
 /**
  * @brief Two beings meet and chat, or a being engages in an internal dialogue
- * @param sim Pointer to the simulation object
+ * @param group Pointer to the simulated_group object
  * @param awake Whether the being is awake
  * @param meeter_being Pointer to the being doing the meeting
  * @param met_being Pointer to the being which was met
@@ -1829,7 +1829,7 @@ static void brain_first_action(ape_simulation * local_sim, n_byte awake,
  * @param being_index Social graph index of the being which is the current focus of attention
  */
 void brain_dialogue(
-    ape_simulation * sim,
+    simulated_group* group,
     n_byte awake,
     simulated_being * meeter_being,
     simulated_being * met_being,
@@ -1890,23 +1890,23 @@ void brain_dialogue(
             /** General sensor */
         case BRAINCODE_SEN:
         {
-            addr1[0] = brain_first_sense(sim, meeter_being, met_being, meeter_social_graph, actor_index, addr0[0]);
+            addr1[0] = brain_first_sense(group, meeter_being, met_being, meeter_social_graph, actor_index, addr0[0]);
             break;
         }
         case BRAINCODE_SEN2:
         {
-            being_second_sense(sim, addr0[0], &addr1[0], meeter_being, met_being, actor_index, IS_CONST1, episode_index, episodic);
+            being_second_sense(group, addr0[0], &addr1[0], meeter_being, met_being, actor_index, IS_CONST1, episode_index, episodic);
             break;
         }
         case BRAINCODE_SEN3:
 
-            addr1[0] = brain_third_sense(sim, meeter_being, met_being, internal, addr0[0], addr1);
+            addr1[0] = brain_third_sense(group, meeter_being, met_being, internal, addr0[0], addr1);
             break;
             /** Action */
         case BRAINCODE_ACT:
         {
 
-            brain_first_action(sim, awake, &addr0[0], &addr1[0], meeter_being, met_being, episode_index,
+            brain_first_action(group, awake, &addr0[0], &addr1[0], meeter_being, met_being, episode_index,
                                episodic, pspace[0], actor_index, meeter_social_graph, IS_CONST1);
             break;
         }

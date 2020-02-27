@@ -255,6 +255,4 @@ static const simulated_file_entry simulated_file_format[]=
 
 n_int command_executing(void);
 
-void  command_change_selected(ape_simulation * sim, n_byte forwards);
-
 #endif /* SIMULATEDAPE_UNIVERSE_INTERNAL_H */

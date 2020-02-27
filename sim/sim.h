@@ -101,12 +101,6 @@ typedef enum
     ET_FIERCE_BIRD_OF_PREY,
 }entity_type;
 
-
-
-#define    NUM_VIEW    (0)
-#define    NUM_TERRAIN (1)
-#define    NUM_CONTROL (2)
-
 #define WINDOW_PROCESSING NUM_TERRAIN
 
 #define    DRAW_WINDOW_VIEW    (1)
@@ -198,16 +192,6 @@ typedef enum
     WEATHER_SEVEN_RAINY_NIGHT = 5,
     WEATHER_SEVEN_DAWN_DUSK = 6
 } weather_values;
-
-enum window_information
-{
-    TERRAIN_WINDOW_WIDTH		= (4096),
-    TERRAIN_WINDOW_HEIGHT       = (3072),
-    TERRAIN_WINDOW_AREA			= (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT),
-    CONTROL_WINDOW_WIDTH        = (2048),
-    CONTROL_WINDOW_HEIGHT       = (2048),
-    CONTROL_WINDOW_AREA         = (CONTROL_WINDOW_WIDTH * CONTROL_WINDOW_HEIGHT)
-};
 
 typedef enum
 {

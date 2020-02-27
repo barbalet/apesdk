@@ -36,7 +36,6 @@
 #import <Cocoa/Cocoa.h>
 
 #include "shared.h"
-#include "../gui/gui.h"
 
 @interface ASShared : NSObject
 
@@ -111,8 +110,6 @@
 - (void) savedFileName:(NSString*)name;
 
 - (BOOL) openFileName:(NSString*)name isScript:(BOOL)scriptFile;
-
-+ (void) starting:(int)argc withValues:(char **)argv;
     
 @property (nonatomic, assign, readonly) NSInteger  identification;
 

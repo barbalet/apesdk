@@ -36,23 +36,13 @@
 #define CONSOLE_REQUIRED
 #define CONSOLE_ONLY
 
-#ifndef    _WIN32
-
 #include "../toolkit/toolkit.h"
+#include "../toolkit/shared.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 #include "../universe/universe.h"
 #include "../entity/entity.h"
 
-#else
-
-#include "..\toolkit\toolkit.h"
-#include "..\script\script.h"
-#include "..\sim\sim.h"
-#include "..\universe\universe.h"
-#include "..\entity\entity.h"
-
-#endif
 
 #include <stdio.h>
 
@@ -227,7 +217,8 @@ n_byte	* offbuffer = 0L;
 /* Twice the minimum number of apes the Simulation will allow to run */
 #define MIN_BEINGS		4
 
-static ape_simulation	sim;
+static  simulated_group group;
+static  simulated_timing timing;
 
 static n_interpret *interpret = 0L;
 
@@ -297,7 +288,7 @@ static void sim_console_clean_up(void)
 static void *sim_thread_posix(void *threadid)
 {
     n_byte *local = (n_byte *)threadid;
-    if (io_console(&sim, (simulated_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
+    if (io_console(&group, (simulated_console_command *) control_commands, io_console_entry_clean, io_console_out) != 0)
     {
         sim_console_clean_up();
     }
@@ -330,25 +321,21 @@ void sim_thread_console(void)
 
 #endif
 
-ape_simulation * sim_sim(void)
-{
-    return &sim;
-}
-
 void sim_realtime(n_uint time)
 {
-    sim.real_time = time;
+    timing.real_time = time;
 }
 
 static simulated_being * sim_being_local(void)
 {
-    ape_simulation * local_sim = sim_sim();
-    if (local_sim == 0L)
+    simulated_group * group = sim_group();
+
+    if (group == 0L)
     {
         return 0L;
     }
     
-    return local_sim->select;
+    return group->select;
 }
 
 
@@ -387,6 +374,16 @@ static n_int  sim_control_max_x;
 
 static n_byte sim_control_previous_character;
 static n_byte sim_control_character_location;
+
+simulated_timing * sim_timing(void)
+{
+    return &timing;
+}
+
+simulated_group * sim_group(void)
+{
+    return &group;
+}
 
 void sim_control_set(n_int px, n_int py, n_byte value, n_byte character, n_int scale)
 {
@@ -434,9 +431,9 @@ static simulated_being * sim_select_name(n_string name)
 {
     n_uint name_hash = math_hash((n_byte *)name, (n_uint)io_length(name, STRING_BLOCK_SIZE));
     n_uint loop = 0;
-    ape_simulation * local_sim = sim_sim();
-    simulated_being      * local_beings = local_sim->beings;
-    while (loop < local_sim->num)
+    simulated_group * group = sim_group();
+    simulated_being * local_beings = group->beings;
+    while (loop < group->num)
     {
         n_uint         being_hash;
         simulated_being  * local_being = &local_beings[loop];
@@ -482,14 +479,14 @@ n_int sim_view_regular(n_int px, n_int py)
     simulated_being * local;
     if ((local = sim_being_local()))
     {
-        ape_simulation * local_sim = sim_sim();
-        simulated_being *    desired_ape = local;
+        simulated_group * group = sim_group();
+        simulated_being * desired_ape = local;
         n_uint  high_squ = 31;
         n_uint    loop = 0;
         
-        while (loop < local_sim->num)
+        while (loop < group->num)
         {
-            simulated_being    * current_ape = &(local_sim->beings[loop]);
+            simulated_being    * current_ape = &(group->beings[loop]);
             
             n_int    screen_x = APESPACE_TO_MAPSPACE(being_location_x(current_ape)) - px;
             n_int    screen_y = APESPACE_TO_MAPSPACE(being_location_y(current_ape)) - py;
@@ -543,16 +540,15 @@ void sim_rotate(n_int integer_rotation_256)
 
 void sim_change_selected(n_byte forwards)
 {
-    ape_simulation * local_sim = sim_sim();
-    if (local_sim)
+    simulated_group * group = sim_group();
+    if (group)
     {
-        command_change_selected(local_sim, forwards);
+        command_change_selected(group, forwards);
     }
 }
 
 static n_int sim_input(void *vcode, n_byte kind, n_int value)
 {
-    ape_simulation * local_sim = sim_sim();
     n_individual_interpret * code = (n_individual_interpret *)vcode;
     n_int *local_vr = code->variable_references;
     simulated_being    *local_being = 0L;
@@ -564,11 +560,13 @@ static n_int sim_input(void *vcode, n_byte kind, n_int value)
     }
     {
         n_uint local_select = (n_uint)temp_select;
-        if( local_select >= local_sim->num)
+        simulated_group * group = sim_group();
+
+        if( local_select >= group->num)
         {
             return APESCRIPT_ERROR(code, AE_SELECTED_ENTITY_OUT_OF_RANGE);
         }
-        local_being = &(local_sim->beings[local_select]);
+        local_being = &(group->beings[local_select]);
     }
     
     switch(kind)
@@ -712,7 +710,8 @@ static n_int sim_input(void *vcode, n_byte kind, n_int value)
 
 static n_int sim_output(void * vcode, void * vindividual, n_byte * kind, n_int * number)
 {
-    ape_simulation * local_sim = sim_sim();
+    simulated_group * group = sim_group();
+
     n_interpret * code = (n_interpret *) vcode;
     n_individual_interpret * individual = (n_individual_interpret *) vindividual;
     n_byte    first_value = kind[0];
@@ -828,10 +827,10 @@ static n_int sim_output(void * vcode, void * vindividual, n_byte * kind, n_int *
                     local_number = land_date();
                     break;
                 case VARIABLE_CURRENT_BEING:
-                    local_number = being_index(local_sim, (simulated_being *)individual->interpret_data);
+                    local_number = being_index(group, (simulated_being *)individual->interpret_data);
                     break;
                 case VARIABLE_NUMBER_BEINGS:
-                    local_number = (n_int)local_sim->num;
+                    local_number = (n_int)group->num;
                     break;
                     
                 case VARIABLE_IS_ERROR:
@@ -895,11 +894,11 @@ static n_int sim_output(void * vcode, void * vindividual, n_byte * kind, n_int *
                     }
                     {
                         n_uint local_select = (n_uint)temp_select;
-                        if( local_select >= local_sim->num)
+                        if( local_select >= group->num)
                         {
                             return APESCRIPT_ERROR(individual, AE_SELECTED_ENTITY_OUT_OF_RANGE);
                         }
-                        local_being = &(local_sim->beings[local_select]);
+                        local_being = &(group->beings[local_select]);
                         if (local_being != 0L)
                         {
                             local_social_graph = being_social(local_being);
@@ -1164,7 +1163,7 @@ n_int     sim_interpret(n_file * input_file)
     }
     else
     {
-        SC_DEBUG_ON(sim.select); /* turn on debugging after script loading */
+        SC_DEBUG_ON(group.select); /* turn on debugging after script loading */
     }
 
     interpret->sc_input  = &sim_input;
@@ -1176,7 +1175,7 @@ n_int     sim_interpret(n_file * input_file)
 }
 
 #ifdef BRAIN_ON
-static void sim_brain_loop(ape_simulation * local_sim, simulated_being * local_being, void * data)
+static void sim_brain_loop(simulated_group * group, simulated_being * local_being, void * data)
 {
     n_byte2 local_brain_state[3];
 
@@ -1194,7 +1193,7 @@ static void sim_brain_loop(ape_simulation * local_sim, simulated_being * local_b
 
 #ifdef BRAINCODE_ON
 
-static void sim_brain_dialogue_loop(ape_simulation * local_sim, simulated_being * local_being, void * data)
+static void sim_brain_dialogue_loop(simulated_group * group, simulated_being * local_being, void * data)
 {
     n_byte     awake = 1;
     n_byte    *local_internal = being_braincode_internal(local_being);
@@ -1204,8 +1203,8 @@ static void sim_brain_dialogue_loop(ape_simulation * local_sim, simulated_being 
         awake=0;
     }
     /* This should be independent of the brainstate/cognitive simulation code */
-    brain_dialogue(local_sim, awake, local_being, local_being, local_internal, local_external, being_random(local_being)%SOCIAL_SIZE);
-    brain_dialogue(local_sim, awake, local_being, local_being, local_external, local_internal, being_random(local_being)%SOCIAL_SIZE);
+    brain_dialogue(group, awake, local_being, local_being, local_internal, local_external, being_random(local_being)%SOCIAL_SIZE);
+    brain_dialogue(group, awake, local_being, local_being, local_external, local_internal, being_random(local_being)%SOCIAL_SIZE);
 }
 
 #endif
@@ -1226,11 +1225,11 @@ static void sim_being_universal_loop_no_sim(simulated_being * local_being, void 
     being_cycle_universal(local_being);
 }
 
-static void sim_being_cycle(ape_simulation * local_sim, simulated_being * local_being, void * data)
+static void sim_being_cycle(simulated_group * group, simulated_being * local_being, void * data)
 {
     if (local_being->delta.awake == 0) return;
 
-    being_cycle_awake(local_sim, local_being);
+    being_cycle_awake(group, local_being);
 }
 
 static void sim_start_conditions(void * vindividual, void * structure, void * data)
@@ -1243,7 +1242,7 @@ static void sim_start_conditions(void * vindividual, void * structure, void * da
     variables[VARIABLE_SPEED - VARIABLE_VECT_ANGLE] =  being_speed(local_being);
     variables[VARIABLE_ENERGY_DELTA - VARIABLE_VECT_ANGLE] = 0;
     
-    variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = being_index(sim_sim(), local_being);
+    variables[VARIABLE_SELECT_BEING - VARIABLE_VECT_ANGLE] = being_index(sim_group(), local_being);
     
     variables[VARIABLE_HEIGHT - VARIABLE_VECT_ANGLE] = being_height(local_being);
     variables[VARIABLE_GOAL_TYPE - VARIABLE_VECT_ANGLE] = local_being->delta.goal[0];
@@ -1334,7 +1333,7 @@ static void sim_end_conditions(void * vindividual, void * structure, void * data
 
 
 
-static void sim_being_interpret(ape_simulation * local_sim, simulated_being * local_being, void * data)
+static void sim_being_interpret(simulated_group * group, simulated_being * local_being, void * data)
 {
     n_individual_interpret individual;
 
@@ -1345,7 +1344,7 @@ static void sim_being_interpret(ape_simulation * local_sim, simulated_being * lo
     if (interpret == 0L) return;
 
     if(interpret_cycle(interpret, &individual, -1,
-                       local_sim->beings, local_being,
+                       group->beings, local_being,
                        &sim_start_conditions, &sim_end_conditions) == -1)
     {
         interpret_cleanup(&interpret);
@@ -1353,19 +1352,21 @@ static void sim_being_interpret(ape_simulation * local_sim, simulated_being * lo
 }
 
 
-static void sim_time(ape_simulation * local_sim)
+static void sim_time(simulated_group * group)
 {
-    local_sim->count_cycles += local_sim->num;
+    simulated_timing *timing = sim_timing();
 
-    local_sim->count_frames ++;
+    timing->count_cycles += group->num;
 
-    if ((local_sim->real_time - local_sim->last_time) > 60)
+    timing->count_frames ++;
+
+    if ((timing->real_time - timing->last_time) > 60)
     {
-        local_sim->last_time = local_sim->real_time;
-        local_sim->delta_cycles = local_sim->count_cycles;
-        local_sim->delta_frames = local_sim->count_frames;
-        local_sim->count_cycles = 0;
-        local_sim->count_frames = 0;
+        timing->last_time = timing->real_time;
+        timing->delta_cycles = timing->count_cycles;
+        timing->delta_frames = timing->count_frames;
+        timing->count_cycles = 0;
+        timing->count_frames = 0;
     }
 }
 
@@ -1387,14 +1388,14 @@ static void sim_time(ape_simulation * local_sim)
 
 #endif
 
-static void sim_being_remove_final(ape_simulation * local_sim, being_remove_loop2_struct ** brls)
+static void sim_being_remove_final(simulated_group * group, being_remove_loop2_struct ** brls)
 {
-    local_sim->num = (*brls)->count;
+    group->num = (*brls)->count;
     if ((*brls)->selected_died)
     {
         if ((*brls)->count)
         {
-            sim_set_select(local_sim->beings);
+            sim_set_select(group->beings);
         }
         else
         {
@@ -1422,14 +1423,16 @@ void sim_update_output(void)
         return;
     }
 
-    if (sim.select == 0L)
+    if (group.select == 0L)
     {
         return;
     }
+#ifndef	_WIN32
     sim_writing_output = 1;
     memory_erase((n_byte *)sim_console_output, STRING_BLOCK_SIZE);
-    watch_control(&sim, being_get_select_name(&sim), sim.select, sim_console_output);
+    watch_control(&group, being_get_select_name(&group), group.select, sim_console_output);
     sim_writing_output = 0;
+#endif
 }
 
 static KIND_OF_USE local_execution = KIND_PRE_STARTUP;
@@ -1466,11 +1469,11 @@ void sim_cycle(void)
                 weather_init();
 #endif
                 /* Sets the number of Simulated Apes initially created, and creates them */
-                sim.num = being_init_group(sim.beings, local_random, sim.max >> 1, sim.max);
+                group.num = being_init_group(group.beings, local_random, group.max >> 1, group.max);
             }
         }
         
-        sim_set_select(sim.beings);
+        sim_set_select(group.beings);
         
         sim_new_progress = 0;
         local_execution = KIND_NOTHING_TO_RUN;
@@ -1484,63 +1487,63 @@ void sim_cycle(void)
     weather_cycle();
 #endif
 
-    loop_being_no_sim(sim.beings, sim.num, sim_being_awake_loop_no_sim, 0L);
-    loop_being_no_sim(sim.beings, sim.num, sim_being_universal_loop_no_sim, 0L);
+    loop_being_no_sim(group.beings, group.num, sim_being_awake_loop_no_sim, 0L);
+    loop_being_no_sim(group.beings, group.num, sim_being_universal_loop_no_sim, 0L);
 
     if (interpret)
     {
-        loop_being(&sim, sim_being_interpret, PROCESSING_WELTER_WEIGHT);
+        loop_being(&group, sim_being_interpret, PROCESSING_WELTER_WEIGHT);
     }
     else
     {
         /** Listen for any shouts */
-        loop_being(&sim, being_listen, PROCESSING_FEATHER_WEIGHT);
+        loop_being(&group, being_listen, PROCESSING_FEATHER_WEIGHT);
 #ifdef EPISODIC_ON
-        loop_being_no_sim(sim.beings, sim.num, episodic_cycle_no_sim, 0L);
+        loop_being_no_sim(group.beings, group.num, episodic_cycle_no_sim, 0L);
 #endif
-        loop_being(&sim, sim_being_cycle, PROCESSING_MIDDLE_WEIGHT);
-        loop_being(&sim, drives_cycle, PROCESSING_LIGHT_WEIGHT);
+        loop_being(&group, sim_being_cycle, PROCESSING_MIDDLE_WEIGHT);
+        loop_being(&group, drives_cycle, PROCESSING_LIGHT_WEIGHT);
     }
 
     if (land_time() & 1)
     {
 #ifdef BRAIN_ON
-        loop_being(&sim, sim_brain_loop, PROCESSING_WELTER_WEIGHT);
+        loop_being(&group, sim_brain_loop, PROCESSING_WELTER_WEIGHT);
 #endif
     }
 #ifdef BRAINCODE_ON
     else
     {
-        loop_being(&sim, sim_brain_dialogue_loop, PROCESSING_MIDDLE_WEIGHT);
+        loop_being(&group, sim_brain_dialogue_loop, PROCESSING_MIDDLE_WEIGHT);
     }
 #endif
 
-    loop_being_no_sim(sim.beings, sim.num, being_tidy_loop_no_sim, &max_honor);
+    loop_being_no_sim(group.beings, group.num, being_tidy_loop_no_sim, &max_honor);
 
-    loop_being(&sim, social_initial_loop, PROCESSING_LIGHT_WEIGHT);
+    loop_being(&group, social_initial_loop, PROCESSING_LIGHT_WEIGHT);
 
     if (max_honor)
     {
-        loop_being_no_sim(sim.beings, sim.num, being_recalibrate_honor_loop_no_sim, 0L);
+        loop_being_no_sim(group.beings, group.num, being_recalibrate_honor_loop_no_sim, 0L);
     }
 
-    loop_being_no_sim(sim.beings, sim.num, social_secondary_loop_no_sim, 0L);
+    loop_being_no_sim(group.beings, group.num, social_secondary_loop_no_sim, 0L);
     
     {
         n_string_block selected_name = {0};
         n_int          selected_lives = 1;
-        being_remove_loop2_struct * brls = being_remove_initial(&sim);
-        if (sim.select)
+        being_remove_loop2_struct * brls = being_remove_initial(&group);
+        if (group.select)
         {
-            being_name_simple(sim.select, selected_name);
+            being_name_simple(group.select, selected_name);
         }
-        if (sim.ext_death != 0L)
+        if (group.ext_death != 0L)
         {
-            loop_no_thread(&sim, 0L, being_remove_loop1, 0L);
+            loop_no_thread(&group, 0L, being_remove_loop1, 0L);
         }
-        loop_no_thread(&sim, 0L, being_remove_loop2, brls);
+        loop_no_thread(&group, 0L, being_remove_loop2, brls);
         selected_lives = brls->selected_died == 0;
-        sim_being_remove_final(&sim, &brls);
+        sim_being_remove_final(&group, &brls);
         if (selected_lives)
         {
             simulated_being * new_select = sim_select_name(selected_name);
@@ -1551,10 +1554,10 @@ void sim_cycle(void)
         }
     }
 
-    sim_time(&sim);
+    sim_time(&group);
 }
 
-#define	MINIMAL_ALLOCATION	((512*512)+(TERRAIN_WINDOW_AREA)+(CONTROL_WINDOW_AREA)+(sizeof(simulated_being) * MIN_BEINGS)+sizeof(simulated_iremains)+1+(sizeof(ape_simulation)))
+#define	MINIMAL_ALLOCATION	((512*512)+(TERRAIN_WINDOW_AREA)+(CONTROL_WINDOW_AREA)+(sizeof(simulated_being) * MIN_BEINGS)+sizeof(simulated_remains)+1)
 
 #define MAXIMUM_ALLOCATION  (MINIMAL_ALLOCATION + (sizeof(simulated_being) * 400))
 
@@ -1568,13 +1571,13 @@ n_uint sim_memory_allocated(n_int max)
     }
 }
 
-static void sim_memory_remains(ape_simulation * local, n_byte * buffer, n_uint * location)
+static void sim_memory_remains(simulated_group * group, n_byte * buffer, n_uint * location)
 {
-    local->remains = (simulated_iremains *) & buffer[ *location ];
-    *location += sizeof(simulated_iremains);
+    group->remains = (simulated_remains *) & buffer[ *location ];
+    *location += sizeof(simulated_remains);
 }
 
-static n_int being_memory(ape_simulation * local, n_byte * buffer, n_uint * location, n_uint memory_available)
+static n_int being_memory(simulated_group * group, n_byte * buffer, n_uint * location, n_uint memory_available)
 {
     n_uint  lpx = 0;
     n_uint  number_apes = 0;
@@ -1592,16 +1595,16 @@ static n_int being_memory(ape_simulation * local, n_byte * buffer, n_uint * loca
     }
     
 #ifdef LARGE_SIM
-    local->max = LARGE_SIM;
+    group->max = LARGE_SIM;
 #else
-    local->max = (memory_available / sizeof(simulated_being)) - 1;
+    group->max = (memory_available / sizeof(simulated_being)) - 1;
 #endif
-    local->beings = (simulated_being *) & buffer[  * location ];
-    * location += sizeof(simulated_being) * local->max ;
+    group->beings = (simulated_being *) & buffer[  * location ];
+    * location += sizeof(simulated_being) * group->max ;
     
-    while (lpx < local->max)
+    while (lpx < group->max)
     {
-        simulated_being * local_being = &(local->beings[ lpx ]);
+        simulated_being * local_being = &(group->beings[ lpx ]);
         memory_erase((n_byte *)local_being, sizeof(simulated_being));
         lpx ++;
     }
@@ -1626,11 +1629,11 @@ static n_int sim_memory(n_uint offscreen_size)
 
     current_location = offscreen_size;
     
-    sim_memory_remains(&sim, offbuffer, &current_location);
+    sim_memory_remains(&group, offbuffer, &current_location);
 
     memory_allocated = memory_allocated - current_location;
     
-    return being_memory(&sim, offbuffer, &current_location, memory_allocated);
+    return being_memory(&group, offbuffer, &current_location, memory_allocated);
 }
 
 static void debug_birth_event(simulated_being * born, simulated_being * mother, void * sim)
@@ -1664,24 +1667,24 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
             interpret = 0L;
         }
     }
-    sim.real_time = randomise;
-    sim.last_time = randomise;
+    timing.real_time = randomise;
+    timing.last_time = randomise;
     
 #ifdef FIXED_RANDOM_SIM
     randomise = FIXED_RANDOM_SIM;
 #endif
     
-    sim.delta_cycles = 0;
-    sim.count_cycles = 0;
-    sim.delta_frames = 0;
-    sim.count_frames = 0;
+    timing.delta_cycles = 0;
+    timing.count_cycles = 0;
+    timing.delta_frames = 0;
+    timing.count_frames = 0;
 
 #if 0
-    sim.ext_birth = &debug_birth_event;
-    sim.ext_death = &debug_death_event;
+    group.ext_birth = &debug_birth_event;
+    group.ext_death = &debug_death_event;
 #else
-    sim.ext_birth = 0L;
-    sim.ext_death = 0L;
+    group.ext_birth = 0L;
+    group.ext_death = 0L;
 #endif
     
     if ((kind == KIND_START_UP) || (kind == KIND_MEMORY_SETUP))
@@ -1702,7 +1705,7 @@ void * sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         land_seed_genetics(local_random);
     }
     
-    being_remains_init(sim.remains); /* Eventually this should be captured through the file handling and moved into the code below */
+    being_remains_init(group.remains); /* Eventually this should be captured through the file handling and moved into the code below */
 
     local_execution = kind;
 
@@ -1723,11 +1726,11 @@ void sim_close(void)
 
 void sim_set_select(simulated_being * select)
 {
-    sim.select = select;
+    group.select = select;
     sim_update_output();
 }
 
-static void sim_flood_loop(ape_simulation * sim, simulated_being * local, void * data)
+static void sim_flood_loop(simulated_group * group, simulated_being * local, void * data)
 {
     n_vect2 location;
 
@@ -1742,16 +1745,16 @@ static void sim_flood_loop(ape_simulation * sim, simulated_being * local, void *
 
 void sim_flood(void)
 {
-    loop_no_thread(&sim, 0L, sim_flood_loop, 0L);
+    loop_no_thread(&group, 0L, sim_flood_loop, 0L);
 }
 
 void sim_healthy_carrier(void)
 {
-    n_uint  loop = (sim.num >> 2);
+    n_uint  loop = (group.num >> 2);
 
-    while (loop < sim.num)
+    while (loop < group.num)
     {
-        simulated_being * local = &sim.beings[loop];
+        simulated_being * local = &group.beings[loop];
         being_dead(local);
         loop++;
     }

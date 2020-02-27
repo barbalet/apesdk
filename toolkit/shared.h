@@ -36,15 +36,7 @@
 #ifndef SIMULATEDAPE_SHARED_H
 #define SIMULATEDAPE_SHARED_H
 
-#ifndef	_WIN32
-
 #include "toolkit.h"
-
-#else
-
-#include "toolkit.h"
-
-#endif
 
 typedef enum
 {
@@ -54,6 +46,36 @@ typedef enum
     SHARED_CYCLE_NEW_APES
 } shared_cycle_state;
 
+enum window_information
+{
+    TERRAIN_WINDOW_WIDTH        = (4096),
+    TERRAIN_WINDOW_HEIGHT       = (3072),
+    TERRAIN_WINDOW_AREA         = (TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT),
+    CONTROL_WINDOW_WIDTH        = (2048),
+    CONTROL_WINDOW_HEIGHT       = (2048),
+    CONTROL_WINDOW_AREA         = (CONTROL_WINDOW_WIDTH * CONTROL_WINDOW_HEIGHT)
+};
+
+#define    NUM_VIEW    (0)
+#define    NUM_TERRAIN (1)
+#define    NUM_CONTROL (2)
+
+enum
+{
+    NA_MENU_PAUSE = 0,
+    NA_MENU_WEATHER,
+    NA_MENU_BRAIN,
+    NA_MENU_BRAINCODE,
+    NA_MENU_TIDEDAYLIGHT,
+    NA_MENU_TERRITORY,
+    NA_MENU_PREVIOUS_APE,
+    NA_MENU_NEXT_APE,
+    NA_MENU_CLEAR_ERRORS,
+    NA_MENU_FLOOD,
+    NA_MENU_HEALTHY_CARRIER,
+    NA_MENU_FOLLOW,
+    NA_MENU_SOCIAL_WEB
+};
 
 void shared_color_8_bit_to_48_bit(n_byte2 * fit);
 

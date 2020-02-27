@@ -374,7 +374,6 @@ n_int vect2_nonzero(n_vect2 * nonzero)
     return ((nonzero->x != 0) || (nonzero->y != 0));
 }
 
-#ifndef _WIN32
 n_vect2 * vect2_min_max_init(void)
 {
     n_vect2 * min_max = memory_new(2 * sizeof(n_vect2));
@@ -386,7 +385,6 @@ n_vect2 * vect2_min_max_init(void)
     vect2_populate(&min_max[1], BIG_NEGATIVE_INTEGER, BIG_NEGATIVE_INTEGER);
     return min_max;
 }
-#endif
 
 void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
 {

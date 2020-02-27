@@ -37,15 +37,7 @@
  *  \brief  This parses ApeScript and produces the ApeScript byte-code.
  */
 
-#ifndef    _WIN32
-
 #include "../toolkit/toolkit.h"
-
-#else
-
-#include "..\toolkit\toolkit.h"
-
-#endif
 
 #include "script.h"
 

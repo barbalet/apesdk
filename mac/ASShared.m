@@ -289,9 +289,4 @@
     return shared_openFileName(cStringFileName,(unsigned char)scriptFile) != 0;
 }
 
-+ (void) starting:(int)argc withValues:(char **)argv
-{
-    io_entry_execution(argc, argv);
-}
-
 @end

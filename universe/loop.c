@@ -33,26 +33,22 @@
 
  ****************************************************************/
 
-#ifndef	_WIN32
 #include "../entity/entity.h"
-#else
-#include "..\entity\entity.h"
-#endif
 
 #include "universe.h"
 
 #include <stdio.h>
 
 
-void loop_no_thread(ape_simulation * sim, simulated_being * being_not, loop_fn bf_func, void * data)
+void loop_no_thread(simulated_group * group, simulated_being * being_not, loop_fn bf_func, void * data)
 {
     n_uint loop = 0;
-    while (loop < sim->num)
+    while (loop < group->num)
     {
-        simulated_being * output = &(sim->beings[loop]);
+        simulated_being * output = &(group->beings[loop]);
         if (output != being_not)
         {
-            bf_func(sim, output, data);
+            bf_func(group, output, data);
         }
         loop++;
     }
@@ -92,21 +88,21 @@ static void loop_add_generic(execute_function * function, void * general_data, v
     }
 }
 
-void loop_being(ape_simulation * sim, loop_fn bf_func, n_int beings_per_thread)
+void loop_being(simulated_group * group, loop_fn bf_func, n_int beings_per_thread)
 {
     n_uint loop  = 0;
     n_uint count = (n_uint)beings_per_thread;
     n_uint beings_per_thread_uint = (n_uint)beings_per_thread;
-    while (loop < sim->num)
+    while (loop < group->num)
     {
-        simulated_being * output = &(sim->beings[loop]);
+        simulated_being * output = &(group->beings[loop]);
         
-        if ((beings_per_thread_uint + loop) >= sim->num)
+        if ((beings_per_thread_uint + loop) >= group->num)
         {
-            count = sim->num - loop;
+            count = group->num - loop;
         }
         
-        loop_add_generic((execute_function*)bf_func, (void*)sim, (void*)output, 0L, (n_int)count, sizeof(simulated_being));
+        loop_add_generic((execute_function*)bf_func, (void*)group, (void*)output, 0L, (n_int)count, sizeof(simulated_being));
         
         if (count != beings_per_thread_uint)
         {
@@ -126,7 +122,7 @@ typedef struct
     simulated_being * being_from_name;
 } being_from_name_loop_struct;
 
-static void being_from_name_loop(ape_simulation * sim, simulated_being * local, void * data)
+static void being_from_name_loop(simulated_group * group, simulated_being * local, void * data)
 {
     being_from_name_loop_struct * bfns = (being_from_name_loop_struct *)data;
     n_string_block str;
@@ -148,48 +144,45 @@ static void being_from_name_loop(ape_simulation * sim, simulated_being * local, 
 
 /**
  * @brief return the being array index with the given name
- * @param sim Pointer to the simulation object
+ * @param group Pointer to the simulated_group object
  * @param name Name of the being
  * @return Array index of the being within the simulation object
  */
-simulated_being * being_from_name(ape_simulation * sim, n_string name)
+simulated_being * being_from_name(simulated_group * group, n_string name)
 {
     being_from_name_loop_struct bfns;
     bfns.being_from_name = 0L;
     io_lower(name, io_length(name,STRING_BLOCK_SIZE));
     bfns.name = name;
-    loop_no_thread(sim, 0L, being_from_name_loop, &bfns);
+    loop_no_thread(group, 0L, being_from_name_loop, &bfns);
     return bfns.being_from_name;
 }
 
-void being_set_select_name(ape_simulation * sim, n_string name)
+void being_set_select_name(simulated_group * group, n_string name)
 {
-    simulated_being * response = being_from_name(sim, name);
+    simulated_being * response = being_from_name(group, name);
     if (response == 0L)
     {
         (void)SHOW_ERROR("Ape not found");
         return;
     }
-    sim->select = response;
+    group->select = response;
 }
 
-n_string being_get_select_name(ape_simulation * sim)
+n_string being_get_select_name(simulated_group * group)
 {
     static n_string_block name;
     n_int  position = 0;
-    if (sim->select == 0L)
+    if (group->select == 0L)
     {
         io_string_write(name,"*** ALL APES DEAD ***", &position);
     }
     else
     {
-        being_name_simple(sim->select, name);
+        being_name_simple(group->select, name);
     }
     return (n_string)name;
 }
-
-
-
 
 typedef struct
 {
@@ -201,7 +194,7 @@ typedef struct
     simulated_being * return_value;
 } being_find_closest_struct;
 
-static void being_find_closest_loop(ape_simulation * sim, simulated_being * local, void * data)
+static void being_find_closest_loop(simulated_group * group, simulated_being * local, void * data)
 {
     being_find_closest_struct * bfcs = (being_find_closest_struct *)data;
     
@@ -232,7 +225,7 @@ static void being_find_closest_loop(ape_simulation * sim, simulated_being * loca
     
 }
 
-static simulated_being * being_find_closest(ape_simulation * sim, simulated_being * actual, n_int parse_requirements, n_int older)
+static simulated_being * being_find_closest(simulated_group * group, simulated_being * actual, n_int parse_requirements, n_int older)
 {
     being_find_closest_struct bfcs;
     bfcs.parse_requirements = parse_requirements;
@@ -243,7 +236,7 @@ static simulated_being * being_find_closest(ape_simulation * sim, simulated_bein
     bfcs.genetics = being_genetics(actual);
     bfcs.actual_age = being_dob(actual);
     
-    loop_no_thread(sim, actual, being_find_closest_loop, &bfcs);
+    loop_no_thread(group, actual, being_find_closest_loop, &bfcs);
     
     return bfcs.return_value;
 }
@@ -256,7 +249,7 @@ typedef struct
     simulated_being * return_value;
 } being_find_child_struct;
 
-static void being_find_child_loop(ape_simulation * sim, simulated_being * local, void * data)
+static void being_find_child_loop(simulated_group * group, simulated_being * local, void * data)
 {
     being_find_child_struct * bfcs = (being_find_child_struct *) data;
     n_uint  comparison = being_genetic_comparison(bfcs->genetics, being_genetics(local), -1);
@@ -268,14 +261,14 @@ static void being_find_child_loop(ape_simulation * sim, simulated_being * local,
     }
 }
 
-static simulated_being * being_find_child(ape_simulation * sim, n_genetics * genetics, n_int max_age)
+static simulated_being * being_find_child(simulated_group * group, n_genetics * genetics, n_int max_age)
 {
     being_find_child_struct bfcs;
     bfcs.comparison_best = 0;
     bfcs.max_age = max_age;
     bfcs.genetics = genetics;
     bfcs.return_value = 0L;
-    loop_no_thread(sim, 0L, being_find_child_loop, &bfcs);
+    loop_no_thread(group, 0L, being_find_child_loop, &bfcs);
     return bfcs.return_value;
 }
 
@@ -286,7 +279,7 @@ typedef struct
     simulated_being * local;
 } being_find_name_struct;
 
-static void being_find_name_loop(ape_simulation * sim, simulated_being * local, void * data)
+static void being_find_name_loop(simulated_group * group, simulated_being * local, void * data)
 {
     being_find_name_struct * bfns = (being_find_name_struct *)data;
     if (bfns->local == 0L)
@@ -298,13 +291,13 @@ static void being_find_name_loop(ape_simulation * sim, simulated_being * local, 
     }
 }
 
-simulated_being * being_find_name(ape_simulation * sim, n_byte2 first_gender, n_byte2 family)
+simulated_being * being_find_name(simulated_group * group, n_byte2 first_gender, n_byte2 family)
 {
     being_find_name_struct bfns;
     bfns.first_gender = first_gender;
     bfns.family = family;
     bfns.local = 0L;
-    loop_no_thread(sim, 0L, being_find_name_loop, &bfns);
+    loop_no_thread(group, 0L, being_find_name_loop, &bfns);
     return bfns.local;
 }
 
@@ -534,15 +527,15 @@ static void being_social_event_string(n_string string, n_int * location, n_int e
     io_string_write(string,"*",location);
 }
 
-void being_remains_init(simulated_iremains * remains)
+void being_remains_init(simulated_remains * remains)
 {
     remains->count = 0;
     remains->location = 0;
 }
 
-static void being_remains(ape_simulation * sim, simulated_being * dead)
+static void being_remains(simulated_group * group, simulated_being * dead)
 {
-    simulated_iremains * remains  = sim->remains;
+    simulated_remains * remains  = group->remains;
     n_byte2         location = remains->location;
     
     remains->bodies[location].location[0] = dead->delta.location[0];
@@ -973,7 +966,7 @@ void being_cycle_universal(simulated_being * local)
 /* For a new child this populates the social graph with family relationships */
 static void being_create_family_links(simulated_being * mother,
                                       simulated_being * child,
-                                      ape_simulation * sim)
+                                      simulated_group * group)
 {
     n_int i,j,index;
     simulated_being * parent[6]= {0L};
@@ -988,7 +981,7 @@ static void being_create_family_links(simulated_being * mother,
     /** First tow entries in the array are parents.
      Subsequent entries are grandparents */
     parent[0] = mother;
-    parent[1] = being_find_name(sim, mother->changes.father_name[0], mother->changes.father_name[1]);
+    parent[1] = being_find_name(group, mother->changes.father_name[0], mother->changes.father_name[1]);
     
     parent_relation[0] = RELATIONSHIP_DAUGHTER;
     parent_relation[1] = RELATIONSHIP_DAUGHTER;
@@ -1022,7 +1015,7 @@ static void being_create_family_links(simulated_being * mother,
                     {
                         /** store the grandparent reference if still living */
                         parent[2+(j*2)+i] =
-                        being_find_name(sim,
+                        being_find_name(group,
                                         parent_social_graph[index].first_name[BEING_MET],
                                         parent_social_graph[index].family_name[BEING_MET]);
                     }
@@ -1051,18 +1044,18 @@ static void being_create_family_links(simulated_being * mother,
                     if ((parent_social_graph[i].relationship==RELATIONSHIP_SON) ||
                         (parent_social_graph[i].relationship==RELATIONSHIP_DAUGHTER))
                     {
-                        sibling = being_find_name(sim, parent_social_graph[i].first_name[BEING_MET], parent_social_graph[i].family_name[BEING_MET]);
+                        sibling = being_find_name(group, parent_social_graph[i].first_name[BEING_MET], parent_social_graph[i].family_name[BEING_MET]);
                         if (sibling!=0L)
                         {
                             if (parent_social_graph[i].relationship==RELATIONSHIP_SON)
                             {
-                                social_set_relationship(sim, child, RELATIONSHIP_BROTHER, sibling);
+                                social_set_relationship(group, child, RELATIONSHIP_BROTHER, sibling);
                             }
                             else
                             {
-                                social_set_relationship(sim, child, RELATIONSHIP_SISTER, sibling);
+                                social_set_relationship(group, child, RELATIONSHIP_SISTER, sibling);
                             }
-                            social_set_relationship(sim, sibling, sibling_relation, child);
+                            social_set_relationship(group, sibling, sibling_relation, child);
                         }
                     }
                 }
@@ -1078,20 +1071,20 @@ static void being_create_family_links(simulated_being * mother,
         /** create the parent/child social graph relation */
         if (FIND_SEX(GET_I(child)) == SEX_FEMALE)
         {
-            social_set_relationship(sim, parent[i], parent_relation[i], child);
+            social_set_relationship(group, parent[i], parent_relation[i], child);
         }
         else
         {
-            social_set_relationship(sim, parent[i], parent_relation[i]+1, child);
+            social_set_relationship(group, parent[i], parent_relation[i]+1, child);
         }
         
         if (i%2==0)
         {
-            social_set_relationship(sim, child, child_relation[i], parent[i]);
+            social_set_relationship(group, child, child_relation[i], parent[i]);
         }
         else
         {
-            social_set_relationship(sim, child, child_relation[i]+1, parent[i]);
+            social_set_relationship(group, child, child_relation[i]+1, parent[i]);
         }
     }
     
@@ -1137,7 +1130,7 @@ void being_goal_cycle(simulated_being * local)
     }
 }
 
-static void being_follow_loop1(ape_simulation * sim, simulated_being * other, void * data)
+static void being_follow_loop1(simulated_group * group, simulated_being * other, void * data)
 {
     being_nearest * nearest = (being_nearest *)data;
     n_vect2        difference_vector;
@@ -1162,7 +1155,7 @@ static void being_follow_loop1(ape_simulation * sim, simulated_being * other, vo
     }
 }
 
-static void being_follow_loop2(ape_simulation * sim, simulated_being * other, void * data)
+static void being_follow_loop2(simulated_group * group, simulated_being * other, void * data)
 {
     being_nearest * nearest = (being_nearest *)data;
     n_vect2        difference_vector;
@@ -1203,11 +1196,11 @@ static void being_follow_loop2(ape_simulation * sim, simulated_being * other, vo
 
 /**
  * Follow a being to which we are paying attention
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @param local The current being
  * @param nearest The nearest being structure
  */
-static void being_follow(ape_simulation * sim,
+static void being_follow(simulated_group * group,
                          simulated_being * local,
                          being_nearest * nearest)
 {
@@ -1224,7 +1217,7 @@ static void being_follow(ape_simulation * sim,
     /** is a mate in view? */
     if (being_check_goal(local, GOAL_MATE))
     {
-        loop_no_thread(sim, local, being_follow_loop1, nearest);
+        loop_no_thread(group, local, being_follow_loop1, nearest);
         if (nearest->opposite_sex != 0L)
         {
             return;
@@ -1244,7 +1237,7 @@ static void being_follow(ape_simulation * sim,
         (local_social_graph[social_graph_index].entity_type == ENTITY_BEING) &&
         (!SOCIAL_GRAPH_ENTRY_EMPTY(local_social_graph, social_graph_index)))
     {
-        loop_no_thread(sim, local, being_follow_loop2, nearest);
+        loop_no_thread(group, local, being_follow_loop2, nearest);
     }
 }
 
@@ -1270,11 +1263,11 @@ void being_listen_loop_no_sim(simulated_being * other, void * data)
 
 /**
  * Listen for shouts
- * @param local_sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @param local_being Array index of the current being
  * @param data Unused here
  */
-void being_listen(ape_simulation * local_sim, simulated_being * local_being, void * data)
+void being_listen(simulated_group * group, simulated_being * local_being, void * data)
 {
     being_listen_struct bls;
     
@@ -1287,10 +1280,10 @@ void being_listen(ape_simulation * local_sim, simulated_being * local_being, voi
     {
         local_being->changes.shout[SHOUT_CTR]--;
     }
-    loop_being_no_sim(local_sim->beings, local_sim->num, being_listen_loop_no_sim, &bls);
+    loop_being_no_sim(group->beings, group->num, being_listen_loop_no_sim, &bls);
 }
 
-static void being_closest_loop(ape_simulation * sim, simulated_being * test_being, void * data)
+static void being_closest_loop(simulated_group * group, simulated_being * test_being, void * data)
 {
     being_nearest * nearest = (being_nearest *)data;
     n_vect2       difference_vector;
@@ -1329,10 +1322,10 @@ static void being_closest_loop(ape_simulation * sim, simulated_being * test_bein
 
 /**
  * Returns the closest beings
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @param local Array index of the current being
  */
-static void being_closest(ape_simulation * sim,
+static void being_closest(simulated_group * group,
                           simulated_being * local,
                           being_nearest * nearest)
 {
@@ -1341,12 +1334,12 @@ static void being_closest(ape_simulation * sim,
     nearest->same_sex_distance = 0xffffffff;
     nearest->opposite_sex = 0L;
     nearest->same_sex = 0L;
-    loop_no_thread(sim, local, being_closest_loop, nearest);
+    loop_no_thread(group, local, being_closest_loop, nearest);
 }
 
 /**
  * One being interacts with another
- * @param sim Pointer to the simulation
+ * @param group Pointer to the simulated_group
  * @param local Array index of the being
  * @param other_being Array index of the other being
  * @param other_being_distance Distance to the other being
@@ -1355,7 +1348,7 @@ static void being_closest(ape_simulation * sim,
  * @param speed The speed of the being
  * @param opposite_sex Non zero if the other being is the opposite sex
  */
-static void being_interact(ape_simulation * sim,
+static void being_interact(simulated_group * group,
                            simulated_being * local,
                            simulated_being    * other_being,
                            n_uint   other_being_distance,
@@ -1374,7 +1367,7 @@ static void being_interact(ape_simulation * sim,
         
         /** social networking */
         n_byte2 familiarity = 0;
-        n_int   being_index = social_network(sim, local, other_being, other_being_distance);
+        n_int   being_index = social_network(group, local, other_being, other_being_distance);
         
         being_delta(local, other_being, &delta_vector);
         
@@ -1391,7 +1384,7 @@ static void being_interact(ape_simulation * sim,
         
         if ((birth_days+AGE_OF_MATURITY) < today_days)
         {
-            if (social_groom(sim, local, other_being, other_being_distance, *awake, familiarity))
+            if (social_groom(group, local, other_being, other_being_distance, *awake, familiarity))
             {
                 *state |= BEING_STATE_GROOMING;
                 
@@ -1412,7 +1405,7 @@ static void being_interact(ape_simulation * sim,
                         being_register_movement(local, "speed is zero");
                     }
 #endif
-                    squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, sim);
+                    squabble_val = social_squabble(local, other_being, other_being_distance, local_is_female, group);
                     if (squabble_val != 0)
                     {
                         *state |= squabble_val;
@@ -1427,11 +1420,11 @@ static void being_interact(ape_simulation * sim,
             /* attraction and mating */
             if (opposite_sex != 0)
             {
-                *state |= social_mate(local, other_being, being_index, other_being_distance, sim);
+                *state |= social_mate(local, other_being, being_index, other_being_distance, group);
             }
             
             /* chat */
-            *state |= social_chat(local, other_being, being_index, sim);
+            *state |= social_chat(local, other_being, being_index, group);
         }
     }
 }
@@ -1443,7 +1436,7 @@ typedef struct
     simulated_being * being;
 } being_index_loop_struct;
 
-static void being_index_loop(ape_simulation * local_sim, simulated_being * local_being, void * data)
+static void being_index_loop(simulated_group * group, simulated_being * local_being, void * data)
 {
     being_index_loop_struct * bils = (being_index_loop_struct *) data;
     
@@ -1462,7 +1455,7 @@ static void being_index_loop(ape_simulation * local_sim, simulated_being * local
     }
 }
 
-n_int being_index(ape_simulation * sim, simulated_being * local)
+n_int being_index(simulated_group * group, simulated_being * local)
 {
     being_index_loop_struct value;
     
@@ -1470,7 +1463,7 @@ n_int being_index(ape_simulation * sim, simulated_being * local)
     value.being = local;
     value.counter = 0;
     
-    loop_no_thread(sim, 0L, being_index_loop, &value);
+    loop_no_thread(group, 0L, being_index_loop, &value);
     return value.return_value;
 }
 
@@ -1524,7 +1517,7 @@ static n_int being_temporary_speed(simulated_being* local, n_int * test_land, n_
     }
 }
 
-static n_int being_conception_child_mass(ape_simulation * sim, simulated_being * local, n_byte2 loc_state)
+static n_int being_conception_child_mass(simulated_group * group, simulated_being * local, n_byte2 loc_state)
 {
     n_int         birth_days = being_dob(local);
     n_int         today_days = land_date();
@@ -1549,26 +1542,26 @@ static n_int being_conception_child_mass(ape_simulation * sim, simulated_being *
             if (today_days > gestation_days)
             {
                 /** A mother could have multiple children, so only find the youngest */
-                simulated_being * being_child = being_find_child(sim, genetics, CARRYING_DAYS);
+                simulated_being * being_child = being_find_child(group, genetics, CARRYING_DAYS);
                 
                 /** Birth */
                 if (being_child == 0L)
                 {
-                    if((sim->num + 1) < sim->max)
+                    if((group->num + 1) < group->max)
                     {
-                        being_child = &(sim->beings[sim->num]);
+                        being_child = &(group->beings[group->num]);
                         
-                        if (being_init(sim->beings, (n_int)sim->num, being_child, local, 0L) == 0)
+                        if (being_init(group->beings, (n_int)group->num, being_child, local, 0L) == 0)
                         {
 #ifdef EPISODIC_ON
                             episodic_close(local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0);
 #endif
-                            being_create_family_links(local,being_child,sim);
-                            if (sim->ext_birth != 0)
+                            being_create_family_links(local, being_child, group);
+                            if (group->ext_birth != 0)
                             {
-                                sim->ext_birth(being_child, local,sim);
+                                group->ext_birth(being_child, local, group);
                             }
-                            sim->num++;
+                            group->num++;
                         }
                     }
                 }
@@ -1607,7 +1600,7 @@ static n_int being_conception_child_mass(ape_simulation * sim, simulated_being *
         /** child follows the mother */
         if ((birth_days + WEANING_DAYS) > today_days)
         {
-            simulated_being * mother = being_find_closest(sim, local, 1, 1);
+            simulated_being * mother = being_find_closest(group, local, 1, 1);
             if (mother != 0L)
             {
                 /** orient towards the mother */
@@ -1719,7 +1712,7 @@ static n_byte2 being_state_find(simulated_being * local, n_int az, n_int loc_s)
     return loc_state;
 }
 
-static void being_not_swimming(ape_simulation * sim, simulated_being * local, n_int * tmp_speed, being_nearest * nearest, n_int * loc_s, n_byte2 * loc_state)
+static void being_not_swimming(simulated_group * group, simulated_being * local, n_int * tmp_speed, being_nearest * nearest, n_int * loc_s, n_byte2 * loc_state)
 {
     n_genetics *  genetics = being_genetics(local);
     
@@ -1727,11 +1720,11 @@ static void being_not_swimming(ape_simulation * sim, simulated_being * local, n_
     *tmp_speed = (*tmp_speed * (GENE_SPEED(genetics)+8)) >> 3;
     
     /** is the being to which we are paying attention within view? */
-    being_follow(sim, local, nearest);
+    being_follow(group, local, nearest);
     if (nearest->opposite_sex == 0L)
     {
         /** Find the closest beings */
-        being_closest(sim, local, nearest);
+        being_closest(group, local, nearest);
     }
     
     /* TODO: SOCIAL_THRESHOLD should not be a macro, it should be a function returning n_int */
@@ -1739,13 +1732,13 @@ static void being_not_swimming(ape_simulation * sim, simulated_being * local, n_
     {
         n_int  awake = local->delta.awake;
         
-        being_interact(sim,
+        being_interact(group,
                        local,
                        nearest->same_sex, nearest->same_sex_distance,
                        &awake, loc_state,
                        loc_s, 0);
         
-        being_interact(sim,
+        being_interact(group,
                        local,
                        nearest->opposite_sex, nearest->opposite_sex_distance,
                        &awake, loc_state,
@@ -1753,7 +1746,7 @@ static void being_not_swimming(ape_simulation * sim, simulated_being * local, n_
     }
 }
 
-static void being_swimming(ape_simulation * sim, simulated_being * local, n_int * tmp_speed)
+static void being_swimming(simulated_group * group, simulated_being * local, n_int * tmp_speed)
 {
     n_uint          loop;
     n_genetics *  genetics = being_genetics(local);
@@ -1784,10 +1777,10 @@ static void being_swimming(ape_simulation * sim, simulated_being * local, n_int 
     being_remove_parasites(local, 1);
 }
 
-static void being_mass_calculation(ape_simulation * sim, simulated_being * local, n_byte2  loc_state)
+static void being_mass_calculation(simulated_group * group, simulated_being * local, n_byte2  loc_state)
 {
     n_int          loc_h      = being_height(local);
-    n_int child_mass = being_conception_child_mass(sim, local, loc_state);
+    n_int child_mass = being_conception_child_mass(group, local, loc_state);
     /** amount of body fat in kg */
     n_int fat_mass = GET_BODY_FAT(local);
     if (fat_mass > BEING_MAX_MASS_FAT_G)
@@ -1844,7 +1837,7 @@ void being_calculate_speed(simulated_being * local, n_int tmp_speed, n_byte2 loc
     being_set_speed(local, (n_byte)loc_s);
 }
 
-void being_cycle_awake(ape_simulation * sim, simulated_being * local)
+void being_cycle_awake(simulated_group * group, simulated_being * local)
 {
     n_int          loc_s      = being_speed(local);
     n_int          loc_h      = being_height(local);
@@ -1865,11 +1858,11 @@ void being_cycle_awake(ape_simulation * sim, simulated_being * local)
     /** If it sees water in the distance then turn */
     if (((loc_state & BEING_STATE_SWIMMING) != 0) || test_land)
     {
-        being_swimming(sim, local, &tmp_speed);
+        being_swimming(group, local, &tmp_speed);
     }
     else
     {
-        being_not_swimming(sim, local, &tmp_speed, &nearest, &loc_s, &loc_state);
+        being_not_swimming(group, local, &tmp_speed, &nearest, &loc_s, &loc_state);
     }
 #ifdef DEBUG_LACK_OF_MOVEMENT
     if (tmp_speed == 0)
@@ -1942,7 +1935,7 @@ void being_cycle_awake(ape_simulation * sim, simulated_being * local)
 #ifdef TERRITORY_ON
     being_territory_index(local);
 #endif
-    being_mass_calculation(sim, local, loc_state);
+    being_mass_calculation(group, local, loc_state);
 }
 
 void being_tidy_loop_no_sim(simulated_being * local_being, void * data)
@@ -2010,15 +2003,15 @@ void being_remove_external_set(n_int value)
     being_remove_external_value = value;
 }
 
-void being_remove_loop1(ape_simulation * local_sim, simulated_being * local_being, void * data)
+void being_remove_loop1(simulated_group * group, simulated_being * local_being, void * data)
 {
     if (being_energy_less_than(local_being, BEING_DEAD + 1))
     {
-        local_sim->ext_death(local_being,local_sim);
+        group->ext_death(local_being, group);
     }
 }
 
-void being_remove_loop2(ape_simulation * local_sim, simulated_being * local, void * data)
+void being_remove_loop2(simulated_group * group, simulated_being * local, void * data)
 {
     being_remove_loop2_struct * brls = (being_remove_loop2_struct *)data;
     
@@ -2033,7 +2026,7 @@ void being_remove_loop2(ape_simulation * local_sim, simulated_being * local, voi
     }
     else
     {
-        being_remains(local_sim, local);
+        being_remains(group, local);
         if (local == brls->reference)
         {
             brls->selected_died = 1;
@@ -2041,12 +2034,12 @@ void being_remove_loop2(ape_simulation * local_sim, simulated_being * local, voi
     }
 }
 
-being_remove_loop2_struct * being_remove_initial(ape_simulation * local_sim)
+being_remove_loop2_struct * being_remove_initial(simulated_group * group)
 {
     being_remove_loop2_struct * brls = (being_remove_loop2_struct *)memory_new(sizeof(being_remove_loop2_struct));
     
-    brls->reference = local_sim->select;
-    brls->being_count = local_sim->beings;
+    brls->reference = group->select;
+    brls->being_count = group->beings;
     brls->selected_died = 0;
     brls->count = 0;
     
