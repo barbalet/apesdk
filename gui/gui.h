@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -94,56 +94,54 @@ typedef enum
 
 #endif
 
-n_byte * draw_weather_grayscale(void);
+n_byte *draw_weather_grayscale( void );
 
-void vascular_draw(n_genetics * genetics,
-                   n_byte * buffer,
-                   n_vect2* img,
-                   n_vect2 *tp, n_vect2 * bp,
-                   n_byte thickness,
-                   n_byte clear,
-                   n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
-                   n_int hip_angle, n_int knee_angle,
-                   n_byte show_skeleton_keypoints);
+void vascular_draw( n_genetics *genetics,
+                    n_byte *buffer,
+                    n_vect2 *img,
+                    n_vect2 *tp, n_vect2 *bp,
+                    n_byte thickness,
+                    n_byte clear,
+                    n_int shoulder_angle, n_int elbow_angle, n_int wrist_angle,
+                    n_int hip_angle, n_int knee_angle,
+                    n_byte show_skeleton_keypoints );
 
-n_vect2 * draw_selected_location(void);
+n_vect2 *draw_selected_location( void );
 
-void draw_point(n_int x, n_int y);
+void draw_point( n_int x, n_int y );
 
-n_int draw_toggle_follow(void);
+n_int draw_toggle_follow( void );
 
-n_int draw_toggle_social_web(void);
+n_int draw_toggle_social_web( void );
 
-n_int draw_toggle_weather(void);
+n_int draw_toggle_weather( void );
 
-n_int draw_toggle_brain(void);
+n_int draw_toggle_brain( void );
 
-n_int draw_toggle_braincode(void);
+n_int draw_toggle_braincode( void );
 
-n_int draw_toggle_territory(void);
+n_int draw_toggle_territory( void );
 
-n_int draw_toggle_tide_daylight(void);
-n_int draw_toggle_tide_daylight_value(void);
+n_int draw_toggle_tide_daylight( void );
+n_int draw_toggle_tide_daylight_value( void );
 
-void  draw_terrain_coord(n_int * co_x, n_int * co_y);
+void  draw_terrain_coord( n_int *co_x, n_int *co_y );
 
-void draw_undraw_clear(void);
+void draw_undraw_clear( void );
 
-n_byte * draw_pointer(n_int which_one);
+n_byte *draw_pointer( n_int which_one );
 
-n_byte * draw_color_fit(void);
+n_byte *draw_color_fit( void );
 
-void draw_about(void);
+void draw_about( void );
 
-void draw_string(n_constant_string str, n_int off_x, n_int off_y, n_join * draw);
+void draw_string( n_constant_string str, n_int off_x, n_int off_y, n_join *draw );
 
-void  draw_window(n_int dim_x, n_int dim_y);
+void  draw_window( n_int dim_x, n_int dim_y );
 
-void  draw_cycle(n_byte size_changed, n_byte kind);
+void  draw_cycle( n_byte size_changed, n_byte kind );
 
-n_byte * draw_offscreen(n_byte * value);
-
-n_int draw_control_font_scaling(void);
+n_byte *draw_offscreen( n_byte *value );
 
 #endif /* SIMULATEDAPE_GUI_H */
 

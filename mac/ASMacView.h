@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -33,31 +33,13 @@
  
  ****************************************************************/
 
-#import <Cocoa/Cocoa.h>
+//#import <Cocoa/Cocoa.h>
 
 
 //@import MetalKit;
 
 
-#ifdef MUSHROOM
 #import "ASShared.h"
-#else
-#ifndef SIMULATED_PLANET
-#ifdef WARFARE
-#import "ASShared.h"
-#else
-#import "Simulated_Ape-Swift.h"
-#endif
-#else
-#import "ASShared.h"
-#ifndef SIMULATED_PLANET
-#import "../apple/ASDefaults.h"
-#define USE_SIMULATED_DEFAULTS
-#endif
-#endif
-#endif
-
-
 #import "ASMacCG.h"
 
 @interface ASMacView :ASMacCG //MTKView
@@ -68,8 +50,6 @@
     ASDefaults    *defaults;
 #endif
 }
-
-@property (nonatomic, strong) ASShared* shared;
 
 - (void) startView;
 - (void) sharedReady;
@@ -82,8 +62,6 @@
 - (void) awakeFromNib;
 
 - (void) startEverything:(BOOL)headyLifting;
-
-- (void) quitProcedure;
 
 - (IBAction) menuQuit:(id) sender;
 - (IBAction) aboutDialog:(id) sender;

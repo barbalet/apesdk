@@ -23,4 +23,4 @@ In the test directory:
 
 To contact Tom Barbalet directly email;
 
-   `tom at apesdk dot com`
+   `barbalet at gmail dot com`

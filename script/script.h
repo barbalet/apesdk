@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -102,7 +102,7 @@ typedef struct
 } n_ae_error;
 
 /** \brief apescript_errors track the errors in ApeScript and additional text for user-manual level documentation */
-static const n_ae_error apescript_errors[]=
+static const n_ae_error apescript_errors[] =
 {
     {AE_UNKNOWN_ERROR,                     "Unknown error",                    "Please contact tom at apesim dot io"},
     {AE_NUMBER_EXPECTED,                   "Number expected",                  "A non-numeric character is included in a number string."},
@@ -159,15 +159,15 @@ static const n_ae_error apescript_errors[]=
 
 #define IO_LOWER_CHAR(value)   if(ASCII_UPPERCASE(value)) (value) += 'a' - 'A'
 
-enum PRIMARY_APESCRIPT
+typedef enum
 {
     VARIABLE_FUNCTION = 0,
     VARIABLE_RUN,
     VARIABLE_WHILE,
     VARIABLE_IF
-};
+} PRIMARY_APESCRIPT;
 
-enum SYNTAX_APESCRIPT
+typedef enum
 {
     SYNTAX_MINUS = 0,
     SYNTAX_ADDITION,
@@ -193,31 +193,31 @@ enum SYNTAX_APESCRIPT
     SYNTAX_GREATER_EQUAL,
 
     SYNTAX_EQUALS
-};
+} SYNTAX_APESCRIPT;
 
-enum SYNTAX_ADDITIONAL_BRAINCODE
+typedef enum
 {
     SYNTAX_MOVE = SYNTAX_EQUALS + 1,
     SYNTAX_JUMP_TO,
     SYNTAX_JUMP_EQUAL_ZERO,
     SYNTAX_DATA
-};
+} SYNTAX_ADDITIONAL_BRAINCODE;
 
-enum APESCRIPT_INTERPRET_TYPES
+typedef enum
 {
-    APESCRIPT_OPEN_BRACKET =  ('('),
-    APESCRIPT_CLOSE_BRACKET = (')'),
-    APESCRIPT_OPEN_BRACE =    ('{'),
-    APESCRIPT_CLOSE_BRACE =   ('}'),
-    APESCRIPT_OPERATOR =      ('='),
-    APESCRIPT_NUMBER =        ('n'),
-    APESCRIPT_TEXT =          ('t'),
-    APESCRIPT_SEMICOLON =     (';'),
-    APESCRIPT_FAILURE =       ('F'),
-    APESCRIPT_FUNCTION =      ('f'),
-    APESCRIPT_RUN =           ('r'),
-    APESCRIPT_STRING =        ('"')
-};
+    APESCRIPT_OPEN_BRACKET =  ( '(' ),
+    APESCRIPT_CLOSE_BRACKET = ( ')' ),
+    APESCRIPT_OPEN_BRACE =    ( '{' ),
+    APESCRIPT_CLOSE_BRACE =   ( '}' ),
+    APESCRIPT_OPERATOR =      ( '=' ),
+    APESCRIPT_NUMBER =        ( 'n' ),
+    APESCRIPT_TEXT =          ( 't' ),
+    APESCRIPT_SEMICOLON =     ( ';' ),
+    APESCRIPT_FAILURE =       ( 'F' ),
+    APESCRIPT_FUNCTION =      ( 'f' ),
+    APESCRIPT_RUN =           ( 'r' ),
+    APESCRIPT_STRING =        ( '"' )
+} APESCRIPT_INTERPRET_TYPES;
 
 #define ASCII_QUOTE(num)      ((num) == '"')
 
@@ -242,8 +242,8 @@ enum APESCRIPT_INTERPRET_TYPES
 
 #define	SIZEOF_NUMBER_WRITE      (sizeof(n_int))
 
-void io_int_to_bytes(n_int value, n_byte * bytes);
-n_int io_bytes_to_int(n_byte * bytes);
+void io_int_to_bytes( n_int value, n_byte *bytes );
+n_int io_bytes_to_int( n_byte *bytes );
 
 #define	VARIABLE_INPUT(num,code)		((num)>((code)->input_greater))
 #define	VARIABLE_SPECIAL(num,code)	    ((num)<((code)->special_less))
@@ -268,7 +268,7 @@ variable array.
 @discussion The two primay interfaces in ApeScript relate to the getting and
 setting of information. This function covers the setting of information.
 */
-typedef n_int (script_input )(void * individual, n_byte kind, n_int value);
+typedef n_int ( script_input )( void *individual, n_byte kind, n_int value );
 
 /*! @typedef
 @field code The pointer to the n_interpret struct.
@@ -278,9 +278,9 @@ typedef n_int (script_input )(void * individual, n_byte kind, n_int value);
 @discussion The two primay interfaces in ApeScript relate to the getting and
 setting of information. This function covers the getting of information.
 */
-typedef n_int (script_output)(void * code, void * individual, n_byte * kind, n_int * number);
+typedef n_int ( script_output )( void *code, void *individual, n_byte *kind, n_int *number );
 
-typedef void (script_external)(void * individual, void * structure, void * data);
+typedef void ( script_external )( void *individual, void *structure, void *data );
 
 #define	VARIABLE_WIDTH		    32
 
@@ -317,7 +317,7 @@ typedef struct
     n_int           interpret_location; /* per entry */
     n_int           leave;              /* per entry */
     n_int           localized_leave;    /* per entry */
-    void *          interpret_data;     /* per entry */
+    void           *interpret_data;     /* per entry */
     n_int		    variable_references[VARIABLE_MAX]; /* per entry */
     n_int	  	    braces_count;        /* per entry */
     n_brace		    braces[BRACES_MAX];  /* per entry */
@@ -327,31 +327,31 @@ typedef struct
 
 /* used for stripping ApeScript errors for documentation */
 
-n_int apescript_error(n_individual_interpret * individual, AE_ENUM value, n_constant_string location, n_int line_number);
+n_int apescript_error( n_individual_interpret *individual, AE_ENUM value, n_constant_string location, n_int line_number );
 
-n_interpret *	parse_convert(n_file * input, n_int main_entry, variable_string * variables);
+n_interpret 	*parse_convert( n_file *input, n_int main_entry, variable_string *variables );
 
-void interpret_individual(n_individual_interpret * individual);
+void interpret_individual( n_individual_interpret *individual );
 
-void  interpret_cleanup(n_interpret ** to_clean);
-n_int interpret_cycle(n_interpret * code, n_individual_interpret * individual, n_int exit_offset,
-                      void * structure, void * data,
-                      script_external * start, script_external * end);
+void  interpret_cleanup( n_interpret **to_clean );
+n_int interpret_cycle( n_interpret *code, n_individual_interpret *individual, n_int exit_offset,
+                       void *structure, void *data,
+                       script_external *start, script_external *end );
 
 
 #ifdef	SCRIPT_DEBUG
 
-n_file * scdebug_file_ready(void);
-void     scdebug_file_cleanup(void);
+n_file *scdebug_file_ready( void );
+void     scdebug_file_cleanup( void );
 
-void     scdebug_string(void * ptr, n_constant_string string);
-void     scdebug_int(void * ptr, n_int number);
-void     scdebug_newline(void * ptr);
-void     scdebug_tabstep(void * ptr, n_int steps);
-n_string scdebug_variable(n_int variable);
+void     scdebug_string( void *ptr, n_constant_string string );
+void     scdebug_int( void *ptr, n_int number );
+void     scdebug_newline( void *ptr );
+void     scdebug_tabstep( void *ptr, n_int steps );
+n_string scdebug_variable( n_int variable );
 
-void     scdebug_writeon(void * ptr);
-void     scdebug_writeoff(void * ptr);
+void     scdebug_writeon( void *ptr );
+void     scdebug_writeoff( void *ptr );
 
 #define	SC_DEBUG_STRING(ptr, string) scdebug_string(ptr, string)
 #define SC_DEBUG_NUMBER(ptr, number) scdebug_int(ptr, number)

@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,7 +35,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#include "shared.h"
+#include "../shared.h"
 
 @interface ASShared : NSObject
 
@@ -45,9 +45,11 @@
 
 - (BOOL) start;
 
+- (long) sharedId;
+
 - (void) about;
 
-- (void) draw:(unsigned char *)buffer width:(NSInteger)width height:(NSInteger)height;
+- (n_byte *) drawWidth:(NSInteger)width height:(NSInteger)height;
 
 - (void) keyReceived:(NSUInteger)key;
 
@@ -110,7 +112,13 @@
 - (void) savedFileName:(NSString*)name;
 
 - (BOOL) openFileName:(NSString*)name isScript:(BOOL)scriptFile;
-    
+
+- (BOOL) menuFollow;
+
+- (BOOL) menuSocialWeb;
+
+- (void) menuCommandLineExecute;
+
 @property (nonatomic, assign, readonly) NSInteger  identification;
 
 @end

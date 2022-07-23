@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,20 +35,8 @@
 
 #import "ASMacView.h"
 
-#ifdef MUSHROOM
-#import "ASShared.h"
-#else
-#ifndef SIMULATED_PLANET
-#ifdef WARFARE
 #import "ASShared.h"
 #import "AppDelegate.h"
-#else
-#import "Simulated_Ape-Swift.h"
-#endif
-#else
-#import "ASShared.h"
-#endif
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,8 +68,6 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 
 - (CVReturn) renderTime:(const CVTimeStamp *)inOutputTime
 {
-    [self.shared cycle];
-
     __weak ASMacView *weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         weakSelf.needsDisplay = YES;
@@ -118,7 +104,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 #ifdef USE_SIMULATED_DEFAULTS
     defaults = [[ASDefaults alloc] init];
 #endif
-#ifdef WARFARE
+    
     {
         AppDelegate *appDelegate = (AppDelegate *)[[NSApplication sharedApplication] delegate];
         
@@ -127,24 +113,6 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
             [appDelegate addShared:self.shared];
         }
     }
-#endif
-
-}
-
-- (void) quitProcedure
-{
-    CVDisplayLinkStop(displayLink);
-#ifdef USE_SIMULATED_DEFAULTS
-    NSLog(@"Defaults saving");
-    [defaults saveSimulation];
-#endif
-    NSLog(@"Quitting");
-
-    [self.shared close];
-    
-    NSLog(@"Quit");
-
-    exit(0);
 }
 
 - (IBAction) menuQuit:(id) sender

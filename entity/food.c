@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -72,77 +72,77 @@
  * @param local pointer to the ape
  * @return Energy absorbed
  */
-n_int food_absorption(simulated_being * local, n_int max_energy, n_byte food_type)
+n_int food_absorption( simulated_being *local, n_int max_energy, n_byte food_type )
 {
-    n_genetics * genetics = being_genetics(local);
+    n_genetics *genetics = being_genetics( local );
 
-    n_int   vegetable = GENE_ENERGY_FROM_VEGETABLES(genetics);
-    n_int   fruit = GENE_ENERGY_FROM_FRUITS(genetics);
-    n_int   shellfish = GENE_ENERGY_FROM_SHELLFISH(genetics);
-    n_int   seawood = GENE_ENERGY_FROM_SEAWEED(genetics);
+    n_int   vegetable = GENE_ENERGY_FROM_VEGETABLES( genetics );
+    n_int   fruit = GENE_ENERGY_FROM_FRUITS( genetics );
+    n_int   shellfish = GENE_ENERGY_FROM_SHELLFISH( genetics );
+    n_int   seawood = GENE_ENERGY_FROM_SEAWEED( genetics );
 
-    n_int   bird_eggs = GENE_ENERGY_FROM_BIRD_EGGS(genetics);
-    n_int   lizard_eggs = GENE_ENERGY_FROM_LIZARD_EGGS(genetics);
+    n_int   bird_eggs = GENE_ENERGY_FROM_BIRD_EGGS( genetics );
+    n_int   lizard_eggs = GENE_ENERGY_FROM_LIZARD_EGGS( genetics );
 
     n_int        return_value = 0;
     /** note that the absorbition for different foods is normalised */
     n_int absorb_denom = 1 + vegetable + fruit + seawood + bird_eggs + lizard_eggs;
 
     /** ingest pathogens from certain foods */
-    being_ingest_pathogen(local, food_type);
+    immune_ingest_pathogen( &local->immune_system, food_type );
 
-    switch (food_type)
+    switch ( food_type )
     {
     case FOOD_VEGETABLE:
 #ifdef DEBUG_LACK_OF_MOVEMENT
-        {
-            n_string_block information_string;
-            sprintf(information_string, "vegetable %ld absorbtion %ld food", vegetable, absorb_denom);
-            being_register_movement(local, information_string);
-        }
+    {
+        n_string_block information_string;
+        sprintf( information_string, "vegetable %ld absorbtion %ld food", vegetable, absorb_denom );
+        being_register_movement( local, information_string );
+    }
 #endif
-        return_value = (vegetable << 4) / absorb_denom;
-        break;
+    return_value = ( vegetable << 4 ) / absorb_denom;
+    break;
     case FOOD_FRUIT:
 #ifdef DEBUG_LACK_OF_MOVEMENT
-        being_register_movement(local, "fruit food");
+        being_register_movement( local, "fruit food" );
 #endif
-        return_value = (fruit << 4) / absorb_denom;
+        return_value = ( fruit << 4 ) / absorb_denom;
         break;
     case FOOD_SHELLFISH:
 #ifdef DEBUG_LACK_OF_MOVEMENT
-        being_register_movement(local, "shellfish food");
+        being_register_movement( local, "shellfish food" );
 #endif
-        return_value = (shellfish << 4) / absorb_denom;
+        return_value = ( shellfish << 4 ) / absorb_denom;
         break;
     case FOOD_SEAWEED:
 #ifdef DEBUG_LACK_OF_MOVEMENT
-        being_register_movement(local, "seaweed food");
+        being_register_movement( local, "seaweed food" );
 #endif
-        return_value = (seawood << 4) / absorb_denom;
+        return_value = ( seawood << 4 ) / absorb_denom;
         break;
     case FOOD_BIRD_EGGS:
 #ifdef DEBUG_LACK_OF_MOVEMENT
-        being_register_movement(local, "bird egg food");
+        being_register_movement( local, "bird egg food" );
 #endif
-        return_value = (seawood << 4) / absorb_denom;
+        return_value = ( seawood << 4 ) / absorb_denom;
         break;
     case FOOD_LIZARD_EGGS:
 #ifdef DEBUG_LACK_OF_MOVEMENT
-        being_register_movement(local, "lizard egg food");
+        being_register_movement( local, "lizard egg food" );
 #endif
-        return_value = (seawood << 4) / absorb_denom;
+        return_value = ( seawood << 4 ) / absorb_denom;
         break;
     default:
 #ifdef DEBUG_LACK_OF_MOVEMENT
-        being_register_movement(local, "no food");
+        being_register_movement( local, "no food" );
 #endif
         return 0;
     }
 
-    return_value = (max_energy * (1 + return_value) >> 3);
+    return_value = ( max_energy * ( 1 + return_value ) >> 3 );
 
-    if (return_value > 320)
+    if ( return_value > 320 )
     {
         return_value = 320; /**< can only eat so much in one go */
     }
@@ -156,12 +156,12 @@ n_int food_absorption(simulated_being * local, n_int max_energy, n_byte food_typ
  * @param kind The type of food
  * @return The amount of food of the given type at this location
  */
-static n_int food_location(n_int loc_x,
-                           n_int loc_y,
-                           n_int kind)
+static n_int food_location( n_int loc_x,
+                            n_int loc_y,
+                            n_int kind )
 {
-    return land_operator_interpolated(loc_x, loc_y,
-                                      (n_byte*)&operators[kind - VARIABLE_BIOLOGY_AREA]);
+    return land_operator_interpolated( loc_x, loc_y,
+                                       ( n_byte * )&operators[kind - VARIABLE_BIOLOGY_AREA] );
 }
 
 /**
@@ -172,25 +172,25 @@ static n_int food_location(n_int loc_x,
  * @param trees Returned value for trees
  * @param bush Returned value for bushes
  */
-void food_values(n_int loc_x,
-                 n_int loc_y,
-                 n_int *grass, n_int *trees, n_int *bush)
+void food_values( n_int loc_x,
+                  n_int loc_y,
+                  n_int *grass, n_int *trees, n_int *bush )
 {
     /* TODO include bird and lizard eggs */
 
     /** grass at this location */
     *grass =
-        food_location(loc_x, loc_y, VARIABLE_BIOLOGY_GRASS)+OFFSET_GRASS;
+        food_location( loc_x, loc_y, VARIABLE_BIOLOGY_GRASS ) + OFFSET_GRASS;
 
     /** trees at this location */
     *trees =
-        food_location(loc_x, loc_y, VARIABLE_BIOLOGY_TREE);
+        food_location( loc_x, loc_y, VARIABLE_BIOLOGY_TREE );
 
     /** bushes at this location */
     *bush =
-        food_location(loc_x, loc_y, VARIABLE_BIOLOGY_BUSH)+OFFSET_BUSH;
+        food_location( loc_x, loc_y, VARIABLE_BIOLOGY_BUSH ) + OFFSET_BUSH;
 
-    *grass += LAND_DITHER(*grass, *trees, *bush);
+    *grass += LAND_DITHER( *grass, *trees, *bush );
 }
 
 /**
@@ -203,23 +203,23 @@ void food_values(n_int loc_x,
 static n_byte food_eat_land(
     n_int loc_x,
     n_int loc_y,
-    n_int * energy)
+    n_int *energy )
 {
     n_byte food_type = FOOD_VEGETABLE;
     n_int grass, trees, bush;
 
     /* TODO Handle this logic centrally - including the int values in the function not outside */
 
-    food_values(loc_x,loc_y,&grass, &trees, &bush);
+    food_values( loc_x, loc_y, &grass, &trees, &bush );
 
     /** which is the dominant form of vegetation in this area? */
-    if ((grass > bush) && (grass > trees))
+    if ( ( grass > bush ) && ( grass > trees ) )
     {
         *energy = ENERGY_GRASS;
     }
     else
     {
-        if (bush > trees)
+        if ( bush > trees )
         {
             *energy = ENERGY_BUSH;
         }
@@ -242,34 +242,34 @@ static n_byte food_eat_land(
 static n_byte food_intertidal(
     n_int loc_x,
     n_int loc_y,
-    n_int * energy)
+    n_int *energy )
 {
     n_byte food_type = FOOD_VEGETABLE;
     n_int seaweed, rockpool, beach;
 
     /** seaweed at this location */
     seaweed =
-        food_location(loc_x, loc_y, VARIABLE_BIOLOGY_SEAWEED);
+        food_location( loc_x, loc_y, VARIABLE_BIOLOGY_SEAWEED );
 
     /** rockpools at this location */
     rockpool =
-        food_location(loc_x, loc_y, VARIABLE_BIOLOGY_ROCKPOOL);
+        food_location( loc_x, loc_y, VARIABLE_BIOLOGY_ROCKPOOL );
 
     /** beach at this location */
     beach =
-        food_location(loc_x, loc_y, VARIABLE_BIOLOGY_BEACH);
+        food_location( loc_x, loc_y, VARIABLE_BIOLOGY_BEACH );
 
-    beach += LAND_DITHER(seaweed, rockpool, beach);
+    beach += LAND_DITHER( seaweed, rockpool, beach );
 
     /** which is the dominant form of food in this area? */
-    if ((seaweed > rockpool) && (seaweed > beach))
+    if ( ( seaweed > rockpool ) && ( seaweed > beach ) )
     {
         *energy = ENERGY_SEAWEED;
         food_type = FOOD_SEAWEED;
     }
     else
     {
-        if (rockpool > beach)
+        if ( rockpool > beach )
         {
             *energy = ENERGY_SHELLFISH;
             food_type = FOOD_SHELLFISH;
@@ -290,23 +290,23 @@ n_int food_eat(
     n_int loc_x,
     n_int loc_y,
     n_int az,
-    n_byte * food_type,
-    simulated_being * local_being)
+    n_byte *food_type,
+    simulated_being *local_being )
 {
     n_int max_energy = BEING_DEAD;
 
     *food_type = FOOD_VEGETABLE;
 
-    if (az > TIDE_MAX)
+    if ( az > TIDE_MAX )
     {
         /** above the high water mark */
-        *food_type = food_eat_land(loc_x, loc_y, &max_energy);
+        *food_type = food_eat_land( loc_x, loc_y, &max_energy );
     }
     else
     {
         /** in the intertidal zone */
-        *food_type = food_intertidal(loc_x, loc_y, &max_energy);
+        *food_type = food_intertidal( loc_x, loc_y, &max_energy );
     }
 
-    return food_absorption(local_being, max_energy, *food_type);
+    return food_absorption( local_being, max_energy, *food_type );
 }

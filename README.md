@@ -1,5 +1,3 @@
-[![Open Source Helpers](https://www.codetriage.com/barbalet/apesdk/badges/users.svg)](https://www.codetriage.com/barbalet/apesdk)
-
 The ApeSDK is a series of simulations that work together. It is primarily written in C and can be built with Mac, Window, Linux and iOS GUIs.
 
 ### History
@@ -35,23 +33,21 @@ The SDK also features a full-stack scripting language and a series of low-level 
 
 The ApeSDK is currently used in:
 
-* **Simulated Ape** - a detailed simulation app for Mac and Windows (formerly known as *Nervana* and *Noble Ape*),
+* **[Simulated Ape](https://gitlab.com/barbalet/simulatedape/)** - a detailed simulation app for Mac and Windows (formerly known as *Nervana* and *Noble Ape*),
 
 * **ApeSim** - an exploratory iOS app based on a UI-stripped-down version of *Simulated Ape*,
-
-* **Simulated Urban** - a detailed urban environment simulation with the organic Ape agents interacting through a cityscape, (an iOS version called *UrbSim* is planned),
 
 * **Simulated Earth** - a detailed planet simulation,
 
 * **Just Plain Chaos** - a skirmish war-game testing for the podcast, *My Rules Are Better*,
 
-* **Simulated War** - a pitched battle simulation, and,
+* **[Simulated Urban](https://https://gitlab.com/barbalet/urban/)** - a detailed urban environment simulation with the organic agents interacting through a cityscape,
 
-* **Level Ape** - audio leveling software.
+* **[London1940.org](https://london1940.org)** - London in 1940 with No Chance of Invasion.
 
 ### ApeSDK License
 
-Copyright 1996-2020 Tom Barbalet. All rights reserved.
+Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  

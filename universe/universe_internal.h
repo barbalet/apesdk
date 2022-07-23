@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -111,17 +111,17 @@
 
 enum file_section_type
 {
-    FIL_VER = (0x10),
-    FIL_LAN = (0x20),
-    FIL_BEI = (0x30),
-    FIL_SOE = (0x40),
-    FIL_EPI = (0x50),
-    FIL_WEA = (0x60),
-    FIL_BRA = (0x70),
-    FIL_END = (0x80)
+    FIL_VER = ( 0x10 ),
+    FIL_LAN = ( 0x20 ),
+    FIL_BEI = ( 0x30 ),
+    FIL_SOE = ( 0x40 ),
+    FIL_EPI = ( 0x50 ),
+    FIL_WEA = ( 0x60 ),
+    FIL_BRA = ( 0x70 ),
+    FIL_END = ( 0x80 )
 };
 
-static const simulated_file_entry simulated_file_format[]=
+static const simulated_file_entry simulated_file_format[] =
 {
 #ifdef USE_FIL_VER
     {"simul{", FIL_VER,  0, 0,                  "Simulation Version Definition"},
@@ -140,7 +140,7 @@ static const simulated_file_entry simulated_file_format[]=
      */
 #ifdef USE_FIL_WEA
     {"weath{", FIL_WEA,  0, 0},
-    {"press=", FIL_WEA | FILE_TYPE_BYTE,    sizeof(n_c_int),    0},
+    {"press=", FIL_WEA | FILE_TYPE_BYTE,    sizeof( n_c_int ),    0},
 #endif
 
 #ifndef REDUCE_FILE /* FILE_TYPE_PACKED has a different form - no offset and the number is the size of the PACKED_DATA_BLOCK units */
@@ -154,10 +154,10 @@ static const simulated_file_entry simulated_file_format[]=
     {"speed=", FIL_BEI | FILE_TYPE_BYTE,  1, 5, "Speed traveling"},    /*n_byte	speed;*/
     {"energ=", FIL_BEI | FILE_TYPE_BYTE2, 1, 6, "Energy within"},   /*n_byte2	energy;*/
     {"datob=", FIL_BEI | FILE_TYPE_BYTE4, 1, 8, "Date of birth in days and millenia"},    /*n_byte2	date_of_birth[2];*/
-    {"rando=", FIL_BEI | FILE_TYPE_BYTE2, 2, 12,"Random within"},    /*n_byte2 seed[2];*/
-    {"state=", FIL_BEI | FILE_TYPE_BYTE2, 1, 16,"State description"},    /*n_byte2	state;*/
+    {"rando=", FIL_BEI | FILE_TYPE_BYTE2, 2, 12, "Random within"},   /*n_byte2 seed[2];*/
+    {"state=", FIL_BEI | FILE_TYPE_BYTE2, 1, 16, "State description"},   /*n_byte2	state;*/
 
-    {"brast=", FIL_BEI | FILE_TYPE_BYTE2, 6, 18,"Brain state values"},    /*n_byte2	brain_state[6];*/
+    {"brast=", FIL_BEI | FILE_TYPE_BYTE2, 6, 18, "Brain state values"},   /*n_byte2	brain_state[6];*/
 
     {"heigt=", FIL_BEI | FILE_TYPE_BYTE2, 1, 30, "Height"},    /*n_byte2	height;*/
     {"masss=", FIL_BEI | FILE_TYPE_BYTE2, 1, 32, "Mass"},    /*n_byte2	mass;*/
@@ -178,7 +178,7 @@ static const simulated_file_entry simulated_file_format[]=
 
     {"fetag=", FIL_BEI | FILE_TYPE_BYTE2, CHROMOSOMES * 2, 88, "Father genetics"}, /*n_genetics fetal_genetics[CHROMOSOMES];*/
 
-    {"fathn=", FIL_BEI | FILE_TYPE_BYTE , 2, 104, "Father family names"}, /*n_byte  father_name[2];*/
+    {"fathn=", FIL_BEI | FILE_TYPE_BYTE, 2, 104, "Father family names"},  /*n_byte  father_name[2];*/
 
 
     {"sosim=", FIL_BEI | FILE_TYPE_BYTE2, 4, 108, "Social simulation values"}, /* n_byte2 social simulation values x, y, nx, ny */
@@ -192,7 +192,7 @@ static const simulated_file_entry simulated_file_format[]=
     {"chigx=", FIL_BEI | FILE_TYPE_BYTE2, 1, 146, "Child Generation Max"},
     {"chign=", FIL_BEI | FILE_TYPE_BYTE2, 1, 148, "Child Generation Min"},
 #ifdef TERRITORY_ON
-    {"terit=", FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES/2, 150, "Territory information"},
+    {"terit=", FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES / 2, 150, "Territory information"},
 #endif
 #ifdef IMMUNE_ON
     {"immun=", FIL_BEI | FILE_TYPE_BYTE, IMMUNE_BYTES, 406, "Immune system information"},
@@ -200,7 +200,7 @@ static const simulated_file_entry simulated_file_format[]=
 
 #ifdef BRAINCODE_ON
     {"brreg=", FIL_BEI | FILE_TYPE_BYTE, BRAINCODE_PSPACE_REGISTERS, 451, "Brain code register"},
-    {"brpro=", FIL_BEI | FILE_TYPE_BYTE, (sizeof(simulated_ibrain_probe)*BRAINCODE_PROBES), 454, "Brain code probe"},
+    {"brpro=", FIL_BEI | FILE_TYPE_BYTE, ( sizeof( simulated_ibrain_probe )*BRAINCODE_PROBES ), 454, "Brain code probe"},
 #endif
 
 #endif
@@ -245,14 +245,11 @@ static const simulated_file_entry simulated_file_format[]=
     /*    {"brdat=", FIL_BRA | DONTFILE_TYPE_PACKED, DOUBLE_BRAIN/PACKED_DATA_BLOCK, 1 },*/
 #endif
 
-    {{0, 0, 0, 0, 0, 0, 0},0, 0, 0, 0L}
+    {{0, 0, 0, 0, 0, 0, 0}, 0, 0, 0, 0L}
 
 };
 
 #define	TRACK_BRAIN(loc,lx,ly,lz)	((loc)[(lx)|((ly)<<5)|((lz)<<10)])
 
-/* functions */
-
-n_int command_executing(void);
 
 #endif /* SIMULATEDAPE_UNIVERSE_INTERNAL_H */

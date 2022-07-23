@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -43,15 +43,6 @@
 #define OFFSET_GRASS    40
 #define OFFSET_BUSH     14
 
-#define IMMUNE_FIT                            5
-#define MIN_ANTIBODIES                        16
-#define MIN_ANTIGENS                          8
-#define PATHOGEN_TRANSMISSION_PROB            1000
-#define PATHOGEN_ENVIRONMENT_PROB             100
-#define PATHOGEN_MUTATION_PROB                100
-#define ANTIBODY_DEPLETION_PROB               100
-#define ANTIBODY_GENERATION_PROB(bei)         (being_energy(bei))
-
 enum featureset_members
 {
     FEATURESET_PIGMENTATION,
@@ -66,7 +57,7 @@ enum featureset_members
     FEATURESET_EYEBROW_SHAPE,
     FEATURESET_MOUTH_SHAPE,
     FEATURESET_TERRITORY,
-    
+
     FEATURESET_FEATURE_SET,
     FEATURESET_SIZE
 };
@@ -188,74 +179,72 @@ enum social_action_type
     SOCIAL_ACTIONS
 };
 
-n_int food_absorption(simulated_being * local, n_int max_energy, n_byte food_type);
+n_int food_absorption( simulated_being *local, n_int max_energy, n_byte food_type );
 
-void food_values(n_int loc_x,
-                 n_int loc_y,
-                 n_int *grass, n_int *trees, n_int *bush);
+void food_values( n_int loc_x,
+                  n_int loc_y,
+                  n_int *grass, n_int *trees, n_int *bush );
 
-n_int genetics_compare(n_genetics * genetics_a, n_genetics * genetics_b);
-void  genetics_zero(n_genetics * genetics_a);
+n_int genetics_compare( n_genetics *genetics_a, n_genetics *genetics_b );
+void  genetics_zero( n_genetics *genetics_a );
 
-void social_action(simulated_being * meeter_being, simulated_being * met_being, n_byte action);
+void social_action( simulated_being *meeter_being, simulated_being *met_being, n_byte action );
 
-n_int get_simulated_isocial(simulated_being * meeter_being, simulated_being * met_being);
+n_int get_simulated_isocial( simulated_being *meeter_being, simulated_being *met_being );
 
 n_int episodic_met_being_celebrity(
-    simulated_being * meeter_being,
-    simulated_being * met_being);
+    simulated_being *meeter_being,
+    simulated_being *met_being );
 
 void episodic_store_memory(
-    simulated_being * local,
+    simulated_being *local,
     being_episodic_event_type event,
     AFFECT_TYPE affect,
     n_byte2 name1, n_byte2 family1,
-    n_byte2 name2, n_byte2 family2, n_byte2 arg);
+    n_byte2 name2, n_byte2 family2, n_byte2 arg );
 
 void episodic_interaction(
-    simulated_being * local,
-    simulated_being * other,
+    simulated_being *local,
+    simulated_being *other,
     being_episodic_event_type event,
     AFFECT_TYPE affect,
-    n_byte2 arg);
+    n_byte2 arg );
 
 n_byte episodic_intention(
-    simulated_being * local,
+    simulated_being *local,
     n_int episode_index,
     n_byte2 mins_ahead,
-    n_byte args);
+    n_byte args );
 
 n_byte episodic_anecdote(
-    simulated_being * local,
-    simulated_being * other);
+    simulated_being *local,
+    simulated_being *other );
 
-void being_init_braincode(simulated_being * local,
-                          simulated_being * other,
-                          n_byte friend_foe,
-                          n_byte internal);
+void being_init_braincode( simulated_being *local,
+                           simulated_being *other,
+                           n_byte friend_foe,
+                           n_byte internal );
 
-n_byte get_braincode_instruction(simulated_being * local_being);
+n_byte get_braincode_instruction( simulated_being *local_being );
 
-void being_ingest_pathogen(simulated_being * local, n_byte food_type);
+n_int being_posture_under( simulated_being *value, enum posture_type post );
 
-n_int being_posture_under(simulated_being * value, enum posture_type post);
+void being_honor_inc_dec( simulated_being *inc, simulated_being *dec );
 
-void being_honor_inc_dec(simulated_being * inc, simulated_being * dec);
+void being_honor_swap( simulated_being *victor, simulated_being *vanquished );
 
-void being_honor_swap(simulated_being * victor, simulated_being * vanquished);
+n_int being_honor_compare( simulated_being *first, simulated_being *second );
 
-n_int being_honor_compare(simulated_being * first, simulated_being * second);
+void being_unpack_family( n_byte2 name, n_byte *values );
 
-void being_unpack_family(n_byte2 name, n_byte * values);
+void being_remove_parasites( simulated_being *value, n_int number_of_parasites );
 
-void being_remove_parasites(simulated_being * value, n_int number_of_parasites);
+inventory_type being_carried( simulated_being *value, BODY_INVENTORY_TYPES location );
+void being_drop( simulated_being *value, BODY_INVENTORY_TYPES location );
+void being_take( simulated_being *value, BODY_INVENTORY_TYPES location, inventory_type object );
 
-enum inventory_type being_carried(simulated_being * value, enum BODY_INVENTORY_TYPES location);
-void being_drop(simulated_being * value, enum BODY_INVENTORY_TYPES location);
-void being_take(simulated_being * value, enum BODY_INVENTORY_TYPES location, enum inventory_type object);
+void being_remains( simulated_group *group, simulated_being *dead );
 
-void being_remains(simulated_group * group, simulated_being * dead);
-
-void brain_cycle(n_byte * local, n_byte2 * constants);
+void brain_cycle( n_byte *local, n_byte2 *constants );
 
 #endif /* SIMULATEDAPE_ENTITY_INTERNAL_H */

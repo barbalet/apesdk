@@ -4,7 +4,7 @@ ASMacCG.m
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -44,18 +44,46 @@ ASMacCG.m
 
 @implementation ASMacCG
 
+- (void) quitProcedure
+{
+//    CVDisplayLinkStop(displayLink);
+#ifdef USE_SIMULATED_DEFAULTS
+    NSLog(@"Defaults saving");
+    [defaults saveSimulation];
+#endif
+    
+    [self.shared close];
+    
+    exit(0);
+}
+
 - (void) drawRect:(NSRect)rect
 {
     NSInteger      dim_x = (NSInteger)rect.size.width;
     NSInteger      dim_y = (NSInteger)rect.size.height;
-    static unsigned char   outputBuffer[TERRAIN_WINDOW_AREA*4];
+    [self.shared cycle];
     
-    [self.shared draw:outputBuffer width:dim_x height:dim_y];
+//    if ([self.shared cycleDebugOutput])
+//    {
+//        NSLog(@"Debug output");
+//        [self.simulationViewDelegate debugOutput];
+//    }
+    if ([self.shared cycleQuit])
+    {
+        NSLog(@"Quit procedure initiated");
+        [self quitProcedure];
+    }
     
+    if ([self.shared cycleNewApes])
+    {
+        NSLog(@"New apes neede to continue simulation");
+        [self.shared newAgents];
+    }
+
     const float scaleFactor = 1;
-    
+            
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGContextRef     drawRef = CGBitmapContextCreate(outputBuffer, (size_t)(rect.size.width * scaleFactor), (size_t)(rect.size.height * scaleFactor), 8, (size_t)(rect.size.width * 4 * scaleFactor), colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGBitmapByteOrder32Big|kCGImageAlphaNoneSkipFirst);
+    CGContextRef     drawRef = CGBitmapContextCreate(shared_draw([self.shared sharedId], dim_x, dim_y, 0), (size_t)(rect.size.width * scaleFactor), (size_t)(rect.size.height * scaleFactor), 8, (size_t)(rect.size.width * 4 * scaleFactor), colorSpace, (CGBitmapInfo)/*kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst*/ kCGBitmapByteOrder32Big|kCGImageAlphaNoneSkipFirst);
     
     CGColorSpaceRelease( colorSpace );
     

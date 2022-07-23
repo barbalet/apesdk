@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -37,21 +37,20 @@
 #ifndef    _WIN32
 
 #include "../toolkit/toolkit.h"
-#include "../toolkit/shared.h"
+#include "shared.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 
 #else
 
 #include "..\toolkit\toolkit.h"
-#include "..\toolkit\shared.h"
+#include "shared.h"
 #include "..\script\script.h"
 #include "..\sim\sim.h"
 
 #endif
 
 #import "ASSimulationView.h"
-#import "Simulated_Ape-Swift.h"
 
 
 
@@ -91,26 +90,7 @@
 }
 
 - (CVReturn) renderTime:(const CVTimeStamp *)inOutputTime
-{
-    [self.shared cycle];
-    
-    if ([self.shared cycleDebugOutput])
-    {
-        NSLog(@"Debug output");
-        [self debugOutput];
-    }
-    if ([self.shared cycleQuit])
-    {
-        NSLog(@"Quit procedure initiated");
-        [self quitProcedure];
-    }
-    
-    if ([self.shared cycleNewApes])
-    {
-        NSLog(@"New apes neede to continue simulation");
-        [self.shared newAgents];
-    }
-    
+{    
     __weak ASSimulationView *weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         weakSelf.needsDisplay = YES;
@@ -146,7 +126,7 @@
 {
     if ([sender respondsToSelector:@selector(setState:)])
     {
-        [sender setState:(value ? NSOnState : NSOffState)];
+        [sender setState:(value ? NSControlStateValueOn : NSControlStateValueOff)];
     }
 }
 

@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -70,6 +70,11 @@
     return self;
 }
 
+- (long) sharedId
+{
+    return _identification;
+}
+
 - (void) about
 {
     shared_about();
@@ -127,12 +132,12 @@
     shared_script_debug_handle(cStringFileName);
 }
 
-- (void) draw:(unsigned char *)buffer width:(NSInteger)width height:(NSInteger)height
+- (n_byte *) drawWidth:(NSInteger)width height:(NSInteger)height
 {
     BOOL size_changed = (width != _old_size_width) || (height != _old_size_height);
     _old_size_width = width;
     _old_size_height = height;
-    shared_draw(buffer, (n_byte)_identification, width, height, (n_byte)size_changed);
+    return shared_draw((n_byte)_identification, width, height, (n_byte)size_changed);
 }
 
 - (void) keyReceived:(NSUInteger)key
@@ -189,7 +194,9 @@
 
 - (void) close
 {
+    NSLog(@"Quitting...");
     shared_close();
+    NSLog(@"Quit");
 }
 
 - (void) identificationBasedOnName:(NSString *)windowName
@@ -199,6 +206,10 @@
     if ([windowName isEqualToString:@"Terrain"])
     {
         _identification = NUM_TERRAIN;
+    }
+    if ([windowName isEqualToString:@"Control"])
+    {
+        _identification = NUM_CONTROL;
     }
 }
 
@@ -275,6 +286,21 @@
 - (void) menuHealthyCarrier
 {
     (void) shared_menu(NA_MENU_HEALTHY_CARRIER);
+}
+
+- (BOOL) menuFollow
+{
+    return YES;
+}
+
+- (BOOL) menuSocialWeb;
+{
+    return shared_menu(NA_MENU_SOCIAL_WEB) != 0;
+}
+
+- (void) menuCommandLineExecute;
+{
+    memory_execute_run(); // io_command_line_execution_set
 }
 
 - (void) savedFileName:(NSString*)name

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -56,9 +56,9 @@
 
 static n_audio  output[AUDIO_FFT_MAX_BUFFER];
 
-static n_uint speak_length(n_byte character)
+static n_uint speak_length( n_byte character )
 {
-    switch (character)
+    switch ( character )
     {
     case 'a':
     case 'e':
@@ -75,7 +75,7 @@ static n_uint speak_length(n_byte character)
     }
 }
 
-static n_uint speak_length_total(n_string paragraph)
+static n_uint speak_length_total( n_string paragraph )
 {
     n_int  loop = 0;
     n_int character;
@@ -83,23 +83,23 @@ static n_uint speak_length_total(n_string paragraph)
     do
     {
         character = paragraph[loop++];
-        if (character != '\n' && character != 0)
+        if ( character != '\n' && character != 0 )
         {
-            length += 1 << speak_length((n_byte)character);
+            length += 1 << speak_length( ( n_byte )character );
         }
     }
-    while (character != '\n' && character != 0);
-    return (n_uint)length;
+    while ( character != '\n' && character != 0 );
+    return ( n_uint )length;
 }
 
 static const n_int set_frequencies[24] =
 {
-    175,178,180,183,
-    185,188,191,193,
-    196,199,202,205,
-    208,211,214,217,
-    220,223,227,229,
-    233,237,240,244
+    175, 178, 180, 183,
+    185, 188, 191, 193,
+    196, 199, 202, 205,
+    208, 211, 214, 217,
+    220, 223, 227, 229,
+    233, 237, 240, 244
 };
 
 
@@ -114,7 +114,7 @@ static const n_int consonant_reorder[16] =
     9, 11, 2, 15,  4, 10, 5, 8
 };
 
-static const n_int low_freq[13]=
+static const n_int low_freq[13] =
 {
     60000, 45000, 30000, 55000,
     30000, 40000, 35000, 60000,
@@ -122,46 +122,46 @@ static const n_int low_freq[13]=
     30000
 };
 
-static void speak_freq(n_int * high, n_int * low, n_byte value)
+static void speak_freq( n_int *high, n_int *low, n_byte value )
 {
     const n_string character_building = "aeiovfstpbjm";
     n_int loop = 0;
     do
     {
-        if (value != character_building[loop])
+        if ( value != character_building[loop] )
         {
             loop++;
         }
     }
-    while ((loop<12) && (value != character_building[loop]));
+    while ( ( loop < 12 ) && ( value != character_building[loop] ) );
 
-    if (loop < 12)
+    if ( loop < 12 )
     {
         low[1] = low_freq[loop  ];
         low[0] = 1;
-        low[3] = low_freq[loop+1];
+        low[3] = low_freq[loop + 1];
         low[2] = 2;
 
-        if (loop < 4) /**< vowel */
+        if ( loop < 4 ) /**< vowel */
         {
             high[0] = set_frequencies[vowel_reorder[loop]];
             high[1] = 600000;
-            high[2] = set_frequencies[vowel_reorder[loop+1]];
+            high[2] = set_frequencies[vowel_reorder[loop + 1]];
             high[3] = 300000;
-            high[4] = set_frequencies[vowel_reorder[loop+2]+2];
+            high[4] = set_frequencies[vowel_reorder[loop + 2] + 2];
             high[5] = 200000;
-            high[6] = set_frequencies[vowel_reorder[loop+4]+3];
+            high[6] = set_frequencies[vowel_reorder[loop + 4] + 3];
             high[7] =  50000;
         }
         else /**< consonant */
         {
-            high[0] = set_frequencies[consonant_reorder[loop-4]];
+            high[0] = set_frequencies[consonant_reorder[loop - 4]];
             high[1] = 600000;
-            high[2] = set_frequencies[consonant_reorder[loop-2]+3];
+            high[2] = set_frequencies[consonant_reorder[loop - 2] + 3];
             high[3] = 400000;
-            high[4] = set_frequencies[consonant_reorder[loop+1]+8];
+            high[4] = set_frequencies[consonant_reorder[loop + 1] + 8];
             high[5] = 100000;
-            high[6] = set_frequencies[consonant_reorder[loop+3]+8];
+            high[6] = set_frequencies[consonant_reorder[loop + 3] + 8];
             high[7] =  50000;
         }
     }
@@ -183,74 +183,74 @@ static void speak_freq(n_int * high, n_int * low, n_byte value)
 
 }
 
-void speak_out(n_string filename, n_string paragraph)
+void speak_out( n_string filename, n_string paragraph )
 {
     FILE    *out_file = 0L;
-    n_uint   total_length = AUDIO_FFT_MAX_BUFFER * speak_length_total(paragraph) >> 2;
+    n_uint   total_length = AUDIO_FFT_MAX_BUFFER * speak_length_total( paragraph ) >> 2;
     n_int    loop         = 0;
     n_byte   found_character;
 
-    if (total_length < 1)
+    if ( total_length < 1 )
     {
-        (void)SHOW_ERROR("Speaking length is less than one");
+        ( void )SHOW_ERROR( "Speaking length is less than one" );
         return;
     }
 
-    out_file = fopen(filename,"w");
+    out_file = fopen( filename, "w" );
 
-    if (out_file == 0L)
+    if ( out_file == 0L )
     {
-        (void)SHOW_ERROR("Failed create speak file!");
+        ( void )SHOW_ERROR( "Failed create speak file!" );
         return;
     }
 
-    audio_aiff_header(out_file, total_length);
+    audio_aiff_header( out_file, total_length );
     do
     {
-        n_uint    power_sample = (speak_length(found_character = (n_byte)paragraph[loop++]) + AUDIO_FFT_MAX_BITS - 2);
+        n_uint    power_sample = ( speak_length( found_character = ( n_byte )paragraph[loop++] ) + AUDIO_FFT_MAX_BITS - 2 );
         n_uint    length = 1 << power_sample;
         n_int     division = AUDIO_FFT_MAX_BUFFER / length;
 
-        audio_clear_buffers(length);
+        audio_clear_buffers( length );
 
-        if (found_character != '\n' && found_character != 0)
+        if ( found_character != '\n' && found_character != 0 )
         {
-            if (found_character !=' ' && found_character != '.')
+            if ( found_character != ' ' && found_character != '.' )
             {
                 n_int local_high[8], local_low[4];
 
-                speak_freq(local_high, local_low,found_character);
+                speak_freq( local_high, local_low, found_character );
 
-                audio_set_frequency((n_uint)(local_high[0]/division), (n_uint)(local_high[1]/division));
-                audio_set_frequency((n_uint)(local_high[2]/division), (n_uint)(local_high[3]/division));
-                audio_set_frequency((n_uint)(local_high[4]/division), (n_uint)(local_high[5]/division));
-                audio_set_frequency((n_uint)(local_high[6]/division), (n_uint)(local_high[7]/division));
+                audio_set_frequency( ( n_uint )( local_high[0] / division ), ( n_uint )( local_high[1] / division ) );
+                audio_set_frequency( ( n_uint )( local_high[2] / division ), ( n_uint )( local_high[3] / division ) );
+                audio_set_frequency( ( n_uint )( local_high[4] / division ), ( n_uint )( local_high[5] / division ) );
+                audio_set_frequency( ( n_uint )( local_high[6] / division ), ( n_uint )( local_high[7] / division ) );
 
-                audio_fft(1, power_sample);
+                audio_fft( 1, power_sample );
 
-                audio_equal_output(output, length);
+                audio_equal_output( output, length );
 
-                audio_clear_buffers(length);
+                audio_clear_buffers( length );
 
-                audio_set_frequency((n_uint)(local_low[0]), (n_uint)(local_low[1]/division));
-                audio_set_frequency((n_uint)(local_low[2]), (n_uint)(local_low[3]/division));
+                audio_set_frequency( ( n_uint )( local_low[0] ), ( n_uint )( local_low[1] / division ) );
+                audio_set_frequency( ( n_uint )( local_low[2] ), ( n_uint )( local_low[3] / division ) );
 
-                audio_fft(1, power_sample);
+                audio_fft( 1, power_sample );
 
-                audio_multiply_output(output, length);
+                audio_multiply_output( output, length );
             }
             else
             {
-                audio_clear_output(output, length);
+                audio_clear_output( output, length );
             }
-            audio_aiff_body(out_file, output, length);
+            audio_aiff_body( out_file, output, length );
         }
     }
-    while (found_character != '\n' && found_character != 0);
+    while ( found_character != '\n' && found_character != 0 );
 
-    if (fclose(out_file) != 0)
+    if ( fclose( out_file ) != 0 )
     {
-        (void)SHOW_ERROR("Failed to close speak file");
+        ( void )SHOW_ERROR( "Failed to close speak file" );
     }
     return;
 }

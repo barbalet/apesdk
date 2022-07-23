@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -56,13 +56,6 @@ import Cocoa
 
     @objc func about() {
         shared_about()
-    }
-
-   @objc  func draw(_ buffer: UnsafeMutablePointer<UInt8>?, width: Int, height: Int) {
-        let size_changed: Bool = (width != old_size_width) || (height != old_size_height)
-        old_size_width = width
-        old_size_height = height
-        shared_draw(buffer, identification, width, height, size_changed ? 1 : 0)
     }
 
     @objc func keyReceived(_ key: Int) {
@@ -218,6 +211,10 @@ import Cocoa
              return shared_openFileName(cstr, scriptFile ? 1 : 0) != 0
         }
         return return_val
+    }
+    
+    @objc func sharedId() -> Int {
+        return identification
     }
     
     @objc var identification: Int = 0

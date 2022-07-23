@@ -13,46 +13,68 @@ before_script:
   
 build:
   stage: build
-  # instead of calling g++ directly you can also use some build toolkit like make
-  # install the necessary build tools when needed
-  # before_script: 
-  #   - apt update && apt -y install make autoconf 
   script: 
     - ./build.sh
-  # artifacts:
-  #   paths:
-  #     - mybinary
-  # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-  # cache:
-  #   paths:
-  #     - "*.o"
+
+.build-toolkit:
+  script:
+    - echo "toolkit test directory"
+    - cd toolkit
+    - cd test
+    - ./test_toolkit_wo_exec.sh --coverage
+    - echo "test_toolkit_wo_exec"
+
+build-toolkit:
+  stage: build
+  script:
+    - echo "toolkit test directory"
+    - cd toolkit
+    - cd test
+    - ./test_toolkit_wo_exec.sh --coverage
+    - echo "test_toolkit_wo_exec"
+    
+build-apescript:
+  stage: build
+  script:
+    - cd test
+    - ./test_script_wo_exec.sh
+
+build-simtime:
+  stage: build
+  script:
+    - cd test
+    - ./test_wo_exec.sh
+
+build-gui:
+  stage: build
+  script:
+    - cd test
+    - ./test_gui_wo_exec.sh
+
+checksimape:
+  stage: test
+  needs: [build]
+  script: 
+    - ./checksimape.sh
 
 coverage_math:
   stage: test
+  needs: [build-toolkit]
   script:
+    - echo "toolkit test directory"
+    - cd toolkit
     - cd test
     - ./test_toolkit_wo_exec.sh --coverage
+    - echo "test_toolkit_wo_exec"
     - ./test_math
     - gcov -n -w *.gcda
     - rm *.gc*
     - rm test_math
     - rm *.o
 
-coverage_io:
-  stage: test
-  script:
-    - cd test
-    - ./test_toolkit_wo_exec.sh --coverage
-    - ./test_io
-    - diff check_file.txt compare_file.txt
-    - gcov -n -w *.gcda
-    - rm *.gc*
-    - rm test_io
-    - rm compare_file.txt
-    - rm *.o
-
 coverage_apescript:
   stage: test
+  needs: [build-apescript]
   script:
     - cd test
     - ./test_script_wo_exec.sh --coverage
@@ -61,21 +83,31 @@ coverage_apescript:
     - rm *.gc*
     - rm test_apescript
     - rm *.o
-
-coverage_sim_time:
+    
+coverage_testcli:
   stage: test
   script:
+    - cd cli
     - cd test
-    - ./test_wo_exec.sh --coverage
-    - ./test_sim_time talesOfAnUnknownSimulator
-    - gcov -n -w *.gcda
-    - rm *.gc*
-    - rm test_sim_time
-    - rm *.o
+    - ./testcli.sh
+
+#coverage_sim_time:
+#  stage: test
+#  needs: [build-simtime]
+#  script:
+#    - cd test
+#    - ./test_wo_exec.sh --coverage
+#    - ./test_sim_time talesOfAnUnknownSimulator
+#    - gcov -n -w *.gcda
+#    - rm *.gc*
+#    - rm test_sim_time
+#    - rm *.o
 
 coverage_object:
   stage: test
+  needs: [build-toolkit]
   script:
+    - cd toolkit
     - cd test
     - ./test_toolkit_wo_exec.sh --coverage
     - ./test_object
@@ -86,18 +118,33 @@ coverage_object:
     
 coverage_object_file:
   stage: test
+  needs: [build-toolkit]
   script:
+    - cd toolkit
     - cd test
     - ./test_toolkit_wo_exec.sh --coverage
     - ./test_object_file.sh
-    - gcov -n -w *.gcda
     - rm *.gc*
     - rm test_object_file
     - rm *.o
-    
+
+coverage_object_file_vect2:
+  stage: test
+  needs: [build-toolkit]
+  script:
+    - cd toolkit
+    - cd test
+    - ./test_toolkit_wo_exec.sh --coverage
+    - ./test_object_file_vect2.sh
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm *.o
+
 coverage_object_string:
   stage: test
+  needs: [build-toolkit]
   script:
+    - cd toolkit
     - cd test
     - ./test_toolkit_wo_exec.sh --coverage
     - ./test_object_string
@@ -106,8 +153,22 @@ coverage_object_string:
     - rm test_object_string
     - rm *.o
 
+coverage_prototype:
+  stage: test
+  needs: [build-toolkit]
+  script:
+    - cd toolkit
+    - cd test
+    - ./test_toolkit_wo_exec.sh --coverage
+    - ./test_prototype
+    - gcov -n -w *.gcda
+    - rm *.gc*
+    - rm test_prototype
+    - rm *.o
+
 coverage_gui:
   stage: test
+  needs: [build-gui]
   script:
     - cd test
     - ./test_gui_wo_exec.sh --coverage
@@ -118,56 +179,14 @@ coverage_gui:
     - rm *.o
 
     
-test_sim:
-  stage: test
-  script:
-    - cd test
-    - ./test_wo_exec.sh
-    - ./test_sim
-    - rm test_sim
-    - rm *.o
+#test_sim:
+#  stage: test
+#  needs: [build-simtime]
+#  script:
+#    - cd test
+#    - ./test_wo_exec.sh
+#    - ./test_sim
+#    - rm test_sim
+#    - rm *.o
 
-test_sim_time_a:
-  stage: test
-  script:
-    - cd test
-    - ./test_wo_exec.sh
-    - ./test_sim_time talesOfAnUnknownSimulator
-    - rm test_sim_time
-    - rm *.o
 
-test_sim_time_b:
-  stage: test
-  script:
-    - cd test
-    - ./test_wo_exec.sh
-    - ./test_sim_time unknownStikesBack
-    - rm test_sim_time
-    - rm *.o
-
-test_sim_time_c:
-  stage: test
-  script:
-    - cd test
-    - ./test_wo_exec.sh
-    - ./test_sim_time workingThroughAllValues
-    - rm test_sim_time
-    - rm *.o
-
-test_sim_time_d:
-  stage: test
-  script:
-    - cd test
-    - ./test_wo_exec.sh
-    - ./test_sim_time quizMeAboutThisMethod
-    - rm test_sim_time
-    - rm *.o
-
-test_sim_time_e:
-  stage: test
-  script:
-    - cd test
-    - ./test_wo_exec.sh
-    - ./test_sim_time maybeThisWillWork
-    - rm test_sim_time
-    - rm *.o

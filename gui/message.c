@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -38,8 +38,8 @@
 typedef struct
 {
     n_string message;
-    n_int * spaces;
-    n_string_block * direct_rendering;
+    n_int *spaces;
+    n_string_block *direct_rendering;
     n_int x;
     n_int y;
     n_int width;
@@ -53,32 +53,32 @@ static n_int number_messages = 0;
 
 n_message messages[MAXIMUM_NUMBER_MESSAGE];
 
-static n_int * message_find_spaces(n_string string, n_int * count)
+static n_int *message_find_spaces( n_string string, n_int *count )
 {
     n_int local_count = 0;
     n_int loop = 0;
     n_int *return_value = 0L;
 
-    if (*count)
+    if ( *count )
     {
-        return_value = memory_new((n_uint)(*count) * sizeof(n_int));
+        return_value = memory_new( ( n_uint )( *count ) * sizeof( n_int ) );
     }
 
-    if (string == 0L)
+    if ( string == 0L )
     {
         return 0L;
     }
 
-    if (string[0] == 0)
+    if ( string[0] == 0 )
     {
         return 0L;
     }
 
     do
     {
-        if (string[loop] == ' ')
+        if ( string[loop] == ' ' )
         {
-            if (*count)
+            if ( *count )
             {
                 return_value[local_count] = loop;
             }
@@ -86,29 +86,29 @@ static n_int * message_find_spaces(n_string string, n_int * count)
 
         }
     }
-    while(string[loop]);
+    while ( string[loop] );
 
     return return_value;
 }
 
-static void message_remove(n_int remove)
+static void message_remove( n_int remove )
 {
     n_message *value = &messages[remove];
 
-    if (value)
+    if ( value )
     {
-        if (value->message)
+        if ( value->message )
         {
-            memory_free((void**)&(value->message));
+            memory_free( ( void ** ) & ( value->message ) );
         }
-        if (value->spaces)
+        if ( value->spaces )
         {
-            memory_free((void**)&(value->spaces));
+            memory_free( ( void ** ) & ( value->spaces ) );
         }
     }
-    if (remove != (number_messages-1))
+    if ( remove != ( number_messages - 1 ) )
     {
-        n_message *copy_from = &messages[number_messages-1];
+        n_message *copy_from = &messages[number_messages - 1];
         value->message = copy_from->message;
         value->spaces = copy_from->spaces;
         value->direct_rendering = copy_from->direct_rendering;
@@ -121,52 +121,52 @@ static void message_remove(n_int remove)
     number_messages--;
 }
 
-static void message_add(n_string message, n_int time_to_expire)
+static void message_add( n_string message, n_int time_to_expire )
 {
-    n_int *  spaces;
+    n_int   *spaces;
     n_string copied_message;
     n_int    space_count = 0;
 
-    if (number_messages == (MAXIMUM_NUMBER_MESSAGE-1))
+    if ( number_messages == ( MAXIMUM_NUMBER_MESSAGE - 1 ) )
     {
         /* if the message stack is full remove the oldest message */
         n_int loop = 0;
         n_int oldest_loop = 0;
         n_int oldest_time_to_expire = 100000;
-        while (loop < number_messages)
+        while ( loop < number_messages )
         {
-            if (oldest_time_to_expire > messages[loop].time_to_expire)
+            if ( oldest_time_to_expire > messages[loop].time_to_expire )
             {
                 oldest_loop = loop;
                 oldest_time_to_expire = messages[loop].time_to_expire;
             }
             loop++;
         }
-        message_remove(oldest_loop);
+        message_remove( oldest_loop );
     }
 
-    if (message == 0L)
+    if ( message == 0L )
     {
         return;
     }
-    if (time_to_expire == 0)
+    if ( time_to_expire == 0 )
     {
         return;
     }
-    (void)message_find_spaces(message, &space_count);
-    if (space_count == 0)
+    ( void )message_find_spaces( message, &space_count );
+    if ( space_count == 0 )
     {
         return;
     }
-    spaces = message_find_spaces(message, &space_count);
-    if (spaces == 0L)
+    spaces = message_find_spaces( message, &space_count );
+    if ( spaces == 0L )
     {
         return;
     }
-    copied_message = io_string_copy(message);
-    if (copied_message == 0L)
+    copied_message = io_string_copy( message );
+    if ( copied_message == 0L )
     {
-        memory_free((void**)&(spaces));
+        memory_free( ( void ** ) & ( spaces ) );
         return;
     }
     messages[number_messages].time_to_expire = time_to_expire;

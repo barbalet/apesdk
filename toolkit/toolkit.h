@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -44,6 +44,8 @@
 
 #include <signal.h> // for SIMULATED_APE_ASSERT
 
+#define  VERBOSE_DEBUG
+
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 
 #define CHAR_SPACE               (32)
@@ -56,24 +58,43 @@
 
 typedef	double	n_double;
 
-#define TWO_PI ((n_double)(6.2831853071795864769252867665590057683943))
+#define TWO_PI               ((n_double)(6.2831853071795864769252867665590057683943))
 
-#define SINE_MAXIMUM (26880)
+#define SINE_MAXIMUM         (26880)
 
 #define BIG_INTEGER          (2147483647)
 #define BIG_NEGATIVE_INTEGER (0-2147483648)
 
 #define NOTHING (0L)
 
+#define TIME_HOUR_MINUTES           (60)
+#define TIME_DAY_MINUTES            (TIME_HOUR_MINUTES * 24)
+#define TIME_MONTH_MINUTES          (TIME_DAY_MINUTES * 28)
+#define TIME_YEAR_MINUTES           (TIME_MONTH_MINUTES * 13)
+#define TIME_YEAR_DAYS              (7 * 52)                /*364 also = 13 * 28 */
+#define TIME_CENTURY_DAYS           (TIME_YEAR_DAYS * 100)
+
+typedef enum
+{
+    INTERVAL_MINS = 0,
+    INTERVAL_HOURS,
+    INTERVAL_DAYS,
+    INTERVAL_MONTHS,
+    INTERVAL_YEARS,
+    INTERVALS
+} TIME_INTERVALS;
+
+
+
 typedef char n_char;
 
 /*! @typedef n_string
  @discussion This is the string format for the Simulated Ape development */
-typedef n_char *          n_string;
+typedef n_char           *n_string;
 
-typedef const n_char *    n_constant_string;
+typedef const n_char     *n_constant_string;
 
-#define STRING_BLOCK_SIZE (2048)
+#define STRING_BLOCK_SIZE (4096)
 
 typedef n_char       n_string_block[STRING_BLOCK_SIZE];
 
@@ -108,6 +129,11 @@ typedef	long long			n_int;
 #endif
 
 
+static const n_int interval_steps[] =
+{ 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
+static const n_constant_string interval_description[] = { " mins", " hours", " days", " months", " years" };
+
+
 typedef enum
 {
     FILE_TYPE_BYTE        = 0x01,
@@ -122,9 +148,12 @@ typedef enum
 
 #define NA_ASSERT(test, message) if(!(test)){io_assert(message, __FILE__, __LINE__); raise(SIGINT);}
 
-void io_assert(n_string message, n_string file_loc, n_int line);
+void io_assert( n_string message, n_string file_loc, n_int line );
 
 #else
+
+
+//#define NA_ASSERT(test, message) if (!(test)) printf("%s line: %d Soft Assert: %s\n",__FILE__, __LINE__, message)
 
 #define NA_ASSERT(test, message) /* test message */
 
@@ -138,7 +167,7 @@ typedef union
         n_int y;
     };
     n_int data[2];
-}n_vect2;
+} n_vect2;
 
 
 typedef union
@@ -163,24 +192,36 @@ typedef union
     n_double data[3];
 } n_vect3;
 
-typedef struct {
+typedef struct
+{
+    n_byte a;
     n_byte r;
     n_byte g;
     n_byte b;
-    n_byte a;
-}n_rgba;
+} n_rgba;
 
 typedef union
 {
     n_rgba  rgba;
     n_byte4 thirtytwo;
-}n_rgba32;
+} n_rgba32;
 
-typedef struct {
-    n_vect2 * points;
+enum window_information
+{
+    TERRAIN_WINDOW_WIDTH        = ( 4096 ),
+    TERRAIN_WINDOW_HEIGHT       = ( 3072 ),
+    TERRAIN_WINDOW_AREA         = ( TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT ),
+    CONTROL_WINDOW_WIDTH        = ( 2048 ),
+    CONTROL_WINDOW_HEIGHT       = ( 2048 ),
+    CONTROL_WINDOW_AREA         = ( CONTROL_WINDOW_WIDTH * CONTROL_WINDOW_HEIGHT )
+};
+
+typedef struct
+{
+    n_vect2 *points;
     n_int no_of_points;
     n_int max_points;
-}n_points;
+} n_points;
 
 typedef struct
 {
@@ -207,6 +248,23 @@ typedef	struct
     const n_string what_is_it;
 } simulated_file_entry;
 
+typedef struct
+{
+    n_uint  count;
+    n_uint  max;
+    n_uint  unit_size;
+    n_byte *data;
+} memory_list;
+
+typedef memory_list int_list;
+
+typedef struct{
+    int_list * number;
+    void * array;
+} number_array;
+
+typedef memory_list number_array_list;
+
 #define POPULATED(ch) ((ch[0] != 0) || (ch[1] != 0) || (ch[2] != 0) || (ch[3] != 0) || (ch[4] != 0) || (ch[5] != 0))
 
 /* include externally, if needed */
@@ -226,15 +284,15 @@ typedef	struct
 #define	FILE_ERROR				  (-1)
 
 
-typedef n_byte (n_pixel)(n_int px, n_int py, n_int dx, n_int dy, void * information);
+typedef n_byte ( n_pixel )( n_int px, n_int py, n_int dx, n_int dy, void *information );
 
-typedef n_int (n_memory_location)(n_int px, n_int py);
+typedef n_int ( n_memory_location )( n_int px, n_int py );
 
-typedef n_byte2 (n_patch)(n_byte2 * local);
+typedef n_byte2 ( n_patch )( n_byte2 *local );
 
-typedef n_int (n_file_in)(n_byte * buff, n_uint len);
+typedef n_int ( n_file_in )( n_byte *buff, n_uint len );
 
-typedef n_byte * (n_file_out)(n_uint * len);
+typedef n_byte *( n_file_out )( n_uint *len );
 
 /*! @struct
 @field pixel_draw The n_pixel function used to draw pixels into
@@ -252,19 +310,19 @@ translating high-level drawing and low-level drawing.
 */
 typedef struct
 {
-    n_pixel * pixel_draw;
-    void	* information;
+    n_pixel *pixel_draw;
+    void	 *information;
 } n_join;
 
 typedef struct
 {
-    n_byte	* screen;
-    n_byte	* background;
+    n_byte	 *screen;
+    n_byte	 *background;
 } n_background8;
 
 typedef struct
 {
-    n_byte  * screen;
+    n_byte   *screen;
     n_byte	  color;
 } n_color8;
 
@@ -284,24 +342,36 @@ typedef struct
     n_byte	*data;
 } n_file;
 
-typedef void (n_file_specific)(n_string string, n_byte * reference);
+typedef void ( n_file_specific )( n_string string, n_byte *reference );
 
 typedef struct
 {
-    void * data;
+    void *data;
     n_uint expected_bytes;
     n_uint hash;
-    void * next;
+    void *next;
 } n_file_chain;
+
 
 typedef enum
 {
     OBJECT_EMPTY = 0,
     OBJECT_STRING,
     OBJECT_NUMBER,
+    OBJECT_BOOLEAN,
     OBJECT_OBJECT,
-    OBJECT_ARRAY = 4,
-}n_object_type;
+    OBJECT_ARRAY = 5,
+} n_object_type;
+
+static const n_string n_object_type_string[OBJECT_ARRAY+1] =
+{
+    "OBJECT_EMPTY",
+    "OBJECT_STRING",
+    "OBJECT_NUMBER",
+    "OBJECT_BOOLEAN",
+    "OBJECT_OBJECT",
+    "OBJECT_ARRAY"
+};
 
 typedef enum
 {
@@ -310,145 +380,218 @@ typedef enum
     OBJ_TYPE_NUMBER,
     OBJ_TYPE_COLON,
     OBJ_TYPE_COMMA,
+    OBJ_TYPE_BOOLEAN,
     OBJ_TYPE_OBJECT_OPEN,
     OBJ_TYPE_OBJECT_CLOSE,
     OBJ_TYPE_ARRAY_OPEN,
     OBJ_TYPE_ARRAY_CLOSE
-}n_object_stream_type;
+} n_object_stream_type;
 
 
 typedef struct
 {
     n_string       data;
-    void*          next;
+    void          *next;
     n_object_type  type;
-}n_array;
+} n_array;
 
 typedef struct
 {
     n_array        primitive;
     n_string       name;
     n_uint         name_hash;
-}n_object;
+} n_object;
 
-n_file * obj_json(n_object * object);
+typedef struct
+{
+    n_array *number_base_array;
+    n_int tracking_array_open;
+    n_int tracking_object_open;
+    n_int tracking_string_quote;
 
-n_array * array_number(n_int set_number);
-n_array * array_string(n_string set_string);
-n_array * array_object(n_object * set_object);
-n_array * array_array(n_array * set_array);
+    n_file * file;
 
-n_array * array_add(n_array * array, n_array * element);
+    n_object_type type;
+    
+    n_object  *base_object;
+    n_array   *base_array;
+    n_int      something_wrong;
 
-n_object * object_number(n_object * obj, n_string name, n_int number);
-n_object * object_string(n_object * obj, n_string name, n_string string);
-n_object * object_object(n_object * obj, n_string name, n_object * object);
-n_object * object_array(n_object * obj, n_string name, n_array * array);
+    n_object_stream_type stream_type;
+    
+}n_object_parse_bundle;
 
-void object_top_object(n_file * file, n_object * top_level);
-n_object * object_file_to_tree(n_file * file);
+typedef void (memory_execute)(void);
 
-void obj_free(n_object ** object);
+void memory_execute_set(memory_execute * value);
+void memory_execute_run(void);
 
-n_string obj_contains(n_object* base, n_string name, n_object_type type);
-n_int    obj_contains_number(n_object* base, n_string name, n_int *number);
+n_array *array_number( n_int set_number );
+n_array *array_boolean( n_int set_boolean );
+n_array *array_string( n_string set_string );
+n_array *array_object( n_object *set_object );
+n_array *array_array( n_array *set_array );
 
-n_int    obj_contains_array_numbers(n_object* base, n_string name, n_int *array_numbers, n_int size);
-n_int    obj_contains_array_nbyte2(n_object* base, n_string name, n_byte2 *array_numbers, n_int size);
+n_array *array_add( n_array *array, n_array * element );
+void array_add_empty( n_array ** array, n_array * element );
 
-n_array *  obj_get_array(n_string array);
-n_object * obj_get_object(n_string object);
-n_int      obj_get_number(n_string object);
+n_object *object_number( n_object *obj, n_string name, n_int number );
+n_object *object_boolean( n_object *obj, n_string name, n_int boolean );
+n_object *object_string( n_object *obj, n_string name, n_string string );
+n_object *object_object( n_object *obj, n_string name, n_object *object );
+n_object *object_array( n_object *obj, n_string name, n_array *array );
 
-n_array * obj_array_next(n_array * array, n_array * element);
-n_int     obj_array_count(n_array * array_obj);
+void object_top_object( n_file *file, n_object *top_level );
+
+void *unknown_file_to_tree( n_file *file, n_object_type *type );
+n_file *unknown_json( void *unknown, n_object_type type );
+void unknown_free( void **unknown, n_object_type type );
+
+void obj_free( n_object **object );
+
+n_string obj_contains( n_object *base, n_string name, n_object_type type );
+n_int    obj_contains_number( n_object *base, n_string name, n_int *number );
+
+n_int    obj_contains_array_numbers( n_object *base, n_string name, n_int *array_numbers, n_int size );
+n_int    obj_contains_array_nbyte2( n_object *base, n_string name, n_byte2 *array_numbers, n_int size );
+
+n_array  *obj_get_array( n_string array );
+n_object *obj_get_object( n_string object );
+n_int     obj_get_number( n_string object );
+n_int     obj_get_boolean( n_string object );
+
+n_array  *obj_array_next( n_array *array, n_array *element );
+n_int     obj_array_count( n_array *array_obj );
+
+memory_list * object_list_vect2(n_array * vect_array);
+n_array *     object_vect2_pointer(n_vect2 * vect_array, n_uint count);
+n_int         object_vect2_from_array(n_array * vect_element, n_vect2 * vect_list);
+
+memory_list * vect2_point_to_lines(memory_list * vect2_list, n_int dist_squared);
+void vect2_x_entry_bubblesort(memory_list * vect2_list);
+
+n_array * object_vect2_array(n_vect2 * value);
+
+typedef n_int ( object_unwrap )( n_string pass_through , n_byte * buffer);
+
+memory_list * object_unwrap_array(n_array * general_array, n_uint size, object_unwrap wrap_func, n_object_type type);
+
+n_object * object_vect2_names(n_string names, memory_list * vect_array);
+n_object * object_vect2_name( n_object *obj, n_string name, n_vect2 * value);
+
+n_int   object_name_vect2(n_string name, n_vect2 * value, n_object * input_json);
+
+n_object * object_line(n_vect2 * values);
+n_object * object_quad(n_vect2 * values);
+
+n_int object_unwrap_four_vect2( n_string pass_through , n_byte * buffer);
+n_int object_unwrap_two_vect2( n_string pass_through , n_byte * buffer);
+n_int object_unwrap_vect2( n_string pass_through , n_byte * buffer);
+
+n_int object_count_name_vect2(n_vect2 * vect_array, n_uint count, object_unwrap * wrap_func, n_string name, n_object * object);
+
+void object_init(n_uint * hashes, n_uint hash_count);
+void object_close(void);
+void object_ptr_debug(void * ptr);
+
+n_uint object_get_hash_count(void);
+
+n_string object_type_string(n_object_type objtype);
 
 /** \brief sine and cosine conversation */
 #define	NEW_SD_MULTIPLE			26880
 
-extern n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number);
+extern n_int draw_error( n_constant_string error_text, n_constant_string location, n_int line_number );
 
 #define	SHOW_ERROR(val)	(draw_error(val, __FILE__, __LINE__))
 
+#define SHOW_SUCCESS (1)
+#define SHOW_NO_OP   (0)
+#define SHOW_FAILURE (-1)
+
 #define IO_LOWER_CHAR(value)   if(ASCII_UPPERCASE(value)) (value) += 'a' - 'A'
 
-typedef n_int (execute_function)(void * general_data, void * read_data, void * write_data);
-typedef void (execute_thread_stub)(execute_function function, void * general_data, void * read_data, void * write_data);
+typedef n_int ( execute_function )( void *general_data, void *read_data, void *write_data );
+typedef void ( execute_thread_stub )( execute_function function, void *general_data, void *read_data, void *write_data );
 
-void  execute_group(execute_function * function, void * general_data, void * read_data, n_int count, n_int size);
+void  execute_group( execute_function *function, void *general_data, void *read_data, n_int count, n_int size );
 
-void area2_add(n_area2 * area, n_vect2 * vect, n_byte first);
+void area2_add( n_area2 *area, n_vect2 *vect, n_byte first );
 
 
-n_int vect2_distance_under(n_vect2 * first, n_vect2 * second, n_int distance);
+n_int vect2_distance_under( n_vect2 *first, n_vect2 *second, n_int distance );
 
-void  vect2_byte2(n_vect2 * converter, n_byte2 * input);
-void  vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
-void  vect2_center(n_vect2 * center, n_vect2 * initial, n_vect2 * second);
+void  vect2_byte2( n_vect2 *converter, n_byte2 *input );
+void  vect2_add( n_vect2 *equals, n_vect2 *initial, n_vect2 *second );
+void  vect2_center( n_vect2 *center, n_vect2 *initial, n_vect2 *second );
 
-void  vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second);
-void  vect2_divide(n_vect2 * equals, n_vect2 * initial, n_vect2 * second, n_int divisor);
+void  vect2_subtract( n_vect2 *equals, n_vect2 *initial, n_vect2 *second );
+void  vect2_divide( n_vect2 *equals, n_vect2 *initial, n_vect2 *second, n_int divisor );
 void  vect2_multiplier(
-    n_vect2 * equals, n_vect2 * initial,
-    n_vect2 * second, n_int multiplier, n_int divisor);
+    n_vect2 *equals, n_vect2 *initial,
+    n_vect2 *second, n_int multiplier, n_int divisor );
 void  vect2_d(
-    n_vect2 * initial, n_vect2 * second,
-    n_int multiplier, n_int divisor);
+    n_vect2 *initial, n_vect2 *second,
+    n_int multiplier, n_int divisor );
 n_int vect2_dot(
-    n_vect2 * initial, n_vect2 * second,
-    n_int multiplier, n_int divisor);
-void vect2_rotate90(n_vect2 * rotation);
-void vect2_direction(n_vect2 * initial, n_int direction, n_int divisor);
-void vect2_delta(n_vect2 * initial, n_vect2 * delta);
-void vect2_offset(n_vect2 * initial, n_int dx, n_int dy);
-void vect2_back_byte2(n_vect2 * converter, n_byte2 * output);
-void vect2_copy(n_vect2 * to, n_vect2 * from);
-void vect2_populate(n_vect2 * value, n_int x, n_int y);
-void vect2_rotation(n_vect2 * location, n_vect2 * rotation);
-void vect2_rotation_bitshift(n_vect2 * location, n_vect2 * rotation);
+    n_vect2 *initial, n_vect2 *second,
+    n_int multiplier, n_int divisor );
+void vect2_rotate90( n_vect2 *rotation );
+void vect2_direction( n_vect2 *initial, n_int direction, n_int divisor );
+void vect2_delta( n_vect2 *initial, n_vect2 *delta );
+void vect2_offset( n_vect2 *initial, n_int dx, n_int dy );
+void vect2_back_byte2( n_vect2 *converter, n_byte2 *output );
+void vect2_copy( n_vect2 *to, n_vect2 *from );
+void vect2_populate( n_vect2 *value, n_int x, n_int y );
+void vect2_rotation( n_vect2 *location, n_vect2 *rotation );
+void vect2_rotation_bitshift( n_vect2 *location, n_vect2 *rotation );
 
-n_int vect2_nonzero(n_vect2 * nonzero);
+n_int vect2_nonzero( n_vect2 *nonzero );
 
-n_vect2 * vect2_min_max_init(void);
+n_vect2 *vect2_min_max_init( void );
 
-void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin);
+void vect2_min_max( n_vect2 *points, n_int number, n_vect2 *maxmin );
 
-void vect2_scalar_multiply(n_vect2 * value, n_int multiplier);
-void vect2_scalar_divide(n_vect2 * value, n_int divisor);
-void vect2_scalar_bitshiftdown(n_vect2 * value, n_int bitshiftdown);
+void vect2_scalar_multiply( n_vect2 *value, n_int multiplier );
+void vect2_scalar_divide( n_vect2 *value, n_int divisor );
+void vect2_scalar_bitshiftdown( n_vect2 *value, n_int bitshiftdown );
 
-void vect3_double(n_vect3 * converter, n_double * input);
-void vect3_add(n_vect3 * equals, n_vect3 * initial, n_vect3 * second);
-void vect3_center(n_vect3 * center, n_vect3 * initial, n_vect3 * second);
-void vect3_subtract(n_vect3 * equals, n_vect3 * initial, n_vect3 * second);
-void vect3_divide(n_vect3 * equals, n_vect3 * initial, n_vect3 * second, n_double divisor);
-void vect3_multiplier(n_vect3 * equals, n_vect3 * initial, n_vect3 * second,
-                      n_double multiplier, n_double divisor);
-void vect3_d(n_vect3 * initial, n_vect3 * second, n_double multiplier, n_double divisor);
-n_double vect3_dot(n_vect3 * initial, n_vect3 * second, n_double multiplier, n_double divisor);
-void vect3_delta(n_vect3 * initial, n_vect3 * delta);
-void vect3_offset(n_vect3 * initial, n_double dx, n_double dy, n_double dz);
-void vect3_back_double(n_vect3 * converter, n_double * output);
-void vect3_copy(n_vect3 * to, n_vect3 * from);
-void vect3_populate(n_vect3 * value, n_double x, n_double y, n_double z);
-n_int vect3_nonzero(n_vect3 * nonzero);
+n_array * vect2_memory_list_number_array(memory_list * list, n_int number);
+n_int vect2_unwrap_number_entry( n_string pass_through, n_byte * buffer, n_int number);
+n_int vect2_unwrap_number( n_array * array, n_vect2 * entry, n_int number);
 
-n_byte * math_general_allocation(n_byte * bc0, n_byte * bc1, n_int i);
+void vect3_double( n_vect3 *converter, n_double *input );
+void vect3_add( n_vect3 *equals, n_vect3 *initial, n_vect3 *second );
+void vect3_center( n_vect3 *center, n_vect3 *initial, n_vect3 *second );
+void vect3_subtract( n_vect3 *equals, n_vect3 *initial, n_vect3 *second );
+void vect3_divide( n_vect3 *equals, n_vect3 *initial, n_vect3 *second, n_double divisor );
+void vect3_multiplier( n_vect3 *equals, n_vect3 *initial, n_vect3 *second,
+                       n_double multiplier, n_double divisor );
+void vect3_d( n_vect3 *initial, n_vect3 *second, n_double multiplier, n_double divisor );
+n_double vect3_dot( n_vect3 *initial, n_vect3 *second, n_double multiplier, n_double divisor );
+void vect3_delta( n_vect3 *initial, n_vect3 *delta );
+void vect3_offset( n_vect3 *initial, n_double dx, n_double dy, n_double dz );
+void vect3_back_double( n_vect3 *converter, n_double *output );
+void vect3_copy( n_vect3 *to, n_vect3 *from );
+void vect3_populate( n_vect3 *value, n_double x, n_double y, n_double z );
+n_int vect3_nonzero( n_vect3 *nonzero );
 
-void math_general_execution(n_int instruction, n_int is_constant0, n_int is_constant1,
-                            n_byte * addr0, n_byte * addr1, n_int value0, n_int * i,
-                            n_int is_const0, n_int is_const1,
-                            n_byte * pspace,
-                            n_byte *bc0, n_byte *bc1,
-                            n_int braincode_min_loop);
+n_byte *math_general_allocation( n_byte *bc0, n_byte *bc1, n_int i );
 
-n_byte4  math_hash_fnv1(n_constant_string key);
-n_uint   math_hash(n_byte * values, n_uint length);
+void math_general_execution( n_int instruction, n_int is_constant0, n_int is_constant1,
+                             n_byte *addr0, n_byte *addr1, n_int value0, n_int *i,
+                             n_int is_const0, n_int is_const1,
+                             n_byte *pspace,
+                             n_byte *bc0, n_byte *bc1,
+                             n_int braincode_min_loop );
 
-void    math_bilinear_8_times(n_byte * side512, n_byte * data, n_byte double_spread);
+n_byte4  math_hash_fnv1( n_constant_string key );
+n_uint   math_hash( n_byte *values, n_uint length );
 
-n_uint  math_root(n_uint squ);
-n_byte  math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn);
+void    math_bilinear_8_times( n_byte *side512, n_byte *data, n_byte double_spread );
+
+n_uint  math_root( n_uint squ );
+n_int   math_tan( n_vect2 *p );
 
 #undef DEBUG_RANDOM
 #undef VERBOSE_DEBUG_RANDOM
@@ -462,102 +605,123 @@ n_byte  math_turn_towards(n_vect2 * p, n_byte fac, n_byte turn);
 
 #define mrdc(string) math_random_debug_count(string)
 
-n_byte2 math_random_debug(n_byte2 * local, n_string file_string, n_int line_number);
+n_byte2 math_random_debug( n_byte2 *local, n_string file_string, n_int line_number );
 
-void math_random_debug_count(n_string place);
+void math_random_debug_count( n_string place );
 
 #else
 
 #define mrdc(string) /* math_random_debug_count(string) */
 
-n_byte2 math_random(n_byte2 * local);
-void    math_random3(n_byte2 * local);
+n_byte2 math_random( n_byte2 *local );
+void    math_random3( n_byte2 *local );
 
 #endif
 
-n_byte  math_join(n_int sx, n_int sy, n_int dx, n_int dy, n_join * draw);
-n_int   math_spread_byte(n_byte val);
+n_byte  math_join( n_int sx, n_int sy, n_int dx, n_int dy, n_join *draw );
+n_int   math_spread_byte( n_byte val );
 
-n_int  math_sine(n_int direction, n_int divisor);
+n_int  math_sine( n_int direction, n_int divisor );
 
-n_byte math_join_vect2(n_int sx, n_int sy, n_vect2 * vect, n_join * draw);
-n_byte math_line_vect(n_vect2 * point1, n_vect2 * point2, n_join * draw);
-n_byte math_line(n_int x1, n_int y1, n_int x2, n_int y2, n_join * draw);
+n_byte math_join_vect2( n_int sx, n_int sy, n_vect2 *vect, n_join *draw );
+n_byte math_line_vect( n_vect2 *point1, n_vect2 *point2, n_join *draw );
+n_byte math_line( n_int x1, n_int y1, n_int x2, n_int y2, n_join *draw );
 
-n_int  math_seg14(n_int character);
+n_int  math_seg14( n_int character );
 
-n_byte math_do_intersect(n_vect2 * p1, n_vect2 * q1, n_vect2 * p2, n_vect2 * q2);
+n_byte math_do_intersect( n_vect2 *p1, n_vect2 *q1, n_vect2 *p2, n_vect2 *q2 );
 
-void       io_number_to_string(n_string value, n_uint number);
-void       io_string_number(n_string output_string, n_string input_string, n_uint number);
-void       io_three_strings(n_string output_string, n_string first_string, n_string second_string, n_string third_string, n_byte new_line);
+void       io_number_to_string( n_string value, n_uint number );
+void       io_string_number( n_string output_string, n_string input_string, n_uint number );
+void       io_three_strings( n_string output_string, n_string first_string, n_string second_string, n_string third_string, n_byte new_line );
 
-void       io_entry_execution(n_int argc, n_string * argv);
-void       io_command_line_execution_set(void);
-n_int      io_command_line_execution(void);
+void       io_lower( n_string value, n_int length );
+void       io_whitespace( n_file *input );
+void       io_whitespace_json( n_file *input );
+void       io_audit_file( const simulated_file_entry *format, n_byte section_to_audit );
+void       io_search_file_format( const simulated_file_entry *format, n_string compare );
+void       io_string_write( n_string dest, n_string insert, n_int *pos );
+n_int      io_read_bin( n_file *fil, n_byte *local_byte );
+n_int      io_file_write( n_file *fil, n_byte byte );
+void       io_file_reused( n_file *fil );
+n_file *   io_file_duplicate(n_file * initial);
+n_int      io_write( n_file *fil, n_constant_string ch, n_byte new_line );
+n_int      io_writenumber( n_file *fil, n_int loc_val, n_uint numer, n_uint denom );
+n_int      io_length( n_string value, n_int max );
+n_int      io_find( n_string check, n_int from, n_int max, n_string value_find, n_int value_find_length );
+n_int      io_read_buff( n_file *fil, n_byte *data, const simulated_file_entry *commands );
+n_int      io_write_buff( n_file *fil, void *data, const simulated_file_entry *commands, n_byte command_num, n_file_specific *func );
+n_int      io_write_csv( n_file *fil, n_byte *data, const simulated_file_entry *commands, n_byte command_num, n_byte initial ) ;
 
-void       io_lower(n_string value, n_int length);
-void       io_whitespace(n_file * input);
-void       io_whitespace_json(n_file * input);
-void       io_audit_file(const simulated_file_entry * format, n_byte section_to_audit);
-void       io_search_file_format(const simulated_file_entry * format, n_string compare);
-void       io_string_write(n_string dest, n_string insert, n_int * pos);
-n_int      io_read_bin(n_file * fil, n_byte * local_byte);
-n_int      io_file_write(n_file * fil, n_byte byte);
-void       io_file_reused(n_file * fil);
-n_int      io_write(n_file * fil, n_constant_string ch, n_byte new_line);
-n_int      io_writenumber(n_file * fil, n_int loc_val, n_uint numer, n_uint denom);
-n_int      io_length(n_string value, n_int max);
-n_int      io_find(n_string check, n_int from, n_int max, n_string value_find, n_int value_find_length);
-n_int      io_read_buff(n_file * fil, n_byte * data, const simulated_file_entry * commands);
-n_int      io_write_buff(n_file * fil, void * data, const simulated_file_entry * commands, n_byte command_num, n_file_specific * func);
-n_int      io_write_csv(n_file * fil, n_byte * data, const simulated_file_entry * commands, n_byte command_num, n_byte initial) ;
+void       memory_erase( n_byte *buf_offscr, n_uint nestop );
 
-void       memory_copy(n_byte * from, n_byte * to, n_uint number);
-void *     memory_new(n_uint bytes);
-void       memory_free(void ** ptr);
-void *     memory_new_range(n_uint memory_min, n_uint *memory_allocated);
+void       memory_copy( n_byte *from, n_byte *to, n_uint number );
+void      *memory_new( n_uint bytes );
+void       memory_free( void **ptr );
+void      *memory_new_range( n_uint memory_min, n_uint *memory_allocated );
 
-n_file *   io_file_new(void);
-void       io_file_free(n_file ** file);
-void       io_file_debug(n_file * file);
+memory_list *memory_list_new( n_uint size, n_uint number );
+void memory_list_copy( memory_list *list, n_byte *data );
+void memory_list_free( memory_list **value );
 
-n_int      io_number(n_string number_string, n_int * actual_value, n_int * decimal_divisor);
+int_list *int_list_new( n_uint number );
+void int_list_copy( int_list *list, n_int int_add);
+void int_list_free( int_list **value );
+
+n_int int_list_find( int_list *list,  n_int location, n_int * error);
+void int_list_debug( int_list * debug_list);
+
+n_file    *io_file_new( void );
+n_file    *io_file_new_from_string_block(n_string_block contents);
+n_file    *io_file_new_from_string(n_string string, n_uint string_length);
+
+void       io_file_free( n_file **file );
+void       io_file_debug( n_file *file );
+
+n_int      io_number( n_string number_string, n_int *actual_value, n_int *decimal_divisor );
+
+n_int      io_disk_read( n_file *local_file, n_string file_name );
+n_int      io_disk_read_no_error( n_file *local_file, n_string file_name );
+
+n_int      io_disk_write( n_file *local_file, n_constant_string file_name );
+n_int      io_disk_check( n_constant_string file_name );
+n_string *io_tab_delimit_to_n_string_ptr( n_file *tab_file, n_int *size_value, n_int *row_value );
+
+void       io_three_string_combination( n_string output, n_string first, n_string second, n_string third, n_int count );
+void       io_time_to_string( n_string value );
+n_string   io_string_copy( n_string string );
+void       io_string_copy_buffer( n_string string, n_string buffer );
+
+n_int      io_read_byte4( n_file *fil, n_uint *actual_value, n_byte *final_char );
+n_int      io_writenum( n_file *fil, n_int loc_val, n_byte ekind, n_byte new_line );
+n_int      io_command( n_file *fil, const simulated_file_entry *commands );
+n_int      io_read_data( n_file *fil, n_byte2 command, n_byte *data_read );
+
+void       io_output_contents( n_file *file );
+
+n_uint     io_file_hash( n_file *file );
+
+n_file *io_file_ready( n_int entry, n_file *file );
+
+void io_file_cleanup( n_int *entry, n_file **file );
+
+void io_file_writeon( n_int *entry, n_file **file, n_byte blocked_write );
+
+void io_file_writeoff( n_int *entry, n_file *file );
+
+void io_file_string( n_int entry, n_file *file, n_constant_string string );
+n_uint io_find_size_data( simulated_file_entry *commands );
 
 
-void       memory_erase(n_byte * buf_offscr, n_uint nestop);
-n_int      io_disk_read(n_file * local_file, n_string file_name);
-n_int      io_disk_read_no_error(n_file * local_file, n_string file_name);
+number_array_list * number_array_list_new(void);
+void number_array_list_free(number_array_list ** nal);
+number_array * number_array_list_find(number_array_list * nal, void * array);
+number_array * number_array_list_find_add(number_array_list * nal, void * array);
 
-n_int      io_disk_write(n_file * local_file, n_constant_string file_name);
-n_int      io_disk_check(n_constant_string file_name);
-n_string * io_tab_delimit_to_n_string_ptr(n_file * tab_file, n_int * size_value, n_int * row_value);
-
-void       io_three_string_combination(n_string output, n_string first, n_string second, n_string third, n_int count);
-void       io_time_to_string(n_string value);
-n_string   io_string_copy(n_string string);
-
-n_int      io_read_byte4(n_file * fil, n_uint * actual_value, n_byte * final_char);
-n_int      io_writenum(n_file * fil, n_int loc_val, n_byte ekind, n_byte new_line);
-n_int      io_command(n_file * fil, const simulated_file_entry * commands);
-n_int      io_read_data(n_file * fil, n_byte2 command, n_byte * data_read);
-
-void       io_output_contents(n_file * file);
-
-n_uint     io_file_hash(n_file * file);
-
-n_file * io_file_ready(n_int entry, n_file * file);
-
-void io_file_cleanup(n_int * entry, n_file ** file);
-
-void io_file_writeon(n_int * entry, n_file ** file, n_byte blocked_write);
-
-void io_file_writeoff(n_int * entry, n_file * file);
-
-void io_file_string(n_int entry, n_file * file, n_constant_string string);
-
-n_uint io_find_size_data(simulated_file_entry * commands);
-
+void number_array_not_number(number_array * na);
+void number_array_number(number_array * na, n_int number);
+n_int number_array_get_number(number_array * na, n_int location, n_int * error);
+n_int number_array_get_size(number_array * na);
 
 #define ASCII_QUOTE(num)      ((num) == '"')
 
@@ -582,8 +746,8 @@ n_uint io_find_size_data(simulated_file_entry * commands);
 
 #define	SIZEOF_NUMBER_WRITE      (sizeof(n_int))
 
-void io_int_to_bytes(n_int value, n_byte * bytes);
-n_int io_bytes_to_int(n_byte * bytes);
+void io_int_to_bytes( n_int value, n_byte *bytes );
+n_int io_bytes_to_int( n_byte *bytes );
 
 
 #ifndef ABS
@@ -596,87 +760,57 @@ typedef    short    n_audio;
 #define AUDIO_FFT_MAX_BITS      (15)
 #define AUDIO_FFT_MAX_BUFFER    (1<<AUDIO_FFT_MAX_BITS)
 
-void audio_fft(n_byte inverse, n_uint power_sample);
-void audio_new_fft(n_uint       power_sample,
-                   n_int      InverseTransform,
-                   n_double    *RealIn,
-                   n_double    *ImagIn,
-                   n_double    *RealOut,
-                   n_double    *ImagOut );
-void   audio_clear_buffers(n_uint length);
-void   audio_clear_output(n_audio * audio, n_uint length);
+void audio_fft( n_byte inverse, n_uint power_sample );
+void audio_new_fft( n_uint       power_sample,
+                    n_int      InverseTransform,
+                    n_double    *RealIn,
+                    n_double    *ImagIn,
+                    n_double    *RealOut,
+                    n_double    *ImagOut );
+void   audio_clear_buffers( n_uint length );
+void   audio_clear_output( n_audio *audio, n_uint length );
 
-void   audio_equal_output(n_audio * audio, n_uint length);
+void   audio_equal_output( n_audio *audio, n_uint length );
 
-void   audio_multiply_output(n_audio * audio, n_uint length);
-void   audio_set_frequency(n_uint entry, n_uint value);
+void   audio_multiply_output( n_audio *audio, n_uint length );
+void   audio_set_frequency( n_uint entry, n_uint value );
 
-void   audio_low_frequency(n_audio * buffer, n_int number_freq, n_int debug);
+void   audio_low_frequency( n_audio *buffer, n_int number_freq, n_int debug );
 
-void audio_buffer_clear(n_audio * buffer, n_int size);
-void audio_buffer_double_clear(n_double * buffer, n_int size);
+void audio_buffer_clear( n_audio *buffer, n_int size );
+void audio_buffer_double_clear( n_double *buffer, n_int size );
 
-void audio_buffer_copy_to_audio(n_double * buffer_double, n_audio * buffer_audio, n_int size);
-void audio_buffer_copy_to_double(n_audio * buffer_audio, n_double * buffer_double, n_int size);
-void audio_buffer_copy_to_double_double(n_double * buffer_double1, n_double * buffer_double2, n_int size);
-void audio_buffer_copy_to_double_double(n_double * buffer_double_to, n_double * buffer_double_from, n_int size);
+void audio_buffer_copy_to_audio( n_double *buffer_double, n_audio *buffer_audio, n_int size );
+void audio_buffer_copy_to_double( n_audio *buffer_audio, n_double *buffer_double, n_int size );
+void audio_buffer_copy_to_double_double( n_double *buffer_double1, n_double *buffer_double2, n_int size );
+void audio_buffer_copy_to_double_double( n_double *buffer_double_to, n_double *buffer_double_from, n_int size );
 
-void graph_init(n_int four_byte_factory);
+void       audio_aiff_header( void *fptr, n_uint total_samples );
+n_int      audio_aiff_is_header( void *fptr, n_uint *samples );
 
-void graph_erase(n_byte * buffer, n_vect2 * img, n_rgba32 * color);
+void       audio_aiff_body( void *fptr, n_audio *samples, n_uint number_samples );
 
-/* draws a line */
-void graph_line(n_byte * buffer,
-                n_vect2 * img,
-                n_vect2 * previous,
-                n_vect2 * current,
-                n_rgba32 * color,
-                n_byte thickness);
+#ifdef VERBOSE_DEBUG
 
-void graph_curve(n_byte * buffer,
-                 n_vect2 * img,
-                 n_vect2 * pt0,
-                 n_vect2 * pt1,
-                 n_vect2 * pt2,
-                 n_rgba32 * color,
-                 n_byte radius_percent,
-                 n_uint start_thickness,
-                 n_uint end_thickness);
+#define VD_PRINT( message ) io_vd_print(message, __FILE__, __LINE__)
 
-void graph_fill_polygon(n_vect2 * points, n_int no_of_points,
-                        n_rgba32 * color, n_byte transparency,
-                        n_byte * buffer, n_vect2 * img);
+#define VD_NUM( message, number ) io_vd_number(message, __FILE__, __LINE__, number)
 
+#define VD_UNUM (message, number ) io_vd_unsigned_number(message, __FILE__, __LINE__, number)
 
-typedef n_string (n_console_input)(n_string value, n_int length);
+void io_vd_print( n_string message, n_string file_loc, n_int line );
+void io_vd_number( n_string message, n_string file_loc, n_int line, n_int number );
+void io_vd_unsigned_number( n_string message, n_string file_loc, n_int line, n_uint number );
 
-typedef void (n_console_output)(n_constant_string value);
+#else
 
-typedef n_int (n_console)(void * ptr, n_string response, n_console_output output_function);
+#define VD_PRINT( message ) /* message */
 
-typedef struct
-{
-    n_console * function;
-    n_string    command;
-    n_string    addition;
-    n_string    help_information;
-} simulated_console_command;
+#define VD_NUM( message, number ) /* message number */
 
-void       audio_aiff_header(void * fptr, n_uint total_samples);
-n_int      audio_aiff_is_header(void * fptr, n_uint *samples);
+#define VD_UNUM (message, number ) /* message number */
 
-void       audio_aiff_body(void * fptr, n_audio *samples, n_uint number_samples);
-
-n_int      io_quit(void * ptr, n_string response, n_console_output output_function);
-n_int      io_help(void * ptr, n_string response, n_console_output output_function);
-n_string   io_console_entry_clean(n_string string, n_int length);
-n_string   io_console_entry(n_string string, n_int length);
-void       io_console_out(n_constant_string value);
-n_int      io_console(void * ptr, simulated_console_command * commands, n_console_input input_function, n_console_output output_function);
-
-void       io_help_line(simulated_console_command * specific, n_console_output output_function);
-
-void       io_console_quit(void);
+#endif
 
 #endif /* _TOOLKIT_H_ */
 

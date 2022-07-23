@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -32,6 +32,10 @@
  this software.
 
  ****************************************************************/
+#include "../toolkit/toolkit.h"
+#include "../script/script.h"
+#include "../sim/sim.h"
+#include "../cli/cli.h"
 
 #ifndef SIMULATEDAPE_UNIVERSE_H
 #define SIMULATEDAPE_UNIVERSE_H
@@ -45,15 +49,15 @@
 #ifdef APESIM_IOS
 #undef  BRAIN_ON
 #else
-#define  BRAIN_ON
+#undef  BRAIN_ON
 #endif
 
 #define  FEATURE_SET
 
 #undef  DEBUG_LACK_OF_MOVEMENT
 
-#define SINGLE_BRAIN			(32768)
-#define DOUBLE_BRAIN			(SINGLE_BRAIN*2)
+#define SINGLE_BRAIN            (32768)
+#define DOUBLE_BRAIN            (SINGLE_BRAIN*2)
 
 #define CHARACTER_WIDTH  (8)
 #define CHARACTER_HEIGHT (14)
@@ -66,7 +70,7 @@
  what these operator sums represent.
  */
 
-static const n_byte	operators[17][7] =
+static const n_byte    operators[17][7] =
 {
     /*AHWOUS*/
     "+.....", /* Area */
@@ -98,9 +102,9 @@ static const n_byte	operators[17][7] =
 #define AGE_OF_MATURITY (30)
 
 /*4*/
-enum SECONDARY_APESCRIPT
+typedef enum
 {
-    VARIABLE_VECT_X = (VARIABLE_IF + 1),
+    VARIABLE_VECT_X = ( VARIABLE_IF + 1 ),
     VARIABLE_VECT_Y,
 
     VARIABLE_RANDOM,
@@ -244,25 +248,25 @@ enum SECONDARY_APESCRIPT
     VARIABLE_MEMORY_AFFECT,
 
     VARIABLE_BEING /* This is a special case, it is the location where the main code starts */
-};
+} SECONDARY_APESCRIPT;
 
-enum BODY_INVENTORY_TYPES
+typedef enum
 {
     BODY_HEAD = 0,
-    
+
     BODY_TEETH,
     BODY_BACK,
     BODY_FRONT,
-    
+
     BODY_LEFT_HAND,
     BODY_RIGHT_HAND,
     BODY_LEFT_FOOT,
     BODY_RIGHT_FOOT,
-    
-    INVENTORY_SIZE
-};
 
-enum
+    INVENTORY_SIZE
+} BODY_INVENTORY_TYPES;
+
+typedef enum
 {
     RELATIONSHIP_SELF = 1,
     RELATIONSHIP_MOTHER,
@@ -292,9 +296,9 @@ enum
     OTHER_PATERNAL_GRANDFATHER,
 
     RELATIONSHIPS
-};
+} RELATIONSHIP_TYPES;
 
-enum PREFERENCES_MATE
+typedef enum
 {
     PREFERENCE_MATE_HEIGHT_MALE = 0,
     PREFERENCE_MATE_HEIGHT_FEMALE,
@@ -311,9 +315,9 @@ enum PREFERENCES_MATE
     PREFERENCE_CHAT,
     PREFERENCE_SOCIAL,
     PREFERENCES
-};
+} PREFERENCES_MATE;
 
-enum attention_type
+typedef enum
 {
     ATTENTION_EXTERNAL = 0,
     ATTENTION_ACTOR,
@@ -322,21 +326,8 @@ enum attention_type
     ATTENTION_RELATIONSHIP,
     ATTENTION_TERRITORY,
     ATTENTION_SIZE
-};
+} attention_type;
 
-enum
-{
-    INTERVAL_MINS = 0,
-    INTERVAL_HOURS,
-    INTERVAL_DAYS,
-    INTERVAL_MONTHS,
-    INTERVAL_YEARS,
-    INTERVALS
-};
-
-static const n_int interval_steps[] =
-{ 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
-static const n_constant_string interval_description[] = { " mins"," hours"," days"," months"," years" };
 
 #define FISHING_PROB  (1<<8)
 
@@ -469,7 +460,7 @@ enum being_interaction_social
 #define EPISODIC_SIZE       12  /* maximum number of episodic memories */
 
 /* ApeScript overrides */
-#define OVERRIDE_GOAL		1
+#define OVERRIDE_GOAL        1
 
 /* number of time steps after which a goal is abandoned */
 #define GOAL_TIMEOUT        (60*24)
@@ -499,7 +490,7 @@ enum being_meet_location_type
 /* Types of entities which it's possible to have a disposition towards */
 enum
 {
-    ENTITY_BEING=0,
+    ENTITY_BEING = 0,
     ENTITY_BEING_GROUP,
     ENTITY_OBJECT,
     ENTITY_TERRITORY
@@ -598,7 +589,7 @@ typedef struct
  @field familiarity Number of times that this place has been visited
  @discussion This is the equivalent of a place cell, containing parameters for a particular place on the map
  */
-typedef	struct
+typedef    struct
 {
     n_byte  name;
     n_byte2 familiarity;
@@ -615,7 +606,7 @@ typedef	struct
  @field frequency current state of the probe
  @discussion A probe which can be attached to the brain to inject or detect signals.
  */
-typedef	struct
+typedef    struct
 {
     n_byte type;
     n_byte position;
@@ -646,6 +637,7 @@ enum
     WATCH_BRAINPROBES,
     WATCH_APPEARANCE,
     WATCH_SPEECH,
+    WATCH_PATHOGENS,
     WATCH_STATES
 };
 
@@ -734,13 +726,15 @@ enum
  @field strength immune system strength
  @discussion Immune system parameters
  */
-typedef	struct
+typedef    struct
 {
     n_byte antigens[IMMUNE_ANTIGENS];
     n_byte shape_antigen[IMMUNE_ANTIGENS];
 
     n_byte antibodies[IMMUNE_POPULATION];
     n_byte shape_antibody[IMMUNE_POPULATION];
+
+    n_byte2 random_seed[2];
 } simulated_immune_system;
 
 #endif
@@ -768,17 +762,6 @@ typedef struct
     n_genetics  genetics[CHROMOSOMES];           /* constant */
 } simulated_being_constant;
 
-#define IMMUNE_FIT                            5
-#define MIN_ANTIBODIES                        16
-#define MIN_ANTIGENS                          8
-#define IMMUNE_ANTIGENS                       8
-#define IMMUNE_POPULATION                     16
-#define PATHOGEN_TRANSMISSION_PROB            1000
-#define PATHOGEN_ENVIRONMENT_PROB             100
-#define PATHOGEN_MUTATION_PROB                100
-#define ANTIBODY_DEPLETION_PROB               100
-#define ANTIBODY_GENERATION_PROB(bei)         (being_energy(bei))
-
 enum PATHOGEN_TRANSMISSION_METHOD
 {
     PATHOGEN_TRANSMISSION_AIR = 0,
@@ -792,14 +775,9 @@ enum PATHOGEN_TRANSMISSION_METHOD
     PATHOGEN_TRANSMISSION_TOTAL
 };
 
-
-#define RANDOM_PATHOGEN(seed,pathogen_type)   (((seed%(255/PATHOGEN_TRANSMISSION_TOTAL))*PATHOGEN_TRANSMISSION_TOTAL)+pathogen_type)
-#define PATHOGEN_SEVERITY(pathogen)           (((pathogen)*(pathogen))>>11)
-#define PATHOGEN_TRANSMISSION(pathogen)       ((pathogen)&7)
-
 enum
 {
-    METABOLISM_STATE=0,
+    METABOLISM_STATE = 0,
     METABOLISM_PROTEIN,
     METABOLISM_STARCH,
     METABOLISM_FAT,
@@ -840,7 +818,7 @@ enum
 
 enum
 {
-    ORGAN_STOMACH=1,
+    ORGAN_STOMACH = 1,
     ORGAN_MUSCLES,
     ORGAN_LIVER,
     ORGAN_KIDNEYS,
@@ -863,9 +841,9 @@ typedef struct
 {
     n_byte2     location[2];
     n_byte      direction_facing;
-    n_byte      velocity;
+    n_byte      velocity[10];
     n_byte2     stored_energy;
-    n_byte2     seed[2];
+    n_byte2     random_seed[2];
     n_byte2     macro_state;
     n_byte      parasites;
     n_byte      honor;
@@ -881,7 +859,7 @@ typedef struct
     n_byte2     social_coord_y;
     n_byte2     social_coord_nx; /* why is this needed? */
     n_byte2     social_coord_ny; /* why is this needed? */
-    
+
     sleep_state awake;
 } simulated_being_delta;
 
@@ -890,7 +868,7 @@ typedef struct
     simulated_isocial       social[SOCIAL_SIZE];
     simulated_iepisodic   episodic[EPISODIC_SIZE];
 #ifdef TERRITORY_ON
-    simulated_iplace territory[TERRITORY_DIMENSION*TERRITORY_DIMENSION];
+    simulated_iplace territory[TERRITORY_DIMENSION * TERRITORY_DIMENSION];
 #endif
 } simulated_being_events;
 
@@ -900,16 +878,16 @@ typedef struct
     n_byte      shout[SHOUT_BYTES];
     n_byte2     inventory[INVENTORY_SIZE];
     n_byte      learned_preference[PREFERENCES];
-    
+
     n_byte4     date_of_conception;
     n_genetics  fetal_genetics[CHROMOSOMES];     /* constant */
-    
+
     n_byte2     father_name[2];
     n_byte2     mother_name[2];
-    
+
     n_byte2     child_generation_min;
     n_byte2     child_generation_max;
-}simulated_being_volatile;
+} simulated_being_volatile;
 
 typedef struct
 {
@@ -937,18 +915,19 @@ typedef struct
 #endif
 } simulated_being;
 
-typedef void (being_birth_event)(simulated_being * born, simulated_being * mother, void * sim);
-typedef void (being_death_event)(simulated_being * deceased, void * sim);
+typedef void ( being_birth_event )( simulated_being *born, simulated_being *mother, void *sim );
+typedef void ( being_death_event )( simulated_being *deceased, void *sim );
 
+#define LARGE_SIM 256
 
 typedef struct
 {
-    simulated_remains * remains;
-    simulated_being   * beings;
-    simulated_being   * select; /* used by gui */
-    being_birth_event * ext_birth;
-    being_death_event * ext_death;
-    
+    simulated_being   beings[LARGE_SIM];
+    simulated_remains remains;
+    simulated_being    *select; /* used by gui */
+    being_birth_event *ext_birth;
+    being_death_event *ext_death;
+
     n_uint            num;
     n_uint            max;
 } simulated_group;
@@ -969,149 +948,158 @@ typedef struct
 
 #define GET_M(bei)      ((bei)->delta.mass)
 
-#define	GET_I(bei)	(being_genetics(bei)[CHROMOSOME_Y])
+#define    GET_I(bei)    (being_genetics(bei)[CHROMOSOME_Y])
 
-#define	FIND_SEX(array)		(array&3)
-#define	SEX_FEMALE			3
+#define    FIND_SEX(array)        (array&3)
+#define    SEX_FEMALE            3
 
-#define	BRAIN_OFFSET(num)	(num)
+#define    BRAIN_OFFSET(num)    (num)
 
 
-typedef void (loop_fn)(simulated_group * group, simulated_being * actual, void * data);
-typedef void (loop_no_sim_fn)(simulated_being * actual, void * data);
+typedef void ( loop_fn )( simulated_group *group, simulated_being *actual, void *data );
+typedef void ( loop_no_sim_fn )( simulated_being *actual, void *data );
+typedef void ( loop_no_sim_no_data_fn )( simulated_being *actual );
 
-void loop_no_thread(simulated_group * group, simulated_being * being_not, loop_fn bf_func, void * data);
-void loop_being_no_sim(simulated_being * beings, n_uint number_beings, loop_no_sim_fn bf_func, void * data);
+void loop_no_thread( simulated_group *group, simulated_being *being_not, loop_fn bf_func, void *data );
+void loop_being_no_sim( simulated_being *beings, n_uint number_beings, loop_no_sim_fn bf_func, void *data );
+void loop_being_no_sim_no_data( simulated_being *beings, n_uint number_beings, loop_no_sim_no_data_fn bf_func );
 
-void loop_being(simulated_group * group, loop_fn bf_func, n_int beings_per_thread);
+void loop_being( simulated_group *group, loop_fn bf_func, n_int beings_per_thread );
 
-n_int being_location_x(simulated_being * value);
-n_int being_location_y(simulated_being * value);
-n_int being_energy(simulated_being * value);
-n_genetics * being_genetics(simulated_being * value);
-n_int being_dob(simulated_being * value);
+n_int being_location_x( simulated_being *value );
+n_int being_location_y( simulated_being *value );
+n_int being_energy( simulated_being *value );
+n_genetics *being_genetics( simulated_being *value );
+n_int being_dob( simulated_being *value );
 
-typedef void (console_generic)(void *ptr, n_string ape_name, simulated_being * local_being, n_string result);
+typedef void ( console_generic )( void *ptr, n_string ape_name, simulated_being *local_being, n_string result );
 
-typedef void (line_braincode)(n_string pointer, n_int line);
+typedef void ( line_braincode )( n_string pointer, n_int line );
 
 #ifdef BRAINCODE_ON
-void command_populate_braincode(simulated_group * group, line_braincode function);
+void command_populate_braincode( simulated_group *group, line_braincode function );
 #endif
 
-n_file * death_record_file_ready(void);
-void death_record_file_cleanup(void);
-void console_capture_death(simulated_being * deceased, void * sim);
+n_file *death_record_file_ready( void );
+void death_record_file_cleanup( void );
+void console_capture_death( simulated_being *deceased, void *sim );
 
 
-void *    sim_init(KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size);
-void      sim_cycle(void);
-void      sim_update_output(void);
+void     *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size );
+void      sim_cycle( void );
+void      sim_update_output( void );
 
 /* This is the new way. Please continue forwards. */
-n_file *  tranfer_out(void);
-n_file *  tranfer_out_json(void);
-n_int     tranfer_in(n_file * input_file);
+n_file   *tranfer_out( void );
+n_file   *tranfer_out_json( void );
+n_int     tranfer_in( n_file *input_file );
 
-n_int     sim_interpret(n_file * input_file);
-void	  sim_close(void);
+n_int     sim_interpret( n_file *input_file );
+void      sim_close( void );
 
-simulated_timing * sim_timing(void);
-simulated_group  * sim_group(void);
+simulated_timing *sim_timing( void );
+simulated_group   *sim_group( void );
 
-n_uint sim_memory_allocated(n_int max);
+n_uint sim_memory_allocated( n_int max );
 
-void sim_flood(void);
+void sim_flood( void );
 
-void sim_healthy_carrier(void);
+void sim_healthy_carrier( void );
 
-void sim_realtime(n_uint time);
+void sim_realtime( n_uint time );
 
-void sim_set_select(simulated_being * select);
+void sim_set_select( simulated_being *select );
 
-n_int sim_new_run_condition(void);
+n_int sim_new_run_condition( void );
 
-void sim_view_options(n_int px, n_int py);
-void sim_rotate(n_int integer_rotation_256);
-void sim_move(n_int rel_vel, n_byte kind);
-void sim_change_selected(n_byte forwards);
+void sim_view_options( n_int px, n_int py );
+void sim_rotate( n_int integer_rotation_256 );
+void sim_move( n_int rel_vel, n_byte kind );
+void sim_change_selected( n_byte forwards );
 
-n_int sim_view_regular(n_int px, n_int py);
-
-
-void sim_control_set(n_int px, n_int py, n_byte value, n_byte character, n_int scale);
-void sim_control_erase(n_int size_x, n_int size_y, n_int scale);
-void sim_control_regular(n_int px, n_int py, n_int scale);
-
-void sim_terrain(n_int sx);
+n_int sim_view_regular( n_int px, n_int py );
 
 
-void sim_set_output(n_int value);
-n_int sim_get_writing_output(void);
-n_string sim_output_string(void);
+void sim_control_set( n_int px, n_int py, n_byte value, n_byte character );
+void sim_control_erase( n_int size_x, n_int size_y, n_int max_characters );
+void sim_control_regular( n_int px, n_int py );
 
-n_int sim_new(void);
+void sim_terrain( n_int sx );
 
-void transfer_debug_csv(n_file * fil, n_byte initial);
 
-n_int get_time_interval(n_string str, n_int * number, n_int * interval);
+void sim_set_console_input( n_console_input *local_input_function );
+void sim_set_console_output( n_console_output *local_output_function );
 
-void watch_ape(void * ptr, n_console_output output_function);
-void watch_control(void *ptr, n_string beingname, simulated_being * local_being, n_string result);
+void sim_set_output( n_int value );
+n_int sim_get_writing_output( void );
+n_string sim_output_string( void );
 
-n_int command_speak(void * ptr, n_string response, n_console_output output_function);
-n_int command_alphabet(void * ptr, n_string response, n_console_output output_function);
+n_int sim_new( void );
 
-void command_change_selected(simulated_group * group, n_byte forwards);
+void transfer_debug_csv( n_file *fil, n_byte initial );
 
-n_int command_stop(void * ptr, n_string response, n_console_output output_function);
-n_int command_idea(void * ptr, n_string response, n_console_output output_function);
-n_int command_being(void * ptr, n_string response, n_console_output output_function);
-n_int command_braincode(void * ptr, n_string response, n_console_output output_function);
-n_int command_speech(void * ptr, n_string response, n_console_output output_function);
 
-n_int command_relationship_count(n_int friend_type);
-simulated_being * command_relationship_being(simulated_group * group, n_int friend_type, n_int location);
+n_int ape_simulation( void *ptr, n_string response, n_console_output output_function );
 
-n_int command_social_graph(void * ptr, n_string response, n_console_output output_function);
-n_int command_genome(void * ptr, n_string response, n_console_output output_function);
-n_int command_appearance(void * ptr, n_string response, n_console_output output_function);
-n_int command_stats(void * ptr, n_string response, n_console_output output_function);
-n_int command_episodic(void * ptr, n_string response, n_console_output output_function);
-n_int command_probes(void * ptr, n_string response, n_console_output output_function);
-n_int command_watch(void * ptr, n_string response, n_console_output output_function);
-n_int command_logging(void * ptr, n_string response, n_console_output output_function);
-n_int command_list(void * ptr, n_string response, n_console_output output_function);
-n_int command_memory(void * ptr, n_string response, n_console_output output_function);
-n_int command_next(void * ptr, n_string response, n_console_output output_function);
-n_int command_previous(void * ptr, n_string response, n_console_output output_function);
-n_int command_simulation(void * ptr, n_string response, n_console_output output_function);
-n_int command_step(void * ptr, n_string response, n_console_output output_function);
-n_int command_run(void * ptr, n_string response, n_console_output output_function);
-n_int command_interval(void * ptr, n_string response, n_console_output output_function);
-n_int command_reset(void * ptr, n_string response, n_console_output output_function);
-n_int command_top(void * ptr, n_string response, n_console_output output_function);
-n_int command_epic(void * ptr, n_string response, n_console_output output_function);
-n_int command_file(void * ptr, n_string response, n_console_output output_function);
-n_int command_event(void * ptr, n_string response, n_console_output output_function);
-n_int command_epic(void * ptr, n_string response, n_console_output output_function);
 
-n_int command_debug(void * ptr, n_string response, n_console_output output_function);
+void watch_ape( void *ptr, n_console_output output_function );
+void watch_control( void *ptr, n_string beingname, simulated_being *local_being, n_string result );
 
-n_int console_death(void * ptr, n_string response, n_console_output output_function);
+n_int command_speak( void *ptr, n_string response, n_console_output output_function );
+n_int command_alphabet( void *ptr, n_string response, n_console_output output_function );
 
-n_int command_save(void * ptr, n_string response, n_console_output output_function);
-n_int command_open(void * ptr, n_string response, n_console_output output_function);
-n_int command_script(void * ptr, n_string response, n_console_output output_function);
+void command_change_selected( simulated_group *group, n_byte forwards );
 
-n_int command_quit(void * ptr, n_string response, n_console_output output_function);
+n_int command_idea( void *ptr, n_string response, n_console_output output_function );
+n_int command_being( void *ptr, n_string response, n_console_output output_function );
+n_int command_braincode( void *ptr, n_string response, n_console_output output_function );
+n_int command_speech( void *ptr, n_string response, n_console_output output_function );
 
-#ifndef	_WIN32
-n_int sim_thread_console_quit(void);
-void  sim_thread_console(void);
+n_int command_relationship_count( n_int friend_type );
+simulated_being *command_relationship_being( simulated_group *group, n_int friend_type, n_int location );
+
+n_int command_pathogen_graph( void *ptr, n_string response, n_console_output output_function );
+n_int command_social_graph( void *ptr, n_string response, n_console_output output_function );
+n_int command_genome( void *ptr, n_string response, n_console_output output_function );
+n_int command_appearance( void *ptr, n_string response, n_console_output output_function );
+n_int command_stats( void *ptr, n_string response, n_console_output output_function );
+n_int command_episodic( void *ptr, n_string response, n_console_output output_function );
+n_int command_probes( void *ptr, n_string response, n_console_output output_function );
+n_int command_watch( void *ptr, n_string response, n_console_output output_function );
+n_int command_logging( void *ptr, n_string response, n_console_output output_function );
+n_int command_list( void *ptr, n_string response, n_console_output output_function );
+n_int command_memory( void *ptr, n_string response, n_console_output output_function );
+n_int command_reset( void *ptr, n_string response, n_console_output output_function );
+n_int command_top( void *ptr, n_string response, n_console_output output_function );
+n_int command_epic( void *ptr, n_string response, n_console_output output_function );
+n_int command_file( void *ptr, n_string response, n_console_output output_function );
+n_int command_event( void *ptr, n_string response, n_console_output output_function );
+n_int command_epic( void *ptr, n_string response, n_console_output output_function );
+
+n_int command_debug( void *ptr, n_string response, n_console_output output_function );
+
+n_int console_death( void *ptr, n_string response, n_console_output output_function );
+
+n_int command_save( void *ptr, n_string response, n_console_output output_function );
+n_int command_open( void *ptr, n_string response, n_console_output output_function );
+n_int command_script( void *ptr, n_string response, n_console_output output_function );
+
+
+#ifndef    _WIN32
+n_int sim_thread_console_quit( void );
+void  sim_thread_console( void );
 #endif
 
+void sim_console( n_string simulation_filename, n_uint randomise );
+void sim_console_debug( n_console_input simulation_input, n_uint randomise );
+
 #ifdef CONSOLE_REQUIRED
+
+void ape_previous(void * ptr, n_console_output output_function);
+void ape_next(void * ptr, n_console_output output_function);
+
+n_int ape_cycle(void * ptr);
+void ape_watch_entity( void *ptr, n_console_output output_function );
 
 const static simulated_console_command control_commands[] =
 {
@@ -1126,30 +1114,33 @@ const static simulated_console_command control_commands[] =
     {&command_script,        "script",         "[file]",               "Load an ApeScript simulation file"},
     {&command_save,          "save",           "[file]",               "Save a simulation file"},
 
-    {&command_quit,           "quit",           "",                     "Quits the console"},
-    {&command_quit,           "exit",           "",                     ""},
-    {&command_quit,           "close",          "",                     ""},
+    {&useful_quit,           "quit",           "",                     "Quits the console"},
+    {&useful_quit,           "exit",           "",                     ""},
+    {&useful_quit,           "close",          "",                     ""},
 
-    {&command_stop,          "stop",           "",                     "Stop the simulation during step or run"},
+    {&useful_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 
     {&command_speak,         "speak",          "[file]",               "Create an AIFF file of Ape speech"},
     {&command_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Ape alphabet"},
     {&command_file,          "file",           "[(component)]",        "Information on the file format"},
-    {&command_run,           "run",            "(time format)|forever","Simulate for a given number of days or forever"},
-    {&command_step,          "step",           "",                     "Run for a single logging interval"},
+    {&useful_run,           "run",            "(time format)|forever", "Simulate for a given number of days or forever"},
+    {&useful_step,          "step",           "",                     "Run for a single logging interval"},
     {&command_top,           "top",            "",                     "List the top apes"},
     {&command_epic,          "epic",           "",                     "List the most talked about apes"},
-    {&command_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
+    {&useful_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
     {&command_event,         "event",          "on|social|off",        "Episodic events (all) on, social on or all off"},
     {&command_logging,       "logging",        "on|off",               "Turn logging of images and data on or off"},
     {&command_logging,       "log",            "",                     ""},
-    {&command_simulation,    "simulation",     "",                     ""},
-    {&command_simulation,    "sim",            "",                     "Show simulation parameters"},
+    {&useful_simulation,    "simulation",     "",                     ""},
+    {&useful_simulation,    "sim",            "",                     "Show simulation parameters"},
     {&command_watch,         "watch",          "(ape name)|all|off|*", "Watch (specific *) for the current ape"},
     {&command_watch,         "monitor",        "",                     ""},
     {&command_idea,          "idea",           "",                     "Track shared braincode between apes"},
     {&command_being,         "ape",            "",                     "Name of the currently watched ape"},
     {&command_being,         "pwd",            "",                     ""},
+
+    {&command_pathogen_graph, "pathogen",       "(ape name)",      "* Show pathogens for a named ape"},
+
     {&command_social_graph,  "friends",        "",                     ""},
     {&command_social_graph,  "social",         "",                     ""},
     {&command_social_graph,  "socialgraph",    "",                     ""},
@@ -1169,14 +1160,14 @@ const static simulated_console_command control_commands[] =
     {&command_list,          "ls",             "",                     ""},
     {&command_list,          "dir",            "",                     ""},
 
-    {&command_next,          "next",           "",                     "Next ape"},
+    {&useful_next,          "next",           "",                     "Next ape"},
 
-    {&command_previous,      "previous",       "",                     "Previous ape"},
-    {&command_previous,      "prev",           "",                     ""},
+    {&useful_previous,      "previous",       "",                     "Previous ape"},
+    {&useful_previous,      "prev",           "",                     ""},
 
 
     {&command_debug,         "debug",          "",                    "Run debug check"},
-    
+
     {&command_memory,        "memory",         "",                    "Memory information for the simulation"},
 
     {0L, 0L},

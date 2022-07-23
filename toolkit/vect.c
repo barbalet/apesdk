@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -38,6 +38,7 @@
  */
 
 #include "toolkit.h"
+#include "stdio.h"
 
 /** \brief new_sd stands for new sine dump and hold the sine and cosine values for the simulation */
 static const n_int	new_sd[256] =
@@ -60,35 +61,35 @@ static const n_int	new_sd[256] =
     -10286, -9673, -9055, -8431, -7802, -7169, -6531, -5889, -5244, -4595, -3944, -3290, -2634, -1977, -1318, -659
 };
 
-void area2_add(n_area2 * area, n_vect2 * vect, n_byte first)
+void area2_add( n_area2 *area, n_vect2 *vect, n_byte first )
 {
-    if (first)
+    if ( first )
     {
         area->bottom_right.x = vect->x;
         area->bottom_right.y = vect->y;
-        
+
         area->top_left.x = vect->x;
         area->top_left.y = vect->y;
         return;
     }
-    
-    if (vect->x < area->top_left.x)
+
+    if ( vect->x < area->top_left.x )
     {
         area->top_left.x = vect->x;
     }
-    if (vect->y < area->top_left.y)
+    if ( vect->y < area->top_left.y )
     {
         area->top_left.y = vect->y;
     }
 
-    if (vect->x > area->bottom_right.x)
+    if ( vect->x > area->bottom_right.x )
     {
         area->bottom_right.x = vect->x;
     }
-    if (vect->y > area->bottom_right.y)
+    if ( vect->y > area->bottom_right.y )
     {
         area->bottom_right.y = vect->y;
-    }   
+    }
 }
 
 /**
@@ -96,13 +97,19 @@ void area2_add(n_area2 * area, n_vect2 * vect, n_byte first)
  * @param converter the vector to hold the information.
  * @param input the n_byte2 that is converted to the n_vect2.
  */
-void vect2_byte2(n_vect2 * converter, n_byte2 * input)
+void vect2_byte2( n_vect2 *converter, n_byte2 *input )
 {
-    NA_ASSERT(converter, "converter NULL");
-    NA_ASSERT(input, "input NULL");
+    NA_ASSERT( converter, "converter NULL" );
+    NA_ASSERT( input, "input NULL" );
 
-    if (converter == 0L) return;
-    if (input == 0L) return;
+    if ( converter == 0L )
+    {
+        return;
+    }
+    if ( input == 0L )
+    {
+        return;
+    }
 
     converter->x = input[0];
     converter->y = input[1];
@@ -114,41 +121,50 @@ void vect2_byte2(n_vect2 * converter, n_byte2 * input)
  * @param initial the first vector to be added.
  * @param second the second vector to be added.
  */
-void vect2_add(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
+void vect2_add( n_vect2 *equals, n_vect2 *initial, n_vect2 *second )
 {
-    NA_ASSERT(equals, "equals NULL");
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
+    NA_ASSERT( equals, "equals NULL" );
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
 
-    if (equals == 0L) return;
-    if (initial == 0L) return;
-    if (second == 0L) return;
+    if ( equals == 0L )
+    {
+        return;
+    }
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
 
     equals->x = initial->x + second->x;
     equals->y = initial->y + second->y;
 }
 
 
-void vect2_center(n_vect2 * center, n_vect2 * initial, n_vect2 * second)
+void vect2_center( n_vect2 *center, n_vect2 *initial, n_vect2 *second )
 {
-    vect2_add(center, initial, second);
+    vect2_add( center, initial, second );
     center->x = center->x / 2;
     center->y = center->y / 2;
 }
 
-void vect2_scalar_multiply(n_vect2 * value, n_int multiplier)
+void vect2_scalar_multiply( n_vect2 *value, n_int multiplier )
 {
     value->x = value->x * multiplier;
     value->y = value->y * multiplier;
 }
 
-void vect2_scalar_divide(n_vect2 * value, n_int divisor)
+void vect2_scalar_divide( n_vect2 *value, n_int divisor )
 {
     value->x = value->x / divisor;
     value->y = value->y / divisor;
 }
 
-void vect2_scalar_bitshiftdown(n_vect2 * value, n_int bitshiftdown)
+void vect2_scalar_bitshiftdown( n_vect2 *value, n_int bitshiftdown )
 {
     value->x = value->x >> bitshiftdown;
     value->y = value->y >> bitshiftdown;
@@ -160,25 +176,34 @@ void vect2_scalar_bitshiftdown(n_vect2 * value, n_int bitshiftdown)
  * @param initial the first vector.
  * @param second the second vector to be subtracted.
  */
-void vect2_subtract(n_vect2 * equals, n_vect2 * initial, n_vect2 * second)
+void vect2_subtract( n_vect2 *equals, n_vect2 *initial, n_vect2 *second )
 {
-    NA_ASSERT(equals, "equals NULL");
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
+    NA_ASSERT( equals, "equals NULL" );
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
 
-    if (equals == 0L) return;
-    if (initial == 0L) return;
-    if (second == 0L) return;
+    if ( equals == 0L )
+    {
+        return;
+    }
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
 
     equals->x = initial->x - second->x;
     equals->y = initial->y - second->y;
 }
 
-void vect2_divide(n_vect2 * equals, n_vect2 * initial, n_vect2 * second, n_int divisor)
+void vect2_divide( n_vect2 *equals, n_vect2 *initial, n_vect2 *second, n_int divisor )
 {
-    vect2_subtract(equals, second, initial);
-    
-    if (equals == 0L || (divisor == 0))
+    vect2_subtract( equals, second, initial );
+
+    if ( equals == 0L || ( divisor == 0 ) )
     {
         return;
     }
@@ -194,21 +219,33 @@ void vect2_divide(n_vect2 * equals, n_vect2 * initial, n_vect2 * second, n_int d
  * @param multiplier the scalar multiplier.
  * @param divisor the the scalar divisor.
  */
-void vect2_multiplier(n_vect2 * equals, n_vect2 * initial, n_vect2 * second,
-                      n_int multiplier, n_int divisor)
+void vect2_multiplier( n_vect2 *equals, n_vect2 *initial, n_vect2 *second,
+                       n_int multiplier, n_int divisor )
 {
-    NA_ASSERT(equals, "equals NULL");
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor, "divisor ZERO");
+    NA_ASSERT( equals, "equals NULL" );
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+    NA_ASSERT( divisor, "divisor ZERO" );
 
-    if (equals == 0L) return;
-    if (initial == 0L) return;
-    if (second == 0L) return;
-    if (divisor == 0L) return;
+    if ( equals == 0L )
+    {
+        return;
+    }
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
+    if ( divisor == 0L )
+    {
+        return;
+    }
 
-    equals->x = (multiplier * initial->x * second->x) / divisor;
-    equals->y = (multiplier * initial->y * second->y) / divisor;
+    equals->x = ( multiplier * initial->x * second->x ) / divisor;
+    equals->y = ( multiplier * initial->y * second->y ) / divisor;
 }
 
 /**
@@ -218,18 +255,27 @@ void vect2_multiplier(n_vect2 * equals, n_vect2 * initial, n_vect2 * second,
  * @param multiplier the scalar multiplier.
  * @param divisor the the scalar divisor.
  */
-void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int divisor)
+void vect2_d( n_vect2 *initial, n_vect2 *second, n_int multiplier, n_int divisor )
 {
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor, "divisor ZERO");
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+    NA_ASSERT( divisor, "divisor ZERO" );
 
-    if (initial == 0L) return;
-    if (second == 0L) return;
-    if (divisor == 0L) return;
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
+    if ( divisor == 0L )
+    {
+        return;
+    }
 
-    initial->x += ( (multiplier * second->x) / divisor);
-    initial->y += ( (multiplier * second->y) / divisor);
+    initial->x += ( ( multiplier * second->x ) / divisor );
+    initial->y += ( ( multiplier * second->y ) / divisor );
 }
 
 /**
@@ -241,26 +287,32 @@ void vect2_d(n_vect2 * initial, n_vect2 * second, n_int multiplier, n_int diviso
  @param divisor The divisor multiplier
  @return The resultant scalar
  */
-n_int vect2_dot(n_vect2 * initial, n_vect2 * second,
-                n_int multiplier, n_int divisor)
+n_int vect2_dot( n_vect2 *initial, n_vect2 *second,
+                 n_int multiplier, n_int divisor )
 {
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor, "divisor ZERO");
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+    NA_ASSERT( divisor, "divisor ZERO" );
 
-    if (initial == 0L) return 0;
-    if (second == 0L) return 0;
+    if ( initial == 0L )
+    {
+        return 0;
+    }
+    if ( second == 0L )
+    {
+        return 0;
+    }
 
-    return (multiplier * ((initial->x * second->x) + (initial->y * second->y))) / divisor;
+    return ( multiplier * ( ( initial->x * second->x ) + ( initial->y * second->y ) ) ) / divisor;
 }
 
-n_int vect2_distance_under(n_vect2 * first, n_vect2 * second, n_int distance)
+n_int vect2_distance_under( n_vect2 *first, n_vect2 *second, n_int distance )
 {
-    n_vect2 difference;
+    n_vect2 difference = {{0, 0}};
     n_int   distance_squ;
-    vect2_subtract(&difference, first, second);
-    distance_squ = (difference.x * difference.x) + (difference.y * difference.y);
-    return (distance * distance) > distance_squ;
+    vect2_subtract( &difference, first, second );
+    distance_squ = ( difference.x * difference.x ) + ( difference.y * difference.y );
+    return ( distance * distance ) > distance_squ;
 }
 
 /**
@@ -269,13 +321,13 @@ n_int vect2_distance_under(n_vect2 * first, n_vect2 * second, n_int distance)
  @param divisor The divisor for the output value
  @return The sine value
  */
-n_int math_sine(n_int direction, n_int divisor)
+n_int math_sine( n_int direction, n_int divisor )
 {
-    NA_ASSERT(divisor, "divisor ZERO");
-    return new_sd[(direction)&255] / (divisor);
+    NA_ASSERT( divisor, "divisor ZERO" );
+    return new_sd[( direction ) & 255] / ( divisor );
 }
 
-void vect2_rotate90(n_vect2 * rotation)
+void vect2_rotate90( n_vect2 *rotation )
 {
     n_int  temp = rotation->y;
     rotation->y = 0 - rotation->x;
@@ -288,126 +340,153 @@ void vect2_rotate90(n_vect2 * rotation)
  @param direction 256 units per rotation
  @param divisor The divisor for the output value
  */
-void vect2_direction(n_vect2 * initial, n_int direction, n_int divisor)
+void vect2_direction( n_vect2 *initial, n_int direction, n_int divisor )
 {
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(divisor, "divisor ZERO");
-    initial->x = ((new_sd[((direction)+64)&255]) / (divisor));
-    initial->y = ((new_sd[(direction)&255]) / (divisor));
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( divisor, "divisor ZERO" );
+    initial->x = ( ( new_sd[( ( direction ) + 64 ) & 255] ) / ( divisor ) );
+    initial->y = ( ( new_sd[( direction ) & 255] ) / ( divisor ) );
 }
 
-void vect2_delta(n_vect2 * initial, n_vect2 * delta)
+void vect2_delta( n_vect2 *initial, n_vect2 *delta )
 {
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(delta, "delta NULL");
-    
-    if (initial == 0L) return;
-    if (delta == 0L) return;
-    
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( delta, "delta NULL" );
+
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( delta == 0L )
+    {
+        return;
+    }
+
     initial->x += delta->x;
     initial->y += delta->y;
 }
 
-void vect2_offset(n_vect2 * initial, n_int dx, n_int dy)
+void vect2_offset( n_vect2 *initial, n_int dx, n_int dy )
 {
-    NA_ASSERT(initial, "initial NULL");
+    NA_ASSERT( initial, "initial NULL" );
 
-    if (initial == 0L) return;
+    if ( initial == 0L )
+    {
+        return;
+    }
 
     initial->x += dx;
     initial->y += dy;
 }
 
-void vect2_back_byte2(n_vect2 * converter, n_byte2 * output)
+void vect2_back_byte2( n_vect2 *converter, n_byte2 *output )
 {
-    NA_ASSERT(converter, "converter NULL");
-    NA_ASSERT(output, "output NULL");
+    NA_ASSERT( converter, "converter NULL" );
+    NA_ASSERT( output, "output NULL" );
 
-    if (converter == 0L) return;
-    if (output == 0L) return;
+    if ( converter == 0L )
+    {
+        return;
+    }
+    if ( output == 0L )
+    {
+        return;
+    }
 
-    if (converter->x > 65535) converter->x = 65535;
-    if (converter->y > 65535) converter->y = 65535;
-    if (converter->x < 0) converter->x = 0;
-    if (converter->y < 0) converter->y = 0;
+    if ( converter->x > 65535 )
+    {
+        converter->x = 65535;
+    }
+    if ( converter->y > 65535 )
+    {
+        converter->y = 65535;
+    }
+    if ( converter->x < 0 )
+    {
+        converter->x = 0;
+    }
+    if ( converter->y < 0 )
+    {
+        converter->y = 0;
+    }
 
-    output[0] = (n_byte2) converter->x;
-    output[1] = (n_byte2) converter->y;
+    output[0] = ( n_byte2 ) converter->x;
+    output[1] = ( n_byte2 ) converter->y;
 }
 
-void  vect2_copy(n_vect2 * to, n_vect2 * from)
+void  vect2_copy( n_vect2 *to, n_vect2 *from )
 {
     to->x = from->x;
     to->y = from->y;
 }
 
-void  vect2_populate(n_vect2 * value, n_int x, n_int y)
+void  vect2_populate( n_vect2 *value, n_int x, n_int y )
 {
     value->x = x;
     value->y = y;
 }
 
-void vect2_rotation(n_vect2 * location, n_vect2 * rotation)
+void vect2_rotation( n_vect2 *location, n_vect2 *rotation )
 {
     n_vect2 temp;
 
-    temp.x = ((location->x * rotation->x) + (location->y * rotation->y)) / SINE_MAXIMUM;
-    temp.y = ((location->x * rotation->y) - (location->y * rotation->x)) / SINE_MAXIMUM;
+    temp.x = ( ( location->x * rotation->x ) + ( location->y * rotation->y ) ) / SINE_MAXIMUM;
+    temp.y = ( ( location->x * rotation->y ) - ( location->y * rotation->x ) ) / SINE_MAXIMUM;
 
     location->x = temp.x;
     location->y = temp.y;
 }
 
-void vect2_rotation_bitshift(n_vect2 * location, n_vect2 * rotation)
+void vect2_rotation_bitshift( n_vect2 *location, n_vect2 *rotation )
 {
     n_vect2 temp;
-    
-    temp.x = ((location->x * rotation->x) + (location->y * rotation->y)) >> 15;
-    temp.y = ((location->x * rotation->y) - (location->y * rotation->x)) >> 15;
-    
+
+    temp.x = ( ( location->x * rotation->x ) + ( location->y * rotation->y ) ) >> 15;
+    temp.y = ( ( location->x * rotation->y ) - ( location->y * rotation->x ) ) >> 15;
+
     location->x = temp.x;
     location->y = temp.y;
 }
 
-n_int vect2_nonzero(n_vect2 * nonzero)
+n_int vect2_nonzero( n_vect2 *nonzero )
 {
-    return ((nonzero->x != 0) || (nonzero->y != 0));
+    return ( ( nonzero->x != 0 ) || ( nonzero->y != 0 ) );
 }
 
-n_vect2 * vect2_min_max_init(void)
+n_vect2 *vect2_min_max_init( void )
 {
-    n_vect2 * min_max = memory_new(2 * sizeof(n_vect2));
-    if (min_max == 0L)
+    n_vect2 *min_max = memory_new( 2 * sizeof( n_vect2 ) );
+    if ( min_max == 0L )
     {
         return 0L;
-    }    
-    vect2_populate(&min_max[0], BIG_INTEGER, BIG_INTEGER);
-    vect2_populate(&min_max[1], BIG_NEGATIVE_INTEGER, BIG_NEGATIVE_INTEGER);
+    }
+    vect2_populate( &min_max[0], BIG_INTEGER, BIG_INTEGER );
+    vect2_populate( &min_max[1], BIG_NEGATIVE_INTEGER, BIG_NEGATIVE_INTEGER );
     return min_max;
 }
 
-void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
+void vect2_min_max( n_vect2 *points, n_int number, n_vect2 *maxmin )
 {
     n_int loop = 0;
 
-    while(loop < number)
+    while ( loop < number )
     {
         n_int px = points[loop].x;
         n_int py = points[loop].y;
-        if (px < maxmin[0].x)
+        if ( px < maxmin[0].x )
         {
             maxmin[0].x = px;
         }
-        if (py < maxmin[0].y)
+        if ( py < maxmin[0].y )
         {
             maxmin[0].y = py;
         }
 
-        if (px > maxmin[1].x)
+        if ( px > maxmin[1].x )
         {
             maxmin[1].x = px;
         }
-        if (py > maxmin[1].y)
+        if ( py > maxmin[1].y )
         {
             maxmin[1].y = py;
         }
@@ -415,63 +494,87 @@ void vect2_min_max(n_vect2 * points, n_int number, n_vect2 * maxmin)
     }
 }
 
-void vect3_double(n_vect3 * converter, n_double * input)
+void vect3_double( n_vect3 *converter, n_double *input )
 {
-    NA_ASSERT(converter, "converter NULL");
-    NA_ASSERT(input, "input NULL");
-    
-    if (converter == 0L) return;
-    if (input == 0L) return;
-    
+    NA_ASSERT( converter, "converter NULL" );
+    NA_ASSERT( input, "input NULL" );
+
+    if ( converter == 0L )
+    {
+        return;
+    }
+    if ( input == 0L )
+    {
+        return;
+    }
+
     converter->x = input[0];
     converter->y = input[1];
     converter->z = input[1];
 }
 
-void vect3_add(n_vect3 * equals, n_vect3 * initial, n_vect3 * second)
+void vect3_add( n_vect3 *equals, n_vect3 *initial, n_vect3 *second )
 {
-    NA_ASSERT(equals, "equals NULL");
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    
-    if (equals == 0L) return;
-    if (initial == 0L) return;
-    if (second == 0L) return;
-    
+    NA_ASSERT( equals, "equals NULL" );
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+
+    if ( equals == 0L )
+    {
+        return;
+    }
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
+
     equals->x = initial->x + second->x;
     equals->y = initial->y + second->y;
     equals->z = initial->z + second->z;
 }
 
 
-void vect3_center(n_vect3 * center, n_vect3 * initial, n_vect3 * second)
+void vect3_center( n_vect3 *center, n_vect3 *initial, n_vect3 *second )
 {
-    vect3_add(center, initial, second);
+    vect3_add( center, initial, second );
     center->x = center->x / 2;
     center->y = center->y / 2;
     center->z = center->z / 2;
 }
 
-void vect3_subtract(n_vect3 * equals, n_vect3 * initial, n_vect3 * second)
+void vect3_subtract( n_vect3 *equals, n_vect3 *initial, n_vect3 *second )
 {
-    NA_ASSERT(equals, "equals NULL");
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    
-    if (equals == 0L) return;
-    if (initial == 0L) return;
-    if (second == 0L) return;
-    
+    NA_ASSERT( equals, "equals NULL" );
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+
+    if ( equals == 0L )
+    {
+        return;
+    }
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
+
     equals->x = initial->x - second->x;
     equals->y = initial->y - second->y;
     equals->z = initial->z - second->z;
 }
 
-void vect3_divide(n_vect3 * equals, n_vect3 * initial, n_vect3 * second, n_double divisor)
+void vect3_divide( n_vect3 *equals, n_vect3 *initial, n_vect3 *second, n_double divisor )
 {
-    vect3_subtract(equals, second, initial);
-    
-    if (equals == 0L || (divisor == 0))
+    vect3_subtract( equals, second, initial );
+
+    if ( equals == 0L || ( divisor == 0 ) )
     {
         return;
     }
@@ -480,104 +583,271 @@ void vect3_divide(n_vect3 * equals, n_vect3 * initial, n_vect3 * second, n_doubl
     equals->z = equals->z / divisor;
 }
 
-void vect3_multiplier(n_vect3 * equals, n_vect3 * initial, n_vect3 * second,
-                      n_double multiplier, n_double divisor)
+void vect3_multiplier( n_vect3 *equals, n_vect3 *initial, n_vect3 *second,
+                       n_double multiplier, n_double divisor )
 {
-    NA_ASSERT(equals, "equals NULL");
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor != 0, "divisor ZERO");
-    
-    if (equals == 0L) return;
-    if (initial == 0L) return;
-    if (second == 0L) return;
-    if (divisor == 0L) return;
-    
-    equals->x = (multiplier * initial->x * second->x) / divisor;
-    equals->y = (multiplier * initial->y * second->y) / divisor;
-    equals->z = (multiplier * initial->z * second->z) / divisor;
+    NA_ASSERT( equals, "equals NULL" );
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+    NA_ASSERT( divisor != 0, "divisor ZERO" );
+
+    if ( equals == 0L )
+    {
+        return;
+    }
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
+    if ( divisor == 0L )
+    {
+        return;
+    }
+
+    equals->x = ( multiplier * initial->x * second->x ) / divisor;
+    equals->y = ( multiplier * initial->y * second->y ) / divisor;
+    equals->z = ( multiplier * initial->z * second->z ) / divisor;
 }
 
-void vect3_d(n_vect3 * initial, n_vect3 * second, n_double multiplier, n_double divisor)
+void vect3_d( n_vect3 *initial, n_vect3 *second, n_double multiplier, n_double divisor )
 {
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor != 0, "divisor ZERO");
-    
-    if (initial == 0L) return;
-    if (second == 0L) return;
-    if (divisor == 0L) return;
-    
-    initial->x += ( (multiplier * second->x) / divisor);
-    initial->y += ( (multiplier * second->y) / divisor);
-    initial->z += ( (multiplier * second->z) / divisor);
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+    NA_ASSERT( divisor != 0, "divisor ZERO" );
+
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( second == 0L )
+    {
+        return;
+    }
+    if ( divisor == 0L )
+    {
+        return;
+    }
+
+    initial->x += ( ( multiplier * second->x ) / divisor );
+    initial->y += ( ( multiplier * second->y ) / divisor );
+    initial->z += ( ( multiplier * second->z ) / divisor );
 }
 
-n_double vect3_dot(n_vect3 * initial, n_vect3 * second,
-                n_double multiplier, n_double divisor)
+n_double vect3_dot( n_vect3 *initial, n_vect3 *second,
+                    n_double multiplier, n_double divisor )
 {
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(second, "second NULL");
-    NA_ASSERT(divisor != 0, "divisor ZERO");
-    
-    if (initial == 0L) return 0;
-    if (second == 0L) return 0;
-    
-    return (multiplier * ((initial->x * second->x) + (initial->y * second->y) + (initial->z * second->z))) / divisor;
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( second, "second NULL" );
+    NA_ASSERT( divisor != 0, "divisor ZERO" );
+
+    if ( initial == 0L )
+    {
+        return 0;
+    }
+    if ( second == 0L )
+    {
+        return 0;
+    }
+
+    return ( multiplier * ( ( initial->x * second->x ) + ( initial->y * second->y ) + ( initial->z * second->z ) ) ) / divisor;
 }
 
-void vect3_delta(n_vect3 * initial, n_vect3 * delta)
+void vect3_delta( n_vect3 *initial, n_vect3 *delta )
 {
-    NA_ASSERT(initial, "initial NULL");
-    NA_ASSERT(delta, "delta NULL");
-    
-    if (initial == 0L) return;
-    if (delta == 0L) return;
-    
+    NA_ASSERT( initial, "initial NULL" );
+    NA_ASSERT( delta, "delta NULL" );
+
+    if ( initial == 0L )
+    {
+        return;
+    }
+    if ( delta == 0L )
+    {
+        return;
+    }
+
     initial->x += delta->x;
     initial->y += delta->y;
     initial->z += delta->z;
 }
 
-void vect3_offset(n_vect3 * initial, n_double dx, n_double dy, n_double dz)
+void vect3_offset( n_vect3 *initial, n_double dx, n_double dy, n_double dz )
 {
-    NA_ASSERT(initial, "initial NULL");
-    
-    if (initial == 0L) return;
-    
+    NA_ASSERT( initial, "initial NULL" );
+
+    if ( initial == 0L )
+    {
+        return;
+    }
+
     initial->x += dx;
     initial->y += dy;
     initial->z += dz;
 }
 
-void vect3_back_double(n_vect3 * converter, n_double * output)
+void vect3_back_double( n_vect3 *converter, n_double *output )
 {
-    NA_ASSERT(converter, "converter NULL");
-    NA_ASSERT(output, "output NULL");
-    
-    if (converter == 0L) return;
-    if (output == 0L) return;
-    
+    NA_ASSERT( converter, "converter NULL" );
+    NA_ASSERT( output, "output NULL" );
+
+    if ( converter == 0L )
+    {
+        return;
+    }
+    if ( output == 0L )
+    {
+        return;
+    }
+
     output[0] = converter->x;
     output[1] = converter->y;
     output[2] = converter->z;
 }
 
-void  vect3_copy(n_vect3 * to, n_vect3 * from)
+void  vect3_copy( n_vect3 *to, n_vect3 *from )
 {
     to->x = from->x;
     to->y = from->y;
     to->z = from->z;
 }
 
-void  vect3_populate(n_vect3 * value, n_double x, n_double y, n_double z)
+void  vect3_populate( n_vect3 *value, n_double x, n_double y, n_double z )
 {
     value->x = x;
     value->y = y;
     value->z = z;
 }
 
-n_int vect3_nonzero(n_vect3 * nonzero)
+n_int vect3_nonzero( n_vect3 *nonzero )
 {
-    return ((nonzero->x != 0) || (nonzero->y != 0) || (nonzero->z != 0));
+    return ( ( nonzero->x != 0 ) || ( nonzero->y != 0 ) || ( nonzero->z != 0 ) );
 }
+
+n_array * vect2_memory_list_number_array(memory_list * list, n_int number)
+{
+    n_array * array = 0L;
+    if ((list == 0L) || (number == 0))
+    {
+        return 0L;
+    }
+    if (list->count)
+    {
+        n_int count = 0;
+        while (count < list->count)
+        {
+            n_vect2 * vects = (n_vect2 *) list->data;
+            array_add_empty(&array, array_array(object_vect2_pointer(&vects[count * number], number)));
+            count++;
+        }
+    }
+    return array;
+}
+
+
+n_int vect2_unwrap_number( n_array * array, n_vect2 * entry, n_int number)
+{
+    n_int     out_value = 0;
+    if (array)
+    {
+        memory_list * elements = object_list_vect2(array);
+        if (elements->count == number)
+        {
+            n_vect2 * vect = (n_vect2 *)elements->data;
+            n_int count = 0;
+            while (count < number)
+            {
+                entry[count].data[0] = vect[count].data[0];
+                entry[count].data[1] = vect[count].data[1];
+                count++;
+            }
+            out_value = 1;
+        }
+        memory_list_free(&elements);
+    }
+    return out_value;
+}
+
+/* logic for creating a line from points
+ 
+   allow for a maximum distance
+ 
+   go through an array of vectors
+ 
+   with an array of vectors the same number as the number of vectors presented.
+ 
+   the y of the new vector is the 0 to n count
+ 
+   at each vector entry find the nearest neighbor entry number or -1 if there is no nearest neighbor within the distance as the x of the vector
+  
+   order the vector array lowest to highest with the x of the vector
+
+   start at the lowest of the x linking the lines in order, -1 values are points */
+
+memory_list * vect2_point_to_lines(memory_list * vect2_list, n_int dist_squared)
+{
+    memory_list * return_list = memory_list_new(sizeof(n_vect2), vect2_list->count);
+    n_vect2 * vect2_data = (n_vect2 *) vect2_list->data;
+    n_int loop = 0;
+    while (loop < vect2_list->count)
+    {
+        n_int loop2 = 0;
+        n_int location = -1;
+        n_int max_distance = dist_squared;
+        n_vect2 vect2_return;
+        vect2_return.y = loop;
+        while (loop2 < vect2_list->count)
+        {
+            if (loop2 != loop)
+            {
+                n_int distx = vect2_data[loop].x - vect2_data[loop2].x;
+                n_int disty = vect2_data[loop].y - vect2_data[loop2].y;
+                n_int compare_distance_squared = (distx * distx) + (disty * disty);
+                if (compare_distance_squared < max_distance)
+                {
+                    location = loop;
+                    max_distance = compare_distance_squared;
+                }
+            }
+            loop2++;
+        }
+        vect2_return.x = location;
+        memory_list_copy(return_list, (n_byte *)&vect2_return);
+        loop++;
+    }
+    return return_list;
+}
+
+
+void vect2_x_entry_bubblesort(memory_list * vect2_list)
+{
+    n_vect2 * vect2_data = (n_vect2*)vect2_list->data;
+    n_int loopc = 0;
+    while (loopc < (vect2_list->count - 1))
+    {
+        n_int loopd = 0;
+        while (loopd < (vect2_list->count - loopc - 1))
+        {
+            if (vect2_data[loopd].x > vect2_data[loopd+1].x)
+            {
+                n_int swapx       = vect2_data[loopd].x;
+                n_int swapy       = vect2_data[loopd].y;
+                vect2_data[loopd].x   = vect2_data[loopd+1].x;
+                vect2_data[loopd].y   = vect2_data[loopd+1].y;
+                vect2_data[loopd+1].x = swapx;
+                vect2_data[loopd+1].y = swapy;
+            }
+            loopd++;
+        }
+        loopc++;
+    }
+}
+
+n_int vect2_unwrap_number_entry( n_string pass_through, n_byte * buffer, n_int number)
+{
+    return vect2_unwrap_number( (n_array *) pass_through, (n_vect2 *) buffer, number);
+}
+

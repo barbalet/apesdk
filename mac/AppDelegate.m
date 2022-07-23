@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -36,15 +36,11 @@
 #import "AppDelegate.h"
 
 @interface AppDelegate ()
-#ifdef WARFARE
 @property (strong) NSString* selectedFileName;
 @property (strong) ASShared* shared;
-#endif
 @end
 
 @implementation AppDelegate
-
-#ifdef WARFARE
 
 - (NSOpenPanel*) uniformOpenPanel
 {
@@ -95,8 +91,6 @@
     self.shared = shared;
 }
 
-#endif
-
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
     NSLog(@"applicationDidFinishLaunching");
@@ -107,6 +101,8 @@
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
     NSLog(@"applicationWillTerminate");
+    
+    [self.shared close];
 
 }
 

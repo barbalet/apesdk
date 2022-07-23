@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -56,7 +56,7 @@
 
 enum SECONDARY_APESCRIPT
 {
-    VARIABLE_RANDOM = (VARIABLE_IF + 1),
+    VARIABLE_RANDOM = ( VARIABLE_IF + 1 ),
     VARIABLE_ESCAPE_PER_SECOND,
 
     VARIABLE_GET_ONE,
@@ -100,7 +100,7 @@ enum SECONDARY_APESCRIPT
 
 #define VARIABLE_FIRST_REAL_ONE VARIABLE_ONE
 
-static variable_string	variable_codes[VARIABLE_MAX]=
+static variable_string	variable_codes[VARIABLE_MAX] =
 {
     /* 0 */ /* special "variables" */
     "function",
@@ -169,59 +169,59 @@ static n_byte   random_populated = 0;
 static n_int	persist_value = 0;
 static n_uint   random_noise = 0x6d73e3a3;
 
-static void commands_random_seed(n_int seed_value)
+static void commands_random_seed( n_int seed_value )
 {
     random_populated = 1;
 
-    if (seed_value < 0)
+    if ( seed_value < 0 )
     {
-        n_uint unsignedvalue = time(NULL);
-        switch (random_noise % 2)
+        n_uint unsignedvalue = time( NULL );
+        switch ( random_noise % 2 )
         {
         case 0:
-            random_noise   ^= (unsignedvalue ^ 0x47c23e19);
+            random_noise   ^= ( unsignedvalue ^ 0x47c23e19 );
             break;
         case 1:
-            random_noise   ^= (unsignedvalue ^ 0x9ef1de93);
+            random_noise   ^= ( unsignedvalue ^ 0x9ef1de93 );
             break;
         case 2:
-            random_noise   ^= (unsignedvalue ^ 0x2e97c735);
+            random_noise   ^= ( unsignedvalue ^ 0x2e97c735 );
             break;
         }
-        random_seed[0] ^= (random_noise>>16) & 0xFFFF;
+        random_seed[0] ^= ( random_noise >> 16 ) & 0xFFFF;
         random_seed[1] ^=  random_noise & 0xFFFF;
     }
     else
     {
-        n_uint  seed = ABS(seed_value);
+        n_uint  seed = ABS( seed_value );
 
-        seed = (seed * 2999)&0xFFFFFFFF;
+        seed = ( seed * 2999 ) & 0xFFFFFFFF;
 
-        random_seed[0] = (seed>>16) & 0xFFFF;
+        random_seed[0] = ( seed >> 16 ) & 0xFFFF;
         random_seed[1] =  seed & 0xFFFF;
     }
 }
 
 static n_byte2 commands_handle_random()
 {
-    if (random_populated == 0)
+    if ( random_populated == 0 )
     {
-        commands_random_seed(-1);
+        commands_random_seed( -1 );
     }
-    return math_random(random_seed);
+    return math_random( random_seed );
 }
 
 /* notification here is optional and it can be done asynchronously */
 
-static void commands_notify_done(n_int * notification)
+static void commands_notify_done( n_int *notification )
 {
     notification[0] = 0;
 }
 
-static void commands_process_run(n_int value, n_int * notification)
+static void commands_process_run( n_int value, n_int *notification )
 {
     /* do not create any additional noise if the values aren't found */
-    switch (value)
+    switch ( value )
     {
     case FUNCTION_ONE_TRIGGER_NUMBER:
     case FUNCTION_TWO_TRIGGER_NUMBER:
@@ -230,20 +230,20 @@ static void commands_process_run(n_int value, n_int * notification)
     case FUNCTION_FIVE_TRIGGER_NUMBER:
     case FUNCTION_SIX_TRIGGER_NUMBER:
         /* best not to add a new line for the debug format */
-        commands_notify_done(notification);
+        commands_notify_done( notification );
         break;
     }
 }
 
-n_int commands_input(void *vindividual, n_byte kind, n_int value)
+n_int commands_input( void *vindividual, n_byte kind, n_int value )
 {
-    n_individual_interpret *individual = (n_individual_interpret *)vindividual;
+    n_individual_interpret *individual = ( n_individual_interpret * )vindividual;
     n_int *local_vr = individual->variable_references;
 
-    if (kind > VARIABLE_READWRITE)
+    if ( kind > VARIABLE_READWRITE )
     {
 
-        if (kind == VARIABLE_PERSIST)
+        if ( kind == VARIABLE_PERSIST )
         {
             persist_value = value;
         }
@@ -253,16 +253,16 @@ n_int commands_input(void *vindividual, n_byte kind, n_int value)
         }
 
 
-        if (kind == VARIABLE_RUN_EXTERNAL_FUNCTION)
+        if ( kind == VARIABLE_RUN_EXTERNAL_FUNCTION )
         {
-            commands_process_run(value, &local_vr[kind - VARIABLE_FIRST_REAL_ONE]);
+            commands_process_run( value, &local_vr[kind - VARIABLE_FIRST_REAL_ONE] );
         }
 
-        if (kind == VARIABLE_RANDOM_SEED)
+        if ( kind == VARIABLE_RANDOM_SEED )
         {
-            commands_random_seed(value);
+            commands_random_seed( value );
         }
-        if (kind == VARIABLE_ESCAPE)
+        if ( kind == VARIABLE_ESCAPE )
         {
             individual->leave = value;
         }
@@ -271,24 +271,24 @@ n_int commands_input(void *vindividual, n_byte kind, n_int value)
     return -1; /* where this fails is more important than this failure */
 }
 
-n_int commands_output(void * vcode, void * vindividual, n_byte * kind, n_int * number)
+n_int commands_output( void *vcode, void *vindividual, n_byte *kind, n_int *number )
 {
-    n_interpret *code = (n_interpret *)vcode;
-    n_individual_interpret *individual = (n_individual_interpret *)vindividual;
+    n_interpret *code = ( n_interpret * )vcode;
+    n_individual_interpret *individual = ( n_individual_interpret * )vindividual;
     n_byte	first_value = kind[0];
     n_byte	second_value = kind[1];
-    if(first_value == 'n')
+    if ( first_value == 'n' )
     {
         *number = code->number_buffer[second_value];
         return 0;
     }
-    if((first_value == 't') && (VARIABLE_SPECIAL(second_value, code)==0))
+    if ( ( first_value == 't' ) && ( VARIABLE_SPECIAL( second_value, code ) == 0 ) )
     {
         n_int	*local_vr = individual->variable_references;
 
-        if(second_value>VARIABLE_READWRITE)
+        if ( second_value > VARIABLE_READWRITE )
         {
-            if (second_value == VARIABLE_PERSIST)
+            if ( second_value == VARIABLE_PERSIST )
             {
                 *number = persist_value;
             }
@@ -301,13 +301,13 @@ n_int commands_output(void * vcode, void * vindividual, n_byte * kind, n_int * n
         }
         else
         {
-            switch(second_value)
+            switch ( second_value )
             {
             case VARIABLE_RANDOM:
                 *number = commands_handle_random();
                 return 0;
 
-                /* this is a special constant */
+            /* this is a special constant */
             case VARIABLE_ESCAPE_PER_SECOND:
                 *number = FRACTION_OF_SECOND;
                 return 0;
@@ -337,9 +337,9 @@ n_int commands_output(void * vcode, void * vindividual, n_byte * kind, n_int * n
                 *number = 8; /* this could be any value */
                 return 0;
 
-                /* there are a number of ways of doing this
-                 in terms of unique execution points
-                 */
+            /* there are a number of ways of doing this
+             in terms of unique execution points
+             */
             case VARIABLE_EXTERNAL_ONE:
                 *number = FUNCTION_ONE_TRIGGER_NUMBER;
                 return 0;
@@ -367,14 +367,14 @@ n_int commands_output(void * vcode, void * vindividual, n_byte * kind, n_int * n
 
 static n_interpret *interpret = 0L;
 
-n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
+n_int draw_error( n_constant_string error_text, n_constant_string location, n_int line_number )
 {
-    printf("ERROR: %s @%s, %ld\n",error_text, location, line_number);
+    printf( "ERROR: %s @%s, %ld\n", error_text, location, line_number );
     return -1;
 }
 
 
-static n_int	test_interpret(n_byte * buff, n_uint len)
+static n_int	test_interpret( n_byte *buff, n_uint len )
 {
     n_file	local;
 
@@ -382,15 +382,15 @@ static n_int	test_interpret(n_byte * buff, n_uint len)
     local . location = 0;
     local . data = buff;
 
-    interpret = parse_convert(&local, VARIABLE_MAIN, (variable_string *)variable_codes);
+    interpret = parse_convert( &local, VARIABLE_MAIN, ( variable_string * )variable_codes );
 
-    if(interpret == 0L)
+    if ( interpret == 0L )
     {
         return -1;
     }
     else
     {
-        SC_DEBUG_ON(0L); /* turn on debugging after script loading */
+        SC_DEBUG_ON( 0L ); /* turn on debugging after script loading */
     }
 
     interpret->sc_input  = &commands_input;
@@ -401,74 +401,74 @@ static n_int	test_interpret(n_byte * buff, n_uint len)
     return 0;
 }
 
-static n_int test_init(n_string interpret_string)
+static n_int test_init( n_string interpret_string )
 {
-    n_file * source_file = io_file_new();
+    n_file *source_file = io_file_new();
 
-    if (io_disk_check(interpret_string) == 0)
+    if ( io_disk_check( interpret_string ) == 0 )
     {
         return -1;
     }
-    if (io_disk_read(source_file, interpret_string) == FILE_ERROR)
+    if ( io_disk_read( source_file, interpret_string ) == FILE_ERROR )
     {
-        io_file_free(&source_file);
+        io_file_free( &source_file );
         return -1;
     }
-    if (test_interpret(source_file->data,source_file->location) == -1)
+    if ( test_interpret( source_file->data, source_file->location ) == -1 )
     {
-        io_file_free(&source_file);
+        io_file_free( &source_file );
         return -1;
     }
-    io_file_free(&source_file);
+    io_file_free( &source_file );
     return 0;
 }
 
 static void test_close()
 {
-    interpret_cleanup(&interpret);
+    interpret_cleanup( &interpret );
 }
 
-int main(int argc, char *argv[])
+int main( int argc, char *argv[] )
 {
     n_int   return_value = 0;
     n_individual_interpret individual;
 
-    printf(" --- test apescript --- start -----------------------------------------\n");
-    
-    interpret_individual(&individual);
+    printf( " --- test apescript --- start -----------------------------------------\n" );
 
-    if (argc != 2)
+    interpret_individual( &individual );
+
+    if ( argc != 2 )
     {
-        printf("ERROR: Single script file string expected\n");
+        printf( "ERROR: Single script file string expected\n" );
         return 0;
     }
 
-    if (test_init(argv[1]) == -1)
+    if ( test_init( argv[1] ) == -1 )
     {
-        printf("ERROR: Load Script %s failed\n",argv[1]);
+        printf( "ERROR: Load Script %s failed\n", argv[1] );
         return 0;
     }
 
     do
     {
-        return_value = interpret_cycle(interpret, &individual, VARIABLE_EXIT - VARIABLE_FIRST_REAL_ONE, 0L,0L,0L,0L);
-        if (individual.leave != 0)
+        return_value = interpret_cycle( interpret, &individual, VARIABLE_EXIT - VARIABLE_FIRST_REAL_ONE, 0L, 0L, 0L, 0L );
+        if ( individual.leave != 0 )
         {
 #ifdef COMMAND_LINE_DEBUG
-            printf("...");
+            printf( "..." );
 #endif
         }
 
     }
-    while (return_value == 1);
+    while ( return_value == 1 );
 
-    if (return_value == -1)
+    if ( return_value == -1 )
     {
-        printf("ERROR: Script %s Ended with Error\n",argv[1]);
+        printf( "ERROR: Script %s Ended with Error\n", argv[1] );
     }
 
     test_close();
-    
-    printf(" --- test apescript ---  end  -----------------------------------------\n");
+
+    printf( " --- test apescript ---  end  -----------------------------------------\n" );
     return 0;
 }

@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -40,13 +40,8 @@
 
 @property (assign) IBOutlet NSWindow *window;
 
-#ifdef WARFARE
-
 - (BOOL)processFile:(NSString *)file;
 - (IBAction)openFileManually:(id)sender;
-
 - (void)addShared:(ASShared*)shared;
-
-#endif
 
 @end

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -41,21 +41,20 @@
 #include "../sim/sim.h"
 #include "../universe/universe.h"
 
-#define	LAND_ON
-#define	WEATHER_ON
+#define    LAND_ON
+#define    WEATHER_ON
 #define RANDOM_INITIAL_BRAINCODE
 #undef  SHORT_NAMES
-#undef	FIXED_RANDOM_SIM
-#undef	LARGE_SIM
+#undef    FIXED_RANDOM_SIM
 
 enum being_energy
 {
     BEING_DEAD   = 0,
-    BEING_HUNGRY = (10 * 128),
-    BEING_FULL   = (BEING_HUNGRY * 3)
+    BEING_HUNGRY = ( 10 * 128 ),
+    BEING_FULL   = ( BEING_HUNGRY * 3 )
 };
 
-#define SOCIAL_RESPECT_NORMAL	127
+#define SOCIAL_RESPECT_NORMAL    127
 
 enum BRAINPROBE_TYPE
 {
@@ -150,29 +149,29 @@ distress,fear,shame) \
 
 typedef enum
 {
-    AFFECT_MATE                 = COMPOSITE_AFFECT(1000,0,0,      0,0,0,       0,0,0),
-    AFFECT_BIRTH                = COMPOSITE_AFFECT(1500,0,1000,   0,100,100,   200,200,50),
-    AFFECT_CARRYING             = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
-    AFFECT_CARRIED              = COMPOSITE_AFFECT(300,300,0,     0,0,0,       0,0,0),
-    AFFECT_SUCKLING             = COMPOSITE_AFFECT(500,0,0,       0,0,0,       0,0,0),
-    AFFECT_CHAT                 = COMPOSITE_AFFECT(0,100,0,       0,0,0,       0,0,0),
-    AFFECT_GROOM                = COMPOSITE_AFFECT(50,50,0,       0,0,0,       0,0,0),
-    AFFECT_SEEK_MATE            = COMPOSITE_AFFECT(0,600,0,       0,0,0,       0,0,0),
-    AFFECT_SQUABBLE_VICTOR      = COMPOSITE_AFFECT(1100,0,100,    0,0,0,       100,0,0),
-    AFFECT_SQUABBLE_VANQUISHED  = COMPOSITE_AFFECT(0,0,100,       200,0,0,     600,100,100),
-    AFFECT_WHACKED              = COMPOSITE_AFFECT(0,0,100,       20,0,0,      20,20,40),
-    AFFECT_HURL                 = COMPOSITE_AFFECT(0,0,0,         100,0,0,     0,0,0),
-    AFFECT_HUGGED               = COMPOSITE_AFFECT(100,0,0,       0,0,0,       0,0,0),
-    AFFECT_PRODDED              = COMPOSITE_AFFECT(0,0,0,         0,0,0,       5,0,5),
-    AFFECT_RECEIVE              = COMPOSITE_AFFECT(25,25,0,       0,0,0,       0,0,0),
-    AFFECT_FISH                 = COMPOSITE_AFFECT(100,100,0,     0,0,0,       0,0,0),
-    AFFECT_SMILED               = COMPOSITE_AFFECT(10,0,0,        0,0,0,       0,0,0),
-    AFFECT_GLOWER               = COMPOSITE_AFFECT(0,0,10,        0,0,0,       0,10,0),
-    EPISODIC_AFFECT_ZERO = (16384)
+    AFFECT_MATE                 = COMPOSITE_AFFECT( 1000, 0, 0,      0, 0, 0,       0, 0, 0 ),
+    AFFECT_BIRTH                = COMPOSITE_AFFECT( 1500, 0, 1000,   0, 100, 100,   200, 200, 50 ),
+    AFFECT_CARRYING             = COMPOSITE_AFFECT( 300, 300, 0,     0, 0, 0,       0, 0, 0 ),
+    AFFECT_CARRIED              = COMPOSITE_AFFECT( 300, 300, 0,     0, 0, 0,       0, 0, 0 ),
+    AFFECT_SUCKLING             = COMPOSITE_AFFECT( 500, 0, 0,       0, 0, 0,       0, 0, 0 ),
+    AFFECT_CHAT                 = COMPOSITE_AFFECT( 0, 100, 0,       0, 0, 0,       0, 0, 0 ),
+    AFFECT_GROOM                = COMPOSITE_AFFECT( 50, 50, 0,       0, 0, 0,       0, 0, 0 ),
+    AFFECT_SEEK_MATE            = COMPOSITE_AFFECT( 0, 600, 0,       0, 0, 0,       0, 0, 0 ),
+    AFFECT_SQUABBLE_VICTOR      = COMPOSITE_AFFECT( 1100, 0, 100,    0, 0, 0,       100, 0, 0 ),
+    AFFECT_SQUABBLE_VANQUISHED  = COMPOSITE_AFFECT( 0, 0, 100,       200, 0, 0,     600, 100, 100 ),
+    AFFECT_WHACKED              = COMPOSITE_AFFECT( 0, 0, 100,       20, 0, 0,      20, 20, 40 ),
+    AFFECT_HURL                 = COMPOSITE_AFFECT( 0, 0, 0,         100, 0, 0,     0, 0, 0 ),
+    AFFECT_HUGGED               = COMPOSITE_AFFECT( 100, 0, 0,       0, 0, 0,       0, 0, 0 ),
+    AFFECT_PRODDED              = COMPOSITE_AFFECT( 0, 0, 0,         0, 0, 0,       5, 0, 5 ),
+    AFFECT_RECEIVE              = COMPOSITE_AFFECT( 25, 25, 0,       0, 0, 0,       0, 0, 0 ),
+    AFFECT_FISH                 = COMPOSITE_AFFECT( 100, 100, 0,     0, 0, 0,       0, 0, 0 ),
+    AFFECT_SMILED               = COMPOSITE_AFFECT( 10, 0, 0,        0, 0, 0,       0, 0, 0 ),
+    AFFECT_GLOWER               = COMPOSITE_AFFECT( 0, 0, 10,        0, 0, 0,       0, 10, 0 ),
+    EPISODIC_AFFECT_ZERO = ( 16384 )
 
 } AFFECT_TYPE;
 
-enum inventory_type
+typedef enum
 {
     INVENTORY_CHILD = 1,
     INVENTORY_WOUND = 2,
@@ -189,13 +188,13 @@ enum inventory_type
     INVENTORY_FISH = 4096,
     INVENTORY_BIRD_EGGS = 8192,
     INVENTORY_LIZARD_EGGS = 16384
-};
+} inventory_type;
 
 
 /* energy values for different foods */
 /* TODO: add EGGS and potentially INSECTS  to food groups */
 
-enum FOOD_KINDS
+typedef enum
 {
     FOOD_VEGETABLE = 0,
     FOOD_FRUIT,
@@ -204,11 +203,11 @@ enum FOOD_KINDS
     FOOD_BIRD_EGGS,
     FOOD_LIZARD_EGGS,
     FOOD_TYPES
-};
+} FOOD_KINDS;
 
 /* maximum energy obtainable from different types of food */
 
-enum energy_types
+typedef enum
 {
     ENERGY_GRASS               = 50,
     ENERGY_BUSH                = 100,
@@ -219,7 +218,7 @@ enum energy_types
     ENERGY_FISH                = 600,
     ENERGY_BIRD_EGGS           = 800,
     ENERGY_LIZARD_EGGS         = 1000
-};
+} energy_types;
 
 /* gestation period in days */
 #define GESTATION_DAYS      1
@@ -305,365 +304,372 @@ typedef enum
 
 typedef struct
 {
-    simulated_being  * local;
-    simulated_isocial * local_social;
+    simulated_being   *local;
+    simulated_isocial *local_social;
     n_uint         opposite_sex_distance;
     n_uint         same_sex_distance;
-    simulated_being  * opposite_sex;
-    simulated_being  * same_sex;
+    simulated_being   *opposite_sex;
+    simulated_being   *same_sex;
 } being_nearest;
 
-void  being_living(simulated_being * value);
+void  being_living( simulated_being *value );
 
-void  being_inc_drive(simulated_being * value, enum drives_definition drive);
-void  being_dec_drive(simulated_being * value, enum drives_definition drive);
+void  being_inc_drive( simulated_being *value, enum drives_definition drive );
+void  being_dec_drive( simulated_being *value, enum drives_definition drive );
 
-n_int being_energy_less_than(simulated_being * value, n_int less_than);
+n_int being_energy_less_than( simulated_being *value, n_int less_than );
 
-void being_turn_away_from_water(simulated_being * value);
-void being_facing_init(simulated_being * value);
-n_byte being_honor_immune(simulated_being * value);
-void being_set_brainstates(simulated_being * value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3);
-
-
-void being_delta(simulated_being * primary, simulated_being * secondary, n_vect2 * delta);
-void being_facing_towards(simulated_being * value, n_vect2 * vector);
-n_int being_pregnant(simulated_being * value);
-n_int being_female(simulated_being * value);
-n_int being_speaking(simulated_being * value);
-
-n_genetics * being_fetal_genetics(simulated_being * value);
+void being_turn_away_from_water( simulated_being *value );
+void being_facing_init( simulated_being *value );
+n_byte being_honor_immune( simulated_being *value );
+void being_set_brainstates( simulated_being *value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3 );
 
 
-n_int social_set_relationship(simulated_group * group, simulated_being * meeter_being, n_byte relationship,simulated_being * met_being);
+void being_delta( simulated_being *primary, simulated_being *secondary, n_vect2 *delta );
+void being_facing_towards( simulated_being *value, n_vect2 *vector );
+n_int being_pregnant( simulated_being *value );
+n_int being_female( simulated_being *value );
+n_int being_speaking( simulated_being *value );
 
-n_int social_get_relationship(simulated_being * meeter_being,
-                              n_byte relationship);
-
-n_int social_network(simulated_group * group, simulated_being * meeter_being, simulated_being * met_being, n_uint distance);
-
-n_byte social_groom(simulated_group * group,
-                    simulated_being * meeter_being,
-                    simulated_being * met_being,
-                    n_uint distance,
-                    n_int awake,
-                    n_byte2 familiarity);
-
-n_byte2 social_squabble(simulated_being * meeter_being, simulated_being * met_being, n_uint distance, n_int is_female, simulated_group * group);
-n_int social_mate(simulated_being * meeter_being, simulated_being * met_being, n_int being_index, n_uint distance, simulated_group * group);
-n_int social_chat(simulated_being * meeter_being, simulated_being * met_being, n_int being_index, simulated_group * group);
+n_genetics *being_fetal_genetics( simulated_being *value );
 
 
-void episodic_food(simulated_being * local, n_int energy, n_byte food_type);
+n_int social_set_relationship( simulated_group *group, simulated_being *meeter_being, n_byte relationship, simulated_being *met_being );
 
-void being_immune_seed(simulated_being * mother, simulated_being * child);
+n_int social_get_relationship( simulated_being *meeter_being,
+                               n_byte relationship );
 
-void body_genetics(simulated_being * beings, n_int number, n_genetics * genetics, n_genetics * mother_genetics, n_genetics * father_genetics, n_byte2 * local);
+n_int social_network( simulated_group *group, simulated_being *meeter_being, simulated_being *met_being, n_uint distance );
+
+n_byte social_groom( simulated_group *group,
+                     simulated_being *meeter_being,
+                     simulated_being *met_being,
+                     n_uint distance,
+                     n_int awake,
+                     n_byte2 familiarity );
+
+n_byte2 social_squabble( simulated_being *meeter_being, simulated_being *met_being, n_uint distance, n_int is_female, simulated_group *group );
+n_int social_mate( simulated_being *meeter_being, simulated_being *met_being, n_int being_index, n_uint distance, simulated_group *group );
+n_int social_chat( simulated_being *meeter_being, simulated_being *met_being, n_int being_index, simulated_group *group );
+
+
+void episodic_food( simulated_being *local, n_int energy, n_byte food_type );
+
+void immune_init( simulated_immune_system *immune, n_byte2 *local_random );
+void immune_seed( simulated_immune_system *immune_mother, simulated_immune_system *immune_child );
+void immune_transmit( simulated_immune_system *immune0, simulated_immune_system *immune1, n_byte transmission_type );
+n_int immune_response( simulated_immune_system *immune, n_byte honor_immune, n_int being_energy );
+void immune_ingest_pathogen( simulated_immune_system *immune, n_byte food_type );
+
+
+void body_genetics( simulated_being *beings, n_int number, n_genetics *genetics, n_genetics *mother_genetics, n_genetics *father_genetics, n_byte2 *local );
 
 n_int food_eat(
-               n_int loc_x,
-               n_int loc_y,
-               n_int az,
-               n_byte * food_type,
-               simulated_being * local_being);
+    n_int loc_x,
+    n_int loc_y,
+    n_int az,
+    n_byte *food_type,
+    simulated_being *local_being );
 
-void  genetics_set(n_genetics * genetics_a, n_genetics * n_genetics);
+void  genetics_set( n_genetics *genetics_a, n_genetics *n_genetics );
 
 void episodic_self(
-                   simulated_being * local,
-                   being_episodic_event_type event,
-                   AFFECT_TYPE affect,
-                   n_byte2 arg);
+    simulated_being *local,
+    being_episodic_event_type event,
+    AFFECT_TYPE affect,
+    n_byte2 arg );
 
 void episodic_close(
-                    simulated_being * local,
-                    simulated_being * other,
-                    being_episodic_event_type event,
-                    AFFECT_TYPE affect,
-                    n_byte2 arg);
+    simulated_being *local,
+    simulated_being *other,
+    being_episodic_event_type event,
+    AFFECT_TYPE affect,
+    n_byte2 arg );
 
-n_byte being_los_projection(simulated_being * local, n_vect2 * extern_end);
+n_byte being_los_projection( simulated_being *local, n_vect2 *extern_end );
 
 #ifdef BRAIN_ON
-n_byte * being_brain(simulated_being * value);
+n_byte *being_brain( simulated_being *value );
 #endif
 
-simulated_iepisodic * being_episodic(simulated_being * value);
-simulated_isocial * being_social(simulated_being * value);
+simulated_iepisodic *being_episodic( simulated_being *value );
+simulated_isocial *being_social( simulated_being *value );
 
-n_int being_brainstates(simulated_being * value, n_int awake, n_byte2 * states);
+n_int being_brainstates( simulated_being *value, n_int awake, n_byte2 *states );
 
-n_byte being_honor(simulated_being * value);
+n_byte being_honor( simulated_being *value );
 
-void being_honor_delta(simulated_being * value, n_int delta);
+void being_honor_delta( simulated_being *value, n_int delta );
 
-n_byte being_first_name(simulated_being * value);
+n_byte being_first_name( simulated_being *value );
 
-void being_set_family_name(simulated_being * value, n_byte first, n_byte last);
+void being_set_family_name( simulated_being *value, n_byte first, n_byte last );
 
-n_byte being_family_first_name(simulated_being * value);
+n_byte being_family_first_name( simulated_being *value );
 
-n_byte being_family_second_name(simulated_being * value);
+n_byte being_family_second_name( simulated_being *value );
 
-n_byte2 being_gender_name(simulated_being * value);
+n_byte2 being_gender_name( simulated_being *value );
 
-n_byte2 being_family_name(simulated_being * value);
+n_byte2 being_family_name( simulated_being *value );
 
-void being_name_simple(simulated_being * value, n_string str);
+void being_name_simple( simulated_being *value, n_string str );
 
-n_byte being_posture(simulated_being * value);
+n_byte being_posture( simulated_being *value );
 
-void being_set_posture(simulated_being * value, n_byte post);
+void being_set_posture( simulated_being *value, n_byte post );
 
-n_int being_location_x(simulated_being * value);
+n_int being_location_x( simulated_being *value );
 
-n_int being_location_y(simulated_being * value);
+n_int being_location_y( simulated_being *value );
 
-n_byte2 * being_location(simulated_being * value);
+n_byte2 *being_location( simulated_being *value );
 
-void being_set_location(simulated_being * value, n_byte2 * from);
+void being_set_location( simulated_being *value, n_byte2 *from );
 
 #ifdef DEBUG_LACK_OF_MOVEMENT
 
-n_int being_total_movement(simulated_being * value);
-void being_add_total_movement(simulated_being * value);
-void being_zero_total_movement(simulated_being * value);
-void being_register_movement(simulated_being * value, n_string comment_string);
+n_int being_total_movement( simulated_being *value );
+void being_add_total_movement( simulated_being *value );
+void being_zero_total_movement( simulated_being *value );
+void being_register_movement( simulated_being *value, n_string comment_string );
 
 #endif
 
-n_int being_dob(simulated_being * value);
+n_int being_dob( simulated_being *value );
 
-n_byte being_speed(simulated_being * value);
+n_byte being_speed( simulated_being *value );
 
-void being_set_speed(simulated_being * value, n_byte sp);
+void being_set_speed( simulated_being *value, n_byte sp );
 
-void being_facing_vector(simulated_being * value, n_vect2 * vect, n_int divisor);
+void being_speed_advance( simulated_being *value );
 
-n_byte being_facing(simulated_being * value);
+n_int being_ten_minute_distance( simulated_being *value );
 
-void being_wander(simulated_being * value, n_int wander);
+void being_facing_vector( simulated_being *value, n_vect2 *vect, n_int divisor );
 
-n_genetics * being_genetics(simulated_being * value);
+n_byte being_facing( simulated_being *value );
 
-n_int being_energy(simulated_being * value);
+void being_wander( simulated_being *value, n_int wander );
 
-void  being_dead(simulated_being * value);
+n_genetics *being_genetics( simulated_being *value );
 
-void   being_energy_delta(simulated_being * value, n_int delta);
+n_int being_energy( simulated_being *value );
 
-n_int being_parasites(simulated_being * value);
+void  being_dead( simulated_being *value );
 
-void being_set_parasites(simulated_being * value, n_byte parasites);
+void   being_energy_delta( simulated_being *value, n_int delta );
 
-void being_add_parasites(simulated_being * value);
+n_int being_parasites( simulated_being *value );
 
-void being_remove_parasites(simulated_being * value, n_int number_of_parasites);
+void being_set_parasites( simulated_being *value, n_byte parasites );
 
-n_byte   being_drive(simulated_being * value, enum drives_definition drive);
+void being_add_parasites( simulated_being *value );
 
-n_int   being_height(simulated_being * value);
+void being_remove_parasites( simulated_being *value, n_int number_of_parasites );
 
-void    being_set_height(simulated_being * value, n_int height);
+n_byte   being_drive( simulated_being *value, enum drives_definition drive );
+n_byte *being_drives( simulated_being *value );
 
-n_int   being_mass(simulated_being * value);
+n_int   being_height( simulated_being *value );
+
+void    being_set_height( simulated_being *value, n_int height );
+
+n_int   being_mass( simulated_being *value );
 
 typedef struct
 {
     n_int         max_shout_volume;
-    simulated_being * local;
+    simulated_being *local;
 } being_listen_struct;
 
-void being_listen(simulated_group * group, simulated_being * local, void * data);
+void being_listen( simulated_group *group, simulated_being *local, void *data );
 
-void being_listen_loop_no_sim(simulated_being * other, void * data);
+void being_listen_loop_no_sim( simulated_being *other, void *data );
 
 #ifdef BRAINCODE_ON
-n_byte * being_braincode_external(simulated_being * value);
-n_byte * being_braincode_internal(simulated_being * value);
+n_byte *being_braincode_external( simulated_being *value );
+n_byte *being_braincode_internal( simulated_being *value );
 #endif
 
-void  being_remove_external_set(n_int value);
-n_int being_remove_internal(void);
-void being_remove_internal_clear(void);
+void  being_remove_external_set( n_int value );
+n_int being_remove_internal( void );
+void being_remove_internal_clear( void );
 
-void   metabolism_vascular_description(n_int index, n_string description);
-n_string metabolism_description(n_int index);
-n_int  metabolism_vascular_radius(simulated_being * local_being, n_int vessel_index);
+void   metabolism_vascular_description( n_int index, n_string description );
+n_string metabolism_description( n_int index );
+n_int  metabolism_vascular_radius( simulated_being *local_being, n_int vessel_index );
 
-void  being_name_byte2(n_byte2 first, n_byte2 family, n_string name);
-n_int being_init(simulated_being * beings, n_int number, simulated_being * local, simulated_being * mother,
-                 n_byte2* random_factor);
+void  being_name_byte2( n_byte2 first, n_byte2 family, n_string name );
+n_int being_init( simulated_being *beings, n_int number, simulated_being *local, simulated_being *mother,
+                  n_byte2 *random_factor );
 
-n_uint being_init_group(simulated_being * beings, n_byte2 * local_random, n_uint count_to, n_uint max);
+n_uint being_init_group( simulated_being *beings, n_byte2 *local_random, n_uint count_to, n_uint max );
 
-void being_erase(simulated_being * value);
+void being_erase( simulated_being *value );
 
-n_uint being_affect(simulated_being * local, n_byte is_positive);
+n_uint being_affect( simulated_being *local, n_byte is_positive );
 
-void   episodic_cycle(simulated_group * group, simulated_being * local, void * data);
-void   episodic_cycle_no_sim(simulated_being * local_being, void * data);
+void   episodic_cycle( simulated_group *group, simulated_being *local, void *data );
+void   episodic_cycle_no_sim( simulated_being *local_being );
 
-void   being_cycle_awake(simulated_group * group, simulated_being * local);
-void   being_cycle_universal(simulated_being * local);
+void   being_cycle_awake( simulated_group *group, simulated_being *local );
+void   being_cycle_universal( simulated_being *local );
 
 typedef struct
 {
     n_int         beings_in_vacinity;
-    simulated_being * being;
+    simulated_being *being;
 } drives_sociability_data;
 
-void drives_sociability_loop_no_sim(simulated_being * other, void * data);
+void drives_sociability_loop_no_sim( simulated_being *other, void *data );
 
-void drives_cycle(simulated_group * group, simulated_being * local_being, void * data);
+void drives_cycle( simulated_group *group, simulated_being *local_being, void *data );
 
-void drives_fatigue(simulated_being * local);
-void drives_hunger(simulated_being * local);
+void drives_fatigue( simulated_being *local );
+void drives_hunger( simulated_being *local );
 
-void    being_state_description(n_byte2 state, n_string result);
+void    being_state_description( n_byte2 state, n_string result );
 
-void    being_set_state(simulated_being * value, being_state_type state);
-void    being_add_state(simulated_being * value, being_state_type state);
-n_byte2 being_state(simulated_being * value);
+void    being_set_state( simulated_being *value, being_state_type state );
+void    being_add_state( simulated_being *value, being_state_type state );
+n_byte2 being_state( simulated_being *value );
 
-n_byte2 being_random(simulated_being * value);
+n_byte2 being_random( simulated_being *value );
 
-void being_set_goal_mate(simulated_being * local, n_byte2 first_name, n_byte2 family_name);
-void being_set_goal_none(simulated_being * local);
-void being_set_goal_location(simulated_being * local, n_byte2 lx, n_byte2 ly);
+void being_set_goal_mate( simulated_being *local, n_byte2 first_name, n_byte2 family_name );
+void being_set_goal_none( simulated_being *local );
+void being_set_goal_location( simulated_being *local, n_byte2 lx, n_byte2 ly );
 
-n_int being_check_goal(simulated_being * local, goal_types goal);
-void being_goal_cycle(simulated_being * local);
+n_int being_check_goal( simulated_being *local, goal_types goal );
+void being_goal_cycle( simulated_being *local );
 
-void being_set_select_name(simulated_group * group, n_string name);
-n_string being_get_select_name(simulated_group * group);
+void being_set_select_name( simulated_group *group, n_string name );
+n_string being_get_select_name( simulated_group *group );
 
-n_int being_name_comparison(simulated_being * value, n_byte2 gender_name, n_byte2 family_name);
+n_int being_name_comparison( simulated_being *value, n_byte2 gender_name, n_byte2 family_name );
 
 void social_graph_link_name(
-    simulated_group * group,
-    simulated_being * local_being,
+    simulated_group *group,
+    simulated_being *local_being,
     n_int social_graph_index,
-    n_byte met, n_string name);
+    n_byte met, n_string name );
 
 n_int episodic_first_person_memories_percent(
-    simulated_being * local,
-    n_byte intention);
+    simulated_being *local,
+    n_byte intention );
 
-void being_immune_transmit(simulated_being * meeter_being, simulated_being * met_being, n_byte transmission_type);
-void body_genome(n_byte maternal, n_genetics * genome, n_byte * genome_str);
+void body_genome( n_byte maternal, n_genetics *genome, n_byte *genome_str );
 
-void being_relationship_description(n_int index, n_string description);
-n_string being_body_inventory_description(n_int index);
+void being_relationship_description( n_int index, n_string description );
+n_string being_body_inventory_description( n_int index );
 
 void brain_dialogue(
-    simulated_group * group,
+    simulated_group *group,
     n_byte awake,
-    simulated_being * meeter_being,
-    simulated_being * met_being,
-    n_byte		* bc0,
-    n_byte		* bc1,
-    n_int being_index);
+    simulated_being *meeter_being,
+    simulated_being *met_being,
+    n_byte         *bc0,
+    n_byte         *bc1,
+    n_int being_index );
 
-simulated_being * being_from_name(simulated_group * group, n_string name);
+simulated_being *being_from_name( simulated_group *group, n_string name );
 
-void being_remove(simulated_group * group);
+void being_remove( simulated_group *group );
 
-void brain_three_byte_command(n_string string, n_byte * response);
+void brain_three_byte_command( n_string string, n_byte *response );
 
-void brain_sentence(n_string string, n_byte * response);
+void brain_sentence( n_string string, n_byte *response );
 
-n_int episode_description(simulated_being * local_being,
-                          n_int index,
-                          n_string description);
+n_int episode_description( simulated_being *local_being,
+                           n_int index,
+                           n_string description );
 
-void episodic_logging(n_console_output * output_function, n_int social);
+void episodic_logging( n_console_output *output_function, n_int social );
 
-n_uint social_respect_mean(simulated_being *local_being);
+n_uint social_respect_mean( simulated_being *local_being );
 
-void social_goals(simulated_being * local);
+void social_goals( simulated_being *local );
 
-void being_genetic_wandering(simulated_being * local, being_nearest * nearest);
+void being_genetic_wandering( simulated_being *local, being_nearest *nearest );
 
-void being_territory_index(simulated_being * local);
-void being_calculate_speed(simulated_being * local, n_int tmp_speed, n_byte2 loc_state);
+void being_territory_index( simulated_being *local );
+void being_calculate_speed( simulated_being *local, n_int tmp_speed, n_byte2 loc_state );
 
-simulated_being * being_find_name(simulated_group * group, n_byte2 first_gender, n_byte2 family);
-void          being_move(simulated_being * local, n_int vel, n_byte kind);
-n_byte        being_awake(simulated_being * local);
+simulated_being *being_find_name( simulated_group *group, n_byte2 first_gender, n_byte2 family );
+void          being_move( simulated_being *local, n_int vel, n_byte kind );
+n_byte        being_awake( simulated_being *local );
 
-n_byte being_crowding(simulated_being * value);
-void being_crowding_cycle(simulated_being * value, n_int beings_in_vacinity);
+n_byte being_crowding( simulated_being *value );
+void being_crowding_cycle( simulated_being *value, n_int beings_in_vacinity );
 
-void speak_out(n_string filename, n_string paragraph);
+void speak_out( n_string filename, n_string paragraph );
 
-void social_conception(simulated_being * female,
-                       simulated_being * male,
-                       simulated_group * group);
+void social_conception( simulated_being *female,
+                        simulated_being *male,
+                        simulated_group *group );
 
-void social_initial_loop(simulated_group * group, simulated_being * local_being, void * data);
+void social_initial_loop( simulated_group *group, simulated_being *local_being, void *data );
 
-void social_secondary_loop_no_sim(simulated_being * local_being, void * data);
+void social_secondary_loop_no_sim( simulated_being *local_being );
 
-void being_tidy_loop_no_sim(simulated_being * local_being, void * data);
+void being_tidy_loop_no_sim( simulated_being *local_being, void *data );
 
-void being_recalibrate_honor_loop_no_sim(simulated_being * value, void * data);
+void being_recalibrate_honor_loop_no_sim( simulated_being *value );
 
-void being_remove_loop1(simulated_group * group, simulated_being * local_being, void * data);
+void being_remove_loop1( simulated_group *group, simulated_being *local_being, void *data );
 
 typedef struct
 {
-    simulated_being * being_count;
-    simulated_being * reference;
+    simulated_being *being_count;
+    simulated_being *reference;
     n_int         selected_died;
     n_uint        count;
 } being_remove_loop2_struct;
 
-void being_remove_loop2(simulated_group * group, simulated_being * local, void * data);
+void being_remove_loop2( simulated_group *group, simulated_being *local, void *data );
 
-being_remove_loop2_struct * being_remove_initial(simulated_group * group);
+being_remove_loop2_struct *being_remove_initial( simulated_group *group );
 
-void being_remains_init(simulated_remains * remains);
+void being_remains_init( simulated_remains *remains );
 
-n_int being_index(simulated_group * group, simulated_being * local);
+n_int being_index( simulated_group *group, simulated_being *local );
 
-void being_high_res(simulated_being * value, n_vect2 * vector);
+void being_high_res( simulated_being *value, n_vect2 *vector );
 
-void being_space(simulated_being * value, n_vect2 * vector);
+void being_space( simulated_being *value, n_vect2 *vector );
 
-void being_clear_attention(simulated_being * value);
+void being_clear_attention( simulated_being *value );
 
-void being_set_attention(simulated_being * value, n_int index, n_int attention);
+void being_set_attention( simulated_being *value, n_int index, n_int attention );
 
-n_byte being_attention(simulated_being * value, n_int index);
+n_byte being_attention( simulated_being *value, n_int index );
 
-n_byte being_basic_line_of_sight(simulated_being * local, n_vect2 * extern_end, n_vect2 * start, n_vect2 * delta, n_vect2 * end);
+n_byte being_basic_line_of_sight( simulated_being *local, n_vect2 *extern_end, n_vect2 *start, n_vect2 *delta, n_vect2 *end );
 
-typedef n_byte (simulated_being_can_move)(n_vect2 * location, n_vect2 * delta);
-void   being_can_move_override(simulated_being_can_move * new_can_move);
-n_byte being_can_move(n_vect2 * location, n_vect2 * delta);
+typedef n_byte ( simulated_being_can_move )( n_vect2 *location, n_vect2 *delta );
+void   being_can_move_override( simulated_being_can_move *new_can_move );
+n_byte being_can_move( n_vect2 *location, n_vect2 *delta );
 
-typedef void   (simulated_being_wrap)(n_vect2 * location);
-void being_wrap_override(simulated_being_wrap * new_move);
-void being_wrap(n_vect2 * location);
+typedef void   ( simulated_being_wrap )( n_vect2 *location );
+void being_wrap_override( simulated_being_wrap *new_move );
+void being_wrap( n_vect2 *location );
 
-typedef void   (simulated_being_initial_location)(n_vect2 * location, n_byte2 * seed);
-void being_initial_location_override(simulated_being_initial_location * new_initial_location);
-void being_initial_location(n_vect2 * location, n_byte2 * seed);
+typedef void   ( simulated_being_initial_location )( n_vect2 *location, n_byte2 *seed );
+void being_initial_location_override( simulated_being_initial_location *new_initial_location );
+void being_initial_location( n_vect2 *location, n_byte2 *seed );
 
-typedef n_byte (simulated_being_line_of_sight)(simulated_being * local, n_vect2 * location);
-void being_line_of_sight_override(simulated_being_line_of_sight * new_line_of_sight);
-n_byte being_line_of_sight(simulated_being * local, n_vect2 * location);
+typedef n_byte ( simulated_being_line_of_sight )( simulated_being *local, n_vect2 *location );
+void being_line_of_sight_override( simulated_being_line_of_sight *new_line_of_sight );
+n_byte being_line_of_sight( simulated_being *local, n_vect2 *location );
 
-typedef void (simulated_being_brain_cycle)(n_byte * local, n_byte2 * constants);
-void being_brain_cycle_override(simulated_being_brain_cycle * new_brain_cycle);
-void being_brain_cycle(n_byte * local, n_byte2 * constants);
+typedef void ( simulated_being_brain_cycle )( n_byte *local, n_byte2 *constants );
+void being_brain_cycle_override( simulated_being_brain_cycle *new_brain_cycle );
+void being_brain_cycle( n_byte *local, n_byte2 *constants );
 
 
-
-void being_immune_response(simulated_being * local);
-void being_reset_drive(simulated_being * value, enum drives_definition drive);
-n_uint being_genetic_comparison(n_genetics * primary, n_genetics * secondary, n_int parse_requirements);
-n_int being_move_energy(simulated_being * local_being, n_int * conductance);
+void being_reset_drive( simulated_being *value, enum drives_definition drive );
+n_uint being_genetic_comparison( n_genetics *primary, n_genetics *secondary, n_int parse_requirements );
+n_int being_move_energy( simulated_being *local_being, n_int *conductance );
 
 #endif /* SIMULATEDAPE_ENTITY_H */

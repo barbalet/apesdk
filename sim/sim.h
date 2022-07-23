@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -60,17 +60,17 @@
 #endif
 
 /*! @define */
-#define	SHORT_VERSION_NAME		 "Simulated Ape 0.699 "
+#define	SHORT_VERSION_NAME		 "Simulated Ape 0.700 "
 #define	FULL_DATE				 __DATE__
 
 /*! @define */
-#define	VERSION_NUMBER		     699
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2020 "
+#define	VERSION_NUMBER		     (700)
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2022 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2020."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2022."
 
 /*! @define */
-#define	SIMULATED_APE_SIGNATURE		    (('N'<< 8) | 'A')
+#define	SIMULATED_APE_SIGNATURE		(('N'<< 8) | 'A')
 #define	SIMULATED_WAR_SIGNATURE		(('N'<< 8) | 'W')
 
 #define  COPYRIGHT_NAME		    "Tom Barbalet. "
@@ -99,7 +99,7 @@ typedef enum
     ET_SIMULATED_APE_GHOST,
     ET_FIERCE_FELINE,
     ET_FIERCE_BIRD_OF_PREY,
-}entity_type;
+} entity_type;
 
 #define WINDOW_PROCESSING NUM_TERRAIN
 
@@ -198,27 +198,21 @@ typedef enum
     KIND_PRE_STARTUP = -2,
     KIND_NOTHING_TO_RUN = -1,
     KIND_LOAD_FILE = 0,
-    KIND_NEW_SIMULATION,
-    KIND_NEW_APES,
-    KIND_START_UP,
-    KIND_MEMORY_SETUP,
+    KIND_NEW_SIMULATION = 1,
+    KIND_NEW_APES = 2,
+    KIND_START_UP = 3,
+    KIND_MEMORY_SETUP = 4,
 } KIND_OF_USE;
 
-extern n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number);
-
-void compress_buffer(n_byte * input, n_byte * output, n_int n, n_int compressed);
-void compress_buffer_run(n_byte * input, n_byte * output, n_int n, n_int compressed, n_int number);
-
-void compress_brain_compressed(n_byte * brain);
-void compress_brain_expand(n_byte * brain);
+extern n_int draw_error( n_constant_string error_text, n_constant_string location, n_int line_number );
 
 enum color_type
 {
-    COLOR_BLACK     =   (0),
-    COLOR_WHITE     =   (252),
-    COLOR_BLUE      =   (253),
-    COLOR_RED_DARK  =   (254),
-    COLOR_RED       =   (255)
+    COLOR_BLACK     =   ( 0 ),
+    COLOR_WHITE     =   ( 252 ),
+    COLOR_BLUE      =   ( 253 ),
+    COLOR_RED_DARK  =   ( 254 ),
+    COLOR_RED       =   ( 255 )
 };
 
 #define    NON_INTERPOLATED COLOR_WHITE
@@ -287,13 +281,6 @@ enum color_type
 
 #define	WEATHER_RAIN		(WEATHER_CLOUD * 3)
 
-#define TIME_HOUR_MINUTES           (60)
-#define TIME_DAY_MINUTES            (TIME_HOUR_MINUTES * 24)
-#define TIME_MONTH_MINUTES          (TIME_DAY_MINUTES * 28)
-#define TIME_YEAR_MINUTES           (TIME_MONTH_MINUTES * 13)
-#define TIME_YEAR_DAYS              (7 * 52)				/*364 also = 13 * 28 */
-#define	TIME_CENTURY_DAYS           (TIME_YEAR_DAYS * 100)
-
 #define LUNAR_ORBIT_MINS            39312
 
 #define	WATER_TEST(pz,w)            ((pz)<(w))
@@ -328,42 +315,42 @@ enum color_type
  Dusk  1152 - 1183
  */
 
-void  weather_init(void);
-void  weather_wind_vector(n_vect2 * pos, n_vect2 * wind);
-n_int weather_pressure(n_int px, n_int py);
-void  weather_cycle(void);
-void  weather_wind(void);
-weather_values weather_seven_values(n_int px, n_int py);
+void  weather_init( void );
+void  weather_wind_vector( n_vect2 *pos, n_vect2 *wind );
+n_int weather_pressure( n_int px, n_int py );
+void  weather_cycle( void );
+void  weather_wind( void );
+weather_values weather_seven_values( n_int px, n_int py );
 
-void land_seed_genetics(n_byte2 * local_random);
+void land_seed_genetics( n_byte2 *local_random );
 
-void land_init(void);
-void land_init_high_def(n_byte double_spread);
+void land_init( void );
+void land_init_high_def( n_byte double_spread );
 
-void  land_clear(KIND_OF_USE kind, n_byte4 start);
-void  land_cycle(void);
-void  land_vect2(n_vect2 * output, n_int * actual_z, n_vect2 * location);
-n_int land_operator_interpolated(n_int locx, n_int locy, n_byte * kind);
+void  land_clear( KIND_OF_USE kind, n_byte4 start );
+void  land_cycle( void );
+void  land_vect2( n_vect2 *output, n_int *actual_z, n_vect2 *location );
+n_int land_operator_interpolated( n_int locx, n_int locy, n_byte *kind );
 
-n_int land_map_dimension(void);
-n_int land_map_bits(void);
+n_int land_map_dimension( void );
+n_int land_map_bits( void );
 
-void  land_tide(void);
-n_int land_location(n_int px, n_int py);
-n_byte * land_location_tile(n_int tile);
-n_int land_location_vect(n_vect2 * value);
+void  land_tide( void );
+n_int land_location( n_int px, n_int py );
+n_byte *land_location_tile( n_int tile );
+n_int land_location_vect( n_vect2 *value );
 
 typedef struct
 {
     n_byte2     genetics[2];                           /* save-able */
-    
-    n_byte      topography[2][MAP_AREA];                    /* generated */
-    n_c_int     atmosphere[2][ MAP_AREA];                 /* save-able and generate-able */
-    n_byte2     delta_pressure[ MAP_AREA];             /* generated */
-    
+
+    n_byte      topography[2][MAP_AREA];               /* generated */
+    n_c_int     atmosphere[2][MAP_AREA];               /* save-able and generate-able */
+    n_byte2     delta_pressure[MAP_AREA];              /* generated */
+
     n_byte2     delta_pressure_highest;
     n_byte2     delta_pressure_lowest;
-    
+
     n_c_int     atmosphere_highest;
     n_c_int     atmosphere_lowest;
     n_int       local_delta;
@@ -382,16 +369,16 @@ typedef struct
     n_int      wind_value_y; /* 6 to 96 */
     n_int      wind_aim_x;  /* 6 to 96 */
     n_int      wind_aim_y;  /* 6 to 96 */
-    
+
     n_int      wind_dissipation;
-    
+
     n_byte4     date;                                  /* save-able */
     n_byte2     time;                                  /* save-able */
-    
+
     n_byte      tide_level;                            /* generated */
-    
+
     n_byte      topography_highdef[HI_RES_MAP_AREA * 2]; /* generated */
-    n_byte4     highres_tide[HI_RES_MAP_AREA/32];      /* generated */
+    n_byte4     highres_tide[HI_RES_MAP_AREA / 32];    /* generated */
 } n_land;
 
 typedef struct
@@ -401,37 +388,37 @@ typedef struct
     n_uint facing;
 } n_tile_coordinates;
 
-void tile_wind(n_land * land);
-void tile_cycle(n_land * land);
+void tile_wind( n_land *land );
+void tile_cycle( n_land *land );
 
-void tile_weather_init(n_land * land);
+void tile_weather_init( n_land *land );
 
-void tile_land_init(n_land * land);
-void tile_land_erase(n_land * land);
-void tile_land_random(n_land * land, n_byte2 * random);
+void tile_land_init( n_land *land );
+void tile_land_erase( n_land *land );
+void tile_land_random( n_land *land, n_byte2 *random );
 
 
-void tile_creation(n_byte * map, n_byte2 * random);
+void tile_creation( n_byte *map, n_byte2 *random );
 
-n_byte tiles_topography(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
-n_byte * tiles_topography_map(n_land * land, n_int tile, n_int buffer);
+n_byte tiles_topography( n_land *land, n_int tile, n_int buffer, n_int lx, n_int ly );
+n_byte *tiles_topography_map( n_land *land, n_int tile, n_int buffer );
 
-n_c_int tiles_atmosphere(n_land * land, n_int tile, n_int buffer, n_int lx, n_int ly);
-void tile_resolve_coordinates(n_tile_coordinates * coordinates);
+n_c_int tiles_atmosphere( n_land *land, n_int tile, n_int buffer, n_int lx, n_int ly );
+void tile_resolve_coordinates( n_tile_coordinates *coordinates );
 
-void land_color_init(void);
-void land_color_time(n_byte2 * color_fit, n_int toggle_tidedaylight);
-void land_color_time_8bit(n_byte * color_fit, n_int toggle_tidedaylight);
+void land_color_init( void );
+void land_color_time( n_byte2 *color_fit, n_int toggle_tidedaylight );
+void land_color_time_8bit( n_byte *color_fit, n_int toggle_tidedaylight );
 
-n_land * land_ptr(void);
-n_byte4 land_date(void);
-n_byte4 land_time(void);
-n_byte2 * land_genetics(void);
-n_byte land_tide_level(void);
-n_byte * land_topography(void);
-n_byte * land_topography_highdef(void);
-n_byte4 * land_highres_tide(void);
-n_c_int * land_weather(n_int tile);
+n_land *land_ptr( void );
+n_byte4 land_date( void );
+n_byte4 land_time( void );
+n_byte2 *land_genetics( void );
+n_byte land_tide_level( void );
+n_byte *land_topography( void );
+n_byte *land_topography_highdef( void );
+n_byte4 *land_highres_tide( void );
+n_c_int *land_weather( n_int tile );
 
 #define BASH_COLOR_DEFAULT "\033[0m"
 
@@ -442,12 +429,12 @@ n_c_int * land_weather(n_int tile);
 #define BASH_COLOR_LIGHT_GREY "\033[37m"
 #define BASH_COLOR_DARK_GREY "\033[90m"
 
-n_int spacetime_after(n_spacetime * initial, n_spacetime * second);
-void  spacetime_copy(n_spacetime * to, n_spacetime * from);
-n_int spacetime_before_now(n_spacetime * initial);
-void  spacetime_set(n_spacetime * set, n_byte2 * location);
+n_int spacetime_after( n_spacetime *initial, n_spacetime *second );
+void  spacetime_copy( n_spacetime *to, n_spacetime *from );
+n_int spacetime_before_now( n_spacetime *initial );
+void  spacetime_set( n_spacetime *set, n_byte2 *location );
 
-void land_convert_to_map(n_vect2 * value);
+void land_convert_to_map( n_vect2 *value );
 
 #endif /* _SIM_H_ */
 

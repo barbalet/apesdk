@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2020 Tom Barbalet. All rights reserved.
+ Copyright 1996-2022 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -37,53 +37,52 @@
 #include <time.h>
 
 #include "../toolkit/toolkit.h"
-#include "../toolkit/shared.h"
+#include "../shared.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 #include "../entity/entity.h"
 #include "../universe/universe.h"
 #include "../gui/gui.h"
 
-void test_gui_run(void)
+void test_gui_run( void )
 {
     n_int   counter = 0;
     n_int   tickCounter = 0x12738291;
-    n_byte  drawBuffer[512 * 512 * 4];
-    
-    shared_init(0,tickCounter);
+
+    shared_init( 0, tickCounter );
     tickCounter += 2601;
-    shared_init(1,tickCounter);
+    shared_init( 1, tickCounter );
     tickCounter += 2601;
-    shared_init(2,tickCounter);
+    shared_init( 2, tickCounter );
     tickCounter += 2601;
-    
-    while (counter < (512*4))
+
+    while ( counter < ( 512 * 4 ) )
     {
-        (void) shared_cycle(tickCounter, 0);
+        ( void ) shared_cycle( tickCounter, 0 );
         tickCounter += 2601;
-        (void) shared_cycle(tickCounter, 1);
+        ( void ) shared_cycle( tickCounter, 1 );
         tickCounter += 2601;
-        (void) shared_cycle(tickCounter, 2);
+        ( void ) shared_cycle( tickCounter, 2 );
         tickCounter += 2601;
-        
-        shared_draw(drawBuffer, 0, 512, 512, 0);
+
+        shared_draw(0, 512, 512, 0 );
         tickCounter += 2601;
-        shared_draw(drawBuffer, 0, 512, 512, 1);
+        shared_draw(0, 512, 512, 1 );
         tickCounter += 2601;
-        shared_draw(drawBuffer, 0, 512, 512, 2);
+        shared_draw(0, 512, 512, 2 );
         tickCounter += 2601;
-        
+
         counter ++;
     }
-    
+
     shared_close();
 }
 
-int main(int argc, const char * argv[])
+int main( int argc, const char *argv[] )
 {
-    printf(" --- test gui --- start -----------------------------------------------\n");
+    printf( " --- test gui --- start -----------------------------------------------\n" );
     test_gui_run();
-    printf(" --- test gui ---  end  -----------------------------------------------\n");
+    printf( " --- test gui ---  end  -----------------------------------------------\n" );
     return 0;
 }
 
