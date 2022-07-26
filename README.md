@@ -39,9 +39,7 @@ The ApeSDK is currently used in:
 
 * **Simulated Earth** - a detailed planet simulation,
 
-* **Just Plain Chaos** - a skirmish war-game testing for the podcast, *My Rules Are Better*,
-
-* **[Simulated Urban](https://https://gitlab.com/barbalet/urban/)** - a detailed urban environment simulation with the organic agents interacting through a cityscape,
+* **Simulated Urban** - a detailed urban environment simulation with the organic agents interacting through a cityscape (now in London 1940 source.)
 
 * **[London1940.org](https://london1940.org)** - London in 1940 with No Chance of Invasion.
 
