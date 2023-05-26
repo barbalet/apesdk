@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,7 +35,6 @@
 #include "../toolkit/toolkit.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
-#include "../cli/cli.h"
 
 #ifndef SIMULATEDAPE_UNIVERSE_H
 #define SIMULATEDAPE_UNIVERSE_H
@@ -328,6 +327,19 @@ typedef enum
     ATTENTION_SIZE
 } attention_type;
 
+typedef enum
+{
+    INTERVAL_MINS = 0,
+    INTERVAL_HOURS,
+    INTERVAL_DAYS,
+    INTERVAL_MONTHS,
+    INTERVAL_YEARS,
+    INTERVALS
+} TIME_INTERVALS;
+
+static const n_int interval_steps[] =
+{ 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
+static const n_constant_string interval_description[] = { " mins", " hours", " days", " months", " years" };
 
 #define FISHING_PROB  (1<<8)
 
@@ -1038,9 +1050,7 @@ n_int sim_new( void );
 
 void transfer_debug_csv( n_file *fil, n_byte initial );
 
-
-n_int ape_simulation( void *ptr, n_string response, n_console_output output_function );
-
+n_int get_time_interval( n_string str, n_int *number, n_int *interval );
 
 void watch_ape( void *ptr, n_console_output output_function );
 void watch_control( void *ptr, n_string beingname, simulated_being *local_being, n_string result );
@@ -1050,6 +1060,7 @@ n_int command_alphabet( void *ptr, n_string response, n_console_output output_fu
 
 void command_change_selected( simulated_group *group, n_byte forwards );
 
+n_int command_stop( void *ptr, n_string response, n_console_output output_function );
 n_int command_idea( void *ptr, n_string response, n_console_output output_function );
 n_int command_being( void *ptr, n_string response, n_console_output output_function );
 n_int command_braincode( void *ptr, n_string response, n_console_output output_function );
@@ -1069,6 +1080,12 @@ n_int command_watch( void *ptr, n_string response, n_console_output output_funct
 n_int command_logging( void *ptr, n_string response, n_console_output output_function );
 n_int command_list( void *ptr, n_string response, n_console_output output_function );
 n_int command_memory( void *ptr, n_string response, n_console_output output_function );
+n_int command_next( void *ptr, n_string response, n_console_output output_function );
+n_int command_previous( void *ptr, n_string response, n_console_output output_function );
+n_int command_simulation( void *ptr, n_string response, n_console_output output_function );
+n_int command_step( void *ptr, n_string response, n_console_output output_function );
+n_int command_run( void *ptr, n_string response, n_console_output output_function );
+n_int command_interval( void *ptr, n_string response, n_console_output output_function );
 n_int command_reset( void *ptr, n_string response, n_console_output output_function );
 n_int command_top( void *ptr, n_string response, n_console_output output_function );
 n_int command_epic( void *ptr, n_string response, n_console_output output_function );
@@ -1084,6 +1101,7 @@ n_int command_save( void *ptr, n_string response, n_console_output output_functi
 n_int command_open( void *ptr, n_string response, n_console_output output_function );
 n_int command_script( void *ptr, n_string response, n_console_output output_function );
 
+n_int command_quit( void *ptr, n_string response, n_console_output output_function );
 
 #ifndef    _WIN32
 n_int sim_thread_console_quit( void );
@@ -1091,15 +1109,8 @@ void  sim_thread_console( void );
 #endif
 
 void sim_console( n_string simulation_filename, n_uint randomise );
-void sim_console_debug( n_console_input simulation_input, n_uint randomise );
 
 #ifdef CONSOLE_REQUIRED
-
-void ape_previous(void * ptr, n_console_output output_function);
-void ape_next(void * ptr, n_console_output output_function);
-
-n_int ape_cycle(void * ptr);
-void ape_watch_entity( void *ptr, n_console_output output_function );
 
 const static simulated_console_command control_commands[] =
 {
@@ -1114,25 +1125,25 @@ const static simulated_console_command control_commands[] =
     {&command_script,        "script",         "[file]",               "Load an ApeScript simulation file"},
     {&command_save,          "save",           "[file]",               "Save a simulation file"},
 
-    {&useful_quit,           "quit",           "",                     "Quits the console"},
-    {&useful_quit,           "exit",           "",                     ""},
-    {&useful_quit,           "close",          "",                     ""},
+    {&command_quit,           "quit",           "",                     "Quits the console"},
+    {&command_quit,           "exit",           "",                     ""},
+    {&command_quit,           "close",          "",                     ""},
 
-    {&useful_stop,          "stop",           "",                     "Stop the simulation during step or run"},
+    {&command_stop,          "stop",           "",                     "Stop the simulation during step or run"},
 
     {&command_speak,         "speak",          "[file]",               "Create an AIFF file of Ape speech"},
     {&command_alphabet,      "alpha",          "[file]",               "Create an AIFF file of Ape alphabet"},
     {&command_file,          "file",           "[(component)]",        "Information on the file format"},
-    {&useful_run,           "run",            "(time format)|forever", "Simulate for a given number of days or forever"},
-    {&useful_step,          "step",           "",                     "Run for a single logging interval"},
+    {&command_run,           "run",            "(time format)|forever", "Simulate for a given number of days or forever"},
+    {&command_step,          "step",           "",                     "Run for a single logging interval"},
     {&command_top,           "top",            "",                     "List the top apes"},
     {&command_epic,          "epic",           "",                     "List the most talked about apes"},
-    {&useful_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
+    {&command_interval,      "interval",       "(days)",               "Set the simulation logging interval in days"},
     {&command_event,         "event",          "on|social|off",        "Episodic events (all) on, social on or all off"},
     {&command_logging,       "logging",        "on|off",               "Turn logging of images and data on or off"},
     {&command_logging,       "log",            "",                     ""},
-    {&useful_simulation,    "simulation",     "",                     ""},
-    {&useful_simulation,    "sim",            "",                     "Show simulation parameters"},
+    {&command_simulation,    "simulation",     "",                     ""},
+    {&command_simulation,    "sim",            "",                     "Show simulation parameters"},
     {&command_watch,         "watch",          "(ape name)|all|off|*", "Watch (specific *) for the current ape"},
     {&command_watch,         "monitor",        "",                     ""},
     {&command_idea,          "idea",           "",                     "Track shared braincode between apes"},
@@ -1160,10 +1171,10 @@ const static simulated_console_command control_commands[] =
     {&command_list,          "ls",             "",                     ""},
     {&command_list,          "dir",            "",                     ""},
 
-    {&useful_next,          "next",           "",                     "Next ape"},
+    {&command_next,          "next",           "",                     "Next ape"},
 
-    {&useful_previous,      "previous",       "",                     "Previous ape"},
-    {&useful_previous,      "prev",           "",                     ""},
+    {&command_previous,      "previous",       "",                     "Previous ape"},
+    {&command_previous,      "prev",           "",                     ""},
 
 
     {&command_debug,         "debug",          "",                    "Run debug check"},

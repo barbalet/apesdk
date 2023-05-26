@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -37,7 +37,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 n_int draw_error( n_constant_string error_text, n_constant_string location, n_int line_number )
 {
@@ -48,66 +47,38 @@ n_int draw_error( n_constant_string error_text, n_constant_string location, n_in
     return -1;
 }
 
-long long current_timestamp() {
-    struct timeval te;
-    gettimeofday(&te, NULL); // get current time
-    long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
-    return milliseconds;
-}
-
 void tof_gather( n_string file_in )
 {
-    n_file   *in_file = 0L;
+    n_file   *in_file = io_file_new();
     n_file   *output_file;
-    n_int    file_error = 0;
+    n_int    file_error = io_disk_read( in_file, file_in );
     n_string file_out = io_string_copy( file_in );
     n_object_type type_of;
-    long long    clock = current_timestamp();
-    
+
+    io_whitespace_json( in_file );
+
     printf( "%s --- \n", file_in );
-
-    
-    in_file = io_file_new();
-    
-    printf("%d \t io_file_new\n", (current_timestamp() - clock));
-    
-    file_error = io_disk_read( in_file, file_in );
-    
-    printf("%d \t io_disk_read\n", (current_timestamp() - clock));
-
     file_out[0] = '2';
     if ( file_error != -1 )
     {
         void *returned_blob = unknown_file_to_tree( in_file, &type_of );
-        
-        printf("%d \t unknown_file_to_tree\n", (current_timestamp() - clock));
-
         io_file_free( &in_file );
-        printf("%d \t io_file_free\n", (current_timestamp() - clock));
         if ( returned_blob )
         {
             output_file = unknown_json( returned_blob, type_of );
-            
-            printf("%d \t unknown_json\n", (current_timestamp() - clock));
-
             if ( output_file )
             {
                 file_error = io_disk_write( output_file, file_out );
-                
-                printf("%d \t io_disk_write\n", (current_timestamp() - clock));
-
                 io_file_free( &output_file );
-                printf("%d \t io_file_free\n", (current_timestamp() - clock));
-
             }
             else
             {
-                printf( "no returned output file\n" );
-
                 unknown_free( &returned_blob, type_of );
 
+                printf( "no returned output file\n" );
                 exit(EXIT_FAILURE);
             }
+            // unknown_free( &returned_blob, type_of );
         }
         else
         {

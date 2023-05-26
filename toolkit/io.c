@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -378,25 +378,6 @@ void io_string_copy_buffer( n_string string, n_string buffer )
     }
     while ( copy_character != 0 );
 }
-
-#ifdef VERBOSE_DEBUG
-
-void io_vd_print( n_string message, n_string file_loc, n_int line )
-{
-    printf( "Debug: %s, %s, %ld\n", message, file_loc, line );
-}
-
-void io_vd_number( n_string message, n_string file_loc, n_int line, n_int number )
-{
-    printf( "Debug: %s, %s, %ld, Number:  %ld \n", message, file_loc, line, number );
-}
-
-void io_vd_unsigned_number( n_string message, n_string file_loc, n_int line, n_uint number )
-{
-    printf( "Debug: %s, %s, %ld, Unsigned Number:  %ld \n", message, file_loc, line, number );
-}
-
-#endif
 
 #ifdef SIMULATED_APE_ASSERT
 

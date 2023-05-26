@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -60,17 +60,17 @@
 #endif
 
 /*! @define */
-#define	SHORT_VERSION_NAME		 "Simulated Ape 0.700 "
+#define	SHORT_VERSION_NAME		 "Simulated Ape 0.701 "
 #define	FULL_DATE				 __DATE__
 
 /*! @define */
-#define	VERSION_NUMBER		     (700)
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2022 "
+#define	VERSION_NUMBER		     701
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2023 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2022."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2023."
 
 /*! @define */
-#define	SIMULATED_APE_SIGNATURE		(('N'<< 8) | 'A')
+#define	SIMULATED_APE_SIGNATURE		    (('N'<< 8) | 'A')
 #define	SIMULATED_WAR_SIGNATURE		(('N'<< 8) | 'W')
 
 #define  COPYRIGHT_NAME		    "Tom Barbalet. "
@@ -101,7 +101,13 @@ typedef enum
     ET_FIERCE_BIRD_OF_PREY,
 } entity_type;
 
-#define WINDOW_PROCESSING NUM_TERRAIN
+#define WINDOW_PROCESSING NUM_CONTROL
+
+#define    NUM_VIEW    (0)
+#define    NUM_TERRAIN (1)
+#define    NUM_CONTROL (2)
+#define    NUM_NIL     (3)
+
 
 #define    DRAW_WINDOW_VIEW    (1)
 #define    DRAW_WINDOW_TERRAIN (2)
@@ -198,10 +204,10 @@ typedef enum
     KIND_PRE_STARTUP = -2,
     KIND_NOTHING_TO_RUN = -1,
     KIND_LOAD_FILE = 0,
-    KIND_NEW_SIMULATION = 1,
-    KIND_NEW_APES = 2,
-    KIND_START_UP = 3,
-    KIND_MEMORY_SETUP = 4,
+    KIND_NEW_SIMULATION,
+    KIND_NEW_APES,
+    KIND_START_UP,
+    KIND_MEMORY_SETUP,
 } KIND_OF_USE;
 
 extern n_int draw_error( n_constant_string error_text, n_constant_string location, n_int line_number );
@@ -229,12 +235,15 @@ enum color_type
 
 #endif
 
-/*
- 750    1624    874
- 828    1472    644
- 750    1334    584
- 640    1136    496
- */
+enum window_information
+{
+    TERRAIN_WINDOW_WIDTH        = ( 4096 ),
+    TERRAIN_WINDOW_HEIGHT       = ( 3072 ),
+    TERRAIN_WINDOW_AREA         = ( TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT ),
+    CONTROL_WINDOW_WIDTH        = ( 2048 ),
+    CONTROL_WINDOW_HEIGHT       = ( 2048 ),
+    CONTROL_WINDOW_AREA         = ( CONTROL_WINDOW_WIDTH * CONTROL_WINDOW_HEIGHT )
+};
 
 
 #define MAP_DIMENSION                 (1<<(MAP_BITS))
@@ -280,6 +289,13 @@ enum color_type
 #define WEATHER_CLOUD       (32768>>4)
 
 #define	WEATHER_RAIN		(WEATHER_CLOUD * 3)
+
+#define TIME_HOUR_MINUTES           (60)
+#define TIME_DAY_MINUTES            (TIME_HOUR_MINUTES * 24)
+#define TIME_MONTH_MINUTES          (TIME_DAY_MINUTES * 28)
+#define TIME_YEAR_MINUTES           (TIME_MONTH_MINUTES * 13)
+#define TIME_YEAR_DAYS              (7 * 52)				/*364 also = 13 * 28 */
+#define	TIME_CENTURY_DAYS           (TIME_YEAR_DAYS * 100)
 
 #define LUNAR_ORBIT_MINS            39312
 

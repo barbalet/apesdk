@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -39,7 +39,6 @@
 #include "../toolkit/toolkit.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
-#include "../cli/cli.h"
 #include "../universe/universe.h"
 #include "../entity/entity.h"
 
@@ -256,15 +255,14 @@ static void sim_console_clean_up( void )
 
     sim_quit_value = 1;
 
-    useful_quit( 0L, 0L, 0L );
+    command_quit( 0L, 0L, 0L );
 
-    while ( useful_executing() ) {}
+    while ( command_executing() ) {}
 }
 
 
 static n_console_input *input_function = &io_console_entry_clean;
 static n_console_output *output_function = &io_console_out;
-
 
 void sim_set_console_input( n_console_input *local_input_function )
 {
@@ -285,11 +283,6 @@ void sim_set_console_output( n_console_output *local_output_function )
 static void *sim_thread_posix( void *threadid )
 {
     n_byte *local = ( n_byte * )threadid;
-    
-    cli_set_previous_next(ape_previous, ape_next);
-    cli_set_simulation(ape_simulation);
-    cli_set_cycle_entity(ape_cycle, ape_watch_entity);
-    
     if ( io_console( &group, ( simulated_console_command * ) control_commands, *input_function, *output_function ) != 0 )
     {
         sim_console_clean_up();
@@ -340,21 +333,14 @@ void sim_console( n_string simulation_filename, n_uint randomise )
             printf( "Simulation file %s loaded\n", simulation_filename );
         }
     }
-#ifdef _WIN32
 
-#else
-
-#ifndef    SIMPLE_LONGTERM_CLE
+#ifndef    _WIN32
     do
     {
         sim_thread_console();
     }
     while ( sim_thread_console_quit() == 0 );
 #else
-    
-    cli_set_previous_next(ape_previous, ape_next);
-    cli_set_simulation(ape_simulation);
-    cli_set_cycle_entity(ape_cycle, ape_watch_entity);
     {
         do
         {}
@@ -364,33 +350,9 @@ void sim_console( n_string simulation_filename, n_uint randomise )
                             io_console_out ) == 0 );
     }
 #endif
-#endif
     sim_close();
 }
 
-void sim_console_debug( n_console_input simulation_input, n_uint randomise )
-{
-    printf( "\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE );
-    printf( "      For a list of commands type 'help'\n\n" );
-
-    io_command_line_execution_set();
-    sim_init( KIND_START_UP, randomise, MAP_AREA, 0 );
-
-    cli_set_previous_next(ape_previous, ape_next);
-    cli_set_simulation(ape_simulation);
-    cli_set_cycle_entity(ape_cycle, ape_watch_entity);
-    
-    {
-        do
-        {}
-        while ( io_console( sim_group(),
-                            ( simulated_console_command * )control_commands,
-                            simulation_input,
-                            io_console_out ) == 0 );
-    }
-
-    sim_close();
-}
 
 void sim_set_output( n_int value )
 {
@@ -1595,12 +1557,8 @@ void sim_cycle( void )
 #ifdef WEATHER_ON
                 weather_init();
 #endif
-                
                 /* Sets the number of Simulated Apes initially created, and creates them */
-                {
-                    n_uint upper_bound = (group.max * 7) / 8;
-                    group.num = being_init_group( group.beings, local_random, upper_bound, group.max );
-                }
+                group.num = being_init_group( group.beings, local_random, group.max >> 1, group.max );
             }
         }
 
@@ -1719,8 +1677,6 @@ static n_int being_memory( simulated_group *group, n_byte *buffer, n_uint *locat
         memory_erase( ( n_byte * )local_being, sizeof( simulated_being ) );
         lpx ++;
     }
-    
-    
     return 0;
 }
 
@@ -1821,7 +1777,7 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
 void sim_close( void )
 {
-    useful_quit( 0L, 0L, 0L );
+    command_quit( 0L, 0L, 0L );
     io_console_quit();
 #ifndef _WIN32
     sim_console_clean_up();

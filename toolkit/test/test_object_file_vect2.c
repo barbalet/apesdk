@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -52,7 +52,9 @@ n_file * tof_file( n_string file_in, n_int * file_error)
 {
     n_file   *in_file = io_file_new();
     *file_error = io_disk_read( in_file, file_in );
-        
+    
+    io_whitespace_json( in_file );
+    
     return in_file;
 }
 

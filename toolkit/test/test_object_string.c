@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -55,6 +55,8 @@ void tof_gather( n_string file_in )
     n_int    file_error = io_disk_read( &local_file, file_in );
     n_string file_out = io_string_copy( file_in );
 
+    io_whitespace_json( &local_file );
+
     printf( "%s --- \n", file_in );
     file_out[0] = '2';
     if ( file_error != -1 )
@@ -89,6 +91,7 @@ void tof_gather_string( n_string file_in )
     local_file.location = 0;
     local_file.size = length;
 
+    io_whitespace_json( &local_file );
     {
         n_object_type type_of;
         void *returned_blob = unknown_file_to_tree( &local_file, &type_of );

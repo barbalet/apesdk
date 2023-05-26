@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -56,9 +56,6 @@ typedef enum
     SHARED_CYCLE_NEW_APES
 } shared_cycle_state;
 
-#define    NUM_VIEW    (0)
-#define    NUM_TERRAIN (1)
-#define    NUM_CONTROL (2)
 
 enum
 {

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -93,7 +93,7 @@ static void object_write_array( n_file *file, n_array *start );
 
 #endif
 
-static n_object *object_file_base( n_object_parse_bundle * opb );
+static n_object *object_file_base( n_file *file );
 
 static number_array_list    * object_number_array_list = 0L;
 
@@ -634,57 +634,60 @@ n_object *object_array( n_object *obj, n_string name, n_array *array )
     return obj_array( obj, io_string_copy( name ), array );
 }
 
+static n_int tracking_array_open;
+static n_int tracking_object_open;
+static n_int tracking_string_quote;
 
-#define CHECK_FILE_SIZE(error_string)   if (opb->file->location >= opb->file->size) \
+#define CHECK_FILE_SIZE(error_string)   if (file->location >= file->size) \
                                         { \
                                             (void)SHOW_ERROR(error_string); \
                                             return 0L; \
                                         }
 
-static n_string object_file_read_string( n_object_parse_bundle * opb )
+static n_string object_file_read_string( n_file *file )
 {
     n_string return_string = 0L;
     n_string_block block_string = {0};
     n_int          location = 0;
-    if ( opb->file->data[opb->file->location] != '"' ) // TODO: Replace with smart char handling
+    if ( file->data[file->location] != '"' ) // TODO: Replace with smart char handling
     {
         ( void )SHOW_ERROR( "json not string as expected" );
         return return_string;
     }
 
-    opb->tracking_string_quote = 1;
+    tracking_string_quote = 1;
 
-    opb->file->location ++;
+    file->location ++;
     do
     {
         CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-        if ( opb->file->data[opb->file->location] != '"' )
+        if ( file->data[file->location] != '"' )
         {
-            block_string[location] = ( n_char )opb->file->data[opb->file->location];
+            block_string[location] = ( n_char )file->data[file->location];
             location++;
-            opb->file->location++;
+            file->location++;
         }
     }
-    while ( opb->file->data[opb->file->location] != '"' );
+    while ( file->data[file->location] != '"' );
     if ( location == 0 )
     {
         ( void )SHOW_ERROR( "blank string in json file" );
         return 0L;
     }
-    opb->tracking_string_quote = 0;
-    opb->file->location++;
+    tracking_string_quote = 0;
+    file->location++;
     CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
     return_string = STRING_COPY3( block_string );
     return return_string;
 }
 
 
-static n_int object_file_read_number( n_object_parse_bundle * opb, n_int *with_error )
+static n_int object_file_read_number( n_file *file, n_int *with_error )
 {
     n_int return_number = 0;
     n_string_block block_string = {0};
     n_int          location = 0;
-    n_byte         read_char = opb->file->data[opb->file->location];
+    n_byte         read_char = file->data[file->location];
     n_int          char_okay = ( ASCII_NUMBER( read_char ) || ( read_char == '-' ) );
     *with_error = 1;
 
@@ -697,13 +700,13 @@ static n_int object_file_read_number( n_object_parse_bundle * opb, n_int *with_e
     CHECK_FILE_SIZE( "end of json file reach unexpectedly for number" );
 
     block_string[location] = ( n_char )read_char;
-    opb->file->location++;
+    file->location++;
     location++;
 
 
     do
     {
-        read_char = opb->file->data[opb->file->location];
+        read_char = file->data[file->location];
         char_okay = ASCII_NUMBER( read_char );
 
         CHECK_FILE_SIZE( "end of json file reach unexpectedly for number" );
@@ -712,7 +715,7 @@ static n_int object_file_read_number( n_object_parse_bundle * opb, n_int *with_e
         {
             block_string[location] = ( n_char )read_char;
             location++;
-            opb->file->location++;
+            file->location++;
         }
 
     }
@@ -739,10 +742,10 @@ static n_int object_file_read_number( n_object_parse_bundle * opb, n_int *with_e
     return return_number;
 }
 
-static n_int object_file_read_boolean( n_object_parse_bundle * opb, n_int *with_error )
+static n_int object_file_read_boolean( n_file *file, n_int *with_error )
 {
     n_int          return_number = 0;
-    n_byte         read_char = opb->file->data[opb->file->location];
+    n_byte         read_char = file->data[file->location];
     n_int          char_okay;
     n_char        *allowed[2] = {"fals", "true"};
     n_int          allowed_advance = 1;
@@ -762,18 +765,18 @@ static n_int object_file_read_boolean( n_object_parse_bundle * opb, n_int *with_
         return 0;
     }
 
-    opb->file->location++;
+    file->location++;
 
     while ( allowed_advance < 4 )
     {
         CHECK_FILE_SIZE( "end of json file reach unexpectedly for boolean" );
 
-        read_char = opb->file->data[opb->file->location];
+        read_char = file->data[file->location];
         char_okay = allowed[return_number][allowed_advance] == read_char;
 
         if ( char_okay )
         {
-            opb->file->location++;
+            file->location++;
         }
         else
         {
@@ -785,14 +788,14 @@ static n_int object_file_read_boolean( n_object_parse_bundle * opb, n_int *with_
 
     if ( return_number == 0 )
     {
-        read_char = opb->file->data[opb->file->location];
+        read_char = file->data[file->location];
         char_okay = 'e' == read_char;
 
         CHECK_FILE_SIZE( "end of json file reach unexpectedly for number" );
 
         if ( char_okay )
         {
-            opb->file->location++;
+            file->location++;
         }
         else
         {
@@ -845,28 +848,29 @@ static n_object_stream_type object_stream_char( n_byte value )
     return OBJ_TYPE_EMPTY;
 }
 
+n_array *number_base_array = 0L;
 
 
-static n_array *object_file_array( n_object_parse_bundle * opb )
+static n_array *object_file_array( n_file *file )
 {
     n_array *base_array = 0L;
 
     n_object_stream_type stream_type;
     n_object_stream_type stream_type_in_this_array = OBJ_TYPE_EMPTY;
 
-    if ( object_stream_char( opb->file->data[opb->file->location] ) != OBJ_TYPE_ARRAY_OPEN )
+    if ( object_stream_char( file->data[file->location] ) != OBJ_TYPE_ARRAY_OPEN )
     {
         ( void )SHOW_ERROR( "json not array as expected" );
         return base_array;
     }
 
-    opb->tracking_array_open ++;
+    tracking_array_open ++;
 
-    opb->file->location ++;
+    file->location ++;
     do
     {
         CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-        stream_type = object_stream_char( opb->file->data[opb->file->location] );
+        stream_type = object_stream_char( file->data[file->location] );
 
         if ( stream_type_in_this_array == OBJ_TYPE_EMPTY )
         {
@@ -880,10 +884,10 @@ static n_array *object_file_array( n_object_parse_bundle * opb )
 
         if ( stream_type == OBJ_TYPE_ARRAY_OPEN )
         {
-            n_array *array_value = object_file_array( opb );
+            n_array *array_value = object_file_array( file );
             if ( array_value )
             {
-                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                stream_type = object_stream_char( file->data[file->location] );
 
                 if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                 {
@@ -897,17 +901,17 @@ static n_array *object_file_array( n_object_parse_bundle * opb )
                     }
                 }
             }
-            stream_type = object_stream_char( opb->file->data[opb->file->location] );
+            stream_type = object_stream_char( file->data[file->location] );
         }
         if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
         {
-            n_object *object_value = object_file_base( opb );
+            n_object *object_value = object_file_base( file );
             OBJ_DBG( object_value, "object value is nil?" );
             if ( object_value )
             {
-                opb->file->location++;
+                file->location++;
                 CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                stream_type = object_stream_char( file->data[file->location] );
 
                 if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                 {
@@ -925,14 +929,14 @@ static n_array *object_file_array( n_object_parse_bundle * opb )
             OBJ_DBG( base_array, "base array still nil?" );
 
             CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-            stream_type = object_stream_char( opb->file->data[opb->file->location] );
+            stream_type = object_stream_char( file->data[file->location] );
         }
         if ( stream_type == OBJ_TYPE_STRING_NOTATION )
         {
-            n_string string_value = object_file_read_string( opb );
+            n_string string_value = object_file_read_string( file );
             if ( string_value )
             {
-                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                stream_type = object_stream_char( file->data[file->location] );
 
                 if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                 {
@@ -950,11 +954,11 @@ static n_array *object_file_array( n_object_parse_bundle * opb )
         if ( stream_type == OBJ_TYPE_NUMBER )
         {
             n_int with_error;
-            n_int number_value = object_file_read_number( opb, &with_error );
+            n_int number_value = object_file_read_number( file, &with_error );
             
             if ( with_error == 0 )
             {
-                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                stream_type = object_stream_char( file->data[file->location] );
 
                 if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                 {
@@ -968,22 +972,22 @@ static n_array *object_file_array( n_object_parse_bundle * opb )
                     }
                 }
                 
-                if (opb->number_base_array == 0L)
+                if (number_base_array == 0L)
                 {
-                    opb->number_base_array = base_array;
+                    number_base_array = base_array;
                 }
                 
-                object_array_add_number(opb->number_base_array, number_value);
+                object_array_add_number(number_base_array, number_value);
             }
         }
         if ( stream_type == OBJ_TYPE_BOOLEAN )
         {
             n_int with_error;
-            n_int boolean_value = object_file_read_boolean( opb, &with_error );
+            n_int boolean_value = object_file_read_boolean( file, &with_error );
 
             if ( with_error == 0 )
             {
-                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                stream_type = object_stream_char( file->data[file->location] );
 
                 if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                 {
@@ -1000,19 +1004,19 @@ static n_array *object_file_array( n_object_parse_bundle * opb )
         }
         if ( stream_type == OBJ_TYPE_ARRAY_CLOSE )
         {
-            opb->tracking_array_open --;
+            tracking_array_open --;
             
             /* TODO: This is based on a sign array layer then getting to the data */
-            if (opb->tracking_array_open == 2)
+            if (tracking_array_open == 2)
             {
-                object_array_add_number(opb->number_base_array, BIG_INTEGER);
+                object_array_add_number(number_base_array, BIG_INTEGER);
             }
-            if (opb->tracking_array_open == 1)
+            if (tracking_array_open == 1)
             {
-                opb->number_base_array = 0L;
+                number_base_array = 0L;
             }
         }
-        opb->file->location ++;
+        file->location ++;
 
         OBJ_DBG( base_array, "base array nil check?" );
     }
@@ -1051,37 +1055,37 @@ static n_int object_string_key(n_string string_key)
     return -1;
 }
 
-static n_object *object_file_base( n_object_parse_bundle *opb )
+static n_object *object_file_base( n_file *file )
 {
     n_object *base_object = 0L;
     n_object_stream_type stream_type;
     CHECK_FILE_SIZE( "file read outside end of file" );
 
-    stream_type = object_stream_char( opb->file->data[opb->file->location] );
+    stream_type = object_stream_char( file->data[file->location] );
 
     if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
     {
-        opb->tracking_object_open++;
+        tracking_object_open++;
         do
         {
-            opb->file->location++;
+            file->location++;
             CHECK_FILE_SIZE( "file read outside end of file" );
-            stream_type = object_stream_char( opb->file->data[opb->file->location] );
+            stream_type = object_stream_char( file->data[file->location] );
             if ( stream_type == OBJ_TYPE_STRING_NOTATION )
             {
-                n_string string_key = object_file_read_string( opb );
+                n_string string_key = object_file_read_string( file );
                 if ( string_key )
                 {
-                    stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                    stream_type = object_stream_char( file->data[file->location] );
                     if ( stream_type == OBJ_TYPE_COLON )
                     {
-                        opb->file->location++;
+                        file->location++;
                         CHECK_FILE_SIZE( "file read outside end of file" );
-                        stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                        stream_type = object_stream_char( file->data[file->location] );
 
                         if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
                         {
-                            n_object *insert_object = object_file_base( opb );
+                            n_object *insert_object = object_file_base( file );
                             if ( insert_object )
                             {
                                 if ( base_object )
@@ -1092,18 +1096,18 @@ static n_object *object_file_base( n_object_parse_bundle *opb )
                                 {
                                     base_object = obj_object( base_object, string_key, insert_object );
                                 }
-                                opb->file->location++;
+                                file->location++;
                                 CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                             }
                         }
                         if ( stream_type == OBJ_TYPE_NUMBER )
                         {
                             n_int number_error;
-                            n_int number_value = object_file_read_number( opb, &number_error );
+                            n_int number_value = object_file_read_number( file, &number_error );
                             if ( number_error == 0 )
                             {
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                                 if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                                 {
                                     if ( base_object )
@@ -1116,16 +1120,16 @@ static n_object *object_file_base( n_object_parse_bundle *opb )
                                     }
                                 }
                                 CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                             }
                         }
                         if ( stream_type == OBJ_TYPE_BOOLEAN )
                         {
                             n_int number_error;
-                            n_int boolean_value = object_file_read_boolean( opb, &number_error );
+                            n_int boolean_value = object_file_read_boolean( file, &number_error );
                             if ( number_error == 0 )
                             {
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                                 if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                                 {
                                     if ( base_object )
@@ -1138,15 +1142,15 @@ static n_object *object_file_base( n_object_parse_bundle *opb )
                                     }
                                 }
                                 CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                             }
                         }
                         if ( stream_type == OBJ_TYPE_STRING_NOTATION )
                         {
-                            n_string string_value = object_file_read_string( opb );
+                            n_string string_value = object_file_read_string( file );
                             if ( string_value )
                             {
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                                 if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                                 {
                                     if ( base_object )
@@ -1159,22 +1163,22 @@ static n_object *object_file_base( n_object_parse_bundle *opb )
                                     }
                                 }
                                 CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                             }
                         }
                         if ( stream_type == OBJ_TYPE_ARRAY_OPEN )
                         {
-                            n_array *array_value = object_file_array( opb ); // TODO: rename object_file_read_array
+                            n_array *array_value = object_file_array( file ); // TODO: rename object_file_read_array
                             if ( array_value )
                             {
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                                 if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
                                 {
                                     n_int string_key_output = object_string_key(string_key);
                                     
                                     if (string_key_output > -1)
                                     {
-                                        object_array_add_number(opb->number_base_array, BIG_NEGATIVE_INTEGER + string_key_output);
+                                        object_array_add_number(number_base_array, BIG_NEGATIVE_INTEGER + string_key_output);
                                     }
                                     
                                     if ( base_object )
@@ -1187,7 +1191,7 @@ static n_object *object_file_base( n_object_parse_bundle *opb )
                                     }
                                 }
                                 CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( opb->file->data[opb->file->location] );
+                                stream_type = object_stream_char( file->data[file->location] );
                             }
                             OBJ_DBG( array_value, "array value nil?" );
                         }
@@ -1196,7 +1200,7 @@ static n_object *object_file_base( n_object_parse_bundle *opb )
             }
             if ( stream_type == OBJ_TYPE_OBJECT_CLOSE )
             {
-                opb->tracking_object_open--;
+                tracking_object_open--;
             }
         }
         while ( stream_type == OBJ_TYPE_COMMA );
@@ -1218,110 +1222,81 @@ void unknown_free( void **unknown, n_object_type type )
     }
 }
 
-
-void object_parse_bundle_init(n_object_parse_bundle * opb, n_file *file, n_object_type *type )
+void *unknown_file_to_tree( n_file *file, n_object_type *type )
 {
-    opb->number_base_array = 0L;
-    
-    opb->tracking_array_open = 0;
-    opb->tracking_object_open = 0;
-    opb->tracking_string_quote = 0;
-    
-    opb->base_object = 0L;
-    opb->base_array = 0L;
-    
-    opb->something_wrong = 0;
-    
-    opb->stream_type = OBJ_TYPE_EMPTY;
-    
-    opb->type = OBJECT_EMPTY;
-    
-    opb->file = file;
-    
-    io_whitespace_json( opb->file );
-    opb->file->location = 0;
-    
-    type = &opb->type;
-}
+    n_object  *base_object = 0L;
+    n_array   *base_array = 0L;
+    n_int      something_wrong = 0;
 
+    n_object_stream_type stream_type;
 
+    tracking_array_open = 0;
+    tracking_object_open = 0;
+    tracking_string_quote = 0;
+    io_whitespace_json( file );
+    file->location = 0;
 
-void * obp_file_to_tree( n_object_parse_bundle * opb )
-{
-    opb->stream_type = object_stream_char( opb->file->data[opb->file->location] );
+    stream_type = object_stream_char( file->data[file->location] );
 
-    if ( opb->stream_type == OBJ_TYPE_OBJECT_OPEN )
+    if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
     {
-        opb->type = OBJECT_OBJECT;
-        opb->base_object = object_file_base( opb );
+        *type = OBJECT_OBJECT;
+        base_object = object_file_base( file );
     }
 
-    if ( opb->stream_type == OBJ_TYPE_ARRAY_OPEN )
+    if ( stream_type == OBJ_TYPE_ARRAY_OPEN )
     {
-        opb->type = OBJECT_ARRAY;
-        opb->base_array = object_file_array( opb );
+        *type = OBJECT_ARRAY;
+        base_array = object_file_array( file );
     }
 
-    if ( opb->tracking_array_open != 0 )
+    if ( tracking_array_open != 0 )
     {
         ( void )SHOW_ERROR( "Array json does not match up" );
-        opb->something_wrong = 1;
+        something_wrong = 1;
     }
-    if ( opb->tracking_object_open != 0 )
+    if ( tracking_object_open != 0 )
     {
         ( void )SHOW_ERROR( "Object json does not match up" );
-        opb->something_wrong = 1;
+        something_wrong = 1;
     }
-    if ( opb->tracking_string_quote != 0 )
+    if ( tracking_string_quote != 0 )
     {
         ( void )SHOW_ERROR( "String quote json does not match up" );
-        opb->something_wrong = 1;
+        something_wrong = 1;
     }
-    if ( opb->something_wrong )
+    if ( something_wrong )
     {
         printf("\n\n");
 
-        printf("%c", opb->file->data[opb->file->location-3]);
-        printf("%c", opb->file->data[opb->file->location-2]);
-        printf("%c", opb->file->data[opb->file->location-1]);
+        printf("%c", file->data[file->location-3]);
+        printf("%c", file->data[file->location-2]);
+        printf("%c", file->data[file->location-1]);
 
-        printf("~%c~", opb->file->data[opb->file->location]);
+        printf("~%c~", file->data[file->location]);
         
-        printf("%c", opb->file->data[opb->file->location+1]);
-        printf("%c", opb->file->data[opb->file->location+2]);
-        printf("%c", opb->file->data[opb->file->location+3]);
+        printf("%c", file->data[file->location+1]);
+        printf("%c", file->data[file->location+2]);
+        printf("%c", file->data[file->location+3]);
 
         printf("\n\n");
 
-        if ( opb->base_object )
+        if ( base_object )
         {
-            obj_free( &opb->base_object );
+            obj_free( &base_object );
         }
-        if ( opb->base_array )
+        if ( base_array )
         {
-            obj_free_array( 1, ( void ** )&opb->base_array, opb->base_array->type );
+            obj_free_array( 1, ( void ** )&base_array, base_array->type );
         }
         return 0L;
     }
-    if ( opb->type == OBJECT_ARRAY )
+    if ( *type == OBJECT_ARRAY )
     {
-        return ( void * )opb->base_array;
+        return ( void * )base_array;
     }
 
-    return ( void * )opb->base_object;
-}
-
-void * unknown_file_to_tree( n_file *file, n_object_type *type )
-{
-    n_object_parse_bundle opb;
-    
-    object_parse_bundle_init(&opb, file, type);
-    
-    obp_file_to_tree(&opb);
-    
-    *type = opb.type; // TODO: type need not be a pointer input
-
-    return obp_file_to_tree(&opb);
+    return ( void * )base_object;
 }
 
 n_string obj_contains( n_object *base, n_string name, n_object_type type )

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -128,6 +128,8 @@ n_int draw_toggle_tide_daylight_value( void );
 void  draw_terrain_coord( n_int *co_x, n_int *co_y );
 
 void draw_undraw_clear( void );
+
+void draw_undraw( void );
 
 n_byte *draw_pointer( n_int which_one );
 

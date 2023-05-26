@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -53,7 +53,6 @@
 #import "ASSimulationView.h"
 
 
-
 @implementation ASSimulationView
 
 - (NSOpenPanel*) uniformOpenPanel
@@ -84,7 +83,12 @@
 - (void) awakeFromNib
 {
     [self startView];
-    [self.shared identificationBasedOnName:[[self window] title]];
+
+    NSWindow * window = [self window];
+        CGFloat scale = [window backingScaleFactor];
+    [self.shared whatIsIdentification:[window title]
+                                scale:(int)scale];
+
     [self startEverything:(self.shared.identification == WINDOW_PROCESSING)];
     [self sharedReady];
 }

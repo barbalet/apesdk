@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -98,8 +98,8 @@ n_file * io_file_new_from_string(n_string string, n_uint string_length)
     {
         return 0L;
     }
-    output->size = (string_length * 3) / 2;
-    output->data = memory_new( output->size );
+    output->size = string_length * 2;
+    output->data = memory_new( string_length * 2 );
     if ( output->data == 0L )
     {
         memory_free( ( void ** )&output );
@@ -182,7 +182,7 @@ static n_int io_disk_read_error( n_file *local_file, n_string file_name, n_byte 
 
     memory_free( ( void ** )&local_file->data );
 
-    local_file->data = memory_new( (file_size / 2) * 3 );
+    local_file->data = memory_new( file_size * 2 );
     if ( local_file->data == 0L )
     {
         if ( error_show )
@@ -191,11 +191,12 @@ static n_int io_disk_read_error( n_file *local_file, n_string file_name, n_byte 
         }
         return -1;
     }
-    
-    fread( local_file->data, 1, file_size, in_file );
-    memory_erase( &(local_file->data[file_size]), file_size / 2 );
 
-    local_file->size = (file_size / 2) * 3;
+    memory_erase( local_file->data, file_size * 2 );
+
+    fread( local_file->data, 1, file_size, in_file );
+
+    local_file->size = file_size * 2;
     local_file->location = file_size;
 
     fclose( in_file );

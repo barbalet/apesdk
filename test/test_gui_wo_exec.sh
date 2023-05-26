@@ -3,7 +3,7 @@
 #
 #	=============================================================
 #
-#   Copyright 1996-2022 Tom Barbalet. All rights reserved.
+#   Copyright 1996-2023 Tom Barbalet. All rights reserved.
 #
 #   Permission is hereby granted, free of charge, to any person
 #   obtaining a copy of this software and associated documentation
@@ -49,7 +49,6 @@ fi
 gcc ${CFLAGS} ${COMMANDLINEE} -c ../toolkit/*.c -lz -lm -lpthread -w
 gcc ${CFLAGS} ${COMMANDLINEE} -c ../script/*.c -lz -lm -lpthread -w
 gcc ${CFLAGS} ${COMMANDLINEE} -c ../render/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ../cli/*.c -lz -lm -lpthread -w
 
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../sim/*.c -lz -lm -lpthread -w
 gcc  ${CFLAGS} ${COMMANDLINEE} -c ../entity/*.c -lz -lm -lpthread -w

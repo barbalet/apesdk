@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -251,5 +251,8 @@ static const simulated_file_entry simulated_file_format[] =
 
 #define	TRACK_BRAIN(loc,lx,ly,lz)	((loc)[(lx)|((ly)<<5)|((lz)<<10)])
 
+/* functions */
+
+n_int command_executing( void );
 
 #endif /* SIMULATEDAPE_UNIVERSE_INTERNAL_H */

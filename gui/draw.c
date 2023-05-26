@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -221,12 +221,9 @@ static n_byte *undraw_location[UNDRAW_MAX];
 static n_byte   undraw_color[UNDRAW_MAX];
 static n_int    undraw_count = 0;
 
-void draw_undraw_clear( void )
-{
-    undraw_count = 0;
-}
 
-static void draw_undraw()
+
+void draw_undraw(void)
 {
     if ( undraw_count == 0 )
     {
@@ -239,6 +236,11 @@ static void draw_undraw()
         undraw_count--;
     }
     while ( undraw_count > -1 );
+    undraw_count = 0;
+}
+
+void draw_undraw_clear( void )
+{
     undraw_count = 0;
 }
 

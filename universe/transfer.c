@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -106,15 +106,15 @@ static n_object *transfer_land_obj( void )
 }
 
 
-static n_object *transfer_being_spacetime_obj( n_spacetime *value )
-{
-    n_object *simulated_ispacetime = object_number( 0L, "date", value->date );
-    n_array   *simulated_ilocation = array_number( value->location[0] );
-    array_add( simulated_ilocation, array_number( value->location[1] ) );
-    object_array( simulated_ispacetime, "location", simulated_ilocation );
-    object_number( simulated_ispacetime, "time", value->time );
-    return simulated_ispacetime;
-}
+//static n_object *transfer_being_spacetime_obj( n_spacetime *value )
+//{
+//    n_object *simulated_ispacetime = object_number( 0L, "date", value->date );
+//    n_array   *simulated_ilocation = array_number( value->location[0] );
+//    array_add( simulated_ilocation, array_number( value->location[1] ) );
+//    object_array( simulated_ispacetime, "location", simulated_ilocation );
+//    object_number( simulated_ispacetime, "time", value->time );
+//    return simulated_ispacetime;
+//}
 
 static n_object *transfer_being_constant_obj( simulated_being_constant *constant )
 {

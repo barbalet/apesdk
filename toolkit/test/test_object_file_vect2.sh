@@ -3,7 +3,7 @@
 #
 #	=============================================================
 #
-#   Copyright 1996-2022 Tom Barbalet. All rights reserved.
+#   Copyright 1996-2023 Tom Barbalet. All rights reserved.
 #
 #   Permission is hereby granted, free of charge, to any person
 #   obtaining a copy of this software and associated documentation
@@ -32,8 +32,8 @@
 
 mv test_object_file_vect2 ../test_object_file_vect2
 cd ..
-mv test_object_file_vect2 test/json
-cd test/json
+mv test_object_file_vect2 json
+cd json
 
 ./test_object_file_vect2 newvector1.json
 

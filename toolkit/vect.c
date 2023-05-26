@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -769,81 +769,6 @@ n_int vect2_unwrap_number( n_array * array, n_vect2 * entry, n_int number)
         memory_list_free(&elements);
     }
     return out_value;
-}
-
-/* logic for creating a line from points
- 
-   allow for a maximum distance
- 
-   go through an array of vectors
- 
-   with an array of vectors the same number as the number of vectors presented.
- 
-   the y of the new vector is the 0 to n count
- 
-   at each vector entry find the nearest neighbor entry number or -1 if there is no nearest neighbor within the distance as the x of the vector
-  
-   order the vector array lowest to highest with the x of the vector
-
-   start at the lowest of the x linking the lines in order, -1 values are points */
-
-memory_list * vect2_point_to_lines(memory_list * vect2_list, n_int dist_squared)
-{
-    memory_list * return_list = memory_list_new(sizeof(n_vect2), vect2_list->count);
-    n_vect2 * vect2_data = (n_vect2 *) vect2_list->data;
-    n_int loop = 0;
-    while (loop < vect2_list->count)
-    {
-        n_int loop2 = 0;
-        n_int location = -1;
-        n_int max_distance = dist_squared;
-        n_vect2 vect2_return;
-        vect2_return.y = loop;
-        while (loop2 < vect2_list->count)
-        {
-            if (loop2 != loop)
-            {
-                n_int distx = vect2_data[loop].x - vect2_data[loop2].x;
-                n_int disty = vect2_data[loop].y - vect2_data[loop2].y;
-                n_int compare_distance_squared = (distx * distx) + (disty * disty);
-                if (compare_distance_squared < max_distance)
-                {
-                    location = loop;
-                    max_distance = compare_distance_squared;
-                }
-            }
-            loop2++;
-        }
-        vect2_return.x = location;
-        memory_list_copy(return_list, (n_byte *)&vect2_return);
-        loop++;
-    }
-    return return_list;
-}
-
-
-void vect2_x_entry_bubblesort(memory_list * vect2_list)
-{
-    n_vect2 * vect2_data = (n_vect2*)vect2_list->data;
-    n_int loopc = 0;
-    while (loopc < (vect2_list->count - 1))
-    {
-        n_int loopd = 0;
-        while (loopd < (vect2_list->count - loopc - 1))
-        {
-            if (vect2_data[loopd].x > vect2_data[loopd+1].x)
-            {
-                n_int swapx       = vect2_data[loopd].x;
-                n_int swapy       = vect2_data[loopd].y;
-                vect2_data[loopd].x   = vect2_data[loopd+1].x;
-                vect2_data[loopd].y   = vect2_data[loopd+1].y;
-                vect2_data[loopd+1].x = swapx;
-                vect2_data[loopd+1].y = swapy;
-            }
-            loopd++;
-        }
-        loopc++;
-    }
 }
 
 n_int vect2_unwrap_number_entry( n_string pass_through, n_byte * buffer, n_int number)

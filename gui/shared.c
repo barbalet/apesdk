@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -38,13 +38,17 @@
 
 #include <stdio.h>
 
-#include "../gui/gui.h"
+#include "gui.h"
 
-#include "../cli/cli.h"
+#ifndef    _WIN32
 
 #include "../shared.h"
 
+#else
 
+#include "..\shared.h"
+
+#endif
 
 static n_int   simulation_started = 0;
 
@@ -72,7 +76,7 @@ static n_int control_toggle_pause( n_byte actual_toggle )
 {
     if ( io_command_line_execution() )
     {
-        useful_stop( 0L, "", io_console_out );
+        command_stop( 0L, "", io_console_out );
     }
 
     if ( actual_toggle )
@@ -506,15 +510,15 @@ n_byte shared_openFileName( n_constant_string cStringFileName, n_int isScript )
 
     if ( isScript )
     {
-        return ( command_script( 0L, cStringFileName, 0L ) == 0 );
+        return ( command_script( 0L, (n_string) cStringFileName, 0L ) == 0 );
     }
-    return ( command_open( 0L, cStringFileName, 0L ) == 0 );
+    return ( command_open( 0L, (n_string) cStringFileName, 0L ) == 0 );
 }
 
 void shared_saveFileName( n_constant_string cStringFileName )
 {
     ( void )control_toggle_pause( 0 );
-    ( void )command_save( 0L, cStringFileName, 0L );
+    ( void )command_save( 0L, (n_string) cStringFileName, 0L );
 }
 
 void shared_delta( n_double delta_x, n_double delta_y, n_int wwind )

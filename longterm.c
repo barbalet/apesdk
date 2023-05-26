@@ -4,7 +4,7 @@
 
     =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -44,11 +44,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#ifdef _WIN32
-#define SIMPLE_LONGTERM_CLE
-#endif
-
-#ifndef SIMPLE_LONGTERM_CLE
+#ifndef _WIN32
 #include <pthread.h>
 #include <unistd.h>
 #include <signal.h>
@@ -178,7 +174,7 @@ int command_line_run( void )
     return ( 1 );
 }
 
-#ifndef SIMPLE_LONGTERM_CLE
+#ifndef _WIN32
 
 static int make_periodic( unsigned int period, sigset_t *alarm_sig )
 {
@@ -241,31 +237,6 @@ static void *periodic_thread( void *arg )
     return NULL;
 }
 
-#endif
-
-#if 0
-int cycle_run( void )
-{
-    pthread_t t_1;
-    sigset_t alarm_sig;
-
-    printf( "\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE );
-
-    /* Block SIGALRM (not really necessary with uClibc) */
-    sigemptyset( &alarm_sig );
-    sigaddset( &alarm_sig, SIGALRM );
-    sigprocmask( SIG_BLOCK, &alarm_sig, NULL );
-
-    srand( ( unsigned int ) time( NULL ) );
-    sim_init( 2, rand(), MAP_AREA, 0 );
-
-    pthread_create( &t_1, NULL, periodic_thread, NULL );
-    while ( 1 )
-    {
-        sleep( 100 );
-    }
-    return 0;
-}
 #endif
 
 int main( int argc, n_string argv[] )

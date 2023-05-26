@@ -4,7 +4,7 @@
  
  =============================================================
  
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -34,6 +34,7 @@
  ****************************************************************/
 
 #import "ASShared.h"
+#import "sim.h"
 
 @interface ASShared()
 
@@ -199,9 +200,17 @@
     NSLog(@"Quit");
 }
 
-- (void) identificationBasedOnName:(NSString *)windowName
+- (void) whatIsIdentification:(NSString *)windowName
+                        scale:(int)scale
 {
-    _identification = NUM_VIEW;
+    long height = 256 * scale;
+    long width = 342 * scale;
+    _identification = NUM_NIL;
+    
+    if ([windowName isEqualToString:@"View"])
+    {
+        _identification = NUM_VIEW;
+    }
     
     if ([windowName isEqualToString:@"Terrain"])
     {
@@ -211,6 +220,51 @@
     {
         _identification = NUM_CONTROL;
     }
+    switch((int)_identification)
+    {
+        case 0:
+            NSLog(@" height %ld width %ld NUM_VIEW\n", height, width);
+            break;
+            
+        case 2:
+            NSLog(@" height %ld width %ld NUM_CONTROL\n", height, width);
+            break;
+            
+        case 1:
+            NSLog(@" height %ld width %ld NUM_TERRAIN\n", height, width);
+            break;
+            
+        case 3:
+            NSLog(@" height %ld width %ld NUM_NIL\n", height, width);
+            break;
+    }
+    
+    if (_identification != NUM_NIL)
+    {
+        return;
+    }
+    if(_identification == NUM_NIL)
+    {
+        _identification = NUM_VIEW;
+    }
+    
+    if ((height == 512) && (width == 342))
+    {
+        _identification = NUM_CONTROL;
+    }else
+    {
+        if (height == 512)
+        {
+            _identification = NUM_TERRAIN;
+        }
+    }
+    if(_identification == NUM_NIL)
+    {
+        _identification = NUM_VIEW;
+    }
+
+    
+
 }
 
 - (void) cycle
@@ -312,7 +366,7 @@
 - (BOOL) openFileName:(NSString*)name isScript:(BOOL)scriptFile
 {
     char * cStringFileName = (char *)[name UTF8String];
-    return shared_openFileName(cStringFileName,(unsigned char)scriptFile) != 0;
+    return shared_openFileName((n_constant_string)cStringFileName,(unsigned char)scriptFile) != 0;
 }
 
 @end

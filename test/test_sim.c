@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -96,7 +96,7 @@ void test_total_moved( simulated_group *group )
 }
 
 
-#define FIRST_RANDOM (24790)
+#define FIRST_RANDOM (47614)
 
 n_int test_hash( void )
 {
@@ -124,15 +124,15 @@ n_int test_hash( void )
 
 #define DELTA_0 (0)
 #define MOVED_0 (0)
-#define DELTA_1 (3031)
-#define MOVED_1 (1876865)
-#define DELTA_2 (169)
-#define MOVED_2 (3075447)
-#define DELTA_3 (817)
-#define MOVED_3 (3162008)
-#define TOTAL_MOVED (4323350)
-#define LINE_OF_SIGHT_COUNT (62)
-#define NUMBER_BEINGS (222)
+#define DELTA_1 (1834)
+#define MOVED_1 (1014461)
+#define DELTA_2 (85)
+#define MOVED_2 (1654709)
+#define DELTA_3 (633)
+#define MOVED_3 (1704592)
+#define TOTAL_MOVED (2507996)
+#define LINE_OF_SIGHT_COUNT (16)
+#define NUMBER_BEINGS (128)
 
 n_int test_sim_run( void )
 {

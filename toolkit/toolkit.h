@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -44,8 +44,6 @@
 
 #include <signal.h> // for SIMULATED_APE_ASSERT
 
-#define  VERBOSE_DEBUG
-
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 
 #define CHAR_SPACE               (32)
@@ -58,33 +56,14 @@
 
 typedef	double	n_double;
 
-#define TWO_PI               ((n_double)(6.2831853071795864769252867665590057683943))
+#define TWO_PI ((n_double)(6.2831853071795864769252867665590057683943))
 
-#define SINE_MAXIMUM         (26880)
+#define SINE_MAXIMUM (26880)
 
 #define BIG_INTEGER          (2147483647)
 #define BIG_NEGATIVE_INTEGER (0-2147483648)
 
 #define NOTHING (0L)
-
-#define TIME_HOUR_MINUTES           (60)
-#define TIME_DAY_MINUTES            (TIME_HOUR_MINUTES * 24)
-#define TIME_MONTH_MINUTES          (TIME_DAY_MINUTES * 28)
-#define TIME_YEAR_MINUTES           (TIME_MONTH_MINUTES * 13)
-#define TIME_YEAR_DAYS              (7 * 52)                /*364 also = 13 * 28 */
-#define TIME_CENTURY_DAYS           (TIME_YEAR_DAYS * 100)
-
-typedef enum
-{
-    INTERVAL_MINS = 0,
-    INTERVAL_HOURS,
-    INTERVAL_DAYS,
-    INTERVAL_MONTHS,
-    INTERVAL_YEARS,
-    INTERVALS
-} TIME_INTERVALS;
-
-
 
 typedef char n_char;
 
@@ -127,11 +106,6 @@ typedef	unsigned long long	n_uint;
 typedef	long long			n_int;
 
 #endif
-
-
-static const n_int interval_steps[] =
-{ 1, TIME_HOUR_MINUTES, TIME_DAY_MINUTES, TIME_MONTH_MINUTES, TIME_YEAR_MINUTES};
-static const n_constant_string interval_description[] = { " mins", " hours", " days", " months", " years" };
 
 
 typedef enum
@@ -206,15 +180,15 @@ typedef union
     n_byte4 thirtytwo;
 } n_rgba32;
 
-enum window_information
-{
-    TERRAIN_WINDOW_WIDTH        = ( 4096 ),
-    TERRAIN_WINDOW_HEIGHT       = ( 3072 ),
-    TERRAIN_WINDOW_AREA         = ( TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT ),
-    CONTROL_WINDOW_WIDTH        = ( 2048 ),
-    CONTROL_WINDOW_HEIGHT       = ( 2048 ),
-    CONTROL_WINDOW_AREA         = ( CONTROL_WINDOW_WIDTH * CONTROL_WINDOW_HEIGHT )
-};
+//enum window_information
+//{
+//    TERRAIN_WINDOW_WIDTH        = ( 4096 ),
+//    TERRAIN_WINDOW_HEIGHT       = ( 3072 ),
+//    TERRAIN_WINDOW_AREA         = ( TERRAIN_WINDOW_WIDTH * TERRAIN_WINDOW_HEIGHT ),
+//    CONTROL_WINDOW_WIDTH        = ( 2048 ),
+//    CONTROL_WINDOW_HEIGHT       = ( 2048 ),
+//    CONTROL_WINDOW_AREA         = ( CONTROL_WINDOW_WIDTH * CONTROL_WINDOW_HEIGHT )
+//};
 
 typedef struct
 {
@@ -352,7 +326,6 @@ typedef struct
     void *next;
 } n_file_chain;
 
-
 typedef enum
 {
     OBJECT_EMPTY = 0,
@@ -402,25 +375,6 @@ typedef struct
     n_uint         name_hash;
 } n_object;
 
-typedef struct
-{
-    n_array *number_base_array;
-    n_int tracking_array_open;
-    n_int tracking_object_open;
-    n_int tracking_string_quote;
-
-    n_file * file;
-
-    n_object_type type;
-    
-    n_object  *base_object;
-    n_array   *base_array;
-    n_int      something_wrong;
-
-    n_object_stream_type stream_type;
-    
-}n_object_parse_bundle;
-
 typedef void (memory_execute)(void);
 
 void memory_execute_set(memory_execute * value);
@@ -466,9 +420,6 @@ n_int     obj_array_count( n_array *array_obj );
 memory_list * object_list_vect2(n_array * vect_array);
 n_array *     object_vect2_pointer(n_vect2 * vect_array, n_uint count);
 n_int         object_vect2_from_array(n_array * vect_element, n_vect2 * vect_list);
-
-memory_list * vect2_point_to_lines(memory_list * vect2_list, n_int dist_squared);
-void vect2_x_entry_bubblesort(memory_list * vect2_list);
 
 n_array * object_vect2_array(n_vect2 * value);
 
@@ -635,6 +586,10 @@ void       io_number_to_string( n_string value, n_uint number );
 void       io_string_number( n_string output_string, n_string input_string, n_uint number );
 void       io_three_strings( n_string output_string, n_string first_string, n_string second_string, n_string third_string, n_byte new_line );
 
+void       io_entry_execution( n_int argc, n_string *argv );
+void       io_command_line_execution_set( void );
+n_int      io_command_line_execution( void );
+
 void       io_lower( n_string value, n_int length );
 void       io_whitespace( n_file *input );
 void       io_whitespace_json( n_file *input );
@@ -785,32 +740,35 @@ void audio_buffer_copy_to_double( n_audio *buffer_audio, n_double *buffer_double
 void audio_buffer_copy_to_double_double( n_double *buffer_double1, n_double *buffer_double2, n_int size );
 void audio_buffer_copy_to_double_double( n_double *buffer_double_to, n_double *buffer_double_from, n_int size );
 
+typedef n_string ( n_console_input )( n_string value, n_int length );
+
+typedef void ( n_console_output )( n_constant_string value );
+
+typedef n_int ( n_console )( void *ptr, n_string response, n_console_output output_function );
+
+typedef struct
+{
+    n_console *function;
+    n_string    command;
+    n_string    addition;
+    n_string    help_information;
+} simulated_console_command;
+
 void       audio_aiff_header( void *fptr, n_uint total_samples );
 n_int      audio_aiff_is_header( void *fptr, n_uint *samples );
 
 void       audio_aiff_body( void *fptr, n_audio *samples, n_uint number_samples );
 
-#ifdef VERBOSE_DEBUG
+n_int      io_quit( void *ptr, n_string response, n_console_output output_function );
+n_int      io_help( void *ptr, n_string response, n_console_output output_function );
+n_string   io_console_entry_clean( n_string string, n_int length );
+n_string   io_console_entry( n_string string, n_int length );
+void       io_console_out( n_constant_string value );
+n_int      io_console( void *ptr, simulated_console_command *commands, n_console_input input_function, n_console_output output_function );
 
-#define VD_PRINT( message ) io_vd_print(message, __FILE__, __LINE__)
+void       io_help_line( simulated_console_command *specific, n_console_output output_function );
 
-#define VD_NUM( message, number ) io_vd_number(message, __FILE__, __LINE__, number)
-
-#define VD_UNUM (message, number ) io_vd_unsigned_number(message, __FILE__, __LINE__, number)
-
-void io_vd_print( n_string message, n_string file_loc, n_int line );
-void io_vd_number( n_string message, n_string file_loc, n_int line, n_int number );
-void io_vd_unsigned_number( n_string message, n_string file_loc, n_int line, n_uint number );
-
-#else
-
-#define VD_PRINT( message ) /* message */
-
-#define VD_NUM( message, number ) /* message number */
-
-#define VD_UNUM (message, number ) /* message number */
-
-#endif
+void       io_console_quit( void );
 
 #endif /* _TOOLKIT_H_ */
 

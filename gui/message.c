@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -121,59 +121,59 @@ static void message_remove( n_int remove )
     number_messages--;
 }
 
-static void message_add( n_string message, n_int time_to_expire )
-{
-    n_int   *spaces;
-    n_string copied_message;
-    n_int    space_count = 0;
-
-    if ( number_messages == ( MAXIMUM_NUMBER_MESSAGE - 1 ) )
-    {
-        /* if the message stack is full remove the oldest message */
-        n_int loop = 0;
-        n_int oldest_loop = 0;
-        n_int oldest_time_to_expire = 100000;
-        while ( loop < number_messages )
-        {
-            if ( oldest_time_to_expire > messages[loop].time_to_expire )
-            {
-                oldest_loop = loop;
-                oldest_time_to_expire = messages[loop].time_to_expire;
-            }
-            loop++;
-        }
-        message_remove( oldest_loop );
-    }
-
-    if ( message == 0L )
-    {
-        return;
-    }
-    if ( time_to_expire == 0 )
-    {
-        return;
-    }
-    ( void )message_find_spaces( message, &space_count );
-    if ( space_count == 0 )
-    {
-        return;
-    }
-    spaces = message_find_spaces( message, &space_count );
-    if ( spaces == 0L )
-    {
-        return;
-    }
-    copied_message = io_string_copy( message );
-    if ( copied_message == 0L )
-    {
-        memory_free( ( void ** ) & ( spaces ) );
-        return;
-    }
-    messages[number_messages].time_to_expire = time_to_expire;
-    messages[number_messages].message = copied_message;
-    messages[number_messages].spaces = spaces;
-    number_messages++;
-}
+//static void message_add( n_string message, n_int time_to_expire )
+//{
+//    n_int   *spaces;
+//    n_string copied_message;
+//    n_int    space_count = 0;
+//
+//    if ( number_messages == ( MAXIMUM_NUMBER_MESSAGE - 1 ) )
+//    {
+//        /* if the message stack is full remove the oldest message */
+//        n_int loop = 0;
+//        n_int oldest_loop = 0;
+//        n_int oldest_time_to_expire = 100000;
+//        while ( loop < number_messages )
+//        {
+//            if ( oldest_time_to_expire > messages[loop].time_to_expire )
+//            {
+//                oldest_loop = loop;
+//                oldest_time_to_expire = messages[loop].time_to_expire;
+//            }
+//            loop++;
+//        }
+//        message_remove( oldest_loop );
+//    }
+//
+//    if ( message == 0L )
+//    {
+//        return;
+//    }
+//    if ( time_to_expire == 0 )
+//    {
+//        return;
+//    }
+//    ( void )message_find_spaces( message, &space_count );
+//    if ( space_count == 0 )
+//    {
+//        return;
+//    }
+//    spaces = message_find_spaces( message, &space_count );
+//    if ( spaces == 0L )
+//    {
+//        return;
+//    }
+//    copied_message = io_string_copy( message );
+//    if ( copied_message == 0L )
+//    {
+//        memory_free( ( void ** ) & ( spaces ) );
+//        return;
+//    }
+//    messages[number_messages].time_to_expire = time_to_expire;
+//    messages[number_messages].message = copied_message;
+//    messages[number_messages].spaces = spaces;
+//    number_messages++;
+//}
 
 
 

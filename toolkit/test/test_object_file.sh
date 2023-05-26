@@ -3,7 +3,7 @@
 #
 #	=============================================================
 #
-#   Copyright 1996-2022 Tom Barbalet. All rights reserved.
+#   Copyright 1996-2023 Tom Barbalet. All rights reserved.
 #
 #   Permission is hereby granted, free of charge, to any person
 #   obtaining a copy of this software and associated documentation
@@ -32,8 +32,8 @@
 
 cd ..
 ./apesdk-json.sh
-mv apesdk-json test/json
-cd test/json
+mv apesdk-json json
+cd json
 
 ./apesdk-json example_four_two_vect2.json
 diff example_four_two_vect2.json 2xample_four_two_vect2.json

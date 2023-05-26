@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2022 Tom Barbalet. All rights reserved.
+ Copyright 1996-2023 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -950,11 +950,11 @@ static void tile_patch( n_land *land, n_int tile, n_int refine )
 }
 
 
-static n_int tile_memory_location( n_int px, n_int py )
-{
-#define    POSITIVE_TILE_COORD(num)      ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
-    return POSITIVE_TILE_COORD( px ) + ( POSITIVE_TILE_COORD( py ) << MAP_BITS );
-}
+//static n_int tile_memory_location( n_int px, n_int py )
+//{
+//#define    POSITIVE_TILE_COORD(num)      ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
+//    return POSITIVE_TILE_COORD( px ) + ( POSITIVE_TILE_COORD( py ) << MAP_BITS );
+//}
 
 void tile_land_init( n_land *land )
 {
