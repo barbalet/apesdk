@@ -1,5 +1,5 @@
 #!/bin/bash
-#	build.sh
+#	build_testcommand.sh
 #
 #	=============================================================
 #
@@ -62,5 +62,7 @@ if [ $? -ne 0 ]
 then
 exit 1
 fi
+
+./testcommand
 
 rm *.o
