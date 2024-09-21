@@ -15,3 +15,5 @@ jobs:
     - uses: actions/checkout@v4
     - name: build
       run: ./build.sh
+    - name: buildtestcommand
+      run: ./buildtestcommand.sh
