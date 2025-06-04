@@ -4,7 +4,7 @@ glrender.c
  
  =============================================================
  
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -38,6 +38,8 @@ glrender.c
  */
 
 #include "glrender.h"
+
+#include <stdio.h>
 
 typedef struct
 {
@@ -199,7 +201,7 @@ void glrender_color_map(n_byte2 * value)
     }
 }
 
-n_int glrender_scene_done()
+n_int glrender_scene_done(void)
 {
     return (draw_scene_not_done < 2);
 }
@@ -256,11 +258,11 @@ void glrender_render_quads(n_byte * output, memory_list * quads)
 void glrender_render_lines(n_byte * output, memory_list *lines)
 {
     n_vect2 direction_vector;
-    n_int   loop = 0;
-    n_int   count = 0;
+    n_byte4 loop = 0;
+    n_byte4 count = 0;
     glr_line * active_list = (glr_line *)lines->data;
     vect2_direction(&direction_vector, 255-current_turn, 1);
-
+    
     while (loop < lines->count)
     {
         n_vect2 reset_start, reset_end;
@@ -292,7 +294,9 @@ void glrender_render_lines(n_byte * output, memory_list *lines)
             continue;
         }
 
-        graph_line(output, &graph_size, &reset_start, &reset_end, (n_rgba32*)&color_map[local_data.color], local_data.thickness);
+        printf("graph_line( %ld %ld ) ( %ld %ld ) ( %ld %ld )\n", graph_size.x,graph_size.y, reset_start.x, reset_start.x, reset_end.x, reset_end.y);
+        
+        //graph_line(output, &graph_size, &reset_start, &reset_end, (n_rgba32*)&color_map[local_data.color], local_data.thickness);
 
         count ++;
     }
@@ -311,8 +315,8 @@ void glrender_render_active(n_byte * output)
 void glrender_render_display(n_byte * output)
 {
     glrender_render_erase(output);
-    glrender_render_lines(output, display_lines);
     glrender_render_quads(output, display_quads);
+    //glrender_render_lines(output, display_lines); // bug resides
 }
 
 void glrender_background_green(void)
@@ -373,12 +377,12 @@ void glrender_end_text_list(void)
     
 }
 
-void glrender_wide_line()
+void glrender_wide_line(void)
 {
     current_thickness = 12;
 }
 
-void glrender_thin_line()
+void glrender_thin_line(void)
 {
     current_thickness = 6;
 }
@@ -402,15 +406,15 @@ void glrender_line(n_vect2 * start, n_vect2 * end)
 
     if (current_case == GRAPHICS_CASE_ACTIVE)
     {
-        memory_list_copy(active_lines, (n_byte*)&new_line);
+        memory_list_copy(active_lines, (n_byte*)&new_line, sizeof(new_line));
     }
     if (current_case == GRAPHICS_CASE_DISPLAY)
     {
-        memory_list_copy(display_lines, (n_byte*)&new_line);
+        memory_list_copy(display_lines, (n_byte*)&new_line, sizeof(new_line));
     }
     if (current_case == GRAPHICS_CASE_TEXT)
     {
-        memory_list_copy(text_lines, (n_byte*)&new_line);
+        memory_list_copy(text_lines, (n_byte*)&new_line, sizeof(new_line));
     }
 }
 
@@ -426,7 +430,7 @@ void glrender_fill(n_vect2 * quads)
     }
     if (current_case == GRAPHICS_CASE_DISPLAY)
     {
-        memory_list_copy(display_quads, (n_byte*)&new_quad);
+        memory_list_copy(display_quads, (n_byte*)&new_quad, sizeof(glr_quad));
     }
 }
 

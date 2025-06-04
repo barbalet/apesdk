@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -45,6 +45,15 @@
 #include <signal.h> // for SIMULATED_APE_ASSERT
 
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
+
+
+// #define COMMON_DEBUG_ON /* should be passed via target definitions via cmd */
+
+#ifdef COMMON_DEBUG_ON
+    #define COMMON_DEBUG(format, ...) printf(format, ##__VA_ARGS__)
+#else
+    #define COMMON_DEBUG(format, ...) /* value */
+#endif
 
 #define CHAR_SPACE               (32)
 #define IS_RETURN(val)            (((val) == 10) || ((val) == 13))
@@ -154,6 +163,15 @@ typedef union
     n_int data[4];
 } n_area2;
 
+typedef struct
+{
+    n_vect2 four[4];
+} n_quad;
+
+typedef struct
+{
+    n_vect2 two[2];
+} n_line;
 
 typedef union
 {
@@ -232,7 +250,8 @@ typedef struct
 
 typedef memory_list int_list;
 
-typedef struct{
+typedef struct
+{
     int_list * number;
     void * array;
 } number_array;
@@ -423,7 +442,13 @@ n_int         object_vect2_from_array(n_array * vect_element, n_vect2 * vect_lis
 
 n_array * object_vect2_array(n_vect2 * value);
 
-typedef n_int ( object_unwrap )( n_string pass_through , n_byte * buffer);
+typedef n_int ( object_unwrap )( n_string pass_through, n_byte * buffer);
+
+
+void object_output_object(n_object * value);
+void object_output_array(n_array * value);
+
+n_array * object_onionskin(n_object * top, n_string value);
 
 memory_list * object_unwrap_array(n_array * general_array, n_uint size, object_unwrap wrap_func, n_object_type type);
 
@@ -435,9 +460,12 @@ n_int   object_name_vect2(n_string name, n_vect2 * value, n_object * input_json)
 n_object * object_line(n_vect2 * values);
 n_object * object_quad(n_vect2 * values);
 
-n_int object_unwrap_four_vect2( n_string pass_through , n_byte * buffer);
-n_int object_unwrap_two_vect2( n_string pass_through , n_byte * buffer);
-n_int object_unwrap_vect2( n_string pass_through , n_byte * buffer);
+n_int vect2_unwrap_quad( n_string pass_through, n_byte * buffer);
+n_int vect2_unwrap_line( n_string pass_through, n_byte * buffer);
+
+n_int object_unwrap_four_vect2( n_string pass_through, n_byte * buffer);
+n_int object_unwrap_two_vect2( n_string pass_through, n_byte * buffer);
+n_int object_unwrap_vect2( n_string pass_through, n_byte * buffer);
 
 n_int object_count_name_vect2(n_vect2 * vect_array, n_uint count, object_unwrap * wrap_func, n_string name, n_object * object);
 
@@ -500,8 +528,10 @@ void vect2_rotation_bitshift( n_vect2 *location, n_vect2 *rotation );
 n_int vect2_nonzero( n_vect2 *nonzero );
 
 n_vect2 *vect2_min_max_init( void );
+void vect2_min_max_permutation( n_vect2 * points, n_vect2 * minmax);
 
 void vect2_min_max( n_vect2 *points, n_int number, n_vect2 *maxmin );
+void vect2_min_max_permutation( n_vect2 * points, n_vect2 * minmax);
 
 void vect2_scalar_multiply( n_vect2 *value, n_int multiplier );
 void vect2_scalar_divide( n_vect2 *value, n_int divisor );
@@ -538,8 +568,6 @@ void math_general_execution( n_int instruction, n_int is_constant0, n_int is_con
 
 n_byte4  math_hash_fnv1( n_constant_string key );
 n_uint   math_hash( n_byte *values, n_uint length );
-
-void    math_bilinear_8_times( n_byte *side512, n_byte *data, n_byte double_spread );
 
 n_uint  math_root( n_uint squ );
 n_int   math_tan( n_vect2 *p );
@@ -616,7 +644,7 @@ void       memory_free( void **ptr );
 void      *memory_new_range( n_uint memory_min, n_uint *memory_allocated );
 
 memory_list *memory_list_new( n_uint size, n_uint number );
-void memory_list_copy( memory_list *list, n_byte *data );
+void memory_list_copy( memory_list *list, n_byte *data, n_uint size);
 void memory_list_free( memory_list **value );
 
 int_list *int_list_new( n_uint number );
@@ -643,7 +671,7 @@ n_int      io_disk_check( n_constant_string file_name );
 n_string *io_tab_delimit_to_n_string_ptr( n_file *tab_file, n_int *size_value, n_int *row_value );
 
 void       io_three_string_combination( n_string output, n_string first, n_string second, n_string third, n_int count );
-void       io_time_to_string( n_string value );
+void       spacetime_to_string( n_string value );
 n_string   io_string_copy( n_string string );
 void       io_string_copy_buffer( n_string string, n_string buffer );
 

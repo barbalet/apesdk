@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -52,12 +52,12 @@ n_int draw_error( n_constant_string error_text, n_constant_string location, n_in
 static n_int check_reader( n_string entry, n_object_type  * type_of, n_vect2 * values)
 {
     n_file * entry_file = io_file_new_from_string_block((n_char *)entry);
-    
+
     if ( entry_file )
     {
         io_whitespace_json( entry_file );
         void *returned_blob = unknown_file_to_tree( entry_file, type_of );
-                
+
         io_file_free( &entry_file );
         if ( returned_blob )
         {
@@ -68,10 +68,10 @@ static n_int check_reader( n_string entry, n_object_type  * type_of, n_vect2 * v
                 n_int return_vect = object_vect2_from_array( returned_array, &vect_value);
 
                 printf("return_vect %ld\n", return_vect);
-                
+
                 printf("comparison ( %ld, %ld ) , ( %ld, %ld ) \n", vect_value.x, vect_value.y, values->x, values->y);
 
-                
+
             }
             else
             {
@@ -100,43 +100,43 @@ static n_int check_vector_from_array(void)
     n_object_type  type_of;
     n_int          return_information;
     n_vect2        values;
-    
-    
+
+
     values.x = -3029;
     values.y = -2134;
 
     return_information |= check_reader("[[-3029,-2134],[-2781,-2040],[-2831,-1911],[-3078,-2007]]", &type_of, &values);
-    
+
     values.x = -2781;
     values.y = -2040;
 
     return_information |= check_reader("[[-2781,-2040],[-2831,-1911],[-3078,-2007]]", &type_of, &values);
-    
+
     values.x = -2831;
     values.y = -1911;
 
     return_information |= check_reader("[[-2831,-1911],[-3078,-2007]]", &type_of, &values);
-    
+
     values.x = -3078;
     values.y = -2007;
 
     return_information |= check_reader("[[-3078,-2007]]", &type_of, &values);
-    
+
     values.x = -2781;
     values.y = -2040;
 
     return_information |= check_reader("[-2781,-2040]", &type_of, &values);
-    
+
     values.x = -2831;
     values.y = -1911;
 
     return_information |= check_reader("[-2831,-1911]", &type_of, &values);
-    
+
     values.x = -3078;
     values.y = -2007;
 
     return_information |= check_reader("[-3078,-2007]", &type_of, &values);
-    
+
     if(return_information)
     {
         exit(EXIT_FAILURE);
@@ -225,15 +225,15 @@ static void check_object( void )
 int main( int argc, const char *argv[] )
 {
     n_int return_value = 0;
-    
+
     printf( " --- test object --- start --------------------------------------------\n" );
 
     check_object();
-    
+
     printf( " --- test object ---  end  --------------------------------------------\n" );
     printf( " --- test check_vector_from_array ---  start  --------------------------------------------\n" );
 
-    
+
     return_value = check_vector_from_array();
 
     printf( " --- test check_vector_from_array ---  end  --------------------------------------------\n" );

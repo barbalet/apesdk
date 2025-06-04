@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -138,7 +138,7 @@ int main( int argc, const char *argv[] )
     n_string example = "{\"general_variables\":2,\"general_variables3\":2}"; /* good */
 
 #else
-    
+
     n_string example = "{\"general_variables\":\"test\",\"general_variables2\":{\"general_variables\":[1,2,4,5,9],\"general_variables2\":-12345,\"general_variables3\":{\"general_variables\":\"test\",\"general_variables2\":[\"hat\",\"cat\",\"horse\",\"rat\"],\"general_variables3\":\"test\"}},\"general_variables3\":\"test\"}";
 
     /*
@@ -146,9 +146,9 @@ int main( int argc, const char *argv[] )
 
     n_string example_decimal_numbers ="{\"geocoords\": {\"topleft\": {\"latitude\": 51.509998,\"longitude\": 0.631000},\"bottomright\": {\"latitude\":51.467999,\"longitude\": 0.543000}}}";
      */
-    
-     #endif
-     
+
+#endif
+
     tof_gather_string( example );
 
     exit(EXIT_SUCCESS);

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,6 +35,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include "../toolkit/toolkit.h"
 #include "../shared.h"
@@ -83,6 +84,6 @@ int main( int argc, const char *argv[] )
     printf( " --- test gui --- start -----------------------------------------------\n" );
     test_gui_run();
     printf( " --- test gui ---  end  -----------------------------------------------\n" );
-    return 0;
+    exit(EXIT_SUCCESS);
 }
 

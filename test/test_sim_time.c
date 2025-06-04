@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -54,7 +54,7 @@ int main ( int c, char **v )
 {
     n_uint  count = 0;
     clock_t startTime = clock();
-    clock_t deltaTime = ( CLOCKS_PER_SEC * 60 * 50 ) + startTime;
+    clock_t deltaTime = ( CLOCKS_PER_SEC * 60 * 30 ) + startTime;
     n_uint  xorchoff = 0;
 
     if ( c == 2 )

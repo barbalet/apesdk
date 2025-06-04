@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -123,6 +123,157 @@ static const n_byte	icns[896] =
     0x09, 0x2A, 0xA4, 0x80, 0x04, 0x9F, 0xC9, 0x00, 0x02, 0x70, 0x72, 0x00, 0x01, 0x60, 0x34, 0x00,
     0x00, 0xC0, 0x18, 0x00, 0x1F, 0x80, 0x0F, 0xC0, 0x00, 0x80, 0x08, 0x00, 0xFF, 0xFF, 0xFF, 0xFF
 };
+
+static n_byte2    color_group[256 * 3];
+static n_byte     land_color_initialized = 0;
+
+#define    SUBSTA(c)    ((c<<8)|c)
+
+void land_color_init( void )
+{
+    static n_byte points[] =
+    {
+        0, 0, 0, 0,
+        106, 43, 70, 120,
+        125, 107, 201, 202,
+        128, 255, 255, 239,
+        150, 88, 169, 79,
+        190, 8, 15, 7,
+        208, 208, 216, 206,
+        255, 255, 255, 255
+    };
+
+    /* performs a linear interpolation of n 8-bit points to 256 16-bit blend values */
+    n_int    lp = 0, lp2 = 0;
+    n_int    dr = 0, dg = 0, db = 0;
+    n_int    ar = 0, ag = 0, ab = 0, cntr = 0;
+    n_int    fp = 0, fl = 0, del_c = 0;
+    while ( lp < 256 )
+    {
+        if ( lp == points[cntr] )
+        {
+            ar = SUBSTA( points[( cntr ) | 1] );
+            ag = SUBSTA( points[( cntr ) | 2] );
+            ab = SUBSTA( points[( cntr ) | 3] );
+            fp = lp;
+            cntr += 4;
+
+            if ( lp != 255 )
+            {
+                fl = points[cntr];
+                del_c = ( fl - fp );
+                dr = SUBSTA( points[( cntr ) | 1] );
+                dg = SUBSTA( points[( cntr ) | 2] );
+                db = SUBSTA( points[( cntr ) | 3] );
+            }
+        }
+
+        if ( del_c == 0 )
+        {
+            return;
+        }
+
+        if ( lp != 255 )
+        {
+            n_int    del_a = ( fl - lp ), del_b = ( lp - fp );
+            color_group[lp2++] = ( n_byte2 )( ( ( ar * del_a ) + ( dr * del_b ) ) / del_c );
+            color_group[lp2++] = ( n_byte2 )( ( ( ag * del_a ) + ( dg * del_b ) ) / del_c );
+            color_group[lp2++] = ( n_byte2 )( ( ( ab * del_a ) + ( db * del_b ) ) / del_c );
+        }
+        else
+        {
+            color_group[lp2++] = ( n_byte2 )( ar );
+            color_group[lp2++] = ( n_byte2 )( ag );
+            color_group[lp2++] = ( n_byte2 )( ab );
+        }
+        lp ++;
+    }
+
+    color_group[( COLOR_WHITE * 3 )    ] = 0xffff;
+    color_group[( COLOR_WHITE * 3 ) + 1] = 0xffff;
+    color_group[( COLOR_WHITE * 3 ) + 2] = 0xffff;
+
+    color_group[( COLOR_BLUE * 3 )    ] = 0x5500;
+    color_group[( COLOR_BLUE * 3 ) + 1] = 0x5500;
+    color_group[( COLOR_BLUE * 3 ) + 2] = 0xeeff;
+
+    color_group[( COLOR_RED_DARK * 3 )    ] = ( 0xeeff * 2 ) >> 2; /* return to * 3 following debugging */
+    color_group[( COLOR_RED_DARK * 3 ) + 1] = 0x0000;
+    color_group[( COLOR_RED_DARK * 3 ) + 2] = 0x0000;
+
+    color_group[( COLOR_RED * 3 )    ] = 0xeeff;
+    color_group[( COLOR_RED * 3 ) + 1] = 0x0000;
+    color_group[( COLOR_RED * 3 ) + 2] = 0x0000;
+}
+
+
+void  land_color_time( n_byte2 *color_fit, n_int toggle_tidedaylight )
+{
+    n_int   day_rotation = ( ( land_time() * 255 ) / TIME_DAY_MINUTES );
+    n_int   darken =  math_sine( day_rotation + 64 + 128, NEW_SD_MULTIPLE / 400 );
+    n_int   loop = 0;
+    n_int   sign = 1;
+    if ( land_color_initialized == 0 )
+    {
+        land_color_init();
+        land_color_initialized = 1;
+    }
+    if ( !toggle_tidedaylight )
+    {
+        if ( darken < 1 )
+        {
+            sign = -1;
+        }
+        darken = ( darken * darken ) / 402;
+        darken = ( sign * darken ) + 624;
+        while ( loop < ( NON_INTERPOLATED * 3 ) )
+        {
+            n_int cg_val = color_group[loop];
+            n_int response = ( cg_val * darken ) >> 10;
+            color_fit[loop] = ( n_byte2 )response;
+            loop++;
+        }
+    }
+    while ( loop < ( 256 * 3 ) )
+    {
+        color_fit[loop] = color_group[loop];
+        loop++;
+    }
+}
+
+void  land_color_time_8bit( n_byte *color_fit, n_int toggle_tidedaylight )
+{
+    n_int   day_rotation = ( ( land_time() * 255 ) / TIME_DAY_MINUTES );
+    n_int   darken =  math_sine( day_rotation + 64 + 128, NEW_SD_MULTIPLE / 400 );
+    n_int   loop = 0;
+    n_int   sign = 1;
+    if ( land_color_initialized == 0 )
+    {
+        land_color_init();
+        land_color_initialized = 1;
+    }
+    if ( !toggle_tidedaylight )
+    {
+        if ( darken < 1 )
+        {
+            sign = -1;
+        }
+        darken = ( darken * darken ) / 402;
+        darken = ( sign * darken ) + 624;
+        while ( loop < ( NON_INTERPOLATED * 3 ) )
+        {
+            n_int cg_val = color_group[loop];
+            n_int response = ( cg_val * darken ) >> 10;
+            color_fit[loop] = ( n_byte )( response >> 8 );
+            loop++;
+        }
+    }
+    while ( loop < ( 256 * 3 ) )
+    {
+        color_fit[loop] = ( n_byte )( color_group[loop] >> 8 );
+        loop++;
+    }
+}
 
 #define	MAX_NUMBER_ERRORS	35
 
@@ -358,60 +509,6 @@ n_byte *draw_pointer( n_int which_one )
     return 0L;
 }
 
-#ifdef MULTITOUCH_CONTROLS
-
-extern touch_control_state tc_state;
-
-void draw_tc_controls( n_join *local_mono )
-{
-    const n_int half_y = window_dim_y / 2;
-    n_vect2 point1, point2, point3;
-
-    if ( tc_state == TCS_SHOW_CONTROLS )
-    {
-        vect2_populate( &point1, 5, half_y + TC_OFFSET_Y );
-        vect2_populate( &point2, 5, half_y - TC_OFFSET_Y );
-        vect2_populate( &point3, TC_FRACTION_X - 5, half_y );
-
-        math_line_vect( &point1, &point2, local_mono );
-        math_line_vect( &point2, &point3, local_mono );
-        math_line_vect( &point3, &point1, local_mono );
-
-        vect2_populate( &point1, window_dim_x - 5, half_y + TC_OFFSET_Y );
-        vect2_populate( &point2, window_dim_x - 5, half_y - TC_OFFSET_Y );
-        vect2_populate( &point3, window_dim_x - TC_FRACTION_X + 5, half_y );
-
-        math_line_vect( &point1, &point2, local_mono );
-        math_line_vect( &point2, &point3, local_mono );
-        math_line_vect( &point3, &point1, local_mono );
-    }
-
-    if ( tc_state == TCS_LEFT_STATE_CONTROLS )
-    {
-        vect2_populate( &point1, TC_FRACTION_X - 5, half_y + TC_OFFSET_Y );
-        vect2_populate( &point2, TC_FRACTION_X - 5, half_y - TC_OFFSET_Y );
-        vect2_populate( &point3, 5, half_y );
-
-        math_line_vect( &point1, &point2, local_mono );
-        math_line_vect( &point2, &point3, local_mono );
-        math_line_vect( &point3, &point1, local_mono );
-    }
-
-    if ( tc_state == TCS_RIGHT_STATE_CONTROLS )
-    {
-        vect2_populate( &point1, window_dim_x - TC_FRACTION_X + 5, half_y + TC_OFFSET_Y );
-        vect2_populate( &point2, window_dim_x - TC_FRACTION_X + 5, half_y - TC_OFFSET_Y );
-        vect2_populate( &point3, window_dim_x - 5, half_y );
-
-        math_line_vect( &point1, &point2, local_mono );
-        math_line_vect( &point2, &point3, local_mono );
-        math_line_vect( &point3, &point1, local_mono );
-    }
-}
-
-#endif
-
-
 void draw_about( void )
 {
     check_about = 1;
@@ -503,37 +600,37 @@ static void draw_about_information( n_byte terrain )
 
 static void draw_character( n_pixel *local_draw, n_int offset, void *local_info, n_int off_x, n_int off_y, n_int val )
 {
-    ledfir( 3, 8, 0, 0, 15 ); //P
+    ledfir( 3, 8, 0, 0, 15 ); /*P*/
 
-    ledfir( 3, 2, 0, 0, 14 ); //O
+    ledfir( 3, 2, 0, 0, 14 ); /*O*/
 
-    ledfir( 0, 0, 5, 0, 13 ); //N
+    ledfir( 0, 0, 5, 0, 13 ); /*N*/
 
-    ledfir( 6, 0, 0, 4, 12 ); //M
+    ledfir( 6, 0, 0, 4, 12 ); /*M*/
 
-    ledfir( 6, 4, 0, 3, 11 ); //L
+    ledfir( 6, 4, 0, 3, 11 ); /*L*/
 
-    ledfir( 0, 8, 5, 0, 10 ); //K
+    ledfir( 0, 8, 5, 0, 10 ); /*K*/
 
-    ledfir( 0, 4, 0, 4, 9 ); //J
+    ledfir( 0, 4, 0, 4, 9 ); /*J*/
 
-    ledfir( 0, 0, 0, 3, 8 ); //I
+    ledfir( 0, 0, 0, 3, 8 ); /*I*/
 
-    ledfir( 3, 4, 3, 0, 7 ); //H
+    ledfir( 3, 4, 3, 0, 7 ); /*H*/
 
-    ledfir( 0, 4, 3, 0, 6 ); //G
+    ledfir( 0, 4, 3, 0, 6 ); /*G*/
 
-    ledfir( 3, 4, 0, 4, 5 ); //F
+    ledfir( 3, 4, 0, 4, 5 ); /*F*/
 
-    ledfir( 3, 5, 3, 3, 4 ); //E
+    ledfir( 3, 5, 3, 3, 4 ); /*E*/
 
-    ledfir( 3, 5, -3, 3, 3 ); //D
+    ledfir( 3, 5, -3, 3, 3 ); /*D*/
 
-    ledfir( 3, 3, 3, -3, 2 ); //C
+    ledfir( 3, 3, 3, -3, 2 ); /*C*/
 
-    ledfir( 0, 0, 3, 3, 1 ); //B
+    ledfir( 0, 0, 3, 3, 1 ); /*B*/
 
-    ledfir( 3, 0, 0, 4, 0 ); //A
+    ledfir( 3, 0, 0, 4, 0 ); /*A*/
 }
 
 /**
@@ -1180,7 +1277,7 @@ static void draw_apeloc( simulated_group *group, simulated_being  *bei, n_join *
     n_vect2     location;
     n_vect2     delta;
     being_space( bei, &location );
-    land_convert_to_map( &location );
+    spacetime_convert_to_map( &location );
     delta.y = start;
     while ( delta.y < stop )
     {
@@ -1482,7 +1579,6 @@ static void draw_metrics( n_uint bcps, n_uint fps, n_join *local_mono )
 /* draws the rotating brain, this is always draw and never erase */
 
 #ifdef BRAIN_ON
-#ifndef SIMULATED_APE_CLIENT
 
 static void draw_brain( simulated_group *group, n_vect2 *dimensions )
 {
@@ -1512,7 +1608,7 @@ static void draw_brain( simulated_group *group, n_vect2 *dimensions )
         n_vect2       vect_y, vect_z;
 
         vect2_direction( &vect_y, turn_y, 105 );
-        vect2_direction( &vect_z, turn_z, 23 ); //NEW_SD_MULTIPLE/1152);
+        vect2_direction( &vect_z, turn_z, 23 ); /*NEW_SD_MULTIPLE/1152);*/
 
         a32 =  vect_y.x;
         a12 =  vect_y.y;
@@ -1555,7 +1651,7 @@ static void draw_brain( simulated_group *group, n_vect2 *dimensions )
                         /* TODO Fix this re-scaling bug */
                         n_int	scr_z = 256 + ( act_x1 >> 11 );
                         n_int	s_x = ( ( act_x2 * scr_z ) >> 17 ) + center_x;
-                        n_int	s_y = ( ( act_y1 * scr_z ) >> 17 ) + center_y - 100; //120
+                        n_int	s_y = ( ( act_y1 * scr_z ) >> 17 ) + center_y - 100; /*120*/
                         ( *local_draw_brain )( s_x, s_y, 0, 0, local_info_brain );
                         if ( ( act_x1 > 0 ) && draw_big )
                         {
@@ -1585,7 +1681,6 @@ static void draw_brain( simulated_group *group, n_vect2 *dimensions )
 }
 
 #endif
-#endif
 
 n_int draw_error( n_constant_string error_text, n_constant_string location, n_int line_number )
 {
@@ -1604,7 +1699,7 @@ n_int draw_error( n_constant_string error_text, n_constant_string location, n_in
 #ifdef EXPLICIT_DEBUG
         printf( "ERROR: %s (%s, %ld)\n", error_text, location, line_number );
 #endif
-        io_time_to_string( simulation_date_time );
+        spacetime_to_string( simulation_date_time );
 
         io_string_write( simulation_date_time_error, simulation_date_time, &position );
         io_string_write( simulation_date_time_error, " ", &position );
@@ -1646,7 +1741,6 @@ n_int draw_error( n_constant_string error_text, n_constant_string location, n_in
     return -1;
 }
 
-#ifndef SIMULATED_APE_CLIENT
 static void draw_remains( simulated_group *group, n_byte *screen )
 {
     simulated_remains *remains = &( group->remains );
@@ -1658,7 +1752,7 @@ static void draw_remains( simulated_group *group, n_byte *screen )
         n_vect2           location;
 
         vect2_byte2( &location, body->location );
-        land_convert_to_map( &location );
+        spacetime_convert_to_map( &location );
 
         while ( lx < ( MAP_DIMENSION + 3 ) )
         {
@@ -1669,7 +1763,6 @@ static void draw_remains( simulated_group *group, n_byte *screen )
         loop++;
     }
 }
-#endif
 
 static void draw_tides( n_byte *map, n_byte *screen, n_byte tide )
 {
@@ -1836,6 +1929,9 @@ static void draw_apes( simulated_group *group, n_byte lores )
     if ( lores ) /* set up drawing environ */
     {
         local_col.screen = draw_pointer( NUM_VIEW );
+        
+        // Note for PW: this is needed to show the map correctly without it,
+        // the map is not erased and it doesn't draw properly.
         memory_copy( land_topography(), local_col.screen, MAP_AREA );
     }
     else
@@ -1850,9 +1946,7 @@ static void draw_apes( simulated_group *group, n_byte lores )
         {
             draw_region( group->select );
         }
-#ifndef SIMULATED_APE_CLIENT
         draw_remains( group, local_col.screen );
-#endif
     }
     else
     {
@@ -2019,8 +2113,12 @@ static void draw_control( simulated_group *group, n_int window_dim_x, n_int wind
                     else
                     {
                         string_second_line[second_line_location] = character;
-                        string_line[location_line_ptr] = 0;
-                        location_line_ptr--;
+                        if(location_line_ptr < 4096){
+                            string_line[location_line_ptr] = 0;
+                        }
+                        if(location_line_ptr > 0){
+                            location_line_ptr--;
+                        }
                     }
                     second_line_location--;
                     if ( character == ' ' && location_line_ptr < ( max_characters - 2 ) )
@@ -2125,16 +2223,6 @@ void  draw_cycle( n_byte size_changed, n_byte kind )
 
     if ( sim_new() )
     {
-        if ( CHECK_DRAW_WINDOW( kind, DRAW_WINDOW_TERRAIN ) )
-        {
-            draw_about_information( 1 );
-        }
-#ifdef APESIM_IOS
-        if ( CHECK_DRAW_WINDOW( kind, DRAW_WINDOW_CONTROL ) )
-        {
-            draw_about_information( 0 );
-        }
-#endif
         return;
     }
     changing_size = size_changed;
@@ -2192,9 +2280,7 @@ void  draw_cycle( n_byte size_changed, n_byte kind )
 #endif
         draw_meters( group );
         draw_errors(); /* 12 */
-#ifndef SIMULATED_APE_CLIENT
         draw_metrics( 0, timing->delta_frames, &local_mono );
-#endif
 
 #ifdef SKELETON_RENDER
         if ( group->select != 0L )
@@ -2216,8 +2302,4 @@ void  draw_cycle( n_byte size_changed, n_byte kind )
             draw_about_information( 1 );
         }
     }
-
-#ifdef MULTITOUCH_CONTROLS
-    draw_tc_controls( &local_mono );
-#endif
 }

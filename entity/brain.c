@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -1472,7 +1472,7 @@ static void being_second_sense( simulated_group *group, n_byte addr00, n_byte *l
 
 
     being_space( meeter_being, &location );
-    land_convert_to_map( &location );
+    spacetime_convert_to_map( &location );
 
     /** clear episodes visited.
      This array helps to avoid repeatedly visiting the same memories */

@@ -3,7 +3,7 @@
 #
 #	=============================================================
 #
-#   Copyright 1996-2023 Tom Barbalet. All rights reserved.
+#   Copyright 1996-2024 Tom Barbalet. All rights reserved.
 #
 #   Permission is hereby granted, free of charge, to any person
 #   obtaining a copy of this software and associated documentation
@@ -57,7 +57,7 @@ then
 exit 1
 fi
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o ./../../simape *.o -lz -lm -lpthread
+gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o ./../simape *.o -lz -lm -lpthread
 if [ $? -ne 0 ]
 then
 exit 1

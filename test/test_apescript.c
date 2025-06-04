@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -49,6 +49,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdlib.h>
 
 /*
  This is intended to be overwritten by third-party usage where applicable.
@@ -470,5 +471,11 @@ int main( int argc, char *argv[] )
     test_close();
 
     printf( " --- test apescript ---  end  -----------------------------------------\n" );
-    return 0;
+    
+    if ( return_value == -1 )
+    {
+        exit(EXIT_FAILURE);
+    }
+    
+    exit(EXIT_SUCCESS);
 }

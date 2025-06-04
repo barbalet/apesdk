@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -96,14 +96,6 @@ static n_int control_toggle_pause( n_byte actual_toggle )
 extern n_byte	check_about;
 extern n_uint	tilt_z;
 
-#ifdef MULTITOUCH_CONTROLS
-
-touch_control_state tc_state = TCS_SHOW_NOTHING;
-touch_control_state tc_temp_state = TCS_SHOW_NOTHING;
-n_int               tc_countdown = 0;
-
-#endif
-
 static n_int control_mouse_was_down = 0;
 
 static void control_mouse( n_byte wwind, n_int px, n_int py, n_byte option )
@@ -141,15 +133,6 @@ static void control_mouse( n_byte wwind, n_int px, n_int py, n_byte option )
         n_int upper_x, upper_y;
 
         check_about = 0;
-
-#ifdef MULTITOUCH_CONTROLS
-        if ( ( tc_state & 1 ) == 0 )
-        {
-            tc_temp_state = tc_state + 1;
-            tc_countdown = 60;
-
-        }
-#endif
         draw_terrain_coord( &upper_x, &upper_y );
 
         if ( option != 0 )
@@ -169,37 +152,6 @@ static void control_mouse( n_byte wwind, n_int px, n_int py, n_byte option )
         else
         {
             n_int sx = px - ( ( upper_x ) >> 1 );
-#ifdef MULTITOUCH_CONTROLS
-            if ( px < TC_FRACTION_X )
-            {
-                if ( tc_state == TCS_LEFT_STATE_CONTROLS )
-                {
-                    tc_temp_state = TCS_SHOW_CONTROLS;
-                    tc_countdown = 60;
-                }
-                else
-                {
-                    tc_temp_state = TCS_RIGHT_STATE_CONTROLS;
-                    tc_countdown = 60;
-                }
-                return;
-            }
-
-            if ( px > ( upper_x - TC_FRACTION_X ) )
-            {
-                if ( tc_state == TCS_RIGHT_STATE_CONTROLS )
-                {
-                    tc_temp_state = TCS_SHOW_CONTROLS;
-                    tc_countdown = 60;
-                }
-                else
-                {
-                    tc_temp_state = TCS_LEFT_STATE_CONTROLS;
-                    tc_countdown = 60;
-                }
-                return;
-            }
-#endif
             sim_terrain( sx );
         }
     }
@@ -292,7 +244,7 @@ static void *control_init( KIND_OF_USE kind, n_uint randomise )
 
 void shared_dimensions( n_int *dimensions )
 {
-    dimensions[0] = 2;
+    dimensions[0] = 3;
     dimensions[1] = 512;
     dimensions[2] = 512;
     dimensions[3] = 1;
@@ -335,16 +287,6 @@ shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification )
         }
     }
 
-#ifdef MULTITOUCH_CONTROLS
-    if ( ( mouse_down == 0 ) && ( mouse_identification == fIdentification ) )
-    {
-        if ( tc_temp_state != tc_state )
-        {
-            tc_state = tc_temp_state;
-        }
-    }
-#endif
-
     if ( ( key_down == 1 ) && ( key_identification == localIdentification ) )
     {
         if ( ( key_identification == NUM_VIEW ) || ( key_identification == NUM_TERRAIN ) )
@@ -352,24 +294,9 @@ shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification )
             control_key( key_identification, key_value );
         }
     }
-
-
     if ( localIdentification == WINDOW_PROCESSING )
     {
         sim_realtime( ticks );
-#ifdef MULTITOUCH_CONTROLS
-        if ( tc_countdown )
-        {
-            tc_countdown--;
-            if ( tc_countdown == 0 )
-            {
-                if ( ( tc_state & 1 ) == 1 )
-                {
-                    tc_temp_state = tc_state - 1;
-                }
-            }
-        }
-#endif
         if ( ( io_command_line_execution() != 1 ) && ( !toggle_pause ) )
         {
             sim_cycle();
@@ -393,8 +320,7 @@ shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification )
             return_value = SHARED_CYCLE_QUIT;
         }
 #endif
-    }
-
+    }    
     return return_value;
 }
 
@@ -409,24 +335,30 @@ n_int shared_init( n_int view, n_uint random )
         {
             return SHOW_ERROR( "Initialization failed lack of memory" );
         }
+        simulation_started = 1;
     }
-    simulation_started = 1;
     return view;
 }
 
 void shared_close( void )
 {
+    simulation_started = 0;
     if (outputBufferOld)
     {
         memory_free((void**)&outputBufferOld);
     }
-    
+
     if (outputBuffer)
     {
         memory_free((void**)&outputBuffer);
     }
-    
+
     sim_close();
+}
+
+n_int shared_simulation_started(void)
+{
+    return simulation_started;
 }
 
 void shared_keyReceived( n_int value, n_int fIdentification )
@@ -601,6 +533,43 @@ void shared_color_8_bit_to_48_bit( n_byte2 *fit )
     land_color_time( fit, 1 );
 }
 
+n_int shared_being_number( void )
+{
+    simulated_group *group = sim_group();
+    if ( group )
+    {
+        return group->num;
+    }
+    return 0;
+}
+
+void shared_being_name( n_int number, n_string name )
+{
+    simulated_group *group = sim_group();
+    simulated_being *being = 0L;
+    if ( group )
+    {
+        if (number < group->num)
+        {
+            being = &(group->beings[number]);
+        }
+    }
+    being_name_simple(being, name);
+}
+
+void shared_being_select( n_int number)
+{
+    simulated_group *group = sim_group();
+    simulated_being *being = 0L;
+    if ( group )
+    {
+        if (number < group->num)
+        {
+            sim_set_select(&group->beings[number]);
+        }
+    }
+}
+
 static n_byte4         colorLookUp[256][256];
 static n_uint          old_hash = 0;
 
@@ -627,24 +596,12 @@ static void shared_color_update( void )
             n_byte blue = fit[loop++];
             n_byte alpha = 0;
 
-#ifdef METAL_RENDER
-#ifdef APESIM_IOS
+
             juxtapose[0] = alpha;
             juxtapose[1] = red;
             juxtapose[2] = green;
             juxtapose[3] = blue;
-#else
-            juxtapose[0] = blue;
-            juxtapose[1] = green;
-            juxtapose[2] = red;
-            juxtapose[3] = alpha;
-#endif
-#else
-            juxtapose[0] = alpha;
-            juxtapose[1] = red;
-            juxtapose[2] = green;
-            juxtapose[3] = blue;
-#endif
+            
             loopColors++;
         }
         while ( cloud < 256 )
@@ -672,7 +629,7 @@ static n_byte * shared_output_buffer(n_int width, n_int height)
     {
         memory_free((void **)&outputBufferOld);
     }
-    
+
     if ((outputBuffer == 0L) || ((width * height * 4) > outputBufferMax))
     {
         outputBufferMax = width * height * 4;
@@ -682,7 +639,7 @@ static n_byte * shared_output_buffer(n_int width, n_int height)
     return outputBuffer;
 }
 
-#ifdef APESIM_IOS
+#ifdef TARGET_OS_IOS
 
 #define Y_POINT(ly, dim_y) (dim_y - ly - 1)
 
@@ -795,7 +752,6 @@ static void shared_bitcopy( n_byte *outputBuffer, n_int dim_x, n_int dim_y,
         n_int    lx = 0;
         n_byte *indexLocalX = &index[Y_POINT( ly, dim_y ) * dim_x];
         loop = ( ( ly + offset_y ) * multi_x ) + offset_x;
-
         while ( lx < dim_x )
         {
             n_byte value = indexLocalX[ lx++ ];
@@ -805,10 +761,24 @@ static void shared_bitcopy( n_byte *outputBuffer, n_int dim_x, n_int dim_y,
     }
 }
 
+/*
+void mock_draw(n_int dim_x, n_int dim_y, n_byte* output) {
+    int loopy = 0;
+    while (loopy < dim_y) {
+        int loopx = 0;
+        while (loopx < dim_x) {
+            output[(loopy * dim_x) + loopx] = (loopx + loopy) & 255;
+            loopx++;
+        }
+        loopy++;
+    }
+}
+*/
+
 n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed )
 {
     n_byte * outputBuffer = shared_output_buffer(dim_x, dim_y);
-
+    
     if ( simulation_started == 0 )
     {
         SHOW_ERROR( "draw - simulation not started" );
@@ -821,6 +791,7 @@ n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte si
             memory_copy( index, outputBuffer, dim_x * dim_y );
         }
 #else
+        
         draw_window( dim_x, dim_y );
         draw_cycle( size_changed, ( n_byte )( 1 << fIdentification ) );
         shared_color_update();
@@ -837,10 +808,13 @@ n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte si
         }
 #endif
     }
+    
+//    mock_draw(dim_x, dim_y, outputBuffer);
+    
     return outputBuffer;
 }
 
-#ifdef APESIM_IOS
+#ifdef TARGET_OS_IOS
 
 #undef IOS_PROCESSOR_SAVER
 

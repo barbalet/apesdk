@@ -1,10 +1,10 @@
 /****************************************************************
- 
+
  test_prototype.c
- 
+
  =============================================================
- 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -30,7 +30,7 @@
  This software is a continuing work of Tom Barbalet, begun on
  13 June 1996. No apes or cats were harmed in the writing of
  this software.
- 
+
  ****************************************************************/
 
 #include<stdio.h>
@@ -109,14 +109,14 @@ n_file * test_prototype_file( n_string file_in )
 {
     n_file   *in_file = io_file_new();
     n_int    file_error = io_disk_read( in_file, file_in );
-    
+
     if (file_error ==  -1)
     {
         io_file_free(&in_file);
         exit(EXIT_FAILURE);
         return 0L;
     }
-    
+
     return in_file;
 }
 
@@ -133,7 +133,7 @@ void * test_prototype_gather( n_file * in_file, n_object_type * type_of )
     {
         io_whitespace_json( in_file );
         void *returned_blob = unknown_file_to_tree( in_file, type_of );
-                
+
         io_file_free( &in_file );
         if ( returned_blob )
         {
@@ -167,11 +167,11 @@ int main( int argc, const char *argv[] )
     clock_t start, stop;
 
     start = clock();
-        
+
     object_init((n_uint*) known_hash, KVE_MAX_VALUES);
     check_prototype( argc, argv );
     object_close();
-    
+
     stop = clock();
 
     printf("delta %6.3f\n", (double)(stop - start) / CLOCKS_PER_SEC);

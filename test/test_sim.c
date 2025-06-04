@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -62,7 +62,7 @@ n_uint test_distance_moved( simulated_group *group, n_int show_stopped )
             {
                 n_string_block name_string;
                 n_string_block time_string;
-                io_time_to_string( time_string );
+                spacetime_to_string( time_string );
                 being_name_simple( being, name_string );
                 printf( "%s %s stopped\n", time_string, name_string );
             }
@@ -96,7 +96,7 @@ void test_total_moved( simulated_group *group )
 }
 
 
-#define FIRST_RANDOM (47614)
+#define FIRST_RANDOM (17963)
 
 n_int test_hash( void )
 {
@@ -121,17 +121,16 @@ n_int test_hash( void )
     return 0;
 }
 
-
 #define DELTA_0 (0)
 #define MOVED_0 (0)
-#define DELTA_1 (1834)
-#define MOVED_1 (1014461)
-#define DELTA_2 (85)
-#define MOVED_2 (1654709)
-#define DELTA_3 (633)
-#define MOVED_3 (1704592)
-#define TOTAL_MOVED (2507996)
-#define LINE_OF_SIGHT_COUNT (16)
+#define DELTA_1 (1700)
+#define MOVED_1 (1011942)
+#define DELTA_2 (56)
+#define MOVED_2 (1680334)
+#define DELTA_3 (455)
+#define MOVED_3 (1703892)
+#define TOTAL_MOVED (2484092)
+#define LINE_OF_SIGHT_COUNT (9)
 #define NUMBER_BEINGS (128)
 
 n_int test_sim_run( void )
@@ -222,7 +221,7 @@ n_int test_sim_run( void )
         {
             printf( "#define LINE_OF_SIGHT_COUNT (%ld)\n", line_of_sight_count );
             printf( "#define NUMBER_BEINGS (%ld)\n", number_beings );
-            
+
             return_value |= 1;
         }
     }

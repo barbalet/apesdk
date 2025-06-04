@@ -1,9 +1,9 @@
 #!/bin/bash
-#	build_testcommand.sh
+#	build.sh
 #
 #	=============================================================
 #
-#   Copyright 1996-2023 Tom Barbalet. All rights reserved.
+#   Copyright 1996-2024 Tom Barbalet. All rights reserved.
 #
 #   Permission is hereby granted, free of charge, to any person
 #   obtaining a copy of this software and associated documentation
@@ -51,7 +51,7 @@ gcc ${CFLAGS} ${COMMANDLINEE} -c ./sim/*.c -lz -lm -lpthread -w
 gcc ${CFLAGS} ${COMMANDLINEE} -c ./entity/*.c -lz -lm -lpthread -w
 gcc ${CFLAGS} ${COMMANDLINEE} -c ./universe/*.c -lz -lm -lpthread -w
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./longterm_testcommand.c -o longterm_testcommand.o
+gcc ${CFLAGS} ${COMMANDLINEE} -c ./longterm_testcommand.c -o longterm_testcommand.o -lz -lm -lpthread
 if [ $? -ne 0 ]
 then
 exit 1
@@ -62,7 +62,5 @@ if [ $? -ne 0 ]
 then
 exit 1
 fi
-
-./testcommand
 
 rm *.o

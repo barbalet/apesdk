@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -56,7 +56,8 @@ static void transfer_land( n_file *tranfer_out, simulated_group *group, simulate
     io_write_buff( tranfer_out, loc_signature, format, FIL_VER, 0L );
 #endif
 #ifdef USE_FIL_LAN
-    io_write_buff( tranfer_out, land_ptr(), format, FIL_LAN, 0L );
+    /*
+    io_write_buff( tranfer_out, land_ptr(), format, FIL_LAN, 0L ); Needs to be fixed */
 #endif
 #ifdef USE_FIL_WEA
     io_write_buff( tranfer_out, value->weather, format, FIL_WEA, 0L );
@@ -105,16 +106,17 @@ static n_object *transfer_land_obj( void )
     return simulated_iland;
 }
 
-
-//static n_object *transfer_being_spacetime_obj( n_spacetime *value )
-//{
-//    n_object *simulated_ispacetime = object_number( 0L, "date", value->date );
-//    n_array   *simulated_ilocation = array_number( value->location[0] );
-//    array_add( simulated_ilocation, array_number( value->location[1] ) );
-//    object_array( simulated_ispacetime, "location", simulated_ilocation );
-//    object_number( simulated_ispacetime, "time", value->time );
-//    return simulated_ispacetime;
-//}
+#if 0
+static n_object *transfer_being_spacetime_obj( n_spacetime *value )
+{
+    n_object *simulated_ispacetime = object_number( 0L, "date", value->date );
+    n_array   *simulated_ilocation = array_number( value->location[0] );
+    array_add( simulated_ilocation, array_number( value->location[1] ) );
+    object_array( simulated_ispacetime, "location", simulated_ilocation );
+    object_number( simulated_ispacetime, "time", value->time );
+    return simulated_ispacetime;
+}
+#endif
 
 static n_object *transfer_being_constant_obj( simulated_being_constant *constant )
 {
@@ -317,8 +319,9 @@ n_int    tranfer_in( n_file *input_file )
             switch ( ret_val )
             {
             case FIL_LAN:
+            /*
                 temp = ( n_byte * )land_ptr();
-                loop_end = 11; /* Needs to be fixed */
+                loop_end = 11; Needs to be fixed */
                 break;
             case FIL_BEI:
                 temp = ( n_byte * ) & ( group->beings[ape_count] );

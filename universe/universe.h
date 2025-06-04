@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -45,10 +45,10 @@
 #define  BRAINCODE_ON  /* entity */
 #define  IMMUNE_ON     /* entity */
 
-#ifdef APESIM_IOS
+#ifdef TARGET_OS_IOS
 #undef  BRAIN_ON
 #else
-#undef  BRAIN_ON
+#define BRAIN_ON
 #endif
 
 #define  FEATURE_SET
@@ -60,6 +60,23 @@
 
 #define CHARACTER_WIDTH  (8)
 #define CHARACTER_HEIGHT (14)
+
+
+typedef enum
+{
+    fc_object_name,
+    fc_n_spacetime,
+    fc_n_byte,
+    fc_n_byte2,
+    fc_end
+} file_contents;
+
+typedef struct
+{
+    file_contents     contents;
+    n_string          value;
+    n_int             number;
+} simulated_file_definition;
 
 /*
  This table represents the operator calculation that is used to create the density
@@ -849,6 +866,10 @@ typedef enum
     FULLY_AWAKE    =   2
 } sleep_state;
 
+
+
+
+
 typedef struct
 {
     n_byte2     location[2];
@@ -864,16 +885,71 @@ typedef struct
     n_byte2     mass;
     n_byte      posture;
     n_byte2     goal[4];
-#ifdef DEBUG_LACK_OF_MOVEMENT
-    n_int       total_movement;
-#endif
+
     n_byte2     social_coord_x;
     n_byte2     social_coord_y;
     n_byte2     social_coord_nx; /* why is this needed? */
     n_byte2     social_coord_ny; /* why is this needed? */
 
-    sleep_state awake;
+    n_byte /*sleep_state*/ awake;
+
+#ifdef DEBUG_LACK_OF_MOVEMENT
+    n_int       total_movement;
+#endif
 } simulated_being_delta;
+
+#if 0
+static simulated_file_definition simulated_being_events_json[]=
+    {
+        {type_object_name, "simulated_being_events", 1},
+        {type_object_name, "social", 1},
+
+        {type_n_spacetime, "space_time", 1},
+
+        {type_n_byte2, "first_name", 2},
+        {type_n_byte2, "family_name", 2},
+
+        {type_n_byte, "attraction", 1},
+        {type_n_byte, "friend_foe", 1},
+        {type_n_byte2, "belief", 1},
+        {type_n_byte2, "familiarity", 1},
+
+        {type_n_byte, "relationship", 1},
+
+        {type_n_byte, "entity_type", 1},
+        {type_end, "", 1}
+
+    #ifdef FEATURE_SET
+        n_byte2         feature_number;
+        simulated_feature   features[MAX_FEATURESET_SIZE];
+
+        n_byte2  value;
+        n_byte2  frequency;
+        n_byte   type;
+
+
+        n_byte2         observations;
+
+        simulated_featureset classification;
+    #endif
+
+    #ifdef BRAINCODE_ON
+        n_byte   braincode[BRAINCODE_SIZE];
+    #endif
+
+        {type_object_name, "episodic", 1},
+        n_spacetime space_time;
+        n_byte2  first_name[2];
+        n_byte2  family_name[2];
+
+        n_byte   event;
+        n_byte   food;
+        n_byte2  affect;
+        n_byte2  arg;
+
+      {type_end, "", 1}
+    };
+#endif
 
 typedef struct
 {

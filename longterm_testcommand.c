@@ -4,7 +4,7 @@
 
     =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -64,18 +64,18 @@ n_int draw_error( n_constant_string error_text, n_constant_string location, n_in
     return -1;
 }
 
-static n_int entry_num = 0;
+static n_int quidjibo_chapter = 0;
 
-static n_string values[]= {"run forever", "stop", "run forever", "stop", "run forever", "list", "stop", "help", "step 250", "stop", "run forever", "stop", "step 1",  "list", "sim", "stop", "quit", "quit", "", ""};
+static n_string values[]= {"step 200", "stop", "step 200", "stop", "step 20", "list", "stop", "help", "step 250", "stop", "step 2", "stop", "step 1",  "list", "sim", "stop", "quit", "quit", "", ""};
 
 n_string autoentry( n_string string, n_int length )
 {
 
-    entry_num++;
+    quidjibo_chapter++;
     
     usleep(2000000);
-    printf("%ld > %s\n",entry_num, values[entry_num - 1]);
-    sprintf(string, "%s\n", values[entry_num - 1]);
+    printf("%ld > %s\n",quidjibo_chapter, values[quidjibo_chapter-1]);
+    sprintf(string, "%s\n", values[quidjibo_chapter-1]);
     
     return string;
 }

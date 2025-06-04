@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -38,31 +38,19 @@
 
 #ifndef	_WIN32
 
-
 #include "../toolkit/toolkit.h"
 #include "../script/script.h"
 #include "../sim/sim.h"
 
-
-#ifdef SIMULATED_APE_CLIENT
-#include "client.h"
-#else
 #include "../universe/universe.h"
 #include "../entity/entity.h"
-#endif
 
 #else
 
-#ifdef SIMULATED_APE_CLIENT
-#include "client.h"
-#else
 #include "..\universe\universe.h"
 #include "..\entity\entity.h"
-#endif
 
 #endif
-
-#undef MULTITOUCH_CONTROLS
 
 #define	   TERRAINWINDOW(alpha)   (alpha)
 #define    CONTROLWINDOW(alpha)   (alpha + TERRAIN_WINDOW_AREA)
@@ -76,23 +64,6 @@
 
 /*	Icon Offset */
 #define	ICONOFFSET					27
-
-#ifdef MULTITOUCH_CONTROLS
-
-typedef enum
-{
-    TCS_SHOW_NOTHING = 0,
-    TCS_SHOW_CONTROLS,
-    TCS_LEFT_STATE,
-    TCS_LEFT_STATE_CONTROLS,
-    TCS_RIGHT_STATE,
-    TCS_RIGHT_STATE_CONTROLS
-} touch_control_state;
-
-#define TC_OFFSET_Y   (40)
-#define TC_FRACTION_X (40)
-
-#endif
 
 n_byte *draw_weather_grayscale( void );
 

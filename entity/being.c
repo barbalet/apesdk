@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -953,7 +953,7 @@ void being_register_movement( simulated_being *value, n_string comment_string )
     if ( ( IS_NIGHT( land_time() ) == 0 ) && ( being_total_movement( value ) == 0 ) )
     {
         n_string_block name_string, time_string;
-        io_time_to_string( time_string );
+        spacetime_to_string( time_string );
         being_name_simple( value, name_string );
         printf( "%s %s %s\n", time_string, name_string, comment_string );
     }
@@ -1194,14 +1194,14 @@ void being_turn_away_from_water( simulated_being *value )
         vect2_direction( &temp_vector, turn_plus, 128 );
         vect2_add( &temp_vector, &temp_vector, &location_vector );
 
-        land_convert_to_map( &temp_vector );
+        spacetime_convert_to_map( &temp_vector );
 
         z_plus = land_location_vect( &temp_vector );
 
         vect2_direction( &temp_vector, turn_minus, 128 );
         vect2_add( &temp_vector, &temp_vector, &location_vector );
 
-        land_convert_to_map( &temp_vector );
+        spacetime_convert_to_map( &temp_vector );
 
         z_minus = land_location_vect( &temp_vector );
 
@@ -1332,9 +1332,9 @@ n_byte being_los_projection( simulated_being *local, n_vect2 *extern_end )
 
     /** move everything from being co-ordinates to map co-ordinates */
 
-    land_convert_to_map( &start );
-    land_convert_to_map( &delta );
-    land_convert_to_map( &end );
+    spacetime_convert_to_map( &start );
+    spacetime_convert_to_map( &delta );
+    spacetime_convert_to_map( &end );
 
     /* check trivial case first - self aware (after co-ord translation) */
     if ( ( delta.x == 0 ) && ( delta.y == 0 ) )

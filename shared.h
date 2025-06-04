@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -56,6 +56,10 @@ typedef enum
     SHARED_CYCLE_NEW_APES
 } shared_cycle_state;
 
+#define    NUM_VIEW    (0)
+#define    NUM_TERRAIN (1)
+#define    NUM_CONTROL (2)
+#define    NUM_NIL     (3)
 
 enum
 {
@@ -81,6 +85,8 @@ void shared_dimensions( n_int *dimensions );
 n_int shared_init( n_int view, n_uint random );
 
 void shared_close( void );
+
+n_int shared_simulation_started(void);
 
 n_int shared_menu( n_int menuValue );
 
@@ -115,6 +121,13 @@ n_byte shared_openFileName( n_constant_string cStringFileName, n_int isScript );
 void shared_saveFileName( n_constant_string cStringFileName );
 
 void shared_script_debug_handle( n_constant_string cStringFileName );
+
+void shared_process(const char* fileUrl);
+
+
+n_int shared_being_number( void );
+void shared_being_name( n_int number, n_string name );
+void shared_being_select( n_int number);
 
 #ifndef    _WIN32
 

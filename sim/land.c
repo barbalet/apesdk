@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -73,11 +73,6 @@ n_byte *land_topography_highdef( void )
     return m_land.topography_highdef;
 }
 
-n_land *land_ptr( void )
-{
-    return &m_land;
-}
-
 n_byte4 land_date( void )
 {
     return m_land.date;
@@ -112,7 +107,7 @@ void land_cycle( void )
 }
 
 /* all this hardcoding will need to be de-hardcoded in the future */
-void math_bilinear_8_times( n_byte *side512, n_byte *data, n_byte double_spread )
+static void math_bilinear_8_times( n_byte *side512, n_byte *data, n_byte double_spread )
 {
     n_int loop_y = 0;
 
@@ -331,8 +326,8 @@ n_int land_location_vect( n_vect2 *value )
 
 weather_values    weather_seven_values( n_int px, n_int py )
 {
-    n_byte    ret_val;
-    n_int    val;
+    n_byte  ret_val;
+    n_int   val;
     n_int   map_x = POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( px ) );
     n_int   map_y = POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( py ) );
 
@@ -546,237 +541,4 @@ void land_vect2( n_vect2 *output, n_int *actual_z, n_vect2 *location )
     output->y = ( z - land_location( APESPACE_TO_MAPSPACE( loc_x ), ( APESPACE_TO_MAPSPACE( loc_y ) + 1 ) ) );
 }
 
-n_int spacetime_after( n_spacetime *initial, n_spacetime *second )
-{
-    if ( initial->date < second->date )
-    {
-        return 0;
-    }
-    if ( initial->date > second->date )
-    {
-        return 1;
-    }
-    if ( initial->time > second->time )
-    {
-        return 1;
-    }
-    return 0;
-}
 
-n_int spacetime_before_now( n_spacetime *initial )
-{
-    if ( initial->date > m_land.date )
-    {
-        return 0;
-    }
-    if ( initial->date < m_land.date )
-    {
-        return 1;
-    }
-    if ( initial->time < m_land.time )
-    {
-        return 1;
-    }
-    return 0;
-}
-
-void spacetime_copy( n_spacetime *to, n_spacetime *from )
-{
-    to->location[0] = from->location[0];
-    to->location[1] = from->location[1];
-
-    to->date = from->date;
-    to->time = from->time;
-}
-
-void spacetime_set( n_spacetime *set, n_byte2 *location )
-{
-    set->location[0] = location[0];
-    set->location[1] = location[1];
-    set->time        = m_land.time;
-    set->date        = m_land.date;
-}
-
-void land_convert_to_map( n_vect2 *value )
-{
-    value->x = APESPACE_TO_MAPSPACE( value->x );
-    value->y = APESPACE_TO_MAPSPACE( value->y );
-}
-
-static n_byte2    color_group[256 * 3];
-static n_byte     land_color_initialized = 0;
-
-#define    SUBSTA(c)    ((c<<8)|c)
-
-void land_color_init( void )
-{
-    static n_byte points[] =
-    {
-        0, 0, 0, 0,
-        106, 43, 70, 120,
-        125, 107, 201, 202,
-        128, 255, 255, 239,
-        150, 88, 169, 79,
-        190, 8, 15, 7,
-        208, 208, 216, 206,
-        255, 255, 255, 255
-    };
-
-    /* performs a linear interpolation of n 8-bit points to 256 16-bit blend values */
-    n_int    lp = 0, lp2 = 0;
-    n_int    dr = 0, dg = 0, db = 0;
-    n_int    ar = 0, ag = 0, ab = 0, cntr = 0;
-    n_int    fp = 0, fl = 0, del_c = 0;
-    while ( lp < 256 )
-    {
-        if ( lp == points[cntr] )
-        {
-            ar = SUBSTA( points[( cntr ) | 1] );
-            ag = SUBSTA( points[( cntr ) | 2] );
-            ab = SUBSTA( points[( cntr ) | 3] );
-            fp = lp;
-            cntr += 4;
-
-            if ( lp != 255 )
-            {
-                fl = points[cntr];
-                del_c = ( fl - fp );
-                dr = SUBSTA( points[( cntr ) | 1] );
-                dg = SUBSTA( points[( cntr ) | 2] );
-                db = SUBSTA( points[( cntr ) | 3] );
-            }
-        }
-
-        if ( del_c == 0 )
-        {
-            return;
-        }
-
-        if ( lp != 255 )
-        {
-            n_int    del_a = ( fl - lp ), del_b = ( lp - fp );
-            color_group[lp2++] = ( n_byte2 )( ( ( ar * del_a ) + ( dr * del_b ) ) / del_c );
-            color_group[lp2++] = ( n_byte2 )( ( ( ag * del_a ) + ( dg * del_b ) ) / del_c );
-            color_group[lp2++] = ( n_byte2 )( ( ( ab * del_a ) + ( db * del_b ) ) / del_c );
-        }
-        else
-        {
-            color_group[lp2++] = ( n_byte2 )( ar );
-            color_group[lp2++] = ( n_byte2 )( ag );
-            color_group[lp2++] = ( n_byte2 )( ab );
-        }
-        lp ++;
-    }
-
-    color_group[( COLOR_WHITE * 3 )    ] = 0xffff;
-    color_group[( COLOR_WHITE * 3 ) + 1] = 0xffff;
-    color_group[( COLOR_WHITE * 3 ) + 2] = 0xffff;
-
-    color_group[( COLOR_BLUE * 3 )    ] = 0x5500;
-    color_group[( COLOR_BLUE * 3 ) + 1] = 0x5500;
-    color_group[( COLOR_BLUE * 3 ) + 2] = 0xeeff;
-
-    color_group[( COLOR_RED_DARK * 3 )    ] = ( 0xeeff * 2 ) >> 2; /* return to * 3 following debugging */
-    color_group[( COLOR_RED_DARK * 3 ) + 1] = 0x0000;
-    color_group[( COLOR_RED_DARK * 3 ) + 2] = 0x0000;
-
-    color_group[( COLOR_RED * 3 )    ] = 0xeeff;
-    color_group[( COLOR_RED * 3 ) + 1] = 0x0000;
-    color_group[( COLOR_RED * 3 ) + 2] = 0x0000;
-}
-
-
-void  land_color_time( n_byte2 *color_fit, n_int toggle_tidedaylight )
-{
-    n_int   day_rotation = ( ( land_time() * 255 ) / TIME_DAY_MINUTES );
-    n_int   darken =  math_sine( day_rotation + 64 + 128, NEW_SD_MULTIPLE / 400 );
-    n_int   loop = 0;
-    n_int   sign = 1;
-    if ( land_color_initialized == 0 )
-    {
-        land_color_init();
-        land_color_initialized = 1;
-    }
-    if ( !toggle_tidedaylight )
-    {
-        if ( darken < 1 )
-        {
-            sign = -1;
-        }
-        darken = ( darken * darken ) / 402;
-        darken = ( sign * darken ) + 624;
-        while ( loop < ( NON_INTERPOLATED * 3 ) )
-        {
-            n_int cg_val = color_group[loop];
-            n_int response = ( cg_val * darken ) >> 10;
-            color_fit[loop] = ( n_byte2 )response;
-            loop++;
-        }
-    }
-    while ( loop < ( 256 * 3 ) )
-    {
-        color_fit[loop] = color_group[loop];
-        loop++;
-    }
-}
-
-void  land_color_time_8bit( n_byte *color_fit, n_int toggle_tidedaylight )
-{
-    n_int   day_rotation = ( ( land_time() * 255 ) / TIME_DAY_MINUTES );
-    n_int   darken =  math_sine( day_rotation + 64 + 128, NEW_SD_MULTIPLE / 400 );
-    n_int   loop = 0;
-    n_int   sign = 1;
-    if ( land_color_initialized == 0 )
-    {
-        land_color_init();
-        land_color_initialized = 1;
-    }
-    if ( !toggle_tidedaylight )
-    {
-        if ( darken < 1 )
-        {
-            sign = -1;
-        }
-        darken = ( darken * darken ) / 402;
-        darken = ( sign * darken ) + 624;
-        while ( loop < ( NON_INTERPOLATED * 3 ) )
-        {
-            n_int cg_val = color_group[loop];
-            n_int response = ( cg_val * darken ) >> 10;
-            color_fit[loop] = ( n_byte )( response >> 8 );
-            loop++;
-        }
-    }
-    while ( loop < ( 256 * 3 ) )
-    {
-        color_fit[loop] = ( n_byte )( color_group[loop] >> 8 );
-        loop++;
-    }
-}
-
-void io_time_to_string( n_string value )
-{
-    n_int minutes = land_time();
-    n_int days = land_date();
-    n_int military_time = ( minutes % 60 );
-    n_int hours = ( minutes / 60 );
-    n_int days_month = ( days % 28 ) + 1;
-    n_int month = ( ( days / 28 ) % 13 ) + 1;
-    n_int years = days / ( 28 * 13 );
-
-    military_time += hours * 100;
-
-    value[0] = '0' + ( military_time / 1000 ) % 10;
-    value[1] = '0' + ( military_time / 100 ) % 10;
-    value[2] = ':';
-    value[3] = '0' + ( military_time / 10 ) % 10;
-    value[4] = '0' + ( military_time / 1 ) % 10;
-    value[5] = ' ';
-    value[6] = '0' + ( days_month / 10 ) % 10;
-    value[7] = '0' + ( days_month / 1 ) % 10;
-    value[8] = '/';
-    value[9] = '0' + ( month / 10 ) % 10;
-    value[10] = '0' + ( month / 1 ) % 10;
-    value[11] = '/';
-    io_number_to_string( &value[12], ( n_uint )years );
-}

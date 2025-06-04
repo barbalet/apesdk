@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -835,7 +835,7 @@ n_byte being_awake( simulated_being *local )
             n_vect2 location;
 
             being_space( local, &location );
-            land_convert_to_map( &location );
+            spacetime_convert_to_map( &location );
 
             if ( WATER_TEST( land_location_vect( &location ), land_tide_level() ) )
             {
@@ -1541,7 +1541,7 @@ static n_int being_temporary_speed( simulated_being *local, n_int *test_land, n_
     being_facing_vector( local, &facing_vector, 4 );
     land_vect2( &slope_vector, az, &location_vector );
     vect2_add( &looking_vector, &location_vector, &facing_vector );
-    land_convert_to_map( &looking_vector );
+    spacetime_convert_to_map( &looking_vector );
 
     *test_land = ( WATER_TEST( land_location_vect( &looking_vector ), land_tide_level() ) != 0 );
 

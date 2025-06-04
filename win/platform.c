@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -34,7 +34,7 @@
  ****************************************************************/
 
 #include "../gui/gui.h"
-#include "../toolkit/shared.h"
+#include "../shared.h"
 #include "platform.h"
 #include <windows.h>
 #include <time.h>
@@ -50,10 +50,11 @@
 #endif
 /** Globals **/
 #ifndef NUMBER_WINDOWS
-#define	NUMBER_WINDOWS				2
+#define	NUMBER_WINDOWS				3
 
 #define WINDOW_ONE					0
 #define WINDOW_TWO					1
+#define WINDOW_THREE				2
 
 #endif
 #undef EARLIER_VERSION_STUDIO
@@ -66,7 +67,7 @@ static HWND           global_hwnd[NUMBER_WINDOWS];
 static HBITMAP        offscreen[NUMBER_WINDOWS];
 static BITMAPINFO	 *bmp_info[NUMBER_WINDOWS];
 
-static n_byte		  window_definition[NUMBER_WINDOWS] = {NUM_VIEW, NUM_TERRAIN};
+static n_byte		  window_definition[NUMBER_WINDOWS] = {NUM_VIEW, NUM_TERRAIN, NUM_CONTROL};
 
 static n_int            firedown = -1;
 static unsigned char    firecontrol = 0;
@@ -91,7 +92,6 @@ static unsigned char plat_initialized = 0;
 #define	WINDOW_OFFSET_X		16 //6
 #define	WINDOW_OFFSET_Y		(38) //(10+22)
 #define WINDOW_MENU_OFFSET	(21)
-
 
 static void platform_menus( void )
 {
@@ -146,10 +146,17 @@ static void platform_menus( void )
 }
 
 
-int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance,
+int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
                      PSTR szCmdLine, int iCmdShow )
 {
     /** Create a window with 0 x, or y co-ord, and with the menu attached. **/
+
+#ifdef COMMON_DEBUG_ON
+    // Allocate a console for this application
+    AllocConsole();
+    // Redirect the standard output to the console
+    freopen("CONOUT$", "w", stdout);
+#endif
 
     int     loop = 0;
     static TCHAR szAppName[] = TEXT ( "NobleApe" ) ;
@@ -235,6 +242,13 @@ int WINAPI WinMain ( HINSTANCE hInstance, HINSTANCE hPrevInstance,
         window_value[3] = practical_window_dimension_y;
 
         global_hwnd[WINDOW_TWO] = CreateWindow( szAppName, TEXT ( "Noble Ape: Terrain" ),
+                                                WS_OVERLAPPED,
+                                                window_value[0], window_value[1],
+                                                window_value[2] + WINDOW_OFFSET_X,
+                                                window_value[3] + WINDOW_OFFSET_Y,
+                                                NULL, NULL, hInstance, NULL ) ;
+
+        global_hwnd[WINDOW_THREE] = CreateWindow( szAppName, TEXT ( "Noble Ape: Control" ),
                                                 WS_OVERLAPPED,
                                                 window_value[0], window_value[1],
                                                 window_value[2] + WINDOW_OFFSET_X,
@@ -333,6 +347,7 @@ LRESULT CALLBACK WndProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM
         {
             shared_cycle( local_time, NUM_TERRAIN );
         }
+        shared_cycle( local_time, WINDOW_PROCESSING );
     }
     plat_update();
 
@@ -340,6 +355,7 @@ LRESULT CALLBACK WndProc ( HWND hwnd, UINT message, WPARAM wParam, LPARAM
     if ( practical_number_windows > 1 )
     {
         InvalidateRect( global_hwnd[1], NULL, TRUE );
+        InvalidateRect( global_hwnd[2], NULL, TRUE );
     }
     return 0;
 

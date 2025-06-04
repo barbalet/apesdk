@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -64,7 +64,6 @@ void io_entry_execution( n_int argc, n_string *argv )
     {
         if ( ( argc == 2 ) && ( argv[1][1] == 'c' ) )
         {
-            printf("Command Line Execution Set\n");
             io_command_line_execution_set();
         }
     }
@@ -138,7 +137,6 @@ n_string io_console_entry_clean( n_string string, n_int length )
 
 n_string io_console_entry( n_string string, n_int length )
 {
-    printf( ">" );
     return io_console_entry_clean( string, length );
 }
 
@@ -226,5 +224,57 @@ n_int io_console( void *ptr, simulated_console_command *commands, n_console_inpu
     return SHOW_ERROR( "Console failure" );
 }
 
+#if 0
 
+#include <stdio.h>
+#include <sys/termios.h>
+#include <unistd.h>
+
+int mygetch(void) {
+    char ch;
+    int error;
+    static struct termios Otty, Ntty;
+
+    fflush(stdout);
+    tcgetattr(0, &Otty);
+    Ntty = Otty;
+
+    Ntty.c_iflag  =  0;     /* input mode       */
+    Ntty.c_oflag  =  0;     /* output mode      */
+    Ntty.c_lflag &= ~ICANON;    /* line settings    */
+
+#if 1
+    /* disable echoing the char as it is typed */
+    Ntty.c_lflag &= ~ECHO;  /* disable echo     */
+#else
+    /* enable echoing the char as it is typed */
+    Ntty.c_lflag |=  ECHO;  /* enable echo      */
+#endif
+
+    Ntty.c_cc[VMIN]  = CMIN;    /* minimum chars to wait for */
+    Ntty.c_cc[VTIME] = CTIME;   /* minimum wait time    */
+
+#if 1
+    /*
+    * use this to flush the input buffer before blocking for new input
+    */
+    #define FLAG TCSAFLUSH
+#else
+    /*
+    * use this to return a char from the current input buffer, or block if
+    * no input is waiting.
+    */
+    #define FLAG TCSANOW
+
+#endif
+
+    if ((error = tcsetattr(0, FLAG, &Ntty)) == 0) {
+        error  = read(0, &ch, 1 );        /* get char from stdin */
+        error += tcsetattr(0, FLAG, &Otty);   /* restore old settings */
+    }
+
+    return (error == 1 ? (int) ch : -1 );
+}
+
+#endif
 

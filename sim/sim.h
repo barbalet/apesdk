@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -46,7 +46,6 @@
 
 #ifndef    _WIN32
 #define   ALPHA_WEATHER_DRAW
-#undef   METAL_RENDER
 #else
 #undef   ALPHA_WEATHER_DRAW
 #endif
@@ -60,14 +59,14 @@
 #endif
 
 /*! @define */
-#define	SHORT_VERSION_NAME		 "Simulated Ape 0.701 "
+#define	SHORT_VERSION_NAME		 "Simulated Ape 0.708 "
 #define	FULL_DATE				 __DATE__
 
 /*! @define */
-#define	VERSION_NUMBER		     701
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2023 "
+#define	VERSION_NUMBER		     708
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2025 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2023."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2025."
 
 /*! @define */
 #define	SIMULATED_APE_SIGNATURE		    (('N'<< 8) | 'A')
@@ -101,13 +100,11 @@ typedef enum
     ET_FIERCE_BIRD_OF_PREY,
 } entity_type;
 
+#ifdef TARGET_OS_IOS
+#define WINDOW_PROCESSING NUM_TERRAIN
+#else
 #define WINDOW_PROCESSING NUM_CONTROL
-
-#define    NUM_VIEW    (0)
-#define    NUM_TERRAIN (1)
-#define    NUM_CONTROL (2)
-#define    NUM_NIL     (3)
-
+#endif
 
 #define    DRAW_WINDOW_VIEW    (1)
 #define    DRAW_WINDOW_TERRAIN (2)
@@ -226,12 +223,12 @@ enum color_type
 #ifdef SIMULATED_PLANET
 
 #define MAP_BITS                      (8)
-#define MAP_TITLES                    (6)
+#define MAP_TILES                    (6)
 
 #else
 
 #define MAP_BITS                      (9)
-#define MAP_TITLES                    (1)
+#define MAP_TILES                    (1)
 
 #endif
 
@@ -426,7 +423,6 @@ void land_color_init( void );
 void land_color_time( n_byte2 *color_fit, n_int toggle_tidedaylight );
 void land_color_time_8bit( n_byte *color_fit, n_int toggle_tidedaylight );
 
-n_land *land_ptr( void );
 n_byte4 land_date( void );
 n_byte4 land_time( void );
 n_byte2 *land_genetics( void );
@@ -450,7 +446,7 @@ void  spacetime_copy( n_spacetime *to, n_spacetime *from );
 n_int spacetime_before_now( n_spacetime *initial );
 void  spacetime_set( n_spacetime *set, n_byte2 *location );
 
-void land_convert_to_map( n_vect2 *value );
+void spacetime_convert_to_map( n_vect2 *value );
 
 #endif /* _SIM_H_ */
 

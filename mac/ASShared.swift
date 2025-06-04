@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,16 +35,25 @@
 
 import Cocoa
 
-@objc class ASShared: NSObject {
+@MainActor class ASShared: NSObject {
     
-    @objc convenience init(frame frameRect: NSRect) {
+    var identification: Int = 0
+    private var returned_value: shared_cycle_state?
+    
+    convenience init(frame frameRect: NSRect, title: String) {
         self.init()
-        identification = 0
-        old_size_width = Int(frameRect.size.width)
-        old_size_height = Int(frameRect.size.height)
+        identification = Int(NUM_VIEW)
+        if title != "" {
+            if title == "Terrain" {
+                identification = Int(NUM_TERRAIN)
+            }
+            if title == "Control" {
+                identification = Int(NUM_CONTROL)
+            }
+        }
     }
 
-    @objc func start() -> Bool {
+    func start() -> Bool {
         print("Randomizing element...")
         let shared_response = shared_init(identification, UInt.random(in: 0 ..< 4294967295))
         if Int(shared_response) == -1 {
@@ -54,19 +63,19 @@ import Cocoa
         return true
     }
 
-    @objc func about() {
+    func about() {
         shared_about()
     }
 
-    @objc func keyReceived(_ key: Int) {
+    func keyReceived(_ key: Int) {
         shared_keyReceived(key, identification)
     }
 
-    @objc func mouseReceived(withXLocation xLocation: Double, yLocation: Double) {
+    func mouseReceived(withXLocation xLocation: Double, yLocation: Double) {
         shared_mouseReceived(xLocation, yLocation, identification)
     }
 
-    @objc func mouseOption(_ mouseOption: Bool) {
+    func mouseOption(_ mouseOption: Bool) {
         if mouseOption {
             shared_mouseOption(1)
         } else {
@@ -74,138 +83,128 @@ import Cocoa
         }
     }
 
-    @objc func keyUp() {
+    func keyUp() {
         shared_keyUp()
     }
 
-    @objc func mouseUp() {
+    func mouseUp() {
         shared_mouseUp()
     }
 
-    @objc func rotation(_ rotationAmount: Double) {
+    func rotation(_ rotationAmount: Double) {
         shared_rotate(rotationAmount, identification)
     }
 
-    @objc func delta_x(_ delta_x: Double, delta_y: Double) {
+    func delta_x(_ delta_x: Double, delta_y: Double) {
         shared_delta(delta_x, delta_y, identification)
     }
 
-    @objc func zoom(_ zoomAmount: Double) {
+    func zoom(_ zoomAmount: Double) {
         shared_zoom(zoomAmount, identification)
     }
 
-    @objc func timeInterval() -> TimeInterval {
+    func timeInterval() -> TimeInterval {
         return 1.0 / (TimeInterval(shared_max_fps()))
     }
 
-    @objc func close() {
+    func close() {
         shared_close()
     }
 
-    @objc func identificationBased(onName windowName: String?) {
-        identification = Int(NUM_VIEW)
-        if (windowName == "Terrain") {
-            identification = Int(NUM_TERRAIN)
-        }
-        if (windowName == "Control") {
-            identification = Int(NUM_CONTROL)
-        }
-    }
-
-    @objc func newSimulation() {
+    func newSimulation() {
         shared_new(UInt.random(in: 0 ..< 4294967295))
     }
 
-    @objc func newAgents() {
+    func newAgents() {
         shared_new_agents(UInt.random(in: 0 ..< 4294967295))
     }
 
-    @objc func cycle() {
+    func cycle() {
         let time_info : UInt = UInt(CFAbsoluteTimeGetCurrent())
         returned_value = shared_cycle(time_info, identification)
     }
 
-    @objc func cycleDebugOutput() -> Bool {
+    func cycleDebugOutput() -> Bool {
         return returned_value == SHARED_CYCLE_DEBUG_OUTPUT
     }
 
-    @objc func cycleQuit() -> Bool {
+    func cycleQuit() -> Bool {
         return returned_value == SHARED_CYCLE_QUIT
     }
 
-    @objc func cycleNewApes() -> Bool {
+    func cycleNewApes() -> Bool {
         return returned_value == SHARED_CYCLE_NEW_APES
     }
 
-    @objc func menuPause() -> Bool {
-        return shared_menu(NA_MENU_PAUSE) != 0
+    func menuPause() -> Int {
+        return shared_menu(NA_MENU_PAUSE)
     }
     
-    @objc func menuFollow() -> Bool {
-        return shared_menu(NA_MENU_FOLLOW) != 0
+    func menuFollow() -> Int {
+        return shared_menu(NA_MENU_FOLLOW)
     }
     
-    @objc func menuSocialWeb() -> Bool {
-        return shared_menu(NA_MENU_SOCIAL_WEB) != 0
+    func menuSocialWeb() -> Int {
+        return shared_menu(NA_MENU_SOCIAL_WEB)
     }
 
-    @objc func menuPreviousApe() {
+    func menuPreviousApe() {
         shared_menu(NA_MENU_PREVIOUS_APE)
     }
 
-    @objc func menuNextApe() {
+    func menuNextApe() {
         shared_menu(NA_MENU_NEXT_APE)
     }
 
-    @objc func menuClearErrors() {
+    func menuClearErrors() {
         shared_menu(NA_MENU_CLEAR_ERRORS)
     }
 
-    @objc func menuNoTerritory() -> Bool {
-        return shared_menu(NA_MENU_TERRITORY) != 0
+    func menuNoTerritory() -> Int {
+        return shared_menu(NA_MENU_TERRITORY)
     }
 
-    @objc func menuNoWeather() -> Bool {
-        return shared_menu(NA_MENU_WEATHER) != 0
+    func menuNoWeather() -> Int {
+        return shared_menu(NA_MENU_WEATHER)
     }
 
-    @objc func menuNoBrain() -> Bool {
-        return shared_menu(NA_MENU_BRAIN) != 0
+    func menuNoBrain() -> Int {
+        return shared_menu(NA_MENU_BRAIN)
     }
 
-    @objc func menuNoBrainCode() -> Bool {
-        return shared_menu(NA_MENU_BRAINCODE) != 0
+    func menuNoBrainCode() -> Int {
+        return shared_menu(NA_MENU_BRAINCODE)
     }
 
-    @objc func menuDaylightTide() -> Bool {
-        return shared_menu(NA_MENU_TIDEDAYLIGHT) != 0
+    func menuDaylightTide() -> Int {
+        return shared_menu(NA_MENU_TIDEDAYLIGHT)
     }
 
-    @objc func menuFlood() {
+    func menuFlood() {
         shared_menu(NA_MENU_FLOOD)
     }
 
-    @objc func menuHealthyCarrier() {
+    func menuHealthyCarrier() {
         shared_menu(NA_MENU_HEALTHY_CARRIER)
     }
 
-    @objc func menuCommandLineExecute() {
+    func menuCommandLineExecute() {
         io_command_line_execution_set()
     }
         
-    @objc func scriptDebugHandle(_ fileName: String) {
+    func scriptDebugHandle(_ fileName: String) {
         fileName.withCString {
             shared_script_debug_handle($0)
         }
     }
     
-    @objc func savedFileName(_ name: String) {
+    func savedFileName(_ name: String) {
         name.withCString {
             shared_saveFileName($0)
         }
     }
 
-    @objc func openFileName(_ name: String, isScript scriptFile: Bool) -> Bool {
+    func openFileName(_ name: String, isScript scriptFile: Bool) -> Bool {
     
         let return_val = name.withCString { (cstr) -> Bool in
              return shared_openFileName(cstr, scriptFile ? 1 : 0) != 0
@@ -213,13 +212,76 @@ import Cocoa
         return return_val
     }
     
-    @objc func sharedId() -> Int {
+    func sharedId() -> Int {
         return identification
     }
     
-    @objc var identification: Int = 0
-    private var returned_value: shared_cycle_state?
-    private var old_size_width: Int = 0
-    private var old_size_height: Int = 0
-
+    func blitCode(dim_x: size_t, dim_y: size_t) {
+        let optionalContext = NSGraphicsContext.current?.cgContext
+        if let context = optionalContext {
+            context.saveGState()
+            
+            let  colorSpace: CGColorSpace = CGColorSpaceCreateDeviceRGB();
+            let  sharedId: Int = sharedId()
+            
+            let optionalDrawRef: CGContext? = CGContext.init(data: shared_draw(sharedId, dim_x, dim_y, 0), width: dim_x, height: dim_y, bitsPerComponent: 8, bytesPerRow: dim_x * 4, space: colorSpace, bitmapInfo: UInt32(CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue))
+            
+            if let drawRef = optionalDrawRef {
+                
+                context.setBlendMode(.normal)
+                
+                context.setShouldAntialias(false)
+                context.setAllowsAntialiasing(false)
+                
+                let optionalImage: CGImage? = drawRef.makeImage()
+                
+                if let image = optionalImage {
+                    let newRect = NSRect(x:0, y:0, width:CGFloat(dim_x), height:CGFloat(dim_y))
+                    context.draw(image, in: newRect)
+                }
+            }
+            context.restoreGState()
+        }
+    }
+    
+    func quitProcedure(){
+        close()
+        exit(0);
+    }
+    
+    func startEverything(headyLifting: Bool, window: NSWindow?) {
+        let increments: NSSize = NSSize(width: 4, height: 4)
+        window?.resizeIncrements = increments
+        if headyLifting {
+            if start() == false {
+                quitProcedure()
+                return
+            }
+        }
+        window?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    
+    func cycledo() {
+        
+        cycle()
+        
+        if cycleQuit() {
+            quitProcedure()
+        }
+        
+        if cycleNewApes() {
+            newAgents()
+        }
+    }
+    
+    func startEverything(_ headyLifting: Bool) {
+        if headyLifting {
+            if !start() {
+                self.quitProcedure()
+                return
+            }
+        }
+        NSApp.activate(ignoringOtherApps: true)
+    }
 }

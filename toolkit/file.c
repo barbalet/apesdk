@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -112,10 +112,9 @@ n_file * io_file_new_from_string(n_string string, n_uint string_length)
     return output;
 }
 
-/**
- * Frees the file pointer
- * @param file the pointer to be freed.
- */
+
+/// Frees the file pointer
+/// - Parameter file: the pointer to be freed.
 void io_file_free( n_file **file )
 {
     if ( file != 0L )
@@ -128,13 +127,17 @@ void io_file_free( n_file **file )
     memory_free( ( void ** )file );
 }
 
-
-
+/// Turn ``n_int`` value to ``n_byte`` value
+/// - Parameter value: integer value
+/// - Parameter bytes: byte pointer
 void io_int_to_bytes( n_int value, n_byte *bytes )
 {
     memory_copy( ( n_byte * )&value, bytes, sizeof( n_int ) );
 }
 
+/// Turn ``n_byte`` to ``n_int`` value.
+/// - Parameter bytes: byte pointer
+/// - Returns: integer value
 n_int io_bytes_to_int( n_byte *bytes )
 {
     /*n_uint unsigned_value;*/
@@ -144,6 +147,9 @@ n_int io_bytes_to_int( n_byte *bytes )
     return return_value;
 }
 
+/// Takes a file and hashes it based on the file size.
+/// - Parameter local_file: The local file pointer.
+/// - Returns: unsigned integer hash value.
 n_uint io_file_hash( n_file *local_file )
 {
     n_uint hash = math_hash( ( n_byte * )&local_file->location, sizeof( n_uint ) );
@@ -152,12 +158,10 @@ n_uint io_file_hash( n_file *local_file )
     return hash;
 }
 
-/**
- * Reads a file from disk.
- * @param local_file the pointer to the n_file data that will have the file stored in it.
- * @param file_name the name of the file to be read.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+/// Reads a file from disk.
+/// - Parameter local_file: the pointer to the n_file data that will have the file stored in it.
+/// - Parameter file_name: the name of the file to be read.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 static n_int io_disk_read_error( n_file *local_file, n_string file_name, n_byte error_show )
 {
     n_uint file_size;
@@ -203,12 +207,10 @@ static n_int io_disk_read_error( n_file *local_file, n_string file_name, n_byte 
     return FILE_OKAY;
 }
 
-/**
- * Reads a file from disk.
- * @param local_file the pointer to the n_file data that will have the file stored in it.
- * @param file_name the name of the file to be read.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+///Reads a file from disk.
+/// - Parameter local_file: the pointer to the n_file data that will have the file stored in it.
+/// - Parameter file_name: the name of the file to be read.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 n_int io_disk_read( n_file *local_file, n_string file_name )
 {
     return io_disk_read_error( local_file, file_name, 1 );
@@ -219,12 +221,11 @@ n_int io_disk_read_no_error( n_file *local_file, n_string file_name )
     return io_disk_read_error( local_file, file_name, 0 );
 }
 
-/**
- * Writes a file to disk.
- * @param local_file the pointer to the n_file data that is written to disk.
- * @param file_name the name of the file to be written.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+
+///Writes a file to disk.
+/// - Parameter local_file: the pointer to the n_file data that is written to disk.
+/// - Parameter file_name: the name of the file to be written.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 n_int io_disk_write( n_file *local_file, n_constant_string file_name )
 {
     n_uint written_length;
@@ -257,11 +258,10 @@ n_int io_disk_write( n_file *local_file, n_constant_string file_name )
     return FILE_OKAY;
 }
 
-/**
- * Appends a file to disk.
- * @param file_name the name of the file to be appended.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+
+///Appends a file to disk.
+/// - Parameter file_name: the name of the file to be appended.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 n_int io_disk_check( n_constant_string file_name )
 {
 #ifndef _WIN32
@@ -284,12 +284,11 @@ n_int io_disk_check( n_constant_string file_name )
     return 1;
 }
 
-/**
- * Reads binary data from the file pointer.
- * @param fil the pointer to the n_file data that is read from.
- * @param local_byte the single byte.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+
+///Reads binary data from the file pointer.
+/// - Parameter fil: the pointer to the n_file data that is read from.
+/// - Parameter local_byte: the single byte.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 n_int io_read_bin( n_file *fil, n_byte *local_byte )
 {
     n_uint    file_location = fil -> location;
@@ -303,11 +302,9 @@ n_int io_read_bin( n_file *fil, n_byte *local_byte )
     return 0;
 }
 
-/**
- * Reads a character - white-space and comments have already been removed
- * @param fil the pointer to the n_file data that is read from.
- * @return CHAR_EOF if there is a problem and the byte value if it is successful.
- */
+///Reads a character - white-space and comments have already been removed
+/// - Parameter fil: the pointer to the n_file data that is read from.
+/// - Returns: CHAR_EOF if there is a problem and the byte value if it is successful.
 static n_byte    io_read( n_file *fil )
 {
     n_byte val = 0;
@@ -318,13 +315,11 @@ static n_byte    io_read( n_file *fil )
     return ( val );
 }
 
-/**
- * Converts a tab delimited file to a series of string pointers
- * @param tab_file the pointer to the n_file data that is read from.
- * @param size_value the pointer to the total number.
- * @param row_value the pointer to the number of columns per row.
- * @return string pointers.
- */
+///Converts a tab delimited file to a series of string pointers
+/// - Parameter tab_file: the pointer to the n_file data that is read from.
+/// - Parameter size_value: the pointer to the total number.
+/// - Parameter row_value: the pointer to the number of columns per row.
+/// - Returns: string pointers.
 n_string *io_tab_delimit_to_n_string_ptr( n_file *tab_file, n_int *size_value, n_int *row_value )
 {
     n_int              string_point_location = 1;
@@ -403,12 +398,10 @@ n_string *io_tab_delimit_to_n_string_ptr( n_file *tab_file, n_int *size_value, n
     return string_point;
 }
 
-/**
- * Appends a file to disk.
- * @param local_file the pointer to the n_file data that is written to disk.
- * @param file_name the name of the file to be appended.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+///Appends a file to disk.
+/// - Parameter local_file: the pointer to the n_file data that is written to disk.
+/// - Parameter file_name: the name of the file to be appended.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 
 # ifdef APESDK_OLD_CODE
 
@@ -437,13 +430,11 @@ static n_int io_disk_append( n_file *local_file, n_string file_name )
     return FILE_OKAY;
 }
 
-/**
- * Adds XML open to the named string.
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
 
+/// Adds XML open to the named string.
+/// - Parameter file: the pointer to the n_file data that is written.
+/// - Parameter name: the string that is wrapped.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 static n_int io_file_xml_open( n_file *file, n_string name )
 {
     if ( io_write( file, "<", 0 ) == -1 )
@@ -462,12 +453,10 @@ static n_int io_file_xml_open( n_file *file, n_string name )
 }
 
 
-/**
- * Adds XML close to the named string.
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+///Adds XML close to the named string.
+/// - Parameter file: the pointer to the n_file data that is written.
+/// - Parameter name: the string that is wrapped.
+/// - Returns: if there is a problem and FILE_OKAY if it is successful.
 static n_int io_file_xml_close( n_file *file, n_string name )
 {
     if ( io_write( file, "</", 0 ) == -1 )
@@ -484,13 +473,12 @@ static n_int io_file_xml_close( n_file *file, n_string name )
     }
     return 0;
 }
-/**
- * Wraps a string with XML open and close
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is the wrapper.
- * @param string the string that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+
+///Wraps a string with XML open and close
+/// - Parameter file: the pointer to the n_file data that is written.
+/// - Parameter name: the string that is the wrapper.
+/// - Parameter string: the string that is wrapped.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 static n_int io_file_xml_string( n_file *file, n_string name, n_string string )
 {
     if ( io_file_xml_open( file, name ) == -1 )
@@ -508,13 +496,11 @@ static n_int io_file_xml_string( n_file *file, n_string name, n_string string )
     return 0;
 }
 
-/**
- * Wraps an integer with XML open and close
- * @param file the pointer to the n_file data that is written.
- * @param name the string that is the wrapper.
- * @param number the integer that is wrapped.
- * @return FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
- */
+///Wraps an integer with XML open and close
+/// - Parameter file: the pointer to the n_file data that is written.
+/// - Parameter name: the string that is the wrapper.
+/// - Parameter number: the integer that is wrapped.
+/// - Returns: FILE_ERROR if there is a problem and FILE_OKAY if it is successful.
 static n_int io_file_xml_int( n_file *file, n_string name, n_int number )
 {
     if ( io_file_xml_open( file, name ) == -1 )
@@ -535,13 +521,11 @@ static n_int io_file_xml_int( n_file *file, n_string name, n_int number )
 
 #endif
 
-/**
- * Read a four byte value from n_file
- * @param fil the pointer to the n_file data that is read from.
- * @param actual_value the actual value read.
- * @param final_char the final character (after the last number).
- * @return number of characters read in condition of success and -1 in condition of failure.
- */
+///Read a four byte value from n_file
+/// - Parameter fil: the pointer to the n_file data that is read from.
+/// - Parameter actual_value: the actual value read.
+/// - Parameter final_char: the final character (after the last number).
+/// - Returns: number of characters read in condition of success and -1 in condition of failure.
 n_int io_read_byte4( n_file *fil, n_uint *actual_value, n_byte *final_char )
 {
     n_uint  temp = 0;
@@ -573,10 +557,8 @@ n_int io_read_byte4( n_file *fil, n_uint *actual_value, n_byte *final_char )
 
 #define    ASCII_WHITESPACE(num) ((((num)>8)&&((num)<14))||((num)==32))
 
-/**
- * Removes the whitespace from the initial file - CRs, LFs, tabs and spaces.
- * @param input the file pointer that will have the white space removed.
- */
+///Removes the whitespace from the initial file - CRs, LFs, tabs and spaces.
+/// - Parameter input: the file pointer that will have the white space removed.
 void io_whitespace( n_file *input )
 {
     n_uint    loop = 0, out_loop = 0;
@@ -625,45 +607,14 @@ void io_whitespace( n_file *input )
     input->size = out_loop;
 }
 
-void io_whitespace_json( n_file *input )
-{
-    n_uint    loop = 0, out_loop = 0;
-    n_uint    end_loop = input->size;
-    n_byte    *local_data = input->data;
-    n_int     inside_string = 0;
-
-    while ( loop < end_loop )
-    {
-        n_byte    temp = local_data[loop++];
-        if ( temp == '"' )
-        {
-            inside_string ^= 1;
-            local_data[out_loop++] = temp;
-        }
-        else if ( ( ASCII_WHITESPACE( temp ) == 0 ) || inside_string )
-        {
-            local_data[out_loop++] = temp;
-        }
-    }
-
-    loop = out_loop;
-
-    while ( loop < end_loop )
-    {
-        local_data[loop++] = 0;
-    }
-    input->size = out_loop;
-    input->location = 0;
-}
-
 n_file * io_file_duplicate(n_file * initial)
 {
     n_file * new_file = memory_new(sizeof(n_file));
     new_file->size = new_file->location = 0;
-    
+
     if (new_file)
     {
-        
+
         new_file->data = memory_new(initial->size);
         if (new_file->data)
         {
@@ -675,14 +626,13 @@ n_file * io_file_duplicate(n_file * initial)
     return new_file;
 }
 
-/**
- This is a dynamic write to file function which will increase the file size and
- allocated a larger data buffer if the original end of the file is reached. It
- is very useful for a number of dynamic file applications through the simulation.
- @param fil The file data to be written to.
- @param byte The byte/character to be written.
- @return Whether the parsing was successful or -1 on failure.
- */
+
+/// This is a dynamic write to file function which will increase the file size and
+/// allocated a larger data buffer if the original end of the file is reached. It
+/// is very useful for a number of dynamic file applications through the simulation.
+/// - Parameter fil: The file data to be written to.
+/// - Parameter byte: The byte/character to be written.
+/// - Returns: Whether the parsing was successful or -1 on failure.
 n_int io_file_write( n_file *fil, n_byte byte )
 {
     n_uint local_size = fil->size;

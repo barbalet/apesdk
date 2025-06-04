@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -292,7 +292,7 @@ static void tile_wrap( n_land *land, n_int tile )
     }
 }
 
-static void title_wind_calculation( n_land *land )
+static void tile_wind_calculation( n_land *land )
 {
     if ( ( math_random( land->genetics ) & 31 ) == 0 )
     {
@@ -471,7 +471,7 @@ static void tiles_swap_topography( n_land *land, n_int tile )
     memory_copy( ( n_byte * )&land->tiles[tile].topography[0], ( n_byte * )&land->tiles[tile].topography[1], MAP_AREA );
 }
 
-static void title_pack_atmosphere( n_land *land, n_int tile )
+static void tile_pack_atmosphere( n_land *land, n_int tile )
 {
     n_int loop = 0;
     while ( loop < MAP_AREA )
@@ -481,7 +481,7 @@ static void title_pack_atmosphere( n_land *land, n_int tile )
     }
 }
 
-static void title_pack_topography( n_land *land, n_int tile )
+static void tile_pack_topography( n_land *land, n_int tile )
 {
     n_int loop = 0;
     while ( loop < MAP_AREA )
@@ -506,14 +506,14 @@ void tile_cycle( n_land *land )
 {
     const n_c_int dissipation = ( n_c_int )( land->wind_dissipation + 1020 );
     n_int  tile = 0;
+/*
+    n_int  max_atm = 0;
+    n_int  max_x = -1, max_y = -1;
 
-//    n_int  max_atm = 0;
-//    n_int  max_x = -1, max_y = -1;
-//
-//    n_int  min_atm = 0;
-//    n_int  min_x = -1, min_y = -1;
-
-    while ( tile < MAP_TITLES )
+    n_int  min_atm = 0;
+    n_int  min_x = -1, min_y = -1;
+*/
+    while ( tile < MAP_TILES )
     {
         n_int  new_delta = 0;
         n_int  ly = 0;
@@ -533,20 +533,20 @@ void tile_cycle( n_land *land )
                     + ( 2 * tiles_atmosphere( land, tile, 0, lx - 1, ly ) )
                     - ( 2 * tiles_atmosphere( land, tile, 0, lx + 1, ly ) )
                     - ( 2 * tiles_atmosphere( land, tile, 0, lx, ly + 1 ) );
-
-//                if (local_atm > max_atm)
-//                {
-//                    max_atm = local_atm;
-//                    max_x = lx;
-//                    max_y = ly;
-//                }
-//                if (min_atm > local_atm)
-//                {
-//                    min_atm = local_atm;
-//                    min_x = lx;
-//                    min_y = ly;
-//                }
-
+#if 0
+                if (local_atm > max_atm)
+                {
+                    max_atm = local_atm;
+                    max_x = lx;
+                    max_y = ly;
+                }
+                if (min_atm > local_atm)
+                {
+                    min_atm = local_atm;
+                    min_x = lx;
+                    min_y = ly;
+                }
+#endif
                 value += ( n_c_int ) ( ( local_atm - land->tiles[tile].local_delta ) >> MAP_BITS ) + tiles_pressure( land, 0, lx, ly );
 
                 tiles_set_atmosphere( land, tile, 1, lx, ly, value );
@@ -561,13 +561,11 @@ void tile_cycle( n_land *land )
         tile++;
     }
     tile = 0;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         tiles_swap_atmosphere( land, tile );
         tile++;
     }
-//    printf("max %ld (%ld, %ld) ", max_atm, max_x, max_y);
-//    printf("min %ld (%ld, %ld)\n", min_atm, min_x, min_y);
 }
 
 static void tile_wind_pp( n_land *land )
@@ -575,7 +573,7 @@ static void tile_wind_pp( n_land *land )
     n_int  tile = 0;
     /* Add dynamic wind */
     const n_int   p01 = land->wind_value_x, p10 = land->wind_value_y;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         n_int         ly = 0;
         while ( ly < MAP_DIMENSION )
@@ -605,7 +603,7 @@ static void tile_wind_np( n_land *land )
     n_int  tile = 0;
     /* Add dynamic wind */
     const n_int   p01 = land->wind_value_x, p10 = 0 - land->wind_value_y;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         n_int         ly = 0;
         while ( ly < MAP_DIMENSION )
@@ -635,7 +633,7 @@ static void tile_wind_pn( n_land *land )
     n_int  tile = 0;
     /* Add dynamic wind */
     const n_int   p01 = 0 - land->wind_value_x, p10 = land->wind_value_y;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         n_int         ly = 0;
         while ( ly < MAP_DIMENSION )
@@ -665,7 +663,7 @@ static void tile_wind_nn( n_land *land )
     n_int  tile = 0;
     /* Add dynamic wind */
     const n_int   p01 = 0 - land->wind_value_x, p10 = 0 - land->wind_value_y;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         n_int         ly = 0;
         while ( ly < MAP_DIMENSION )
@@ -693,7 +691,7 @@ static void tile_wind_nn( n_land *land )
 void tile_wind( n_land *land )
 {
     n_int  tile = 0, p01, p10;
-    title_wind_calculation( land );
+    tile_wind_calculation( land );
     p01 = land->wind_value_x;
     p10 = land->wind_value_y;
     if ( p01 > -1 )
@@ -718,7 +716,7 @@ void tile_wind( n_land *land )
             tile_wind_nn( land );
         }
     }
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         if ( ( land->tiles[tile].atmosphere_lowest < bits_neg ) || ( land->tiles[tile].atmosphere_highest > bits_pos ) )
         {
@@ -727,7 +725,7 @@ void tile_wind( n_land *land )
         tile++;
     }
     tile = 0;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         tiles_swap_atmosphere( land, tile );
         tile++;
@@ -746,7 +744,7 @@ void tile_weather_init( n_land *land )
 
     land->wind_dissipation = tile_wind_dissipation;
 
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         n_tile *tilePtr = &land->tiles[tile];
 
@@ -766,7 +764,7 @@ void tile_weather_init( n_land *land )
         tile++;
     }
     tile = 0;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         n_int ly = 0;
         while ( ly < MAP_DIMENSION )
@@ -791,12 +789,12 @@ void tile_weather_init( n_land *land )
     }
     tile = 0;
 #ifndef FAST_START_UNREALISTIC_INITIAL_WEATHER
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
 #else
-    while ( tile < ( MAP_TITLES / 2 ) )
+    while ( tile < ( MAP_TILES / 2 ) )
 #endif
     {
-        title_pack_atmosphere( land, tile );
+        tile_pack_atmosphere( land, tile );
         tile++;
     }
 }
@@ -804,9 +802,9 @@ void tile_weather_init( n_land *land )
 
 void tile_land_erase( n_land *land )
 {
-    n_byte2 save_genetics[MAP_TITLES][2];
+    n_byte2 save_genetics[MAP_TILES][2];
     n_int   tile = 0;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         save_genetics[tile][0] = land->tiles[tile].genetics[0];
         save_genetics[tile][1] = land->tiles[tile].genetics[1];
@@ -816,11 +814,11 @@ void tile_land_erase( n_land *land )
     memory_erase( ( n_byte * )land, sizeof( n_land ) );
 
     tile = 0;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         land->tiles[tile].genetics[0] = save_genetics[tile][0];
         land->tiles[tile].genetics[1] = save_genetics[tile][1];
-        title_pack_topography( land, tile );
+        tile_pack_topography( land, tile );
         tile++;
     }
 }
@@ -949,12 +947,13 @@ static void tile_patch( n_land *land, n_int tile, n_int refine )
 
 }
 
-
-//static n_int tile_memory_location( n_int px, n_int py )
-//{
-//#define    POSITIVE_TILE_COORD(num)      ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
-//    return POSITIVE_TILE_COORD( px ) + ( POSITIVE_TILE_COORD( py ) << MAP_BITS );
-//}
+#if 0
+static n_int tile_memory_location( n_int px, n_int py )
+{
+#define    POSITIVE_TILE_COORD(num)      ((num+(3*MAP_DIMENSION))&(MAP_DIMENSION-1))
+    return POSITIVE_TILE_COORD( px ) + ( POSITIVE_TILE_COORD( py ) << MAP_BITS );
+}
+#endif
 
 void tile_land_init( n_land *land )
 {
@@ -962,19 +961,19 @@ void tile_land_init( n_land *land )
     while ( refine < 7 )
     {
         n_int tile = 0;
-        while ( tile < MAP_TITLES )
+        while ( tile < MAP_TILES )
         {
             tile_patch( land, tile, refine );
             tile++;
         }
         tile = 0;
-        while ( tile < MAP_TITLES )
+        while ( tile < MAP_TILES )
         {
             tile_round( land, tile );
             tile++;
         }
         tile = 0;
-        while ( tile < MAP_TITLES )
+        while ( tile < MAP_TILES )
         {
             tiles_swap_topography( land, tile );
             tile++;
@@ -986,7 +985,7 @@ void tile_land_init( n_land *land )
 void tile_land_random( n_land *land, n_byte2 *random )
 {
     n_int tile = 0;
-    while ( tile < MAP_TITLES )
+    while ( tile < MAP_TILES )
     {
         land->tiles[tile].genetics[0] = ( n_byte2 )( ( ( math_random( random ) & 255 ) << 8 ) | ( math_random( random ) & 255 ) );
         land->tiles[tile].genetics[1] = ( n_byte2 )( ( ( math_random( random ) & 255 ) << 8 ) | ( math_random( random ) & 255 ) );

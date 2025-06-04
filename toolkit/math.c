@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -222,7 +222,7 @@ n_int math_tan( n_vect2 *p )
     n_int check_switch = 128;
     vect2_direction( &vector_facing, 0, 8 );
     best_p = vect2_dot( p, &vector_facing, 1, 1 );
-    
+
     do
     {
         n_int   temp_p;
@@ -233,7 +233,7 @@ n_int math_tan( n_vect2 *p )
             best_p = temp_p;
             return_value += check_switch;
         }
-        
+
         vect2_direction( &vector_facing, return_value - check_switch + 256, 8 );
         temp_p = vect2_dot( p, &vector_facing, 1, 1 );
         if (temp_p > best_p)
@@ -242,7 +242,8 @@ n_int math_tan( n_vect2 *p )
             return_value -= check_switch;
         }
         check_switch = check_switch >> 1;
-    } while (check_switch);
+    }
+    while (check_switch);
     return (return_value + 256) & 255;
 }
 
@@ -252,30 +253,30 @@ n_int math_spline(n_vect2 * start_vector, n_vect2 * end_vector, n_vect2 * elemen
     {
         return -1;
     }
-    
+
     n_vect2 start, end;
-    
+
     vect2_subtract( &start, &start_vector[1], &start_vector[0] );
     vect2_subtract( &end, &end_vector[1], &end_vector[0] );
-    
+
     n_int tan_start = math_tan(&start);
     n_int tan_end = math_tan(&end);
     n_int tan_new = tan_start;
     n_int tan_delta;
-    
+
     if (tan_start > tan_end)
     {
         tan_end += 256;
     }
-    
+
     tan_delta = (tan_end - tan_start) / number_elements;
-    
+
     /* pre calculation */
-    
+
     n_int loop = 0;
-    
+
     n_vect2 span;
-    
+
     span.x = start_vector[1].x;
     span.y = start_vector[1].y;
 
@@ -284,21 +285,23 @@ n_int math_spline(n_vect2 * start_vector, n_vect2 * end_vector, n_vect2 * elemen
         n_vect2 direction;
         tan_new += tan_delta;
         vect2_direction(&direction, tan_new, 1);
-        vect2_delta(&span , &direction);
+        vect2_delta(&span, &direction);
         loop++;
     }
-    
+
     n_int dx = (end_vector[0].x - start_vector[1].x);
     n_int dy = (end_vector[0].y - start_vector[1].y);
     n_int dix = (span.x - start_vector[1].x);
     n_int diy = (span.y - start_vector[1].y);
-    
+
     n_int divisor = 0;
-    
+
     if (dx && dy)
     {
         divisor = ((dix / dx) + (diy / dy)) / 2;
-    } else {
+    }
+    else
+    {
         if (dx)
         {
             divisor = (dix / dx);
@@ -308,17 +311,17 @@ n_int math_spline(n_vect2 * start_vector, n_vect2 * end_vector, n_vect2 * elemen
             divisor = (diy / dy);
         }
     }
-    
+
     if (divisor == 0)
     {
         return -1;
     }
-    
+
     /* final calculation */
     loop = 0;
-    
+
     tan_new = tan_start;
-    
+
     span.x = start_vector[1].x;
     span.y = start_vector[1].y;
 
@@ -327,12 +330,12 @@ n_int math_spline(n_vect2 * start_vector, n_vect2 * end_vector, n_vect2 * elemen
         n_vect2 direction;
         tan_new += tan_delta;
         vect2_direction(&direction, tan_new, divisor);
-        vect2_delta(&span , &direction);
+        vect2_delta(&span, &direction);
         elements[loop].x = span.x;
         elements[loop].y = span.y;
         loop++;
     }
-    
+
     return 0;
 }
 
@@ -369,30 +372,30 @@ void math_random_debug_count( n_string string )
 #ifdef DEBUG_RANDOM
 n_byte2 math_random_debug( n_byte2 *local, n_string file_string, n_int line_number )
 #else
-n_byte2 math_random( n_byte2 *local )
+n_byte2 math_random( n_byte2 *seed )
 #endif
 {
-    n_byte2 tmp0;
-    n_byte2 tmp1;
+    n_byte2 tmp0 = seed[0];
+    n_byte2 tmp1 = seed[1];
+    n_int runIt = 1;
 
-    tmp0 = local[0];
-    tmp1 = local[1];
-
-    local[0] = tmp1;
-    switch ( tmp0 & 7 )
-    {
-    case 0:
-        local[1] = ( unsigned short )( tmp1 ^ ( tmp0 >> 1 ) ^ 0xd028 );
-        break;
-    case 4:
-        local[1] = ( unsigned short )( tmp1 ^ ( tmp0 >> 2 ) ^ 0xae08 );
-        break;
-    case 8:
-        local[1] = ( unsigned short )( tmp1 ^ ( tmp0 >> 3 ) ^ 0x6320 );
-        break;
-    default:
-        local[1] = ( unsigned short )( tmp1 ^ ( tmp0 >> 1 ) );
-        break;
+    seed[0] = tmp1;
+    n_byte tempAnd7 = tmp0 & 7;
+    
+    if (tempAnd7 == 0) {
+        seed[0] = ( tmp1 ^ ( tmp0 >> 3 ) ^ 23141 );
+        runIt = 0;
+    }
+    if (tempAnd7 == 3) {
+        seed[1] = ( tmp0 ^ ( tmp1 >> 1 ) ^ 53289 );
+        runIt = 0;
+    }
+    if (tempAnd7 == 5) {
+        seed[1] = ( tmp1 ^ ( tmp0 >> 2 ) ^ 44550 );
+        runIt = 0;
+    }
+    if (runIt == 1) {
+        seed[1] = ( tmp0 ^ ( tmp1 >> 1 ) );
     }
 
 #ifdef DEBUG_RANDOM
@@ -488,81 +491,54 @@ static n_int math_min( n_int a, n_int b )
     return !( b < a ) ? a : b;
 }
 
-
-/*Given three colinear points p, q, r, the function checks if point q lies on line segment 'pr' */
-static n_byte  math_on_segment( n_vect2 *p, n_vect2 *q, n_vect2 *r )
-{
-    if ( ( q->x <= math_max( p->x, r->x ) ) &&
-            ( q->x >= math_min( p->x, r->x ) ) &&
-            ( q->y <= math_max( p->y, r->y ) ) &&
-            ( q->y >= math_min( p->y, r->y ) ) )
-    {
-        return 1;
-    }
-    return 0;
-}
-
-/* To find orientation of ordered triplet (p, q, r).
-   The function returns following values
-     0 --> p, q and r are colinear
-     1 --> Clockwise
-     2 --> Counterclockwise
+/*
+ * Line segment intersection test using parametric line equations.
+ *
+ * Two line segments can be represented as:
+ * Segment 1: P1 + t1 * (Q1 - P1) where t1 ∈ [0,1]
+ * Segment 2: P2 + t2 * (Q2 - P2) where t2 ∈ [0,1]
+ *
+ * At intersection: P1 + t1 * dir1 = P2 + t2 * dir2
+ * Solving for t1 and t2, if both are in [0,1], segments intersect.
  */
-static n_int math_orientation( n_vect2 *p, n_vect2 *q, n_vect2 *r )
+n_byte math_do_intersect(n_vect2 *p1, n_vect2 *q1, n_vect2 *p2, n_vect2 *q2)
 {
-    n_int val = ( ( q->y - p->y ) *
-                  ( r->x - q->x ) ) -
-                ( ( q->x - p->x ) *
-                  ( r->y - q->y ) );
-
-    if ( val == 0 )
+    /* Calculate direction vectors for both line segments */
+    n_int dir1_x = q1->x - p1->x;
+    n_int dir1_y = q1->y - p1->y;
+    n_int dir2_x = q2->x - p2->x;
+    n_int dir2_y = q2->y - p2->y;
+    
+    /* Calculate cross product of direction vectors */
+    n_int cross_product = dir1_x * dir2_y - dir1_y * dir2_x;
+    
+    /* If cross product is 0, direction vectors are parallel (no intersection) */
+    if (cross_product == 0)
     {
-        return 0;    /* colinear */
+        return 0;
     }
-
-    return ( val > 0 ) ? 1 : 2; /* clock or counterclock wise */
-}
-
-/* The main function that returns true if line segment 'p1q1'
-   and 'p2q2' intersect. */
-n_byte math_do_intersect( n_vect2 *p1, n_vect2 *q1, n_vect2 *p2, n_vect2 *q2 )
-{
-    /* Find the four orientations needed for general and special cases */
-    n_int o1 = math_orientation( p1, q1, p2 );
-    n_int o2 = math_orientation( p1, q1, q2 );
-    n_int o3 = math_orientation( p2, q2, p1 );
-    n_int o4 = math_orientation( p2, q2, q1 );
-
-    /* General case */
-    if ( o1 != o2 && o3 != o4 )
+    
+    /* Calculate vector from p2 to p1 */
+    n_int p2_to_p1_x = p1->x - p2->x;
+    n_int p2_to_p1_y = p1->y - p2->y;
+    
+    /* Calculate numerators for the parametric equations */
+    n_int t1_numerator = dir2_x * p2_to_p1_y - dir2_y * p2_to_p1_x;
+    n_int t2_numerator = dir1_x * p2_to_p1_y - dir1_y * p2_to_p1_x;
+    
+    /*
+     * Check if intersection point lies on both segments by ensuring 0 <= t1 <= 1 and 0 <= t2 <= 1
+     * Since t1 = t1_numerator / cross_product and t2 = t2_numerator / cross_product,
+     * we need to check the sign of cross_product to avoid division and handle negatives correctly.
+     */
+    if (cross_product > 0)
     {
-        return 1;
+        return (t1_numerator >= 0 && t1_numerator <= cross_product &&
+                t2_numerator >= 0 && t2_numerator <= cross_product);
     }
-
-    /* Special Cases */
-    /* p1, q1 and p2 are colinear and p2 lies on segment p1q1 */
-    if ( o1 == 0 && math_on_segment( p1, p2, q1 ) )
+    else
     {
-        return 1;
+        return (t1_numerator <= 0 && t1_numerator >= cross_product &&
+                t2_numerator <= 0 && t2_numerator >= cross_product);
     }
-
-    /* p1, q1 and p2 are colinear and q2 lies on segment p1q1 */
-    if ( o2 == 0 && math_on_segment( p1, q2, q1 ) )
-    {
-        return 1;
-    }
-
-    /* p2, q2 and p1 are colinear and p1 lies on segment p2q2 */
-    if ( o3 == 0 && math_on_segment( p2, p1, q2 ) )
-    {
-        return 1;
-    }
-
-    /* p2, q2 and q1 are colinear and q1 lies on segment p2q2 */
-    if ( o4 == 0 && math_on_segment( p2, q1, q2 ) )
-    {
-        return 1;
-    }
-
-    return 0; /* Doesn't fall in any of the above cases */
 }

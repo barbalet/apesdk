@@ -35,7 +35,7 @@ The ApeSDK is currently used in:
 
 * **Simulated Ape** - a detailed simulation app for Mac and Windows (formerly known as *Nervana* and *Noble Ape*),
 
-* **ApeSim** - an exploratory iOS app based on a UI-stripped-down version of *Simulated Ape*,
+* **Simulated War** - a pitched battle simulation, (included with Simulated Ape),
 
 * **Simulated Urban** - a detailed urban environment simulation with the organic Ape agents interacting through a cityscape, (included with Simulated Ape), and,
 

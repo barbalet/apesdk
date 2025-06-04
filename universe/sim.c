@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -344,7 +344,7 @@ void sim_console( n_string simulation_filename, n_uint randomise )
     {
         do
         {}
-        while ( io_console( group,
+        while ( io_console( &group,
                             ( simulated_console_command * )control_commands,
                             io_console_entry,
                             io_console_out ) == 0 );
@@ -1516,12 +1516,10 @@ void sim_update_output( void )
     {
         return;
     }
-#ifndef    _WIN32
     sim_writing_output = 1;
     memory_erase( ( n_byte * )sim_console_output, STRING_BLOCK_SIZE );
     watch_control( &group, being_get_select_name( &group ), group.select, sim_console_output );
     sim_writing_output = 0;
-#endif
 }
 
 static KIND_OF_USE local_execution = KIND_PRE_STARTUP;
@@ -1742,7 +1740,7 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     timing.delta_frames = 0;
     timing.count_frames = 0;
 
-#if 0
+#if 1
     group.ext_birth = &debug_birth_event;
     group.ext_death = &debug_death_event;
 #else
@@ -1771,7 +1769,6 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     being_remains_init( &( group.remains ) ); /* Eventually this should be captured through the file handling and moved into the code below */
 
     local_execution = kind;
-
     return ( ( void * ) offbuffer );
 }
 
@@ -1797,7 +1794,7 @@ static void sim_flood_loop( simulated_group *group, simulated_being *local, void
     n_vect2 location;
 
     being_space( local, &location );
-    land_convert_to_map( &location );
+    spacetime_convert_to_map( &location );
 
     if ( land_location_vect( &location ) < 160 )
     {

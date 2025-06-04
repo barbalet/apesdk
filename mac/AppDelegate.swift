@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -35,10 +35,12 @@
 
 import Cocoa
 
-@NSApplicationMain
-@objc class AppDelegate: NSObject, NSApplicationDelegate {
+@main
+class AppDelegate: NSObject, NSApplicationDelegate {
+    
     @IBOutlet weak var window: NSWindow!
-
+    var shared:ASShared!
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
         let menu = NSMenu()
@@ -49,5 +51,9 @@ import Cocoa
     
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+    }
+    
+    func add(shared: ASShared) {
+        self.shared = shared
     }
 }

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -214,7 +214,7 @@ n_int io_length( n_string value, n_int max )
  }
 
  */
-
+#if 1
 n_int io_find( n_string check, n_int from, n_int max, n_string value_find, n_int value_find_length )
 {
     n_int  loop = from;
@@ -237,6 +237,41 @@ n_int io_find( n_string check, n_int from, n_int max, n_string value_find, n_int
     }
     return -1;
 }
+#else
+n_int io_find( n_string check, n_int from, n_int max, n_string value_find, n_int value_find_length )
+{
+    n_int loop = from;
+    n_int check_length = 0;
+    n_int match_start = from;
+    
+    while ( loop < max )
+    {
+        if ( check[loop] == value_find[check_length] )
+        {
+            if ( check_length == 0 )
+            {
+                match_start = loop;  // Remember where this potential match started
+            }
+            check_length++;
+            if ( check_length == value_find_length )
+            {
+                return match_start;  // Return the start position of the match
+            }
+        }
+        else
+        {
+            if ( check_length > 0 )
+            {
+                // Backtrack: restart search from position after where partial match began
+                loop = match_start;
+                check_length = 0;
+            }
+        }
+        loop++;
+    }
+    return -1;
+}
+#endif
 
 void io_string_write( n_string dest, n_string insert, n_int *pos )
 {

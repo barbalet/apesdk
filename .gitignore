@@ -7,3 +7,4 @@ xcschememanagement.plist
 *.xcbkptlist
 
 *.xcbkptlist
+.vscode/*

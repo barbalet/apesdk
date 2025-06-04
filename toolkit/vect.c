@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -465,6 +465,29 @@ n_vect2 *vect2_min_max_init( void )
     return min_max;
 }
 
+void vect2_min_max_permutation( n_vect2 * points, n_vect2 * minmax)
+{
+    n_int px = points->x;
+    n_int py = points->y;
+    if ( px < minmax[0].x )
+    {
+        minmax[0].x = px;
+    }
+    if ( py < minmax[0].y )
+    {
+        minmax[0].y = py;
+    }
+
+    if ( px > minmax[1].x )
+    {
+        minmax[1].x = px;
+    }
+    if ( py > minmax[1].y )
+    {
+        minmax[1].y = py;
+    }
+}
+
 void vect2_min_max( n_vect2 *points, n_int number, n_vect2 *maxmin )
 {
     n_int loop = 0;
@@ -774,5 +797,16 @@ n_int vect2_unwrap_number( n_array * array, n_vect2 * entry, n_int number)
 n_int vect2_unwrap_number_entry( n_string pass_through, n_byte * buffer, n_int number)
 {
     return vect2_unwrap_number( (n_array *) pass_through, (n_vect2 *) buffer, number);
+}
+
+n_int vect2_unwrap_quad( n_string pass_through, n_byte * buffer)
+{
+    return vect2_unwrap_number_entry( pass_through, buffer, 4);
+
+}
+
+n_int vect2_unwrap_line( n_string pass_through, n_byte * buffer)
+{
+    return vect2_unwrap_number_entry( pass_through, buffer, 2);
 }
 

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -142,11 +142,16 @@ memory_list *memory_list_new( n_uint size, n_uint number )
     return new_list;
 }
 
-void memory_list_copy( memory_list *list, n_byte *data )
+void memory_list_copy( memory_list *list, n_byte *data, n_uint size)
 {
-    memory_copy( data, &( list->data[list->unit_size * list->count] ), list->unit_size );
-    list->count++;
-    if ( list->count == list->max )
+    memory_copy( data, &( list->data[list->unit_size * list->count] ), size );
+    list->count += (size /(list->unit_size));
+    if (size % (list->unit_size))
+    {
+        (void)SHOW_ERROR("wrong base unit size");
+    }
+
+    if ( list->count >= list->max )
     {
         n_uint   new_max = ( list->max * 2 );
         n_uint   new_size = new_max * list->unit_size;
@@ -176,7 +181,7 @@ int_list *int_list_new( n_uint number )
 
 void int_list_copy( int_list *list, n_int int_add)
 {
-    memory_list_copy(list, (n_byte *) &int_add);
+    memory_list_copy(list, (n_byte *) &int_add, sizeof(int_add));
 }
 
 void int_list_free( int_list **value )
@@ -187,7 +192,7 @@ void int_list_free( int_list **value )
 n_int int_list_find( int_list * list,  n_int location, n_int * error)
 {
     n_int * data_int = (n_int *) list->data;
-    
+
     if ((location > list->count) || (location < 0))
     {
         *error = -1;
@@ -244,7 +249,7 @@ void number_array_list_free(number_array_list ** nal)
 
 static void number_array_list_copy(number_array_list * nal, number_array * na)
 {
-    memory_list_copy(nal, (n_byte *)na);
+    memory_list_copy(nal, (n_byte *)na, sizeof(number_array));
 }
 
 number_array * number_array_list_find(number_array_list * nal, void * array)
@@ -274,13 +279,13 @@ number_array * number_array_list_find_add(number_array_list * nal, void * array)
         }
         loop++;
     }
-    
+
     number_array * return_value = memory_new(sizeof(number_array));
     return_value->array = array;
     return_value->number = int_list_new(8);
-    
+
     number_array_list_copy(nal, return_value);
-    
+
     return return_value;
 }
 

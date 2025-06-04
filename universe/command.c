@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2023 Tom Barbalet. All rights reserved.
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -620,7 +620,7 @@ n_int command_simulation( void *ptr, n_string response, n_console_output output_
 
     io_three_strings( beingstr, beingstr, "Tide level: ", tide_level, 1 );
 
-    io_time_to_string( time );
+    spacetime_to_string( time );
 
     if ( timing->delta_cycles )
     {
@@ -1493,7 +1493,7 @@ static void watch_being( void *ptr, n_console_output output_function )
 
         watch_string_length = 0;
 
-        io_time_to_string( str );
+        spacetime_to_string( str );
         io_string_write( beingstr, str, &watch_string_length );
         histogram_being_state( group, ( n_uint * )histogram, 1 );
         for ( i = 0; i < BEING_STATES; i++ )
