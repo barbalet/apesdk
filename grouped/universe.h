@@ -48,7 +48,7 @@
 #ifdef TARGET_OS_IOS
 #undef  BRAIN_ON
 #else
-#define BRAIN_ON
+#undef BRAIN_ON
 #endif
 
 #define  FEATURE_SET
