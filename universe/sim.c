@@ -626,6 +626,8 @@ void sim_change_selected( n_byte forwards )
     }
 }
 
+#ifdef APESCRIPT_INCLUDED
+
 static n_int sim_input( void *vcode, n_byte kind, n_int value )
 {
     n_individual_interpret *code = ( n_individual_interpret * )vcode;
@@ -1253,6 +1255,8 @@ n_int     sim_interpret( n_file *input_file )
     return 0;
 }
 
+#endif
+
 #ifdef BRAIN_ON
 static void sim_brain_loop( simulated_group *group, simulated_being *local_being, void *data )
 {
@@ -1414,7 +1418,7 @@ static void sim_end_conditions( void *vindividual, void *structure, void *data )
     being_set_parasites( local_being, ( n_byte )local_parasites );
 }
 
-
+#ifdef APESCRIPT_INCLUDED
 
 static void sim_being_interpret( simulated_group *group, simulated_being *local_being, void *data )
 {
@@ -1439,7 +1443,7 @@ static void sim_being_interpret( simulated_group *group, simulated_being *local_
         interpret_cleanup( &interpret );
     }
 }
-
+#endif
 
 static void sim_time( simulated_group *group )
 {
@@ -1577,11 +1581,13 @@ void sim_cycle( void )
     loop_being_no_sim_no_data( group.beings, group.num, sim_being_awake_loop_no_sim );
     loop_being_no_sim_no_data( group.beings, group.num, being_cycle_universal );
 
+#ifdef APESCRIPT_INCLUDED
     if ( interpret )
     {
         loop_being( &group, sim_being_interpret, PROCESSING_WELTER_WEIGHT );
     }
     else
+#endif
     {
         /** Listen for any shouts */
         loop_being( &group, being_listen, PROCESSING_FEATHER_WEIGHT );
@@ -1721,11 +1727,13 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
     if ( kind == KIND_NEW_SIMULATION )
     {
+#ifdef APESCRIPT_INCLUDED
         if ( interpret )
         {
             interpret_cleanup( &interpret );
             interpret = 0L;
         }
+#endif
         memory_execute(io_command_line_execution_set);
     }
     timing.real_time = randomise;
@@ -1779,7 +1787,9 @@ void sim_close( void )
 #ifndef _WIN32
     sim_console_clean_up();
 #endif
+#ifdef APESCRIPT_INCLUDED
     interpret_cleanup( &interpret );
+#endif
     memory_free( ( void ** ) &offbuffer );
     /*death_record_file_cleanup();*/
 }

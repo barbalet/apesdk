@@ -33,6 +33,8 @@
 
  ****************************************************************/
 
+#ifdef APESCRIPT_INCLUDED
+
 #include <math.h>
 
 #include "../toolkit/toolkit.h"
@@ -1187,3 +1189,4 @@ void vascular_draw( n_genetics *genetics,
 #endif
 }
 
+#endif

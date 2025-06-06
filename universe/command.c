@@ -2374,6 +2374,7 @@ static n_int command_base_open( void *ptr, n_string response, n_console_output o
             return SHOW_ERROR( "Failed to open file" );
         }
 
+#ifdef APESCRIPT_INCLUDED
         if ( script )
         {
             if ( sim_interpret( file_opened ) != 0 )
@@ -2384,6 +2385,7 @@ static n_int command_base_open( void *ptr, n_string response, n_console_output o
             }
         }
         else
+#endif
         {
             if ( tranfer_in( file_opened ) != 0 )
             {

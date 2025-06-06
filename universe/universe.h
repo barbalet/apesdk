@@ -48,7 +48,11 @@
 #ifdef TARGET_OS_IOS
 #undef  BRAIN_ON
 #else
+#ifdef APESCRIPT_INCLUDED
 #define BRAIN_ON
+#else
+#undef  BRAIN_ON
+#endif
 #endif
 
 #define  FEATURE_SET
@@ -1082,7 +1086,11 @@ n_file   *tranfer_out( void );
 n_file   *tranfer_out_json( void );
 n_int     tranfer_in( n_file *input_file );
 
+
+#ifdef APESCRIPT_INCLUDED
 n_int     sim_interpret( n_file *input_file );
+#endif
+
 void      sim_close( void );
 
 simulated_timing *sim_timing( void );

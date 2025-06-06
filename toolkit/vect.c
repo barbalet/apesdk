@@ -38,7 +38,7 @@
  */
 
 #include "toolkit.h"
-#include "stdio.h"
+#include <stdio.h>
 
 /** \brief new_sd stands for new sine dump and hold the sine and cosine values for the simulation */
 static const n_int	new_sd[256] =

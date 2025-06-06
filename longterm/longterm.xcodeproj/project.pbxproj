@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4A812CE72DF1F6FF001C45E0 /* spacetime.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A812CE62DF1F6FF001C45E0 /* spacetime.c */; };
+		4A40D8C42DF2BDB8005C5D7E /* skeleton.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A40D8C32DF2BDB8005C5D7E /* skeleton.c */; };
+		4A9B52862DF1255800AE75F7 /* spacetime.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A9B52852DF1255800AE75F7 /* spacetime.c */; };
 		4AB0C5132B0E62C800022B4D /* longterm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5122B0E62C800022B4D /* longterm.c */; };
 		4AB0C51B2B0E62F200022B4D /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5142B0E62F100022B4D /* file.c */; };
 		4AB0C51C2B0E62F200022B4D /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5152B0E62F100022B4D /* math.c */; };
@@ -29,8 +30,6 @@
 		4AB0C53E2B0E633400022B4D /* body.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5342B0E633300022B4D /* body.c */; };
 		4AB0C53F2B0E633400022B4D /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5352B0E633300022B4D /* episodic.c */; };
 		4AB0C5412B0E633400022B4D /* brain.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5372B0E633400022B4D /* brain.c */; };
-		4AB0C5472B0E638200022B4D /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5442B0E638200022B4D /* interpret.c */; };
-		4AB0C5482B0E638200022B4D /* parse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C5452B0E638200022B4D /* parse.c */; };
 		4AB0C54F2B0E639500022B4D /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C54A2B0E639500022B4D /* sim.c */; };
 		4AB0C5502B0E639500022B4D /* command.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C54B2B0E639500022B4D /* command.c */; };
 		4AB0C5512B0E639500022B4D /* loop.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AB0C54D2B0E639500022B4D /* loop.c */; };
@@ -50,7 +49,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4A812CE62DF1F6FF001C45E0 /* spacetime.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = spacetime.c; path = ../sim/spacetime.c; sourceTree = SOURCE_ROOT; };
+		4A40D8C32DF2BDB8005C5D7E /* skeleton.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = skeleton.c; path = ../entity/skeleton.c; sourceTree = SOURCE_ROOT; };
+		4A9B52852DF1255800AE75F7 /* spacetime.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = spacetime.c; path = ../sim/spacetime.c; sourceTree = SOURCE_ROOT; };
 		4AB0C5052B0E621800022B4D /* longterm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = longterm; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AB0C5122B0E62C800022B4D /* longterm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = longterm.c; path = ../longterm.c; sourceTree = "<group>"; };
 		4AB0C5142B0E62F100022B4D /* file.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = file.c; path = ../toolkit/file.c; sourceTree = "<group>"; };
@@ -77,9 +77,6 @@
 		4AB0C5342B0E633300022B4D /* body.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = body.c; path = ../entity/body.c; sourceTree = "<group>"; };
 		4AB0C5352B0E633300022B4D /* episodic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = episodic.c; path = ../entity/episodic.c; sourceTree = "<group>"; };
 		4AB0C5372B0E633400022B4D /* brain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = brain.c; path = ../entity/brain.c; sourceTree = "<group>"; };
-		4AB0C5442B0E638200022B4D /* interpret.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = interpret.c; path = ../script/interpret.c; sourceTree = "<group>"; };
-		4AB0C5452B0E638200022B4D /* parse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = parse.c; path = ../script/parse.c; sourceTree = "<group>"; };
-		4AB0C5462B0E638200022B4D /* script.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = script.h; path = ../script/script.h; sourceTree = "<group>"; };
 		4AB0C5492B0E639500022B4D /* universe_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = universe_internal.h; path = ../universe/universe_internal.h; sourceTree = "<group>"; };
 		4AB0C54A2B0E639500022B4D /* sim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sim.c; path = ../universe/sim.c; sourceTree = "<group>"; };
 		4AB0C54B2B0E639500022B4D /* command.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = command.c; path = ../universe/command.c; sourceTree = "<group>"; };
@@ -103,7 +100,6 @@
 			isa = PBXGroup;
 			children = (
 				4AB0C5432B0E636400022B4D /* universe */,
-				4AB0C5422B0E635F00022B4D /* script */,
 				4AB0C5122B0E62C800022B4D /* longterm.c */,
 				4AB0C5112B0E62AC00022B4D /* toolkit */,
 				4AB0C5102B0E62A800022B4D /* sim */,
@@ -123,6 +119,7 @@
 		4AB0C50F2B0E623600022B4D /* entity */ = {
 			isa = PBXGroup;
 			children = (
+				4A40D8C32DF2BDB8005C5D7E /* skeleton.c */,
 				4AB0C5312B0E633300022B4D /* being.c */,
 				4AB0C5342B0E633300022B4D /* body.c */,
 				4AB0C5372B0E633400022B4D /* brain.c */,
@@ -141,7 +138,7 @@
 		4AB0C5102B0E62A800022B4D /* sim */ = {
 			isa = PBXGroup;
 			children = (
-				4A812CE62DF1F6FF001C45E0 /* spacetime.c */,
+				4A9B52852DF1255800AE75F7 /* spacetime.c */,
 				4AB0C5242B0E630A00022B4D /* audio.c */,
 				4AB0C5252B0E630A00022B4D /* console.c */,
 				4AB0C5212B0E630A00022B4D /* land.c */,
@@ -164,16 +161,6 @@
 				4AB0C51A2B0E62F100022B4D /* vect.c */,
 			);
 			name = toolkit;
-			sourceTree = "<group>";
-		};
-		4AB0C5422B0E635F00022B4D /* script */ = {
-			isa = PBXGroup;
-			children = (
-				4AB0C5442B0E638200022B4D /* interpret.c */,
-				4AB0C5452B0E638200022B4D /* parse.c */,
-				4AB0C5462B0E638200022B4D /* script.h */,
-			);
-			name = script;
 			sourceTree = "<group>";
 		};
 		4AB0C5432B0E636400022B4D /* universe */ = {
@@ -249,24 +236,23 @@
 				4AB0C53A2B0E633400022B4D /* food.c in Sources */,
 				4AB0C51F2B0E62F200022B4D /* object.c in Sources */,
 				4AB0C5282B0E630A00022B4D /* tile.c in Sources */,
-				4AB0C5482B0E638200022B4D /* parse.c in Sources */,
 				4AB0C53F2B0E633400022B4D /* episodic.c in Sources */,
 				4AB0C52A2B0E630A00022B4D /* console.c in Sources */,
 				4AB0C53B2B0E633400022B4D /* immune.c in Sources */,
 				4AB0C53C2B0E633400022B4D /* being.c in Sources */,
 				4AB0C5502B0E639500022B4D /* command.c in Sources */,
-				4AB0C5472B0E638200022B4D /* interpret.c in Sources */,
 				4AB0C5132B0E62C800022B4D /* longterm.c in Sources */,
 				4AB0C54F2B0E639500022B4D /* sim.c in Sources */,
 				4AB0C51D2B0E62F200022B4D /* io.c in Sources */,
 				4AB0C5412B0E633400022B4D /* brain.c in Sources */,
-				4A812CE72DF1F6FF001C45E0 /* spacetime.c in Sources */,
+				4A9B52862DF1255800AE75F7 /* spacetime.c in Sources */,
 				4AB0C5202B0E62F200022B4D /* vect.c in Sources */,
 				4AB0C51E2B0E62F200022B4D /* memory.c in Sources */,
 				4AB0C5382B0E633400022B4D /* speak.c in Sources */,
 				4AB0C53E2B0E633400022B4D /* body.c in Sources */,
 				4AB0C51C2B0E62F200022B4D /* math.c in Sources */,
 				4AB0C5522B0E639500022B4D /* transfer.c in Sources */,
+				4A40D8C42DF2BDB8005C5D7E /* skeleton.c in Sources */,
 				4AB0C53D2B0E633400022B4D /* drives.c in Sources */,
 				4AB0C5512B0E639500022B4D /* loop.c in Sources */,
 				4AB0C52B2B0E630A00022B4D /* territory.c in Sources */,

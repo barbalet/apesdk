@@ -37,7 +37,7 @@
  *  \brief  This covers the primary graphics of Simulated Ape.
  */
 
-#include "stdio.h"
+#include <stdio.h>
 #include "graph.h"
 
 typedef void ( graph_func_set_color )( n_byte *buffer, n_rgba32 *color, n_int number );
