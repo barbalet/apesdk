@@ -36,10 +36,9 @@
 #ifndef SIMULATEDAPE_ENTITY_H
 #define SIMULATEDAPE_ENTITY_H
 
-#include "../toolkit/toolkit.h"
-#include "../script/script.h"
-#include "../sim/sim.h"
-#include "../universe/universe.h"
+#include "toolkit.h"
+#include "sim.h"
+#include "universe.h"
 
 #define    LAND_ON
 #define    WEATHER_ON

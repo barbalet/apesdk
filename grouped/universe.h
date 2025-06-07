@@ -32,9 +32,8 @@
  this software.
 
  ****************************************************************/
-#include "../toolkit/toolkit.h"
-#include "../script/script.h"
-#include "../sim/sim.h"
+#include "toolkit.h"
+#include "sim.h"
 
 #ifndef SIMULATEDAPE_UNIVERSE_H
 #define SIMULATEDAPE_UNIVERSE_H
@@ -124,7 +123,7 @@ static const n_byte    operators[17][7] =
 /*4*/
 typedef enum
 {
-    VARIABLE_VECT_X = ( VARIABLE_IF + 1 ),
+    VARIABLE_VECT_X = ( 3 + 1 ),
     VARIABLE_VECT_Y,
 
     VARIABLE_RANDOM,
