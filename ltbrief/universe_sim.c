@@ -461,31 +461,6 @@ static n_int sim_input( void *vcode, n_byte kind, n_int value )
     {
     case VARIABLE_BRAIN_VALUE:
     {
-#ifdef BRAIN_ON
-        n_int    current_x = local_vr[VARIABLE_BRAIN_X - VARIABLE_VECT_ANGLE];
-        n_int    current_y = local_vr[VARIABLE_BRAIN_Y - VARIABLE_VECT_ANGLE];
-        n_int    current_z = local_vr[VARIABLE_BRAIN_Z - VARIABLE_VECT_ANGLE];
-
-        if ( ( value < 0 ) || ( value > 255 ) )
-        {
-            return APESCRIPT_ERROR( code, AE_VALUE_OUT_OF_RANGE );
-        }
-
-        if ( ( current_x < 0 ) || ( current_y < 0 ) || ( current_z < 0 ) ||
-                ( current_x > 31 ) || ( current_y > 31 ) || ( current_z > 31 ) )
-        {
-            return APESCRIPT_ERROR( code, AE_COORDINATES_OUT_OF_RANGE );
-        }
-        {
-            simulated_being *local_being = ( simulated_being * )( ( n_individual_interpret * )code )->interpret_data;
-            n_byte *local_brain = being_brain( local_being );
-            if ( local_brain != 0L )
-            {
-                TRACK_BRAIN( local_brain, current_x, current_y, current_z ) = ( n_byte ) value;
-            }
-        }
-        /* add brain value */
-#endif
         return 0;
     }
 
@@ -743,25 +718,6 @@ static n_int sim_output( void *vcode, void *vindividual, n_byte *kind, n_int *nu
             break;
             case VARIABLE_BRAIN_VALUE:
             {
-#ifdef BRAIN_ON
-                n_int    current_x = local_vr[VARIABLE_BRAIN_X - VARIABLE_VECT_ANGLE];
-                n_int    current_y = local_vr[VARIABLE_BRAIN_Y - VARIABLE_VECT_ANGLE];
-                n_int    current_z = local_vr[VARIABLE_BRAIN_Z - VARIABLE_VECT_ANGLE];
-
-                if ( ( current_x < 0 ) || ( current_y < 0 ) || ( current_z < 0 ) ||
-                        ( current_x > 31 ) || ( current_y > 31 ) || ( current_z > 31 ) )
-                {
-                    return APESCRIPT_ERROR( individual, AE_COORDINATES_OUT_OF_RANGE );
-                }
-                {
-                    simulated_being *local_being = ( simulated_being * )individual->interpret_data;
-                    n_byte *local_brain = being_brain( local_being );
-                    if ( local_brain != 0L )
-                    {
-                        local_number = TRACK_BRAIN( local_brain, current_x, current_y, current_z );
-                    }
-                }
-#endif
             }
             break;
             default:
@@ -1064,21 +1020,6 @@ n_int     sim_interpret( n_file *input_file )
 
 #endif
 
-#ifdef BRAIN_ON
-static void sim_brain_loop( simulated_group *group, simulated_being *local_being, void *data )
-{
-    n_byte2 local_brain_state[3];
-
-    if ( being_brainstates( local_being, ( local_being->delta.awake == 0 ), local_brain_state ) )
-    {
-        n_byte            *local_brain = being_brain( local_being );
-        if ( local_brain != 0L )
-        {
-            being_brain_cycle( local_brain, local_brain_state );
-        }
-    }
-}
-#endif
 
 
 #ifdef BRAINCODE_ON
@@ -1300,14 +1241,7 @@ void sim_cycle( void )
         loop_being( &group, drives_cycle, PROCESSING_LIGHT_WEIGHT );
     }
 
-    if ( land_time() & 1 )
-    {
-#ifdef BRAIN_ON
-        loop_being( &group, sim_brain_loop, PROCESSING_WELTER_WEIGHT );
-#endif
-    }
 #ifdef BRAINCODE_ON
-    else
     {
         loop_being( &group, sim_brain_dialogue_loop, PROCESSING_MIDDLE_WEIGHT );
     }

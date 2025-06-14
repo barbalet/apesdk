@@ -876,72 +876,6 @@ n_byte being_awake( simulated_being *local )
  */
 
 
-#ifdef BRAINCODE_ON
-#ifdef BRAIN_ON
-
-static void being_brain_probe( simulated_being *local )
-{
-    n_byte *local_brain = being_brain( local );
-    n_int    i = 0;
-    n_int    count[NUMBER_BRAINPROBE_TYPES] = {0};
-
-
-    if ( local_brain == 0L )
-    {
-        return;
-    }
-
-    while ( i < BRAINCODE_PROBES )
-    {
-        count[local->braindata.brainprobe[i++].type]++;
-    }
-
-    /** check to ensure that there are a minimum number of sensors and actuators */
-    if ( count[INPUT_SENSOR] < ( BRAINCODE_PROBES >> 2 ) )
-    {
-        local->braindata.brainprobe[0].type = INPUT_SENSOR;
-    }
-    else if ( count[OUTPUT_ACTUATOR] < ( BRAINCODE_PROBES >> 2 ) )
-    {
-        local->braindata.brainprobe[0].type = OUTPUT_ACTUATOR;
-    }
-
-    /** update each probe */
-    i = 0;
-
-    while ( i < BRAINCODE_PROBES )
-    {
-        local->braindata.brainprobe[i].state++;
-        if ( local->braindata.brainprobe[i].state >= local->braindata.brainprobe[i].frequency )
-        {
-            n_byte *local_braincode = being_braincode_internal( local );
-            /** position within the brain */
-            n_int position_in_brain = ( ( local->braindata.brainprobe[i].position * ( SINGLE_BRAIN >> 8 ) ) ) & ( SINGLE_BRAIN - 1 );
-            n_int position_in_braincode = local->braindata.brainprobe[i].address % BRAINCODE_SIZE;
-
-            local->braindata.brainprobe[i].state = 0;
-
-            if ( local->braindata.brainprobe[i].type == INPUT_SENSOR )
-            {
-                /** address within braincode */
-                n_int set_value = ( local_brain[position_in_brain] + local->braindata.brainprobe[i].offset ) & 255;
-                /** read from brain */
-                local_braincode[position_in_braincode] = ( n_byte )set_value;
-            }
-            else
-            {
-                /** address within braincode */
-                n_int set_value = ( local_braincode[position_in_braincode] + local->braindata.brainprobe[i].offset ) & 255;
-                /** write to brain */
-                local_brain[position_in_brain] = ( n_byte )set_value;
-            }
-        }
-        i++;
-    }
-}
-#endif
-#endif
-
 /** stuff still goes on during sleep */
 void being_cycle_universal( simulated_being *local )
 {
@@ -953,13 +887,6 @@ void being_cycle_universal( simulated_being *local )
     {
         being_energy_delta( local, 0 - immune_energy_used );
     }
-
-#ifdef BRAINCODE_ON
-#ifdef BRAIN_ON
-    /** may need to add external probe linking too */
-    being_brain_probe( local );
-#endif
-#endif
 
     if ( ( local->delta.awake == 0 ) && local )
     {

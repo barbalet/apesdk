@@ -44,15 +44,6 @@
 #define  BRAINCODE_ON  /* entity */
 #define  IMMUNE_ON     /* entity */
 
-#ifdef TARGET_OS_IOS
-#undef  BRAIN_ON
-#else
-#ifdef APESCRIPT_INCLUDED
-#define BRAIN_ON
-#else
-#undef  BRAIN_ON
-#endif
-#endif
 
 #define  FEATURE_SET
 
@@ -986,9 +977,7 @@ typedef struct
     n_byte braincode_register[BRAINCODE_PSPACE_REGISTERS];
     simulated_ibrain_probe brainprobe[BRAINCODE_PROBES];
 #endif
-#ifdef BRAIN_ON
-    n_byte            brain[DOUBLE_BRAIN];
-#endif
+
     n_byte2     brain_state[6];
     n_byte2     script_overrides;
     n_byte      attention[ATTENTION_SIZE];

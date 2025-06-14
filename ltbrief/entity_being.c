@@ -727,18 +727,6 @@ n_byte2 being_state( simulated_being *value )
 
 /*#pragma mark - brainstates*/
 
-#ifdef BRAIN_ON
-
-void being_set_brainstates( simulated_being *value, n_int asleep, n_byte2 val1, n_byte2 val2, n_byte2 val3 )
-{
-    n_int three_offset = ( asleep ? 0 : 3 );
-
-    value->braindata.brain_state[three_offset + 0] = val1;
-    value->braindata.brain_state[three_offset + 1] = val2;
-    value->braindata.brain_state[three_offset + 2] = val3;
-}
-
-#endif
 
 n_int being_brainstates( simulated_being *value, n_int asleep, n_byte2 *states )
 {
@@ -854,12 +842,6 @@ n_int being_posture_under( simulated_being *value, enum posture_type post )
 
 /*#pragma mark - brain*/
 
-#ifdef BRAIN_ON
-n_byte *being_brain( simulated_being *value )
-{
-    return value->braindata.brain;
-}
-#endif
 
 /*#pragma mark - misc*/
 
@@ -1637,19 +1619,6 @@ n_int being_init( simulated_being *beings, n_int number,
 #endif
     being_erase( local );
 
-#ifdef BRAIN_ON
-    {
-        n_byte       *brain_memory = being_brain( local );
-        if ( brain_memory != 0L )
-        {
-            memory_erase( brain_memory, DOUBLE_BRAIN );
-        }
-        else
-        {
-            return SHOW_ERROR( "Brain memory not available" );
-        }
-    }
-#endif
 
     being_set_goal_none( local );
 
@@ -1871,16 +1840,7 @@ n_int being_init( simulated_being *beings, n_int number,
     }
 
     local->delta.crowding = MIN_CROWDING;
-#ifdef BRAIN_ON
-    if ( being_brain( local ) )
-    {
-        /** These magic numbers were found in March 2001 -
-         feel free to change them! */
-        being_set_brainstates( local, 0, 171, 0, 146 );
-        being_set_brainstates( local, 1, 86, 501, 73 );
 
-    }
-#endif
     return 0;
 }
 

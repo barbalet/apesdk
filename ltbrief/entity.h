@@ -387,9 +387,6 @@ void episodic_close(
 
 n_byte being_los_projection( simulated_being *local, n_vect2 *extern_end );
 
-#ifdef BRAIN_ON
-n_byte *being_brain( simulated_being *value );
-#endif
 
 simulated_iepisodic *being_episodic( simulated_being *value );
 simulated_isocial *being_social( simulated_being *value );
