@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 import Cocoa
@@ -39,7 +35,7 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBOutlet weak var window: NSWindow!
-    var shared:ASShared!
+    var shared:SimulationShared!
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -53,7 +49,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Insert code here to tear down your application
     }
     
-    func add(shared: ASShared) {
+    func add(shared: SimulationShared) {
         self.shared = shared
     }
 }

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 /*! \file   toolkit.h
@@ -46,7 +42,7 @@
 
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 
-
+#undef APESCRIPT_INCLUDED
 // #define COMMON_DEBUG_ON /* should be passed via target definitions via cmd */
 
 #ifdef COMMON_DEBUG_ON

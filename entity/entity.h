@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -27,17 +27,12 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 #ifndef SIMULATEDAPE_ENTITY_H
 #define SIMULATEDAPE_ENTITY_H
 
 #include "../toolkit/toolkit.h"
-#include "../script/script.h"
 #include "../sim/sim.h"
 #include "../universe/universe.h"
 

@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -506,13 +502,7 @@ void tile_cycle( n_land *land )
 {
     const n_c_int dissipation = ( n_c_int )( land->wind_dissipation + 1020 );
     n_int  tile = 0;
-/*
-    n_int  max_atm = 0;
-    n_int  max_x = -1, max_y = -1;
 
-    n_int  min_atm = 0;
-    n_int  min_x = -1, min_y = -1;
-*/
     while ( tile < MAP_TILES )
     {
         n_int  new_delta = 0;
@@ -533,20 +523,7 @@ void tile_cycle( n_land *land )
                     + ( 2 * tiles_atmosphere( land, tile, 0, lx - 1, ly ) )
                     - ( 2 * tiles_atmosphere( land, tile, 0, lx + 1, ly ) )
                     - ( 2 * tiles_atmosphere( land, tile, 0, lx, ly + 1 ) );
-#if 0
-                if (local_atm > max_atm)
-                {
-                    max_atm = local_atm;
-                    max_x = lx;
-                    max_y = ly;
-                }
-                if (min_atm > local_atm)
-                {
-                    min_atm = local_atm;
-                    min_x = lx;
-                    min_y = ly;
-                }
-#endif
+
                 value += ( n_c_int ) ( ( local_atm - land->tiles[tile].local_delta ) >> MAP_BITS ) + tiles_pressure( land, 0, lx, ly );
 
                 tiles_set_atmosphere( land, tile, 1, lx, ly, value );
@@ -564,6 +541,31 @@ void tile_cycle( n_land *land )
     while ( tile < MAP_TILES )
     {
         tiles_swap_atmosphere( land, tile );
+        tile++;
+    }
+}
+
+void tile_lightning( n_land *land )
+{
+    n_int tile = 0;
+    while ( tile < MAP_TILES )
+    {
+        n_byte2 lowest = land->tiles[ tile ].delta_pressure_lowest;
+        n_byte2 highest = land->tiles[ tile ].delta_pressure_highest;
+
+        n_byte2 pressure_cut = ( lowest + ( highest * 3 ) ) / 4;
+        
+        n_uint lp = 0;
+        while (lp < MAP_AREA)
+        {
+            n_byte value = 0;
+            if (land->tiles[ tile ].delta_pressure[ lp ] > pressure_cut)
+            {
+                value = (lp >> 4) & 7;
+            }
+            land->tiles[ tile ].lightning[ lp ] = value;
+            lp++;
+        }
         tile++;
     }
 }
@@ -958,9 +960,19 @@ static n_int tile_memory_location( n_int px, n_int py )
 void tile_land_init( n_land *land )
 {
     n_int refine = 0;
+    n_int tile = 0;
+
+    // Create lightning for debugging
+    
+//    while ( tile < MAP_TILES )
+//    {
+//        weather_lightning_test( tile );
+//        tile++;
+//    }
+        
     while ( refine < 7 )
     {
-        n_int tile = 0;
+        tile = 0;
         while ( tile < MAP_TILES )
         {
             tile_patch( land, tile, refine );

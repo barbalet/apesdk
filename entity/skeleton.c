@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -27,19 +27,16 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
-
-#ifdef APESCRIPT_INCLUDED
 
 #include <math.h>
 
 #include "../toolkit/toolkit.h"
 #include "../render/graph.h"
 #include "entity.h"
+
+#ifdef APESCRIPT_INCLUDED
+
 
 #define MAX_SKELETON_DIAGRAM_POINTS 200000
 

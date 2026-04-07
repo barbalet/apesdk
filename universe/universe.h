@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,18 +26,22 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
+ 
  ****************************************************************/
-#include "../toolkit/toolkit.h"
-#include "../script/script.h"
-#include "../sim/sim.h"
 
 #ifndef SIMULATEDAPE_UNIVERSE_H
 #define SIMULATEDAPE_UNIVERSE_H
+
+#include "../toolkit/toolkit.h"
+#include "../sim/sim.h"
+
+#ifdef APESCRIPT_INCLUDED
+
+#include "../script/script.h"
+
+#define BRAIN_ON
+
+#endif
 
 #define  EPISODIC_ON
 
@@ -48,8 +52,12 @@
 #ifdef TARGET_OS_IOS
 #undef  BRAIN_ON
 #else
+
 #ifdef APESCRIPT_INCLUDED
 #define BRAIN_ON
+
+#include "../script/script.h"
+
 #else
 #undef  BRAIN_ON
 #endif
@@ -119,12 +127,16 @@ static const n_byte    operators[17][7] =
 #define AGE_IN_YEARS(bei)       (AGE_IN_DAYS(bei)/TIME_YEAR_DAYS)
 
 /* in days, a little young, yes */
-#define AGE_OF_MATURITY (30)
+#define AGE_OF_MATURITY (12 * TIME_YEAR_DAYS)
 
 /*4*/
 typedef enum
 {
+#ifdef APESCRIPT_INCLUDED
     VARIABLE_VECT_X = ( VARIABLE_IF + 1 ),
+#else
+    VARIABLE_VECT_X = ( 3 + 1 ),
+#endif
     VARIABLE_VECT_Y,
 
     VARIABLE_RANDOM,
@@ -474,7 +486,7 @@ enum being_interaction_social
 #define THROW_ACCURACY      (1<<15)
 #define WHACK_ACCURACY      (1<<15)
 
-#define PAIR_BOND_THRESHOLD 2  /* minimum level of attraction for mating */
+#define PAIR_BOND_THRESHOLD 8  /* minimum level of attraction for mating */
 
 #ifdef FEATURE_SET
 

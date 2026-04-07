@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -389,15 +385,19 @@ n_c_int *land_weather( n_int tile )
     return ( n_c_int * )m_land.tiles[tile].atmosphere;
 }
 
+n_byte *land_weather_lightning( n_int tile )
+{
+    return ( n_byte * )m_land.tiles[tile].lightning;
+}
+
 void weather_cycle( void )
 {
     tile_cycle( &m_land );
-    /*
-        tile_cycle(&m_land);
-        tile_cycle(&m_land);
-     */
+//    tile_cycle(&m_land);
+//    tile_cycle(&m_land);
 
     tile_wind( &m_land );
+//    tile_lightning( &m_land );
 }
 
 void weather_init( void )
@@ -435,10 +435,33 @@ void  weather_wind_vector( n_vect2 *pos, n_vect2 *wind )
     wind->y = local_pressure - weather_pressure( pos->x, pos->y  - WEATHER_TO_MAPSPACE( 1 ) );
 }
 
+void weather_lightning_test( n_int tile )
+{
+    n_uint lpy = 0;
+    while ( lpy < MAP_DIMENSION )
+    {
+        n_uint lpx = 0;
+        while ( lpx < MAP_DIMENSION )
+        {
+            n_byte drift = (MAP_AREA - (lpx >> 5) + (lpy >> 5)) & 7;
+            weather_set_lightning(tile, lpx, lpy, drift  );
+            lpx++;
+        }
+        lpy++;
+    }
+}
+
+void weather_set_lightning( n_int tile,  n_int px, n_int py, n_byte value)
+{
+    n_uint lp = (py * MAP_DIMENSION) + px;
+    
+    m_land.tiles[ tile ].lightning [ lp ] = value & 3;
+}
+
+
 n_byte *land_location_tile( n_int tile )
 {
     return tiles_topography_map( &m_land, tile, 0 );
-
 }
 
 n_int land_location( n_int px, n_int py )

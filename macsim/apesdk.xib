@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23727" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24412" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23727"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24412"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -261,7 +260,7 @@
             <windowStyleMask key="styleMask" titled="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" topStrut="YES"/>
             <rect key="contentRect" x="10" y="235" width="512" height="512"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1470" height="918"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1470" height="922"/>
             <view key="contentView" id="mBp-CW-WLP">
                 <rect key="frame" x="0.0" y="0.0" width="512" height="512"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -278,7 +277,7 @@
             <windowStyleMask key="styleMask" titled="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" topStrut="YES"/>
             <rect key="contentRect" x="530" y="235" width="512" height="512"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1470" height="918"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1470" height="922"/>
             <value key="minSize" type="size" width="512" height="400"/>
             <value key="maxSize" type="size" width="4096" height="3072"/>
             <view key="contentView" id="YFU-Zt-vGh">
@@ -297,7 +296,7 @@
             <windowStyleMask key="styleMask" titled="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" topStrut="YES"/>
             <rect key="contentRect" x="530" y="235" width="342" height="512"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1470" height="918"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1470" height="922"/>
             <value key="minSize" type="size" width="342" height="512"/>
             <value key="maxSize" type="size" width="2048" height="2048"/>
             <view key="contentView" id="cJz-Ig-RJn">

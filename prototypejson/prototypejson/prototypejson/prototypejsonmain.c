@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 #include <stdio.h>
@@ -70,10 +66,6 @@ void copyright_to_file(n_file * file)
     io_file_string(0, file, "WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\n");
     io_file_string(0, file, "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n");
     io_file_string(0, file, "OTHER DEALINGS IN THE SOFTWARE.\n\n");
-
-    io_file_string(0, file, "This software is a continuing work of Tom Barbalet, begun on\n");
-    io_file_string(0, file, "13 June 1996. No apes or cats were harmed in the writing of\n");
-    io_file_string(0, file, "this software.\n\n");
 }
 
 void convert_simulated_file_definition(simulated_file_definition * sfd)

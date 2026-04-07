@@ -22,10 +22,6 @@ REM    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 REM    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 REM    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 REM    OTHER DEALINGS IN THE SOFTWARE.
-REM
-REM    This software is a continuing work of Tom Barbalet, begun on
-REM    13 June 1996. No apes or cats were harmed in the writing of
-REM    this software.
 
 setlocal
 

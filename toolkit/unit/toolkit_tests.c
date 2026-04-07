@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 #include <stdio.h>
@@ -486,7 +482,7 @@ int main(int argc, char *argv[]) {
     test_string_utilities();
     test_math_functions();
     test_geometry_functions();
-    //test_object_functions(); // need to be uncommented when memory issue is fixed
+    test_object_functions(); // need to be uncommented when memory issue is fixed
     
     // Print summary
     print_test_summary();

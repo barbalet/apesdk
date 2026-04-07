@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -1208,6 +1204,10 @@ static void watch_stats( void *ptr, n_string beingname, simulated_being *local_b
     n_string_block     relationship_str;
     n_string_block     status;
 
+    n_int age = land_date() - being_dob( local_being );
+    n_int days_old = age % TIME_YEAR_DAYS;
+    n_int years_old = age / TIME_YEAR_DAYS;
+    
     if ( local_being == 0L )
     {
         ( void )SHOW_ERROR( "No being for stats" );
@@ -1217,7 +1217,7 @@ static void watch_stats( void *ptr, n_string beingname, simulated_being *local_b
     being_state_description( being_state( local_being ), status );
     being_relationship_description( being_attention( local_being, ATTENTION_RELATIONSHIP ), relationship_str );
 
-    sprintf( str, "%s (%ld %ld) %s\n%s: %s\nGen %lu:%lu  %s  ERG:%ld SPD:%ld\nHonor:%d  HEI:%ld  Days Old:%ld\n",
+    sprintf( str, "%s (%ld %ld) %s\n%s: %s\nGen %lu:%lu  %s  ERG:%ld SPD:%ld\nHonor:%d  HEI:%ld  Old(Years:%ld  Days:%ld)\n",
              beingname,
              being_location_x( local_being ) / 16, being_location_y( local_being ) / 16,
              watch_sixteenth_wind( being_facing( local_being ) ),
@@ -1231,7 +1231,7 @@ static void watch_stats( void *ptr, n_string beingname, simulated_being *local_b
 
              being_honor( local_being ),
              GET_BEING_HEIGHT( local_being ),
-             land_date() - being_dob( local_being )
+             years_old, days_old
            );
 
     io_string_write( result, str, &watch_string_length );

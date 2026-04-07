@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -1480,7 +1476,7 @@ n_int social_mate(
     n_int loc_state = 0;
     n_int attraction = 0;
     n_int attract;
-    /*    n_byte2 matingprob;*/
+    n_byte2 matingprob;
     simulated_isocial *meeter_social_graph = being_social( meeter_being );
 
     if ( !meeter_social_graph )
@@ -1488,22 +1484,25 @@ n_int social_mate(
         return -1;
     }
 
-    /*if ((being_drive(meeter_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
-            (being_drive(met_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE))*/
+    if ( ( land_date() - being_dob( meeter_being ) ) < AGE_OF_MATURITY ) {
+        return -1;
+    }
+    if ( ( land_date() - being_dob( met_being ) ) < AGE_OF_MATURITY ) {
+        return -1;
+    }
+    
+    if ((being_drive(meeter_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE) &&
+            (being_drive(met_being, DRIVE_SEX) > THRESHOLD_SEEK_MATE))
     {
 
         /** mating is probabilistic, with a bias towards
             higher status individuals */
 
-        /*
-
         matingprob = being_random(meeter_being);
         if (matingprob <
-                (32000 + (n_byte2)(met_being->honor)*
-                 GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB)) */
+                (32000 + (n_byte2)being_honor(met_being) *
+                 GENE_STATUS_PREFERENCE(being_genetics(meeter_being))*MATING_PROB))
         {
-
-
             /** attractiveness based upon various criteria */
             attraction = 1 +
                          social_attraction_pheromone( meeter_being, met_being ) +
@@ -1517,31 +1516,30 @@ n_int social_mate(
                          ;
 
             /** some minimum level of attraction required for pair bonding */
-            /*if (meeter_social_graph[being_index].attraction > PAIR_BOND_THRESHOLD)
+            if (meeter_social_graph[being_index].attraction > PAIR_BOND_THRESHOLD)
             {
                 attraction++;
-                */
-            if ( distance < MATING_RANGE )
-            {
-                /** transmit pathogens */
-                immune_transmit( &meeter_being->immune_system, &met_being->immune_system, PATHOGEN_TRANSMISSION_SEX );
-                immune_transmit( &met_being->immune_system, &meeter_being->immune_system, PATHOGEN_TRANSMISSION_SEX );
-                /** check opposite sexes */
-                if ( ( FIND_SEX( GET_I( meeter_being ) ) == SEX_FEMALE ) &&
-                        ( FIND_SEX( GET_I( met_being ) ) != SEX_FEMALE ) )
+                if ( distance < MATING_RANGE )
                 {
-                    if ( being_pregnant( meeter_being ) == 0 )
+                    /** transmit pathogens */
+                    immune_transmit( &meeter_being->immune_system, &met_being->immune_system, PATHOGEN_TRANSMISSION_SEX );
+                    immune_transmit( &met_being->immune_system, &meeter_being->immune_system, PATHOGEN_TRANSMISSION_SEX );
+                    /** check opposite sexes */
+                    if ( ( FIND_SEX( GET_I( meeter_being ) ) == SEX_FEMALE ) &&
+                            ( FIND_SEX( GET_I( met_being ) ) != SEX_FEMALE ) )
                     {
-                        social_conception( meeter_being, met_being, group );
+                        if ( being_pregnant( meeter_being ) == 0 )
+                        {
+                            social_conception( meeter_being, met_being, group );
+                        }
                     }
                 }
-            }
-            /*
+            
             }
             else
             {
                 attraction--;
-            }*/
+            }
         }
 
         attract = meeter_social_graph[being_index].attraction;

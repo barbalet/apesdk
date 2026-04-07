@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 #include <stdio.h>
@@ -96,7 +92,7 @@ void test_total_moved( simulated_group *group )
 }
 
 
-#define FIRST_RANDOM (17963)
+#define FIRST_RANDOM (17127)
 
 n_int test_hash( void )
 {
@@ -123,14 +119,14 @@ n_int test_hash( void )
 
 #define DELTA_0 (0)
 #define MOVED_0 (0)
-#define DELTA_1 (1700)
-#define MOVED_1 (1011942)
-#define DELTA_2 (56)
-#define MOVED_2 (1680334)
-#define DELTA_3 (455)
-#define MOVED_3 (1703892)
-#define TOTAL_MOVED (2484092)
-#define LINE_OF_SIGHT_COUNT (9)
+#define DELTA_1 (1693)
+#define MOVED_1 (1046031)
+#define DELTA_2 (0)
+#define MOVED_2 (1702142)
+#define DELTA_3 (543)
+#define MOVED_3 (1727959)
+#define TOTAL_MOVED (2542732)
+#define LINE_OF_SIGHT_COUNT (12)
 #define NUMBER_BEINGS (128)
 
 n_int test_sim_run( void )

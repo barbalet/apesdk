@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -117,14 +113,12 @@ n_file * io_file_new_from_string(n_string string, n_uint string_length)
 /// - Parameter file: the pointer to be freed.
 void io_file_free( n_file **file )
 {
-    if ( file != 0L )
-    {
-        if ( ( *file )->data )
-        {
-            memory_free( ( void ** ) & ( ( *file )->data ) );
+    if (file && *file) {
+        if ((*file)->data) {
+            memory_free((void**)&((*file)->data));
         }
+        memory_free((void **)file);
     }
-    memory_free( ( void ** )file );
 }
 
 /// Turn ``n_int`` value to ``n_byte`` value
@@ -189,6 +183,7 @@ static n_int io_disk_read_error( n_file *local_file, n_string file_name, n_byte 
     local_file->data = memory_new( file_size * 2 );
     if ( local_file->data == 0L )
     {
+        memory_free((void*)&local_file);
         if ( error_show )
         {
             return SHOW_ERROR( "File data could not be allocated" );
@@ -198,7 +193,10 @@ static n_int io_disk_read_error( n_file *local_file, n_string file_name, n_byte 
 
     memory_erase( local_file->data, file_size * 2 );
 
-    fread( local_file->data, 1, file_size, in_file );
+    if (file_size != fread( local_file->data, 1, file_size, in_file ))
+    {
+        return SHOW_ERROR("File size not loaded");
+    }
 
     local_file->size = file_size * 2;
     local_file->location = file_size;

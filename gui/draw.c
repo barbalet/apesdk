@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -193,9 +189,9 @@ void land_color_init( void )
     color_group[( COLOR_WHITE * 3 ) + 1] = 0xffff;
     color_group[( COLOR_WHITE * 3 ) + 2] = 0xffff;
 
-    color_group[( COLOR_BLUE * 3 )    ] = 0x5500;
-    color_group[( COLOR_BLUE * 3 ) + 1] = 0x5500;
-    color_group[( COLOR_BLUE * 3 ) + 2] = 0xeeff;
+    color_group[( COLOR_BLUE * 3 )    ] = 0xb500;
+    color_group[( COLOR_BLUE * 3 ) + 1] = 0xb500;
+    color_group[( COLOR_BLUE * 3 ) + 2] = 0xffff;
 
     color_group[( COLOR_RED_DARK * 3 )    ] = ( 0xeeff * 2 ) >> 2; /* return to * 3 following debugging */
     color_group[( COLOR_RED_DARK * 3 ) + 1] = 0x0000;
@@ -1452,10 +1448,21 @@ static void draw_weather( n_int toggle )
     if ( toggle )
     {
         n_c_int *local_pressure = land_weather( 0 );
+        n_byte  *local_lightnight = land_weather_lightning( 0 );
+        n_byte  timer3 = land_time() & 7;
         n_int loop = 0;
         while ( loop < MAP_AREA )
         {
-            n_int value = local_pressure[ loop ] >> 7;
+            n_int value = local_pressure[ loop ] >> 7;;
+            
+            if ( timer3 )
+            {
+                n_byte valuelight = local_lightnight[ loop ];
+                if ( timer3 == valuelight )
+                {
+                    value = 255;
+                }
+            }
 
             if ( value < 0 )
             {

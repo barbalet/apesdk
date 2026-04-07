@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 /*! \file   glrender.h
@@ -80,6 +76,11 @@ n_int glrender_scene_done(void); /* */
 
 void glrender_wide_line(void); /* */
 void glrender_thin_line(void); /* */
+
+#define glrender_fence_line(start, end, number) glrender_line_debug(start, end, __FILE__, __LINE__, number)
+
+
+void glrender_line_debug(n_vect2 * start, n_vect2 * end, n_string files, n_int linen, n_int debugnumber); /* */
 
 void glrender_line(n_vect2 * start, n_vect2 * end); /* */
 void glrender_quads(n_vect2 * quads, n_byte filled); /* */

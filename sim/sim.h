@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -64,9 +60,9 @@
 
 /*! @define */
 #define	VERSION_NUMBER		     708
-#define	COPYRIGHT_DATE		     "Copyright 1996 - 2025 "
+#define	COPYRIGHT_DATE		     "Copyright 1996 - 2026 "
 
-#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2025."
+#define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2026."
 
 /*! @define */
 #define	SIMULATED_APE_SIGNATURE		    (('N'<< 8) | 'A')
@@ -335,6 +331,10 @@ void  weather_cycle( void );
 void  weather_wind( void );
 weather_values weather_seven_values( n_int px, n_int py );
 
+void weather_lightning_test( n_int tile );
+
+void weather_set_lightning( n_int tile,  n_int px, n_int py, n_byte value);
+
 void land_seed_genetics( n_byte2 *local_random );
 
 void land_init( void );
@@ -361,6 +361,8 @@ typedef struct
     n_c_int     atmosphere[2][MAP_AREA];               /* save-able and generate-able */
     n_byte2     delta_pressure[MAP_AREA];              /* generated */
 
+    n_byte      lightning[MAP_AREA];
+    
     n_byte2     delta_pressure_highest;
     n_byte2     delta_pressure_lowest;
 
@@ -385,13 +387,13 @@ typedef struct
 
     n_int      wind_dissipation;
 
-    n_byte4     date;                                  /* save-able */
-    n_byte2     time;                                  /* save-able */
+    n_byte4     date;                                    /* save-able */
+    n_byte2     time;                                    /* save-able */
 
-    n_byte      tide_level;                            /* generated */
+    n_byte      tide_level;                              /* generated */
 
     n_byte      topography_highdef[HI_RES_MAP_AREA * 2]; /* generated */
-    n_byte4     highres_tide[HI_RES_MAP_AREA / 32];    /* generated */
+    n_byte4     highres_tide[HI_RES_MAP_AREA / 32];      /* generated */
 } n_land;
 
 typedef struct
@@ -403,13 +405,13 @@ typedef struct
 
 void tile_wind( n_land *land );
 void tile_cycle( n_land *land );
+void tile_lightning( n_land *land );
 
 void tile_weather_init( n_land *land );
 
 void tile_land_init( n_land *land );
 void tile_land_erase( n_land *land );
 void tile_land_random( n_land *land, n_byte2 *random );
-
 
 void tile_creation( n_byte *map, n_byte2 *random );
 
@@ -431,6 +433,7 @@ n_byte *land_topography( void );
 n_byte *land_topography_highdef( void );
 n_byte4 *land_highres_tide( void );
 n_c_int *land_weather( n_int tile );
+n_byte *land_weather_lightning( n_int tile );
 
 #define BASH_COLOR_DEFAULT "\033[0m"
 

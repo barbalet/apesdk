@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -27,20 +27,20 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 #define CONSOLE_REQUIRED
 #define CONSOLE_ONLY
 
 #include "../toolkit/toolkit.h"
-#include "../script/script.h"
 #include "../sim/sim.h"
 #include "../universe/universe.h"
 #include "../entity/entity.h"
+
+#ifdef APESCRIPT_INCLUDED
+#include "../script/script.h"
+#endif
+
 
 #include <stdio.h>
 
@@ -51,6 +51,8 @@
 #include <pthread.h>
 
 #endif
+
+#ifdef APESCRIPT_INCLUDED
 
 static variable_string    apescript_variable_codes[VARIABLE_MAX] =
 {
@@ -209,6 +211,8 @@ static variable_string    apescript_variable_codes[VARIABLE_MAX] =
     "being"
 };
 
+#endif
+
 n_byte     *offbuffer = 0L;
 
 /* Twice the minimum number of apes the Simulation will allow to run */
@@ -217,7 +221,9 @@ n_byte     *offbuffer = 0L;
 static  simulated_group group;
 static  simulated_timing timing;
 
+#ifdef APESCRIPT_INCLUDED
 static n_interpret *interpret = 0L;
+#endif
 
 static n_int        sim_new_progress = 0;
 
@@ -1313,6 +1319,9 @@ static void sim_being_cycle( simulated_group *group, simulated_being *local_bein
     being_cycle_awake( group, local_being );
 }
 
+#ifdef APESCRIPT_INCLUDED
+
+
 static void sim_start_conditions( void *vindividual, void *structure, void *data )
 {
     n_individual_interpret *individual = ( n_individual_interpret * )vindividual;
@@ -1418,7 +1427,6 @@ static void sim_end_conditions( void *vindividual, void *structure, void *data )
     being_set_parasites( local_being, ( n_byte )local_parasites );
 }
 
-#ifdef APESCRIPT_INCLUDED
 
 static void sim_being_interpret( simulated_group *group, simulated_being *local_being, void *data )
 {

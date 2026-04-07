@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 /* This is intended to dramatically simplify the interface between
@@ -38,6 +34,7 @@
 
 #include <stdio.h>
 
+#include "buffer.h"
 #include "gui.h"
 
 #ifndef    _WIN32
@@ -63,9 +60,16 @@ static n_byte  key_identification;
 static n_byte2 key_value;
 static n_byte  key_down;
 
-static n_byte * outputBuffer = 0L;
-static n_byte * outputBufferOld = 0L;
-static n_int    outputBufferMax = -1;
+static ape_buffer outputBuffer = { 0L, 0L, 0 };
+
+static n_int    ios_control_x = 0;
+static n_int    ios_control_y = 0;
+
+static n_int    ios_view_x = 0;
+static n_int    ios_view_y = 0;
+
+static n_int    ios_dimension_x = 0;
+static n_int    ios_dimension_y = 0;
 
 #define	Y_DELTA	36
 #define	X_DELTA	20
@@ -219,7 +223,7 @@ void shared_script_debug_handle( n_constant_string cStringFileName )
 
 #else
 
-void shared_script_debug_handle( n_string cStringFileName )
+void shared_script_debug_handle( n_constant_string cStringFileName )
 {
 
 }
@@ -343,15 +347,7 @@ n_int shared_init( n_int view, n_uint random )
 void shared_close( void )
 {
     simulation_started = 0;
-    if (outputBufferOld)
-    {
-        memory_free((void**)&outputBufferOld);
-    }
-
-    if (outputBuffer)
-    {
-        memory_free((void**)&outputBuffer);
-    }
+    ape_buffer_free( &outputBuffer );
 
     sim_close();
 }
@@ -394,6 +390,22 @@ void shared_mouseReceived( n_double valX, n_double valY, n_int fIdentification )
         mouse_y = ( n_int )valY;
     }
 }
+
+void shared_mouseReceived_ios( n_double valX, n_double valY )
+{
+    n_int new_rotation_vertical = ( valX < valY );
+
+    if (new_rotation_vertical) printf("port\n"); else printf("land\n");
+    printf("mouse %f x %f\n", valX, valY);
+    printf("contr %ld x %ld\n", ios_control_x, ios_control_y);
+    printf("view  %ld x %ld\n", ios_view_x, ios_view_y);
+    printf("dimen %ld x %ld\n", ios_dimension_x, ios_dimension_y);
+    printf("------------\n");
+
+    mouse_x = ( n_int )valX;
+    mouse_y = ( n_int )valY;
+}
+
 
 void shared_mouseUp( void )
 {
@@ -560,7 +572,6 @@ void shared_being_name( n_int number, n_string name )
 void shared_being_select( n_int number)
 {
     simulated_group *group = sim_group();
-    simulated_being *being = 0L;
     if ( group )
     {
         if (number < group->num)
@@ -625,18 +636,7 @@ static void shared_color_update( void )
 
 static n_byte * shared_output_buffer(n_int width, n_int height)
 {
-    if (outputBufferOld)
-    {
-        memory_free((void **)&outputBufferOld);
-    }
-
-    if ((outputBuffer == 0L) || ((width * height * 4) > outputBufferMax))
-    {
-        outputBufferMax = width * height * 4;
-        outputBufferOld = outputBuffer;
-        outputBuffer = memory_new(outputBufferMax);
-    }
-    return outputBuffer;
+    return ape_buffer_require( &outputBuffer, width, height );
 }
 
 #ifdef TARGET_OS_IOS
@@ -649,131 +649,116 @@ static n_byte * shared_output_buffer(n_int width, n_int height)
 
 #endif
 
-static void shared_bitcopy_view( n_byte *outputBuffer, n_int dim_x, n_int dim_y,
-                                 n_int offset_x, n_int offset_y, n_int multi_x )
+static void shared_bitcopy_view(n_byte *outputBuffer, n_int dim_x, n_int dim_y,
+                                 n_int offset_x, n_int offset_y, n_int multi_x)
 {
-    n_byte   *index = draw_pointer( NUM_VIEW );
-    n_byte   *local_weather = draw_weather_grayscale();
+    n_byte *index = draw_pointer(NUM_VIEW);
+    n_byte *local_weather = draw_weather_grayscale();
     n_vect2 *being_location = draw_selected_location();
-    n_byte4 *outputBuffer4 = ( n_byte4 * )outputBuffer;
-    n_int     loop = 0;
-    n_int     ly = 0;
-    if ( index == 0L )
+    n_byte4 *outputBuffer4 = (n_byte4 *)outputBuffer;
+
+    if (index == 0L || local_weather == 0L || being_location == 0L)
     {
         return;
     }
-    while ( ly < dim_y )
+
+    n_int base_x = (256 + being_location->x + dim_x) % dim_x;
+    n_int base_y = (256 + being_location->y + dim_y) % dim_y;
+
+    for (n_int ly = 0; ly < dim_y; ly++)
     {
-        n_int    lx = 0;
-        n_int point_y = ( Y_POINT( ly, dim_y ) + ( dim_y + 256 + being_location->y ) ) % dim_y;
-        n_int offset = point_y * dim_x;
-        n_byte *indexLocalX = &index[offset];
-        n_byte *weatherLocalX = &local_weather[offset];
+        n_int point_y = (Y_POINT(ly, dim_y) + base_y) % dim_y;
+        n_int row_offset = point_y * dim_x;
+        n_byte *index_row = &index[row_offset];
+        n_byte *weather_row = &local_weather[row_offset];
+        n_int out_offset = (ly + offset_y) * multi_x + offset_x;
 
-        loop = ( ly + offset_y ) * multi_x;
-
-        while ( lx < dim_x )
+        for (n_int lx = 0; lx < dim_x; lx++)
         {
-            n_int point_x = ( ( lx + ( dim_x + 256 + being_location->x ) ) % dim_x ) + offset_x;
-            n_byte cloud = weatherLocalX[point_x];
-            n_byte value = indexLocalX[point_x];
-            outputBuffer4[loop++] = colorLookUp[cloud][value];
-            lx++;
+            n_int point_x = (lx + base_x) % dim_x;
+            n_byte value = index_row[point_x];
+            n_byte cloud = weather_row[point_x];
+            n_byte4 *color_row = (n_byte4 *)colorLookUp[cloud];
+            outputBuffer4[out_offset + lx] = color_row[value];
         }
-        ly++;
     }
 }
 
-static void shared_bitcopy_view_ios( n_byte *outputBuffer, n_int dimension,
-                                     n_int offset_x, n_int offset_y, n_int multi_x )
+static void shared_bitcopy_view_ios(n_byte *outputBuffer, n_int dimension,
+                                    n_int offset_x, n_int offset_y, n_int multi_x)
 {
-    n_byte   *index = draw_pointer( NUM_VIEW );
-    n_byte   *local_weather = draw_weather_grayscale();
+    n_byte *index = draw_pointer(NUM_VIEW);
+    n_byte *local_weather = draw_weather_grayscale();
     n_vect2 *being_location = draw_selected_location();
-    n_byte4 *outputBuffer4 = ( n_byte4 * )outputBuffer;
-    n_int     map_dim_x = MAP_DIMENSION;
-    n_int     map_dim_y = MAP_DIMENSION;
+    n_byte4 *outputBuffer4 = (n_byte4 *)outputBuffer;
 
-    n_int     point_start = ( MAP_DIMENSION - dimension ) / 2;
+    n_int map_dim_x = MAP_DIMENSION;
+    n_int map_dim_y = MAP_DIMENSION;
 
-    n_int     loop = 0;
-    n_int     screen_y = 0;
-    if ( dimension > MAP_DIMENSION )
+    if (index == 0L || local_weather == 0L || being_location == 0L)
     {
-        point_start = 0;
+        return;
+    }
+
+    if (dimension > MAP_DIMENSION)
+    {
         dimension = MAP_DIMENSION;
     }
 
-    if ( index == 0L )
+    n_int point_start = (MAP_DIMENSION - dimension) / 2;
+    if (point_start < 0) point_start = 0;
+
+    n_int base_x = (256 + being_location->x + map_dim_x) % map_dim_x;
+    n_int base_y = (256 + being_location->y + map_dim_y) % map_dim_y;
+
+    for (n_int screen_y = 0; screen_y < dimension; screen_y++)
     {
-        return;
-    }
+        n_int ly = point_start + screen_y;
+        n_int point_y = (Y_POINT(ly, map_dim_y) + base_y) % map_dim_y;
+        n_int row_offset = point_y * map_dim_x;
+        n_byte *index_row = &index[row_offset];
+        n_byte *weather_row = &local_weather[row_offset];
+        n_int out_offset = (ly + offset_y) * multi_x + offset_x;
 
-    while ( screen_y < dimension )
-    {
-        n_int    ly = point_start + screen_y;
-        n_int    screen_x = 0;
-        n_int point_y = ( Y_POINT( ly, map_dim_y ) + ( map_dim_y + 256 + being_location->y ) ) % map_dim_y;
-        n_int offset = point_y * map_dim_x;
-        n_byte *indexLocalX = &index[offset];
-        n_byte *weatherLocalX = &local_weather[offset];
-
-        loop = ( ly + offset_y ) * multi_x;
-
-        while ( screen_x < dimension )
+        for (n_int screen_x = 0; screen_x < dimension; screen_x++)
         {
-            n_int    lx = point_start + screen_x;
-            n_int    point_x = ( ( lx + ( map_dim_x + 256 + being_location->x ) ) % map_dim_x ) + offset_x;
-            n_byte   cloud = weatherLocalX[point_x];
-            n_byte   value = indexLocalX[point_x];
-            outputBuffer4[loop++] = colorLookUp[cloud][value];
-            screen_x++;
+            n_int lx = point_start + screen_x;
+            n_int point_x = (lx + base_x) % map_dim_x;
+            n_byte value = index_row[point_x];
+            n_byte cloud = weather_row[point_x];
+            n_byte4 *color_row = (n_byte4 *)colorLookUp[cloud];
+            outputBuffer4[out_offset + screen_x] = color_row[value];
         }
-        screen_y++;
     }
 }
 
 
-static void shared_bitcopy( n_byte *outputBuffer, n_int dim_x, n_int dim_y,
-                            n_int offset_x, n_int offset_y, n_int multi_x, n_int fIdentification )
+static void shared_bitcopy(n_byte *outputBuffer, n_int dim_x, n_int dim_y,
+                           n_int offset_x, n_int offset_y, n_int multi_x, n_int fIdentification)
 {
-    n_byte   *index = draw_pointer( fIdentification );
-    n_byte4 *outputBuffer4 = ( n_byte4 * )outputBuffer;
-    n_int     loop = 0;
-    n_int     ly = 0;
+    n_byte *index = draw_pointer(fIdentification);
+    n_byte4 *outputBuffer4 = (n_byte4 *)outputBuffer;
 
-    if ( index == 0L )
+    if (index == 0L)
     {
         return;
     }
 
-    while ( ly < dim_y )
+    n_byte4 *color_row = (n_byte4 *)colorLookUp[0];
+
+    for (n_int ly = 0; ly < dim_y; ly++)
     {
-        n_int    lx = 0;
-        n_byte *indexLocalX = &index[Y_POINT( ly, dim_y ) * dim_x];
-        loop = ( ( ly + offset_y ) * multi_x ) + offset_x;
-        while ( lx < dim_x )
+        n_byte *index_row = &index[Y_POINT(ly, dim_y) * dim_x];
+        n_int out_offset = (ly + offset_y) * multi_x + offset_x;
+
+        for (n_int lx = 0; lx < dim_x; lx++)
         {
-            n_byte value = indexLocalX[ lx++ ];
-            outputBuffer4[ loop++ ] = colorLookUp[ 0 ][ value ];
+            n_byte value = index_row[lx];
+            outputBuffer4[out_offset + lx] = color_row[value];
         }
-        ly++;
     }
 }
 
-/*
-void mock_draw(n_int dim_x, n_int dim_y, n_byte* output) {
-    int loopy = 0;
-    while (loopy < dim_y) {
-        int loopx = 0;
-        while (loopx < dim_x) {
-            output[(loopy * dim_x) + loopx] = (loopx + loopy) & 255;
-            loopx++;
-        }
-        loopy++;
-    }
-}
-*/
 
 n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed )
 {
@@ -798,7 +783,9 @@ n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte si
 
 #ifdef ALPHA_WEATHER_DRAW
         if ( fIdentification == NUM_VIEW )
-        {
+        { // fix here for MacOS 26
+            dim_y -= 4;
+            
             shared_bitcopy_view( outputBuffer, dim_x, dim_y, 0, 0, dim_x );
         }
         else
@@ -808,15 +795,13 @@ n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte si
         }
 #endif
     }
-    
-//    mock_draw(dim_x, dim_y, outputBuffer);
-    
+
     return outputBuffer;
 }
 
 #ifdef TARGET_OS_IOS
 
-#undef IOS_PROCESSOR_SAVER
+#define IOS_PROCESSOR_SAVER
 
 #ifdef IOS_PROCESSOR_SAVER
 static n_int ios_time_cycle = 0;
@@ -874,6 +859,9 @@ void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
 {
     n_int new_rotation_vertical = ( dim_x < dim_y );
 
+    ios_dimension_x = dim_x;
+    ios_dimension_y = dim_y;
+    
     if ( simulation_started == 0 )
     {
         SHOW_ERROR( "draw - simulation not started" );
@@ -896,11 +884,17 @@ void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
     {
         /* portrait */
         draw_window( dim_x, dim_y - dim_x );
-        draw_cycle( 0, DRAW_WINDOW_TERRAIN | DRAW_WINDOW_VIEW );
+        draw_cycle( 0, DRAW_WINDOW_CONTROL | DRAW_WINDOW_VIEW );
         shared_color_update();
 
-        shared_bitcopy( ( n_byte * )outputBuffer, dim_x, dim_y - dim_x, 0, 0, dim_x, NUM_TERRAIN );
-        shared_bitcopy_view_ios( ( n_byte * )outputBuffer, dim_x, 0, dim_y - dim_x, dim_x );
+        ios_control_x = dim_x;
+        ios_control_y = dim_y - dim_x  - 120;
+
+        ios_view_x = 0;
+        ios_view_y = dim_y - dim_x  - 120;
+        
+        shared_bitcopy( ( n_byte * )outputBuffer, dim_x, dim_y - dim_x - 120, 0, 0, dim_x, NUM_CONTROL );
+        shared_bitcopy_view_ios( ( n_byte * )outputBuffer, dim_x, 0, dim_y - dim_x - 120, dim_x );
     }
     else
     {
@@ -914,7 +908,13 @@ void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
         draw_cycle( 0, DRAW_WINDOW_CONTROL | DRAW_WINDOW_VIEW );
         shared_color_update();
 
-        shared_bitcopy( ( n_byte * )outputBuffer, dim_x - dim_y, dim_y, dim_y, 0, dim_x, NUM_CONTROL );
+        ios_control_x = dim_x - dim_y;
+        ios_control_y = dim_y;
+
+        ios_view_x = 0;
+        ios_view_y = 0 - point_start;
+        
+        shared_bitcopy( ( n_byte * )outputBuffer, dim_x - dim_y , dim_y, dim_y, 0, dim_x, NUM_CONTROL );
         shared_bitcopy_view_ios( ( n_byte * )outputBuffer, dim_y, 0, 0 - point_start, dim_x );
     }
 }

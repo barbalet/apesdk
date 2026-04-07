@@ -1,6 +1,6 @@
 /****************************************************************
 
- graph.h
+ buffer.h
 
  =============================================================
 
@@ -26,39 +26,31 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
- 
+
  ****************************************************************/
 
-/*! \file   graph.c
- *  \brief  This covers the primary graphics of Simulated Ape.
- */
+#ifndef SIMULATEDAPE_BUFFER_H
+#define SIMULATEDAPE_BUFFER_H
+
+#ifndef _WIN32
 
 #include "../toolkit/toolkit.h"
 
-void graph_init( n_int four_byte_factory );
-void graph_init_three(void);
+#else
 
-void graph_erase( n_byte *buffer, n_vect2 *img, n_rgba32 *color );
+#include "..\toolkit\toolkit.h"
 
-/* draws a line */
-void graph_line( n_byte *buffer,
-                 n_vect2 *img,
-                 n_vect2 *previous,
-                 n_vect2 *current,
-                 n_rgba32 *color,
-                 n_byte thickness );
+#endif
 
-void graph_curve( n_byte *buffer,
-                  n_vect2 *img,
-                  n_vect2 *pt0,
-                  n_vect2 *pt1,
-                  n_vect2 *pt2,
-                  n_rgba32 *color,
-                  n_byte radius_percent,
-                  n_uint start_thickness,
-                  n_uint end_thickness );
+typedef struct
+{
+    n_byte *current;
+    n_byte *previous;
+    n_int   maximum_bytes;
+} ape_buffer;
 
-void graph_fill_polygon( n_vect2 *points, n_int no_of_points,
-                         n_rgba32 *color, n_byte transparency,
-                         n_byte *buffer, n_vect2 *img );
+n_byte *ape_buffer_require( ape_buffer *buffer, n_int width, n_int height );
+void ape_buffer_free( ape_buffer *buffer );
+n_byte *ape_buffer_rgba_to_rgb24( n_byte *copy_in, n_uint size );
 
+#endif /* SIMULATEDAPE_BUFFER_H */

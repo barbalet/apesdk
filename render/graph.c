@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,10 +26,6 @@
  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
-
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
 
  ****************************************************************/
 
@@ -158,47 +154,6 @@ n_byte ( graph_line_to_point )( n_int px, n_int py, n_int dx, n_int dy, void *in
     }
     
     return 1;
-}
-
-
-void graph_line2( n_byte   *buffer,
-                 n_vect2  *img,
-                 n_vect2  *previous,
-                 n_vect2  *current,
-                 n_rgba32 *color,
-                 n_byte thickness )
-{
-    n_join  graph_line_join;
-    
-    graph_point_for_line data;
-    data.img = img;
-    data.color = color;
-    data.buffer = buffer;
-
-    graph_line_join.information = &data;
-    graph_line_join.pixel_draw =  &graph_line_to_point;
-    
-    math_line_vect( previous, current, &graph_line_join );
-    if ( thickness > 2 )
-    {
-        previous->x --;
-        current->x --;
-        math_line_vect( previous, current, &graph_line_join );
-        previous->x += 2;
-        current->x += 2;
-        math_line_vect( previous, current, &graph_line_join );
-        previous->x --;
-        current->x --;
-
-        previous->y --;
-        current->y --;
-        math_line_vect( previous, current, &graph_line_join );
-        previous->y += 2;
-        current->y += 2;
-        math_line_vect( previous, current, &graph_line_join );
-        previous->y --;
-        current->y --;
-    }
 }
 
 

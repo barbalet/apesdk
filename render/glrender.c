@@ -27,10 +27,6 @@ glrender.c
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
  
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
- 
  ****************************************************************/
 
 /*! \file   glrender.c
@@ -255,6 +251,27 @@ void glrender_render_quads(n_byte * output, memory_list * quads)
     }
 }
 
+static n_int glrender_reset_boundaries(n_vect2 * bounds)
+{
+    if (bounds->x < -9000)
+    {
+        return 0;
+    }
+    if (bounds->x > 9000)
+    {
+        return 0;
+    }
+    if (bounds->y < -9000)
+    {
+        return 0;
+    }
+    if (bounds->y > 9000)
+    {
+        return 0;
+    }
+    return 1;
+}
+
 void glrender_render_lines(n_byte * output, memory_list *lines)
 {
     n_vect2 direction_vector;
@@ -293,10 +310,21 @@ void glrender_render_lines(n_byte * output, memory_list *lines)
         {
             continue;
         }
-
-        printf("graph_line( %ld %ld ) ( %ld %ld ) ( %ld %ld )\n", graph_size.x,graph_size.y, reset_start.x, reset_start.x, reset_end.x, reset_end.y);
         
-        //graph_line(output, &graph_size, &reset_start, &reset_end, (n_rgba32*)&color_map[local_data.color], local_data.thickness);
+        // TODO: Limits code should be un-needed
+        
+        if (glrender_reset_boundaries(&reset_start) == 0)
+        {
+            continue;
+        }
+        if (glrender_reset_boundaries(&reset_end) == 0)
+        {
+            continue;
+        }
+
+//        printf("graph_line( %ld %ld ) ( %ld %ld ) ( %ld %ld )\n", graph_size.x,graph_size.y, reset_start.x, reset_start.x, reset_end.x, reset_end.y);
+        
+        graph_line(output, &graph_size, &reset_start, &reset_end, (n_rgba32*)&color_map[local_data.color], local_data.thickness);
 
         count ++;
     }
@@ -316,7 +344,7 @@ void glrender_render_display(n_byte * output)
 {
     glrender_render_erase(output);
     glrender_render_quads(output, display_quads);
-    //glrender_render_lines(output, display_lines); // bug resides
+    glrender_render_lines(output, display_lines); // TODO: bug resides needs to be fixed.
 }
 
 void glrender_background_green(void)
@@ -387,13 +415,18 @@ void glrender_thin_line(void)
     current_thickness = 6;
 }
 
+
+
+
 #define ENCODE_RGB(r,g,b) (((const n_int)(255*r)<<16)|((n_int)(255*g)<<8)|(n_int)(255*b))
 
 #define DECODE_R(rgb) ((float)((rgb>>16)&255)/(float)255.0)
 #define DECODE_G(rgb) ((float)((rgb>> 8)&255)/(float)255.0)
 #define DECODE_B(rgb) ((float)((rgb>> 0)&255)/(float)255.0)
 
-void glrender_line(n_vect2 * start, n_vect2 * end)
+
+
+void glrender_line(n_vect2 * start, n_vect2 * end) // TODO: Check boundaries and assert on failing lines
 {
     glr_line new_line;
     
@@ -403,7 +436,7 @@ void glrender_line(n_vect2 * start, n_vect2 * end)
     new_line.start.y = start->y;
     new_line.end.x = end->x;
     new_line.end.y = end->y;
-
+        
     if (current_case == GRAPHICS_CASE_ACTIVE)
     {
         memory_list_copy(active_lines, (n_byte*)&new_line, sizeof(new_line));
@@ -416,6 +449,23 @@ void glrender_line(n_vect2 * start, n_vect2 * end)
     {
         memory_list_copy(text_lines, (n_byte*)&new_line, sizeof(new_line));
     }
+}
+
+
+void glrender_line_debug(n_vect2 * start, n_vect2 * end, n_string files, n_int linen, n_int debugnumber) // TODO: Check boundaries and assert on failing lines
+{
+    if (glrender_reset_boundaries(start) == 0)
+    {
+        printf("start (%ld, %ld) %s %ld %ld\n", start->x, start->y, files, linen, debugnumber);
+        NA_ASSERT(0, "Assert here");
+    }
+    if (glrender_reset_boundaries(end) == 0)
+    {
+        printf("end (%ld, %ld) %s %ld %ld\n", end->x, end->y, files, linen, debugnumber);
+        NA_ASSERT(0, "Assert here");
+    }
+    
+    glrender_line(start, end);
 }
 
 void glrender_fill(n_vect2 * quads)

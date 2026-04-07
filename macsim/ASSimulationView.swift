@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 
@@ -60,13 +56,11 @@ class ASSimulationView: ASMacView {
 
     override func awakeFromNib() {
         
-        print("awakeFromNib Sim View")
-        
         DispatchQueue.main.async { [weak self] in
             if let localSelf = self {
                 localSelf.shared = ASShared(frame: localSelf.bounds, title: localSelf.window?.title ?? "")
                 
-                print(localSelf.shared.identification)
+                print("Window found: \(localSelf.shared.identification)")
                 
                 localSelf.shared.startEverything(headyLifting: localSelf.shared.identification == WINDOW_PROCESSING, window: localSelf.window)
             }

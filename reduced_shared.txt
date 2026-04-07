@@ -1,0 +1,86 @@
+/****************************************************************
+
+ shared.h
+
+ =============================================================
+
+ Copyright 1996-2025 Tom Barbalet. All rights reserved.
+
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+ ****************************************************************/
+
+#ifndef SHARED_H
+#define SHARED_H
+
+#include <stdint.h>
+
+// View type constants
+#define NUM_VIEW        0
+#define NUM_TERRAIN     1
+#define NUM_CONTROL     2
+
+// Menu constants
+#define NA_MENU_PAUSE           100
+#define NA_MENU_PREVIOUS_APE    101
+#define NA_MENU_NEXT_APE        102
+#define NA_MENU_CLEAR_ERRORS    103
+#define NA_MENU_TERRITORY       104
+#define NA_MENU_WEATHER         105
+#define NA_MENU_BRAINCODE       106
+
+// Type definitions
+typedef int32_t n_int;
+
+// Core simulation functions
+void shared_init(n_int view_type, unsigned int seed);
+int shared_simulation_started(void);
+int shared_cycle(unsigned int time_info, n_int view_type);
+
+// Drawing functions
+void* shared_draw(n_int view_type, int width, int height, int unused);
+
+// Input handling functions
+void shared_keyReceived(int key, n_int view_type);
+void shared_keyUp(void);
+void shared_mouseReceived(double x, double y, n_int view_type);
+void shared_mouseOption(int option);
+void shared_mouseUp(void);
+void shared_delta(double delta_x, double delta_y, n_int view_type);
+void shared_zoom(double magnification, n_int view_type);
+void shared_rotate(double rotation, n_int view_type);
+
+// Menu functions
+int shared_menu(int menu_id);
+
+// File operations
+int shared_openFileName(const char* filename, int script_mode);
+void shared_saveFileName(const char* filename);
+
+// Simulation control
+void shared_new(unsigned int seed);
+void shared_about(void);
+
+// Command line interface
+void io_command_line_execution_set(void);
+
+#endif // SHARED_H

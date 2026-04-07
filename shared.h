@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 #ifndef SIMULATEDAPE_SHARED_H
@@ -46,6 +42,7 @@
 #include ".\toolkit\toolkit.h"
 
 #endif
+
 
 
 typedef enum
@@ -102,6 +99,7 @@ void shared_keyUp( void );
 void shared_mouseOption( n_byte option );
 void shared_mouseReceived( n_double valX, n_double valY, n_int localIdentification );
 void shared_mouseUp( void );
+void shared_mouseReceived_ios( n_double valX, n_double valY );
 
 void shared_about( void );
 
@@ -123,7 +121,6 @@ void shared_saveFileName( n_constant_string cStringFileName );
 void shared_script_debug_handle( n_constant_string cStringFileName );
 
 void shared_process(const char* fileUrl);
-
 
 n_int shared_being_number( void );
 void shared_being_name( n_int number, n_string name );

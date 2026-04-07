@@ -4,7 +4,7 @@
 
  =============================================================
 
- Copyright 1996-2025 Tom Barbalet. All rights reserved.
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -27,10 +27,6 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 
- This software is a continuing work of Tom Barbalet, begun on
- 13 June 1996. No apes or cats were harmed in the writing of
- this software.
-
  ****************************************************************/
 
 /*! \file   script.h
@@ -42,8 +38,16 @@
 /*	Variable Definitions */
 
 
-#define	 SCRIPT_DEBUG             /* Add all the runtime debug */
+#undef	 SCRIPT_DEBUG             /* Add all the runtime debug */
 #undef   ROUGH_CODE_OUT           /* printf outputs the interpret stream in character number format */
+
+typedef enum
+{
+    VARIABLE_FUNCTION = 0,
+    VARIABLE_RUN,
+    VARIABLE_WHILE,
+    VARIABLE_IF
+} PRIMARY_APESCRIPT;
 
 typedef enum
 {
@@ -159,13 +163,7 @@ static const n_ae_error apescript_errors[] =
 
 #define IO_LOWER_CHAR(value)   if(ASCII_UPPERCASE(value)) (value) += 'a' - 'A'
 
-typedef enum
-{
-    VARIABLE_FUNCTION = 0,
-    VARIABLE_RUN,
-    VARIABLE_WHILE,
-    VARIABLE_IF
-} PRIMARY_APESCRIPT;
+
 
 typedef enum
 {
@@ -363,13 +361,14 @@ void     scdebug_writeoff( void *ptr );
 
 #else
 
-#define	SC_DEBUG_STRING(string)	/* string */
-#define SC_DEBUG_NUMBER(number) /* number */
-#define	SC_DEBUG_NEWLINE		/* */
-#define	SC_DEBUG_UP				/* */
-#define	SC_DEBUG_DOWN			/* */
-#define	SC_DEBUG_ON(ptr)		/* ptr */
-#define SC_DEBUG_OFF			/* */
+#define    SC_DEBUG_STRING(ptr, string) /*scdebug_string(ptr, string) */
+#define SC_DEBUG_NUMBER(ptr, number) /*scdebug_int(ptr, number)*/
+#define    SC_DEBUG_NEWLINE(ptr)        /* scdebug_newline(ptr)*/
+#define    SC_DEBUG_UP(ptr)             /*scdebug_tabstep(ptr,1)*/
+#define    SC_DEBUG_DOWN(ptr)           /*  scdebug_tabstep(ptr,-1)*/
+#define    SC_DEBUG_ON(ptr)            /* scdebug_writeon(ptr)*/
+#define SC_DEBUG_OFF(ptr)             /*scdebug_writeoff(ptr)*/
+
 
 #endif
 
