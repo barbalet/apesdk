@@ -115,8 +115,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAboutPanel(_ sender: Any?) {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: appName,
-            .version: "Cycle 15 Twilight Atmosphere Pass",
-            .credits: NSAttributedString(string: "A full-screen Metal viewer for ApeSDK, now giving dawn, dusk, and night their own horizon glow, celestial halo, and low-light water tinting so time-of-day shifts read as atmosphere rather than only a sky-color swap.")
+            .version: "Cycle 21 Wet Ground Haze Pass",
+            .credits: NSAttributedString(string: "A full-screen Metal viewer for ApeSDK, now letting rain-soaked ground affect the air above it so runoff corridors and sheltered puddles lift low drifting haze, especially through twilight and fresh weather, instead of reading as purely surface-bound effects.")
         ])
     }
 
