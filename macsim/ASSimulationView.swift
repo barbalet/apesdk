@@ -408,6 +408,157 @@ private struct ImmersiveApeEmbodimentProfile {
     var renderHands: Bool
 }
 
+private struct ImmersiveApeBodyProfile {
+    let torsoWidth: Float
+    let torsoDepth: Float
+    let torsoHeight: Float
+    let chestWidth: Float
+    let chestDepth: Float
+    let hipWidth: Float
+    let hipDepth: Float
+    let shoulderWidth: Float
+    let shoulderHeight: Float
+    let neckHeight: Float
+    let headRadius: Float
+    let muzzleLength: Float
+    let browRadius: Float
+    let armUpperLength: Float
+    let armLowerLength: Float
+    let armRadius: Float
+    let legUpperLength: Float
+    let legLowerLength: Float
+    let legRadius: Float
+    let handRadius: Float
+    let footLength: Float
+    let footHeight: Float
+    let crouch: Float
+    let spineLean: Float
+    let headLift: Float
+    let armReach: Float
+    let gaitAmplitude: Float
+    let crestHeight: Float
+    let bellyDepth: Float
+}
+
+private struct ImmersiveApeMotionProfile {
+    let phaseRate: Float
+    let strideDistance: Float
+    let armSwingDistance: Float
+    let legStrideDistance: Float
+    let kneeLift: Float
+    let torsoLift: Float
+    let hipLift: Float
+    let shoulderLift: Float
+    let idleShift: Float
+    let socialForward: Float
+    let torsoSideShift: Float
+    let headSideShift: Float
+    let gestureReach: Float
+    let gestureLift: Float
+    let stanceWidthScale: Float
+    let elbowOut: Float
+    let breath: Float
+}
+
+private struct ImmersiveApeGaitSignature {
+    let cadenceScale: Float
+    let phaseOffset: Float
+    let leftStrideScale: Float
+    let rightStrideScale: Float
+    let leftArmScale: Float
+    let rightArmScale: Float
+    let torsoSway: Float
+    let shoulderTilt: Float
+    let hipTilt: Float
+    let headBob: Float
+    let footLift: Float
+    let stanceBias: Float
+}
+
+private struct ImmersiveApeSilhouetteProfile {
+    let torsoForward: Float
+    let torsoLift: Float
+    let chestWidthScale: Float
+    let chestDepthScale: Float
+    let shoulderSpreadScale: Float
+    let armSpreadScale: Float
+    let handRaise: Float
+    let elbowTuck: Float
+    let headForward: Float
+    let headLift: Float
+    let stanceWidthScale: Float
+    let crestLift: Float
+}
+
+private struct ImmersiveApeSkeletonDNA {
+    let spineScale: Float
+    let ribcageScale: Float
+    let shoulderWidthScale: Float
+    let shoulderSocketInsetScale: Float
+    let pelvisWidthScale: Float
+    let upperArmScale: Float
+    let forearmScale: Float
+    let upperLegScale: Float
+    let lowerLegScale: Float
+    let neckScale: Float
+    let headScale: Float
+    let handScale: Float
+    let footScale: Float
+    let collarLiftScale: Float
+}
+
+private struct ImmersiveApeAvatarSkeleton {
+    let torsoCenter: SIMD3<Float>
+    let lumbar: SIMD3<Float>
+    let chestCenter: SIMD3<Float>
+    let bellyCenter: SIMD3<Float>
+    let hipCenter: SIMD3<Float>
+    let neck: SIMD3<Float>
+    let headCenter: SIMD3<Float>
+    let muzzleCenter: SIMD3<Float>
+    let browCenter: SIMD3<Float>
+    let leftShoulder: SIMD3<Float>
+    let rightShoulder: SIMD3<Float>
+    let leftShoulderSocket: SIMD3<Float>
+    let rightShoulderSocket: SIMD3<Float>
+    let leftCollar: SIMD3<Float>
+    let rightCollar: SIMD3<Float>
+    let leftElbow: SIMD3<Float>
+    let rightElbow: SIMD3<Float>
+    let leftWrist: SIMD3<Float>
+    let rightWrist: SIMD3<Float>
+    let leftHip: SIMD3<Float>
+    let rightHip: SIMD3<Float>
+    let leftKnee: SIMD3<Float>
+    let rightKnee: SIMD3<Float>
+    let leftAnkle: SIMD3<Float>
+    let rightAnkle: SIMD3<Float>
+    let crestBase: SIMD3<Float>
+    let crestTip: SIMD3<Float>
+    let headRadius: Float
+    let handRadius: Float
+    let footLength: Float
+    let footHeight: Float
+}
+
+private struct ImmersiveApeExtremityProfile {
+    let palmLength: Float
+    let palmRadius: Float
+    let fingerLength: Float
+    let fingerRadius: Float
+    let thumbLength: Float
+    let thumbLift: Float
+    let thumbSpread: Float
+    let knuckleSpread: Float
+    let soleLength: Float
+    let soleRadius: Float
+    let heelRadius: Float
+    let toeLength: Float
+    let toeRadius: Float
+    let toeSpread: Float
+    let archLift: Float
+}
+
 private struct ImmersiveApeTerrainGrid {
     let positions: [SIMD3<Float>]
     let materials: [UInt8]
@@ -582,6 +733,26 @@ private struct ImmersiveApeBiomeDNAProfile {
     let scrubCopseBias: Float
     let forestHollowBias: Float
     let stoneGardenBias: Float
+    let coastalSuccessionBias: Float
+    let meadowSuccessionBias: Float
+    let scrubSuccessionBias: Float
+    let forestSuccessionBias: Float
+    let stoneSuccessionBias: Float
+    let coastalDispersalBias: Float
+    let meadowDispersalBias: Float
+    let scrubDispersalBias: Float
+    let forestDispersalBias: Float
+    let stoneDispersalBias: Float
+    let coastalPhenologyBias: Float
+    let meadowPhenologyBias: Float
+    let scrubPhenologyBias: Float
+    let forestPhenologyBias: Float
+    let stonePhenologyBias: Float
+    let coastalLandmarkBias: Float
+    let meadowLandmarkBias: Float
+    let scrubLandmarkBias: Float
+    let forestLandmarkBias: Float
+    let stoneLandmarkBias: Float
     let foliageTint: SIMD3<Float>
     let bloomTint: SIMD3<Float>
     let dryTint: SIMD3<Float>
@@ -623,7 +794,7 @@ private struct ImmersiveApeFloraPosture {
 
 private let immersiveApeWorldScale: Float = 0.04
 private let immersiveApeHeightScale: Float = 0.08
-private let immersiveApeCurrentDevelopmentCycle: Int = 26
+private let immersiveApeCurrentDevelopmentCycle: Int = 36
 
 @MainActor
 private final class ImmersiveApeSimulationController {
@@ -1140,6 +1311,8 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         buildSelectedEmbodiment(
             from: capture,
             profile: embodiment,
+            attentionFocus: attentionFocus,
+            encounterCount: encounters.count,
             environment: environment,
             timeValue: Float(capture.snapshot.time),
             opaque: &opaqueBuilder,
@@ -2426,6 +2599,71 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                     posture: floraPosture,
                     builder: &opaque
                 )
+
+                addBiomeSuccessionAccent(
+                    at: base,
+                    material: material,
+                    moisture: adjustedMoisture,
+                    relief: relief,
+                    habitat: habitat,
+                    environment: environment,
+                    seed: seed,
+                    variant: chance,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    dnaProfile: dnaProfile,
+                    posture: floraPosture,
+                    builder: &opaque
+                )
+
+                addBiomeDispersalTrail(
+                    at: base,
+                    material: material,
+                    moisture: adjustedMoisture,
+                    relief: relief,
+                    habitat: habitat,
+                    environment: environment,
+                    seed: seed,
+                    variant: chance,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    dnaProfile: dnaProfile,
+                    posture: floraPosture,
+                    builder: &opaque
+                )
+
+                addBiomePhenologyAccent(
+                    at: base,
+                    material: material,
+                    moisture: adjustedMoisture,
+                    relief: relief,
+                    habitat: habitat,
+                    environment: environment,
+                    timeValue: timeValue,
+                    seed: seed,
+                    variant: chance,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    dnaProfile: dnaProfile,
+                    posture: floraPosture,
+                    builder: &opaque
+                )
+
+                addBiomeLandmarkSpecimen(
+                    at: base,
+                    material: material,
+                    moisture: adjustedMoisture,
+                    relief: relief,
+                    habitat: habitat,
+                    environment: environment,
+                    seed: seed,
+                    variant: chance,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    dnaProfile: dnaProfile,
+                    posture: floraPosture,
+                    builder: &opaque
+                )
             }
         }
     }
@@ -2944,6 +3182,1029 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         }
     }
 
+    private func addBiomeSuccessionAccent(
+        at base: SIMD3<Float>,
+        material: UInt8,
+        moisture: Float,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        environment: ImmersiveApeEnvironment,
+        seed: UInt32,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        posture: ImmersiveApeFloraPosture,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let sampleX = Int32((base.x * 54).rounded())
+        let sampleZ = Int32((base.z * 54).rounded())
+        let successionRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x65D1_1F07)
+        let secondRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x2C47_B58D)
+        let thirdRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x91A8_3CE1)
+        let fourthRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xE341_6A2B)
+        let offsetRadius = 0.16 + (variant * 0.22)
+        let offsetA = SIMD3<Float>((secondRoll - 0.5) * offsetRadius, 0, (thirdRoll - 0.5) * offsetRadius)
+        let offsetB = SIMD3<Float>((fourthRoll - 0.5) * (offsetRadius * 0.92), 0, (successionRoll - 0.5) * (offsetRadius * 0.84))
+        let offsetC = SIMD3<Float>((thirdRoll - 0.5) * (offsetRadius * 0.64), 0, ((1 - secondRoll) - 0.5) * (offsetRadius * 0.72))
+        let foliageTint = immersiveApeMix(habitat.accentColor, dnaProfile.foliageTint, t: 0.52)
+        let bloomTint = immersiveApeMix(habitat.accentColor, dnaProfile.bloomTint, t: 0.64)
+        let dryTint = immersiveApeMix(habitat.accentColor, dnaProfile.dryTint, t: 0.56)
+        let juvenilePocket = immersiveApeSaturate(
+            (moisture * 0.3)
+                + (relief.basin * 0.2)
+                + (habitat.coverDensity * 0.2)
+                + (secondRoll * 0.12)
+                - (relief.ridge * 0.12)
+        )
+        let maturePocket = immersiveApeSaturate(
+            (habitat.clutterDensity * 0.26)
+                + (relief.ridge * 0.22)
+                + (relief.slope * 0.16)
+                + (thirdRoll * 0.12)
+                + ((1 - moisture) * 0.08)
+        )
+
+        switch material {
+        case 1:
+            if successionRoll < 0.005 + (((juvenilePocket * 0.58) + (maturePocket * 0.42)) * 0.04 * dnaProfile.coastalSuccessionBias) {
+                addReedCluster(
+                    at: base + (offsetA * 0.56),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    accentTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.8 + (maturePocket * 0.18) + (dnaProfile.coastalSuccessionBias * 0.08),
+                    posture: posture
+                )
+                addGrass(
+                    at: base + (offsetB * 0.44),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.58) + (secondRoll * 0.42)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.42 + (juvenilePocket * 0.18),
+                    posture: posture
+                )
+                if fourthRoll < 0.48 {
+                    addGrass(
+                        at: base + (offsetC * 0.34),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.5) + (thirdRoll * 0.5)),
+                        shadow: shadow,
+                        silhouette: silhouette,
+                        scale: 0.32 + (juvenilePocket * 0.12),
+                        posture: posture
+                    )
+                }
+            }
+        case 2:
+            if successionRoll < 0.006 + (((juvenilePocket * 0.6) + (maturePocket * 0.4)) * 0.04 * dnaProfile.meadowSuccessionBias) {
+                addSeedHeadCluster(
+                    at: base + (offsetA * 0.52),
+                    builder: &builder,
+                    environment: environment,
+                    stemTint: foliageTint,
+                    headTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.82 + (maturePocket * 0.16) + (dnaProfile.meadowSuccessionBias * 0.08),
+                    posture: posture
+                )
+                addGrass(
+                    at: base + (offsetB * 0.48),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.54) + (thirdRoll * 0.46)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.48 + (juvenilePocket * 0.16),
+                    posture: posture
+                )
+                if fourthRoll < 0.58 {
+                    addFlowerPatch(
+                        at: base + (offsetC * 0.38),
+                        builder: &builder,
+                        environment: environment,
+                        tint: bloomTint,
+                        shadow: shadow,
+                        scale: 0.58 + (juvenilePocket * 0.12),
+                        posture: posture
+                    )
+                }
+            }
+        case 3:
+            if successionRoll < 0.005 + (((juvenilePocket * 0.44) + (maturePocket * 0.56)) * 0.04 * dnaProfile.scrubSuccessionBias) {
+                let scrubSilhouette = immersiveApeBiomeSilhouette(
+                    material: 3,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.64) + (secondRoll * 0.36)),
+                    dnaProfile: dnaProfile
+                )
+                addScrubThicketAccent(
+                    at: base + (offsetA * 0.54),
+                    builder: &builder,
+                    environment: environment,
+                    stemTint: dryTint,
+                    berryTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.76 + (maturePocket * 0.18) + (dnaProfile.scrubSuccessionBias * 0.08),
+                    posture: posture
+                )
+                addBush(
+                    at: base + (offsetB * 0.42),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.56) + (thirdRoll * 0.44)),
+                    shadow: shadow,
+                    silhouette: scrubSilhouette,
+                    scale: 0.42 + (juvenilePocket * 0.16),
+                    posture: posture
+                )
+                if fourthRoll < 0.52 {
+                    addDryTuft(
+                        at: base + (offsetC * 0.34),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.44 + (maturePocket * 0.14),
+                        posture: posture
+                    )
+                }
+            }
+        case 4:
+            if successionRoll < 0.005 + ((((juvenilePocket * 0.52) + (maturePocket * 0.48)) * 0.04) * dnaProfile.forestSuccessionBias) {
+                let saplingSilhouette = immersiveApeBiomeSilhouette(
+                    material: 3,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.6) + (fourthRoll * 0.4)),
+                    dnaProfile: dnaProfile
+                )
+                addFernPatch(
+                    at: base + (offsetA * 0.46),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    shadow: shadow,
+                    scale: 0.82 + (maturePocket * 0.16) + (dnaProfile.forestSuccessionBias * 0.06),
+                    posture: posture
+                )
+                addFernPatch(
+                    at: base + (offsetB * 0.32),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    shadow: shadow,
+                    scale: 0.48 + (juvenilePocket * 0.14),
+                    posture: posture
+                )
+                if fourthRoll < 0.54 {
+                    addBush(
+                        at: base + (offsetC * 0.28),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.52) + (secondRoll * 0.48)),
+                        shadow: shadow,
+                        silhouette: saplingSilhouette,
+                        scale: 0.4 + (juvenilePocket * 0.14),
+                        posture: posture
+                    )
+                }
+            }
+        case 5:
+            if successionRoll < 0.004 + (((juvenilePocket * 0.36) + (maturePocket * 0.64)) * 0.04 * dnaProfile.stoneSuccessionBias) {
+                let stoneSilhouette = immersiveApeBiomeSilhouette(
+                    material: 5,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.62) + (thirdRoll * 0.38)),
+                    dnaProfile: dnaProfile
+                )
+                let pioneerSilhouette = immersiveApeBiomeSilhouette(
+                    material: 2,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.54) + (secondRoll * 0.46)),
+                    dnaProfile: dnaProfile
+                )
+                addLichenStoneCluster(
+                    at: base + (offsetA * 0.32),
+                    builder: &builder,
+                    environment: environment,
+                    shadow: shadow,
+                    silhouette: stoneSilhouette,
+                    lichenTint: immersiveApeMix(foliageTint, bloomTint, t: 0.16),
+                    dryTint: dryTint,
+                    variant: min(1.0, (variant * 0.58) + (fourthRoll * 0.42)),
+                    scale: 0.72 + (maturePocket * 0.14) + (dnaProfile.stoneSuccessionBias * 0.06)
+                )
+                if juvenilePocket > 0.46 {
+                    addGrass(
+                        at: base + (offsetB * 0.26),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.48) + (secondRoll * 0.52)),
+                        shadow: shadow,
+                        silhouette: pioneerSilhouette,
+                        scale: 0.32 + (juvenilePocket * 0.12),
+                        posture: posture
+                    )
+                } else {
+                    addDryTuft(
+                        at: base + (offsetB * 0.28),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.4 + (maturePocket * 0.12),
+                        posture: posture
+                    )
+                }
+            }
+        default:
+            break
+        }
+    }
+
+    private func addBiomeDispersalTrail(
+        at base: SIMD3<Float>,
+        material: UInt8,
+        moisture: Float,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        environment: ImmersiveApeEnvironment,
+        seed: UInt32,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        posture: ImmersiveApeFloraPosture,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let sampleX = Int32((base.x * 58).rounded())
+        let sampleZ = Int32((base.z * 58).rounded())
+        let driftRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x6A31_F5C1)
+        let secondRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x18C4_72AD)
+        let thirdRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x9B72_41E3)
+        let fourthRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xD54A_0F97)
+        let driftLength = 0.16 + (relief.runoff * 0.12) + (relief.slope * 0.08) + (posture.bend * 0.9)
+        let laneSpread = 0.05 + (habitat.coverDensity * 0.06) + (secondRoll * 0.03)
+        let driftA = (posture.direction * (driftLength * (0.58 + (secondRoll * 0.18)))) + (posture.crossDirection * ((thirdRoll - 0.5) * laneSpread))
+        let driftB = (posture.direction * (driftLength * (0.92 + (thirdRoll * 0.24)))) + (posture.crossDirection * ((fourthRoll - 0.5) * laneSpread * 1.18))
+        let driftC = (posture.direction * (driftLength * 0.28)) + (posture.crossDirection * (((1 - secondRoll) - 0.5) * laneSpread * 0.84))
+        let foliageTint = immersiveApeMix(habitat.accentColor, dnaProfile.foliageTint, t: 0.48)
+        let bloomTint = immersiveApeMix(habitat.accentColor, dnaProfile.bloomTint, t: 0.62)
+        let dryTint = immersiveApeMix(habitat.accentColor, dnaProfile.dryTint, t: 0.54)
+        let driftStrength = immersiveApeSaturate(
+            (relief.runoff * 0.24)
+                + (relief.slope * 0.18)
+                + (posture.bend * 2.4)
+                + (habitat.coverDensity * 0.16)
+                + (moisture * 0.12)
+        )
+        let seedfall = immersiveApeSaturate(
+            (habitat.clutterDensity * 0.28)
+                + (moisture * 0.14)
+                + ((1 - relief.ridge) * 0.12)
+                + (thirdRoll * 0.08)
+        )
+
+        switch material {
+        case 1:
+            if driftRoll < 0.005 + (driftStrength * 0.04 * dnaProfile.coastalDispersalBias) {
+                addGrass(
+                    at: base + driftA,
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.52) + (secondRoll * 0.48)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.34 + (seedfall * 0.12),
+                    posture: posture
+                )
+                addGrass(
+                    at: base + driftB,
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.46) + (thirdRoll * 0.54)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.28 + (driftStrength * 0.1),
+                    posture: posture
+                )
+                if fourthRoll < 0.54 {
+                    addReedCluster(
+                        at: base + (driftC * 0.52),
+                        builder: &builder,
+                        environment: environment,
+                        tint: foliageTint,
+                        accentTint: bloomTint,
+                        shadow: shadow,
+                        scale: 0.46 + (seedfall * 0.12),
+                        posture: posture
+                    )
+                }
+            }
+        case 2:
+            if driftRoll < 0.006 + (driftStrength * 0.04 * dnaProfile.meadowDispersalBias) {
+                addGrass(
+                    at: base + driftA,
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.5) + (thirdRoll * 0.5)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.38 + (seedfall * 0.12),
+                    posture: posture
+                )
+                addSeedHeadCluster(
+                    at: base + (driftC * 0.46),
+                    builder: &builder,
+                    environment: environment,
+                    stemTint: foliageTint,
+                    headTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.48 + (seedfall * 0.12),
+                    posture: posture
+                )
+                if fourthRoll < 0.62 {
+                    addFlowerPatch(
+                        at: base + driftB,
+                        builder: &builder,
+                        environment: environment,
+                        tint: bloomTint,
+                        shadow: shadow,
+                        scale: 0.52 + (driftStrength * 0.1),
+                        posture: posture
+                    )
+                }
+            }
+        case 3:
+            if driftRoll < 0.005 + (seedfall * 0.04 * dnaProfile.scrubDispersalBias) {
+                let scrubSilhouette = immersiveApeBiomeSilhouette(
+                    material: 3,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.58) + (secondRoll * 0.42)),
+                    dnaProfile: dnaProfile
+                )
+                addBush(
+                    at: base + driftA,
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.52) + (thirdRoll * 0.48)),
+                    shadow: shadow,
+                    silhouette: scrubSilhouette,
+                    scale: 0.36 + (seedfall * 0.14),
+                    posture: posture
+                )
+                addDryTuft(
+                    at: base + driftB,
+                    builder: &builder,
+                    environment: environment,
+                    tint: dryTint,
+                    shadow: shadow,
+                    scale: 0.38 + (driftStrength * 0.1),
+                    posture: posture
+                )
+                if fourthRoll < 0.56 {
+                    addScrubThicketAccent(
+                        at: base + (driftC * 0.42),
+                        builder: &builder,
+                        environment: environment,
+                        stemTint: dryTint,
+                        berryTint: bloomTint,
+                        shadow: shadow,
+                        scale: 0.5 + (seedfall * 0.12),
+                        posture: posture
+                    )
+                }
+            }
+        case 4:
+            if driftRoll < 0.005 + (((driftStrength * 0.54) + (seedfall * 0.46)) * 0.04 * dnaProfile.forestDispersalBias) {
+                let saplingSilhouette = immersiveApeBiomeSilhouette(
+                    material: 3,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.56) + (fourthRoll * 0.44)),
+                    dnaProfile: dnaProfile
+                )
+                addFernPatch(
+                    at: base + driftA,
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    shadow: shadow,
+                    scale: 0.5 + (seedfall * 0.12),
+                    posture: posture
+                )
+                addBush(
+                    at: base + driftB,
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.48) + (secondRoll * 0.52)),
+                    shadow: shadow,
+                    silhouette: saplingSilhouette,
+                    scale: 0.34 + (driftStrength * 0.12),
+                    posture: posture
+                )
+                if fourthRoll < 0.58 {
+                    addLeafLitterPatch(
+                        at: base + (driftC * 0.56),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.58 + (seedfall * 0.14)
+                    )
+                }
+            }
+        case 5:
+            if driftRoll < 0.004 + (((driftStrength * 0.4) + (seedfall * 0.6)) * 0.04 * dnaProfile.stoneDispersalBias) {
+                let stoneSilhouette = immersiveApeBiomeSilhouette(
+                    material: 5,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.56) + (thirdRoll * 0.44)),
+                    dnaProfile: dnaProfile
+                )
+                let pioneerSilhouette = immersiveApeBiomeSilhouette(
+                    material: 2,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.44) + (secondRoll * 0.56)),
+                    dnaProfile: dnaProfile
+                )
+                addLichenStoneCluster(
+                    at: base + (driftC * 0.4),
+                    builder: &builder,
+                    environment: environment,
+                    shadow: shadow,
+                    silhouette: stoneSilhouette,
+                    lichenTint: immersiveApeMix(foliageTint, bloomTint, t: 0.14),
+                    dryTint: dryTint,
+                    variant: min(1.0, (variant * 0.52) + (fourthRoll * 0.48)),
+                    scale: 0.52 + (seedfall * 0.12)
+                )
+                if moisture > 0.46 {
+                    addGrass(
+                        at: base + driftA,
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.42) + (secondRoll * 0.58)),
+                        shadow: shadow,
+                        silhouette: pioneerSilhouette,
+                        scale: 0.28 + (driftStrength * 0.08),
+                        posture: posture
+                    )
+                } else {
+                    addDryTuft(
+                        at: base + driftB,
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.34 + (seedfall * 0.1),
+                        posture: posture
+                    )
+                }
+            }
+        default:
+            break
+        }
+    }
+
+    private func addBiomePhenologyAccent(
+        at base: SIMD3<Float>,
+        material: UInt8,
+        moisture: Float,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        environment: ImmersiveApeEnvironment,
+        timeValue: Float,
+        seed: UInt32,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        posture: ImmersiveApeFloraPosture,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let sampleX = Int32((base.x * 66).rounded())
+        let sampleZ = Int32((base.z * 66).rounded())
+        let phaseRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x7341_0BE5)
+        let secondRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x2A57_D1C9)
+        let thirdRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x9E14_63AF)
+        let fourthRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xC851_27D3)
+        let offsetRadius = 0.13 + (variant * 0.18)
+        let offsetA = SIMD3<Float>((secondRoll - 0.5) * offsetRadius, 0, (thirdRoll - 0.5) * offsetRadius)
+        let offsetB = SIMD3<Float>((fourthRoll - 0.5) * (offsetRadius * 0.88), 0, (phaseRoll - 0.5) * (offsetRadius * 0.82))
+        let offsetC = SIMD3<Float>((thirdRoll - 0.5) * (offsetRadius * 0.62), 0, ((1 - secondRoll) - 0.5) * (offsetRadius * 0.68))
+        let phasePulse = 0.5 + (0.5 * sin((timeValue * (0.004 + (environment.daylight * 0.003))) + (base.x * 0.43) - (base.z * 0.31) + (variant * Float.pi * 2)))
+        let freshPhase = immersiveApeSaturate(
+            (moisture * 0.28)
+                + (environment.rainAmount * 0.2)
+                + (relief.basin * 0.12)
+                + (phasePulse * 0.16)
+                - (relief.ridge * 0.08)
+        )
+        let reproductivePhase = immersiveApeSaturate(
+            (environment.daylight * 0.24)
+                + ((1 - environment.rainAmount) * 0.12)
+                + (habitat.clutterDensity * 0.16)
+                + (phasePulse * 0.18)
+                + (thirdRoll * 0.08)
+        )
+        let dryPhase = immersiveApeSaturate(
+            ((1 - moisture) * 0.22)
+                + (relief.ridge * 0.18)
+                + ((1 - phasePulse) * 0.18)
+                + (habitat.clutterDensity * 0.14)
+                + ((1 - environment.rainAmount) * 0.08)
+        )
+        let foliageTint = immersiveApeMix(
+            immersiveApeMix(habitat.accentColor, dnaProfile.foliageTint, t: 0.5),
+            immersiveApeMix(environment.waterColor, environment.sunColor, t: 0.24),
+            t: freshPhase * 0.18
+        )
+        let bloomTint = immersiveApeMix(dnaProfile.bloomTint, environment.sunColor, t: reproductivePhase * 0.24)
+        let dryTint = immersiveApeMix(dnaProfile.dryTint, environment.horizonColor, t: dryPhase * 0.18)
+
+        switch material {
+        case 1:
+            if phaseRoll < 0.005 + (max(freshPhase, max(reproductivePhase, dryPhase)) * 0.04 * dnaProfile.coastalPhenologyBias) {
+                addReedCluster(
+                    at: base + (offsetA * 0.42),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    accentTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.42 + (freshPhase * 0.1) + (reproductivePhase * 0.08),
+                    posture: posture
+                )
+                addGrass(
+                    at: base + (offsetB * 0.36),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.46) + (secondRoll * 0.54)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.28 + (freshPhase * 0.12),
+                    posture: posture
+                )
+                if dryPhase > 0.48 && fourthRoll < 0.54 {
+                    addDryTuft(
+                        at: base + (offsetC * 0.34),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.32 + (dryPhase * 0.1),
+                        posture: posture
+                    )
+                }
+            }
+        case 2:
+            if phaseRoll < 0.006 + (max(freshPhase, max(reproductivePhase, dryPhase)) * 0.04 * dnaProfile.meadowPhenologyBias) {
+                addFlowerPatch(
+                    at: base + (offsetA * 0.38),
+                    builder: &builder,
+                    environment: environment,
+                    tint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.54 + (reproductivePhase * 0.14),
+                    posture: posture
+                )
+                addGrass(
+                    at: base + (offsetB * 0.42),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.44) + (thirdRoll * 0.56)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.3 + (freshPhase * 0.12),
+                    posture: posture
+                )
+                if dryPhase > 0.42 {
+                    addSeedHeadCluster(
+                        at: base + (offsetC * 0.34),
+                        builder: &builder,
+                        environment: environment,
+                        stemTint: foliageTint,
+                        headTint: bloomTint,
+                        shadow: shadow,
+                        scale: 0.42 + (reproductivePhase * 0.12) + (dryPhase * 0.08),
+                        posture: posture
+                    )
+                }
+            }
+        case 3:
+            if phaseRoll < 0.005 + (max(freshPhase, max(reproductivePhase, dryPhase)) * 0.04 * dnaProfile.scrubPhenologyBias) {
+                let scrubSilhouette = immersiveApeBiomeSilhouette(
+                    material: 3,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.54) + (secondRoll * 0.46)),
+                    dnaProfile: dnaProfile
+                )
+                addBush(
+                    at: base + (offsetA * 0.36),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.48) + (thirdRoll * 0.52)),
+                    shadow: shadow,
+                    silhouette: scrubSilhouette,
+                    scale: 0.3 + (freshPhase * 0.12),
+                    posture: posture
+                )
+                addScrubThicketAccent(
+                    at: base + (offsetB * 0.34),
+                    builder: &builder,
+                    environment: environment,
+                    stemTint: dryTint,
+                    berryTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.46 + (reproductivePhase * 0.12),
+                    posture: posture
+                )
+                if dryPhase > 0.46 && fourthRoll < 0.6 {
+                    addDryTuft(
+                        at: base + (offsetC * 0.32),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.34 + (dryPhase * 0.1),
+                        posture: posture
+                    )
+                }
+            }
+        case 4:
+            if phaseRoll < 0.005 + (max(freshPhase, max(reproductivePhase, dryPhase)) * 0.04 * dnaProfile.forestPhenologyBias) {
+                let saplingSilhouette = immersiveApeBiomeSilhouette(
+                    material: 3,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.5) + (fourthRoll * 0.5)),
+                    dnaProfile: dnaProfile
+                )
+                addFernPatch(
+                    at: base + (offsetA * 0.34),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    shadow: shadow,
+                    scale: 0.48 + (freshPhase * 0.12),
+                    posture: posture
+                )
+                if freshPhase > 0.44 && fourthRoll < 0.58 {
+                    addBush(
+                        at: base + (offsetB * 0.28),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.44) + (secondRoll * 0.56)),
+                        shadow: shadow,
+                        silhouette: saplingSilhouette,
+                        scale: 0.28 + (freshPhase * 0.12),
+                        posture: posture
+                    )
+                }
+                if dryPhase > 0.42 {
+                    addLeafLitterPatch(
+                        at: base + (offsetC * 0.42),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.56 + (dryPhase * 0.14)
+                    )
+                }
+            }
+        case 5:
+            if phaseRoll < 0.004 + (max(freshPhase, max(reproductivePhase, dryPhase)) * 0.04 * dnaProfile.stonePhenologyBias) {
+                let stoneSilhouette = immersiveApeBiomeSilhouette(
+                    material: 5,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.5) + (thirdRoll * 0.5)),
+                    dnaProfile: dnaProfile
+                )
+                let pioneerSilhouette = immersiveApeBiomeSilhouette(
+                    material: 2,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.42) + (secondRoll * 0.58)),
+                    dnaProfile: dnaProfile
+                )
+                addLichenStoneCluster(
+                    at: base + (offsetA * 0.3),
+                    builder: &builder,
+                    environment: environment,
+                    shadow: shadow,
+                    silhouette: stoneSilhouette,
+                    lichenTint: immersiveApeMix(foliageTint, bloomTint, t: reproductivePhase * 0.14),
+                    dryTint: dryTint,
+                    variant: min(1.0, (variant * 0.48) + (fourthRoll * 0.52)),
+                    scale: 0.46 + (freshPhase * 0.08) + (dryPhase * 0.08)
+                )
+                if freshPhase > 0.46 {
+                    addGrass(
+                        at: base + (offsetB * 0.3),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.38) + (secondRoll * 0.62)),
+                        shadow: shadow,
+                        silhouette: pioneerSilhouette,
+                        scale: 0.24 + (freshPhase * 0.1),
+                        posture: posture
+                    )
+                } else if dryPhase > 0.48 {
+                    addDryTuft(
+                        at: base + (offsetC * 0.32),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.3 + (dryPhase * 0.1),
+                        posture: posture
+                    )
+                }
+            }
+        default:
+            break
+        }
+    }
+
+    private func addBiomeLandmarkSpecimen(
+        at base: SIMD3<Float>,
+        material: UInt8,
+        moisture: Float,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        environment: ImmersiveApeEnvironment,
+        seed: UInt32,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        posture: ImmersiveApeFloraPosture,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let sampleX = Int32((base.x * 34).rounded())
+        let sampleZ = Int32((base.z * 34).rounded())
+        let landmarkRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x7E14_93AF)
+        let secondRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x249C_5D31)
+        let thirdRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xA451_0CF7)
+        let fourthRoll = immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xD927_62E1)
+        let offsetRadius = 0.2 + (variant * 0.28)
+        let offsetA = SIMD3<Float>((secondRoll - 0.5) * offsetRadius, 0, (thirdRoll - 0.5) * offsetRadius)
+        let offsetB = SIMD3<Float>((fourthRoll - 0.5) * (offsetRadius * 0.86), 0, (landmarkRoll - 0.5) * (offsetRadius * 0.78))
+        let offsetC = SIMD3<Float>((thirdRoll - 0.5) * (offsetRadius * 0.58), 0, ((1 - secondRoll) - 0.5) * (offsetRadius * 0.66))
+        let foliageTint = immersiveApeMix(habitat.accentColor, dnaProfile.foliageTint, t: 0.5)
+        let bloomTint = immersiveApeMix(habitat.accentColor, dnaProfile.bloomTint, t: 0.64)
+        let dryTint = immersiveApeMix(habitat.accentColor, dnaProfile.dryTint, t: 0.58)
+        let anchorStrength = immersiveApeSaturate(
+            (habitat.coverDensity * 0.34)
+                + (habitat.clutterDensity * 0.18)
+                + (relief.basin * 0.12)
+                + (relief.runoff * 0.1)
+                + (relief.ridge * 0.08)
+        )
+        let exposure = immersiveApeSaturate((relief.ridge * 0.24) + (relief.slope * 0.18) - (relief.basin * 0.08))
+
+        switch material {
+        case 1:
+            if landmarkRoll < 0.003 + (anchorStrength * 0.03 * dnaProfile.coastalLandmarkBias) {
+                addReedCluster(
+                    at: base + (offsetA * 0.28),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    accentTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.94 + (dnaProfile.coastalLandmarkBias * 0.12) + (anchorStrength * 0.08),
+                    posture: posture
+                )
+                addGrass(
+                    at: base + (offsetB * 0.34),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.44) + (secondRoll * 0.56)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.56 + (anchorStrength * 0.12),
+                    posture: posture
+                )
+                if fourthRoll < 0.58 {
+                    addDriftwood(
+                        at: base + (offsetC * 0.36),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        variant: min(1.0, (variant * 0.58) + (thirdRoll * 0.42)),
+                        shadow: shadow,
+                        scale: 0.7 + (exposure * 0.16)
+                    )
+                }
+            }
+        case 2:
+            if landmarkRoll < 0.003 + (anchorStrength * 0.03 * dnaProfile.meadowLandmarkBias) {
+                addSeedHeadCluster(
+                    at: base + (offsetA * 0.24),
+                    builder: &builder,
+                    environment: environment,
+                    stemTint: foliageTint,
+                    headTint: bloomTint,
+                    shadow: shadow,
+                    scale: 1.0 + (dnaProfile.meadowLandmarkBias * 0.12) + (anchorStrength * 0.08),
+                    posture: posture
+                )
+                addFlowerPatch(
+                    at: base + (offsetB * 0.3),
+                    builder: &builder,
+                    environment: environment,
+                    tint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.72 + (dnaProfile.bloomBias * 0.1),
+                    posture: posture
+                )
+                addGrass(
+                    at: base + (offsetC * 0.38),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.42) + (fourthRoll * 0.58)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.62 + (anchorStrength * 0.12),
+                    posture: posture
+                )
+            }
+        case 3:
+            if landmarkRoll < 0.003 + (anchorStrength * 0.03 * dnaProfile.scrubLandmarkBias) {
+                let scrubSilhouette = immersiveApeBiomeSilhouette(
+                    material: 3,
+                    moisture: moisture,
+                    variation: min(1.0, (variant * 0.52) + (secondRoll * 0.48)),
+                    dnaProfile: dnaProfile
+                )
+                addScrubThicketAccent(
+                    at: base + (offsetA * 0.24),
+                    builder: &builder,
+                    environment: environment,
+                    stemTint: dryTint,
+                    berryTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.96 + (dnaProfile.scrubLandmarkBias * 0.12) + (anchorStrength * 0.08),
+                    posture: posture
+                )
+                addBush(
+                    at: base + (offsetB * 0.34),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.46) + (thirdRoll * 0.54)),
+                    shadow: shadow,
+                    silhouette: scrubSilhouette,
+                    scale: 0.72 + (anchorStrength * 0.14),
+                    posture: posture
+                )
+                if fourthRoll < 0.6 {
+                    addDryTuft(
+                        at: base + (offsetC * 0.38),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.62 + (exposure * 0.14),
+                        posture: posture
+                    )
+                }
+            }
+        case 4:
+            if landmarkRoll < 0.0022 + (anchorStrength * 0.024 * dnaProfile.forestLandmarkBias) {
+                let forestSilhouette = ImmersiveApeBiomeSilhouette(
+                    treeHeightScale: silhouette.treeHeightScale * (1.08 + (dnaProfile.forestLandmarkBias * 0.04)),
+                    treeCanopyWidthScale: silhouette.treeCanopyWidthScale * (1.04 + (anchorStrength * 0.04)),
+                    treeCanopyHeightScale: silhouette.treeCanopyHeightScale * 1.06,
+                    treeLean: silhouette.treeLean * 0.92,
+                    bushWidthScale: silhouette.bushWidthScale,
+                    bushHeightScale: silhouette.bushHeightScale,
+                    grassHeightScale: silhouette.grassHeightScale,
+                    grassSpread: silhouette.grassSpread,
+                    grassLean: silhouette.grassLean,
+                    grassColor: silhouette.grassColor,
+                    rockWidthScale: silhouette.rockWidthScale,
+                    rockHeightScale: silhouette.rockHeightScale,
+                    rockCluster: silhouette.rockCluster
+                )
+                addTree(
+                    at: base + (offsetA * 0.14),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.48) + (secondRoll * 0.52)),
+                    shadow: shadow,
+                    silhouette: forestSilhouette
+                )
+                addFernPatch(
+                    at: base + (offsetB * 0.34),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    shadow: shadow,
+                    scale: 0.84 + (dnaProfile.forestLandmarkBias * 0.1),
+                    posture: posture
+                )
+                if fourthRoll < 0.62 {
+                    addLeafLitterPatch(
+                        at: base + (offsetC * 0.48),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.92 + (anchorStrength * 0.14)
+                    )
+                }
+            }
+        case 5:
+            if landmarkRoll < 0.0028 + (anchorStrength * 0.028 * dnaProfile.stoneLandmarkBias) {
+                let stoneSilhouette = ImmersiveApeBiomeSilhouette(
+                    treeHeightScale: silhouette.treeHeightScale,
+                    treeCanopyWidthScale: silhouette.treeCanopyWidthScale,
+                    treeCanopyHeightScale: silhouette.treeCanopyHeightScale,
+                    treeLean: silhouette.treeLean,
+                    bushWidthScale: silhouette.bushWidthScale,
+                    bushHeightScale: silhouette.bushHeightScale,
+                    grassHeightScale: silhouette.grassHeightScale,
+                    grassSpread: silhouette.grassSpread,
+                    grassLean: silhouette.grassLean,
+                    grassColor: silhouette.grassColor,
+                    rockWidthScale: silhouette.rockWidthScale * (1.08 + (dnaProfile.stoneLandmarkBias * 0.04)),
+                    rockHeightScale: silhouette.rockHeightScale * 1.08,
+                    rockCluster: max(2, silhouette.rockCluster)
+                )
+                addLichenStoneCluster(
+                    at: base + (offsetA * 0.2),
+                    builder: &builder,
+                    environment: environment,
+                    shadow: shadow,
+                    silhouette: stoneSilhouette,
+                    lichenTint: immersiveApeMix(foliageTint, bloomTint, t: 0.14),
+                    dryTint: dryTint,
+                    variant: min(1.0, (variant * 0.44) + (thirdRoll * 0.56)),
+                    scale: 0.92 + (dnaProfile.stoneLandmarkBias * 0.1) + (anchorStrength * 0.08)
+                )
+                addRock(
+                    at: base + (offsetB * 0.34),
+                    builder: &builder,
+                    environment: environment,
+                    variant: min(1.0, (variant * 0.4) + (fourthRoll * 0.6)),
+                    shadow: shadow,
+                    silhouette: stoneSilhouette,
+                    scale: 0.7 + (anchorStrength * 0.12)
+                )
+                if moisture > 0.44 {
+                    addGrass(
+                        at: base + (offsetC * 0.34),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.36) + (secondRoll * 0.64)),
+                        shadow: shadow,
+                        silhouette: silhouette,
+                        scale: 0.42 + (anchorStrength * 0.1),
+                        posture: posture
+                    )
+                } else if fourthRoll < 0.62 {
+                    addDryTuft(
+                        at: base + (offsetC * 0.32),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.5 + (exposure * 0.12),
+                        posture: posture
+                    )
+                }
+            }
+        default:
+            break
+        }
+    }
+
     private func addBiomeTransitionAccent(
         at base: SIMD3<Float>,
         builder: inout ImmersiveApeMeshBuilder,
@@ -3104,6 +4365,8 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
     private func buildSelectedEmbodiment(
         from capture: ImmersiveApeSceneCapture,
         profile: ImmersiveApeEmbodimentProfile,
+        attentionFocus: ImmersiveApeAttentionFocus,
+        encounterCount: Int,
         environment: ImmersiveApeEnvironment,
         timeValue: Float,
         opaque: inout ImmersiveApeMeshBuilder,
@@ -3116,8 +4379,38 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         let selected = capture.snapshot.selected
         let forward = immersiveApeFacingVector(facing: selected.facing)
         let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
-        let bodyHeight = max(1.2, selected.height)
-        let swing = sin((timeValue * 0.018) + Float(selected.index) * 0.27) * profile.handSwing
+        let bodyProfile = immersiveApeBodyProfile(for: selected)
+        let interactionMode = immersiveApeEncounterMode(attentionKind: attentionFocus.kind)
+        let interactionWeight: Float = interactionMode == nil
+            ? min(0.4, Float(encounterCount) * 0.08)
+            : min(1.0, 0.34 + (Float(encounterCount) * 0.12) + (attentionFocus.cameraWeight * 0.24))
+        let motionProfile = immersiveApeMotionProfile(
+            for: selected,
+            localPosition: attentionFocus.localPosition,
+            interactionMode: interactionMode,
+            interactionWeight: interactionWeight
+        )
+        let gaitSignature = immersiveApeGaitSignature(for: selected)
+        let silhouetteProfile = immersiveApeSilhouetteProfile(
+            for: selected,
+            interactionMode: interactionMode,
+            interactionWeight: interactionWeight
+        )
+        let skeletonDNA = immersiveApeSkeletonDNA(for: selected)
+        let motionPhase = (timeValue * motionProfile.phaseRate * gaitSignature.cadenceScale)
+            + Float(selected.index) * 0.27
+            + gaitSignature.phaseOffset
+        let leftStrideWave = sin(motionPhase + gaitSignature.phaseOffset)
+        let rightStrideWave = sin(motionPhase + Float.pi - gaitSignature.phaseOffset)
+        let leftGaitCycle = max(0, leftStrideWave) * gaitSignature.leftStrideScale
+        let rightGaitCycle = max(0, rightStrideWave) * gaitSignature.rightStrideScale
+        let gaitSway = leftStrideWave - rightStrideWave
+        let gaitLift = (leftGaitCycle + rightGaitCycle) * 0.5
+        let gestureWave = sin((timeValue * 0.023) + Float(selected.index) * 0.53)
+        let settleWave = sin((timeValue * 0.0095) + Float(selected.index) * 0.43)
+        let breathWave = sin((timeValue * 0.0068) + Float(selected.index) * 0.31)
+        let leftSwing = leftStrideWave * gaitSignature.leftArmScale * (profile.handSwing + (motionProfile.armSwingDistance * 0.18))
+        let rightSwing = rightStrideWave * gaitSignature.rightArmScale * (profile.handSwing + (motionProfile.armSwingDistance * 0.18))
         let skinColor = immersiveApeSkinColor(pigmentation: selected.pigmentation)
         let hairColor = immersiveApeHairColor(hair: selected.hair)
         let chestTint = immersiveApeMix(
@@ -3125,34 +4418,132 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             SIMD4<Float>(environment.fogColor.x, environment.fogColor.y, environment.fogColor.z, 1),
             t: 0.32
         )
-
-        let chestCenter = (forward * profile.chestForward) + SIMD3<Float>(0, profile.chestHeight, 0)
+        let ribcageScale = skeletonDNA.ribcageScale
+        let extremityProfile = immersiveApeExtremityProfile(
+            for: selected,
+            bodyProfile: bodyProfile,
+            skeletonDNA: skeletonDNA
+        )
+        let shoulderWidth = max(profile.shoulderWidth, bodyProfile.shoulderWidth * 0.76) * skeletonDNA.shoulderWidthScale
+        let armScale = (skeletonDNA.upperArmScale * 0.58) + (skeletonDNA.forearmScale * 0.42)
+        let armRadius = max(0.045, bodyProfile.armRadius * 0.72 * armScale)
+        let forearmRadius = armRadius * 0.88
+        let handRadius = bodyProfile.handRadius * skeletonDNA.handScale
+        let handRadii = SIMD3<Float>(
+            handRadius * 1.08,
+            handRadius * 0.72,
+            handRadius * 1.34
+        )
+        let chestForward = profile.chestForward
+            + (bodyProfile.chestDepth * 0.12)
+            + (motionProfile.socialForward * 0.72)
+            + silhouetteProfile.torsoForward
+        let chestLateral = (motionProfile.torsoSideShift * 0.48)
+            + (motionProfile.idleShift * settleWave * 0.24)
+            + (gaitSignature.torsoSway * gaitSway)
+        let chestVertical = profile.chestHeight
+            - (bodyProfile.crouch * 0.16)
+            + silhouetteProfile.torsoLift
+            + (motionProfile.torsoLift * gaitLift * 0.4)
+            + (motionProfile.breath * breathWave)
+            + (gaitSignature.headBob * gaitLift * 0.34)
+        let chestCenter = (forward * chestForward)
+            + (right * chestLateral)
+            + SIMD3<Float>(0, chestVertical, 0)
         transparent.addSphere(
             center: chestCenter,
-            radii: SIMD3<Float>(0.24, bodyHeight * 0.16, 0.19),
+            radii: SIMD3<Float>(
+                bodyProfile.chestWidth * 0.86 * silhouetteProfile.chestWidthScale * ribcageScale,
+                bodyProfile.torsoHeight * 0.72,
+                bodyProfile.chestDepth * 0.92 * silhouetteProfile.chestDepthScale * immersiveApeClamp((ribcageScale * 0.72) + 0.28, min: 0.84, max: 1.16)
+            ),
             segments: 8,
             rings: 6,
             color: SIMD4<Float>(chestTint.x, chestTint.y, chestTint.z, profile.chestAlpha)
         )
+        transparent.addSphere(
+            center: chestCenter + (forward * (bodyProfile.chestDepth * 0.16)) + SIMD3<Float>(0, bodyProfile.torsoHeight * 0.22, 0),
+            radii: SIMD3<Float>(
+                bodyProfile.torsoWidth * 0.62 * immersiveApeClamp(((silhouetteProfile.chestWidthScale * ribcageScale) * 0.76) + 0.24, min: 0.82, max: 1.18),
+                bodyProfile.torsoHeight * 0.34,
+                bodyProfile.chestDepth * 0.58 * silhouetteProfile.chestDepthScale * immersiveApeClamp((ribcageScale * 0.74) + 0.26, min: 0.84, max: 1.14)
+            ),
+            segments: 7,
+            rings: 5,
+            color: SIMD4<Float>(chestTint.x, chestTint.y, chestTint.z, profile.chestAlpha * 0.72)
+        )
 
-        let leftShoulder = (right * profile.shoulderWidth) + SIMD3<Float>(0, profile.shoulderHeight, 0)
-        let rightShoulder = (-right * profile.shoulderWidth) + SIMD3<Float>(0, profile.shoulderHeight, 0)
-        let leftHand = (right * profile.handSpread) + (forward * (profile.handForward + swing)) + SIMD3<Float>(0, profile.handHeight, 0)
-        let rightHand = (-right * profile.handSpread) + (forward * (profile.handForward - swing)) + SIMD3<Float>(0, profile.handHeight, 0)
-        let leftElbow = immersiveApeLerp(leftShoulder, leftHand, factor: 0.55) + SIMD3<Float>(0, profile.elbowDrop, 0)
-        let rightElbow = immersiveApeLerp(rightShoulder, rightHand, factor: 0.55) + SIMD3<Float>(0, profile.elbowDrop, 0)
+        let shoulderForward = (motionProfile.socialForward * 0.58) + (silhouetteProfile.torsoForward * 0.72)
+        let shoulderLateral = (motionProfile.torsoSideShift * 0.38)
+            + (motionProfile.idleShift * settleWave * 0.22)
+            + (gaitSignature.torsoSway * gaitSway * 0.82)
+        let shoulderVertical = profile.shoulderHeight
+            + silhouetteProfile.torsoLift
+            + (motionProfile.shoulderLift * (0.28 + (max(0, gestureWave) * 0.72)))
+            + (gaitSignature.shoulderTilt * gaitSway)
+        let shoulderBase = (forward * shoulderForward)
+            + (right * shoulderLateral)
+            + SIMD3<Float>(0, shoulderVertical, 0)
+        let spreadShoulderWidth = shoulderWidth * silhouetteProfile.shoulderSpreadScale
+        let leftShoulder = shoulderBase
+            + (right * spreadShoulderWidth)
+            + SIMD3<Float>(0, gaitSignature.shoulderTilt * leftGaitCycle, 0)
+        let rightShoulder = shoulderBase
+            - (right * spreadShoulderWidth)
+            + SIMD3<Float>(0, gaitSignature.shoulderTilt * rightGaitCycle, 0)
+        let handSpread = profile.handSpread * silhouetteProfile.armSpreadScale
+        let leftHandSpread = right * (handSpread + (gaitSignature.stanceBias * 0.18))
+        let rightHandSpread = -right * (handSpread - (gaitSignature.stanceBias * 0.18))
+        let leftHandForward = forward * (profile.handForward + motionProfile.gestureReach + leftSwing)
+        let rightHandForward = forward * (profile.handForward + motionProfile.gestureReach + rightSwing)
+        let leftHandVertical = SIMD3<Float>(
+            0,
+            profile.handHeight + silhouetteProfile.handRaise + (max(0, gestureWave) * motionProfile.gestureLift) + (gaitSignature.headBob * leftGaitCycle * 0.4),
+            0
+        )
+        let rightHandVertical = SIMD3<Float>(
+            0,
+            profile.handHeight + silhouetteProfile.handRaise + (max(0, -gestureWave) * motionProfile.gestureLift) + (gaitSignature.headBob * rightGaitCycle * 0.4),
+            0
+        )
+        let leftHand = leftHandSpread + leftHandForward + (right * motionProfile.elbowOut) + leftHandVertical
+        let rightHand = rightHandSpread + rightHandForward - (right * motionProfile.elbowOut) + rightHandVertical
+        let leftElbow = immersiveApeLerp(leftShoulder, leftHand, factor: 0.55)
+            + (right * max(0, (motionProfile.elbowOut * 0.42) - silhouetteProfile.elbowTuck))
+            + SIMD3<Float>(0, profile.elbowDrop + (motionProfile.shoulderLift * 0.12), 0)
+        let rightElbow = immersiveApeLerp(rightShoulder, rightHand, factor: 0.55)
+            - (right * max(0, (motionProfile.elbowOut * 0.42) - silhouetteProfile.elbowTuck))
+            + SIMD3<Float>(0, profile.elbowDrop + (motionProfile.shoulderLift * 0.12), 0)
 
-        for (shoulder, elbow, hand) in [(leftShoulder, leftElbow, leftHand), (rightShoulder, rightElbow, rightHand)] {
-            opaque.addCylinder(base: shoulder, top: elbow, radius: 0.055, segments: 8, color: skinColor)
-            opaque.addCylinder(base: elbow, top: hand, radius: 0.048, segments: 8, color: skinColor)
-            opaque.addSphere(center: elbow, radii: SIMD3<Float>(repeating: 0.05), segments: 6, rings: 5, color: skinColor)
-            opaque.addSphere(center: hand, radii: SIMD3<Float>(0.06, 0.04, 0.085), segments: 6, rings: 5, color: skinColor)
+        for (shoulder, elbow, hand, thumbDirection) in [
+            (leftShoulder, leftElbow, leftHand, right),
+            (rightShoulder, rightElbow, rightHand, -right)
+        ] {
+            opaque.addSphere(center: shoulder, radii: SIMD3<Float>(repeating: armRadius * 1.08), segments: 6, rings: 5, color: skinColor)
+            opaque.addCylinder(base: shoulder, top: elbow, radius: armRadius, segments: 8, color: skinColor)
+            opaque.addCylinder(base: elbow, top: hand, radius: forearmRadius, segments: 8, color: skinColor)
+            opaque.addSphere(center: elbow, radii: SIMD3<Float>(repeating: armRadius * 0.96), segments: 6, rings: 5, color: skinColor)
+            opaque.addSphere(center: hand, radii: handRadii, segments: 6, rings: 5, color: skinColor)
+            addApeHandDetail(
+                at: hand,
+                elbow: elbow,
+                facing: forward,
+                thumbDirection: thumbDirection,
+                profile: extremityProfile,
+                color: skinColor,
+                builder: &opaque
+            )
         }
 
         if selected.hair > 3 {
             transparent.addSphere(
-                center: (forward * (profile.eyeForward + 0.12)) + SIMD3<Float>(0, profile.eyeHeight + 0.05, 0),
-                radii: SIMD3<Float>(0.16, 0.045, 0.14),
+                center: (forward * (profile.eyeForward + 0.12 + silhouetteProfile.headForward))
+                    + SIMD3<Float>(0, profile.eyeHeight + silhouetteProfile.headLift + max(0.05, bodyProfile.crestHeight * 0.22 + silhouetteProfile.crestLift), 0),
+                radii: SIMD3<Float>(
+                    max(0.16, bodyProfile.headRadius * 0.92 * skeletonDNA.headScale),
+                    max(0.045, (bodyProfile.crestHeight + silhouetteProfile.crestLift) * 0.7),
+                    bodyProfile.headRadius * 0.78 * skeletonDNA.headScale
+                ),
                 segments: 6,
                 rings: 4,
                 color: SIMD4<Float>(hairColor.x, hairColor.y, hairColor.z, 0.28)
@@ -3184,9 +4575,15 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 continue
             }
 
+            let distance = simd_length(SIMD2<Float>(basePosition.x, basePosition.z))
+            let interactionMode = immersiveApeEncounterMode(selected: capture.snapshot.selected, nearby: ape)
+            let interactionWeight = immersiveApeEncounterImportance(distance: distance, mode: interactionMode, nearby: ape)
+
             addApe(
                 at: basePosition,
                 ape: ape,
+                interactionMode: interactionMode,
+                interactionWeight: interactionWeight,
                 environment: environment,
                 timeValue: timeValue,
                 opaque: &opaque,
@@ -4273,33 +5670,324 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         )
     }
 
+    private func addApeHandDetail(
+        at wrist: SIMD3<Float>,
+        elbow: SIMD3<Float>,
+        facing: SIMD3<Float>,
+        thumbDirection: SIMD3<Float>,
+        profile: ImmersiveApeExtremityProfile,
+        color: SIMD4<Float>,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let up = SIMD3<Float>(0, 1, 0)
+        let forearmDirection = (wrist - elbow).normalizedSafe
+        let handForward = ((forearmDirection * 0.68) + (facing * 0.32)).normalizedSafe
+        let handSide = thumbDirection.normalizedSafe
+        let palmBase = wrist - (forearmDirection * (profile.palmLength * 0.16))
+        let knuckleCenter = wrist
+            + (handForward * (profile.palmLength * 0.46))
+            + (up * (profile.fingerRadius * 0.22))
+
+        builder.addCylinder(
+            base: palmBase,
+            top: knuckleCenter,
+            radius: profile.palmRadius,
+            segments: 6,
+            color: color
+        )
+        builder.addSphere(
+            center: wrist + (handForward * (profile.palmLength * 0.18)),
+            radii: SIMD3<Float>(repeating: profile.palmRadius * 0.92),
+            segments: 5,
+            rings: 4,
+            color: color
+        )
+
+        let fingerOffsets: [Float] = [-1.35, -0.45, 0.45, 1.35]
+        for fingerOffset in fingerOffsets {
+            let offsetMagnitude = abs(fingerOffset)
+            let knuckle = knuckleCenter + (handSide * (profile.knuckleSpread * fingerOffset))
+            let fingerTip = knuckle
+                + (handForward * (profile.fingerLength * (0.96 - (offsetMagnitude * 0.06))))
+                + (handSide * (profile.knuckleSpread * fingerOffset * 0.16))
+                - (up * (profile.fingerRadius * offsetMagnitude * 0.18))
+            builder.addCone(
+                base: knuckle,
+                tip: fingerTip,
+                radius: max(0.006, profile.fingerRadius * (0.82 - (offsetMagnitude * 0.08))),
+                segments: 5,
+                color: color
+            )
+        }
+
+        let thumbBase = wrist
+            + (handSide * profile.thumbSpread)
+            + (up * profile.thumbLift)
+            - (handForward * (profile.palmLength * 0.04))
+        let thumbTip = thumbBase
+            + (handSide * (profile.thumbLength * 0.78))
+            + (handForward * (profile.thumbLength * 0.36))
+            - (up * (profile.fingerRadius * 0.18))
+        builder.addCone(
+            base: thumbBase,
+            tip: thumbTip,
+            radius: max(0.006, profile.fingerRadius * 0.9),
+            segments: 5,
+            color: color
+        )
+    }
+
+    private func addApeFootDetail(
+        at ankle: SIMD3<Float>,
+        knee: SIMD3<Float>,
+        facing: SIMD3<Float>,
+        toeSideDirection: SIMD3<Float>,
+        profile: ImmersiveApeExtremityProfile,
+        color: SIMD4<Float>,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let up = SIMD3<Float>(0, 1, 0)
+        let shinDirection = (ankle - knee).normalizedSafe
+        let footForward = ((facing * 0.82) - (shinDirection * 0.18)).normalizedSafe
+        let footSide = toeSideDirection.normalizedSafe
+        let heelCenter = ankle
+            - (footForward * (profile.soleLength * 0.18))
+            + (up * (profile.heelRadius * 0.16))
+        let toeBase = ankle
+            + (footForward * (profile.soleLength * 0.34))
+            - (up * (profile.archLift * 0.2))
+
+        builder.addCylinder(
+            base: heelCenter,
+            top: toeBase,
+            radius: profile.soleRadius,
+            segments: 6,
+            color: color
+        )
+        builder.addSphere(
+            center: heelCenter,
+            radii: SIMD3<Float>(repeating: profile.heelRadius),
+            segments: 5,
+            rings: 4,
+            color: color
+        )
+
+        let toeOffsets: [Float] = [-1, 0, 1]
+        for toeOffset in toeOffsets {
+            let toeBasePoint = toeBase + (footSide * (toeOffset * profile.toeSpread))
+            let toeTip = toeBasePoint
+                + (footForward * (profile.toeLength * (1 - (abs(toeOffset) * 0.08))))
+                - (up * (profile.toeRadius * abs(toeOffset) * 0.14))
+            builder.addCone(
+                base: toeBasePoint,
+                tip: toeTip,
+                radius: max(0.006, profile.toeRadius * (0.9 - (abs(toeOffset) * 0.08))),
+                segments: 5,
+                color: color
+            )
+        }
+    }
+
     private func addApe(
         at base: SIMD3<Float>,
         ape: shared_immersiveape_being_snapshot,
+        interactionMode: ImmersiveApeEncounterMode,
+        interactionWeight: Float,
         environment: ImmersiveApeEnvironment,
         timeValue: Float,
         opaque: inout ImmersiveApeMeshBuilder,
         transparent: inout ImmersiveApeMeshBuilder
     ) {
         let bodyHeight = max(1.2, ape.height)
+        let bodyProfile = immersiveApeBodyProfile(for: ape)
+        let motionProfile = immersiveApeMotionProfile(
+            for: ape,
+            localPosition: base,
+            interactionMode: interactionMode,
+            interactionWeight: interactionWeight
+        )
+        let gaitSignature = immersiveApeGaitSignature(for: ape)
+        let silhouetteProfile = immersiveApeSilhouetteProfile(
+            for: ape,
+            interactionMode: interactionMode,
+            interactionWeight: interactionWeight
+        )
         let forward = immersiveApeFacingVector(facing: ape.facing)
-        let right = SIMD3<Float>(-forward.z, 0, forward.x)
-        let walk = sin((timeValue * 0.015) + Float(ape.index) * 0.27) * 0.2
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let motionPhase = (timeValue * motionProfile.phaseRate * gaitSignature.cadenceScale)
+            + Float(ape.index) * 0.27
+            + gaitSignature.phaseOffset
+        let leftStrideWave = sin(motionPhase + gaitSignature.phaseOffset)
+        let rightStrideWave = sin(motionPhase + Float.pi - gaitSignature.phaseOffset)
+        let leftGaitCycle = max(0, leftStrideWave) * gaitSignature.leftStrideScale
+        let rightGaitCycle = max(0, rightStrideWave) * gaitSignature.rightStrideScale
+        let gaitSway = leftStrideWave - rightStrideWave
+        let gaitLift = (leftGaitCycle + rightGaitCycle) * 0.5
+        let gestureWave = sin((timeValue * 0.023) + Float(ape.index) * 0.53)
+        let settleWave = sin((timeValue * 0.0095) + Float(ape.index) * 0.43)
+        let breathWave = sin((timeValue * 0.0068) + Float(ape.index) * 0.31)
         let frame = 0.18 + (Float(ape.frame) / 15) * 0.14
         let skinColor = immersiveApeSkinColor(pigmentation: ape.pigmentation)
         let hairColor = immersiveApeHairColor(hair: ape.hair)
-        let torsoCenter = base + SIMD3<Float>(0, bodyHeight * 0.58, 0)
-        let hipCenter = base + SIMD3<Float>(0, bodyHeight * 0.34, 0)
-        let headCenter = base + SIMD3<Float>(0, bodyHeight * 0.92, 0) + (forward * 0.06)
+        let torsoColor = immersiveApeMix(skinColor, SIMD4<Float>(0.08, 0.05, 0.03, 1), t: 0.07)
+        let hipColor = immersiveApeMix(skinColor, SIMD4<Float>(0.05, 0.03, 0.02, 1), t: 0.1)
+        let muzzleColor = immersiveApeMix(skinColor, SIMD4<Float>(0.18, 0.12, 0.08, 1), t: 0.12)
+        let browColor = immersiveApeMix(hairColor, skinColor, t: 0.38)
+        let skeletonDNA = immersiveApeSkeletonDNA(for: ape)
+        let skeleton = immersiveApeAvatarSkeleton(
+            at: base,
+            being: ape,
+            bodyProfile: bodyProfile,
+            motionProfile: motionProfile,
+            gaitSignature: gaitSignature,
+            silhouetteProfile: silhouetteProfile,
+            skeletonDNA: skeletonDNA,
+            forward: forward,
+            right: right,
+            gestureWave: gestureWave,
+            settleWave: settleWave,
+            breathWave: breathWave,
+            leftStrideWave: leftStrideWave,
+            rightStrideWave: rightStrideWave,
+            leftGaitCycle: leftGaitCycle,
+            rightGaitCycle: rightGaitCycle,
+            gaitSway: gaitSway,
+            gaitLift: gaitLift
+        )
+        let torsoCenter = skeleton.torsoCenter
+        let chestCenter = skeleton.chestCenter
+        let bellyCenter = skeleton.bellyCenter
+        let hipCenter = skeleton.hipCenter
+        let neckBase = skeleton.neck
+        let headCenter = skeleton.headCenter
+        let muzzleCenter = skeleton.muzzleCenter
+        let browCenter = skeleton.browCenter
+        let extremityProfile = immersiveApeExtremityProfile(
+            for: ape,
+            bodyProfile: bodyProfile,
+            skeletonDNA: skeletonDNA
+        )
+        let leftShoulder = skeleton.leftShoulder
+        let rightShoulder = skeleton.rightShoulder
+        let leftShoulderSocket = skeleton.leftShoulderSocket
+        let rightShoulderSocket = skeleton.rightShoulderSocket
+        let leftCollar = skeleton.leftCollar
+        let rightCollar = skeleton.rightCollar
+        let leftElbow = skeleton.leftElbow
+        let rightElbow = skeleton.rightElbow
+        let leftHand = skeleton.leftWrist
+        let rightHand = skeleton.rightWrist
+        let leftHip = skeleton.leftHip
+        let rightHip = skeleton.rightHip
+        let leftKnee = skeleton.leftKnee
+        let rightKnee = skeleton.rightKnee
+        let leftFoot = skeleton.leftAnkle
+        let rightFoot = skeleton.rightAnkle
+        let headRadius = skeleton.headRadius
+        let handRadius = skeleton.handRadius
+        let footLength = skeleton.footLength
+        let footHeight = skeleton.footHeight
+        let torsoWidthScale = immersiveApeClamp((skeletonDNA.ribcageScale * 0.64) + (skeletonDNA.pelvisWidthScale * 0.36), min: 0.84, max: 1.18)
+        let torsoDepthScale = immersiveApeClamp((skeletonDNA.ribcageScale * 0.58) + 0.42, min: 0.86, max: 1.16)
+        let pelvisDepthScale = immersiveApeClamp((skeletonDNA.pelvisWidthScale * 0.72) + 0.28, min: 0.86, max: 1.18)
 
-        opaque.addSphere(center: torsoCenter, radii: SIMD3<Float>(frame * 1.1, bodyHeight * 0.22, frame * 0.76), segments: 10, rings: 8, color: skinColor)
-        opaque.addSphere(center: hipCenter, radii: SIMD3<Float>(frame, bodyHeight * 0.16, frame * 0.74), segments: 10, rings: 8, color: immersiveApeMix(skinColor, SIMD4<Float>(0.05, 0.03, 0.02, 1), t: 0.08))
-        opaque.addSphere(center: headCenter, radii: SIMD3<Float>(repeating: bodyHeight * 0.11), segments: 10, rings: 8, color: skinColor)
+        opaque.addCylinder(
+            base: hipCenter,
+            top: chestCenter,
+            radius: bodyProfile.torsoWidth * 0.34,
+            segments: 10,
+            color: torsoColor
+        )
+        opaque.addSphere(
+            center: torsoCenter,
+            radii: SIMD3<Float>(bodyProfile.torsoWidth * torsoWidthScale, bodyProfile.torsoHeight, bodyProfile.torsoDepth * torsoDepthScale),
+            segments: 10,
+            rings: 8,
+            color: torsoColor
+        )
+        opaque.addSphere(
+            center: chestCenter,
+            radii: SIMD3<Float>(
+                bodyProfile.chestWidth * silhouetteProfile.chestWidthScale * skeletonDNA.ribcageScale,
+                bodyProfile.torsoHeight * 0.72,
+                bodyProfile.chestDepth * silhouetteProfile.chestDepthScale * torsoDepthScale
+            ),
+            segments: 10,
+            rings: 8,
+            color: immersiveApeMix(torsoColor, skinColor, t: 0.16)
+        )
+        opaque.addSphere(
+            center: bellyCenter,
+            radii: SIMD3<Float>(
+                bodyProfile.torsoWidth * 0.92 * torsoWidthScale,
+                bodyProfile.torsoHeight * 0.54,
+                max(bodyProfile.torsoDepth * 0.94, bodyProfile.bellyDepth)
+            ),
+            segments: 9,
+            rings: 7,
+            color: immersiveApeMix(torsoColor, skinColor, t: 0.08)
+        )
+        opaque.addSphere(
+            center: hipCenter,
+            radii: SIMD3<Float>(bodyProfile.hipWidth * skeletonDNA.pelvisWidthScale, bodyHeight * 0.12, bodyProfile.hipDepth * pelvisDepthScale),
+            segments: 10,
+            rings: 8,
+            color: hipColor
+        )
+        opaque.addCylinder(
+            base: skeleton.lumbar,
+            top: leftCollar,
+            radius: bodyProfile.armRadius * 0.32,
+            segments: 6,
+            color: torsoColor
+        )
+        opaque.addCylinder(
+            base: skeleton.lumbar,
+            top: rightCollar,
+            radius: bodyProfile.armRadius * 0.32,
+            segments: 6,
+            color: torsoColor
+        )
+        opaque.addCylinder(
+            base: neckBase,
+            top: headCenter - (forward * (bodyProfile.headRadius * 0.14)),
+            radius: bodyProfile.armRadius * 0.58,
+            segments: 8,
+            color: torsoColor
+        )
+        opaque.addSphere(
+            center: headCenter,
+            radii: SIMD3<Float>(repeating: headRadius),
+            segments: 10,
+            rings: 8,
+            color: skinColor
+        )
+        opaque.addCylinder(
+            base: headCenter + (forward * (headRadius * 0.18)),
+            top: muzzleCenter,
+            radius: headRadius * 0.34,
+            segments: 7,
+            color: muzzleColor
+        )
+        opaque.addSphere(
+            center: muzzleCenter,
+            radii: SIMD3<Float>(repeating: headRadius * 0.46),
+            segments: 7,
+            rings: 5,
+            color: muzzleColor
+        )
+        opaque.addSphere(
+            center: browCenter,
+            radii: SIMD3<Float>(bodyProfile.browRadius * 1.08, headRadius * 0.18, bodyProfile.browRadius),
+            segments: 6,
+            rings: 5,
+            color: browColor
+        )
 
         if ape.pregnant != 0 {
             opaque.addSphere(
-                center: torsoCenter + SIMD3<Float>(0, -bodyHeight * 0.06, 0) + (forward * 0.09),
-                radii: SIMD3<Float>(frame * 0.85, bodyHeight * 0.13, frame * 0.74),
+                center: bellyCenter + SIMD3<Float>(0, -bodyHeight * 0.04, 0) + (forward * (bodyProfile.bellyDepth * 0.18)),
+                radii: SIMD3<Float>(bodyProfile.hipWidth * 0.9 * skeletonDNA.pelvisWidthScale, bodyProfile.torsoHeight * 0.48, bodyProfile.bellyDepth * 1.06),
                 segments: 8,
                 rings: 6,
                 color: skinColor
@@ -4308,35 +5996,89 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
         if ape.hair > 3 {
             opaque.addSphere(
-                center: headCenter + SIMD3<Float>(0, bodyHeight * 0.02, 0),
-                radii: SIMD3<Float>(bodyHeight * 0.115, bodyHeight * 0.08 + (Float(ape.hair) * 0.003), bodyHeight * 0.115),
+                center: headCenter + SIMD3<Float>(0, headRadius * 0.34 + silhouetteProfile.crestLift * 0.24, 0),
+                radii: SIMD3<Float>(
+                    headRadius * 0.96,
+                    bodyProfile.headRadius * 0.58 + ((bodyProfile.crestHeight + silhouetteProfile.crestLift) * 0.24),
+                    headRadius * 0.9
+                ),
                 segments: 8,
                 rings: 6,
                 color: hairColor
             )
+            opaque.addCylinder(
+                base: skeleton.crestBase,
+                top: skeleton.crestTip,
+                radius: headRadius * 0.22,
+                segments: 6,
+                color: hairColor
+            )
+            opaque.addSphere(
+                center: skeleton.crestTip,
+                radii: SIMD3<Float>(
+                    headRadius * 0.28,
+                    max(bodyProfile.crestHeight * 0.42, headRadius * 0.18),
+                    headRadius * 0.24
+                ),
+                segments: 6,
+                rings: 5,
+                color: hairColor
+            )
         }
 
-        let shoulderOffset = right * frame * 0.82
-        let shoulderHeight = bodyHeight * 0.78
-        let handForward = forward * walk * 0.28
-        let legForward = forward * walk * 0.18
-        let armRadius = frame * 0.28
-        let legRadius = frame * 0.32
+        for (shoulder, socket, collar, elbow, hand, thumbDirection) in [
+            (leftShoulder, leftShoulderSocket, leftCollar, leftElbow, leftHand, right),
+            (rightShoulder, rightShoulderSocket, rightCollar, rightElbow, rightHand, -right)
+        ] {
+            opaque.addSphere(center: shoulder, radii: SIMD3<Float>(repeating: bodyProfile.armRadius * 1.08), segments: 6, rings: 5, color: skinColor)
+            opaque.addCylinder(base: collar, top: shoulder, radius: bodyProfile.armRadius * 0.34, segments: 6, color: torsoColor)
+            opaque.addCylinder(base: shoulder, top: socket, radius: bodyProfile.armRadius * 0.46, segments: 6, color: torsoColor)
+            opaque.addCylinder(base: socket, top: elbow, radius: bodyProfile.armRadius, segments: 8, color: skinColor)
+            opaque.addCylinder(base: elbow, top: hand, radius: bodyProfile.armRadius * 0.88, segments: 8, color: skinColor)
+            opaque.addSphere(center: elbow, radii: SIMD3<Float>(repeating: bodyProfile.armRadius * 0.94), segments: 6, rings: 5, color: skinColor)
+            opaque.addSphere(
+                center: hand,
+                radii: SIMD3<Float>(handRadius * 1.04, handRadius * 0.72, handRadius * 1.28),
+                segments: 6,
+                rings: 5,
+                color: skinColor
+            )
+            addApeHandDetail(
+                at: hand,
+                elbow: elbow,
+                facing: forward,
+                thumbDirection: thumbDirection,
+                profile: extremityProfile,
+                color: skinColor,
+                builder: &opaque
+            )
+        }
 
-        let leftShoulder = base + SIMD3<Float>(0, shoulderHeight, 0) + shoulderOffset
-        let rightShoulder = base + SIMD3<Float>(0, shoulderHeight, 0) - shoulderOffset
-        let leftHip = base + SIMD3<Float>(0, bodyHeight * 0.38, 0) + (right * frame * 0.52)
-        let rightHip = base + SIMD3<Float>(0, bodyHeight * 0.38, 0) - (right * frame * 0.52)
-
-        opaque.addCylinder(base: leftShoulder, top: leftShoulder + SIMD3<Float>(0, -bodyHeight * 0.24, 0) + handForward, radius: armRadius, segments: 8, color: skinColor)
-        opaque.addCylinder(base: rightShoulder, top: rightShoulder + SIMD3<Float>(0, -bodyHeight * 0.24, 0) - handForward, radius: armRadius, segments: 8, color: skinColor)
-        opaque.addCylinder(base: leftHip, top: leftHip + SIMD3<Float>(0, -bodyHeight * 0.38, 0) - legForward, radius: legRadius, segments: 8, color: skinColor)
-        opaque.addCylinder(base: rightHip, top: rightHip + SIMD3<Float>(0, -bodyHeight * 0.38, 0) + legForward, radius: legRadius, segments: 8, color: skinColor)
-
-        opaque.addSphere(center: leftShoulder + SIMD3<Float>(0, -bodyHeight * 0.27, 0) + handForward, radii: SIMD3<Float>(repeating: armRadius * 0.9), segments: 6, rings: 5, color: skinColor)
-        opaque.addSphere(center: rightShoulder + SIMD3<Float>(0, -bodyHeight * 0.27, 0) - handForward, radii: SIMD3<Float>(repeating: armRadius * 0.9), segments: 6, rings: 5, color: skinColor)
-        opaque.addSphere(center: leftHip + SIMD3<Float>(0, -bodyHeight * 0.42, 0) - legForward, radii: SIMD3<Float>(legRadius * 0.95, legRadius * 0.65, legRadius * 1.2), segments: 6, rings: 5, color: skinColor)
-        opaque.addSphere(center: rightHip + SIMD3<Float>(0, -bodyHeight * 0.42, 0) + legForward, radii: SIMD3<Float>(legRadius * 0.95, legRadius * 0.65, legRadius * 1.2), segments: 6, rings: 5, color: skinColor)
+        for (hip, knee, foot, toeSideDirection) in [
+            (leftHip, leftKnee, leftFoot, right),
+            (rightHip, rightKnee, rightFoot, -right)
+        ] {
+            opaque.addSphere(center: hip, radii: SIMD3<Float>(repeating: bodyProfile.legRadius * 1.04), segments: 6, rings: 5, color: hipColor)
+            opaque.addCylinder(base: hip, top: knee, radius: bodyProfile.legRadius, segments: 8, color: skinColor)
+            opaque.addCylinder(base: knee, top: foot, radius: bodyProfile.legRadius * 0.86, segments: 8, color: skinColor)
+            opaque.addSphere(center: knee, radii: SIMD3<Float>(repeating: bodyProfile.legRadius * 0.92), segments: 6, rings: 5, color: skinColor)
+            opaque.addSphere(
+                center: foot,
+                radii: SIMD3<Float>(footLength * 0.56, footHeight, footLength),
+                segments: 6,
+                rings: 5,
+                color: hipColor
+            )
+            addApeFootDetail(
+                at: foot,
+                knee: knee,
+                facing: forward,
+                toeSideDirection: toeSideDirection,
+                profile: extremityProfile,
+                color: hipColor,
+                builder: &opaque
+            )
+        }
 
         if ape.speaking != 0 {
             let speechColor = immersiveApeSpeechColor(eyeColor: ape.eye_color)
@@ -4938,11 +6680,892 @@ private func immersiveApeFocusDescription(capture: ImmersiveApeSceneCapture) -> 
     immersiveApeAttentionFocus(capture: capture, encounters: immersiveApeEncounters(capture: capture)).summary
 }
 
+private func immersiveApeEncounterMode(
+    attentionKind: ImmersiveApeAttentionKind
+) -> ImmersiveApeEncounterMode? {
+    switch attentionKind {
+    case .conversation:
+        return .conversation
+    case .conflict:
+        return .conflict
+    case .grooming:
+        return .grooming
+    case .courtship:
+        return .courtship
+    case .companionship:
+        return .companionship
+    case .rest, .roam:
+        return .presence
+    case .forage:
+        return nil
+    }
+}
+
+private func immersiveApePointRelativeToSkeleton(
+    start: SIMD3<Float>,
+    end: SIMD3<Float>,
+    distanceAlongAxisPercent: Float,
+    distanceFromAxisPercent: Float,
+    axisNormal: SIMD3<Float>
+) -> SIMD3<Float> {
+    let axis = end - start
+    let axisPoint = start + (axis * distanceAlongAxisPercent)
+    let perpendicular = simd_cross(axisNormal, axis).normalizedSafe
+    return axisPoint + (perpendicular * simd_length(axis) * distanceFromAxisPercent)
+}
+
+private func immersiveApeSkeletonDNA(
+    for being: shared_immersiveape_being_snapshot
+) -> ImmersiveApeSkeletonDNA {
+    let maturity = immersiveApeSaturate(being.age_days / 3200)
+    let juvenile = 1 - maturity
+    let frame = Float(being.frame) / 15
+    let hair = Float(being.hair) / 15
+    let pigmentation = Float(being.pigmentation) / 15
+    let eyeColor = Float(being.eye_color) / 15
+    let eyeShape = Float(being.eye_shape) / 15
+    let honor = Float(being.honor) / 255
+    let femaleBias: Float = being.female != 0 ? 1 : 0
+
+    return ImmersiveApeSkeletonDNA(
+        spineScale: immersiveApeClamp(
+            0.92
+                + (maturity * 0.1)
+                + ((0.5 - pigmentation) * 0.06)
+                + ((eyeShape - 0.5) * 0.04),
+            min: 0.84,
+            max: 1.16
+        ),
+        ribcageScale: immersiveApeClamp(
+            0.9
+                + (frame * 0.18)
+                + (hair * 0.04)
+                - (juvenile * 0.08)
+                - (femaleBias * 0.03),
+            min: 0.82,
+            max: 1.18
+        ),
+        shoulderWidthScale: immersiveApeClamp(
+            0.9
+                + (frame * 0.16)
+                + ((eyeShape - 0.5) * 0.05)
+                - (juvenile * 0.07)
+                - (femaleBias * 0.03),
+            min: 0.82,
+            max: 1.18
+        ),
+        shoulderSocketInsetScale: immersiveApeClamp(
+            0.92
+                + ((0.5 - eyeColor) * 0.08)
+                + (hair * 0.03),
+            min: 0.84,
+            max: 1.12
+        ),
+        pelvisWidthScale: immersiveApeClamp(
+            0.9
+                + ((1 - frame) * 0.12)
+                + (femaleBias * 0.06)
+                + (juvenile * 0.04),
+            min: 0.84,
+            max: 1.2
+        ),
+        upperArmScale: immersiveApeClamp(
+            0.92
+                + (frame * 0.12)
+                + (hair * 0.05)
+                + ((eyeShape - 0.5) * 0.03),
+            min: 0.84,
+            max: 1.18
+        ),
+        forearmScale: immersiveApeClamp(
+            0.9
+                + (frame * 0.1)
+                + ((0.5 - pigmentation) * 0.04)
+                + ((0.5 - eyeColor) * 0.04),
+            min: 0.82,
+            max: 1.16
+        ),
+        upperLegScale: immersiveApeClamp(
+            0.9
+                + (maturity * 0.12)
+                + ((1 - frame) * 0.05),
+            min: 0.84,
+            max: 1.18
+        ),
+        lowerLegScale: immersiveApeClamp(
+            0.9
+                + (maturity * 0.08)
+                + ((1 - frame) * 0.04)
+                + ((eyeColor - 0.5) * 0.03),
+            min: 0.84,
+            max: 1.16
+        ),
+        neckScale: immersiveApeClamp(
+            0.9
+                + (juvenile * 0.12)
+                + ((1 - frame) * 0.08)
+                + (hair * 0.02),
+            min: 0.82,
+            max: 1.18
+        ),
+        headScale: immersiveApeClamp(
+            0.94
+                + (juvenile * 0.14)
+                + ((1 - frame) * 0.06)
+                + ((eyeShape - 0.5) * 0.04),
+            min: 0.88,
+            max: 1.22
+        ),
+        handScale: immersiveApeClamp(
+            0.92
+                + (frame * 0.08)
+                + (hair * 0.04)
+                + ((0.5 - pigmentation) * 0.03),
+            min: 0.86,
+            max: 1.14
+        ),
+        footScale: immersiveApeClamp(
+            0.92
+                + ((1 - frame) * 0.08)
+                + (maturity * 0.05),
+            min: 0.86,
+            max: 1.16
+        ),
+        collarLiftScale: immersiveApeClamp(
+            0.9
+                + (honor * 0.08)
+                + (hair * 0.04)
+                + ((eyeShape - 0.5) * 0.03),
+            min: 0.84,
+            max: 1.18
+        )
+    )
+}
+
+private func immersiveApeAvatarSkeleton(
+    at base: SIMD3<Float>,
+    being: shared_immersiveape_being_snapshot,
+    bodyProfile: ImmersiveApeBodyProfile,
+    motionProfile: ImmersiveApeMotionProfile,
+    gaitSignature: ImmersiveApeGaitSignature,
+    silhouetteProfile: ImmersiveApeSilhouetteProfile,
+    skeletonDNA: ImmersiveApeSkeletonDNA,
+    forward: SIMD3<Float>,
+    right: SIMD3<Float>,
+    gestureWave: Float,
+    settleWave: Float,
+    breathWave: Float,
+    leftStrideWave: Float,
+    rightStrideWave: Float,
+    leftGaitCycle: Float,
+    rightGaitCycle: Float,
+    gaitSway: Float,
+    gaitLift: Float
+) -> ImmersiveApeAvatarSkeleton {
+    let bodyHeight = max(1.2, being.height)
+    let up = SIMD3<Float>(0, 1, 0)
+    let crouchOffset = up * -bodyProfile.crouch
+    let torsoLean = forward * bodyProfile.spineLean
+    let torsoForwardOffset = forward * (motionProfile.socialForward + silhouetteProfile.torsoForward)
+    let torsoLateralOffset = right * (
+        motionProfile.torsoSideShift
+            + (motionProfile.idleShift * settleWave)
+            + (gaitSignature.torsoSway * gaitSway)
+    )
+    let torsoLift = bodyHeight * 0.58
+        + silhouetteProfile.torsoLift
+        + (motionProfile.torsoLift * gaitLift)
+        + (motionProfile.breath * breathWave)
+        + (gaitSignature.headBob * gaitLift)
+    let torsoVerticalOffset = up * torsoLift
+    let torsoCenter = base + crouchOffset + torsoLean + torsoForwardOffset + torsoLateralOffset + torsoVerticalOffset
+    let lumbar = torsoCenter + (up * (bodyProfile.torsoHeight * 0.16))
+
+    let chestAlongSpine = immersiveApePointRelativeToSkeleton(
+        start: lumbar,
+        end: torsoCenter + (up * (bodyProfile.torsoHeight * (0.92 * skeletonDNA.spineScale))),
+        distanceAlongAxisPercent: 0.74,
+        distanceFromAxisPercent: 0,
+        axisNormal: forward
+    )
+    let chestLift = up * (
+        (motionProfile.shoulderLift * max(0, gestureWave) * 0.18)
+            + (gaitSignature.headBob * gaitLift * 0.28)
+    )
+    let chestForward = forward * (bodyProfile.chestDepth * (0.2 + ((skeletonDNA.ribcageScale - 1) * 0.08)))
+    let chestCenter = chestAlongSpine + chestForward + chestLift
+
+    let hipForwardOffset = forward * (
+        (motionProfile.socialForward * 0.42)
+            + (silhouetteProfile.torsoForward * 0.36)
+            - (bodyProfile.hipDepth * 0.08)
+    )
+    let hipLateralOffset = right * (
+        (motionProfile.torsoSideShift * 0.34)
+            - (motionProfile.idleShift * settleWave * 0.28)
+            - (gaitSignature.hipTilt * gaitSway)
+    )
+    let hipLift = up * (bodyHeight * 0.34 + (motionProfile.hipLift * gaitLift))
+    let hipCenter = base + crouchOffset + hipForwardOffset + hipLateralOffset + hipLift
+    let bellyCenter = immersiveApePointRelativeToSkeleton(
+        start: lumbar,
+        end: hipCenter,
+        distanceAlongAxisPercent: 0.6,
+        distanceFromAxisPercent: 0,
+        axisNormal: forward
+    ) + (forward * (bodyProfile.bellyDepth * 0.18))
+
+    let neckBase = chestCenter
+        + (up * (bodyProfile.torsoHeight * (0.42 + ((skeletonDNA.spineScale - 1) * 0.08))))
+        - (forward * (bodyProfile.chestDepth * 0.08))
+    let headForwardOffset = forward * (
+        (bodyProfile.muzzleLength * (0.28 + ((skeletonDNA.headScale - 1) * 0.08)))
+            + silhouetteProfile.headForward
+    )
+    let headLateralOffset = right * (
+        motionProfile.headSideShift
+            + (motionProfile.idleShift * settleWave * 0.22)
+            + (gaitSignature.torsoSway * gaitSway * 0.42)
+    )
+    let headLift = bodyProfile.neckHeight * skeletonDNA.neckScale
+        + bodyProfile.headLift
+        + silhouetteProfile.headLift
+        + (motionProfile.gestureLift * max(0, gestureWave) * 0.18)
+        + (motionProfile.breath * breathWave * 0.6)
+        + (gaitSignature.headBob * gaitLift * 0.62)
+    let headCenter = neckBase + headForwardOffset + headLateralOffset + (up * headLift)
+    let headRadius = bodyProfile.headRadius * skeletonDNA.headScale
+    let muzzleCenter = headCenter + (forward * (bodyProfile.muzzleLength * 0.62))
+    let browCenter = headCenter
+        + (forward * (bodyProfile.muzzleLength * 0.18))
+        + (up * (headRadius * 0.28))
+
+    let shoulderDrift = (forward * (motionProfile.socialForward * 0.62))
+        + (right * (
+            (motionProfile.torsoSideShift * 0.54)
+                + (motionProfile.idleShift * settleWave * 0.32)
+                + (gaitSignature.torsoSway * gaitSway * 0.84)
+        ))
+    let shoulderBase = immersiveApePointRelativeToSkeleton(
+        start: lumbar,
+        end: neckBase,
+        distanceAlongAxisPercent: 0.96,
+        distanceFromAxisPercent: 0,
+        axisNormal: forward
+    ) + (shoulderDrift * 0.18)
+        + (forward * (silhouetteProfile.torsoForward * 0.12))
+        + (up * (motionProfile.shoulderLift * (0.16 + (max(0, gestureWave) * 0.24))))
+    let shoulderSpread = (
+        (bodyProfile.shoulderWidth * motionProfile.stanceWidthScale)
+            + gaitSignature.stanceBias
+    ) * silhouetteProfile.shoulderSpreadScale * skeletonDNA.shoulderWidthScale
+    let shoulderSocketInset = bodyProfile.shoulderWidth * 0.24 * skeletonDNA.shoulderSocketInsetScale
+    let leftShoulder = shoulderBase
+        + (right * shoulderSpread)
+        + (up * (gaitSignature.shoulderTilt * leftGaitCycle))
+    let rightShoulder = shoulderBase
+        - (right * shoulderSpread)
+        + (up * (gaitSignature.shoulderTilt * rightGaitCycle))
+    let leftShoulderSocket = leftShoulder
+        - (right * shoulderSocketInset)
+        + (forward * (bodyProfile.chestDepth * 0.06))
+    let rightShoulderSocket = rightShoulder
+        + (right * shoulderSocketInset)
+        + (forward * (bodyProfile.chestDepth * 0.06))
+    let collarLift = up * (bodyProfile.neckHeight * 0.24 * skeletonDNA.collarLiftScale)
+    let leftCollar = immersiveApeLerp(neckBase, leftShoulder, factor: 0.56) + collarLift
+    let rightCollar = immersiveApeLerp(neckBase, rightShoulder, factor: 0.56) + collarLift
+
+    let upperArmLength = bodyProfile.armUpperLength * skeletonDNA.upperArmScale
+    let forearmLength = bodyProfile.armLowerLength * skeletonDNA.forearmScale
+    let armGesture = forward * (bodyProfile.armReach + motionProfile.gestureReach)
+    let leftArmSwing = forward * (leftStrideWave * motionProfile.armSwingDistance * gaitSignature.leftArmScale)
+    let rightArmSwing = forward * (rightStrideWave * motionProfile.armSwingDistance * gaitSignature.rightArmScale)
+    let handDrop = -((upperArmLength + forearmLength) * 0.82)
+    let leftHandLift = max(0, gestureWave) * motionProfile.gestureLift
+    let rightHandLift = max(0, -gestureWave) * motionProfile.gestureLift
+    let spreadElbowOut = motionProfile.elbowOut * silhouetteProfile.armSpreadScale
+    let leftWristBase = leftShoulderSocket + armGesture + leftArmSwing + (right * spreadElbowOut)
+    let rightWristBase = rightShoulderSocket + armGesture + rightArmSwing - (right * spreadElbowOut)
+    let leftWrist = leftWristBase + (up * (handDrop + silhouetteProfile.handRaise + leftHandLift + (gaitSignature.headBob * leftGaitCycle * 0.36)))
+    let rightWrist = rightWristBase + (up * (handDrop + silhouetteProfile.handRaise + rightHandLift + (gaitSignature.headBob * rightGaitCycle * 0.36)))
+    let armBlend = upperArmLength / max(upperArmLength + forearmLength, 0.001)
+    let elbowSpread = bodyProfile.armRadius * 0.44 + (motionProfile.elbowOut * 0.34)
+    let leftElbow = immersiveApeLerp(leftShoulderSocket, leftWrist, factor: armBlend)
+        + (right * max(0, elbowSpread - silhouetteProfile.elbowTuck))
+        + (up * (-upperArmLength * 0.14 + (motionProfile.shoulderLift * 0.14)))
+    let rightElbow = immersiveApeLerp(rightShoulderSocket, rightWrist, factor: armBlend)
+        - (right * max(0, elbowSpread - silhouetteProfile.elbowTuck))
+        + (up * (-upperArmLength * 0.14 + (motionProfile.shoulderLift * 0.14)))
+
+    let hipSpread = bodyProfile.hipWidth * 0.82 * skeletonDNA.pelvisWidthScale
+    let leftHip = hipCenter + (right * hipSpread)
+    let rightHip = hipCenter - (right * hipSpread)
+    let footHeight = bodyProfile.footHeight * skeletonDNA.footScale
+    let footBaseHeight = footHeight + (bodyProfile.crouch * 0.08)
+    let footSpread = (
+        (bodyProfile.hipWidth * 0.78 * motionProfile.stanceWidthScale)
+            + (gaitSignature.stanceBias * 0.7)
+    ) * silhouetteProfile.stanceWidthScale * skeletonDNA.pelvisWidthScale
+    let leftLegStride = forward * (leftStrideWave * motionProfile.legStrideDistance * gaitSignature.leftStrideScale)
+    let rightLegStride = forward * (rightStrideWave * motionProfile.legStrideDistance * gaitSignature.rightStrideScale)
+    let leftAnkle = base
+        + (right * footSpread)
+        - leftLegStride
+        + (up * (footBaseHeight + (leftGaitCycle * gaitSignature.footLift)))
+    let rightAnkle = base
+        - (right * footSpread)
+        - rightLegStride
+        + (up * (footBaseHeight + (rightGaitCycle * gaitSignature.footLift)))
+    let upperLegLength = bodyProfile.legUpperLength * skeletonDNA.upperLegScale
+    let lowerLegLength = bodyProfile.legLowerLength * skeletonDNA.lowerLegScale
+    let legBlend = upperLegLength / max(upperLegLength + lowerLegLength, 0.001)
+    let leftKnee = immersiveApeLerp(leftHip, leftAnkle, factor: legBlend)
+        + (up * (-bodyHeight * 0.06 + (leftGaitCycle * motionProfile.kneeLift)))
+        + (right * (motionProfile.idleShift * 0.18))
+    let rightKnee = immersiveApeLerp(rightHip, rightAnkle, factor: legBlend)
+        + (up * (-bodyHeight * 0.06 + (rightGaitCycle * motionProfile.kneeLift)))
+        - (right * (motionProfile.idleShift * 0.18))
+
+    let crestBase = headCenter
+        + (up * (headRadius * 0.72))
+        - (forward * (headRadius * 0.16))
+    let crestTip = crestBase + (up * (bodyProfile.crestHeight + silhouetteProfile.crestLift))
+
+    return ImmersiveApeAvatarSkeleton(
+        torsoCenter: torsoCenter,
+        lumbar: lumbar,
+        chestCenter: chestCenter,
+        bellyCenter: bellyCenter,
+        hipCenter: hipCenter,
+        neck: neckBase,
+        headCenter: headCenter,
+        muzzleCenter: muzzleCenter,
+        browCenter: browCenter,
+        leftShoulder: leftShoulder,
+        rightShoulder: rightShoulder,
+        leftShoulderSocket: leftShoulderSocket,
+        rightShoulderSocket: rightShoulderSocket,
+        leftCollar: leftCollar,
+        rightCollar: rightCollar,
+        leftElbow: leftElbow,
+        rightElbow: rightElbow,
+        leftWrist: leftWrist,
+        rightWrist: rightWrist,
+        leftHip: leftHip,
+        rightHip: rightHip,
+        leftKnee: leftKnee,
+        rightKnee: rightKnee,
+        leftAnkle: leftAnkle,
+        rightAnkle: rightAnkle,
+        crestBase: crestBase,
+        crestTip: crestTip,
+        headRadius: headRadius,
+        handRadius: bodyProfile.handRadius * skeletonDNA.handScale,
+        footLength: bodyProfile.footLength * skeletonDNA.footScale,
+        footHeight: footHeight
+    )
+}
+
+private func immersiveApeExtremityProfile(
+    for being: shared_immersiveape_being_snapshot,
+    bodyProfile: ImmersiveApeBodyProfile,
+    skeletonDNA: ImmersiveApeSkeletonDNA
+) -> ImmersiveApeExtremityProfile {
+    let maturity = immersiveApeSaturate(being.age_days / 3200)
+    let juvenile = 1 - maturity
+    let frame = Float(being.frame) / 15
+    let hair = Float(being.hair) / 15
+    let pigmentation = Float(being.pigmentation) / 15
+    let eyeColor = Float(being.eye_color) / 15
+    let eyeShape = Float(being.eye_shape) / 15
+    let honor = Float(being.honor) / 255
+
+    return ImmersiveApeExtremityProfile(
+        palmLength: bodyProfile.handRadius * immersiveApeClamp(
+            1.68
+                + (frame * 0.18)
+                + (hair * 0.12)
+                - (juvenile * 0.08),
+            min: 1.52,
+            max: 2.12
+        ),
+        palmRadius: bodyProfile.handRadius * immersiveApeClamp(
+            0.72
+                + (skeletonDNA.handScale * 0.28)
+                + (frame * 0.06),
+            min: 0.64,
+            max: 0.96
+        ),
+        fingerLength: bodyProfile.handRadius * immersiveApeClamp(
+            1.44
+                + ((1 - frame) * 0.18)
+                + (juvenile * 0.16)
+                + ((eyeShape - 0.5) * 0.2),
+            min: 1.18,
+            max: 1.96
+        ),
+        fingerRadius: bodyProfile.handRadius * immersiveApeClamp(
+            0.3
+                + (frame * 0.08)
+                + ((0.5 - pigmentation) * 0.04),
+            min: 0.24,
+            max: 0.46
+        ),
+        thumbLength: bodyProfile.handRadius * immersiveApeClamp(
+            0.9
+                + (skeletonDNA.handScale * 0.22)
+                + ((eyeColor - 0.5) * 0.14),
+            min: 0.78,
+            max: 1.22
+        ),
+        thumbLift: bodyProfile.handRadius * immersiveApeClamp(
+            0.16
+                + (hair * 0.12)
+                + (honor * 0.08),
+            min: 0.14,
+            max: 0.36
+        ),
+        thumbSpread: bodyProfile.handRadius * immersiveApeClamp(
+            0.5
+                + (frame * 0.16)
+                + ((eyeShape - 0.5) * 0.1),
+            min: 0.42,
+            max: 0.86
+        ),
+        knuckleSpread: bodyProfile.handRadius * immersiveApeClamp(
+            0.24
+                + ((1 - frame) * 0.08)
+                + (juvenile * 0.06),
+            min: 0.2,
+            max: 0.42
+        ),
+        soleLength: bodyProfile.footLength * immersiveApeClamp(
+            0.58
+                + (skeletonDNA.footScale * 0.22)
+                + ((1 - frame) * 0.08),
+            min: 0.52,
+            max: 0.86
+        ),
+        soleRadius: bodyProfile.footHeight * immersiveApeClamp(
+            1.2
+                + (frame * 0.16)
+                + (hair * 0.06),
+            min: 1.08,
+            max: 1.46
+        ),
+        heelRadius: bodyProfile.footHeight * immersiveApeClamp(
+            1.08
+                + (frame * 0.14)
+                + (honor * 0.08),
+            min: 1,
+            max: 1.4
+        ),
+        toeLength: bodyProfile.footLength * immersiveApeClamp(
+            0.18
+                + (juvenile * 0.06)
+                + ((eyeColor - 0.5) * 0.06),
+            min: 0.14,
+            max: 0.3
+        ),
+        toeRadius: bodyProfile.footHeight * immersiveApeClamp(
+            0.62
+                + ((1 - frame) * 0.14)
+                + (juvenile * 0.08),
+            min: 0.54,
+            max: 0.9
+        ),
+        toeSpread: bodyProfile.footLength * immersiveApeClamp(
+            0.12
+                + ((1 - frame) * 0.05)
+                + (hair * 0.03),
+            min: 0.1,
+            max: 0.2
+        ),
+        archLift: bodyProfile.footHeight * immersiveApeClamp(
+            0.32
+                + (honor * 0.14)
+                + ((eyeShape - 0.5) * 0.08),
+            min: 0.24,
+            max: 0.56
+        )
+    )
+}
+
+private func immersiveApeBodyProfile(
+    for being: shared_immersiveape_being_snapshot
+) -> ImmersiveApeBodyProfile {
+    let bodyHeight = max(1.2, being.height)
+    let moving = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_MOVING))
+    let swimming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SWIMMING))
+    let eating = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_EATING))
+    let attacking = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE))
+    let speaking = being.speaking != 0
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SPEAKING))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+    let sleeping = being.state == 0
+    let frame = Float(being.frame) / 15
+    let hair = Float(being.hair) / 15
+    let mass = immersiveApeSaturate((being.mass - 18) / 42)
+    let maturity = immersiveApeSaturate(being.age_days / 3200)
+    let juvenile = 1 - maturity
+    let femaleBias: Float = being.female != 0 ? 1 : 0
+    let pregnancyBias: Float = being.pregnant != 0 ? 1 : 0
+
+    let crouchFactor: Float
+    if sleeping {
+        crouchFactor = 0.18
+    } else if eating {
+        crouchFactor = 0.08
+    } else if swimming {
+        crouchFactor = 0.05
+    } else if moving {
+        crouchFactor = 0.01
+    } else {
+        crouchFactor = 0.02 + (juvenile * 0.02)
+    }
+
+    var gaitAmplitude: Float = sleeping ? 0 : (moving ? (0.11 + (mass * 0.03) + (frame * 0.02)) : 0.03 + (mass * 0.008))
+    if swimming {
+        gaitAmplitude = 0.05 + (hair * 0.01)
+    }
+    if eating {
+        gaitAmplitude *= 0.35
+    }
+    if attacking {
+        gaitAmplitude += 0.03
+    }
+
+    return ImmersiveApeBodyProfile(
+        torsoWidth: bodyHeight * (0.15 + (frame * 0.03) + (mass * 0.02) - (juvenile * 0.008)),
+        torsoDepth: bodyHeight * (0.11 + (mass * 0.02) + (pregnancyBias * 0.03)),
+        torsoHeight: bodyHeight * (0.18 + (maturity * 0.03) + (mass * 0.015)),
+        chestWidth: bodyHeight * (0.17 + (frame * 0.035) + (mass * 0.02) - (femaleBias * 0.006)),
+        chestDepth: bodyHeight * (0.13 + (mass * 0.02) + (pregnancyBias * 0.015)),
+        hipWidth: bodyHeight * (0.12 + (frame * 0.02) + (femaleBias * 0.015) + (pregnancyBias * 0.02)),
+        hipDepth: bodyHeight * (0.1 + (mass * 0.02) + (pregnancyBias * 0.02)),
+        shoulderWidth: bodyHeight * (0.13 + (frame * 0.03) + (mass * 0.015) - (femaleBias * 0.006)),
+        shoulderHeight: bodyHeight * (0.76 - (crouchFactor * 0.42)),
+        neckHeight: bodyHeight * (0.04 + ((1 - frame) * 0.012) + (juvenile * 0.01)),
+        headRadius: bodyHeight * (0.1 + (juvenile * 0.016) + ((1 - frame) * 0.004)),
+        muzzleLength: bodyHeight * (0.07 + (frame * 0.008) + (hair * 0.006)),
+        browRadius: bodyHeight * (0.026 + (hair * 0.008)),
+        armUpperLength: bodyHeight * (0.18 + (frame * 0.02) + (mass * 0.01)),
+        armLowerLength: bodyHeight * (0.19 + (mass * 0.012) - (juvenile * 0.006)),
+        armRadius: bodyHeight * (0.03 + (frame * 0.01) + (mass * 0.005)),
+        legUpperLength: bodyHeight * (0.16 + (mass * 0.01) + (maturity * 0.008)),
+        legLowerLength: bodyHeight * (0.17 + ((1 - frame) * 0.012)),
+        legRadius: bodyHeight * (0.033 + (mass * 0.008)),
+        handRadius: bodyHeight * (0.028 + (frame * 0.008) + (mass * 0.004)),
+        footLength: bodyHeight * (0.085 + (mass * 0.012)),
+        footHeight: bodyHeight * (0.024 + (mass * 0.006)),
+        crouch: bodyHeight * crouchFactor,
+        spineLean: bodyHeight * (attacking ? 0.08 : swimming ? 0.035 : eating ? 0.025 : speaking ? 0.018 : moving ? 0.03 : 0.008),
+        headLift: bodyHeight * (speaking ? 0.03 : attacking ? 0.016 : sleeping ? -0.16 : 0),
+        armReach: bodyHeight * (attacking ? 0.12 : speaking ? 0.045 : swimming ? 0.055 : eating ? -0.03 : 0),
+        gaitAmplitude: gaitAmplitude,
+        crestHeight: being.hair > 3 ? bodyHeight * (0.02 + (hair * 0.035)) : 0,
+        bellyDepth: bodyHeight * (0.05 + (mass * 0.02) + (pregnancyBias * 0.05))
+    )
+}
+
+private func immersiveApeGaitSignature(
+    for being: shared_immersiveape_being_snapshot
+) -> ImmersiveApeGaitSignature {
+    let bodyHeight = max(1.2, being.height)
+    let frame = Float(being.frame) / 15
+    let hair = Float(being.hair) / 15
+    let mass = immersiveApeSaturate((being.mass - 18) / 42)
+    let maturity = immersiveApeSaturate(being.age_days / 3200)
+    let energy = immersiveApeSaturate(being.energy)
+    let honor = Float(being.honor) / 255
+    let eyeColor = Float(being.eye_color) / 15
+    let eyeShape = Float(being.eye_shape) / 15
+    let femaleBias: Float = being.female != 0 ? 1 : 0
+    let pregnancyBias: Float = being.pregnant != 0 ? 1 : 0
+    let sideDominance = immersiveApeClamp(
+        ((frame - 0.5) * 0.24)
+            + ((energy - 0.5) * 0.18)
+            + ((honor - 0.5) * 0.18)
+            + ((eyeShape - 0.5) * 0.12)
+            - (pregnancyBias * 0.14)
+            - (femaleBias * 0.04),
+        min: -0.32,
+        max: 0.32
+    )
+    let leadBias = max(0, sideDominance)
+    let trailBias = max(0, -sideDominance)
+    let cadenceScale = immersiveApeClamp(
+        0.9
+            + (energy * 0.16)
+            + ((1 - mass) * 0.05)
+            + (maturity * 0.03)
+            - (pregnancyBias * 0.05),
+        min: 0.86,
+        max: 1.16
+    )
+
+    return ImmersiveApeGaitSignature(
+        cadenceScale: cadenceScale,
+        phaseOffset: sideDominance * 0.36,
+        leftStrideScale: 1 + (leadBias * 0.2) - (trailBias * 0.06),
+        rightStrideScale: 1 + (trailBias * 0.2) - (leadBias * 0.06),
+        leftArmScale: 1 + (leadBias * 0.18) + ((eyeColor - 0.5) * 0.08),
+        rightArmScale: 1 + (trailBias * 0.18) + ((0.5 - eyeColor) * 0.08),
+        torsoSway: bodyHeight * (0.014 + (mass * 0.01) + (hair * 0.006)),
+        shoulderTilt: bodyHeight * (0.016 + (frame * 0.012) + (energy * 0.006)),
+        hipTilt: bodyHeight * (0.014 + (mass * 0.014) + (pregnancyBias * 0.008)),
+        headBob: bodyHeight * (0.012 + ((1 - frame) * 0.01) + ((1 - maturity) * 0.006)),
+        footLift: bodyHeight * (0.02 + ((1 - mass) * 0.012) + (energy * 0.008)),
+        stanceBias: bodyHeight * (sideDominance * 0.018)
+    )
+}
+
+private func immersiveApeSilhouetteProfile(
+    for being: shared_immersiveape_being_snapshot,
+    interactionMode: ImmersiveApeEncounterMode?,
+    interactionWeight: Float
+) -> ImmersiveApeSilhouetteProfile {
+    let bodyHeight = max(1.2, being.height)
+    let moving = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_MOVING))
+    let swimming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SWIMMING))
+    let eating = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_EATING))
+    let grooming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_GROOMING))
+    let attacking = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE))
+    let speaking = being.speaking != 0
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SPEAKING))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+    let sleeping = being.state == 0
+    let movingWeight: Float = moving ? 1 : 0
+    let swimmingWeight: Float = swimming ? 1 : 0
+    let eatingWeight: Float = eating ? 1 : 0
+    let groomingWeight: Float = grooming ? 1 : 0
+    let speakingWeight: Float = speaking ? 1 : 0
+    let conflictWeight: Float = attacking ? 1 : ((interactionMode == .conflict) ? immersiveApeClamp(interactionWeight, min: 0, max: 1) : 0)
+    let pauseWeight: Float = (moving || sleeping) ? 0 : 1
+    let interactionStrength = immersiveApeClamp(interactionWeight, min: 0, max: 1)
+
+    let closeSocialModeWeight: Float
+    switch interactionMode {
+    case .conversation:
+        closeSocialModeWeight = 1.0
+    case .grooming:
+        closeSocialModeWeight = 0.92
+    case .courtship:
+        closeSocialModeWeight = 0.86
+    case .companionship:
+        closeSocialModeWeight = 0.7
+    case .presence:
+        closeSocialModeWeight = 0.4
+    case .conflict, .none:
+        closeSocialModeWeight = 0
+    }
+
+    let closeSocialWeight = max(groomingWeight * 0.88, interactionStrength * closeSocialModeWeight)
+
+    return ImmersiveApeSilhouetteProfile(
+        torsoForward: bodyHeight * (
+            (movingWeight * 0.012)
+                + (closeSocialWeight * 0.01)
+                + (speakingWeight * 0.008)
+                + (conflictWeight * 0.02)
+                - (pauseWeight * 0.003)
+                - (eatingWeight * 0.012)
+                - (groomingWeight * 0.004)
+                - (swimmingWeight * 0.02)
+        ),
+        torsoLift: bodyHeight * (
+            (pauseWeight * 0.01)
+                + (speakingWeight * 0.012)
+                + (closeSocialWeight * 0.004)
+                - (movingWeight * 0.002)
+                - (groomingWeight * 0.008)
+                - (sleeping ? 0.08 : 0)
+        ),
+        chestWidthScale: immersiveApeClamp(
+            1
+                + (speakingWeight * 0.12)
+                + (conflictWeight * 0.08)
+                + (closeSocialWeight * 0.05)
+                - (pauseWeight * 0.03)
+                - (swimmingWeight * 0.08),
+            min: 0.84,
+            max: 1.2
+        ),
+        chestDepthScale: immersiveApeClamp(
+            1
+                + (speakingWeight * 0.1)
+                + (conflictWeight * 0.06)
+                + (movingWeight * 0.03)
+                - (pauseWeight * 0.02)
+                - (eatingWeight * 0.05)
+                - (groomingWeight * 0.03)
+                - (swimmingWeight * 0.12),
+            min: 0.8,
+            max: 1.18
+        ),
+        shoulderSpreadScale: immersiveApeClamp(
+            1
+                + (speakingWeight * 0.08)
+                + (conflictWeight * 0.12)
+                + (movingWeight * 0.04)
+                + (closeSocialWeight * 0.04)
+                - (pauseWeight * 0.05)
+                - (groomingWeight * 0.04)
+                - (sleeping ? 0.18 : 0),
+            min: 0.8,
+            max: 1.24
+        ),
+        armSpreadScale: immersiveApeClamp(
+            1
+                + (speakingWeight * 0.12)
+                + (conflictWeight * 0.08)
+                - (closeSocialWeight * 0.06)
+                - (pauseWeight * 0.08)
+                - (eatingWeight * 0.14)
+                - (groomingWeight * 0.08),
+            min: 0.72,
+            max: 1.24
+        ),
+        handRaise: bodyHeight * (
+            (speakingWeight * 0.03)
+                + (closeSocialWeight * 0.012)
+                + (conflictWeight * 0.016)
+                - (pauseWeight * 0.006)
+                - (eatingWeight * 0.02)
+                - (groomingWeight * 0.014)
+        ),
+        elbowTuck: bodyHeight * max(
+            0,
+            (closeSocialWeight * 0.02)
+                + (pauseWeight * 0.018)
+                + (eatingWeight * 0.018)
+                + (groomingWeight * 0.018)
+                - (speakingWeight * 0.008)
+                - (conflictWeight * 0.016)
+        ),
+        headForward: bodyHeight * (
+            (movingWeight * 0.016)
+                + (conflictWeight * 0.02)
+                + (closeSocialWeight * 0.008)
+                - (pauseWeight * 0.004)
+                - (groomingWeight * 0.008)
+                - (sleeping ? 0.06 : 0)
+                - (swimmingWeight * 0.02)
+        ),
+        headLift: bodyHeight * (
+            (speakingWeight * 0.026)
+                + (closeSocialWeight * 0.012)
+                + (pauseWeight * 0.01)
+                - (movingWeight * 0.004)
+                - (eatingWeight * 0.014)
+                - (groomingWeight * 0.012)
+                - (sleeping ? 0.08 : 0)
+        ),
+        stanceWidthScale: immersiveApeClamp(
+            1
+                + (conflictWeight * 0.08)
+                + (movingWeight * 0.04)
+                - (closeSocialWeight * 0.05)
+                - (pauseWeight * 0.04)
+                - (groomingWeight * 0.03)
+                - (sleeping ? 0.16 : 0),
+            min: 0.82,
+            max: 1.18
+        ),
+        crestLift: bodyHeight * (
+            (speakingWeight * 0.016)
+                + (conflictWeight * 0.014)
+                + (closeSocialWeight * 0.006)
+        )
+    )
+}
+
+private func immersiveApeMotionProfile(
+    for being: shared_immersiveape_being_snapshot,
+    localPosition: SIMD3<Float>,
+    interactionMode: ImmersiveApeEncounterMode?,
+    interactionWeight: Float
+) -> ImmersiveApeMotionProfile {
+    let bodyHeight = max(1.2, being.height)
+    let bodyProfile = immersiveApeBodyProfile(for: being)
+    let moving = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_MOVING))
+    let swimming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SWIMMING))
+    let eating = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_EATING))
+    let grooming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_GROOMING))
+    let attacking = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE))
+    let speaking = being.speaking != 0
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SPEAKING))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+    let sleeping = being.state == 0
+    let movingWeight: Float = moving ? 1 : 0
+    let swimmingWeight: Float = swimming ? 1 : 0
+    let eatingWeight: Float = eating ? 1 : 0
+    let groomingWeight: Float = grooming ? 1 : 0
+    let conflictWeight: Float = attacking ? 1 : ((interactionMode == .conflict) ? immersiveApeClamp(interactionWeight, min: 0, max: 1) : 0)
+    let speakingWeight: Float = speaking ? 1 : 0
+    let pauseWeight: Float = (moving || sleeping) ? 0 : 1
+    let planarDistance = simd_length(SIMD2<Float>(localPosition.x, localPosition.z))
+    let interactionStrength = immersiveApeClamp(interactionWeight, min: 0, max: 1)
+    let proximity = immersiveApeClamp(1 - (planarDistance / 10), min: 0, max: 1) * interactionStrength
+    let socialModeWeight: Float
+
+    switch interactionMode {
+    case .conversation:
+        socialModeWeight = 1.0
+    case .grooming:
+        socialModeWeight = 0.95
+    case .courtship:
+        socialModeWeight = 0.84
+    case .companionship:
+        socialModeWeight = 0.7
+    case .presence:
+        socialModeWeight = 0.34
+    case .conflict:
+        socialModeWeight = 0.58
+    case .none:
+        socialModeWeight = 0
+    }
+
+    let socialWeight = proximity * socialModeWeight
+    let forward = immersiveApeFacingVector(facing: being.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let directionToFocus = simd_length_squared(SIMD2<Float>(localPosition.x, localPosition.z)) > 0.0001
+        ? immersiveApePlanarDirection(-localPosition)
+        : SIMD3<Float>(0, 0, 0)
+    let turnSign = simd_dot(right, directionToFocus)
+    let facingWeight = max(Float(0), simd_dot(forward, directionToFocus))
+
+    return ImmersiveApeMotionProfile(
+        phaseRate: 0.007 + (movingWeight * (0.012 + (bodyProfile.gaitAmplitude * 0.03))) + (speakingWeight * 0.004) + (socialWeight * 0.002),
+        strideDistance: bodyHeight * ((movingWeight * (0.07 + (bodyProfile.gaitAmplitude * 0.22))) + (pauseWeight * 0.008) + (conflictWeight * 0.025)),
+        armSwingDistance: bodyHeight * ((movingWeight * (0.06 + (bodyProfile.gaitAmplitude * 0.18))) + (speakingWeight * 0.028) + (groomingWeight * 0.02) + (conflictWeight * 0.045)),
+        legStrideDistance: bodyHeight * ((movingWeight * (0.08 + (bodyProfile.gaitAmplitude * 0.16))) + (pauseWeight * 0.008) + (swimmingWeight * 0.018)),
+        kneeLift: bodyHeight * ((movingWeight * 0.042) + (conflictWeight * 0.024) + (pauseWeight * 0.014)),
+        torsoLift: bodyHeight * ((movingWeight * 0.018) + (pauseWeight * 0.008) + (speakingWeight * 0.006)),
+        hipLift: bodyHeight * ((movingWeight * 0.012) + (pauseWeight * 0.004)),
+        shoulderLift: bodyHeight * ((speakingWeight * 0.022) + (groomingWeight * 0.016) + (movingWeight * 0.01) + (socialWeight * 0.008)),
+        idleShift: bodyHeight * ((pauseWeight * 0.018) + (socialWeight * 0.012) + (speakingWeight * 0.01)),
+        socialForward: bodyHeight * ((socialWeight * 0.024) + (conflictWeight * 0.03) - (groomingWeight * 0.006) - (swimmingWeight * 0.008)),
+        torsoSideShift: bodyHeight * turnSign * ((socialWeight * 0.018) + (speakingWeight * 0.008)),
+        headSideShift: bodyHeight * turnSign * ((socialWeight * 0.028) + (speakingWeight * 0.014) + ((1 - facingWeight) * socialWeight * 0.01)),
+        gestureReach: bodyHeight * ((speakingWeight * 0.05) + (groomingWeight * 0.018) + (conflictWeight * 0.07) - (eatingWeight * 0.038) + (swimmingWeight * 0.012)),
+        gestureLift: bodyHeight * ((speakingWeight * 0.05) + (groomingWeight * 0.028) + (pauseWeight * 0.014) + (socialWeight * 0.018)),
+        stanceWidthScale: 1 + (conflictWeight * 0.18) + (socialWeight * 0.08) - (swimmingWeight * 0.06) - (sleeping ? 0.22 : 0),
+        elbowOut: bodyHeight * ((speakingWeight * 0.028) + (groomingWeight * 0.02) + (socialWeight * 0.012) + 0.01),
+        breath: bodyHeight * ((sleeping ? 0.008 : 0.012) + (speakingWeight * 0.005) + (socialWeight * 0.003))
+    )
+}
+
 private func immersiveApeEmbodimentProfile(
     for being: shared_immersiveape_being_snapshot,
     encounterCount: Int
 ) -> ImmersiveApeEmbodimentProfile {
     let bodyHeight = max(1.2, being.height)
+    let bodyProfile = immersiveApeBodyProfile(for: being)
     let moving = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_MOVING))
     let swimming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SWIMMING))
     let eating = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_EATING))
@@ -4954,20 +7577,20 @@ private func immersiveApeEmbodimentProfile(
     let sleeping = being.state == 0
 
     var profile = ImmersiveApeEmbodimentProfile(
-        eyeForward: 0.06,
+        eyeForward: 0.05 + (bodyProfile.spineLean * 0.4),
         eyeRight: 0.045,
-        eyeHeight: max(1.42, bodyHeight * 0.95),
+        eyeHeight: max(1.42, bodyHeight * 0.88 + bodyProfile.neckHeight + (bodyProfile.headRadius * 0.48) + (bodyProfile.headLift * 0.2)),
         targetDistance: 10.2,
-        targetDrop: -0.54,
-        shoulderWidth: 0.16,
-        shoulderHeight: bodyHeight * 0.73,
-        handSpread: 0.2,
-        handForward: 0.33,
-        handHeight: bodyHeight * 0.56,
-        handSwing: moving ? 0.09 : 0.03,
-        elbowDrop: -0.09,
-        chestHeight: bodyHeight * 0.52,
-        chestForward: 0.11,
+        targetDrop: -0.54 - (bodyProfile.crouch * 0.12),
+        shoulderWidth: bodyProfile.shoulderWidth * 0.76,
+        shoulderHeight: bodyProfile.shoulderHeight,
+        handSpread: bodyProfile.shoulderWidth * 1.28,
+        handForward: 0.31 + (bodyProfile.armReach * 0.38),
+        handHeight: max(bodyHeight * 0.48, bodyProfile.shoulderHeight - ((bodyProfile.armUpperLength + bodyProfile.armLowerLength) * 0.58)),
+        handSwing: moving ? max(0.08, bodyProfile.gaitAmplitude * 0.72) : 0.03,
+        elbowDrop: -max(0.05, bodyProfile.armUpperLength * 0.14),
+        chestHeight: (bodyHeight * 0.52) - (bodyProfile.crouch * 0.3),
+        chestForward: 0.08 + (bodyProfile.chestDepth * 0.14),
         chestAlpha: 0.28,
         fieldOfView: 58,
         renderHands: true
@@ -5490,6 +8113,26 @@ private func immersiveApeBiomeDNAProfile(
         scrubCopseBias: immersiveApeClamp(0.78 + (hair * 0.16) + (mass * 0.12) + (densitySeed * 0.16), min: 0.72, max: 1.24),
         forestHollowBias: immersiveApeClamp(0.8 + (pigment * 0.12) + (canopySeed * 0.18) + (groundSeed * 0.08) + pregnancyBias, min: 0.74, max: 1.22),
         stoneGardenBias: immersiveApeClamp(0.78 + (densitySeed * 0.2) + ((1 - pigment) * 0.08) + (eyeShape * 0.1), min: 0.72, max: 1.22),
+        coastalSuccessionBias: immersiveApeClamp(0.78 + (groundSeed * 0.18) + ((1 - frame) * 0.08) + (canopySeed * 0.08), min: 0.72, max: 1.22),
+        meadowSuccessionBias: immersiveApeClamp(0.8 + (bloomSeed * 0.16) + (eyeColor * 0.14) + (groundSeed * 0.1), min: 0.74, max: 1.22),
+        scrubSuccessionBias: immersiveApeClamp(0.78 + (hair * 0.14) + (mass * 0.12) + (densitySeed * 0.14), min: 0.72, max: 1.24),
+        forestSuccessionBias: immersiveApeClamp(0.8 + (pigment * 0.12) + (canopySeed * 0.16) + (groundSeed * 0.06) + pregnancyBias, min: 0.74, max: 1.22),
+        stoneSuccessionBias: immersiveApeClamp(0.76 + (densitySeed * 0.18) + ((1 - pigment) * 0.1) + (mass * 0.08), min: 0.7, max: 1.22),
+        coastalDispersalBias: immersiveApeClamp(0.78 + (groundSeed * 0.16) + ((1 - hair) * 0.08) + (eyeShape * 0.08), min: 0.72, max: 1.22),
+        meadowDispersalBias: immersiveApeClamp(0.8 + (bloomSeed * 0.14) + (eyeColor * 0.16) + (frame * 0.08), min: 0.74, max: 1.22),
+        scrubDispersalBias: immersiveApeClamp(0.78 + (hair * 0.16) + (densitySeed * 0.14) + (mass * 0.1), min: 0.72, max: 1.24),
+        forestDispersalBias: immersiveApeClamp(0.8 + (canopySeed * 0.16) + (pigment * 0.1) + (groundSeed * 0.08) + pregnancyBias, min: 0.74, max: 1.22),
+        stoneDispersalBias: immersiveApeClamp(0.76 + (densitySeed * 0.18) + ((1 - pigment) * 0.08) + (eyeShape * 0.08), min: 0.7, max: 1.22),
+        coastalPhenologyBias: immersiveApeClamp(0.78 + (groundSeed * 0.16) + ((1 - frame) * 0.08) + (eyeShape * 0.08), min: 0.72, max: 1.22),
+        meadowPhenologyBias: immersiveApeClamp(0.8 + (bloomSeed * 0.18) + (eyeColor * 0.14) + (frame * 0.06), min: 0.74, max: 1.22),
+        scrubPhenologyBias: immersiveApeClamp(0.78 + (hair * 0.16) + (densitySeed * 0.12) + (mass * 0.1), min: 0.72, max: 1.24),
+        forestPhenologyBias: immersiveApeClamp(0.8 + (pigment * 0.12) + (canopySeed * 0.14) + (groundSeed * 0.08) + pregnancyBias, min: 0.74, max: 1.22),
+        stonePhenologyBias: immersiveApeClamp(0.76 + (densitySeed * 0.16) + ((1 - pigment) * 0.1) + (eyeShape * 0.08), min: 0.7, max: 1.22),
+        coastalLandmarkBias: immersiveApeClamp(0.78 + (groundSeed * 0.18) + ((1 - frame) * 0.08) + ((1 - hair) * 0.06), min: 0.72, max: 1.22),
+        meadowLandmarkBias: immersiveApeClamp(0.8 + (bloomSeed * 0.18) + (eyeColor * 0.14) + (groundSeed * 0.08), min: 0.74, max: 1.22),
+        scrubLandmarkBias: immersiveApeClamp(0.78 + (hair * 0.18) + (densitySeed * 0.14) + (mass * 0.08), min: 0.72, max: 1.24),
+        forestLandmarkBias: immersiveApeClamp(0.8 + (canopySeed * 0.18) + (pigment * 0.12) + (groundSeed * 0.06) + pregnancyBias, min: 0.74, max: 1.22),
+        stoneLandmarkBias: immersiveApeClamp(0.76 + (densitySeed * 0.2) + ((1 - pigment) * 0.08) + (mass * 0.08), min: 0.7, max: 1.22),
         foliageTint: immersiveApeMix(
             SIMD3<Float>(0.18, 0.34, 0.14),
             SIMD3<Float>(0.34, 0.56, 0.2),
