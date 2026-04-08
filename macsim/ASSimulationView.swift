@@ -289,11 +289,16 @@ private struct ImmersiveApeGPUBufferSet {
 }
 
 private struct ImmersiveApeEnvironment {
+    let daylight: Float
+    let twilightStrength: Float
+    let nightStrength: Float
     let clearColor: SIMD3<Float>
     let fogColor: SIMD3<Float>
     let sunColor: SIMD3<Float>
     let waterColor: SIMD3<Float>
     let foamColor: SIMD3<Float>
+    let horizonColor: SIMD3<Float>
+    let horizonGlowColor: SIMD3<Float>
     let cloudColor: SIMD4<Float>
     let lightDirection: SIMD3<Float>
     let ambient: Float
@@ -508,6 +513,57 @@ private struct ImmersiveApeTerrainGrid {
         let vertical = up - down
         return simd_cross(vertical, horizontal).normalizedSafe
     }
+
+    func sampleCoordinates(for position: SIMD3<Float>) -> (row: Float, column: Float) {
+        let extent = Float(resolution - 1) * step * 0.5
+        return (
+            row: (position.z + extent) / step,
+            column: (position.x + extent) / step
+        )
+    }
+}
+
+private struct ImmersiveApeShoreSample {
+    let groundPosition: SIMD3<Float>
+    let groundNormal: SIMD3<Float>
+    let waterHeight: Float
+    let waterSurfaceHeight: Float
+    let waterNormal: SIMD3<Float>
+    let cloudDensity: Float
+    let cloudShadow: Float
+    let depth: Float
+    let shorelineBlend: Float
+    let wetness: Float
+    let shoreBreak: Float
+    let foam: Float
+}
+
+private struct ImmersiveApeBiomeSilhouette {
+    let treeHeightScale: Float
+    let treeCanopyWidthScale: Float
+    let treeCanopyHeightScale: Float
+    let treeLean: Float
+    let bushWidthScale: Float
+    let bushHeightScale: Float
+    let grassHeightScale: Float
+    let grassSpread: Float
+    let grassLean: Float
+    let grassColor: SIMD3<Float>
+    let rockWidthScale: Float
+    let rockHeightScale: Float
+    let rockCluster: Int
+}
+
+private struct ImmersiveApeBiomeHabitat {
+    let coverDensity: Float
+    let clutterDensity: Float
+    let accentColor: SIMD3<Float>
+}
+
+private struct ImmersiveApeBiomeTransition {
+    let edgeStrength: Float
+    let neighborMaterial: UInt8
+    let neighborWeight: Float
 }
 
 private let immersiveApeWorldScale: Float = 0.04
@@ -923,34 +979,61 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         let cloudy = rainy || weather == .cloudyDay || weather == .cloudyNight
         let dawnDusk = weather == .dawnDusk
         let rainAmount: Float = rainy ? 1.0 : (cloudy ? 0.16 : 0.0)
+        let twilightBand = immersiveApeSaturate(1 - (abs(daylight - 0.18) / 0.24))
+        let twilightStrength = max(dawnDusk ? 1.0 : 0.0, twilightBand * (1 - (daylight * 0.48)))
+        let nightStrength = immersiveApeSaturate((0.48 - daylight) / 0.48)
 
         let nightSky = SIMD3<Float>(0.03, 0.05, 0.1)
-        let daySky = dawnDusk ? SIMD3<Float>(0.82, 0.54, 0.38) : SIMD3<Float>(0.34, 0.64, 0.95)
+        let dawnSky = SIMD3<Float>(0.82, 0.54, 0.38)
+        let daySky = dawnDusk ? dawnSky : SIMD3<Float>(0.34, 0.64, 0.95)
+        let nightHorizon = SIMD3<Float>(0.1, 0.12, 0.19)
+        let dawnHorizon = SIMD3<Float>(0.96, 0.58, 0.33)
+        let dayHorizon = SIMD3<Float>(0.58, 0.74, 0.96)
+        let twilightGlow = SIMD3<Float>(1.0, 0.54, 0.28)
+        let moonGlow = SIMD3<Float>(0.42, 0.5, 0.72)
         let stormSky = SIMD3<Float>(0.18, 0.24, 0.33)
         let baseSky = immersiveApeMix(nightSky, daySky, t: daylight)
-        let clearColor = immersiveApeMix(baseSky, stormSky, t: cloudy ? (rainy ? 0.75 : 0.45) : 0.0)
+        var horizonColor = immersiveApeMix(nightHorizon, dawnDusk ? dawnHorizon : dayHorizon, t: daylight)
+        horizonColor = immersiveApeMix(horizonColor, twilightGlow, t: twilightStrength * 0.36)
+        let horizonGlowColor = immersiveApeMix(moonGlow, twilightGlow, t: twilightStrength)
+        let horizonLift = 0.08 + (twilightStrength * 0.18) + (nightStrength * 0.04)
+        let clearBase = immersiveApeMix(baseSky, horizonColor, t: horizonLift)
+        let clearColor = immersiveApeMix(clearBase, stormSky, t: cloudy ? (rainy ? 0.75 : 0.45) : 0.0)
 
-        let fogColor = immersiveApeMix(SIMD3<Float>(0.08, 0.09, 0.12), clearColor, t: 0.6)
-        let sunColor = dawnDusk
+        let fogBase = immersiveApeMix(SIMD3<Float>(0.08, 0.09, 0.12), clearColor, t: 0.6)
+        let fogColor = immersiveApeMix(fogBase, horizonColor, t: (twilightStrength * 0.18) + (nightStrength * 0.06))
+        let daylightSunColor = dawnDusk
             ? SIMD3<Float>(1.0, 0.67, 0.45)
             : immersiveApeMix(SIMD3<Float>(0.82, 0.86, 1.0), SIMD3<Float>(1.0, 0.98, 0.92), t: daylight)
-        let waterColor = immersiveApeMix(SIMD3<Float>(0.03, 0.08, 0.18), SIMD3<Float>(0.06, 0.36, 0.58), t: daylight * 0.9)
-        let foamColor = immersiveApeMix(SIMD3<Float>(0.72, 0.77, 0.82), SIMD3<Float>(0.94, 0.97, 1.0), t: daylight)
+        let sunColor = immersiveApeMix(SIMD3<Float>(0.7, 0.78, 0.92), daylightSunColor, t: 0.28 + (daylight * 0.72))
+        let waterBase = immersiveApeMix(SIMD3<Float>(0.03, 0.08, 0.18), SIMD3<Float>(0.06, 0.36, 0.58), t: daylight * 0.9)
+        let waterColor = immersiveApeMix(waterBase, horizonColor * 0.74, t: (twilightStrength * 0.16) + (nightStrength * 0.1))
+        let foamBase = immersiveApeMix(SIMD3<Float>(0.72, 0.77, 0.82), SIMD3<Float>(0.94, 0.97, 1.0), t: daylight)
+        let foamColor = immersiveApeMix(foamBase, horizonColor, t: twilightStrength * 0.08)
+        let cloudTint = immersiveApeMix(SIMD3<Float>(0.76, 0.82, 0.94), SIMD3<Float>(0.94, 0.96, 1.0), t: min(1.0, (daylight * 0.82) + (twilightStrength * 0.08)))
+        let cloudColorRGB = immersiveApeMix(cloudTint, horizonColor, t: (twilightStrength * 0.14) + (nightStrength * 0.06))
         let angle = snapshot.sun_angle - Float.pi * 0.5
         let lightDirection = SIMD3<Float>(cos(angle), -max(0.18, sin(angle)), sin(angle)).normalizedSafe
         let starVisibility = immersiveApeSaturate((1 - daylight) * (cloudy ? 0.42 : 0.95))
         let surfStrength = 0.46 + (abs(snapshot.tide) * 0.18) + (rainAmount * 0.28)
+        let baseAmbient = rainy ? 0.46 : (0.28 + (daylight * 0.3) + (twilightStrength * 0.05))
+        let fogDensityBase: Float = rainy ? 0.035 : (cloudy ? 0.024 : 0.015)
 
         return ImmersiveApeEnvironment(
+            daylight: daylight,
+            twilightStrength: twilightStrength,
+            nightStrength: nightStrength,
             clearColor: clearColor,
             fogColor: fogColor,
             sunColor: sunColor,
             waterColor: waterColor,
             foamColor: foamColor,
-            cloudColor: SIMD4<Float>(0.94, 0.96, 1.0, rainy ? 0.6 : (cloudy ? 0.46 : 0.26)),
+            horizonColor: horizonColor,
+            horizonGlowColor: horizonGlowColor,
+            cloudColor: SIMD4<Float>(cloudColorRGB.x, cloudColorRGB.y, cloudColorRGB.z, rainy ? 0.6 : (cloudy ? 0.46 : 0.26)),
             lightDirection: lightDirection,
-            ambient: rainy ? 0.48 : (daylight > 0.15 ? 0.58 : 0.34),
-            fogDensity: rainy ? 0.035 : (cloudy ? 0.024 : 0.015),
+            ambient: min(0.62, baseAmbient),
+            fogDensity: fogDensityBase + (twilightStrength * 0.004) + (nightStrength * 0.003),
             cloudCount: rainy ? 12 : (cloudy ? 8 : 5),
             rainAmount: rainAmount,
             starVisibility: starVisibility,
@@ -976,7 +1059,8 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         var transparentBuilder = ImmersiveApeMeshBuilder()
 
         buildTerrain(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), opaque: &opaqueBuilder, transparent: &transparentBuilder, seed: capture.snapshot.world_seed)
-        buildVegetation(using: grid, environment: environment, opaque: &opaqueBuilder, seed: capture.snapshot.world_seed)
+        buildWaterReflections(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), transparent: &transparentBuilder, seed: capture.snapshot.world_seed)
+        buildVegetation(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), opaque: &opaqueBuilder, seed: capture.snapshot.world_seed)
         buildFood(from: capture, referenceHeight: referenceHeight, environment: environment, opaque: &opaqueBuilder, transparent: &transparentBuilder)
         buildAttentionGuide(
             focus: attentionFocus,
@@ -994,7 +1078,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         )
         buildNearbyApes(from: capture, environment: environment, timeValue: Float(capture.snapshot.time), opaque: &opaqueBuilder, transparent: &transparentBuilder)
         buildSocialContext(from: capture, encounters: encounters, environment: environment, timeValue: Float(capture.snapshot.time), transparent: &transparentBuilder)
-        buildSky(from: capture, environment: environment, opaque: &opaqueBuilder, transparent: &transparentBuilder)
+        buildSky(from: capture, grid: grid, environment: environment, opaque: &opaqueBuilder, transparent: &transparentBuilder)
         buildWeatherEffects(from: capture, environment: environment, transparent: &transparentBuilder)
 
         let selectedMoving = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_MOVING))
@@ -1099,19 +1183,33 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                         let noiseRow = (row * subdivisions) + subRow
                         let noise = immersiveApeNoise(Int32(noiseColumn), Int32(noiseRow), seed: seed)
 
-                        let terrainV0 = makeTerrainVertex(grid: grid, row: row0, column: column0, environment: environment, noise: noise)
-                        let terrainV1 = makeTerrainVertex(grid: grid, row: row0, column: column1, environment: environment, noise: noise)
-                        let terrainV2 = makeTerrainVertex(grid: grid, row: row1, column: column1, environment: environment, noise: noise)
-                        let terrainV3 = makeTerrainVertex(grid: grid, row: row1, column: column0, environment: environment, noise: noise)
+                        let shoreV0 = makeShoreSample(grid: grid, row: row0, column: column0, environment: environment, timeValue: timeValue)
+                        let shoreV1 = makeShoreSample(grid: grid, row: row0, column: column1, environment: environment, timeValue: timeValue)
+                        let shoreV2 = makeShoreSample(grid: grid, row: row1, column: column1, environment: environment, timeValue: timeValue)
+                        let shoreV3 = makeShoreSample(grid: grid, row: row1, column: column0, environment: environment, timeValue: timeValue)
+
+                        let terrainV0 = makeTerrainVertex(grid: grid, shore: shoreV0, row: row0, column: column0, environment: environment, noise: noise)
+                        let terrainV1 = makeTerrainVertex(grid: grid, shore: shoreV1, row: row0, column: column1, environment: environment, noise: noise)
+                        let terrainV2 = makeTerrainVertex(grid: grid, shore: shoreV2, row: row1, column: column1, environment: environment, noise: noise)
+                        let terrainV3 = makeTerrainVertex(grid: grid, shore: shoreV3, row: row1, column: column0, environment: environment, noise: noise)
                         opaque.addQuad(terrainV0, terrainV1, terrainV2, terrainV3)
 
-                        let waterV0 = makeWaterVertex(grid: grid, row: row0, column: column0, environment: environment, timeValue: timeValue)
-                        let waterV1 = makeWaterVertex(grid: grid, row: row0, column: column1, environment: environment, timeValue: timeValue)
-                        let waterV2 = makeWaterVertex(grid: grid, row: row1, column: column1, environment: environment, timeValue: timeValue)
-                        let waterV3 = makeWaterVertex(grid: grid, row: row1, column: column0, environment: environment, timeValue: timeValue)
+                        let waterV0 = makeWaterVertex(shore: shoreV0, environment: environment)
+                        let waterV1 = makeWaterVertex(shore: shoreV1, environment: environment)
+                        let waterV2 = makeWaterVertex(shore: shoreV2, environment: environment)
+                        let waterV3 = makeWaterVertex(shore: shoreV3, environment: environment)
 
                         if max(waterV0.color.w, waterV1.color.w, waterV2.color.w, waterV3.color.w) > 0.02 {
                             transparent.addQuad(waterV0, waterV1, waterV2, waterV3)
+                        }
+
+                        let surfV0 = makeSurfVertex(shore: shoreV0, environment: environment)
+                        let surfV1 = makeSurfVertex(shore: shoreV1, environment: environment)
+                        let surfV2 = makeSurfVertex(shore: shoreV2, environment: environment)
+                        let surfV3 = makeSurfVertex(shore: shoreV3, environment: environment)
+
+                        if max(surfV0.color.w, surfV1.color.w, surfV2.color.w, surfV3.color.w) > 0.03 {
+                            transparent.addQuad(surfV0, surfV1, surfV2, surfV3)
                         }
                     }
                 }
@@ -1119,69 +1217,269 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         }
     }
 
+    private func makeShoreSample(
+        grid: ImmersiveApeTerrainGrid,
+        row: Float,
+        column: Float,
+        environment: ImmersiveApeEnvironment,
+        timeValue: Float
+    ) -> ImmersiveApeShoreSample {
+        let groundPosition = grid.interpolatedPosition(row: row, column: column)
+        let groundNormal = grid.interpolatedNormal(row: row, column: column)
+        let cloudDensity = grid.interpolatedCloud(row: row, column: column)
+        let cloudShadow = cloudShadowFactor(grid: grid, row: row, column: column, environment: environment, timeValue: timeValue)
+        let waterHeight = grid.interpolatedWaterHeight(row: row, column: column)
+        let depth = waterHeight - groundPosition.y
+        let waveHeight = immersiveApeWaveHeight(at: groundPosition, timeValue: timeValue)
+        let waterNormal = immersiveApeWaveNormal(at: groundPosition, timeValue: timeValue)
+        let shorelineBlend = immersiveApeSaturate((0.34 - abs(depth)) * 2.4)
+        let wetReach = depth - (max(0, waveHeight) * 0.38) + 0.03
+        let wetness = immersiveApeSaturate((0.62 - abs(wetReach)) * 1.75) * (0.62 + (environment.surfStrength * 0.3))
+        let breakerBand = immersiveApeSaturate((0.22 - abs(depth - 0.06)) * 5.0)
+        let washBand = immersiveApeSaturate((0.18 - abs(depth + 0.04 - (max(0, waveHeight) * 0.65))) * 5.6)
+        let crest = immersiveApeSaturate((waveHeight + 0.06) * 4.8)
+        let shoreBreak = immersiveApeClamp((breakerBand * 0.78) + (washBand * 0.38), min: 0, max: 1) * environment.surfStrength
+        let foam = immersiveApeSaturate((shoreBreak * 0.78) + (crest * shoreBreak * 0.45) + (washBand * 0.2))
+
+        return ImmersiveApeShoreSample(
+            groundPosition: groundPosition,
+            groundNormal: groundNormal,
+            waterHeight: waterHeight,
+            waterSurfaceHeight: waterHeight + waveHeight,
+            waterNormal: waterNormal,
+            cloudDensity: cloudDensity,
+            cloudShadow: cloudShadow,
+            depth: depth,
+            shorelineBlend: shorelineBlend,
+            wetness: wetness,
+            shoreBreak: shoreBreak,
+            foam: foam
+        )
+    }
+
+    private func cloudShadowFactor(
+        grid: ImmersiveApeTerrainGrid,
+        row: Float,
+        column: Float,
+        environment: ImmersiveApeEnvironment,
+        timeValue: Float
+    ) -> Float {
+        guard environment.daylight > 0.04 else {
+            return 0
+        }
+
+        let windPlanar = immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
+        let driftDirection = simd_length_squared(windPlanar) > 0.0001 ? windPlanar : SIMD3<Float>(0.86, 0, 0.32)
+        let driftCells = timeValue * 0.00115
+        let sampleRow = row + (driftDirection.z * driftCells)
+        let sampleColumn = column + (driftDirection.x * driftCells)
+        let leadingOffset: Float = 1.4
+        let sideOffset: Float = 0.85
+        let base = grid.interpolatedCloud(row: sampleRow, column: sampleColumn)
+        let leading = grid.interpolatedCloud(
+            row: sampleRow + (driftDirection.z * leadingOffset),
+            column: sampleColumn + (driftDirection.x * leadingOffset)
+        )
+        let lateral = grid.interpolatedCloud(
+            row: sampleRow + (driftDirection.x * sideOffset),
+            column: sampleColumn - (driftDirection.z * sideOffset)
+        )
+        let density = (base * 0.62) + (leading * 0.24) + (lateral * 0.14)
+        let threshold: Float = environment.rainAmount > 0.4 ? 0.14 : 0.2
+        let sunHeight = immersiveApeSaturate((-environment.lightDirection.y - 0.18) / 0.82)
+        let daylightWeight = environment.daylight * (0.3 + (sunHeight * 0.42))
+        return immersiveApeSaturate((density - threshold) * 1.8) * daylightWeight
+    }
+
     private func makeTerrainVertex(
         grid: ImmersiveApeTerrainGrid,
+        shore: ImmersiveApeShoreSample,
         row: Float,
         column: Float,
         environment: ImmersiveApeEnvironment,
         noise: Float
     ) -> ImmersiveApeVertex {
         let sample = grid.footprint(row: row, column: column)
-        let position = grid.interpolatedPosition(row: row, column: column)
-        let cloud = grid.interpolatedCloud(row: row, column: column)
-        let waterHeight = grid.interpolatedWaterHeight(row: row, column: column)
+        let palette00 = immersiveApeBiomeTerrainColor(
+            material: grid.material(row: sample.row0, column: sample.column0),
+            environment: environment,
+            moisture: shore.wetness,
+            shadow: shore.cloudShadow,
+            variation: immersiveApeNoise(Int32(sample.column0), Int32(sample.row0), seed: 0xB10E_0001)
+        )
+        let palette01 = immersiveApeBiomeTerrainColor(
+            material: grid.material(row: sample.row0, column: sample.column1),
+            environment: environment,
+            moisture: shore.wetness,
+            shadow: shore.cloudShadow,
+            variation: immersiveApeNoise(Int32(sample.column1), Int32(sample.row0), seed: 0xB10E_0002)
+        )
+        let palette10 = immersiveApeBiomeTerrainColor(
+            material: grid.material(row: sample.row1, column: sample.column0),
+            environment: environment,
+            moisture: shore.wetness,
+            shadow: shore.cloudShadow,
+            variation: immersiveApeNoise(Int32(sample.column0), Int32(sample.row1), seed: 0xB10E_0003)
+        )
+        let palette11 = immersiveApeBiomeTerrainColor(
+            material: grid.material(row: sample.row1, column: sample.column1),
+            environment: environment,
+            moisture: shore.wetness,
+            shadow: shore.cloudShadow,
+            variation: immersiveApeNoise(Int32(sample.column1), Int32(sample.row1), seed: 0xB10E_0004)
+        )
         var baseColor = immersiveApeBilinearBlend(
-            immersiveApeTerrainMaterialColor(grid.material(row: sample.row0, column: sample.column0)),
-            immersiveApeTerrainMaterialColor(grid.material(row: sample.row0, column: sample.column1)),
-            immersiveApeTerrainMaterialColor(grid.material(row: sample.row1, column: sample.column0)),
-            immersiveApeTerrainMaterialColor(grid.material(row: sample.row1, column: sample.column1)),
+            palette00,
+            palette01,
+            palette10,
+            palette11,
             rowMix: sample.rowMix,
             columnMix: sample.columnMix
         )
+        let drySand = immersiveApeTerrainMaterialColor(1)
+        let wetSand = immersiveApeMix(immersiveApeMix(drySand, environment.waterColor, t: 0.18), SIMD3<Float>(0.12, 0.1, 0.08), t: 0.35)
+        let centerRow = min(max(Int(round(row)), 0), grid.resolution - 1)
+        let centerColumn = min(max(Int(round(column)), 0), grid.resolution - 1)
+        let centerMaterial = grid.material(row: centerRow, column: centerColumn)
+        let transition = immersiveApeBiomeTransition(grid: grid, row: row, column: column, material: centerMaterial)
 
-        let shorelineBlend = immersiveApeSaturate((0.32 - abs(waterHeight - position.y)) * 2.2)
-        baseColor = immersiveApeMix(baseColor, immersiveApeTerrainMaterialColor(1), t: shorelineBlend * 0.42)
-
-        baseColor *= 0.92 + (noise * 0.14)
-        baseColor = immersiveApeMix(baseColor, environment.fogColor, t: cloud * 0.25)
+        baseColor = immersiveApeMix(baseColor, drySand, t: shore.shorelineBlend * 0.32)
+        baseColor = immersiveApeMix(baseColor, wetSand, t: shore.wetness * 0.5)
+        if transition.edgeStrength > 0.04, transition.neighborMaterial != centerMaterial {
+            let edgeVariation = immersiveApeNoise(Int32(centerColumn), Int32(centerRow), seed: 0xEC07_0AE0)
+            let neighborColor = immersiveApeBiomeTerrainColor(
+                material: transition.neighborMaterial,
+                environment: environment,
+                moisture: shore.wetness,
+                shadow: shore.cloudShadow,
+                variation: edgeVariation
+            )
+            let ecotoneColor = immersiveApeMix(baseColor, neighborColor, t: 0.48)
+            let ecotoneMix = transition.edgeStrength * (0.12 + (transition.neighborWeight * 0.18))
+            baseColor = immersiveApeMix(baseColor, ecotoneColor, t: ecotoneMix)
+        }
+        baseColor *= max(0.76, (0.9 + (noise * 0.12)) - (shore.wetness * 0.04))
+        baseColor = immersiveApeMix(baseColor, environment.foamColor, t: shore.foam * 0.05)
+        baseColor = immersiveApeMix(baseColor, environment.fogColor, t: shore.cloudDensity * 0.08)
 
         return ImmersiveApeVertex(
-            position: position,
-            normal: grid.interpolatedNormal(row: row, column: column),
+            position: shore.groundPosition,
+            normal: shore.groundNormal,
             color: SIMD4<Float>(baseColor.x, baseColor.y, baseColor.z, 1)
         )
     }
 
     private func makeWaterVertex(
-        grid: ImmersiveApeTerrainGrid,
-        row: Float,
-        column: Float,
-        environment: ImmersiveApeEnvironment,
-        timeValue: Float
+        shore: ImmersiveApeShoreSample,
+        environment: ImmersiveApeEnvironment
     ) -> ImmersiveApeVertex {
-        let ground = grid.interpolatedPosition(row: row, column: column)
-        let cloud = grid.interpolatedCloud(row: row, column: column)
-        let waterHeight = grid.interpolatedWaterHeight(row: row, column: column)
-        let depth = max(0, waterHeight - ground.y)
-        let wave = immersiveApeWaveHeight(at: ground, timeValue: timeValue)
-        let normal = immersiveApeWaveNormal(at: ground, timeValue: timeValue)
-        let shoreBreak = immersiveApeSaturate((0.48 - depth) * 1.7) * environment.surfStrength
-        let crest = immersiveApeSaturate((wave + 0.06) * 4.8)
-        let foam = immersiveApeSaturate((shoreBreak * 0.82) + (crest * shoreBreak * 0.4))
-        let rawColor = immersiveApeMix(environment.waterColor, environment.foamColor, t: foam)
-        let color = immersiveApeMix(rawColor, environment.fogColor, t: cloud * 0.18)
-        let alpha = immersiveApeClamp((depth * 0.16) + 0.12 + (shoreBreak * 0.16), min: 0, max: 0.72)
+        let depth = max(0, shore.depth)
+        let shallowTint = immersiveApeSaturate((0.82 - depth) * 1.1)
+        let rawColor = immersiveApeMix(environment.waterColor, environment.foamColor, t: shore.foam)
+        let twilightWaterTint = immersiveApeMix(environment.horizonColor, environment.foamColor, t: 0.22 + (environment.twilightStrength * 0.36))
+        let timeOfDayWater = immersiveApeMix(rawColor, twilightWaterTint, t: (environment.twilightStrength * 0.16) + (environment.nightStrength * 0.08))
+        let shallowColor = immersiveApeMix(timeOfDayWater, immersiveApeTerrainMaterialColor(1), t: shallowTint * 0.14)
+        let cloudShadow = immersiveApeMix(shallowColor, environment.fogColor * 0.82, t: shore.cloudShadow * 0.46)
+        let color = immersiveApeMix(cloudShadow, environment.fogColor, t: shore.cloudDensity * 0.12)
+        let alpha = immersiveApeClamp((depth * 0.16) + 0.12 + (shore.shoreBreak * 0.16), min: 0, max: 0.72)
 
         return ImmersiveApeVertex(
-            position: SIMD3<Float>(ground.x, waterHeight + wave, ground.z),
-            normal: normal,
+            position: SIMD3<Float>(shore.groundPosition.x, shore.waterSurfaceHeight, shore.groundPosition.z),
+            normal: shore.waterNormal,
             color: SIMD4<Float>(color.x, color.y, color.z, depth > 0.01 ? alpha : 0)
         )
+    }
+
+    private func makeSurfVertex(
+        shore: ImmersiveApeShoreSample,
+        environment: ImmersiveApeEnvironment
+    ) -> ImmersiveApeVertex {
+        let surfaceHeight = max(shore.groundPosition.y + 0.012, shore.waterSurfaceHeight - 0.015) + 0.018 + (shore.foam * 0.028)
+        let surfBase = immersiveApeMix(environment.foamColor, environment.waterColor, t: 0.22)
+        let surfShadow = immersiveApeMix(surfBase, environment.fogColor * 0.9, t: shore.cloudShadow * 0.34)
+        let surfColor = immersiveApeMix(surfShadow, environment.fogColor, t: shore.cloudDensity * 0.08)
+        let alpha = immersiveApeClamp((shore.shoreBreak * 0.11) + (shore.foam * 0.15), min: 0, max: 0.26)
+        let normal = (shore.groundNormal + shore.waterNormal).normalizedSafe
+
+        return ImmersiveApeVertex(
+            position: SIMD3<Float>(shore.groundPosition.x, surfaceHeight, shore.groundPosition.z),
+            normal: normal,
+            color: SIMD4<Float>(surfColor.x, surfColor.y, surfColor.z, alpha)
+        )
+    }
+
+    private func buildWaterReflections(
+        using grid: ImmersiveApeTerrainGrid,
+        environment: ImmersiveApeEnvironment,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder,
+        seed: UInt32
+    ) {
+        let sampleStride = 2
+        let reflectionBase = immersiveApeMix(environment.foamColor, environment.sunColor, t: 0.68)
+        let reflectionTint = immersiveApeMix(reflectionBase, environment.horizonGlowColor, t: (environment.twilightStrength * 0.22) + (environment.nightStrength * 0.12))
+
+        for row in stride(from: 1, to: grid.resolution - 2, by: sampleStride) {
+            for column in stride(from: 1, to: grid.resolution - 2, by: sampleStride) {
+                let sampleRow = Float(row) + 0.5
+                let sampleColumn = Float(column) + 0.5
+                let shore = makeShoreSample(grid: grid, row: sampleRow, column: sampleColumn, environment: environment, timeValue: timeValue)
+                let depth = max(0, shore.depth)
+
+                if depth < 0.05 {
+                    continue
+                }
+
+                let surfaceCenter = SIMD3<Float>(shore.groundPosition.x, shore.waterSurfaceHeight + 0.02, shore.groundPosition.z)
+                let viewDirection = (smoothedEye - surfaceCenter).normalizedSafe
+                let reflectedLight = immersiveApeReflect(environment.lightDirection, normal: shore.waterNormal).normalizedSafe
+                let alignment = immersiveApeSaturate(simd_dot(viewDirection, reflectedLight))
+                let fresnel = pow(1 - immersiveApeSaturate(simd_dot(viewDirection, shore.waterNormal)), 2.2)
+                let cloudDimming = 1 - max(shore.cloudDensity * 0.44, shore.cloudShadow * 1.18)
+                let shoreBoost = 0.72 + (shore.foam * 0.48) + (shore.wetness * 0.18)
+                let jitter = immersiveApeNoise(Int32(column), Int32(row), seed: seed ^ 0x51EA_F1EC)
+                let shimmerPhase = (timeValue * 0.031) + (Float(row + column) * 0.17) + (jitter * Float.pi * 2)
+                let shimmer = 0.74 + (0.26 * sin(shimmerPhase))
+                let highlight = pow(alignment, 10) * (0.2 + (fresnel * 0.8)) * cloudDimming * shoreBoost * shimmer
+
+                if highlight < 0.032 {
+                    continue
+                }
+
+                let streakDirection = immersiveApePlanarDirection(smoothedEye - surfaceCenter)
+                let travelDirection = simd_length_squared(streakDirection) > 0.0001
+                    ? streakDirection
+                    : immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
+                let halfLength = (grid.step * 0.24) + (fresnel * grid.step * 0.34) + (highlight * grid.step * 0.3)
+                let radius = 0.045 + (highlight * 0.16)
+                let streakAlpha = immersiveApeClamp(highlight * 0.24, min: 0, max: 0.2)
+                let hotspotAlpha = immersiveApeClamp(streakAlpha * 1.25, min: 0, max: 0.24)
+                let base = surfaceCenter - (travelDirection * halfLength)
+                let top = surfaceCenter + (travelDirection * halfLength)
+
+                transparent.addCylinder(
+                    base: base,
+                    top: top,
+                    radius: radius,
+                    segments: 7,
+                    color: SIMD4<Float>(reflectionTint.x, reflectionTint.y, reflectionTint.z, streakAlpha)
+                )
+
+                transparent.addSphere(
+                    center: surfaceCenter + SIMD3<Float>(0, 0.006 + (highlight * 0.02), 0),
+                    radii: SIMD3<Float>(radius * 2.4, radius * 0.65, radius * 2.4),
+                    segments: 7,
+                    rings: 5,
+                    color: SIMD4<Float>(reflectionTint.x, reflectionTint.y, reflectionTint.z, hotspotAlpha)
+                )
+            }
+        }
     }
 
     private func buildVegetation(
         using grid: ImmersiveApeTerrainGrid,
         environment: ImmersiveApeEnvironment,
+        timeValue: Float,
         opaque: inout ImmersiveApeMeshBuilder,
         seed: UInt32
     ) {
@@ -1194,26 +1492,183 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 var base = grid.position(row: row, column: column)
                 base.x += jitterX
                 base.z += jitterZ
+                let coordinates = grid.sampleCoordinates(for: base)
+                let shadow = cloudShadowFactor(grid: grid, row: coordinates.row, column: coordinates.column, environment: environment, timeValue: timeValue)
+                let moisture = immersiveApeSaturate((grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column) - base.y + 0.08) * 0.9)
+                let silhouette = immersiveApeBiomeSilhouette(material: material, moisture: moisture, variation: chance)
+                let habitat = immersiveApeBiomeHabitat(
+                    material: material,
+                    row: coordinates.row,
+                    column: coordinates.column,
+                    moisture: moisture,
+                    variation: chance,
+                    seed: seed
+                )
+                let transition = immersiveApeBiomeTransition(grid: grid, row: coordinates.row, column: coordinates.column, material: material)
+                let vegetationRoll = immersiveApeNoise(Int32(column), Int32(row), seed: seed ^ 0x5D11_BA1D)
+                let clutterRoll = immersiveApeNoise(Int32(column), Int32(row), seed: seed ^ 0x71C4_820F)
+                let accentRoll = immersiveApeNoise(Int32(column), Int32(row), seed: seed ^ 0x23FA_6C45)
 
                 if simd_length_squared(SIMD2<Float>(base.x, base.z)) < 16 {
                     continue
                 }
 
                 switch material {
-                case 4 where chance < 0.52:
-                    addTree(at: base, builder: &opaque, environment: environment, seed: seed, variant: chance)
-                case 3 where chance < 0.58:
-                    addBush(at: base, builder: &opaque, environment: environment, seed: seed, variant: chance)
-                case 2 where chance < 0.28:
-                    addGrass(at: base, builder: &opaque, seed: seed, variant: chance)
-                case 5 where chance < 0.16:
-                    addRock(at: base, builder: &opaque, variant: chance)
-                case 1 where chance < 0.12:
-                    addRock(at: base, builder: &opaque, variant: chance * 0.8)
+                case 4:
+                    if vegetationRoll < 0.12 + (habitat.coverDensity * 0.42) {
+                        addTree(at: base, builder: &opaque, environment: environment, seed: seed, variant: chance, shadow: shadow, silhouette: silhouette)
+                    }
+                    if clutterRoll < 0.06 + (habitat.clutterDensity * 0.16) {
+                        addLeafLitterPatch(at: base, builder: &opaque, environment: environment, tint: habitat.accentColor, shadow: shadow)
+                    }
+                case 3:
+                    if vegetationRoll < 0.14 + (habitat.coverDensity * 0.4) {
+                        addBush(at: base, builder: &opaque, environment: environment, seed: seed, variant: chance, shadow: shadow, silhouette: silhouette)
+                    }
+                    if clutterRoll < 0.08 + (habitat.clutterDensity * 0.22) {
+                        addDryTuft(at: base, builder: &opaque, environment: environment, tint: habitat.accentColor, shadow: shadow, scale: 0.8 + (habitat.coverDensity * 0.34))
+                    }
+                case 2:
+                    if vegetationRoll < 0.08 + (habitat.coverDensity * 0.24) {
+                        addGrass(at: base, builder: &opaque, environment: environment, seed: seed, variant: chance, shadow: shadow, silhouette: silhouette)
+                    }
+                    if clutterRoll < 0.05 + (habitat.clutterDensity * 0.24) {
+                        addFlowerPatch(at: base, builder: &opaque, environment: environment, tint: habitat.accentColor, shadow: shadow)
+                    }
+                case 1:
+                    if habitat.coverDensity > 0.14 && vegetationRoll < 0.02 + (habitat.coverDensity * 0.12) {
+                        addGrass(at: base, builder: &opaque, environment: environment, seed: seed, variant: chance, shadow: shadow, silhouette: silhouette)
+                    }
+                    if clutterRoll < 0.02 + (habitat.clutterDensity * 0.1) {
+                        addDriftwood(at: base, builder: &opaque, environment: environment, tint: habitat.accentColor, variant: chance, shadow: shadow)
+                    }
+                    if accentRoll < 0.03 + (habitat.clutterDensity * 0.08) {
+                        addRock(at: base, builder: &opaque, environment: environment, variant: chance * 0.72, shadow: shadow, silhouette: silhouette)
+                    }
+                case 5:
+                    if vegetationRoll < 0.04 + (habitat.coverDensity * 0.2) {
+                        addRock(at: base, builder: &opaque, environment: environment, variant: chance, shadow: shadow, silhouette: silhouette)
+                    }
+                    if clutterRoll < 0.04 + (habitat.clutterDensity * 0.18) {
+                        addDryTuft(at: base, builder: &opaque, environment: environment, tint: habitat.accentColor, shadow: shadow, scale: 0.56 + (habitat.clutterDensity * 0.2))
+                    }
                 default:
                     break
                 }
+
+                if transition.edgeStrength > 0.16 && accentRoll < 0.03 + (transition.edgeStrength * 0.14) {
+                    addBiomeTransitionAccent(
+                        at: base,
+                        builder: &opaque,
+                        environment: environment,
+                        material: material,
+                        transition: transition,
+                        moisture: moisture,
+                        variant: chance,
+                        seed: seed,
+                        shadow: shadow
+                    )
+                }
             }
+        }
+    }
+
+    private func addBiomeTransitionAccent(
+        at base: SIMD3<Float>,
+        builder: inout ImmersiveApeMeshBuilder,
+        environment: ImmersiveApeEnvironment,
+        material: UInt8,
+        transition: ImmersiveApeBiomeTransition,
+        moisture: Float,
+        variant: Float,
+        seed: UInt32,
+        shadow: Float
+    ) {
+        guard transition.neighborMaterial != material else {
+            return
+        }
+
+        let first = min(material, transition.neighborMaterial)
+        let second = max(material, transition.neighborMaterial)
+        let tint = immersiveApeMix(
+            immersiveApeTerrainMaterialColor(material),
+            immersiveApeTerrainMaterialColor(transition.neighborMaterial),
+            t: 0.5
+        )
+        let edgeBoost = 0.78 + (transition.edgeStrength * 0.44)
+
+        switch (first, second) {
+        case (1, 2):
+            let meadowSilhouette = immersiveApeBiomeSilhouette(material: 2, moisture: moisture, variation: variant)
+            addGrass(
+                at: base,
+                builder: &builder,
+                environment: environment,
+                seed: seed,
+                variant: min(1.0, variant * edgeBoost),
+                shadow: shadow,
+                silhouette: meadowSilhouette
+            )
+        case (1, 3):
+            addDryTuft(
+                at: base,
+                builder: &builder,
+                environment: environment,
+                tint: tint,
+                shadow: shadow,
+                scale: 0.72 + (transition.edgeStrength * 0.32)
+            )
+        case (2, 3):
+            if material == 2 {
+                addFlowerPatch(at: base, builder: &builder, environment: environment, tint: tint, shadow: shadow)
+            } else {
+                addDryTuft(
+                    at: base,
+                    builder: &builder,
+                    environment: environment,
+                    tint: tint,
+                    shadow: shadow,
+                    scale: 0.84 + (transition.edgeStrength * 0.26)
+                )
+            }
+        case (2, 4):
+            let edgeBushSilhouette = immersiveApeBiomeSilhouette(material: 3, moisture: moisture, variation: variant)
+            addBush(
+                at: base,
+                builder: &builder,
+                environment: environment,
+                seed: seed,
+                variant: min(1.0, variant * edgeBoost),
+                shadow: shadow,
+                silhouette: edgeBushSilhouette
+            )
+        case (3, 4):
+            if material == 4 {
+                addLeafLitterPatch(at: base, builder: &builder, environment: environment, tint: tint, shadow: shadow)
+            } else {
+                let edgeBushSilhouette = immersiveApeBiomeSilhouette(material: 3, moisture: moisture, variation: variant)
+                addBush(
+                    at: base,
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, variant * edgeBoost),
+                    shadow: shadow,
+                    silhouette: edgeBushSilhouette
+                )
+            }
+        case (2, 5), (3, 5), (4, 5):
+            let stoneSilhouette = immersiveApeBiomeSilhouette(material: 5, moisture: moisture, variation: variant)
+            addRock(
+                at: base,
+                builder: &builder,
+                environment: environment,
+                variant: min(1.0, variant * (0.82 + (transition.edgeStrength * 0.28))),
+                shadow: shadow,
+                silhouette: stoneSilhouette
+            )
+        default:
+            break
         }
     }
 
@@ -1483,11 +1938,13 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
     private func buildSky(
         from capture: ImmersiveApeSceneCapture,
+        grid: ImmersiveApeTerrainGrid,
         environment: ImmersiveApeEnvironment,
         opaque: inout ImmersiveApeMeshBuilder,
         transparent: inout ImmersiveApeMeshBuilder
     ) {
         let daylight = immersiveApeSaturate(capture.snapshot.daylight)
+        buildHorizonAtmosphere(environment: environment, transparent: &transparent)
         let celestialRadius: Float = daylight > 0.15 ? 2.4 : 1.4
         let celestialColor = daylight > 0.15
             ? SIMD4<Float>(environment.sunColor.x, environment.sunColor.y, environment.sunColor.z, 1)
@@ -1508,6 +1965,20 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             segments: 8,
             rings: 6,
             color: SIMD4<Float>(celestialColor.x, celestialColor.y, celestialColor.z, daylight > 0.15 ? 0.1 : 0.08)
+        )
+
+        let haloScale = daylight > 0.15
+            ? 5.2 + (environment.twilightStrength * 2.2)
+            : 6.4 + (environment.nightStrength * 2.8)
+        let haloAlpha = daylight > 0.15
+            ? 0.06 + (environment.twilightStrength * 0.08)
+            : 0.05 + (environment.nightStrength * 0.08)
+        transparent.addSphere(
+            center: celestialPosition,
+            radii: SIMD3<Float>(repeating: celestialRadius * haloScale),
+            segments: 10,
+            rings: 7,
+            color: SIMD4<Float>(environment.horizonGlowColor.x, environment.horizonGlowColor.y, environment.horizonGlowColor.z, haloAlpha)
         )
 
         if environment.starVisibility > 0.05 {
@@ -1543,29 +2014,147 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             }
         }
 
-        for cloudIndex in 0..<environment.cloudCount {
-            let cloudSeed = capture.snapshot.world_seed ^ UInt32(cloudIndex * 977)
-            let azimuth = (immersiveApeNoise(Int32(cloudIndex), 0, seed: cloudSeed) * Float.pi * 2) + (Float(capture.snapshot.time) * 0.0009)
-            let radius = 24 + (immersiveApeNoise(Int32(cloudIndex), 1, seed: cloudSeed) * 28)
-            let altitude = 16 + (immersiveApeNoise(Int32(cloudIndex), 2, seed: cloudSeed) * 10) + ((1 - daylight) * 4)
-            let center = smoothedEye + SIMD3<Float>(cos(azimuth) * radius, altitude, sin(azimuth) * radius)
-            let billowCount = 3 + Int(immersiveApeNoise(Int32(cloudIndex), 3, seed: cloudSeed) * 3)
+        buildInterpolatedCloudField(
+            using: grid,
+            from: capture,
+            environment: environment,
+            transparent: &transparent
+        )
+    }
+
+    private func buildHorizonAtmosphere(
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        let horizonAlpha = 0.03 + (environment.twilightStrength * 0.13) + (environment.nightStrength * 0.04)
+        let horizonHeight = 14 + (environment.twilightStrength * 8) + (environment.nightStrength * 4)
+        transparent.addSphere(
+            center: smoothedEye + SIMD3<Float>(0, -6 + (environment.twilightStrength * 1.6), 0),
+            radii: SIMD3<Float>(118, horizonHeight, 118),
+            segments: 14,
+            rings: 7,
+            color: SIMD4<Float>(environment.horizonColor.x, environment.horizonColor.y, environment.horizonColor.z, horizonAlpha)
+        )
+
+        let upperAlpha = 0.025 + (environment.twilightStrength * 0.08) + (environment.nightStrength * 0.02)
+        transparent.addSphere(
+            center: smoothedEye + SIMD3<Float>(0, 12 + (environment.twilightStrength * 2.4), 0),
+            radii: SIMD3<Float>(136, 40 + (environment.twilightStrength * 8), 136),
+            segments: 12,
+            rings: 6,
+            color: SIMD4<Float>(environment.horizonGlowColor.x, environment.horizonGlowColor.y, environment.horizonGlowColor.z, upperAlpha)
+        )
+
+        if environment.nightStrength > 0.12 {
+            transparent.addSphere(
+                center: smoothedEye + SIMD3<Float>(0, 4, 0),
+                radii: SIMD3<Float>(144, 26, 144),
+                segments: 12,
+                rings: 6,
+                color: SIMD4<Float>(environment.fogColor.x, environment.fogColor.y, environment.fogColor.z, 0.018 + (environment.nightStrength * 0.04))
+            )
+        }
+    }
+
+    private func buildInterpolatedCloudField(
+        using grid: ImmersiveApeTerrainGrid,
+        from capture: ImmersiveApeSceneCapture,
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        let daylight = immersiveApeSaturate(capture.snapshot.daylight)
+        let sampleStride = 4
+        let threshold: Float = environment.rainAmount > 0.4 ? 0.16 : 0.22
+        let windPlanar = immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
+        let windDirection = simd_length_squared(windPlanar) > 0.0001
+            ? windPlanar
+            : SIMD3<Float>(0.94, 0, 0.34)
+        let driftDistance = Float(capture.snapshot.time) * 0.00085
+        var candidates: [(density: Float, row: Int, column: Int, noise: Float)] = []
+
+        for row in stride(from: 2, to: grid.resolution - 2, by: sampleStride) {
+            for column in stride(from: 2, to: grid.resolution - 2, by: sampleStride) {
+                let sampleRow = Float(row) + 0.5
+                let sampleColumn = Float(column) + 0.5
+                let density = grid.interpolatedCloud(row: sampleRow, column: sampleColumn)
+
+                if density < threshold {
+                    continue
+                }
+
+                let localNoise = immersiveApeNoise(Int32(column), Int32(row), seed: capture.snapshot.world_seed ^ 0xC10D_A17)
+                candidates.append((density: density, row: row, column: column, noise: localNoise))
+            }
+        }
+
+        candidates.sort { lhs, rhs in
+            if abs(lhs.density - rhs.density) > 0.001 {
+                return lhs.density > rhs.density
+            }
+            return lhs.noise > rhs.noise
+        }
+
+        let cloudBudget = min(candidates.count, max(8, environment.cloudCount * 5))
+
+        for candidate in candidates.prefix(cloudBudget) {
+            let sampleRow = Float(candidate.row) + 0.5
+            let sampleColumn = Float(candidate.column) + 0.5
+            let density = candidate.density
+            let basePosition = grid.interpolatedPosition(row: sampleRow, column: sampleColumn)
+            let sampledWaterHeight = grid.interpolatedWaterHeight(row: sampleRow, column: sampleColumn)
+            let moistureLift = max(0, sampledWaterHeight - basePosition.y)
+            let gradient = SIMD3<Float>(
+                grid.interpolatedCloud(row: sampleRow, column: sampleColumn + 1.2) - grid.interpolatedCloud(row: sampleRow, column: sampleColumn - 1.2),
+                0,
+                grid.interpolatedCloud(row: sampleRow + 1.2, column: sampleColumn) - grid.interpolatedCloud(row: sampleRow - 1.2, column: sampleColumn)
+            )
+            let spreadPlanar = immersiveApePlanarDirection(gradient)
+            let spreadDirection = simd_length_squared(spreadPlanar) > 0.0001
+                ? spreadPlanar
+                : SIMD3<Float>(cos(candidate.noise * Float.pi * 2), 0, sin(candidate.noise * Float.pi * 2))
+            let crossDirection = SIMD3<Float>(-spreadDirection.z, 0, spreadDirection.x)
+            let drift = windDirection * (driftDistance * (0.7 + density))
+            let baseCenter = SIMD3<Float>(
+                basePosition.x + drift.x,
+                15.2 + (density * 10.5) + ((1 - daylight) * 3.5) + (moistureLift * 0.18),
+                basePosition.z + drift.z
+            )
+            let baseAlpha = environment.cloudColor.w * immersiveApeClamp((density - threshold) * 2.2 + 0.18, min: 0.16, max: 0.92)
+            let billowCount = 2 + Int(round(density * 3.5))
+
+            transparent.addSphere(
+                center: baseCenter + SIMD3<Float>(0, -0.32, 0),
+                radii: SIMD3<Float>(2.8 + (density * 4.6), 0.72 + (density * 0.42), 2.3 + (density * 4.1)),
+                segments: 7,
+                rings: 5,
+                color: SIMD4<Float>(environment.cloudColor.x, environment.cloudColor.y, environment.cloudColor.z, baseAlpha * 0.42)
+            )
 
             for billow in 0..<billowCount {
-                let offsetNoise = immersiveApeNoise(Int32(cloudIndex), Int32(10 + billow), seed: cloudSeed)
-                let offsetAngle = offsetNoise * Float.pi * 2
-                let offsetRadius = 1.5 + (offsetNoise * 3.5)
-                let billowCenter = center + SIMD3<Float>(cos(offsetAngle) * offsetRadius, Float(billow) * 0.35, sin(offsetAngle) * offsetRadius)
-                let xRadius = 2.8 + (offsetNoise * 2.8)
-                let yRadius = 0.9 + (offsetNoise * 0.6)
-                let zRadius = 2.2 + (offsetNoise * 2.4)
+                let billowNoise = immersiveApeNoise(
+                    Int32(candidate.column + (billow * 7)),
+                    Int32(candidate.row + (billow * 11)),
+                    seed: capture.snapshot.world_seed ^ UInt32((billow + 1) * 1597)
+                )
+                let alignment = Float(billow) - (Float(billowCount - 1) * 0.5)
+                let offsetPrimary = alignment * (1.4 + (density * 2.8))
+                let offsetSecondary = (billowNoise - 0.5) * (1.4 + (density * 2.1))
+                let billowCenter =
+                    baseCenter
+                    + (spreadDirection * offsetPrimary)
+                    + (crossDirection * offsetSecondary)
+                    + SIMD3<Float>(0, abs(alignment) * 0.14 + (billowNoise * 0.48), 0)
+                let xRadius = 2.0 + (density * 4.0) + (billowNoise * 1.4)
+                let yRadius = 0.72 + (density * 1.05) + (billowNoise * 0.34)
+                let zRadius = 1.7 + (density * 3.3) + ((1 - billowNoise) * 1.3)
+                let localAlpha = baseAlpha * (0.88 - min(0.16, abs(alignment) * 0.08))
 
                 transparent.addSphere(
                     center: billowCenter,
                     radii: SIMD3<Float>(xRadius, yRadius, zRadius),
                     segments: 8,
                     rings: 6,
-                    color: environment.cloudColor
+                    color: SIMD4<Float>(environment.cloudColor.x, environment.cloudColor.y, environment.cloudColor.z, localAlpha)
                 )
             }
         }
@@ -1608,41 +2197,50 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         builder: inout ImmersiveApeMeshBuilder,
         environment: ImmersiveApeEnvironment,
         seed: UInt32,
-        variant: Float
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette
     ) {
-        let trunkHeight: Float = 2.2 + (variant * 1.6)
-        let canopyRadius: Float = 1.1 + (variant * 0.9)
-        let trunkColor = SIMD4<Float>(0.28, 0.19, 0.12, 1)
-        let foliageBase = immersiveApeMix(SIMD3<Float>(0.16, 0.34, 0.13), SIMD3<Float>(0.46, 0.58, 0.19), t: variant)
-        let foliageColor = immersiveApeMix(foliageBase, environment.fogColor, t: 0.12)
+        let trunkHeight: Float = (2.2 + (variant * 1.6)) * silhouette.treeHeightScale
+        let canopyRadius: Float = (1.1 + (variant * 0.9)) * silhouette.treeCanopyWidthScale
+        let lean = SIMD3<Float>(
+            (variant - 0.5) * silhouette.treeLean,
+            0,
+            ((1 - variant) - 0.5) * silhouette.treeLean
+        )
+        let trunkTop = base + lean + SIMD3<Float>(0, trunkHeight, 0)
+        let trunkBase = immersiveApeMix(SIMD3<Float>(0.24, 0.16, 0.11), SIMD3<Float>(0.41, 0.28, 0.18), t: variant * 0.7)
+        let trunkColor = immersiveApeSunlitShadowedColor(trunkBase, environment: environment, shadow: shadow * 0.82)
+        let foliageBase = immersiveApeMix(SIMD3<Float>(0.11, 0.27, 0.13), SIMD3<Float>(0.28, 0.45, 0.18), t: variant)
+        let foliageColor = immersiveApeSunlitShadowedColor(foliageBase, environment: environment, shadow: shadow * 1.08)
 
         builder.addCylinder(
             base: base,
-            top: base + SIMD3<Float>(0, trunkHeight, 0),
+            top: trunkTop,
             radius: 0.12 + (variant * 0.05),
             segments: 10,
-            color: trunkColor
+            color: SIMD4<Float>(trunkColor.x, trunkColor.y, trunkColor.z, 1)
         )
 
         builder.addSphere(
-            center: base + SIMD3<Float>(0, trunkHeight + 0.45, 0),
-            radii: SIMD3<Float>(canopyRadius, canopyRadius * 0.85, canopyRadius),
+            center: trunkTop + SIMD3<Float>(0, 0.45 * silhouette.treeCanopyHeightScale, 0),
+            radii: SIMD3<Float>(canopyRadius, canopyRadius * 0.85 * silhouette.treeCanopyHeightScale, canopyRadius),
             segments: 10,
             rings: 8,
             color: SIMD4<Float>(foliageColor.x, foliageColor.y, foliageColor.z, 1)
         )
 
         builder.addSphere(
-            center: base + SIMD3<Float>(0.36, trunkHeight + 0.8, 0.28),
-            radii: SIMD3<Float>(canopyRadius * 0.65, canopyRadius * 0.5, canopyRadius * 0.65),
+            center: trunkTop + SIMD3<Float>(0.36 * silhouette.treeCanopyWidthScale, 0.8 * silhouette.treeCanopyHeightScale, 0.28 * silhouette.treeCanopyWidthScale),
+            radii: SIMD3<Float>(canopyRadius * 0.65, canopyRadius * 0.5 * silhouette.treeCanopyHeightScale, canopyRadius * 0.65),
             segments: 8,
             rings: 6,
             color: SIMD4<Float>(foliageColor.x * 0.95, foliageColor.y * 1.02, foliageColor.z * 0.92, 1)
         )
 
         builder.addSphere(
-            center: base + SIMD3<Float>(-0.42, trunkHeight + 0.65, -0.3),
-            radii: SIMD3<Float>(canopyRadius * 0.6, canopyRadius * 0.48, canopyRadius * 0.6),
+            center: trunkTop + SIMD3<Float>(-0.42 * silhouette.treeCanopyWidthScale, 0.65 * silhouette.treeCanopyHeightScale, -0.3 * silhouette.treeCanopyWidthScale),
+            radii: SIMD3<Float>(canopyRadius * 0.6, canopyRadius * 0.48 * silhouette.treeCanopyHeightScale, canopyRadius * 0.6),
             segments: 8,
             rings: 6,
             color: SIMD4<Float>(foliageColor.x * 0.9, foliageColor.y * 0.98, foliageColor.z * 0.9, 1)
@@ -1654,43 +2252,52 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         builder: inout ImmersiveApeMeshBuilder,
         environment: ImmersiveApeEnvironment,
         seed: UInt32,
-        variant: Float
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette
     ) {
-        let coreColor = immersiveApeMix(SIMD3<Float>(0.18, 0.3, 0.12), SIMD3<Float>(0.38, 0.46, 0.19), t: variant)
-        let color = SIMD4<Float>(coreColor.x, coreColor.y, coreColor.z, 1)
+        let coreColor = immersiveApeMix(SIMD3<Float>(0.28, 0.34, 0.15), SIMD3<Float>(0.56, 0.5, 0.21), t: variant)
+        let litColor = immersiveApeSunlitShadowedColor(coreColor, environment: environment, shadow: shadow)
+        let color = SIMD4<Float>(litColor.x, litColor.y, litColor.z, 1)
 
-        builder.addSphere(center: base + SIMD3<Float>(0, 0.42, 0), radii: SIMD3<Float>(0.7, 0.46, 0.62), segments: 8, rings: 6, color: color)
-        builder.addSphere(center: base + SIMD3<Float>(0.28, 0.36, 0.18), radii: SIMD3<Float>(0.46, 0.34, 0.4), segments: 7, rings: 5, color: color)
-        builder.addSphere(center: base + SIMD3<Float>(-0.26, 0.34, -0.18), radii: SIMD3<Float>(0.44, 0.32, 0.38), segments: 7, rings: 5, color: color)
+        builder.addSphere(center: base + SIMD3<Float>(0, 0.42 * silhouette.bushHeightScale, 0), radii: SIMD3<Float>(0.7 * silhouette.bushWidthScale, 0.46 * silhouette.bushHeightScale, 0.62 * silhouette.bushWidthScale), segments: 8, rings: 6, color: color)
+        builder.addSphere(center: base + SIMD3<Float>(0.28 * silhouette.bushWidthScale, 0.36 * silhouette.bushHeightScale, 0.18 * silhouette.bushWidthScale), radii: SIMD3<Float>(0.46 * silhouette.bushWidthScale, 0.34 * silhouette.bushHeightScale, 0.4 * silhouette.bushWidthScale), segments: 7, rings: 5, color: color)
+        builder.addSphere(center: base + SIMD3<Float>(-0.26 * silhouette.bushWidthScale, 0.34 * silhouette.bushHeightScale, -0.18 * silhouette.bushWidthScale), radii: SIMD3<Float>(0.44 * silhouette.bushWidthScale, 0.32 * silhouette.bushHeightScale, 0.38 * silhouette.bushWidthScale), segments: 7, rings: 5, color: color)
     }
 
     private func addGrass(
         at base: SIMD3<Float>,
         builder: inout ImmersiveApeMeshBuilder,
+        environment: ImmersiveApeEnvironment,
         seed: UInt32,
-        variant: Float
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette
     ) {
-        let grassColor = SIMD4<Float>(0.3, 0.52, 0.18, 1)
-        let height: Float = 0.55 + (variant * 0.4)
+        let litGrass = immersiveApeSunlitShadowedColor(silhouette.grassColor, environment: environment, shadow: shadow * 0.94)
+        let grassColor = SIMD4<Float>(litGrass.x, litGrass.y, litGrass.z, 1)
+        let height: Float = (0.55 + (variant * 0.4)) * silhouette.grassHeightScale
         let radius: Float = 0.04
+        let spread = silhouette.grassSpread
+        let lean = silhouette.grassLean
 
         builder.addCone(
             base: base,
-            tip: base + SIMD3<Float>(0, height, 0.06),
+            tip: base + SIMD3<Float>(lean, height, spread),
             radius: radius,
             segments: 5,
             color: grassColor
         )
         builder.addCone(
-            base: base + SIMD3<Float>(0.06, 0, -0.02),
-            tip: base + SIMD3<Float>(0.02, height * 0.92, -0.08),
+            base: base + SIMD3<Float>(spread, 0, -0.02),
+            tip: base + SIMD3<Float>(lean * 0.45, height * 0.92, -(spread + 0.02)),
             radius: radius,
             segments: 5,
             color: grassColor
         )
         builder.addCone(
-            base: base + SIMD3<Float>(-0.05, 0, 0.02),
-            tip: base + SIMD3<Float>(-0.04, height * 0.84, 0.08),
+            base: base + SIMD3<Float>(-spread * 0.82, 0, 0.02),
+            tip: base + SIMD3<Float>(-lean * 0.56, height * 0.84, spread + 0.02),
             radius: radius,
             segments: 5,
             color: grassColor
@@ -1700,15 +2307,130 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
     private func addRock(
         at base: SIMD3<Float>,
         builder: inout ImmersiveApeMeshBuilder,
-        variant: Float
+        environment: ImmersiveApeEnvironment,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette
     ) {
-        let color = SIMD4<Float>(0.44, 0.43, 0.42, 1)
+        let rockBase = immersiveApeMix(SIMD3<Float>(0.38, 0.37, 0.35), SIMD3<Float>(0.5, 0.46, 0.41), t: variant)
+        let litRock = immersiveApeSunlitShadowedColor(rockBase, environment: environment, shadow: shadow * 0.72)
+        let color = SIMD4<Float>(litRock.x, litRock.y, litRock.z, 1)
         builder.addSphere(
             center: base + SIMD3<Float>(0, 0.18, 0),
-            radii: SIMD3<Float>(0.42 + (variant * 0.2), 0.22 + (variant * 0.1), 0.34 + (variant * 0.14)),
+            radii: SIMD3<Float>(
+                (0.42 + (variant * 0.2)) * silhouette.rockWidthScale,
+                (0.22 + (variant * 0.1)) * silhouette.rockHeightScale,
+                (0.34 + (variant * 0.14)) * silhouette.rockWidthScale
+            ),
             segments: 8,
             rings: 6,
             color: color
+        )
+
+        if silhouette.rockCluster > 1 {
+            builder.addSphere(
+                center: base + SIMD3<Float>(0.18 * silhouette.rockWidthScale, 0.14 * silhouette.rockHeightScale, -0.12 * silhouette.rockWidthScale),
+                radii: SIMD3<Float>(0.2 * silhouette.rockWidthScale, 0.12 * silhouette.rockHeightScale, 0.18 * silhouette.rockWidthScale),
+                segments: 7,
+                rings: 5,
+                color: color
+            )
+        }
+
+        if silhouette.rockCluster > 2 {
+            builder.addSphere(
+                center: base + SIMD3<Float>(-0.16 * silhouette.rockWidthScale, 0.11 * silhouette.rockHeightScale, 0.16 * silhouette.rockWidthScale),
+                radii: SIMD3<Float>(0.17 * silhouette.rockWidthScale, 0.1 * silhouette.rockHeightScale, 0.15 * silhouette.rockWidthScale),
+                segments: 7,
+                rings: 5,
+                color: color
+            )
+        }
+    }
+
+    private func addFlowerPatch(
+        at base: SIMD3<Float>,
+        builder: inout ImmersiveApeMeshBuilder,
+        environment: ImmersiveApeEnvironment,
+        tint: SIMD3<Float>,
+        shadow: Float
+    ) {
+        let stemBase = immersiveApeSunlitShadowedColor(SIMD3<Float>(0.22, 0.42, 0.12), environment: environment, shadow: shadow * 0.86)
+        let stemColor = SIMD4<Float>(stemBase.x, stemBase.y, stemBase.z, 1)
+        let blossomBase = immersiveApeSunlitShadowedColor(tint, environment: environment, shadow: shadow * 0.72)
+        let blossomColor = SIMD4<Float>(blossomBase.x, blossomBase.y, blossomBase.z, 1)
+        let bloomHighlight = SIMD4<Float>(min(1, blossomBase.x * 1.08), min(1, blossomBase.y * 1.08), min(1, blossomBase.z * 1.08), 1)
+
+        for (offset, height) in [
+            (SIMD3<Float>(0, 0, 0), Float(0.26)),
+            (SIMD3<Float>(0.08, 0, -0.04), Float(0.22)),
+            (SIMD3<Float>(-0.07, 0, 0.05), Float(0.24))
+        ] {
+            let root = base + offset
+            let bloomCenter = root + SIMD3<Float>(0, height, 0)
+            builder.addCylinder(base: root, top: bloomCenter, radius: 0.012, segments: 5, color: stemColor)
+            builder.addSphere(center: bloomCenter, radii: SIMD3<Float>(0.045, 0.032, 0.045), segments: 6, rings: 5, color: blossomColor)
+            builder.addSphere(center: bloomCenter + SIMD3<Float>(0.018, 0.01, -0.016), radii: SIMD3<Float>(0.018, 0.014, 0.018), segments: 5, rings: 4, color: bloomHighlight)
+        }
+    }
+
+    private func addLeafLitterPatch(
+        at base: SIMD3<Float>,
+        builder: inout ImmersiveApeMeshBuilder,
+        environment: ImmersiveApeEnvironment,
+        tint: SIMD3<Float>,
+        shadow: Float
+    ) {
+        let litterBase = immersiveApeMix(SIMD3<Float>(0.33, 0.22, 0.11), tint, t: 0.24)
+        let litterColor = immersiveApeSunlitShadowedColor(litterBase, environment: environment, shadow: shadow * 0.94)
+        let color = SIMD4<Float>(litterColor.x, litterColor.y, litterColor.z, 1)
+
+        builder.addSphere(center: base + SIMD3<Float>(0.06, 0.018, 0), radii: SIMD3<Float>(0.14, 0.018, 0.1), segments: 6, rings: 4, color: color)
+        builder.addSphere(center: base + SIMD3<Float>(-0.08, 0.014, 0.05), radii: SIMD3<Float>(0.11, 0.015, 0.09), segments: 6, rings: 4, color: color)
+        builder.addSphere(center: base + SIMD3<Float>(0.01, 0.012, -0.08), radii: SIMD3<Float>(0.1, 0.014, 0.08), segments: 6, rings: 4, color: SIMD4<Float>(color.x * 0.94, color.y * 0.92, color.z * 0.9, 1))
+    }
+
+    private func addDryTuft(
+        at base: SIMD3<Float>,
+        builder: inout ImmersiveApeMeshBuilder,
+        environment: ImmersiveApeEnvironment,
+        tint: SIMD3<Float>,
+        shadow: Float,
+        scale: Float
+    ) {
+        let tuftBase = immersiveApeMix(SIMD3<Float>(0.46, 0.4, 0.16), tint, t: 0.36)
+        let litTuft = immersiveApeSunlitShadowedColor(tuftBase, environment: environment, shadow: shadow * 0.9)
+        let tuftColor = SIMD4<Float>(litTuft.x, litTuft.y, litTuft.z, 1)
+        let height = 0.24 * scale
+        let spread = 0.06 * scale
+
+        builder.addCone(base: base, tip: base + SIMD3<Float>(0.04 * scale, height, spread), radius: 0.028 * scale, segments: 5, color: tuftColor)
+        builder.addCone(base: base + SIMD3<Float>(spread, 0, -0.01), tip: base + SIMD3<Float>(0.01, height * 0.86, -(spread + 0.015)), radius: 0.024 * scale, segments: 5, color: tuftColor)
+        builder.addCone(base: base + SIMD3<Float>(-spread, 0, 0.01), tip: base + SIMD3<Float>(-0.03 * scale, height * 0.8, spread + 0.02), radius: 0.022 * scale, segments: 5, color: tuftColor)
+    }
+
+    private func addDriftwood(
+        at base: SIMD3<Float>,
+        builder: inout ImmersiveApeMeshBuilder,
+        environment: ImmersiveApeEnvironment,
+        tint: SIMD3<Float>,
+        variant: Float,
+        shadow: Float
+    ) {
+        let driftBase = immersiveApeMix(SIMD3<Float>(0.58, 0.5, 0.38), tint, t: 0.12 + (variant * 0.08))
+        let litWood = immersiveApeSunlitShadowedColor(driftBase, environment: environment, shadow: shadow * 0.82)
+        let woodColor = SIMD4<Float>(litWood.x, litWood.y, litWood.z, 1)
+        let length = 0.42 + (variant * 0.24)
+        let basePoint = base + SIMD3<Float>(-length * 0.45, 0.05, -0.05)
+        let topPoint = base + SIMD3<Float>(length * 0.45, 0.11, 0.07)
+
+        builder.addCylinder(base: basePoint, top: topPoint, radius: 0.045, segments: 7, color: woodColor)
+        builder.addCylinder(
+            base: base + SIMD3<Float>(-0.06, 0.07, 0.02),
+            top: base + SIMD3<Float>(0.1, 0.16, -0.11),
+            radius: 0.024,
+            segments: 6,
+            color: SIMD4<Float>(woodColor.x * 0.94, woodColor.y * 0.92, woodColor.z * 0.9, 1)
         )
     }
 
@@ -2713,7 +3435,7 @@ private func immersiveApeHUDState(for capture: ImmersiveApeSceneCapture, paused:
     let encounterPanel = immersiveApeEncounterPanel(capture: capture)
 
     return ImmersiveApeHUDState(
-        headline: "\(capture.selectedName)  •  \(sexLabel)  •  \(ageDays)d  •  Cycle 6 / 100",
+        headline: "\(capture.selectedName)  •  \(sexLabel)  •  \(ageDays)d  •  Cycle 15 / 100",
         status: "\(immersiveApeTimeString(capture.snapshot.time))  •  \(immersiveApeWeatherDescription(capture.snapshot.weather))  •  \(immersiveApeTideDescription(capture.snapshot.tide))  •  \(capture.apeCount) apes live  •  \(paused ? "Paused" : "Following selected ape")",
         detail: "\(immersiveApeFocusDescription(capture: capture))  •  \(immersiveApeStateDescription(selected.state))  •  \(immersiveApeGoalDescription(selected.goal_type))",
         story: encounterStory,
@@ -2737,6 +3459,22 @@ private func immersiveApePlanarDirection(_ position: SIMD3<Float>) -> SIMD3<Floa
     }
 
     return simd_normalize(planar)
+}
+
+private func immersiveApeReflect(_ incident: SIMD3<Float>, normal: SIMD3<Float>) -> SIMD3<Float> {
+    let unitNormal = normal.normalizedSafe
+    return incident - (2 * simd_dot(incident, unitNormal) * unitNormal)
+}
+
+private func immersiveApeSunlitShadowedColor(
+    _ baseColor: SIMD3<Float>,
+    environment: ImmersiveApeEnvironment,
+    shadow: Float
+) -> SIMD3<Float> {
+    let sunHeight = immersiveApeSaturate((-environment.lightDirection.y - 0.18) / 0.82)
+    let lowSunWarmth = environment.daylight * (1 - sunHeight) * 0.18
+    let litColor = immersiveApeMix(baseColor, environment.sunColor, t: lowSunWarmth * (1 - shadow) * 0.24)
+    return immersiveApeMix(litColor, environment.fogColor * 0.84, t: shadow * (0.44 - (lowSunWarmth * 0.1)))
 }
 
 private func immersiveApeBilinearBlend(
@@ -2780,6 +3518,234 @@ private func immersiveApeTerrainMaterialColor(_ material: UInt8) -> SIMD3<Float>
     default:
         return SIMD3<Float>(0.42, 0.4, 0.39)
     }
+}
+
+private func immersiveApeBiomeTerrainColor(
+    material: UInt8,
+    environment: ImmersiveApeEnvironment,
+    moisture: Float,
+    shadow: Float,
+    variation: Float
+) -> SIMD3<Float> {
+    let clampedVariation = immersiveApeSaturate(variation)
+    let dampness = immersiveApeSaturate(moisture)
+    let base: SIMD3<Float>
+
+    switch material {
+    case 0:
+        base = immersiveApeMix(SIMD3<Float>(0.06, 0.12, 0.16), SIMD3<Float>(0.1, 0.18, 0.2), t: clampedVariation)
+    case 1:
+        let dune = immersiveApeMix(SIMD3<Float>(0.69, 0.63, 0.49), SIMD3<Float>(0.83, 0.76, 0.58), t: clampedVariation)
+        let damp = immersiveApeMix(SIMD3<Float>(0.42, 0.38, 0.29), environment.waterColor, t: 0.16)
+        base = immersiveApeMix(dune, damp, t: dampness * 0.72)
+    case 2:
+        let meadow = immersiveApeMix(SIMD3<Float>(0.35, 0.56, 0.2), SIMD3<Float>(0.63, 0.68, 0.22), t: clampedVariation)
+        let lush = immersiveApeMix(meadow, SIMD3<Float>(0.24, 0.49, 0.2), t: dampness * 0.28)
+        base = lush
+    case 3:
+        let scrub = immersiveApeMix(SIMD3<Float>(0.36, 0.43, 0.16), SIMD3<Float>(0.56, 0.51, 0.21), t: clampedVariation)
+        base = immersiveApeMix(scrub, SIMD3<Float>(0.3, 0.38, 0.16), t: dampness * 0.18)
+    case 4:
+        let forest = immersiveApeMix(SIMD3<Float>(0.13, 0.27, 0.12), SIMD3<Float>(0.24, 0.41, 0.17), t: clampedVariation)
+        base = immersiveApeMix(forest, SIMD3<Float>(0.1, 0.22, 0.12), t: dampness * 0.22)
+    default:
+        let stone = immersiveApeMix(SIMD3<Float>(0.38, 0.36, 0.34), SIMD3<Float>(0.49, 0.44, 0.39), t: clampedVariation)
+        base = immersiveApeMix(stone, SIMD3<Float>(0.3, 0.32, 0.31), t: dampness * 0.12)
+    }
+
+    return immersiveApeSunlitShadowedColor(base, environment: environment, shadow: shadow * 0.52)
+}
+
+private func immersiveApeBiomeSilhouette(
+    material: UInt8,
+    moisture: Float,
+    variation: Float
+) -> ImmersiveApeBiomeSilhouette {
+    let dampness = immersiveApeSaturate(moisture)
+    let t = immersiveApeSaturate(variation)
+
+    switch material {
+    case 1:
+        return ImmersiveApeBiomeSilhouette(
+            treeHeightScale: 0.92,
+            treeCanopyWidthScale: 1.05,
+            treeCanopyHeightScale: 0.78,
+            treeLean: 0.18,
+            bushWidthScale: 1.08,
+            bushHeightScale: 0.76,
+            grassHeightScale: 0.9 + (t * 0.18),
+            grassSpread: 0.09 + (t * 0.03),
+            grassLean: 0.05 + (dampness * 0.04),
+            grassColor: immersiveApeMix(SIMD3<Float>(0.46, 0.52, 0.22), SIMD3<Float>(0.62, 0.63, 0.28), t: t * 0.6),
+            rockWidthScale: 0.78,
+            rockHeightScale: 0.72,
+            rockCluster: 1
+        )
+    case 2:
+        return ImmersiveApeBiomeSilhouette(
+            treeHeightScale: 1.0,
+            treeCanopyWidthScale: 1.0,
+            treeCanopyHeightScale: 1.0,
+            treeLean: 0.08,
+            bushWidthScale: 0.92,
+            bushHeightScale: 0.82,
+            grassHeightScale: 1.15 + (t * 0.28),
+            grassSpread: 0.07 + (t * 0.02),
+            grassLean: 0.03 + (t * 0.03),
+            grassColor: immersiveApeMix(SIMD3<Float>(0.44, 0.61, 0.22), SIMD3<Float>(0.69, 0.72, 0.26), t: t * 0.7),
+            rockWidthScale: 0.9,
+            rockHeightScale: 0.8,
+            rockCluster: 1
+        )
+    case 3:
+        return ImmersiveApeBiomeSilhouette(
+            treeHeightScale: 0.94,
+            treeCanopyWidthScale: 1.02,
+            treeCanopyHeightScale: 0.82,
+            treeLean: 0.14,
+            bushWidthScale: 1.18 + (t * 0.16),
+            bushHeightScale: 0.72 + (dampness * 0.08),
+            grassHeightScale: 0.82,
+            grassSpread: 0.07,
+            grassLean: 0.04,
+            grassColor: immersiveApeMix(SIMD3<Float>(0.39, 0.49, 0.2), SIMD3<Float>(0.55, 0.56, 0.23), t: t * 0.6),
+            rockWidthScale: 1.0,
+            rockHeightScale: 0.82,
+            rockCluster: 2
+        )
+    case 4:
+        return ImmersiveApeBiomeSilhouette(
+            treeHeightScale: 1.16 + (dampness * 0.08),
+            treeCanopyWidthScale: 0.94,
+            treeCanopyHeightScale: 1.12,
+            treeLean: 0.07,
+            bushWidthScale: 0.94,
+            bushHeightScale: 0.88,
+            grassHeightScale: 0.78,
+            grassSpread: 0.05,
+            grassLean: 0.02,
+            grassColor: immersiveApeMix(SIMD3<Float>(0.28, 0.43, 0.19), SIMD3<Float>(0.38, 0.5, 0.21), t: t * 0.5),
+            rockWidthScale: 1.08,
+            rockHeightScale: 0.9,
+            rockCluster: 2
+        )
+    default:
+        return ImmersiveApeBiomeSilhouette(
+            treeHeightScale: 1.0,
+            treeCanopyWidthScale: 1.0,
+            treeCanopyHeightScale: 1.0,
+            treeLean: 0.06,
+            bushWidthScale: 0.96,
+            bushHeightScale: 0.82,
+            grassHeightScale: 0.74,
+            grassSpread: 0.05,
+            grassLean: 0.02,
+            grassColor: immersiveApeMix(SIMD3<Float>(0.35, 0.46, 0.2), SIMD3<Float>(0.48, 0.54, 0.22), t: t * 0.5),
+            rockWidthScale: 1.18 + (t * 0.14),
+            rockHeightScale: 0.92 + (dampness * 0.06),
+            rockCluster: 3
+        )
+    }
+}
+
+private func immersiveApeBiomeHabitat(
+    material: UInt8,
+    row: Float,
+    column: Float,
+    moisture: Float,
+    variation: Float,
+    seed: UInt32
+) -> ImmersiveApeBiomeHabitat {
+    let macro = immersiveApeNoise(Int32(floor(row * 0.18)), Int32(floor(column * 0.18)), seed: seed ^ 0x13C7_A511)
+    let micro = immersiveApeNoise(Int32(floor(row * 0.42)), Int32(floor(column * 0.42)), seed: seed ^ 0x77E1_2D3B)
+    let ridge = immersiveApeNoise(Int32(floor((row + column) * 0.2)), Int32(floor(abs(row - column) * 0.2)), seed: seed ^ 0x35D4_91AF)
+    let patch = immersiveApeSaturate((macro * 0.55) + (micro * 0.3) + (ridge * 0.15))
+    let dampness = immersiveApeSaturate(moisture)
+    let t = immersiveApeSaturate(variation)
+
+    switch material {
+    case 1:
+        return ImmersiveApeBiomeHabitat(
+            coverDensity: immersiveApeSaturate((patch * 0.68) - (dampness * 0.42) + 0.08),
+            clutterDensity: immersiveApeSaturate(((1 - dampness) * 0.26) + (micro * 0.3) + 0.04),
+            accentColor: immersiveApeMix(SIMD3<Float>(0.61, 0.58, 0.27), SIMD3<Float>(0.73, 0.69, 0.34), t: t * 0.5)
+        )
+    case 2:
+        return ImmersiveApeBiomeHabitat(
+            coverDensity: immersiveApeSaturate(0.24 + (patch * 0.52) + (dampness * 0.08)),
+            clutterDensity: immersiveApeSaturate(0.18 + (micro * 0.46) + (t * 0.12)),
+            accentColor: immersiveApeMix(SIMD3<Float>(0.92, 0.78, 0.3), SIMD3<Float>(0.94, 0.9, 0.7), t: micro)
+        )
+    case 3:
+        return ImmersiveApeBiomeHabitat(
+            coverDensity: immersiveApeSaturate(0.18 + (patch * 0.48) - (dampness * 0.08)),
+            clutterDensity: immersiveApeSaturate(0.16 + (ridge * 0.38) + (t * 0.08)),
+            accentColor: immersiveApeMix(SIMD3<Float>(0.52, 0.47, 0.22), SIMD3<Float>(0.62, 0.56, 0.25), t: t)
+        )
+    case 4:
+        return ImmersiveApeBiomeHabitat(
+            coverDensity: immersiveApeSaturate(0.28 + (patch * 0.58) + (dampness * 0.06)),
+            clutterDensity: immersiveApeSaturate(0.2 + (micro * 0.34) + ((1 - patch) * 0.1)),
+            accentColor: immersiveApeMix(SIMD3<Float>(0.29, 0.34, 0.16), SIMD3<Float>(0.38, 0.42, 0.2), t: ridge)
+        )
+    default:
+        return ImmersiveApeBiomeHabitat(
+            coverDensity: immersiveApeSaturate(0.08 + (patch * 0.3) - (dampness * 0.14)),
+            clutterDensity: immersiveApeSaturate(0.12 + (ridge * 0.28)),
+            accentColor: immersiveApeMix(SIMD3<Float>(0.5, 0.48, 0.3), SIMD3<Float>(0.61, 0.58, 0.36), t: t * 0.6)
+        )
+    }
+}
+
+private func immersiveApeBiomeTransition(
+    grid: ImmersiveApeTerrainGrid,
+    row: Float,
+    column: Float,
+    material: UInt8
+) -> ImmersiveApeBiomeTransition {
+    let centerRow = min(max(Int(round(row)), 0), grid.resolution - 1)
+    let centerColumn = min(max(Int(round(column)), 0), grid.resolution - 1)
+    var totalWeight: Float = 0
+    var differingWeight: Float = 0
+    var materialWeights: [UInt8: Float] = [:]
+
+    for rowOffset in -1...1 {
+        for columnOffset in -1...1 {
+            if rowOffset == 0 && columnOffset == 0 {
+                continue
+            }
+
+            let sampleRow = min(max(centerRow + rowOffset, 0), grid.resolution - 1)
+            let sampleColumn = min(max(centerColumn + columnOffset, 0), grid.resolution - 1)
+            let sampleMaterial = grid.material(row: sampleRow, column: sampleColumn)
+
+            if sampleMaterial == 0 {
+                continue
+            }
+
+            let distance = Float(abs(rowOffset) + abs(columnOffset))
+            let weight = 1 / (1 + distance)
+            totalWeight += weight
+
+            if sampleMaterial != material {
+                differingWeight += weight
+                materialWeights[sampleMaterial, default: 0] += weight
+            }
+        }
+    }
+
+    guard
+        totalWeight > 0,
+        let neighbor = materialWeights.max(by: { lhs, rhs in lhs.value < rhs.value })
+    else {
+        return ImmersiveApeBiomeTransition(edgeStrength: 0, neighborMaterial: material, neighborWeight: 0)
+    }
+
+    return ImmersiveApeBiomeTransition(
+        edgeStrength: immersiveApeSaturate(differingWeight / totalWeight),
+        neighborMaterial: neighbor.key,
+        neighborWeight: immersiveApeSaturate(neighbor.value / totalWeight)
+    )
 }
 
 private func immersiveApeFoodTint(_ food: UInt8) -> SIMD4<Float> {

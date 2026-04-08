@@ -115,8 +115,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAboutPanel(_ sender: Any?) {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: appName,
-            .version: "Cycle 6 Interpolated Coast and Cloud Pass",
-            .credits: NSAttributedString(string: "A full-screen Metal viewer for ApeSDK, now smoothing terrain, shoreline, beach, water-edge, and cloud transitions by interpolating between terrain samples before drawing the world.")
+            .version: "Cycle 15 Twilight Atmosphere Pass",
+            .credits: NSAttributedString(string: "A full-screen Metal viewer for ApeSDK, now giving dawn, dusk, and night their own horizon glow, celestial halo, and low-light water tinting so time-of-day shifts read as atmosphere rather than only a sky-color swap.")
         ])
     }
 
