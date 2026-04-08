@@ -8,3 +8,5 @@ xcschememanagement.plist
 
 *.xcbkptlist
 .vscode/*
+*.o
+*_bin

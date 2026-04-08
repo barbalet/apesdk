@@ -581,7 +581,7 @@ n_object *object_number( n_object *obj, n_string name, n_int number )
 
 n_object *object_boolean( n_object *obj, n_string name, n_int boolean )
 {
-    return obj_boolean( obj, name, boolean );
+    return obj_boolean( obj, io_string_copy( name ), boolean );
 }
 
 n_object *object_string( n_object *obj, n_string name, n_string string )
@@ -1653,4 +1653,3 @@ n_array * object_onionskin(n_object * top, n_string value)
     }
     return 0L;
 }
-

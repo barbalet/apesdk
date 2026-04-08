@@ -113,8 +113,8 @@ void test_apescript_errors(void) {
                "First error should be AE_UNKNOWN_ERROR");
     
     // Test that we have the expected number of errors
-    TEST_ASSERT(i == AE_NUMBER_ERRORS - 1, 
-               "Number of errors should match AE_NUMBER_ERRORS - 1");
+    TEST_ASSERT(i == AE_NUMBER_ERRORS, 
+               "Number of errors should match AE_NUMBER_ERRORS");
 }
 
 // Test n_brace structure
@@ -372,15 +372,20 @@ void test_apescript_error(void) {
     n_individual_interpret individual;
     memset(&individual, 0, sizeof(individual));
     
-    // Test error reporting (should return error code)
+    // Test error reporting (returns draw_error result on failure)
     n_int error_result = apescript_error(&individual, AE_UNKNOWN_ERROR, __FILE__, __LINE__);
-    TEST_ASSERT(error_result == AE_UNKNOWN_ERROR, 
-               "apescript_error should return the error enum value");
+    TEST_ASSERT(error_result == -1, 
+               "apescript_error should return -1 for an unknown error");
     
     // Test with different error
     error_result = apescript_error(&individual, AE_NUMBER_EXPECTED, __FILE__, __LINE__);
-    TEST_ASSERT(error_result == AE_NUMBER_EXPECTED, 
-               "apescript_error should return AE_NUMBER_EXPECTED");
+    TEST_ASSERT(error_result == -1, 
+               "apescript_error should return -1 for a known error");
+
+    // Parser error paths call apescript_error with a NULL individual
+    error_result = apescript_error(0L, AE_NUMBER_EXPECTED, __FILE__, __LINE__);
+    TEST_ASSERT(error_result == -1,
+               "apescript_error should handle a NULL individual");
 }
 
 // Main test runner
