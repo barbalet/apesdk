@@ -32,6 +32,7 @@
 #ifndef SIMULATEDAPE_SHARED_H
 #define SIMULATEDAPE_SHARED_H
 
+#include <stdint.h>
 
 #ifndef _WIN32
 
@@ -125,6 +126,81 @@ void shared_process(const char* fileUrl);
 n_int shared_being_number( void );
 void shared_being_name( n_int number, n_string name );
 void shared_being_select( n_int number);
+
+typedef struct
+{
+    int32_t index;
+    float   x;
+    float   y;
+    float   z;
+    float   facing;
+    float   energy;
+    float   age_days;
+    float   height;
+    float   mass;
+    uint8_t speaking;
+    uint8_t female;
+    uint8_t pregnant;
+    uint8_t pigmentation;
+    uint8_t hair;
+    uint8_t frame;
+    uint8_t eye_color;
+    uint8_t eye_shape;
+    uint16_t state;
+    uint8_t goal_type;
+    uint8_t honor;
+    uint8_t drive_hunger;
+    uint8_t drive_social;
+    uint8_t drive_fatigue;
+    uint8_t drive_sex;
+} shared_immersiveape_being_snapshot;
+
+typedef struct
+{
+    float   x;
+    float   y;
+    float   z;
+    float   intensity;
+    uint8_t food_type;
+    uint8_t vegetation;
+    uint8_t rain;
+    uint8_t reserved;
+} shared_immersiveape_food_snapshot;
+
+typedef struct
+{
+    int32_t has_selection;
+    int32_t selected_index;
+    uint32_t date;
+    uint32_t time;
+    uint32_t world_seed;
+    float   daylight;
+    float   sun_angle;
+    float   tide;
+    float   water_level;
+    uint8_t weather;
+    uint8_t nearby_count;
+    uint8_t food_count;
+    uint8_t reserved0;
+    shared_immersiveape_being_snapshot selected;
+} shared_immersiveape_scene_snapshot;
+
+int32_t shared_immersiveape_capture_scene(
+    shared_immersiveape_scene_snapshot *scene,
+    shared_immersiveape_being_snapshot *nearby,
+    int32_t max_nearby,
+    shared_immersiveape_food_snapshot *food,
+    int32_t max_food );
+
+void shared_immersiveape_fill_terrain_patch(
+    int32_t center_x,
+    int32_t center_y,
+    int32_t half_extent,
+    int32_t resolution,
+    float *heights,
+    uint8_t *materials,
+    uint8_t *clouds,
+    float *water_heights );
 
 #ifndef    _WIN32
 

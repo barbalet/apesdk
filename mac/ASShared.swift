@@ -35,6 +35,11 @@ import Cocoa
     convenience init(frame frameRect: NSRect, title: String) {
         self.init(frame: frameRect, title: title, bindings: .ape)
     }
+
+    convenience init(immersiveFrame frameRect: NSRect, title: String) {
+        self.init(frame: frameRect, title: title, bindings: .ape)
+        identification = Int(WINDOW_PROCESSING)
+    }
 }
 
 private extension SimulationBindings {

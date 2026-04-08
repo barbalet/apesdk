@@ -33,9 +33,12 @@
      the various platform versions of Simulated Ape */
 
 #include <stdio.h>
+#include <math.h>
 
 #include "buffer.h"
 #include "gui.h"
+
+#include "../entity/entity_internal.h"
 
 #ifndef    _WIN32
 
@@ -577,6 +580,492 @@ void shared_being_select( n_int number)
         if (number < group->num)
         {
             sim_set_select(&group->beings[number]);
+        }
+    }
+}
+
+enum
+{
+    IMMERSIVEAPE_MATERIAL_WATER = 0,
+    IMMERSIVEAPE_MATERIAL_SHORE = 1,
+    IMMERSIVEAPE_MATERIAL_GRASS = 2,
+    IMMERSIVEAPE_MATERIAL_BUSH = 3,
+    IMMERSIVEAPE_MATERIAL_FOREST = 4,
+    IMMERSIVEAPE_MATERIAL_ROCK = 5
+};
+
+static float shared_immersiveape_daylight( uint32_t time_minutes )
+{
+    float day_fraction = (float)( time_minutes % TIME_DAY_MINUTES ) / (float)TIME_DAY_MINUTES;
+    float value = ( sinf( ( day_fraction * (float)TWO_PI ) - (float)( TWO_PI / 4.0 ) ) * 0.5f ) + 0.5f;
+
+    if ( value < 0.0f )
+    {
+        return 0.0f;
+    }
+    if ( value > 1.0f )
+    {
+        return 1.0f;
+    }
+    return value;
+}
+
+static int32_t shared_immersiveape_ground_height( int32_t ape_x, int32_t ape_y )
+{
+    return land_location(
+        POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( ape_x ) ),
+        POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( ape_y ) ) );
+}
+
+static int32_t shared_immersiveape_wrap_delta( int32_t delta )
+{
+    int32_t resolution = MAP_APE_RESOLUTION_SIZE;
+    int32_t half_resolution = resolution >> 1;
+
+    if ( delta > half_resolution )
+    {
+        delta -= resolution;
+    }
+    if ( delta < -half_resolution )
+    {
+        delta += resolution;
+    }
+    return delta;
+}
+
+static void shared_immersiveape_fill_being_snapshot(
+    shared_immersiveape_being_snapshot *destination,
+    simulated_being *being,
+    int32_t index,
+    int32_t x_adjust,
+    int32_t y_adjust )
+{
+    n_genetics *genetics = being_genetics( being );
+    int32_t     local_x = being_location_x( being ) + x_adjust;
+    int32_t     local_y = being_location_y( being ) + y_adjust;
+    int32_t     ground = shared_immersiveape_ground_height( local_x, local_y );
+    int32_t     water_level = land_tide_level();
+
+    if ( destination == 0L || being == 0L || genetics == 0L )
+    {
+        return;
+    }
+
+    destination->index = index;
+    destination->x = (float)local_x;
+    destination->y = (float)local_y;
+    destination->z = (float)WALK_ON_WATER( ground, water_level );
+    destination->facing = (float)( being_facing( being ) * TWO_PI / 256.0 );
+    destination->energy = (float)being_energy( being );
+    destination->age_days = (float)AGE_IN_DAYS( being );
+    destination->height = (float)GET_BEING_HEIGHT( being ) / 1000.0f;
+    destination->mass = (float)being_mass( being ) / 1000.0f;
+    destination->speaking = (uint8_t)( being_speaking( being ) != 0 );
+    destination->female = (uint8_t)( being_female( being ) != 0 );
+    destination->pregnant = (uint8_t)( being_pregnant( being ) != 0 );
+    destination->pigmentation = (uint8_t)GENE_PIGMENTATION( genetics );
+    destination->hair = (uint8_t)GENE_HAIR( genetics );
+    destination->frame = (uint8_t)GENE_FRAME( genetics );
+    destination->eye_color = (uint8_t)GENE_EYE_COLOR( genetics );
+    destination->eye_shape = (uint8_t)GENE_EYE_SHAPE( genetics );
+    destination->state = (uint16_t)being_state( being );
+    destination->goal_type = (uint8_t)being->delta.goal[0];
+    destination->honor = (uint8_t)being_honor( being );
+    destination->drive_hunger = (uint8_t)being_drive( being, DRIVE_HUNGER );
+    destination->drive_social = (uint8_t)being_drive( being, DRIVE_SOCIAL );
+    destination->drive_fatigue = (uint8_t)being_drive( being, DRIVE_FATIGUE );
+    destination->drive_sex = (uint8_t)being_drive( being, DRIVE_SEX );
+}
+
+static void shared_immersiveape_insert_nearby(
+    shared_immersiveape_being_snapshot *nearby,
+    int32_t *distances,
+    int32_t *count,
+    int32_t max_nearby,
+    shared_immersiveape_being_snapshot candidate,
+    int32_t distance_squared )
+{
+    int32_t insert_position;
+    int32_t limit;
+
+    if ( nearby == 0L || distances == 0L || count == 0L || max_nearby <= 0 )
+    {
+        return;
+    }
+
+    limit = *count;
+    if ( limit > max_nearby )
+    {
+        limit = max_nearby;
+    }
+
+    insert_position = limit;
+    while ( insert_position > 0 && distances[insert_position - 1] > distance_squared )
+    {
+        if ( insert_position < max_nearby )
+        {
+            nearby[insert_position] = nearby[insert_position - 1];
+            distances[insert_position] = distances[insert_position - 1];
+        }
+        insert_position--;
+    }
+
+    if ( insert_position < max_nearby )
+    {
+        nearby[insert_position] = candidate;
+        distances[insert_position] = distance_squared;
+        if ( *count < max_nearby )
+        {
+            ( *count )++;
+        }
+    }
+}
+
+static void shared_immersiveape_insert_food(
+    shared_immersiveape_food_snapshot *food,
+    float *strengths,
+    int32_t *count,
+    int32_t max_food,
+    shared_immersiveape_food_snapshot candidate )
+{
+    int32_t insert_position;
+    int32_t limit;
+
+    if ( food == 0L || strengths == 0L || count == 0L || max_food <= 0 )
+    {
+        return;
+    }
+
+    limit = *count;
+    if ( limit > max_food )
+    {
+        limit = max_food;
+    }
+
+    insert_position = limit;
+    while ( insert_position > 0 && strengths[insert_position - 1] < candidate.intensity )
+    {
+        if ( insert_position < max_food )
+        {
+            food[insert_position] = food[insert_position - 1];
+            strengths[insert_position] = strengths[insert_position - 1];
+        }
+        insert_position--;
+    }
+
+    if ( insert_position < max_food )
+    {
+        food[insert_position] = candidate;
+        strengths[insert_position] = candidate.intensity;
+        if ( *count < max_food )
+        {
+            ( *count )++;
+        }
+    }
+}
+
+static shared_immersiveape_food_snapshot shared_immersiveape_food_candidate(
+    int32_t sample_x,
+    int32_t sample_y,
+    uint32_t seed )
+{
+    shared_immersiveape_food_snapshot candidate = { 0 };
+    int32_t ground = shared_immersiveape_ground_height( sample_x, sample_y );
+    int32_t tide = land_tide_level();
+    int32_t grass = 0;
+    int32_t trees = 0;
+    int32_t bush = 0;
+    int32_t seaweed = land_operator_interpolated( sample_x, sample_y, ( n_byte * )&operators[VARIABLE_BIOLOGY_SEAWEED - VARIABLE_BIOLOGY_AREA] );
+    int32_t rockpool = land_operator_interpolated( sample_x, sample_y, ( n_byte * )&operators[VARIABLE_BIOLOGY_ROCKPOOL - VARIABLE_BIOLOGY_AREA] );
+    int32_t beach = land_operator_interpolated( sample_x, sample_y, ( n_byte * )&operators[VARIABLE_BIOLOGY_BEACH - VARIABLE_BIOLOGY_AREA] );
+    uint32_t hash_value = math_hash( ( n_byte * )&sample_x, sizeof( sample_x ) );
+
+    hash_value ^= math_hash( ( n_byte * )&sample_y, sizeof( sample_y ) );
+    hash_value ^= seed;
+
+    candidate.x = (float)sample_x;
+    candidate.y = (float)sample_y;
+    candidate.z = (float)WALK_ON_WATER( ground, tide );
+    candidate.rain = (uint8_t)( weather_pressure(
+                                    POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( sample_x ) ),
+                                    POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( sample_y ) ) ) > WEATHER_RAIN );
+
+    if ( WATER_TEST( ground, tide ) )
+    {
+        if ( seaweed >= rockpool )
+        {
+            candidate.food_type = FOOD_SEAWEED;
+            candidate.intensity = (float)seaweed;
+            candidate.vegetation = IMMERSIVEAPE_MATERIAL_WATER;
+        }
+        else
+        {
+            candidate.food_type = FOOD_SHELLFISH;
+            candidate.intensity = (float)rockpool;
+            candidate.vegetation = IMMERSIVEAPE_MATERIAL_SHORE;
+        }
+
+        if ( beach > rockpool && beach > seaweed )
+        {
+            candidate.food_type = FOOD_SHELLFISH;
+            candidate.intensity = (float)beach;
+            candidate.vegetation = IMMERSIVEAPE_MATERIAL_SHORE;
+        }
+
+        return candidate;
+    }
+
+    food_values( sample_x, sample_y, &grass, &trees, &bush );
+
+    candidate.food_type = FOOD_VEGETABLE;
+    candidate.intensity = (float)grass;
+    candidate.vegetation = IMMERSIVEAPE_MATERIAL_GRASS;
+
+    if ( trees > bush && trees > grass )
+    {
+        candidate.food_type = ( hash_value & 7 ) == 0 ? FOOD_BIRD_EGGS : FOOD_FRUIT;
+        candidate.intensity = (float)trees;
+        candidate.vegetation = IMMERSIVEAPE_MATERIAL_FOREST;
+    }
+    else if ( bush > grass )
+    {
+        candidate.food_type = ( hash_value & 15 ) == 0 ? FOOD_LIZARD_EGGS : FOOD_FRUIT;
+        candidate.intensity = (float)bush;
+        candidate.vegetation = IMMERSIVEAPE_MATERIAL_BUSH;
+    }
+
+    return candidate;
+}
+
+int32_t shared_immersiveape_capture_scene(
+    shared_immersiveape_scene_snapshot *scene,
+    shared_immersiveape_being_snapshot *nearby,
+    int32_t max_nearby,
+    shared_immersiveape_food_snapshot *food,
+    int32_t max_food )
+{
+    simulated_group *group = sim_group();
+    simulated_being *selected;
+    shared_immersiveape_being_snapshot nearby_candidate = { 0 };
+    int32_t nearby_distances[64] = { 0 };
+    float   food_strengths[64] = { 0 };
+    int32_t nearby_count = 0;
+    int32_t food_count = 0;
+    int32_t selected_index = 0;
+    int32_t selected_x;
+    int32_t selected_y;
+    uint32_t world_seed;
+    int32_t sample_loop_x;
+
+    if ( scene == 0L || group == 0L || group->num == 0 )
+    {
+        return 0;
+    }
+
+    if ( max_nearby > 64 )
+    {
+        max_nearby = 64;
+    }
+    if ( max_food > 64 )
+    {
+        max_food = 64;
+    }
+
+    selected = group->select;
+    if ( selected == 0L )
+    {
+        selected = &group->beings[0];
+    }
+
+    selected_index = (int32_t)( selected - group->beings );
+    if ( selected_index < 0 || selected_index >= (int32_t)group->num )
+    {
+        selected_index = 0;
+        selected = &group->beings[0];
+    }
+
+    selected_x = being_location_x( selected );
+    selected_y = being_location_y( selected );
+
+    world_seed = math_hash( ( n_byte * )land_genetics(), sizeof( n_byte2 ) * 2 );
+    world_seed ^= math_hash( ( n_byte * )being_genetics( selected ), sizeof( n_genetics ) * CHROMOSOMES );
+
+    scene->has_selection = 1;
+    scene->selected_index = selected_index;
+    scene->date = land_date();
+    scene->time = land_time();
+    scene->world_seed = world_seed;
+    scene->daylight = shared_immersiveape_daylight( scene->time );
+    scene->sun_angle = (float)( ( scene->time % TIME_DAY_MINUTES ) * TWO_PI / TIME_DAY_MINUTES );
+    scene->tide = (float)( land_tide_level() - WATER_MAP ) / (float)( TIDE_AMPLITUDE_LUNAR + TIDE_AMPLITUDE_SOLAR );
+    scene->water_level = (float)land_tide_level();
+    scene->weather = (uint8_t)weather_seven_values( selected_x, selected_y );
+    scene->nearby_count = 0;
+    scene->food_count = 0;
+    scene->reserved0 = 0;
+
+    shared_immersiveape_fill_being_snapshot( &scene->selected, selected, selected_index, 0, 0 );
+
+    for ( sample_loop_x = 0; sample_loop_x < 64; sample_loop_x++ )
+    {
+        nearby_distances[sample_loop_x] = BIG_INTEGER;
+        food_strengths[sample_loop_x] = -1.0f;
+    }
+
+    if ( nearby != 0L && max_nearby > 0 )
+    {
+        n_uint being_loop;
+
+        for ( being_loop = 0; being_loop < group->num; being_loop++ )
+        {
+            simulated_being *local_being = &group->beings[being_loop];
+            int32_t dx;
+            int32_t dy;
+            int32_t distance_squared;
+
+            if ( local_being == selected )
+            {
+                continue;
+            }
+
+            dx = shared_immersiveape_wrap_delta( being_location_x( local_being ) - selected_x );
+            dy = shared_immersiveape_wrap_delta( being_location_y( local_being ) - selected_y );
+            distance_squared = ( dx * dx ) + ( dy * dy );
+
+            shared_immersiveape_fill_being_snapshot(
+                &nearby_candidate,
+                local_being,
+                (int32_t)being_loop,
+                dx,
+                dy );
+
+            shared_immersiveape_insert_nearby(
+                nearby,
+                nearby_distances,
+                &nearby_count,
+                max_nearby,
+                nearby_candidate,
+                distance_squared );
+        }
+    }
+
+    if ( food != 0L && max_food > 0 )
+    {
+        int32_t sample_x;
+        for ( sample_x = -3; sample_x <= 3; sample_x++ )
+        {
+            int32_t sample_y;
+            for ( sample_y = -3; sample_y <= 3; sample_y++ )
+            {
+                shared_immersiveape_food_snapshot candidate;
+                int32_t absolute_x = selected_x + ( sample_x * 384 );
+                int32_t absolute_y = selected_y + ( sample_y * 384 );
+
+                if ( sample_x == 0 && sample_y == 0 )
+                {
+                    continue;
+                }
+
+                candidate = shared_immersiveape_food_candidate( absolute_x, absolute_y, world_seed );
+                if ( candidate.intensity > 12.0f )
+                {
+                    shared_immersiveape_insert_food(
+                        food,
+                        food_strengths,
+                        &food_count,
+                        max_food,
+                        candidate );
+                }
+            }
+        }
+    }
+
+    scene->nearby_count = (uint8_t)nearby_count;
+    scene->food_count = (uint8_t)food_count;
+
+    return 1;
+}
+
+void shared_immersiveape_fill_terrain_patch(
+    int32_t center_x,
+    int32_t center_y,
+    int32_t half_extent,
+    int32_t resolution,
+    float *heights,
+    uint8_t *materials,
+    uint8_t *clouds,
+    float *water_heights )
+{
+    int32_t tide = land_tide_level();
+    int32_t row;
+
+    if ( heights == 0L || materials == 0L || clouds == 0L || water_heights == 0L || resolution < 2 )
+    {
+        return;
+    }
+
+    for ( row = 0; row < resolution; row++ )
+    {
+        int32_t column;
+        float fy = (float)row / (float)( resolution - 1 );
+        int32_t sample_y = center_y + (int32_t)( ( ( fy * 2.0f ) - 1.0f ) * (float)half_extent );
+
+        for ( column = 0; column < resolution; column++ )
+        {
+            int32_t index = row * resolution + column;
+            float fx = (float)column / (float)( resolution - 1 );
+            int32_t sample_x = center_x + (int32_t)( ( ( fx * 2.0f ) - 1.0f ) * (float)half_extent );
+            int32_t sample_ground = shared_immersiveape_ground_height( sample_x, sample_y );
+            int32_t grass = 0;
+            int32_t trees = 0;
+            int32_t bush = 0;
+            int32_t map_x = POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( sample_x ) );
+            int32_t map_y = POSITIVE_LAND_COORD( APESPACE_TO_MAPSPACE( sample_y ) );
+            int32_t cloud_value = weather_pressure( map_x, map_y ) >> 7;
+
+            heights[index] = (float)sample_ground;
+            water_heights[index] = (float)tide;
+
+            if ( cloud_value < 0 )
+            {
+                cloud_value = 0;
+            }
+            if ( cloud_value > 255 )
+            {
+                cloud_value = 255;
+            }
+            clouds[index] = (uint8_t)cloud_value;
+
+            if ( WATER_TEST( sample_ground, tide ) )
+            {
+                materials[index] = IMMERSIVEAPE_MATERIAL_WATER;
+                continue;
+            }
+
+            if ( sample_ground < ( tide + 6 ) )
+            {
+                materials[index] = IMMERSIVEAPE_MATERIAL_SHORE;
+                continue;
+            }
+
+            food_values( sample_x, sample_y, &grass, &trees, &bush );
+
+            if ( sample_ground > 190 )
+            {
+                materials[index] = IMMERSIVEAPE_MATERIAL_ROCK;
+            }
+            else if ( trees > bush && trees > grass && trees > 22 )
+            {
+                materials[index] = IMMERSIVEAPE_MATERIAL_FOREST;
+            }
+            else if ( bush > grass && bush > 18 )
+            {
+                materials[index] = IMMERSIVEAPE_MATERIAL_BUSH;
+            }
+            else
+            {
+                materials[index] = IMMERSIVEAPE_MATERIAL_GRASS;
+            }
         }
     }
 }
