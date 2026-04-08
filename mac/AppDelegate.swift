@@ -115,8 +115,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAboutPanel(_ sender: Any?) {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: appName,
-            .version: "Cycle 3 Social Readability Pass",
-            .credits: NSAttributedString(string: "A full-screen Metal viewer for ApeSDK, now layering encounter summaries, in-world contact ribbons, and a more intentional follow camera onto the immersive perspective.")
+            .version: "Cycle 6 Interpolated Coast and Cloud Pass",
+            .credits: NSAttributedString(string: "A full-screen Metal viewer for ApeSDK, now smoothing terrain, shoreline, beach, water-edge, and cloud transitions by interpolating between terrain samples before drawing the world.")
         ])
     }
 
@@ -387,7 +387,7 @@ final class ImmersiveApeViewController: NSViewController {
     private let statusLabel = NSTextField(labelWithString: "Booting ApeSDK...")
     private let detailLabel = NSTextField(labelWithString: "Linking ape goals, weather, and surf context...")
     private let storyLabel = NSTextField(labelWithString: "Following the selected ape through the procedural world...")
-    private let encounterTitleLabel = NSTextField(labelWithString: "Nearby Encounters")
+    private let encounterTitleLabel = NSTextField(labelWithString: "Intent + Encounters")
     private let encounterLabel = NSTextField(labelWithString: "Scanning nearby apes...")
     private let footerLabel = NSTextField(labelWithString: "Esc quit")
     private let errorLabel = NSTextField(labelWithString: "")
