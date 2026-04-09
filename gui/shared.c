@@ -676,6 +676,148 @@ static uint8_t shared_immersiveape_territory_familiarity(
 #endif
 }
 
+static uint8_t shared_immersiveape_episodic_temporal_weight(
+    simulated_iepisodic *episode )
+{
+    const int32_t window_minutes = TIME_DAY_MINUTES * 12;
+    int32_t total_minutes;
+    int32_t day_delta;
+    int32_t minute_delta;
+
+    if ( episode == 0L || episode->event == 0 )
+    {
+        return 0;
+    }
+
+    day_delta = ( int32_t )land_date() - ( int32_t )episode->space_time.date;
+    minute_delta = ( int32_t )land_time() - ( int32_t )episode->space_time.time;
+    total_minutes = ( day_delta * TIME_DAY_MINUTES ) + minute_delta;
+
+    if ( total_minutes < 0 )
+    {
+        total_minutes = -total_minutes;
+    }
+
+    if ( total_minutes >= window_minutes )
+    {
+        return 0;
+    }
+
+    return ( uint8_t )( ( ( window_minutes - total_minutes ) * 255 ) / window_minutes );
+}
+
+static n_int shared_immersiveape_episodic_matches_being(
+    simulated_iepisodic *episode,
+    simulated_being *being )
+{
+    if ( episode == 0L || being == 0L || episode->event == 0 )
+    {
+        return 0;
+    }
+
+    return being_name_comparison(
+               being,
+               episode->first_name[BEING_MEETER],
+               episode->family_name[BEING_MEETER] ) ||
+           being_name_comparison(
+               being,
+               episode->first_name[BEING_MET],
+               episode->family_name[BEING_MET] );
+}
+
+static void shared_immersiveape_fill_being_episodic_snapshot(
+    shared_immersiveape_being_snapshot *destination,
+    simulated_being *observer,
+    simulated_being *being )
+{
+    simulated_iepisodic *episodic;
+    n_int                best_index = -1;
+    n_int                best_score = -1;
+    n_int                episode_index;
+
+    if ( destination == 0L )
+    {
+        return;
+    }
+
+    destination->episodic_event = 0;
+    destination->episodic_recency = 0;
+    destination->episodic_firsthand = 0;
+    destination->episodic_intention = 0;
+    destination->episodic_affect = 0;
+
+    if ( observer == 0L || being == 0L || observer == being )
+    {
+        return;
+    }
+
+    episodic = being_episodic( observer );
+    if ( episodic == 0L )
+    {
+        return;
+    }
+
+    for ( episode_index = 0; episode_index < EPISODIC_SIZE; episode_index++ )
+    {
+        n_int   affect_delta;
+        n_int   score;
+        uint8_t temporal_weight;
+        n_byte  event = episodic[episode_index].event;
+        n_int   firsthand;
+
+        if ( event == 0 )
+        {
+            continue;
+        }
+
+        if ( shared_immersiveape_episodic_matches_being( &episodic[episode_index], being ) == 0 )
+        {
+            continue;
+        }
+
+        affect_delta = ( n_int )episodic[episode_index].affect - EPISODIC_AFFECT_ZERO;
+        temporal_weight = shared_immersiveape_episodic_temporal_weight( &episodic[episode_index] );
+        firsthand = being_name_comparison(
+                        observer,
+                        episodic[episode_index].first_name[BEING_MEETER],
+                        episodic[episode_index].family_name[BEING_MEETER] );
+
+        score = ABS( affect_delta ) + ( ( n_int )temporal_weight * 3 );
+        if ( event >= EVENT_INTENTION )
+        {
+            score += 96;
+        }
+        if ( firsthand )
+        {
+            score += 64;
+        }
+
+        if ( score > best_score )
+        {
+            best_score = score;
+            best_index = episode_index;
+        }
+    }
+
+    if ( best_index < 0 )
+    {
+        return;
+    }
+
+    destination->episodic_event =
+        ( uint8_t )( episodic[best_index].event & ( EVENT_INTENTION - 1 ) );
+    destination->episodic_recency =
+        shared_immersiveape_episodic_temporal_weight( &episodic[best_index] );
+    destination->episodic_firsthand = ( uint8_t )( being_name_comparison(
+                                          observer,
+                                          episodic[best_index].first_name[BEING_MEETER],
+                                          episodic[best_index].family_name[BEING_MEETER] ) != 0 );
+    destination->episodic_intention =
+        ( uint8_t )( episodic[best_index].event >= EVENT_INTENTION );
+    destination->episodic_affect =
+        ( int16_t )( ( n_int )episodic[best_index].affect - EPISODIC_AFFECT_ZERO );
+}
+
 static void shared_immersiveape_fill_being_social_snapshot(
     shared_immersiveape_being_snapshot *destination,
     simulated_being *observer,
@@ -774,9 +916,13 @@ static void shared_immersiveape_fill_being_snapshot(
     destination->eye_color = (uint8_t)GENE_EYE_COLOR( genetics );
     destination->eye_shape = (uint8_t)GENE_EYE_SHAPE( genetics );
     destination->state = (uint16_t)being_state( being );
+    destination->carrying_child = (uint8_t)(
+                                      ( ( being->changes.inventory[BODY_FRONT] & INVENTORY_CHILD ) != 0 ) ||
+                                      ( ( being->changes.inventory[BODY_BACK] & INVENTORY_CHILD ) != 0 ) );
     destination->goal_type = (uint8_t)being->delta.goal[0];
     destination->honor = (uint8_t)being_honor( being );
     shared_immersiveape_fill_being_social_snapshot( destination, observer, being );
+    shared_immersiveape_fill_being_episodic_snapshot( destination, observer, being );
     destination->territory_familiarity = shared_immersiveape_territory_familiarity(
         being,
         being_location_x( being ),

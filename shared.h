@@ -147,6 +147,7 @@ typedef struct
     uint8_t eye_color;
     uint8_t eye_shape;
     uint16_t state;
+    uint8_t carrying_child;
     uint8_t goal_type;
     uint8_t honor;
     uint8_t social_friend_foe;
@@ -155,6 +156,11 @@ typedef struct
     uint8_t social_relationship;
     uint8_t territory_familiarity;
     uint8_t observer_territory_familiarity;
+    uint8_t episodic_event;
+    uint8_t episodic_recency;
+    uint8_t episodic_firsthand;
+    uint8_t episodic_intention;
+    int16_t episodic_affect;
     uint8_t drive_hunger;
     uint8_t drive_social;
     uint8_t drive_fatigue;
