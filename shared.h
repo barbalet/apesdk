@@ -149,6 +149,12 @@ typedef struct
     uint16_t state;
     uint8_t goal_type;
     uint8_t honor;
+    uint8_t social_friend_foe;
+    uint8_t social_attraction;
+    uint16_t social_familiarity;
+    uint8_t social_relationship;
+    uint8_t territory_familiarity;
+    uint8_t observer_territory_familiarity;
     uint8_t drive_hunger;
     uint8_t drive_social;
     uint8_t drive_fatigue;

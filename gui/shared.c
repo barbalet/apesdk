@@ -633,8 +633,113 @@ static int32_t shared_immersiveape_wrap_delta( int32_t delta )
     return delta;
 }
 
+static uint8_t shared_immersiveape_territory_familiarity(
+    simulated_being *being,
+    int32_t ape_x,
+    int32_t ape_y )
+{
+#ifdef TERRITORY_ON
+    n_uint territory_index;
+    n_uint familiarity;
+    n_uint territory_loop;
+    n_uint max_familiarity = 1;
+
+    if ( being == 0L )
+    {
+        return 0;
+    }
+
+    territory_index =
+        APESPACE_TO_TERRITORY( ape_y ) * TERRITORY_DIMENSION +
+        APESPACE_TO_TERRITORY( ape_x );
+    familiarity = ( n_uint )being->events.territory[territory_index].familiarity;
+
+    for ( territory_loop = 0; territory_loop < TERRITORY_AREA; territory_loop++ )
+    {
+        if ( being->events.territory[territory_loop].familiarity > max_familiarity )
+        {
+            max_familiarity = ( n_uint )being->events.territory[territory_loop].familiarity;
+        }
+    }
+
+    if ( max_familiarity == 0 )
+    {
+        return 0;
+    }
+
+    return ( uint8_t )( familiarity * 255 / max_familiarity );
+#else
+    ( void )being;
+    ( void )ape_x;
+    ( void )ape_y;
+    return 0;
+#endif
+}
+
+static void shared_immersiveape_fill_being_social_snapshot(
+    shared_immersiveape_being_snapshot *destination,
+    simulated_being *observer,
+    simulated_being *being )
+{
+    simulated_isocial *social_graph;
+    n_int              social_index;
+
+    if ( destination == 0L )
+    {
+        return;
+    }
+
+    destination->social_friend_foe = SOCIAL_RESPECT_NORMAL;
+    destination->social_attraction = 0;
+    destination->social_familiarity = 0;
+    destination->social_relationship = 0;
+
+    if ( observer == 0L || being == 0L )
+    {
+        return;
+    }
+
+    if ( observer == being )
+    {
+        destination->social_relationship = RELATIONSHIP_SELF;
+        return;
+    }
+
+    social_graph = being_social( observer );
+    if ( social_graph == 0L )
+    {
+        return;
+    }
+
+    for ( social_index = 1; social_index < SOCIAL_SIZE_BEINGS; social_index++ )
+    {
+        if ( SOCIAL_GRAPH_ENTRY_EMPTY( social_graph, social_index ) )
+        {
+            continue;
+        }
+
+        if ( social_graph[social_index].entity_type != ENTITY_BEING )
+        {
+            continue;
+        }
+
+        if ( being_name_comparison(
+                 being,
+                 social_graph[social_index].first_name[BEING_MET],
+                 social_graph[social_index].family_name[BEING_MET] ) )
+        {
+            destination->social_friend_foe = social_graph[social_index].friend_foe;
+            destination->social_attraction = social_graph[social_index].attraction;
+            destination->social_familiarity = social_graph[social_index].familiarity;
+            destination->social_relationship = social_graph[social_index].relationship;
+            return;
+        }
+    }
+}
+
 static void shared_immersiveape_fill_being_snapshot(
     shared_immersiveape_being_snapshot *destination,
+    simulated_being *observer,
     simulated_being *being,
     int32_t index,
     int32_t x_adjust,
@@ -671,6 +776,15 @@ static void shared_immersiveape_fill_being_snapshot(
     destination->state = (uint16_t)being_state( being );
     destination->goal_type = (uint8_t)being->delta.goal[0];
     destination->honor = (uint8_t)being_honor( being );
+    shared_immersiveape_fill_being_social_snapshot( destination, observer, being );
+    destination->territory_familiarity = shared_immersiveape_territory_familiarity(
+        being,
+        being_location_x( being ),
+        being_location_y( being ) );
+    destination->observer_territory_familiarity = shared_immersiveape_territory_familiarity(
+        observer != 0L ? observer : being,
+        being_location_x( being ),
+        being_location_y( being ) );
     destination->drive_hunger = (uint8_t)being_drive( being, DRIVE_HUNGER );
     destination->drive_social = (uint8_t)being_drive( being, DRIVE_SOCIAL );
     destination->drive_fatigue = (uint8_t)being_drive( being, DRIVE_FATIGUE );
@@ -904,7 +1018,7 @@ int32_t shared_immersiveape_capture_scene(
     scene->food_count = 0;
     scene->reserved0 = 0;
 
-    shared_immersiveape_fill_being_snapshot( &scene->selected, selected, selected_index, 0, 0 );
+    shared_immersiveape_fill_being_snapshot( &scene->selected, selected, selected, selected_index, 0, 0 );
 
     for ( sample_loop_x = 0; sample_loop_x < 64; sample_loop_x++ )
     {
@@ -934,6 +1048,7 @@ int32_t shared_immersiveape_capture_scene(
 
             shared_immersiveape_fill_being_snapshot(
                 &nearby_candidate,
+                selected,
                 local_being,
                 (int32_t)being_loop,
                 dx,

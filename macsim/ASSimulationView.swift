@@ -213,6 +213,7 @@ struct ImmersiveApeHUDState {
     let headline: String
     let status: String
     let detail: String
+    let performance: String
     let story: String
     let encounters: String
     let footer: String
@@ -319,8 +320,38 @@ private struct ImmersiveApeSceneCapture {
     let materials: [UInt8]
     let clouds: [UInt8]
     let waterHeights: [Float]
+    let terrainResolution: Int
     let selectedName: String
     let apeCount: Int
+}
+
+private struct ImmersiveApeRenderQuality {
+    let label: String
+    let terrainResolution: Int
+    let terrainInterpolationSubdivisions: Int
+    let landformSampleStride: Int
+    let waterReflectionSampleStride: Int
+    let vegetationSampleStride: Int
+    let maxNearby: Int
+    let maxFood: Int
+    let cloudBudgetMultiplier: Float
+    let starBudgetMultiplier: Float
+    let includeLandformDetails: Bool
+    let includeWaterReflections: Bool
+    let includeVegetation: Bool
+    let includeSocialContext: Bool
+    let includeAttentionGuide: Bool
+    let includeSky: Bool
+    let includeWeatherEffects: Bool
+    let meshBuildInterval: Int
+}
+
+private struct ImmersiveApePreparedFrame {
+    let opaque: ImmersiveApeGPUBufferSet?
+    let transparent: ImmersiveApeGPUBufferSet?
+    let uniforms: ImmersiveApeUniforms
+    let clearColor: MTLClearColor
+    let hudState: ImmersiveApeHUDState
 }
 
 private enum ImmersiveApeEncounterMode {
@@ -373,7 +404,76 @@ private struct ImmersiveApeFoodCue {
     let food: shared_immersiveape_food_snapshot
     let localPosition: SIMD3<Float>
     let distance: Float
+    let abundance: Float
     let score: Float
+}
+
+private enum ImmersiveApeFoodFocusRole {
+    case primary
+    case alternate
+    case none
+}
+
+private struct ImmersiveApeForagingContextSector {
+    let direction: SIMD3<Float>
+    let weight: Float
+    let color: SIMD4<Float>
+}
+
+private struct ImmersiveApeForagingContext {
+    let summaryLabel: String
+    let directionLabel: String
+    let strength: Float
+    let sectors: [ImmersiveApeForagingContextSector]
+}
+
+private struct ImmersiveApeMeetingBehavior {
+    let summaryLead: String
+    let panelLabel: String
+    let storyLead: String
+    let strength: Float
+    let corridorRadius: Float
+    let targetRadius: Float
+    let handSpreadScale: Float
+    let handForwardDelta: Float
+    let handHeightDelta: Float
+    let chestForwardDelta: Float
+    let targetDistanceDelta: Float
+    let targetDropDelta: Float
+    let fieldOfViewDelta: Float
+}
+
+private struct ImmersiveApeSpeechBehavior {
+    let summaryLead: String
+    let panelLabel: String
+    let storyLead: String
+    let strength: Float
+    let laneRadius: Float
+    let plumeLength: Float
+    let rippleRadius: Float
+    let shouting: Bool
+}
+
+private struct ImmersiveApeMemoryBehavior {
+    let panelLabel: String
+    let storyLead: String
+    let strength: Float
+    let laneRadius: Float
+    let orbitRadius: Float
+    let trailOffset: Float
+    let echoCount: Int
+    let color: SIMD4<Float>
+}
+
+private struct ImmersiveApeTerritoryBehavior {
+    let summaryLead: String
+    let panelLabel: String
+    let storyLead: String
+    let strength: Float
+    let ringRadius: Float
+    let laneRadius: Float
+    let bodyRadius: Float
+    let color: SIMD4<Float>
 }
 
 private struct ImmersiveApeAttentionFocus {
@@ -386,6 +486,464 @@ private struct ImmersiveApeAttentionFocus {
     let color: SIMD4<Float>
     let distance: Float
     let cameraWeight: Float
+    let foodType: UInt8?
+    let foodAbundance: Float
+    let alternateFoodType: UInt8?
+    let alternateFoodAbundance: Float
+    let alternateLocalPosition: SIMD3<Float>?
+    let alternateDistance: Float
+    let socialFriendOrFoe: UInt8
+    let socialAttraction: UInt8
+    let socialFamiliarity: UInt16
+    let socialRelationship: UInt8
+    let territoryFamiliarity: UInt8
+    let observerTerritoryFamiliarity: UInt8
+}
+
+private func immersiveApeMeetingBehavior(
+    mode: ImmersiveApeEncounterMode,
+    distance: Float
+) -> ImmersiveApeMeetingBehavior? {
+    let closeness = immersiveApeClamp(1 - (distance / 18), min: 0, max: 1)
+
+    switch mode {
+    case .conversation:
+        let settled = closeness > 0.58
+        return ImmersiveApeMeetingBehavior(
+            summaryLead: settled ? "Trading calls with" : "Closing to exchange with",
+            panelLabel: settled ? "Call exchange" : "Closing to exchange",
+            storyLead: settled ? "trading calls with" : "closing to exchange with",
+            strength: 0.34 + (closeness * 0.66),
+            corridorRadius: 0.2 + (closeness * 0.1),
+            targetRadius: 0.32 + (closeness * 0.12),
+            handSpreadScale: 1.04,
+            handForwardDelta: 0.05 + (closeness * 0.03),
+            handHeightDelta: 0.04 + (closeness * 0.03),
+            chestForwardDelta: 0.026 + (closeness * 0.02),
+            targetDistanceDelta: -0.26 - (closeness * 0.56),
+            targetDropDelta: -0.02 + (closeness * 0.04),
+            fieldOfViewDelta: 0.3
+        )
+    case .conflict:
+        let settled = closeness > 0.5
+        return ImmersiveApeMeetingBehavior(
+            summaryLead: settled ? "Bracing against" : "Closing tension with",
+            panelLabel: settled ? "Bracing clash" : "Closing tension",
+            storyLead: settled ? "bracing against" : "closing tension with",
+            strength: 0.42 + (closeness * 0.58),
+            corridorRadius: 0.24 + (closeness * 0.14),
+            targetRadius: 0.36 + (closeness * 0.14),
+            handSpreadScale: 1.16,
+            handForwardDelta: 0.12 + (closeness * 0.08),
+            handHeightDelta: 0.08 + (closeness * 0.05),
+            chestForwardDelta: 0.05 + (closeness * 0.04),
+            targetDistanceDelta: 0.7 + (closeness * 0.34),
+            targetDropDelta: 0.06,
+            fieldOfViewDelta: 1.8
+        )
+    case .grooming:
+        let settled = closeness > 0.54
+        return ImmersiveApeMeetingBehavior(
+            summaryLead: settled ? "Settling to groom with" : "Closing to groom with",
+            panelLabel: settled ? "Settling to groom" : "Closing to groom",
+            storyLead: settled ? "settling to groom with" : "closing to groom with",
+            strength: 0.4 + (closeness * 0.6),
+            corridorRadius: 0.18 + (closeness * 0.1),
+            targetRadius: 0.3 + (closeness * 0.12),
+            handSpreadScale: 0.82,
+            handForwardDelta: 0.08 + (closeness * 0.08),
+            handHeightDelta: -0.01 + (closeness * 0.02),
+            chestForwardDelta: 0.04 + (closeness * 0.03),
+            targetDistanceDelta: -0.82 - (closeness * 0.62),
+            targetDropDelta: -0.08 - (closeness * 0.08),
+            fieldOfViewDelta: -0.6
+        )
+    case .courtship:
+        let settled = closeness > 0.48
+        return ImmersiveApeMeetingBehavior(
+            summaryLead: settled ? "Circling in courtship around" : "Drawing into courtship with",
+            panelLabel: settled ? "Courtship orbit" : "Drawing into courtship",
+            storyLead: settled ? "circling in courtship around" : "drawing into courtship with",
+            strength: 0.36 + (closeness * 0.64),
+            corridorRadius: 0.22 + (closeness * 0.12),
+            targetRadius: 0.34 + (closeness * 0.14),
+            handSpreadScale: 0.96,
+            handForwardDelta: 0.03 + (closeness * 0.04),
+            handHeightDelta: 0.02 + (closeness * 0.02),
+            chestForwardDelta: 0.038 + (closeness * 0.028),
+            targetDistanceDelta: -0.42 - (closeness * 0.34),
+            targetDropDelta: -0.03,
+            fieldOfViewDelta: 0.2
+        )
+    case .companionship:
+        let settled = closeness > 0.52
+        return ImmersiveApeMeetingBehavior(
+            summaryLead: settled ? "Keeping company with" : "Drawing together with",
+            panelLabel: settled ? "Keeping company" : "Drawing together",
+            storyLead: settled ? "keeping company with" : "drawing together with",
+            strength: 0.3 + (closeness * 0.58),
+            corridorRadius: 0.2 + (closeness * 0.08),
+            targetRadius: 0.3 + (closeness * 0.1),
+            handSpreadScale: 1.0,
+            handForwardDelta: 0.02 + (closeness * 0.03),
+            handHeightDelta: 0.01 + (closeness * 0.02),
+            chestForwardDelta: 0.02 + (closeness * 0.02),
+            targetDistanceDelta: 0.22 - (closeness * 0.42),
+            targetDropDelta: -0.02,
+            fieldOfViewDelta: 0.4
+        )
+    case .presence:
+        return nil
+    }
+}
+
+private func immersiveApeMeetingBehavior(focus: ImmersiveApeAttentionFocus) -> ImmersiveApeMeetingBehavior? {
+    guard let mode = immersiveApeEncounterMode(attentionKind: focus.kind) else {
+        return nil
+    }
+
+    return immersiveApeMeetingBehavior(mode: mode, distance: focus.distance)
+}
+
+private func immersiveApeIsSpeaking(_ being: shared_immersiveape_being_snapshot) -> Bool {
+    being.speaking != 0
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SPEAKING))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+}
+
+private func immersiveApeIsShouting(_ being: shared_immersiveape_being_snapshot) -> Bool {
+    immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+}
+
+private func immersiveApeEncounterSpeechBehavior(
+    selected: shared_immersiveape_being_snapshot,
+    encounter: ImmersiveApeEncounter,
+    kind: ImmersiveApeAttentionKind? = nil
+) -> ImmersiveApeSpeechBehavior? {
+    let selectedSpeaking = immersiveApeIsSpeaking(selected)
+    let nearbySpeaking = immersiveApeIsSpeaking(encounter.ape)
+    let shouting = immersiveApeIsShouting(selected) || immersiveApeIsShouting(encounter.ape)
+    let closeness = immersiveApeClamp(1 - (encounter.distance / 20), min: 0, max: 1)
+    let voiceStrength = 0.26
+        + (closeness * 0.34)
+        + (selectedSpeaking ? 0.14 : 0)
+        + (nearbySpeaking ? 0.14 : 0)
+        + (shouting ? 0.14 : 0)
+    let strength = immersiveApeClamp(voiceStrength, min: 0.22, max: 1.0)
+    let mode = kind.flatMap { immersiveApeEncounterMode(attentionKind: $0) } ?? encounter.mode
+
+    switch mode {
+    case .conversation:
+        return ImmersiveApeSpeechBehavior(
+            summaryLead: shouting ? "Shouting across to" : "Exchanging calls with",
+            panelLabel: shouting ? "Shouted exchange" : "Call exchange",
+            storyLead: shouting ? "shouting across to" : "exchanging calls with",
+            strength: strength,
+            laneRadius: 0.08 + (strength * 0.04),
+            plumeLength: 0.26 + (strength * 0.16),
+            rippleRadius: 0.14 + (strength * 0.08),
+            shouting: shouting
+        )
+    case .conflict:
+        guard selectedSpeaking || nearbySpeaking || shouting else {
+            return nil
+        }
+
+        return ImmersiveApeSpeechBehavior(
+            summaryLead: shouting ? "Throwing a threat call at" : "Pressing a hostile call toward",
+            panelLabel: shouting ? "Threat call" : "Hostile exchange",
+            storyLead: shouting ? "throwing a threat call at" : "pressing a hostile call toward",
+            strength: immersiveApeClamp(strength + 0.08, min: 0.28, max: 1.0),
+            laneRadius: 0.1 + (strength * 0.05),
+            plumeLength: 0.3 + (strength * 0.2),
+            rippleRadius: 0.16 + (strength * 0.1),
+            shouting: true
+        )
+    case .grooming:
+        guard selectedSpeaking || nearbySpeaking else {
+            return nil
+        }
+
+        return ImmersiveApeSpeechBehavior(
+            summaryLead: "Settling into chatter with",
+            panelLabel: "Grooming chatter",
+            storyLead: "settling into chatter with",
+            strength: immersiveApeClamp(strength * 0.84, min: 0.22, max: 0.82),
+            laneRadius: 0.06 + (strength * 0.03),
+            plumeLength: 0.2 + (strength * 0.08),
+            rippleRadius: 0.1 + (strength * 0.04),
+            shouting: false
+        )
+    case .courtship:
+        guard selectedSpeaking || nearbySpeaking else {
+            return nil
+        }
+
+        return ImmersiveApeSpeechBehavior(
+            summaryLead: "Calling toward",
+            panelLabel: "Courtship call",
+            storyLead: "calling toward",
+            strength: immersiveApeClamp(strength * 0.88, min: 0.22, max: 0.88),
+            laneRadius: 0.07 + (strength * 0.03),
+            plumeLength: 0.24 + (strength * 0.1),
+            rippleRadius: 0.12 + (strength * 0.05),
+            shouting: false
+        )
+    case .companionship:
+        guard selectedSpeaking || nearbySpeaking else {
+            return nil
+        }
+
+        return ImmersiveApeSpeechBehavior(
+            summaryLead: "Keeping contact with",
+            panelLabel: "Contact call",
+            storyLead: "keeping contact with",
+            strength: immersiveApeClamp(strength * 0.8, min: 0.2, max: 0.76),
+            laneRadius: 0.06 + (strength * 0.025),
+            plumeLength: 0.22 + (strength * 0.08),
+            rippleRadius: 0.11 + (strength * 0.04),
+            shouting: false
+        )
+    case .presence:
+        return nil
+    }
+}
+
+private func immersiveApeEncounterMemoryBehavior(
+    familiarity: UInt16,
+    friendOrFoe: UInt8,
+    attraction: UInt8,
+    relationship: UInt8
+) -> ImmersiveApeMemoryBehavior? {
+    let familiarityWeight = sqrt(immersiveApeClamp(Float(familiarity) / 640, min: 0, max: 1))
+    let respectDelta = (Float(friendOrFoe) - 127) / 128
+    let attractionWeight = Float(attraction) / 255
+    let isKin = relationship > 1
+
+    func behavior(
+        panelLabel: String,
+        storyLead: String,
+        strength: Float,
+        laneRadius: Float,
+        orbitRadius: Float,
+        trailOffset: Float,
+        echoCount: Int,
+        color: SIMD4<Float>
+    ) -> ImmersiveApeMemoryBehavior {
+        ImmersiveApeMemoryBehavior(
+            panelLabel: panelLabel,
+            storyLead: storyLead,
+            strength: immersiveApeClamp(strength, min: 0.22, max: 1.0),
+            laneRadius: laneRadius,
+            orbitRadius: orbitRadius,
+            trailOffset: trailOffset,
+            echoCount: echoCount,
+            color: color
+        )
+    }
+
+    if isKin {
+        let strength = 0.42 + (familiarityWeight * 0.42)
+        return behavior(
+            panelLabel: "Kin memory",
+            storyLead: "a kin trace",
+            strength: strength,
+            laneRadius: 0.06 + (strength * 0.024),
+            orbitRadius: 0.14 + (strength * 0.08),
+            trailOffset: 0.12 + (strength * 0.06),
+            echoCount: 5,
+            color: SIMD4<Float>(0.98, 0.84, 0.58, 0.12)
+        )
+    }
+
+    if attractionWeight > 0.2 {
+        let strength = 0.3 + (familiarityWeight * 0.24) + (attractionWeight * 0.38)
+        return behavior(
+            panelLabel: "Drawn memory",
+            storyLead: "a drawn trace",
+            strength: strength,
+            laneRadius: 0.056 + (strength * 0.024),
+            orbitRadius: 0.13 + (strength * 0.08),
+            trailOffset: 0.11 + (strength * 0.06),
+            echoCount: 4,
+            color: SIMD4<Float>(1.0, 0.72, 0.76, 0.12)
+        )
+    }
+
+    if familiarityWeight > 0.18 && respectDelta < -0.18 {
+        let strength = 0.32 + (familiarityWeight * 0.28) + (abs(respectDelta) * 0.34)
+        return behavior(
+            panelLabel: "Tense memory",
+            storyLead: "a tense trace",
+            strength: strength,
+            laneRadius: 0.058 + (strength * 0.026),
+            orbitRadius: 0.12 + (strength * 0.07),
+            trailOffset: 0.11 + (strength * 0.08),
+            echoCount: 4,
+            color: SIMD4<Float>(1.0, 0.54, 0.36, 0.12)
+        )
+    }
+
+    if familiarityWeight > 0.18 && respectDelta > 0.12 {
+        let strength = 0.28 + (familiarityWeight * 0.3) + (respectDelta * 0.28)
+        return behavior(
+            panelLabel: "Trusted memory",
+            storyLead: "a trusted trace",
+            strength: strength,
+            laneRadius: 0.054 + (strength * 0.022),
+            orbitRadius: 0.12 + (strength * 0.07),
+            trailOffset: 0.1 + (strength * 0.06),
+            echoCount: 4,
+            color: SIMD4<Float>(0.62, 0.86, 1.0, 0.11)
+        )
+    }
+
+    if familiarityWeight > 0.12 {
+        let strength = 0.24 + (familiarityWeight * 0.28)
+        return behavior(
+            panelLabel: "Familiar trace",
+            storyLead: "a familiar trace",
+            strength: strength,
+            laneRadius: 0.05 + (strength * 0.02),
+            orbitRadius: 0.11 + (strength * 0.06),
+            trailOffset: 0.09 + (strength * 0.05),
+            echoCount: 3,
+            color: SIMD4<Float>(0.88, 0.93, 1.0, 0.1)
+        )
+    }
+
+    return nil
+}
+
+private func immersiveApeEncounterMemoryBehavior(encounter: ImmersiveApeEncounter) -> ImmersiveApeMemoryBehavior? {
+    immersiveApeEncounterMemoryBehavior(
+        familiarity: encounter.ape.social_familiarity,
+        friendOrFoe: encounter.ape.social_friend_foe,
+        attraction: encounter.ape.social_attraction,
+        relationship: encounter.ape.social_relationship
+    )
+}
+
+private func immersiveApeEncounterTerritoryBehavior(
+    observerFamiliarity: UInt8,
+    territoryFamiliarity: UInt8
+) -> ImmersiveApeTerritoryBehavior? {
+    let observerWeight = Float(observerFamiliarity) / 255
+    let territoryWeight = Float(territoryFamiliarity) / 255
+    let strongestWeight = max(observerWeight, territoryWeight)
+    let familiarityDelta = observerWeight - territoryWeight
+    let difference = abs(familiarityDelta)
+
+    guard strongestWeight >= 0.18 else {
+        return nil
+    }
+
+    let strength = immersiveApeClamp(
+        (strongestWeight * 0.72) + (difference * 0.44),
+        min: 0.26,
+        max: 1.0
+    )
+
+    func behavior(
+        summaryLead: String,
+        panelLabel: String,
+        storyLead: String,
+        color: SIMD4<Float>
+    ) -> ImmersiveApeTerritoryBehavior {
+        ImmersiveApeTerritoryBehavior(
+            summaryLead: summaryLead,
+            panelLabel: panelLabel,
+            storyLead: storyLead,
+            strength: strength,
+            ringRadius: 0.22 + (strength * 0.16),
+            laneRadius: 0.08 + (strength * 0.04),
+            bodyRadius: 0.1 + (strength * 0.05),
+            color: color
+        )
+    }
+
+    if observerWeight >= 0.56 && territoryWeight >= 0.56 {
+        return behavior(
+            summaryLead: "shared ground",
+            panelLabel: "Shared Ground",
+            storyLead: "shared ground under both apes",
+            color: SIMD4<Float>(0.7, 0.92, 0.76, 0.12)
+        )
+    }
+
+    if observerWeight >= 0.62 && territoryWeight < 0.32 {
+        return behavior(
+            summaryLead: "home ground",
+            panelLabel: "Home Ground",
+            storyLead: "known ground holding with the selected ape",
+            color: SIMD4<Float>(0.58, 0.82, 1.0, 0.12)
+        )
+    }
+
+    if territoryWeight >= 0.62 && observerWeight < 0.32 {
+        return behavior(
+            summaryLead: "their ground",
+            panelLabel: "Their Ground",
+            storyLead: "the encounter leaning into the other ape's ground",
+            color: SIMD4<Float>(1.0, 0.68, 0.4, 0.12)
+        )
+    }
+
+    if difference < 0.14 {
+        return behavior(
+            summaryLead: "border ground",
+            panelLabel: "Border Ground",
+            storyLead: "a boundary line holding under the encounter",
+            color: SIMD4<Float>(0.92, 0.86, 0.58, 0.1)
+        )
+    }
+
+    if familiarityDelta > 0 {
+        return behavior(
+            summaryLead: "known edge",
+            panelLabel: "Known Edge",
+            storyLead: "known ground thinning into an edge",
+            color: SIMD4<Float>(0.66, 0.84, 1.0, 0.11)
+        )
+    }
+
+    return behavior(
+        summaryLead: "crossing edge",
+        panelLabel: "Crossing Edge",
+        storyLead: "the path crossing into the other ape's stronger ground",
+        color: SIMD4<Float>(0.98, 0.62, 0.32, 0.11)
+    )
+}
+
+private func immersiveApeEncounterTerritoryBehavior(encounter: ImmersiveApeEncounter) -> ImmersiveApeTerritoryBehavior? {
+    immersiveApeEncounterTerritoryBehavior(
+        observerFamiliarity: encounter.ape.observer_territory_familiarity,
+        territoryFamiliarity: encounter.ape.territory_familiarity
+    )
+}
+
+private func immersiveApeEncounterTerritoryBehavior(focus: ImmersiveApeAttentionFocus) -> ImmersiveApeTerritoryBehavior? {
+    immersiveApeEncounterTerritoryBehavior(
+        observerFamiliarity: focus.observerTerritoryFamiliarity,
+        territoryFamiliarity: focus.territoryFamiliarity
+    )
+}
+
+private func immersiveApeTerritoryStoryTail(_ behavior: ImmersiveApeTerritoryBehavior?) -> String {
+    guard let behavior else {
+        return ""
+    }
+
+    return " Territory pressure now reads as \(behavior.storyLead)."
+}
+
+private func immersiveApeEncounterMemoryBehavior(focus: ImmersiveApeAttentionFocus) -> ImmersiveApeMemoryBehavior? {
+    immersiveApeEncounterMemoryBehavior(
+        familiarity: focus.socialFamiliarity,
+        friendOrFoe: focus.socialFriendOrFoe,
+        attraction: focus.socialAttraction,
+        relationship: focus.socialRelationship
+    )
 }
 
 private struct ImmersiveApeEmbodimentProfile {
@@ -406,6 +964,24 @@ private struct ImmersiveApeEmbodimentProfile {
     var chestAlpha: Float
     var fieldOfView: Float
     var renderHands: Bool
+}
+
+private struct ImmersiveApeForagingPosture {
+    let eyeHeightDelta: Float
+    let targetDistanceDelta: Float
+    let targetDropDelta: Float
+    let handSpreadScale: Float
+    let handForwardDelta: Float
+    let handHeightDelta: Float
+    let elbowDropDelta: Float
+    let chestForwardDelta: Float
+    let chestHeightDelta: Float
+    let fieldOfViewDelta: Float
+    let leadHandForwardDelta: Float
+    let leadHandHeightDelta: Float
+    let supportHandForwardDelta: Float
+    let supportHandHeightDelta: Float
+    let handInwardBias: Float
 }
 
 private struct ImmersiveApeBodyProfile {
@@ -541,6 +1117,12 @@ private struct ImmersiveApeAvatarSkeleton {
     let footHeight: Float
 }
 
+private struct ImmersiveApeTerrainPose {
+    let up: SIMD3<Float>
+    let forward: SIMD3<Float>
+    let right: SIMD3<Float>
+}
+
 private struct ImmersiveApeExtremityProfile {
     let palmLength: Float
     let palmRadius: Float
@@ -557,6 +1139,37 @@ private struct ImmersiveApeExtremityProfile {
     let toeRadius: Float
     let toeSpread: Float
     let archLift: Float
+}
+
+private struct ImmersiveApeFacialProfile {
+    let eyeRadius: Float
+    let eyeSpacing: Float
+    let eyeForward: Float
+    let eyeLift: Float
+    let eyeHeightScale: Float
+    let pupilRadius: Float
+    let pupilForward: Float
+    let gazeSide: Float
+    let gazeLift: Float
+    let headTurnSide: Float
+    let headTurnLift: Float
+    let earRadius: Float
+    let earSpread: Float
+    let earLift: Float
+    let earTilt: Float
+    let browLift: Float
+    let browPinch: Float
+    let cheekRadius: Float
+    let cheekSpread: Float
+    let cheekLift: Float
+    let jawWidth: Float
+    let jawHeight: Float
+    let jawForward: Float
+    let jawDrop: Float
+    let lipRadius: Float
+    let nostrilRadius: Float
+    let nostrilSpread: Float
+    let blink: Float
 }
 
 private struct ImmersiveApeTerrainGrid {
@@ -794,7 +1407,7 @@ private struct ImmersiveApeFloraPosture {
 
 private let immersiveApeWorldScale: Float = 0.04
 private let immersiveApeHeightScale: Float = 0.08
-private let immersiveApeCurrentDevelopmentCycle: Int = 36
+private let immersiveApeCurrentDevelopmentCycle: Int = 54
 
 @MainActor
 private final class ImmersiveApeSimulationController {
@@ -812,7 +1425,7 @@ private final class ImmersiveApeSimulationController {
 
         let interval = shared.timeInterval()
         let derivedFPS = interval > 0 ? Int(round(1.0 / interval)) : 60
-        preferredFramesPerSecond = max(24, min(60, derivedFPS))
+        preferredFramesPerSecond = max(30, min(60, derivedFPS))
 
         primeInitialPopulation()
     }
@@ -885,16 +1498,110 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
     private let hudUpdater: (ImmersiveApeHUDState) -> Void
     private let quitHandler: () -> Void
 
-    private let terrainResolution = 56
+    private let minimumFramesPerSecond = 30
     private let terrainHalfExtent: Int32 = 1664
-    private let terrainInterpolationSubdivisions = 3
-    private let maxNearby = 12
-    private let maxFood = 20
+    private let performanceSampleDuration: TimeInterval = 0.75
+    private let qualityStepCooldown: TimeInterval = 1.0
+    private let qualityRecoveryDuration: TimeInterval = 4.0
     private let worldScale: Float = immersiveApeWorldScale
     private let heightScale: Float = immersiveApeHeightScale
+    private static let renderQualityPresets = [
+        ImmersiveApeRenderQuality(
+            label: "Full",
+            terrainResolution: 48,
+            terrainInterpolationSubdivisions: 2,
+            landformSampleStride: 4,
+            waterReflectionSampleStride: 3,
+            vegetationSampleStride: 5,
+            maxNearby: 8,
+            maxFood: 14,
+            cloudBudgetMultiplier: 1.0,
+            starBudgetMultiplier: 1.0,
+            includeLandformDetails: true,
+            includeWaterReflections: true,
+            includeVegetation: true,
+            includeSocialContext: true,
+            includeAttentionGuide: true,
+            includeSky: true,
+            includeWeatherEffects: true,
+            meshBuildInterval: 1
+        ),
+        ImmersiveApeRenderQuality(
+            label: "Balanced",
+            terrainResolution: 40,
+            terrainInterpolationSubdivisions: 2,
+            landformSampleStride: 5,
+            waterReflectionSampleStride: 4,
+            vegetationSampleStride: 6,
+            maxNearby: 6,
+            maxFood: 10,
+            cloudBudgetMultiplier: 0.45,
+            starBudgetMultiplier: 0.45,
+            includeLandformDetails: true,
+            includeWaterReflections: false,
+            includeVegetation: true,
+            includeSocialContext: false,
+            includeAttentionGuide: true,
+            includeSky: true,
+            includeWeatherEffects: false,
+            meshBuildInterval: 1
+        ),
+        ImmersiveApeRenderQuality(
+            label: "Lean",
+            terrainResolution: 28,
+            terrainInterpolationSubdivisions: 1,
+            landformSampleStride: 6,
+            waterReflectionSampleStride: 5,
+            vegetationSampleStride: 8,
+            maxNearby: 3,
+            maxFood: 6,
+            cloudBudgetMultiplier: 0.18,
+            starBudgetMultiplier: 0.18,
+            includeLandformDetails: false,
+            includeWaterReflections: false,
+            includeVegetation: false,
+            includeSocialContext: false,
+            includeAttentionGuide: false,
+            includeSky: false,
+            includeWeatherEffects: false,
+            meshBuildInterval: 2
+        ),
+        ImmersiveApeRenderQuality(
+            label: "Emergency",
+            terrainResolution: 20,
+            terrainInterpolationSubdivisions: 1,
+            landformSampleStride: 8,
+            waterReflectionSampleStride: 6,
+            vegetationSampleStride: 10,
+            maxNearby: 1,
+            maxFood: 4,
+            cloudBudgetMultiplier: 0,
+            starBudgetMultiplier: 0,
+            includeLandformDetails: false,
+            includeWaterReflections: false,
+            includeVegetation: false,
+            includeSocialContext: false,
+            includeAttentionGuide: false,
+            includeSky: false,
+            includeWeatherEffects: false,
+            meshBuildInterval: 3
+        )
+    ]
 
     private var smoothedEye = SIMD3<Float>(0, 1.7, -0.25)
     private var smoothedTarget = SIMD3<Float>(0, 1.45, 9)
+    private var activeQualityIndex: Int
+    private var measuredFramesPerSecond: Double = 30
+    private var frameSampleStartTime: TimeInterval?
+    private var sampledFrameCount = 0
+    private var lastQualityShiftTime: TimeInterval = 0
+    private var qualityRecoveryStartTime: TimeInterval?
+    private var preparedFrameCache: ImmersiveApePreparedFrame?
+    private var framesSinceSceneBuild = 0
+
+    private var currentQuality: ImmersiveApeRenderQuality {
+        Self.renderQualityPresets[activeQualityIndex]
+    }
 
     init(
         view: MTKView,
@@ -915,6 +1622,8 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         self.hudUpdater = hudUpdater
         self.quitHandler = quitHandler
         self.simulation = try ImmersiveApeSimulationController()
+        self.activeQualityIndex = Self.renderQualityPresets.count - 1
+        self.measuredFramesPerSecond = Double(minimumFramesPerSecond)
 
         let library: MTLLibrary
         do {
@@ -968,6 +1677,8 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
     }
 
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        preparedFrameCache = nil
+        framesSinceSceneBuild = 0
     }
 
     func draw(in view: MTKView) {
@@ -980,7 +1691,19 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             return
         }
 
-        guard let capture = captureScene() else {
+        updatePerformanceState(at: ProcessInfo.processInfo.systemUptime)
+        let performanceReadout = performanceHUDString()
+        let preparedFrame: ImmersiveApePreparedFrame
+        if shouldReusePreparedFrame(), let cachedPreparedFrame = preparedFrameCache {
+            preparedFrame = cachedPreparedFrame
+            framesSinceSceneBuild += 1
+        } else if let newlyPreparedFrame = prepareFrame(drawableSize: view.drawableSize, performance: performanceReadout) {
+            preparedFrame = newlyPreparedFrame
+            preparedFrameCache = newlyPreparedFrame
+            framesSinceSceneBuild = 0
+        } else {
+            preparedFrameCache = nil
+            framesSinceSceneBuild = 0
             renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.03, green: 0.05, blue: 0.08, alpha: 1)
             renderPassDescriptor.depthAttachment.clearDepth = 1
 
@@ -994,6 +1717,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                     headline: "Immersive Ape",
                     status: "No ape is currently selected in the simulation.",
                     detail: "The immersive camera will lock on as soon as a simulated ape becomes the active selection.",
+                    performance: performanceReadout,
                     story: "The immersive view is standing by for the next ape perspective.",
                     encounters: "No nearby encounters yet.\nSelect another ape with [ or ] if the current focus is unavailable.",
                     footer: "Esc quit  [ ] switch ape  Space pause"
@@ -1002,15 +1726,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             return
         }
 
-        let environment = makeEnvironment(from: capture.snapshot)
-        let renderPacket = buildRenderPacket(from: capture, environment: environment, drawableSize: view.drawableSize)
-
-        renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(
-            red: Double(environment.clearColor.x),
-            green: Double(environment.clearColor.y),
-            blue: Double(environment.clearColor.z),
-            alpha: 1.0
-        )
+        renderPassDescriptor.colorAttachments[0].clearColor = preparedFrame.clearColor
         renderPassDescriptor.depthAttachment.clearDepth = 1
 
         guard let commandBuffer = commandQueue.makeCommandBuffer(),
@@ -1019,12 +1735,12 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             return
         }
 
-        var uniforms = renderPacket.uniforms
+        var uniforms = preparedFrame.uniforms
 
         encoder.setCullMode(.back)
         encoder.setFrontFacing(.counterClockwise)
 
-        if let opaque = renderPacket.opaque {
+        if let opaque = preparedFrame.opaque {
             encoder.setRenderPipelineState(opaquePipeline)
             encoder.setDepthStencilState(opaqueDepthState)
             encoder.setVertexBuffer(opaque.vertexBuffer, offset: 0, index: 0)
@@ -1039,7 +1755,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             )
         }
 
-        if let transparent = renderPacket.transparent {
+        if let transparent = preparedFrame.transparent {
             encoder.setRenderPipelineState(transparentPipeline)
             encoder.setDepthStencilState(transparentDepthState)
             encoder.setVertexBuffer(transparent.vertexBuffer, offset: 0, index: 0)
@@ -1059,7 +1775,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         commandBuffer.present(drawable)
         commandBuffer.commit()
 
-        hudUpdater(immersiveApeHUDState(for: capture, paused: simulation.isPaused))
+        hudUpdater(hudState(preparedFrame.hudState, withPerformance: performanceReadout))
     }
 
     private func configure(view: MTKView) {
@@ -1067,10 +1783,140 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         view.colorPixelFormat = .bgra8Unorm
         view.depthStencilPixelFormat = .depth32Float
         view.clearColor = MTLClearColor(red: 0.02, green: 0.03, blue: 0.05, alpha: 1)
-        view.preferredFramesPerSecond = simulation.preferredFramesPerSecond
+        view.preferredFramesPerSecond = minimumFramesPerSecond
         view.enableSetNeedsDisplay = false
         view.isPaused = false
         view.framebufferOnly = false
+    }
+
+    private func shouldReusePreparedFrame() -> Bool {
+        currentQuality.meshBuildInterval > 1
+            && preparedFrameCache != nil
+            && framesSinceSceneBuild < (currentQuality.meshBuildInterval - 1)
+    }
+
+    private func prepareFrame(drawableSize: CGSize, performance: String) -> ImmersiveApePreparedFrame? {
+        guard let capture = captureScene() else {
+            return nil
+        }
+
+        let environment = makeEnvironment(from: capture.snapshot)
+        let referenceHeight = capture.snapshot.selected.z * heightScale
+        let grid = makeTerrainGrid(from: capture, referenceHeight: referenceHeight)
+        let biomeDNA = immersiveApeBiomeDNAProfile(
+            selected: capture.snapshot.selected,
+            selectedIndex: Int32(capture.snapshot.selected_index),
+            worldSeed: capture.snapshot.world_seed
+        )
+        let resolvedCapture = resolveSceneCapture(from: capture, grid: grid, dnaProfile: biomeDNA)
+        let renderPacket = buildRenderPacket(
+            from: resolvedCapture,
+            grid: grid,
+            environment: environment,
+            drawableSize: drawableSize
+        )
+
+        return ImmersiveApePreparedFrame(
+            opaque: renderPacket.opaque,
+            transparent: renderPacket.transparent,
+            uniforms: renderPacket.uniforms,
+            clearColor: MTLClearColor(
+                red: Double(environment.clearColor.x),
+                green: Double(environment.clearColor.y),
+                blue: Double(environment.clearColor.z),
+                alpha: 1.0
+            ),
+            hudState: immersiveApeHUDState(for: resolvedCapture, paused: simulation.isPaused, performance: performance)
+        )
+    }
+
+    private func hudState(_ state: ImmersiveApeHUDState, withPerformance performance: String) -> ImmersiveApeHUDState {
+        ImmersiveApeHUDState(
+            headline: state.headline,
+            status: state.status,
+            detail: state.detail,
+            performance: performance,
+            story: state.story,
+            encounters: state.encounters,
+            footer: state.footer
+        )
+    }
+
+    private func updatePerformanceState(at timestamp: TimeInterval) {
+        guard let frameSampleStartTime else {
+            self.frameSampleStartTime = timestamp
+            sampledFrameCount = 1
+            return
+        }
+
+        sampledFrameCount += 1
+        let elapsed = timestamp - frameSampleStartTime
+
+        guard elapsed >= performanceSampleDuration else {
+            return
+        }
+
+        measuredFramesPerSecond = Double(sampledFrameCount) / elapsed
+        sampledFrameCount = 0
+        self.frameSampleStartTime = timestamp
+        rebalanceRenderQuality(at: timestamp)
+    }
+
+    private func rebalanceRenderQuality(at timestamp: TimeInterval) {
+        let floorFPS = Double(minimumFramesPerSecond)
+        let canShiftQuality = (timestamp - lastQualityShiftTime) >= qualityStepCooldown
+
+        if measuredFramesPerSecond < (floorFPS - 0.5) {
+            qualityRecoveryStartTime = nil
+
+            guard canShiftQuality, activeQualityIndex < (Self.renderQualityPresets.count - 1) else {
+                return
+            }
+
+            activeQualityIndex += 1
+            lastQualityShiftTime = timestamp
+            preparedFrameCache = nil
+            framesSinceSceneBuild = 0
+            return
+        }
+
+        guard measuredFramesPerSecond >= (floorFPS + 8) else {
+            qualityRecoveryStartTime = nil
+            return
+        }
+
+        if qualityRecoveryStartTime == nil {
+            qualityRecoveryStartTime = timestamp
+        }
+
+        guard
+            canShiftQuality,
+            activeQualityIndex > 0,
+            let qualityRecoveryStartTime,
+            (timestamp - qualityRecoveryStartTime) >= qualityRecoveryDuration
+        else {
+            return
+        }
+
+        activeQualityIndex -= 1
+        lastQualityShiftTime = timestamp
+        self.qualityRecoveryStartTime = nil
+        preparedFrameCache = nil
+        framesSinceSceneBuild = 0
+    }
+
+    private func performanceHUDString() -> String {
+        let qualityLabel = measuredFramesPerSecond < Double(minimumFramesPerSecond)
+            ? "\(currentQuality.label) • Recovering"
+            : currentQuality.label
+        return String(
+            format: "FPS %.1f  •  Target %d  •  Floor %d  •  Quality %@  •  Mesh x%d",
+            measuredFramesPerSecond,
+            minimumFramesPerSecond,
+            minimumFramesPerSecond,
+            qualityLabel,
+            currentQuality.meshBuildInterval
+        )
     }
 
     private static func makeVertexDescriptor() -> MTLVertexDescriptor {
@@ -1127,17 +1973,19 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
     private func captureScene() -> ImmersiveApeSceneCapture? {
         var scene = shared_immersiveape_scene_snapshot()
-        var nearby = Array(repeating: shared_immersiveape_being_snapshot(), count: maxNearby)
-        var foods = Array(repeating: shared_immersiveape_food_snapshot(), count: maxFood)
+        let quality = currentQuality
+        let terrainResolution = quality.terrainResolution
+        var nearby = Array(repeating: shared_immersiveape_being_snapshot(), count: quality.maxNearby)
+        var foods = Array(repeating: shared_immersiveape_food_snapshot(), count: quality.maxFood)
 
         let sceneReady = nearby.withUnsafeMutableBufferPointer { nearbyPointer in
             foods.withUnsafeMutableBufferPointer { foodPointer in
                 shared_immersiveape_capture_scene(
                     &scene,
                     nearbyPointer.baseAddress,
-                    Int32(maxNearby),
+                    Int32(quality.maxNearby),
                     foodPointer.baseAddress,
-                    Int32(maxFood)
+                    Int32(quality.maxFood)
                 )
             }
         }
@@ -1171,8 +2019,8 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             }
         }
 
-        let nearbyCount = min(Int(scene.nearby_count), maxNearby)
-        let foodCount = min(Int(scene.food_count), maxFood)
+        let nearbyCount = min(Int(scene.nearby_count), quality.maxNearby)
+        let foodCount = min(Int(scene.food_count), quality.maxFood)
         let referenceHeight = scene.selected.z * heightScale
         let nearbySlice = Array(nearby.prefix(nearbyCount))
         let nearbyNames = nearbySlice.map { immersiveApeNearbyName(for: $0.index) }
@@ -1194,9 +2042,404 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             materials: materials,
             clouds: clouds,
             waterHeights: waterHeights,
+            terrainResolution: terrainResolution,
             selectedName: immersiveApeSelectedName(index: Int(scene.selected_index)),
             apeCount: Int(shared_being_number())
         )
+    }
+
+    private func resolveSceneCapture(
+        from capture: ImmersiveApeSceneCapture,
+        grid: ImmersiveApeTerrainGrid,
+        dnaProfile: ImmersiveApeBiomeDNAProfile
+    ) -> ImmersiveApeSceneCapture {
+        guard !capture.nearby.isEmpty else {
+            return capture
+        }
+
+        let rawPositions = capture.nearbyLocalPositions
+        let foodPositions = localFoodPositions(for: capture)
+        let foodClearanceRadii = capture.foods.map { immersiveApeFoodClearanceRadius(for: $0) }
+        let nearbyRadii = capture.nearby.map { immersiveApeSceneApeRadius(for: $0) }
+        let swimmingStates = capture.nearby.map {
+            immersiveApeHasState($0.state, immersiveApeStateFlag(BEING_STATE_SWIMMING))
+        }
+        let selectedRadius = immersiveApeSceneApeRadius(for: capture.snapshot.selected) + 0.14
+        var resolvedPositions = capture.nearby.indices.map { index in
+            immersiveApeProjectedScenePosition(
+                rawPositions[index],
+                radius: nearbyRadii[index],
+                swimming: swimmingStates[index],
+                grid: grid
+            )
+        }
+
+        for iteration in 0..<14 {
+            let currentPositions = resolvedPositions
+            var updatedPositions = currentPositions
+
+            for index in capture.nearby.indices {
+                let radius = nearbyRadii[index]
+                let swimming = swimmingStates[index]
+                let rawPlanarPosition = SIMD2<Float>(rawPositions[index].x, rawPositions[index].z)
+                var planarPosition = SIMD2<Float>(currentPositions[index].x, currentPositions[index].z)
+                var repulsion = immersiveApeSceneRepulsionVector(
+                    from: SIMD2<Float>(0, 0),
+                    to: planarPosition,
+                    minimumDistance: selectedRadius + radius + 0.08,
+                    seed: Float((index + 1) * 97)
+                )
+
+                for foodIndex in foodPositions.indices {
+                    let foodPlanarPosition = SIMD2<Float>(foodPositions[foodIndex].x, foodPositions[foodIndex].z)
+                    repulsion += immersiveApeSceneRepulsionVector(
+                        from: foodPlanarPosition,
+                        to: planarPosition,
+                        minimumDistance: radius + foodClearanceRadii[foodIndex] + 0.04,
+                        seed: Float(((index + 1) * 53) + ((foodIndex + 1) * 29))
+                    )
+                }
+
+                for otherIndex in capture.nearby.indices where otherIndex != index {
+                    let otherPlanarPosition = SIMD2<Float>(currentPositions[otherIndex].x, currentPositions[otherIndex].z)
+                    repulsion += immersiveApeSceneRepulsionVector(
+                        from: otherPlanarPosition,
+                        to: planarPosition,
+                        minimumDistance: radius + nearbyRadii[otherIndex] + 0.08,
+                        seed: Float(((index + 1) * 131) + ((otherIndex + 1) * 31))
+                    )
+                }
+
+                let repulsionLength = simd_length(repulsion)
+                if repulsionLength > 0.0001 {
+                    let repulsionStep = min(radius * 0.92, (0.18 + (repulsionLength * 0.34)) * (iteration < 4 ? 1.0 : 0.82))
+                    planarPosition += (repulsion / repulsionLength) * repulsionStep
+                }
+
+                let placementGradient = immersiveApeScenePlacementGradient(
+                    at: planarPosition,
+                    rawPlanarPosition: rawPlanarPosition,
+                    radius: radius,
+                    swimming: swimming,
+                    selectedRadius: selectedRadius,
+                    foodPositions: foodPositions,
+                    foodClearanceRadii: foodClearanceRadii,
+                    grid: grid,
+                    dnaProfile: dnaProfile,
+                    seed: capture.snapshot.world_seed
+                )
+                let gradientLength = simd_length(placementGradient)
+
+                if gradientLength > 0.0001 {
+                    let avoidanceStep = min(radius * 0.74, 0.12 + (gradientLength * max(0.24, radius * 0.42)))
+                    planarPosition -= (placementGradient / gradientLength) * avoidanceStep
+                }
+
+                let tetherStrength: Float = iteration < 6 ? 0.1 : 0.06
+                planarPosition += (rawPlanarPosition - planarPosition) * tetherStrength
+
+                updatedPositions[index] = immersiveApeProjectedScenePosition(
+                    SIMD3<Float>(planarPosition.x, currentPositions[index].y, planarPosition.y),
+                    radius: radius,
+                    swimming: swimming,
+                    grid: grid
+                )
+            }
+
+            resolvedPositions = updatedPositions
+        }
+
+        return ImmersiveApeSceneCapture(
+            snapshot: capture.snapshot,
+            nearby: capture.nearby,
+            nearbyNames: capture.nearbyNames,
+            nearbyLocalPositions: resolvedPositions,
+            foods: capture.foods,
+            heights: capture.heights,
+            materials: capture.materials,
+            clouds: capture.clouds,
+            waterHeights: capture.waterHeights,
+            terrainResolution: capture.terrainResolution,
+            selectedName: capture.selectedName,
+            apeCount: capture.apeCount
+        )
+    }
+
+    private func localFoodPositions(for capture: ImmersiveApeSceneCapture) -> [SIMD3<Float>] {
+        let referenceHeight = capture.snapshot.selected.z * heightScale
+
+        return capture.foods.map { food in
+            SIMD3<Float>(
+                (food.x - capture.snapshot.selected.x) * worldScale,
+                (food.z * heightScale) - referenceHeight,
+                (food.y - capture.snapshot.selected.y) * worldScale
+            )
+        }
+    }
+
+    private func immersiveApeSceneApeRadius(for being: shared_immersiveape_being_snapshot) -> Float {
+        let bodyProfile = immersiveApeBodyProfile(for: being)
+        let bodyWidth = max(bodyProfile.shoulderWidth, max(bodyProfile.chestWidth, bodyProfile.hipWidth))
+        let limbAllowance = max(bodyProfile.armRadius * 1.4, bodyProfile.handRadius * 0.9)
+        let gaitAllowance = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_MOVING))
+            ? (bodyProfile.gaitAmplitude * 0.2)
+            : 0.04
+
+        return immersiveApeClamp(
+            (bodyWidth * 1.22) + limbAllowance + gaitAllowance + 0.08,
+            min: 0.34,
+            max: 0.72
+        )
+    }
+
+    private func immersiveApeFoodClearanceRadius(for food: shared_immersiveape_food_snapshot) -> Float {
+        switch ImmersiveApeFoodCode(rawValue: food.food_type) {
+        case .fruit:
+            return 0.4
+        case .seaweed:
+            return 0.34
+        case .shellfish:
+            return 0.28
+        case .birdEggs, .lizardEggs:
+            return 0.26
+        case .vegetable, .none:
+            return 0.36
+        }
+    }
+
+    private func immersiveApeSceneRepulsionVector(
+        from obstacle: SIMD2<Float>,
+        to position: SIMD2<Float>,
+        minimumDistance: Float,
+        seed: Float
+    ) -> SIMD2<Float> {
+        let delta = position - obstacle
+        let distanceSquared = simd_length_squared(delta)
+        let minimumDistanceSquared = minimumDistance * minimumDistance
+
+        guard distanceSquared < minimumDistanceSquared else {
+            return SIMD2<Float>(0, 0)
+        }
+
+        if distanceSquared > 0.0001 {
+            let distance = sqrt(distanceSquared)
+            return (delta / distance) * (minimumDistance - distance)
+        }
+
+        let angle = seed * 0.173
+        return SIMD2<Float>(cos(angle), sin(angle)) * minimumDistance
+    }
+
+    private func immersiveApeProjectedScenePosition(
+        _ position: SIMD3<Float>,
+        radius: Float,
+        swimming: Bool,
+        grid: ImmersiveApeTerrainGrid
+    ) -> SIMD3<Float> {
+        let extent = max(grid.step, (Float(grid.resolution - 1) * grid.step * 0.5) - radius - 0.35)
+        let clampedX = immersiveApeClamp(position.x, min: -extent, max: extent)
+        let clampedZ = immersiveApeClamp(position.z, min: -extent, max: extent)
+        let samplePosition = SIMD3<Float>(clampedX, 0, clampedZ)
+        let coordinates = grid.sampleCoordinates(for: samplePosition)
+        let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+        let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+        let surfaceHeight = swimming ? max(groundPosition.y, waterHeight - 0.04) : groundPosition.y
+
+        return SIMD3<Float>(clampedX, surfaceHeight, clampedZ)
+    }
+
+    private func immersiveApeScenePlacementGradient(
+        at planarPosition: SIMD2<Float>,
+        rawPlanarPosition: SIMD2<Float>,
+        radius: Float,
+        swimming: Bool,
+        selectedRadius: Float,
+        foodPositions: [SIMD3<Float>],
+        foodClearanceRadii: [Float],
+        grid: ImmersiveApeTerrainGrid,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        seed: UInt32
+    ) -> SIMD2<Float> {
+        let sampleDistance = max(0.24, min(grid.step * 0.22, radius * 0.95))
+        let xPositive = immersiveApeScenePlacementCost(
+            at: planarPosition + SIMD2<Float>(sampleDistance, 0),
+            rawPlanarPosition: rawPlanarPosition,
+            radius: radius,
+            swimming: swimming,
+            selectedRadius: selectedRadius,
+            foodPositions: foodPositions,
+            foodClearanceRadii: foodClearanceRadii,
+            grid: grid,
+            dnaProfile: dnaProfile,
+            seed: seed
+        )
+        let xNegative = immersiveApeScenePlacementCost(
+            at: planarPosition - SIMD2<Float>(sampleDistance, 0),
+            rawPlanarPosition: rawPlanarPosition,
+            radius: radius,
+            swimming: swimming,
+            selectedRadius: selectedRadius,
+            foodPositions: foodPositions,
+            foodClearanceRadii: foodClearanceRadii,
+            grid: grid,
+            dnaProfile: dnaProfile,
+            seed: seed
+        )
+        let zPositive = immersiveApeScenePlacementCost(
+            at: planarPosition + SIMD2<Float>(0, sampleDistance),
+            rawPlanarPosition: rawPlanarPosition,
+            radius: radius,
+            swimming: swimming,
+            selectedRadius: selectedRadius,
+            foodPositions: foodPositions,
+            foodClearanceRadii: foodClearanceRadii,
+            grid: grid,
+            dnaProfile: dnaProfile,
+            seed: seed
+        )
+        let zNegative = immersiveApeScenePlacementCost(
+            at: planarPosition - SIMD2<Float>(0, sampleDistance),
+            rawPlanarPosition: rawPlanarPosition,
+            radius: radius,
+            swimming: swimming,
+            selectedRadius: selectedRadius,
+            foodPositions: foodPositions,
+            foodClearanceRadii: foodClearanceRadii,
+            grid: grid,
+            dnaProfile: dnaProfile,
+            seed: seed
+        )
+
+        return SIMD2<Float>(
+            (xPositive - xNegative) / (sampleDistance * 2),
+            (zPositive - zNegative) / (sampleDistance * 2)
+        )
+    }
+
+    private func immersiveApeScenePlacementCost(
+        at planarPosition: SIMD2<Float>,
+        rawPlanarPosition: SIMD2<Float>,
+        radius: Float,
+        swimming: Bool,
+        selectedRadius: Float,
+        foodPositions: [SIMD3<Float>],
+        foodClearanceRadii: [Float],
+        grid: ImmersiveApeTerrainGrid,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        seed: UInt32
+    ) -> Float {
+        let projectedPosition = immersiveApeProjectedScenePosition(
+            SIMD3<Float>(planarPosition.x, 0, planarPosition.y),
+            radius: radius,
+            swimming: swimming,
+            grid: grid
+        )
+        let coordinates = grid.sampleCoordinates(for: projectedPosition)
+        let sampleRow = min(max(Int(round(coordinates.row)), 0), grid.resolution - 1)
+        let sampleColumn = min(max(Int(round(coordinates.column)), 0), grid.resolution - 1)
+        let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+        let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+        let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+        let moisture = immersiveApeSaturate((waterHeight - groundPosition.y + 0.08) * 0.9)
+        let adjustedMoisture = immersiveApeClamp(
+            (moisture * dnaProfile.moistureAffinity)
+                + (relief.basin * 0.14)
+                + (relief.runoff * 0.18)
+                - (relief.ridge * 0.12),
+            min: 0,
+            max: 1
+        )
+        let variation = immersiveApeNoise(
+            Int32(floor(coordinates.column * 0.6)),
+            Int32(floor(coordinates.row * 0.6)),
+            seed: seed ^ 0x29B7_41C3
+        )
+        let baseHabitat = immersiveApeBiomeHabitat(
+            material: grid.material(row: sampleRow, column: sampleColumn),
+            row: coordinates.row,
+            column: coordinates.column,
+            moisture: adjustedMoisture,
+            variation: variation,
+            seed: seed,
+            dnaProfile: dnaProfile
+        )
+        let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+        let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+        let runoffGrowth = relief.runoff
+        let coverDensity = immersiveApeClamp(
+            baseHabitat.coverDensity
+                + (shelteredGrowth * 0.14)
+                + (runoffGrowth * 0.1)
+                - (exposedGround * 0.12),
+            min: 0,
+            max: 1
+        )
+        let clutterDensity = immersiveApeClamp(
+            baseHabitat.clutterDensity
+                + (exposedGround * 0.12)
+                + (runoffGrowth * 0.05)
+                - (shelteredGrowth * 0.04),
+            min: 0,
+            max: 1
+        )
+        let waterDepth = max(0, waterHeight - groundPosition.y)
+        let extent = max(grid.step, (Float(grid.resolution - 1) * grid.step * 0.5) - radius - 0.35)
+        let edgeClearance = extent - max(abs(planarPosition.x), abs(planarPosition.y))
+        let originDistance = simd_length(planarPosition)
+        let selectedClearance = selectedRadius + radius + 0.08
+        let displacement = simd_length(planarPosition - rawPlanarPosition)
+        let displacementLimit = 1.8 + (radius * 4) + (swimming ? 1.2 : 0)
+        let normalizedDisplacement = displacement / max(displacementLimit, 0.001)
+        let material = grid.material(row: sampleRow, column: sampleColumn)
+        var cost = normalizedDisplacement * normalizedDisplacement * 1.8
+
+        if edgeClearance < 0.6 {
+            let edgePenalty = max(0, 0.6 - edgeClearance)
+            cost += edgePenalty * edgePenalty * 6
+        }
+
+        switch material {
+        case 0:
+            cost += swimming ? 0.4 : 7.5
+        case 4:
+            cost += 0.35
+        case 5:
+            cost += 0.8
+        default:
+            break
+        }
+
+        cost += relief.slope * (swimming ? 0.7 : 3.2)
+        cost += relief.runoff * (swimming ? 0.18 : 0.9)
+        cost += coverDensity * 1.5
+        cost += clutterDensity * 2.2
+
+        if swimming {
+            let shallowPenalty = max(0, 0.08 - waterDepth)
+            let deepPenalty = max(0, waterDepth - 0.72)
+            cost += (shallowPenalty * shallowPenalty) * 10
+            cost += deepPenalty * 1.6
+        } else {
+            cost += waterDepth * 10
+        }
+
+        if originDistance < selectedClearance {
+            let overlap = selectedClearance - originDistance
+            cost += overlap * overlap * 18
+        }
+
+        for foodIndex in foodPositions.indices {
+            let foodPlanarPosition = SIMD2<Float>(foodPositions[foodIndex].x, foodPositions[foodIndex].z)
+            let distance = simd_length(planarPosition - foodPlanarPosition)
+            let clearance = radius + foodClearanceRadii[foodIndex]
+
+            if distance < clearance {
+                let overlap = clearance - distance
+                cost += overlap * overlap * 12
+            }
+        }
+
+        return cost
     }
 
     private func makeEnvironment(from snapshot: shared_immersiveape_scene_snapshot) -> ImmersiveApeEnvironment {
@@ -1270,15 +2513,16 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
     private func buildRenderPacket(
         from capture: ImmersiveApeSceneCapture,
+        grid: ImmersiveApeTerrainGrid,
         environment: ImmersiveApeEnvironment,
         drawableSize: CGSize
     ) -> (opaque: ImmersiveApeGPUBufferSet?, transparent: ImmersiveApeGPUBufferSet?, uniforms: ImmersiveApeUniforms) {
         let referenceHeight = capture.snapshot.selected.z * heightScale
-        let grid = makeTerrainGrid(from: capture, referenceHeight: referenceHeight)
         let encounters = immersiveApeEncounters(capture: capture)
         let attentionFocus = immersiveApeAttentionFocus(capture: capture, encounters: encounters)
         let embodiment = immersiveApeEmbodimentProfile(
             for: capture.snapshot.selected,
+            attentionFocus: attentionFocus,
             encounterCount: encounters.count
         )
         let biomeDNA = immersiveApeBiomeDNAProfile(
@@ -1291,23 +2535,39 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         var transparentBuilder = ImmersiveApeMeshBuilder()
 
         buildTerrain(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), opaque: &opaqueBuilder, transparent: &transparentBuilder, seed: capture.snapshot.world_seed)
-        buildLandformDetails(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), opaque: &opaqueBuilder, transparent: &transparentBuilder, seed: capture.snapshot.world_seed)
-        buildWaterReflections(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), transparent: &transparentBuilder, seed: capture.snapshot.world_seed)
-        buildVegetation(
-            using: grid,
+        if currentQuality.includeLandformDetails {
+            buildLandformDetails(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), opaque: &opaqueBuilder, transparent: &transparentBuilder, seed: capture.snapshot.world_seed)
+        }
+        if currentQuality.includeWaterReflections {
+            buildWaterReflections(using: grid, environment: environment, timeValue: Float(capture.snapshot.time), transparent: &transparentBuilder, seed: capture.snapshot.world_seed)
+        }
+        if currentQuality.includeVegetation {
+            buildVegetation(
+                using: grid,
+                environment: environment,
+                timeValue: Float(capture.snapshot.time),
+                opaque: &opaqueBuilder,
+                seed: capture.snapshot.world_seed,
+                dnaProfile: biomeDNA
+            )
+        }
+        buildFood(
+            from: capture,
+            attentionFocus: attentionFocus,
+            referenceHeight: referenceHeight,
             environment: environment,
             timeValue: Float(capture.snapshot.time),
             opaque: &opaqueBuilder,
-            seed: capture.snapshot.world_seed,
-            dnaProfile: biomeDNA
-        )
-        buildFood(from: capture, referenceHeight: referenceHeight, environment: environment, opaque: &opaqueBuilder, transparent: &transparentBuilder)
-        buildAttentionGuide(
-            focus: attentionFocus,
-            selected: capture.snapshot.selected,
-            timeValue: Float(capture.snapshot.time),
             transparent: &transparentBuilder
         )
+        if currentQuality.includeAttentionGuide {
+            buildAttentionGuide(
+                focus: attentionFocus,
+                selected: capture.snapshot.selected,
+                timeValue: Float(capture.snapshot.time),
+                transparent: &transparentBuilder
+            )
+        }
         buildSelectedEmbodiment(
             from: capture,
             profile: embodiment,
@@ -1318,10 +2578,23 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             opaque: &opaqueBuilder,
             transparent: &transparentBuilder
         )
-        buildNearbyApes(from: capture, environment: environment, timeValue: Float(capture.snapshot.time), opaque: &opaqueBuilder, transparent: &transparentBuilder)
-        buildSocialContext(from: capture, encounters: encounters, environment: environment, timeValue: Float(capture.snapshot.time), transparent: &transparentBuilder)
-        buildSky(from: capture, grid: grid, environment: environment, opaque: &opaqueBuilder, transparent: &transparentBuilder)
-        buildWeatherEffects(from: capture, environment: environment, transparent: &transparentBuilder)
+        buildNearbyApes(
+            from: capture,
+            using: grid,
+            environment: environment,
+            timeValue: Float(capture.snapshot.time),
+            opaque: &opaqueBuilder,
+            transparent: &transparentBuilder
+        )
+        if currentQuality.includeSocialContext {
+            buildSocialContext(from: capture, encounters: encounters, environment: environment, timeValue: Float(capture.snapshot.time), transparent: &transparentBuilder)
+        }
+        if currentQuality.includeSky {
+            buildSky(from: capture, grid: grid, environment: environment, opaque: &opaqueBuilder, transparent: &transparentBuilder)
+        }
+        if currentQuality.includeWeatherEffects {
+            buildWeatherEffects(from: capture, environment: environment, transparent: &transparentBuilder)
+        }
 
         let selectedMoving = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_MOVING))
         let planarForward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
@@ -1373,16 +2646,17 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
     private func makeTerrainGrid(from capture: ImmersiveApeSceneCapture, referenceHeight: Float) -> ImmersiveApeTerrainGrid {
         let extent = Float(terrainHalfExtent) * worldScale
-        let step = (extent * 2) / Float(terrainResolution - 1)
-        var positions = Array(repeating: SIMD3<Float>(0, 0, 0), count: terrainResolution * terrainResolution)
-        var cloudFactors = Array(repeating: Float.zero, count: terrainResolution * terrainResolution)
-        var localWaterHeights = Array(repeating: Float.zero, count: terrainResolution * terrainResolution)
+        let resolution = capture.terrainResolution
+        let step = (extent * 2) / Float(resolution - 1)
+        var positions = Array(repeating: SIMD3<Float>(0, 0, 0), count: resolution * resolution)
+        var cloudFactors = Array(repeating: Float.zero, count: resolution * resolution)
+        var localWaterHeights = Array(repeating: Float.zero, count: resolution * resolution)
         var minHeight = Float.greatestFiniteMagnitude
         var maxHeight = -Float.greatestFiniteMagnitude
 
-        for row in 0..<terrainResolution {
-            for column in 0..<terrainResolution {
-                let index = row * terrainResolution + column
+        for row in 0..<resolution {
+            for column in 0..<resolution {
+                let index = row * resolution + column
                 let x = -extent + (Float(column) * step)
                 let z = -extent + (Float(row) * step)
                 let y = (capture.heights[index] * heightScale) - referenceHeight
@@ -1400,10 +2674,46 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             materials: capture.materials,
             cloudFactors: cloudFactors,
             waterHeights: localWaterHeights,
-            resolution: terrainResolution,
+            resolution: resolution,
             step: step,
             minHeight: minHeight.isFinite ? minHeight : 0,
             maxHeight: maxHeight.isFinite ? maxHeight : 0
+        )
+    }
+
+    private func immersiveApeTerrainPose(
+        at base: SIMD3<Float>,
+        facing: Float,
+        grid: ImmersiveApeTerrainGrid,
+        timeValue: Float,
+        swimming: Bool
+    ) -> ImmersiveApeTerrainPose {
+        let worldUp = SIMD3<Float>(0, 1, 0)
+        let coordinates = grid.sampleCoordinates(for: base)
+        let terrainNormal = grid.interpolatedNormal(row: coordinates.row, column: coordinates.column)
+        let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+        let waterNormal = immersiveApeWaveNormal(at: SIMD3<Float>(base.x, waterHeight, base.z), timeValue: timeValue)
+        let contactNormal = swimming
+            ? immersiveApeLerp(terrainNormal, waterNormal, factor: 0.4).normalizedSafe
+            : terrainNormal
+        let groundingStrength = immersiveApeClamp((1 - contactNormal.y) * (swimming ? 1.1 : 2.2), min: swimming ? 0.16 : 0.22, max: swimming ? 0.42 : 0.8)
+        let up = immersiveApeLerp(worldUp, contactNormal, factor: groundingStrength).normalizedSafe
+        let facingForward = immersiveApeFacingVector(facing: facing)
+        var forward = facingForward - (up * simd_dot(facingForward, up))
+
+        if simd_length_squared(forward) < 0.0001 {
+            let fallback = SIMD3<Float>(0, 0, 1)
+            forward = fallback - (up * simd_dot(fallback, up))
+        }
+
+        forward = forward.normalizedSafe
+        let right = simd_cross(forward, up).normalizedSafe
+        let adjustedUp = simd_cross(right, forward).normalizedSafe
+
+        return ImmersiveApeTerrainPose(
+            up: adjustedUp,
+            forward: forward,
+            right: right
         )
     }
 
@@ -1415,7 +2725,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         transparent: inout ImmersiveApeMeshBuilder,
         seed: UInt32
     ) {
-        let subdivisions = terrainInterpolationSubdivisions
+        let subdivisions = currentQuality.terrainInterpolationSubdivisions
         let subdivisionStep = 1.0 / Float(subdivisions)
 
         for row in 0..<(grid.resolution - 1) {
@@ -1473,7 +2783,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         transparent: inout ImmersiveApeMeshBuilder,
         seed: UInt32
     ) {
-        let sampleStride = 3
+        let sampleStride = currentQuality.landformSampleStride
 
         for row in stride(from: 2, to: grid.resolution - 2, by: sampleStride) {
             for column in stride(from: 2, to: grid.resolution - 2, by: sampleStride) {
@@ -1922,7 +3232,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         transparent: inout ImmersiveApeMeshBuilder,
         seed: UInt32
     ) {
-        let sampleStride = 2
+        let sampleStride = currentQuality.waterReflectionSampleStride
         let reflectionBase = immersiveApeMix(environment.foamColor, environment.sunColor, t: 0.68)
         let reflectionTint = immersiveApeMix(reflectionBase, environment.horizonGlowColor, t: (environment.twilightStrength * 0.22) + (environment.nightStrength * 0.12))
 
@@ -2416,8 +3726,10 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         seed: UInt32,
         dnaProfile: ImmersiveApeBiomeDNAProfile
     ) {
-        for row in stride(from: 2, to: grid.resolution - 2, by: 4) {
-            for column in stride(from: 2, to: grid.resolution - 2, by: 4) {
+        let sampleStride = currentQuality.vegetationSampleStride
+
+        for row in stride(from: 2, to: grid.resolution - 2, by: sampleStride) {
+            for column in stride(from: 2, to: grid.resolution - 2, by: sampleStride) {
                 let material = grid.material(row: row, column: column)
                 let chance = immersiveApeNoise(Int32(column), Int32(row), seed: seed)
                 let jitterX = (immersiveApeNoise(Int32(column), Int32(row), seed: seed ^ 0xA1) - 0.5) * grid.step * 0.7
@@ -4313,13 +5625,37 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
     private func buildFood(
         from capture: ImmersiveApeSceneCapture,
+        attentionFocus: ImmersiveApeAttentionFocus,
         referenceHeight: Float,
         environment: ImmersiveApeEnvironment,
+        timeValue: Float,
         opaque: inout ImmersiveApeMeshBuilder,
         transparent: inout ImmersiveApeMeshBuilder
     ) {
         let primaryDrive = immersiveApeDominantDrive(for: capture.snapshot.selected)
-        let strongestIntensity = max(capture.foods.first?.intensity ?? 1, 1)
+        let eating = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_EATING))
+        let noFood = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD)) && !eating
+        let approachStrength = (!eating && !noFood && attentionFocus.kind == .forage)
+            ? immersiveApeForagingApproachStrength(distance: attentionFocus.distance)
+            : 0
+        let foragingContext = attentionFocus.kind == .forage
+            ? Self.immersiveApeForagingContext(capture: capture)
+            : nil
+        let showsChoiceSites = attentionFocus.kind == .forage
+            && attentionFocus.alternateFoodType != nil
+            && !eating
+            && !noFood
+        let strongestIntensity = capture.foods.reduce(Float(1)) { strongest, food in
+            max(strongest, max(food.intensity, 1))
+        }
+
+        if let foragingContext {
+            addForagingContextField(
+                context: foragingContext,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+        }
 
         for (foodIndex, food) in capture.foods.enumerated() {
             let localPosition = SIMD3<Float>(
@@ -4330,6 +5666,64 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
             if simd_length_squared(SIMD2<Float>(localPosition.x, localPosition.z)) > 6400 {
                 continue
+            }
+
+            let abundance = immersiveApeFoodAbundanceStrength(
+                intensity: food.intensity,
+                strongestIntensity: strongestIntensity
+            )
+            let focusRole = immersiveApeFoodFocusRole(
+                focus: attentionFocus,
+                localPosition: localPosition,
+                foodType: food.food_type
+            )
+            let focusedSite = focusRole == .primary
+            let displayedAbundance: Float
+
+            switch focusRole {
+            case .primary:
+                displayedAbundance = noFood
+                    ? abundance * 0.24
+                    : (eating
+                        ? abundance * 0.46
+                        : abundance * (1 - (approachStrength * 0.24)))
+            case .alternate:
+                displayedAbundance = showsChoiceSites ? abundance * 0.76 : abundance
+            case .none:
+                displayedAbundance = abundance
+            }
+
+            addFoodAbundanceField(
+                at: localPosition,
+                food: food.food_type,
+                abundance: immersiveApeClamp(displayedAbundance, min: 0.08, max: 1.0),
+                environment: environment,
+                timeValue: timeValue,
+                builder: &transparent
+            )
+
+            if focusedSite {
+                addForagingFoodSiteFeedback(
+                    at: localPosition,
+                    focus: attentionFocus,
+                    selected: capture.snapshot.selected,
+                    food: food.food_type,
+                    abundance: abundance,
+                    timeValue: timeValue,
+                    transparent: &transparent
+                )
+            }
+
+            if showsChoiceSites && focusRole != .none {
+                addForagingChoiceSiteFeedback(
+                    at: localPosition,
+                    focus: attentionFocus,
+                    role: focusRole,
+                    food: food.food_type,
+                    abundance: abundance,
+                    timeValue: timeValue,
+                    transparent: &transparent
+                )
             }
 
             switch ImmersiveApeFoodCode(rawValue: food.food_type) {
@@ -4352,14 +5746,416 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             }
 
             if foodIndex == 0 || (primaryDrive == .hunger && food.intensity > strongestIntensity * 0.55) {
+                let beaconStrength: Float
+
+                switch focusRole {
+                case .primary:
+                    beaconStrength = noFood
+                        ? abundance * 0.18
+                        : (eating
+                            ? abundance * 0.42
+                            : abundance * (1 - (approachStrength * 0.18)))
+                case .alternate:
+                    beaconStrength = showsChoiceSites ? abundance * 0.54 : abundance
+                case .none:
+                    beaconStrength = abundance
+                }
                 addFoodBeacon(
                     at: localPosition,
                     builder: &transparent,
                     tint: immersiveApeFoodTint(food.food_type),
-                    strength: immersiveApeClamp(food.intensity / strongestIntensity, min: 0.28, max: 1.0)
+                    strength: immersiveApeClamp(beaconStrength, min: focusedSite ? 0.1 : 0.28, max: 1.0)
                 )
             }
         }
+    }
+
+    private func addForagingContextField(
+        context: ImmersiveApeForagingContext,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.sectors.isEmpty else {
+            return
+        }
+
+        let ringRadius = 1.2 + (context.strength * 0.42)
+        let ringAlpha = 0.03 + (context.strength * 0.04)
+        let center = SIMD3<Float>(0, 0.035, 0)
+
+        transparent.addSphere(
+            center: center,
+            radii: SIMD3<Float>(ringRadius, 0.014 + (context.strength * 0.006), ringRadius * 0.96),
+            segments: 14,
+            rings: 5,
+            color: SIMD4<Float>(0.82, 0.9, 0.86, ringAlpha)
+        )
+
+        for (sectorIndex, sector) in context.sectors.enumerated() {
+            let pulse = 0.76 + (0.24 * sin((timeValue * 0.032) + (Float(sectorIndex) * 0.7)))
+            let sectorCenter = center + (sector.direction * (0.96 + (sector.weight * 0.44)))
+            let lobeRadius = 0.16 + (sector.weight * 0.14) + (context.strength * 0.05)
+            let lobeAlpha = (0.04 + (sector.weight * 0.06)) * pulse
+
+            transparent.addSphere(
+                center: sectorCenter,
+                radii: SIMD3<Float>(lobeRadius, 0.018 + (sector.weight * 0.006), lobeRadius * 0.86),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(sector.color.x, sector.color.y, sector.color.z, lobeAlpha)
+            )
+            transparent.addCylinder(
+                base: center + (sector.direction * 0.34),
+                top: sectorCenter,
+                radius: 0.008 + (sector.weight * 0.004),
+                segments: 5,
+                color: SIMD4<Float>(sector.color.x, sector.color.y, sector.color.z, lobeAlpha * 0.82)
+            )
+        }
+
+        if let dominant = context.sectors.max(by: { $0.weight < $1.weight }) {
+            let dominantCenter = center + (dominant.direction * (1.08 + (context.strength * 0.34)))
+            transparent.addSphere(
+                center: dominantCenter + SIMD3<Float>(0, 0.1 + (context.strength * 0.06), 0),
+                radii: SIMD3<Float>(repeating: 0.034 + (context.strength * 0.014)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(dominant.color.x, dominant.color.y, dominant.color.z, 0.11 + (context.strength * 0.08))
+            )
+        }
+    }
+
+    private func immersiveApeFoodFocusRole(
+        focus: ImmersiveApeAttentionFocus,
+        localPosition: SIMD3<Float>,
+        foodType: UInt8
+    ) -> ImmersiveApeFoodFocusRole {
+        guard focus.kind == .forage else {
+            return .none
+        }
+
+        func matches(position: SIMD3<Float>?, type: UInt8?) -> Bool {
+            guard let position, let type, type == foodType else {
+                return false
+            }
+
+            let delta = localPosition - position
+            return simd_length_squared(SIMD2<Float>(delta.x, delta.z)) < 0.36 && abs(delta.y) < 0.8
+        }
+
+        if matches(position: focus.localPosition, type: focus.foodType) {
+            return .primary
+        }
+
+        if matches(position: focus.alternateLocalPosition, type: focus.alternateFoodType) {
+            return .alternate
+        }
+
+        return .none
+    }
+
+    private func addForagingFoodSiteFeedback(
+        at base: SIMD3<Float>,
+        focus: ImmersiveApeAttentionFocus,
+        selected: shared_immersiveape_being_snapshot,
+        food: UInt8,
+        abundance: Float,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        let eating = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_EATING))
+        let noFood = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD)) && !eating
+        let approachStrength = (!eating && !noFood) ? immersiveApeForagingApproachStrength(distance: focus.distance) : 0
+        let tint = noFood ? immersiveApeFoodScarcityTint(food) : immersiveApeFoodTint(food)
+        let up = SIMD3<Float>(0, 1, 0)
+        let forward = immersiveApePlanarDirection(base)
+        let safeForward = simd_length_squared(forward) > 0.0001 ? forward : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-safeForward.z, 0, safeForward.x).normalizedSafe
+        let center = base + SIMD3<Float>(0, 0.04, 0)
+        let pulse = 0.76 + (0.24 * sin((timeValue * 0.045) + (focus.distance * 0.12)))
+        let prepAlpha = (0.04 + (abundance * 0.03) + (approachStrength * 0.05)) * pulse
+        let feedAlpha = (0.05 + (abundance * 0.04)) * pulse
+        let depletedAlpha = (0.045 + ((1 - abundance) * 0.05)) * pulse
+
+        if approachStrength > 0.08 {
+            transparent.addSphere(
+                center: center,
+                radii: SIMD3<Float>(0.18 + (approachStrength * 0.16), 0.012 + (approachStrength * 0.006), 0.16 + (approachStrength * 0.12)),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, prepAlpha)
+            )
+        }
+
+        if eating {
+            transparent.addSphere(
+                center: center + (up * 0.02),
+                radii: SIMD3<Float>(0.16 + (abundance * 0.08), 0.018, 0.13 + (abundance * 0.06)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, feedAlpha * 0.72)
+            )
+
+            switch ImmersiveApeFoodCode(rawValue: food) {
+            case .fruit:
+                for peelSide: Float in [1, -1] {
+                    transparent.addSphere(
+                        center: center + (right * (peelSide * 0.08)) - (safeForward * 0.02),
+                        radii: SIMD3<Float>(repeating: 0.03 + (abundance * 0.01)),
+                        segments: 5,
+                        rings: 4,
+                        color: SIMD4<Float>(tint.x, tint.y, tint.z, feedAlpha * 0.86)
+                    )
+                }
+                transparent.addCylinder(
+                    base: center - (up * 0.01),
+                    top: center + (up * 0.1),
+                    radius: 0.012 + (abundance * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, feedAlpha * 0.78)
+                )
+            case .seaweed:
+                for stripSide: Float in [1, -1] {
+                    transparent.addCylinder(
+                        base: center + (right * (stripSide * 0.06)) - (safeForward * 0.02),
+                        top: center + (right * (stripSide * 0.04)) + (up * (0.14 + (abundance * 0.05))),
+                        radius: 0.014 + (abundance * 0.004),
+                        segments: 5,
+                        color: SIMD4<Float>(tint.x, tint.y, tint.z, feedAlpha * 0.76)
+                    )
+                }
+            case .shellfish:
+                for shellSide: Float in [1, -1] {
+                    transparent.addSphere(
+                        center: center + (right * (shellSide * 0.09)) + (up * 0.01),
+                        radii: SIMD3<Float>(0.06 + (abundance * 0.02), 0.014, 0.042 + (abundance * 0.014)),
+                        segments: 6,
+                        rings: 4,
+                        color: SIMD4<Float>(tint.x, tint.y, tint.z, feedAlpha * 0.84)
+                    )
+                }
+            case .birdEggs, .lizardEggs:
+                for shardSide: Float in [1, -1] {
+                    transparent.addSphere(
+                        center: center + (right * (shardSide * 0.05)) + (up * 0.015),
+                        radii: SIMD3<Float>(0.024 + (abundance * 0.008), 0.03 + (abundance * 0.01), 0.024 + (abundance * 0.008)),
+                        segments: 5,
+                        rings: 4,
+                        color: SIMD4<Float>(tint.x, tint.y, tint.z, feedAlpha * 0.86)
+                    )
+                }
+            case .vegetable, .none:
+                for stemSide: Float in [1, -1] {
+                    transparent.addCone(
+                        base: center + (right * (stemSide * 0.04)) - (safeForward * 0.01),
+                        tip: center + (right * (stemSide * 0.02)) + (up * (0.1 + (abundance * 0.04))) + (safeForward * 0.03),
+                        radius: 0.02 + (abundance * 0.008),
+                        segments: 5,
+                        color: SIMD4<Float>(tint.x, tint.y, tint.z, feedAlpha * 0.76)
+                    )
+                }
+            }
+        }
+
+        if noFood {
+            transparent.addSphere(
+                center: center,
+                radii: SIMD3<Float>(0.14 + ((1 - abundance) * 0.08), 0.012, 0.12 + ((1 - abundance) * 0.06)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, depletedAlpha * 0.72)
+            )
+
+            switch ImmersiveApeFoodCode(rawValue: food) {
+            case .fruit:
+                transparent.addSphere(
+                    center: center - (safeForward * 0.04),
+                    radii: SIMD3<Float>(repeating: 0.024 + ((1 - abundance) * 0.008)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, depletedAlpha * 0.82)
+                )
+            case .seaweed:
+                transparent.addCylinder(
+                    base: center - (safeForward * 0.02),
+                    top: center + (up * 0.08),
+                    radius: 0.012 + ((1 - abundance) * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, depletedAlpha * 0.74)
+                )
+            case .shellfish:
+                transparent.addSphere(
+                    center: center + (right * 0.04),
+                    radii: SIMD3<Float>(0.05 + ((1 - abundance) * 0.016), 0.012, 0.038 + ((1 - abundance) * 0.012)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, depletedAlpha * 0.82)
+                )
+            case .birdEggs, .lizardEggs:
+                transparent.addSphere(
+                    center: center + (up * 0.02),
+                    radii: SIMD3<Float>(0.02 + ((1 - abundance) * 0.008), 0.028 + ((1 - abundance) * 0.01), 0.02 + ((1 - abundance) * 0.008)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, depletedAlpha * 0.84)
+                )
+            case .vegetable, .none:
+                transparent.addCone(
+                    base: center - (safeForward * 0.02),
+                    tip: center + (up * 0.08) + (safeForward * 0.02),
+                    radius: 0.018 + ((1 - abundance) * 0.008),
+                    segments: 5,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, depletedAlpha * 0.74)
+                )
+            }
+        }
+    }
+
+    private func addForagingChoiceSiteFeedback(
+        at base: SIMD3<Float>,
+        focus: ImmersiveApeAttentionFocus,
+        role: ImmersiveApeFoodFocusRole,
+        food: UInt8,
+        abundance: Float,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard role != .none else {
+            return
+        }
+
+        let roleDistance = role == .primary ? focus.distance : focus.alternateDistance
+        let tint = immersiveApeFoodTint(food)
+        let siteCenter = base + SIMD3<Float>(0, 0.04, 0)
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.04) + (roleDistance * 0.11)))
+        let roleStrength: Float = role == .primary ? 1 : 0.58
+        let radius = 0.16 + (abundance * 0.08) + (roleStrength * 0.06)
+        let haloAlpha = (0.04 + (abundance * 0.03)) * pulse * (role == .primary ? 1.0 : 0.58)
+
+        transparent.addSphere(
+            center: siteCenter,
+            radii: SIMD3<Float>(radius, 0.012 + (roleStrength * 0.004), radius * 0.9),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(tint.x, tint.y, tint.z, haloAlpha)
+        )
+
+        switch role {
+        case .primary:
+            transparent.addCylinder(
+                base: siteCenter,
+                top: siteCenter + SIMD3<Float>(0, 0.18 + (abundance * 0.06), 0),
+                radius: 0.01 + (abundance * 0.003),
+                segments: 5,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, haloAlpha * 0.86)
+            )
+            transparent.addSphere(
+                center: siteCenter + SIMD3<Float>(0, 0.22 + (abundance * 0.05), 0),
+                radii: SIMD3<Float>(repeating: 0.03 + (abundance * 0.01)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, haloAlpha * 0.94)
+            )
+        case .alternate:
+            let driftRadius = radius * 0.82
+            for angleOffset in [Float(0.4), Float(2.55), Float(4.7)] {
+                let angle = angleOffset + (timeValue * 0.015)
+                let offset = SIMD3<Float>(cos(angle) * driftRadius, 0.02 + (sin(angle + 0.8) * 0.02), sin(angle) * driftRadius)
+                transparent.addSphere(
+                    center: siteCenter + offset,
+                    radii: SIMD3<Float>(repeating: 0.018 + (abundance * 0.008)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, haloAlpha * 0.78)
+                )
+            }
+        case .none:
+            break
+        }
+    }
+
+    fileprivate nonisolated static func immersiveApeForagingContext(capture: ImmersiveApeSceneCapture) -> ImmersiveApeForagingContext? {
+        let cues = immersiveApeFoodCues(capture: capture).filter { $0.distance < 44 }
+        guard !cues.isEmpty else {
+            return nil
+        }
+
+        let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+        let sectorDirections = sectorAngles.map { angle in
+            ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+        }
+        var weights = Array(repeating: Float.zero, count: sectorDirections.count)
+        var colorSums = Array(repeating: SIMD3<Float>(repeating: 0), count: sectorDirections.count)
+
+        for cue in cues {
+            let cueDirection = immersiveApePlanarDirection(cue.localPosition)
+            let influence = cue.abundance * immersiveApeClamp(1 - (cue.distance / 44), min: 0.16, max: 1.0)
+            let tint = immersiveApeFoodTint(cue.food.food_type)
+            let tintRGB = SIMD3<Float>(tint.x, tint.y, tint.z)
+
+            if let sectorIndex = sectorDirections.enumerated().max(by: { simd_dot(cueDirection, $0.element) < simd_dot(cueDirection, $1.element) })?.offset {
+                weights[sectorIndex] += influence
+                colorSums[sectorIndex] += tintRGB * influence
+            }
+        }
+
+        let sectors = sectorDirections.enumerated().compactMap { index, direction -> ImmersiveApeForagingContextSector? in
+            guard weights[index] > 0.05 else {
+                return nil
+            }
+
+            let rgb = colorSums[index] / max(weights[index], 0.001)
+            return ImmersiveApeForagingContextSector(
+                direction: direction,
+                weight: weights[index],
+                color: SIMD4<Float>(rgb.x, rgb.y, rgb.z, 1)
+            )
+        }
+
+        guard !sectors.isEmpty else {
+            return nil
+        }
+
+        let totalWeight = weights.reduce(0, +)
+        let dominantIndex = weights.enumerated().max(by: { $0.element < $1.element })?.offset ?? 0
+        let dominantWeight = weights[dominantIndex]
+        let strength = immersiveApeClamp((totalWeight * 0.28) + (dominantWeight * 0.22), min: 0.18, max: 1.0)
+        let summaryLabel: String
+
+        if totalWeight > 3.0 || dominantWeight > 1.36 {
+            summaryLabel = "food-rich pocket"
+        } else if totalWeight > 1.75 {
+            summaryLabel = "steady spread"
+        } else if totalWeight > 0.82 {
+            summaryLabel = "scattered picks"
+        } else {
+            summaryLabel = "thin pickings"
+        }
+
+        let directionLabel: String
+        switch dominantIndex {
+        case 0:
+            directionLabel = "ahead"
+        case 1:
+            directionLabel = "ahead-right"
+        case 2:
+            directionLabel = "behind-right"
+        case 3:
+            directionLabel = "behind"
+        case 4:
+            directionLabel = "behind-left"
+        default:
+            directionLabel = "ahead-left"
+        }
+
+        return ImmersiveApeForagingContext(
+            summaryLabel: summaryLabel,
+            directionLabel: directionLabel,
+            strength: strength,
+            sectors: sectors
+        )
     }
 
     private func buildSelectedEmbodiment(
@@ -4379,6 +6175,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         let selected = capture.snapshot.selected
         let forward = immersiveApeFacingVector(facing: selected.facing)
         let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let up = SIMD3<Float>(0, 1, 0)
         let bodyProfile = immersiveApeBodyProfile(for: selected)
         let interactionMode = immersiveApeEncounterMode(attentionKind: attentionFocus.kind)
         let interactionWeight: Float = interactionMode == nil
@@ -4396,6 +6193,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             interactionMode: interactionMode,
             interactionWeight: interactionWeight
         )
+        let foragingPosture = immersiveApeForagingPosture(for: selected, focus: attentionFocus)
         let skeletonDNA = immersiveApeSkeletonDNA(for: selected)
         let motionPhase = (timeValue * motionProfile.phaseRate * gaitSignature.cadenceScale)
             + Float(selected.index) * 0.27
@@ -4506,8 +6304,29 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             profile.handHeight + silhouetteProfile.handRaise + (max(0, -gestureWave) * motionProfile.gestureLift) + (gaitSignature.headBob * rightGaitCycle * 0.4),
             0
         )
-        let leftHand = leftHandSpread + leftHandForward + (right * motionProfile.elbowOut) + leftHandVertical
-        let rightHand = rightHandSpread + rightHandForward - (right * motionProfile.elbowOut) + rightHandVertical
+        var leftHand = leftHandSpread + leftHandForward + (right * motionProfile.elbowOut) + leftHandVertical
+        var rightHand = rightHandSpread + rightHandForward - (right * motionProfile.elbowOut) + rightHandVertical
+
+        if let foragingPosture {
+            let leadIsLeft = selected.index % 2 == 0
+
+            if leadIsLeft {
+                leftHand += (forward * foragingPosture.leadHandForwardDelta)
+                    + (up * foragingPosture.leadHandHeightDelta)
+                    - (right * foragingPosture.handInwardBias)
+                rightHand += (forward * foragingPosture.supportHandForwardDelta)
+                    + (up * foragingPosture.supportHandHeightDelta)
+                    + (right * (foragingPosture.handInwardBias * 0.28))
+            } else {
+                leftHand += (forward * foragingPosture.supportHandForwardDelta)
+                    + (up * foragingPosture.supportHandHeightDelta)
+                    - (right * (foragingPosture.handInwardBias * 0.28))
+                rightHand += (forward * foragingPosture.leadHandForwardDelta)
+                    + (up * foragingPosture.leadHandHeightDelta)
+                    + (right * foragingPosture.handInwardBias)
+            }
+        }
+
         let leftElbow = immersiveApeLerp(leftShoulder, leftHand, factor: 0.55)
             + (right * max(0, (motionProfile.elbowOut * 0.42) - silhouetteProfile.elbowTuck))
             + SIMD3<Float>(0, profile.elbowDrop + (motionProfile.shoulderLift * 0.12), 0)
@@ -4550,6 +6369,89 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             )
         }
 
+        let eating = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_EATING))
+        let noFood = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD))
+        let preparing = attentionFocus.kind == .forage && !eating && !noFood
+            ? immersiveApeForagingApproachStrength(distance: attentionFocus.distance)
+            : 0
+
+        if eating {
+            addForagingOutcomeFeedback(
+                focus: attentionFocus,
+                chestCenter: chestCenter,
+                leftHand: leftHand,
+                rightHand: rightHand,
+                forward: forward,
+                right: right,
+                bodyProfile: bodyProfile,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+        }
+
+        if preparing > 0.08 {
+            addForagingPreparationFeedback(
+                focus: attentionFocus,
+                chestCenter: chestCenter,
+                leftHand: leftHand,
+                rightHand: rightHand,
+                forward: forward,
+                right: right,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+        }
+
+        if noFood && !eating && attentionFocus.kind == .forage {
+            addForagingScarcityFeedback(
+                focus: attentionFocus,
+                chestCenter: chestCenter,
+                leftHand: leftHand,
+                rightHand: rightHand,
+                forward: forward,
+                right: right,
+                bodyProfile: bodyProfile,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+        }
+
+        addSocialMeetingFeedback(
+            focus: attentionFocus,
+            chestCenter: chestCenter,
+            leftHand: leftHand,
+            rightHand: rightHand,
+            forward: forward,
+            right: right,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
+        addSelectedSpeechFeedback(
+            selected: selected,
+            focus: attentionFocus,
+            chestCenter: chestCenter,
+            forward: forward,
+            right: right,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
+        addSelectedMemoryFeedback(
+            focus: attentionFocus,
+            chestCenter: chestCenter,
+            forward: forward,
+            right: right,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
+        addSelectedTerritoryFeedback(
+            focus: attentionFocus,
+            chestCenter: chestCenter,
+            forward: forward,
+            right: right,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
+
         if immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_SWIMMING)) {
             transparent.addSphere(
                 center: SIMD3<Float>(0, 0.05, 0),
@@ -4561,8 +6463,299 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         }
     }
 
+    private func addSelectedMemoryFeedback(
+        focus: ImmersiveApeAttentionFocus,
+        chestCenter: SIMD3<Float>,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeEncounterMemoryBehavior(focus: focus) else {
+            return
+        }
+
+        let up = SIMD3<Float>(0, 1, 0)
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.028) + (focus.distance * 0.05)))
+        let alpha = behavior.color.w * pulse
+        let chestAnchor = chestCenter + (right * (behavior.trailOffset * 0.18)) + (up * 0.03)
+        let browAnchor = chestCenter
+            + (forward * 0.16)
+            + (right * (behavior.trailOffset * 0.26))
+            + (up * 0.34)
+
+        transparent.addCylinder(
+            base: chestAnchor,
+            top: browAnchor,
+            radius: 0.01 + (behavior.strength * 0.003),
+            segments: 5,
+            color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.8)
+        )
+
+        let localEchoCount = max(2, min(4, behavior.echoCount))
+        for echoIndex in 0..<localEchoCount {
+            let t = Float(echoIndex + 1) / Float(localEchoCount + 1)
+            let sway = sin((timeValue * 0.032) + (Float(echoIndex) * 1.12))
+            let center = immersiveApeLerp(chestAnchor, browAnchor, factor: t)
+                + (right * (sway * behavior.trailOffset * 0.12 * (1 - t)))
+                + (forward * (0.02 + (t * 0.05)))
+            transparent.addSphere(
+                center: center,
+                radii: SIMD3<Float>(repeating: 0.018 + (behavior.strength * 0.006) + (t * 0.005)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * (0.74 + (t * 0.18)))
+            )
+        }
+
+        transparent.addSphere(
+            center: browAnchor + (forward * 0.04),
+            radii: SIMD3<Float>(
+                behavior.orbitRadius * 0.3,
+                0.012 + (behavior.strength * 0.003),
+                behavior.orbitRadius * 0.24
+            ),
+            segments: 6,
+            rings: 4,
+            color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.72)
+        )
+    }
+
+    private func addSelectedTerritoryFeedback(
+        focus: ImmersiveApeAttentionFocus,
+        chestCenter: SIMD3<Float>,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeEncounterTerritoryBehavior(focus: focus) else {
+            return
+        }
+
+        let up = SIMD3<Float>(0, 1, 0)
+        let pulse = 0.76 + (0.24 * sin((timeValue * 0.03) + (focus.distance * 0.05)))
+        let territoryRGB = immersiveApeMix(
+            SIMD3<Float>(focus.color.x, focus.color.y, focus.color.z),
+            SIMD3<Float>(behavior.color.x, behavior.color.y, behavior.color.z),
+            t: 0.58
+        )
+        let alpha = behavior.color.w * pulse
+        let chestAnchor = chestCenter + (forward * 0.05) + (up * 0.03)
+        let lateralReach = behavior.bodyRadius * 0.72
+
+        transparent.addSphere(
+            center: chestAnchor,
+            radii: SIMD3<Float>(
+                behavior.bodyRadius,
+                0.018 + (behavior.strength * 0.004),
+                behavior.bodyRadius * 0.78
+            ),
+            segments: 6,
+            rings: 4,
+            color: SIMD4<Float>(territoryRGB.x, territoryRGB.y, territoryRGB.z, alpha * 0.9)
+        )
+        transparent.addCylinder(
+            base: chestAnchor - (right * lateralReach),
+            top: chestAnchor + (right * lateralReach),
+            radius: 0.008 + (behavior.strength * 0.002),
+            segments: 5,
+            color: SIMD4<Float>(territoryRGB.x, territoryRGB.y, territoryRGB.z, alpha * 0.76)
+        )
+        transparent.addSphere(
+            center: chestAnchor + (forward * (0.1 + (behavior.strength * 0.04))),
+            radii: SIMD3<Float>(repeating: 0.022 + (behavior.strength * 0.008)),
+            segments: 5,
+            rings: 4,
+            color: SIMD4<Float>(territoryRGB.x, territoryRGB.y, territoryRGB.z, alpha * 0.84)
+        )
+    }
+
+    private func addSelectedSpeechFeedback(
+        selected: shared_immersiveape_being_snapshot,
+        focus: ImmersiveApeAttentionFocus,
+        chestCenter: SIMD3<Float>,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard immersiveApeIsSpeaking(selected) else {
+            return
+        }
+
+        let bodyHeight = max(1.2, selected.height)
+        let up = SIMD3<Float>(0, 1, 0)
+        let shouting = immersiveApeIsShouting(selected)
+        let focusMode = immersiveApeEncounterMode(attentionKind: focus.kind) ?? .conversation
+        let baseSpeech = immersiveApeSpeechColor(eyeColor: selected.eye_color)
+        let encounterTint = immersiveApeEncounterColor(focusMode)
+        let speechRGB = immersiveApeMix(
+            SIMD3<Float>(baseSpeech.x, baseSpeech.y, baseSpeech.z),
+            SIMD3<Float>(encounterTint.x, encounterTint.y, encounterTint.z),
+            t: shouting ? 0.34 : 0.18
+        )
+        let throatBase = chestCenter + (forward * 0.06) + (up * (bodyHeight * 0.14))
+        let mouthCenter = throatBase + (forward * (0.14 + (shouting ? 0.05 : 0))) + (up * (bodyHeight * 0.08))
+        let pulse = 0.76 + (0.24 * sin((timeValue * 0.04) + (focus.distance * 0.05)))
+        let alpha = (0.05 + ((shouting ? 0.08 : 0.05) * pulse))
+
+        transparent.addCylinder(
+            base: chestCenter + (up * 0.04),
+            top: throatBase,
+            radius: 0.014 + (shouting ? 0.004 : 0.002),
+            segments: 5,
+            color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, alpha * 0.62)
+        )
+        transparent.addCone(
+            base: throatBase,
+            tip: mouthCenter + (forward * (shouting ? 0.22 : 0.14)) + (up * (shouting ? 0.08 : 0.04)),
+            radius: shouting ? 0.1 : 0.072,
+            segments: 6,
+            color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, alpha * 0.78)
+        )
+
+        for pulseIndex in 0..<(shouting ? 4 : 3) {
+            let phase = (Float(pulseIndex) * 0.94) + (timeValue * 0.03)
+            let pulseCenter = mouthCenter
+                + (forward * (0.08 + (Float(pulseIndex) * 0.08)))
+                + (right * (cos(phase) * 0.03))
+                + (up * (sin(phase) * 0.02))
+            transparent.addSphere(
+                center: pulseCenter,
+                radii: SIMD3<Float>(repeating: (shouting ? 0.028 : 0.022) + (Float(pulseIndex) * 0.006)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, alpha * 0.86)
+            )
+        }
+    }
+
+    private func addSocialMeetingFeedback(
+        focus: ImmersiveApeAttentionFocus,
+        chestCenter: SIMD3<Float>,
+        leftHand: SIMD3<Float>,
+        rightHand: SIMD3<Float>,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard
+            let meetingBehavior = immersiveApeMeetingBehavior(focus: focus),
+            let mode = immersiveApeEncounterMode(attentionKind: focus.kind)
+        else {
+            return
+        }
+
+        let up = SIMD3<Float>(0, 1, 0)
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.034) + (focus.distance * 0.08)))
+        let alpha = (0.04 + (meetingBehavior.strength * 0.05)) * pulse
+        let chestBeacon = chestCenter + (forward * (0.05 + (meetingBehavior.chestForwardDelta * 0.8)))
+
+        transparent.addSphere(
+            center: chestBeacon,
+            radii: SIMD3<Float>(
+                0.11 + (meetingBehavior.strength * 0.05),
+                0.024 + (meetingBehavior.strength * 0.006),
+                0.1 + (meetingBehavior.strength * 0.04)
+            ),
+            segments: 7,
+            rings: 4,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.68)
+        )
+
+        switch mode {
+        case .conversation:
+            for hand in [leftHand, rightHand] {
+                transparent.addCylinder(
+                    base: chestBeacon,
+                    top: hand + (up * 0.02),
+                    radius: 0.012 + (meetingBehavior.strength * 0.003),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.72)
+                )
+            }
+            transparent.addSphere(
+                center: immersiveApeLerp(leftHand, rightHand, factor: 0.5) + (up * 0.05),
+                radii: SIMD3<Float>(repeating: 0.026 + (meetingBehavior.strength * 0.008)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.82)
+            )
+        case .conflict:
+            transparent.addCylinder(
+                base: leftHand + (up * 0.02),
+                top: rightHand + (up * 0.02),
+                radius: 0.014 + (meetingBehavior.strength * 0.004),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.86)
+            )
+            for hand in [leftHand, rightHand] {
+                transparent.addCylinder(
+                    base: chestBeacon + (forward * 0.08),
+                    top: hand + (up * 0.04),
+                    radius: 0.012 + (meetingBehavior.strength * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.76)
+                )
+            }
+        case .grooming:
+            for hand in [leftHand, rightHand] {
+                transparent.addSphere(
+                    center: hand + (up * 0.015),
+                    radii: SIMD3<Float>(0.08 + (meetingBehavior.strength * 0.025), 0.014, 0.07 + (meetingBehavior.strength * 0.02)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.78)
+                )
+            }
+            transparent.addCylinder(
+                base: leftHand + (up * 0.02),
+                top: rightHand + (up * 0.02),
+                radius: 0.01 + (meetingBehavior.strength * 0.003),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.72)
+            )
+        case .courtship:
+            for orbitIndex in 0..<3 {
+                let angle = (Float(orbitIndex) * (Float.pi * 2 / 3)) + (timeValue * 0.026)
+                let orbitOffset = (right * (cos(angle) * (0.1 + (meetingBehavior.strength * 0.04))))
+                    + (forward * (sin(angle) * (0.08 + (meetingBehavior.strength * 0.03))))
+                    + (up * (0.04 + (sin(angle + 0.6) * 0.03)))
+                transparent.addSphere(
+                    center: chestBeacon + orbitOffset,
+                    radii: SIMD3<Float>(repeating: 0.024 + (meetingBehavior.strength * 0.008)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.84)
+                )
+            }
+        case .companionship:
+            transparent.addCylinder(
+                base: chestBeacon - (forward * 0.08),
+                top: chestBeacon + (forward * (0.16 + (meetingBehavior.strength * 0.04))),
+                radius: 0.016 + (meetingBehavior.strength * 0.003),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.72)
+            )
+            for hand in [leftHand, rightHand] {
+                transparent.addSphere(
+                    center: hand + (forward * 0.03),
+                    radii: SIMD3<Float>(repeating: 0.022 + (meetingBehavior.strength * 0.007)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.68)
+                )
+            }
+        case .presence:
+            break
+        }
+    }
+
     private func buildNearbyApes(
         from capture: ImmersiveApeSceneCapture,
+        using grid: ImmersiveApeTerrainGrid,
         environment: ImmersiveApeEnvironment,
         timeValue: Float,
         opaque: inout ImmersiveApeMeshBuilder,
@@ -4578,9 +6771,18 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             let distance = simd_length(SIMD2<Float>(basePosition.x, basePosition.z))
             let interactionMode = immersiveApeEncounterMode(selected: capture.snapshot.selected, nearby: ape)
             let interactionWeight = immersiveApeEncounterImportance(distance: distance, mode: interactionMode, nearby: ape)
+            let swimming = immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SWIMMING))
+            let terrainPose = immersiveApeTerrainPose(
+                at: basePosition,
+                facing: ape.facing,
+                grid: grid,
+                timeValue: timeValue,
+                swimming: swimming
+            )
 
             addApe(
                 at: basePosition,
+                terrainPose: terrainPose,
                 ape: ape,
                 interactionMode: interactionMode,
                 interactionWeight: interactionWeight,
@@ -4644,6 +6846,359 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 rings: 4,
                 color: SIMD4<Float>(ribbonColor.x, ribbonColor.y, ribbonColor.z, 0.1 + (encounter.importance * 0.1))
             )
+
+            addEncounterMemoryField(
+                encounter: encounter,
+                selectedHead: selectedHead,
+                targetHead: targetHead,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+            addEncounterTerritoryField(
+                encounter: encounter,
+                index: index,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+            addEncounterMeetingField(
+                encounter: encounter,
+                index: index,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+            addEncounterSpeechField(
+                selected: capture.snapshot.selected,
+                encounter: encounter,
+                selectedHead: selectedHead,
+                targetHead: targetHead,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+        }
+    }
+
+    private func addEncounterTerritoryField(
+        encounter: ImmersiveApeEncounter,
+        index: Int,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeEncounterTerritoryBehavior(encounter: encounter) else {
+            return
+        }
+
+        let groundOrigin = SIMD3<Float>(0, 0.05, 0)
+        let targetPlanar = SIMD3<Float>(
+            encounter.localPosition.x,
+            0.05 + max(0, encounter.localPosition.y * 0.05),
+            encounter.localPosition.z
+        )
+        let targetDirection = immersiveApePlanarDirection(targetPlanar)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.028) + (Float(index) * 0.88)))
+        let alpha = behavior.color.w * pulse
+        let markerCount = max(2, min(4, Int(round(behavior.strength * 4.2))))
+
+        for markerIndex in 1...markerCount {
+            let t = Float(markerIndex) / Float(markerCount + 1)
+            let drift = sin((timeValue * 0.024) + (Float(markerIndex) * 0.82))
+            let center = immersiveApeLerp(groundOrigin, targetPlanar, factor: 0.18 + (t * 0.66))
+                + (right * drift * behavior.laneRadius * 0.34 * (1 - t))
+                + SIMD3<Float>(0, 0.012 + (pulse * 0.004), 0)
+            let radius = behavior.laneRadius * (0.96 - (t * 0.16))
+
+            transparent.addSphere(
+                center: center,
+                radii: SIMD3<Float>(radius, 0.012 + (behavior.strength * 0.003), radius * 0.82),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * (0.7 + (t * 0.12)))
+            )
+        }
+
+        transparent.addSphere(
+            center: targetPlanar + SIMD3<Float>(0, 0.016, 0),
+            radii: SIMD3<Float>(
+                behavior.ringRadius,
+                0.016 + (behavior.strength * 0.004),
+                behavior.ringRadius * 0.82
+            ),
+            segments: 7,
+            rings: 4,
+            color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.84)
+        )
+        transparent.addCylinder(
+            base: targetPlanar - (forward * behavior.laneRadius),
+            top: targetPlanar + (forward * behavior.laneRadius),
+            radius: 0.008 + (behavior.strength * 0.002),
+            segments: 5,
+            color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.74)
+        )
+    }
+
+    private func addEncounterMemoryField(
+        encounter: ImmersiveApeEncounter,
+        selectedHead: SIMD3<Float>,
+        targetHead: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeEncounterMemoryBehavior(encounter: encounter) else {
+            return
+        }
+
+        let path = (targetHead - selectedHead).normalizedSafe
+        let up = SIMD3<Float>(0, 1, 0)
+        let side = simd_cross(up, path).normalizedSafe
+        let pulse = 0.76 + (0.24 * sin((timeValue * 0.02) + (encounter.distance * 0.05)))
+        let alpha = behavior.color.w * pulse
+        var previousCenter: SIMD3<Float>?
+
+        for echoIndex in 0..<behavior.echoCount {
+            let t = Float(echoIndex + 1) / Float(behavior.echoCount + 1)
+            let sign: Float = (echoIndex % 2 == 0) ? 1 : -1
+            let sway = 0.72 + (0.28 * sin((timeValue * 0.024) + (Float(echoIndex) * 1.1)))
+            let center = immersiveApeLerp(selectedHead, targetHead, factor: 0.14 + (t * 0.72))
+                + (side * sign * behavior.trailOffset * (0.38 + ((1 - t) * 0.62)) * sway)
+                + (up * (0.05 + (behavior.strength * 0.05) + (t * 0.08)))
+
+            transparent.addSphere(
+                center: center,
+                radii: SIMD3<Float>(
+                    behavior.laneRadius * (0.92 - (t * 0.12)),
+                    0.014 + (behavior.strength * 0.004),
+                    behavior.laneRadius * (0.74 - (t * 0.08))
+                ),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * (0.76 + (t * 0.18)))
+            )
+
+            if let previousCenter {
+                transparent.addCylinder(
+                    base: previousCenter,
+                    top: center,
+                    radius: 0.008 + (behavior.strength * 0.002),
+                    segments: 5,
+                    color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.62)
+                )
+            }
+
+            previousCenter = center
+        }
+
+        let targetHalo = targetHead + (up * 0.12) + (side * (behavior.trailOffset * 0.18))
+        if let previousCenter {
+            transparent.addCylinder(
+                base: previousCenter,
+                top: targetHalo,
+                radius: 0.008 + (behavior.strength * 0.002),
+                segments: 5,
+                color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.56)
+            )
+        }
+        transparent.addSphere(
+            center: targetHalo,
+            radii: SIMD3<Float>(
+                behavior.orbitRadius,
+                0.014 + (behavior.strength * 0.004),
+                behavior.orbitRadius * 0.76
+            ),
+            segments: 7,
+            rings: 4,
+            color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.72)
+        )
+    }
+
+    private func addEncounterMeetingField(
+        encounter: ImmersiveApeEncounter,
+        index: Int,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeMeetingBehavior(mode: encounter.mode, distance: encounter.distance) else {
+            return
+        }
+
+        let encounterColor = immersiveApeEncounterColor(encounter.mode)
+        let targetPlanar = SIMD3<Float>(
+            encounter.localPosition.x,
+            0.04 + max(0, encounter.localPosition.y * 0.05),
+            encounter.localPosition.z
+        )
+        let meetingCenter = immersiveApeLerp(SIMD3<Float>(0, 0.04, 0), targetPlanar, factor: 0.54)
+        let targetDirection = immersiveApePlanarDirection(targetPlanar)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let pulse = 0.72 + (0.28 * sin((timeValue * 0.022) + (Float(index) * 0.84)))
+        let alpha = (0.04 + (behavior.strength * 0.04)) * pulse
+
+        transparent.addSphere(
+            center: meetingCenter,
+            radii: SIMD3<Float>(
+                behavior.corridorRadius * 1.1,
+                0.016 + (behavior.strength * 0.004),
+                behavior.corridorRadius * 0.8
+            ),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(encounterColor.x, encounterColor.y, encounterColor.z, alpha)
+        )
+
+        switch encounter.mode {
+        case .conversation:
+            for side: Float in [1, -1] {
+                transparent.addSphere(
+                    center: meetingCenter + (right * (behavior.corridorRadius * 0.48 * side)) + SIMD3<Float>(0, 0.1, 0),
+                    radii: SIMD3<Float>(repeating: 0.026 + (behavior.strength * 0.01)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(encounterColor.x, encounterColor.y, encounterColor.z, alpha * 0.92)
+                )
+            }
+        case .conflict:
+            for side: Float in [1, -1] {
+                transparent.addCylinder(
+                    base: meetingCenter + (right * (side * behavior.corridorRadius * 0.34)) + SIMD3<Float>(0, 0.02, 0),
+                    top: meetingCenter - (right * (side * behavior.corridorRadius * 0.34)) + SIMD3<Float>(0, 0.14 + (behavior.strength * 0.04), 0),
+                    radius: 0.012 + (behavior.strength * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(encounterColor.x, encounterColor.y, encounterColor.z, alpha * 0.88)
+                )
+            }
+        case .grooming:
+            for side: Float in [1, -1] {
+                transparent.addSphere(
+                    center: meetingCenter + (right * (behavior.corridorRadius * 0.32 * side)) + SIMD3<Float>(0, 0.03, 0),
+                    radii: SIMD3<Float>(0.11 + (behavior.strength * 0.03), 0.014, 0.09 + (behavior.strength * 0.02)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(encounterColor.x, encounterColor.y, encounterColor.z, alpha * 0.84)
+                )
+            }
+        case .courtship:
+            for orbitIndex in 0..<3 {
+                let angle = (Float(orbitIndex) * (Float.pi * 2 / 3)) + (timeValue * 0.018)
+                let orbitOffset = SIMD3<Float>(
+                    cos(angle) * (behavior.corridorRadius * 0.62),
+                    0.05 + (sin(angle + 0.7) * 0.03),
+                    sin(angle) * (behavior.corridorRadius * 0.48)
+                )
+                transparent.addSphere(
+                    center: meetingCenter + orbitOffset,
+                    radii: SIMD3<Float>(repeating: 0.024 + (behavior.strength * 0.01)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(encounterColor.x, encounterColor.y, encounterColor.z, alpha * 0.9)
+                )
+            }
+        case .companionship:
+            transparent.addCylinder(
+                base: meetingCenter - (forward * (behavior.corridorRadius * 0.44)),
+                top: meetingCenter + (forward * (behavior.corridorRadius * 0.44)),
+                radius: 0.018 + (behavior.strength * 0.005),
+                segments: 5,
+                color: SIMD4<Float>(encounterColor.x, encounterColor.y, encounterColor.z, alpha * 0.82)
+            )
+        case .presence:
+            break
+        }
+    }
+
+    private func addEncounterSpeechField(
+        selected: shared_immersiveape_being_snapshot,
+        encounter: ImmersiveApeEncounter,
+        selectedHead: SIMD3<Float>,
+        targetHead: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeEncounterSpeechBehavior(selected: selected, encounter: encounter) else {
+            return
+        }
+
+        let selectedSpeaking = immersiveApeIsSpeaking(selected) || encounter.mode == .conversation
+        let nearbySpeaking = immersiveApeIsSpeaking(encounter.ape) || encounter.mode == .conversation
+        let path = (targetHead - selectedHead).normalizedSafe
+        let up = SIMD3<Float>(0, 1, 0)
+        let side = simd_cross(up, path).normalizedSafe
+        let selectedSpeech = immersiveApeSpeechColor(eyeColor: selected.eye_color)
+        let nearbySpeech = immersiveApeSpeechColor(eyeColor: encounter.ape.eye_color)
+        let sharedSpeech = immersiveApeMix(
+            SIMD3<Float>(selectedSpeech.x, selectedSpeech.y, selectedSpeech.z),
+            SIMD3<Float>(nearbySpeech.x, nearbySpeech.y, nearbySpeech.z),
+            t: 0.5
+        )
+        let encounterTint = immersiveApeEncounterColor(encounter.mode)
+        let speechRGB = immersiveApeMix(
+            sharedSpeech,
+            SIMD3<Float>(encounterTint.x, encounterTint.y, encounterTint.z),
+            t: behavior.shouting ? 0.34 : 0.18
+        )
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.026) + (encounter.distance * 0.08)))
+        let pulseCount = behavior.shouting ? 5 : 4
+
+        for pulseIndex in 1...pulseCount {
+            let t = Float(pulseIndex) / Float(pulseCount + 1)
+            let drift = sin((timeValue * 0.032) + (Float(pulseIndex) * 0.9))
+            let pulseCenter = immersiveApeLerp(selectedHead, targetHead, factor: t)
+                + (side * (drift * behavior.laneRadius * (1 - abs((t * 2) - 1))))
+                + (up * (0.04 + (behavior.strength * 0.05) + (abs(drift) * 0.03)))
+            let alpha = (0.05 + (behavior.strength * 0.05)) * pulse
+
+            transparent.addSphere(
+                center: pulseCenter,
+                radii: SIMD3<Float>(
+                    behavior.laneRadius * 0.8,
+                    0.016 + (behavior.strength * 0.004),
+                    behavior.laneRadius * 0.66
+                ),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, alpha)
+            )
+        }
+
+        if selectedSpeaking {
+            let selectedBase = selectedHead + (path * 0.08) + (up * 0.05)
+            transparent.addCone(
+                base: selectedBase,
+                tip: selectedBase + (path * behavior.plumeLength) + (up * (0.08 + (behavior.strength * 0.05))),
+                radius: behavior.laneRadius * (behavior.shouting ? 1.3 : 0.96),
+                segments: 6,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, (0.06 + (behavior.strength * 0.06)) * pulse)
+            )
+        }
+
+        if nearbySpeaking {
+            let targetBase = targetHead - (path * 0.08) + (up * 0.05)
+            transparent.addCone(
+                base: targetBase,
+                tip: targetBase - (path * behavior.plumeLength) + (up * (0.08 + (behavior.strength * 0.05))),
+                radius: behavior.laneRadius * (behavior.shouting ? 1.3 : 0.96),
+                segments: 6,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, (0.06 + (behavior.strength * 0.06)) * pulse)
+            )
+        }
+
+        if behavior.shouting {
+            let midpoint = immersiveApeLerp(selectedHead, targetHead, factor: 0.5) + (up * 0.12)
+            transparent.addSphere(
+                center: midpoint,
+                radii: SIMD3<Float>(
+                    behavior.rippleRadius,
+                    0.02 + (behavior.strength * 0.006),
+                    behavior.rippleRadius * 0.84
+                ),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, (0.08 + (behavior.strength * 0.06)) * pulse)
+            )
         }
     }
 
@@ -4666,6 +7221,71 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         let markerAlpha = 0.1 + (focus.cameraWeight * 0.1) + (pulse * 0.03)
         let markerColor = SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, markerAlpha)
         let baseRadius = 0.018 + (focus.cameraWeight * 0.016)
+
+        let eating = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_EATING))
+        let noFood = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD)) && !eating
+
+        if focus.kind == .forage {
+            if noFood {
+                addForagingScarcityGuide(
+                    focus: focus,
+                    groundOrigin: groundOrigin,
+                    planarTarget: planarTarget,
+                    target: target,
+                    timeValue: timeValue,
+                    transparent: &transparent
+                )
+            } else if !eating {
+                addForagingChoiceGuide(
+                    focus: focus,
+                    groundOrigin: groundOrigin,
+                    primaryTarget: target,
+                    timeValue: timeValue,
+                    transparent: &transparent
+                )
+                addForagingApproachGuide(
+                    focus: focus,
+                    planarTarget: planarTarget,
+                    target: target,
+                    timeValue: timeValue,
+                    transparent: &transparent
+                )
+                addForagingSearchGuide(
+                    focus: focus,
+                    selected: selected,
+                    groundOrigin: groundOrigin,
+                    planarTarget: planarTarget,
+                    target: target,
+                    timeValue: timeValue,
+                    transparent: &transparent
+                )
+            }
+        }
+
+        addSocialMeetingGuide(
+            focus: focus,
+            groundOrigin: groundOrigin,
+            planarTarget: planarTarget,
+            target: target,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
+        addSocialMemoryGuide(
+            focus: focus,
+            groundOrigin: groundOrigin,
+            planarTarget: planarTarget,
+            target: target,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
+        addSocialTerritoryGuide(
+            focus: focus,
+            groundOrigin: groundOrigin,
+            planarTarget: planarTarget,
+            target: target,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
 
         transparent.addCylinder(base: origin, top: midpoint, radius: baseRadius, segments: 6, color: beamColor)
         transparent.addCylinder(base: midpoint, top: target, radius: baseRadius, segments: 6, color: beamColor)
@@ -4707,6 +7327,1150 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 segments: 8,
                 rings: 4,
                 color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, (0.05 + (focus.cameraWeight * 0.04)) * shimmer)
+            )
+        }
+    }
+
+    private func addSocialMemoryGuide(
+        focus: ImmersiveApeAttentionFocus,
+        groundOrigin: SIMD3<Float>,
+        planarTarget: SIMD3<Float>,
+        target: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeEncounterMemoryBehavior(focus: focus) else {
+            return
+        }
+
+        let targetDirection = immersiveApePlanarDirection(planarTarget)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let pulse = 0.72 + (0.28 * sin((timeValue * 0.026) + (focus.distance * 0.05)))
+        let alpha = behavior.color.w * pulse
+        let markerCount = max(2, min(4, behavior.echoCount))
+
+        for markerIndex in 1...markerCount {
+            let t = Float(markerIndex) / Float(markerCount + 1)
+            let sign: Float = (markerIndex % 2 == 0) ? -1 : 1
+            let drift = 0.8 + (0.2 * sin((timeValue * 0.03) + (Float(markerIndex) * 0.78)))
+            let guideCenter = immersiveApeLerp(groundOrigin, planarTarget, factor: t)
+                + (right * sign * behavior.trailOffset * 0.24 * (1 - t) * drift)
+                + SIMD3<Float>(0, 0.02 + (t * 0.02) + (pulse * 0.008), 0)
+            transparent.addSphere(
+                center: guideCenter,
+                radii: SIMD3<Float>(
+                    behavior.laneRadius * (0.94 - (t * 0.14)),
+                    0.014 + (behavior.strength * 0.004),
+                    behavior.laneRadius * (0.76 - (t * 0.08))
+                ),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * (0.76 + (t * 0.16)))
+            )
+        }
+
+        transparent.addSphere(
+            center: target + (right * (behavior.trailOffset * 0.16)) + SIMD3<Float>(0, 0.12, 0),
+            radii: SIMD3<Float>(
+                behavior.orbitRadius * 0.82,
+                0.014 + (behavior.strength * 0.004),
+                behavior.orbitRadius * 0.66
+            ),
+            segments: 7,
+            rings: 4,
+            color: SIMD4<Float>(behavior.color.x, behavior.color.y, behavior.color.z, alpha * 0.72)
+        )
+    }
+
+    private func addSocialTerritoryGuide(
+        focus: ImmersiveApeAttentionFocus,
+        groundOrigin: SIMD3<Float>,
+        planarTarget: SIMD3<Float>,
+        target: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let behavior = immersiveApeEncounterTerritoryBehavior(focus: focus) else {
+            return
+        }
+
+        let targetDirection = immersiveApePlanarDirection(planarTarget)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.026) + (focus.distance * 0.06)))
+        let markerCount = max(2, min(4, Int(round(behavior.strength * 4.2))))
+        let territoryRGB = immersiveApeMix(
+            SIMD3<Float>(focus.color.x, focus.color.y, focus.color.z),
+            SIMD3<Float>(behavior.color.x, behavior.color.y, behavior.color.z),
+            t: 0.62
+        )
+
+        for markerIndex in 1...markerCount {
+            let t = Float(markerIndex) / Float(markerCount + 1)
+            let drift = sin((timeValue * 0.03) + (Float(markerIndex) * 0.78))
+            let guideCenter = immersiveApeLerp(groundOrigin, planarTarget, factor: t)
+                + (right * drift * behavior.laneRadius * 0.34 * (1 - t))
+                + SIMD3<Float>(0, 0.014 + (pulse * 0.005), 0)
+            let radius = behavior.laneRadius * (0.98 - (t * 0.18))
+
+            transparent.addSphere(
+                center: guideCenter,
+                radii: SIMD3<Float>(radius, 0.012 + (behavior.strength * 0.003), radius * 0.82),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(territoryRGB.x, territoryRGB.y, territoryRGB.z, behavior.color.w * pulse * (0.7 + (t * 0.12)))
+            )
+        }
+
+        transparent.addSphere(
+            center: planarTarget + SIMD3<Float>(0, 0.016, 0),
+            radii: SIMD3<Float>(
+                behavior.ringRadius,
+                0.014 + (behavior.strength * 0.004),
+                behavior.ringRadius * 0.82
+            ),
+            segments: 7,
+            rings: 4,
+            color: SIMD4<Float>(territoryRGB.x, territoryRGB.y, territoryRGB.z, behavior.color.w * pulse * 0.88)
+        )
+        transparent.addCylinder(
+            base: target,
+            top: target + SIMD3<Float>(0, 0.12 + (behavior.strength * 0.05), 0),
+            radius: 0.008 + (behavior.strength * 0.002),
+            segments: 5,
+            color: SIMD4<Float>(territoryRGB.x, territoryRGB.y, territoryRGB.z, behavior.color.w * pulse * 0.72)
+        )
+    }
+
+    private func addSocialMeetingGuide(
+        focus: ImmersiveApeAttentionFocus,
+        groundOrigin: SIMD3<Float>,
+        planarTarget: SIMD3<Float>,
+        target: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard
+            let behavior = immersiveApeMeetingBehavior(focus: focus),
+            let mode = immersiveApeEncounterMode(attentionKind: focus.kind)
+        else {
+            return
+        }
+
+        let targetDirection = immersiveApePlanarDirection(planarTarget)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.03) + (focus.distance * 0.06)))
+        let markerCount = max(2, min(5, Int(round((focus.distance / 7) + 1))))
+
+        for markerIndex in 1...markerCount {
+            let t = Float(markerIndex) / Float(markerCount + 1)
+            let drift = sin((timeValue * 0.024) + (Float(markerIndex) * 0.82))
+            let guideCenter = immersiveApeLerp(groundOrigin, planarTarget, factor: t)
+                + (right * (drift * (0.03 + (behavior.strength * 0.04)) * (1 - t)))
+                + SIMD3<Float>(0, 0.016 + (pulse * 0.006), 0)
+            let alpha = (0.04 + (behavior.strength * 0.04)) * (0.82 + (0.18 * drift))
+            let radius = behavior.corridorRadius * (1.02 - (t * 0.18))
+
+            transparent.addSphere(
+                center: guideCenter,
+                radii: SIMD3<Float>(radius, 0.016 + (behavior.strength * 0.004), radius * 0.84),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha)
+            )
+        }
+
+        let zoneAlpha = (0.07 + (behavior.strength * 0.06)) * pulse
+        transparent.addSphere(
+            center: planarTarget + SIMD3<Float>(0, 0.025, 0),
+            radii: SIMD3<Float>(
+                behavior.targetRadius,
+                0.02 + (behavior.strength * 0.006),
+                behavior.targetRadius * 0.86
+            ),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.76)
+        )
+
+        switch mode {
+        case .conversation:
+            for side: Float in [1, -1] {
+                transparent.addSphere(
+                    center: target + (right * (behavior.targetRadius * 0.56 * side)) + SIMD3<Float>(0, 0.16 + (behavior.strength * 0.04), 0),
+                    radii: SIMD3<Float>(repeating: 0.03 + (behavior.strength * 0.012)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.9)
+                )
+            }
+            transparent.addCylinder(
+                base: target - (right * (behavior.targetRadius * 0.34)) + SIMD3<Float>(0, 0.14, 0),
+                top: target + (right * (behavior.targetRadius * 0.34)) + SIMD3<Float>(0, 0.14, 0),
+                radius: 0.01 + (behavior.strength * 0.003),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.72)
+            )
+        case .conflict:
+            for side: Float in [1, -1] {
+                transparent.addCylinder(
+                    base: target + (right * (side * behavior.targetRadius * 0.36)) + SIMD3<Float>(0, 0.04, 0),
+                    top: target - (right * (side * behavior.targetRadius * 0.36)) + SIMD3<Float>(0, 0.2 + (behavior.strength * 0.04), 0),
+                    radius: 0.012 + (behavior.strength * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.88)
+                )
+            }
+        case .grooming:
+            for side: Float in [1, -1] {
+                transparent.addSphere(
+                    center: planarTarget + (right * (behavior.targetRadius * 0.34 * side)) + SIMD3<Float>(0, 0.03, 0),
+                    radii: SIMD3<Float>(0.13 + (behavior.strength * 0.03), 0.016, 0.1 + (behavior.strength * 0.02)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.82)
+                )
+            }
+            transparent.addCylinder(
+                base: target - (right * (behavior.targetRadius * 0.22)) + SIMD3<Float>(0, 0.07, 0),
+                top: target + (right * (behavior.targetRadius * 0.22)) + SIMD3<Float>(0, 0.07, 0),
+                radius: 0.014 + (behavior.strength * 0.004),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.76)
+            )
+        case .courtship:
+            for orbitIndex in 0..<3 {
+                let angle = (Float(orbitIndex) * (Float.pi * 2 / 3)) + (timeValue * 0.02)
+                let orbitOffset = SIMD3<Float>(
+                    cos(angle) * (behavior.targetRadius * 0.58),
+                    0.09 + (sin(angle + 0.6) * 0.04),
+                    sin(angle) * (behavior.targetRadius * 0.48)
+                )
+                transparent.addSphere(
+                    center: target + orbitOffset,
+                    radii: SIMD3<Float>(repeating: 0.028 + (behavior.strength * 0.01)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.9)
+                )
+            }
+        case .companionship:
+            transparent.addCylinder(
+                base: planarTarget - (forward * (behavior.targetRadius * 0.42)),
+                top: planarTarget + (forward * (behavior.targetRadius * 0.42)),
+                radius: 0.02 + (behavior.strength * 0.004),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.78)
+            )
+            for side: Float in [1, -1] {
+                transparent.addSphere(
+                    center: target + (right * (behavior.targetRadius * 0.34 * side)) + SIMD3<Float>(0, 0.08, 0),
+                    radii: SIMD3<Float>(repeating: 0.022 + (behavior.strength * 0.008)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, zoneAlpha * 0.76)
+                )
+            }
+        case .presence:
+            break
+        }
+    }
+
+    private func addForagingChoiceGuide(
+        focus: ImmersiveApeAttentionFocus,
+        groundOrigin: SIMD3<Float>,
+        primaryTarget: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard
+            let alternateFoodType = focus.alternateFoodType,
+            let alternateLocalPosition = focus.alternateLocalPosition
+        else {
+            return
+        }
+
+        let alternatePlanarTarget = SIMD3<Float>(
+            alternateLocalPosition.x,
+            0.08 + max(0, alternateLocalPosition.y * 0.08),
+            alternateLocalPosition.z
+        )
+        let alternateTarget = alternateLocalPosition + SIMD3<Float>(0, 0.28, 0)
+        let abundance = immersiveApeClamp(focus.alternateFoodAbundance, min: 0.18, max: 1.0)
+        let alternateTint = immersiveApeFoodTint(alternateFoodType)
+        let alternateRGB = SIMD3<Float>(alternateTint.x, alternateTint.y, alternateTint.z)
+        let primaryRGB = SIMD3<Float>(focus.color.x, focus.color.y, focus.color.z)
+        let bridgeRGB = immersiveApeMix(primaryRGB, alternateRGB, t: 0.46)
+        let branchPulse = 0.76 + (0.24 * sin((timeValue * 0.032) + (focus.alternateDistance * 0.07)))
+        let branchColor = SIMD4<Float>(alternateRGB.x, alternateRGB.y, alternateRGB.z, (0.04 + (abundance * 0.04)) * branchPulse)
+        let branchMidpoint = immersiveApeLerp(groundOrigin, alternateTarget, factor: 0.52)
+            + SIMD3<Float>(0, 0.2 + (abundance * 0.12), 0)
+
+        transparent.addCylinder(
+            base: groundOrigin,
+            top: branchMidpoint,
+            radius: 0.01 + (abundance * 0.005),
+            segments: 5,
+            color: branchColor
+        )
+        transparent.addCylinder(
+            base: branchMidpoint,
+            top: alternateTarget,
+            radius: 0.01 + (abundance * 0.005),
+            segments: 5,
+            color: branchColor
+        )
+
+        let markerCount = max(2, min(4, Int(round(focus.alternateDistance / 8))))
+        for markerIndex in 1...markerCount {
+            let t = Float(markerIndex) / Float(markerCount + 1)
+            let markerCenter = immersiveApeLerp(groundOrigin, alternatePlanarTarget, factor: t)
+                + SIMD3<Float>(0, 0.012 + (sin((timeValue * 0.05) + (t * 4)) * 0.008), 0)
+            transparent.addSphere(
+                center: markerCenter,
+                radii: SIMD3<Float>(0.09 - (t * 0.018) + (abundance * 0.02), 0.014, 0.09 - (t * 0.018) + (abundance * 0.02)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(alternateRGB.x, alternateRGB.y, alternateRGB.z, (0.04 + (abundance * 0.03)) * branchPulse)
+            )
+        }
+
+        if simd_length_squared(primaryTarget - alternateTarget) < 576 {
+            let bridgeMidpoint = immersiveApeLerp(primaryTarget, alternateTarget, factor: 0.5)
+                + SIMD3<Float>(0, 0.22 + (abundance * 0.1), 0)
+            let bridgeColor = SIMD4<Float>(bridgeRGB.x, bridgeRGB.y, bridgeRGB.z, 0.028 + (abundance * 0.024))
+            transparent.addCylinder(base: primaryTarget, top: bridgeMidpoint, radius: 0.007 + (abundance * 0.003), segments: 5, color: bridgeColor)
+            transparent.addCylinder(base: bridgeMidpoint, top: alternateTarget, radius: 0.007 + (abundance * 0.003), segments: 5, color: bridgeColor)
+        }
+
+        let targetAlpha = (0.06 + (abundance * 0.05)) * branchPulse
+        switch ImmersiveApeFoodCode(rawValue: alternateFoodType) {
+        case .fruit:
+            for orbitSide: Float in [1, -1] {
+                transparent.addSphere(
+                    center: alternateTarget + SIMD3<Float>(orbitSide * 0.08, 0.03, 0),
+                    radii: SIMD3<Float>(repeating: 0.035 + (abundance * 0.012)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(alternateRGB.x, alternateRGB.y, alternateRGB.z, targetAlpha * 0.86)
+                )
+            }
+        case .seaweed:
+            for stalkSide: Float in [1, -1] {
+                transparent.addCylinder(
+                    base: alternatePlanarTarget + SIMD3<Float>(stalkSide * 0.05, 0.02, 0),
+                    top: alternateTarget + SIMD3<Float>(stalkSide * 0.03, 0.18 + (abundance * 0.06), 0.04),
+                    radius: 0.014 + (abundance * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(alternateRGB.x, alternateRGB.y, alternateRGB.z, targetAlpha * 0.78)
+                )
+            }
+        case .shellfish:
+            transparent.addSphere(
+                center: alternateTarget + SIMD3<Float>(0, 0.02, 0),
+                radii: SIMD3<Float>(0.09 + (abundance * 0.03), 0.014, 0.06 + (abundance * 0.02)),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(alternateRGB.x, alternateRGB.y, alternateRGB.z, targetAlpha * 0.8)
+            )
+        case .birdEggs, .lizardEggs:
+            transparent.addSphere(
+                center: alternateTarget + SIMD3<Float>(0, 0.06, 0.02),
+                radii: SIMD3<Float>(0.03 + (abundance * 0.01), 0.042 + (abundance * 0.014), 0.03 + (abundance * 0.01)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(alternateRGB.x, alternateRGB.y, alternateRGB.z, targetAlpha * 0.84)
+            )
+        case .vegetable, .none:
+            transparent.addCone(
+                base: alternateTarget + SIMD3<Float>(-0.03, 0.01, -0.01),
+                tip: alternateTarget + SIMD3<Float>(0.02, 0.12 + (abundance * 0.05), 0.04),
+                radius: 0.024 + (abundance * 0.01),
+                segments: 5,
+                color: SIMD4<Float>(alternateRGB.x, alternateRGB.y, alternateRGB.z, targetAlpha * 0.76)
+            )
+        }
+    }
+
+    private func addForagingApproachGuide(
+        focus: ImmersiveApeAttentionFocus,
+        planarTarget: SIMD3<Float>,
+        target: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let foodType = focus.foodType else {
+            return
+        }
+
+        let approachStrength = immersiveApeForagingApproachStrength(distance: focus.distance)
+        guard approachStrength > 0.08 else {
+            return
+        }
+
+        let abundance = immersiveApeClamp(focus.foodAbundance, min: 0.2, max: 1.0)
+        let pulse = 0.78 + (0.22 * sin((timeValue * 0.04) + (focus.distance * 0.14)))
+        let targetDirection = immersiveApePlanarDirection(planarTarget)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let ringAlpha = (0.05 + (abundance * 0.04) + (approachStrength * 0.08)) * pulse
+        let railAlpha = 0.04 + (approachStrength * 0.06)
+
+        transparent.addSphere(
+            center: planarTarget + SIMD3<Float>(0, 0.018, 0),
+            radii: SIMD3<Float>(0.22 + (approachStrength * 0.16), 0.014, 0.18 + (approachStrength * 0.12)),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, ringAlpha)
+        )
+        transparent.addCylinder(
+            base: target + (right * -(0.12 + (approachStrength * 0.05))) + SIMD3<Float>(0, 0.02, 0),
+            top: target + (right * (0.12 + (approachStrength * 0.05))) + SIMD3<Float>(0, 0.12 + (approachStrength * 0.06), 0),
+            radius: 0.008 + (approachStrength * 0.004),
+            segments: 5,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, railAlpha)
+        )
+        transparent.addCylinder(
+            base: target + (right * (0.12 + (approachStrength * 0.05))) + SIMD3<Float>(0, 0.02, 0),
+            top: target + (right * -(0.12 + (approachStrength * 0.05))) + SIMD3<Float>(0, 0.12 + (approachStrength * 0.06), 0),
+            radius: 0.008 + (approachStrength * 0.004),
+            segments: 5,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, railAlpha)
+        )
+
+        switch ImmersiveApeFoodCode(rawValue: foodType) {
+        case .fruit:
+            for grabSide: Float in [1, -1] {
+                transparent.addSphere(
+                    center: target + (right * (grabSide * (0.09 + (approachStrength * 0.02)))) + SIMD3<Float>(0, 0.04 + (approachStrength * 0.03), 0),
+                    radii: SIMD3<Float>(repeating: 0.03 + (abundance * 0.01) + (approachStrength * 0.01)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, ringAlpha * 0.88)
+                )
+            }
+        case .seaweed:
+            for stalkSide: Float in [1, -1] {
+                transparent.addCylinder(
+                    base: planarTarget + (right * (stalkSide * 0.06)),
+                    top: target + (right * (stalkSide * 0.04)) + (forward * 0.04) + SIMD3<Float>(0, 0.18 + (approachStrength * 0.08), 0),
+                    radius: 0.014 + (abundance * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, ringAlpha * 0.8)
+                )
+            }
+        case .shellfish:
+            transparent.addSphere(
+                center: target + SIMD3<Float>(0, 0.03, 0),
+                radii: SIMD3<Float>(0.09 + (approachStrength * 0.04), 0.016, 0.07 + (approachStrength * 0.03)),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, ringAlpha * 0.84)
+            )
+        case .birdEggs, .lizardEggs:
+            transparent.addSphere(
+                center: target + SIMD3<Float>(0, 0.05 + (approachStrength * 0.03), 0.02),
+                radii: SIMD3<Float>(0.034 + (approachStrength * 0.014), 0.046 + (approachStrength * 0.016), 0.034 + (approachStrength * 0.014)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, ringAlpha * 0.86)
+            )
+        case .vegetable, .none:
+            for sweepSide: Float in [1, -1] {
+                transparent.addCone(
+                    base: target + (right * (sweepSide * 0.05)) + SIMD3<Float>(0, 0.02, 0),
+                    tip: target + (right * (sweepSide * 0.02)) + (forward * (0.04 + (approachStrength * 0.03))) + SIMD3<Float>(0, 0.11 + (approachStrength * 0.05), 0),
+                    radius: 0.02 + (abundance * 0.008),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, ringAlpha * 0.78)
+                )
+            }
+        }
+    }
+
+    private func addForagingOutcomeFeedback(
+        focus: ImmersiveApeAttentionFocus,
+        chestCenter: SIMD3<Float>,
+        leftHand: SIMD3<Float>,
+        rightHand: SIMD3<Float>,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        bodyProfile: ImmersiveApeBodyProfile,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let foodType = focus.foodType else {
+            return
+        }
+
+        let up = SIMD3<Float>(0, 1, 0)
+        let abundance = immersiveApeClamp(focus.foodAbundance, min: 0.2, max: 1.0)
+        let intakeCenter = chestCenter
+            + (forward * (bodyProfile.chestDepth * 0.72 + bodyProfile.muzzleLength * 0.22))
+            + (up * (bodyProfile.torsoHeight * 0.24))
+        let intakePulse = 0.72 + (0.28 * sin((timeValue * 0.05) + (focus.distance * 0.18)))
+        let washAlpha = (0.04 + (abundance * 0.04)) * intakePulse
+
+        transparent.addSphere(
+            center: intakeCenter - (forward * 0.06),
+            radii: SIMD3<Float>(0.24 + (abundance * 0.08), 0.08 + (abundance * 0.03), 0.2 + (abundance * 0.06)),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, washAlpha)
+        )
+
+        for (handIndex, handCenter) in [leftHand, rightHand].enumerated() {
+            let sideDirection: Float = handIndex == 0 ? 1 : -1
+            let handPulse = 0.78 + (0.22 * sin((timeValue * 0.07) + (Float(handIndex) * 1.6)))
+            let handAlpha = (0.05 + (abundance * 0.05)) * handPulse
+            let handColor = SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, handAlpha)
+
+            switch ImmersiveApeFoodCode(rawValue: foodType) {
+            case .fruit:
+                transparent.addSphere(
+                    center: handCenter + (forward * 0.08) + (up * 0.02),
+                    radii: SIMD3<Float>(repeating: 0.055 + (abundance * 0.02)),
+                    segments: 5,
+                    rings: 4,
+                    color: handColor
+                )
+            case .seaweed:
+                transparent.addCylinder(
+                    base: handCenter + (forward * 0.04),
+                    top: handCenter + (forward * 0.12) + (up * (0.2 + (abundance * 0.08))) + (right * (sideDirection * 0.03)),
+                    radius: 0.018 + (abundance * 0.006),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, handAlpha * 0.94)
+                )
+            case .shellfish:
+                transparent.addSphere(
+                    center: handCenter + (forward * 0.08),
+                    radii: SIMD3<Float>(0.08 + (abundance * 0.03), 0.02, 0.06 + (abundance * 0.02)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, handAlpha * 0.9)
+                )
+            case .birdEggs, .lizardEggs:
+                transparent.addSphere(
+                    center: handCenter + (forward * 0.08) + (up * 0.02),
+                    radii: SIMD3<Float>(0.045 + (abundance * 0.015), 0.065 + (abundance * 0.02), 0.045 + (abundance * 0.015)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, handAlpha * 0.94)
+                )
+            case .vegetable, .none:
+                transparent.addCone(
+                    base: handCenter + (forward * 0.02),
+                    tip: handCenter + (forward * 0.14) + (up * (0.14 + (abundance * 0.05))) + (right * (sideDirection * 0.02)),
+                    radius: 0.04 + (abundance * 0.015),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, handAlpha * 0.88)
+                )
+            }
+
+            let sampleCount = handIndex == 0 ? 3 : 2
+            for sampleIndex in 1...sampleCount {
+                let t = Float(sampleIndex) / Float(sampleCount + 1)
+                let sway = sin((timeValue * 0.06) + (Float(sampleIndex) * 1.2) + (Float(handIndex) * 0.8))
+                let transitCenter = immersiveApeLerp(handCenter, intakeCenter, factor: 0.18 + (t * 0.68))
+                    + (right * (sway * 0.03 * (1 - t) * sideDirection))
+                    + (up * (0.02 + (abs(sway) * 0.03)))
+                let transitAlpha = (0.05 + (abundance * 0.05)) * (1 - (t * 0.18)) * handPulse
+
+                switch ImmersiveApeFoodCode(rawValue: foodType) {
+                case .fruit:
+                    transparent.addSphere(
+                        center: transitCenter,
+                        radii: SIMD3<Float>(repeating: 0.034 + (abundance * 0.014)),
+                        segments: 5,
+                        rings: 4,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, transitAlpha)
+                    )
+                case .seaweed:
+                    transparent.addCylinder(
+                        base: transitCenter - (up * 0.04),
+                        top: transitCenter + (up * 0.07) + (forward * 0.02),
+                        radius: 0.012 + (abundance * 0.004),
+                        segments: 5,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, transitAlpha * 0.92)
+                    )
+                case .shellfish:
+                    transparent.addSphere(
+                        center: transitCenter,
+                        radii: SIMD3<Float>(0.05 + (abundance * 0.02), 0.014, 0.038 + (abundance * 0.014)),
+                        segments: 6,
+                        rings: 4,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, transitAlpha * 0.88)
+                    )
+                case .birdEggs, .lizardEggs:
+                    transparent.addSphere(
+                        center: transitCenter,
+                        radii: SIMD3<Float>(0.03 + (abundance * 0.012), 0.045 + (abundance * 0.014), 0.03 + (abundance * 0.012)),
+                        segments: 5,
+                        rings: 4,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, transitAlpha * 0.9)
+                    )
+                case .vegetable, .none:
+                    transparent.addCone(
+                        base: transitCenter - (forward * 0.02),
+                        tip: transitCenter + (forward * 0.04) + (up * 0.08),
+                        radius: 0.025 + (abundance * 0.01),
+                        segments: 5,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, transitAlpha * 0.84)
+                    )
+                }
+            }
+        }
+
+        let mouthAlpha = (0.08 + (abundance * 0.07)) * intakePulse
+        switch ImmersiveApeFoodCode(rawValue: foodType) {
+        case .fruit:
+            for orbitIndex in 0..<3 {
+                let angle = (Float(orbitIndex) * (Float.pi * 2 / 3)) + (timeValue * 0.04)
+                let orbitOffset = SIMD3<Float>(
+                    cos(angle) * (0.11 + (abundance * 0.04)),
+                    0.03 + (Float(orbitIndex) * 0.03),
+                    sin(angle) * (0.08 + (abundance * 0.03))
+                )
+                transparent.addSphere(
+                    center: intakeCenter + orbitOffset,
+                    radii: SIMD3<Float>(repeating: 0.042 + (abundance * 0.014)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, mouthAlpha * 0.82)
+                )
+            }
+        case .seaweed:
+            for swayIndex in 0..<3 {
+                let sway = sin((timeValue * 0.035) + Float(swayIndex) * 1.3)
+                let baseOffset = right * ((Float(swayIndex) - 1) * 0.07)
+                transparent.addCylinder(
+                    base: intakeCenter + baseOffset - (forward * 0.03),
+                    top: intakeCenter + baseOffset + (up * (0.18 + (abundance * 0.08))) + (right * (sway * 0.05)),
+                    radius: 0.016 + (abundance * 0.005),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, mouthAlpha * 0.74)
+                )
+            }
+        case .shellfish:
+            for shellSide: Float in [1, -1] {
+                transparent.addSphere(
+                    center: intakeCenter + (right * (shellSide * 0.08)) + (forward * 0.02),
+                    radii: SIMD3<Float>(0.09 + (abundance * 0.03), 0.018, 0.06 + (abundance * 0.02)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, mouthAlpha * 0.76)
+                )
+            }
+        case .birdEggs, .lizardEggs:
+            for eggIndex in 0..<2 {
+                let eggOffset = SIMD3<Float>(
+                    (Float(eggIndex) == 0 ? -0.05 : 0.05),
+                    0.03 + (Float(eggIndex) * 0.05),
+                    0.04
+                )
+                transparent.addSphere(
+                    center: intakeCenter + eggOffset,
+                    radii: SIMD3<Float>(0.038 + (abundance * 0.012), 0.052 + (abundance * 0.016), 0.038 + (abundance * 0.012)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, mouthAlpha * 0.8)
+                )
+            }
+        case .vegetable, .none:
+            for leafIndex in 0..<3 {
+                let leafSide: Float = leafIndex == 1 ? 0 : (leafIndex == 0 ? -1 : 1)
+                transparent.addCone(
+                    base: intakeCenter + (right * (leafSide * 0.04)) - (forward * 0.02),
+                    tip: intakeCenter + (right * (leafSide * 0.06)) + (up * (0.13 + (Float(leafIndex) * 0.03))) + (forward * 0.05),
+                    radius: 0.035 + (abundance * 0.012),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, mouthAlpha * 0.72)
+                )
+            }
+        }
+    }
+
+    private func addForagingPreparationFeedback(
+        focus: ImmersiveApeAttentionFocus,
+        chestCenter: SIMD3<Float>,
+        leftHand: SIMD3<Float>,
+        rightHand: SIMD3<Float>,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let foodType = focus.foodType else {
+            return
+        }
+
+        let approachStrength = immersiveApeForagingApproachStrength(distance: focus.distance)
+        guard approachStrength > 0.08 else {
+            return
+        }
+
+        let abundance = immersiveApeClamp(focus.foodAbundance, min: 0.2, max: 1.0)
+        let pulse = 0.76 + (0.24 * sin((timeValue * 0.05) + (focus.distance * 0.16)))
+        let prepCenter = immersiveApeLerp((leftHand + rightHand) * 0.5, chestCenter, factor: 0.42)
+            + (forward * (0.06 + (approachStrength * 0.04)))
+        let prepAlpha = (0.04 + (abundance * 0.04) + (approachStrength * 0.07)) * pulse
+
+        transparent.addSphere(
+            center: prepCenter,
+            radii: SIMD3<Float>(0.11 + (approachStrength * 0.05), 0.035 + (approachStrength * 0.015), 0.1 + (approachStrength * 0.04)),
+            segments: 6,
+            rings: 4,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha)
+        )
+        transparent.addCylinder(
+            base: leftHand + (forward * 0.03),
+            top: prepCenter,
+            radius: 0.01 + (approachStrength * 0.004),
+            segments: 5,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha * 0.78)
+        )
+        transparent.addCylinder(
+            base: rightHand + (forward * 0.03),
+            top: prepCenter,
+            radius: 0.01 + (approachStrength * 0.004),
+            segments: 5,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha * 0.78)
+        )
+
+        switch ImmersiveApeFoodCode(rawValue: foodType) {
+        case .fruit:
+            for prepSide: Float in [1, -1] {
+                transparent.addSphere(
+                    center: prepCenter + (right * (prepSide * 0.05)),
+                    radii: SIMD3<Float>(repeating: 0.028 + (approachStrength * 0.01)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha * 0.84)
+                )
+            }
+        case .seaweed:
+            for sweepSide: Float in [1, -1] {
+                transparent.addCylinder(
+                    base: prepCenter + (right * (sweepSide * 0.04)) - (forward * 0.03),
+                    top: prepCenter + (right * (sweepSide * 0.05)) + SIMD3<Float>(0, 0.14 + (approachStrength * 0.06), 0),
+                    radius: 0.012 + (approachStrength * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha * 0.76)
+                )
+            }
+        case .shellfish:
+            transparent.addSphere(
+                center: prepCenter,
+                radii: SIMD3<Float>(0.07 + (approachStrength * 0.03), 0.014, 0.05 + (approachStrength * 0.02)),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha * 0.84)
+            )
+        case .birdEggs, .lizardEggs:
+            transparent.addSphere(
+                center: prepCenter + SIMD3<Float>(0, 0.03, 0.02),
+                radii: SIMD3<Float>(0.03 + (approachStrength * 0.01), 0.042 + (approachStrength * 0.012), 0.03 + (approachStrength * 0.01)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha * 0.86)
+            )
+        case .vegetable, .none:
+            transparent.addCone(
+                base: prepCenter - (forward * 0.02),
+                tip: prepCenter + (forward * 0.05) + SIMD3<Float>(0, 0.1 + (approachStrength * 0.05), 0),
+                radius: 0.022 + (approachStrength * 0.01),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, prepAlpha * 0.78)
+            )
+        }
+    }
+
+    private func addForagingScarcityFeedback(
+        focus: ImmersiveApeAttentionFocus,
+        chestCenter: SIMD3<Float>,
+        leftHand: SIMD3<Float>,
+        rightHand: SIMD3<Float>,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        bodyProfile: ImmersiveApeBodyProfile,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        let up = SIMD3<Float>(0, 1, 0)
+        let foodType = ImmersiveApeFoodCode(rawValue: focus.foodType ?? ImmersiveApeFoodCode.vegetable.rawValue)
+        let abundance = immersiveApeClamp(focus.foodAbundance, min: 0.08, max: 0.72)
+        let scarcityStrength = 0.48 + ((1 - abundance) * 0.44)
+        let intakeCenter = chestCenter
+            + (forward * (bodyProfile.chestDepth * 0.68 + bodyProfile.muzzleLength * 0.18))
+            + (up * (bodyProfile.torsoHeight * 0.22))
+        let hollowAlpha = (0.035 + ((1 - abundance) * 0.035)) * (0.82 + (0.18 * sin((timeValue * 0.04) + (focus.distance * 0.06))))
+
+        transparent.addSphere(
+            center: intakeCenter - (forward * 0.05),
+            radii: SIMD3<Float>(0.22 + (scarcityStrength * 0.08), 0.04 + (scarcityStrength * 0.02), 0.18 + (scarcityStrength * 0.06)),
+            segments: 7,
+            rings: 4,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, hollowAlpha)
+        )
+        transparent.addCylinder(
+            base: intakeCenter - (right * (0.08 + (scarcityStrength * 0.02))),
+            top: intakeCenter + (right * (0.08 + (scarcityStrength * 0.02))),
+            radius: 0.008 + (scarcityStrength * 0.003),
+            segments: 5,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, hollowAlpha * 1.2)
+        )
+
+        for (handIndex, handCenter) in [leftHand, rightHand].enumerated() {
+            let handSide: Float = handIndex == 0 ? 1 : -1
+            let driftPulse = 0.78 + (0.22 * sin((timeValue * 0.05) + (Float(handIndex) * 1.3)))
+            let remnantCount = handIndex == 0 ? 3 : 2
+
+            for remnantIndex in 0..<remnantCount {
+                let t = Float(remnantIndex + 1) / Float(remnantCount + 1)
+                let arc = sin((timeValue * 0.06) + Float(remnantIndex) * 1.1 + (Float(handIndex) * 0.9))
+                let remnantCenter = immersiveApeLerp(intakeCenter, handCenter, factor: 0.3 + (t * 0.58))
+                    + (right * (arc * 0.06 * handSide))
+                    - (up * (0.02 + (t * 0.06)))
+                let remnantAlpha = (0.045 + ((1 - abundance) * 0.045)) * (1 - (t * 0.16)) * driftPulse
+
+                switch foodType {
+                case .fruit:
+                    transparent.addSphere(
+                        center: remnantCenter,
+                        radii: SIMD3<Float>(repeating: 0.024 + (scarcityStrength * 0.01)),
+                        segments: 5,
+                        rings: 4,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, remnantAlpha)
+                    )
+                case .seaweed:
+                    transparent.addCylinder(
+                        base: remnantCenter + (up * 0.03),
+                        top: remnantCenter - (up * (0.06 + (scarcityStrength * 0.02))) + (right * (handSide * 0.01)),
+                        radius: 0.01 + (scarcityStrength * 0.003),
+                        segments: 5,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, remnantAlpha * 0.92)
+                    )
+                case .shellfish:
+                    transparent.addSphere(
+                        center: remnantCenter,
+                        radii: SIMD3<Float>(0.04 + (scarcityStrength * 0.012), 0.012, 0.03 + (scarcityStrength * 0.01)),
+                        segments: 6,
+                        rings: 4,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, remnantAlpha * 0.88)
+                    )
+                case .birdEggs, .lizardEggs:
+                    transparent.addSphere(
+                        center: remnantCenter,
+                        radii: SIMD3<Float>(0.022 + (scarcityStrength * 0.008), 0.032 + (scarcityStrength * 0.01), 0.022 + (scarcityStrength * 0.008)),
+                        segments: 5,
+                        rings: 4,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, remnantAlpha * 0.9)
+                    )
+                case .vegetable, .none:
+                    transparent.addCone(
+                        base: remnantCenter + (up * 0.01),
+                        tip: remnantCenter + (forward * 0.03) - (up * (0.05 + (scarcityStrength * 0.02))),
+                        radius: 0.018 + (scarcityStrength * 0.007),
+                        segments: 5,
+                        color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, remnantAlpha * 0.84)
+                    )
+                }
+            }
+        }
+    }
+
+    private func addForagingScarcityGuide(
+        focus: ImmersiveApeAttentionFocus,
+        groundOrigin: SIMD3<Float>,
+        planarTarget: SIMD3<Float>,
+        target: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        let abundance = immersiveApeClamp(focus.foodAbundance, min: 0.08, max: 0.72)
+        let scarcityStrength = 0.5 + ((1 - abundance) * 0.34)
+        let targetDirection = immersiveApePlanarDirection(planarTarget)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : SIMD3<Float>(0, 0, 1)
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let remnantType = ImmersiveApeFoodCode(rawValue: focus.foodType ?? ImmersiveApeFoodCode.vegetable.rawValue)
+        let guidePulse = 0.72 + (0.28 * sin((timeValue * 0.028) + (focus.distance * 0.05)))
+        let guideCount = max(2, min(5, Int(round((focus.distance / 8) + 1))))
+
+        for markerIndex in 1...guideCount {
+            let t = Float(markerIndex) / Float(guideCount + 1)
+            let drift = sin((timeValue * 0.04) + (Float(markerIndex) * 0.9))
+            let guideCenter = immersiveApeLerp(groundOrigin, planarTarget, factor: t)
+                + (right * (drift * 0.04 * (1 - t)))
+                - SIMD3<Float>(0, 0.01 + (t * 0.02), 0)
+            let alpha = (0.04 + ((1 - abundance) * 0.05)) * (0.84 + (0.16 * drift))
+
+            transparent.addSphere(
+                center: guideCenter,
+                radii: SIMD3<Float>(0.09 - (t * 0.02) + (scarcityStrength * 0.02), 0.014, 0.09 - (t * 0.02) + (scarcityStrength * 0.02)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha)
+            )
+        }
+
+        let targetAlpha = (0.07 + ((1 - abundance) * 0.07)) * guidePulse
+        transparent.addSphere(
+            center: planarTarget + SIMD3<Float>(0, 0.02, 0),
+            radii: SIMD3<Float>(0.26 + (scarcityStrength * 0.08), 0.016, 0.2 + (scarcityStrength * 0.06)),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.64)
+        )
+        transparent.addCylinder(
+            base: target + (right * -0.12) + SIMD3<Float>(0, 0.03, 0),
+            top: target + (right * 0.12) + SIMD3<Float>(0, 0.18, 0),
+            radius: 0.014 + (scarcityStrength * 0.004),
+            segments: 5,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.8)
+        )
+        transparent.addCylinder(
+            base: target + (right * 0.12) + SIMD3<Float>(0, 0.03, 0),
+            top: target + (right * -0.12) + SIMD3<Float>(0, 0.18, 0),
+            radius: 0.014 + (scarcityStrength * 0.004),
+            segments: 5,
+            color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.8)
+        )
+
+        switch remnantType {
+        case .fruit:
+            for remnantSide: Float in [1, -1] {
+                transparent.addSphere(
+                    center: target + (right * (remnantSide * 0.08)) + SIMD3<Float>(0, 0.05, 0),
+                    radii: SIMD3<Float>(repeating: 0.03 + (scarcityStrength * 0.01)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.56)
+                )
+            }
+        case .seaweed:
+            for remnantIndex in 0..<2 {
+                let side = Float(remnantIndex == 0 ? -1 : 1)
+                transparent.addCylinder(
+                    base: planarTarget + (right * (side * 0.07)) + SIMD3<Float>(0, 0.03, 0),
+                    top: planarTarget + (right * (side * 0.05)) + SIMD3<Float>(0, 0.18, 0),
+                    radius: 0.014 + (scarcityStrength * 0.004),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.52)
+                )
+            }
+        case .shellfish:
+            transparent.addSphere(
+                center: target + (forward * 0.04),
+                radii: SIMD3<Float>(0.1 + (scarcityStrength * 0.03), 0.014, 0.07 + (scarcityStrength * 0.02)),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.56)
+            )
+        case .birdEggs, .lizardEggs:
+            for remnantSide: Float in [1, -1] {
+                transparent.addSphere(
+                    center: target + (right * (remnantSide * 0.05)) + SIMD3<Float>(0, 0.06, 0.02),
+                    radii: SIMD3<Float>(0.026 + (scarcityStrength * 0.008), 0.036 + (scarcityStrength * 0.01), 0.026 + (scarcityStrength * 0.008)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.6)
+                )
+            }
+        case .vegetable, .none:
+            for remnantSide: Float in [1, -1] {
+                transparent.addCone(
+                    base: target + (right * (remnantSide * 0.05)) + SIMD3<Float>(0, 0.03, 0),
+                    tip: target + (right * (remnantSide * 0.03)) + (forward * 0.05) + SIMD3<Float>(0, 0.14, 0),
+                    radius: 0.025 + (scarcityStrength * 0.008),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.5)
+                )
+            }
+        }
+    }
+
+    private func addForagingSearchGuide(
+        focus: ImmersiveApeAttentionFocus,
+        selected: shared_immersiveape_being_snapshot,
+        groundOrigin: SIMD3<Float>,
+        planarTarget: SIMD3<Float>,
+        target: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard let foodType = focus.foodType else {
+            return
+        }
+
+        let abundance = immersiveApeClamp(focus.foodAbundance, min: 0.2, max: 1.0)
+        let approachStrength = immersiveApeForagingApproachStrength(distance: focus.distance)
+        let selectedForward = immersiveApeFacingVector(facing: selected.facing)
+        let targetDirection = immersiveApePlanarDirection(planarTarget)
+        let forward = simd_length_squared(targetDirection) > 0.0001
+            ? targetDirection
+            : selectedForward
+        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let sweepPhase = (timeValue * 0.022) + (focus.distance * 0.05)
+        let sweepOffset = sin(sweepPhase) * (0.34 + (abundance * 0.26))
+        let searchDirection = (forward + (right * sweepOffset)).normalizedSafe
+        let coneBase = groundOrigin + (forward * 0.26)
+        let coneLength = (1.6 + (focus.cameraWeight * 2.2) + (abundance * 1.2)) * (1 - (approachStrength * 0.62))
+        let coneTip = coneBase + (searchDirection * coneLength) + SIMD3<Float>(0, 0.14 + (abundance * 0.1), 0)
+        let coneColor = SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, (0.03 + (abundance * 0.04)) * (1 - (approachStrength * 0.74)))
+
+        transparent.addCone(
+            base: coneBase,
+            tip: coneTip,
+            radius: 0.42 + (abundance * 0.18),
+            segments: 6,
+            color: coneColor
+        )
+
+        let searchMarkerCount = max(4, min(8, Int(round((focus.distance / 4) + (abundance * 2)))))
+        for markerIndex in 1...searchMarkerCount {
+            let t = Float(markerIndex) / Float(searchMarkerCount + 1)
+            let wave = sin((timeValue * 0.04) + (Float(markerIndex) * 0.9) + (t * 4.2))
+            let lateralDrift = right * (wave * (0.1 + (abundance * 0.08)) * (1 - t))
+            let guideCenter = immersiveApeLerp(groundOrigin, planarTarget, factor: t)
+                + lateralDrift
+                + SIMD3<Float>(0, 0.03 + (abs(wave) * 0.03), 0)
+            let shimmer = 0.82 + (0.18 * sin((timeValue * 0.06) + (Float(markerIndex) * 0.7)))
+            let alpha = (0.05 + (abundance * 0.05)) * shimmer * (1 - (approachStrength * 0.56))
+
+            switch ImmersiveApeFoodCode(rawValue: foodType) {
+            case .fruit:
+                transparent.addSphere(
+                    center: guideCenter,
+                    radii: SIMD3<Float>(repeating: 0.045 + (abundance * 0.02)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha)
+                )
+            case .seaweed:
+                transparent.addCylinder(
+                    base: guideCenter,
+                    top: guideCenter + SIMD3<Float>(0, 0.16 + (abundance * 0.08), 0),
+                    radius: 0.018 + (abundance * 0.006),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.92)
+                )
+            case .shellfish:
+                transparent.addSphere(
+                    center: guideCenter,
+                    radii: SIMD3<Float>(0.07 + (abundance * 0.03), 0.016, 0.05 + (abundance * 0.02)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.9)
+                )
+            case .birdEggs, .lizardEggs:
+                transparent.addSphere(
+                    center: guideCenter,
+                    radii: SIMD3<Float>(0.04 + (abundance * 0.015), 0.06 + (abundance * 0.02), 0.04 + (abundance * 0.015)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.92)
+                )
+            case .vegetable, .none:
+                transparent.addCone(
+                    base: guideCenter,
+                    tip: guideCenter + SIMD3<Float>(0.03, 0.14 + (abundance * 0.06), -0.02),
+                    radius: 0.04 + (abundance * 0.016),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, alpha * 0.86)
+                )
+            }
+        }
+
+        let targetPulse = 0.68 + (0.32 * sin((timeValue * 0.03) + (focus.distance * 0.08)))
+        let targetAlpha = ((0.08 + (abundance * 0.08)) * targetPulse * (1 - (approachStrength * 0.32))) + (approachStrength * 0.04)
+
+        switch ImmersiveApeFoodCode(rawValue: foodType) {
+        case .fruit:
+            for orbitIndex in 0..<3 {
+                let orbitAngle = (Float(orbitIndex) * (Float.pi * 2 / 3)) + (timeValue * 0.02)
+                let orbitOffset = SIMD3<Float>(
+                    cos(orbitAngle) * (0.18 + (abundance * 0.06)),
+                    0.12 + (Float(orbitIndex) * 0.05),
+                    sin(orbitAngle) * (0.16 + (abundance * 0.04))
+                )
+                transparent.addSphere(
+                    center: target + orbitOffset,
+                    radii: SIMD3<Float>(repeating: 0.055 + (abundance * 0.02)),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.8)
+                )
+            }
+        case .seaweed:
+            for swayIndex in 0..<3 {
+                let sway = sin((timeValue * 0.024) + Float(swayIndex) * 1.4)
+                let baseOffset = right * ((Float(swayIndex) - 1) * 0.14)
+                let tipOffset = (right * (sway * 0.08)) + (forward * (0.06 + (Float(swayIndex) * 0.03)))
+                transparent.addCylinder(
+                    base: planarTarget + baseOffset,
+                    top: planarTarget + baseOffset + tipOffset + SIMD3<Float>(0, 0.44 + (abundance * 0.16), 0),
+                    radius: 0.024 + (abundance * 0.008),
+                    segments: 5,
+                    color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.72)
+                )
+            }
+        case .shellfish:
+            transparent.addSphere(
+                center: planarTarget + SIMD3<Float>(0, 0.035, 0),
+                radii: SIMD3<Float>(0.28 + (abundance * 0.08), 0.02, 0.2 + (abundance * 0.06)),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.7)
+            )
+            transparent.addSphere(
+                center: target + (right * 0.1),
+                radii: SIMD3<Float>(repeating: 0.06 + (abundance * 0.02)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.88)
+            )
+        case .birdEggs, .lizardEggs:
+            transparent.addSphere(
+                center: target,
+                radii: SIMD3<Float>(0.16 + (abundance * 0.04), 0.06 + (abundance * 0.02), 0.16 + (abundance * 0.04)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.68)
+            )
+            transparent.addSphere(
+                center: target + SIMD3<Float>(0, 0.16, 0),
+                radii: SIMD3<Float>(repeating: 0.05 + (abundance * 0.02)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.82)
+            )
+        case .vegetable, .none:
+            transparent.addCone(
+                base: planarTarget + (right * -0.08),
+                tip: target + (right * 0.06) + (forward * 0.08),
+                radius: 0.1 + (abundance * 0.04),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.62)
+            )
+            transparent.addCone(
+                base: planarTarget + (right * 0.08),
+                tip: target + (right * -0.05) + (forward * -0.04),
+                radius: 0.08 + (abundance * 0.03),
+                segments: 5,
+                color: SIMD4<Float>(focus.color.x, focus.color.y, focus.color.z, targetAlpha * 0.56)
             )
         }
     }
@@ -4756,9 +8520,8 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             color: SIMD4<Float>(environment.horizonGlowColor.x, environment.horizonGlowColor.y, environment.horizonGlowColor.z, haloAlpha)
         )
 
-        if environment.starVisibility > 0.05 {
-            let starCount = 24 + Int(environment.starVisibility * 72)
-
+        let starCount = Int(round(Float(24 + Int(environment.starVisibility * 72)) * currentQuality.starBudgetMultiplier))
+        if environment.starVisibility > 0.05 && starCount > 0 {
             for starIndex in 0..<starCount {
                 let starSeed = capture.snapshot.world_seed ^ UInt32((starIndex + 1) * 1297)
                 let azimuth = immersiveApeNoise(Int32(starIndex), 91, seed: starSeed) * Float.pi * 2
@@ -4869,7 +8632,15 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             return lhs.noise > rhs.noise
         }
 
-        let cloudBudget = min(candidates.count, max(8, environment.cloudCount * 5))
+        guard currentQuality.cloudBudgetMultiplier > 0 else {
+            return
+        }
+
+        let baseCloudBudget = max(8, environment.cloudCount * 5)
+        let cloudBudget = min(
+            candidates.count,
+            max(1, Int(round(Float(baseCloudBudget) * currentQuality.cloudBudgetMultiplier)))
+        )
 
         for candidate in candidates.prefix(cloudBudget) {
             let sampleRow = Float(candidate.row) + 0.5
@@ -5637,6 +9408,119 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         builder.addSphere(center: base + SIMD3<Float>(0, 0.08, -0.04), radii: SIMD3<Float>(0.08, 0.11, 0.08), segments: 6, rings: 5, color: eggColor)
     }
 
+    private func addFoodAbundanceField(
+        at base: SIMD3<Float>,
+        food: UInt8,
+        abundance: Float,
+        environment: ImmersiveApeEnvironment,
+        timeValue: Float,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let tint = immersiveApeFoodTint(food)
+        let pulse = 0.58 + (0.42 * sin((timeValue * 0.018) + (base.x * 0.41) + (base.z * 0.29)))
+        let radius = 0.34 + (abundance * 0.44)
+        let lowAlpha = 0.04 + (abundance * 0.06)
+        let highAlpha = (0.08 + (abundance * 0.08)) * (0.74 + (pulse * 0.26))
+
+        builder.addSphere(
+            center: base + SIMD3<Float>(0, 0.03, 0),
+            radii: SIMD3<Float>(radius, 0.022 + (abundance * 0.014), radius * 0.92),
+            segments: 10,
+            rings: 5,
+            color: SIMD4<Float>(tint.x, tint.y, tint.z, lowAlpha)
+        )
+
+        switch ImmersiveApeFoodCode(rawValue: food) {
+        case .fruit:
+            for (angleOffset, lift, scale) in [
+                (Float(0.0), Float(0.42), Float(0.24)),
+                (Float(2.1), Float(0.54), Float(0.22)),
+                (Float(4.2), Float(0.48), Float(0.2))
+            ] {
+                let angle = angleOffset + (timeValue * 0.01)
+                let offset = SIMD3<Float>(cos(angle) * radius * 0.36, lift + (pulse * 0.04), sin(angle) * radius * 0.32)
+                builder.addSphere(
+                    center: base + offset,
+                    radii: SIMD3<Float>(repeating: scale + (abundance * 0.06)),
+                    segments: 6,
+                    rings: 5,
+                    color: SIMD4<Float>(tint.x, tint.y, tint.z, highAlpha * 0.72)
+                )
+            }
+        case .seaweed:
+            let seaweedTint = immersiveApeMix(
+                SIMD3<Float>(tint.x, tint.y, tint.z),
+                environment.waterColor,
+                t: 0.24
+            )
+            for (xOffset, zOffset, topX, topZ) in [
+                (Float(-0.12), Float(0.08), Float(0.08), Float(0.22)),
+                (Float(0.14), Float(-0.06), Float(-0.04), Float(0.18)),
+                (Float(0.02), Float(0.02), Float(0.12), Float(-0.16))
+            ] {
+                let fieldBase = base + SIMD3<Float>(xOffset * radius, 0.02, zOffset * radius)
+                let fieldTip = base + SIMD3<Float>(topX * radius, 0.42 + (abundance * 0.22) + (pulse * 0.05), topZ * radius)
+                builder.addCylinder(
+                    base: fieldBase,
+                    top: fieldTip,
+                    radius: 0.022 + (abundance * 0.01),
+                    segments: 5,
+                    color: SIMD4<Float>(seaweedTint.x, seaweedTint.y, seaweedTint.z, highAlpha * 0.66)
+                )
+            }
+        case .shellfish:
+            let shellTint = immersiveApeMix(
+                SIMD3<Float>(tint.x, tint.y, tint.z),
+                environment.foamColor,
+                t: 0.3
+            )
+            builder.addSphere(
+                center: base + SIMD3<Float>(0, 0.05, 0),
+                radii: SIMD3<Float>(radius * 0.86, 0.03, radius * 0.56),
+                segments: 8,
+                rings: 5,
+                color: SIMD4<Float>(shellTint.x, shellTint.y, shellTint.z, highAlpha * 0.62)
+            )
+            builder.addSphere(
+                center: base + SIMD3<Float>(radius * 0.18, 0.14 + (pulse * 0.03), -radius * 0.08),
+                radii: SIMD3<Float>(repeating: 0.08 + (abundance * 0.03)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(shellTint.x, shellTint.y, shellTint.z, highAlpha * 0.84)
+            )
+        case .birdEggs, .lizardEggs:
+            builder.addSphere(
+                center: base + SIMD3<Float>(0, 0.07, 0),
+                radii: SIMD3<Float>(radius * 0.72, 0.028, radius * 0.72),
+                segments: 8,
+                rings: 5,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, highAlpha * 0.6)
+            )
+            builder.addSphere(
+                center: base + SIMD3<Float>(0, 0.28 + (pulse * 0.04), 0),
+                radii: SIMD3<Float>(radius * 0.26, 0.08 + (abundance * 0.03), radius * 0.26),
+                segments: 6,
+                rings: 5,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, highAlpha * 0.72)
+            )
+        case .vegetable, .none:
+            builder.addSphere(
+                center: base + SIMD3<Float>(radius * 0.14, 0.05, -radius * 0.08),
+                radii: SIMD3<Float>(radius * 0.68, 0.028, radius * 0.54),
+                segments: 8,
+                rings: 5,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, highAlpha * 0.62)
+            )
+            builder.addCone(
+                base: base + SIMD3<Float>(-radius * 0.18, 0.03, radius * 0.1),
+                tip: base + SIMD3<Float>(-radius * 0.06, 0.32 + (abundance * 0.14), radius * 0.22),
+                radius: 0.08 + (abundance * 0.04),
+                segments: 5,
+                color: SIMD4<Float>(tint.x, tint.y, tint.z, highAlpha * 0.58)
+            )
+        }
+    }
+
     private func addFoodBeacon(
         at base: SIMD3<Float>,
         builder: inout ImmersiveApeMeshBuilder,
@@ -5788,8 +9672,208 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         }
     }
 
+    private func addApeFace(
+        ape: shared_immersiveape_being_snapshot,
+        localPosition: SIMD3<Float>,
+        interactionMode: ImmersiveApeEncounterMode,
+        interactionWeight: Float,
+        bodyProfile: ImmersiveApeBodyProfile,
+        headCenter: SIMD3<Float>,
+        muzzleCenter: SIMD3<Float>,
+        browCenter: SIMD3<Float>,
+        headRadius: Float,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        skinColor: SIMD4<Float>,
+        hairColor: SIMD4<Float>,
+        muzzleColor: SIMD4<Float>,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let up = SIMD3<Float>(0, 1, 0)
+        let facialProfile = immersiveApeFacialProfile(
+            for: ape,
+            localPosition: localPosition,
+            interactionMode: interactionMode,
+            interactionWeight: interactionWeight,
+            bodyProfile: bodyProfile,
+            headRadius: headRadius
+        )
+        let scleraTint = immersiveApeMix(
+            SIMD3<Float>(0.94, 0.92, 0.86),
+            SIMD3<Float>(skinColor.x, skinColor.y, skinColor.z),
+            t: (Float(ape.pigmentation) / 15) * 0.06
+        )
+        let scleraColor = SIMD4<Float>(scleraTint.x, scleraTint.y, scleraTint.z, 1)
+        let irisColor = immersiveApeIrisColor(eyeColor: ape.eye_color, eyeShape: ape.eye_shape)
+        let pupilColor = SIMD4<Float>(0.05, 0.03, 0.02, 1)
+        let earColor = immersiveApeMix(skinColor, hairColor, t: 0.18 + ((Float(ape.hair) / 15) * 0.1))
+        let innerEarColor = immersiveApeMix(earColor, muzzleColor, t: 0.34)
+        let mouthColor = immersiveApeMix(muzzleColor, SIMD4<Float>(0.08, 0.03, 0.03, 1), t: 0.68)
+        let browColor = immersiveApeMix(hairColor, skinColor, t: 0.24)
+        let cheekColor = immersiveApeMix(muzzleColor, skinColor, t: 0.28)
+        let faceForward = (
+            (forward * 0.94)
+                + (right * facialProfile.headTurnSide)
+                + (up * facialProfile.headTurnLift)
+        ).normalizedSafe
+        let rawFaceRight = simd_cross(up, faceForward)
+        let faceRight = simd_length_squared(rawFaceRight) > 0.0001 ? rawFaceRight.normalizedSafe : right
+        let faceUp = simd_cross(faceForward, faceRight).normalizedSafe
+
+        let earBase = headCenter
+            - (faceForward * (headRadius * 0.08))
+            + (faceUp * facialProfile.earLift)
+        for earSide: Float in [1, -1] {
+            let earCenter = earBase
+                + (faceRight * facialProfile.earSpread * earSide)
+                + (faceForward * (facialProfile.earTilt * earSide))
+            builder.addSphere(
+                center: earCenter,
+                radii: SIMD3<Float>(facialProfile.earRadius * 0.82, facialProfile.earRadius, facialProfile.earRadius * 0.52),
+                segments: 6,
+                rings: 5,
+                color: earColor
+            )
+            builder.addSphere(
+                center: earCenter
+                    - (faceForward * (facialProfile.earRadius * 0.12))
+                    - (faceRight * (facialProfile.earRadius * 0.08 * earSide)),
+                radii: SIMD3<Float>(facialProfile.earRadius * 0.42, facialProfile.earRadius * 0.56, facialProfile.earRadius * 0.28),
+                segments: 5,
+                rings: 4,
+                color: innerEarColor
+            )
+        }
+
+        let browBase = browCenter
+            + (faceUp * facialProfile.browLift)
+            + (faceForward * (facialProfile.eyeForward * 0.28))
+        for browSide: Float in [1, -1] {
+            let browMid = browBase
+                + (faceRight * facialProfile.eyeSpacing * browSide)
+                + (faceUp * (headRadius * 0.1))
+            let browInner = browMid
+                - (faceRight * (facialProfile.eyeRadius * 0.2 * browSide))
+                + (faceUp * facialProfile.browPinch)
+            let browOuter = browMid
+                + (faceRight * (facialProfile.eyeRadius * 0.42 * browSide))
+                - (faceUp * (facialProfile.browPinch * 0.22))
+            builder.addCylinder(
+                base: browInner,
+                top: browOuter,
+                radius: max(0.006, facialProfile.eyeRadius * 0.12),
+                segments: 5,
+                color: browColor
+            )
+        }
+
+        for cheekSide: Float in [1, -1] {
+            let cheekSideOffset = faceRight * facialProfile.cheekSpread * cheekSide
+            let cheekVerticalOffset = faceUp * (facialProfile.cheekLift - (headRadius * 0.02))
+            let cheekForwardOffset = faceForward * (headRadius * 0.08)
+            let cheekCenter = muzzleCenter + cheekSideOffset + cheekVerticalOffset + cheekForwardOffset
+            builder.addSphere(
+                center: cheekCenter,
+                radii: SIMD3<Float>(
+                    facialProfile.cheekRadius * 0.92,
+                    facialProfile.cheekRadius * 0.74,
+                    facialProfile.cheekRadius * 0.58
+                ),
+                segments: 5,
+                rings: 4,
+                color: cheekColor
+            )
+        }
+
+        let jawCenter = muzzleCenter
+            - (faceUp * (headRadius * 0.24 + facialProfile.jawDrop))
+            + (faceForward * facialProfile.jawForward)
+        builder.addCylinder(
+            base: muzzleCenter - (faceUp * (headRadius * 0.12)),
+            top: jawCenter + (faceUp * (facialProfile.jawHeight * 0.18)),
+            radius: facialProfile.jawHeight * 0.28,
+            segments: 6,
+            color: muzzleColor
+        )
+        builder.addSphere(
+            center: jawCenter,
+            radii: SIMD3<Float>(facialProfile.jawWidth, facialProfile.jawHeight, headRadius * 0.44),
+            segments: 7,
+            rings: 5,
+            color: muzzleColor
+        )
+        let lipCenter = immersiveApeLerp(muzzleCenter, jawCenter, factor: 0.48) + (faceForward * (headRadius * 0.16))
+        builder.addCylinder(
+            base: lipCenter - (faceRight * (facialProfile.jawWidth * 0.34)),
+            top: lipCenter + (faceRight * (facialProfile.jawWidth * 0.34)),
+            radius: facialProfile.lipRadius,
+            segments: 6,
+            color: mouthColor
+        )
+
+        let nostrilBase = muzzleCenter
+            + (faceForward * (headRadius * 0.22))
+            - (faceUp * (headRadius * 0.02))
+        for nostrilSide: Float in [1, -1] {
+            builder.addSphere(
+                center: nostrilBase + (faceRight * facialProfile.nostrilSpread * nostrilSide),
+                radii: SIMD3<Float>(repeating: facialProfile.nostrilRadius),
+                segments: 5,
+                rings: 4,
+                color: mouthColor
+            )
+        }
+
+        let eyeBase = browCenter
+            + (faceUp * facialProfile.eyeLift)
+            + (faceForward * facialProfile.eyeForward)
+        let pupilOffset = (faceRight * facialProfile.gazeSide) + (faceUp * facialProfile.gazeLift)
+        let eyeHeight = max(0.004, facialProfile.eyeRadius * facialProfile.eyeHeightScale)
+        let upperLidHeight = max(0.004, facialProfile.eyeRadius * facialProfile.blink * 0.32)
+
+        for eyeSide: Float in [1, -1] {
+            let eyeCenter = eyeBase + (faceRight * facialProfile.eyeSpacing * eyeSide)
+            builder.addSphere(
+                center: eyeCenter,
+                radii: SIMD3<Float>(facialProfile.eyeRadius * 0.92, eyeHeight, facialProfile.eyeRadius * 0.74),
+                segments: 5,
+                rings: 4,
+                color: scleraColor
+            )
+
+            let irisCenter = eyeCenter
+                + (faceForward * facialProfile.pupilForward)
+                + (pupilOffset * 0.72)
+            builder.addSphere(
+                center: irisCenter,
+                radii: SIMD3<Float>(repeating: facialProfile.pupilRadius * 1.22),
+                segments: 5,
+                rings: 4,
+                color: irisColor
+            )
+            builder.addSphere(
+                center: irisCenter + (faceForward * (facialProfile.pupilRadius * 0.72)),
+                radii: SIMD3<Float>(repeating: facialProfile.pupilRadius * 0.62),
+                segments: 4,
+                rings: 3,
+                color: pupilColor
+            )
+
+            if facialProfile.blink > 0.08 {
+                builder.addSphere(
+                    center: eyeCenter + (faceUp * (facialProfile.eyeRadius * 0.34)),
+                    radii: SIMD3<Float>(facialProfile.eyeRadius, upperLidHeight, facialProfile.eyeRadius * 0.78),
+                    segments: 5,
+                    rings: 4,
+                    color: skinColor
+                )
+            }
+        }
+    }
+
     private func addApe(
         at base: SIMD3<Float>,
+        terrainPose: ImmersiveApeTerrainPose,
         ape: shared_immersiveape_being_snapshot,
         interactionMode: ImmersiveApeEncounterMode,
         interactionWeight: Float,
@@ -5812,8 +9896,9 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             interactionMode: interactionMode,
             interactionWeight: interactionWeight
         )
-        let forward = immersiveApeFacingVector(facing: ape.facing)
-        let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+        let forward = terrainPose.forward
+        let right = terrainPose.right
+        let up = terrainPose.up
         let motionPhase = (timeValue * motionProfile.phaseRate * gaitSignature.cadenceScale)
             + Float(ape.index) * 0.27
             + gaitSignature.phaseOffset
@@ -5844,6 +9929,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             skeletonDNA: skeletonDNA,
             forward: forward,
             right: right,
+            up: up,
             gestureWave: gestureWave,
             settleWave: settleWave,
             breathWave: breathWave,
@@ -5986,7 +10072,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
         if ape.pregnant != 0 {
             opaque.addSphere(
-                center: bellyCenter + SIMD3<Float>(0, -bodyHeight * 0.04, 0) + (forward * (bodyProfile.bellyDepth * 0.18)),
+                center: bellyCenter + (up * (-bodyHeight * 0.04)) + (forward * (bodyProfile.bellyDepth * 0.18)),
                 radii: SIMD3<Float>(bodyProfile.hipWidth * 0.9 * skeletonDNA.pelvisWidthScale, bodyProfile.torsoHeight * 0.48, bodyProfile.bellyDepth * 1.06),
                 segments: 8,
                 rings: 6,
@@ -5996,7 +10082,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
         if ape.hair > 3 {
             opaque.addSphere(
-                center: headCenter + SIMD3<Float>(0, headRadius * 0.34 + silhouetteProfile.crestLift * 0.24, 0),
+                center: headCenter + (up * (headRadius * 0.34 + silhouetteProfile.crestLift * 0.24)),
                 radii: SIMD3<Float>(
                     headRadius * 0.96,
                     bodyProfile.headRadius * 0.58 + ((bodyProfile.crestHeight + silhouetteProfile.crestLift) * 0.24),
@@ -6025,6 +10111,24 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 color: hairColor
             )
         }
+
+        addApeFace(
+            ape: ape,
+            localPosition: base,
+            interactionMode: interactionMode,
+            interactionWeight: interactionWeight,
+            bodyProfile: bodyProfile,
+            headCenter: headCenter,
+            muzzleCenter: muzzleCenter,
+            browCenter: browCenter,
+            headRadius: headRadius,
+            forward: forward,
+            right: right,
+            skinColor: skinColor,
+            hairColor: hairColor,
+            muzzleColor: muzzleColor,
+            builder: &opaque
+        )
 
         for (shoulder, socket, collar, elbow, hand, thumbDirection) in [
             (leftShoulder, leftShoulderSocket, leftCollar, leftElbow, leftHand, right),
@@ -6080,24 +10184,22 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             )
         }
 
-        if ape.speaking != 0 {
-            let speechColor = immersiveApeSpeechColor(eyeColor: ape.eye_color)
-            for bubbleIndex in 0..<4 {
-                let phase = (Float(bubbleIndex) * 0.8) + (Float(ape.index) * 0.2) + (timeValue * 0.02)
-                let bubblePosition = headCenter + SIMD3<Float>(cos(phase) * 0.14, 0.18 + (Float(bubbleIndex) * 0.12) + (sin(phase * 1.7) * 0.04), sin(phase) * 0.14)
-                transparent.addSphere(
-                    center: bubblePosition,
-                    radii: SIMD3<Float>(repeating: 0.055 + (Float(bubbleIndex) * 0.01)),
-                    segments: 6,
-                    rings: 5,
-                    color: speechColor
-                )
-            }
-        }
+        addApeSpeechEffect(
+            ape: ape,
+            interactionMode: interactionMode,
+            headCenter: headCenter,
+            muzzleCenter: muzzleCenter,
+            bodyHeight: bodyHeight,
+            forward: forward,
+            right: right,
+            up: up,
+            timeValue: timeValue,
+            transparent: &transparent
+        )
 
         if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SWIMMING)) {
             transparent.addSphere(
-                center: base + SIMD3<Float>(0, 0.06, 0),
+                center: base + (up * 0.06),
                 radii: SIMD3<Float>(frame * 2.4, 0.045, frame * 2.1),
                 segments: 10,
                 rings: 5,
@@ -6107,7 +10209,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
         if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_EATING)) {
             transparent.addSphere(
-                center: headCenter + (forward * 0.16) + SIMD3<Float>(0, -bodyHeight * 0.04, 0),
+                center: headCenter + (forward * 0.16) + (up * (-bodyHeight * 0.04)),
                 radii: SIMD3<Float>(0.11, 0.08, 0.11),
                 segments: 6,
                 rings: 5,
@@ -6117,21 +10219,11 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
         if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_GROOMING)) {
             transparent.addSphere(
-                center: torsoCenter + SIMD3<Float>(0, bodyHeight * 0.05, 0),
+                center: torsoCenter + (up * (bodyHeight * 0.05)),
                 radii: SIMD3<Float>(frame * 1.6, bodyHeight * 0.11, frame * 1.45),
                 segments: 8,
                 rings: 5,
                 color: SIMD4<Float>(0.62, 0.95, 0.74, 0.16)
-            )
-        }
-
-        if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SHOUTING)) {
-            transparent.addCone(
-                base: headCenter + SIMD3<Float>(0, bodyHeight * 0.1, 0),
-                tip: headCenter + SIMD3<Float>(0, bodyHeight * 0.42, 0),
-                radius: frame * 0.7,
-                segments: 6,
-                color: SIMD4<Float>(0.98, 0.78, 0.32, 0.18)
             )
         }
 
@@ -6147,11 +10239,100 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
 
         if immersiveApeGoalEquals(ape.goal_type, GOAL_MATE) {
             transparent.addSphere(
-                center: headCenter + SIMD3<Float>(0, bodyHeight * 0.2, 0),
+                center: headCenter + (up * (bodyHeight * 0.2)),
                 radii: SIMD3<Float>(0.18, 0.11, 0.18),
                 segments: 6,
                 rings: 5,
                 color: SIMD4<Float>(1.0, 0.72, 0.64, 0.16)
+            )
+        }
+    }
+
+    private func addApeSpeechEffect(
+        ape: shared_immersiveape_being_snapshot,
+        interactionMode: ImmersiveApeEncounterMode,
+        headCenter: SIMD3<Float>,
+        muzzleCenter: SIMD3<Float>,
+        bodyHeight: Float,
+        forward: SIMD3<Float>,
+        right: SIMD3<Float>,
+        up: SIMD3<Float>,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard immersiveApeIsSpeaking(ape) else {
+            return
+        }
+
+        let shouting = immersiveApeIsShouting(ape)
+        let baseSpeech = immersiveApeSpeechColor(eyeColor: ape.eye_color)
+        let encounterTint = immersiveApeEncounterColor(interactionMode)
+        let speechRGB = immersiveApeMix(
+            SIMD3<Float>(baseSpeech.x, baseSpeech.y, baseSpeech.z),
+            SIMD3<Float>(encounterTint.x, encounterTint.y, encounterTint.z),
+            t: shouting ? 0.34 : 0.18
+        )
+        let pulse = 0.72 + (0.28 * sin((timeValue * 0.03) + (Float(ape.index) * 0.27)))
+        let bubbleCount = shouting ? 5 : 4
+        let baseAlpha = (shouting ? 0.18 : 0.12) * pulse
+
+        for bubbleIndex in 0..<bubbleCount {
+            let phase = (Float(bubbleIndex) * 0.8) + (Float(ape.index) * 0.2) + (timeValue * 0.02)
+            let bubblePosition = headCenter
+                + (right * (cos(phase) * (shouting ? 0.18 : 0.14)))
+                + (up * (0.18 + (Float(bubbleIndex) * 0.12) + (sin(phase * 1.7) * 0.04)))
+                + (forward * (sin(phase) * (shouting ? 0.18 : 0.14)))
+            transparent.addSphere(
+                center: bubblePosition,
+                radii: SIMD3<Float>(repeating: (shouting ? 0.06 : 0.05) + (Float(bubbleIndex) * 0.01)),
+                segments: 6,
+                rings: 5,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, baseAlpha)
+            )
+        }
+
+        switch interactionMode {
+        case .grooming:
+            transparent.addSphere(
+                center: muzzleCenter + (up * (bodyHeight * 0.04)),
+                radii: SIMD3<Float>(0.12, 0.04, 0.1),
+                segments: 6,
+                rings: 4,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, baseAlpha * 0.82)
+            )
+        case .courtship:
+            for orbitIndex in 0..<3 {
+                let angle = (Float(orbitIndex) * (Float.pi * 2 / 3)) + (timeValue * 0.022)
+                let orbitOffset = (right * (cos(angle) * 0.12))
+                    + (forward * (sin(angle) * 0.1))
+                    + (up * (0.14 + (sin(angle + 0.8) * 0.04)))
+                transparent.addSphere(
+                    center: headCenter + orbitOffset,
+                    radii: SIMD3<Float>(repeating: 0.026 + (Float(orbitIndex) * 0.006)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, baseAlpha * 0.92)
+                )
+            }
+        default:
+            transparent.addCone(
+                base: muzzleCenter + (up * (bodyHeight * 0.02)),
+                tip: muzzleCenter
+                    + (forward * (shouting ? 0.34 : 0.24))
+                    + (up * (bodyHeight * (shouting ? 0.18 : 0.12))),
+                radius: shouting ? 0.12 : 0.08,
+                segments: 6,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, baseAlpha * 0.86)
+            )
+        }
+
+        if shouting {
+            transparent.addSphere(
+                center: headCenter + (forward * 0.1) + (up * (bodyHeight * 0.12)),
+                radii: SIMD3<Float>(0.18, 0.035, 0.16),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(speechRGB.x, speechRGB.y, speechRGB.z, baseAlpha * 0.92)
             )
         }
     }
@@ -6379,6 +10560,44 @@ private func immersiveApeFoodDescription(_ food: UInt8) -> String {
     }
 }
 
+private func immersiveApeFoodHandlingPhrase(_ food: UInt8?) -> String {
+    switch ImmersiveApeFoodCode(rawValue: food ?? ImmersiveApeFoodCode.vegetable.rawValue) {
+    case .fruit:
+        return "Pluck Reach"
+    case .seaweed:
+        return "Strip Pull"
+    case .shellfish:
+        return "Pry Grip"
+    case .birdEggs, .lizardEggs:
+        return "Cradle Lift"
+    case .vegetable, .none:
+        return "Gather Sweep"
+    }
+}
+
+private func immersiveApeForagingApproachStrength(distance: Float) -> Float {
+    let approach = immersiveApeClamp(1 - ((distance - 2.8) / 8.8), min: 0, max: 1)
+    return approach * approach
+}
+
+private func immersiveApeFoodAbundanceStrength(
+    intensity: Float,
+    strongestIntensity: Float
+) -> Float {
+    let safeStrongest = max(strongestIntensity, 1)
+    return immersiveApeClamp(((max(intensity, 1) / safeStrongest) * 0.84) + 0.16, min: 0.18, max: 1.0)
+}
+
+private func immersiveApeFoodAbundancePhrase(_ strength: Float) -> String {
+    if strength >= 0.76 {
+        return "rich patch"
+    }
+    if strength >= 0.48 {
+        return "steady patch"
+    }
+    return "light find"
+}
+
 private func immersiveApeGoalDescription(_ goal: UInt8) -> String {
     let goalValue = UInt32(goal)
 
@@ -6488,6 +10707,9 @@ private func immersiveApeDriveSummary(_ being: shared_immersiveape_being_snapsho
 
 private func immersiveApeFoodCues(capture: ImmersiveApeSceneCapture) -> [ImmersiveApeFoodCue] {
     let referenceHeight = capture.snapshot.selected.z * immersiveApeHeightScale
+    let strongestIntensity = capture.foods.reduce(Float(1)) { strongest, food in
+        max(strongest, max(food.intensity, 1))
+    }
 
     return capture.foods.compactMap { food in
         let localPosition = SIMD3<Float>(
@@ -6501,6 +10723,10 @@ private func immersiveApeFoodCues(capture: ImmersiveApeSceneCapture) -> [Immersi
             return nil
         }
 
+        let abundance = immersiveApeFoodAbundanceStrength(
+            intensity: food.intensity,
+            strongestIntensity: strongestIntensity
+        )
         let distanceFactor = immersiveApeClamp(1 - (distance / 68), min: 0.22, max: 1.0)
         let score = max(food.intensity, 1) * (0.55 + (distanceFactor * 0.45))
 
@@ -6508,6 +10734,7 @@ private func immersiveApeFoodCues(capture: ImmersiveApeSceneCapture) -> [Immersi
             food: food,
             localPosition: localPosition,
             distance: distance,
+            abundance: abundance,
             score: score
         )
     }
@@ -6525,18 +10752,50 @@ private func immersiveApeAttentionFocus(
 ) -> ImmersiveApeAttentionFocus {
     let selected = capture.snapshot.selected
     let dominantDrive = immersiveApeDominantDrive(for: selected)
-    let foodCue = immersiveApeFoodCues(capture: capture).first
+    let foodCues = immersiveApeFoodCues(capture: capture)
+    let foragingContext = ImmersiveApeRenderer.immersiveApeForagingContext(capture: capture)
+    let foodCue = foodCues.first
+    let alternateFoodCue = foodCues.dropFirst().first(where: { cue in
+        guard let primary = foodCue else {
+            return false
+        }
+
+        if cue.distance >= 42 {
+            return false
+        }
+
+        if cue.score <= (primary.score * 0.46) {
+            return false
+        }
+
+        return cue.food.food_type != primary.food.food_type
+            || abs(cue.abundance - primary.abundance) > 0.12
+            || abs(cue.distance - primary.distance) > 3.6
+    })
     let primaryEncounter = encounters.first
     let mateEncounter = encounters.first { $0.ape.female != selected.female }
     let forward = immersiveApeFacingVector(facing: selected.facing)
 
     func encounterFocus(
         kind: ImmersiveApeAttentionKind,
-        encounter: ImmersiveApeEncounter,
-        summary: String
+        encounter: ImmersiveApeEncounter
     ) -> ImmersiveApeAttentionFocus {
         let panelModeLabel: String
         let focusColor: SIMD4<Float>
+        let behavior = immersiveApeMeetingBehavior(
+            mode: immersiveApeEncounterMode(attentionKind: kind) ?? encounter.mode,
+            distance: encounter.distance
+        )
+        let speechBehavior = immersiveApeEncounterSpeechBehavior(
+            selected: selected,
+            encounter: encounter,
+            kind: kind
+        )
+        let memoryBehavior = immersiveApeEncounterMemoryBehavior(encounter: encounter)
+        let territoryBehavior = immersiveApeEncounterTerritoryBehavior(encounter: encounter)
+        let memorySuffix = memoryBehavior.map { "  •  \($0.panelLabel)" } ?? ""
+        let territorySuffix = territoryBehavior.map { "  •  \($0.panelLabel)" } ?? ""
+        let territorySummary = territoryBehavior.map { " over \($0.summaryLead)" } ?? ""
         switch kind {
         case .conversation:
             panelModeLabel = "Conversation"
@@ -6566,72 +10825,194 @@ private func immersiveApeAttentionFocus(
 
         return ImmersiveApeAttentionFocus(
             kind: kind,
-            summary: summary,
-            panelLine: "Intent: \(encounter.name)  •  \(panelModeLabel)  •  \(Int(round(encounter.distance)))m",
-            fallbackStory: "\(capture.selectedName) is keeping \(encounter.name) centered as social attention steers the current path.",
+            summary: speechBehavior != nil
+                ? "Focus: \(speechBehavior!.summaryLead) \(encounter.name)\(territorySummary)"
+                : (behavior != nil
+                ? "Focus: \(behavior!.summaryLead) \(encounter.name)\(territorySummary)"
+                : "Focus: \(panelModeLabel) attention on \(encounter.name)\(territorySummary)"),
+            panelLine: speechBehavior != nil
+                ? "Intent: \(encounter.name)  •  \(speechBehavior!.panelLabel)  •  \(Int(round(encounter.distance)))m\(memorySuffix)\(territorySuffix)"
+                : (behavior != nil
+                ? "Intent: \(encounter.name)  •  \(behavior!.panelLabel)  •  \(Int(round(encounter.distance)))m\(memorySuffix)\(territorySuffix)"
+                : "Intent: \(encounter.name)  •  \(panelModeLabel)  •  \(Int(round(encounter.distance)))m\(memorySuffix)\(territorySuffix)"),
+            fallbackStory: speechBehavior != nil
+                ? (memoryBehavior != nil
+                    ? "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), with \(memoryBehavior!.storyLead) threading through the speech plumes and lane pulses."
+                    : "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), with speech plumes and lane pulses pulling the encounter into view.")
+                : (behavior != nil
+                ? (memoryBehavior != nil
+                    ? "\(capture.selectedName) is \(behavior!.storyLead) \(encounter.name), with \(memoryBehavior!.storyLead) threading beneath the meeting field."
+                    : "\(capture.selectedName) is \(behavior!.storyLead) \(encounter.name), with the meeting field pulling the path into a distinct social zone before the bodies fully settle.")
+                : "\(capture.selectedName) is keeping \(encounter.name) centered as social attention steers the current path.") + immersiveApeTerritoryStoryTail(territoryBehavior),
             localPosition: encounter.localPosition,
             targetLift: max(1.0, encounter.ape.height * 0.9),
             color: focusColor,
             distance: encounter.distance,
-            cameraWeight: min(1.0, 0.58 + (encounter.importance * 0.22))
+            cameraWeight: min(1.0, 0.58 + (encounter.importance * 0.22)),
+            foodType: nil,
+            foodAbundance: 0,
+            alternateFoodType: nil,
+            alternateFoodAbundance: 0,
+            alternateLocalPosition: nil,
+            alternateDistance: 0,
+            socialFriendOrFoe: encounter.ape.social_friend_foe,
+            socialAttraction: encounter.ape.social_attraction,
+            socialFamiliarity: encounter.ape.social_familiarity,
+            socialRelationship: encounter.ape.social_relationship,
+            territoryFamiliarity: encounter.ape.territory_familiarity,
+            observerTerritoryFamiliarity: encounter.ape.observer_territory_familiarity
         )
     }
 
     func foodFocus(
         cue: ImmersiveApeFoodCue,
-        summary: String
+        summary: String,
+        feeding: Bool = false,
+        scarcity: Bool = false,
+        alternateCue: ImmersiveApeFoodCue? = nil,
+        context: ImmersiveApeForagingContext? = nil
     ) -> ImmersiveApeAttentionFocus {
         let foodName = immersiveApeFoodDescription(cue.food.food_type)
+        let foodNameLower = foodName.lowercased()
+        let abundancePhrase = immersiveApeFoodAbundancePhrase(cue.abundance)
+        let handlingLabel = immersiveApeFoodHandlingPhrase(cue.food.food_type)
+        let handlingPhrase = handlingLabel.lowercased()
+        let focusColor = scarcity ? immersiveApeFoodScarcityTint(cue.food.food_type) : immersiveApeFoodTint(cue.food.food_type)
+        let alternateFoodName = alternateCue.map { immersiveApeFoodDescription($0.food.food_type) }
+        let alternateAbundance = alternateCue.map { immersiveApeFoodAbundancePhrase($0.abundance) }
+        let contextPhrase = context.map { "\($0.summaryLabel) \($0.directionLabel)" }
+        let approachStrength = feeding || scarcity ? 0 : immersiveApeForagingApproachStrength(distance: cue.distance)
+        let preparing = approachStrength > 0.34
 
         return ImmersiveApeAttentionFocus(
             kind: .forage,
             summary: summary,
-            panelLine: "Intent: \(foodName)  •  \(Int(round(cue.distance)))m",
-            fallbackStory: "\(capture.selectedName) is tracking \(foodName.lowercased()) cues through the terrain, surf, and weather.",
+            panelLine: scarcity
+                ? "Intent: Food Scarce  •  \(foodName)  •  \(abundancePhrase.capitalized)"
+                : feeding
+                ? "Intent: Feeding  •  \(foodName)  •  \(abundancePhrase.capitalized)"
+                : preparing
+                ? "Intent: Preparing  •  \(handlingLabel)  •  \(foodName)"
+                : (alternateFoodName != nil && alternateAbundance != nil
+                    ? "Intent: \(foodName)  •  \(abundancePhrase.capitalized)  •  over \(alternateAbundance!.capitalized) \(alternateFoodName!)"
+                    : (contextPhrase != nil
+                        ? "Intent: \(foodName)  •  \(abundancePhrase.capitalized)  •  \(contextPhrase!)"
+                        : "Intent: \(foodName)  •  \(abundancePhrase.capitalized)  •  \(Int(round(cue.distance)))m")),
+            fallbackStory: scarcity
+                ? "\(capture.selectedName) is sampling a \(abundancePhrase) of \(foodNameLower) that is running out, with the forage cue collapsing into a depleted readback at the body and the target patch."
+                : feeding
+                ? "\(capture.selectedName) is feeding from a \(abundancePhrase) of \(foodNameLower), with the intake reading against the embodied hands and chest while the source patch opens under the target."
+                : preparing
+                ? "\(capture.selectedName) is closing the last reach on a \(abundancePhrase) of \(foodNameLower), with the wider search collapsing into a \(handlingPhrase) around the target."
+                : (alternateCue != nil && alternateFoodName != nil && alternateAbundance != nil
+                    ? "\(capture.selectedName) is favoring a \(abundancePhrase) of \(foodNameLower) over a \(alternateAbundance!) of \(alternateFoodName!.lowercased()) nearby, drawing the body into a \(handlingPhrase) while the chosen patch reads stronger than the deferred option."
+                    : (contextPhrase != nil
+                        ? "\(capture.selectedName) is tracking a \(abundancePhrase) of \(foodNameLower) through a \(contextPhrase!), with the local food field reading before the chosen patch and the forelimbs settling into a \(handlingPhrase)."
+                        : "\(capture.selectedName) is tracking a \(abundancePhrase) of \(foodNameLower) through the terrain, surf, and weather, with the forelimbs settling into a \(handlingPhrase).")),
             localPosition: cue.localPosition,
             targetLift: 0.34,
-            color: immersiveApeFoodTint(cue.food.food_type),
+            color: focusColor,
             distance: cue.distance,
-            cameraWeight: 0.66
+            cameraWeight: scarcity ? 0.58 : (feeding ? 0.72 : min(0.82, (alternateCue != nil ? 0.7 : 0.66) + (approachStrength * 0.1))),
+            foodType: cue.food.food_type,
+            foodAbundance: cue.abundance,
+            alternateFoodType: alternateCue?.food.food_type,
+            alternateFoodAbundance: alternateCue?.abundance ?? 0,
+            alternateLocalPosition: alternateCue?.localPosition,
+            alternateDistance: alternateCue?.distance ?? 0,
+            socialFriendOrFoe: 127,
+            socialAttraction: 0,
+            socialFamiliarity: 0,
+            socialRelationship: 0,
+            territoryFamiliarity: 0,
+            observerTerritoryFamiliarity: 0
         )
     }
 
     if immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
         || immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE)) {
         if let encounter = primaryEncounter {
-            return encounterFocus(kind: .conflict, encounter: encounter, summary: "Focus: Conflict with \(encounter.name)")
+            return encounterFocus(kind: .conflict, encounter: encounter)
         }
     }
 
     if immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_GROOMING)),
         let encounter = primaryEncounter {
-        return encounterFocus(kind: .grooming, encounter: encounter, summary: "Focus: Grooming with \(encounter.name)")
+        return encounterFocus(kind: .grooming, encounter: encounter)
     }
 
     if selected.speaking != 0
         || immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_SPEAKING))
         || immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_SHOUTING)) {
         if let encounter = primaryEncounter {
-            return encounterFocus(kind: .conversation, encounter: encounter, summary: "Focus: Conversing with \(encounter.name)")
+            return encounterFocus(kind: .conversation, encounter: encounter)
         }
     }
 
     if immersiveApeGoalEquals(selected.goal_type, GOAL_MATE) || dominantDrive == .mate {
         if let encounter = mateEncounter ?? primaryEncounter {
-            return encounterFocus(kind: .courtship, encounter: encounter, summary: "Focus: Courtship attention on \(encounter.name)")
+            return encounterFocus(kind: .courtship, encounter: encounter)
         }
     }
 
     if immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_EATING))
+        || immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD))
         || dominantDrive == .hunger {
         if let cue = foodCue {
             let foodName = immersiveApeFoodDescription(cue.food.food_type).lowercased()
-            return foodFocus(cue: cue, summary: "Focus: Tracking \(foodName) cues")
+            let handlingPhrase = immersiveApeFoodHandlingPhrase(cue.food.food_type).lowercased()
+            let feeding = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_EATING))
+            let scarcity = immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD)) && !feeding
+            let approachStrength = feeding || scarcity ? 0 : immersiveApeForagingApproachStrength(distance: cue.distance)
+            let preparing = approachStrength > 0.34
+            let summary = feeding
+                ? "Focus: Feeding from a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName)"
+                : (scarcity
+                    ? "Focus: Coming up empty at a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName)"
+                    : preparing
+                    ? (alternateFoodCue != nil
+                        ? "Focus: Choosing \(foodName) and closing into a \(handlingPhrase)"
+                        : "Focus: Preparing a \(handlingPhrase) on a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName)")
+                    : (alternateFoodCue != nil
+                        ? "Focus: Favoring a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName) with a \(handlingPhrase)"
+                        : (foragingContext != nil
+                            ? "Focus: Reading a \(foragingContext!.summaryLabel) \(foragingContext!.directionLabel) around a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName)"
+                            : "Focus: Setting up a \(handlingPhrase) toward a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName)")))
+            return foodFocus(cue: cue, summary: summary, feeding: feeding, scarcity: scarcity, alternateCue: feeding || scarcity ? nil : alternateFoodCue, context: feeding || scarcity ? nil : foragingContext)
         }
     }
 
+    if immersiveApeHasState(selected.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD)) {
+        let emptyDistance: Float = 4.4
+        let emptyPosition = (forward * emptyDistance) + SIMD3<Float>(0, -0.04, 0)
+
+        return ImmersiveApeAttentionFocus(
+            kind: .forage,
+            summary: "Focus: Foraging is coming up empty nearby",
+            panelLine: "Intent: Food Scarce  •  no nearby find",
+            fallbackStory: "\(capture.selectedName) is sweeping the immediate ground ahead and finding no worthwhile forage yet.",
+            localPosition: emptyPosition,
+            targetLift: 0.14,
+            color: immersiveApeFoodScarcityTint(nil),
+            distance: emptyDistance,
+            cameraWeight: 0.5,
+            foodType: nil,
+            foodAbundance: 0,
+            alternateFoodType: nil,
+            alternateFoodAbundance: 0,
+            alternateLocalPosition: nil,
+            alternateDistance: 0,
+            socialFriendOrFoe: 127,
+            socialAttraction: 0,
+            socialFamiliarity: 0,
+            socialRelationship: 0,
+            territoryFamiliarity: 0,
+            observerTerritoryFamiliarity: 0
+        )
+    }
+
     if dominantDrive == .social, let encounter = primaryEncounter {
-        return encounterFocus(kind: .companionship, encounter: encounter, summary: "Focus: Social pull toward \(encounter.name)")
+        return encounterFocus(kind: .companionship, encounter: encounter)
     }
 
     if selected.state == 0 || dominantDrive == .fatigue {
@@ -6647,17 +11028,38 @@ private func immersiveApeAttentionFocus(
             targetLift: 0.18,
             color: SIMD4<Float>(0.72, 0.84, 1.0, 0.16),
             distance: restDistance,
-            cameraWeight: 0.42
+            cameraWeight: 0.42,
+            foodType: nil,
+            foodAbundance: 0,
+            alternateFoodType: nil,
+            alternateFoodAbundance: 0,
+            alternateLocalPosition: nil,
+            alternateDistance: 0,
+            socialFriendOrFoe: 127,
+            socialAttraction: 0,
+            socialFamiliarity: 0,
+            socialRelationship: 0,
+            territoryFamiliarity: 0,
+            observerTerritoryFamiliarity: 0
         )
     }
 
     if let encounter = primaryEncounter {
-        return encounterFocus(kind: .companionship, encounter: encounter, summary: "Focus: Keeping \(encounter.name) in view")
+        return encounterFocus(kind: .companionship, encounter: encounter)
     }
 
     if let cue = foodCue {
         let foodName = immersiveApeFoodDescription(cue.food.food_type).lowercased()
-        return foodFocus(cue: cue, summary: "Focus: Noticing \(foodName) nearby")
+        let handlingPhrase = immersiveApeFoodHandlingPhrase(cue.food.food_type).lowercased()
+        let approachStrength = immersiveApeForagingApproachStrength(distance: cue.distance)
+        let summary = approachStrength > 0.34
+            ? "Focus: Near a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName) with a \(handlingPhrase) ready"
+            : (alternateFoodCue != nil
+                ? "Focus: Weighing a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName) against nearby food"
+                : (foragingContext != nil
+                    ? "Focus: Noticing a \(foragingContext!.summaryLabel) \(foragingContext!.directionLabel)"
+                    : "Focus: Noticing a \(immersiveApeFoodAbundancePhrase(cue.abundance)) of \(foodName)"))
+        return foodFocus(cue: cue, summary: summary, alternateCue: alternateFoodCue, context: foragingContext)
     }
 
     let roamDistance: Float = immersiveApeGoalEquals(selected.goal_type, GOAL_LOCATION) ? 13.5 : 10.5
@@ -6672,7 +11074,19 @@ private func immersiveApeAttentionFocus(
         targetLift: 0.24,
         color: SIMD4<Float>(0.9, 0.95, 1.0, 0.12),
         distance: roamDistance,
-        cameraWeight: 0.5
+        cameraWeight: 0.5,
+        foodType: nil,
+        foodAbundance: 0,
+        alternateFoodType: nil,
+        alternateFoodAbundance: 0,
+        alternateLocalPosition: nil,
+        alternateDistance: 0,
+        socialFriendOrFoe: 127,
+        socialAttraction: 0,
+        socialFamiliarity: 0,
+        socialRelationship: 0,
+        territoryFamiliarity: 0,
+        observerTerritoryFamiliarity: 0
     )
 }
 
@@ -6852,6 +11266,7 @@ private func immersiveApeAvatarSkeleton(
     skeletonDNA: ImmersiveApeSkeletonDNA,
     forward: SIMD3<Float>,
     right: SIMD3<Float>,
+    up: SIMD3<Float>,
     gestureWave: Float,
     settleWave: Float,
     breathWave: Float,
@@ -6863,7 +11278,6 @@ private func immersiveApeAvatarSkeleton(
     gaitLift: Float
 ) -> ImmersiveApeAvatarSkeleton {
     let bodyHeight = max(1.2, being.height)
-    let up = SIMD3<Float>(0, 1, 0)
     let crouchOffset = up * -bodyProfile.crouch
     let torsoLean = forward * bodyProfile.spineLean
     let torsoForwardOffset = forward * (motionProfile.socialForward + silhouetteProfile.torsoForward)
@@ -7189,6 +11603,202 @@ private func immersiveApeExtremityProfile(
             min: 0.24,
             max: 0.56
         )
+    )
+}
+
+private func immersiveApeFacialProfile(
+    for being: shared_immersiveape_being_snapshot,
+    localPosition: SIMD3<Float>,
+    interactionMode: ImmersiveApeEncounterMode,
+    interactionWeight: Float,
+    bodyProfile: ImmersiveApeBodyProfile,
+    headRadius: Float
+) -> ImmersiveApeFacialProfile {
+    let frame = Float(being.frame) / 15
+    let hair = Float(being.hair) / 15
+    let eyeColor = Float(being.eye_color) / 15
+    let eyeShape = Float(being.eye_shape) / 15
+    let honor = Float(being.honor) / 255
+    let maturity = immersiveApeSaturate(being.age_days / 3200)
+    let juvenile = 1 - maturity
+    let femaleBias: Float = being.female != 0 ? 1 : 0
+    let moving = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_MOVING))
+    let swimming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SWIMMING))
+    let eating = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_EATING))
+    let grooming = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_GROOMING))
+    let attacking = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE))
+    let speaking = being.speaking != 0
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SPEAKING))
+    let shouting = immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+    let sleeping = being.state == 0
+    let sleepingWeight: Float = sleeping ? 1 : 0
+    let movingWeight: Float = moving ? 1 : 0
+    let swimmingWeight: Float = swimming ? 1 : 0
+    let eatingWeight: Float = eating ? 1 : 0
+    let groomingWeight: Float = grooming ? 1 : 0
+    let attackingWeight: Float = attacking ? 1 : 0
+    let speakingWeight: Float = speaking ? 1 : 0
+    let shoutingWeight: Float = shouting ? 1 : 0
+    let interactionStrength = immersiveApeClamp(interactionWeight, min: 0, max: 1)
+
+    let socialModeWeight: Float
+    switch interactionMode {
+    case .conversation:
+        socialModeWeight = 1.0
+    case .grooming:
+        socialModeWeight = 0.92
+    case .courtship:
+        socialModeWeight = 0.84
+    case .companionship:
+        socialModeWeight = 0.68
+    case .presence:
+        socialModeWeight = 0.28
+    case .conflict:
+        socialModeWeight = 0.56
+    }
+
+    let socialWeight = interactionStrength * socialModeWeight
+    let forward = immersiveApeFacingVector(facing: being.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+
+    var gazeDirection = forward
+    if sleeping {
+        gazeDirection = ((forward * 0.18) + SIMD3<Float>(0, -1, 0)).normalizedSafe
+    } else if eating {
+        gazeDirection = ((forward * 0.42) + SIMD3<Float>(0, -0.88, 0)).normalizedSafe
+    } else if (socialWeight > 0.16 && interactionMode != .presence) || attacking {
+        let focusDirection = simd_length_squared(SIMD2<Float>(localPosition.x, localPosition.z)) > 0.0001
+            ? immersiveApePlanarDirection(-localPosition)
+            : forward
+        let focusLift: Float
+        if grooming {
+            focusLift = -0.06
+        } else if attacking {
+            focusLift = 0.08
+        } else {
+            focusLift = 0.02 + (socialWeight * 0.08)
+        }
+        gazeDirection = (focusDirection + SIMD3<Float>(0, focusLift, 0)).normalizedSafe
+    } else if moving {
+        let scanPhase = (Float(being.index) * 0.61) + (interactionStrength * Float.pi)
+        gazeDirection = (forward + (right * (sin(scanPhase) * 0.12)) + SIMD3<Float>(0, 0.03, 0)).normalizedSafe
+    } else {
+        let settlePhase = (Float(being.index) * 0.43) + (interactionStrength * 2.1)
+        gazeDirection = (forward + (right * (sin(settlePhase) * 0.05)) + SIMD3<Float>(0, 0.01, 0)).normalizedSafe
+    }
+
+    let blinkBase: Float = sleepingWeight > 0 ? 1 : (swimmingWeight > 0 ? 0.28 : 0.12)
+    let blink = immersiveApeClamp(
+        blinkBase
+            + (groomingWeight * 0.06)
+            + ((1 - socialWeight) * 0.04)
+            - (speakingWeight * 0.04)
+            - (shoutingWeight * 0.06)
+            - (attackingWeight * 0.08)
+            - (movingWeight * 0.02),
+        min: 0.04,
+        max: 1
+    )
+    let speakingActivityWeight = max(speakingWeight, shoutingWeight)
+    let eyeRadius = headRadius * (0.13 + ((1 - frame) * 0.018) + (juvenile * 0.012))
+    let eyeSpacing = headRadius * (0.42 + (frame * 0.05) - (femaleBias * 0.02))
+    let eyeForward = bodyProfile.muzzleLength * (0.04 + (eyeShape * 0.04))
+    let eyeLift = headRadius * (
+        0.02
+            + (juvenile * 0.03)
+            + (speakingActivityWeight * 0.03)
+            - (eatingWeight * 0.05)
+            - (sleepingWeight * 0.1)
+    )
+    let eyeHeightScale = immersiveApeClamp((0.7 + (eyeShape * 0.16)) * (1 - (blink * 0.88)), min: 0.06, max: 0.92)
+    let pupilRadius = headRadius * (0.04 + (eyeColor * 0.01))
+    let gazeSide = immersiveApeClamp(simd_dot(gazeDirection, right), min: -0.9, max: 0.9) * headRadius * 0.1
+    let gazeLift = immersiveApeClamp(gazeDirection.y, min: -0.9, max: 0.9) * headRadius * 0.08
+    let headTurnSide = immersiveApeClamp(simd_dot(gazeDirection, right), min: -0.9, max: 0.9)
+        * (0.22 + (interactionStrength * 0.12) + (attackingWeight * 0.08))
+    let headTurnLift = immersiveApeClamp(gazeDirection.y, min: -0.9, max: 0.9)
+        * (0.24 + (socialWeight * 0.1) + (sleepingWeight * 0.12))
+    let earRadius = headRadius * (0.22 + ((1 - frame) * 0.05) + (juvenile * 0.04))
+    let earSpread = headRadius * (0.84 + (hair * 0.12) + (attackingWeight * 0.06))
+    let earLift = headRadius * (0.1 + (honor * 0.08) - (sleepingWeight * 0.08))
+    let earTilt = headRadius * (
+        (attackingWeight * 0.12)
+            + (socialWeight * 0.04)
+            - (sleepingWeight * 0.08)
+            - (eatingWeight * 0.03)
+    )
+    let browLift = headRadius * (
+        (speakingActivityWeight * 0.08)
+            + (socialWeight * 0.03)
+            - (attackingWeight * 0.05)
+            - (sleepingWeight * 0.08)
+            - (eatingWeight * 0.03)
+    )
+    let browPinch = headRadius * (
+        0.02
+            + (attackingWeight * 0.06)
+            + (groomingWeight * 0.02)
+            + (socialWeight * 0.02)
+    )
+    let cheekRadius = headRadius * (
+        0.18
+            + (juvenile * 0.02)
+            + (femaleBias * 0.01)
+            + (socialWeight * 0.03)
+    )
+    let cheekSpread = headRadius * (0.34 + (frame * 0.04) + (attackingWeight * 0.02))
+    let cheekLift = headRadius * (
+        (groomingWeight * 0.03)
+            + (socialWeight * 0.02)
+            - (sleepingWeight * 0.06)
+            - (eatingWeight * 0.03)
+    )
+    let jawWidth = headRadius * (0.44 + (frame * 0.08) + (attackingWeight * 0.04))
+    let jawHeight = headRadius * (0.24 + (sleepingWeight * 0.06) + (speakingActivityWeight * 0.04) + (groomingWeight * 0.02))
+    let jawForward = headRadius * (0.12 + (attackingWeight * 0.08) + (speakingActivityWeight * 0.04) - (eatingWeight * 0.02))
+    let jawDrop = headRadius * (
+        0.02
+            + (sleepingWeight * 0.08)
+            + (eatingWeight * 0.06)
+            + (speakingWeight * 0.06)
+            + (shoutingWeight * 0.12)
+            + (attackingWeight * 0.08)
+            + (socialWeight * 0.02)
+    )
+    let lipRadius = headRadius * (0.04 + (hair * 0.012))
+    let nostrilRadius = headRadius * (0.028 + (frame * 0.006))
+    let nostrilSpread = headRadius * (0.12 + (frame * 0.03))
+
+    return ImmersiveApeFacialProfile(
+        eyeRadius: eyeRadius,
+        eyeSpacing: eyeSpacing,
+        eyeForward: eyeForward,
+        eyeLift: eyeLift,
+        eyeHeightScale: eyeHeightScale,
+        pupilRadius: pupilRadius,
+        pupilForward: headRadius * 0.08,
+        gazeSide: gazeSide,
+        gazeLift: gazeLift,
+        headTurnSide: headTurnSide,
+        headTurnLift: headTurnLift,
+        earRadius: earRadius,
+        earSpread: earSpread,
+        earLift: earLift,
+        earTilt: earTilt,
+        browLift: browLift,
+        browPinch: browPinch,
+        cheekRadius: cheekRadius,
+        cheekSpread: cheekSpread,
+        cheekLift: cheekLift,
+        jawWidth: jawWidth,
+        jawHeight: jawHeight,
+        jawForward: jawForward,
+        jawDrop: jawDrop,
+        lipRadius: lipRadius,
+        nostrilRadius: nostrilRadius,
+        nostrilSpread: nostrilSpread,
+        blink: blink
     )
 }
 
@@ -7560,8 +12170,156 @@ private func immersiveApeMotionProfile(
     )
 }
 
+private func immersiveApeForagingPosture(
+    for being: shared_immersiveape_being_snapshot,
+    focus: ImmersiveApeAttentionFocus
+) -> ImmersiveApeForagingPosture? {
+    guard focus.kind == .forage, let foodType = focus.foodType else {
+        return nil
+    }
+
+    if immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_EATING))
+        || immersiveApeHasState(being.state, immersiveApeStateFlag(BEING_STATE_NO_FOOD)) {
+        return nil
+    }
+
+    let distanceWeight = immersiveApeClamp(1 - ((focus.distance - 2.5) / 18), min: 0.18, max: 1.0)
+    let cameraWeight = immersiveApeClamp(0.4 + (focus.cameraWeight * 0.6), min: 0.32, max: 1.0)
+    let engagement = distanceWeight * cameraWeight
+
+    func posture(
+        eyeHeightDelta: Float,
+        targetDistanceDelta: Float,
+        targetDropDelta: Float,
+        handSpreadScale: Float,
+        handForwardDelta: Float,
+        handHeightDelta: Float,
+        elbowDropDelta: Float,
+        chestForwardDelta: Float,
+        chestHeightDelta: Float,
+        fieldOfViewDelta: Float,
+        leadHandForwardDelta: Float,
+        leadHandHeightDelta: Float,
+        supportHandForwardDelta: Float,
+        supportHandHeightDelta: Float,
+        handInwardBias: Float
+    ) -> ImmersiveApeForagingPosture {
+        ImmersiveApeForagingPosture(
+            eyeHeightDelta: eyeHeightDelta * engagement,
+            targetDistanceDelta: targetDistanceDelta * engagement,
+            targetDropDelta: targetDropDelta * engagement,
+            handSpreadScale: 1 + ((handSpreadScale - 1) * engagement),
+            handForwardDelta: handForwardDelta * engagement,
+            handHeightDelta: handHeightDelta * engagement,
+            elbowDropDelta: elbowDropDelta * engagement,
+            chestForwardDelta: chestForwardDelta * engagement,
+            chestHeightDelta: chestHeightDelta * engagement,
+            fieldOfViewDelta: fieldOfViewDelta * engagement,
+            leadHandForwardDelta: leadHandForwardDelta * engagement,
+            leadHandHeightDelta: leadHandHeightDelta * engagement,
+            supportHandForwardDelta: supportHandForwardDelta * engagement,
+            supportHandHeightDelta: supportHandHeightDelta * engagement,
+            handInwardBias: handInwardBias * engagement
+        )
+    }
+
+    switch ImmersiveApeFoodCode(rawValue: foodType) {
+    case .fruit:
+        return posture(
+            eyeHeightDelta: 0.032,
+            targetDistanceDelta: -1.24,
+            targetDropDelta: -0.12,
+            handSpreadScale: 0.82,
+            handForwardDelta: 0.18,
+            handHeightDelta: 0.05,
+            elbowDropDelta: 0.04,
+            chestForwardDelta: 0.05,
+            chestHeightDelta: 0.018,
+            fieldOfViewDelta: -1.2,
+            leadHandForwardDelta: 0.12,
+            leadHandHeightDelta: 0.09,
+            supportHandForwardDelta: 0.02,
+            supportHandHeightDelta: 0.01,
+            handInwardBias: 0.045
+        )
+    case .seaweed:
+        return posture(
+            eyeHeightDelta: -0.018,
+            targetDistanceDelta: -0.94,
+            targetDropDelta: -0.22,
+            handSpreadScale: 1.12,
+            handForwardDelta: 0.2,
+            handHeightDelta: -0.05,
+            elbowDropDelta: -0.01,
+            chestForwardDelta: 0.06,
+            chestHeightDelta: -0.018,
+            fieldOfViewDelta: 0.7,
+            leadHandForwardDelta: 0.06,
+            leadHandHeightDelta: -0.02,
+            supportHandForwardDelta: 0.04,
+            supportHandHeightDelta: -0.04,
+            handInwardBias: 0.028
+        )
+    case .shellfish:
+        return posture(
+            eyeHeightDelta: -0.045,
+            targetDistanceDelta: -1.38,
+            targetDropDelta: -0.3,
+            handSpreadScale: 0.76,
+            handForwardDelta: 0.24,
+            handHeightDelta: -0.1,
+            elbowDropDelta: -0.018,
+            chestForwardDelta: 0.08,
+            chestHeightDelta: -0.026,
+            fieldOfViewDelta: -1.0,
+            leadHandForwardDelta: 0.08,
+            leadHandHeightDelta: -0.03,
+            supportHandForwardDelta: 0.08,
+            supportHandHeightDelta: -0.05,
+            handInwardBias: 0.012
+        )
+    case .birdEggs, .lizardEggs:
+        return posture(
+            eyeHeightDelta: 0.012,
+            targetDistanceDelta: -1.08,
+            targetDropDelta: -0.15,
+            handSpreadScale: 0.72,
+            handForwardDelta: 0.17,
+            handHeightDelta: 0.024,
+            elbowDropDelta: 0.05,
+            chestForwardDelta: 0.048,
+            chestHeightDelta: 0.014,
+            fieldOfViewDelta: -1.4,
+            leadHandForwardDelta: 0.04,
+            leadHandHeightDelta: 0.05,
+            supportHandForwardDelta: 0.03,
+            supportHandHeightDelta: 0.03,
+            handInwardBias: 0.01
+        )
+    case .vegetable, .none:
+        return posture(
+            eyeHeightDelta: -0.025,
+            targetDistanceDelta: -0.96,
+            targetDropDelta: -0.24,
+            handSpreadScale: 1.08,
+            handForwardDelta: 0.19,
+            handHeightDelta: -0.07,
+            elbowDropDelta: -0.01,
+            chestForwardDelta: 0.072,
+            chestHeightDelta: -0.02,
+            fieldOfViewDelta: 0.32,
+            leadHandForwardDelta: 0.05,
+            leadHandHeightDelta: -0.02,
+            supportHandForwardDelta: 0.04,
+            supportHandHeightDelta: -0.04,
+            handInwardBias: 0.035
+        )
+    }
+}
+
 private func immersiveApeEmbodimentProfile(
     for being: shared_immersiveape_being_snapshot,
+    attentionFocus: ImmersiveApeAttentionFocus,
     encounterCount: Int
 ) -> ImmersiveApeEmbodimentProfile {
     let bodyHeight = max(1.2, being.height)
@@ -7653,6 +12411,30 @@ private func immersiveApeEmbodimentProfile(
         profile.chestAlpha = 0.22
         profile.fieldOfView = 52
         profile.renderHands = false
+    }
+
+    if let foragingPosture = immersiveApeForagingPosture(for: being, focus: attentionFocus) {
+        profile.eyeHeight += foragingPosture.eyeHeightDelta
+        profile.targetDistance = max(6.1, profile.targetDistance + foragingPosture.targetDistanceDelta)
+        profile.targetDrop += foragingPosture.targetDropDelta
+        profile.handSpread = max(bodyProfile.shoulderWidth * 0.68, profile.handSpread * foragingPosture.handSpreadScale)
+        profile.handForward = max(0.18, profile.handForward + foragingPosture.handForwardDelta)
+        profile.handHeight = max(bodyHeight * 0.36, profile.handHeight + foragingPosture.handHeightDelta)
+        profile.elbowDrop += foragingPosture.elbowDropDelta
+        profile.chestHeight = max(bodyHeight * 0.28, profile.chestHeight + foragingPosture.chestHeightDelta)
+        profile.chestForward = max(0.04, profile.chestForward + foragingPosture.chestForwardDelta)
+        profile.fieldOfView = immersiveApeClamp(profile.fieldOfView + foragingPosture.fieldOfViewDelta, min: 52, max: 61)
+    }
+
+    if let meetingBehavior = immersiveApeMeetingBehavior(focus: attentionFocus), sleeping == false {
+        profile.targetDistance = max(6.2, profile.targetDistance + meetingBehavior.targetDistanceDelta)
+        profile.targetDrop += meetingBehavior.targetDropDelta
+        profile.handSpread = max(bodyProfile.shoulderWidth * 0.66, profile.handSpread * meetingBehavior.handSpreadScale)
+        profile.handForward = max(0.18, profile.handForward + meetingBehavior.handForwardDelta)
+        profile.handHeight = max(bodyHeight * 0.38, profile.handHeight + meetingBehavior.handHeightDelta)
+        profile.chestForward = max(0.04, profile.chestForward + meetingBehavior.chestForwardDelta)
+        profile.chestAlpha = min(0.4, profile.chestAlpha + (meetingBehavior.strength * 0.06))
+        profile.fieldOfView = immersiveApeClamp(profile.fieldOfView + meetingBehavior.fieldOfViewDelta, min: 52, max: 62)
     }
 
     if encounterCount > 1 && sleeping == false {
@@ -7784,20 +12566,71 @@ private func immersiveApeEncounterStory(capture: ImmersiveApeSceneCapture) -> St
         return focus.fallbackStory
     }
 
+    let meetingBehavior = immersiveApeMeetingBehavior(mode: encounter.mode, distance: encounter.distance)
+    let speechBehavior = immersiveApeEncounterSpeechBehavior(selected: capture.snapshot.selected, encounter: encounter)
+    let memoryBehavior = immersiveApeEncounterMemoryBehavior(encounter: encounter)
+    let territoryBehavior = immersiveApeEncounterTerritoryBehavior(encounter: encounter)
+    let territoryTail = immersiveApeTerritoryStoryTail(territoryBehavior)
+    let baseStory: String
+
     switch encounter.mode {
     case .conversation:
-        return "\(capture.selectedName) is trading calls with \(encounter.name) while the group keeps moving through the landscape."
+        baseStory = speechBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), with the new speech field carrying the exchange through \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), with the new speech field carrying the exchange between both heads.")
+            : (meetingBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), with \(memoryBehavior!.storyLead) now holding beneath the meeting field."
+                : "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), with the new meeting field holding the exchange in place inside the wider landscape.")
+            : "\(capture.selectedName) is trading calls with \(encounter.name) while the group keeps moving through the landscape.")
     case .conflict:
-        return "\(capture.selectedName) is locked into a tense encounter with \(encounter.name), and the camera widens to hold both apes in view."
+        baseStory = speechBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), with shouted pressure now rippling down \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), with shouted pressure now rippling down the encounter lane.")
+            : (meetingBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), and the clash now gathers into a visible brace zone threaded with \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), and the clash now gathers into a visible brace zone before contact.")
+            : "\(capture.selectedName) is locked into a tense encounter with \(encounter.name), and the camera widens to hold both apes in view.")
     case .grooming:
-        return "\(capture.selectedName) is settling into close social contact with \(encounter.name), turning the scene intimate and still."
+        baseStory = speechBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), adding a soft speech layer to the shared grooming space through \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), adding a soft speech layer to the shared grooming space.")
+            : (meetingBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), turning the social pull into a soft shared meeting space held by \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), turning the social pull into a soft shared meeting space.")
+            : "\(capture.selectedName) is settling into close social contact with \(encounter.name), turning the scene intimate and still.")
     case .courtship:
-        return "\(capture.selectedName) is circling \(encounter.name) with courtship pressure building inside the current weather and light."
+        baseStory = speechBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), letting courtship now read as a voiced orbit braided with \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), letting courtship now read as a voiced orbit instead of only a spatial one.")
+            : (meetingBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), with courtship pressure now reading as a distinct orbit around \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), with courtship pressure now reading as a distinct orbit instead of a generic approach.")
+            : "\(capture.selectedName) is circling \(encounter.name) with courtship pressure building inside the current weather and light.")
     case .companionship:
-        return "\(capture.selectedName) is travelling with \(encounter.name) close enough to keep the social pull visible."
+        baseStory = speechBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), so the shared path now carries visible contact calls and \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), so the shared path now carries visible contact calls as well as proximity.")
+            : (meetingBehavior != nil
+            ? (memoryBehavior != nil
+                ? "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), so companionship now reads as a shared lane carried by \(memoryBehavior!.storyLead)."
+                : "\(capture.selectedName) is \(meetingBehavior!.storyLead) \(encounter.name), so companionship now reads as a shared lane through the scene.")
+            : "\(capture.selectedName) is travelling with \(encounter.name) close enough to keep the social pull visible.")
     case .presence:
-        return "\(capture.selectedName) has \(encounter.name) nearby, a quiet social cue inside the wider procedural world."
+        baseStory = memoryBehavior != nil
+            ? "\(capture.selectedName) has \(encounter.name) nearby, with \(memoryBehavior!.storyLead) quietly surfacing inside the wider procedural world."
+            : "\(capture.selectedName) has \(encounter.name) nearby, a quiet social cue inside the wider procedural world."
     }
+
+    return baseStory + territoryTail
 }
 
 private func immersiveApeEncounterPanel(capture: ImmersiveApeSceneCapture) -> String {
@@ -7810,13 +12643,19 @@ private func immersiveApeEncounterPanel(capture: ImmersiveApeSceneCapture) -> St
 
     let encounterLines = encounters.prefix(3).enumerated().map { offset, encounter in
         let distance = Int(round(encounter.distance))
-        return "\(offset + 1). \(encounter.name)  •  \(encounter.mode.label)  •  \(distance)m"
+        let memorySuffix = immersiveApeEncounterMemoryBehavior(encounter: encounter).map { "  •  \($0.panelLabel)" } ?? ""
+        let territorySuffix = immersiveApeEncounterTerritoryBehavior(encounter: encounter).map { "  •  \($0.panelLabel)" } ?? ""
+        return "\(offset + 1). \(encounter.name)  •  \(encounter.mode.label)  •  \(distance)m\(memorySuffix)\(territorySuffix)"
     }
 
     return ([focus.panelLine] + encounterLines).joined(separator: "\n")
 }
 
-private func immersiveApeHUDState(for capture: ImmersiveApeSceneCapture, paused: Bool) -> ImmersiveApeHUDState {
+private func immersiveApeHUDState(
+    for capture: ImmersiveApeSceneCapture,
+    paused: Bool,
+    performance: String
+) -> ImmersiveApeHUDState {
     let selected = capture.snapshot.selected
     let sexLabel = selected.female != 0 ? "Female" : "Male"
     let ageDays = Int(selected.age_days.rounded())
@@ -7827,6 +12666,7 @@ private func immersiveApeHUDState(for capture: ImmersiveApeSceneCapture, paused:
         headline: "\(capture.selectedName)  •  \(sexLabel)  •  \(ageDays)d  •  Cycle \(immersiveApeCurrentDevelopmentCycle) / 100",
         status: "\(immersiveApeTimeString(capture.snapshot.time))  •  \(immersiveApeWeatherDescription(capture.snapshot.weather))  •  \(immersiveApeTideDescription(capture.snapshot.tide))  •  \(capture.apeCount) apes live  •  \(paused ? "Paused" : "Following selected ape")",
         detail: "\(immersiveApeFocusDescription(capture: capture))  •  \(immersiveApeStateDescription(selected.state))  •  \(immersiveApeGoalDescription(selected.goal_type))",
+        performance: performance,
         story: encounterStory,
         encounters: encounterPanel,
         footer: "\(immersiveApeDriveSummary(selected))  •  Honor \(selected.honor)  •  Esc quit  [ ] switch ape  Space pause"
@@ -8402,6 +13242,12 @@ private func immersiveApeFoodTint(_ food: UInt8) -> SIMD4<Float> {
     }
 }
 
+private func immersiveApeFoodScarcityTint(_ food: UInt8?) -> SIMD4<Float> {
+    let base = immersiveApeFoodTint(food ?? ImmersiveApeFoodCode.vegetable.rawValue)
+    let dimmed = immersiveApeMix(SIMD3<Float>(base.x, base.y, base.z), SIMD3<Float>(0.48, 0.52, 0.56), t: 0.62)
+    return SIMD4<Float>(dimmed.x, dimmed.y, dimmed.z, 1)
+}
+
 private func immersiveApeSkinColor(pigmentation: UInt8) -> SIMD4<Float> {
     let t = Float(pigmentation) / 15
     let light = SIMD3<Float>(0.86, 0.69, 0.56)
@@ -8415,6 +13261,15 @@ private func immersiveApeHairColor(hair: UInt8) -> SIMD4<Float> {
     let dark = SIMD3<Float>(0.08, 0.05, 0.04)
     let warm = SIMD3<Float>(0.35, 0.21, 0.11)
     let mixed = immersiveApeMix(dark, warm, t: t * 0.7)
+    return SIMD4<Float>(mixed.x, mixed.y, mixed.z, 1)
+}
+
+private func immersiveApeIrisColor(eyeColor: UInt8, eyeShape: UInt8) -> SIMD4<Float> {
+    let hue = Float(eyeColor) / 15
+    let contour = Float(eyeShape) / 15
+    let cool = immersiveApeMix(SIMD3<Float>(0.16, 0.28, 0.18), SIMD3<Float>(0.24, 0.4, 0.28), t: contour)
+    let warm = immersiveApeMix(SIMD3<Float>(0.42, 0.24, 0.12), SIMD3<Float>(0.62, 0.44, 0.16), t: contour * 0.5)
+    let mixed = immersiveApeMix(cool, warm, t: hue)
     return SIMD4<Float>(mixed.x, mixed.y, mixed.z, 1)
 }
 

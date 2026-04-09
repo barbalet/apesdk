@@ -386,6 +386,7 @@ final class ImmersiveApeViewController: NSViewController {
     private let headlineLabel = NSTextField(labelWithString: "Immersive Ape")
     private let statusLabel = NSTextField(labelWithString: "Booting ApeSDK...")
     private let detailLabel = NSTextField(labelWithString: "Linking ape goals, weather, and surf context...")
+    private let performanceLabel = NSTextField(labelWithString: "FPS --  •  Target 60  •  Floor 30  •  Quality Full")
     private let storyLabel = NSTextField(labelWithString: "Following the selected ape through the procedural world...")
     private let encounterTitleLabel = NSTextField(labelWithString: "Intent + Encounters")
     private let encounterLabel = NSTextField(labelWithString: "Scanning nearby apes...")
@@ -457,6 +458,8 @@ final class ImmersiveApeViewController: NSViewController {
         statusLabel.textColor = NSColor.white.withAlphaComponent(0.9)
         detailLabel.font = .systemFont(ofSize: 12, weight: .regular)
         detailLabel.textColor = NSColor.white.withAlphaComponent(0.82)
+        performanceLabel.font = .monospacedSystemFont(ofSize: 12, weight: .semibold)
+        performanceLabel.textColor = NSColor.white.withAlphaComponent(0.88)
         storyLabel.font = .systemFont(ofSize: 13, weight: .medium)
         storyLabel.textColor = NSColor.white.withAlphaComponent(0.9)
         storyLabel.alignment = .center
@@ -467,7 +470,7 @@ final class ImmersiveApeViewController: NSViewController {
         footerLabel.font = .monospacedSystemFont(ofSize: 11, weight: .medium)
         footerLabel.textColor = NSColor.white.withAlphaComponent(0.75)
 
-        for label in [statusLabel, detailLabel, storyLabel, encounterLabel, footerLabel] {
+        for label in [statusLabel, detailLabel, performanceLabel, storyLabel, encounterLabel, footerLabel] {
             label.lineBreakMode = .byWordWrapping
             label.cell?.wraps = true
             label.cell?.usesSingleLineMode = false
@@ -476,6 +479,7 @@ final class ImmersiveApeViewController: NSViewController {
         stackView.addArrangedSubview(headlineLabel)
         stackView.addArrangedSubview(statusLabel)
         stackView.addArrangedSubview(detailLabel)
+        stackView.addArrangedSubview(performanceLabel)
         stackView.addArrangedSubview(footerLabel)
 
         encounterStack.addArrangedSubview(encounterTitleLabel)
@@ -604,6 +608,7 @@ final class ImmersiveApeViewController: NSViewController {
             self?.headlineLabel.stringValue = state.headline
             self?.statusLabel.stringValue = state.status
             self?.detailLabel.stringValue = state.detail
+            self?.performanceLabel.stringValue = state.performance
             self?.storyLabel.stringValue = state.story
             self?.encounterLabel.stringValue = state.encounters
             self?.footerLabel.stringValue = state.footer
