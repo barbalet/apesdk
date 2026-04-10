@@ -115,8 +115,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showAboutPanel(_ sender: Any?) {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: appName,
-            .version: "Cycle 22 Biome DNA Flora Pass",
-            .credits: NSAttributedString(string: "A full-screen Metal viewer for ApeSDK, now deriving biome growth from a selected ape DNA profile so meadow, scrub, forest, coast, and stone layers pick up stronger canopy, understory, bloom, and clutter variation instead of sharing a mostly generic flora pass.")
+            .version: "Cycle \(immersiveApeCurrentDevelopmentCycle) \(immersiveApeCurrentDevelopmentCycleTitle)",
+            .credits: NSAttributedString(string: immersiveApeCurrentDevelopmentCycleSummary)
         ])
     }
 

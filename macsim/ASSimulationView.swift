@@ -432,6 +432,178 @@ private struct ImmersiveApeForagingContext {
     let sectors: [ImmersiveApeForagingContextSector]
 }
 
+private struct ImmersiveApeSocialNeighborhoodSector {
+    let direction: SIMD3<Float>
+    let weight: Float
+    let color: SIMD4<Float>
+}
+
+private struct ImmersiveApeSocialNeighborhoodContext {
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let sectors: [ImmersiveApeSocialNeighborhoodSector]
+}
+
+private enum ImmersiveApeWeatherContextStyle: Equatable {
+    case front
+    case clearing
+    case wrapped
+    case patchy
+    case open
+}
+
+private struct ImmersiveApeWeatherContextSector {
+    let direction: SIMD3<Float>
+    let density: Float
+    let openness: Float
+}
+
+private struct ImmersiveApeWeatherContext {
+    let style: ImmersiveApeWeatherContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let focusIndex: Int
+    let sectors: [ImmersiveApeWeatherContextSector]
+}
+
+private enum ImmersiveApePrecipitationContextStyle: Equatable {
+    case squall
+    case leeBreak
+    case slant
+    case sheet
+    case mist
+}
+
+private struct ImmersiveApePrecipitationContextLane {
+    let offset: Float
+    let intensity: Float
+    let shelter: Float
+}
+
+private struct ImmersiveApePrecipitationContext {
+    let style: ImmersiveApePrecipitationContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let driftDirection: SIMD3<Float>
+    let focusIndex: Int
+    let lanes: [ImmersiveApePrecipitationContextLane]
+}
+
+private enum ImmersiveApeAirflowContextStyle: Equatable {
+    case gustLane
+    case leePocket
+    case splitWake
+    case draft
+    case stillPocket
+}
+
+private struct ImmersiveApeAirflowContextLane {
+    let offset: Float
+    let flow: Float
+    let shelter: Float
+    let turbulence: Float
+}
+
+private struct ImmersiveApeAirflowContext {
+    let style: ImmersiveApeAirflowContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let driftDirection: SIMD3<Float>
+    let focusIndex: Int
+    let lanes: [ImmersiveApeAirflowContextLane]
+}
+
+private enum ImmersiveApeVaporContextStyle: Equatable {
+    case rainHaze
+    case shoreMist
+    case basinHaze
+    case liftingVeil
+    case clearLift
+}
+
+private struct ImmersiveApeVaporContextSector {
+    let direction: SIMD3<Float>
+    let density: Float
+    let clarity: Float
+    let waterInfluence: Float
+}
+
+private struct ImmersiveApeVaporContext {
+    let style: ImmersiveApeVaporContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let driftDirection: SIMD3<Float>
+    let focusIndex: Int
+    let sectors: [ImmersiveApeVaporContextSector]
+}
+
+private enum ImmersiveApeSurfaceWaterContextStyle: Equatable {
+    case shoreWash
+    case pooledHollow
+    case runoffTrace
+    case slickFooting
+    case firmFooting
+}
+
+private struct ImmersiveApeSurfaceWaterContextSector {
+    let direction: SIMD3<Float>
+    let wetness: Float
+    let pooling: Float
+    let runoff: Float
+    let shoreline: Float
+    let firmness: Float
+}
+
+private struct ImmersiveApeSurfaceWaterContext {
+    let style: ImmersiveApeSurfaceWaterContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let focusIndex: Int
+    let sectors: [ImmersiveApeSurfaceWaterContextSector]
+}
+
+private enum ImmersiveApeCoverResponseContextStyle: Equatable {
+    case shoreReeds
+    case dripCanopy
+    case leeBrush
+    case weatherBentCover
+    case openScrub
+}
+
+private struct ImmersiveApeCoverResponseContextSector {
+    let direction: SIMD3<Float>
+    let cover: Float
+    let shelter: Float
+    let bend: Float
+    let droop: Float
+    let shoreBias: Float
+    let canopyBias: Float
+    let openness: Float
+}
+
+private struct ImmersiveApeCoverResponseContext {
+    let style: ImmersiveApeCoverResponseContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let driftDirection: SIMD3<Float>
+    let focusIndex: Int
+    let sectors: [ImmersiveApeCoverResponseContextSector]
+}
+
 private struct ImmersiveApeMeetingBehavior {
     let summaryLead: String
     let panelLabel: String
@@ -556,6 +728,37 @@ private struct ImmersiveApeCaregivingContext {
     let storyTail: String
 }
 
+private enum ImmersiveApeSocialFieldRole {
+    case support
+    case pressure
+    case witness
+}
+
+private enum ImmersiveApeSocialFieldStyle {
+    case supported
+    case pressured
+    case split
+    case witnessed
+}
+
+private struct ImmersiveApeSocialFieldMarker {
+    let localPosition: SIMD3<Float>
+    let role: ImmersiveApeSocialFieldRole
+    let strength: Float
+}
+
+private struct ImmersiveApeSocialFieldContext {
+    let style: ImmersiveApeSocialFieldStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let ringRadius: Float
+    let laneRadius: Float
+    let color: SIMD4<Float>
+    let markers: [ImmersiveApeSocialFieldMarker]
+}
+
 private struct ImmersiveApeAttentionFocus {
     let kind: ImmersiveApeAttentionKind
     let summary: String
@@ -566,6 +769,7 @@ private struct ImmersiveApeAttentionFocus {
     let color: SIMD4<Float>
     let distance: Float
     let cameraWeight: Float
+    let socialTargetIndex: Int32?
     let foodType: UInt8?
     let foodAbundance: Float
     let alternateFoodType: UInt8?
@@ -1704,6 +1908,1489 @@ private func immersiveApeEncounterEpisodicRecallImportance(_ behavior: Immersive
     }
 }
 
+private func immersiveApeSocialFieldCountLabel(
+    _ count: Int,
+    singular: String,
+    plural: String
+) -> String? {
+    guard count > 0 else {
+        return nil
+    }
+
+    return count == 1 ? "1 \(singular)" : "\(count) \(plural)"
+}
+
+private func immersiveApeSocialFieldRoleColor(_ role: ImmersiveApeSocialFieldRole) -> SIMD4<Float> {
+    switch role {
+    case .support:
+        return SIMD4<Float>(0.64, 0.88, 1.0, 0.12)
+    case .pressure:
+        return SIMD4<Float>(1.0, 0.58, 0.34, 0.13)
+    case .witness:
+        return SIMD4<Float>(0.9, 0.94, 1.0, 0.09)
+    }
+}
+
+private func immersiveApeAudienceMarker(
+    for encounter: ImmersiveApeEncounter
+) -> ImmersiveApeSocialFieldMarker {
+    let tieBehavior = immersiveApeEncounterSocialTieBehavior(encounter: encounter)
+    let statusBehavior = immersiveApeEncounterStatusBehavior(encounter: encounter)
+    let episodicBehavior = immersiveApeEncounterEpisodicRecallBehavior(encounter: encounter)
+    var supportScore: Float = 0
+    var pressureScore: Float = 0
+
+    switch encounter.mode {
+    case .conversation:
+        supportScore += 0.1
+    case .conflict:
+        pressureScore += 0.28
+    case .grooming:
+        supportScore += 0.2
+    case .caregiving:
+        supportScore += 0.24
+    case .courtship:
+        supportScore += 0.12
+    case .companionship:
+        supportScore += 0.16
+    case .presence:
+        break
+    }
+
+    if let tieBehavior {
+        switch tieBehavior.style {
+        case .kin:
+            supportScore += 0.42
+        case .ally:
+            supportScore += 0.32
+        case .drawn:
+            supportScore += 0.22
+        case .wary:
+            pressureScore += 0.24
+        case .rival:
+            pressureScore += 0.42
+        }
+    }
+
+    if let statusBehavior {
+        switch statusBehavior.style {
+        case .yielding:
+            pressureScore += 0.16
+        case .peer:
+            break
+        case .commanding:
+            supportScore += 0.12
+        }
+    }
+
+    if let episodicBehavior {
+        switch episodicBehavior.style {
+        case .warm:
+            supportScore += 0.06
+        case .tense, .intention:
+            pressureScore += 0.08
+        case .anecdote:
+            pressureScore += 0.04
+        case .fading:
+            break
+        }
+    }
+
+    supportScore += encounter.importance * (encounter.mode == .conflict ? 0.02 : 0.06)
+    pressureScore += encounter.importance * (encounter.mode == .conflict ? 0.08 : 0.03)
+    let witnessStrength = 0.14 + (encounter.importance * 0.08)
+
+    if supportScore >= pressureScore + 0.12, supportScore > 0.28 {
+        return ImmersiveApeSocialFieldMarker(
+            localPosition: encounter.localPosition,
+            role: .support,
+            strength: immersiveApeClamp(supportScore, min: 0.24, max: 1.0)
+        )
+    }
+
+    if pressureScore >= supportScore + 0.12, pressureScore > 0.28 {
+        return ImmersiveApeSocialFieldMarker(
+            localPosition: encounter.localPosition,
+            role: .pressure,
+            strength: immersiveApeClamp(pressureScore, min: 0.24, max: 1.0)
+        )
+    }
+
+    return ImmersiveApeSocialFieldMarker(
+        localPosition: encounter.localPosition,
+        role: .witness,
+        strength: immersiveApeClamp(
+            witnessStrength + (max(supportScore, pressureScore) * 0.16),
+            min: 0.2,
+            max: 1.0
+        )
+    )
+}
+
+private func immersiveApeSocialFieldContext(
+    primary: ImmersiveApeEncounter,
+    encounters: [ImmersiveApeEncounter]
+) -> ImmersiveApeSocialFieldContext? {
+    let secondaryEncounters = encounters
+        .filter { $0.ape.index != primary.ape.index }
+        .prefix(3)
+
+    guard !secondaryEncounters.isEmpty else {
+        return nil
+    }
+
+    let markers = secondaryEncounters.map { immersiveApeAudienceMarker(for: $0) }
+
+    let supportMarkers = markers.filter { $0.role == .support }
+    let pressureMarkers = markers.filter { $0.role == .pressure }
+    let witnessMarkers = markers.filter { $0.role == .witness }
+    let supportStrength = supportMarkers.reduce(Float(0)) { $0 + $1.strength }
+    let pressureStrength = pressureMarkers.reduce(Float(0)) { $0 + $1.strength }
+    let witnessStrength = witnessMarkers.reduce(Float(0)) { $0 + $1.strength }
+    let overallStrength = immersiveApeClamp(
+        (supportStrength + pressureStrength + (witnessStrength * 0.55)) / Float(max(1, markers.count)),
+        min: 0.24,
+        max: 1.0
+    )
+    let style: ImmersiveApeSocialFieldStyle
+    let summaryPhrase: String
+    let storyTail: String
+    let baseColor: SIMD4<Float>
+
+    if !supportMarkers.isEmpty, supportStrength > (pressureStrength * 1.35) {
+        style = .supported
+        summaryPhrase = " with nearby backing"
+        storyTail = " Nearby allies and kin now lean into the encounter, so the social field reads as backed company instead of a private pair."
+        baseColor = immersiveApeMix(
+            immersiveApeEncounterColor(primary.mode),
+            immersiveApeSocialFieldRoleColor(.support),
+            t: 0.62
+        )
+    } else if !pressureMarkers.isEmpty, pressureStrength > (supportStrength * 1.35) {
+        style = .pressured
+        summaryPhrase = " under crowd pressure"
+        storyTail = " Nearby rivals and wary apes now crowd the flanks, so the encounter reads as group pressure instead of a private exchange."
+        baseColor = immersiveApeMix(
+            immersiveApeEncounterColor(primary.mode),
+            immersiveApeSocialFieldRoleColor(.pressure),
+            t: 0.62
+        )
+    } else if !supportMarkers.isEmpty, !pressureMarkers.isEmpty {
+        style = .split
+        summaryPhrase = " amid split company"
+        storyTail = " Nearby apes divide between backing and pressure, so the encounter reads as a local group split rather than a simple pair."
+        baseColor = SIMD4<Float>(0.94, 0.82, 0.56, 0.12)
+    } else {
+        style = .witnessed
+        summaryPhrase = " with nearby witnesses"
+        storyTail = " Nearby apes hold at the edge as witnesses, turning the encounter into a watched social event."
+        baseColor = immersiveApeMix(
+            immersiveApeEncounterColor(primary.mode),
+            immersiveApeSocialFieldRoleColor(.witness),
+            t: 0.58
+        )
+    }
+
+    let panelParts = [
+        immersiveApeSocialFieldCountLabel(supportMarkers.count, singular: "backing", plural: "backing"),
+        immersiveApeSocialFieldCountLabel(pressureMarkers.count, singular: "pressing", plural: "pressing"),
+        immersiveApeSocialFieldCountLabel(witnessMarkers.count, singular: "watching", plural: "watching")
+    ].compactMap { $0 }
+    let panelLabel = "Audience " + (panelParts.isEmpty ? "nearby" : panelParts.joined(separator: " / "))
+
+    return ImmersiveApeSocialFieldContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: overallStrength,
+        ringRadius: 0.32 + (overallStrength * 0.16) + (Float(markers.count) * 0.04),
+        laneRadius: 0.14 + (overallStrength * 0.06),
+        color: baseColor,
+        markers: markers
+    )
+}
+
+private func immersiveApeDirectionalLabel(_ directionIndex: Int) -> String {
+    switch directionIndex {
+    case 0:
+        return "ahead"
+    case 1:
+        return "ahead-right"
+    case 2:
+        return "behind-right"
+    case 3:
+        return "behind"
+    case 4:
+        return "behind-left"
+    default:
+        return "ahead-left"
+    }
+}
+
+private func immersiveApeDirectionalIndex(
+    direction: SIMD3<Float>,
+    forward: SIMD3<Float>,
+    right: SIMD3<Float>
+) -> Int {
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let normalizedDirection = simd_length_squared(direction) > 0.0001
+        ? direction.normalizedSafe
+        : forward.normalizedSafe
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+
+    return sectorDirections.enumerated().max(by: {
+        simd_dot(normalizedDirection, $0.element) < simd_dot(normalizedDirection, $1.element)
+    })?.offset ?? 0
+}
+
+private func immersiveApeWindDirection(environment: ImmersiveApeEnvironment) -> SIMD3<Float> {
+    let windPlanar = immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
+    return simd_length_squared(windPlanar) > 0.0001
+        ? windPlanar
+        : SIMD3<Float>(0.88, 0, 0.32)
+}
+
+private func immersiveApeCrossDirection(_ direction: SIMD3<Float>) -> SIMD3<Float> {
+    SIMD3<Float>(-direction.z, 0, direction.x).normalizedSafe
+}
+
+private func immersiveApeLateralLabel(_ offset: Float) -> String {
+    if offset < -2.5 {
+        return "left"
+    }
+    if offset > 2.5 {
+        return "right"
+    }
+    return "center"
+}
+
+private func immersiveApeLateralPhrase(_ offset: Float) -> String {
+    if offset < -2.5 {
+        return "left side"
+    }
+    if offset > 2.5 {
+        return "right side"
+    }
+    return "center lane"
+}
+
+private func immersiveApeSocialNeighborhoodContext(
+    capture: ImmersiveApeSceneCapture,
+    encounters: [ImmersiveApeEncounter]
+) -> ImmersiveApeSocialNeighborhoodContext? {
+    let activeEncounters = encounters.filter { $0.distance < 48 }
+    guard activeEncounters.count > 1 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    var weights = Array(repeating: Float.zero, count: sectorDirections.count)
+    var colorSums = Array(repeating: SIMD3<Float>(repeating: 0), count: sectorDirections.count)
+    var supportStrength: Float = 0
+    var pressureStrength: Float = 0
+    var witnessStrength: Float = 0
+
+    for encounter in activeEncounters {
+        let marker = immersiveApeAudienceMarker(for: encounter)
+        let encounterDirection = immersiveApePlanarDirection(encounter.localPosition)
+        let influence = marker.strength * immersiveApeClamp(1 - (encounter.distance / 48), min: 0.18, max: 1.0)
+        let tint = immersiveApeMix(
+            immersiveApeEncounterColor(encounter.mode),
+            immersiveApeSocialFieldRoleColor(marker.role),
+            t: 0.64
+        )
+        let tintRGB = SIMD3<Float>(tint.x, tint.y, tint.z)
+
+        if let sectorIndex = sectorDirections.enumerated().max(by: {
+            simd_dot(encounterDirection, $0.element) < simd_dot(encounterDirection, $1.element)
+        })?.offset {
+            weights[sectorIndex] += influence
+            colorSums[sectorIndex] += tintRGB * influence
+        }
+
+        switch marker.role {
+        case .support:
+            supportStrength += influence
+        case .pressure:
+            pressureStrength += influence
+        case .witness:
+            witnessStrength += influence
+        }
+    }
+
+    let sectors = sectorDirections.enumerated().compactMap { index, direction -> ImmersiveApeSocialNeighborhoodSector? in
+        guard weights[index] > 0.05 else {
+            return nil
+        }
+
+        let rgb = colorSums[index] / max(weights[index], 0.001)
+        return ImmersiveApeSocialNeighborhoodSector(
+            direction: direction,
+            weight: weights[index],
+            color: SIMD4<Float>(rgb.x, rgb.y, rgb.z, 1)
+        )
+    }
+
+    guard !sectors.isEmpty else {
+        return nil
+    }
+
+    let totalWeight = weights.reduce(0, +)
+    let dominantIndex = weights.enumerated().max(by: { $0.element < $1.element })?.offset ?? 0
+    let dominantWeight = weights[dominantIndex]
+    let directionLabel = immersiveApeDirectionalLabel(dominantIndex)
+
+    let strength = immersiveApeClamp((totalWeight * 0.26) + (dominantWeight * 0.2), min: 0.18, max: 1.0)
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if supportStrength > (pressureStrength * 1.25), supportStrength > (witnessStrength * 0.92) {
+        summaryPhrase = " through backed company \(directionLabel)"
+        panelLabel = "Company \(directionLabel)"
+        storyTail = " Nearby backing is gathering \(directionLabel), so the active encounter reads inside a wider social field instead of a single nearest ape."
+    } else if pressureStrength > (supportStrength * 1.25), pressureStrength > (witnessStrength * 0.92) {
+        summaryPhrase = " under crowd pressure \(directionLabel)"
+        panelLabel = "Pressure \(directionLabel)"
+        storyTail = " Nearby pressure is gathering \(directionLabel), so the active encounter now reads inside a wider crowd push."
+    } else if supportStrength > 0.44, pressureStrength > 0.44 {
+        summaryPhrase = " amid split company \(directionLabel)"
+        panelLabel = "Split \(directionLabel)"
+        storyTail = " Backing and pressure now divide around the selected ape, with the local split strongest \(directionLabel)."
+    } else if totalWeight < 0.9 {
+        summaryPhrase = " through thin company \(directionLabel)"
+        panelLabel = "Thin \(directionLabel)"
+        storyTail = " Social pull is thinning out \(directionLabel), leaving the encounter only lightly held by the neighborhood."
+    } else {
+        summaryPhrase = " with a watchful fringe \(directionLabel)"
+        panelLabel = "Watchful \(directionLabel)"
+        storyTail = " Watchful nearby apes are thickening \(directionLabel), so the encounter reads as a noticed event inside the wider group."
+    }
+
+    return ImmersiveApeSocialNeighborhoodContext(
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        sectors: sectors
+    )
+}
+
+private func immersiveApeWeatherContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeWeatherContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    let sampleDistances: [Float] = [12, 24, 38]
+    let sampleWeights: [Float] = [1.0, 0.78, 0.56]
+    let sectors = sectorDirections.map { direction in
+        var densitySum: Float = 0
+        var weightSum: Float = 0
+
+        for (distanceIndex, sampleDistance) in sampleDistances.enumerated() {
+            let samplePosition = direction * sampleDistance
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let weight = sampleWeights[distanceIndex]
+            densitySum += grid.interpolatedCloud(row: coordinates.row, column: coordinates.column) * weight
+            weightSum += weight
+        }
+
+        let nearCoordinates = grid.sampleCoordinates(for: direction * 6)
+        let nearDensity = grid.interpolatedCloud(row: nearCoordinates.row, column: nearCoordinates.column)
+        let density = immersiveApeClamp(
+            ((densitySum / max(weightSum, 0.001)) * 0.84) + (nearDensity * 0.16),
+            min: 0,
+            max: 1
+        )
+
+        return ImmersiveApeWeatherContextSector(
+            direction: direction,
+            density: density,
+            openness: immersiveApeClamp(1 - density, min: 0, max: 1)
+        )
+    }
+
+    let overallDensity = sectors.reduce(Float.zero) { $0 + $1.density } / Float(max(1, sectors.count))
+    let densest = sectors.enumerated().max(by: { $0.element.density < $1.element.density })
+        ?? (offset: 0, element: sectors[0])
+    let clearest = sectors.enumerated().min(by: { $0.element.density < $1.element.density })
+        ?? (offset: 0, element: sectors[0])
+    let densitySpread = densest.element.density - clearest.element.density
+    let contrastStrength = immersiveApeClamp(densitySpread * 1.6, min: 0, max: 1)
+    let strength = immersiveApeClamp(
+        max(overallDensity, contrastStrength) + (environment.rainAmount * 0.12) + (environment.twilightStrength * 0.06),
+        min: 0.18,
+        max: 1.0
+    )
+    let focusIndex: Int
+    let style: ImmersiveApeWeatherContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if overallDensity > 0.72, densitySpread < 0.12 {
+        focusIndex = densest.offset
+        style = .wrapped
+
+        if environment.rainAmount > 0.45 {
+            summaryPhrase = " under a rain ceiling"
+            panelLabel = "Rain ceiling"
+            storyTail = " Rain is closing the sky into a single ceiling around the selected ape, so weather reads as a full surrounding system instead of a simple overlay."
+        } else {
+            summaryPhrase = " under a closed sky"
+            panelLabel = "Closed sky"
+            storyTail = " Cloud cover is sealing the sky into a single ceiling around the selected ape, flattening light and distance into one shared atmosphere."
+        }
+    } else if environment.rainAmount > 0.4 || (overallDensity > 0.46 && densitySpread > 0.12 && densest.element.density > overallDensity + 0.07) {
+        let directionLabel = immersiveApeDirectionalLabel(densest.offset)
+        focusIndex = densest.offset
+        style = .front
+
+        if environment.rainAmount > 0.45 {
+            summaryPhrase = " under a rain front \(directionLabel)"
+            panelLabel = "Rain front \(directionLabel)"
+            storyTail = " A rain-heavy cloud bank is gathering \(directionLabel), so the scene reads under an arriving front instead of even overhead cover."
+        } else {
+            summaryPhrase = " under a weather front \(directionLabel)"
+            panelLabel = "Front \(directionLabel)"
+            storyTail = " Cloud mass is thickening \(directionLabel), so the sky now reads as a moving front instead of flat overhead color."
+        }
+    } else if densitySpread > 0.16 && clearest.element.density < overallDensity - 0.1 {
+        let directionLabel = immersiveApeDirectionalLabel(clearest.offset)
+        focusIndex = clearest.offset
+        style = .clearing
+        summaryPhrase = " with a clear break \(directionLabel)"
+        panelLabel = "Break \(directionLabel)"
+        storyTail = " The cloud cover is opening \(directionLabel), so weather now reads as a directional clearing instead of uniform cover."
+    } else if overallDensity < 0.28 {
+        let directionLabel = immersiveApeDirectionalLabel(densest.offset)
+        focusIndex = densest.offset
+        style = .open
+        summaryPhrase = " under open sky"
+        panelLabel = "Open sky  •  bank \(directionLabel)"
+        storyTail = " Most of the sky stays open, with the remaining cloud bank held \(directionLabel), so the atmosphere reads as uneven cover rather than a full ceiling."
+    } else {
+        let directionLabel = immersiveApeDirectionalLabel(densest.offset)
+        focusIndex = densest.offset
+        style = .patchy
+        summaryPhrase = " under patchy cover \(directionLabel)"
+        panelLabel = "Patchy \(directionLabel)"
+        storyTail = " Cloud cover is bunching \(directionLabel) while thinner air stays elsewhere, so the sky reads as local weather structure instead of a flat blanket."
+    }
+
+    return ImmersiveApeWeatherContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        focusIndex: focusIndex,
+        sectors: sectors
+    )
+}
+
+private func immersiveApePrecipitationContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApePrecipitationContext? {
+    guard environment.rainAmount > 0.05, grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let driftDirection = immersiveApeWindDirection(environment: environment)
+    let crossDirection = immersiveApeCrossDirection(driftDirection)
+    let driftLabel = immersiveApeDirectionalLabel(
+        immersiveApeDirectionalIndex(direction: driftDirection, forward: forward, right: right)
+    )
+    let laneOffsets: [Float] = [-10, -5, 0, 5, 10]
+    let sampleDistances: [(distance: Float, weight: Float)] = [(6, 1.0), (14, 0.84), (24, 0.68)]
+    let biomeDNA = immersiveApeBiomeDNAProfile(
+        selected: capture.snapshot.selected,
+        selectedIndex: Int32(capture.snapshot.selected_index),
+        worldSeed: capture.snapshot.world_seed
+    )
+    var lanes: [ImmersiveApePrecipitationContextLane] = []
+
+    for laneOffset in laneOffsets {
+        var intensitySum: Float = 0
+        var shelterSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = (driftDirection * sample.distance) + (crossDirection * laneOffset)
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let nearestRow = min(max(Int(coordinates.row.rounded()), 0), grid.resolution - 1)
+            let nearestColumn = min(max(Int(coordinates.column.rounded()), 0), grid.resolution - 1)
+            let basePosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let cloudDensity = grid.interpolatedCloud(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let variation = immersiveApeNoise(
+                Int32((coordinates.column * 9).rounded()),
+                Int32((coordinates.row * 9).rounded()),
+                seed: capture.snapshot.world_seed ^ 0x57D2_9A31
+            )
+            let moisture = immersiveApeClamp(
+                max(0, waterHeight - basePosition.y) + (cloudDensity * 0.3) + (environment.rainAmount * 0.34),
+                min: 0,
+                max: 1
+            )
+            let habitat = immersiveApeBiomeHabitat(
+                material: grid.material(row: nearestRow, column: nearestColumn),
+                row: coordinates.row,
+                column: coordinates.column,
+                moisture: moisture,
+                variation: variation,
+                seed: capture.snapshot.world_seed,
+                dnaProfile: biomeDNA
+            )
+            let exposure = immersiveApeSaturate(
+                (relief.ridge * 0.34)
+                + (relief.slope * 0.26)
+                + (habitat.clutterDensity * 0.18)
+                - (habitat.coverDensity * 0.08)
+            )
+            let shelter = immersiveApeSaturate(
+                (habitat.coverDensity * 0.46)
+                + (relief.basin * 0.34)
+                + ((1 - relief.slope) * 0.12)
+            )
+            let intensity = immersiveApeClamp(
+                (environment.rainAmount * (0.22 + (cloudDensity * 0.78)) * (0.76 + (exposure * 0.34) - (shelter * 0.28)))
+                + (moisture * 0.08),
+                min: 0,
+                max: 1
+            )
+
+            intensitySum += intensity * sample.weight
+            shelterSum += shelter * sample.weight
+            weightSum += sample.weight
+        }
+
+        let laneWeight = max(weightSum, 0.001)
+        lanes.append(
+            ImmersiveApePrecipitationContextLane(
+                offset: laneOffset,
+                intensity: intensitySum / laneWeight,
+                shelter: shelterSum / laneWeight
+            )
+        )
+    }
+
+    guard !lanes.isEmpty else {
+        return nil
+    }
+
+    let averageIntensity = lanes.reduce(Float.zero) { $0 + $1.intensity } / Float(max(1, lanes.count))
+    let wettest = lanes.enumerated().max(by: { $0.element.intensity < $1.element.intensity })
+        ?? (offset: 0, element: lanes[0])
+    let driest = lanes.enumerated().min(by: { $0.element.intensity < $1.element.intensity })
+        ?? (offset: 0, element: lanes[0])
+    let spread = wettest.element.intensity - driest.element.intensity
+    let strength = immersiveApeClamp(
+        (averageIntensity * 0.74) + (spread * 0.62) + (environment.rainAmount * 0.18),
+        min: 0.18,
+        max: 1.0
+    )
+    let wetSide = immersiveApeLateralLabel(wettest.element.offset)
+    let drySide = immersiveApeLateralLabel(driest.element.offset)
+    let wetSidePhrase = immersiveApeLateralPhrase(wettest.element.offset)
+    let drySidePhrase = immersiveApeLateralPhrase(driest.element.offset)
+    let style: ImmersiveApePrecipitationContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if averageIntensity < 0.24 {
+        style = .mist
+        focusIndex = wettest.offset
+        summaryPhrase = " through drifting mist \(driftLabel)"
+        panelLabel = "Mist \(driftLabel)"
+        storyTail = " Moisture is only just holding in the air and drifting \(driftLabel), so the weather reads as a moving veil instead of a full rain sheet."
+    } else if driest.element.shelter > 0.34, spread > 0.2, driest.element.intensity < averageIntensity - 0.12 {
+        style = .leeBreak
+        focusIndex = driest.offset
+        summaryPhrase = " with a lee break in the \(drySidePhrase)"
+        panelLabel = "Lee break \(drySide)"
+        storyTail = " Terrain and cover are thinning the rain in the \(drySidePhrase), leaving a visible lee break inside the wider shower as it drives \(driftLabel)."
+    } else if wettest.element.intensity > averageIntensity + 0.1, spread > 0.18 {
+        style = .squall
+        focusIndex = wettest.offset
+        summaryPhrase = " under a squall lane \(driftLabel)"
+        panelLabel = "Squall \(driftLabel)  •  \(wetSide)"
+        storyTail = " Rain is bunching into a harder lane on the \(wetSidePhrase) and driving \(driftLabel), so precipitation reads as a moving band instead of even drizzle."
+    } else if averageIntensity > 0.58 || environment.rainAmount > 0.72 {
+        style = .sheet
+        focusIndex = wettest.offset
+        summaryPhrase = " inside a rain sheet \(driftLabel)"
+        panelLabel = "Rain sheet \(driftLabel)"
+        storyTail = " Rain is sweeping \(driftLabel) in one broad sheet, carrying the storm down to ground level instead of leaving it only in the sky."
+    } else {
+        style = .slant
+        focusIndex = wettest.offset
+        summaryPhrase = " through slant rain \(driftLabel)"
+        panelLabel = "Slant rain \(driftLabel)"
+        storyTail = " Rain is slanting \(driftLabel) across the selected ape, so the weather now reads as motion through the air rather than only cloud above."
+    }
+
+    return ImmersiveApePrecipitationContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        driftDirection: driftDirection,
+        focusIndex: focusIndex,
+        lanes: lanes
+    )
+}
+
+private func immersiveApeAirflowContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeAirflowContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let driftDirection = immersiveApeWindDirection(environment: environment)
+    let crossDirection = immersiveApeCrossDirection(driftDirection)
+    let driftLabel = immersiveApeDirectionalLabel(
+        immersiveApeDirectionalIndex(direction: driftDirection, forward: forward, right: right)
+    )
+    let laneOffsets: [Float] = [-10, -5, 0, 5, 10]
+    let sampleDistances: [(distance: Float, weight: Float)] = [(4, 1.0), (12, 0.86), (22, 0.68)]
+    let biomeDNA = immersiveApeBiomeDNAProfile(
+        selected: capture.snapshot.selected,
+        selectedIndex: Int32(capture.snapshot.selected_index),
+        worldSeed: capture.snapshot.world_seed
+    )
+    let timeValue = Float(capture.snapshot.time)
+    var lanes: [ImmersiveApeAirflowContextLane] = []
+
+    for laneOffset in laneOffsets {
+        var flowSum: Float = 0
+        var shelterSum: Float = 0
+        var turbulenceSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = (driftDirection * sample.distance) + (crossDirection * laneOffset)
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let nearestRow = min(max(Int(coordinates.row.rounded()), 0), grid.resolution - 1)
+            let nearestColumn = min(max(Int(coordinates.column.rounded()), 0), grid.resolution - 1)
+            let basePosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let cloudDensity = grid.interpolatedCloud(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let variation = immersiveApeNoise(
+                Int32((coordinates.column * 8).rounded()),
+                Int32((coordinates.row * 8).rounded()),
+                seed: capture.snapshot.world_seed ^ 0x5A41_73CF
+            )
+            let moisture = immersiveApeClamp(
+                max(0, waterHeight - basePosition.y) + (cloudDensity * 0.22) + (environment.rainAmount * 0.22),
+                min: 0,
+                max: 1
+            )
+            let habitat = immersiveApeBiomeHabitat(
+                material: grid.material(row: nearestRow, column: nearestColumn),
+                row: coordinates.row,
+                column: coordinates.column,
+                moisture: moisture,
+                variation: variation,
+                seed: capture.snapshot.world_seed,
+                dnaProfile: biomeDNA
+            )
+            let shelter = immersiveApeSaturate(
+                (habitat.coverDensity * 0.5)
+                + (relief.basin * 0.32)
+                + ((1 - relief.slope) * 0.14)
+            )
+            let exposure = immersiveApeSaturate(
+                (relief.ridge * 0.38)
+                + (relief.slope * 0.28)
+                + (habitat.clutterDensity * 0.14)
+                - (habitat.coverDensity * 0.1)
+            )
+            let gust = 0.5 + (0.5 * sin(
+                (timeValue * (0.009 + (environment.rainAmount * 0.008)))
+                + (basePosition.x * 0.41)
+                - (basePosition.z * 0.33)
+                + (laneOffset * 0.09)
+            ))
+            let swirl = 0.5 + (0.5 * sin(
+                (timeValue * 0.006)
+                + (basePosition.x * 0.24)
+                + (basePosition.z * 0.29)
+                - (laneOffset * 0.12)
+            ))
+            let flow = immersiveApeClamp(
+                0.14
+                    + (environment.rainAmount * 0.16)
+                    + (environment.surfStrength * 0.08)
+                    + (exposure * 0.34)
+                    + (gust * 0.12)
+                    + (cloudDensity * 0.06)
+                    - (shelter * 0.28),
+                min: 0,
+                max: 1
+            )
+            let turbulence = immersiveApeClamp(
+                (swirl * 0.22)
+                    + ((abs(laneOffset) / 10) * 0.18)
+                    + (shelter * 0.16)
+                    + (exposure * 0.14)
+                    - (flow * 0.08),
+                min: 0,
+                max: 1
+            )
+
+            flowSum += flow * sample.weight
+            shelterSum += shelter * sample.weight
+            turbulenceSum += turbulence * sample.weight
+            weightSum += sample.weight
+        }
+
+        let laneWeight = max(weightSum, 0.001)
+        lanes.append(
+            ImmersiveApeAirflowContextLane(
+                offset: laneOffset,
+                flow: flowSum / laneWeight,
+                shelter: shelterSum / laneWeight,
+                turbulence: turbulenceSum / laneWeight
+            )
+        )
+    }
+
+    guard !lanes.isEmpty else {
+        return nil
+    }
+
+    let averageFlow = lanes.reduce(Float.zero) { $0 + $1.flow } / Float(max(1, lanes.count))
+    let averageShelter = lanes.reduce(Float.zero) { $0 + $1.shelter } / Float(max(1, lanes.count))
+    let averageTurbulence = lanes.reduce(Float.zero) { $0 + $1.turbulence } / Float(max(1, lanes.count))
+    let strongest = lanes.enumerated().max(by: { $0.element.flow < $1.element.flow })
+        ?? (offset: 0, element: lanes[0])
+    let quietest = lanes.enumerated().min(by: { $0.element.flow < $1.element.flow })
+        ?? (offset: 0, element: lanes[0])
+    let centerLane = lanes.enumerated().min(by: { abs($0.element.offset) < abs($1.element.offset) })
+        ?? (offset: 0, element: lanes[0])
+    let sideLanes = lanes.filter { abs($0.offset) >= 5 }
+    let sideFlow = sideLanes.reduce(Float.zero) { $0 + $1.flow } / Float(max(1, sideLanes.count))
+    let spread = strongest.element.flow - quietest.element.flow
+    let strength = immersiveApeClamp(
+        (averageFlow * 0.74) + (spread * 0.44) + (averageTurbulence * 0.18),
+        min: 0.18,
+        max: 1.0
+    )
+    let strongSide = immersiveApeLateralLabel(strongest.element.offset)
+    let quietSide = immersiveApeLateralLabel(quietest.element.offset)
+    let strongSidePhrase = immersiveApeLateralPhrase(strongest.element.offset)
+    let quietSidePhrase = immersiveApeLateralPhrase(quietest.element.offset)
+    let style: ImmersiveApeAirflowContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if averageFlow < 0.22, averageShelter > 0.34 {
+        style = .stillPocket
+        focusIndex = centerLane.offset
+        summaryPhrase = " in still air"
+        panelLabel = "Still air"
+        storyTail = " Terrain and cover are taking the push out of the local air around the selected ape, leaving a still pocket instead of a constant draft."
+    } else if quietest.element.shelter > 0.42, quietest.element.flow < averageFlow - 0.12, spread > 0.14 {
+        style = .leePocket
+        focusIndex = quietest.offset
+        summaryPhrase = " with a lee pocket in the \(quietSidePhrase)"
+        panelLabel = "Lee pocket \(quietSide)"
+        storyTail = " Cover and terrain are breaking the wind in the \(quietSidePhrase), so a quiet lee pocket forms while air keeps moving \(driftLabel) around it."
+    } else if sideFlow > centerLane.element.flow + 0.1, averageTurbulence > 0.28 {
+        style = .splitWake
+        focusIndex = centerLane.offset
+        summaryPhrase = " inside a split wake \(driftLabel)"
+        panelLabel = "Split wake \(driftLabel)"
+        storyTail = " Air is splitting around the selected ape and rejoining downwind \(driftLabel), so the local weather reads as a wake instead of one even push."
+    } else if strongest.element.flow > averageFlow + 0.12, strongest.element.flow > 0.4 {
+        style = .gustLane
+        focusIndex = strongest.offset
+        summaryPhrase = " through a gust lane \(driftLabel)"
+        panelLabel = "Gust lane \(driftLabel)  •  \(strongSide)"
+        storyTail = " Wind is pressing into a harder lane on the \(strongSidePhrase) and running \(driftLabel), so air movement reads as a track across the selected ape instead of a flat breeze."
+    } else {
+        style = .draft
+        focusIndex = strongest.offset
+        summaryPhrase = " in a running draft \(driftLabel)"
+        panelLabel = "Draft \(driftLabel)"
+        storyTail = " A steady draft is running \(driftLabel) through the selected ape's space, carrying weather as motion through the terrain instead of only as overhead state."
+    }
+
+    return ImmersiveApeAirflowContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        driftDirection: driftDirection,
+        focusIndex: focusIndex,
+        lanes: lanes
+    )
+}
+
+private func immersiveApeVaporContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeVaporContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    let sampleDistances: [(distance: Float, weight: Float)] = [(4, 1.0), (10, 0.82), (18, 0.64)]
+    let driftDirection = immersiveApeWindDirection(environment: environment)
+    let sectors = sectorDirections.map { direction in
+        var densitySum: Float = 0
+        var claritySum: Float = 0
+        var waterSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = direction * sample.distance
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let cloudDensity = grid.interpolatedCloud(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let waterDepth = max(0, waterHeight - groundPosition.y)
+            let shorelineBlend = immersiveApeSaturate((0.28 - abs(waterHeight - groundPosition.y)) * 3.0)
+            let waterInfluence = immersiveApeClamp(
+                (waterDepth * 0.92)
+                    + (shorelineBlend * (0.54 + (environment.surfStrength * 0.26)))
+                    + (relief.basin * 0.28)
+                    + (relief.runoff * 0.24),
+                min: 0,
+                max: 1
+            )
+            let density = immersiveApeClamp(
+                (environment.fogDensity * 8.4)
+                    + (environment.rainAmount * 0.22)
+                    + (environment.twilightStrength * 0.16)
+                    + (environment.nightStrength * 0.1)
+                    + (cloudDensity * 0.22)
+                    + (waterInfluence * 0.34)
+                    - (relief.ridge * 0.08),
+                min: 0,
+                max: 1
+            )
+            let clarity = immersiveApeClamp(
+                1
+                    - density
+                    + (environment.daylight * 0.12)
+                    + (relief.ridge * 0.08)
+                    - (environment.rainAmount * 0.08),
+                min: 0,
+                max: 1
+            )
+
+            densitySum += density * sample.weight
+            claritySum += clarity * sample.weight
+            waterSum += waterInfluence * sample.weight
+            weightSum += sample.weight
+        }
+
+        let sectorWeight = max(weightSum, 0.001)
+        return ImmersiveApeVaporContextSector(
+            direction: direction,
+            density: densitySum / sectorWeight,
+            clarity: claritySum / sectorWeight,
+            waterInfluence: waterSum / sectorWeight
+        )
+    }
+
+    guard !sectors.isEmpty else {
+        return nil
+    }
+
+    let overallDensity = sectors.reduce(Float.zero) { $0 + $1.density } / Float(max(1, sectors.count))
+    let densest = sectors.enumerated().max(by: { $0.element.density < $1.element.density })
+        ?? (offset: 0, element: sectors[0])
+    let clearest = sectors.enumerated().max(by: { $0.element.clarity < $1.element.clarity })
+        ?? (offset: 0, element: sectors[0])
+    let densitySpread = densest.element.density - clearest.element.density
+    let strength = immersiveApeClamp(
+        (overallDensity * 0.72) + (densitySpread * 0.34) + (environment.fogDensity * 3.6),
+        min: 0.18,
+        max: 1.0
+    )
+    let densestLabel = immersiveApeDirectionalLabel(densest.offset)
+    let clearestLabel = immersiveApeDirectionalLabel(clearest.offset)
+    let style: ImmersiveApeVaporContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if overallDensity > 0.46, environment.rainAmount > 0.24 {
+        style = .rainHaze
+        focusIndex = densest.offset
+        summaryPhrase = " in rain haze \(densestLabel)"
+        panelLabel = "Rain haze \(densestLabel)"
+        storyTail = " Suspended moisture is thickening \(densestLabel), so rain now reads through a low murk instead of clean open air."
+    } else if densest.element.waterInfluence > 0.42, environment.surfStrength > 0.54 {
+        style = .shoreMist
+        focusIndex = densest.offset
+        summaryPhrase = " with shore mist \(densestLabel)"
+        panelLabel = "Shore mist \(densestLabel)"
+        storyTail = " Damp air is lifting off nearby water \(densestLabel), so the local weather reads through shore mist instead of dry coastal air."
+    } else if densest.element.waterInfluence > 0.28, overallDensity > 0.24 {
+        style = .basinHaze
+        focusIndex = densest.offset
+        summaryPhrase = " with basin haze \(densestLabel)"
+        panelLabel = "Basin haze \(densestLabel)"
+        storyTail = " Low wet ground is holding haze \(densestLabel), sinking moisture into the terrain instead of leaving it only in the sky."
+    } else if densitySpread > 0.16, clearest.element.clarity > 0.56 {
+        style = .liftingVeil
+        focusIndex = clearest.offset
+        summaryPhrase = " with a lifting veil \(clearestLabel)"
+        panelLabel = "Lift \(clearestLabel)"
+        storyTail = " The low vapor is thinning \(clearestLabel), opening a clearer channel through the local weather instead of one even veil."
+    } else {
+        style = .clearLift
+        focusIndex = clearest.offset
+        summaryPhrase = " in clear air"
+        panelLabel = "Clear air  •  lift \(clearestLabel)"
+        storyTail = " The low air is staying comparatively clear, with the remaining moisture lifting \(clearestLabel) instead of settling around the selected ape."
+    }
+
+    return ImmersiveApeVaporContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        driftDirection: driftDirection,
+        focusIndex: focusIndex,
+        sectors: sectors
+    )
+}
+
+private func immersiveApeSurfaceWaterContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeSurfaceWaterContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    let sampleDistances: [(distance: Float, weight: Float)] = [(2.5, 1.0), (6.5, 0.82), (11.5, 0.6)]
+    let sectors = sectorDirections.map { direction in
+        var wetnessSum: Float = 0
+        var poolingSum: Float = 0
+        var runoffSum: Float = 0
+        var shorelineSum: Float = 0
+        var firmnessSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = direction * sample.distance
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let cloudDensity = grid.interpolatedCloud(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let waterDepth = max(0, waterHeight - groundPosition.y)
+            let shorelineBlend = immersiveApeSaturate((0.34 - abs(waterHeight - groundPosition.y)) * 2.8)
+            let wetness = immersiveApeClamp(
+                (environment.rainAmount * 0.24)
+                    + (environment.fogDensity * 4.2)
+                    + (waterDepth * 0.94)
+                    + (shorelineBlend * (0.28 + (environment.surfStrength * 0.24)))
+                    + (relief.basin * 0.34)
+                    + (relief.runoff * 0.24)
+                    + (cloudDensity * 0.12)
+                    - (relief.ridge * 0.1),
+                min: 0,
+                max: 1
+            )
+            let pooling = immersiveApeClamp(
+                (relief.basin * 0.62)
+                    + (waterDepth * 1.1)
+                    + (shorelineBlend * 0.24)
+                    + (environment.rainAmount * 0.18)
+                    - (relief.slope * 0.18)
+                    - (relief.ridge * 0.08),
+                min: 0,
+                max: 1
+            )
+            let runoff = immersiveApeClamp(
+                (relief.runoff * 0.68)
+                    + (relief.slope * 0.26)
+                    + (environment.rainAmount * 0.24)
+                    + (cloudDensity * 0.08)
+                    - (waterDepth * 0.12),
+                min: 0,
+                max: 1
+            )
+            let shoreline = immersiveApeClamp(
+                (shorelineBlend * (0.78 + (environment.surfStrength * 0.34)))
+                    + (waterDepth * 0.92)
+                    + (environment.surfStrength * 0.18),
+                min: 0,
+                max: 1
+            )
+            let firmness = immersiveApeClamp(
+                1
+                    - wetness
+                    + (environment.daylight * 0.12)
+                    + (relief.ridge * 0.16)
+                    + (relief.slope * 0.08)
+                    - (environment.rainAmount * 0.12)
+                    - (shorelineBlend * 0.18),
+                min: 0,
+                max: 1
+            )
+
+            wetnessSum += wetness * sample.weight
+            poolingSum += pooling * sample.weight
+            runoffSum += runoff * sample.weight
+            shorelineSum += shoreline * sample.weight
+            firmnessSum += firmness * sample.weight
+            weightSum += sample.weight
+        }
+
+        let sectorWeight = max(weightSum, 0.001)
+        return ImmersiveApeSurfaceWaterContextSector(
+            direction: direction,
+            wetness: wetnessSum / sectorWeight,
+            pooling: poolingSum / sectorWeight,
+            runoff: runoffSum / sectorWeight,
+            shoreline: shorelineSum / sectorWeight,
+            firmness: firmnessSum / sectorWeight
+        )
+    }
+
+    guard !sectors.isEmpty else {
+        return nil
+    }
+
+    let overallWetness = sectors.reduce(Float.zero) { $0 + $1.wetness } / Float(max(1, sectors.count))
+    let wettest = sectors.enumerated().max(by: { $0.element.wetness < $1.element.wetness })
+        ?? (offset: 0, element: sectors[0])
+    let driest = sectors.enumerated().min(by: { $0.element.wetness < $1.element.wetness })
+        ?? (offset: 0, element: sectors[0])
+    let pooled = sectors.enumerated().max(by: { $0.element.pooling < $1.element.pooling })
+        ?? (offset: 0, element: sectors[0])
+    let runoffFocus = sectors.enumerated().max(by: { $0.element.runoff < $1.element.runoff })
+        ?? (offset: 0, element: sectors[0])
+    let shore = sectors.enumerated().max(by: { $0.element.shoreline < $1.element.shoreline })
+        ?? (offset: 0, element: sectors[0])
+    let firmest = sectors.enumerated().max(by: { $0.element.firmness < $1.element.firmness })
+        ?? (offset: 0, element: sectors[0])
+    let wetnessSpread = wettest.element.wetness - driest.element.wetness
+    let strongestSignal = max(pooled.element.pooling, max(runoffFocus.element.runoff, shore.element.shoreline))
+    let strength = immersiveApeClamp(
+        (overallWetness * 0.68) + (strongestSignal * 0.28) + (wetnessSpread * 0.22),
+        min: 0.18,
+        max: 1.0
+    )
+    let shoreLabel = immersiveApeDirectionalLabel(shore.offset)
+    let pooledLabel = immersiveApeDirectionalLabel(pooled.offset)
+    let runoffLabel = immersiveApeDirectionalLabel(runoffFocus.offset)
+    let wettestLabel = immersiveApeDirectionalLabel(wettest.offset)
+    let firmLabel = immersiveApeDirectionalLabel(firmest.offset)
+    let style: ImmersiveApeSurfaceWaterContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if shore.element.shoreline > 0.46, environment.surfStrength > 0.5 {
+        style = .shoreWash
+        focusIndex = shore.offset
+        summaryPhrase = " with shore wash \(shoreLabel)"
+        panelLabel = "Shore wash \(shoreLabel)"
+        storyTail = " Water is washing in along the ground \(shoreLabel), so the selected ape now reads at the edge of moving shore water instead of on stable dry footing."
+    } else if pooled.element.pooling > 0.48, overallWetness > 0.24 {
+        style = .pooledHollow
+        focusIndex = pooled.offset
+        summaryPhrase = " over pooled ground \(pooledLabel)"
+        panelLabel = "Pooled hollow \(pooledLabel)"
+        storyTail = " Low ground is holding pooled water \(pooledLabel), so the weather now settles into hollows underfoot instead of staying only in the air."
+    } else if runoffFocus.element.runoff > 0.46, wettest.element.wetness > 0.24 {
+        style = .runoffTrace
+        focusIndex = runoffFocus.offset
+        summaryPhrase = " through runoff \(runoffLabel)"
+        panelLabel = "Runoff trace \(runoffLabel)"
+        storyTail = " Water is cutting runoff \(runoffLabel) through the terrain, so rain reads as drainage underfoot instead of only as falling weather."
+    } else if overallWetness > 0.24 || wettest.element.wetness > 0.38 {
+        style = .slickFooting
+        focusIndex = wettest.offset
+        summaryPhrase = " on slick footing \(wettestLabel)"
+        panelLabel = "Slick footing \(wettestLabel)"
+        storyTail = " Moisture is staying in the surface \(wettestLabel), turning the selected ape's footing slick instead of leaving the ground visually firm."
+    } else {
+        style = .firmFooting
+        focusIndex = firmest.offset
+        summaryPhrase = " on firm footing"
+        panelLabel = "Firm footing  •  driest \(firmLabel)"
+        storyTail = " The ground is keeping its grip, with the driest footing \(firmLabel), so the weather no longer reads as saturating every step."
+    }
+
+    return ImmersiveApeSurfaceWaterContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        focusIndex: focusIndex,
+        sectors: sectors
+    )
+}
+
+private func immersiveApeCoverResponseContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeCoverResponseContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    let sampleDistances: [(distance: Float, weight: Float)] = [(3, 1.0), (7.5, 0.82), (13, 0.62)]
+    let biomeDNA = immersiveApeBiomeDNAProfile(
+        selected: capture.snapshot.selected,
+        selectedIndex: Int32(capture.snapshot.selected_index),
+        worldSeed: capture.snapshot.world_seed
+    )
+    let driftDirection = immersiveApeWindDirection(environment: environment)
+    let sectors = sectorDirections.map { direction in
+        var coverSum: Float = 0
+        var shelterSum: Float = 0
+        var bendSum: Float = 0
+        var droopSum: Float = 0
+        var shoreSum: Float = 0
+        var canopySum: Float = 0
+        var opennessSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = direction * sample.distance
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let nearestRow = min(max(Int(coordinates.row.rounded()), 0), grid.resolution - 1)
+            let nearestColumn = min(max(Int(coordinates.column.rounded()), 0), grid.resolution - 1)
+            let material = grid.material(row: nearestRow, column: nearestColumn)
+            let habitatMaterial: UInt8 = material == 0 ? 1 : material
+            let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let moisture = immersiveApeSaturate((waterHeight - groundPosition.y + 0.08) * 0.9)
+            let adjustedMoisture = immersiveApeClamp(
+                (moisture * biomeDNA.moistureAffinity)
+                    + (relief.basin * 0.14)
+                    + (relief.runoff * 0.18)
+                    - (relief.ridge * 0.12),
+                min: 0,
+                max: 1
+            )
+            let variation = immersiveApeNoise(Int32(nearestColumn), Int32(nearestRow), seed: capture.snapshot.world_seed ^ 0x5D11_BA1D)
+            let baseHabitat = immersiveApeBiomeHabitat(
+                material: habitatMaterial,
+                row: coordinates.row,
+                column: coordinates.column,
+                moisture: adjustedMoisture,
+                variation: variation,
+                seed: capture.snapshot.world_seed,
+                dnaProfile: biomeDNA
+            )
+            let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+            let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+            let runoffGrowth = relief.runoff
+            let habitat = ImmersiveApeBiomeHabitat(
+                coverDensity: immersiveApeClamp(
+                    baseHabitat.coverDensity
+                        + (shelteredGrowth * 0.14)
+                        + (runoffGrowth * 0.1)
+                        - (exposedGround * 0.12),
+                    min: 0,
+                    max: 1
+                ),
+                clutterDensity: immersiveApeClamp(
+                    baseHabitat.clutterDensity
+                        + (exposedGround * 0.12)
+                        + (runoffGrowth * 0.05)
+                        - (shelteredGrowth * 0.04),
+                    min: 0,
+                    max: 1
+                ),
+                accentColor: immersiveApeMix(
+                    immersiveApeMix(baseHabitat.accentColor, environment.waterColor, t: runoffGrowth * 0.12),
+                    immersiveApeTerrainMaterialColor(5),
+                    t: exposedGround * 0.08
+                )
+            )
+            let posture = immersiveApeFloraPosture(
+                at: groundPosition,
+                material: habitatMaterial,
+                moisture: adjustedMoisture,
+                relief: relief,
+                habitat: habitat,
+                environment: environment,
+                timeValue: Float(capture.snapshot.time),
+                variation: variation,
+                dnaProfile: biomeDNA
+            )
+            let shorelineBlend = immersiveApeSaturate((0.34 - abs(waterHeight - groundPosition.y)) * 2.6)
+
+            let materialCoverScale: Float
+            let canopyScale: Float
+            let shoreScale: Float
+            let openBoost: Float
+            switch material {
+            case 4:
+                materialCoverScale = 0.92
+                canopyScale = 0.76
+                shoreScale = 0.04
+                openBoost = 0.04
+            case 3:
+                materialCoverScale = 0.78
+                canopyScale = 0.16
+                shoreScale = 0.08
+                openBoost = 0.1
+            case 2:
+                materialCoverScale = 0.68
+                canopyScale = 0.08
+                shoreScale = 0.22
+                openBoost = 0.14
+            case 1:
+                materialCoverScale = 0.52
+                canopyScale = 0.02
+                shoreScale = 0.78
+                openBoost = 0.12
+            case 5:
+                materialCoverScale = 0.32
+                canopyScale = 0.02
+                shoreScale = 0.04
+                openBoost = 0.22
+            default:
+                materialCoverScale = 0.08
+                canopyScale = 0.0
+                shoreScale = 0.12
+                openBoost = 0.28
+            }
+
+            let canopyBias = immersiveApeClamp(
+                (habitat.coverDensity * canopyScale)
+                    + (posture.droop * 0.32),
+                min: 0,
+                max: 1
+            )
+            let shoreBias = immersiveApeClamp(
+                (shorelineBlend * shoreScale)
+                    + (adjustedMoisture * (shoreScale * 0.28))
+                    + (environment.surfStrength * 0.12),
+                min: 0,
+                max: 1
+            )
+            let cover = immersiveApeClamp(
+                (habitat.coverDensity * materialCoverScale)
+                    + (canopyBias * 0.22)
+                    + (shoreBias * 0.12)
+                    - (material == 0 ? 0.12 : 0),
+                min: 0,
+                max: 1
+            )
+            let shelter = immersiveApeClamp(
+                (habitat.coverDensity * 0.46)
+                    + (relief.basin * 0.26)
+                    + (canopyBias * 0.18)
+                    - (relief.slope * 0.18)
+                    - (relief.ridge * 0.08),
+                min: 0,
+                max: 1
+            )
+            let bend = immersiveApeClamp(
+                (posture.bend * 3.4)
+                    + (abs(posture.lateralSway) * 4.2)
+                    + (environment.rainAmount * 0.06)
+                    + (shoreBias * 0.08)
+                    - (shelter * 0.1),
+                min: 0,
+                max: 1
+            )
+            let droop = immersiveApeClamp(
+                (posture.droop * 2.2)
+                    + (adjustedMoisture * 0.18)
+                    + (canopyBias * 0.08),
+                min: 0,
+                max: 1
+            )
+            let openness = immersiveApeClamp(
+                1
+                    - cover
+                    + (relief.ridge * 0.16)
+                    + (relief.slope * 0.1)
+                    + openBoost,
+                min: 0,
+                max: 1
+            )
+
+            coverSum += cover * sample.weight
+            shelterSum += shelter * sample.weight
+            bendSum += bend * sample.weight
+            droopSum += droop * sample.weight
+            shoreSum += shoreBias * sample.weight
+            canopySum += canopyBias * sample.weight
+            opennessSum += openness * sample.weight
+            weightSum += sample.weight
+        }
+
+        let sectorWeight = max(weightSum, 0.001)
+        return ImmersiveApeCoverResponseContextSector(
+            direction: direction,
+            cover: coverSum / sectorWeight,
+            shelter: shelterSum / sectorWeight,
+            bend: bendSum / sectorWeight,
+            droop: droopSum / sectorWeight,
+            shoreBias: shoreSum / sectorWeight,
+            canopyBias: canopySum / sectorWeight,
+            openness: opennessSum / sectorWeight
+        )
+    }
+
+    guard !sectors.isEmpty else {
+        return nil
+    }
+
+    let overallCover = sectors.reduce(Float.zero) { $0 + $1.cover } / Float(max(1, sectors.count))
+    let coverSpread = (sectors.map(\.cover).max() ?? 0) - (sectors.map(\.cover).min() ?? 0)
+    let canopyFocus = sectors.enumerated().max(by: { $0.element.canopyBias < $1.element.canopyBias })
+        ?? (offset: 0, element: sectors[0])
+    let shoreFocus = sectors.enumerated().max(by: { $0.element.shoreBias < $1.element.shoreBias })
+        ?? (offset: 0, element: sectors[0])
+    let leeFocus = sectors.enumerated().max(by: { $0.element.shelter < $1.element.shelter })
+        ?? (offset: 0, element: sectors[0])
+    let bendFocus = sectors.enumerated().max(by: { $0.element.bend < $1.element.bend })
+        ?? (offset: 0, element: sectors[0])
+    let openFocus = sectors.enumerated().max(by: { $0.element.openness < $1.element.openness })
+        ?? (offset: 0, element: sectors[0])
+    let strongestResponse = max(
+        canopyFocus.element.canopyBias + (canopyFocus.element.droop * 0.4),
+        max(
+            shoreFocus.element.shoreBias + (shoreFocus.element.bend * 0.32),
+            max(
+                leeFocus.element.shelter + (leeFocus.element.cover * 0.26),
+                bendFocus.element.bend + (bendFocus.element.cover * 0.24)
+            )
+        )
+    )
+    let strength = immersiveApeClamp(
+        (overallCover * 0.42)
+            + (strongestResponse * 0.34)
+            + (openFocus.element.openness * 0.16)
+            + (coverSpread * 0.12),
+        min: 0.18,
+        max: 1.0
+    )
+    let canopyLabel = immersiveApeDirectionalLabel(canopyFocus.offset)
+    let shoreLabel = immersiveApeDirectionalLabel(shoreFocus.offset)
+    let leeLabel = immersiveApeDirectionalLabel(leeFocus.offset)
+    let bendLabel = immersiveApeDirectionalLabel(bendFocus.offset)
+    let openLabel = immersiveApeDirectionalLabel(openFocus.offset)
+    let style: ImmersiveApeCoverResponseContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if canopyFocus.element.canopyBias > 0.42, canopyFocus.element.droop > 0.34 {
+        style = .dripCanopy
+        focusIndex = canopyFocus.offset
+        summaryPhrase = " under canopy drip \(canopyLabel)"
+        panelLabel = "Canopy drip \(canopyLabel)"
+        storyTail = " Nearby cover is catching and shedding moisture \(canopyLabel), so the weather now reads as canopy drip and shelter instead of only as open rain."
+    } else if shoreFocus.element.shoreBias > 0.44, shoreFocus.element.bend > 0.16 {
+        style = .shoreReeds
+        focusIndex = shoreFocus.offset
+        summaryPhrase = " with shore reeds \(shoreLabel)"
+        panelLabel = "Shore reeds \(shoreLabel)"
+        storyTail = " Reeded cover is lashing near the shore \(shoreLabel), so wind and water now read through nearby coastal plants instead of only through surf and spray."
+    } else if leeFocus.element.shelter > 0.48, leeFocus.element.cover > 0.28, leeFocus.element.bend < 0.42 {
+        style = .leeBrush
+        focusIndex = leeFocus.offset
+        summaryPhrase = " with lee brush \(leeLabel)"
+        panelLabel = "Lee brush \(leeLabel)"
+        storyTail = " Brush is thickening into shelter \(leeLabel), holding a quieter pocket in the nearby cover instead of letting the weather push evenly through."
+    } else if bendFocus.element.bend > 0.22, bendFocus.element.cover > 0.18 {
+        style = .weatherBentCover
+        focusIndex = bendFocus.offset
+        summaryPhrase = " through bent cover \(bendLabel)"
+        panelLabel = "Bent cover \(bendLabel)"
+        storyTail = " Nearby plants are bending with the weather \(bendLabel), so the scene now reads through moving cover instead of still background vegetation."
+    } else {
+        style = .openScrub
+        focusIndex = openFocus.offset
+        summaryPhrase = " in open scrub"
+        panelLabel = "Open scrub  •  widest \(openLabel)"
+        storyTail = " The selected ape is standing in comparatively open cover, with the widest break \(openLabel), so the weather reads with little nearby plant shelter."
+    }
+
+    return ImmersiveApeCoverResponseContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        driftDirection: driftDirection,
+        focusIndex: focusIndex,
+        sectors: sectors
+    )
+}
+
 private func immersiveApeSocialTieStoryTail(_ behavior: ImmersiveApeSocialTieBehavior?) -> String {
     guard let behavior else {
         return ""
@@ -1726,6 +3413,82 @@ private func immersiveApeEpisodicRecallStoryTail(_ behavior: ImmersiveApeEpisodi
     }
 
     return " \(behavior.storyTail)"
+}
+
+private func immersiveApeSocialFieldStoryTail(_ context: ImmersiveApeSocialFieldContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeSocialNeighborhoodStoryTail(_ context: ImmersiveApeSocialNeighborhoodContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeWeatherStoryTail(_ context: ImmersiveApeWeatherContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApePrecipitationStoryTail(_ context: ImmersiveApePrecipitationContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeAirflowStoryTail(_ context: ImmersiveApeAirflowContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeVaporStoryTail(_ context: ImmersiveApeVaporContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeSurfaceWaterStoryTail(_ context: ImmersiveApeSurfaceWaterContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeCoverResponseStoryTail(_ context: ImmersiveApeCoverResponseContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeFocusedEncounter(
+    focus: ImmersiveApeAttentionFocus,
+    encounters: [ImmersiveApeEncounter]
+) -> ImmersiveApeEncounter? {
+    if let targetIndex = focus.socialTargetIndex,
+       let encounter = encounters.first(where: { $0.ape.index == targetIndex }) {
+        return encounter
+    }
+
+    return encounters.first
 }
 
 private func immersiveApeEncounterMemoryBehavior(focus: ImmersiveApeAttentionFocus) -> ImmersiveApeMemoryBehavior? {
@@ -2198,7 +3961,9 @@ private struct ImmersiveApeFloraPosture {
 
 private let immersiveApeWorldScale: Float = 0.04
 private let immersiveApeHeightScale: Float = 0.08
-private let immersiveApeCurrentDevelopmentCycle: Int = 58
+let immersiveApeCurrentDevelopmentCycle: Int = 66
+let immersiveApeCurrentDevelopmentCycleTitle = "Cover Response"
+let immersiveApeCurrentDevelopmentCycleSummary = "A full-screen Metal viewer for ApeSDK that now reads nearby cover as shore reeds, canopy drip, lee brush, weather-bent vegetation, or open scrub around the selected ape so weather registers in surrounding plants instead of only in sky, air, and ground."
 
 @MainActor
 private final class ImmersiveApeSimulationController {
@@ -2617,7 +4382,13 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 blue: Double(environment.clearColor.z),
                 alpha: 1.0
             ),
-            hudState: immersiveApeHUDState(for: resolvedCapture, paused: simulation.isPaused, performance: performance)
+            hudState: immersiveApeHUDState(
+                for: resolvedCapture,
+                grid: grid,
+                environment: environment,
+                paused: simulation.isPaused,
+                performance: performance
+            )
         )
     }
 
@@ -3378,13 +5149,20 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             transparent: &transparentBuilder
         )
         if currentQuality.includeSocialContext {
-            buildSocialContext(from: capture, encounters: encounters, environment: environment, timeValue: Float(capture.snapshot.time), transparent: &transparentBuilder)
+            buildSocialContext(
+                from: capture,
+                encounters: encounters,
+                focus: attentionFocus,
+                environment: environment,
+                timeValue: Float(capture.snapshot.time),
+                transparent: &transparentBuilder
+            )
         }
         if currentQuality.includeSky {
             buildSky(from: capture, grid: grid, environment: environment, opaque: &opaqueBuilder, transparent: &transparentBuilder)
         }
         if currentQuality.includeWeatherEffects {
-            buildWeatherEffects(from: capture, environment: environment, transparent: &transparentBuilder)
+            buildWeatherEffects(from: capture, grid: grid, environment: environment, transparent: &transparentBuilder)
         }
 
         let selectedMoving = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_MOVING))
@@ -7955,6 +9733,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
     private func buildSocialContext(
         from capture: ImmersiveApeSceneCapture,
         encounters: [ImmersiveApeEncounter],
+        focus: ImmersiveApeAttentionFocus,
         environment: ImmersiveApeEnvironment,
         timeValue: Float,
         transparent: inout ImmersiveApeMeshBuilder
@@ -7967,6 +9746,10 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         let selectedHead = SIMD3<Float>(0, selectedHeight * 0.92, 0)
         let socialRingAlpha = 0.05 + min(0.08, Float(encounters.count) * 0.015)
         let socialRingRadius = 0.9 + min(1.5, Float(encounters.count) * 0.32)
+        let socialNeighborhoodContext = immersiveApeSocialNeighborhoodContext(
+            capture: capture,
+            encounters: encounters
+        )
 
         transparent.addSphere(
             center: SIMD3<Float>(0, 0.05, 0),
@@ -7975,6 +9758,14 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             rings: 5,
             color: SIMD4<Float>(environment.foamColor.x, environment.foamColor.y, environment.foamColor.z, socialRingAlpha)
         )
+
+        if let socialNeighborhoodContext {
+            addSocialNeighborhoodField(
+                context: socialNeighborhoodContext,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+        }
 
         for (index, encounter) in encounters.prefix(4).enumerated() {
             let encounterHeight = max(1.2, encounter.ape.height)
@@ -8053,6 +9844,256 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 timeValue: timeValue,
                 transparent: &transparent
             )
+        }
+
+        if let focusedEncounter = immersiveApeFocusedEncounter(focus: focus, encounters: encounters),
+           let socialFieldContext = immersiveApeSocialFieldContext(primary: focusedEncounter, encounters: encounters) {
+            addEncounterAudienceField(
+                primary: focusedEncounter,
+                context: socialFieldContext,
+                timeValue: timeValue,
+                transparent: &transparent
+            )
+        }
+    }
+
+    private func addSocialNeighborhoodField(
+        context: ImmersiveApeSocialNeighborhoodContext,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.sectors.isEmpty else {
+            return
+        }
+
+        let center = SIMD3<Float>(0, 0.045, 0)
+        let up = SIMD3<Float>(0, 1, 0)
+        let strongestWeight = context.sectors.reduce(Float.zero) { max($0, $1.weight) }
+        let totalWeight = context.sectors.reduce(Float.zero) { $0 + $1.weight }
+        let colorSum = context.sectors.reduce(SIMD3<Float>(repeating: 0)) { partial, sector in
+            partial + (SIMD3<Float>(sector.color.x, sector.color.y, sector.color.z) * sector.weight)
+        }
+        let averageColor = colorSum / max(totalWeight, 0.001)
+        let ringRadius = 1.24 + (context.strength * 0.48)
+        let ringAlpha = 0.03 + (context.strength * 0.05)
+
+        transparent.addSphere(
+            center: center,
+            radii: SIMD3<Float>(ringRadius, 0.014 + (context.strength * 0.006), ringRadius * 0.94),
+            segments: 14,
+            rings: 5,
+            color: SIMD4<Float>(averageColor.x, averageColor.y, averageColor.z, ringAlpha)
+        )
+        transparent.addSphere(
+            center: center + (up * (0.08 + (context.strength * 0.03))),
+            radii: SIMD3<Float>(0.08 + (context.strength * 0.03), 0.018, 0.07 + (context.strength * 0.024)),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(averageColor.x, averageColor.y, averageColor.z, ringAlpha * 0.88)
+        )
+
+        for (sectorIndex, sector) in context.sectors.enumerated() {
+            let normalizedWeight = immersiveApeClamp(
+                sector.weight / max(strongestWeight, 0.001),
+                min: 0.18,
+                max: 1.0
+            )
+            let pulse = 0.74 + (0.26 * sin((timeValue * 0.029) + (Float(sectorIndex) * 0.78)))
+            let sectorCenter = center + (sector.direction * (1.02 + (normalizedWeight * 0.48) + (context.strength * 0.12)))
+            let lobeRadius = 0.15 + (normalizedWeight * 0.14) + (context.strength * 0.05)
+            let lobeAlpha = (0.04 + (normalizedWeight * 0.07)) * pulse
+
+            transparent.addCylinder(
+                base: center + (sector.direction * 0.3),
+                top: sectorCenter,
+                radius: 0.01 + (normalizedWeight * 0.005),
+                segments: 5,
+                color: SIMD4<Float>(sector.color.x, sector.color.y, sector.color.z, lobeAlpha * 0.82)
+            )
+            transparent.addSphere(
+                center: sectorCenter,
+                radii: SIMD3<Float>(lobeRadius, 0.02 + (normalizedWeight * 0.006), lobeRadius * 0.84),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(sector.color.x, sector.color.y, sector.color.z, lobeAlpha)
+            )
+            transparent.addSphere(
+                center: sectorCenter + (up * (0.06 + (normalizedWeight * 0.03))),
+                radii: SIMD3<Float>(repeating: 0.03 + (normalizedWeight * 0.012)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(sector.color.x, sector.color.y, sector.color.z, lobeAlpha * 0.86)
+            )
+        }
+
+        if let dominantSector = context.sectors.max(by: { $0.weight < $1.weight }) {
+            let dominantStrength = immersiveApeClamp(
+                dominantSector.weight / max(strongestWeight, 0.001),
+                min: 0.2,
+                max: 1.0
+            )
+            let dominantCenter = center + (dominantSector.direction * (1.12 + (context.strength * 0.36)))
+            let beaconCenter = dominantCenter + (up * (0.16 + (dominantStrength * 0.08)))
+
+            transparent.addCylinder(
+                base: dominantCenter + (up * 0.03),
+                top: beaconCenter,
+                radius: 0.012 + (dominantStrength * 0.004),
+                segments: 5,
+                color: SIMD4<Float>(
+                    dominantSector.color.x,
+                    dominantSector.color.y,
+                    dominantSector.color.z,
+                    0.07 + (context.strength * 0.05)
+                )
+            )
+            transparent.addSphere(
+                center: beaconCenter,
+                radii: SIMD3<Float>(repeating: 0.04 + (dominantStrength * 0.018)),
+                segments: 5,
+                rings: 4,
+                color: SIMD4<Float>(
+                    dominantSector.color.x,
+                    dominantSector.color.y,
+                    dominantSector.color.z,
+                    0.1 + (context.strength * 0.08)
+                )
+            )
+        }
+    }
+
+    private func addEncounterAudienceField(
+        primary: ImmersiveApeEncounter,
+        context: ImmersiveApeSocialFieldContext,
+        timeValue: Float,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.markers.isEmpty else {
+            return
+        }
+
+        let up = SIMD3<Float>(0, 1, 0)
+        let focusPlanar = SIMD3<Float>(
+            primary.localPosition.x,
+            0.05 + max(0, primary.localPosition.y * 0.05),
+            primary.localPosition.z
+        )
+        let focusHead = focusPlanar + (up * (0.12 + (context.strength * 0.04)))
+        let pulse = 0.74 + (0.26 * sin((timeValue * 0.024) + (primary.distance * 0.05)))
+        let fieldAlpha = context.color.w * pulse
+
+        transparent.addSphere(
+            center: focusPlanar + (up * 0.04),
+            radii: SIMD3<Float>(
+                context.ringRadius,
+                0.016 + (context.strength * 0.004),
+                context.ringRadius * 0.76
+            ),
+            segments: 8,
+            rings: 4,
+            color: SIMD4<Float>(context.color.x, context.color.y, context.color.z, fieldAlpha * 0.84)
+        )
+        transparent.addSphere(
+            center: focusHead,
+            radii: SIMD3<Float>(repeating: 0.026 + (context.strength * 0.008)),
+            segments: 6,
+            rings: 4,
+            color: SIMD4<Float>(context.color.x, context.color.y, context.color.z, fieldAlpha * 0.78)
+        )
+
+        for (index, marker) in context.markers.enumerated() {
+            let sourcePlanar = SIMD3<Float>(
+                marker.localPosition.x,
+                0.04 + max(0, marker.localPosition.y * 0.05),
+                marker.localPosition.z
+            )
+            let path = (focusPlanar - sourcePlanar).normalizedSafe
+            let side = SIMD3<Float>(-path.z, 0, path.x).normalizedSafe
+            let roleColor = immersiveApeMix(
+                context.color,
+                immersiveApeSocialFieldRoleColor(marker.role),
+                t: 0.66
+            )
+            let alpha = (0.04 + (marker.strength * 0.05)) * pulse
+            let drift = sin((timeValue * 0.028) + (Float(index) * 0.82))
+
+            switch marker.role {
+            case .support:
+                let supportMid = immersiveApeLerp(sourcePlanar, focusPlanar, factor: 0.42)
+                    + (up * (0.08 + (marker.strength * 0.04)))
+                    + (side * drift * context.laneRadius * 0.12)
+                transparent.addCylinder(
+                    base: sourcePlanar + (up * 0.03),
+                    top: supportMid,
+                    radius: 0.008 + (marker.strength * 0.002),
+                    segments: 5,
+                    color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * 0.72)
+                )
+                transparent.addCylinder(
+                    base: supportMid,
+                    top: focusHead,
+                    radius: 0.008 + (marker.strength * 0.002),
+                    segments: 5,
+                    color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * 0.64)
+                )
+                transparent.addSphere(
+                    center: supportMid,
+                    radii: SIMD3<Float>(repeating: 0.02 + (marker.strength * 0.007)),
+                    segments: 5,
+                    rings: 4,
+                    color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * 0.86)
+                )
+            case .pressure:
+                let pressureMid = immersiveApeLerp(sourcePlanar, focusPlanar, factor: 0.34)
+                    + (up * (0.07 + (marker.strength * 0.04)))
+                transparent.addCylinder(
+                    base: sourcePlanar + (up * 0.03),
+                    top: pressureMid,
+                    radius: 0.008 + (marker.strength * 0.002),
+                    segments: 5,
+                    color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * 0.66)
+                )
+                transparent.addCylinder(
+                    base: pressureMid - (side * (context.laneRadius * 0.62)),
+                    top: pressureMid + (side * (context.laneRadius * 0.62)),
+                    radius: 0.009 + (marker.strength * 0.002),
+                    segments: 5,
+                    color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * 0.86)
+                )
+                transparent.addCylinder(
+                    base: pressureMid - (path * (context.laneRadius * 0.34)),
+                    top: pressureMid + (path * (context.laneRadius * 0.34)) + (up * 0.04),
+                    radius: 0.008 + (marker.strength * 0.002),
+                    segments: 5,
+                    color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * 0.74)
+                )
+            case .witness:
+                let witnessCenter = sourcePlanar + (up * (0.08 + (marker.strength * 0.02)))
+                transparent.addSphere(
+                    center: witnessCenter,
+                    radii: SIMD3<Float>(
+                        context.laneRadius * 0.42,
+                        0.012 + (marker.strength * 0.003),
+                        context.laneRadius * 0.32
+                    ),
+                    segments: 6,
+                    rings: 4,
+                    color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * 0.68)
+                )
+                for markerIndex in 1...2 {
+                    let t = Float(markerIndex) / 3
+                    let center = immersiveApeLerp(sourcePlanar, focusPlanar, factor: 0.1 + (t * 0.22))
+                        + (up * (0.04 + (t * 0.03)))
+                        + (side * drift * context.laneRadius * 0.14 * (1 - t))
+                    transparent.addSphere(
+                        center: center,
+                        radii: SIMD3<Float>(repeating: 0.012 + (marker.strength * 0.004)),
+                        segments: 5,
+                        rings: 4,
+                        color: SIMD4<Float>(roleColor.x, roleColor.y, roleColor.z, alpha * (0.52 + (t * 0.16)))
+                    )
+                }
+            }
         }
     }
 
@@ -10315,7 +12356,19 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         transparent: inout ImmersiveApeMeshBuilder
     ) {
         let daylight = immersiveApeSaturate(capture.snapshot.daylight)
+        let weatherContext = immersiveApeWeatherContext(
+            capture: capture,
+            grid: grid,
+            environment: environment
+        )
         buildHorizonAtmosphere(environment: environment, transparent: &transparent)
+        if let weatherContext {
+            addWeatherSkyContextField(
+                context: weatherContext,
+                environment: environment,
+                transparent: &transparent
+            )
+        }
         let celestialRadius: Float = daylight > 0.15 ? 2.4 : 1.4
         let celestialColor = daylight > 0.15
             ? SIMD4<Float>(environment.sunColor.x, environment.sunColor.y, environment.sunColor.z, 1)
@@ -10426,6 +12479,126 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         }
     }
 
+    private func addWeatherSkyContextField(
+        context: ImmersiveApeWeatherContext,
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.sectors.isEmpty else {
+            return
+        }
+
+        let center = smoothedEye + SIMD3<Float>(0, 18 + (context.strength * 5), 0)
+        let up = SIMD3<Float>(0, 1, 0)
+        let clearTint = immersiveApeMix(
+            environment.clearColor,
+            environment.horizonGlowColor,
+            t: 0.26 + (environment.twilightStrength * 0.24)
+        )
+        let cloudTint = SIMD3<Float>(environment.cloudColor.x, environment.cloudColor.y, environment.cloudColor.z)
+        let focusSector = context.sectors[min(max(context.focusIndex, 0), context.sectors.count - 1)]
+
+        for (sectorIndex, sector) in context.sectors.enumerated() {
+            let emphasis: Float = sectorIndex == context.focusIndex ? 1.0 : 0.72
+            let sectorDistance = 18 + (sector.density * 10) + (sector.openness * 4)
+            let sectorLift = 2.6 + (sector.density * 4)
+            let sectorCenter =
+                center
+                + (sector.direction * sectorDistance)
+                + (up * sectorLift)
+            let cloudAlphaBase: Float = 0.02 + (sector.density * 0.05) + (context.strength * 0.02)
+            let cloudAlpha = cloudAlphaBase * emphasis
+
+            transparent.addSphere(
+                center: sectorCenter,
+                radii: SIMD3<Float>(
+                    4.8 + (sector.density * 6.2),
+                    1.0 + (sector.density * 1.4),
+                    4.2 + (sector.density * 5.6)
+                ),
+                segments: 8,
+                rings: 5,
+                color: SIMD4<Float>(cloudTint.x, cloudTint.y, cloudTint.z, cloudAlpha)
+            )
+
+            if context.style == .clearing || context.style == .open {
+                let clearAlphaBase: Float = 0.012 + (sector.openness * 0.05) + (context.strength * 0.015)
+                let clearEmphasis: Float = sectorIndex == context.focusIndex ? 1.08 : 0.42
+                let clearAlpha = clearAlphaBase * clearEmphasis
+                transparent.addSphere(
+                    center: sectorCenter + (up * (1.6 + (sector.openness * 2.2))),
+                    radii: SIMD3<Float>(
+                        4.0 + (sector.openness * 5.6),
+                        0.9 + (sector.openness * 1.1),
+                        3.8 + (sector.openness * 5.0)
+                    ),
+                    segments: 8,
+                    rings: 5,
+                    color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, clearAlpha)
+                )
+            }
+        }
+
+        switch context.style {
+        case .front:
+            let frontCenter =
+                center
+                + (focusSector.direction * (28 + (context.strength * 8)))
+                - (up * (3.5 + (environment.rainAmount * 2.6)))
+            transparent.addSphere(
+                center: frontCenter,
+                radii: SIMD3<Float>(16 + (context.strength * 8), 2.6 + (context.strength * 1.2), 12 + (context.strength * 6)),
+                segments: 10,
+                rings: 5,
+                color: SIMD4<Float>(cloudTint.x, cloudTint.y, cloudTint.z, 0.04 + (context.strength * 0.06))
+            )
+            transparent.addSphere(
+                center: frontCenter - (focusSector.direction * 5) - (up * 1.2),
+                radii: SIMD3<Float>(14 + (context.strength * 6), 2.0 + (context.strength * 0.9), 10 + (context.strength * 4)),
+                segments: 9,
+                rings: 5,
+                color: SIMD4<Float>(environment.fogColor.x, environment.fogColor.y, environment.fogColor.z, 0.026 + (context.strength * 0.045))
+            )
+        case .clearing:
+            let breakCenter =
+                center
+                + (focusSector.direction * (24 + (context.strength * 6)))
+                + (up * (6 + (context.strength * 2)))
+            transparent.addSphere(
+                center: breakCenter,
+                radii: SIMD3<Float>(12 + (context.strength * 6), 2.6 + (context.strength * 0.9), 10 + (context.strength * 5)),
+                segments: 9,
+                rings: 5,
+                color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, 0.04 + (context.strength * 0.05))
+            )
+        case .wrapped:
+            transparent.addSphere(
+                center: center + (up * 2),
+                radii: SIMD3<Float>(38 + (context.strength * 12), 4.4 + (context.strength * 1.2), 34 + (context.strength * 10)),
+                segments: 12,
+                rings: 6,
+                color: SIMD4<Float>(cloudTint.x, cloudTint.y, cloudTint.z, 0.03 + (context.strength * 0.04))
+            )
+        case .patchy:
+            let patchCenter = center + (focusSector.direction * (20 + (context.strength * 6))) + (up * 2.8)
+            transparent.addSphere(
+                center: patchCenter,
+                radii: SIMD3<Float>(11 + (context.strength * 5), 2.1 + (context.strength * 0.8), 8 + (context.strength * 4)),
+                segments: 9,
+                rings: 5,
+                color: SIMD4<Float>(cloudTint.x, cloudTint.y, cloudTint.z, 0.024 + (context.strength * 0.04))
+            )
+        case .open:
+            transparent.addSphere(
+                center: center + (up * (8 + (context.strength * 2))),
+                radii: SIMD3<Float>(22 + (context.strength * 10), 2.6 + (context.strength * 0.8), 20 + (context.strength * 8)),
+                segments: 10,
+                rings: 5,
+                color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, 0.022 + (context.strength * 0.035))
+            )
+        }
+    }
+
     private func buildInterpolatedCloudField(
         using grid: ImmersiveApeTerrainGrid,
         from capture: ImmersiveApeSceneCapture,
@@ -10435,10 +12608,7 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         let daylight = immersiveApeSaturate(capture.snapshot.daylight)
         let sampleStride = 4
         let threshold: Float = environment.rainAmount > 0.4 ? 0.16 : 0.22
-        let windPlanar = immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
-        let windDirection = simd_length_squared(windPlanar) > 0.0001
-            ? windPlanar
-            : SIMD3<Float>(0.94, 0, 0.34)
+        let windDirection = immersiveApeWindDirection(environment: environment)
         let driftDistance = Float(capture.snapshot.time) * 0.00085
         var candidates: [(density: Float, row: Int, column: Int, noise: Float)] = []
 
@@ -10538,32 +12708,754 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         }
     }
 
-    private func buildWeatherEffects(
-        from capture: ImmersiveApeSceneCapture,
+    private func addPrecipitationContextField(
+        context: ImmersiveApePrecipitationContext,
         environment: ImmersiveApeEnvironment,
         transparent: inout ImmersiveApeMeshBuilder
     ) {
-        guard environment.rainAmount > 0.05 else {
+        guard !context.lanes.isEmpty else {
             return
         }
 
-        let rainCount = 40 + Int(environment.rainAmount * 44)
-        let slant = SIMD3<Float>(environment.lightDirection.x * -0.65, -1.0, environment.lightDirection.z * -0.65).normalizedSafe
-        let rainColor = SIMD4<Float>(environment.foamColor.x, environment.foamColor.y, environment.foamColor.z, 0.08 + (environment.rainAmount * 0.06))
+        let driftDirection = context.driftDirection
+        let crossDirection = immersiveApeCrossDirection(driftDirection)
+        let slant = SIMD3<Float>(
+            driftDirection.x * (0.7 + (context.strength * 0.18)),
+            -1.0,
+            driftDirection.z * (0.7 + (context.strength * 0.18))
+        ).normalizedSafe
+        let rainTint = immersiveApeMix(environment.foamColor, environment.fogColor, t: 0.42)
+        let clearTint = immersiveApeMix(environment.clearColor, environment.horizonGlowColor, t: 0.3)
+        let focusLane = context.lanes[min(max(context.focusIndex, 0), context.lanes.count - 1)]
 
-        for dropIndex in 0..<rainCount {
-            let rainSeed = capture.snapshot.world_seed ^ UInt32((dropIndex + 17) * 1987)
-            let azimuth = (immersiveApeNoise(Int32(dropIndex), 120, seed: rainSeed) * Float.pi * 2) + (Float(capture.snapshot.time) * 0.006)
-            let radius = 3.5 + (immersiveApeNoise(Int32(dropIndex), 121, seed: rainSeed) * 30)
-            let altitude = 3 + (immersiveApeNoise(Int32(dropIndex), 122, seed: rainSeed) * 16)
-            let length = 1.6 + (immersiveApeNoise(Int32(dropIndex), 123, seed: rainSeed) * 1.8)
-            let start = smoothedEye + SIMD3<Float>(cos(azimuth) * radius, altitude, sin(azimuth) * radius)
-            let end = start + (slant * length)
+        for (laneIndex, lane) in context.lanes.enumerated() {
+            let emphasis: Float = laneIndex == context.focusIndex ? 1.0 : 0.72
+            let laneCenter =
+                smoothedEye
+                + (crossDirection * lane.offset)
+                + (driftDirection * (8 + (lane.intensity * 10)))
+            let start = laneCenter + SIMD3<Float>(0, 11 + (lane.intensity * 5), 0)
+            let end = start + (slant * (7 + (lane.intensity * 5)))
+            let alpha = (0.018 + (lane.intensity * 0.04)) * emphasis
+            let radius = 0.14 + (lane.intensity * 0.34)
 
             transparent.addCylinder(
                 base: start,
                 top: end,
-                radius: 0.012 + (immersiveApeNoise(Int32(dropIndex), 124, seed: rainSeed) * 0.01),
+                radius: radius,
+                segments: 6,
+                color: SIMD4<Float>(rainTint.x, rainTint.y, rainTint.z, alpha)
+            )
+
+            let shoulderOffset = 0.75 + (lane.intensity * 1.1)
+            transparent.addCylinder(
+                base: start + (crossDirection * shoulderOffset),
+                top: end + (crossDirection * shoulderOffset),
+                radius: radius * 0.72,
+                segments: 5,
+                color: SIMD4<Float>(rainTint.x, rainTint.y, rainTint.z, alpha * 0.72)
+            )
+            transparent.addCylinder(
+                base: start - (crossDirection * shoulderOffset),
+                top: end - (crossDirection * shoulderOffset),
+                radius: radius * 0.72,
+                segments: 5,
+                color: SIMD4<Float>(rainTint.x, rainTint.y, rainTint.z, alpha * 0.72)
+            )
+
+            if context.style == .leeBreak && laneIndex == context.focusIndex {
+                transparent.addSphere(
+                    center: laneCenter + SIMD3<Float>(0, 5.5 + (lane.shelter * 2.2), 0),
+                    radii: SIMD3<Float>(2.8 + (lane.shelter * 3.2), 1.2 + (lane.shelter * 0.9), 2.4 + (lane.shelter * 2.8)),
+                    segments: 8,
+                    rings: 5,
+                    color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, 0.018 + (lane.shelter * 0.03))
+                )
+            }
+        }
+
+        switch context.style {
+        case .squall:
+            let focusCenter =
+                smoothedEye
+                + (crossDirection * focusLane.offset)
+                + (driftDirection * (12 + (context.strength * 10)))
+            let focusStart = focusCenter + SIMD3<Float>(0, 15 + (context.strength * 4), 0)
+            let focusEnd = focusStart + (slant * (12 + (context.strength * 6)))
+            transparent.addCylinder(
+                base: focusStart,
+                top: focusEnd,
+                radius: 0.34 + (context.strength * 0.48),
+                segments: 7,
+                color: SIMD4<Float>(rainTint.x, rainTint.y, rainTint.z, 0.038 + (context.strength * 0.045))
+            )
+        case .sheet:
+            let sheetCenter = smoothedEye + (driftDirection * (10 + (context.strength * 7))) + SIMD3<Float>(0, 8, 0)
+            transparent.addCylinder(
+                base: sheetCenter + SIMD3<Float>(0, 8, 0),
+                top: sheetCenter + (slant * (11 + (context.strength * 5))),
+                radius: 0.5 + (context.strength * 0.56),
+                segments: 7,
+                color: SIMD4<Float>(rainTint.x, rainTint.y, rainTint.z, 0.032 + (context.strength * 0.038))
+            )
+        case .mist:
+            transparent.addSphere(
+                center: smoothedEye + (driftDirection * (8 + (context.strength * 5))) + SIMD3<Float>(0, 4.5, 0),
+                radii: SIMD3<Float>(10 + (context.strength * 6), 3 + (context.strength * 1.4), 9 + (context.strength * 5)),
+                segments: 10,
+                rings: 5,
+                color: SIMD4<Float>(rainTint.x, rainTint.y, rainTint.z, 0.014 + (context.strength * 0.022))
+            )
+        default:
+            break
+        }
+    }
+
+    private func addAirflowContextField(
+        context: ImmersiveApeAirflowContext,
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.lanes.isEmpty else {
+            return
+        }
+
+        let driftDirection = context.driftDirection
+        let crossDirection = immersiveApeCrossDirection(driftDirection)
+        let streamerTint = immersiveApeMix(environment.fogColor, environment.horizonGlowColor, t: 0.34 + (environment.twilightStrength * 0.12))
+        let clearTint = immersiveApeMix(environment.clearColor, environment.horizonGlowColor, t: 0.24)
+        let focusLane = context.lanes[min(max(context.focusIndex, 0), context.lanes.count - 1)]
+
+        for (laneIndex, lane) in context.lanes.enumerated() {
+            let emphasis: Float = laneIndex == context.focusIndex ? 1.0 : 0.68
+            let laneCenter =
+                smoothedEye
+                + (crossDirection * lane.offset)
+                + (driftDirection * (3.8 + (lane.flow * 6.6)))
+                + SIMD3<Float>(0, 2.2 + (lane.turbulence * 0.9), 0)
+            let halfLength = 1.4 + (lane.flow * 2.8)
+            let radius = 0.08 + (lane.flow * 0.12) + (lane.turbulence * 0.06)
+            let alpha = (0.008 + (lane.flow * 0.02) + (lane.turbulence * 0.01)) * emphasis * (1 - (lane.shelter * 0.12))
+
+            transparent.addCylinder(
+                base: laneCenter - (driftDirection * halfLength),
+                top: laneCenter + (driftDirection * (halfLength * 1.3)),
+                radius: radius,
+                segments: 6,
+                color: SIMD4<Float>(streamerTint.x, streamerTint.y, streamerTint.z, alpha)
+            )
+
+            transparent.addCylinder(
+                base: laneCenter + SIMD3<Float>(0, 0.5 + (lane.turbulence * 0.3), 0) - (driftDirection * (halfLength * 0.8)),
+                top: laneCenter + SIMD3<Float>(0, 0.5 + (lane.turbulence * 0.3), 0) + (driftDirection * halfLength),
+                radius: radius * 0.72,
+                segments: 5,
+                color: SIMD4<Float>(streamerTint.x, streamerTint.y, streamerTint.z, alpha * 0.72)
+            )
+
+            if laneIndex == context.focusIndex,
+               (context.style == .leePocket || context.style == .stillPocket) {
+                transparent.addSphere(
+                    center: laneCenter + SIMD3<Float>(0, 0.1, 0),
+                    radii: SIMD3<Float>(1.8 + (lane.shelter * 2.6), 1.1 + (lane.shelter * 0.9), 1.6 + (lane.shelter * 2.2)),
+                    segments: 8,
+                    rings: 5,
+                    color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, 0.012 + (lane.shelter * 0.026))
+                )
+            }
+        }
+
+        switch context.style {
+        case .gustLane:
+            let gustCenter =
+                smoothedEye
+                + (crossDirection * focusLane.offset)
+                + (driftDirection * (8 + (context.strength * 8)))
+                + SIMD3<Float>(0, 2.8, 0)
+            transparent.addCylinder(
+                base: gustCenter - (driftDirection * (2.2 + (context.strength * 1.4))),
+                top: gustCenter + (driftDirection * (4.8 + (context.strength * 3.4))),
+                radius: 0.16 + (context.strength * 0.16),
+                segments: 7,
+                color: SIMD4<Float>(streamerTint.x, streamerTint.y, streamerTint.z, 0.024 + (context.strength * 0.024))
+            )
+        case .splitWake:
+            let wakeOffset = 2.8 + (context.strength * 1.8)
+            let wakeCenter = smoothedEye + (driftDirection * (5.5 + (context.strength * 4))) + SIMD3<Float>(0, 2.2, 0)
+            transparent.addCylinder(
+                base: wakeCenter + (crossDirection * wakeOffset) - (driftDirection * 1.4),
+                top: wakeCenter + (crossDirection * wakeOffset) + (driftDirection * 3.8),
+                radius: 0.12 + (context.strength * 0.12),
+                segments: 6,
+                color: SIMD4<Float>(streamerTint.x, streamerTint.y, streamerTint.z, 0.02 + (context.strength * 0.02))
+            )
+            transparent.addCylinder(
+                base: wakeCenter - (crossDirection * wakeOffset) - (driftDirection * 1.4),
+                top: wakeCenter - (crossDirection * wakeOffset) + (driftDirection * 3.8),
+                radius: 0.12 + (context.strength * 0.12),
+                segments: 6,
+                color: SIMD4<Float>(streamerTint.x, streamerTint.y, streamerTint.z, 0.02 + (context.strength * 0.02))
+            )
+        case .stillPocket:
+            transparent.addSphere(
+                center: smoothedEye + (driftDirection * 2.8) + SIMD3<Float>(0, 2.2, 0),
+                radii: SIMD3<Float>(3.8 + (context.strength * 2.8), 1.8 + (context.strength * 0.8), 3.4 + (context.strength * 2.4)),
+                segments: 8,
+                rings: 5,
+                color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, 0.016 + (context.strength * 0.018))
+            )
+        default:
+            break
+        }
+    }
+
+    private func addVaporContextField(
+        context: ImmersiveApeVaporContext,
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.sectors.isEmpty else {
+            return
+        }
+
+        let center = smoothedEye + SIMD3<Float>(0, 1.0 + (context.strength * 0.4), 0)
+        let up = SIMD3<Float>(0, 1, 0)
+        let fogTint = immersiveApeMix(
+            immersiveApeMix(environment.fogColor, environment.waterColor, t: 0.22),
+            environment.horizonGlowColor,
+            t: (environment.twilightStrength * 0.28) + (environment.nightStrength * 0.08)
+        )
+        let clearTint = immersiveApeMix(environment.clearColor, environment.horizonGlowColor, t: 0.24)
+        let focusSector = context.sectors[min(max(context.focusIndex, 0), context.sectors.count - 1)]
+
+        for (sectorIndex, sector) in context.sectors.enumerated() {
+            let emphasis: Float = sectorIndex == context.focusIndex ? 1.0 : 0.72
+            let sectorCenter =
+                center
+                + (sector.direction * (5.5 + (sector.density * 8.5)))
+                + (up * (0.28 + (sector.density * 0.42)))
+            let vaporAlpha = (0.008 + (sector.density * 0.028)) * emphasis
+
+            transparent.addSphere(
+                center: sectorCenter,
+                radii: SIMD3<Float>(
+                    2.4 + (sector.density * 4.6),
+                    0.34 + (sector.density * 0.46),
+                    2.1 + (sector.density * 4.0)
+                ),
+                segments: 8,
+                rings: 5,
+                color: SIMD4<Float>(fogTint.x, fogTint.y, fogTint.z, vaporAlpha)
+            )
+
+            if context.style == .liftingVeil || context.style == .clearLift {
+                let clearAlpha = (0.006 + (sector.clarity * 0.018)) * (sectorIndex == context.focusIndex ? 1.06 : 0.34)
+                transparent.addSphere(
+                    center: sectorCenter + (up * (0.3 + (sector.clarity * 0.24))),
+                    radii: SIMD3<Float>(
+                        2.0 + (sector.clarity * 3.8),
+                        0.28 + (sector.clarity * 0.34),
+                        1.8 + (sector.clarity * 3.2)
+                    ),
+                    segments: 8,
+                    rings: 5,
+                    color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, clearAlpha)
+                )
+            }
+        }
+
+        switch context.style {
+        case .rainHaze:
+            transparent.addSphere(
+                center: center + (focusSector.direction * (7 + (context.strength * 6))) + (up * 0.5),
+                radii: SIMD3<Float>(8 + (context.strength * 5), 1.3 + (context.strength * 0.7), 7 + (context.strength * 4)),
+                segments: 10,
+                rings: 5,
+                color: SIMD4<Float>(fogTint.x, fogTint.y, fogTint.z, 0.018 + (context.strength * 0.026))
+            )
+        case .shoreMist, .basinHaze:
+            transparent.addSphere(
+                center: center + (focusSector.direction * (6 + (context.strength * 5))) + (up * 0.24),
+                radii: SIMD3<Float>(5 + (context.strength * 4), 0.9 + (context.strength * 0.5), 4.5 + (context.strength * 3.2)),
+                segments: 9,
+                rings: 5,
+                color: SIMD4<Float>(fogTint.x, fogTint.y, fogTint.z, 0.016 + (context.strength * 0.022))
+            )
+        case .liftingVeil, .clearLift:
+            transparent.addSphere(
+                center: center + (focusSector.direction * (6 + (context.strength * 5))) + (up * 0.5),
+                radii: SIMD3<Float>(4.2 + (context.strength * 3), 0.8 + (context.strength * 0.3), 3.8 + (context.strength * 2.6)),
+                segments: 9,
+                rings: 5,
+                color: SIMD4<Float>(clearTint.x, clearTint.y, clearTint.z, 0.012 + (context.strength * 0.018))
+            )
+        }
+    }
+
+    private func addSurfaceWaterContextField(
+        context: ImmersiveApeSurfaceWaterContext,
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.sectors.isEmpty else {
+            return
+        }
+
+        let center = SIMD3<Float>(0, 0.04, 0)
+        let up = SIMD3<Float>(0, 1, 0)
+        let wetTint = immersiveApeMix(
+            environment.waterColor,
+            environment.foamColor,
+            t: 0.18 + (environment.rainAmount * 0.12)
+        )
+        let sheenTint = immersiveApeMix(
+            wetTint,
+            environment.horizonGlowColor,
+            t: (environment.twilightStrength * 0.18) + (environment.nightStrength * 0.06)
+        )
+        let dryTint = immersiveApeMix(
+            environment.clearColor,
+            environment.sunColor,
+            t: 0.24 + (environment.daylight * 0.12)
+        )
+        let focusSector = context.sectors[min(max(context.focusIndex, 0), context.sectors.count - 1)]
+
+        for (sectorIndex, sector) in context.sectors.enumerated() {
+            let emphasis: Float = sectorIndex == context.focusIndex ? 1.0 : 0.72
+            let sectorDistance =
+                1.4
+                + (sector.runoff * 1.6)
+                + (sector.pooling * 1.2)
+                + (sector.shoreline * 1.4)
+            let sectorCenter =
+                center
+                + (sector.direction * sectorDistance)
+                + (up * (0.028 + (sector.pooling * 0.03)))
+            let baseAlpha =
+                (0.01 + (sector.wetness * 0.028) + (sector.shoreline * 0.01))
+                * emphasis
+
+            transparent.addSphere(
+                center: sectorCenter,
+                radii: SIMD3<Float>(
+                    0.7 + (sector.wetness * 1.6),
+                    0.032 + (sector.pooling * 0.04),
+                    0.62 + (sector.wetness * 1.4)
+                ),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(sheenTint.x, sheenTint.y, sheenTint.z, baseAlpha)
+            )
+
+            if sector.runoff > 0.34 {
+                let traceLength = 0.52 + (sector.runoff * 1.1)
+                transparent.addCylinder(
+                    base: sectorCenter - (sector.direction * (traceLength * 0.6)),
+                    top: sectorCenter + (sector.direction * traceLength),
+                    radius: 0.024 + (sector.runoff * 0.028),
+                    segments: 5,
+                    color: SIMD4<Float>(
+                        wetTint.x,
+                        wetTint.y,
+                        wetTint.z,
+                        (0.008 + (sector.runoff * 0.018)) * emphasis
+                    )
+                )
+            }
+
+            if context.style == .firmFooting || sector.firmness > 0.58 {
+                let dryAlpha =
+                    (0.006 + (sector.firmness * 0.012))
+                    * (sectorIndex == context.focusIndex ? 0.86 : 0.28)
+                transparent.addSphere(
+                    center: sectorCenter + (up * 0.012),
+                    radii: SIMD3<Float>(
+                        0.56 + (sector.firmness * 1.1),
+                        0.018 + (sector.firmness * 0.018),
+                        0.52 + (sector.firmness * 1.0)
+                    ),
+                    segments: 7,
+                    rings: 4,
+                    color: SIMD4<Float>(dryTint.x, dryTint.y, dryTint.z, dryAlpha)
+                )
+            }
+        }
+
+        let crossDirection = immersiveApeCrossDirection(focusSector.direction)
+
+        switch context.style {
+        case .shoreWash:
+            let washCenter =
+                center
+                + (focusSector.direction * (3.0 + (context.strength * 1.8)))
+                + (up * 0.03)
+            transparent.addCylinder(
+                base: washCenter - (crossDirection * (1.8 + (context.strength * 1.1))),
+                top: washCenter + (crossDirection * (1.8 + (context.strength * 1.1))),
+                radius: 0.09 + (context.strength * 0.05),
+                segments: 6,
+                color: SIMD4<Float>(wetTint.x, wetTint.y, wetTint.z, 0.024 + (context.strength * 0.024))
+            )
+            transparent.addSphere(
+                center: washCenter,
+                radii: SIMD3<Float>(2.4 + (context.strength * 1.6), 0.07 + (context.strength * 0.04), 1.0 + (context.strength * 0.8)),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(sheenTint.x, sheenTint.y, sheenTint.z, 0.02 + (context.strength * 0.022))
+            )
+        case .pooledHollow:
+            let hollowCenter =
+                center
+                + (focusSector.direction * (2.2 + (context.strength * 1.4)))
+                + (up * 0.035)
+            transparent.addSphere(
+                center: hollowCenter,
+                radii: SIMD3<Float>(1.6 + (context.strength * 1.2), 0.048 + (context.strength * 0.028), 1.4 + (context.strength * 1.0)),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(wetTint.x, wetTint.y, wetTint.z, 0.026 + (context.strength * 0.03))
+            )
+            transparent.addSphere(
+                center: hollowCenter + (crossDirection * 0.08) + (up * 0.004),
+                radii: SIMD3<Float>(0.7 + (context.strength * 0.5), 0.014 + (context.strength * 0.008), 0.52 + (context.strength * 0.34)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(environment.foamColor.x, environment.foamColor.y, environment.foamColor.z, 0.018 + (context.strength * 0.022))
+            )
+        case .runoffTrace:
+            let traceCenter =
+                center
+                + (focusSector.direction * (2.2 + (context.strength * 1.8)))
+                + (up * 0.028)
+            transparent.addCylinder(
+                base: traceCenter - (focusSector.direction * 1.2),
+                top: traceCenter + (focusSector.direction * (2.6 + (context.strength * 1.2))),
+                radius: 0.05 + (context.strength * 0.04),
+                segments: 6,
+                color: SIMD4<Float>(wetTint.x, wetTint.y, wetTint.z, 0.022 + (context.strength * 0.024))
+            )
+            transparent.addCylinder(
+                base: traceCenter + (crossDirection * 0.34),
+                top: traceCenter + (focusSector.direction * 1.2) - (crossDirection * 0.16),
+                radius: 0.028 + (context.strength * 0.018),
+                segments: 5,
+                color: SIMD4<Float>(sheenTint.x, sheenTint.y, sheenTint.z, 0.016 + (context.strength * 0.018))
+            )
+        case .slickFooting:
+            transparent.addSphere(
+                center: center + (up * 0.03),
+                radii: SIMD3<Float>(2.8 + (context.strength * 2.2), 0.05 + (context.strength * 0.03), 2.4 + (context.strength * 1.8)),
+                segments: 9,
+                rings: 4,
+                color: SIMD4<Float>(sheenTint.x, sheenTint.y, sheenTint.z, 0.018 + (context.strength * 0.02))
+            )
+        case .firmFooting:
+            transparent.addSphere(
+                center: center + (up * 0.02),
+                radii: SIMD3<Float>(2.4 + (context.strength * 1.6), 0.03 + (context.strength * 0.02), 2.1 + (context.strength * 1.4)),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(dryTint.x, dryTint.y, dryTint.z, 0.014 + (context.strength * 0.014))
+            )
+        }
+    }
+
+    private func addCoverResponseContextField(
+        context: ImmersiveApeCoverResponseContext,
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        guard !context.sectors.isEmpty else {
+            return
+        }
+
+        let center = SIMD3<Float>(0, 0.58 + (context.strength * 0.12), 0)
+        let up = SIMD3<Float>(0, 1, 0)
+        let driftDirection = context.driftDirection
+        let crossDirection = immersiveApeCrossDirection(driftDirection)
+        let foliageTint = immersiveApeMix(
+            SIMD3<Float>(0.28, 0.42, 0.2),
+            environment.waterColor,
+            t: 0.12 + (environment.rainAmount * 0.08)
+        )
+        let wetTint = immersiveApeMix(
+            foliageTint,
+            environment.fogColor,
+            t: 0.16 + (environment.rainAmount * 0.14) + (environment.twilightStrength * 0.06)
+        )
+        let dripTint = immersiveApeMix(wetTint, environment.foamColor, t: 0.18)
+        let openTint = immersiveApeMix(
+            SIMD3<Float>(0.52, 0.46, 0.24),
+            environment.sunColor,
+            t: 0.18 + (environment.daylight * 0.12)
+        )
+        let focusSector = context.sectors[min(max(context.focusIndex, 0), context.sectors.count - 1)]
+
+        for (sectorIndex, sector) in context.sectors.enumerated() {
+            let emphasis: Float = sectorIndex == context.focusIndex ? 1.0 : 0.7
+            let sectorDistance = 2.0 + (sector.cover * 2.8) + (sector.shoreBias * 1.1) + (sector.openness * 0.6)
+            let sectorCenter =
+                center
+                + (sector.direction * sectorDistance)
+                + (up * (0.18 + (sector.canopyBias * 0.9) + (sector.droop * 0.22)))
+            let sectorTint = immersiveApeMix(wetTint, openTint, t: sector.openness * 0.46)
+            let baseAlpha = (0.01 + (sector.cover * 0.02) + (sector.canopyBias * 0.012)) * emphasis
+
+            transparent.addSphere(
+                center: sectorCenter,
+                radii: SIMD3<Float>(
+                    0.7 + (sector.cover * 1.5),
+                    0.34 + (sector.canopyBias * 0.9) + (sector.droop * 0.16),
+                    0.62 + (sector.cover * 1.3)
+                ),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(sectorTint.x, sectorTint.y, sectorTint.z, baseAlpha)
+            )
+
+            if sector.bend > 0.14 {
+                let root = center + (sector.direction * (sectorDistance - 0.42))
+                let tip =
+                    root
+                    + (up * (0.8 + (sector.cover * 0.9)))
+                    + (driftDirection * (0.18 + (sector.bend * 0.8)))
+                    + (crossDirection * ((Float(sectorIndex) - 2.5) * 0.04))
+                transparent.addCylinder(
+                    base: root,
+                    top: tip,
+                    radius: 0.03 + (sector.cover * 0.028),
+                    segments: 5,
+                    color: SIMD4<Float>(
+                        sectorTint.x,
+                        sectorTint.y,
+                        sectorTint.z,
+                        (0.008 + (sector.bend * 0.018)) * emphasis
+                    )
+                )
+            }
+
+            if sector.droop > 0.26, sector.canopyBias > 0.18 {
+                let dripBase = sectorCenter + (up * (0.28 + (sector.canopyBias * 0.34)))
+                let dripTip = dripBase - (up * (0.32 + (sector.droop * 0.48)))
+                transparent.addCylinder(
+                    base: dripBase,
+                    top: dripTip,
+                    radius: 0.016 + (sector.droop * 0.014),
+                    segments: 5,
+                    color: SIMD4<Float>(
+                        dripTint.x,
+                        dripTint.y,
+                        dripTint.z,
+                        (0.006 + (sector.droop * 0.014)) * emphasis
+                    )
+                )
+            }
+        }
+
+        switch context.style {
+        case .shoreReeds, .weatherBentCover:
+            let leanBase = center + (focusSector.direction * (2.4 + (context.strength * 1.8)))
+            for index in 0..<3 {
+                let lateral = (Float(index) - 1) * (0.18 + (context.strength * 0.08))
+                let root = leanBase + (crossDirection * lateral)
+                let tip =
+                    root
+                    + (up * (1.2 + (context.strength * 0.8)))
+                    + (driftDirection * (0.5 + (context.strength * 0.7)))
+                transparent.addCylinder(
+                    base: root,
+                    top: tip,
+                    radius: 0.038 + (context.strength * 0.024),
+                    segments: 5,
+                    color: SIMD4<Float>(wetTint.x, wetTint.y, wetTint.z, 0.014 + (context.strength * 0.018))
+                )
+            }
+        case .dripCanopy:
+            let canopyCenter =
+                center
+                + (focusSector.direction * (2.6 + (context.strength * 1.4)))
+                + (up * (1.7 + (context.strength * 0.5)))
+            transparent.addSphere(
+                center: canopyCenter,
+                radii: SIMD3<Float>(1.7 + (context.strength * 1.2), 0.64 + (context.strength * 0.32), 1.5 + (context.strength * 1.0)),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(wetTint.x, wetTint.y, wetTint.z, 0.018 + (context.strength * 0.02))
+            )
+            for lateral in [-0.22 as Float, 0.18] {
+                transparent.addCylinder(
+                    base: canopyCenter + (crossDirection * lateral),
+                    top: canopyCenter + (crossDirection * lateral) - (up * (0.76 + (context.strength * 0.4))),
+                    radius: 0.02 + (context.strength * 0.012),
+                    segments: 5,
+                    color: SIMD4<Float>(dripTint.x, dripTint.y, dripTint.z, 0.012 + (context.strength * 0.016))
+                )
+            }
+        case .leeBrush:
+            let brushCenter =
+                center
+                + (focusSector.direction * (2.3 + (context.strength * 1.5)))
+                + (up * 0.42)
+            transparent.addSphere(
+                center: brushCenter,
+                radii: SIMD3<Float>(1.3 + (context.strength * 1.0), 0.7 + (context.strength * 0.4), 1.1 + (context.strength * 0.8)),
+                segments: 8,
+                rings: 4,
+                color: SIMD4<Float>(wetTint.x, wetTint.y, wetTint.z, 0.018 + (context.strength * 0.018))
+            )
+            transparent.addSphere(
+                center: brushCenter - (driftDirection * 0.46) + (up * 0.08),
+                radii: SIMD3<Float>(0.86 + (context.strength * 0.7), 0.42 + (context.strength * 0.2), 0.74 + (context.strength * 0.54)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(openTint.x, openTint.y, openTint.z, 0.012 + (context.strength * 0.012))
+            )
+        case .openScrub:
+            transparent.addSphere(
+                center: center + (focusSector.direction * (2.2 + (context.strength * 1.1))) + (up * 0.18),
+                radii: SIMD3<Float>(1.0 + (context.strength * 0.8), 0.28 + (context.strength * 0.14), 0.92 + (context.strength * 0.7)),
+                segments: 7,
+                rings: 4,
+                color: SIMD4<Float>(openTint.x, openTint.y, openTint.z, 0.014 + (context.strength * 0.012))
+            )
+        }
+    }
+
+    private func buildWeatherEffects(
+        from capture: ImmersiveApeSceneCapture,
+        grid: ImmersiveApeTerrainGrid,
+        environment: ImmersiveApeEnvironment,
+        transparent: inout ImmersiveApeMeshBuilder
+    ) {
+        let airflowContext = immersiveApeAirflowContext(
+            capture: capture,
+            grid: grid,
+            environment: environment
+        )
+        if let airflowContext {
+            addAirflowContextField(
+                context: airflowContext,
+                environment: environment,
+                transparent: &transparent
+            )
+        }
+        let vaporContext = immersiveApeVaporContext(
+            capture: capture,
+            grid: grid,
+            environment: environment
+        )
+        if let vaporContext {
+            addVaporContextField(
+                context: vaporContext,
+                environment: environment,
+                transparent: &transparent
+            )
+        }
+        let surfaceWaterContext = immersiveApeSurfaceWaterContext(
+            capture: capture,
+            grid: grid,
+            environment: environment
+        )
+        if let surfaceWaterContext {
+            addSurfaceWaterContextField(
+                context: surfaceWaterContext,
+                environment: environment,
+                transparent: &transparent
+            )
+        }
+        let coverResponseContext = immersiveApeCoverResponseContext(
+            capture: capture,
+            grid: grid,
+            environment: environment
+        )
+        if let coverResponseContext {
+            addCoverResponseContextField(
+                context: coverResponseContext,
+                environment: environment,
+                transparent: &transparent
+            )
+        }
+
+        guard environment.rainAmount > 0.05 else {
+            return
+        }
+
+        let precipitationContext = immersiveApePrecipitationContext(
+            capture: capture,
+            grid: grid,
+            environment: environment
+        )
+        if let precipitationContext {
+            addPrecipitationContextField(
+                context: precipitationContext,
+                environment: environment,
+                transparent: &transparent
+            )
+        }
+
+        let driftDirection = precipitationContext?.driftDirection ?? immersiveApeWindDirection(environment: environment)
+        let crossDirection = immersiveApeCrossDirection(driftDirection)
+        let slant = SIMD3<Float>(driftDirection.x * 0.72, -1.0, driftDirection.z * 0.72).normalizedSafe
+        let baseRainColor = SIMD4<Float>(
+            environment.foamColor.x,
+            environment.foamColor.y,
+            environment.foamColor.z,
+            0.06 + (environment.rainAmount * 0.06)
+        )
+        let rainCount = 40 + Int(environment.rainAmount * 44) + Int((precipitationContext?.strength ?? 0) * 18)
+
+        for dropIndex in 0..<rainCount {
+            let rainSeed = capture.snapshot.world_seed ^ UInt32((dropIndex + 17) * 1987)
+            let altitudeNoise = immersiveApeNoise(Int32(dropIndex), 122, seed: rainSeed)
+            let lengthNoise = immersiveApeNoise(Int32(dropIndex), 123, seed: rainSeed)
+            let radiusNoise = immersiveApeNoise(Int32(dropIndex), 124, seed: rainSeed)
+            let laneNoise = immersiveApeNoise(Int32(dropIndex), 125, seed: rainSeed)
+            let densityNoise = immersiveApeNoise(Int32(dropIndex), 126, seed: rainSeed)
+            let start: SIMD3<Float>
+            let length: Float
+            let alphaScale: Float
+
+            if let precipitationContext, !precipitationContext.lanes.isEmpty {
+                let laneIndex = min(
+                    precipitationContext.lanes.count - 1,
+                    Int(floor(laneNoise * Float(precipitationContext.lanes.count)))
+                )
+                let lane = precipitationContext.lanes[laneIndex]
+                let laneVisibility = immersiveApeClamp(0.18 + (lane.intensity * 0.82), min: 0.12, max: 1.0)
+                if densityNoise > laneVisibility {
+                    continue
+                }
+
+                let lateralJitter = (radiusNoise - 0.5) * (2.0 + (lane.intensity * 1.8))
+                let forwardDistance = 4 + (immersiveApeNoise(Int32(dropIndex), 121, seed: rainSeed) * 28)
+                let altitude = 2.8 + (altitudeNoise * 15.5)
+                length = 1.4 + (lane.intensity * 2.4) + (lengthNoise * 1.4)
+                alphaScale = 0.44 + (lane.intensity * 0.86)
+                start =
+                    smoothedEye
+                    + (crossDirection * (lane.offset + lateralJitter))
+                    + (driftDirection * forwardDistance)
+                    + SIMD3<Float>(0, altitude, 0)
+            } else {
+                let azimuth = (immersiveApeNoise(Int32(dropIndex), 120, seed: rainSeed) * Float.pi * 2) + (Float(capture.snapshot.time) * 0.006)
+                let radius = 3.5 + (immersiveApeNoise(Int32(dropIndex), 121, seed: rainSeed) * 30)
+                let altitude = 3 + (altitudeNoise * 16)
+                length = 1.6 + (lengthNoise * 1.8)
+                alphaScale = 1.0
+                start = smoothedEye + SIMD3<Float>(cos(azimuth) * radius, altitude, sin(azimuth) * radius)
+            }
+            let end = start + (slant * length)
+            let rainColor = SIMD4<Float>(
+                baseRainColor.x,
+                baseRainColor.y,
+                baseRainColor.z,
+                baseRainColor.w * alphaScale
+            )
+
+            transparent.addCylinder(
+                base: start,
+                top: end,
+                radius: 0.012 + (radiusNoise * 0.01),
                 segments: 4,
                 color: rainColor
             )
@@ -12610,6 +15502,10 @@ private func immersiveApeAttentionFocus(
     let primaryEncounter = encounters.first
     let mateEncounter = encounters.first { $0.ape.female != selected.female }
     let forward = immersiveApeFacingVector(facing: selected.facing)
+    let socialNeighborhoodContext = immersiveApeSocialNeighborhoodContext(
+        capture: capture,
+        encounters: encounters
+    )
 
     func encounterFocus(
         kind: ImmersiveApeAttentionKind,
@@ -12634,6 +15530,7 @@ private func immersiveApeAttentionFocus(
         let statusBehavior = immersiveApeEncounterStatusBehavior(encounter: encounter)
         let episodicBehavior = immersiveApeEncounterEpisodicRecallBehavior(encounter: encounter)
         let territoryBehavior = immersiveApeEncounterTerritoryBehavior(encounter: encounter)
+        let socialFieldContext = immersiveApeSocialFieldContext(primary: encounter, encounters: encounters)
         let memorySuffix = memoryBehavior.map { "  •  \($0.panelLabel)" } ?? ""
         let tieSuffix = tieBehavior.map { "  •  \($0.panelLabel)" } ?? ""
         let statusSuffix = statusBehavior.map { "  •  \($0.panelLabel)" } ?? ""
@@ -12644,6 +15541,9 @@ private func immersiveApeAttentionFocus(
         let episodicSummary = episodicBehavior.map { $0.summaryPhrase } ?? ""
         let territorySuffix = territoryBehavior.map { "  •  \($0.panelLabel)" } ?? ""
         let territorySummary = territoryBehavior.map { " over \($0.summaryLead)" } ?? ""
+        let socialFieldSuffix = socialFieldContext.map { "  •  \($0.panelLabel)" } ?? ""
+        let socialFieldSummary = socialFieldContext.map { $0.summaryPhrase } ?? ""
+        let socialNeighborhoodSummary = socialNeighborhoodContext.map { $0.summaryPhrase } ?? ""
         switch kind {
         case .conversation:
             panelModeLabel = "Conversation"
@@ -12675,15 +15575,15 @@ private func immersiveApeAttentionFocus(
         }
 
         let summaryLine = speechBehavior != nil
-            ? "Focus: \(speechBehavior!.summaryLead) \(encounter.name)\(tieSummary)\(statusSummary)\(episodicSummary)\(territorySummary)"
+            ? "Focus: \(speechBehavior!.summaryLead) \(encounter.name)\(tieSummary)\(statusSummary)\(episodicSummary)\(territorySummary)\(socialFieldSummary)\(socialNeighborhoodSummary)"
             : (behavior != nil
-                ? "Focus: \(behavior!.summaryLead) \(encounter.name)\(tieSummary)\(statusSummary)\(episodicSummary)\(territorySummary)"
-                : "Focus: \(panelModeLabel) attention on \(encounter.name)\(tieSummary)\(statusSummary)\(episodicSummary)\(territorySummary)")
+                ? "Focus: \(behavior!.summaryLead) \(encounter.name)\(tieSummary)\(statusSummary)\(episodicSummary)\(territorySummary)\(socialFieldSummary)\(socialNeighborhoodSummary)"
+                : "Focus: \(panelModeLabel) attention on \(encounter.name)\(tieSummary)\(statusSummary)\(episodicSummary)\(territorySummary)\(socialFieldSummary)\(socialNeighborhoodSummary)")
         let panelLine = speechBehavior != nil
-            ? "Intent: \(encounter.name)  •  \(speechBehavior!.panelLabel)  •  \(Int(round(encounter.distance)))m\(caregivingSuffix)\(memorySuffix)\(tieSuffix)\(statusSuffix)\(episodicSuffix)\(territorySuffix)"
+            ? "Intent: \(encounter.name)  •  \(speechBehavior!.panelLabel)  •  \(Int(round(encounter.distance)))m\(caregivingSuffix)\(memorySuffix)\(tieSuffix)\(statusSuffix)\(episodicSuffix)\(territorySuffix)\(socialFieldSuffix)"
             : (behavior != nil
-                ? "Intent: \(encounter.name)  •  \(behavior!.panelLabel)  •  \(Int(round(encounter.distance)))m\(caregivingSuffix)\(memorySuffix)\(tieSuffix)\(statusSuffix)\(episodicSuffix)\(territorySuffix)"
-                : "Intent: \(encounter.name)  •  \(panelModeLabel)  •  \(Int(round(encounter.distance)))m\(caregivingSuffix)\(memorySuffix)\(tieSuffix)\(statusSuffix)\(episodicSuffix)\(territorySuffix)")
+                ? "Intent: \(encounter.name)  •  \(behavior!.panelLabel)  •  \(Int(round(encounter.distance)))m\(caregivingSuffix)\(memorySuffix)\(tieSuffix)\(statusSuffix)\(episodicSuffix)\(territorySuffix)\(socialFieldSuffix)"
+                : "Intent: \(encounter.name)  •  \(panelModeLabel)  •  \(Int(round(encounter.distance)))m\(caregivingSuffix)\(memorySuffix)\(tieSuffix)\(statusSuffix)\(episodicSuffix)\(territorySuffix)\(socialFieldSuffix)")
         let fallbackStory = (speechBehavior != nil
             ? (memoryBehavior != nil
                 ? "\(capture.selectedName) is \(speechBehavior!.storyLead) \(encounter.name), with \(memoryBehavior!.storyLead) threading through the speech plumes and lane pulses."
@@ -12698,6 +15598,8 @@ private func immersiveApeAttentionFocus(
             + immersiveApeStatusStoryTail(statusBehavior)
             + immersiveApeEpisodicRecallStoryTail(episodicBehavior)
             + immersiveApeTerritoryStoryTail(territoryBehavior)
+            + immersiveApeSocialFieldStoryTail(socialFieldContext)
+            + immersiveApeSocialNeighborhoodStoryTail(socialNeighborhoodContext)
 
         return ImmersiveApeAttentionFocus(
             kind: kind,
@@ -12709,6 +15611,7 @@ private func immersiveApeAttentionFocus(
             color: focusColor,
             distance: encounter.distance,
             cameraWeight: min(1.0, 0.58 + (encounter.importance * 0.22)),
+            socialTargetIndex: encounter.ape.index,
             foodType: nil,
             foodAbundance: 0,
             alternateFoodType: nil,
@@ -12780,6 +15683,7 @@ private func immersiveApeAttentionFocus(
             color: focusColor,
             distance: cue.distance,
             cameraWeight: scarcity ? 0.58 : (feeding ? 0.72 : min(0.82, (alternateCue != nil ? 0.7 : 0.66) + (approachStrength * 0.1))),
+            socialTargetIndex: nil,
             foodType: cue.food.food_type,
             foodAbundance: cue.abundance,
             alternateFoodType: alternateCue?.food.food_type,
@@ -12872,6 +15776,7 @@ private func immersiveApeAttentionFocus(
             color: immersiveApeFoodScarcityTint(nil),
             distance: emptyDistance,
             cameraWeight: 0.5,
+            socialTargetIndex: nil,
             foodType: nil,
             foodAbundance: 0,
             alternateFoodType: nil,
@@ -12911,6 +15816,7 @@ private func immersiveApeAttentionFocus(
             color: SIMD4<Float>(0.72, 0.84, 1.0, 0.16),
             distance: restDistance,
             cameraWeight: 0.42,
+            socialTargetIndex: nil,
             foodType: nil,
             foodAbundance: 0,
             alternateFoodType: nil,
@@ -12963,6 +15869,7 @@ private func immersiveApeAttentionFocus(
         color: SIMD4<Float>(0.9, 0.95, 1.0, 0.12),
         distance: roamDistance,
         cameraWeight: 0.5,
+        socialTargetIndex: nil,
         foodType: nil,
         foodAbundance: 0,
         alternateFoodType: nil,
@@ -14522,12 +17429,34 @@ private func immersiveApeEncounterColor(_ mode: ImmersiveApeEncounterMode) -> SI
     }
 }
 
-private func immersiveApeEncounterStory(capture: ImmersiveApeSceneCapture) -> String {
+private func immersiveApeEncounterStory(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> String {
     let encounters = immersiveApeEncounters(capture: capture)
     let focus = immersiveApeAttentionFocus(capture: capture, encounters: encounters)
+    let weatherTail = immersiveApeWeatherStoryTail(
+        immersiveApeWeatherContext(capture: capture, grid: grid, environment: environment)
+    )
+    let precipitationTail = immersiveApePrecipitationStoryTail(
+        immersiveApePrecipitationContext(capture: capture, grid: grid, environment: environment)
+    )
+    let airflowTail = immersiveApeAirflowStoryTail(
+        immersiveApeAirflowContext(capture: capture, grid: grid, environment: environment)
+    )
+    let vaporTail = immersiveApeVaporStoryTail(
+        immersiveApeVaporContext(capture: capture, grid: grid, environment: environment)
+    )
+    let surfaceWaterTail = immersiveApeSurfaceWaterStoryTail(
+        immersiveApeSurfaceWaterContext(capture: capture, grid: grid, environment: environment)
+    )
+    let coverResponseTail = immersiveApeCoverResponseStoryTail(
+        immersiveApeCoverResponseContext(capture: capture, grid: grid, environment: environment)
+    )
 
-    guard let encounter = encounters.first else {
-        return focus.fallbackStory
+    guard let encounter = immersiveApeFocusedEncounter(focus: focus, encounters: encounters) else {
+        return focus.fallbackStory + weatherTail + precipitationTail + airflowTail + vaporTail + surfaceWaterTail + coverResponseTail
     }
 
     let meetingBehavior = immersiveApeMeetingBehavior(mode: encounter.mode, distance: encounter.distance)
@@ -14541,6 +17470,12 @@ private func immersiveApeEncounterStory(capture: ImmersiveApeSceneCapture) -> St
     let statusTail = immersiveApeStatusStoryTail(statusBehavior)
     let episodicTail = immersiveApeEpisodicRecallStoryTail(episodicBehavior)
     let territoryTail = immersiveApeTerritoryStoryTail(territoryBehavior)
+    let socialFieldTail = immersiveApeSocialFieldStoryTail(
+        immersiveApeSocialFieldContext(primary: encounter, encounters: encounters)
+    )
+    let socialNeighborhoodTail = immersiveApeSocialNeighborhoodStoryTail(
+        immersiveApeSocialNeighborhoodContext(capture: capture, encounters: encounters)
+    )
     let caregivingContext = encounter.mode == .caregiving
         ? immersiveApeEncounterCaregivingContext(selected: capture.snapshot.selected, nearby: encounter.ape)
         : nil
@@ -14609,15 +17544,46 @@ private func immersiveApeEncounterStory(capture: ImmersiveApeSceneCapture) -> St
             : "\(capture.selectedName) has \(encounter.name) nearby, a quiet social cue inside the wider procedural world."
     }
 
-    return baseStory + tieTail + statusTail + episodicTail + territoryTail
+    return baseStory + tieTail + statusTail + episodicTail + territoryTail + socialFieldTail + socialNeighborhoodTail + weatherTail + precipitationTail + airflowTail + vaporTail + surfaceWaterTail + coverResponseTail
 }
 
-private func immersiveApeEncounterPanel(capture: ImmersiveApeSceneCapture) -> String {
+private func immersiveApeEncounterPanel(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> String {
     let encounters = immersiveApeEncounters(capture: capture)
     let focus = immersiveApeAttentionFocus(capture: capture, encounters: encounters)
+    let neighborhoodContext = immersiveApeSocialNeighborhoodContext(capture: capture, encounters: encounters)
+    let weatherContext = immersiveApeWeatherContext(capture: capture, grid: grid, environment: environment)
+    let precipitationContext = immersiveApePrecipitationContext(capture: capture, grid: grid, environment: environment)
+    let airflowContext = immersiveApeAirflowContext(capture: capture, grid: grid, environment: environment)
+    let vaporContext = immersiveApeVaporContext(capture: capture, grid: grid, environment: environment)
+    let surfaceWaterContext = immersiveApeSurfaceWaterContext(capture: capture, grid: grid, environment: environment)
+    let coverResponseContext = immersiveApeCoverResponseContext(capture: capture, grid: grid, environment: environment)
 
     guard !encounters.isEmpty else {
-        return "\(focus.panelLine)\nNo close apes within the current encounter radius."
+        var panelLines = [focus.panelLine]
+        if let weatherContext {
+            panelLines.append("Sky: \(weatherContext.panelLabel)")
+        }
+        if let precipitationContext {
+            panelLines.append("Rain: \(precipitationContext.panelLabel)")
+        }
+        if let airflowContext {
+            panelLines.append("Air: \(airflowContext.panelLabel)")
+        }
+        if let vaporContext {
+            panelLines.append("Vapor: \(vaporContext.panelLabel)")
+        }
+        if let surfaceWaterContext {
+            panelLines.append("Ground: \(surfaceWaterContext.panelLabel)")
+        }
+        if let coverResponseContext {
+            panelLines.append("Cover: \(coverResponseContext.panelLabel)")
+        }
+        panelLines.append("No close apes within the current encounter radius.")
+        return panelLines.joined(separator: "\n")
     }
 
     let encounterLines = encounters.prefix(3).enumerated().map { offset, encounter in
@@ -14633,24 +17599,52 @@ private func immersiveApeEncounterPanel(capture: ImmersiveApeSceneCapture) -> St
         return "\(offset + 1). \(encounter.name)  •  \(encounter.mode.label)  •  \(distance)m\(caregivingSuffix)\(memorySuffix)\(tieSuffix)\(statusSuffix)\(episodicSuffix)\(territorySuffix)"
     }
 
-    return ([focus.panelLine] + encounterLines).joined(separator: "\n")
+    var panelLines = [focus.panelLine]
+    if let neighborhoodContext {
+        panelLines.append("Field: \(neighborhoodContext.panelLabel)")
+    }
+    if let weatherContext {
+        panelLines.append("Sky: \(weatherContext.panelLabel)")
+    }
+    if let precipitationContext {
+        panelLines.append("Rain: \(precipitationContext.panelLabel)")
+    }
+    if let airflowContext {
+        panelLines.append("Air: \(airflowContext.panelLabel)")
+    }
+    if let vaporContext {
+        panelLines.append("Vapor: \(vaporContext.panelLabel)")
+    }
+    if let surfaceWaterContext {
+        panelLines.append("Ground: \(surfaceWaterContext.panelLabel)")
+    }
+    if let coverResponseContext {
+        panelLines.append("Cover: \(coverResponseContext.panelLabel)")
+    }
+    panelLines.append(contentsOf: encounterLines)
+
+    return panelLines.joined(separator: "\n")
 }
 
 private func immersiveApeHUDState(
     for capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment,
     paused: Bool,
     performance: String
 ) -> ImmersiveApeHUDState {
     let selected = capture.snapshot.selected
     let sexLabel = selected.female != 0 ? "Female" : "Male"
     let ageDays = Int(selected.age_days.rounded())
-    let encounterStory = immersiveApeEncounterStory(capture: capture)
-    let encounterPanel = immersiveApeEncounterPanel(capture: capture)
+    let encounterStory = immersiveApeEncounterStory(capture: capture, grid: grid, environment: environment)
+    let encounterPanel = immersiveApeEncounterPanel(capture: capture, grid: grid, environment: environment)
+    let surfaceWaterSummary = immersiveApeSurfaceWaterContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
+    let coverResponseSummary = immersiveApeCoverResponseContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
 
     return ImmersiveApeHUDState(
         headline: "\(capture.selectedName)  •  \(sexLabel)  •  \(ageDays)d  •  Cycle \(immersiveApeCurrentDevelopmentCycle) / 100",
         status: "\(immersiveApeTimeString(capture.snapshot.time))  •  \(immersiveApeWeatherDescription(capture.snapshot.weather))  •  \(immersiveApeTideDescription(capture.snapshot.tide))  •  \(capture.apeCount) apes live  •  \(paused ? "Paused" : "Following selected ape")",
-        detail: "\(immersiveApeFocusDescription(capture: capture))  •  \(immersiveApeStateDescription(selected.state))  •  \(immersiveApeGoalDescription(selected.goal_type))",
+        detail: "\(immersiveApeFocusDescription(capture: capture))\(surfaceWaterSummary)\(coverResponseSummary)  •  \(immersiveApeStateDescription(selected.state))  •  \(immersiveApeGoalDescription(selected.goal_type))",
         performance: performance,
         story: encounterStory,
         encounters: encounterPanel,
