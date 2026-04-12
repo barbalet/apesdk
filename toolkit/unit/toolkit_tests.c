@@ -513,8 +513,11 @@ void debug_print_vect3(const char* name, n_vect3* v) {
 
 void debug_print_memory_list(const char* name, memory_list* list) {
     if (list) {
-        printf("DEBUG: %s - count: %u, max: %u, unit_size: %u\n", 
-               name, list->count, list->max, list->unit_size);
+        printf("DEBUG: %s - count: %lu, max: %lu, unit_size: %lu\n",
+               name,
+               (unsigned long)list->count,
+               (unsigned long)list->max,
+               (unsigned long)list->unit_size);
     } else {
         printf("DEBUG: %s - NULL\n", name);
     }

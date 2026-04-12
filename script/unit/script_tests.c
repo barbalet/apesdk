@@ -42,6 +42,7 @@
 static int tests_run = 0;
 static int tests_passed = 0;
 static int tests_failed = 0;
+static n_int mock_script_values[256] = {0};
 
 n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
@@ -67,23 +68,18 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
 
 // Mock implementations for testing
 static n_int test_script_input(void *individual, n_byte kind, n_int value) {
-    // Simple mock that just stores the value
-    static n_int stored_values[256] = {0};
-    if (kind < 256) {
-        stored_values[kind] = value;
-        return 0; // Success
-    }
-    return -1; // Error
+    (void)individual;
+
+    mock_script_values[kind] = value;
+    return 0;
 }
 
 static n_int test_script_output(void *code, void *individual, n_byte *kind, n_int *number) {
-    // Simple mock that returns stored values
-    static n_int stored_values[256] = {0};
-    if (*kind < 256) {
-        *number = stored_values[*kind];
-        return 0; // Success
-    }
-    return -1; // Error
+    (void)code;
+    (void)individual;
+
+    *number = mock_script_values[*kind];
+    return 0;
 }
 
 static void test_script_external_start(void *individual, void *structure, void *data) {
@@ -333,6 +329,7 @@ void test_function_pointers(void) {
     n_int number = 0;
     result = output_func(NULL, NULL, &kind, &number);
     TEST_ASSERT(result == 0, "Mock output function should return success");
+    TEST_ASSERT(number == 42, "Mock output function should return the stored value");
 }
 
 // Test io_int_to_bytes and io_bytes_to_int functions

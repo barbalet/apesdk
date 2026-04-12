@@ -64,10 +64,10 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     tests_run++; \
     if ((expected) == (actual)) { \
         tests_passed++; \
-        printf("PASS: %s (expected: %d, got: %d)\n", message, expected, actual); \
+        printf("PASS: %s (expected: %ld, got: %ld)\n", message, (long)(expected), (long)(actual)); \
     } else { \
         tests_failed++; \
-        printf("FAIL: %s (expected: %d, got: %d)\n", message, expected, actual); \
+        printf("FAIL: %s (expected: %ld, got: %ld)\n", message, (long)(expected), (long)(actual)); \
     } \
 } while(0)
 

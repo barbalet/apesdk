@@ -55,7 +55,7 @@ int main ( int c, char **v )
 
     if ( c == 2 )
     {
-        n_int      string_length = io_length( ( n_byte * )v[1], STRING_BLOCK_SIZE );
+        n_int      string_length = io_length( v[1], STRING_BLOCK_SIZE );
 
         if ( string_length > 0 )
         {
