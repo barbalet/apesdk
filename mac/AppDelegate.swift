@@ -444,13 +444,13 @@ enum ImmersiveApePresentationMode {
         case .fullScreenPrimary:
             return """
                 Mode 1 / 2  •  Full Screen Primary
-                Fills the main display and keeps the immersive HUD spread wide across the screen.
+                Fills the main display while detached companion windows stay free to move around it.
                 Key: W toggle floating window
                 """
         case .floatingWindow:
             return """
                 Mode 2 / 2  •  Floating Window
-                Uses a centered resizable window so the simulation can share space with other Mac apps.
+                Uses a centered resizable main window while detached panels can cluster beside it.
                 Key: W toggle full-screen primary
                 """
         }
@@ -492,14 +492,14 @@ enum ImmersiveApePanelLayoutMode {
         switch self {
         case .wideImmersive:
             return """
-                Layout 1 / 2  •  Wide Immersive
-                Keeps the HUD left, encounters right, and the story low and centered for the broad full-screen field.
+                Layout 1 / 2  •  Detached Wide Spread
+                Positions the detached HUD, encounter, story, help, and feedback windows around the broad full-screen field.
                 Auto: full-screen primary
                 """
         case .sharedWindow:
             return """
-                Layout 2 / 2  •  Shared Window
-                Keeps the HUD left while encounter and story panels dock into a right-side column for desktop sharing.
+                Layout 2 / 2  •  Detached Desktop Cluster
+                Positions the detached panel windows beside the floating simulation window for desktop sharing.
                 Auto: floating window
                 """
         }
@@ -508,9 +508,9 @@ enum ImmersiveApePanelLayoutMode {
     var accessibilitySentence: String {
         switch self {
         case .wideImmersive:
-            return "Panel layout wide immersive field."
+            return "Panel layout detached wide spread."
         case .sharedWindow:
-            return "Panel layout shared window column."
+            return "Panel layout detached desktop cluster."
         }
     }
 }
@@ -526,6 +526,55 @@ final class ImmersiveApeWindow: NSWindow {
 
     override func cancelOperation(_ sender: Any?) {
         NSApp.terminate(sender)
+    }
+}
+
+final class ImmersiveApePanelWindowController: NSWindowController {
+    init(title: String, contentView: NSView, defaultSize: NSSize, minSize: NSSize) {
+        let styleMask: NSWindow.StyleMask = [.titled, .miniaturizable, .resizable]
+        let window = ImmersiveApeWindow(
+            contentRect: NSRect(origin: .zero, size: defaultSize),
+            styleMask: styleMask,
+            backing: .buffered,
+            defer: false
+        )
+
+        contentView.frame = NSRect(origin: .zero, size: defaultSize)
+        contentView.autoresizingMask = [.width, .height]
+        contentView.translatesAutoresizingMaskIntoConstraints = true
+
+        window.title = title
+        window.isReleasedWhenClosed = false
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.hasShadow = true
+        window.level = .floating
+        window.collectionBehavior = [.managed, .fullScreenAuxiliary]
+        window.minSize = minSize
+        window.contentView = contentView
+
+        super.init(window: window)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
+
+    func setFrame(_ frame: NSRect, display: Bool = true) {
+        window?.setFrame(frame.integral, display: display)
+    }
+
+    func showIfNeeded() {
+        guard let window else {
+            return
+        }
+
+        window.orderFrontRegardless()
+    }
+
+    func hide() {
+        window?.orderOut(nil)
     }
 }
 
@@ -587,6 +636,8 @@ final class ImmersiveApeWindowController: NSWindowController, NSWindowDelegate {
                 return
             }
 
+            self.immersiveViewController.updateDetachedPanelLayout()
+            self.immersiveViewController.orderDetachedPanelsFront()
             self.immersiveViewController.focusRenderer()
             window.makeKeyAndOrderFront(sender)
         }
@@ -594,6 +645,7 @@ final class ImmersiveApeWindowController: NSWindowController, NSWindowDelegate {
 
     func shutdown() {
         immersiveApeDebugLog("shutdown")
+        immersiveViewController.closeDetachedPanels()
         immersiveViewController.shutdown()
     }
 
@@ -623,6 +675,8 @@ final class ImmersiveApeWindowController: NSWindowController, NSWindowDelegate {
         window.orderFrontRegardless()
         window.makeKeyAndOrderFront(nil)
         window.makeMain()
+        immersiveViewController.updateDetachedPanelLayout()
+        immersiveViewController.orderDetachedPanelsFront()
         immersiveViewController.focusRenderer()
     }
 
@@ -640,6 +694,8 @@ final class ImmersiveApeWindowController: NSWindowController, NSWindowDelegate {
         NSApp.activate(ignoringOtherApps: true)
         window?.orderFrontRegardless()
         window?.makeKeyAndOrderFront(nil)
+        immersiveViewController.updateDetachedPanelLayout()
+        immersiveViewController.orderDetachedPanelsFront()
         immersiveViewController.focusRenderer()
     }
 
@@ -952,7 +1008,7 @@ final class ImmersiveApeViewController: NSViewController {
     private let presentationTitleLabel = NSTextField(labelWithString: "Window")
     private let presentationLabel = NSTextField(labelWithString: "Full-screen primary mode is active. Press W to toggle a floating window.")
     private let layoutTitleLabel = NSTextField(labelWithString: "Layout")
-    private let layoutLabel = NSTextField(labelWithString: "Wide immersive layout is active. Switch to a floating window to dock encounter and story panels into a shared desktop column.")
+    private let layoutLabel = NSTextField(labelWithString: "Detached panel windows are active. Full-screen spreads them wide; floating mode clusters them beside the simulation window.")
     private let guideTitleLabel = NSTextField(labelWithString: "Guide")
     private let guideLabel = NSTextField(labelWithString: "Guide hidden. Press / to open the interaction guide for controls, budgets, ambience, and current shell state.")
     private let feedbackTitleLabel = NSTextField(labelWithString: "Feedback")
@@ -999,9 +1055,12 @@ final class ImmersiveApeViewController: NSViewController {
     private var latestSceneAccessibilitySummary = "Immersive Ape is starting up. Wait for a selected ape, then press A to hear the current scene summary."
     private var latestAudioState = ImmersiveApeAudioState.silent
     private var latestControlFeedbackAccessibility = "No recent control feedback."
-    private var latestAccessibilitySummary = "Immersive Ape is starting up. Wait for a selected ape, then press A to hear the current scene summary. Audio standing by for the next selected ape. Performance budget balanced with a 60 frames per second target, spatial LOD rings focused near the selected ape, and adaptive trade-offs, frame headroom, sample window state, adaptive outlook, adaptive confidence, adaptive thresholds, adaptive band position, shift readiness, plus budget margins standing by for the next scene. Focus neighborhood waiting for a selected ape. Focus history unavailable. Focus anchors empty. Window mode full screen primary. Panel layout wide immersive field. Interaction guide closed. No recent control feedback."
-    private var widePanelConstraints: [NSLayoutConstraint] = []
-    private var sharedWindowConstraints: [NSLayoutConstraint] = []
+    private var latestAccessibilitySummary = "Immersive Ape is starting up. Wait for a selected ape, then press A to hear the current scene summary. Audio standing by for the next selected ape. Performance budget balanced with a 60 frames per second target, spatial LOD rings focused near the selected ape, and adaptive trade-offs, frame headroom, sample window state, adaptive outlook, adaptive confidence, adaptive thresholds, adaptive band position, shift readiness, plus budget margins standing by for the next scene. Focus neighborhood waiting for a selected ape. Focus history unavailable. Focus anchors empty. Window mode full screen primary. Panel layout detached wide spread. Interaction guide closed. No recent control feedback."
+    private var hudWindowController: ImmersiveApePanelWindowController?
+    private var encounterWindowController: ImmersiveApePanelWindowController?
+    private var storyWindowController: ImmersiveApePanelWindowController?
+    private var helpWindowController: ImmersiveApePanelWindowController?
+    private var feedbackWindowController: ImmersiveApePanelWindowController?
     private var feedbackHideTimer: Timer?
     private var feedbackDisplayToken = 0
     private var audioMuted = false
@@ -1042,7 +1101,6 @@ final class ImmersiveApeViewController: NSViewController {
         hudChrome.state = .active
         hudChrome.wantsLayer = true
         hudChrome.layer?.cornerRadius = 18
-        rootView.addSubview(hudChrome)
 
         let stackView = NSStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -1056,7 +1114,6 @@ final class ImmersiveApeViewController: NSViewController {
         encounterChrome.state = .active
         encounterChrome.wantsLayer = true
         encounterChrome.layer?.cornerRadius = 18
-        rootView.addSubview(encounterChrome)
 
         let encounterStack = NSStackView()
         encounterStack.translatesAutoresizingMaskIntoConstraints = false
@@ -1070,7 +1127,6 @@ final class ImmersiveApeViewController: NSViewController {
         storyChrome.state = .active
         storyChrome.wantsLayer = true
         storyChrome.layer?.cornerRadius = 18
-        rootView.addSubview(storyChrome)
 
         let storyStack = NSStackView()
         storyStack.translatesAutoresizingMaskIntoConstraints = false
@@ -1084,9 +1140,7 @@ final class ImmersiveApeViewController: NSViewController {
         feedbackChrome.state = .active
         feedbackChrome.wantsLayer = true
         feedbackChrome.layer?.cornerRadius = 18
-        feedbackChrome.alphaValue = 0
         feedbackChrome.isHidden = true
-        rootView.addSubview(feedbackChrome)
 
         let feedbackStack = NSStackView()
         feedbackStack.translatesAutoresizingMaskIntoConstraints = false
@@ -1101,7 +1155,6 @@ final class ImmersiveApeViewController: NSViewController {
         helpChrome.wantsLayer = true
         helpChrome.layer?.cornerRadius = 20
         helpChrome.isHidden = true
-        rootView.addSubview(helpChrome)
 
         let helpStack = NSStackView()
         helpStack.translatesAutoresizingMaskIntoConstraints = false
@@ -1229,57 +1282,7 @@ final class ImmersiveApeViewController: NSViewController {
         errorLabel.isHidden = true
         rootView.addSubview(errorLabel)
 
-        refreshPresentationHUD()
-        refreshLayoutHUD()
-        refreshGuideHUD()
-        refreshAudioHUD()
-        setPerformanceHUD(performanceLabel.stringValue)
-        updateHistoryHUD()
-        updateAnchorHUD()
-        updateNavigatorHUD()
-        helpBodyLabel.stringValue = interactionGuideText()
-        configureAccessibilityElements()
-        applyAccessibilityDisplayPreferences()
-
-        widePanelConstraints = [
-            hudChrome.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 24),
-            hudChrome.topAnchor.constraint(equalTo: rootView.safeAreaLayoutGuide.topAnchor, constant: 24),
-            hudChrome.widthAnchor.constraint(lessThanOrEqualToConstant: 520),
-
-            encounterChrome.topAnchor.constraint(equalTo: rootView.safeAreaLayoutGuide.topAnchor, constant: 24),
-            encounterChrome.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -24),
-            encounterChrome.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
-            encounterChrome.leadingAnchor.constraint(greaterThanOrEqualTo: hudChrome.trailingAnchor, constant: 24),
-
-            storyChrome.centerXAnchor.constraint(equalTo: rootView.centerXAnchor),
-            storyChrome.bottomAnchor.constraint(equalTo: rootView.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            storyChrome.widthAnchor.constraint(lessThanOrEqualToConstant: 760),
-            storyChrome.leadingAnchor.constraint(greaterThanOrEqualTo: rootView.leadingAnchor, constant: 24),
-            storyChrome.trailingAnchor.constraint(lessThanOrEqualTo: rootView.trailingAnchor, constant: -24)
-        ]
-
-        sharedWindowConstraints = [
-            hudChrome.leadingAnchor.constraint(equalTo: rootView.leadingAnchor, constant: 24),
-            hudChrome.topAnchor.constraint(equalTo: rootView.safeAreaLayoutGuide.topAnchor, constant: 24),
-            hudChrome.widthAnchor.constraint(lessThanOrEqualToConstant: 440),
-
-            encounterChrome.topAnchor.constraint(equalTo: rootView.safeAreaLayoutGuide.topAnchor, constant: 24),
-            encounterChrome.trailingAnchor.constraint(equalTo: rootView.trailingAnchor, constant: -24),
-            encounterChrome.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
-            encounterChrome.leadingAnchor.constraint(greaterThanOrEqualTo: hudChrome.trailingAnchor, constant: 16),
-
-            storyChrome.topAnchor.constraint(equalTo: encounterChrome.bottomAnchor, constant: 20),
-            storyChrome.leadingAnchor.constraint(equalTo: encounterChrome.leadingAnchor),
-            storyChrome.trailingAnchor.constraint(equalTo: encounterChrome.trailingAnchor),
-            storyChrome.bottomAnchor.constraint(lessThanOrEqualTo: rootView.safeAreaLayoutGuide.bottomAnchor, constant: -24)
-        ]
-
         NSLayoutConstraint.activate([
-            metalView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
-            metalView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
-            metalView.topAnchor.constraint(equalTo: rootView.topAnchor),
-            metalView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor),
-
             stackView.leadingAnchor.constraint(equalTo: hudChrome.leadingAnchor, constant: 18),
             stackView.trailingAnchor.constraint(equalTo: hudChrome.trailingAnchor, constant: -18),
             stackView.topAnchor.constraint(equalTo: hudChrome.topAnchor, constant: 16),
@@ -1300,31 +1303,68 @@ final class ImmersiveApeViewController: NSViewController {
             feedbackStack.topAnchor.constraint(equalTo: feedbackChrome.topAnchor, constant: 14),
             feedbackStack.bottomAnchor.constraint(equalTo: feedbackChrome.bottomAnchor, constant: -14),
 
-            feedbackChrome.topAnchor.constraint(equalTo: rootView.safeAreaLayoutGuide.topAnchor, constant: 24),
-            feedbackChrome.centerXAnchor.constraint(equalTo: rootView.centerXAnchor),
-            feedbackChrome.widthAnchor.constraint(lessThanOrEqualToConstant: 460),
-            feedbackChrome.leadingAnchor.constraint(greaterThanOrEqualTo: rootView.leadingAnchor, constant: 40),
-            feedbackChrome.trailingAnchor.constraint(lessThanOrEqualTo: rootView.trailingAnchor, constant: -40),
-
             helpStack.leadingAnchor.constraint(equalTo: helpChrome.leadingAnchor, constant: 20),
             helpStack.trailingAnchor.constraint(equalTo: helpChrome.trailingAnchor, constant: -20),
             helpStack.topAnchor.constraint(equalTo: helpChrome.topAnchor, constant: 18),
             helpStack.bottomAnchor.constraint(equalTo: helpChrome.bottomAnchor, constant: -18),
 
-            helpChrome.centerXAnchor.constraint(equalTo: rootView.centerXAnchor),
-            helpChrome.centerYAnchor.constraint(equalTo: rootView.centerYAnchor),
-            helpChrome.widthAnchor.constraint(lessThanOrEqualToConstant: 640),
-            helpChrome.leadingAnchor.constraint(greaterThanOrEqualTo: rootView.leadingAnchor, constant: 40),
-            helpChrome.trailingAnchor.constraint(lessThanOrEqualTo: rootView.trailingAnchor, constant: -40),
+            metalView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
+            metalView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
+            metalView.topAnchor.constraint(equalTo: rootView.topAnchor),
+            metalView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor),
 
             errorLabel.centerXAnchor.constraint(equalTo: rootView.centerXAnchor),
             errorLabel.centerYAnchor.constraint(equalTo: rootView.centerYAnchor),
             errorLabel.leadingAnchor.constraint(greaterThanOrEqualTo: rootView.leadingAnchor, constant: 32),
             errorLabel.trailingAnchor.constraint(lessThanOrEqualTo: rootView.trailingAnchor, constant: -32)
-        ] + widePanelConstraints)
+        ])
+
+        hudWindowController = ImmersiveApePanelWindowController(
+            title: "Immersive Ape HUD",
+            contentView: hudChrome,
+            defaultSize: NSSize(width: 560, height: 900),
+            minSize: NSSize(width: 360, height: 420)
+        )
+        encounterWindowController = ImmersiveApePanelWindowController(
+            title: "Immersive Ape Encounters",
+            contentView: encounterChrome,
+            defaultSize: NSSize(width: 380, height: 260),
+            minSize: NSSize(width: 280, height: 180)
+        )
+        storyWindowController = ImmersiveApePanelWindowController(
+            title: "Immersive Ape Story",
+            contentView: storyChrome,
+            defaultSize: NSSize(width: 780, height: 220),
+            minSize: NSSize(width: 420, height: 180)
+        )
+        helpWindowController = ImmersiveApePanelWindowController(
+            title: "Immersive Ape Guide",
+            contentView: helpChrome,
+            defaultSize: NSSize(width: 680, height: 520),
+            minSize: NSSize(width: 520, height: 320)
+        )
+        feedbackWindowController = ImmersiveApePanelWindowController(
+            title: "Immersive Ape Feedback",
+            contentView: feedbackChrome,
+            defaultSize: NSSize(width: 500, height: 180),
+            minSize: NSSize(width: 360, height: 140)
+        )
+        helpWindowController?.hide()
+        feedbackWindowController?.hide()
+
+        refreshPresentationHUD()
+        refreshLayoutHUD()
+        refreshGuideHUD()
+        refreshAudioHUD()
+        setPerformanceHUD(performanceLabel.stringValue)
+        updateHistoryHUD()
+        updateAnchorHUD()
+        updateNavigatorHUD()
+        helpBodyLabel.stringValue = interactionGuideText()
+        configureAccessibilityElements()
+        applyAccessibilityDisplayPreferences()
 
         view = rootView
-        updatePanelLayout()
     }
 
     override func viewDidLoad() {
@@ -1370,6 +1410,8 @@ final class ImmersiveApeViewController: NSViewController {
 
     override func viewDidAppear() {
         super.viewDidAppear()
+        updateDetachedPanelLayout()
+        orderDetachedPanelsFront()
         focusRenderer()
     }
 
@@ -1380,6 +1422,27 @@ final class ImmersiveApeViewController: NSViewController {
             }
             self.view.window?.makeFirstResponder(self.metalView)
         }
+    }
+
+    func updateDetachedPanelLayout() {
+        updatePanelLayout()
+    }
+
+    func orderDetachedPanelsFront() {
+        synchronizeDetachedPanelVisibility()
+        for controller in persistentPanelWindowControllers() {
+            controller.showIfNeeded()
+        }
+        if helpOverlayVisible {
+            helpWindowController?.showIfNeeded()
+        }
+        if feedbackWindowController?.window?.isVisible == true {
+            feedbackWindowController?.showIfNeeded()
+        }
+    }
+
+    func closeDetachedPanels() {
+        allPanelWindowControllers().forEach { $0.close() }
     }
 
     func selectPreviousApe() {
@@ -2229,8 +2292,8 @@ final class ImmersiveApeViewController: NSViewController {
         feedbackOverlayTitleLabel.stringValue = title
         feedbackOverlayDetailLabel.stringValue = detail
         feedbackChrome.setAccessibilityValue("\(title). \(normalizedFeedbackSentence(detail))")
-        feedbackChrome.alphaValue = 1
         feedbackChrome.isHidden = false
+        feedbackWindowController?.showIfNeeded()
         refreshAccessibilitySummary()
 
         if isViewLoaded {
@@ -2253,8 +2316,8 @@ final class ImmersiveApeViewController: NSViewController {
             return
         }
 
-        feedbackChrome.alphaValue = 0
         feedbackChrome.isHidden = true
+        feedbackWindowController?.hide()
     }
 
     private func updateControlFeedback(_ state: ImmersiveApeHUDState) {
@@ -2463,10 +2526,73 @@ final class ImmersiveApeViewController: NSViewController {
         "Interaction guide open. Use left and right brackets to cycle apes, number keys one through four for nearby apes, minus and equals for recent focus history, number keys five through eight to recall focus anchors, shift plus five through eight to save focus anchors, comma and period for camera modes, semicolon and apostrophe for performance budgets, M to mute or restore procedural ambience, W to change window mode, A to announce the current scene summary, slash to close the guide, space to pause, and escape to quit. \(audioAccessibilitySentence()) \(performanceAccessibilitySentence()) \(focusNavigatorAccessibilitySentence()) \(currentPresentationMode.accessibilitySentence) \(currentPanelLayoutMode.accessibilitySentence)"
     }
 
+    private func allPanelWindowControllers() -> [ImmersiveApePanelWindowController] {
+        [
+            hudWindowController,
+            encounterWindowController,
+            storyWindowController,
+            helpWindowController,
+            feedbackWindowController
+        ]
+        .compactMap { $0 }
+    }
+
+    private func persistentPanelWindowControllers() -> [ImmersiveApePanelWindowController] {
+        [
+            hudWindowController,
+            encounterWindowController,
+            storyWindowController
+        ]
+        .compactMap { $0 }
+    }
+
+    private func panelWindowSize(_ controller: ImmersiveApePanelWindowController?, fallback: NSSize) -> NSSize {
+        guard let frame = controller?.window?.frame, frame.width > 0, frame.height > 0 else {
+            return fallback
+        }
+        return frame.size
+    }
+
+    private func clampedPanelFrame(origin: NSPoint, size: NSSize, within visibleFrame: NSRect) -> NSRect {
+        let horizontalInset: CGFloat = 20
+        let verticalInset: CGFloat = 24
+        let width = min(size.width, max(320, visibleFrame.width - (horizontalInset * 2)))
+        let height = min(size.height, max(160, visibleFrame.height - (verticalInset * 2)))
+        let minX = visibleFrame.minX + horizontalInset
+        let maxX = visibleFrame.maxX - horizontalInset - width
+        let minY = visibleFrame.minY + verticalInset
+        let maxY = visibleFrame.maxY - verticalInset - height
+        let x = min(max(origin.x, minX), maxX)
+        let y = min(max(origin.y, minY), maxY)
+        return NSRect(x: x, y: y, width: width, height: height).integral
+    }
+
+    private func synchronizeDetachedPanelVisibility() {
+        persistentPanelWindowControllers().forEach { $0.showIfNeeded() }
+
+        if helpOverlayVisible {
+            helpWindowController?.showIfNeeded()
+        } else {
+            helpWindowController?.hide()
+        }
+
+        if feedbackChrome.isHidden == false {
+            feedbackWindowController?.showIfNeeded()
+        } else {
+            feedbackWindowController?.hide()
+        }
+    }
+
     private func refreshHelpOverlay() {
-        helpChrome.isHidden = !helpOverlayVisible
         helpBodyLabel.stringValue = interactionGuideText()
         helpChrome.setAccessibilityValue(helpOverlayVisible ? interactionGuideText() : "Interaction guide hidden.")
+        if helpOverlayVisible {
+            helpChrome.isHidden = false
+            helpWindowController?.showIfNeeded()
+        } else {
+            helpChrome.isHidden = true
+            helpWindowController?.hide()
+        }
     }
 
     private func preferredPanelLayoutMode() -> ImmersiveApePanelLayoutMode {
@@ -2480,29 +2606,129 @@ final class ImmersiveApeViewController: NSViewController {
 
     private func updatePanelLayout() {
         let mode = preferredPanelLayoutMode()
+        currentPanelLayoutMode = mode
 
-        guard widePanelConstraints.isEmpty == false, sharedWindowConstraints.isEmpty == false else {
-            currentPanelLayoutMode = mode
+        guard let primaryWindow = view.window else {
+            refreshLayoutHUD()
+            refreshAccessibilitySummary()
             return
         }
 
-        if currentPanelLayoutMode != mode {
-            switch mode {
-            case .wideImmersive:
-                NSLayoutConstraint.deactivate(sharedWindowConstraints)
-                NSLayoutConstraint.activate(widePanelConstraints)
-            case .sharedWindow:
-                NSLayoutConstraint.deactivate(widePanelConstraints)
-                NSLayoutConstraint.activate(sharedWindowConstraints)
-            }
+        let primaryFrame = primaryWindow.frame
+        let visibleFrame = primaryWindow.screen?.visibleFrame ?? NSScreen.main?.visibleFrame ?? primaryFrame
+        let hudSize = panelWindowSize(hudWindowController, fallback: NSSize(width: 560, height: 900))
+        let encounterSize = panelWindowSize(encounterWindowController, fallback: NSSize(width: 380, height: 260))
+        let storySize = panelWindowSize(storyWindowController, fallback: NSSize(width: 780, height: 220))
+        let helpSize = panelWindowSize(helpWindowController, fallback: NSSize(width: 680, height: 520))
+        let feedbackSize = panelWindowSize(feedbackWindowController, fallback: NSSize(width: 500, height: 180))
+        let gutter: CGFloat = 20
 
-            currentPanelLayoutMode = mode
-
-            if isViewLoaded {
-                view.layoutSubtreeIfNeeded()
-            }
+        switch mode {
+        case .wideImmersive:
+            hudWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.minX + 24,
+                        y: primaryFrame.maxY - hudSize.height - 24
+                    ),
+                    size: hudSize,
+                    within: visibleFrame
+                )
+            )
+            encounterWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.maxX - encounterSize.width - 24,
+                        y: primaryFrame.maxY - encounterSize.height - 24
+                    ),
+                    size: encounterSize,
+                    within: visibleFrame
+                )
+            )
+            storyWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.midX - (storySize.width * 0.5),
+                        y: primaryFrame.minY + 24
+                    ),
+                    size: storySize,
+                    within: visibleFrame
+                )
+            )
+            helpWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.midX - (helpSize.width * 0.5),
+                        y: primaryFrame.midY - (helpSize.height * 0.5)
+                    ),
+                    size: helpSize,
+                    within: visibleFrame
+                )
+            )
+            feedbackWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.midX - (feedbackSize.width * 0.5),
+                        y: primaryFrame.maxY - feedbackSize.height - 24
+                    ),
+                    size: feedbackSize,
+                    within: visibleFrame
+                )
+            )
+        case .sharedWindow:
+            hudWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.minX - hudSize.width - gutter,
+                        y: primaryFrame.maxY - hudSize.height
+                    ),
+                    size: hudSize,
+                    within: visibleFrame
+                )
+            )
+            encounterWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.maxX + gutter,
+                        y: primaryFrame.maxY - encounterSize.height
+                    ),
+                    size: encounterSize,
+                    within: visibleFrame
+                )
+            )
+            storyWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.maxX + gutter,
+                        y: primaryFrame.maxY - encounterSize.height - gutter - storySize.height
+                    ),
+                    size: storySize,
+                    within: visibleFrame
+                )
+            )
+            helpWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.midX - (helpSize.width * 0.5),
+                        y: primaryFrame.midY - (helpSize.height * 0.5)
+                    ),
+                    size: helpSize,
+                    within: visibleFrame
+                )
+            )
+            feedbackWindowController?.setFrame(
+                clampedPanelFrame(
+                    origin: NSPoint(
+                        x: primaryFrame.midX - (feedbackSize.width * 0.5),
+                        y: primaryFrame.maxY + gutter
+                    ),
+                    size: feedbackSize,
+                    within: visibleFrame
+                )
+            )
         }
 
+        synchronizeDetachedPanelVisibility()
         refreshLayoutHUD()
         refreshAccessibilitySummary()
     }
