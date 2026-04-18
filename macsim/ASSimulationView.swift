@@ -366,6 +366,9 @@ private struct ImmersiveApeRenderQuality {
     let landformSampleStride: Int
     let waterReflectionSampleStride: Int
     let vegetationSampleStride: Int
+    let groundCoverPassCount: Int
+    let alphaVeilPassCount: Int
+    let skylineVeilPassCount: Int
     let maxNearby: Int
     let maxFood: Int
     let cloudBudgetMultiplier: Float
@@ -788,6 +791,165 @@ private struct ImmersiveApeCoverResponseContext {
     let driftDirection: SIMD3<Float>
     let focusIndex: Int
     let sectors: [ImmersiveApeCoverResponseContextSector]
+}
+
+private enum ImmersiveApeGroundCoverContextStyle: Equatable {
+    case reedBed
+    case sedgeFloor
+    case scrubFloor
+    case fernFloor
+    case stoneBreak
+}
+
+private struct ImmersiveApeGroundCoverContextSector {
+    let direction: SIMD3<Float>
+    let density: Float
+    let reedPresence: Float
+    let sedgePresence: Float
+    let scrubPresence: Float
+    let fernPresence: Float
+    let stonePresence: Float
+}
+
+private struct ImmersiveApeGroundCoverContext {
+    let style: ImmersiveApeGroundCoverContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let focusIndex: Int
+    let sectors: [ImmersiveApeGroundCoverContextSector]
+}
+
+private enum ImmersiveApeAlphaFoliageContextStyle: Equatable {
+    case reedVeil
+    case frondVeil
+    case leafScreen
+    case fernCurtain
+    case brokenVeil
+}
+
+private struct ImmersiveApeAlphaFoliageContextSector {
+    let direction: SIMD3<Float>
+    let density: Float
+    let openness: Float
+    let reedBias: Float
+    let frondBias: Float
+    let leafBias: Float
+    let fernBias: Float
+}
+
+private struct ImmersiveApeAlphaFoliageContext {
+    let style: ImmersiveApeAlphaFoliageContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let focusIndex: Int
+    let sectors: [ImmersiveApeAlphaFoliageContextSector]
+}
+
+private struct ImmersiveApeAlphaFoliageProfile {
+    let density: Float
+    let openness: Float
+    let reedBias: Float
+    let frondBias: Float
+    let leafBias: Float
+    let fernBias: Float
+    let heightBias: Float
+    let widthBias: Float
+}
+
+private enum ImmersiveApeSkylineFoliageContextStyle: Equatable {
+    case reedBand
+    case silhouetteBand
+    case canopyCurtain
+    case upperDrift
+    case brokenSkyline
+}
+
+private struct ImmersiveApeSkylineFoliageContextSector {
+    let direction: SIMD3<Float>
+    let density: Float
+    let openness: Float
+    let reedBias: Float
+    let bandBias: Float
+    let canopyBias: Float
+    let driftBias: Float
+}
+
+private struct ImmersiveApeSkylineFoliageContext {
+    let style: ImmersiveApeSkylineFoliageContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let focusIndex: Int
+    let sectors: [ImmersiveApeSkylineFoliageContextSector]
+}
+
+private struct ImmersiveApeSkylineFoliageProfile {
+    let density: Float
+    let openness: Float
+    let reedBias: Float
+    let bandBias: Float
+    let canopyBias: Float
+    let driftBias: Float
+    let riseBias: Float
+    let widthBias: Float
+}
+
+private enum ImmersiveApeFoliageDynamicsContextStyle: Equatable {
+    case sunSlashes
+    case moonApertures
+    case rainSweep
+    case surfSweep
+    case apeWake
+}
+
+private struct ImmersiveApeFoliageDynamicsContext {
+    let style: ImmersiveApeFoliageDynamicsContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+    let focusIndex: Int
+}
+
+private enum ImmersiveApeJungleCompositionContextStyle: Equatable {
+    case benchmarkCanopy
+    case shaftedDepth
+    case weatherVolume
+    case wakeCorridor
+    case layeredDepth
+}
+
+private struct ImmersiveApeJungleCompositionContext {
+    let style: ImmersiveApeJungleCompositionContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let strength: Float
+}
+
+private struct ImmersiveApeFoliageMotionDrive {
+    let direction: SIMD3<Float>
+    let strength: Float
+    let apePressure: Float
+    let surfPush: Float
+    let rainSweep: Float
+    let lightAperture: Float
+}
+
+private struct ImmersiveApeJungleCompositionPlacement {
+    let floorWeight: Float
+    let veilWeight: Float
+    let skylineWeight: Float
+    let lightWeight: Float
+    let motionWeight: Float
+    let benchmarkWeight: Float
+    let depthWeight: Float
+    let stabilityWeight: Float
 }
 
 private enum ImmersiveApeExposureContextStyle: Equatable {
@@ -3811,12 +3973,19 @@ private func immersiveApeCoverResponseContext(
                     t: exposedGround * 0.08
                 )
             )
+            let motionDrive = immersiveApeFoliageMotionDrive(
+                at: groundPosition,
+                material: habitatMaterial,
+                capture: capture,
+                environment: environment
+            )
             let posture = immersiveApeFloraPosture(
                 at: groundPosition,
                 material: habitatMaterial,
                 moisture: adjustedMoisture,
                 relief: relief,
                 habitat: habitat,
+                motionDrive: motionDrive,
                 environment: environment,
                 timeValue: Float(capture.snapshot.time),
                 variation: variation,
@@ -3945,7 +4114,8 @@ private func immersiveApeCoverResponseContext(
     }
 
     let overallCover = sectors.reduce(Float.zero) { $0 + $1.cover } / Float(max(1, sectors.count))
-    let coverSpread = (sectors.map(\.cover).max() ?? 0) - (sectors.map(\.cover).min() ?? 0)
+    let sectorCovers = sectors.map { $0.cover }
+    let coverSpread = (sectorCovers.max() ?? 0) - (sectorCovers.min() ?? 0)
     let canopyFocus = sectors.enumerated().max(by: { $0.element.canopyBias < $1.element.canopyBias })
         ?? (offset: 0, element: sectors[0])
     let shoreFocus = sectors.enumerated().max(by: { $0.element.shoreBias < $1.element.shoreBias })
@@ -3956,24 +4126,16 @@ private func immersiveApeCoverResponseContext(
         ?? (offset: 0, element: sectors[0])
     let openFocus = sectors.enumerated().max(by: { $0.element.openness < $1.element.openness })
         ?? (offset: 0, element: sectors[0])
-    let strongestResponse = max(
-        canopyFocus.element.canopyBias + (canopyFocus.element.droop * 0.4),
-        max(
-            shoreFocus.element.shoreBias + (shoreFocus.element.bend * 0.32),
-            max(
-                leeFocus.element.shelter + (leeFocus.element.cover * 0.26),
-                bendFocus.element.bend + (bendFocus.element.cover * 0.24)
-            )
-        )
-    )
-    let strength = immersiveApeClamp(
-        (overallCover * 0.42)
-            + (strongestResponse * 0.34)
-            + (openFocus.element.openness * 0.16)
-            + (coverSpread * 0.12),
-        min: 0.18,
-        max: 1.0
-    )
+    let canopyResponse = canopyFocus.element.canopyBias + (canopyFocus.element.droop * 0.4)
+    let shoreResponse = shoreFocus.element.shoreBias + (shoreFocus.element.bend * 0.32)
+    let leeResponse = leeFocus.element.shelter + (leeFocus.element.cover * 0.26)
+    let bendResponse = bendFocus.element.bend + (bendFocus.element.cover * 0.24)
+    let strongestResponse = max(canopyResponse, max(shoreResponse, max(leeResponse, bendResponse)))
+    let strengthBase = (overallCover * 0.42)
+        + (strongestResponse * 0.34)
+        + (openFocus.element.openness * 0.16)
+        + (coverSpread * 0.12)
+    let strength = immersiveApeClamp(strengthBase, min: 0.18, max: 1.0)
     let canopyLabel = immersiveApeDirectionalLabel(canopyFocus.offset)
     let shoreLabel = immersiveApeDirectionalLabel(shoreFocus.offset)
     let leeLabel = immersiveApeDirectionalLabel(leeFocus.offset)
@@ -4026,6 +4188,1301 @@ private func immersiveApeCoverResponseContext(
         driftDirection: driftDirection,
         focusIndex: focusIndex,
         sectors: sectors
+    )
+}
+
+private func immersiveApeGroundCoverDensityLabel(_ density: Float) -> String {
+    switch density {
+    case 0.72...:
+        return "Thick"
+    case 0.5...:
+        return "Dense"
+    case 0.32...:
+        return "Layered"
+    default:
+        return "Light"
+    }
+}
+
+private func immersiveApeGroundCoverContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeGroundCoverContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    let sampleDistances: [(distance: Float, weight: Float)] = [(2.5, 1.0), (6.0, 0.88), (10.5, 0.7)]
+    let biomeDNA = immersiveApeBiomeDNAProfile(
+        selected: capture.snapshot.selected,
+        selectedIndex: Int32(capture.snapshot.selected_index),
+        worldSeed: capture.snapshot.world_seed
+    )
+    let sectors = sectorDirections.map { direction in
+        var densitySum: Float = 0
+        var reedSum: Float = 0
+        var sedgeSum: Float = 0
+        var scrubSum: Float = 0
+        var fernSum: Float = 0
+        var stoneSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = direction * sample.distance
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let nearestRow = min(max(Int(coordinates.row.rounded()), 0), grid.resolution - 1)
+            let nearestColumn = min(max(Int(coordinates.column.rounded()), 0), grid.resolution - 1)
+            let material = grid.material(row: nearestRow, column: nearestColumn)
+
+            guard material != 0 else {
+                continue
+            }
+
+            let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let moisture = immersiveApeSaturate((waterHeight - groundPosition.y + 0.08) * 0.9)
+            let adjustedMoisture = immersiveApeClamp(
+                (moisture * biomeDNA.moistureAffinity)
+                    + (relief.basin * 0.14)
+                    + (relief.runoff * 0.18)
+                    - (relief.ridge * 0.12),
+                min: 0,
+                max: 1
+            )
+            let variation = immersiveApeNoise(Int32(nearestColumn), Int32(nearestRow), seed: capture.snapshot.world_seed ^ 0x6AC4_3D5F)
+            let baseHabitat = immersiveApeBiomeHabitat(
+                material: material,
+                row: coordinates.row,
+                column: coordinates.column,
+                moisture: adjustedMoisture,
+                variation: variation,
+                seed: capture.snapshot.world_seed,
+                dnaProfile: biomeDNA
+            )
+            let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+            let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+            let runoffGrowth = relief.runoff
+            let habitat = ImmersiveApeBiomeHabitat(
+                coverDensity: immersiveApeClamp(
+                    baseHabitat.coverDensity
+                        + (shelteredGrowth * 0.14)
+                        + (runoffGrowth * 0.1)
+                        - (exposedGround * 0.12),
+                    min: 0,
+                    max: 1
+                ),
+                clutterDensity: immersiveApeClamp(
+                    baseHabitat.clutterDensity
+                        + (exposedGround * 0.12)
+                        + (runoffGrowth * 0.05)
+                        - (shelteredGrowth * 0.04),
+                    min: 0,
+                    max: 1
+                ),
+                accentColor: baseHabitat.accentColor
+            )
+            let shorelineBlend = immersiveApeSaturate((0.34 - abs(waterHeight - groundPosition.y)) * 2.6)
+            let floorDensity = immersiveApeClamp(
+                (habitat.coverDensity * 0.76)
+                    + (shelteredGrowth * 0.12)
+                    + (runoffGrowth * 0.08)
+                    + (adjustedMoisture * 0.12)
+                    - (exposedGround * 0.1),
+                min: 0,
+                max: 1
+            )
+            let densityContribution: Float
+            let reedContribution: Float
+            let sedgeContribution: Float
+            let scrubContribution: Float
+            let fernContribution: Float
+            let stoneContribution: Float
+
+            switch material {
+            case 1:
+                reedContribution = immersiveApeClamp(
+                    (floorDensity * 0.52)
+                        + (shorelineBlend * 0.32)
+                        + (adjustedMoisture * 0.16),
+                    min: 0,
+                    max: 1
+                ) * (0.88 + (biomeDNA.reedDensity * 0.18))
+                sedgeContribution = 0
+                scrubContribution = 0
+                fernContribution = 0
+                stoneContribution = 0
+                densityContribution = reedContribution
+            case 2:
+                reedContribution = 0
+                sedgeContribution = immersiveApeClamp(
+                    (floorDensity * 0.58)
+                        + (shelteredGrowth * 0.16)
+                        + (adjustedMoisture * 0.12),
+                    min: 0,
+                    max: 1
+                ) * (0.88 + (biomeDNA.meadowDensity * 0.18))
+                scrubContribution = 0
+                fernContribution = 0
+                stoneContribution = 0
+                densityContribution = sedgeContribution
+            case 3:
+                reedContribution = 0
+                sedgeContribution = 0
+                scrubContribution = immersiveApeClamp(
+                    (floorDensity * 0.46)
+                        + (habitat.clutterDensity * 0.18)
+                        + (exposedGround * 0.12),
+                    min: 0,
+                    max: 1
+                ) * (0.9 + (biomeDNA.scrubDensity * 0.16))
+                fernContribution = 0
+                stoneContribution = 0
+                densityContribution = scrubContribution
+            case 4:
+                reedContribution = 0
+                sedgeContribution = 0
+                scrubContribution = 0
+                fernContribution = immersiveApeClamp(
+                    (floorDensity * 0.56)
+                        + (shelteredGrowth * 0.18)
+                        + (adjustedMoisture * 0.18),
+                    min: 0,
+                    max: 1
+                ) * (0.9 + (biomeDNA.forestUnderstory * 0.18))
+                stoneContribution = 0
+                densityContribution = fernContribution
+            default:
+                reedContribution = 0
+                sedgeContribution = 0
+                scrubContribution = 0
+                fernContribution = 0
+                stoneContribution = immersiveApeClamp(
+                    (floorDensity * 0.28)
+                        + (habitat.clutterDensity * 0.22)
+                        + (relief.ridge * 0.16),
+                    min: 0,
+                    max: 1
+                ) * (0.9 + (biomeDNA.stoneClusterScale * 0.14))
+                densityContribution = stoneContribution
+            }
+
+            densitySum += densityContribution * sample.weight
+            reedSum += reedContribution * sample.weight
+            sedgeSum += sedgeContribution * sample.weight
+            scrubSum += scrubContribution * sample.weight
+            fernSum += fernContribution * sample.weight
+            stoneSum += stoneContribution * sample.weight
+            weightSum += sample.weight
+        }
+
+        let sectorWeight = max(weightSum, 0.001)
+        return ImmersiveApeGroundCoverContextSector(
+            direction: direction,
+            density: densitySum / sectorWeight,
+            reedPresence: reedSum / sectorWeight,
+            sedgePresence: sedgeSum / sectorWeight,
+            scrubPresence: scrubSum / sectorWeight,
+            fernPresence: fernSum / sectorWeight,
+            stonePresence: stoneSum / sectorWeight
+        )
+    }
+
+    guard !sectors.isEmpty else {
+        return nil
+    }
+
+    let overallDensity = sectors.reduce(Float.zero) { $0 + $1.density } / Float(max(1, sectors.count))
+    guard overallDensity > 0.12 else {
+        return nil
+    }
+
+    let densitySpread = (sectors.map(\.density).max() ?? 0) - (sectors.map(\.density).min() ?? 0)
+    let reedFocus = sectors.enumerated().max(by: { $0.element.reedPresence < $1.element.reedPresence }) ?? (offset: 0, element: sectors[0])
+    let sedgeFocus = sectors.enumerated().max(by: { $0.element.sedgePresence < $1.element.sedgePresence }) ?? (offset: 0, element: sectors[0])
+    let scrubFocus = sectors.enumerated().max(by: { $0.element.scrubPresence < $1.element.scrubPresence }) ?? (offset: 0, element: sectors[0])
+    let fernFocus = sectors.enumerated().max(by: { $0.element.fernPresence < $1.element.fernPresence }) ?? (offset: 0, element: sectors[0])
+    let stoneFocus = sectors.enumerated().max(by: { $0.element.stonePresence < $1.element.stonePresence }) ?? (offset: 0, element: sectors[0])
+
+    let options: [(style: ImmersiveApeGroundCoverContextStyle, focus: (offset: Int, element: ImmersiveApeGroundCoverContextSector), score: Float)] = [
+        (.reedBed, reedFocus, reedFocus.element.reedPresence),
+        (.sedgeFloor, sedgeFocus, sedgeFocus.element.sedgePresence),
+        (.scrubFloor, scrubFocus, scrubFocus.element.scrubPresence),
+        (.fernFloor, fernFocus, fernFocus.element.fernPresence),
+        (.stoneBreak, stoneFocus, stoneFocus.element.stonePresence)
+    ]
+    let dominant = options.max(by: { $0.score < $1.score }) ?? options[0]
+    let densityLabel = immersiveApeGroundCoverDensityLabel(max(overallDensity, dominant.focus.element.density))
+    let directionLabel = immersiveApeDirectionalLabel(dominant.focus.offset)
+    let strength = immersiveApeClamp(
+        (overallDensity * 0.68)
+            + (dominant.score * 0.22)
+            + (densitySpread * 0.16),
+        min: 0.18,
+        max: 1.0
+    )
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    switch dominant.style {
+    case .reedBed:
+        summaryPhrase = " over \(densityLabel.lowercased()) reed beds \(directionLabel)"
+        panelLabel = "\(densityLabel) reed beds \(directionLabel)"
+        storyTail = " Dense reed beds are filling the floor \(directionLabel), so the shoreline now reads as layered ground cover instead of exposed sand broken by isolated plants."
+    case .sedgeFloor:
+        summaryPhrase = " over \(densityLabel.lowercased()) sedge floor \(directionLabel)"
+        panelLabel = "\(densityLabel) sedge floor \(directionLabel)"
+        storyTail = " Sedge and grass are thickening across the floor \(directionLabel), so the scene now reads as a living meadow carpet instead of open ground between specimen props."
+    case .scrubFloor:
+        summaryPhrase = " over \(densityLabel.lowercased()) scrub floor \(directionLabel)"
+        panelLabel = "\(densityLabel) scrub floor \(directionLabel)"
+        storyTail = " Low scrub growth is knitting the ground together \(directionLabel), so the terrain now reads as covered footing instead of scattered dry tufts between larger bushes."
+    case .fernFloor:
+        summaryPhrase = " over \(densityLabel.lowercased()) fern floor \(directionLabel)"
+        panelLabel = "\(densityLabel) fern floor \(directionLabel)"
+        storyTail = " Ferns and understory plants are crowding the floor \(directionLabel), so the forest now reads from its dense floor layer as well as from trunks and canopy."
+    case .stoneBreak:
+        summaryPhrase = " through \(densityLabel.lowercased()) stone-floor growth \(directionLabel)"
+        panelLabel = "\(densityLabel) stone-floor growth \(directionLabel)"
+        storyTail = " Even the stony breaks are carrying low pioneer cover \(directionLabel), so the ground no longer falls back to bare rock between the larger habitat accents."
+    }
+
+    return ImmersiveApeGroundCoverContext(
+        style: dominant.style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        focusIndex: dominant.focus.offset,
+        sectors: sectors
+    )
+}
+
+private func immersiveApeAlphaFoliageDensityLabel(_ density: Float) -> String {
+    switch density {
+    case 0.72...:
+        return "Thick"
+    case 0.5...:
+        return "Layered"
+    case 0.34...:
+        return "Screened"
+    default:
+        return "Light"
+    }
+}
+
+private func immersiveApeAlphaFoliageProfile(
+    material: UInt8,
+    moisture: Float,
+    relief: ImmersiveApeTerrainRelief,
+    habitat: ImmersiveApeBiomeHabitat,
+    dnaProfile: ImmersiveApeBiomeDNAProfile
+) -> ImmersiveApeAlphaFoliageProfile {
+    let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+    let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+    let runoffGrowth = relief.runoff
+    let wetBias = immersiveApeClamp(
+        (moisture * 0.52)
+            + (runoffGrowth * 0.24)
+            + (shelteredGrowth * 0.14)
+            - (exposedGround * 0.08),
+        min: 0,
+        max: 1
+    )
+    let densityBase = immersiveApeClamp(
+        (habitat.coverDensity * 0.72)
+            + (habitat.clutterDensity * 0.16)
+            + (shelteredGrowth * 0.12)
+            + (wetBias * 0.08)
+            - (exposedGround * 0.16),
+        min: 0,
+        max: 1
+    )
+    let openness = immersiveApeClamp(
+        ((1 - densityBase) * 0.62)
+            + (exposedGround * 0.26)
+            + (relief.slope * 0.14)
+            - (shelteredGrowth * 0.12),
+        min: 0,
+        max: 1
+    )
+
+    let reedBias: Float
+    let frondBias: Float
+    let leafBias: Float
+    let fernBias: Float
+    let heightBias: Float
+    let widthBias: Float
+
+    switch material {
+    case 1:
+        reedBias = immersiveApeClamp(
+            (densityBase * 0.42)
+                + (wetBias * 0.36)
+                + (dnaProfile.reedDensity * 0.18)
+                + (dnaProfile.coastalGrowth * 0.08),
+            min: 0,
+            max: 1
+        )
+        frondBias = immersiveApeClamp((densityBase * 0.12) + (wetBias * 0.08), min: 0, max: 1)
+        leafBias = 0
+        fernBias = 0
+        heightBias = 0.86 + (wetBias * 0.22) + (dnaProfile.reedBedBias * 0.12)
+        widthBias = 0.76 + (densityBase * 0.18)
+    case 2:
+        reedBias = 0
+        frondBias = immersiveApeClamp(
+            (densityBase * 0.18)
+                + (wetBias * 0.12)
+                + (dnaProfile.meadowSeedBias * 0.08),
+            min: 0,
+            max: 1
+        )
+        leafBias = immersiveApeClamp(
+            (densityBase * 0.46)
+                + (habitat.clutterDensity * 0.18)
+                + (dnaProfile.meadowDensity * 0.16)
+                + (shelteredGrowth * 0.08),
+            min: 0,
+            max: 1
+        )
+        fernBias = 0
+        heightBias = 0.92 + (densityBase * 0.16) + (dnaProfile.meadowSwaleBias * 0.12)
+        widthBias = 0.84 + (habitat.clutterDensity * 0.16)
+    case 3:
+        reedBias = 0
+        frondBias = immersiveApeClamp(
+            (densityBase * 0.44)
+                + (habitat.clutterDensity * 0.2)
+                + (dnaProfile.scrubCopseBias * 0.16),
+            min: 0,
+            max: 1
+        )
+        leafBias = immersiveApeClamp(
+            (densityBase * 0.52)
+                + (habitat.clutterDensity * 0.22)
+                + (dnaProfile.scrubThicketBias * 0.18),
+            min: 0,
+            max: 1
+        )
+        fernBias = immersiveApeClamp((wetBias * 0.18) + (shelteredGrowth * 0.12), min: 0, max: 1)
+        heightBias = 1.0 + (habitat.coverDensity * 0.18) + (dnaProfile.scrubDensity * 0.12)
+        widthBias = 0.92 + (habitat.clutterDensity * 0.18)
+    case 4:
+        reedBias = 0
+        frondBias = immersiveApeClamp(
+            (densityBase * 0.36)
+                + (wetBias * 0.18)
+                + (dnaProfile.forestUnderstory * 0.18),
+            min: 0,
+            max: 1
+        )
+        leafBias = immersiveApeClamp(
+            (densityBase * 0.26)
+                + (habitat.coverDensity * 0.12)
+                + (dnaProfile.forestHollowBias * 0.1),
+            min: 0,
+            max: 1
+        )
+        fernBias = immersiveApeClamp(
+            (densityBase * 0.58)
+                + (wetBias * 0.22)
+                + (shelteredGrowth * 0.16)
+                + (dnaProfile.forestFernBias * 0.18),
+            min: 0,
+            max: 1
+        )
+        heightBias = 1.08 + (wetBias * 0.18) + (dnaProfile.forestUnderstory * 0.12)
+        widthBias = 0.98 + (habitat.coverDensity * 0.14)
+    case 5:
+        reedBias = 0
+        frondBias = immersiveApeClamp((densityBase * 0.16) + (habitat.clutterDensity * 0.12), min: 0, max: 1)
+        leafBias = immersiveApeClamp(
+            (densityBase * 0.18)
+                + (habitat.clutterDensity * 0.16)
+                + (dnaProfile.stoneGardenBias * 0.08),
+            min: 0,
+            max: 1
+        )
+        fernBias = 0
+        heightBias = 0.82 + (habitat.clutterDensity * 0.12)
+        widthBias = 0.74 + (relief.ridge * 0.12)
+    default:
+        reedBias = 0
+        frondBias = 0
+        leafBias = 0
+        fernBias = 0
+        heightBias = 0.9
+        widthBias = 0.8
+    }
+
+    let density = immersiveApeClamp(
+        max(max(reedBias, frondBias), max(leafBias, fernBias)) * (1 - (openness * 0.22)),
+        min: 0,
+        max: 1
+    )
+
+    return ImmersiveApeAlphaFoliageProfile(
+        density: density,
+        openness: openness,
+        reedBias: reedBias,
+        frondBias: frondBias,
+        leafBias: leafBias,
+        fernBias: fernBias,
+        heightBias: heightBias,
+        widthBias: widthBias
+    )
+}
+
+private func immersiveApeAlphaFoliageContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeAlphaFoliageContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    let sampleDistances: [(distance: Float, weight: Float)] = [(4.5, 1.0), (9.0, 0.88), (15.0, 0.72)]
+    let biomeDNA = immersiveApeBiomeDNAProfile(
+        selected: capture.snapshot.selected,
+        selectedIndex: Int32(capture.snapshot.selected_index),
+        worldSeed: capture.snapshot.world_seed
+    )
+    let sectors = sectorDirections.map { direction in
+        var densitySum: Float = 0
+        var opennessSum: Float = 0
+        var reedSum: Float = 0
+        var frondSum: Float = 0
+        var leafSum: Float = 0
+        var fernSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = direction * sample.distance
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let nearestRow = min(max(Int(coordinates.row.rounded()), 0), grid.resolution - 1)
+            let nearestColumn = min(max(Int(coordinates.column.rounded()), 0), grid.resolution - 1)
+            let material = grid.material(row: nearestRow, column: nearestColumn)
+
+            guard material != 0 else {
+                continue
+            }
+
+            let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let moisture = immersiveApeSaturate((waterHeight - groundPosition.y + 0.08) * 0.9)
+            let adjustedMoisture = immersiveApeClamp(
+                (moisture * biomeDNA.moistureAffinity)
+                    + (relief.basin * 0.14)
+                    + (relief.runoff * 0.18)
+                    - (relief.ridge * 0.12),
+                min: 0,
+                max: 1
+            )
+            let variation = immersiveApeNoise(
+                Int32(nearestColumn),
+                Int32(nearestRow),
+                seed: capture.snapshot.world_seed ^ 0x53D9_8A41
+            )
+            let baseHabitat = immersiveApeBiomeHabitat(
+                material: material,
+                row: coordinates.row,
+                column: coordinates.column,
+                moisture: adjustedMoisture,
+                variation: variation,
+                seed: capture.snapshot.world_seed,
+                dnaProfile: biomeDNA
+            )
+            let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+            let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+            let runoffGrowth = relief.runoff
+            let habitat = ImmersiveApeBiomeHabitat(
+                coverDensity: immersiveApeClamp(
+                    baseHabitat.coverDensity
+                        + (shelteredGrowth * 0.14)
+                        + (runoffGrowth * 0.1)
+                        - (exposedGround * 0.12),
+                    min: 0,
+                    max: 1
+                ),
+                clutterDensity: immersiveApeClamp(
+                    baseHabitat.clutterDensity
+                        + (exposedGround * 0.12)
+                        + (runoffGrowth * 0.05)
+                        - (shelteredGrowth * 0.04),
+                    min: 0,
+                    max: 1
+                ),
+                accentColor: immersiveApeMix(
+                    immersiveApeMix(baseHabitat.accentColor, environment.waterColor, t: runoffGrowth * 0.12),
+                    immersiveApeTerrainMaterialColor(5),
+                    t: exposedGround * 0.08
+                )
+            )
+            let profile = immersiveApeAlphaFoliageProfile(
+                material: material,
+                moisture: adjustedMoisture,
+                relief: relief,
+                habitat: habitat,
+                dnaProfile: biomeDNA
+            )
+
+            densitySum += profile.density * sample.weight
+            opennessSum += profile.openness * sample.weight
+            reedSum += profile.reedBias * sample.weight
+            frondSum += profile.frondBias * sample.weight
+            leafSum += profile.leafBias * sample.weight
+            fernSum += profile.fernBias * sample.weight
+            weightSum += sample.weight
+        }
+
+        let sectorWeight = max(weightSum, 0.001)
+        return ImmersiveApeAlphaFoliageContextSector(
+            direction: direction,
+            density: densitySum / sectorWeight,
+            openness: opennessSum / sectorWeight,
+            reedBias: reedSum / sectorWeight,
+            frondBias: frondSum / sectorWeight,
+            leafBias: leafSum / sectorWeight,
+            fernBias: fernSum / sectorWeight
+        )
+    }
+
+    guard !sectors.isEmpty else {
+        return nil
+    }
+
+    let overallDensity = sectors.reduce(Float.zero) { $0 + $1.density } / Float(max(1, sectors.count))
+    guard overallDensity > 0.12 else {
+        return nil
+    }
+
+    let opennessSpread = (sectors.map(\.openness).max() ?? 0) - (sectors.map(\.openness).min() ?? 0)
+    let reedFocus = sectors.enumerated().max(by: { $0.element.reedBias < $1.element.reedBias }) ?? (offset: 0, element: sectors[0])
+    let frondFocus = sectors.enumerated().max(by: { $0.element.frondBias < $1.element.frondBias }) ?? (offset: 0, element: sectors[0])
+    let leafFocus = sectors.enumerated().max(by: { $0.element.leafBias < $1.element.leafBias }) ?? (offset: 0, element: sectors[0])
+    let fernFocus = sectors.enumerated().max(by: { $0.element.fernBias < $1.element.fernBias }) ?? (offset: 0, element: sectors[0])
+    let openFocus = sectors.enumerated().max(by: { $0.element.openness < $1.element.openness }) ?? (offset: 0, element: sectors[0])
+
+    let dominantDensity = max(
+        overallDensity,
+        max(
+            max(reedFocus.element.density, frondFocus.element.density),
+            max(leafFocus.element.density, fernFocus.element.density)
+        )
+    )
+    let densityLabel = immersiveApeAlphaFoliageDensityLabel(dominantDensity)
+    let style: ImmersiveApeAlphaFoliageContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let focusScore: Float
+
+    if reedFocus.element.reedBias > 0.52 {
+        let directionLabel = immersiveApeDirectionalLabel(reedFocus.offset)
+        style = .reedVeil
+        focusIndex = reedFocus.offset
+        focusScore = reedFocus.element.reedBias
+        summaryPhrase = " through \(densityLabel.lowercased()) reed veil \(directionLabel)"
+        panelLabel = "\(densityLabel) reed veil \(directionLabel)"
+        storyTail = " Alpha reeds are hanging into the near field \(directionLabel), so the shoreline now reads through a low veil of plant occlusion instead of a mostly open air column above the ground cover."
+    } else if fernFocus.element.fernBias > 0.52 {
+        let directionLabel = immersiveApeDirectionalLabel(fernFocus.offset)
+        style = .fernCurtain
+        focusIndex = fernFocus.offset
+        focusScore = fernFocus.element.fernBias
+        summaryPhrase = " behind \(densityLabel.lowercased()) fern curtain \(directionLabel)"
+        panelLabel = "\(densityLabel) fern curtain \(directionLabel)"
+        storyTail = " Fern and understory sheets are hanging into the forest air \(directionLabel), so the scene now reads through layered foliage depth instead of only through trunks above the floor cover."
+    } else if leafFocus.element.leafBias > 0.48 {
+        let directionLabel = immersiveApeDirectionalLabel(leafFocus.offset)
+        style = .leafScreen
+        focusIndex = leafFocus.offset
+        focusScore = leafFocus.element.leafBias
+        summaryPhrase = " behind \(densityLabel.lowercased()) leaf screen \(directionLabel)"
+        panelLabel = "\(densityLabel) leaf screen \(directionLabel)"
+        storyTail = " Broad leaf sheets are screening the middle distance \(directionLabel), so the landscape now reads through layered foliage screens instead of open sightlines above the living floor."
+    } else if frondFocus.element.frondBias > 0.4 {
+        let directionLabel = immersiveApeDirectionalLabel(frondFocus.offset)
+        style = .frondVeil
+        focusIndex = frondFocus.offset
+        focusScore = frondFocus.element.frondBias
+        summaryPhrase = " through \(densityLabel.lowercased()) frond veil \(directionLabel)"
+        panelLabel = "\(densityLabel) frond veil \(directionLabel)"
+        storyTail = " Fronds are hanging across the near and middle distance \(directionLabel), so the world now reads through soft layered occlusion instead of an open band above the ground layer."
+    } else {
+        let directionLabel = immersiveApeDirectionalLabel(openFocus.offset)
+        style = .brokenVeil
+        focusIndex = openFocus.offset
+        focusScore = openFocus.element.openness
+        summaryPhrase = " through broken foliage gaps \(directionLabel)"
+        panelLabel = "Broken veil  •  widest \(directionLabel)"
+        storyTail = " Alpha foliage is hanging in a broken screen with the widest gaps \(directionLabel), so the scene alternates between cover and openings instead of defaulting to a fully open air column."
+    }
+
+    let strength = immersiveApeClamp(
+        (overallDensity * 0.64)
+            + (focusScore * 0.24)
+            + (opennessSpread * 0.12),
+        min: 0.18,
+        max: 1.0
+    )
+
+    return ImmersiveApeAlphaFoliageContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        focusIndex: focusIndex,
+        sectors: sectors
+    )
+}
+
+private func immersiveApeSkylineFoliageProfile(
+    material: UInt8,
+    moisture: Float,
+    relief: ImmersiveApeTerrainRelief,
+    habitat: ImmersiveApeBiomeHabitat,
+    dnaProfile: ImmersiveApeBiomeDNAProfile
+) -> ImmersiveApeSkylineFoliageProfile {
+    let lowerProfile = immersiveApeAlphaFoliageProfile(
+        material: material,
+        moisture: moisture,
+        relief: relief,
+        habitat: habitat,
+        dnaProfile: dnaProfile
+    )
+    let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+    let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+    let densityBase = immersiveApeClamp(
+        (lowerProfile.density * 0.56)
+            + (habitat.coverDensity * 0.26)
+            + (habitat.clutterDensity * 0.14)
+            + (shelteredGrowth * 0.08)
+            - (exposedGround * 0.12),
+        min: 0,
+        max: 1
+    )
+    let openness = immersiveApeClamp(
+        ((1 - densityBase) * 0.66)
+            + (exposedGround * 0.2)
+            + (relief.slope * 0.12)
+            - (shelteredGrowth * 0.1),
+        min: 0,
+        max: 1
+    )
+
+    let reedBias: Float
+    let bandBias: Float
+    let canopyBias: Float
+    let driftBias: Float
+    let riseBias: Float
+    let widthBias: Float
+
+    switch material {
+    case 1:
+        reedBias = immersiveApeClamp(
+            (lowerProfile.reedBias * 0.76)
+                + (moisture * 0.18)
+                + (dnaProfile.reedBedBias * 0.14)
+                + (dnaProfile.coastalGrowth * 0.08),
+            min: 0,
+            max: 1
+        )
+        bandBias = immersiveApeClamp((reedBias * 0.7) + (densityBase * 0.16), min: 0, max: 1)
+        canopyBias = immersiveApeClamp((reedBias * 0.28) + (habitat.coverDensity * 0.08), min: 0, max: 1)
+        driftBias = immersiveApeClamp((lowerProfile.frondBias * 0.18) + (relief.runoff * 0.08), min: 0, max: 1)
+        riseBias = 1.16 + (lowerProfile.heightBias * 0.2) + (dnaProfile.reedDensity * 0.12)
+        widthBias = 0.94 + (lowerProfile.widthBias * 0.14)
+    case 2:
+        reedBias = 0
+        bandBias = immersiveApeClamp(
+            (lowerProfile.leafBias * 0.48)
+                + (habitat.coverDensity * 0.18)
+                + (dnaProfile.meadowDensity * 0.14),
+            min: 0,
+            max: 1
+        )
+        canopyBias = immersiveApeClamp(
+            (lowerProfile.leafBias * 0.34)
+                + (lowerProfile.frondBias * 0.24)
+                + (dnaProfile.meadowSwaleBias * 0.08),
+            min: 0,
+            max: 1
+        )
+        driftBias = immersiveApeClamp(
+            (lowerProfile.frondBias * 0.36)
+                + (relief.slope * 0.1)
+                + (habitat.clutterDensity * 0.06),
+            min: 0,
+            max: 1
+        )
+        riseBias = 1.2 + (lowerProfile.heightBias * 0.18) + (dnaProfile.meadowSeedBias * 0.08)
+        widthBias = 1.0 + (lowerProfile.widthBias * 0.12)
+    case 3:
+        reedBias = 0
+        bandBias = immersiveApeClamp(
+            (lowerProfile.leafBias * 0.42)
+                + (lowerProfile.frondBias * 0.22)
+                + (dnaProfile.scrubDensity * 0.14),
+            min: 0,
+            max: 1
+        )
+        canopyBias = immersiveApeClamp(
+            (lowerProfile.leafBias * 0.58)
+                + (habitat.coverDensity * 0.18)
+                + (dnaProfile.scrubThicketBias * 0.18),
+            min: 0,
+            max: 1
+        )
+        driftBias = immersiveApeClamp(
+            (lowerProfile.frondBias * 0.42)
+                + (habitat.clutterDensity * 0.14)
+                + (dnaProfile.scrubCopseBias * 0.12),
+            min: 0,
+            max: 1
+        )
+        riseBias = 1.34 + (lowerProfile.heightBias * 0.2) + (dnaProfile.canopyHeightScale * 0.08)
+        widthBias = 1.08 + (lowerProfile.widthBias * 0.14)
+    case 4:
+        reedBias = 0
+        bandBias = immersiveApeClamp(
+            (lowerProfile.fernBias * 0.34)
+                + (lowerProfile.leafBias * 0.28)
+                + (dnaProfile.forestUnderstory * 0.14),
+            min: 0,
+            max: 1
+        )
+        canopyBias = immersiveApeClamp(
+            (lowerProfile.fernBias * 0.4)
+                + (lowerProfile.frondBias * 0.34)
+                + (habitat.coverDensity * 0.18)
+                + (dnaProfile.forestHollowBias * 0.16),
+            min: 0,
+            max: 1
+        )
+        driftBias = immersiveApeClamp(
+            (lowerProfile.frondBias * 0.48)
+                + (moisture * 0.12)
+                + (dnaProfile.forestUnderstory * 0.18),
+            min: 0,
+            max: 1
+        )
+        riseBias = 1.46 + (lowerProfile.heightBias * 0.24) + (dnaProfile.canopyHeightScale * 0.12)
+        widthBias = 1.14 + (lowerProfile.widthBias * 0.16)
+    case 5:
+        reedBias = 0
+        bandBias = immersiveApeClamp(
+            (lowerProfile.leafBias * 0.22)
+                + (habitat.clutterDensity * 0.14)
+                + (relief.ridge * 0.12)
+                + (dnaProfile.stoneGardenBias * 0.08),
+            min: 0,
+            max: 1
+        )
+        canopyBias = immersiveApeClamp((lowerProfile.leafBias * 0.12) + (habitat.coverDensity * 0.08), min: 0, max: 1)
+        driftBias = immersiveApeClamp(
+            (lowerProfile.frondBias * 0.24)
+                + (relief.slope * 0.12)
+                + (dnaProfile.stoneClusterScale * 0.1),
+            min: 0,
+            max: 1
+        )
+        riseBias = 1.08 + (lowerProfile.heightBias * 0.12)
+        widthBias = 0.96 + (lowerProfile.widthBias * 0.1)
+    default:
+        reedBias = 0
+        bandBias = 0
+        canopyBias = 0
+        driftBias = 0
+        riseBias = 1.1
+        widthBias = 1.0
+    }
+
+    let density = immersiveApeClamp(
+        max(max(reedBias, bandBias), max(canopyBias, driftBias)) * (1 - (openness * 0.22)),
+        min: 0,
+        max: 1
+    )
+
+    return ImmersiveApeSkylineFoliageProfile(
+        density: density,
+        openness: openness,
+        reedBias: reedBias,
+        bandBias: bandBias,
+        canopyBias: canopyBias,
+        driftBias: driftBias,
+        riseBias: riseBias,
+        widthBias: widthBias
+    )
+}
+
+private func immersiveApeSkylineFoliageContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeSkylineFoliageContext? {
+    guard grid.resolution > 2 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let sectorAngles: [Float] = [0, Float.pi / 3, (Float.pi * 2) / 3, Float.pi, (Float.pi * 4) / 3, (Float.pi * 5) / 3]
+    let sectorDirections = sectorAngles.map { angle in
+        ((forward * cos(angle)) + (right * sin(angle))).normalizedSafe
+    }
+    let sampleDistances: [(distance: Float, weight: Float)] = [(14.0, 1.0), (26.0, 0.86), (40.0, 0.68)]
+    let biomeDNA = immersiveApeBiomeDNAProfile(
+        selected: capture.snapshot.selected,
+        selectedIndex: Int32(capture.snapshot.selected_index),
+        worldSeed: capture.snapshot.world_seed
+    )
+    let sectors = sectorDirections.map { direction in
+        var densitySum: Float = 0
+        var opennessSum: Float = 0
+        var reedSum: Float = 0
+        var bandSum: Float = 0
+        var canopySum: Float = 0
+        var driftSum: Float = 0
+        var weightSum: Float = 0
+
+        for sample in sampleDistances {
+            let samplePosition = direction * sample.distance
+            let coordinates = grid.sampleCoordinates(for: samplePosition)
+            let nearestRow = min(max(Int(coordinates.row.rounded()), 0), grid.resolution - 1)
+            let nearestColumn = min(max(Int(coordinates.column.rounded()), 0), grid.resolution - 1)
+            let material = grid.material(row: nearestRow, column: nearestColumn)
+
+            guard material != 0 else {
+                continue
+            }
+
+            let groundPosition = grid.interpolatedPosition(row: coordinates.row, column: coordinates.column)
+            let waterHeight = grid.interpolatedWaterHeight(row: coordinates.row, column: coordinates.column)
+            let relief = immersiveApeTerrainRelief(grid: grid, row: coordinates.row, column: coordinates.column)
+            let moisture = immersiveApeSaturate((waterHeight - groundPosition.y + 0.08) * 0.9)
+            let adjustedMoisture = immersiveApeClamp(
+                (moisture * biomeDNA.moistureAffinity)
+                    + (relief.basin * 0.14)
+                    + (relief.runoff * 0.18)
+                    - (relief.ridge * 0.12),
+                min: 0,
+                max: 1
+            )
+            let variation = immersiveApeNoise(
+                Int32(nearestColumn),
+                Int32(nearestRow),
+                seed: capture.snapshot.world_seed ^ 0x6C2A_41F3
+            )
+            let baseHabitat = immersiveApeBiomeHabitat(
+                material: material,
+                row: coordinates.row,
+                column: coordinates.column,
+                moisture: adjustedMoisture,
+                variation: variation,
+                seed: capture.snapshot.world_seed,
+                dnaProfile: biomeDNA
+            )
+            let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+            let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+            let runoffGrowth = relief.runoff
+            let habitat = ImmersiveApeBiomeHabitat(
+                coverDensity: immersiveApeClamp(
+                    baseHabitat.coverDensity
+                        + (shelteredGrowth * 0.14)
+                        + (runoffGrowth * 0.1)
+                        - (exposedGround * 0.12),
+                    min: 0,
+                    max: 1
+                ),
+                clutterDensity: immersiveApeClamp(
+                    baseHabitat.clutterDensity
+                        + (exposedGround * 0.12)
+                        + (runoffGrowth * 0.05)
+                        - (shelteredGrowth * 0.04),
+                    min: 0,
+                    max: 1
+                ),
+                accentColor: immersiveApeMix(
+                    immersiveApeMix(baseHabitat.accentColor, environment.waterColor, t: runoffGrowth * 0.12),
+                    immersiveApeTerrainMaterialColor(5),
+                    t: exposedGround * 0.08
+                )
+            )
+            let profile = immersiveApeSkylineFoliageProfile(
+                material: material,
+                moisture: adjustedMoisture,
+                relief: relief,
+                habitat: habitat,
+                dnaProfile: biomeDNA
+            )
+
+            densitySum += profile.density * sample.weight
+            opennessSum += profile.openness * sample.weight
+            reedSum += profile.reedBias * sample.weight
+            bandSum += profile.bandBias * sample.weight
+            canopySum += profile.canopyBias * sample.weight
+            driftSum += profile.driftBias * sample.weight
+            weightSum += sample.weight
+        }
+
+        let sectorWeight = max(weightSum, 0.001)
+        return ImmersiveApeSkylineFoliageContextSector(
+            direction: direction,
+            density: densitySum / sectorWeight,
+            openness: opennessSum / sectorWeight,
+            reedBias: reedSum / sectorWeight,
+            bandBias: bandSum / sectorWeight,
+            canopyBias: canopySum / sectorWeight,
+            driftBias: driftSum / sectorWeight
+        )
+    }
+
+    guard !sectors.isEmpty else {
+        return nil
+    }
+
+    let overallDensity = sectors.reduce(Float.zero) { $0 + $1.density } / Float(max(1, sectors.count))
+    guard overallDensity > 0.1 else {
+        return nil
+    }
+
+    let opennessSpread = (sectors.map { $0.openness }.max() ?? 0) - (sectors.map { $0.openness }.min() ?? 0)
+    let reedFocus = sectors.enumerated().max(by: { $0.element.reedBias < $1.element.reedBias }) ?? (offset: 0, element: sectors[0])
+    let bandFocus = sectors.enumerated().max(by: { $0.element.bandBias < $1.element.bandBias }) ?? (offset: 0, element: sectors[0])
+    let canopyFocus = sectors.enumerated().max(by: { $0.element.canopyBias < $1.element.canopyBias }) ?? (offset: 0, element: sectors[0])
+    let driftFocus = sectors.enumerated().max(by: { $0.element.driftBias < $1.element.driftBias }) ?? (offset: 0, element: sectors[0])
+    let openFocus = sectors.enumerated().max(by: { $0.element.openness < $1.element.openness }) ?? (offset: 0, element: sectors[0])
+    let densityLabel = immersiveApeAlphaFoliageDensityLabel(
+        max(
+            overallDensity,
+            max(
+                max(reedFocus.element.density, bandFocus.element.density),
+                max(canopyFocus.element.density, driftFocus.element.density)
+            )
+        )
+    )
+    let style: ImmersiveApeSkylineFoliageContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let focusScore: Float
+
+    if reedFocus.element.reedBias > 0.5 {
+        let directionLabel = immersiveApeDirectionalLabel(reedFocus.offset)
+        style = .reedBand
+        focusIndex = reedFocus.offset
+        focusScore = reedFocus.element.reedBias
+        summaryPhrase = " under \(densityLabel.lowercased()) reed skyline \(directionLabel)"
+        panelLabel = "\(densityLabel) reed skyline \(directionLabel)"
+        storyTail = " Tall reed sheets are climbing into the skyline \(directionLabel), so the coast now reaches the horizon through a second alpha band above the lower veil instead of clearing out after the near plants."
+    } else if canopyFocus.element.canopyBias > 0.5 {
+        let directionLabel = immersiveApeDirectionalLabel(canopyFocus.offset)
+        style = .canopyCurtain
+        focusIndex = canopyFocus.offset
+        focusScore = canopyFocus.element.canopyBias
+        summaryPhrase = " under \(densityLabel.lowercased()) canopy curtain \(directionLabel)"
+        panelLabel = "\(densityLabel) canopy curtain \(directionLabel)"
+        storyTail = " A higher canopy curtain is hanging behind the first veil \(directionLabel), so the scene now climbs toward the skyline through a second foliage layer instead of stopping at mid-height screens."
+    } else if bandFocus.element.bandBias > 0.46 {
+        let directionLabel = immersiveApeDirectionalLabel(bandFocus.offset)
+        style = .silhouetteBand
+        focusIndex = bandFocus.offset
+        focusScore = bandFocus.element.bandBias
+        summaryPhrase = " behind \(densityLabel.lowercased()) skyline band \(directionLabel)"
+        panelLabel = "\(densityLabel) skyline band \(directionLabel)"
+        storyTail = " A taller foliage band is holding the horizon \(directionLabel), so the world now reads into the skyline through layered silhouettes instead of ending with one lower veil."
+    } else if driftFocus.element.driftBias > 0.38 {
+        let directionLabel = immersiveApeDirectionalLabel(driftFocus.offset)
+        style = .upperDrift
+        focusIndex = driftFocus.offset
+        focusScore = driftFocus.element.driftBias
+        summaryPhrase = " through drifting upper foliage \(directionLabel)"
+        panelLabel = "Upper drift \(directionLabel)"
+        storyTail = " Upper foliage is spreading in a lighter drifting layer \(directionLabel), so the second alpha field reaches above the first veil instead of leaving the skyline comparatively empty."
+    } else {
+        let directionLabel = immersiveApeDirectionalLabel(openFocus.offset)
+        style = .brokenSkyline
+        focusIndex = openFocus.offset
+        focusScore = openFocus.element.openness
+        summaryPhrase = " with broken skyline gaps \(directionLabel)"
+        panelLabel = "Broken skyline  •  widest \(directionLabel)"
+        storyTail = " The higher foliage layer is arriving as a broken skyline with its widest gap \(directionLabel), so the horizon now alternates between layered canopy and open breaks instead of staying uniformly clear above the first veil."
+    }
+
+    let strength = immersiveApeClamp(
+        (overallDensity * 0.62)
+            + (focusScore * 0.24)
+            + (opennessSpread * 0.14),
+        min: 0.18,
+        max: 1.0
+    )
+
+    return ImmersiveApeSkylineFoliageContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        focusIndex: focusIndex,
+        sectors: sectors
+    )
+}
+
+private func immersiveApeFoliageDynamicsContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeFoliageDynamicsContext? {
+    let alphaContext = immersiveApeAlphaFoliageContext(capture: capture, grid: grid, environment: environment)
+    let skylineContext = immersiveApeSkylineFoliageContext(capture: capture, grid: grid, environment: environment)
+    let combinedCoverStrength = max(alphaContext?.strength ?? 0, skylineContext?.strength ?? 0)
+    guard combinedCoverStrength > 0.16 else {
+        return nil
+    }
+
+    let forward = immersiveApeFacingVector(facing: capture.snapshot.selected.facing)
+    let right = SIMD3<Float>(-forward.z, 0, forward.x).normalizedSafe
+    let lightDirectionIndex = immersiveApeDirectionalIndex(
+        direction: immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z)),
+        forward: forward,
+        right: right
+    )
+    let lightLabel = immersiveApeDirectionalLabel(lightDirectionIndex)
+    let coverFocusIndex = (alphaContext?.strength ?? 0) >= (skylineContext?.strength ?? 0)
+        ? (alphaContext?.focusIndex ?? lightDirectionIndex)
+        : (skylineContext?.focusIndex ?? lightDirectionIndex)
+    let sunHeight = immersiveApeSaturate((-environment.lightDirection.y - 0.18) / 0.82)
+    let shaftStrength = immersiveApeClamp(
+        (environment.daylight * (1 - sunHeight) * 0.84)
+            + (environment.nightStrength * 0.68)
+            + (combinedCoverStrength * 0.18),
+        min: 0,
+        max: 1
+    )
+    let surfDirectionIndex = ((alphaContext?.style == .reedVeil) || (skylineContext?.style == .reedBand))
+        ? coverFocusIndex
+        : lightDirectionIndex
+    let surfLabel = immersiveApeDirectionalLabel(surfDirectionIndex)
+    let surfSweep = immersiveApeClamp(
+        environment.surfStrength * (((alphaContext?.style == .reedVeil) || (skylineContext?.style == .reedBand)) ? 0.94 : 0.48),
+        min: 0,
+        max: 1
+    )
+    let rainSweep = immersiveApeClamp(
+        (environment.rainAmount * 0.78) + (combinedCoverStrength * 0.16),
+        min: 0,
+        max: 1
+    )
+
+    let selectedMoving = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_MOVING)) ? Float(0.22) : 0
+    let nearbyMotion = zip(capture.nearby, capture.nearbyLocalPositions).compactMap { ape, position -> (index: Int, weight: Float)? in
+        let planarDistance = simd_length(SIMD2<Float>(position.x, position.z))
+        guard planarDistance <= 22 else {
+            return nil
+        }
+
+        var weight: Float = immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_MOVING)) ? 0.34 : 0.08
+        if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
+            || immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE)) {
+            weight += 0.2
+        }
+        if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+            || immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SPEAKING)) {
+            weight += 0.12
+        }
+
+        let distanceWeight = immersiveApeClamp(1 - (planarDistance / 22), min: 0, max: 1)
+        let directionIndex = immersiveApeDirectionalIndex(
+            direction: immersiveApePlanarDirection(position),
+            forward: forward,
+            right: right
+        )
+        let weighted = weight * distanceWeight
+        return weighted > 0.06 ? (directionIndex, weighted) : nil
+    }
+    let apeFocus = nearbyMotion.max(by: { $0.weight < $1.weight })
+    let apeWake = immersiveApeClamp(
+        selectedMoving + nearbyMotion.reduce(Float.zero) { $0 + $1.weight },
+        min: 0,
+        max: 1
+    )
+    let apeLabel = immersiveApeDirectionalLabel(apeFocus?.index ?? coverFocusIndex)
+
+    let style: ImmersiveApeFoliageDynamicsContextStyle
+    let focusIndex: Int
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+    let focusStrength: Float
+
+    if environment.nightStrength > environment.daylight, shaftStrength > max(rainSweep, max(surfSweep, apeWake)) * 0.9, shaftStrength > 0.34 {
+        style = .moonApertures
+        focusIndex = lightDirectionIndex
+        focusStrength = shaftStrength
+        summaryPhrase = " with moon apertures \(lightLabel)"
+        panelLabel = "Moon apertures \(lightLabel)"
+        storyTail = " Moonlight is cutting apertures through both foliage layers \(lightLabel) while the same shared motion carries through the floor cover, lower veil, and skyline layer, so light and vegetation now read as one moving system."
+    } else if shaftStrength >= max(rainSweep, max(surfSweep, apeWake)) * 0.88, shaftStrength > 0.3 {
+        style = .sunSlashes
+        focusIndex = lightDirectionIndex
+        focusStrength = shaftStrength
+        summaryPhrase = " with sun slashes \(lightLabel)"
+        panelLabel = "Sun slashes \(lightLabel)"
+        storyTail = " Low sun is carving visible slashes through both foliage layers \(lightLabel) while the same wind-swept motion carries across the floor cover, lower veil, and skyline layer, so the scene now moves as one illuminated volume instead of separate plant bands."
+    } else if rainSweep >= max(surfSweep, apeWake), rainSweep > 0.34 {
+        style = .rainSweep
+        focusIndex = lightDirectionIndex
+        focusStrength = rainSweep
+        summaryPhrase = " in rain-swept flow \(lightLabel)"
+        panelLabel = "Rain sweep \(lightLabel)"
+        storyTail = " Rain is driving the floor cover and both foliage layers in the same sweep \(lightLabel), and the light now breaks into wet slashes through those moving gaps instead of sitting apart from the vegetation motion."
+    } else if surfSweep >= apeWake, surfSweep > 0.28 {
+        style = .surfSweep
+        focusIndex = surfDirectionIndex
+        focusStrength = surfSweep
+        summaryPhrase = " in surf-driven sweep \(surfLabel)"
+        panelLabel = "Surf sweep \(surfLabel)"
+        storyTail = " Surf push is rolling through the coastal floor cover and both foliage veils \(surfLabel), while the broken light keeps threading those same moving layers instead of stopping at the waterline."
+    } else {
+        style = .apeWake
+        focusIndex = apeFocus?.index ?? coverFocusIndex
+        focusStrength = max(0.18, apeWake)
+        summaryPhrase = " with ape wake \(apeLabel)"
+        panelLabel = "Ape wake \(apeLabel)"
+        storyTail = " Nearby ape movement is kicking a visible wake through the floor cover, lower veil, and skyline layer \(apeLabel), while the light now breaks around those shifting gaps instead of reading as a separate overlay."
+    }
+
+    let strength = immersiveApeClamp(
+        (focusStrength * 0.72)
+            + (combinedCoverStrength * 0.18)
+            + (max(rainSweep, max(surfSweep, apeWake)) * 0.1),
+        min: 0.18,
+        max: 1.0
+    )
+
+    return ImmersiveApeFoliageDynamicsContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: strength,
+        focusIndex: focusIndex
+    )
+}
+
+private func immersiveApeJungleCompositionContext(
+    capture: ImmersiveApeSceneCapture,
+    grid: ImmersiveApeTerrainGrid,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeJungleCompositionContext? {
+    let groundContext = immersiveApeGroundCoverContext(capture: capture, grid: grid, environment: environment)
+    let alphaContext = immersiveApeAlphaFoliageContext(capture: capture, grid: grid, environment: environment)
+    let skylineContext = immersiveApeSkylineFoliageContext(capture: capture, grid: grid, environment: environment)
+    let dynamicsContext = immersiveApeFoliageDynamicsContext(capture: capture, grid: grid, environment: environment)
+
+    let groundStrength = groundContext?.strength ?? 0
+    let alphaStrength = alphaContext?.strength ?? 0
+    let skylineStrength = skylineContext?.strength ?? 0
+    let dynamicsStrength = dynamicsContext?.strength ?? 0
+    let layeredStrength = min(groundStrength, min(alphaStrength * 0.98, skylineStrength * 0.94))
+    let totalStrength = max(layeredStrength, max(groundStrength, max(alphaStrength, skylineStrength)))
+    guard totalStrength > 0.18 else {
+        return nil
+    }
+
+    let sunHeight = immersiveApeSaturate((-environment.lightDirection.y - 0.18) / 0.82)
+    let shaftStrength = immersiveApeClamp(
+        (environment.daylight * (1 - sunHeight) * 0.78)
+            + (environment.nightStrength * 0.64)
+            + (max(alphaStrength, skylineStrength) * 0.18),
+        min: 0,
+        max: 1
+    )
+    let motionStrength = immersiveApeClamp(
+        (dynamicsStrength * 0.72)
+            + (environment.rainAmount * 0.1)
+            + (environment.surfStrength * 0.08),
+        min: 0,
+        max: 1
+    )
+    let benchmarkStrength = immersiveApeClamp(
+        (layeredStrength * 0.42)
+            + (shaftStrength * 0.2)
+            + (motionStrength * 0.18)
+            + (groundStrength * 0.1)
+            + (alphaStrength * 0.06)
+            + (skylineStrength * 0.04),
+        min: 0,
+        max: 1
+    )
+    let benchmarkLabel: String
+    if benchmarkStrength > 0.72 && layeredStrength > 0.4 {
+        benchmarkLabel = "Benchmark ready"
+    } else if benchmarkStrength > 0.46 {
+        benchmarkLabel = "Benchmark settling"
+    } else {
+        benchmarkLabel = "Benchmark floor-led"
+    }
+
+    let style: ImmersiveApeJungleCompositionContextStyle
+    let summaryPhrase: String
+    let panelLabel: String
+    let storyTail: String
+
+    if benchmarkStrength > 0.72 && shaftStrength > 0.28 && motionStrength > 0.24 {
+        style = .benchmarkCanopy
+        summaryPhrase = " with benchmark-ready jungle depth"
+        panelLabel = "Benchmark canopy  •  \(benchmarkLabel)"
+        storyTail = " The final jungle pass is now holding as a benchmark-ready canopy stack, with dense floor cover feeding a readable lower veil, a settled skyline layer, and broken shafts moving through all three bands instead of the scene flattening back into separate passes."
+    } else if shaftStrength >= max(motionStrength, layeredStrength * 0.74), shaftStrength > 0.28 {
+        style = .shaftedDepth
+        summaryPhrase = " with shafted depth hierarchy"
+        panelLabel = "Shafted depth  •  \(benchmarkLabel)"
+        storyTail = " The scene is now resolving as a shafted depth stack, where the floor cover, lower veil, and skyline layer stay in readable order while the light keeps cutting through them as one continuous volume instead of only touching the topmost foliage."
+    } else if dynamicsContext?.style == .rainSweep || dynamicsContext?.style == .surfSweep {
+        style = .weatherVolume
+        summaryPhrase = " as weather-driven jungle volume"
+        panelLabel = "Weather volume  •  \(benchmarkLabel)"
+        storyTail = " The final jungle composition is now holding together under weather pressure, with floor cover, veil, skyline, and broken shafts all moving in the same direction instead of the depth stack coming apart under rain or surf."
+    } else if dynamicsContext?.style == .apeWake {
+        style = .wakeCorridor
+        summaryPhrase = " with wake-cut depth lanes"
+        panelLabel = "Wake corridor  •  \(benchmarkLabel)"
+        storyTail = " Nearby ape motion is now carving a readable corridor through the full jungle stack, so the floor cover, mid veil, skyline layer, and broken light all part together as one spatial field instead of reacting in isolated strips."
+    } else {
+        style = .layeredDepth
+        summaryPhrase = " with layered jungle depth"
+        panelLabel = "Layered depth  •  \(benchmarkLabel)"
+        storyTail = " The renderer is now landing as a layered jungle depth field, with dense growth on the floor, a readable middle veil, and a skyline layer that keeps the horizon occupied while the shared motion and light preserve one coherent volume."
+    }
+
+    return ImmersiveApeJungleCompositionContext(
+        style: style,
+        summaryPhrase: summaryPhrase,
+        panelLabel: panelLabel,
+        storyTail: storyTail,
+        strength: benchmarkStrength
     )
 }
 
@@ -4750,6 +6207,46 @@ private func immersiveApeCoverResponseStoryTail(_ context: ImmersiveApeCoverResp
     return context.storyTail
 }
 
+private func immersiveApeGroundCoverStoryTail(_ context: ImmersiveApeGroundCoverContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeAlphaFoliageStoryTail(_ context: ImmersiveApeAlphaFoliageContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeSkylineFoliageStoryTail(_ context: ImmersiveApeSkylineFoliageContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeFoliageDynamicsStoryTail(_ context: ImmersiveApeFoliageDynamicsContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
+private func immersiveApeJungleCompositionStoryTail(_ context: ImmersiveApeJungleCompositionContext?) -> String {
+    guard let context else {
+        return ""
+    }
+
+    return context.storyTail
+}
+
 private func immersiveApeExposureStoryTail(_ context: ImmersiveApeExposureContext?) -> String {
     guard let context else {
         return ""
@@ -5226,6 +6723,9 @@ private struct ImmersiveApeFloraPosture {
     let droop: Float
     let spreadScale: Float
     let heightScale: Float
+    let motionStrength: Float
+    let lightAperture: Float
+    let apePush: Float
 
     static let neutral = ImmersiveApeFloraPosture(
         direction: SIMD3<Float>(0, 0, 1),
@@ -5234,15 +6734,18 @@ private struct ImmersiveApeFloraPosture {
         lateralSway: 0,
         droop: 0,
         spreadScale: 1,
-        heightScale: 1
+        heightScale: 1,
+        motionStrength: 0,
+        lightAperture: 0,
+        apePush: 0
     )
 }
 
 private let immersiveApeWorldScale: Float = 0.04
 private let immersiveApeHeightScale: Float = 0.08
-let immersiveApeCurrentDevelopmentCycle: Int = 95
-let immersiveApeCurrentDevelopmentCycleTitle = "Adaptive Band Readback"
-let immersiveApeCurrentDevelopmentCycleSummary = "A full-screen Metal viewer for ApeSDK that now locates the current sample inside the adaptive hold band, distinguishing between guard pressure, lower and upper hold lanes, recovery-side headroom, and rich-bound settle states, and carries that same band state through the performance HUD, guide, feedback, and accessibility readback so longer sessions can see where the session sits between protection and recovery instead of inferring it from thresholds alone."
+let immersiveApeCurrentDevelopmentCycle: Int = 100
+let immersiveApeCurrentDevelopmentCycleTitle = "Final Jungle Composition"
+let immersiveApeCurrentDevelopmentCycleSummary = "A full-screen Metal viewer for ApeSDK that now consolidates dense ground cover, a lower alpha veil, a skyline foliage layer, shaft lighting, and coherent whole-scene motion into one stable jungle composition, using budget-aware placement and a shared benchmark corridor to keep the depth hierarchy readable while carrying that final composition state through the scene detail, story, encounter panel, and accessibility summary."
 
 @MainActor
 private final class ImmersiveApeSimulationController {
@@ -5373,6 +6876,9 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             landformSampleStride: 4,
             waterReflectionSampleStride: 3,
             vegetationSampleStride: 5,
+            groundCoverPassCount: 3,
+            alphaVeilPassCount: 3,
+            skylineVeilPassCount: 2,
             maxNearby: 8,
             maxFood: 14,
             cloudBudgetMultiplier: 1.0,
@@ -5393,6 +6899,9 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             landformSampleStride: 5,
             waterReflectionSampleStride: 4,
             vegetationSampleStride: 6,
+            groundCoverPassCount: 2,
+            alphaVeilPassCount: 2,
+            skylineVeilPassCount: 1,
             maxNearby: 6,
             maxFood: 10,
             cloudBudgetMultiplier: 0.45,
@@ -5413,6 +6922,9 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             landformSampleStride: 6,
             waterReflectionSampleStride: 5,
             vegetationSampleStride: 8,
+            groundCoverPassCount: 0,
+            alphaVeilPassCount: 0,
+            skylineVeilPassCount: 0,
             maxNearby: 3,
             maxFood: 6,
             cloudBudgetMultiplier: 0.18,
@@ -5433,6 +6945,9 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
             landformSampleStride: 8,
             waterReflectionSampleStride: 6,
             vegetationSampleStride: 10,
+            groundCoverPassCount: 0,
+            alphaVeilPassCount: 0,
+            skylineVeilPassCount: 0,
             maxNearby: 1,
             maxFood: 4,
             cloudBudgetMultiplier: 0,
@@ -7352,10 +8867,12 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         }
         if currentQuality.includeVegetation {
             buildVegetation(
+                from: capture,
                 using: grid,
                 environment: environment,
                 timeValue: Float(capture.snapshot.time),
                 opaque: &opaqueBuilder,
+                transparent: &transparentBuilder,
                 seed: capture.snapshot.world_seed,
                 dnaProfile: biomeDNA
             )
@@ -8550,11 +10067,149 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
         )
     }
 
+    private func jungleCompositionPlacement(
+        distance: Float,
+        material: UInt8,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        motionDrive: ImmersiveApeFoliageMotionDrive,
+        environment: ImmersiveApeEnvironment
+    ) -> ImmersiveApeJungleCompositionPlacement {
+        let nearRadius = max(6.0, currentSpatialLODProfile.nearRadius)
+        let midRadius = max(nearRadius + 6, currentSpatialLODProfile.midRadius)
+        let horizonRadius = max(midRadius + 8, currentSpatialLODProfile.horizonRadius)
+        let budgetRichness = immersiveApeClamp(
+            Float(currentQuality.groundCoverPassCount + currentQuality.alphaVeilPassCount + currentQuality.skylineVeilPassCount) / 8,
+            min: 0,
+            max: 1
+        )
+        let structuralDensity = immersiveApeClamp(
+            (habitat.coverDensity * 0.58)
+                + (habitat.clutterDensity * 0.16)
+                + (relief.basin * 0.14)
+                + (relief.runoff * 0.08)
+                - (relief.ridge * 0.1),
+            min: 0,
+            max: 1
+        )
+        let floorBand = immersiveApeClamp(
+            1 - immersiveApeSaturate((distance - 4) / max(6, nearRadius * 0.92)),
+            min: 0,
+            max: 1
+        )
+        let veilCenter = nearRadius + ((midRadius - nearRadius) * 0.38)
+        let veilSpan = max(5, midRadius * 0.3)
+        let veilBand = 1 - immersiveApeSaturate(abs(distance - veilCenter) / veilSpan)
+        let skylineCenter = midRadius + ((horizonRadius - midRadius) * 0.34)
+        let skylineSpan = max(8, (horizonRadius - midRadius) * 0.46)
+        let skylineBand = 1 - immersiveApeSaturate(abs(distance - skylineCenter) / skylineSpan)
+        let benchmarkCenter = nearRadius + ((midRadius - nearRadius) * (0.44 + (budgetRichness * 0.14)))
+        let benchmarkSpan = max(6, (midRadius - nearRadius) * (0.52 + ((1 - budgetRichness) * 0.12)))
+        let benchmarkWeight = 1 - immersiveApeSaturate(abs(distance - benchmarkCenter) / benchmarkSpan)
+        let materialFloorBias: Float
+        let materialVeilBias: Float
+        let materialSkylineBias: Float
+        switch material {
+        case 1:
+            materialFloorBias = 1.08
+            materialVeilBias = 1.04
+            materialSkylineBias = 0.82
+        case 2:
+            materialFloorBias = 1.0
+            materialVeilBias = 1.0
+            materialSkylineBias = 0.9
+        case 3:
+            materialFloorBias = 0.92
+            materialVeilBias = 1.04
+            materialSkylineBias = 0.98
+        case 4:
+            materialFloorBias = 0.98
+            materialVeilBias = 1.08
+            materialSkylineBias = 1.08
+        case 5:
+            materialFloorBias = 0.88
+            materialVeilBias = 0.8
+            materialSkylineBias = 0.78
+        default:
+            materialFloorBias = 1
+            materialVeilBias = 1
+            materialSkylineBias = 1
+        }
+
+        let lightWeight = immersiveApeClamp(
+            (motionDrive.lightAperture * 0.68)
+                + (benchmarkWeight * 0.14)
+                + (budgetRichness * 0.08)
+                + (environment.daylight * 0.05)
+                + (environment.nightStrength * 0.05),
+            min: 0,
+            max: 1
+        )
+        let motionWeight = immersiveApeClamp(
+            (motionDrive.strength * 0.72)
+                + (motionDrive.apePressure * 0.14)
+                + (motionDrive.surfPush * 0.08)
+                + (motionDrive.rainSweep * 0.06),
+            min: 0,
+            max: 1
+        )
+        let floorWeight = immersiveApeClamp(
+            floorBand
+                * materialFloorBias
+                * (0.5 + (structuralDensity * 0.28) + (benchmarkWeight * 0.12) + (budgetRichness * 0.1)),
+            min: 0,
+            max: 1
+        )
+        let veilWeight = immersiveApeClamp(
+            veilBand
+                * materialVeilBias
+                * (0.44 + (structuralDensity * 0.24) + (benchmarkWeight * 0.16) + (budgetRichness * 0.16)),
+            min: 0,
+            max: 1
+        )
+        let skylineWeight = immersiveApeClamp(
+            skylineBand
+                * materialSkylineBias
+                * (0.38 + (structuralDensity * 0.22) + (benchmarkWeight * 0.14) + (budgetRichness * 0.22)),
+            min: 0,
+            max: 1
+        )
+        let depthWeight = immersiveApeClamp(
+            (floorWeight * 0.28)
+                + (veilWeight * 0.34)
+                + (skylineWeight * 0.38),
+            min: 0,
+            max: 1
+        )
+        let stabilityWeight = immersiveApeClamp(
+            0.42
+                + (budgetRichness * 0.2)
+                + (benchmarkWeight * 0.16)
+                + (structuralDensity * 0.16)
+                - (relief.slope * 0.08),
+            min: 0,
+            max: 1
+        )
+
+        return ImmersiveApeJungleCompositionPlacement(
+            floorWeight: floorWeight,
+            veilWeight: veilWeight,
+            skylineWeight: skylineWeight,
+            lightWeight: lightWeight,
+            motionWeight: motionWeight,
+            benchmarkWeight: benchmarkWeight,
+            depthWeight: depthWeight,
+            stabilityWeight: stabilityWeight
+        )
+    }
+
     private func buildVegetation(
+        from capture: ImmersiveApeSceneCapture,
         using grid: ImmersiveApeTerrainGrid,
         environment: ImmersiveApeEnvironment,
         timeValue: Float,
         opaque: inout ImmersiveApeMeshBuilder,
+        transparent: inout ImmersiveApeMeshBuilder,
         seed: UInt32,
         dnaProfile: ImmersiveApeBiomeDNAProfile
     ) {
@@ -8625,12 +10280,27 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                         t: exposedGround * 0.08
                     )
                 )
+                let motionDrive = immersiveApeFoliageMotionDrive(
+                    at: base,
+                    material: material,
+                    capture: capture,
+                    environment: environment
+                )
+                let composition = jungleCompositionPlacement(
+                    distance: distance,
+                    material: material,
+                    relief: relief,
+                    habitat: habitat,
+                    motionDrive: motionDrive,
+                    environment: environment
+                )
                 let floraPosture = immersiveApeFloraPosture(
                     at: base,
                     material: material,
                     moisture: adjustedMoisture,
                     relief: relief,
                     habitat: habitat,
+                    motionDrive: motionDrive,
                     environment: environment,
                     timeValue: timeValue,
                     variation: chance,
@@ -8683,6 +10353,59 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                 default:
                     break
                 }
+
+                addDenseGroundCoverLayer(
+                    at: base,
+                    material: material,
+                    moisture: adjustedMoisture,
+                    relief: relief,
+                    habitat: habitat,
+                    environment: environment,
+                    seed: seed,
+                    variant: chance,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    dnaProfile: dnaProfile,
+                    composition: composition,
+                    posture: floraPosture,
+                    builder: &opaque
+                )
+
+                addAlphaVegetationVeil(
+                    at: base,
+                    distance: distance,
+                    material: material,
+                    moisture: adjustedMoisture,
+                    relief: relief,
+                    habitat: habitat,
+                    environment: environment,
+                    seed: seed,
+                    variant: chance,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    dnaProfile: dnaProfile,
+                    composition: composition,
+                    posture: floraPosture,
+                    builder: &transparent
+                )
+
+                addSkylineFoliageLayer(
+                    at: base,
+                    distance: distance,
+                    material: material,
+                    moisture: adjustedMoisture,
+                    relief: relief,
+                    habitat: habitat,
+                    environment: environment,
+                    seed: seed,
+                    variant: chance,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    dnaProfile: dnaProfile,
+                    composition: composition,
+                    posture: floraPosture,
+                    builder: &transparent
+                )
 
                 if transition.edgeStrength > 0.16 && accentRoll < 0.03 + (transition.edgeStrength * 0.14) {
                     addBiomeTransitionAccent(
@@ -8809,6 +10532,710 @@ final class ImmersiveApeRenderer: NSObject, MTKViewDelegate {
                     dnaProfile: dnaProfile,
                     posture: floraPosture,
                     builder: &opaque
+                )
+            }
+        }
+    }
+
+    private func addDenseGroundCoverLayer(
+        at base: SIMD3<Float>,
+        material: UInt8,
+        moisture: Float,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        environment: ImmersiveApeEnvironment,
+        seed: UInt32,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        composition: ImmersiveApeJungleCompositionPlacement,
+        posture: ImmersiveApeFloraPosture,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let passCount = currentQuality.groundCoverPassCount
+        guard passCount > 0 else {
+            return
+        }
+        guard composition.floorWeight > 0.08 else {
+            return
+        }
+
+        let sampleX = Int32((base.x * 82).rounded())
+        let sampleZ = Int32((base.z * 82).rounded())
+        let rolls: [Float] = [
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x14C7_91AB),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x6F35_D2C1),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xB842_17E9),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xD913_6C5F)
+        ]
+        let offsetRadius = 0.12 + (variant * 0.18)
+        let offsets: [SIMD3<Float>] = [
+            SIMD3<Float>((rolls[0] - 0.5) * offsetRadius, 0, (rolls[1] - 0.5) * offsetRadius),
+            SIMD3<Float>((rolls[2] - 0.5) * (offsetRadius * 0.86), 0, (rolls[3] - 0.5) * (offsetRadius * 0.92)),
+            SIMD3<Float>((rolls[1] - 0.5) * (offsetRadius * 1.08), 0, ((1 - rolls[2]) - 0.5) * (offsetRadius * 0.74)),
+            SIMD3<Float>(((1 - rolls[0]) - 0.5) * (offsetRadius * 0.64), 0, (rolls[3] - 0.5) * (offsetRadius * 0.6))
+        ]
+        let effectivePassCount = min(offsets.count, passCount + (composition.benchmarkWeight > 0.58 ? 1 : 0))
+        let shelteredGrowth = relief.basin * (0.78 - (relief.slope * 0.24))
+        let exposedGround = relief.ridge * (0.62 + (relief.slope * 0.38))
+        let runoffGrowth = relief.runoff
+        let floorDensity = immersiveApeClamp(
+            ((habitat.coverDensity * 0.82)
+                + (shelteredGrowth * 0.14)
+                + (runoffGrowth * 0.12)
+                + (moisture * 0.14)
+                - (exposedGround * 0.12))
+                * (0.74 + (composition.floorWeight * 0.34) + (composition.depthWeight * 0.12)),
+            min: 0,
+            max: 1
+        )
+        let wetPocket = immersiveApeClamp(
+            (moisture * 0.54)
+                + (runoffGrowth * 0.22)
+                + (shelteredGrowth * 0.16)
+                - (exposedGround * 0.06),
+            min: 0,
+            max: 1
+        )
+        let anchorStrength = immersiveApeClamp(
+            ((floorDensity * 0.62)
+                + (habitat.clutterDensity * 0.18)
+                + (shelteredGrowth * 0.1))
+                * (0.82 + (composition.stabilityWeight * 0.12) + (composition.motionWeight * 0.08)),
+            min: 0,
+            max: 1
+        )
+        let foliageTint = immersiveApeMix(habitat.accentColor, dnaProfile.foliageTint, t: 0.52)
+        let bloomTint = immersiveApeMix(habitat.accentColor, dnaProfile.bloomTint, t: 0.62)
+        let dryTint = immersiveApeMix(habitat.accentColor, dnaProfile.dryTint, t: 0.56)
+
+        switch material {
+        case 1:
+            guard floorDensity > 0.18 || wetPocket > 0.22 else {
+                return
+            }
+
+            if rolls[0] < 0.28 + (floorDensity * 0.26) + (wetPocket * 0.22) {
+                addReedCluster(
+                    at: base + offsets[0],
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    accentTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.5 + (wetPocket * 0.16) + (anchorStrength * 0.08),
+                    posture: posture
+                )
+            }
+
+            for index in 0..<effectivePassCount {
+                if rolls[(index + 1) % rolls.count] < 0.56 + (floorDensity * 0.22) {
+                    addGrass(
+                        at: base + offsets[index] + SIMD3<Float>(0, 0.002, 0),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.44) + (rolls[index] * 0.56)),
+                        shadow: shadow,
+                        silhouette: silhouette,
+                        scale: 0.3 + (wetPocket * 0.08) + (anchorStrength * 0.06),
+                        posture: posture
+                    )
+                }
+            }
+        case 2:
+            guard floorDensity > 0.2 else {
+                return
+            }
+
+            for index in 0..<effectivePassCount {
+                if rolls[index] < 0.62 + (floorDensity * 0.2) {
+                    addGrass(
+                        at: base + offsets[index] + SIMD3<Float>(0, 0.002, 0),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.42) + (rolls[(index + 1) % rolls.count] * 0.58)),
+                        shadow: shadow,
+                        silhouette: silhouette,
+                        scale: 0.34 + (anchorStrength * 0.08),
+                        posture: posture
+                    )
+                }
+            }
+
+            if effectivePassCount > 1, rolls[3] < 0.22 + (floorDensity * 0.24) {
+                addSeedHeadCluster(
+                    at: base + offsets[1],
+                    builder: &builder,
+                    environment: environment,
+                    stemTint: foliageTint,
+                    headTint: bloomTint,
+                    shadow: shadow,
+                    scale: 0.44 + (anchorStrength * 0.1),
+                    posture: posture
+                )
+            }
+        case 3:
+            guard floorDensity > 0.16 else {
+                return
+            }
+
+            for index in 0..<effectivePassCount {
+                if rolls[index] < 0.54 + (floorDensity * 0.2) {
+                    addDryTuft(
+                        at: base + offsets[index] + SIMD3<Float>(0, 0.002, 0),
+                        builder: &builder,
+                        environment: environment,
+                        tint: dryTint,
+                        shadow: shadow,
+                        scale: 0.34 + (anchorStrength * 0.08),
+                        posture: posture
+                    )
+                }
+            }
+
+            if effectivePassCount > 1, rolls[2] < 0.16 + (habitat.clutterDensity * 0.18) {
+                addBush(
+                    at: base + (offsets[1] * 0.74),
+                    builder: &builder,
+                    environment: environment,
+                    seed: seed,
+                    variant: min(1.0, (variant * 0.4) + (rolls[2] * 0.6)),
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    scale: 0.32 + (anchorStrength * 0.08),
+                    posture: posture
+                )
+            }
+        case 4:
+            guard floorDensity > 0.18 else {
+                return
+            }
+
+            if rolls[0] < 0.3 + (floorDensity * 0.28) + (wetPocket * 0.18) {
+                addFernPatch(
+                    at: base + offsets[0] + SIMD3<Float>(0, 0.002, 0),
+                    builder: &builder,
+                    environment: environment,
+                    tint: foliageTint,
+                    shadow: shadow,
+                    scale: 0.46 + (wetPocket * 0.14) + (anchorStrength * 0.08),
+                    posture: posture
+                )
+            }
+
+            for index in 1..<effectivePassCount {
+                if rolls[index] < 0.48 + (floorDensity * 0.22) {
+                    addGrass(
+                        at: base + offsets[index] + SIMD3<Float>(0, 0.002, 0),
+                        builder: &builder,
+                        environment: environment,
+                        seed: seed,
+                        variant: min(1.0, (variant * 0.4) + (rolls[(index + 1) % rolls.count] * 0.6)),
+                        shadow: shadow,
+                        silhouette: silhouette,
+                        scale: 0.26 + (wetPocket * 0.08),
+                        posture: posture
+                    )
+                }
+            }
+
+            if effectivePassCount > 1, rolls[3] < 0.22 + (habitat.clutterDensity * 0.18) {
+                addLeafLitterPatch(
+                    at: base + (offsets[1] * 0.68),
+                    builder: &builder,
+                    environment: environment,
+                    tint: dryTint,
+                    shadow: shadow,
+                    scale: 0.62 + (anchorStrength * 0.08)
+                )
+            }
+        case 5:
+            guard floorDensity > 0.12 else {
+                return
+            }
+
+            if rolls[0] < 0.26 + (habitat.clutterDensity * 0.24) {
+                addDryTuft(
+                    at: base + offsets[0] + SIMD3<Float>(0, 0.002, 0),
+                    builder: &builder,
+                    environment: environment,
+                    tint: dryTint,
+                    shadow: shadow,
+                    scale: 0.28 + (anchorStrength * 0.08),
+                    posture: posture
+                )
+            }
+            if effectivePassCount > 1, rolls[2] < 0.16 + (habitat.clutterDensity * 0.16) {
+                addLichenStoneCluster(
+                    at: base + (offsets[1] * 0.58),
+                    builder: &builder,
+                    environment: environment,
+                    shadow: shadow,
+                    silhouette: silhouette,
+                    lichenTint: immersiveApeMix(foliageTint, bloomTint, t: 0.16),
+                    dryTint: dryTint,
+                    variant: min(1.0, (variant * 0.38) + (rolls[2] * 0.62)),
+                    scale: 0.34 + (anchorStrength * 0.08)
+                )
+            }
+        default:
+            break
+        }
+    }
+
+    private func addAlphaFoliageSheet(
+        bottomCenter: SIMD3<Float>,
+        topCenter: SIMD3<Float>,
+        acrossDirection: SIMD3<Float>,
+        baseHalfWidth: Float,
+        topHalfWidth: Float,
+        baseColor: SIMD4<Float>,
+        tipColor: SIMD4<Float>,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let across = acrossDirection.normalizedSafe
+        guard simd_length_squared(across) > 0.0001 else {
+            return
+        }
+
+        let bottomLeft = bottomCenter - (across * baseHalfWidth)
+        let bottomRight = bottomCenter + (across * baseHalfWidth)
+        let topLeft = topCenter - (across * topHalfWidth)
+        let topRight = topCenter + (across * topHalfWidth)
+        let normal = simd_cross(topLeft - bottomLeft, bottomRight - bottomLeft).normalizedSafe
+
+        guard simd_length_squared(normal) > 0.0001 else {
+            return
+        }
+
+        builder.addQuad(
+            ImmersiveApeVertex(position: bottomLeft, normal: normal, color: baseColor),
+            ImmersiveApeVertex(position: bottomRight, normal: normal, color: baseColor),
+            ImmersiveApeVertex(position: topRight, normal: normal, color: tipColor),
+            ImmersiveApeVertex(position: topLeft, normal: normal, color: tipColor)
+        )
+
+        let reverseNormal = -normal
+        builder.addQuad(
+            ImmersiveApeVertex(position: bottomRight, normal: reverseNormal, color: baseColor),
+            ImmersiveApeVertex(position: bottomLeft, normal: reverseNormal, color: baseColor),
+            ImmersiveApeVertex(position: topLeft, normal: reverseNormal, color: tipColor),
+            ImmersiveApeVertex(position: topRight, normal: reverseNormal, color: tipColor)
+        )
+    }
+
+    private func addFoliageLightBreaks(
+        apertureCenter: SIMD3<Float>,
+        acrossDirection: SIMD3<Float>,
+        environment: ImmersiveApeEnvironment,
+        fieldDensity: Float,
+        openness: Float,
+        posture: ImmersiveApeFloraPosture,
+        variant: Float,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let shaftStrength = immersiveApeClamp(
+            (posture.lightAperture * 0.82)
+                + (fieldDensity * 0.18)
+                + (posture.motionStrength * 0.08)
+                - (openness * 0.14),
+            min: 0,
+            max: 1
+        )
+        guard shaftStrength > 0.16 else {
+            return
+        }
+
+        let lightTravel = environment.lightDirection.normalizedSafe
+        let planarLight = immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
+        let acrossBase = simd_length_squared(planarLight) > 0.0001
+            ? ((acrossDirection.normalizedSafe * 0.52) + (planarLight * 0.48)).normalizedSafe
+            : acrossDirection.normalizedSafe
+        let shaftTintBase = environment.daylight >= environment.nightStrength
+            ? immersiveApeMix(environment.sunColor, environment.horizonGlowColor, t: 0.34 + (environment.twilightStrength * 0.18))
+            : immersiveApeMix(environment.foamColor, environment.horizonColor, t: 0.58)
+        let shaftTint = immersiveApeMix(shaftTintBase, environment.fogColor, t: 0.12 + (openness * 0.18))
+        let shaftColor = immersiveApeSunlitShadowedColor(shaftTint, environment: environment, shadow: 0.08 + ((1 - fieldDensity) * 0.12))
+        let slashColor = immersiveApeMix(shaftColor, environment.clearColor, t: 0.18 + (environment.rainAmount * 0.12))
+        let shaftTop = apertureCenter
+            + (posture.direction * (posture.apePush * 0.14))
+            + SIMD3<Float>(0, 0.18 + (posture.lightAperture * 0.24) + (posture.motionStrength * 0.08), 0)
+        let shaftBottom = shaftTop
+            + (lightTravel * (0.66 + (shaftStrength * 0.78)))
+            + (posture.direction * (posture.motionStrength * 0.12))
+        let baseAlpha = immersiveApeClamp(
+            0.014 + (shaftStrength * 0.032) + (environment.rainAmount * 0.01),
+            min: 0,
+            max: 0.07
+        )
+
+        addAlphaFoliageSheet(
+            bottomCenter: shaftBottom,
+            topCenter: shaftTop,
+            acrossDirection: acrossBase,
+            baseHalfWidth: 0.03 + (shaftStrength * 0.04),
+            topHalfWidth: 0.008 + (shaftStrength * 0.016),
+            baseColor: SIMD4<Float>(shaftColor.x, shaftColor.y, shaftColor.z, baseAlpha * 0.46),
+            tipColor: SIMD4<Float>(shaftColor.x, shaftColor.y, shaftColor.z, baseAlpha),
+            builder: &builder
+        )
+
+        if openness > 0.24 || variant > 0.58 {
+            let slashOffset = acrossBase * ((variant - 0.5) * 0.12)
+            let slashTop = shaftTop + slashOffset + SIMD3<Float>(0, 0.04 + (environment.rainAmount * 0.04), 0)
+            let slashBottom = slashTop
+                + (lightTravel * (0.38 + (shaftStrength * 0.34)))
+                + (posture.crossDirection * posture.lateralSway * 0.28)
+
+            addAlphaFoliageSheet(
+                bottomCenter: slashBottom,
+                topCenter: slashTop,
+                acrossDirection: acrossBase,
+                baseHalfWidth: 0.018 + (shaftStrength * 0.024),
+                topHalfWidth: 0.006 + (shaftStrength * 0.012),
+                baseColor: SIMD4<Float>(slashColor.x, slashColor.y, slashColor.z, baseAlpha * 0.3),
+                tipColor: SIMD4<Float>(slashColor.x, slashColor.y, slashColor.z, baseAlpha * 0.72),
+                builder: &builder
+            )
+        }
+    }
+
+    private func addAlphaVegetationVeil(
+        at base: SIMD3<Float>,
+        distance: Float,
+        material: UInt8,
+        moisture: Float,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        environment: ImmersiveApeEnvironment,
+        seed: UInt32,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        composition: ImmersiveApeJungleCompositionPlacement,
+        posture: ImmersiveApeFloraPosture,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let passCount = currentQuality.alphaVeilPassCount
+        guard passCount > 0 else {
+            return
+        }
+        guard composition.veilWeight > 0.08 else {
+            return
+        }
+
+        let midRadius = currentSpatialLODProfile.midRadius
+        guard distance >= 6, distance <= (midRadius + 8) else {
+            return
+        }
+
+        let rangeFadeIn = immersiveApeSaturate((distance - 6) / 4.5)
+        let rangeFadeOut = 1 - immersiveApeSaturate((distance - (midRadius * 0.84)) / max(Float(6), midRadius * 0.24))
+        let rangeWeight = rangeFadeIn * rangeFadeOut * (0.72 + (composition.veilWeight * 0.28))
+        guard rangeWeight > 0.05 else {
+            return
+        }
+
+        let profile = immersiveApeAlphaFoliageProfile(
+            material: material,
+            moisture: moisture,
+            relief: relief,
+            habitat: habitat,
+            dnaProfile: dnaProfile
+        )
+        let fieldDensity = immersiveApeClamp(
+            profile.density
+                * rangeWeight
+                * (0.76 + (composition.veilWeight * 0.18) + (composition.benchmarkWeight * 0.12)),
+            min: 0,
+            max: 1
+        )
+        guard fieldDensity > 0.14 else {
+            return
+        }
+
+        let sampleX = Int32((base.x * 68).rounded())
+        let sampleZ = Int32((base.z * 68).rounded())
+        let rolls: [Float] = [
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x74A1_2C5F),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x11F4_83BD),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xA36C_59E1),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xD54B_0F27)
+        ]
+        let offsetRadius = 0.18 + (variant * 0.16) + (fieldDensity * 0.12)
+        let offsets: [SIMD3<Float>] = [
+            SIMD3<Float>((rolls[0] - 0.5) * offsetRadius, 0, (rolls[1] - 0.5) * offsetRadius),
+            SIMD3<Float>((rolls[2] - 0.5) * (offsetRadius * 1.18), 0, ((1 - rolls[0]) - 0.5) * (offsetRadius * 0.92)),
+            SIMD3<Float>(((1 - rolls[1]) - 0.5) * (offsetRadius * 0.86), 0, (rolls[3] - 0.5) * (offsetRadius * 1.08)),
+            SIMD3<Float>((rolls[3] - 0.5) * (offsetRadius * 0.72), 0, ((1 - rolls[2]) - 0.5) * (offsetRadius * 0.78))
+        ]
+        let effectivePassCount = min(
+            offsets.count,
+            passCount + ((fieldDensity > 0.58 || composition.benchmarkWeight > 0.62) ? 1 : 0)
+        )
+        let baseTint = immersiveApeMix(habitat.accentColor, dnaProfile.foliageTint, t: 0.58)
+        let leafTint = immersiveApeMix(baseTint, dnaProfile.bloomTint, t: 0.12)
+        let dryTint = immersiveApeMix(baseTint, dnaProfile.dryTint, t: 0.1)
+        let primaryTint: SIMD3<Float>
+        let secondaryTint: SIMD3<Float>
+
+        switch material {
+        case 1:
+            primaryTint = immersiveApeMix(baseTint, environment.waterColor, t: 0.12)
+            secondaryTint = immersiveApeMix(leafTint, environment.sunColor, t: 0.08)
+        case 2:
+            primaryTint = immersiveApeMix(baseTint, leafTint, t: 0.18)
+            secondaryTint = immersiveApeMix(leafTint, environment.sunColor, t: 0.06)
+        case 3:
+            primaryTint = immersiveApeMix(baseTint, dryTint, t: 0.12)
+            secondaryTint = immersiveApeMix(leafTint, dnaProfile.bloomTint, t: 0.08)
+        case 4:
+            primaryTint = immersiveApeMix(baseTint, environment.waterColor, t: 0.08)
+            secondaryTint = immersiveApeMix(leafTint, environment.sunColor, t: 0.04)
+        default:
+            primaryTint = immersiveApeMix(baseTint, dryTint, t: 0.22)
+            secondaryTint = immersiveApeMix(primaryTint, environment.sunColor, t: 0.04)
+        }
+
+        let litPrimary = immersiveApeSunlitShadowedColor(primaryTint, environment: environment, shadow: shadow * 0.78)
+        let litSecondary = immersiveApeSunlitShadowedColor(secondaryTint, environment: environment, shadow: shadow * 0.62)
+        let alphaBase = immersiveApeClamp(
+            (0.08 + (fieldDensity * 0.12) - (profile.openness * 0.03))
+                * (0.88 + (rangeWeight * 0.08) + (composition.lightWeight * 0.04)),
+            min: 0.08,
+            max: 0.24
+        )
+        let baseColor = SIMD4<Float>(litPrimary.x, litPrimary.y, litPrimary.z, alphaBase)
+        let tipColor = SIMD4<Float>(litSecondary.x, litSecondary.y, litSecondary.z, alphaBase * 0.72)
+        let baseHeight = (0.74 + (profile.heightBias * 0.42) + (silhouette.grassHeightScale * 0.18))
+            * (0.9 + (fieldDensity * 0.12) + (composition.depthWeight * 0.08))
+        let baseWidth = (0.11 + (profile.widthBias * 0.07) + (silhouette.grassSpread * 0.04))
+            * (0.88 + (fieldDensity * 0.12) + (composition.veilWeight * 0.1))
+        let leanBase = ((posture.direction * (0.12 + (posture.bend * 0.82) + (composition.motionWeight * 0.08)))
+            + (posture.crossDirection * posture.lateralSway * (0.76 + (composition.motionWeight * 0.12))))
+
+        for index in 0..<effectivePassCount {
+            if rolls[index] > 0.34 + (fieldDensity * 0.54) {
+                continue
+            }
+
+            let root = base + offsets[index] + SIMD3<Float>(0, 0.06 + (rolls[(index + 3) % rolls.count] * 0.06), 0)
+            let height = baseHeight * (0.86 + (rolls[(index + 1) % rolls.count] * 0.32)) * posture.heightScale
+            let width = baseWidth * (0.82 + (rolls[(index + 2) % rolls.count] * 0.26)) * posture.spreadScale
+            let angle = (rolls[(index + 1) % rolls.count] - 0.5) * Float.pi * 0.82
+            let across = ((posture.crossDirection * cos(angle)) + (posture.direction * sin(angle))).normalizedSafe
+            let leanVector = leanBase * height * (0.72 + (rolls[index] * 0.28))
+            let droopLift = posture.droop * height * 0.16
+            let topCenter = root + leanVector + SIMD3<Float>(0, height - droopLift, 0)
+
+            addAlphaFoliageSheet(
+                bottomCenter: root,
+                topCenter: topCenter,
+                acrossDirection: across,
+                baseHalfWidth: width,
+                topHalfWidth: width * (0.38 + (fieldDensity * 0.18)),
+                baseColor: baseColor,
+                tipColor: tipColor,
+                builder: &builder
+            )
+
+            if index == 0 || (index == 1 && fieldDensity > 0.48) {
+                addFoliageLightBreaks(
+                    apertureCenter: topCenter,
+                    acrossDirection: across,
+                    environment: environment,
+                    fieldDensity: fieldDensity * (0.88 + (composition.lightWeight * 0.18)),
+                    openness: profile.openness,
+                    posture: posture,
+                    variant: rolls[index],
+                    builder: &builder
+                )
+            }
+
+            if index == 0, (material == 3 || material == 4), (profile.frondBias > 0.44 || profile.fernBias > 0.52) {
+                let crossAngle = angle + (Float.pi * 0.5)
+                let crossAcross = ((posture.crossDirection * cos(crossAngle)) + (posture.direction * sin(crossAngle))).normalizedSafe
+                addAlphaFoliageSheet(
+                    bottomCenter: root + SIMD3<Float>(0, 0.02, 0),
+                    topCenter: topCenter + (leanVector * 0.08),
+                    acrossDirection: crossAcross,
+                    baseHalfWidth: width * 0.72,
+                    topHalfWidth: width * 0.28,
+                    baseColor: SIMD4<Float>(baseColor.x * 0.94, baseColor.y * 0.98, baseColor.z * 0.94, baseColor.w * 0.82),
+                    tipColor: SIMD4<Float>(tipColor.x * 0.96, tipColor.y * 1.02, tipColor.z * 0.96, tipColor.w * 0.82),
+                    builder: &builder
+                )
+            }
+        }
+    }
+
+    private func addSkylineFoliageLayer(
+        at base: SIMD3<Float>,
+        distance: Float,
+        material: UInt8,
+        moisture: Float,
+        relief: ImmersiveApeTerrainRelief,
+        habitat: ImmersiveApeBiomeHabitat,
+        environment: ImmersiveApeEnvironment,
+        seed: UInt32,
+        variant: Float,
+        shadow: Float,
+        silhouette: ImmersiveApeBiomeSilhouette,
+        dnaProfile: ImmersiveApeBiomeDNAProfile,
+        composition: ImmersiveApeJungleCompositionPlacement,
+        posture: ImmersiveApeFloraPosture,
+        builder: inout ImmersiveApeMeshBuilder
+    ) {
+        let passCount = currentQuality.skylineVeilPassCount
+        guard passCount > 0 else {
+            return
+        }
+        guard composition.skylineWeight > 0.08 else {
+            return
+        }
+
+        let midRadius = currentSpatialLODProfile.midRadius
+        let horizonRadius = currentSpatialLODProfile.horizonRadius
+        let skylineStart = max(12.0, midRadius * 0.44)
+        guard distance >= skylineStart, distance <= horizonRadius else {
+            return
+        }
+
+        let fadeIn = immersiveApeSaturate((distance - skylineStart) / max(6.0, midRadius * 0.24))
+        let fadeOut = 1 - immersiveApeSaturate((distance - (horizonRadius * 0.9)) / max(6.0, horizonRadius * 0.12))
+        let rangeWeight = fadeIn * fadeOut * (0.72 + (composition.skylineWeight * 0.28))
+        guard rangeWeight > 0.05 else {
+            return
+        }
+
+        let profile = immersiveApeSkylineFoliageProfile(
+            material: material,
+            moisture: moisture,
+            relief: relief,
+            habitat: habitat,
+            dnaProfile: dnaProfile
+        )
+        let fieldDensity = immersiveApeClamp(
+            profile.density
+                * rangeWeight
+                * (0.74 + (composition.skylineWeight * 0.18) + (composition.benchmarkWeight * 0.12)),
+            min: 0,
+            max: 1
+        )
+        guard fieldDensity > 0.12 else {
+            return
+        }
+
+        let sampleX = Int32((base.x * 74).rounded())
+        let sampleZ = Int32((base.z * 74).rounded())
+        let rolls: [Float] = [
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x5B81_CE27),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0x14A7_93D1),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xC63E_207B),
+            immersiveApeNoise(sampleX, sampleZ, seed: seed ^ 0xE11D_49AF)
+        ]
+        let effectivePassCount = min(
+            rolls.count,
+            passCount + ((fieldDensity > 0.54 || composition.benchmarkWeight > 0.62) ? 1 : 0)
+        )
+        let offsetRadius = 0.28 + (variant * 0.22) + (fieldDensity * 0.16)
+        let offsets: [SIMD3<Float>] = [
+            SIMD3<Float>((rolls[0] - 0.5) * offsetRadius, 0, (rolls[1] - 0.5) * offsetRadius),
+            SIMD3<Float>((rolls[2] - 0.5) * (offsetRadius * 1.26), 0, ((1 - rolls[0]) - 0.5) * (offsetRadius * 0.96)),
+            SIMD3<Float>(((1 - rolls[1]) - 0.5) * (offsetRadius * 1.08), 0, (rolls[3] - 0.5) * (offsetRadius * 1.24)),
+            SIMD3<Float>((rolls[3] - 0.5) * (offsetRadius * 0.84), 0, ((1 - rolls[2]) - 0.5) * (offsetRadius * 0.88))
+        ]
+        let distanceFactor = immersiveApeSaturate(distance / max(1.0, horizonRadius))
+        let baseTint = immersiveApeMix(habitat.accentColor, dnaProfile.foliageTint, t: 0.6)
+        let canopyTint = immersiveApeMix(baseTint, environment.fogColor, t: 0.14 + (distanceFactor * 0.18))
+        let highlightTint = immersiveApeMix(canopyTint, environment.sunColor, t: 0.06 + (fieldDensity * 0.04))
+        let litBase = immersiveApeSunlitShadowedColor(canopyTint, environment: environment, shadow: shadow * 0.68)
+        let litTip = immersiveApeSunlitShadowedColor(highlightTint, environment: environment, shadow: shadow * 0.48)
+        let alphaBase = immersiveApeClamp(
+            (0.045 + (fieldDensity * 0.08) - (profile.openness * 0.018))
+                * (0.88 + (rangeWeight * 0.1) + (composition.lightWeight * 0.06)),
+            min: 0.04,
+            max: 0.14
+        )
+        let baseColor = SIMD4<Float>(litBase.x, litBase.y, litBase.z, alphaBase)
+        let tipColor = SIMD4<Float>(litTip.x, litTip.y, litTip.z, alphaBase * 0.74)
+        let rootLift = 0.86 + (profile.riseBias * 0.28) + (distanceFactor * 0.42) + (composition.depthWeight * 0.12)
+        let baseHeight = (1.34 + (profile.riseBias * 0.68) + (silhouette.treeCanopyHeightScale * 0.22))
+            * (0.92 + (fieldDensity * 0.12) + (composition.skylineWeight * 0.12))
+        let baseWidth = (0.22 + (profile.widthBias * 0.12) + (silhouette.treeCanopyWidthScale * 0.04))
+            * (0.88 + (fieldDensity * 0.12) + (composition.depthWeight * 0.12))
+        let leanBase = ((posture.direction * (0.18 + (posture.bend * 0.88) + (composition.motionWeight * 0.1)))
+            + (posture.crossDirection * posture.lateralSway * (0.86 + (composition.motionWeight * 0.12))))
+
+        for index in 0..<effectivePassCount {
+            if rolls[index] > 0.3 + (fieldDensity * 0.56) {
+                continue
+            }
+
+            let root = base + offsets[index] + SIMD3<Float>(0, rootLift + (rolls[(index + 3) % rolls.count] * 0.24), 0)
+            let height = baseHeight * (0.84 + (rolls[(index + 1) % rolls.count] * 0.34))
+            let width = baseWidth * (0.82 + (rolls[(index + 2) % rolls.count] * 0.28))
+            let angle = (rolls[(index + 2) % rolls.count] - 0.5) * Float.pi * 0.9
+            let across = ((posture.crossDirection * cos(angle)) + (posture.direction * sin(angle))).normalizedSafe
+            let leanVector = leanBase * height * (0.62 + (rolls[index] * 0.32))
+            let topCenter = root + leanVector + SIMD3<Float>(0, height, 0)
+
+            addAlphaFoliageSheet(
+                bottomCenter: root,
+                topCenter: topCenter,
+                acrossDirection: across,
+                baseHalfWidth: width,
+                topHalfWidth: width * (0.48 + (fieldDensity * 0.16)),
+                baseColor: baseColor,
+                tipColor: tipColor,
+                builder: &builder
+            )
+
+            if index == 0 || (index == 1 && fieldDensity > 0.42) {
+                addFoliageLightBreaks(
+                    apertureCenter: topCenter + SIMD3<Float>(0, height * 0.08, 0),
+                    acrossDirection: across,
+                    environment: environment,
+                    fieldDensity: fieldDensity * (0.88 + (composition.lightWeight * 0.2)),
+                    openness: profile.openness,
+                    posture: posture,
+                    variant: rolls[index],
+                    builder: &builder
+                )
+            }
+
+            if profile.canopyBias > 0.46 || profile.bandBias > 0.44 {
+                let crossAngle = angle + (Float.pi * 0.48)
+                let crossAcross = ((posture.crossDirection * cos(crossAngle)) + (posture.direction * sin(crossAngle))).normalizedSafe
+                addAlphaFoliageSheet(
+                    bottomCenter: root + SIMD3<Float>(0, height * 0.18, 0),
+                    topCenter: topCenter + (leanVector * 0.12) + SIMD3<Float>(0, height * 0.08, 0),
+                    acrossDirection: crossAcross,
+                    baseHalfWidth: width * 0.78,
+                    topHalfWidth: width * 0.32,
+                    baseColor: SIMD4<Float>(baseColor.x * 0.96, baseColor.y * 0.98, baseColor.z * 0.96, baseColor.w * 0.82),
+                    tipColor: SIMD4<Float>(tipColor.x * 0.98, tipColor.y * 1.02, tipColor.z * 0.98, tipColor.w * 0.82),
+                    builder: &builder
+                )
+            }
+
+            if index == 0, profile.driftBias > 0.38 {
+                let driftAcross = ((posture.crossDirection * cos(angle + (Float.pi * 0.24))) + (posture.direction * sin(angle + (Float.pi * 0.24)))).normalizedSafe
+                let driftBottom = topCenter + SIMD3<Float>(0, height * 0.12, 0)
+                let driftTop = driftBottom + (leanVector * 0.26) + SIMD3<Float>(0, height * 0.28, 0)
+                addAlphaFoliageSheet(
+                    bottomCenter: driftBottom,
+                    topCenter: driftTop,
+                    acrossDirection: driftAcross,
+                    baseHalfWidth: width * 0.52,
+                    topHalfWidth: width * 0.18,
+                    baseColor: SIMD4<Float>(baseColor.x, baseColor.y, baseColor.z, baseColor.w * 0.64),
+                    tipColor: SIMD4<Float>(tipColor.x, tipColor.y, tipColor.z, tipColor.w * 0.58),
+                    builder: &builder
                 )
             }
         }
@@ -20885,6 +23312,11 @@ private func immersiveApeAccessibilitySummary(
     )
     let encounters = immersiveApeEncounters(capture: capture)
     let weatherNeighborhoodContext = immersiveApeWeatherNeighborhoodContext(capture: capture, grid: grid, environment: environment)
+    let groundCoverContext = immersiveApeGroundCoverContext(capture: capture, grid: grid, environment: environment)
+    let alphaFoliageContext = immersiveApeAlphaFoliageContext(capture: capture, grid: grid, environment: environment)
+    let skylineFoliageContext = immersiveApeSkylineFoliageContext(capture: capture, grid: grid, environment: environment)
+    let foliageDynamicsContext = immersiveApeFoliageDynamicsContext(capture: capture, grid: grid, environment: environment)
+    let jungleCompositionContext = immersiveApeJungleCompositionContext(capture: capture, grid: grid, environment: environment)
     let exposureContext = immersiveApeExposureContext(capture: capture, grid: grid, environment: environment)
 
     let quickPickSentence: String
@@ -20902,9 +23334,14 @@ private func immersiveApeAccessibilitySummary(
     }
 
     let weatherSentence = weatherNeighborhoodContext.map { "Weather \($0.panelLabel)." } ?? ""
+    let groundCoverSentence = groundCoverContext.map { " Ground cover \($0.panelLabel)." } ?? ""
+    let alphaFoliageSentence = alphaFoliageContext.map { " Veil \($0.panelLabel)." } ?? ""
+    let skylineSentence = skylineFoliageContext.map { " Skyline \($0.panelLabel)." } ?? ""
+    let dynamicsSentence = foliageDynamicsContext.map { " Dynamics \($0.panelLabel)." } ?? ""
+    let compositionSentence = jungleCompositionContext.map { " Composition \($0.panelLabel)." } ?? ""
     let exposureSentence = exposureContext.map { " Exposure \($0.panelLabel)." } ?? ""
 
-    return "\(capture.selectedName), \(sexLabel), \(ageDays) days old. \(paused ? "Simulation paused." : "Following selected ape.") Camera \(cameraControlContext.panelLabel.lowercased()). Focus \(focusDescription). Selection \(selectionLayerContext.currentIndex + 1) of \(selectionLayerContext.totalCount) in a population of \(capture.apeCount). \(quickPickSentence) \(encounterSentence) \(weatherSentence)\(exposureSentence)"
+    return "\(capture.selectedName), \(sexLabel), \(ageDays) days old. \(paused ? "Simulation paused." : "Following selected ape.") Camera \(cameraControlContext.panelLabel.lowercased()). Focus \(focusDescription). Selection \(selectionLayerContext.currentIndex + 1) of \(selectionLayerContext.totalCount) in a population of \(capture.apeCount). \(quickPickSentence) \(encounterSentence) \(weatherSentence)\(groundCoverSentence)\(alphaFoliageSentence)\(skylineSentence)\(dynamicsSentence)\(compositionSentence)\(exposureSentence)"
 }
 
 private func immersiveApeEncounterStory(
@@ -20945,6 +23382,21 @@ private func immersiveApeEncounterStory(
     let surfTail = immersiveApeSurfStoryTail(
         immersiveApeSurfContext(capture: capture, grid: grid, environment: environment)
     )
+    let groundCoverTail = immersiveApeGroundCoverStoryTail(
+        immersiveApeGroundCoverContext(capture: capture, grid: grid, environment: environment)
+    )
+    let alphaFoliageTail = immersiveApeAlphaFoliageStoryTail(
+        immersiveApeAlphaFoliageContext(capture: capture, grid: grid, environment: environment)
+    )
+    let skylineFoliageTail = immersiveApeSkylineFoliageStoryTail(
+        immersiveApeSkylineFoliageContext(capture: capture, grid: grid, environment: environment)
+    )
+    let foliageDynamicsTail = immersiveApeFoliageDynamicsStoryTail(
+        immersiveApeFoliageDynamicsContext(capture: capture, grid: grid, environment: environment)
+    )
+    let jungleCompositionTail = immersiveApeJungleCompositionStoryTail(
+        immersiveApeJungleCompositionContext(capture: capture, grid: grid, environment: environment)
+    )
     let coverResponseTail = immersiveApeCoverResponseStoryTail(
         immersiveApeCoverResponseContext(capture: capture, grid: grid, environment: environment)
     )
@@ -20954,7 +23406,7 @@ private func immersiveApeEncounterStory(
     let selectionTail = selectionLayerContext.storyTail
 
     guard let encounter = immersiveApeFocusedEncounter(focus: focus, encounters: encounters) else {
-        return focus.fallbackStory + selectionTail + cameraControlContext.storyTail + weatherNeighborhoodTail + weatherTail + lightTail + precipitationTail + airflowTail + vaporTail + surfaceWaterTail + surfTail + coverResponseTail + exposureTail
+        return focus.fallbackStory + selectionTail + cameraControlContext.storyTail + weatherNeighborhoodTail + weatherTail + lightTail + precipitationTail + airflowTail + vaporTail + surfaceWaterTail + surfTail + groundCoverTail + alphaFoliageTail + skylineFoliageTail + foliageDynamicsTail + jungleCompositionTail + coverResponseTail + exposureTail
     }
 
     let meetingBehavior = immersiveApeMeetingBehavior(mode: encounter.mode, distance: encounter.distance)
@@ -21042,7 +23494,7 @@ private func immersiveApeEncounterStory(
             : "\(capture.selectedName) has \(encounter.name) nearby, a quiet social cue inside the wider procedural world."
     }
 
-    return baseStory + tieTail + statusTail + episodicTail + territoryTail + socialFieldTail + socialNeighborhoodTail + selectionTail + cameraControlContext.storyTail + weatherNeighborhoodTail + weatherTail + lightTail + precipitationTail + airflowTail + vaporTail + surfaceWaterTail + surfTail + coverResponseTail + exposureTail
+    return baseStory + tieTail + statusTail + episodicTail + territoryTail + socialFieldTail + socialNeighborhoodTail + selectionTail + cameraControlContext.storyTail + weatherNeighborhoodTail + weatherTail + lightTail + precipitationTail + airflowTail + vaporTail + surfaceWaterTail + surfTail + groundCoverTail + alphaFoliageTail + skylineFoliageTail + foliageDynamicsTail + jungleCompositionTail + coverResponseTail + exposureTail
 }
 
 private func immersiveApeEncounterPanel(
@@ -21068,6 +23520,11 @@ private func immersiveApeEncounterPanel(
     let vaporContext = immersiveApeVaporContext(capture: capture, grid: grid, environment: environment)
     let surfaceWaterContext = immersiveApeSurfaceWaterContext(capture: capture, grid: grid, environment: environment)
     let surfContext = immersiveApeSurfContext(capture: capture, grid: grid, environment: environment)
+    let groundCoverContext = immersiveApeGroundCoverContext(capture: capture, grid: grid, environment: environment)
+    let alphaFoliageContext = immersiveApeAlphaFoliageContext(capture: capture, grid: grid, environment: environment)
+    let skylineFoliageContext = immersiveApeSkylineFoliageContext(capture: capture, grid: grid, environment: environment)
+    let foliageDynamicsContext = immersiveApeFoliageDynamicsContext(capture: capture, grid: grid, environment: environment)
+    let jungleCompositionContext = immersiveApeJungleCompositionContext(capture: capture, grid: grid, environment: environment)
     let coverResponseContext = immersiveApeCoverResponseContext(capture: capture, grid: grid, environment: environment)
     let exposureContext = immersiveApeExposureContext(capture: capture, grid: grid, environment: environment)
 
@@ -21100,6 +23557,21 @@ private func immersiveApeEncounterPanel(
         }
         if let surfContext {
             panelLines.append("Surf: \(surfContext.panelLabel)")
+        }
+        if let groundCoverContext {
+            panelLines.append("Floor: \(groundCoverContext.panelLabel)")
+        }
+        if let alphaFoliageContext {
+            panelLines.append("Veil: \(alphaFoliageContext.panelLabel)")
+        }
+        if let skylineFoliageContext {
+            panelLines.append("Skyline: \(skylineFoliageContext.panelLabel)")
+        }
+        if let foliageDynamicsContext {
+            panelLines.append("Dynamics: \(foliageDynamicsContext.panelLabel)")
+        }
+        if let jungleCompositionContext {
+            panelLines.append("Composition: \(jungleCompositionContext.panelLabel)")
         }
         if let coverResponseContext {
             panelLines.append("Cover: \(coverResponseContext.panelLabel)")
@@ -21154,6 +23626,21 @@ private func immersiveApeEncounterPanel(
     if let surfContext {
         panelLines.append("Surf: \(surfContext.panelLabel)")
     }
+    if let groundCoverContext {
+        panelLines.append("Floor: \(groundCoverContext.panelLabel)")
+    }
+    if let alphaFoliageContext {
+        panelLines.append("Veil: \(alphaFoliageContext.panelLabel)")
+    }
+    if let skylineFoliageContext {
+        panelLines.append("Skyline: \(skylineFoliageContext.panelLabel)")
+    }
+    if let foliageDynamicsContext {
+        panelLines.append("Dynamics: \(foliageDynamicsContext.panelLabel)")
+    }
+    if let jungleCompositionContext {
+        panelLines.append("Composition: \(jungleCompositionContext.panelLabel)")
+    }
     if let coverResponseContext {
         panelLines.append("Cover: \(coverResponseContext.panelLabel)")
     }
@@ -21207,13 +23694,18 @@ private func immersiveApeHUDState(
     let lightSummary = immersiveApeLightContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
     let surfaceWaterSummary = immersiveApeSurfaceWaterContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
     let surfSummary = immersiveApeSurfContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
+    let groundCoverSummary = immersiveApeGroundCoverContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
+    let alphaFoliageSummary = immersiveApeAlphaFoliageContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
+    let skylineFoliageSummary = immersiveApeSkylineFoliageContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
+    let foliageDynamicsSummary = immersiveApeFoliageDynamicsContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
+    let jungleCompositionSummary = immersiveApeJungleCompositionContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
     let coverResponseSummary = immersiveApeCoverResponseContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
     let exposureSummary = immersiveApeExposureContext(capture: capture, grid: grid, environment: environment)?.summaryPhrase ?? ""
 
     return ImmersiveApeHUDState(
         headline: "\(capture.selectedName)  •  \(sexLabel)  •  \(ageDays)d  •  Cycle \(immersiveApeCurrentDevelopmentCycle) / 100",
         status: "\(immersiveApeTimeString(capture.snapshot.time))  •  \(immersiveApeWeatherDescription(capture.snapshot.weather))  •  \(immersiveApeTideDescription(capture.snapshot.tide))  •  \(capture.apeCount) apes live  •  \(paused ? "Paused" : "Following selected ape")",
-        detail: "\(immersiveApeFocusDescription(capture: capture))\(selectionLayerContext.summaryPhrase)\(cameraControlContext.summaryPhrase)\(weatherNeighborhoodSummary)\(lightSummary)\(surfaceWaterSummary)\(surfSummary)\(coverResponseSummary)\(exposureSummary)  •  \(immersiveApeStateDescription(selected.state))  •  \(immersiveApeGoalDescription(selected.goal_type))",
+        detail: "\(immersiveApeFocusDescription(capture: capture))\(selectionLayerContext.summaryPhrase)\(cameraControlContext.summaryPhrase)\(weatherNeighborhoodSummary)\(lightSummary)\(surfaceWaterSummary)\(surfSummary)\(groundCoverSummary)\(alphaFoliageSummary)\(skylineFoliageSummary)\(foliageDynamicsSummary)\(jungleCompositionSummary)\(coverResponseSummary)\(exposureSummary)  •  \(immersiveApeStateDescription(selected.state))  •  \(immersiveApeGoalDescription(selected.goal_type))",
         selection: immersiveApeSelectionPanel(selectionLayerContext),
         camera: cameraControlContext.panelText,
         audioState: audioState,
@@ -21317,21 +23809,123 @@ private func immersiveApeTerrainGradient(
     )
 }
 
+private func immersiveApeFoliageMotionDrive(
+    at base: SIMD3<Float>,
+    material: UInt8,
+    capture: ImmersiveApeSceneCapture,
+    environment: ImmersiveApeEnvironment
+) -> ImmersiveApeFoliageMotionDrive {
+    let windPlanar = immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
+    let windDirection = simd_length_squared(windPlanar) > 0.0001
+        ? windPlanar
+        : SIMD3<Float>(0.88, 0, 0.32)
+    let planarBase = SIMD3<Float>(base.x, 0, base.z)
+    let baseDistance = simd_length(SIMD2<Float>(base.x, base.z))
+    let selectedMoving = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_MOVING)) ? Float(0.24) : 0
+    let selectedAttack = (
+        immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
+            || immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE))
+    ) ? Float(0.16) : 0
+    let selectedShout = immersiveApeHasState(capture.snapshot.selected.state, immersiveApeStateFlag(BEING_STATE_SHOUTING)) ? Float(0.1) : 0
+    let selectedWeight = (selectedMoving + selectedAttack + selectedShout) * immersiveApeClamp(1 - (baseDistance / 18), min: 0, max: 1)
+    var apeVector = simd_length_squared(planarBase) > 0.0001
+        ? planarBase.normalizedSafe * selectedWeight
+        : SIMD3<Float>(0, 0, 0)
+    var apePressure = selectedWeight * 0.72
+
+    for (ape, position) in zip(capture.nearby, capture.nearbyLocalPositions) {
+        let delta = SIMD3<Float>(base.x - position.x, 0, base.z - position.z)
+        let planarDistance = simd_length(SIMD2<Float>(delta.x, delta.z))
+        guard planarDistance <= 18 else {
+            continue
+        }
+
+        var activity: Float = immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_MOVING)) ? 0.34 : 0.08
+        if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_ATTACK))
+            || immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SHOWFORCE)) {
+            activity += 0.2
+        }
+        if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SHOUTING))
+            || immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SPEAKING)) {
+            activity += 0.12
+        }
+        if immersiveApeHasState(ape.state, immersiveApeStateFlag(BEING_STATE_SWIMMING)) {
+            activity += 0.08
+        }
+
+        let distanceWeight = immersiveApeClamp(1 - (planarDistance / 18), min: 0, max: 1)
+        let weightedActivity = activity * distanceWeight
+        apePressure += weightedActivity
+
+        if simd_length_squared(delta) > 0.0001 {
+            apeVector += delta.normalizedSafe * weightedActivity
+        }
+    }
+
+    apePressure = immersiveApeClamp(apePressure, min: 0, max: 1)
+    let apeDirection = simd_length_squared(apeVector) > 0.0001
+        ? apeVector.normalizedSafe
+        : windDirection
+    let surfMaterialBias: Float
+    switch material {
+    case 1:
+        surfMaterialBias = 0.86
+    case 2:
+        surfMaterialBias = 0.42
+    case 4:
+        surfMaterialBias = 0.24
+    default:
+        surfMaterialBias = 0.16
+    }
+    let surfPush = immersiveApeClamp(environment.surfStrength * surfMaterialBias, min: 0, max: 1)
+    let rainSweep = immersiveApeClamp(
+        environment.rainAmount * (0.48 + (surfMaterialBias * 0.16)),
+        min: 0,
+        max: 1
+    )
+    let combinedDirection = ((windDirection * (0.72 + (rainSweep * 0.16) + (surfPush * 0.12))) + (apeDirection * max(0.12, apePressure * 0.82))).normalizedSafe
+    let sunHeight = immersiveApeSaturate((-environment.lightDirection.y - 0.18) / 0.82)
+    let lightAperture = immersiveApeClamp(
+        (environment.daylight * (1 - sunHeight) * 0.82) + (environment.nightStrength * 0.58),
+        min: 0,
+        max: 1
+    )
+    let strength = immersiveApeClamp(
+        0.14
+            + (rainSweep * 0.24)
+            + (surfPush * 0.18)
+            + (apePressure * 0.34),
+        min: 0,
+        max: 1
+    )
+
+    return ImmersiveApeFoliageMotionDrive(
+        direction: combinedDirection,
+        strength: strength,
+        apePressure: apePressure,
+        surfPush: surfPush,
+        rainSweep: rainSweep,
+        lightAperture: lightAperture
+    )
+}
+
 private func immersiveApeFloraPosture(
     at base: SIMD3<Float>,
     material: UInt8,
     moisture: Float,
     relief: ImmersiveApeTerrainRelief,
     habitat: ImmersiveApeBiomeHabitat,
+    motionDrive: ImmersiveApeFoliageMotionDrive,
     environment: ImmersiveApeEnvironment,
     timeValue: Float,
     variation: Float,
     dnaProfile: ImmersiveApeBiomeDNAProfile
 ) -> ImmersiveApeFloraPosture {
     let windPlanar = immersiveApePlanarDirection(SIMD3<Float>(-environment.lightDirection.x, 0, -environment.lightDirection.z))
-    let windDirection = simd_length_squared(windPlanar) > 0.0001
+    let baseWindDirection = simd_length_squared(windPlanar) > 0.0001
         ? windPlanar
         : SIMD3<Float>(0.88, 0, 0.32)
+    let windDirection = ((baseWindDirection * (0.68 + (motionDrive.rainSweep * 0.14) + (motionDrive.surfPush * 0.08))) + (motionDrive.direction * max(0.18, motionDrive.apePressure * 0.54))).normalizedSafe
     let crossDirection = SIMD3<Float>(-windDirection.z, 0, windDirection.x)
     let shelter = immersiveApeSaturate((habitat.coverDensity * 0.38) + (relief.basin * 0.28) - (relief.slope * 0.18))
     let exposure = immersiveApeSaturate((relief.ridge * 0.34) + (relief.slope * 0.28) + (habitat.clutterDensity * 0.12) - (habitat.coverDensity * 0.1))
@@ -21357,14 +23951,14 @@ private func immersiveApeFloraPosture(
     }
 
     let bend = immersiveApeClamp(
-        (0.03 + (rainWeight * 0.08) + (exposure * 0.1) + (gust * 0.05) - (shelter * 0.04)) * materialBias,
+        (0.03 + (rainWeight * 0.08) + (exposure * 0.1) + (gust * 0.05) + (motionDrive.strength * 0.08) + (motionDrive.apePressure * 0.04) + (motionDrive.surfPush * 0.03) - (shelter * 0.04)) * materialBias,
         min: 0.01,
-        max: 0.28
+        max: 0.36
     )
-    let lateralSway = crossPulse * bend * (0.26 + (gust * 0.18))
-    let droop = immersiveApeClamp((rainWeight * 0.46) + (moisture * 0.18) + (shelter * 0.06) - (exposure * 0.08), min: 0, max: 0.42)
-    let spreadScale = immersiveApeClamp(1.0 + (exposure * 0.08) + (gust * 0.04) - (shelter * 0.06), min: 0.9, max: 1.18)
-    let heightScale = immersiveApeClamp(1.02 + (moisture * 0.04) + (shelter * 0.02) - (droop * 0.16), min: 0.84, max: 1.08)
+    let lateralSway = crossPulse * bend * (0.26 + (gust * 0.18) + (motionDrive.strength * 0.22))
+    let droop = immersiveApeClamp((rainWeight * 0.46) + (moisture * 0.18) + (shelter * 0.06) + (motionDrive.rainSweep * 0.12) - (exposure * 0.08), min: 0, max: 0.48)
+    let spreadScale = immersiveApeClamp(1.0 + (exposure * 0.08) + (gust * 0.04) + (motionDrive.surfPush * 0.05) - (shelter * 0.06), min: 0.9, max: 1.24)
+    let heightScale = immersiveApeClamp(1.02 + (moisture * 0.04) + (shelter * 0.02) + (motionDrive.lightAperture * 0.04) - (droop * 0.16) - (motionDrive.apePressure * 0.04), min: 0.82, max: 1.12)
 
     return ImmersiveApeFloraPosture(
         direction: windDirection,
@@ -21373,7 +23967,10 @@ private func immersiveApeFloraPosture(
         lateralSway: lateralSway,
         droop: droop,
         spreadScale: spreadScale,
-        heightScale: heightScale
+        heightScale: heightScale,
+        motionStrength: motionDrive.strength,
+        lightAperture: motionDrive.lightAperture,
+        apePush: motionDrive.apePressure
     )
 }
 
