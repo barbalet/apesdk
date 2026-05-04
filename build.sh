@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #	build.sh
 #
 #	=============================================================
@@ -26,37 +26,77 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #   OTHER DEALINGS IN THE SOFTWARE.
 
-if [ $# -ge 1 -a "$1" == "--debug" ]
-then
-    CFLAGS=-g
-else
-    CFLAGS=-O2 
-fi
+set -eu
 
-if [ $# -ge 1 -a "$1" == "--additional" ]
-then
-COMMANDLINEE=-DNOTHING_NEEDED_HERE
-else
+usage()
+{
+    echo "usage: ./build.sh [--debug] [--additional] [--output PATH] [--prefix PATH]"
+}
+
+CC=${CC:-cc}
+CFLAGS=${CFLAGS:-"-O2"}
+CPPFLAGS=${CPPFLAGS:-}
+LDFLAGS=${LDFLAGS:-}
+LIBS=${LIBS:-"-lz -lm -pthread"}
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
-fi
+OUTPUT=simape
+PREFIX=
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./toolkit/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./script/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./render/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./sim/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./entity/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./universe/*.c -lz -lm -lpthread -w
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        --debug)
+            CFLAGS="-g"
+            ;;
+        --additional)
+            COMMANDLINEE=-DNOTHING_NEEDED_HERE
+            ;;
+        --output)
+            shift
+            if [ $# -eq 0 ]
+            then
+                usage
+                exit 1
+            fi
+            OUTPUT=$1
+            ;;
+        --prefix)
+            shift
+            if [ $# -eq 0 ]
+            then
+                usage
+                exit 1
+            fi
+            PREFIX=$1
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./longterm.c -o longterm.o
-if [ $? -ne 0 ]
+BUILD_DIR=.build
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+trap 'rm -rf "$BUILD_DIR"' EXIT HUP INT TERM
+
+for file in ./toolkit/*.c ./script/*.c ./render/*.c ./sim/*.c ./entity/*.c ./universe/*.c ./longterm.c
+do
+    object="$BUILD_DIR/$(basename "$file" .c).o"
+    "$CC" $CFLAGS $CPPFLAGS "$COMMANDLINEE" -I. -c "$file" -o "$object" -w
+done
+
+"$CC" $CFLAGS $LDFLAGS -o "$OUTPUT" "$BUILD_DIR"/*.o $LIBS
+
+if [ -n "$PREFIX" ]
 then
-exit 1
+    mkdir -p "$PREFIX/bin"
+    cp "$OUTPUT" "$PREFIX/bin/simape"
 fi
-
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o ./../simape *.o -lz -lm -lpthread
-if [ $? -ne 0 ]
-then
-exit 1
-fi
-
-rm *.o
