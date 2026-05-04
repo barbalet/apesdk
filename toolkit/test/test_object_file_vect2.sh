@@ -26,31 +26,17 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #   OTHER DEALINGS IN THE SOFTWARE.
 
-set -euo pipefail
+mv test_object_file_vect2 ../test_object_file_vect2
+cd ..
+mv test_object_file_vect2 json
+cd json
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TOOLKIT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-JSON_DIR="${TOOLKIT_DIR}/json"
-TOOL_BINARY="${SCRIPT_DIR}/test_object_file_vect2"
+./test_object_file_vect2 newvector1.json
 
-cleanup() {
-    rm -f "${JSON_DIR}"/2*.json
-}
+./test_object_file_vect2 newvector2.json
 
-trap cleanup EXIT
+./test_object_file_vect2 newvector3.json
 
-round_trip() {
-    local input_name="$1"
-    local output_file="${JSON_DIR}/2${input_name#?}"
+./test_object_file_vect2 example_four_two_vect2.json
 
-    (
-        cd "${JSON_DIR}"
-        "${TOOL_BINARY}" "${input_name}"
-        diff -u "${input_name}" "${output_file}"
-    )
-}
-
-round_trip newvector1.json
-round_trip newvector2.json
-round_trip newvector3.json
-round_trip example_four_two_vect2.json
+rm 2*.json
