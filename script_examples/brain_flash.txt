@@ -1,0 +1,1 @@
+function ( brain_flash ) {	brain_x = loop_value;	brain_y = loop_value;	brain_z = loop_value;	brain_time = time & 1;	brain_value = brain_time * 255;}function ( being ) {    while ( loop_value < 32 ) {        run( brain_flash );        loop_value = loop_value + 4;	    }    full = hungry * 3;    if (energy < full) {        energy_delta = full - energy;    }}

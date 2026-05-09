@@ -1,0 +1,1 @@
+function(being){	random_value = random;		brain_x = random_value & 31;	random_value = random_value / 32;		brain_y = random_value & 31;	random_value = random_value / 32;		brain_z = random_value & 31;	brain_value = 255;	    full = hungry * 3;    if (energy < full) {        energy_delta = full - energy;    }}

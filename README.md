@@ -1,6 +1,4 @@
-The ApeSDK is a series of simulations that work together. It is primarily written in C. This repository currently packages the command-line Simulated Ape build as `simape`.
-
-Current package version: `0.708`
+The ApeSDK is a series of simulations that work together. It is primarily written in C and can be built with Mac, Window, Linux and iOS GUIs.
 
 ### History
 
@@ -42,12 +40,3 @@ The ApeSDK is currently used in:
 * **Simulated Urban** - a detailed urban environment simulation with the organic Ape agents interacting through a cityscape, (included with Simulated Ape), and,
 
 * **Simulated Planet** - a detailed planet simulation (included with Simulated Ape).
-
-### Command-Line Build
-
-```sh
-./build.sh --output simape
-./simape --self-test
-```
-
-Homebrew release and submission details are in [BUILD.md](BUILD.md).

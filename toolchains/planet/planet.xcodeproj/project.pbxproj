@@ -1,0 +1,489 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4A8FCDD31F98794E00EBEC62 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A8FCDD21F98794E00EBEC62 /* Assets.xcassets */; };
+		4A8FCE101F98803C00EBEC62 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A8FCE0F1F98803C00EBEC62 /* OpenGL.framework */; };
+		4A8FCE121F98806300EBEC62 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A8FCE111F98806300EBEC62 /* AppKit.framework */; };
+		4A8FCE141F98807B00EBEC62 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A8FCE131F98807B00EBEC62 /* Cocoa.framework */; };
+		4ABDF50529C2C04F005F50A5 /* newmac.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4ABDF50329C2C04F005F50A5 /* newmac.xib */; };
+		4ABDF50629C2C04F005F50A5 /* planet.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF50429C2C04F005F50A5 /* planet.c */; };
+		4ABDF50929C2C066005F50A5 /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF50729C2C066005F50A5 /* shared.c */; };
+		4ABDF50A29C2C066005F50A5 /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF50829C2C066005F50A5 /* draw.c */; };
+		4ABDF50D29C2C132005F50A5 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF50C29C2C132005F50A5 /* graph.c */; };
+		4ABDF51529C2C152005F50A5 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF50E29C2C152005F50A5 /* file.c */; };
+		4ABDF51629C2C152005F50A5 /* vect.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF50F29C2C152005F50A5 /* vect.c */; };
+		4ABDF51729C2C152005F50A5 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51029C2C152005F50A5 /* io.c */; };
+		4ABDF51829C2C152005F50A5 /* object.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51129C2C152005F50A5 /* object.c */; };
+		4ABDF51929C2C152005F50A5 /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51229C2C152005F50A5 /* memory.c */; };
+		4ABDF51A29C2C152005F50A5 /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51329C2C152005F50A5 /* math.c */; };
+		4ABDF52129C2C170005F50A5 /* territory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51C29C2C16F005F50A5 /* territory.c */; };
+		4ABDF52229C2C170005F50A5 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51D29C2C170005F50A5 /* console.c */; };
+		4ABDF52329C2C170005F50A5 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51E29C2C170005F50A5 /* audio.c */; };
+		4ABDF52429C2C170005F50A5 /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF51F29C2C170005F50A5 /* land.c */; };
+		4ABDF52529C2C170005F50A5 /* tile.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF52029C2C170005F50A5 /* tile.c */; };
+		4ABDF52929C2C188005F50A5 /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF52629C2C187005F50A5 /* interpret.c */; };
+		4ABDF52A29C2C188005F50A5 /* parse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4ABDF52729C2C187005F50A5 /* parse.c */; };
+		4AF0A0012EA2000100A1B2C3 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AF0A0032EA2000300A1B2C3 /* buffer.c */; };
+		4AF0A0022EA2000200A1B2C3 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AF0A0042EA2000400A1B2C3 /* app_shell.c */; };
+		4AE3E1DB2DB2E9F800C18697 /* ASShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE3E1DA2DB2E9F800C18697 /* ASShared.swift */; };
+		4AE3E1DC2DB2E9F800C18697 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE3E1D82DB2E9F800C18697 /* AppDelegate.swift */; };
+		4AE3E1DD2DB2E9F800C18697 /* ASMacView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE3E1D92DB2E9F800C18697 /* ASMacView.swift */; };
+		4AE3E1E02E9B0000C1869700 /* SimulationBindings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE3E1DF2E9B0000C1869700 /* SimulationBindings.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4A8FCDCC1F98794E00EBEC62 /* planet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = planet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A8FCDD21F98794E00EBEC62 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4A8FCDD71F98794E00EBEC62 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4A8FCDDA1F98794E00EBEC62 /* Planet_Noble_Ape.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Planet_Noble_Ape.entitlements; sourceTree = "<group>"; };
+		4A8FCE0F1F98803C00EBEC62 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		4A8FCE111F98806300EBEC62 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		4A8FCE131F98807B00EBEC62 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		4ABDF50229C2C04F005F50A5 /* planet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = planet.h; path = planet/planet.h; sourceTree = "<group>"; };
+		4ABDF50329C2C04F005F50A5 /* newmac.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = newmac.xib; path = planet/newmac.xib; sourceTree = "<group>"; };
+		4ABDF50429C2C04F005F50A5 /* planet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = planet.c; path = planet/planet.c; sourceTree = "<group>"; };
+		4ABDF50729C2C066005F50A5 /* shared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = shared.c; path = gui/shared.c; sourceTree = "<group>"; };
+		4ABDF50829C2C066005F50A5 /* draw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = draw.c; path = gui/draw.c; sourceTree = "<group>"; };
+		4ABDF50B29C2C132005F50A5 /* graph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = graph.h; path = ../../render/graph.h; sourceTree = "<group>"; };
+		4ABDF50C29C2C132005F50A5 /* graph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = graph.c; path = ../../render/graph.c; sourceTree = "<group>"; };
+		4ABDF50E29C2C152005F50A5 /* file.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = file.c; path = ../../toolkit/file.c; sourceTree = "<group>"; };
+		4ABDF50F29C2C152005F50A5 /* vect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vect.c; path = ../../toolkit/vect.c; sourceTree = "<group>"; };
+		4ABDF51029C2C152005F50A5 /* io.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = io.c; path = ../../toolkit/io.c; sourceTree = "<group>"; };
+		4ABDF51129C2C152005F50A5 /* object.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = object.c; path = ../../toolkit/object.c; sourceTree = "<group>"; };
+		4ABDF51229C2C152005F50A5 /* memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = memory.c; path = ../../toolkit/memory.c; sourceTree = "<group>"; };
+		4ABDF51329C2C152005F50A5 /* math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = math.c; path = ../../toolkit/math.c; sourceTree = "<group>"; };
+		4ABDF51429C2C152005F50A5 /* toolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = toolkit.h; path = ../../toolkit/toolkit.h; sourceTree = "<group>"; };
+		4ABDF51B29C2C16F005F50A5 /* sim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sim.h; path = ../../sim/sim.h; sourceTree = "<group>"; };
+		4ABDF51C29C2C16F005F50A5 /* territory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = territory.c; path = ../../sim/territory.c; sourceTree = "<group>"; };
+		4ABDF51D29C2C170005F50A5 /* console.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = console.c; path = ../../sim/console.c; sourceTree = "<group>"; };
+		4ABDF51E29C2C170005F50A5 /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = audio.c; path = ../../sim/audio.c; sourceTree = "<group>"; };
+		4ABDF51F29C2C170005F50A5 /* land.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = land.c; path = ../../sim/land.c; sourceTree = "<group>"; };
+		4ABDF52029C2C170005F50A5 /* tile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tile.c; path = ../../sim/tile.c; sourceTree = "<group>"; };
+		4ABDF52629C2C187005F50A5 /* interpret.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = interpret.c; path = ../../script/interpret.c; sourceTree = "<group>"; };
+		4ABDF52729C2C187005F50A5 /* parse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = parse.c; path = ../../script/parse.c; sourceTree = "<group>"; };
+		4ABDF52829C2C187005F50A5 /* script.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = script.h; path = ../../script/script.h; sourceTree = "<group>"; };
+		4ABDF52B29C2C19A005F50A5 /* shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shared.h; path = ../../shared.h; sourceTree = "<group>"; };
+		4AF0A0032EA2000300A1B2C3 /* buffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = buffer.c; path = ../../gui/buffer.c; sourceTree = "<group>"; };
+		4AF0A0042EA2000400A1B2C3 /* app_shell.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = app_shell.c; path = ../../gui/app_shell.c; sourceTree = "<group>"; };
+		4AE3E1D82DB2E9F800C18697 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = ../../mac/AppDelegate.swift; sourceTree = SOURCE_ROOT; };
+		4AE3E1D92DB2E9F800C18697 /* ASMacView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ASMacView.swift; path = ../../mac/ASMacView.swift; sourceTree = SOURCE_ROOT; };
+		4AE3E1DA2DB2E9F800C18697 /* ASShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ASShared.swift; path = ../../mac/ASShared.swift; sourceTree = SOURCE_ROOT; };
+		4AE3E1DF2E9B0000C1869700 /* SimulationBindings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SimulationBindings.swift; path = ../../mac/SimulationBindings.swift; sourceTree = SOURCE_ROOT; };
+		4AE3E1DE2DB2E9FA00C18697 /* planet-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "planet-Bridging-Header.h"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4A8FCDC91F98794E00EBEC62 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A8FCE141F98807B00EBEC62 /* Cocoa.framework in Frameworks */,
+				4A8FCE121F98806300EBEC62 /* AppKit.framework in Frameworks */,
+				4A8FCE101F98803C00EBEC62 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4A8FCDC31F98794E00EBEC62 = {
+			isa = PBXGroup;
+			children = (
+				4ABDF52B29C2C19A005F50A5 /* shared.h */,
+				4AE62DD926FF5EF800AD479D /* render */,
+				4ABFBC86232EDBFF00FFCDAF /* toolkit */,
+				4ABFBC85232EDBFA00FFCDAF /* sim */,
+				4ABFBC84232EDBF400FFCDAF /* script */,
+				4A8FCDE21F98796200EBEC62 /* mac */,
+				4A8FCDE11F98795E00EBEC62 /* gui */,
+				4A8FCDE01F98795A00EBEC62 /* planet */,
+				4A8FCDCE1F98794E00EBEC62 /* Planet Noble Ape */,
+				4A8FCDCD1F98794E00EBEC62 /* Products */,
+				4A8FCE0E1F98803C00EBEC62 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		4A8FCDCD1F98794E00EBEC62 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4A8FCDCC1F98794E00EBEC62 /* planet.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4A8FCDCE1F98794E00EBEC62 /* Planet Noble Ape */ = {
+			isa = PBXGroup;
+			children = (
+				4A8FCDD21F98794E00EBEC62 /* Assets.xcassets */,
+				4A8FCDD71F98794E00EBEC62 /* Info.plist */,
+				4A8FCDDA1F98794E00EBEC62 /* Planet_Noble_Ape.entitlements */,
+			);
+			path = "Planet Noble Ape";
+			sourceTree = "<group>";
+		};
+		4A8FCDE01F98795A00EBEC62 /* planet */ = {
+			isa = PBXGroup;
+			children = (
+				4ABDF50329C2C04F005F50A5 /* newmac.xib */,
+				4ABDF50429C2C04F005F50A5 /* planet.c */,
+				4ABDF50229C2C04F005F50A5 /* planet.h */,
+			);
+			name = planet;
+			sourceTree = "<group>";
+		};
+		4A8FCDE11F98795E00EBEC62 /* gui */ = {
+			isa = PBXGroup;
+			children = (
+				4AF0A0042EA2000400A1B2C3 /* app_shell.c */,
+				4AF0A0032EA2000300A1B2C3 /* buffer.c */,
+				4ABDF50829C2C066005F50A5 /* draw.c */,
+				4ABDF50729C2C066005F50A5 /* shared.c */,
+			);
+			name = gui;
+			sourceTree = "<group>";
+		};
+		4A8FCDE21F98796200EBEC62 /* mac */ = {
+			isa = PBXGroup;
+			children = (
+				4AE3E1D82DB2E9F800C18697 /* AppDelegate.swift */,
+				4AE3E1D92DB2E9F800C18697 /* ASMacView.swift */,
+				4AE3E1DA2DB2E9F800C18697 /* ASShared.swift */,
+				4AE3E1DF2E9B0000C1869700 /* SimulationBindings.swift */,
+				4AE3E1DE2DB2E9FA00C18697 /* planet-Bridging-Header.h */,
+			);
+			name = mac;
+			sourceTree = "<group>";
+		};
+		4A8FCE0E1F98803C00EBEC62 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4A8FCE131F98807B00EBEC62 /* Cocoa.framework */,
+				4A8FCE111F98806300EBEC62 /* AppKit.framework */,
+				4A8FCE0F1F98803C00EBEC62 /* OpenGL.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4ABFBC84232EDBF400FFCDAF /* script */ = {
+			isa = PBXGroup;
+			children = (
+				4ABDF52629C2C187005F50A5 /* interpret.c */,
+				4ABDF52729C2C187005F50A5 /* parse.c */,
+				4ABDF52829C2C187005F50A5 /* script.h */,
+			);
+			name = script;
+			sourceTree = "<group>";
+		};
+		4ABFBC85232EDBFA00FFCDAF /* sim */ = {
+			isa = PBXGroup;
+			children = (
+				4ABDF51E29C2C170005F50A5 /* audio.c */,
+				4ABDF51D29C2C170005F50A5 /* console.c */,
+				4ABDF51F29C2C170005F50A5 /* land.c */,
+				4ABDF51B29C2C16F005F50A5 /* sim.h */,
+				4ABDF51C29C2C16F005F50A5 /* territory.c */,
+				4ABDF52029C2C170005F50A5 /* tile.c */,
+			);
+			name = sim;
+			sourceTree = "<group>";
+		};
+		4ABFBC86232EDBFF00FFCDAF /* toolkit */ = {
+			isa = PBXGroup;
+			children = (
+				4ABDF50E29C2C152005F50A5 /* file.c */,
+				4ABDF51029C2C152005F50A5 /* io.c */,
+				4ABDF51329C2C152005F50A5 /* math.c */,
+				4ABDF51229C2C152005F50A5 /* memory.c */,
+				4ABDF51129C2C152005F50A5 /* object.c */,
+				4ABDF51429C2C152005F50A5 /* toolkit.h */,
+				4ABDF50F29C2C152005F50A5 /* vect.c */,
+			);
+			name = toolkit;
+			sourceTree = "<group>";
+		};
+		4AE62DD926FF5EF800AD479D /* render */ = {
+			isa = PBXGroup;
+			children = (
+				4ABDF50C29C2C132005F50A5 /* graph.c */,
+				4ABDF50B29C2C132005F50A5 /* graph.h */,
+			);
+			name = render;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4A8FCDCB1F98794E00EBEC62 /* planet */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A8FCDDD1F98794E00EBEC62 /* Build configuration list for PBXNativeTarget "planet" */;
+			buildPhases = (
+				4A8FCDC81F98794E00EBEC62 /* Sources */,
+				4A8FCDC91F98794E00EBEC62 /* Frameworks */,
+				4A8FCDCA1F98794E00EBEC62 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = planet;
+			productName = "Planet Noble Ape";
+			productReference = 4A8FCDCC1F98794E00EBEC62 /* planet.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4A8FCDC41F98794E00EBEC62 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0940;
+				ORGANIZATIONNAME = "Thomas Barbalet";
+				TargetAttributes = {
+					4A8FCDCB1F98794E00EBEC62 = {
+						CreatedOnToolsVersion = 9.0;
+						LastSwiftMigration = 1630;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 4A8FCDC71F98794E00EBEC62 /* Build configuration list for PBXProject "planet" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4A8FCDC31F98794E00EBEC62;
+			productRefGroup = 4A8FCDCD1F98794E00EBEC62 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4A8FCDCB1F98794E00EBEC62 /* planet */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4A8FCDCA1F98794E00EBEC62 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4ABDF50529C2C04F005F50A5 /* newmac.xib in Resources */,
+				4A8FCDD31F98794E00EBEC62 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4A8FCDC81F98794E00EBEC62 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4ABDF51A29C2C152005F50A5 /* math.c in Sources */,
+				4ABDF52929C2C188005F50A5 /* interpret.c in Sources */,
+				4ABDF52A29C2C188005F50A5 /* parse.c in Sources */,
+				4ABDF50929C2C066005F50A5 /* shared.c in Sources */,
+				4AF0A0012EA2000100A1B2C3 /* buffer.c in Sources */,
+				4ABDF51929C2C152005F50A5 /* memory.c in Sources */,
+				4AF0A0022EA2000200A1B2C3 /* app_shell.c in Sources */,
+				4ABDF51629C2C152005F50A5 /* vect.c in Sources */,
+				4ABDF50A29C2C066005F50A5 /* draw.c in Sources */,
+				4ABDF51729C2C152005F50A5 /* io.c in Sources */,
+				4ABDF52229C2C170005F50A5 /* console.c in Sources */,
+				4ABDF50D29C2C132005F50A5 /* graph.c in Sources */,
+				4ABDF52529C2C170005F50A5 /* tile.c in Sources */,
+				4ABDF51529C2C152005F50A5 /* file.c in Sources */,
+				4ABDF51829C2C152005F50A5 /* object.c in Sources */,
+				4ABDF50629C2C04F005F50A5 /* planet.c in Sources */,
+				4ABDF52329C2C170005F50A5 /* audio.c in Sources */,
+				4ABDF52129C2C170005F50A5 /* territory.c in Sources */,
+				4ABDF52429C2C170005F50A5 /* land.c in Sources */,
+				4AE3E1DB2DB2E9F800C18697 /* ASShared.swift in Sources */,
+				4AE3E1DC2DB2E9F800C18697 /* AppDelegate.swift in Sources */,
+				4AE3E1DD2DB2E9F800C18697 /* ASMacView.swift in Sources */,
+				4AE3E1E02E9B0000C1869700 /* SimulationBindings.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4A8FCDDB1F98794E00EBEC62 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					SIMULATED_PLANET,
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		4A8FCDDC1F98794E00EBEC62 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = SIMULATED_PLANET;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		4A8FCDDE1F98794E00EBEC62 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "Planet Noble Ape/Planet_Noble_Ape.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Planet Noble Ape/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Planet-Noble-Ape";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "planet-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		4A8FCDDF1F98794E00EBEC62 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "Planet Noble Ape/Planet_Noble_Ape.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Planet Noble Ape/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.nobleape.Planet-Noble-Ape";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "planet-Bridging-Header.h";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4A8FCDC71F98794E00EBEC62 /* Build configuration list for PBXProject "planet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A8FCDDB1F98794E00EBEC62 /* Debug */,
+				4A8FCDDC1F98794E00EBEC62 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A8FCDDD1F98794E00EBEC62 /* Build configuration list for PBXNativeTarget "planet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A8FCDDE1F98794E00EBEC62 /* Debug */,
+				4A8FCDDF1F98794E00EBEC62 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4A8FCDC41F98794E00EBEC62 /* Project object */;
+}

@@ -1,0 +1,1 @@
+function ( being ) {	while ( loop_value < 32 ) {        full = hungry * 3;        if (energy < full) {            energy_delta = full - energy;        }    }}

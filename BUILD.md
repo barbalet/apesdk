@@ -1,37 +1,27 @@
 ## Building the ApeSDK
 
-ApeSDK has been built with a variety of development environments including CodeWarrior, Visual Studio and Xcode. The current repository is packaged around the command-line Simulated Ape build.
+ApeSDK has been built with a variety of development environments including CodeWarrior, Visual Studio and XCode. As a majority of the development environments used to build the Simulation have not included traditional make files, the Simulation source is not packaged with these files.
+
+You can also get sub-projects that require the ApeSDK and contain these project files (`simulatedape` for the Simulated Ape Mac and Windows GUIs, the Simulated Urban Mac JSON output togetther with the Planet and War Simulation).
 
 ## Command Line
 
-The command-line build script builds the `simape` binary on macOS and Linux:
+There are a number of command line build scripts. These should build for Mac and Linux:
 
-```sh
-./build.sh --output simape
-./simape --self-test
-```
+* `build.sh` - builds the `simape` command line version that allows for a variety of executions and analysis
 
-The script respects the standard `CC`, `CFLAGS`, `CPPFLAGS`, `LDFLAGS`, and `LIBS` environment variables. It can also install into a staging prefix:
+In the test directory:
 
-```sh
-./build.sh --prefix /tmp/apesdk
-```
+* `test_gui_wo_exec.sh` - builds `test_gui` which runs the guis in a leaderless mode to check buffers/overruns etc. Note: this script doesn’t execute `test_gui`, that is done separately.
 
-## Homebrew Release
+* `test_toolkit_wo_exec.sh` - builds a series of executable binaries including `test_math`, `test_io`, `test_object`, `test_object_string` etc
 
-The Homebrew formula expects the v0.708 source package at:
+* `test_object_file.sh` - run after `test_toolkit_wo_exec.sh` to feed through and test the object files contained within the test directory.
 
-```text
-https://github.com/barbalet/apesdk/releases/download/v0.708/apesdk-0.708.tar.gz
-```
 
-Create the release package and checksum with:
+* `test_script_wo_exec.sh` - builds `test_apescript` without executing it
 
-```sh
-./packaging/create-release-tarball.sh 0.708
-```
-
-Upload `dist/apesdk-0.708.tar.gz` to the GitHub release for tag `v0.708`. The generated `dist/apesdk-0.708.tar.gz.sha256` file contains the checksum used by `Formula/apesdk.rb`.
+* `test_wo_exec.sh` - builds `test_sim` and `test_sim_time` without executing them.
 
 ## Contact
 

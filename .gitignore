@@ -1,5 +1,10 @@
 .DS_Store
-*.o
-/.build/
-/dist/
-/simape
+contents.xcworkspacedata
+*.xccheckout
+UserInterfaceState.xcuserstate
+*.xcscheme
+xcschememanagement.plist
+*.xcbkptlist
+
+*.xcbkptlist
+.vscode/*
