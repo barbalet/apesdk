@@ -2,7 +2,7 @@
 
 This checklist describes the release flow for ApeSDK when shipping the macOS Simulated Ape application built from `toolchains/sim-mac`. It creates Apple Silicon and Intel DMG packages from the `sim-mac` Xcode project, plus a source archive for the exact tagged source used to build those artifacts.
 
-Before starting, decide the new release number and use it as the `VERSION` input throughout this checklist. Set `VERSION` without a leading `v`; the Git tag adds the leading `v` separately. For example, the current Simulated Ape engine version `0.708` uses `VERSION=0.708` and tag `v0.708`.
+Before starting, decide the new release number and use it as the `VERSION` input throughout this checklist. Set `VERSION` without a leading `v`; the Git tag adds the leading `v` separately. For example, the current Simulated Ape engine version `0.709` uses `VERSION=0.709` and tag `v0.709`.
 
 ## 1. Prepare the Version
 
@@ -65,17 +65,17 @@ The unsigned build output is:
 Ad-hoc sign the generated app if Developer ID signing is not available:
 
 ```bash
-codesign --force --deep --sign - .build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app
+codesign --force --deep --sign - ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app"
 ```
 
 If you have Developer ID and notarization credentials, sign and notarize instead of ad-hoc signing:
 
 ```bash
 VERSION="<VERSION>"
-codesign --force --deep --options runtime --timestamp --sign "$DEVELOPER_ID_APPLICATION" .build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app
-ditto -c -k --keepParent .build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app "dist/simulated-ape-mac-silicon-${VERSION}-notary.zip"
+codesign --force --deep --options runtime --timestamp --sign "$DEVELOPER_ID_APPLICATION" ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app"
+ditto -c -k --keepParent ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app" "dist/simulated-ape-mac-silicon-${VERSION}-notary.zip"
 xcrun notarytool submit "dist/simulated-ape-mac-silicon-${VERSION}-notary.zip" --keychain-profile "$NOTARY_PROFILE" --wait
-xcrun stapler staple .build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app
+xcrun stapler staple ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app"
 ```
 
 Package the DMG:
@@ -84,7 +84,7 @@ Package the DMG:
 VERSION="<VERSION>"
 hdiutil create \
   -volname "Simulated Ape ${VERSION} Apple Silicon" \
-  -srcfolder .build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app \
+  -srcfolder ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app" \
   -format UDZO \
   -ov \
   "dist/simulated-ape-mac-silicon-${VERSION}.dmg"
@@ -93,7 +93,7 @@ hdiutil create \
 Verify the architecture:
 
 ```bash
-lipo -info .build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app/Contents/MacOS/Simulated Ape
+lipo -info ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app/Contents/MacOS/Simulated Ape"
 ```
 
 ## 5. Build Intel
@@ -121,7 +121,7 @@ The unsigned build output is:
 Ad-hoc sign the generated app if Developer ID signing is not available:
 
 ```bash
-codesign --force --deep --sign - .build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app
+codesign --force --deep --sign - ".build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app"
 ```
 
 If you have Developer ID and notarization credentials, use the same signing, notary submission, and stapling flow described in the Apple Silicon section, with the x86_64 app path and an Intel-specific notary zip name.
@@ -132,7 +132,7 @@ Package the DMG:
 VERSION="<VERSION>"
 hdiutil create \
   -volname "Simulated Ape ${VERSION} Intel" \
-  -srcfolder .build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app \
+  -srcfolder ".build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app" \
   -format UDZO \
   -ov \
   "dist/simulated-ape-mac-intel-${VERSION}.dmg"
@@ -141,7 +141,7 @@ hdiutil create \
 Verify the architecture:
 
 ```bash
-lipo -info .build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app/Contents/MacOS/Simulated Ape
+lipo -info ".build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app/Contents/MacOS/Simulated Ape"
 ```
 
 ## 6. Create the Source Package
