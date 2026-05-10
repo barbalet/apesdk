@@ -76,7 +76,7 @@ struct SimMacApp: App {
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .appInfo) {
-                Button("About sim-mac") {
+                Button("About Simulated Ape") {
                     // Your custom About panel logic
                     shared_about()
                 }

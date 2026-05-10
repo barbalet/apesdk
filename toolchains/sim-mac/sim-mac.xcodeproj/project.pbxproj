@@ -476,7 +476,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-mac";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Simulated Ape";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "render/sim-mac-Bridging-Header.h";
@@ -505,7 +505,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-mac";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Simulated Ape";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "render/sim-mac-Bridging-Header.h";
