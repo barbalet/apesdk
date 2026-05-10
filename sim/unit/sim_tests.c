@@ -64,10 +64,10 @@ n_int draw_error(n_constant_string error_text, n_constant_string location, n_int
     tests_run++; \
     if ((expected) == (actual)) { \
         tests_passed++; \
-        printf("PASS: %s (expected: %d, got: %d)\n", message, expected, actual); \
+        printf("PASS: %s (expected: %ld, got: %ld)\n", message, (long)(expected), (long)(actual)); \
     } else { \
         tests_failed++; \
-        printf("FAIL: %s (expected: %d, got: %d)\n", message, expected, actual); \
+        printf("FAIL: %s (expected: %ld, got: %ld)\n", message, (long)(expected), (long)(actual)); \
     } \
 } while(0)
 
@@ -91,6 +91,28 @@ void print_test_summary(void) {
     printf("Success rate: %.1f%%\n", 
            tests_run > 0 ? (100.0 * tests_passed / tests_run) : 0.0);
     printf("==================\n");
+}
+
+static n_int extract_last_year(n_constant_string value, char year[5]) {
+    n_int length = (n_int)strlen(value);
+    n_int loop = length - 4;
+
+    while (loop >= 0) {
+        if (ASCII_NUMBER(value[loop]) &&
+            ASCII_NUMBER(value[loop + 1]) &&
+            ASCII_NUMBER(value[loop + 2]) &&
+            ASCII_NUMBER(value[loop + 3])) {
+            year[0] = value[loop];
+            year[1] = value[loop + 1];
+            year[2] = value[loop + 2];
+            year[3] = value[loop + 3];
+            year[4] = 0;
+            return 1;
+        }
+        loop--;
+    }
+
+    return 0;
 }
 
 // Test constants and defines
@@ -259,6 +281,7 @@ void test_braincode_system(void) {
 // Test string constants
 void test_string_constants(void) {
     printf("\n--- Testing String Constants ---\n");
+    char copyright_year[5] = {0};
     
     TEST_NOT_NULL(SHORT_VERSION_NAME, "Short version name exists");
     TEST_NOT_NULL(COPYRIGHT_NAME, "Copyright name exists");
@@ -268,7 +291,8 @@ void test_string_constants(void) {
     // Basic string content tests
     TEST_ASSERT(strstr(SHORT_VERSION_NAME, "0.708") != NULL, "Version in short name");
     TEST_ASSERT(strstr(COPYRIGHT_NAME, "Tom Barbalet") != NULL, "Author in copyright");
-    TEST_ASSERT(strstr(FULL_VERSION_COPYRIGHT, "1996-2025") != NULL, "Date range in copyright");
+    TEST_ASSERT(extract_last_year(COPYRIGHT_DATE, copyright_year), "Copyright date includes an end year");
+    TEST_ASSERT(strstr(FULL_VERSION_COPYRIGHT, copyright_year) != NULL, "Date range in copyright");
 }
 
 // Test drawing window flags

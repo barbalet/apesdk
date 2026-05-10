@@ -1546,7 +1546,7 @@ void sim_cycle( void )
     {
         if ( local_execution != KIND_MEMORY_SETUP )
         {
-            if ( local_execution != KIND_NEW_APES )
+            if ( ( local_execution != KIND_NEW_APES ) && ( local_execution != KIND_LOAD_FILE ) )
             {
                 land_clear( local_execution, AGE_OF_MATURITY );
 #ifdef LAND_ON

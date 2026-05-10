@@ -2314,7 +2314,7 @@ n_int command_save( void *ptr, n_string response, n_console_output output_functi
 
     command_stop( ptr, "", output_function );
 
-    file_opened = tranfer_out_json();
+    file_opened = tranfer_out();
     if ( file_opened == 0L )
     {
         return SHOW_ERROR( "Failed to generate output contents" );
@@ -2789,4 +2789,3 @@ n_int command_quit( void *ptr, n_string response, n_console_output output_functi
     ( void )command_stop( ptr, response, output_function );
     return io_quit( ptr, response, output_function );
 }
-

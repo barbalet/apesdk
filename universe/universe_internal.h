@@ -35,9 +35,11 @@
 #define USE_FIL_VER
 #define USE_FIL_LAN
 #define USE_FIL_BEI
-#undef USE_FIL_SOE
-#undef USE_FIL_EPI
-#undef USE_FIL_WEA
+#define USE_FIL_SOE
+#define USE_FIL_EPI
+#define USE_FIL_TER
+#define USE_FIL_TOP
+#define USE_FIL_WEA
 #undef USE_FIL_BRA
 
 /*	Land - References */
@@ -71,6 +73,11 @@
 #else
 #define TERRITORY_BYTES        0
 #endif
+
+#define TOPOGRAPHY_BYTES       (MAP_AREA * 2)
+#define WEATHER_ATMOSPHERE_BYTES (sizeof(n_c_int) * MAP_AREA * 2)
+#define WEATHER_LIGHTNING_OFFSET (WEATHER_ATMOSPHERE_BYTES)
+#define WEATHER_BYTES          (WEATHER_ATMOSPHERE_BYTES + MAP_AREA)
 
 #define PARA_BYTES      2
 #define PARA_ENTRIES    2
@@ -114,7 +121,9 @@ enum file_section_type
     FIL_EPI = ( 0x50 ),
     FIL_WEA = ( 0x60 ),
     FIL_BRA = ( 0x70 ),
-    FIL_END = ( 0x80 )
+    FIL_TER = ( 0x80 ),
+    FIL_TOP = ( 0x90 ),
+    FIL_END = ( 0xA0 )
 };
 
 static const simulated_file_entry simulated_file_format[] =
@@ -131,12 +140,17 @@ static const simulated_file_entry simulated_file_format[] =
     {"landg=", FIL_LAN | FILE_TYPE_BYTE2, 2, 6,  "Seed that created the land"},
 
 #endif
+#ifdef USE_FIL_TOP
+    {"topog{", FIL_TOP,  0, 0, "topography definition"},
+    {"topby=", FIL_TOP | FILE_TYPE_BYTE, TOPOGRAPHY_BYTES, 0, "Topography byte buffers"},
+#endif
     /* the line above is a substantial limit to the simulation space. The weather will limit the map area to;
      ((sizeof(n_int)/2) * (MAP_AREA)/(256*256)) <= 255
      */
 #ifdef USE_FIL_WEA
-    {"weath{", FIL_WEA,  0, 0},
-    {"press=", FIL_WEA | FILE_TYPE_BYTE,    sizeof( n_c_int ),    0},
+    {"weath{", FIL_WEA,  0, 0, "weather definition"},
+    {"atmby=", FIL_WEA | FILE_TYPE_BYTE, WEATHER_ATMOSPHERE_BYTES, 0, "Atmosphere byte buffers"},
+    {"litby=", FIL_WEA | FILE_TYPE_BYTE, MAP_AREA, WEATHER_LIGHTNING_OFFSET, "Lightning byte buffer"},
 #endif
 
 #ifndef REDUCE_FILE /* FILE_TYPE_PACKED has a different form - no offset and the number is the size of the PACKED_DATA_BLOCK units */
@@ -187,6 +201,8 @@ static const simulated_file_entry simulated_file_format[] =
     {"genen=", FIL_BEI | FILE_TYPE_BYTE2, 1, 144, "Generation Min"},
     {"chigx=", FIL_BEI | FILE_TYPE_BYTE2, 1, 146, "Child Generation Max"},
     {"chign=", FIL_BEI | FILE_TYPE_BYTE2, 1, 148, "Child Generation Min"},
+    {"awako=", FIL_BEI | FILE_TYPE_BYTE, 1, 550, "Awake level plus one"},
+    {"bname=", FIL_BEI | FILE_TYPE_BYTE2, 2, 552, "Being name"},
 #ifdef TERRITORY_ON
     {"terit=", FIL_BEI | FILE_TYPE_BYTE2, TERRITORY_BYTES / 2, 150, "Territory information"},
 #endif
@@ -235,6 +251,13 @@ static const simulated_file_entry simulated_file_format[] =
     {"epfoo=", FIL_EPI | FILE_TYPE_BYTE,  1, 19, "Food"},/* n_byte   food;*/
     {"epafe=", FIL_EPI | FILE_TYPE_BYTE2, 1, 20, "Affect"},/* n_byte2  affect;*/
     {"eparg=", FIL_EPI | FILE_TYPE_BYTE2, 1, 22, "Arg"},/* n_byte2  arg;*/
+#endif
+
+#ifdef USE_FIL_TER
+    {"terri{", FIL_TER,  0, 0, "Territory memory definition"},
+    {"tridx=", FIL_TER | FILE_TYPE_BYTE2, 1, 0, "Territory index"},
+    {"trnam=", FIL_TER | FILE_TYPE_BYTE,  1, 2, "Territory name"},
+    {"trfam=", FIL_TER | FILE_TYPE_BYTE2, 1, 4, "Territory familiarity"},
 #endif
 
 #ifndef REDUCE_FILE  /* FILE_TYPE_PACKED has a different form - no offset and the number is the size of the PACKED_DATA_BLOCK units */

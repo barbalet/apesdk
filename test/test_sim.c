@@ -92,7 +92,7 @@ void test_total_moved( simulated_group *group )
 }
 
 
-#define FIRST_RANDOM (17127)
+#define FIRST_RANDOM (20814)
 
 n_int test_hash( void )
 {
@@ -107,10 +107,10 @@ n_int test_hash( void )
 
     n_byte2 random = being_random( first_being );
 
-    printf( "random %d\n", random );
+    printf( "random %u\n", ( unsigned int )random );
     if ( random != FIRST_RANDOM )
     {
-        printf( "#define FIRST_RANDOM (%ld)\n", random );
+        printf( "#define FIRST_RANDOM (%u)\n", ( unsigned int )random );
 
         return 1;
     }
@@ -119,14 +119,14 @@ n_int test_hash( void )
 
 #define DELTA_0 (0)
 #define MOVED_0 (0)
-#define DELTA_1 (1693)
-#define MOVED_1 (1046031)
+#define DELTA_1 (1684)
+#define MOVED_1 (1025236)
 #define DELTA_2 (0)
-#define MOVED_2 (1702142)
-#define DELTA_3 (543)
-#define MOVED_3 (1727959)
-#define TOTAL_MOVED (2542732)
-#define LINE_OF_SIGHT_COUNT (12)
+#define MOVED_2 (1647623)
+#define DELTA_3 (465)
+#define MOVED_3 (1671242)
+#define TOTAL_MOVED (2414823)
+#define LINE_OF_SIGHT_COUNT (6)
 #define NUMBER_BEINGS (128)
 
 n_int test_sim_run( void )
@@ -145,14 +145,19 @@ n_int test_sim_run( void )
         distance_moved += distance_delta;
         if ( ( counter & 511 ) == 0 )
         {
-            printf( "%ld distance moved %ld running total %ld\n", counter, distance_delta, distance_moved );
+            printf(
+                "%ld distance moved %lu running total %lu\n",
+                ( long )counter,
+                ( unsigned long )distance_delta,
+                ( unsigned long )distance_moved
+            );
 
             if ( counter == 0 )
             {
                 if ( ( distance_delta != DELTA_0 ) || ( distance_moved != MOVED_0 ) )
                 {
-                    printf( "#define DELTA_0 (%ld)\n", distance_delta );
-                    printf( "#define MOVED_0 (%ld)\n", distance_moved );
+                    printf( "#define DELTA_0 (%lu)\n", ( unsigned long )distance_delta );
+                    printf( "#define MOVED_0 (%lu)\n", ( unsigned long )distance_moved );
                     return_value |= 1;
                 }
             }
@@ -160,8 +165,8 @@ n_int test_sim_run( void )
             {
                 if ( ( distance_delta != DELTA_1 ) || ( distance_moved != MOVED_1 ) )
                 {
-                    printf( "#define DELTA_1 (%ld)\n", distance_delta );
-                    printf( "#define MOVED_1 (%ld)\n", distance_moved );
+                    printf( "#define DELTA_1 (%lu)\n", ( unsigned long )distance_delta );
+                    printf( "#define MOVED_1 (%lu)\n", ( unsigned long )distance_moved );
                     return_value |= 1;
                 }
             }
@@ -169,8 +174,8 @@ n_int test_sim_run( void )
             {
                 if ( ( distance_delta != DELTA_2 ) || ( distance_moved != MOVED_2 ) )
                 {
-                    printf( "#define DELTA_2 (%ld)\n", distance_delta );
-                    printf( "#define MOVED_2 (%ld)\n", distance_moved );
+                    printf( "#define DELTA_2 (%lu)\n", ( unsigned long )distance_delta );
+                    printf( "#define MOVED_2 (%lu)\n", ( unsigned long )distance_moved );
                     return_value |= 1;
                 }
             }
@@ -178,8 +183,8 @@ n_int test_sim_run( void )
             {
                 if ( ( distance_delta != DELTA_3 ) || ( distance_moved != MOVED_3 ) )
                 {
-                    printf( "#define DELTA_3 (%ld)\n", distance_delta );
-                    printf( "#define MOVED_3 (%ld)\n", distance_moved );
+                    printf( "#define DELTA_3 (%lu)\n", ( unsigned long )distance_delta );
+                    printf( "#define MOVED_3 (%lu)\n", ( unsigned long )distance_moved );
                     return_value |= 1;
                 }
             }
@@ -187,11 +192,11 @@ n_int test_sim_run( void )
         counter ++;
     }
 
-    printf( "total distance moved %ld\n", distance_moved );
+    printf( "total distance moved %lu\n", ( unsigned long )distance_moved );
 
     if ( distance_moved != TOTAL_MOVED )
     {
-        printf( "#define TOTAL_MOVED (%ld)\n", distance_moved );
+        printf( "#define TOTAL_MOVED (%lu)\n", ( unsigned long )distance_moved );
         return_value |= 1;
     }
 
@@ -215,8 +220,8 @@ n_int test_sim_run( void )
 
         if ( ( line_of_sight_count != LINE_OF_SIGHT_COUNT ) || ( number_beings != NUMBER_BEINGS ) )
         {
-            printf( "#define LINE_OF_SIGHT_COUNT (%ld)\n", line_of_sight_count );
-            printf( "#define NUMBER_BEINGS (%ld)\n", number_beings );
+            printf( "#define LINE_OF_SIGHT_COUNT (%ld)\n", ( long )line_of_sight_count );
+            printf( "#define NUMBER_BEINGS (%ld)\n", ( long )number_beings );
 
             return_value |= 1;
         }

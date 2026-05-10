@@ -48,6 +48,7 @@ n_int draw_error( n_constant_string error_text, n_constant_string location, n_in
 static n_int check_reader( n_string entry, n_object_type  * type_of, n_vect2 * values)
 {
     n_file * entry_file = io_file_new_from_string_block((n_char *)entry);
+    n_int return_value = 1;
 
     if ( entry_file )
     {
@@ -59,42 +60,57 @@ static n_int check_reader( n_string entry, n_object_type  * type_of, n_vect2 * v
         {
             if (*type_of == OBJECT_ARRAY)
             {
-                n_vect2 vect_value;
+                n_vect2 vect_value = {0};
                 n_array * returned_array = (n_array *) returned_blob;
-                n_int return_vect = object_vect2_from_array( returned_array, &vect_value);
+                n_array * first_element = obj_array_next( returned_array, 0L );
+                n_int return_vect = 0;
+
+                if ( first_element && first_element->type == OBJECT_ARRAY )
+                {
+                    memory_list *vect_list = object_list_vect2( returned_array );
+                    if ( vect_list && vect_list->count > 0 )
+                    {
+                        vect_value = ( ( n_vect2 * )vect_list->data )[0];
+                        return_vect = 1;
+                    }
+                    memory_list_free( &vect_list );
+                }
+                else
+                {
+                    return_vect = object_vect2_from_array( returned_array, &vect_value);
+                }
 
                 printf("return_vect %ld\n", return_vect);
-
                 printf("comparison ( %ld, %ld ) , ( %ld, %ld ) \n", vect_value.x, vect_value.y, values->x, values->y);
 
-
+                return_value = ( ( return_vect == 1 ) &&
+                                 ( vect_value.x == values->x ) &&
+                                 ( vect_value.y == values->y ) ) ? 0 : 1;
             }
             else
             {
                 printf( "no returned array\n" );
-                return 1;
             }
+            unknown_free( &returned_blob, *type_of );
         }
         else
         {
             printf( "no returned data\n" );
-            return 1;
 
         }
     }
     else
     {
         printf( "reading from disk failed\n" );
-        return 1;
 
     }
-    return 0;
+    return return_value;
 }
 
 static n_int check_vector_from_array(void)
 {
     n_object_type  type_of;
-    n_int          return_information;
+    n_int          return_information = 0;
     n_vect2        values;
 
 
@@ -236,4 +252,3 @@ int main( int argc, const char *argv[] )
 
     exit(EXIT_SUCCESS);
 }
-

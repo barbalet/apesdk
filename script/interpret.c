@@ -715,7 +715,7 @@ n_int apescript_error( n_individual_interpret *individual, AE_ENUM value, n_cons
         local_error = apescript_errors[loop].error_string;
         if ( value == local_enum )
         {
-            if ( individual->interpret_data )
+            if ( individual && individual->interpret_data )
             {
                 SC_DEBUG_STRING( individual->interpret_data, " [ ERROR : " );
                 SC_DEBUG_STRING( individual->interpret_data, local_error );
@@ -731,4 +731,3 @@ n_int apescript_error( n_individual_interpret *individual, AE_ENUM value, n_cons
 
     return apescript_error( individual, AE_UNKNOWN_ERROR, location, line_number );
 }
-

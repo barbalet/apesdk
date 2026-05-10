@@ -375,6 +375,30 @@ n_byte2 *land_genetics( void )
     return ( n_byte2 * )m_land.tiles[0].genetics;
 }
 
+void land_load_state( n_byte4 date, n_byte2 time, n_byte2 *genetics )
+{
+    n_byte2 loaded_genetics[2] = {0, 0};
+    tile_land_erase( &m_land );
+    if ( genetics != 0L )
+    {
+        loaded_genetics[0] = genetics[0];
+        loaded_genetics[1] = genetics[1];
+        m_land.tiles[0].genetics[0] = loaded_genetics[0];
+        m_land.tiles[0].genetics[1] = loaded_genetics[1];
+        m_land.genetics[0] = loaded_genetics[0];
+        m_land.genetics[1] = loaded_genetics[1];
+    }
+    m_land.date = date;
+    m_land.time = time;
+    land_init();
+    m_land.tiles[0].genetics[0] = loaded_genetics[0];
+    m_land.tiles[0].genetics[1] = loaded_genetics[1];
+    m_land.genetics[0] = loaded_genetics[0];
+    m_land.genetics[1] = loaded_genetics[1];
+    land_init_high_def( 1 );
+    land_tide();
+}
+
 n_byte *land_topography( void )
 {
     return ( n_byte * )m_land.tiles[0].topography;
@@ -487,11 +511,18 @@ void land_tide( void )
 
 void land_clear( KIND_OF_USE kind, n_byte4 start )
 {
+    n_byte4 loaded_date = m_land.date;
+    n_byte2 loaded_time = m_land.time;
     tile_land_erase( &m_land );
     if ( kind != KIND_LOAD_FILE )
     {
         m_land.time = 5 * TIME_HOUR_MINUTES;
         m_land.date = start;
+    }
+    else
+    {
+        m_land.time = loaded_time;
+        m_land.date = loaded_date;
     }
 }
 
@@ -563,5 +594,3 @@ void land_vect2( n_vect2 *output, n_int *actual_z, n_vect2 *location )
     output->x = ( z - land_location( ( APESPACE_TO_MAPSPACE( loc_x ) + 1 ), APESPACE_TO_MAPSPACE( loc_y ) ) );
     output->y = ( z - land_location( APESPACE_TO_MAPSPACE( loc_x ), ( APESPACE_TO_MAPSPACE( loc_y ) + 1 ) ) );
 }
-
-

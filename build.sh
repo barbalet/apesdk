@@ -26,6 +26,8 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #   OTHER DEALINGS IN THE SOFTWARE.
 
+cd "$(dirname "$0")"
+
 if [ $# -ge 1 -a "$1" == "--debug" ]
 then
     CFLAGS=-g
