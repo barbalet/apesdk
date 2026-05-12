@@ -484,7 +484,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.709;
+				MARKETING_VERSION = 0.710;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-mac";
 				PRODUCT_NAME = "Simulated Ape";
 				REGISTER_APP_GROUPS = YES;
@@ -513,7 +513,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.709;
+				MARKETING_VERSION = 0.710;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-mac";
 				PRODUCT_NAME = "Simulated Ape";
 				REGISTER_APP_GROUPS = YES;
