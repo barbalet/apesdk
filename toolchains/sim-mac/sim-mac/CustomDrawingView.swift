@@ -34,6 +34,7 @@ import AppKit
 @MainActor
 class CustomDrawingView: NSView {
     let viewType: Int32
+    private var tutorialTrackingArea: NSTrackingArea?
 
     init(viewType: Int32) {
         self.viewType = viewType
@@ -47,6 +48,30 @@ class CustomDrawingView: NSView {
     }
 
     override var isFlipped: Bool { false }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        window?.acceptsMouseMovedEvents = true
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+
+        if let tutorialTrackingArea {
+            removeTrackingArea(tutorialTrackingArea)
+        }
+
+        let options: NSTrackingArea.Options = [
+            .activeAlways,
+            .enabledDuringMouseDrag,
+            .inVisibleRect,
+            .mouseEnteredAndExited,
+            .mouseMoved
+        ]
+        let trackingArea = NSTrackingArea(rect: .zero, options: options, owner: self, userInfo: nil)
+        addTrackingArea(trackingArea)
+        tutorialTrackingArea = trackingArea
+    }
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
@@ -137,7 +162,16 @@ class CustomDrawingView: NSView {
         return true
     }
 
+    override func mouseEntered(with event: NSEvent) {
+        InitialTutorialController.shared.beginFromPointerActivity(over: self)
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        InitialTutorialController.shared.beginFromPointerActivity(over: self)
+    }
+
     override func mouseDown(with event: NSEvent) {
+        InitialTutorialController.shared.beginFromPointerActivity(over: self)
         let location = convert(event.locationInWindow, from: nil)
         let value = event.modifierFlags.contains(.control) || event.modifierFlags.contains(.option)
         if value {

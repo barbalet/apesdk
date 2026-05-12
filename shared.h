@@ -75,6 +75,14 @@ enum
     NA_MENU_SOCIAL_WEB
 };
 
+enum
+{
+    SHARED_TUTORIAL_EDGE_MIN_X = 0,
+    SHARED_TUTORIAL_EDGE_MAX_X,
+    SHARED_TUTORIAL_EDGE_MIN_Y,
+    SHARED_TUTORIAL_EDGE_MAX_Y
+};
+
 void shared_color_8_bit_to_48_bit( n_byte2 *fit );
 
 void shared_dimensions( n_int *dimensions );
@@ -121,6 +129,17 @@ void shared_saveFileName( n_constant_string cStringFileName );
 void shared_script_debug_handle( n_constant_string cStringFileName );
 
 void shared_process(const char* fileUrl);
+
+n_int shared_initial_tutorial_enabled( void );
+n_int shared_initial_tutorial_count( void );
+n_int shared_initial_tutorial_window( n_int step );
+n_int shared_initial_tutorial_anchor_x( n_int step );
+n_int shared_initial_tutorial_anchor_y( n_int step );
+n_int shared_initial_tutorial_anchor_width( n_int step );
+n_int shared_initial_tutorial_anchor_height( n_int step );
+n_int shared_initial_tutorial_edge( n_int step );
+n_constant_string shared_initial_tutorial_title( n_int step );
+n_constant_string shared_initial_tutorial_text( n_int step );
 
 n_int shared_being_number( void );
 void shared_being_name( n_int number, n_string name );

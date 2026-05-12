@@ -37,6 +37,7 @@ struct ViewWrapper: NSViewRepresentable {
     func makeNSView(context: Context) -> CustomDrawingView {
         let view = CustomDrawingView(viewType: viewType)
         view.translatesAutoresizingMaskIntoConstraints = false
+        InitialTutorialController.shared.register(view)
 
         // Make sure draw() will be called
         DispatchQueue.main.async {
