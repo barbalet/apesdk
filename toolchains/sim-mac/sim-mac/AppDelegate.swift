@@ -38,9 +38,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         openAdditionalWindows()
-        DispatchQueue.main.async {
-            InitialTutorialController.shared.beginWhenReady()
-        }
     }
 
     func openAdditionalWindows() {

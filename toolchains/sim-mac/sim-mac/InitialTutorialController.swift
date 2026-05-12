@@ -36,6 +36,7 @@ private struct InitialTutorialStep {
     let index: Int
     let count: Int
     let window: Int32
+    let windowName: String
     let anchorX: CGFloat
     let anchorY: CGFloat
     let anchorWidth: CGFloat
@@ -56,6 +57,7 @@ private struct InitialTutorialStep {
         self.index = index
         self.count = count
         self.window = Int32(shared_initial_tutorial_window(n_int(index)))
+        self.windowName = InitialTutorialStep.displayName(for: self.window)
         self.anchorX = CGFloat(shared_initial_tutorial_anchor_x(n_int(index))) / 1000.0
         self.anchorY = CGFloat(shared_initial_tutorial_anchor_y(n_int(index))) / 1000.0
         self.anchorWidth = CGFloat(shared_initial_tutorial_anchor_width(n_int(index))) / 1000.0
@@ -77,21 +79,32 @@ private struct InitialTutorialStep {
             return .maxY
         }
     }
+
+    private static func displayName(for window: Int32) -> String {
+        switch window {
+        case NUM_VIEW:
+            return "View"
+        case NUM_TERRAIN:
+            return "Terrain"
+        case NUM_CONTROL:
+            return "Control"
+        default:
+            return "Window"
+        }
+    }
 }
 
 @MainActor
-final class InitialTutorialController {
+final class InitialTutorialController: NSObject, NSPopoverDelegate {
     static let shared = InitialTutorialController()
 
     private var views: [Int32: CustomDrawingView] = [:]
+    private var nextStepOrdinalByWindow: [Int32: Int] = [:]
     private var popover: NSPopover?
-    private var currentIndex = 0
-    private var requested = false
-    private var started = false
-    private var retryCount = 0
-    private var preferredWindow: Int32?
 
-    private init() {}
+    private override init() {
+        super.init()
+    }
 
     private var initialTutorialEnabled: Bool {
         #if INITIAL_TUTORIAL_ON
@@ -103,111 +116,58 @@ final class InitialTutorialController {
 
     func register(_ view: CustomDrawingView) {
         views[view.viewType] = view
-        beginIfReady()
     }
 
-    func beginFromPointerActivity(over view: CustomDrawingView) {
-        preferredWindow = view.viewType
+    @discardableResult
+    func showNextTutorial(for view: CustomDrawingView) -> Bool {
         views[view.viewType] = view
-        beginWhenReady()
-    }
 
-    func beginWhenReady() {
         guard initialTutorialEnabled else {
-            return
+            return true
+        }
+        guard popover == nil else {
+            return false
+        }
+        guard view.window != nil else {
+            return false
         }
 
-        requested = true
-        beginIfReady()
+        let indexes = stepIndexes(for: view.viewType)
+        let ordinal = nextStepOrdinalByWindow[view.viewType] ?? 0
+        guard ordinal < indexes.count else {
+            return true
+        }
+        guard let step = InitialTutorialStep(index: indexes[ordinal], count: stepCount) else {
+            return true
+        }
+
+        show(step: step, ordinal: ordinal + 1, total: indexes.count, in: view)
+        nextStepOrdinalByWindow[view.viewType] = ordinal + 1
+        return true
     }
 
     private var stepCount: Int {
         Int(shared_initial_tutorial_count())
     }
 
-    private func beginIfReady() {
-        guard requested && !started else {
-            return
-        }
-        guard initialTutorialEnabled && stepCount > 0 else {
-            return
-        }
-
-        guard let startIndex = availableStartIndex() else {
-            retryBegin()
-            return
-        }
-
-        started = true
-        retryCount = 0
-        currentIndex = startIndex
-        showCurrentStep()
-    }
-
-    private func availableStartIndex() -> Int? {
-        if let preferredWindow {
-            for index in 0 ..< stepCount {
-                if stepWindowIsVisible(index, window: preferredWindow) {
-                    return index
-                }
-            }
-        }
-
+    private func stepIndexes(for window: Int32) -> [Int] {
+        var indexes: [Int] = []
         for index in 0 ..< stepCount {
-            if stepWindowIsVisible(index) {
-                return index
+            if Int32(shared_initial_tutorial_window(n_int(index))) == window {
+                indexes.append(index)
             }
         }
-
-        return nil
+        return indexes
     }
 
-    private func stepWindowIsVisible(_ index: Int, window preferredWindow: Int32? = nil) -> Bool {
-        let window = Int32(shared_initial_tutorial_window(n_int(index)))
-        if let preferredWindow, preferredWindow != window {
-            return false
-        }
-        guard let view = views[window] else {
-            return false
-        }
-        return view.window != nil
-    }
-
-    private func retryBegin() {
-        guard retryCount < 30 else {
-            return
-        }
-
-        retryCount += 1
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-            self?.beginIfReady()
-        }
-    }
-
-    private func showCurrentStep() {
-        guard let step = InitialTutorialStep(index: currentIndex, count: stepCount) else {
-            finish()
-            return
-        }
-        guard let view = views[step.window], view.window != nil else {
-            if let nextIndex = nextAvailableIndex(after: currentIndex) {
-                currentIndex = nextIndex
-                showCurrentStep()
-            } else {
-                retryShowCurrentStep()
-            }
-            return
-        }
-
+    private func show(step: InitialTutorialStep, ordinal: Int, total: Int, in view: CustomDrawingView) {
         popover?.close()
 
         let bubble = InitialTutorialBubble(
             step: step,
-            canGoBack: previousAvailableIndex(before: currentIndex) != nil,
-            isFinalStep: nextAvailableIndex(after: currentIndex) == nil,
-            goBack: { [weak self] in self?.previousStep() },
-            goForward: { [weak self] in self?.nextStep() },
-            dismiss: { [weak self] in self?.finish() }
+            ordinal: ordinal,
+            total: total,
+            dismiss: { [weak self] in self?.closePopover() }
         )
         let hostingController = NSHostingController(rootView: bubble)
         let nextPopover = NSPopover()
@@ -215,39 +175,10 @@ final class InitialTutorialController {
         nextPopover.behavior = .applicationDefined
         nextPopover.contentSize = NSSize(width: 360, height: 230)
         nextPopover.contentViewController = hostingController
+        nextPopover.delegate = self
 
         popover = nextPopover
-        view.window?.makeKeyAndOrderFront(nil)
         nextPopover.show(relativeTo: anchorRect(for: step, in: view), of: view, preferredEdge: step.preferredEdge)
-        view.window?.makeFirstResponder(view)
-    }
-
-    private func retryShowCurrentStep() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-            self?.showCurrentStep()
-        }
-    }
-
-    private func nextAvailableIndex(after index: Int) -> Int? {
-        var nextIndex = index + 1
-        while nextIndex < stepCount {
-            if stepWindowIsVisible(nextIndex) {
-                return nextIndex
-            }
-            nextIndex += 1
-        }
-        return nil
-    }
-
-    private func previousAvailableIndex(before index: Int) -> Int? {
-        var previousIndex = index - 1
-        while previousIndex >= 0 {
-            if stepWindowIsVisible(previousIndex) {
-                return previousIndex
-            }
-            previousIndex -= 1
-        }
-        return nil
     }
 
     private func anchorRect(for step: InitialTutorialStep, in view: NSView) -> NSRect {
@@ -263,42 +194,46 @@ final class InitialTutorialController {
         )
     }
 
-    private func previousStep() {
-        guard let previousIndex = previousAvailableIndex(before: currentIndex) else {
-            return
-        }
-
-        currentIndex = previousIndex
-        showCurrentStep()
-    }
-
-    private func nextStep() {
-        guard let nextIndex = nextAvailableIndex(after: currentIndex) else {
-            finish()
-            return
-        }
-
-        currentIndex = nextIndex
-        showCurrentStep()
-    }
-
-    private func finish() {
+    private func closePopover() {
         popover?.close()
+    }
+
+    nonisolated func popoverDidClose(_ notification: Notification) {
+        Task { @MainActor in
+            self.popover = nil
+        }
+    }
+
+    nonisolated func popoverShouldClose(_ popover: NSPopover) -> Bool {
+        true
+    }
+
+    private func clearPopoverIfNeeded(_ popover: NSPopover) {
+        if self.popover === popover {
+            self.popover = nil
+        }
+    }
+
+    nonisolated func popoverDidDetach(_ popover: NSPopover) {
+        Task { @MainActor in
+            self.clearPopoverIfNeeded(popover)
+        }
+    }
+
+    deinit {
         popover = nil
     }
 }
 
 private struct InitialTutorialBubble: View {
     let step: InitialTutorialStep
-    let canGoBack: Bool
-    let isFinalStep: Bool
-    let goBack: () -> Void
-    let goForward: () -> Void
+    let ordinal: Int
+    let total: Int
     let dismiss: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Step \(step.index + 1) of \(step.count)")
+            Text("\(step.windowName) \(ordinal) of \(total)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -312,15 +247,9 @@ private struct InitialTutorialBubble: View {
             Spacer(minLength: 4)
 
             HStack {
-                Button("Skip", action: dismiss)
-                    .buttonStyle(.borderless)
-
                 Spacer()
 
-                Button("Back", action: goBack)
-                    .disabled(!canGoBack)
-
-                Button(isFinalStep ? "Done" : "Next", action: goForward)
+                Button("Close", action: dismiss)
                     .keyboardShortcut(.defaultAction)
             }
         }

@@ -35,6 +35,7 @@ import AppKit
 class CustomDrawingView: NSView {
     let viewType: Int32
     private var tutorialTrackingArea: NSTrackingArea?
+    private var tutorialPointerInside = false
 
     init(viewType: Int32) {
         self.viewType = viewType
@@ -163,15 +164,19 @@ class CustomDrawingView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        InitialTutorialController.shared.beginFromPointerActivity(over: self)
+        noteTutorialPointerEntered()
     }
 
     override func mouseMoved(with event: NSEvent) {
-        InitialTutorialController.shared.beginFromPointerActivity(over: self)
+        noteTutorialPointerEntered()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        tutorialPointerInside = false
     }
 
     override func mouseDown(with event: NSEvent) {
-        InitialTutorialController.shared.beginFromPointerActivity(over: self)
+        noteTutorialPointerEntered()
         let location = convert(event.locationInWindow, from: nil)
         let value = event.modifierFlags.contains(.control) || event.modifierFlags.contains(.option)
         if value {
@@ -225,6 +230,14 @@ class CustomDrawingView: NSView {
 
     override func rotate(with event: NSEvent) {
         shared_rotate(Double(event.rotation), n_int(self.viewType))
+    }
+
+    private func noteTutorialPointerEntered() {
+        if tutorialPointerInside {
+            return
+        }
+
+        tutorialPointerInside = InitialTutorialController.shared.showNextTutorial(for: self)
     }
     
     private func viewTypeDisplayName(_ type: Int32) -> String {
