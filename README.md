@@ -7,6 +7,15 @@ The ApeSDK was started in 1996. Since then it has been under continuous open sou
 * From 2003-2009, it was used by Apple. 
 * From 2005-2011, it was used by Intel.
 
+
+## Contact And Feedback
+
+Contact `barbalet at gmail dot com` if you have questions, feedback, or would like to collaborate.
+
+Join the [ApeSDK Discord server](https://discord.gg/sCXPWgv) for discussion and coordination.
+
+File bugs, requests, and trackable feedback in [GitHub Issues](https://github.com/barbalet/apesdk/issues). GitHub issue tracking requires signing in with a GitHub account or a Google account so you can receive progress updates on the issues you file.
+
 ### Simulations Combined
 
 The ApeSDK features a number of simulation components:
