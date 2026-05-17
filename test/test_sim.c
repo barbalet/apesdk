@@ -119,6 +119,17 @@ n_int test_hash( void )
 
 #define DELTA_0 (0)
 #define MOVED_0 (0)
+
+#if defined( __linux__ )
+#define DELTA_1 (1693)
+#define MOVED_1 (1046031)
+#define DELTA_2 (0)
+#define MOVED_2 (1702142)
+#define DELTA_3 (543)
+#define MOVED_3 (1727959)
+#define TOTAL_MOVED (2542732)
+#define LINE_OF_SIGHT_COUNT (12)
+#else
 #define DELTA_1 (1684)
 #define MOVED_1 (1025236)
 #define DELTA_2 (0)
@@ -127,6 +138,8 @@ n_int test_hash( void )
 #define MOVED_3 (1671242)
 #define TOTAL_MOVED (2414823)
 #define LINE_OF_SIGHT_COUNT (6)
+#endif
+
 #define NUMBER_BEINGS (128)
 
 n_int test_sim_run( void )

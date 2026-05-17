@@ -22,12 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # war-mac and urban-mac depend on sibling source trees outside this checkout.
           - project: toolchains/sim-mac/sim-mac.xcodeproj
             scheme: sim-mac
-          - project: toolchains/war-mac/war-mac.xcodeproj
-            scheme: war-mac
-          - project: toolchains/urban-mac/urban-mac.xcodeproj
-            scheme: urban-mac
           - project: toolchains/planet/planet.xcodeproj
             scheme: planet
     steps:
