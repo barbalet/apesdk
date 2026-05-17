@@ -110,6 +110,12 @@ void graph_init( n_int four_byte_factory )
         graph_local_bytes_per_unit = &graph_four_bytes_per_unit;
         graph_local_set_color_transparency = &graph_four_set_color_transparency;
     }
+    else
+    {
+        graph_local_set_color = &graph_one_set_color;
+        graph_local_bytes_per_unit = &graph_one_bytes_per_unit;
+        graph_local_set_color_transparency = &graph_one_set_color_transparency;
+    }
 }
 
 void graph_init_three(void)

@@ -1,0 +1,43 @@
+name: ApeSDK CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux-c:
+    name: Linux C build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install C dependencies
+        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
+      - name: Run fast C tests
+        run: ./test.sh
+
+  macos-xcode:
+    name: macOS Swift toolchain builds
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: toolchains/sim-mac/sim-mac.xcodeproj
+            scheme: sim-mac
+          - project: toolchains/war-mac/war-mac.xcodeproj
+            scheme: war-mac
+          - project: toolchains/urban-mac/urban-mac.xcodeproj
+            scheme: urban-mac
+          - project: toolchains/planet/planet.xcodeproj
+            scheme: planet
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.scheme }}
+        run: |
+          xcodebuild \
+            -project "${{ matrix.project }}" \
+            -scheme "${{ matrix.scheme }}" \
+            -configuration Debug \
+            -destination "generic/platform=macOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            build

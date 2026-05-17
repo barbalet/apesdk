@@ -472,6 +472,10 @@ void    being_set_height( simulated_being *value, n_int height );
 
 n_int   being_mass( simulated_being *value );
 
+inventory_type being_carried( simulated_being *value, BODY_INVENTORY_TYPES location );
+void being_drop( simulated_being *value, BODY_INVENTORY_TYPES location );
+void being_take( simulated_being *value, BODY_INVENTORY_TYPES location, inventory_type object );
+
 typedef struct
 {
     n_int         max_shout_volume;

@@ -120,22 +120,52 @@ static n_rgba32 create_test_color(n_byte r, n_byte g, n_byte b, n_byte a) {
     return color;
 }
 
+static n_byte4* pixel32(n_byte* buffer) {
+    return (n_byte4*)buffer;
+}
+
+static n_int count_color32(n_byte* buffer, n_rgba32* color) {
+    n_int count = 0;
+    n_int pixel = 0;
+
+    while (pixel < (TEST_BUFFER_WIDTH * TEST_BUFFER_HEIGHT)) {
+        if (pixel32(buffer)[pixel] == color->thirtytwo) {
+            count++;
+        }
+        pixel++;
+    }
+    return count;
+}
+
 /****************************************************************
  * Graph Module Tests
  ****************************************************************/
 
 /* Test graph_init functionality */
 static int test_graph_init(void) {
+    n_byte buffer[8] = {0};
+    n_vect2 img;
+    n_rgba32 color = create_test_color(7, 11, 13, 17);
+
+    vect2_populate(&img, 2, 1);
+
     /* Test basic initialization */
     graph_init(1);
-    TEST_ASSERT(1, "graph_init with four_byte_factory=1 should complete without error");
+    graph_erase(buffer, &img, &color);
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[0], "graph_init enables four-byte pixels");
     
     graph_init(0);
-    TEST_ASSERT(1, "graph_init with four_byte_factory=0 should complete without error");
+    memset(buffer, 0, sizeof(buffer));
+    graph_erase(buffer, &img, &color);
+    TEST_ASSERT_EQUAL(color.rgba.b, buffer[0], "graph_init disables four-byte pixels");
     
     /* Test three-component initialization */
     graph_init_three();
-    TEST_ASSERT(1, "graph_init_three should complete without error");
+    memset(buffer, 0, sizeof(buffer));
+    graph_erase(buffer, &img, &color);
+    TEST_ASSERT_EQUAL(color.rgba.b, buffer[0], "graph_init_three writes blue component first");
+    TEST_ASSERT_EQUAL(color.rgba.g, buffer[1], "graph_init_three writes green component second");
+    TEST_ASSERT_EQUAL(color.rgba.r, buffer[2], "graph_init_three writes red component third");
     
     return 1;
 }
@@ -152,11 +182,11 @@ static int test_graph_erase(void) {
     memset(buffer, 0xAA, TEST_BUFFER_SIZE);
     
     /* Test erase functionality */
+    graph_init(1);
     graph_erase(buffer, &img, &color);
-    TEST_ASSERT(1, "graph_erase should complete without error");
-    
-    /* Note: We can't easily verify the exact behavior without knowing
-     * the internal implementation details, but we can ensure it doesn't crash */
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[0], "graph_erase colors first pixel");
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[TEST_BUFFER_WIDTH - 1], "graph_erase colors first row");
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[TEST_BUFFER_WIDTH * TEST_BUFFER_HEIGHT - 1], "graph_erase copies color to final row");
     
     free(buffer);
     return 1;
@@ -172,29 +202,31 @@ static int test_graph_line(void) {
     n_rgba32 color = create_test_color(0, 255, 0, 255); /* Green */
     
     /* Test horizontal line */
+    graph_init(1);
     vect2_populate(&start, 10, 50);
     vect2_populate(&end, 100, 50);
     
     graph_line(buffer, &img, &start, &end, &color, 1);
-    TEST_ASSERT(1, "Horizontal line drawing should complete without error");
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[50 * TEST_BUFFER_WIDTH + 10], "Horizontal line colors start pixel");
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[50 * TEST_BUFFER_WIDTH + 55], "Horizontal line colors midpoint");
     
     /* Test vertical line */
     vect2_populate(&start, 50, 10);
     vect2_populate(&end, 50, 100);
     
     graph_line(buffer, &img, &start, &end, &color, 2);
-    TEST_ASSERT(1, "Vertical line drawing should complete without error");
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[55 * TEST_BUFFER_WIDTH + 50], "Vertical line colors midpoint");
     
     /* Test diagonal line */
     vect2_populate(&start, 10, 10);
     vect2_populate(&end, 100, 100);
     
     graph_line(buffer, &img, &start, &end, &color, 3);
-    TEST_ASSERT(1, "Diagonal line drawing should complete without error");
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[55 * TEST_BUFFER_WIDTH + 55], "Diagonal line colors midpoint");
     
     /* Test with zero thickness */
     graph_line(buffer, &img, &start, &end, &color, 0);
-    TEST_ASSERT(1, "Line with zero thickness should complete without error");
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[20 * TEST_BUFFER_WIDTH + 20], "Zero thickness line still draws its path");
     
     free(buffer);
     return 1;
@@ -208,26 +240,32 @@ static int test_graph_curve(void) {
     n_vect2 img = create_test_img_size();
     n_vect2 pt0, pt1, pt2;
     n_rgba32 color = create_test_color(0, 0, 255, 255); /* Blue */
+    n_int changed_pixels;
     
     /* Test basic curve */
+    graph_init(1);
     vect2_populate(&pt0, 10, 50);
     vect2_populate(&pt1, 50, 10);
     vect2_populate(&pt2, 90, 50);
     
+    changed_pixels = count_color32(buffer, &color);
     graph_curve(buffer, &img, &pt0, &pt1, &pt2, &color, 50, 1, 3);
-    TEST_ASSERT(1, "Basic curve drawing should complete without error");
+    TEST_ASSERT(count_color32(buffer, &color) > changed_pixels, "Basic curve changes the buffer");
     
     /* Test curve with same start and end thickness */
+    changed_pixels = count_color32(buffer, &color);
     graph_curve(buffer, &img, &pt0, &pt1, &pt2, &color, 25, 2, 2);
-    TEST_ASSERT(1, "Curve with uniform thickness should complete without error");
+    TEST_ASSERT(count_color32(buffer, &color) > changed_pixels, "Curve with uniform thickness changes the buffer");
     
     /* Test curve with extreme radius */
+    changed_pixels = count_color32(buffer, &color);
     graph_curve(buffer, &img, &pt0, &pt1, &pt2, &color, 100, 1, 1);
-    TEST_ASSERT(1, "Curve with maximum radius should complete without error");
+    TEST_ASSERT(count_color32(buffer, &color) > changed_pixels, "Curve with maximum radius changes the buffer");
     
     /* Test curve with zero radius */
+    changed_pixels = count_color32(buffer, &color);
     graph_curve(buffer, &img, &pt0, &pt1, &pt2, &color, 0, 1, 1);
-    TEST_ASSERT(1, "Curve with zero radius should complete without error");
+    TEST_ASSERT(count_color32(buffer, &color) > changed_pixels, "Curve with zero radius changes the buffer");
     
     free(buffer);
     return 1;
@@ -247,8 +285,9 @@ static int test_graph_fill_polygon(void) {
     vect2_populate(&triangle[1], 20, 80);
     vect2_populate(&triangle[2], 80, 80);
     
-    graph_fill_polygon(triangle, 3, &color, 255, buffer, &img);
-    TEST_ASSERT(1, "Triangle filling should complete without error");
+    graph_init(1);
+    graph_fill_polygon(triangle, 3, &color, 0, buffer, &img);
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[60 * TEST_BUFFER_WIDTH + 50], "Triangle filling colors interior pixel");
     
     /* Create a square */
     n_vect2 square[4];
@@ -257,8 +296,8 @@ static int test_graph_fill_polygon(void) {
     vect2_populate(&square[2], 150, 150);
     vect2_populate(&square[3], 100, 150);
     
-    graph_fill_polygon(square, 4, &color, 128, buffer, &img);
-    TEST_ASSERT(1, "Square filling with transparency should complete without error");
+    graph_fill_polygon(square, 4, &color, 0, buffer, &img);
+    TEST_ASSERT_EQUAL(color.thirtytwo, pixel32(buffer)[125 * TEST_BUFFER_WIDTH + 125], "Square filling colors interior pixel");
     
     /* Test with single point (degenerate case) */
     n_vect2 point[1];

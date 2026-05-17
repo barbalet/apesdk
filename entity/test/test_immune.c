@@ -37,6 +37,15 @@
 
 simulated_immune_system systems[10];
 
+#define TEST_ASSERT(condition, message) \
+    do { \
+        if (!(condition)) { \
+            printf("FAIL: %s (line %d)\n", message, __LINE__); \
+            return 1; \
+        } \
+        printf("PASS: %s\n", message); \
+    } while(0)
+
 n_int draw_error(n_constant_string error_text, n_constant_string location, n_int line_number)
 {
     printf("ERROR: %s @ %s %ld\n",(const n_string) error_text, location, line_number);
@@ -47,10 +56,22 @@ int main (void)
 {
     n_byte2 random[2] = {0x6727, 0xfd31};
     n_int  result;
+    n_int  loop;
+
     immune_init( &systems[0], ( n_byte2 *)random );
+
+    for ( loop = 0; loop < IMMUNE_ANTIGENS; loop++ )
+    {
+        TEST_ASSERT( systems[0].antigens[loop] == 0, "immune_init clears antigens" );
+    }
+
+    for ( loop = 0; loop < IMMUNE_POPULATION; loop++ )
+    {
+        TEST_ASSERT( systems[0].antibodies[loop] == 0, "immune_init clears antibodies" );
+    }
     
     result =  immune_response( &systems[0], 1, 2560 );
-    printf("immune_response %ld\n", result);
+    TEST_ASSERT( result == 0, "immune_response is zero without active antigens" );
     
     return 0;
 }
