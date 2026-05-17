@@ -391,12 +391,12 @@ static void command_show_friends_being( void *ptr, simulated_being *local_being,
 
                 if ( first )
                 {
-                    sprintf( result_str, "%s%05d  *%s*%s %ld\n", four_characters, ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
+                    snprintf( result_str, STRING_BLOCK_SIZE, "%s%05d  *%s*%s %ld\n", four_characters, ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
                     first = 0;
                 }
                 else
                 {
-                    sprintf( result_str, "    %05d  *%s*%s %ld\n", ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
+                    snprintf( result_str, STRING_BLOCK_SIZE, "    %05d  *%s*%s %ld\n", ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
                 }
             }
             else
@@ -405,18 +405,18 @@ static void command_show_friends_being( void *ptr, simulated_being *local_being,
                 {
                     /** The current focus of attention */
 #ifdef REMOVE_BOLDING_TEXT
-                    sprintf( result_str, "%s %05d *%s*%s %ld\n", four_characters, ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
+                    snprintf( result_str, STRING_BLOCK_SIZE, "%s %05d *%s*%s %ld\n", four_characters, ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
 #else
-                    sprintf( result_str, "%s %05d <*%s*>%s %ld\n", four_characters, ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
+                    snprintf( result_str, STRING_BLOCK_SIZE, "%s %05d <*%s*>%s %ld\n", four_characters, ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
 #endif
                     first = 0;
                 }
                 else
                 {
 #ifdef REMOVE_BOLDING_TEXT
-                    sprintf( result_str, "    %05d *%s*%s %ld\n", ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
+                    snprintf( result_str, STRING_BLOCK_SIZE, "    %05d *%s*%s %ld\n", ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
 #else
-                    sprintf( result_str, "    %05d <*%s*>%s %ld\n", ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
+                    snprintf( result_str, STRING_BLOCK_SIZE, "    %05d <*%s*>%s %ld\n", ( int )local_social_graph[i].familiarity, met_being_name, relationship_str2, attraction );
 #endif
                 }
             }
@@ -838,16 +838,16 @@ static void watch_appearance( void *ptr, n_string beingname, simulated_being *lo
     n_string_block str;
     n_genetics *genetics = being_genetics( local_being );
 
-    sprintf( str, "Height: %.3f m\n", ( int )GET_BEING_HEIGHT( local_being ) / 1000.0f );
+    snprintf( str, STRING_BLOCK_SIZE, "Height: %.3f m\n", ( int )GET_BEING_HEIGHT( local_being ) / 1000.0f );
     io_string_write( result, str, &watch_string_length );
 
-    sprintf( str, "Mass: %.2f Kg\n", ( float )GET_M( local_being ) / 100.0f );
+    snprintf( str, STRING_BLOCK_SIZE, "Mass: %.2f Kg\n", ( float )GET_M( local_being ) / 100.0f );
     io_string_write( result, str, &watch_string_length );
 
-    sprintf( str, "Body fat: %.2f Kg\n", ( float )GET_BODY_FAT( local_being ) / 100.0f );
+    snprintf( str, STRING_BLOCK_SIZE, "Body fat: %.2f Kg\n", ( float )GET_BODY_FAT( local_being ) / 100.0f );
     io_string_write( result, str, &watch_string_length );
 
-    sprintf( str, "Hair length: %.1f mm\n", ( float )( GENE_HAIR( genetics ) * 100.0f / 160.0f ) );
+    snprintf( str, STRING_BLOCK_SIZE, "Hair length: %.1f mm\n", ( float )( GENE_HAIR( genetics ) * 100.0f / 160.0f ) );
     io_string_write( result, str, &watch_string_length );
 
     sprintf( str, "Pigmentation: %02d\n", ( int )( GENE_PIGMENTATION( genetics ) ) );
