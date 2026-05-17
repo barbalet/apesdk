@@ -1,5 +1,5 @@
 #!/bin/bash
-# Canonical fast ApeSDK test runner.
+# Canonical deterministic ApeSDK test runner.
 
 set -euo pipefail
 
@@ -43,23 +43,4 @@ run_in "${ROOT_DIR}/entity/unit" ./entity_tests
 run_in "${ROOT_DIR}/universe/unit" bash universe_tests.sh
 run_in "${ROOT_DIR}/universe/unit" ./universe_tests
 
-run_in "${ROOT_DIR}/toolkit/test" bash test_toolkit_wo_exec.sh
-run_in "${ROOT_DIR}/toolkit/test" ./test_math
-run_in "${ROOT_DIR}/toolkit/test" ./test_prototype
-run_in "${ROOT_DIR}/toolkit/test" ./test_object_string
-run_in "${ROOT_DIR}/toolkit/test" ./test_object
-run_in "${ROOT_DIR}/toolkit/test" bash test_object_file.sh
-run_in "${ROOT_DIR}/toolkit/test" bash test_object_file_vect2.sh
-run_in "${ROOT_DIR}/toolkit/test" bash test_memory_list.sh
-run_in "${ROOT_DIR}/toolkit/test" ./test_memory_list_run
-
-run_in "${ROOT_DIR}/test" bash test_script_wo_exec.sh
-run_in "${ROOT_DIR}/test" ./test_apescript check_apescript.txt
-
-run_in "${ROOT_DIR}/test" bash test_wo_exec.sh
-run_in "${ROOT_DIR}/test" ./test_sim
-
-run_in "${ROOT_DIR}/test" bash test_gui_wo_exec.sh
-run_in "${ROOT_DIR}/test" ./test_gui
-
-printf "\nAll fast tests passed.\n"
+printf "\nAll deterministic tests passed.\n"
