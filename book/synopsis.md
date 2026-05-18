@@ -11,6 +11,12 @@ The current engine version is `Simulated Ape 0.710`, defined in
 [`RELEASE.md`](../RELEASE.md), and the deterministic project test runner is
 [`test.sh`](../test.sh).
 
+Historical context comes from the [Noble Ape site](https://nobleape.com/), whose
+2012 talk transcript describes Noble Ape as the predecessor name for ApeSDK and
+records many of the same design threads that remain visible in the current
+source: landscape, weather, drives, social graphs, braincode, ApeScript, and
+open-source research collaboration.
+
 ## How To Read This Book
 
 Each chapter has three jobs:
