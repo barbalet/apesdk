@@ -23,6 +23,30 @@ interesting simulation behavior. That distinction is exactly what this chapter's
 testing, release, and documentation discipline is for. ApeSDK remains valuable
 when experiments, artifacts, and claims can be reproduced.
 
+## Archive Evidence
+
+- [The Mind of the Noble Ape in Three Simulations](https://www.apesdk.com/doc/Barbalet_OriginOfMind.pdf)
+  says the software was available in "source and executable form free of
+  charge." That line supports this chapter's maintenance argument: ApeSDK's
+  value depends on inspectable source, repeatable artifacts, and public
+  scrutiny.
+- The [Ape Brain article](https://www.apesdk.com/doc/Barbalet_ApeBrain.pdf)
+  describes artificial life as "an applied philosophy." That phrase explains why
+  maintenance, tests, documentation, and release discipline are not separate
+  from the project's intellectual purpose.
+- The [IGDA IPR SIG White Paper](https://www.apesdk.com/doc/IGDA_IPRights_WhitePaper.pdf)
+  and early interviews are historical context for stewardship and public-facing
+  project identity, not current build instructions.
+- The auto-captioned
+  [command-line build video](https://www.youtube.com/watch?v=cYnLhDEwTWs&t=45s)
+  walks through `build.sh`, the
+  [Swift and C update](https://www.youtube.com/watch?v=3c-FTrRt-cw&t=1s)
+  says the Mac version now uses "Swift and C," and the
+  [long-term development update](https://www.youtube.com/watch?v=jD2AiFiu1FE&t=0s)
+  describes a "long-term development time frame." Those references support this
+  chapter's emphasis on build clarity, platform boundaries, and release
+  expectations.
+
 ## Building
 
 The command-line build is [`build.sh`](../build.sh). It compiles the C modules

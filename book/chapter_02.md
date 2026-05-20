@@ -25,6 +25,28 @@ and memory. A project that has moved from early machines through modern macOS,
 Linux, Windows, and app toolchains cannot leave representation accidental. The
 toolkit is where portability becomes a practical discipline.
 
+## Archive Evidence
+
+- The [IEEE technical article](https://www.apesdk.com/doc/Barbalet_IEEE.pdf)
+  records the early executable constraint as "under 100 K." That specific
+  constraint explains why this chapter treats small types, small helpers, and
+  toolkit-level discipline as part of the project identity rather than mere
+  implementation style.
+- The same article describes line-of-sight, line drawing, random numbers, and
+  file parsing as optimized core functions. This supports the chapter's claim
+  that `toolkit/` is a portability and reproducibility layer, not generic
+  plumbing.
+- The [Apple Shark Optimization document](https://www.apesdk.com/doc/Apple_SharkOptimization.pdf)
+  is best treated as historical evidence that low-level behavior mattered
+  outside the simulation itself, especially when ApeSDK was used as an
+  optimization and processor-behavior workload.
+- The auto-captioned
+  [overview of ApeSDK with Simulated Ape](https://www.youtube.com/watch?v=W9SmPYhtsGA&t=26s)
+  calls the project "basically a toolkit," while
+  [Looking at the Importance of 32 vs 64 bit Integers](https://www.youtube.com/watch?v=Fddh5fmTENk&t=23s)
+  treats integer width as a visible simulation concern. Together they reinforce
+  this chapter's point that the low-level type layer is part of the model.
+
 ## Shared Types
 
 Important types include:

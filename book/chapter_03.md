@@ -23,6 +23,24 @@ and state more precisely than a visual demo alone. That distinction remains
 important. A rendered world may show motion, but the time model and coordinate
 model explain what that motion means.
 
+## Archive Evidence
+
+- The [ApeSDK Philosophic manual page](https://www.apesdk.com/doc/man/philosophic.html)
+  distinguishes the simulation's "internal and external" quantities. This
+  directly supports this chapter's separation of external simulation time and
+  coordinates from the internal time and space a being may store or infer.
+- The same manual describes time externally as fixed and progressive, which
+  matches the current code's explicit date/time counters and regular calendar
+  assumptions.
+- The [Original Manuals](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  devote an early section to land, existence, and time. That placement supports
+  this chapter's claim that time and place are foundational, not decorative.
+- In the auto-captioned
+  [thunderstorms video](https://www.youtube.com/watch?v=dw8FRHvx5qI&t=320s),
+  the land is discussed through wind, dissipation, topography, and date
+  information. That video evidence supports this chapter's treatment of
+  coordinates and time as environmental mechanics rather than display labels.
+
 ## Simulation Time
 
 The current time constants in `sim/sim.h` define a compact calendar:

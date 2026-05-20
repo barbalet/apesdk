@@ -17,6 +17,12 @@ records many of the same design threads that remain visible in the current
 source: landscape, weather, drives, social graphs, braincode, ApeScript, and
 open-source research collaboration.
 
+The public [ApeSDK documentation archive](https://apesdk.com/doc/) adds another
+source layer for this book. It links the original manuals, published technical
+writing, philosophy chapters, Apple optimization material, interviews, and the
+current manual. Chapter notes below now point back to those archive documents
+where they clarify the current source.
+
 ## How To Read This Book
 
 Each chapter has three jobs:
@@ -72,6 +78,47 @@ The important workflows are:
   tests, while macOS builds the `sim-mac` and `planet` Xcode projects.
 - Follow [`RELEASE.md`](../RELEASE.md) for the macOS release process and
   versioned artifacts.
+
+## Archive Evidence Source Map
+
+Use these archive documents alongside the chapters:
+
+- [The Original Manuals of Noble Ape](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  - use for the early Nervana/Noble Ape framing of origin, desire, perception,
+  identity, reproduction, and the project as a working manual tradition.
+- [The Simulated Ape Manual](https://www.apesdk.com/doc/man/) - use for the
+  current user-facing manual structure: getting started, file format,
+  ApeScript, and scripting examples.
+- [The Mind of the Noble Ape in Three Simulations](https://www.apesdk.com/doc/Barbalet_OriginOfMind.pdf)
+  - use for the layered account of mind: biological, cognitive, social, and
+  narrative simulation working together.
+- [IEEE Computer Graphics and Applications article](https://www.apesdk.com/doc/Barbalet_IEEE.pdf)
+  - use for technical claims about modular core/graphics, landform generation,
+  weather, cognition, portability, and optimization.
+- [Ape Brain article](https://www.apesdk.com/doc/Barbalet_ApeBrain.pdf) - use
+  where intelligence is framed through survival, systems, and artificial life as
+  applied philosophy.
+- [Nature Inspired Informatics](https://www.apesdk.com/doc/Barbalet_NatureInspired.pdf)
+  and [Divine Action and Natural Selection](https://www.apesdk.com/doc/Barbalet_DivActNatSel.pdf)
+  - broader philosophical and nature-inspired context.
+- [Apple Shark Optimization](https://www.apesdk.com/doc/Apple_SharkOptimization.pdf)
+  - Apple optimization reference tied to the project history.
+- [IGDA IPR SIG White Paper](https://www.apesdk.com/doc/IGDA_IPRights_WhitePaper.pdf)
+  - preservation of intellectual-property discussion from the archive.
+- Early interviews: [Weekend Australian](https://www.apesdk.com/doc/wa.html),
+  [internet.au](https://www.apesdk.com/doc/ia.html),
+  [Canberra Times](https://www.apesdk.com/doc/ct.html),
+  [National Graduate](https://www.apesdk.com/doc/ng.html),
+  [Australasian Science](https://www.apesdk.com/doc/as.html),
+  [Rushkoff article](https://www.apesdk.com/doc/rush.html), and
+  [Flipcode](https://www.apesdk.com/doc/flip.html).
+- Auto-captioned videos from
+  [Last Monkey Standing](https://www.youtube.com/@LastMonkeyStanding) - use as
+  oral-history evidence for current ApeSDK practice: the 2024 ApeSDK talk,
+  the 2020 overview and command-line videos, the Python/Swift/C walkthroughs,
+  the pathogen/immune videos, and Unreal integration discussions. Because the
+  captions are automatic, quote only short checked phrases and otherwise
+  paraphrase the evidence.
 
 ## A Note On Determinism
 

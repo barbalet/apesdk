@@ -26,6 +26,26 @@ genetic model compact, but the historical direction is useful. Genetics in
 ApeSDK should be read as a stable variation mechanism that can grow, not as a
 finished biological claim.
 
+## Archive Evidence
+
+- The [Original Manuals](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  describe movement as "desire-driven motivation." That phrase is the early
+  version of this chapter's body-first claim: beings do not merely move because
+  a rule says so; movement is attached to internal pressure, energy, state, and
+  future orientation.
+- [The Mind of the Noble Ape in Three Simulations](https://www.apesdk.com/doc/Barbalet_OriginOfMind.pdf)
+  argues that the environment needed enough depth for simulated minds to
+  flourish. In this chapter, that supports the idea that bodies and worlds must
+  be interpreted together.
+- The [Simulated Ape Manual](https://www.apesdk.com/doc/man/) remains the
+  user-facing companion for current behavior, while `entity/` is the source
+  authority.
+- The auto-captioned
+  [downloaded ApeSDK explanation](https://www.youtube.com/watch?v=mvORipomK98&t=50s)
+  identifies a visible "cognitive simulation" alongside the running beings and
+  command interface. That supports this chapter's body-first claim: the ape on
+  screen is the observable surface of several embodied internal systems.
+
 ## Energy And Survival
 
 `entity/entity.h` defines the basic energy bands:

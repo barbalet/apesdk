@@ -24,6 +24,26 @@ complexity than compact bytecode. That question remains relevant. The current
 book separates braincode and ApeScript because they serve different levels of
 control, but historically they are part of the same design conversation.
 
+## Archive Evidence
+
+- The [Simulated Ape Manual](https://www.apesdk.com/doc/man/) indexes ApeScript
+  through "the basics of the scripting language" and a page on variables and
+  errors. That supports this chapter's focus on parser discipline, access
+  classes, and deterministic failure.
+- The [Original Manuals](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  list command-line intelligence, storage formats, and identity files among the
+  early concerns still needing explanation. The current `script/`,
+  `universe/command.c`, and transfer layers are the modern form of those
+  concerns.
+- The auto-captioned
+  [ApeScript linking-language note](https://www.youtube.com/watch?v=3wI_hLWoc58&t=24s)
+  says an ApeScript version could produce "output in C JavaScript and python."
+  The
+  [Python walkthrough](https://www.youtube.com/watch?v=LQ1r0MiJU-w&t=19s)
+  also describes an interface where strings are put in and taken out. Those
+  videos reinforce this chapter's treatment of script and command text as a
+  serious portability boundary.
+
 ## The Contract
 
 `script.h` defines the primary script terms:

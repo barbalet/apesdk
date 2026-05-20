@@ -45,6 +45,28 @@ directory structure. `toolkit`, `sim`, `entity`, `universe`, `script`, `render`,
 and `gui` are not just folders. They are the modern boundaries of the same
 modular philosophy.
 
+## Archive Evidence
+
+- The [Original Manuals](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  give the origin story in deliberately stark form: "On 12 June 1996, there was
+  nothing." In this chapter, that line supports the idea that ApeSDK should be
+  read historically, as a project that grew from a written and simulated
+  research notebook rather than from a finished product brief.
+- The [Mind of the Noble Ape in Three Simulations](https://www.apesdk.com/doc/Barbalet_OriginOfMind.pdf)
+  describes the mind model as "three distinct yet interoperating simulated
+  models." That phrase anchors this chapter's claim that ApeSDK is not a single
+  AI module, but a layered system in which biological, cognitive, social, and
+  narrative mechanisms meet.
+- The [IEEE article](https://www.apesdk.com/doc/Barbalet_IEEE.pdf) says the
+  early work centered on "the simulation core and the simulation graphics." That
+  explains why this chapter treats the current source tree as both model and
+  presentation boundary.
+- The auto-captioned
+  [ApeSDK Talk](https://www.youtube.com/watch?v=qdqe0mCgeUE&t=210s) gives the
+  oral-history anchor "June 13th 1996" and describes the present project as a
+  hobby that moved through several names before ApeSDK. That supports this
+  chapter's emphasis on continuity rather than a single clean product origin.
+
 ## The Current Version Boundary
 
 The current version is declared in [`sim/sim.h`](../sim/sim.h):

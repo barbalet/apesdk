@@ -23,6 +23,25 @@ fully simulated organism for it to matter. A compact probabilistic or
 operator-driven field can still create habitat, movement pressure, and social
 consequences.
 
+## Archive Evidence
+
+- The [IEEE article](https://www.apesdk.com/doc/Barbalet_IEEE.pdf) states that
+  the project aimed to "simulate a biologically diverse landscape." That phrase
+  is the direct historical root of this chapter's treatment of terrain as an
+  active ecological field.
+- In [The Mind of the Noble Ape in Three Simulations](https://www.apesdk.com/doc/Barbalet_OriginOfMind.pdf),
+  the biological layer is described through environmental properties such as
+  height, water, sunlight, and salt. That supports the chapter's explanation of
+  the operator table as compact ecology rather than decorative map coloring.
+- The [Original Manuals](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  provide the broader island and virtual-environment framing behind this
+  ecological reading.
+- The auto-captioned
+  [Ideas of Thunderstorms with Simulated Ape](https://www.youtube.com/watch?v=dw8FRHvx5qI&t=110s)
+  points to an existing "weather system" and frames thunder and lightning as an
+  atmospheric extension. That supports this chapter's view of land, weather,
+  and tiles as active ecological machinery.
+
 ## Terrain As A Signal Field
 
 Terrain is not background art. It is a signal field used by movement, food,

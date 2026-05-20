@@ -23,6 +23,27 @@ For this chapter, the lesson is that visualization and inspection have always
 been part of the project. The app view, command-line view, and internal state
 view each expose a different truth. None should be mistaken for the whole model.
 
+## Archive Evidence
+
+- The [IEEE article](https://www.apesdk.com/doc/Barbalet_IEEE.pdf) describes
+  multiple displayed graphical views and internal graphics generation. That
+  supports this chapter's claim that observation has always been part of the
+  project, not a later cosmetic feature.
+- The [ApeSDK Philosophic page](https://www.apesdk.com/doc/man/philosophic.html)
+  notes that "movement is the main observable effect" of fear and desire. That
+  line explains why visual observation must be paired with command and state
+  inspection: movement is visible, but its cause is internal.
+- The [Apple Shark Optimization document](https://www.apesdk.com/doc/Apple_SharkOptimization.pdf)
+  belongs here as performance-observation context rather than current user
+  guidance.
+- The auto-captioned
+  [terminal-with-graphics video](https://www.youtube.com/watch?v=5Dmhf7mCVoQ&t=188s)
+  moves from a running graphical simulation into the terminal window, and the
+  [Unreal integration discussion](https://www.youtube.com/watch?v=PnJwWsYr0gs&t=758s)
+  notes that engine integration has to handle strings and console outputs. Both
+  videos support this chapter's rule that visual observation and textual
+  inspection should travel together.
+
 ## Rendering And GUI
 
 `render/graph.c` and `render/graph.h` provide low-level graphing primitives.

@@ -21,6 +21,27 @@ Ape reference reminds the reader what that compactness was trying to support:
 not just movement control, but a way for internal representation, social
 association, and communication-like behavior to share a computational form.
 
+## Archive Evidence
+
+- The [Nature Inspired Informatics chapter](https://www.apesdk.com/doc/Barbalet_NatureInspired.pdf)
+  describes cognition as movement from external world to an "internal created
+  representation." That phrase supports this chapter's claim that braincode and
+  brain state should be understood as representation machinery, not only action
+  triggers.
+- The [Ape Brain article](https://www.apesdk.com/doc/Barbalet_ApeBrain.pdf)
+  offers the compact provocation "Survival is intelligence." In this chapter,
+  that supports reading braincode as survival-oriented control rather than a
+  human-imitation language.
+- The [IEEE article](https://www.apesdk.com/doc/Barbalet_IEEE.pdf) describes the
+  cognitive simulation as information transfer with sensory input and motor
+  output, giving the technical bridge to probes and actuators.
+- The auto-captioned
+  [downloaded ApeSDK explanation](https://www.youtube.com/watch?v=mvORipomK98&t=126s)
+  shows the demo moving into braincode, and the
+  [Python walkthrough](https://www.youtube.com/watch?v=LQ1r0MiJU-w&t=429s)
+  mentions "shared brain code between apes." Those video references support
+  this chapter's reading of braincode as an inspectable behavioral substrate.
+
 ## The Budget
 
 Current constants include:

@@ -24,6 +24,23 @@ models. That is exactly the point of bounded social cognition: what a being
 knows socially is not a perfect transcript of the past, but a structured summary
 that can guide future action.
 
+## Archive Evidence
+
+- [The Mind of the Noble Ape in Three Simulations](https://www.apesdk.com/doc/Barbalet_OriginOfMind.pdf)
+  says the productive use of the mind models is "in concert: not in contrast or
+  competition." That quotation is the best archive support for this chapter's
+  insistence that social graph, memory, body, environment, and drives must be
+  read together.
+- The [ApeSDK Philosophic page](https://www.apesdk.com/doc/man/philosophic.html)
+  links society to a chain from external space through vision, internal space,
+  identity, and language. This supports the chapter's view of social behavior
+  as layered rather than isolated.
+- The auto-captioned
+  [Python version walkthrough](https://www.youtube.com/watch?v=LQ1r0MiJU-w&t=245s)
+  describes live output for "social interactions" among related apes. That
+  gives a current video reference for this chapter's claim that social state is
+  something the engine exposes for inspection, not only something it renders.
+
 ## The Social Graph
 
 `simulated_isocial` is the core social graph entry. It records:

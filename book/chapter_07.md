@@ -26,6 +26,22 @@ drives do not act alone. They combine with new information, social memory,
 episodic memory, location, and language-like representations. In current
 ApeSDK terms, drive values are one part of a larger decision context.
 
+## Archive Evidence
+
+- The [Original Manuals](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  treat natural desires as time-bound needs: food, sleep, safety, and
+  reproduction. This is the historical basis for reading the current four-drive
+  model as scheduling pressure rather than mood decoration.
+- The [Nature Inspired Informatics chapter](https://www.apesdk.com/doc/Barbalet_NatureInspired.pdf)
+  names "fear and desire" as two primary cognitive elements. In current ApeSDK
+  terms, this supports the chapter's contrast between immediate suppression,
+  longer-horizon goals, and drive-mediated movement.
+- The auto-captioned
+  [ApeSDK Talk](https://www.youtube.com/watch?v=qdqe0mCgeUE&t=1379s) names the
+  four-drive list as sex, hunger, social, and fatigue. That oral-history
+  reference usefully ties the current drive fields to the older biological and
+  robotics lineage discussed in this chapter.
+
 ## Hunger
 
 `drives_hunger()` checks energy against `BEING_HUNGRY`. If the being is hungry,

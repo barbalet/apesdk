@@ -24,6 +24,26 @@ past event is retained. Important events, scalar social changes, and
 language-like internal representations interact over time. That supports this
 chapter's emphasis on bounded memory, replacement, and evidence chains.
 
+## Archive Evidence
+
+- The [ApeSDK Philosophic page](https://www.apesdk.com/doc/man/philosophic.html)
+  says "places and events can be considered as objects." That line supports the
+  chapter's view that episodic memory is not only a list of social incidents; it
+  is a way to bind beings, locations, objects, and actions into future evidence.
+- The [Original Manuals](https://www.apesdk.com/doc/Barbalet_OriginalManuals.pdf)
+  discuss past history as daily movement and interaction, with trivial or
+  repetitive elements forgotten. That maps directly onto bounded episodic memory
+  and replacement.
+- [The Mind of the Noble Ape in Three Simulations](https://www.apesdk.com/doc/Barbalet_OriginOfMind.pdf)
+  gives the higher-level reason: social constraints and narrative are part of
+  the applied mind, not optional storytelling.
+- The auto-captioned
+  [overview video](https://www.youtube.com/watch?v=W9SmPYhtsGA&t=536s) places
+  episodic material beside the social aspects of the simulation, while the
+  [downloaded ApeSDK explanation](https://www.youtube.com/watch?v=mvORipomK98&t=87s)
+  points to the "Narrative engine" as live output. Together they support this
+  chapter's link between memory, social history, and generated narrative.
+
 ## Event Vocabulary
 
 The event enum includes eating, mating, hitting and being hit, swimming,
