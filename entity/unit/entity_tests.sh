@@ -19,12 +19,13 @@ fi
 
 rm -f ./*.o ./entity_tests
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../sim -I../../entity -I../../universe -c ../../toolkit/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../sim -I../../entity -I../../universe -c ../../script/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../sim -I../../entity -I../../universe -c ../../sim/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../sim -I../../entity -I../../universe -c ../../entity/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../sim -I../../entity -I../../universe -c ../../universe/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../sim -I../../entity -I../../universe -c entity_tests.c -o entity_tests.o -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../render -I../../sim -I../../entity -I../../universe -c ../../toolkit/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../render -I../../sim -I../../entity -I../../universe -c ../../script/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../render -I../../sim -I../../entity -I../../universe -c ../../render/graph.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../render -I../../sim -I../../entity -I../../universe -c ../../sim/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../render -I../../sim -I../../entity -I../../universe -c ../../entity/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../render -I../../sim -I../../entity -I../../universe -c ../../universe/*.c -lz -lm -lpthread -w
+gcc ${CFLAGS} ${COMMANDLINEE} -I../../toolkit -I../../script -I../../render -I../../sim -I../../entity -I../../universe -c entity_tests.c -o entity_tests.o -lz -lm -lpthread -w
 gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o entity_tests ./*.o -lz -lm -lpthread -w
 
 rm -f ./*.o

@@ -173,17 +173,24 @@ static void test_brain_body_genome_and_immune(void)
 
 static void test_episodic_and_social(void)
 {
-    simulated_group group;
+    simulated_group *group;
     simulated_being *first;
     simulated_being *second;
     n_int relationship_index;
     simulated_iepisodic *memory;
 
-    memory_erase((n_byte *)&group, sizeof(group));
-    group.num = 2;
-    group.max = LARGE_SIM;
-    first = &group.beings[0];
-    second = &group.beings[1];
+    group = (simulated_group *)memory_new(sizeof(simulated_group));
+    TEST_ASSERT(group != 0L, "simulated_group test fixture allocates");
+    if (group == 0L)
+    {
+        return;
+    }
+
+    memory_erase((n_byte *)group, sizeof(simulated_group));
+    group->num = 2;
+    group->max = LARGE_SIM;
+    first = &group->beings[0];
+    second = &group->beings[1];
 
     make_being(first, 10, 11, 12, 0);
     make_being(second, 13, 14, 15, 1);
@@ -194,10 +201,12 @@ static void test_episodic_and_social(void)
     TEST_ASSERT(memory[0].arg == INVENTORY_GRASS, "episodic_self stores the event argument");
     TEST_ASSERT(episodic_first_person_memories_percent(first, 0) == 100, "episodic first-person percentage sees self event");
 
-    relationship_index = social_set_relationship(&group, first, RELATIONSHIP_SISTER, second);
+    relationship_index = social_set_relationship(group, first, RELATIONSHIP_SISTER, second);
     TEST_ASSERT(relationship_index > 0, "social_set_relationship creates a social graph entry");
     TEST_ASSERT(social_get_relationship(first, RELATIONSHIP_SISTER) == relationship_index, "social_get_relationship finds stored relationship");
     TEST_ASSERT(social_respect_mean(first) > 0, "social_respect_mean reports populated graph");
+
+    memory_free((void **)&group);
 }
 
 int main(void)
