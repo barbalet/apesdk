@@ -42,7 +42,7 @@
 
 #undef   COMMAND_LINE_DEBUG       /* Sends the debug output as printf output - added through command line build */
 
-#undef APESCRIPT_INCLUDED
+#define APESCRIPT_INCLUDED
 // #define COMMON_DEBUG_ON /* should be passed via target definitions via cmd */
 
 #ifdef COMMON_DEBUG_ON

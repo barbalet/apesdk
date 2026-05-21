@@ -149,6 +149,10 @@ struct SimMacApp: App {
                     let menuResponse = shared_menu(NA_MENU_WEATHER)
                     isWeather = (menuResponse == 1)
                 }
+                Button(isBrain ? "No Brain" : "Brain") {
+                    let menuResponse = shared_menu(NA_MENU_BRAIN)
+                    isBrain = (menuResponse == 1)
+                }
                 Button(isBraincode ? "No Braincode" : "Braincode") {
                     let menuResponse = shared_menu(NA_MENU_BRAINCODE)
                     isBraincode = (menuResponse == 1)

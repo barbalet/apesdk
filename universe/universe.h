@@ -49,9 +49,6 @@
 #define  BRAINCODE_ON  /* entity */
 #define  IMMUNE_ON     /* entity */
 
-#ifdef TARGET_OS_IOS
-#undef  BRAIN_ON
-#else
 
 #ifdef APESCRIPT_INCLUDED
 #define BRAIN_ON
@@ -60,7 +57,6 @@
 
 #else
 #undef  BRAIN_ON
-#endif
 #endif
 
 #define  FEATURE_SET

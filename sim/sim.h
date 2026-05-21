@@ -98,11 +98,7 @@ typedef enum
     ET_FIERCE_BIRD_OF_PREY,
 } entity_type;
 
-#ifdef TARGET_OS_IOS
-#define WINDOW_PROCESSING NUM_TERRAIN
-#else
 #define WINDOW_PROCESSING NUM_CONTROL
-#endif
 
 #define    DRAW_WINDOW_VIEW    (1)
 #define    DRAW_WINDOW_TERRAIN (2)

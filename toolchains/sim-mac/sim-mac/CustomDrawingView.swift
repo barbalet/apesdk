@@ -103,9 +103,6 @@ class CustomDrawingView: NSView {
                 let optionalImage: CGImage? = drawRef.makeImage()
                 if let image = optionalImage {
                     let newRect = NSRect(x: 0, y: 0, width: CGFloat(dimX), height: CGFloat(dimY))
-                    // Apply vertical flip transformation
-                    context.translateBy(x: 0, y: CGFloat(dimY))
-                    context.scaleBy(x: 1.0, y: -1.0)
 
                     context.draw(image, in: newRect)
                 }
