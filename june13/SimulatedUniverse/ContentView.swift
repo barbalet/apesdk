@@ -1,21 +1,18 @@
 import SwiftUI
 
 struct ContentView: View {
-    private let overlays = ["Social", "Memory", "Weather", "Resources"]
-
     var body: some View {
         NavigationSplitView {
             List {
                 Section("Modes") {
-                    Label("Explore", systemImage: "map")
-                    Label("Inspect", systemImage: "magnifyingglass")
-                    Label("Experiment", systemImage: "slider.horizontal.3")
-                    Label("Replay", systemImage: "clock.arrow.circlepath")
+                    ForEach(UniverseMode.allCases) { mode in
+                        Label(mode.title, systemImage: modeIcon(for: mode))
+                    }
                 }
 
                 Section("Overlays") {
-                    ForEach(overlays, id: \.self) { overlay in
-                        Label(overlay, systemImage: overlayIcon(for: overlay))
+                    ForEach(UniverseOverlay.allCases) { overlay in
+                        Label(overlay.title, systemImage: overlayIcon(for: overlay))
                     }
                 }
             }
@@ -50,18 +47,29 @@ struct ContentView: View {
         }
     }
 
-    private func overlayIcon(for overlay: String) -> String {
+    private func modeIcon(for mode: UniverseMode) -> String {
+        switch mode {
+        case .explore:
+            return "map"
+        case .inspect:
+            return "magnifyingglass"
+        case .experiment:
+            return "slider.horizontal.3"
+        case .replay:
+            return "clock.arrow.circlepath"
+        }
+    }
+
+    private func overlayIcon(for overlay: UniverseOverlay) -> String {
         switch overlay {
-        case "Social":
+        case .social:
             return "point.3.connected.trianglepath.dotted"
-        case "Memory":
+        case .memory:
             return "brain.head.profile"
-        case "Weather":
+        case .weather:
             return "cloud.sun.rain"
-        case "Resources":
+        case .resources:
             return "leaf"
-        default:
-            return "circle"
         }
     }
 }
