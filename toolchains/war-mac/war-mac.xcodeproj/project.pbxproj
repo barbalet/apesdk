@@ -11,6 +11,7 @@
 		4A6D93A62DCA89AB00BC68D8 /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A6D93A22DCA89AB00BC68D8 /* draw.c */; };
 		4A6D93D22E9A0000BC68D800 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A6D93D32E9A0000BC68D800 /* buffer.c */; };
 		4A6D93D42E9C0000BC68D800 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A6D93D52E9C0000BC68D800 /* app_shell.c */; };
+		4A6D93D62E9D0000BC68D800 /* war-mac-bridge.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A6D93D72E9D0000BC68D800 /* war-mac-bridge.c */; };
 		4A6D93B02DCA89EB00BC68D8 /* object.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A6D93AD2DCA89EB00BC68D8 /* object.c */; };
 		4A6D93B12DCA89EB00BC68D8 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A6D93A92DCA89EB00BC68D8 /* file.c */; };
 		4A6D93B22DCA89EB00BC68D8 /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A6D93AB2DCA89EB00BC68D8 /* math.c */; };
@@ -33,6 +34,8 @@
 		4A6D93D32E9A0000BC68D800 /* buffer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = buffer.c; path = ../../gui/buffer.c; sourceTree = SOURCE_ROOT; };
 		4A6D93D52E9C0000BC68D800 /* app_shell.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = app_shell.c; path = ../../gui/app_shell.c; sourceTree = SOURCE_ROOT; };
 		4A6D93A72DCA89AC00BC68D8 /* war-mac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "war-mac-Bridging-Header.h"; sourceTree = "<group>"; };
+		4A6D93D72E9D0000BC68D800 /* war-mac-bridge.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "war-mac-bridge.c"; sourceTree = "<group>"; };
+		4A6D93D82E9D0000BC68D800 /* war-mac-bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "war-mac-bridge.h"; sourceTree = "<group>"; };
 		4A6D93A92DCA89EB00BC68D8 /* file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = file.c; path = ../../toolkit/file.c; sourceTree = SOURCE_ROOT; };
 		4A6D93AA2DCA89EB00BC68D8 /* io.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = io.c; path = ../../toolkit/io.c; sourceTree = SOURCE_ROOT; };
 		4A6D93AB2DCA89EB00BC68D8 /* math.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = math.c; path = ../../toolkit/math.c; sourceTree = SOURCE_ROOT; };
@@ -94,6 +97,8 @@
 				4A6D93A22DCA89AB00BC68D8 /* draw.c */,
 				4A6D93A32DCA89AB00BC68D8 /* shared.c */,
 				4A6D93A72DCA89AC00BC68D8 /* war-mac-Bridging-Header.h */,
+				4A6D93D82E9D0000BC68D800 /* war-mac-bridge.h */,
+				4A6D93D72E9D0000BC68D800 /* war-mac-bridge.c */,
 			);
 			path = gui;
 			sourceTree = "<group>";
@@ -200,15 +205,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A6D93BE2DCA8AAA00BC68D8 /* war_shared.h in Sources */,
-				4A6D93BF2DCA8AAA00BC68D8 /* battle.h in Sources */,
-				4A6D93C02DCA8AAA00BC68D8 /* battle.c in Sources */,
-				4A6D93C12DCA8AAA00BC68D8 /* board.c in Sources */,
-				4A6D93C22DCA8AAA00BC68D8 /* engine.c in Sources */,
-				4A6D93C32DCA8AAA00BC68D8 /* toolkit.h in Sources */,
-				4A6D93C42DCA8AAA00BC68D8 /* war-mac-Bridging-Header.h in Sources */,
-				4A6D93A52DCA89AB00BC68D8 /* shared.c in Sources */,
-				4A6D93A62DCA89AB00BC68D8 /* draw.c in Sources */,
+				4A6D93D62E9D0000BC68D800 /* war-mac-bridge.c in Sources */,
 				4A6D93D22E9A0000BC68D800 /* buffer.c in Sources */,
 				4A6D93D42E9C0000BC68D800 /* app_shell.c in Sources */,
 				4A6D93B02DCA89EB00BC68D8 /* object.c in Sources */,

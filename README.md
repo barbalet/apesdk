@@ -29,9 +29,8 @@ modules, documentation, tests, and toolchains around a shared simulation model.
   `entity`, and `universe`.
 
 - **Current macOS app builds.**
-  GitHub Actions currently builds the `sim-mac` and `planet` Xcode projects.
-  Some older wrappers remain in the tree as useful reference material but need
-  sibling source trees outside this checkout.
+  GitHub Actions currently builds the `sim-mac`, `war-mac`, `urban-mac`, and
+  `planet` Xcode projects from this checkout.
 
 - **Reader documentation.**
   [`book/`](book/) contains a long-form guide to understanding the current
@@ -92,8 +91,8 @@ without needing a large framework stack.
 | --- | --- | --- |
 | **Simulated Ape for macOS** | [`toolchains/sim-mac`](toolchains/sim-mac/) | Active macOS Swift/Xcode wrapper. CI builds the `sim-mac` scheme, producing `Simulated Ape.app`. |
 | **Simulated Planet** | [`toolchains/planet`](toolchains/planet/) | Active macOS Xcode project in CI. Demonstrates broader weather, terrain, and movement concepts. |
-| **Simulated War** | [`toolchains/war-mac`](toolchains/war-mac/) | Legacy/reference wrapper. It depends on sibling source trees outside this checkout. |
-| **Simulated Urban** | [`toolchains/urban-mac`](toolchains/urban-mac/) | Legacy/reference wrapper. It depends on sibling source trees outside this checkout. |
+| **Simulated War** | [`toolchains/war-mac`](toolchains/war-mac/) | Reference macOS wrapper with a local bridge so CI can build it from a clean checkout. |
+| **Simulated Urban** | [`toolchains/urban-mac`](toolchains/urban-mac/) | Reference macOS wrapper with a local bridge so CI can build it from a clean checkout. |
 
 The toolchains show how the C simulation modules connect to native front ends,
 especially on macOS through Swift, Xcode projects, and C bridging layers.

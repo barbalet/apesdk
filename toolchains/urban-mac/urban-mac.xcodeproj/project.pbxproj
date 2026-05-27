@@ -11,6 +11,7 @@
 		4AA384502DCAF3E30094960F /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AA3844E2DCAF3E30094960F /* shared.c */; };
 		4AA384BF2E9A000094960F00 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AA384C02E9A000094960F00 /* buffer.c */; };
 		4AA384C12E9C000094960F00 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AA384C22E9C000094960F00 /* app_shell.c */; };
+		4AA384C32E9D000094960F00 /* urban-bridge.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AA384C42E9D000094960F00 /* urban-bridge.c */; };
 		4AA3845A2DCAF41F0094960F /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AA384562DCAF41F0094960F /* memory.c */; };
 		4AA3845B2DCAF41F0094960F /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AA384532DCAF41F0094960F /* file.c */; };
 		4AA3845C2DCAF41F0094960F /* vect.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AA384592DCAF41F0094960F /* vect.c */; };
@@ -64,6 +65,7 @@
 		4AA384C02E9A000094960F00 /* buffer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = buffer.c; path = ../../gui/buffer.c; sourceTree = SOURCE_ROOT; };
 		4AA384C22E9C000094960F00 /* app_shell.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = app_shell.c; path = ../../gui/app_shell.c; sourceTree = SOURCE_ROOT; };
 		4AA384512DCAF3E50094960F /* urban-mac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "urban-mac-Bridging-Header.h"; sourceTree = "<group>"; };
+		4AA384C42E9D000094960F00 /* urban-bridge.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "urban-bridge.c"; sourceTree = "<group>"; };
 		4AA384532DCAF41F0094960F /* file.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = file.c; path = ../../toolkit/file.c; sourceTree = SOURCE_ROOT; };
 		4AA384542DCAF41F0094960F /* io.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = io.c; path = ../../toolkit/io.c; sourceTree = SOURCE_ROOT; };
 		4AA384552DCAF41F0094960F /* math.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = math.c; path = ../../toolkit/math.c; sourceTree = SOURCE_ROOT; };
@@ -174,6 +176,7 @@
 				4AA3844D2DCAF3E30094960F /* draw.c */,
 				4AA3844E2DCAF3E30094960F /* shared.c */,
 				4AA384512DCAF3E50094960F /* urban-mac-Bridging-Header.h */,
+				4AA384C42E9D000094960F00 /* urban-bridge.c */,
 			);
 			path = gui;
 			sourceTree = "<group>";
@@ -367,8 +370,6 @@
 			files = (
 				4AA384A52DCAF4D20094960F /* glrender.c in Sources */,
 				4AA384A62DCAF4D20094960F /* graph.c in Sources */,
-				4AA3846F2DCAF4460094960F /* road.c in Sources */,
-				4AA384702DCAF4460094960F /* game_objects.c in Sources */,
 				4AA384882DCAF4790094960F /* skeleton.c in Sources */,
 				4AA384892DCAF4790094960F /* drives.c in Sources */,
 				4AA384AB2DCAF4F90094960F /* interpret.c in Sources */,
@@ -381,22 +382,12 @@
 				4AA3848F2DCAF4790094960F /* immune.c in Sources */,
 				4AA384902DCAF4790094960F /* speak.c in Sources */,
 				4AA384912DCAF4790094960F /* social.c in Sources */,
-				4AA384712DCAF4460094960F /* economy.c in Sources */,
-				4AA384722DCAF4460094960F /* house.c in Sources */,
-				4AA384732DCAF4460094960F /* neighborhood.c in Sources */,
-				4AA384742DCAF4460094960F /* city.c in Sources */,
-				4AA384752DCAF4460094960F /* park.c in Sources */,
 				4AA384B42DCAF5200094960F /* loop.c in Sources */,
 				4AA384B52DCAF5200094960F /* sim.c in Sources */,
 				4AA384B62DCAF5200094960F /* transfer.c in Sources */,
 				4AA384B72DCAF5200094960F /* command.c in Sources */,
-				4AA384762DCAF4460094960F /* fence.c in Sources */,
-				4AA384772DCAF4460094960F /* tree.c in Sources */,
-				4AA384782DCAF4460094960F /* twoblock.c in Sources */,
 				4AA384BC2DCAF5400094960F /* pngload.c in Sources */,
 				4AA384BD2DCAF5400094960F /* pnglite.c in Sources */,
-				4AA384792DCAF4460094960F /* agent.c in Sources */,
-				4AA3847A2DCAF4460094960F /* matrix.c in Sources */,
 				4AA3845A2DCAF41F0094960F /* memory.c in Sources */,
 				4AA3845B2DCAF41F0094960F /* file.c in Sources */,
 				4AA3845C2DCAF41F0094960F /* vect.c in Sources */,
@@ -409,8 +400,7 @@
 				4AA3849E2DCAF4A90094960F /* tile.c in Sources */,
 				4AA3849F2DCAF4A90094960F /* land.c in Sources */,
 				4AA3845F2DCAF41F0094960F /* math.c in Sources */,
-				4AA3844F2DCAF3E30094960F /* draw.c in Sources */,
-				4AA384502DCAF3E30094960F /* shared.c in Sources */,
+				4AA384C32E9D000094960F00 /* urban-bridge.c in Sources */,
 				4AA384BF2E9A000094960F00 /* buffer.c in Sources */,
 				4AA384C12E9C000094960F00 /* app_shell.c in Sources */,
 			);

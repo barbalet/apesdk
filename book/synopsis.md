@@ -66,9 +66,8 @@ The important directories are:
 - [`script/`](../script/) - ApeScript parser and interpreter.
 - [`render/`](../render/) and [`gui/`](../gui/) - low-level graphing, buffers,
   drawing, messages, and shared UI support.
-- [`toolchains/`](../toolchains/) - current macOS app projects for `sim-mac`
-  and `planet`, plus legacy wrappers whose full builds may require sibling
-  source trees outside this checkout.
+- [`toolchains/`](../toolchains/) - current macOS app projects for `sim-mac`,
+  `war-mac`, `urban-mac`, and `planet`.
 
 The important workflows are:
 

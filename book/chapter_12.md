@@ -57,12 +57,13 @@ The repository also contains Windows build scripts and Xcode-based macOS
 toolchains. The active macOS CI build matrix currently includes:
 
 - `toolchains/sim-mac/sim-mac.xcodeproj` with scheme `sim-mac`;
+- `toolchains/war-mac/war-mac.xcodeproj` with scheme `war-mac`;
+- `toolchains/urban-mac/urban-mac.xcodeproj` with scheme `urban-mac`;
 - `toolchains/planet/planet.xcodeproj` with scheme `planet`.
 
-The `war-mac` and `urban-mac` wrappers are present, but they depend on sibling
-source trees outside this checkout. Do not describe them as fully CI-covered by
-this repository unless those dependencies are present and the workflow has been
-changed.
+The `war-mac` and `urban-mac` wrappers now use local bridge implementations for
+their CI builds, so they can compile from a clean checkout without requiring
+sibling source trees.
 
 ## Deterministic Testing
 
@@ -244,10 +245,9 @@ Build scripts are documentation in executable form. `build.sh` says which C
 modules form the command-line target. Xcode projects say which app wrappers are
 active. CI says which targets are expected to build automatically.
 
-Documentation should match those facts. If `sim-mac` and `planet` build in CI,
-say that. If `war-mac` and `urban-mac` require sibling source trees outside the
-checkout, say that too. Optimistic documentation creates wasted time. Honest
-documentation creates trust.
+Documentation should match those facts. If `sim-mac`, `war-mac`, `urban-mac`,
+and `planet` build in CI, say that. Optimistic documentation creates wasted time.
+Honest documentation creates trust.
 
 Platform honesty is especially important in old, portable codebases. A wrapper
 may be valuable even if it is not fully buildable in the current checkout. The
