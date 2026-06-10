@@ -6,7 +6,7 @@ simulation of autonomous ape-like beings living in a changing landscape with
 weather, biology, movement, memory, language, social relationships, immune
 behavior, and braincode-driven control.
 
-The current engine version is **Simulated Ape 0.710**, defined in
+The current engine version is **Simulated Ape 0.711**, defined in
 [`sim/sim.h`](sim/sim.h). The project continues the older **Noble Ape** and
 **Nervana** lineage while keeping the simulation core portable across command
 line builds, native app wrappers, and test harnesses.
@@ -34,7 +34,7 @@ modules, documentation, tests, and toolchains around a shared simulation model.
 
 - **Reader documentation.**
   [`book/`](book/) contains a long-form guide to understanding the current
-  ApeSDK source tree, including the Noble Ape lineage and the 0.710 testing and
+  ApeSDK source tree, including the Noble Ape lineage and the 0.711 testing and
   release workflow.
 
 - **Future interface proposal.**

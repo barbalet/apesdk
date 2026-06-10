@@ -6,7 +6,7 @@ reading the source without losing the larger design: a portable artificial life
 simulation built from explicit modules for landscape, weather, bodies, social
 memory, language, scripting, rendering, and command-line inspection.
 
-The current engine version is `Simulated Ape 0.710`, defined in
+The current engine version is `Simulated Ape 0.711`, defined in
 [`sim/sim.h`](../sim/sim.h). The release checklist lives in
 [`RELEASE.md`](../RELEASE.md), and the deterministic project test runner is
 [`test.sh`](../test.sh).

@@ -2,7 +2,7 @@
 
 This checklist describes the release flow for ApeSDK when shipping the macOS Simulated Ape application built from `toolchains/sim-mac`. It creates Apple Silicon and Intel DMG packages from the `sim-mac` Xcode project, plus a source archive for the exact tagged source used to build those artifacts.
 
-Before starting, decide the new release number and use it as the `VERSION` input throughout this checklist. Set `VERSION` without a leading `v`; the Git tag adds the leading `v` separately. For example, the current Simulated Ape engine version `0.710` uses `VERSION=0.710` and tag `v0.710`.
+Before starting, decide the new release number and use it as the `VERSION` input throughout this checklist. Set `VERSION` without a leading `v`; the Git tag adds the leading `v` separately. For example, the current Simulated Ape engine version `0.711` uses `VERSION=0.711` and tag `v0.711`.
 
 ## 1. Prepare the Version
 

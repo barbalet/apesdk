@@ -1,7 +1,7 @@
 # Chapter 1 - Why We Build a Synthetic Planet
 
 ApeSDK is a long-running artificial life codebase. Its current public identity
-is `Simulated Ape 0.710`, but the design reaches back to Noble Ape and earlier
+is `Simulated Ape 0.711`, but the design reaches back to Noble Ape and earlier
 work on portable simulations of ape-like beings. The project is not just an app.
 It is a set of C modules and platform wrappers for building a world, populating
 it with embodied beings, observing what happens, and repeating the run under
@@ -72,8 +72,8 @@ modular philosophy.
 The current version is declared in [`sim/sim.h`](../sim/sim.h):
 
 ```c
-#define SHORT_VERSION_NAME "Simulated Ape 0.710 "
-#define VERSION_NUMBER 710
+#define SHORT_VERSION_NAME "Simulated Ape 0.711 "
+#define VERSION_NUMBER 711
 ```
 
 That is not only release metadata. In simulation work, versioning is part of the
@@ -243,7 +243,7 @@ system because it makes behavior less theatrical and more explainable.
 
 Most software projects use version numbers to communicate release state to
 users. ApeSDK needs that, but it also needs version numbers to protect
-interpretation. When a saved state or released artifact says `0.710`, it anchors
+interpretation. When a saved state or released artifact says `0.711`, it anchors
 that artifact to a particular set of constants, file formats, tests, and build
 assumptions.
 
@@ -393,7 +393,7 @@ confirms it?
 By the time those questions are answered, the sentence becomes stronger:
 
 ```text
-At version 0.710, fixed seed S, being A was hungry at time T, moved from
+At version 0.711, fixed seed S, being A was hungry at time T, moved from
 ape-space position P through water-level condition W toward a resource field R;
 fatigue increased after swimming and no mate/social goal was active.
 ```

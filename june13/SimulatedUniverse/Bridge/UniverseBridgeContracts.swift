@@ -122,8 +122,8 @@ struct BridgeVersionHandshake: Codable, Equatable {
     static let developmentDefault = BridgeVersionHandshake(
         appSnapshotContractVersion: SnapshotContract.currentVersion,
         facadeContractVersion: SnapshotContract.currentVersion,
-        apeSDKVersionNumber: 710,
-        apeSDKShortVersionName: "Simulated Ape 0.710",
+        apeSDKVersionNumber: 711,
+        apeSDKShortVersionName: "Simulated Ape 0.711",
         enabledCapabilities: [.braincode, .immune, .territory, .transferBinary, .transferJSON]
     )
 }

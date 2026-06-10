@@ -103,7 +103,7 @@ repeatable. If a test depends on timing, GUI availability, random output,
 external files, or platform-specific state, stabilize it before making it a
 required check.
 
-## Release 0.710 And Later
+## Release 0.711 And Later
 
 The release process in [`RELEASE.md`](../RELEASE.md) is centered on the macOS
 `Simulated Ape.app` build from `toolchains/sim-mac`.

@@ -119,7 +119,7 @@ static n_int extract_last_year(n_constant_string value, char year[5]) {
 void test_constants(void) {
     printf("\n--- Testing Constants ---\n");
     
-    TEST_EQUALS_INT(710, VERSION_NUMBER, "Version number should be 710");
+    TEST_EQUALS_INT(711, VERSION_NUMBER, "Version number should be 711");
     TEST_ASSERT(SIMULATED_APE_SIGNATURE == (('N'<< 8) | 'A'), "Simulated Ape signature");
     TEST_ASSERT(SIMULATED_WAR_SIGNATURE == (('N'<< 8) | 'W'), "Simulated War signature");
     
@@ -289,7 +289,7 @@ void test_string_constants(void) {
     TEST_NOT_NULL(FULL_VERSION_COPYRIGHT, "Full version copyright exists");
     
     // Basic string content tests
-    TEST_ASSERT(strstr(SHORT_VERSION_NAME, "0.710") != NULL, "Version in short name");
+    TEST_ASSERT(strstr(SHORT_VERSION_NAME, "0.711") != NULL, "Version in short name");
     TEST_ASSERT(strstr(COPYRIGHT_NAME, "Tom Barbalet") != NULL, "Author in copyright");
     TEST_ASSERT(extract_last_year(COPYRIGHT_DATE, copyright_year), "Copyright date includes an end year");
     TEST_ASSERT(strstr(FULL_VERSION_COPYRIGHT, copyright_year) != NULL, "Date range in copyright");
