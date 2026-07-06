@@ -67,38 +67,51 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 // MARK: - Main ContentView
 struct ContentView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isWideLayout: Bool {
+        horizontalSizeClass == .regular
+    }
+
     var body: some View {
-        VStack(spacing: 16) {
-            ASiOSViewRepresentable()
-                .edgesIgnoringSafeArea(.all)
-                .overlay(alignment: .bottomTrailing) {
-                    ButtonPanel()
-                        .padding()
-                }
-        }
+        ASiOSViewRepresentable()
+            .ignoresSafeArea()
+            .overlay(alignment: isWideLayout ? .trailing : .bottomTrailing) {
+                ButtonPanel(isWideLayout: isWideLayout)
+                    .padding(isWideLayout ? 24 : 16)
+            }
     }
 }
 
 // MARK: - Button Panel
 struct ButtonPanel: View {
+    let isWideLayout: Bool
+
     var body: some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            Button("Next Ape") {
+        VStack(alignment: .trailing, spacing: isWideLayout ? 12 : 8) {
+            simulationButton("Next Ape") {
                 shared_menu(NA_MENU_NEXT_APE)
             }
-            Button("Previous Ape") {
+            simulationButton("Previous Ape") {
                 shared_menu(NA_MENU_PREVIOUS_APE)
             }
-//            Button("Clear Errors") {
-//                shared_menu(NA_MENU_CLEAR_ERRORS)
-//            }
-            Button("New Simulation") {
+            simulationButton("New Simulation") {
                 shared_new(n_uint(CFAbsoluteTimeGetCurrent()))
             }
         }
-        .padding(8)
+        .padding(isWideLayout ? 14 : 8)
+        .frame(width: isWideLayout ? 220 : nil)
         .background(.ultraThinMaterial)
-        .cornerRadius(12)
+        .clipShape(RoundedRectangle(cornerRadius: isWideLayout ? 16 : 12, style: .continuous))
+    }
+
+    private func simulationButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .frame(maxWidth: isWideLayout ? .infinity : nil, alignment: .trailing)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(isWideLayout ? .large : .regular)
     }
 }
 
@@ -124,12 +137,12 @@ class ASiOSView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        shared_init(n_int(NUM_TERRAIN), n_uint(CFAbsoluteTimeGetCurrent()))
+        shared_init(n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        shared_init(n_int(NUM_TERRAIN), n_uint(CFAbsoluteTimeGetCurrent()))
+        shared_init(n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))
     }
 
     @objc func animationTimer() {
@@ -138,8 +151,9 @@ class ASiOSView: UIView {
         }
     }
 
-    func screenScale() -> CGFloat {
-        return UIScreen.main.scale
+    func renderScale() -> CGFloat {
+        guard bounds.width > 0, oldDimensionX > 0 else { return 1.0 }
+        return CGFloat(oldDimensionX) / bounds.width
     }
 
     override func draw(_ rect: CGRect) {
@@ -189,7 +203,7 @@ class ASiOSView: UIView {
         for touch in allTouches {
             let location = touch.location(in: self)
             print("Touch moved to: \(location)")
-            let scaleFactor = screenScale()
+            let scaleFactor = renderScale()
             shared_mouseReceived(n_double(Float(location.x * scaleFactor)), n_double(Float(location.y * scaleFactor)), n_int(NUM_TERRAIN))
         }
     }

@@ -346,6 +346,11 @@ n_int shared_init( n_int view, n_uint random )
 
 void shared_close( void )
 {
+    if ( simulation_started == 0 )
+    {
+        return;
+    }
+
     simulation_started = 0;
     ape_buffer_free( &outputBuffer );
 
@@ -789,4 +794,27 @@ n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte si
     }
 
     return outputBuffer;
+}
+
+void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
+{
+    n_byte *buffer;
+
+    if ( outputBuffer == 0L )
+    {
+        return;
+    }
+
+    buffer = shared_draw( NUM_TERRAIN, dim_x, dim_y, 0 );
+    if ( buffer == 0L )
+    {
+        return;
+    }
+
+    memory_copy( buffer, ( n_byte * )outputBuffer, ( n_uint )( dim_x * dim_y * 4 ) );
+}
+
+shared_cycle_state shared_cycle_ios( n_uint ticks )
+{
+    return shared_cycle( ticks, WINDOW_PROCESSING );
 }

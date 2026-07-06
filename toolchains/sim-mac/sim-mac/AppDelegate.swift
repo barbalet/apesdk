@@ -33,11 +33,21 @@ import AppKit
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    static var isTerminating = false
+
     var terrainWindow: NSWindow!
     var controlWindow: NSWindow!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         openAdditionalWindows()
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        Self.isTerminating = true
+
+        if shared_simulation_started() != 0 {
+            shared_close()
+        }
     }
 
     func openAdditionalWindows() {

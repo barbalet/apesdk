@@ -41,6 +41,41 @@
 		4A212EDB2DCCB3CC001F26AA /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED22DCCB3CC001F26AA /* console.c */; };
 		4A212EDC2DCCB3CC001F26AA /* spacetime.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED52DCCB3CC001F26AA /* spacetime.c */; };
 		4A212EDD2DCCB3CC001F26AA /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED32DCCB3CC001F26AA /* land.c */; };
+		4A60F0012EAA000000000001 /* ApeSimApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A60F0022EAA000000000001 /* ApeSimApp.swift */; };
+		4A60F0102EAA000000000001 /* command.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212E9F2DCCB35C001F26AA /* command.c */; };
+		4A60F0112EAA000000000001 /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EA12DCCB35C001F26AA /* sim.c */; };
+		4A60F0122EAA000000000001 /* loop.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EA02DCCB35C001F26AA /* loop.c */; };
+		4A60F0132EAA000000000001 /* transfer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EA22DCCB35C001F26AA /* transfer.c */; };
+		4A60F0142EAA000000000001 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED12DCCB3CC001F26AA /* audio.c */; };
+		4A60F0152EAA000000000001 /* territory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED62DCCB3CC001F26AA /* territory.c */; };
+		4A60F0162EAA000000000001 /* tile.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED72DCCB3CC001F26AA /* tile.c */; };
+		4A60F0172EAA000000000001 /* console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED22DCCB3CC001F26AA /* console.c */; };
+		4A60F0182EAA000000000001 /* spacetime.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED52DCCB3CC001F26AA /* spacetime.c */; };
+		4A60F0192EAA000000000001 /* land.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ED32DCCB3CC001F26AA /* land.c */; };
+		4A60F01A2EAA000000000001 /* graph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212E952DCCB314001F26AA /* graph.c */; };
+		4A60F01B2EAA000000000001 /* speak.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EB42DCCB377001F26AA /* speak.c */; };
+		4A60F01C2EAA000000000001 /* drives.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EAC2DCCB377001F26AA /* drives.c */; };
+		4A60F01D2EAA000000000001 /* body.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EAA2DCCB377001F26AA /* body.c */; };
+		4A60F01E2EAA000000000001 /* brain.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EAB2DCCB377001F26AA /* brain.c */; };
+		4A60F01F2EAA000000000001 /* being.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EA92DCCB377001F26AA /* being.c */; };
+		4A60F0202EAA000000000001 /* episodic.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EAF2DCCB377001F26AA /* episodic.c */; };
+		4A60F0212EAA000000000001 /* food.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EB02DCCB377001F26AA /* food.c */; };
+		4A60F0222EAA000000000001 /* immune.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EB12DCCB377001F26AA /* immune.c */; };
+		4A60F0232EAA000000000001 /* skeleton.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EB22DCCB377001F26AA /* skeleton.c */; };
+		4A60F0242EAA000000000001 /* social.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EB32DCCB377001F26AA /* social.c */; };
+		4A60F0252EAA000000000001 /* file.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EBF2DCCB397001F26AA /* file.c */; };
+		4A60F0262EAA000000000001 /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EC22DCCB397001F26AA /* memory.c */; };
+		4A60F0272EAA000000000001 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EC02DCCB397001F26AA /* io.c */; };
+		4A60F0282EAA000000000001 /* math.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EC12DCCB397001F26AA /* math.c */; };
+		4A60F0292EAA000000000001 /* object.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EC32DCCB397001F26AA /* object.c */; };
+		4A60F02A2EAA000000000001 /* vect.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EC52DCCB397001F26AA /* vect.c */; };
+		4A60F02B2EAA000000000001 /* draw.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212E982DCCB339001F26AA /* draw.c */; };
+		4A60F02C2EAA000000000001 /* interpret.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ECC2DCCB3B1001F26AA /* interpret.c */; };
+		4A60F02D2EAA000000000001 /* parse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212ECD2DCCB3B1001F26AA /* parse.c */; };
+		4A60F02E2EAA000000000001 /* message.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212E9A2DCCB339001F26AA /* message.c */; };
+		4A60F02F2EAA000000000001 /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212E9B2DCCB339001F26AA /* shared.c */; };
+		4A60F0302EAA000000000001 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EE02E9A00001F26AA00 /* buffer.c */; };
+		4A60F0312EAA000000000001 /* tutorial.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EE22E9A01001F26AA00 /* tutorial.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -90,6 +125,8 @@
 		4A212ED62DCCB3CC001F26AA /* territory.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = territory.c; path = ../sim/territory.c; sourceTree = SOURCE_ROOT; };
 		4A212ED72DCCB3CC001F26AA /* tile.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = tile.c; path = ../sim/tile.c; sourceTree = SOURCE_ROOT; };
 		4A212EDE2DCCB450001F26AA /* shared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = shared.h; path = ../shared.h; sourceTree = SOURCE_ROOT; };
+		4A60F0022EAA000000000001 /* ApeSimApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApeSimApp.swift; sourceTree = "<group>"; };
+		4A60F0032EAA000000000001 /* ApeSim-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ApeSim-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -102,6 +139,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		4A212E6D2DCCAF95001F26AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A60F0052EAA000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -123,6 +167,7 @@
 				4A212E8E2DCCB2A0001F26AA /* universe */,
 				4A212E8D2DCCB29A001F26AA /* gui */,
 				4A212E722DCCAF95001F26AA /* sim-mac */,
+				4A60F0042EAA000000000001 /* ios */,
 				4A212E712DCCAF95001F26AA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -131,8 +176,17 @@
 			isa = PBXGroup;
 			children = (
 				4A212E702DCCAF95001F26AA /* sim-mac.app */,
+				4A60F0032EAA000000000001 /* ApeSim-iOS.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4A60F0042EAA000000000001 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				4A60F0022EAA000000000001 /* ApeSimApp.swift */,
+			);
+			path = "source-links/ios";
 			sourceTree = "<group>";
 		};
 		4A212E8D2DCCB29A001F26AA /* gui */ = {
@@ -252,6 +306,25 @@
 			productReference = 4A212E702DCCAF95001F26AA /* sim-mac.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4A60F0062EAA000000000001 /* ApeSim-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A60F0092EAA000000000001 /* Build configuration list for PBXNativeTarget "ApeSim-iOS" */;
+			buildPhases = (
+				4A60F0072EAA000000000001 /* Sources */,
+				4A60F0052EAA000000000001 /* Frameworks */,
+				4A60F0082EAA000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ApeSim-iOS";
+			packageProductDependencies = (
+			);
+			productName = "ApeSim-iOS";
+			productReference = 4A60F0032EAA000000000001 /* ApeSim-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -263,6 +336,10 @@
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
 					4A212E6F2DCCAF95001F26AA = {
+						CreatedOnToolsVersion = 16.3;
+						LastSwiftMigration = 1630;
+					};
+					4A60F0062EAA000000000001 = {
 						CreatedOnToolsVersion = 16.3;
 						LastSwiftMigration = 1630;
 					};
@@ -283,12 +360,20 @@
 			projectRoot = "";
 			targets = (
 				4A212E6F2DCCAF95001F26AA /* sim-mac */,
+				4A60F0062EAA000000000001 /* ApeSim-iOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		4A212E6E2DCCAF95001F26AA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A60F0082EAA000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -336,6 +421,48 @@
 				4A212E9E2DCCB339001F26AA /* shared.c in Sources */,
 				4A212EDF2E9A00001F26AA00 /* buffer.c in Sources */,
 				4A212EE12E9A01001F26AA00 /* tutorial.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A60F0072EAA000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A60F0012EAA000000000001 /* ApeSimApp.swift in Sources */,
+				4A60F0102EAA000000000001 /* command.c in Sources */,
+				4A60F0112EAA000000000001 /* sim.c in Sources */,
+				4A60F0122EAA000000000001 /* loop.c in Sources */,
+				4A60F0132EAA000000000001 /* transfer.c in Sources */,
+				4A60F0142EAA000000000001 /* audio.c in Sources */,
+				4A60F0152EAA000000000001 /* territory.c in Sources */,
+				4A60F0162EAA000000000001 /* tile.c in Sources */,
+				4A60F0172EAA000000000001 /* console.c in Sources */,
+				4A60F0182EAA000000000001 /* spacetime.c in Sources */,
+				4A60F0192EAA000000000001 /* land.c in Sources */,
+				4A60F01A2EAA000000000001 /* graph.c in Sources */,
+				4A60F01B2EAA000000000001 /* speak.c in Sources */,
+				4A60F01C2EAA000000000001 /* drives.c in Sources */,
+				4A60F01D2EAA000000000001 /* body.c in Sources */,
+				4A60F01E2EAA000000000001 /* brain.c in Sources */,
+				4A60F01F2EAA000000000001 /* being.c in Sources */,
+				4A60F0202EAA000000000001 /* episodic.c in Sources */,
+				4A60F0212EAA000000000001 /* food.c in Sources */,
+				4A60F0222EAA000000000001 /* immune.c in Sources */,
+				4A60F0232EAA000000000001 /* skeleton.c in Sources */,
+				4A60F0242EAA000000000001 /* social.c in Sources */,
+				4A60F0252EAA000000000001 /* file.c in Sources */,
+				4A60F0262EAA000000000001 /* memory.c in Sources */,
+				4A60F0272EAA000000000001 /* io.c in Sources */,
+				4A60F0282EAA000000000001 /* math.c in Sources */,
+				4A60F0292EAA000000000001 /* object.c in Sources */,
+				4A60F02A2EAA000000000001 /* vect.c in Sources */,
+				4A60F02B2EAA000000000001 /* draw.c in Sources */,
+				4A60F02C2EAA000000000001 /* interpret.c in Sources */,
+				4A60F02D2EAA000000000001 /* parse.c in Sources */,
+				4A60F02E2EAA000000000001 /* message.c in Sources */,
+				4A60F02F2EAA000000000001 /* shared.c in Sources */,
+				4A60F0302EAA000000000001 /* buffer.c in Sources */,
+				4A60F0312EAA000000000001 /* tutorial.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,6 +650,69 @@
 			};
 			name = Release;
 		};
+		4A60F00A2EAA000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Simulated Ape";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.711;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-ios";
+				PRODUCT_NAME = "ApeSim-iOS";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "source-links/sim-mac/render/sim-mac-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+			};
+			name = Debug;
+		};
+		4A60F00B2EAA000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Simulated Ape";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.711;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-ios";
+				PRODUCT_NAME = "ApeSim-iOS";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "source-links/sim-mac/render/sim-mac-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -540,6 +730,15 @@
 			buildConfigurations = (
 				4A212E7D2DCCAF96001F26AA /* Debug */,
 				4A212E7E2DCCAF96001F26AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A60F0092EAA000000000001 /* Build configuration list for PBXNativeTarget "ApeSim-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A60F00A2EAA000000000001 /* Debug */,
+				4A60F00B2EAA000000000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

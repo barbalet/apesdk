@@ -77,6 +77,10 @@ class CustomDrawingView: NSView {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         dirtyRect.fill()
+
+        if AppDelegate.isTerminating {
+            return
+        }
         
         if shared_simulation_started() == 0 {
             shared_init(n_int(self.viewType), UInt.random(in: 0 ..< 4294967295))
@@ -110,7 +114,9 @@ class CustomDrawingView: NSView {
             context.restoreGState()
         }
         DispatchQueue.main.async { [weak self] in
-            self?.needsDisplay = true
+            if AppDelegate.isTerminating == false {
+                self?.needsDisplay = true
+            }
         }
     }
     

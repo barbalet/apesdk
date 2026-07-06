@@ -73,6 +73,7 @@ private func randomSimulationSeed() -> UInt {
 
     private let bindings: SimulationBindings
     private var returnedValue: SimulationCycleState = .ok
+    private(set) var isClosing = false
 
     init(frame frameRect: NSRect, title: String, bindings: SimulationBindings) {
         self.bindings = bindings
@@ -90,7 +91,7 @@ private func randomSimulationSeed() -> UInt {
     }
 
     func simulationStarted() -> Bool {
-        bindings.simulationStarted()
+        isClosing == false && bindings.simulationStarted()
     }
 
     func about() {
@@ -137,6 +138,11 @@ private func randomSimulationSeed() -> UInt {
     }
 
     func close() {
+        if isClosing {
+            return
+        }
+
+        isClosing = true
         bindings.close()
     }
 
@@ -149,6 +155,10 @@ private func randomSimulationSeed() -> UInt {
     }
 
     func cycle() {
+        if isClosing {
+            return
+        }
+
         let timeInfo = UInt(CFAbsoluteTimeGetCurrent())
         returnedValue = bindings.cycle(timeInfo, identification)
     }
@@ -242,6 +252,10 @@ private func randomSimulationSeed() -> UInt {
     }
 
     func blitCode(dim_x: size_t, dim_y: size_t) {
+        if isClosing {
+            return
+        }
+
         guard
             let context = NSGraphicsContext.current?.cgContext,
             let drawBuffer = bindings.draw(sharedId(), Int(dim_x), Int(dim_y), 0)
@@ -295,6 +309,10 @@ private func randomSimulationSeed() -> UInt {
     }
 
     func cycledo() {
+        if isClosing {
+            return
+        }
+
         cycle()
 
         if cycleQuit() {
@@ -325,7 +343,7 @@ private func randomSimulationSeed() -> UInt {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
 
-        if let shared, shared.simulationStarted() {
+        if let shared, shared.simulationStarted(), shared.isClosing == false {
             var dimY = Int(dirtyRect.height)
             let dimX = Int(dirtyRect.width)
 
@@ -338,8 +356,12 @@ private func randomSimulationSeed() -> UInt {
             shared.blitCode(dim_x: dimX, dim_y: dimY)
         }
 
-        DispatchQueue.main.async { [weak self] in
-            self?.needsDisplay = true
+        if shared?.isClosing == false {
+            DispatchQueue.main.async { [weak self] in
+                if self?.shared?.isClosing == false {
+                    self?.needsDisplay = true
+                }
+            }
         }
     }
 
