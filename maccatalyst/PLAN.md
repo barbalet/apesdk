@@ -6,7 +6,7 @@ Last updated: 2026-07-06
 
 Create a `maccatalyst` home for the next Apple-platform simulation app:
 
-- A full Mac build with the current `sim-mac` functionality, including multiple windows, menu commands, file open/save, input handling, and initial tutorial behavior.
+- A full Mac build with the current `sim-mac` functionality, including multiple windows, menu commands, file open/save, and input handling. Initial help/tutorial popovers are intentionally disabled on macOS and Mac Catalyst.
 - An iPadOS and iOS build that shows and drives the simulation.
 - Shared simulation, rendering, and bridge C code wherever possible.
 - Platform-specific Swift only where macOS, Mac Catalyst, iPadOS, or iOS genuinely need different windowing or input behavior.
@@ -53,6 +53,7 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
   - The older shared `mac/` wrapper now makes close idempotent, stops redraw scheduling while closing, and calls close from `applicationWillTerminate`.
 - Done: Rebuilt `maccatalyst` Mac, original `toolchains/sim-mac`, and `toolchains/planet` after shutdown hardening.
 - Done: Verified the rebuilt `maccatalyst` Mac app exits through the user-facing Quit menu item; System Events reported no remaining `com.apesdk.sim-mac` process afterward.
+- Done: Disabled initial help/tutorial popovers on macOS and future Mac Catalyst paths. The original `sim-mac` project and the `maccatalyst` Mac project no longer define `INITIAL_TUTORIAL_ON`, and `InitialTutorialController` is guarded off on macOS/Mac Catalyst.
 - Decision: The user replaced `/Applications/Simulated Ape.app` with the mentioned build, but future process testing should avoid the `/Applications` copy until the app is 100% production/release compilable.
 - Decision: Keep the inherited `sim-mac` target and scheme name for now to preserve traceability to the known-good Mac baseline. Revisit renaming after the mobile target is more usable.
 - Not done: No Mac Catalyst-specific target has been added yet.
@@ -241,6 +242,12 @@ Shutdown hardening added:
 - `mac/AppDelegate.swift`: `applicationWillTerminate` closes and clears the shared controller.
 - `mac/SimulationBindings.swift`: `SimulationShared.close()` is idempotent, draw/cycle/blit paths return while closing, and redraw scheduling stops while closing.
 
+Initial help/tutorial popover removal:
+
+- `toolchains/sim-mac/sim-mac.xcodeproj` no longer defines `INITIAL_TUTORIAL_ON` in Debug or Release.
+- `maccatalyst/maccatalyst.xcodeproj` no longer defines `INITIAL_TUTORIAL_ON` in Debug or Release.
+- `toolchains/sim-mac/sim-mac/InitialTutorialController.swift` now returns disabled on macOS and Mac Catalyst so pointer movement cannot show the tutorial popovers.
+
 Post-shutdown-hardening build commands:
 
 ```sh
@@ -266,6 +273,31 @@ osascript -e 'tell application "System Events" to tell (first application proces
 
 Result: the launched app reported windows `Control`, `Terrain`, `View`. The menu-based quit returned `false` for the remaining `com.apesdk.sim-mac` process check, so the rebuilt `maccatalyst` app exited cleanly through the manual Quit path.
 
+Post-help-popover-removal build commands:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-maccatalyst-mac-derived build
+xcodebuild -project toolchains/sim-mac/sim-mac.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-sim-mac-derived build
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /private/tmp/apesdk-maccatalyst-ios-derived CODE_SIGNING_ALLOWED=NO build
+```
+
+Result on 2026-07-06: all three commands produced `BUILD SUCCEEDED`.
+
+Post-help-popover-removal launch/quit smoke test:
+
+```sh
+open -n /private/tmp/apesdk-maccatalyst-mac-derived/Build/Products/Debug/Simulated\ Ape.app
+osascript -e 'delay 2' -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac") to get {name, name of windows}'
+osascript -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac")' \
+  -e 'set frontmost to true' \
+  -e 'click menu item "Quit Simulated Ape" of menu "Simulated Ape" of menu bar item "Simulated Ape" of menu bar 1' \
+  -e 'end tell' \
+  -e 'delay 3' \
+  -e 'tell application "System Events" to exists (first application process whose bundle identifier is "com.apesdk.sim-mac")'
+```
+
+Result: the launched app reported windows `Control`, `Terrain`, `View`. The menu-based quit returned `false` for the remaining `com.apesdk.sim-mac` process check.
+
 ## Canonical Source Map
 
 - Current Mac app baseline:
@@ -276,7 +308,7 @@ Result: the launched app reported windows `Control`, `Terrain`, `View`. The menu
   - `toolchains/sim-mac/sim-mac/ViewWrapper.swift`
   - `toolchains/sim-mac/sim-mac/CustomDrawingView.swift`
   - `toolchains/sim-mac/sim-mac/CustomDrawingView.swift` now stops drawing/redraw scheduling after termination begins.
-  - `toolchains/sim-mac/sim-mac/InitialTutorialController.swift`
+  - `toolchains/sim-mac/sim-mac/InitialTutorialController.swift` now disables the initial help/tutorial popovers on macOS and Mac Catalyst.
   - `toolchains/sim-mac/render/sim-mac-Bridging-Header.h`
 - Current compact iOS app source:
   - `ios/ApeSimApp.swift`
@@ -335,7 +367,7 @@ The new Mac build is not a replacement for `toolchains/sim-mac` until these are 
 - Keyboard input for letters and arrows.
 - Mouse down/up/drag, right mouse, and option/control-modified mouse.
 - Scroll wheel, magnify, and rotate gestures where supported.
-- Initial tutorial popovers or a platform-appropriate equivalent.
+- Initial help/tutorial popovers are intentionally disabled on macOS and Mac Catalyst; any future replacement must not interfere with the running simulation.
 - App sandbox/file entitlements appropriate to the target.
 - Local debug build and launch from Xcode command line.
 - Manual app shutdown without queued redraw entering shared drawing after close.
@@ -399,9 +431,9 @@ Status: In progress.
 - Done: Validate the three-window Mac experience exists at launch.
 - Partial: Validate menu command presence. Command behavior still needs exercising.
 - Done: Validate manual Quit for the rebuilt `maccatalyst` app after shutdown hardening.
+- Done by decision: Disable initial help/tutorial popovers on macOS and Mac Catalyst per user request.
 - Next: Recreate or validate keyboard shortcuts.
 - Next: Recreate or validate file open/save behavior.
-- Next: Recreate or validate initial tutorial behavior or document a platform-appropriate replacement.
 
 ### Phase 3: iOS/iPadOS Usability
 
@@ -425,7 +457,7 @@ Status: Not started.
 
 ## Immediate Next Steps
 
-1. Continue Mac parity checks beyond launch presence: keyboard shortcuts, mouse/gesture input, file open/save, and initial tutorial behavior.
+1. Continue Mac parity checks beyond launch presence: keyboard shortcuts, mouse/gesture input, and file open/save.
 2. Investigate optional iPad multi-window scene behavior.
 3. Decide when to add a true Mac Catalyst target in addition to the native `sim-mac` target and `ApeSim-iOS` target.
 

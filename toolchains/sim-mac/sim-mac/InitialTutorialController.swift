@@ -107,10 +107,14 @@ final class InitialTutorialController: NSObject, NSPopoverDelegate {
     }
 
     private var initialTutorialEnabled: Bool {
+        #if os(macOS) || targetEnvironment(macCatalyst)
+        return false
+        #else
         #if INITIAL_TUTORIAL_ON
         return true
         #else
         return shared_initial_tutorial_enabled() != 0
+        #endif
         #endif
     }
 
