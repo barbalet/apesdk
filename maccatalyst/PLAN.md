@@ -42,6 +42,9 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done: Smoke-tested the `maccatalyst` Mac app launch. `System Events` observed `Control`, `Terrain`, and `View` windows plus the expected top-level menus.
 - Done: Installed and launched the `ApeSim-iOS` product on an iPad Air 13-inch (M4) Simulator running iOS 26.5.
 - Done: Verified the iPad Simulator renders visible terrain from the shared simulation.
+- Done with note: User validation of `/private/tmp/apesdk-ipados-orientation-fixed.png` and `/private/tmp/apesdk-ios-orientation-fixed.png` showed that the terrain graphics still needed a 180-degree rotation while the SwiftUI controls were already upright. The mobile terrain copy path now rotates the shared terrain buffer 180 degrees, and the UIKit touch mapping now applies the same inverse rotation so terrain input still maps to the displayed terrain.
+- Done: Mobile priority 0 now keeps the visible app name, bundle name, executable name, and compiled iOS/iPadOS Simulator product aligned as `Simulated Ape` / `Simulated Ape.app`.
+- Done with note: Replaced the temporary mobile text-button overlay with a compact SF Symbols command surface for Previous Ape, New Simulation, and Next Ape. User visual acceptance is still needed before treating this as the final iOS/iPadOS interface.
 - Done: Added an adaptive mobile command panel: compact width remains bottom-trailing, while regular iPad width uses a larger trailing panel.
 - Done: Fixed mobile touch coordinate mapping so touches are scaled to the actual render buffer rather than blindly using `UIScreen.scale`.
 - Done with note: Verified Simulator UI touch delivery through Computer Use. `simctl io tap` remains unavailable, but a terrain drag produced UIKit touch dispatch events in the rebuilt `ApeSim-iOS` process.
@@ -76,8 +79,8 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Decision: The user replaced `/Applications/Simulated Ape.app` with the mentioned build, but future process testing should avoid the `/Applications` copy until the app is 100% production/release compilable.
 - Decision: Keep the inherited `sim-mac` target and scheme name for now to preserve traceability to the known-good Mac baseline. Revisit renaming after the mobile target is more usable.
 - Decision update: Add a dedicated Mac Catalyst target as its own priority after the remaining native Mac command/gesture validation and before any iPad multi-window session implementation. The existing `ApeSim-iOS` target already builds and launches as Mac Catalyst and remains the reference until the dedicated target exists.
-- Decision: Do not expose explicit iPad multi-window controls yet. SwiftUI `WindowGroup` and the generated scene manifest already support multiple scenes, but the shared simulation engine is still singleton state; visible iPad multi-window UX should wait for scene-instance simulation/app-shell design or a deliberate decision to share one global simulation across windows.
-- Done: Designed the iPad multi-window architecture. The path is to keep the current `WindowGroup` as one shared simulation surface until a scene-owned session handle exists; then explicit iPad multi-window UI can create independent simulation sessions without forking iOS/Mac source.
+- Decision update: iPad multi-window UI is a priority, but it must be preceded by the per-scene iPad session model so each window owns an independent simulation session instead of competing over singleton state.
+- Done: Designed the iPad multi-window architecture. The path is to keep the current `WindowGroup` as one shared simulation surface only until a scene-owned session handle exists; then explicit iPad multi-window UI can create independent simulation sessions without forking iOS/Mac source.
 - Not done: No separate Mac Catalyst-specific target has been added yet; this is now an explicit queued phase before iPad session implementation and final transition work.
 
 ## Baseline Evidence
@@ -132,6 +135,46 @@ Built product:
 ```text
 /private/tmp/apesdk-maccatalyst-ios-derived/Build/Products/Debug-iphonesimulator/ApeSim-iOS.app
 ```
+
+Mobile priority 0 rotation, naming, and control-surface pass on 2026-07-07:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-ios-rotate-tests test
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /private/tmp/apesdk-ios-rotate-mobile-derived CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -destination 'generic/platform=macOS,variant=Mac Catalyst' -derivedDataPath /private/tmp/apesdk-ios-rotate-catalyst-derived CODE_SIGNING_ALLOWED=NO build
+```
+
+Results:
+
+- Swift Testing produced `TEST SUCCEEDED`: 10 tests in 1 suite passed, including the 180-degree mobile terrain copy helper.
+- iOS Simulator build produced `BUILD SUCCEEDED`.
+- Product: `/private/tmp/apesdk-ios-rotate-mobile-derived/Build/Products/Debug-iphonesimulator/Simulated Ape.app`.
+- Generated Info.plist has `CFBundleDisplayName = Simulated Ape`, `CFBundleName = Simulated Ape`, and `CFBundleExecutable = Simulated Ape`.
+- The user-facing target/scheme name remains `ApeSim-iOS` for build-path traceability, but the built app product is now `Simulated Ape.app`.
+- Mac Catalyst build from the same reference scheme also produced `BUILD SUCCEEDED`.
+- Mac Catalyst product: `/private/tmp/apesdk-ios-rotate-catalyst-derived/Build/Products/Debug-maccatalyst/Simulated Ape.app`.
+- Generated Mac Catalyst Info.plist also has `CFBundleDisplayName = Simulated Ape`, `CFBundleName = Simulated Ape`, and `CFBundleExecutable = Simulated Ape`.
+
+Simulator validation:
+
+```sh
+xcrun simctl install 28E193E7-623B-4E28-8C37-A90E044D8CBE /private/tmp/apesdk-ios-rotate-mobile-derived/Build/Products/Debug-iphonesimulator/Simulated\ Ape.app
+xcrun simctl launch 28E193E7-623B-4E28-8C37-A90E044D8CBE com.apesdk.sim-ios
+xcrun simctl io 28E193E7-623B-4E28-8C37-A90E044D8CBE screenshot /private/tmp/apesdk-ipados-rotate180.png
+xcrun simctl install A643FADE-0BCC-4290-A7C4-96B7BB771E25 /private/tmp/apesdk-ios-rotate-mobile-derived/Build/Products/Debug-iphonesimulator/Simulated\ Ape.app
+xcrun simctl launch A643FADE-0BCC-4290-A7C4-96B7BB771E25 com.apesdk.sim-ios
+xcrun simctl io A643FADE-0BCC-4290-A7C4-96B7BB771E25 screenshot /private/tmp/apesdk-ios-rotate180.png
+```
+
+Observed devices:
+
+- iPad Air 13-inch (M4), iOS 26.5, UDID `28E193E7-623B-4E28-8C37-A90E044D8CBE`.
+- iPhone 17, iOS 26.5, UDID `A643FADE-0BCC-4290-A7C4-96B7BB771E25`.
+
+Result: both products installed and launched, fresh screenshots were captured, and both app instances were terminated afterward. Screenshots for user validation:
+
+- `/private/tmp/apesdk-ipados-rotate180.png`
+- `/private/tmp/apesdk-ios-rotate180.png`
 
 Post-change Mac verification:
 
@@ -513,7 +556,7 @@ iPad multi-window decision evidence:
 - `ios/ApeSimApp.swift` uses SwiftUI `WindowGroup`.
 - The generated iOS Simulator Info.plist from `/private/tmp/apesdk-plan-four-cycles-iossim` sets `UIApplicationSupportsMultipleScenes = true` and `UIDeviceFamily = [1, 2]`.
 - The shared engine remains singleton-oriented: `universe/sim.c` has a static `simulated_group group`, and `gui/shared.c` has process-global shared simulation state such as `simulation_started`.
-- Decision: do not add explicit iPad multi-window controls until there is a scene-instance simulation/app-shell design, unless the intended UX is explicitly to show the same global simulation in multiple windows.
+- Decision: iPad multi-window UI is a priority, but do not add explicit iPad multi-window controls until there is a scene-instance simulation/app-shell design.
 
 Mac Catalyst signing and launch check:
 
@@ -653,6 +696,7 @@ The mobile build should at least provide:
 - Done: Cycle updates through `shared_cycle_ios` or a documented shared replacement.
 - Done with note: Touch input routed to the shared mouse/input API. Verification used Simulator UI drag plus UIKit event logs because this `simctl io` lacks synthetic taps.
 - Done: New Simulation, Next Ape, and Previous Ape commands are present in the overlay.
+- Done with note: Replaced the text-button overlay with a compact icon command surface. This is the first pass toward a better iOS/iPadOS interface and still needs user validation.
 - Done: Idle timer behavior appropriate for a running simulation.
 - Done: iPad layout that can grow beyond the single compact iPhone overlay.
 
@@ -669,7 +713,7 @@ The mobile build should at least provide:
 
 ## iPad Multi-Window Architecture
 
-Decision: keep the current iPad `WindowGroup` as a single shared simulation surface for now. Do not expose an explicit New Window / duplicate simulation command until the simulation can be owned by a scene instance instead of process-global state.
+Decision: iPad multi-window UI is a priority, but keep the current iPad `WindowGroup` as a single shared simulation surface until the simulation can be owned by a scene instance instead of process-global state. Do not expose an explicit New Window / duplicate simulation command before that per-scene model exists.
 
 Reasoning:
 
@@ -700,7 +744,7 @@ Target architecture before explicit iPad multi-window UI:
    - Second: shared/menu state in `gui/shared.c`, including pause and display toggles.
    - Third: simulation core state in `universe/sim.c`, especially `simulated_group group`, `simulated_timing timing`, and any interpreter/session-adjacent state.
 6. Prefer explicit context/session pointers over thread-local storage. iPad scenes can share the main thread, so thread-local state would not make scenes independent.
-7. Once independent sessions exist, add iPad UI for multi-window behavior. The first user-facing version should create a fresh simulation per new window; duplicating an existing simulation should be a separate, explicit command because it needs save/clone semantics.
+7. Once independent sessions exist, add iPad UI for multi-window behavior. This is priority work after the dedicated Mac Catalyst target phase. The first user-facing version should create a fresh simulation per new window; duplicating an existing simulation should be a separate, explicit command because it needs save/clone semantics.
 
 Acceptance criteria for exposing explicit iPad multi-window controls:
 
@@ -759,13 +803,14 @@ Status: In progress.
 - Done: Validate a mobile build from the new project.
 - Done: Keep the current compact iOS overlay working.
 - Done: Improve iPad layout for larger screens.
+- Done with note: Replaced the temporary text buttons with a compact icon command panel. This is a first visual pass and needs user acceptance before being considered final.
 - Done: Confirm touch, simulation cycling, and redraw behavior at smoke-test level.
 - Done with note: Touch automation used Computer Use against the Simulator UI; `simctl io tap` is unavailable in the current toolchain.
 - Done: Exercise the mobile overlay commands (`New Simulation`, `Next Ape`, `Previous Ape`) through the Simulator UI.
 - Done: Investigate optional iPad multi-window scene behavior. The generated iOS Simulator Info.plist already sets `UIApplicationSupportsMultipleScenes = true` for the SwiftUI `WindowGroup` app.
-- Decision: Do not add explicit iPad multi-window controls yet. The underlying scene manifest supports multiple scenes, but the shared simulation engine currently uses singleton state.
+- Decision update: iPad multi-window UI is a priority. Do not add explicit controls until the per-scene session model exists because the underlying shared simulation engine currently uses singleton state.
 - Done: Designed scene-instance simulation/app-shell isolation before exposing explicit iPad multi-window controls. The accepted direction is a per-scene Swift model plus an opaque C session API, with current `shared_*` calls retained as wrappers around a default process session during migration.
-- Next: Keep the current single shared simulation surface until the dedicated Mac Catalyst target phase is complete and explicit iPad multi-window UI becomes a priority.
+- Next: Keep the current single shared simulation surface until the dedicated Mac Catalyst target phase is complete, then implement the per-scene iPad session model before adding multi-window UI.
 
 ### Phase 4: Dedicated Mac Catalyst Target
 
@@ -788,13 +833,14 @@ Status: Not started.
 
 ## Immediate Next Steps
 
+0. Get user validation on the fresh mobile priority 0 pass before the rest of this list: `/private/tmp/apesdk-ipados-rotate180.png`, `/private/tmp/apesdk-ios-rotate180.png`, the `Simulated Ape.app` mobile product naming, and the first-pass compact icon command surface.
 1. Add manual or stronger UI automation validation for visible scroll/magnify/rotate behavior.
 2. Continue safe visible command validation for non-toggle menu commands and expand `SimMacTests` only where new feedback or regressions identify missing parity assertions.
 3. Add the dedicated Mac Catalyst target and scheme as its own phase, keeping existing iOS/iPadOS and native Mac targets in place.
-4. If explicit iPad multi-window UI becomes a priority, implement the documented per-scene model and C session API before adding user-facing window controls.
+4. Implement the per-scene iPad session model. iPad multi-window UI is a priority, and the per-scene session model must come before user-facing window controls.
 5. Start Phase 5 transition work only after parity is proven: compare against `toolchains/sim-mac`, keep both builds during proof, and ask before removing or moving old source.
 6. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
 
 ## Open Questions
 
-- None blocking right now.
+- User validation is needed for the fresh iPadOS/iOS priority 0 screenshots and first-pass icon command surface before considering the mobile orientation/interface pass accepted.

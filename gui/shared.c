@@ -822,6 +822,25 @@ n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte si
     return outputBuffer;
 }
 
+void shared_copy_rotate_180( n_byte4 *outputBuffer, const n_byte4 *source, n_int dim_x, n_int dim_y )
+{
+    if ( ( outputBuffer == 0L ) || ( source == 0L ) )
+    {
+        return;
+    }
+
+    for ( n_int ly = 0; ly < dim_y; ly++ )
+    {
+        n_int row_offset = ly * dim_x;
+        n_int source_row_offset = ( dim_y - 1 - ly ) * dim_x;
+
+        for ( n_int lx = 0; lx < dim_x; lx++ )
+        {
+            outputBuffer[row_offset + lx] = source[source_row_offset + ( dim_x - 1 - lx )];
+        }
+    }
+}
+
 void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
 {
     n_byte *buffer;
@@ -837,7 +856,7 @@ void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
         return;
     }
 
-    memory_copy( buffer, ( n_byte * )outputBuffer, ( n_uint )( dim_x * dim_y * 4 ) );
+    shared_copy_rotate_180( outputBuffer, ( const n_byte4 * )buffer, dim_x, dim_y );
 }
 
 shared_cycle_state shared_cycle_ios( n_uint ticks )

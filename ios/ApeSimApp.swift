@@ -77,41 +77,66 @@ struct ContentView: View {
         ASiOSViewRepresentable()
             .ignoresSafeArea()
             .overlay(alignment: isWideLayout ? .trailing : .bottomTrailing) {
-                ButtonPanel(isWideLayout: isWideLayout)
+                CommandPanel(isWideLayout: isWideLayout)
                     .padding(isWideLayout ? 24 : 16)
             }
     }
 }
 
-// MARK: - Button Panel
-struct ButtonPanel: View {
+// MARK: - Command Panel
+struct CommandPanel: View {
     let isWideLayout: Bool
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: isWideLayout ? 12 : 8) {
-            simulationButton("Next Ape") {
-                shared_menu(NA_MENU_NEXT_APE)
-            }
-            simulationButton("Previous Ape") {
-                shared_menu(NA_MENU_PREVIOUS_APE)
-            }
-            simulationButton("New Simulation") {
-                shared_new(n_uint(CFAbsoluteTimeGetCurrent()))
+        Group {
+            if isWideLayout {
+                VStack(spacing: 10) {
+                    commandButton(title: "Previous Ape", systemImage: "chevron.left") {
+                        shared_menu(NA_MENU_PREVIOUS_APE)
+                    }
+                    commandButton(title: "New Simulation", systemImage: "arrow.triangle.2.circlepath", isPrimary: true) {
+                        shared_new(n_uint(CFAbsoluteTimeGetCurrent()))
+                    }
+                    commandButton(title: "Next Ape", systemImage: "chevron.right") {
+                        shared_menu(NA_MENU_NEXT_APE)
+                    }
+                }
+            } else {
+                HStack(spacing: 8) {
+                    commandButton(title: "Previous Ape", systemImage: "chevron.left") {
+                        shared_menu(NA_MENU_PREVIOUS_APE)
+                    }
+                    commandButton(title: "New Simulation", systemImage: "arrow.triangle.2.circlepath", isPrimary: true) {
+                        shared_new(n_uint(CFAbsoluteTimeGetCurrent()))
+                    }
+                    commandButton(title: "Next Ape", systemImage: "chevron.right") {
+                        shared_menu(NA_MENU_NEXT_APE)
+                    }
+                }
             }
         }
-        .padding(isWideLayout ? 14 : 8)
-        .frame(width: isWideLayout ? 220 : nil)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: isWideLayout ? 16 : 12, style: .continuous))
+        .padding(isWideLayout ? 10 : 8)
+        .background(.ultraThinMaterial, in: Capsule())
     }
 
-    private func simulationButton(_ title: String, action: @escaping () -> Void) -> some View {
+    private func commandButton(title: String,
+                               systemImage: String,
+                               isPrimary: Bool = false,
+                               action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
-                .frame(maxWidth: isWideLayout ? .infinity : nil, alignment: .trailing)
+            Image(systemName: systemImage)
+                .font(.system(size: isWideLayout ? 22 : 19, weight: .semibold))
+                .frame(width: isWideLayout ? 50 : 44, height: isWideLayout ? 50 : 44)
+                .foregroundStyle(isPrimary ? .white : .primary)
+                .background(isPrimary ? Color.accentColor : Color(uiColor: .secondarySystemBackground), in: Circle())
+                .overlay {
+                    Circle()
+                        .stroke(Color.primary.opacity(isPrimary ? 0 : 0.16), lineWidth: 1)
+                }
         }
-        .buttonStyle(.borderedProminent)
-        .controlSize(isWideLayout ? .large : .regular)
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(title))
+        .help(title)
     }
 }
 
@@ -134,6 +159,7 @@ class ASiOSView: UIView {
     private var offscreenBuffer = [UInt32](repeating: 0, count: 2000 * 3000)
     private var drawRef: CGContext?
     private var oldDimensionX: Int = -1
+    private var oldDimensionY: Int = -1
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -151,9 +177,18 @@ class ASiOSView: UIView {
         }
     }
 
-    func renderScale() -> CGFloat {
-        guard bounds.width > 0, oldDimensionX > 0 else { return 1.0 }
-        return CGFloat(oldDimensionX) / bounds.width
+    func simulationPoint(for location: CGPoint) -> CGPoint {
+        guard bounds.width > 0, bounds.height > 0, oldDimensionX > 0, oldDimensionY > 0 else {
+            return location
+        }
+
+        let scaleX = CGFloat(oldDimensionX) / bounds.width
+        let scaleY = CGFloat(oldDimensionY) / bounds.height
+        let rotatedX = CGFloat(oldDimensionX - 1) - (location.x * scaleX)
+        let rotatedY = CGFloat(oldDimensionY - 1) - (location.y * scaleY)
+
+        return CGPoint(x: min(max(rotatedX, 0), CGFloat(oldDimensionX - 1)),
+                       y: min(max(rotatedY, 0), CGFloat(oldDimensionY - 1)))
     }
 
     override func draw(_ rect: CGRect) {
@@ -163,7 +198,7 @@ class ASiOSView: UIView {
 
         guard let context = UIGraphicsGetCurrentContext() else { return }
 
-        if drawRef == nil || oldDimensionX != dimensionX {
+        if drawRef == nil || oldDimensionX != dimensionX || oldDimensionY != dimensionY {
             let colorSpace = CGColorSpaceCreateDeviceRGB()
             drawRef = CGContext(data: &offscreenBuffer,
                                 width: dimensionX,
@@ -174,6 +209,7 @@ class ASiOSView: UIView {
                                 bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue | CGBitmapInfo.byteOrder32Big.rawValue)
 
             oldDimensionX = dimensionX
+            oldDimensionY = dimensionY
         }
 
         context.saveGState()
@@ -203,8 +239,8 @@ class ASiOSView: UIView {
         for touch in allTouches {
             let location = touch.location(in: self)
             print("Touch moved to: \(location)")
-            let scaleFactor = renderScale()
-            shared_mouseReceived(n_double(Float(location.x * scaleFactor)), n_double(Float(location.y * scaleFactor)), n_int(NUM_TERRAIN))
+            let simulationLocation = simulationPoint(for: location)
+            shared_mouseReceived(n_double(Float(simulationLocation.x)), n_double(Float(simulationLocation.y)), n_int(NUM_TERRAIN))
         }
     }
 

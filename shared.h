@@ -112,6 +112,7 @@ void shared_mouseReceived_ios( n_double valX, n_double valY );
 void shared_about( void );
 
 n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed );
+void shared_copy_rotate_180( n_byte4 *outputBuffer, const n_byte4 *source, n_int dim_x, n_int dim_y );
 void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y );
 
 shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification );

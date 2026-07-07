@@ -345,6 +345,32 @@ struct SimMacParityTests {
         #expect(shared_simulation_started() == 1)
     }
 
+    @Test("iOS draw wrapper rotates terrain for UIKit display")
+    func mobileDrawWrapperRotatesRowsForUIKitDisplay() {
+        let width = 5
+        let height = 3
+        let pixelCount = width * height
+        let rawPixels = (0..<pixelCount).map { n_byte4($0 + 1) }
+        var mobilePixels = [n_byte4](repeating: 0, count: pixelCount)
+
+        rawPixels.withUnsafeBufferPointer { sourceBuffer in
+            mobilePixels.withUnsafeMutableBufferPointer { outputBuffer in
+                shared_copy_rotate_180(outputBuffer.baseAddress, sourceBuffer.baseAddress, n_int(width), n_int(height))
+            }
+        }
+
+        for y in 0..<height {
+            let rowOffset = y * width
+            let rotatedRowOffset = (height - 1 - y) * width
+
+            for x in 0..<width {
+                let pixelIndex = rowOffset + x
+                let rotatedIndex = rotatedRowOffset + (width - 1 - x)
+                #expect(mobilePixels[pixelIndex] == rawPixels[rotatedIndex])
+            }
+        }
+    }
+
     @Test("Keyboard, mouse, drag, and gesture routes stay safe")
     func keyboardMouseDragAndGestureRoutes() {
         shared_close()
