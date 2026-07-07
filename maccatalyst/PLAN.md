@@ -75,10 +75,10 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done: Exercised native Mac Control menu toggle behavior from a derived `/private/tmp` build. `Pause`, `Territory`, `No Weather`, `No Brain`, and `Braincode` accepted clicks and updated to their inverse labels.
 - Decision: The user replaced `/Applications/Simulated Ape.app` with the mentioned build, but future process testing should avoid the `/Applications` copy until the app is 100% production/release compilable.
 - Decision: Keep the inherited `sim-mac` target and scheme name for now to preserve traceability to the known-good Mac baseline. Revisit renaming after the mobile target is more usable.
-- Decision: Do not add a separate Mac Catalyst target yet. The existing `ApeSim-iOS` target already builds and launches as Mac Catalyst; add a dedicated Catalyst target only when Catalyst-specific menus/windows/settings need to diverge from the iOS/iPadOS app.
+- Decision update: Add a dedicated Mac Catalyst target as its own priority after the remaining native Mac command/gesture validation and before any iPad multi-window session implementation. The existing `ApeSim-iOS` target already builds and launches as Mac Catalyst and remains the reference until the dedicated target exists.
 - Decision: Do not expose explicit iPad multi-window controls yet. SwiftUI `WindowGroup` and the generated scene manifest already support multiple scenes, but the shared simulation engine is still singleton state; visible iPad multi-window UX should wait for scene-instance simulation/app-shell design or a deliberate decision to share one global simulation across windows.
 - Done: Designed the iPad multi-window architecture. The path is to keep the current `WindowGroup` as one shared simulation surface until a scene-owned session handle exists; then explicit iPad multi-window UI can create independent simulation sessions without forking iOS/Mac source.
-- Not done: No separate Mac Catalyst-specific target has been added yet.
+- Not done: No separate Mac Catalyst-specific target has been added yet; this is now an explicit queued phase before iPad session implementation and final transition work.
 
 ## Baseline Evidence
 
@@ -765,9 +765,20 @@ Status: In progress.
 - Done: Investigate optional iPad multi-window scene behavior. The generated iOS Simulator Info.plist already sets `UIApplicationSupportsMultipleScenes = true` for the SwiftUI `WindowGroup` app.
 - Decision: Do not add explicit iPad multi-window controls yet. The underlying scene manifest supports multiple scenes, but the shared simulation engine currently uses singleton state.
 - Done: Designed scene-instance simulation/app-shell isolation before exposing explicit iPad multi-window controls. The accepted direction is a per-scene Swift model plus an opaque C session API, with current `shared_*` calls retained as wrappers around a default process session during migration.
-- Next: Implement the session API only when explicit iPad multi-window UI becomes a priority; until then keep the current single shared simulation surface.
+- Next: Keep the current single shared simulation surface until the dedicated Mac Catalyst target phase is complete and explicit iPad multi-window UI becomes a priority.
 
-### Phase 4: Transition
+### Phase 4: Dedicated Mac Catalyst Target
+
+Status: Not started.
+
+- Add a dedicated Mac Catalyst target and scheme under `maccatalyst/maccatalyst.xcodeproj`.
+- Use the existing `ApeSim-iOS` Mac Catalyst build as the known-good reference while adding the dedicated target.
+- Keep shared simulation, rendering, iOS/iPadOS Swift, and Mac Swift source references canonical; fork only target settings, app-shell files, menus, entitlements, or platform behavior that genuinely must differ for Mac Catalyst.
+- Build the dedicated Mac Catalyst target into an explicit `/private/tmp` derived data location.
+- Launch the dedicated Mac Catalyst product from `/private/tmp`, verify the expected window/menu surface, and quit it cleanly.
+- Do not replace the native `sim-mac` target or the current `ApeSim-iOS` target while this target is being brought up.
+
+### Phase 5: Transition
 
 Status: Not started.
 
@@ -778,9 +789,11 @@ Status: Not started.
 ## Immediate Next Steps
 
 1. Add manual or stronger UI automation validation for visible scroll/magnify/rotate behavior.
-2. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
-3. Continue safe visible command validation for non-toggle menu commands and expand `SimMacTests` only where new feedback or regressions identify missing parity assertions.
+2. Continue safe visible command validation for non-toggle menu commands and expand `SimMacTests` only where new feedback or regressions identify missing parity assertions.
+3. Add the dedicated Mac Catalyst target and scheme as its own phase, keeping existing iOS/iPadOS and native Mac targets in place.
 4. If explicit iPad multi-window UI becomes a priority, implement the documented per-scene model and C session API before adding user-facing window controls.
+5. Start Phase 5 transition work only after parity is proven: compare against `toolchains/sim-mac`, keep both builds during proof, and ask before removing or moving old source.
+6. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
 
 ## Open Questions
 
