@@ -285,13 +285,18 @@ struct SimMacParityTests {
         try? FileManager.default.removeItem(atPath: savePath)
     }
 
-    @Test("Simulation save route writes a sandbox temporary file")
-    func sandboxTemporarySaveWritesFile() throws {
+    @Test("Simulation save route writes a sandbox temporary file that can be reopened")
+    func sandboxTemporarySaveAndOpenRoundTrip() throws {
         shared_close()
         defer { shared_close() }
 
         #expect(shared_init(n_int(NUM_CONTROL), 0x12738291) == n_int(NUM_CONTROL))
         _ = shared_cycle(1, n_int(NUM_CONTROL))
+        shared_being_select(0)
+
+        var savedX: n_int = 0
+        var savedY: n_int = 0
+        #expect(shared_selected_being_location(&savedX, &savedY) == 1)
 
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("apesdk-sim-mac-roundtrip-\(UUID().uuidString)")
@@ -302,6 +307,16 @@ struct SimMacParityTests {
         #expect(FileManager.default.fileExists(atPath: url.path))
         let data = try Data(contentsOf: url)
         #expect(data.isEmpty == false)
+
+        #expect(shared_new(0x99887766) == 0)
+        shared_being_select(0)
+        #expect(shared_openFileName(url.path, 0) == 1)
+        shared_being_select(0)
+        var restoredX: n_int = 0
+        var restoredY: n_int = 0
+        #expect(shared_selected_being_location(&restoredX, &restoredY) == 1)
+        #expect(restoredX == savedX)
+        #expect(restoredY == savedY)
         #expect(shared_simulation_started() == 1)
     }
 

@@ -66,12 +66,18 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done: Fixed `command_base_open` so failed/missing opens clear `command_file_interaction`; this unblocked later save calls after a missing-file route.
 - Done: Updated the Mac app sandbox entitlement from user-selected read-only to user-selected read-write so the Save As panel is valid for the app's advertised save behavior.
 - Done: Performed a visible File menu panel smoke test from the derived `maccatalyst` Mac build. Save As opened a `Save` dialog, Open opened an `Open` dialog, Open Script opened an `Open` dialog, and the app quit cleanly afterward.
+- Done: Expanded the sandbox save Swift Testing route into a save/open round trip. The test now saves, mutates the world, reopens the saved file, and verifies the selected ape's location is restored.
+- Done with note: Performed a visible user-selected File panel save/open/save pass from a derived `maccatalyst` Mac build. Save As created a non-empty file in `/private/tmp`, Open selected that file through the Open panel, a second Save As created another non-empty file, and the app quit cleanly. The two files were not byte-identical because the running simulation can advance between panel operations; the deterministic read-back assertion remains covered by Swift Testing.
 - Done with note: Investigated stronger automated scroll/magnify/rotate gesture event tests. The local AppKit SDK exposes the responder methods and event properties, but synthetic gesture `NSEvent` construction is not reliable in this environment; this remains covered at shared-route smoke level and still needs real-device/manual or better UI automation validation.
 - Done: Rebuilt `ApeSim-iOS` for a generic iOS Simulator destination from the `maccatalyst` project. The generated Info.plist has `UIApplicationSupportsMultipleScenes = true` in `UIApplicationSceneManifest`.
 - Done: Built the existing `ApeSim-iOS` scheme as Mac Catalyst into `Debug-maccatalyst` from the `maccatalyst` project. The generated Catalyst Info.plist has `UIDeviceFamily = [6]` and `UIApplicationSupportsMultipleScenes = true`.
+- Done: Smoke-tested the unsigned Mac Catalyst `ApeSim-iOS` product from `/private/tmp`. It launched as bundle id `com.apesdk.sim-ios`, exposed one `Simulated Ape` window with standard Catalyst menus, and quit cleanly. A signed generic Catalyst build still requires a development team.
+- Done: Exercised native Mac Control menu toggle behavior from a derived `/private/tmp` build. `Pause`, `Territory`, `No Weather`, `No Brain`, and `Braincode` accepted clicks and updated to their inverse labels.
 - Decision: The user replaced `/Applications/Simulated Ape.app` with the mentioned build, but future process testing should avoid the `/Applications` copy until the app is 100% production/release compilable.
 - Decision: Keep the inherited `sim-mac` target and scheme name for now to preserve traceability to the known-good Mac baseline. Revisit renaming after the mobile target is more usable.
-- Decision: Do not add a separate Mac Catalyst target yet. The existing `ApeSim-iOS` target already builds as Mac Catalyst; add a dedicated Catalyst target only when Catalyst-specific menus/windows/settings need to diverge from the iOS/iPadOS app.
+- Decision: Do not add a separate Mac Catalyst target yet. The existing `ApeSim-iOS` target already builds and launches as Mac Catalyst; add a dedicated Catalyst target only when Catalyst-specific menus/windows/settings need to diverge from the iOS/iPadOS app.
+- Decision: Do not expose explicit iPad multi-window controls yet. SwiftUI `WindowGroup` and the generated scene manifest already support multiple scenes, but the shared simulation engine is still singleton state; visible iPad multi-window UX should wait for scene-instance simulation/app-shell design or a deliberate decision to share one global simulation across windows.
+- Done: Designed the iPad multi-window architecture. The path is to keep the current `WindowGroup` as one shared simulation surface until a scene-owned session handle exists; then explicit iPad multi-window UI can create independent simulation sessions without forking iOS/Mac source.
 - Not done: No separate Mac Catalyst-specific target has been added yet.
 
 ## Baseline Evidence
@@ -494,6 +500,72 @@ Results:
 - The generated Catalyst Info.plist includes `UIApplicationSceneManifest` with `UIApplicationSupportsMultipleScenes = true`, and `UIDeviceFamily = [6]`.
 - The save route now writes a non-empty sandbox temporary file under test. Root cause found and fixed: `command_base_open` left `command_file_interaction` set after missing-file opens, causing later saves to no-op.
 
+Four-cycle continuation on 2026-07-07:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-plan-cycle-file-roundtrip test
+```
+
+Result: `TEST SUCCEEDED`. Observed Swift Testing results: 9 tests in 1 suite passed. The sandbox file test now performs a save/open round trip: it records the selected ape location, saves to a temporary file, mutates the world, reopens the saved file, and verifies the selected ape location is restored.
+
+iPad multi-window decision evidence:
+
+- `ios/ApeSimApp.swift` uses SwiftUI `WindowGroup`.
+- The generated iOS Simulator Info.plist from `/private/tmp/apesdk-plan-four-cycles-iossim` sets `UIApplicationSupportsMultipleScenes = true` and `UIDeviceFamily = [1, 2]`.
+- The shared engine remains singleton-oriented: `universe/sim.c` has a static `simulated_group group`, and `gui/shared.c` has process-global shared simulation state such as `simulation_started`.
+- Decision: do not add explicit iPad multi-window controls until there is a scene-instance simulation/app-shell design, unless the intended UX is explicitly to show the same global simulation in multiple windows.
+
+Mac Catalyst signing and launch check:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -destination 'generic/platform=macOS,variant=Mac Catalyst' -derivedDataPath /private/tmp/apesdk-plan-cycle-catalyst-launch build
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -destination 'generic/platform=macOS,variant=Mac Catalyst' -derivedDataPath /private/tmp/apesdk-plan-cycle-catalyst-launch CODE_SIGNING_ALLOWED=NO build
+open -n /private/tmp/apesdk-plan-cycle-catalyst-launch/Build/Products/Debug-maccatalyst/ApeSim-iOS.app
+osascript -e 'delay 2' -e 'tell application "System Events" to ...'
+osascript -e 'tell application id "com.apesdk.sim-ios" to quit' ...
+```
+
+Results:
+
+- Signed generic Mac Catalyst build without an explicit team failed with: `Signing for "ApeSim-iOS" requires a development team`.
+- Unsigned generic Mac Catalyst build produced `BUILD SUCCEEDED`.
+- Product: `/private/tmp/apesdk-plan-cycle-catalyst-launch/Build/Products/Debug-maccatalyst/ApeSim-iOS.app`.
+- `open` launched the product. System Events observed `windows=Simulated Ape` and top-level menus `Apple`, `ApeSim-iOS`, `File`, `Edit`, `View`, `Window`, `Help`.
+- Quit by bundle id returned `false` for the remaining `com.apesdk.sim-ios` process check.
+
+Native Mac Control menu behavior smoke test:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-plan-cycle-menu-derived build
+open -n /private/tmp/apesdk-plan-cycle-menu-derived/Build/Products/Debug/Simulated\ Ape.app
+osascript -e '...' # clicked Control menu toggle items
+osascript -e 'tell application id "com.apesdk.sim-mac" to quit' ...
+```
+
+Result: build produced `BUILD SUCCEEDED`. System Events first observed Control menu items including `Pause`, `Territory`, `No Weather`, `No Brain`, and `Braincode`. Clicking those reversible commands updated the visible labels to `Resume`, `No Territory`, `Weather`, `Brain`, and `No Braincode`. Quit by bundle id returned `false` for the remaining `com.apesdk.sim-mac` process check.
+
+Visible user-selected File panel save/open/save pass on 2026-07-07:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-plan-panel-roundtrip-derived build
+open -n /private/tmp/apesdk-plan-panel-roundtrip-derived/Build/Products/Debug/Simulated\ Ape.app
+osascript -e '...' # Pause, File > Save As…, select /private/tmp/apesdk-panel-roundtrip.QUGBMk/panel-a.txt
+osascript -e '...' # File > New Simulation, File > Open…, select panel-a.txt, File > Save As…, select panel-b.txt
+osascript -e 'tell application id "com.apesdk.sim-mac" to quit' ...
+```
+
+Result: build produced `BUILD SUCCEEDED`. The first Save As panel created `/private/tmp/apesdk-panel-roundtrip.QUGBMk/panel-a.txt` with size `11948671` bytes. Open selected that file through the visible Open panel and returned to the normal `Terrain`, `Control`, and `View` windows. The second Save As panel created `/private/tmp/apesdk-panel-roundtrip.QUGBMk/panel-b.txt.txt` with size `12121048` bytes. The app quit cleanly, with the remaining `com.apesdk.sim-mac` process check returning `false`.
+
+Interpretation: user-selected Save As, Open, and subsequent Save As work through real panels in the sandboxed derived app. The two saved files were not byte-identical because the simulation can advance between panel operations; the deterministic state read-back check is the Swift Testing save/open round trip, which pauses the world through direct shared calls and verifies the selected ape location after reopen.
+
+Post-architecture-plan verification:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-plan-up-to-ipad-architecture-tests test
+```
+
+Result on 2026-07-07: `TEST SUCCEEDED`. Observed Swift Testing results: 9 tests in 1 suite passed.
+
 ## Canonical Source Map
 
 - Current Mac app baseline:
@@ -554,17 +626,13 @@ The new Mac build is not a replacement for `toolchains/sim-mac` until these are 
 - Continuous simulation loop through `shared_cycle`.
 - Drawing through `shared_draw`.
 - New Simulation menu command.
-- Open simulation file.
-- Open script file.
-- Save As.
+- Done with note: Open simulation file is covered by visible Open panel selection plus Swift Testing save/open read-back.
+- Done with note: Open script file panel opens and can be canceled; script content execution through a selected file still needs safe validation if script parity becomes a focus.
+- Done with note: Save As is covered by visible user-selected panel saves plus Swift Testing direct save/open read-back.
 - About Simulated Ape.
-- Pause/Resume.
+- Done: Pause/Resume and the Territory, Weather, Brain, and Braincode toggles have visible UI smoke coverage through the Control menu.
 - Previous Ape and Next Ape.
 - Clear Errors.
-- Territory toggle.
-- Weather toggle.
-- Brain toggle.
-- Braincode toggle.
 - Command Line command.
 - Online Manual and Simulation Page commands.
 - Done: Keyboard input for letters and arrows has a first-responder path and a smoke pass.
@@ -599,6 +667,49 @@ The mobile build should at least provide:
 4. Introduce new Swift files under `maccatalyst/` only when they are truly shared wrappers or intentional platform forks.
 5. Only retire or move `toolchains/sim-mac` after the parity checklist is complete and the user approves the transition.
 
+## iPad Multi-Window Architecture
+
+Decision: keep the current iPad `WindowGroup` as a single shared simulation surface for now. Do not expose an explicit New Window / duplicate simulation command until the simulation can be owned by a scene instance instead of process-global state.
+
+Reasoning:
+
+- SwiftUI `WindowGroup` and the generated iOS/iPadOS scene manifest already permit multiple scenes.
+- `ios/ApeSimApp.swift` currently creates `ContentView()` with no scene-owned simulation model, and each `ASiOSView` calls the global `shared_init`, `shared_draw_ios`, `shared_cycle_ios`, `shared_mouseReceived`, and `shared_menu` APIs.
+- The C simulation is still singleton-oriented: `universe/sim.c` owns `static simulated_group group` and `static simulated_timing timing`; `sim_group()` and `sim_timing()` return those globals.
+- `gui/shared.c` also owns global shell/input/render state such as `simulation_started`, mouse/key state, iOS draw dimensions, output buffer, and menu toggles.
+- Opening multiple iPad windows today would therefore show multiple views competing over one global simulation, not independent simulations.
+
+Target architecture before explicit iPad multi-window UI:
+
+1. Add a Swift scene model, tentatively `ApeSimulationSceneModel`, owned by each `WindowGroup` scene. It should own the timer, view identity, render buffer metadata, selected command state, and an opaque C session handle.
+2. Extend the existing `gui/app_shell.*` instance helper first. It already models per-shell lifecycle, input, and output-buffer state, so it is the safest bridge between the current global app shell and a later per-simulation session.
+3. Introduce a C session API alongside the existing global API, not as a hard replacement:
+   - `shared_session_create(random)`
+   - `shared_session_destroy(session)`
+   - `shared_session_init(session, view, random)`
+   - `shared_session_cycle(session, ticks, identification)`
+   - `shared_session_draw(session, identification, width, height, size_changed)`
+   - `shared_session_menu(session, menu_id)`
+   - `shared_session_mouse_received(session, x, y, identification)`
+   - `shared_session_mouse_up(session)`
+   - `shared_session_open_file(session, path, is_script)`
+   - `shared_session_save_file(session, path)`
+4. Keep the current `shared_*` functions as wrappers around one default process session until native Mac parity is complete. This avoids breaking `toolchains/sim-mac`, `maccatalyst` Mac, tests, or older wrappers during the migration.
+5. Move singleton state in layers:
+   - First: shell state already represented by `ape_app_shell` and the iOS render/input buffers.
+   - Second: shared/menu state in `gui/shared.c`, including pause and display toggles.
+   - Third: simulation core state in `universe/sim.c`, especially `simulated_group group`, `simulated_timing timing`, and any interpreter/session-adjacent state.
+6. Prefer explicit context/session pointers over thread-local storage. iPad scenes can share the main thread, so thread-local state would not make scenes independent.
+7. Once independent sessions exist, add iPad UI for multi-window behavior. The first user-facing version should create a fresh simulation per new window; duplicating an existing simulation should be a separate, explicit command because it needs save/clone semantics.
+
+Acceptance criteria for exposing explicit iPad multi-window controls:
+
+- Two iPad windows can run side-by-side without sharing selected ape, pause state, terrain rotation, input state, or simulation world mutations.
+- Closing one scene releases its shell/session resources without calling `shared_close()` on another scene.
+- `New Simulation`, `Next Ape`, and `Previous Ape` affect only the active scene.
+- The existing global `shared_*` wrappers continue to pass `SimMacTests` while the transition is underway.
+- No canonical source is copied solely to make the iPad fork work.
+
 ## Work Phases
 
 ### Phase 0: Baseline and Source Map
@@ -632,13 +743,13 @@ Status: In progress.
 - Done: Build the `maccatalyst` Mac target after adding the iOS wrappers.
 - Done: Launch and smoke-test the `maccatalyst` Mac app against the parity checklist before considering it a replacement.
 - Done: Validate the three-window Mac experience exists at launch.
-- Partial: Validate menu command presence. Command behavior still needs exercising.
+- Done with note: Validate menu command presence and reversible Control menu toggle behavior. Non-reversible commands, dialog commands, and Online commands still need safe visible behavior validation where Swift Testing and existing panel smoke tests do not cover them.
 - Done: Validate manual Quit for the rebuilt `maccatalyst` app after shutdown hardening.
 - Done by decision: Disable initial help/tutorial popovers on macOS and Mac Catalyst per user request.
 - Done: Recreate or validate keyboard shortcuts and focused letter/arrow key routing.
 - Done with note: Recreate or validate mouse down/up/drag/right/option routing. Source and build are covered; drag/right-click UI automation remains limited by available tooling.
-- Done with note: Add initial Swift Testing coverage for the Mac parity checklist in one grouped test file. This now covers panel construction, tutorial data, command constants, file-route smoke checks, save-file creation, input/event routing, mobile wrappers, reset commands, and ape selection/drag movement, but does not replace manual UI validation for every visible command.
-- Done with note: Recreate or validate file open/save behavior at panel/entitlement and shared-route smoke level. Visible Save As/Open/Open Script panels are UI-smoke-tested and direct sandbox save-file creation is Swift-tested; full end-to-end user-selected open/read-back validation should still get manual or stronger UI automation validation.
+- Done with note: Add initial Swift Testing coverage for the Mac parity checklist in one grouped test file. This now covers panel construction, tutorial data, command constants, file-route smoke checks, save/open round trip, input/event routing, mobile wrappers, reset commands, and ape selection/drag movement, but does not replace manual UI validation for every visible command.
+- Done with note: Recreate or validate file open/save behavior at panel/entitlement and shared-route smoke level. Visible Save As/Open/Open Script panels are UI-smoke-tested, visible user-selected Save As/Open/Save As completed in a derived app, and direct sandbox save/open read-back is Swift-tested. Byte-identical UI-level replay is not treated as a reliable assertion while the simulation is live.
 - Done with note: Recreate or validate scroll wheel, magnify, and rotate gestures at shared-route smoke level. Synthetic AppKit gesture event construction is unreliable in this environment, so full visible gesture behavior still needs manual or better UI automation validation.
 
 ### Phase 3: iOS/iPadOS Usability
@@ -652,7 +763,9 @@ Status: In progress.
 - Done with note: Touch automation used Computer Use against the Simulator UI; `simctl io tap` is unavailable in the current toolchain.
 - Done: Exercise the mobile overlay commands (`New Simulation`, `Next Ape`, `Previous Ape`) through the Simulator UI.
 - Done: Investigate optional iPad multi-window scene behavior. The generated iOS Simulator Info.plist already sets `UIApplicationSupportsMultipleScenes = true` for the SwiftUI `WindowGroup` app.
-- Next: Add actual multi-window UI/UX only if we decide the iPad app should expose more than the current single simulation surface per scene.
+- Decision: Do not add explicit iPad multi-window controls yet. The underlying scene manifest supports multiple scenes, but the shared simulation engine currently uses singleton state.
+- Done: Designed scene-instance simulation/app-shell isolation before exposing explicit iPad multi-window controls. The accepted direction is a per-scene Swift model plus an opaque C session API, with current `shared_*` calls retained as wrappers around a default process session during migration.
+- Next: Implement the session API only when explicit iPad multi-window UI becomes a priority; until then keep the current single shared simulation surface.
 
 ### Phase 4: Transition
 
@@ -664,10 +777,10 @@ Status: Not started.
 
 ## Immediate Next Steps
 
-1. Add manual or stronger UI automation validation for end-to-end user-selected file open/read-back and visible scroll/magnify/rotate behavior.
-2. Decide whether iPad should expose explicit multi-window controls beyond the existing SwiftUI `WindowGroup` scene support.
-3. Decide what Mac Catalyst-specific behavior is needed before adding a separate Catalyst target; the current `ApeSim-iOS` target already builds as Catalyst.
-4. Continue expanding `SimMacTests` only where new user feedback or regressions identify missing parity assertions.
+1. Add manual or stronger UI automation validation for visible scroll/magnify/rotate behavior.
+2. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
+3. Continue safe visible command validation for non-toggle menu commands and expand `SimMacTests` only where new feedback or regressions identify missing parity assertions.
+4. If explicit iPad multi-window UI becomes a priority, implement the documented per-scene model and C session API before adding user-facing window controls.
 
 ## Open Questions
 
