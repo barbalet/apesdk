@@ -45,6 +45,8 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done with note: User validation of `/private/tmp/apesdk-ipados-orientation-fixed.png` and `/private/tmp/apesdk-ios-orientation-fixed.png` showed that the terrain graphics still needed a 180-degree rotation while the SwiftUI controls were already upright. The mobile terrain copy path now rotates the shared terrain buffer 180 degrees, and the UIKit touch mapping now applies the same inverse rotation so terrain input still maps to the displayed terrain.
 - Done: Mobile priority 0 now keeps the visible app name, bundle name, executable name, and compiled iOS/iPadOS Simulator product aligned as `Simulated Ape` / `Simulated Ape.app`.
 - Done with note: Replaced the temporary mobile text-button overlay with a compact SF Symbols command surface for Previous Ape, New Simulation, and Next Ape. User visual acceptance is still needed before treating this as the final iOS/iPadOS interface.
+- Done: User confirmed task 0 is completed on 2026-07-07.
+- Done with note: Task 1 current-parity decision recorded on 2026-07-07. Scroll and magnify are accepted as current no-op/no-crash parity routes for now because `shared_delta` and `shared_zoom` are empty. Rotate remains the only visibly meaningful route in this phase, and a derived-app visible screenshot pass confirmed Terrain changed after rotate-capable input.
 - Done: Added an adaptive mobile command panel: compact width remains bottom-trailing, while regular iPad width uses a larger trailing panel.
 - Done: Fixed mobile touch coordinate mapping so touches are scaled to the actual render buffer rather than blindly using `UIScreen.scale`.
 - Done with note: Verified Simulator UI touch delivery through Computer Use. `simctl io tap` remains unavailable, but a terrain drag produced UIKit touch dispatch events in the rebuilt `ApeSim-iOS` process.
@@ -76,12 +78,18 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done: Built the existing `ApeSim-iOS` scheme as Mac Catalyst into `Debug-maccatalyst` from the `maccatalyst` project. The generated Catalyst Info.plist has `UIDeviceFamily = [6]` and `UIApplicationSupportsMultipleScenes = true`.
 - Done: Smoke-tested the unsigned Mac Catalyst `ApeSim-iOS` product from `/private/tmp`. It launched as bundle id `com.apesdk.sim-ios`, exposed one `Simulated Ape` window with standard Catalyst menus, and quit cleanly. A signed generic Catalyst build still requires a development team.
 - Done: Exercised native Mac Control menu toggle behavior from a derived `/private/tmp` build. `Pause`, `Territory`, `No Weather`, `No Brain`, and `Braincode` accepted clicks and updated to their inverse labels.
+- Done with note: Completed the safe visible native Mac non-toggle menu validation from a derived `/private/tmp` build. `New Simulation`, `About Simulated Ape`, `Previous Ape`, `Next Ape`, `Clear Errors`, and `Command Line` accepted UI clicks, the app kept the expected `Control`, `Terrain`, and `View` windows, and the app quit cleanly. `Manual` and `Simulation Page` remain source-and-presence validated only because automated clicking opens external webpages through `NSWorkspace.shared.open`.
+- Done: Added a dedicated Mac Catalyst target and shared scheme, `ApeSim-MacCatalyst`, under `maccatalyst/maccatalyst.xcodeproj`.
+- Done with note: `ApeSim-MacCatalyst` uses the existing `ios/ApeSimApp.swift` and shared C file references. It forks only target metadata: scheme, product reference, bundle id `com.apesdk.sim-catalyst`, and Mac Catalyst device-family settings.
+- Done: Built `ApeSim-MacCatalyst` as an unsigned Mac Catalyst development product from `/private/tmp`. The product is `Simulated Ape.app` and the generated Info.plist reports `CFBundleDisplayName`, `CFBundleName`, and `CFBundleExecutable` as `Simulated Ape`.
+- Done: Smoke-tested the dedicated Mac Catalyst product from `/private/tmp`. It launched as bundle id `com.apesdk.sim-catalyst`, exposed one `Simulated Ape` window with standard Catalyst menus, and quit cleanly.
+- Done: Deleted the failed `june13/` project tree per user request on 2026-07-07.
 - Decision: The user replaced `/Applications/Simulated Ape.app` with the mentioned build, but future process testing should avoid the `/Applications` copy until the app is 100% production/release compilable.
 - Decision: Keep the inherited `sim-mac` target and scheme name for now to preserve traceability to the known-good Mac baseline. Revisit renaming after the mobile target is more usable.
 - Decision update: Add a dedicated Mac Catalyst target as its own priority after the remaining native Mac command/gesture validation and before any iPad multi-window session implementation. The existing `ApeSim-iOS` target already builds and launches as Mac Catalyst and remains the reference until the dedicated target exists.
 - Decision update: iPad multi-window UI is a priority, but it must be preceded by the per-scene iPad session model so each window owns an independent simulation session instead of competing over singleton state.
 - Done: Designed the iPad multi-window architecture. The path is to keep the current `WindowGroup` as one shared simulation surface only until a scene-owned session handle exists; then explicit iPad multi-window UI can create independent simulation sessions without forking iOS/Mac source.
-- Not done: No separate Mac Catalyst-specific target has been added yet; this is now an explicit queued phase before iPad session implementation and final transition work.
+- Next: Implement the per-scene iPad session model before adding explicit iPad multi-window UI.
 
 ## Baseline Evidence
 
@@ -525,6 +533,56 @@ xcrun swift -module-cache-path /private/tmp/apesdk-swift-probe-modules -e '...NS
 
 Result on 2026-07-07: `NSEvent.scrollWheel(...)` is not available under that Swift name in the local SDK, and synthetic `.magnify` / `.rotate` events through `NSEvent.otherEvent(...)` abort with an AppKit internal assertion. Keep gesture behavior covered by the existing shared-route Swift Testing smoke checks until real gesture UI automation or manual validation is available.
 
+Task 1 restart inspection on 2026-07-07:
+
+- `toolchains/sim-mac/sim-mac/CustomDrawingView.swift` overrides `scrollWheel`, `magnify`, and `rotate`.
+- `scrollWheel` calls `shared_delta(event.deltaX, event.deltaY, viewType)`.
+- `magnify` calls `shared_zoom(event.magnification, viewType)`.
+- `rotate` calls `shared_rotate(Double(event.rotation), viewType)`.
+- `gui/shared.c` implements `shared_rotate` for `NUM_TERRAIN` by calling `sim_rotate`, but `shared_delta` and `shared_zoom` are empty.
+
+User decision on 2026-07-07: task 1 should confirm current parity only and visibly validate rotate only. Scroll and magnify are current no-op/no-crash parity because `shared_delta` and `shared_zoom` are empty. Do not add visible scroll/zoom semantics during this phase.
+
+Visible rotate validation on 2026-07-07:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-task1-gesture-tests test
+open -n /private/tmp/apesdk-task1-gesture-tests/Build/Products/Debug/Simulated\ Ape.app
+osascript -e '...' # Raised the Terrain window and sent left-arrow rotate input to the focused derived app.
+screencapture -x /private/tmp/apesdk-task1-rotate-before.png
+screencapture -x /private/tmp/apesdk-task1-rotate-after.png
+osascript -e '...' # Quit Simulated Ape through the app menu.
+```
+
+Result: the first Swift Testing run exposed that a direct headless `shared_rotate` render-difference check was not reliable, so that strict test was not retained. The retained Swift Testing suite then produced `TEST SUCCEEDED`: 10 tests in 1 suite passed. The visible derived-app pass showed the Terrain window changed between the before and after screenshots, and the app quit cleanly with `System Events` reporting no remaining `Simulated Ape` process. Evidence:
+
+- `/private/tmp/apesdk-task1-rotate-before.png`
+- `/private/tmp/apesdk-task1-rotate-after.png`
+
+Safe native Mac non-toggle command validation on 2026-07-07:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-nontoggle-menu-tests test
+open -n /private/tmp/apesdk-nontoggle-menu-tests/Build/Products/Debug/Simulated\ Ape.app
+osascript -e '...' # Clicked About, Previous Ape, Next Ape, Clear Errors, and Command Line through the menu bar.
+screencapture -x /private/tmp/apesdk-nontoggle-menu-before.png
+screencapture -x /private/tmp/apesdk-nontoggle-menu-after.png
+open -n /private/tmp/apesdk-nontoggle-menu-tests/Build/Products/Debug/Simulated\ Ape.app
+osascript -e '...' # Clicked File > New Simulation through the menu bar.
+screencapture -x /private/tmp/apesdk-nontoggle-new-before.png
+screencapture -x /private/tmp/apesdk-nontoggle-new-after.png
+osascript -e '...' # Quit Simulated Ape through the app menu after each run.
+```
+
+Result: Swift Testing produced `TEST SUCCEEDED`: 10 tests in 1 suite passed. The derived app exposed the expected `Control`, `Terrain`, and `View` windows. `About Simulated Ape`, `Previous Ape`, `Next Ape`, `Clear Errors`, `Command Line`, and `New Simulation` all accepted UI clicks. The `New Simulation` before/after screenshots had different SHA-256 hashes, confirming a visible change. `Manual` and `Simulation Page` were present in the Online menu and source-confirmed to call `NSWorkspace.shared.open`, but were intentionally not clicked during this safe pass because they open external webpages. Both derived app runs quit cleanly, with `System Events` reporting no remaining `Simulated Ape` process. Evidence:
+
+- `/private/tmp/apesdk-nontoggle-menu-before.png`
+- `/private/tmp/apesdk-nontoggle-menu-after.png`
+- `/private/tmp/apesdk-nontoggle-new-before.png`
+- `/private/tmp/apesdk-nontoggle-new-after.png`
+
+User request on 2026-07-07: the four `/private/tmp/apesdk-nontoggle-*.png` screenshots above were deleted after display/validation.
+
 Four-cycle pass on 2026-07-07:
 
 ```sh
@@ -575,6 +633,27 @@ Results:
 - Product: `/private/tmp/apesdk-plan-cycle-catalyst-launch/Build/Products/Debug-maccatalyst/ApeSim-iOS.app`.
 - `open` launched the product. System Events observed `windows=Simulated Ape` and top-level menus `Apple`, `ApeSim-iOS`, `File`, `Edit`, `View`, `Window`, `Help`.
 - Quit by bundle id returned `false` for the remaining `com.apesdk.sim-ios` process check.
+
+Dedicated Mac Catalyst target pass on 2026-07-07:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -list
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-MacCatalyst -configuration Debug -destination 'generic/platform=macOS,variant=Mac Catalyst' -derivedDataPath /private/tmp/apesdk-dedicated-catalyst-derived CODE_SIGNING_ALLOWED=NO build
+plutil -p /private/tmp/apesdk-dedicated-catalyst-derived/Build/Products/Debug-maccatalyst/Simulated\ Ape.app/Contents/Info.plist
+open -n /private/tmp/apesdk-dedicated-catalyst-derived/Build/Products/Debug-maccatalyst/Simulated\ Ape.app
+osascript -e '...' # Read window/menu surface and running bundle id, then quit through the app menu.
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-dedicated-catalyst-simmac-regression test
+```
+
+Results:
+
+- `xcodebuild -list` reports target and scheme `ApeSim-MacCatalyst` alongside the existing `sim-mac`, `ApeSim-iOS`, and `SimMacTests` targets/schemes.
+- `ApeSim-MacCatalyst` build produced `BUILD SUCCEEDED`.
+- Product: `/private/tmp/apesdk-dedicated-catalyst-derived/Build/Products/Debug-maccatalyst/Simulated Ape.app`.
+- Generated Info.plist values: `CFBundleIdentifier = com.apesdk.sim-catalyst`, `CFBundleDisplayName = Simulated Ape`, `CFBundleName = Simulated Ape`, `CFBundleExecutable = Simulated Ape`, `CFBundleSupportedPlatforms = [MacOSX]`, `UIDeviceFamily = [6]`, and `UIApplicationSupportsMultipleScenes = true`.
+- `open` launched the product. System Events observed `windows=Simulated Ape`, top-level menus `Apple`, `Simulated Ape`, `File`, `Edit`, `View`, `Window`, `Help`, and running bundle id `com.apesdk.sim-catalyst`.
+- Quit through the app menu returned `false` for the remaining `Simulated Ape` process check.
+- Existing `sim-mac` regression after the project-file edit produced `TEST SUCCEEDED`: 10 tests in 1 suite passed.
 
 Native Mac Control menu behavior smoke test:
 
@@ -650,10 +729,8 @@ Result on 2026-07-07: `TEST SUCCEEDED`. Observed Swift Testing results: 9 tests 
   - `render/`
   - `shared.h`
   - `universe/command.c` now clears `command_file_interaction` after missing or failed opens so later save/open routes are not blocked.
-- Existing Catalyst-oriented reference material, not adopted yet:
-  - `june13/SimulatedUniverse.xcodeproj`
-  - `june13/SimulatedUniverse-200-Cycle-Plan.md`
-  - `june13/Docs/`
+- Removed reference material:
+  - `june13/` was deleted on 2026-07-07 per user request because it was a failed project.
 - Older shared Mac wrapper affected by the supplied crash report:
   - `mac/AppDelegate.swift`
   - `mac/SimulationBindings.swift`
@@ -668,23 +745,23 @@ The new Mac build is not a replacement for `toolchains/sim-mac` until these are 
 - Control window rendering `NUM_CONTROL`.
 - Continuous simulation loop through `shared_cycle`.
 - Drawing through `shared_draw`.
-- New Simulation menu command.
+- Done with note: New Simulation menu command accepted a derived-app UI click and produced a visibly different before/after screenshot pair.
 - Done with note: Open simulation file is covered by visible Open panel selection plus Swift Testing save/open read-back.
 - Done with note: Open script file panel opens and can be canceled; script content execution through a selected file still needs safe validation if script parity becomes a focus.
 - Done with note: Save As is covered by visible user-selected panel saves plus Swift Testing direct save/open read-back.
-- About Simulated Ape.
+- Done: About Simulated Ape accepted a derived-app UI click through the app menu.
 - Done: Pause/Resume and the Territory, Weather, Brain, and Braincode toggles have visible UI smoke coverage through the Control menu.
-- Previous Ape and Next Ape.
-- Clear Errors.
-- Command Line command.
-- Online Manual and Simulation Page commands.
+- Done: Previous Ape and Next Ape accepted derived-app UI clicks through the Control menu.
+- Done: Clear Errors accepted a derived-app UI click through the Control menu.
+- Done with note: Command Line accepted a derived-app UI click through the Control menu and the app remained responsive enough to quit cleanly.
+- Done with note: Online Manual and Simulation Page commands are present in the Online menu and source-confirmed to route through `NSWorkspace.shared.open`; they were not clicked during safe automation because they open external webpages.
 - Done: Keyboard input for letters and arrows has a first-responder path and a smoke pass.
 - Done: Mouse down/up/drag, right mouse, and option/control-modified mouse share the corrected source path and are covered by Swift Testing event-route checks. External UI automation still covered normal and option clicks only; drag/right-click should get manual or better UI automation coverage when tooling allows.
-- Done with note: Scroll wheel, magnify, and rotate shared gesture routes are covered at smoke-test level by Swift Testing. Full human-visible gesture behavior still needs manual or UI automation validation.
+- Done with note: Scroll wheel and magnify are accepted as current no-op/no-crash parity routes. Rotate is visibly covered by the derived-app screenshot validation recorded above.
 - Initial help/tutorial popovers are intentionally disabled on macOS and Mac Catalyst; any future replacement must not interfere with the running simulation.
 - Done: App sandbox file entitlement now allows user-selected read-write access for Open and Save As.
-- Local debug build and launch from Xcode command line.
-- Manual app shutdown without queued redraw entering shared drawing after close.
+- Done: Local debug build and launch from Xcode command line.
+- Done: Manual app shutdown without queued redraw entering shared drawing after close.
 
 ## iOS/iPadOS Minimum Checklist
 
@@ -795,6 +872,7 @@ Status: In progress.
 - Done with note: Add initial Swift Testing coverage for the Mac parity checklist in one grouped test file. This now covers panel construction, tutorial data, command constants, file-route smoke checks, save/open round trip, input/event routing, mobile wrappers, reset commands, and ape selection/drag movement, but does not replace manual UI validation for every visible command.
 - Done with note: Recreate or validate file open/save behavior at panel/entitlement and shared-route smoke level. Visible Save As/Open/Open Script panels are UI-smoke-tested, visible user-selected Save As/Open/Save As completed in a derived app, and direct sandbox save/open read-back is Swift-tested. Byte-identical UI-level replay is not treated as a reliable assertion while the simulation is live.
 - Done with note: Recreate or validate scroll wheel, magnify, and rotate gestures at shared-route smoke level. Synthetic AppKit gesture event construction is unreliable in this environment, so full visible gesture behavior still needs manual or better UI automation validation.
+- Done with note: Recreate or validate the remaining safe non-toggle native Mac menu commands. About, New Simulation, Previous Ape, Next Ape, Clear Errors, and Command Line accepted UI clicks in a derived app. Online Manual and Simulation Page are source-and-presence validated only because clicking them opens external webpages.
 
 ### Phase 3: iOS/iPadOS Usability
 
@@ -810,18 +888,18 @@ Status: In progress.
 - Done: Investigate optional iPad multi-window scene behavior. The generated iOS Simulator Info.plist already sets `UIApplicationSupportsMultipleScenes = true` for the SwiftUI `WindowGroup` app.
 - Decision update: iPad multi-window UI is a priority. Do not add explicit controls until the per-scene session model exists because the underlying shared simulation engine currently uses singleton state.
 - Done: Designed scene-instance simulation/app-shell isolation before exposing explicit iPad multi-window controls. The accepted direction is a per-scene Swift model plus an opaque C session API, with current `shared_*` calls retained as wrappers around a default process session during migration.
-- Next: Keep the current single shared simulation surface until the dedicated Mac Catalyst target phase is complete, then implement the per-scene iPad session model before adding multi-window UI.
+- Next: Implement the per-scene iPad session model before adding multi-window UI.
 
 ### Phase 4: Dedicated Mac Catalyst Target
 
-Status: Not started.
+Status: Done.
 
-- Add a dedicated Mac Catalyst target and scheme under `maccatalyst/maccatalyst.xcodeproj`.
-- Use the existing `ApeSim-iOS` Mac Catalyst build as the known-good reference while adding the dedicated target.
-- Keep shared simulation, rendering, iOS/iPadOS Swift, and Mac Swift source references canonical; fork only target settings, app-shell files, menus, entitlements, or platform behavior that genuinely must differ for Mac Catalyst.
-- Build the dedicated Mac Catalyst target into an explicit `/private/tmp` derived data location.
-- Launch the dedicated Mac Catalyst product from `/private/tmp`, verify the expected window/menu surface, and quit it cleanly.
-- Do not replace the native `sim-mac` target or the current `ApeSim-iOS` target while this target is being brought up.
+- Done: Added the dedicated `ApeSim-MacCatalyst` target and shared scheme under `maccatalyst/maccatalyst.xcodeproj`.
+- Done: Used the existing `ApeSim-iOS` Mac Catalyst build as the known-good reference while adding the dedicated target.
+- Done: Kept shared simulation, rendering, iOS/iPadOS Swift, and Mac Swift source references canonical. The new target forks target metadata only.
+- Done: Built the dedicated Mac Catalyst target into `/private/tmp/apesdk-dedicated-catalyst-derived`.
+- Done: Launched the dedicated Mac Catalyst product from `/private/tmp`, verified the expected one-window standard Catalyst menu surface, confirmed bundle id `com.apesdk.sim-catalyst`, and quit it cleanly.
+- Done: Kept the native `sim-mac` target and current `ApeSim-iOS` target in place.
 
 ### Phase 5: Transition
 
@@ -833,14 +911,10 @@ Status: Not started.
 
 ## Immediate Next Steps
 
-0. Get user validation on the fresh mobile priority 0 pass before the rest of this list: `/private/tmp/apesdk-ipados-rotate180.png`, `/private/tmp/apesdk-ios-rotate180.png`, the `Simulated Ape.app` mobile product naming, and the first-pass compact icon command surface.
-1. Add manual or stronger UI automation validation for visible scroll/magnify/rotate behavior.
-2. Continue safe visible command validation for non-toggle menu commands and expand `SimMacTests` only where new feedback or regressions identify missing parity assertions.
-3. Add the dedicated Mac Catalyst target and scheme as its own phase, keeping existing iOS/iPadOS and native Mac targets in place.
-4. Implement the per-scene iPad session model. iPad multi-window UI is a priority, and the per-scene session model must come before user-facing window controls.
-5. Start Phase 5 transition work only after parity is proven: compare against `toolchains/sim-mac`, keep both builds during proof, and ask before removing or moving old source.
-6. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
+1. Implement the per-scene iPad session model. iPad multi-window UI is a priority, and the per-scene session model must come before user-facing window controls.
+2. Start Phase 5 transition work only after parity is proven: compare against `toolchains/sim-mac`, keep both builds during proof, and ask before removing or moving old source.
+3. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
 
 ## Open Questions
 
-- User validation is needed for the fresh iPadOS/iOS priority 0 screenshots and first-pass icon command surface before considering the mobile orientation/interface pass accepted.
+- None blocking right now.

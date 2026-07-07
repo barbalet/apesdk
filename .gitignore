@@ -4,6 +4,7 @@ contents.xcworkspacedata
 UserInterfaceState.xcuserstate
 *.xcscheme
 !maccatalyst/maccatalyst.xcodeproj/xcshareddata/xcschemes/sim-mac.xcscheme
+!maccatalyst/maccatalyst.xcodeproj/xcshareddata/xcschemes/ApeSim-MacCatalyst.xcscheme
 xcschememanagement.plist
 *.xcbkptlist
 
