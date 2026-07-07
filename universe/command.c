@@ -2395,6 +2395,8 @@ static n_int command_base_open( void *ptr, n_string response, n_console_output o
             }
             if ( sim_init( KIND_LOAD_FILE, 0, MAP_AREA, 0 ) == 0L )
             {
+                io_file_free( &file_opened );
+                command_file_interaction = 0;
                 return SHOW_ERROR( "Not enough memory to load file" );
             }
             io_file_free( &file_opened );
@@ -2413,6 +2415,10 @@ static n_int command_base_open( void *ptr, n_string response, n_console_output o
 
             output_function( output_string );
         }
+    }
+    else
+    {
+        command_file_interaction = 0;
     }
     return 0;
 }

@@ -168,26 +168,25 @@ struct SimMacParityTests {
 
     @Test("AppKit window, panel, tutorial, and wrapper contracts")
     func appKitContracts() {
-        let existingWindowNumbers = Set(NSApp.windows.map(\.windowNumber))
-        let delegate = AppDelegate()
-        delegate.openAdditionalWindows()
-        RunLoop.current.run(until: Date().addingTimeInterval(0.05))
-
-        let createdWindows = NSApp.windows.filter { window in
-            !existingWindowNumbers.contains(window.windowNumber)
+        if NSApp.windows.contains(where: { $0.title == "Terrain" }) == false ||
+            NSApp.windows.contains(where: { $0.title == "Control" }) == false {
+            let delegate = AppDelegate()
+            delegate.openAdditionalWindows()
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         }
-        let titles = Set(createdWindows.map(\.title))
+
+        let appWindows = NSApp.windows.filter { ["Terrain", "Control"].contains($0.title) }
+        let titles = Set(appWindows.map(\.title))
         #expect(titles.isSuperset(of: Set(["Terrain", "Control"])))
 
-        if let terrain = createdWindows.first(where: { $0.title == "Terrain" }) {
+        if let terrain = appWindows.first(where: { $0.title == "Terrain" }) {
             #expect(terrain.minSize == NSSize(width: 512, height: 400))
             #expect(terrain.contentResizeIncrements == NSSize(width: 4, height: 4))
         }
-        if let control = createdWindows.first(where: { $0.title == "Control" }) {
+        if let control = appWindows.first(where: { $0.title == "Control" }) {
             #expect(control.minSize == NSSize(width: 342, height: 512))
             #expect(control.contentResizeIncrements == NSSize(width: 4, height: 4))
         }
-        createdWindows.forEach { $0.close() }
 
         let app = SimMacApp()
         let openPanel = app.uniformOpenPanel()
@@ -204,8 +203,45 @@ struct SimMacParityTests {
         #expect(InitialTutorialController.shared.showNextTutorial(for: view))
         #expect(shared_initial_tutorial_enabled() == 0)
         #expect(shared_initial_tutorial_count() > 0)
+        for viewType in [NUM_VIEW, NUM_TERRAIN, NUM_CONTROL] {
+            #expect(InitialTutorialController.shared.showNextTutorial(for: Self.makeView(Int32(viewType))))
+            #expect(ViewWrapper(viewType: Int32(viewType)).viewType == Int32(viewType))
+        }
         #expect(ViewWrapper(viewType: Int32(NUM_VIEW)).viewType == Int32(NUM_VIEW))
         #expect(AppDelegate.isTerminating == false)
+    }
+
+    @Test("Tutorial step data remains valid while Mac popovers stay disabled")
+    func tutorialStepDataContracts() {
+        #expect(shared_initial_tutorial_enabled() == 0)
+        let count = shared_initial_tutorial_count()
+        #expect(count > 0)
+
+        for step in 0..<count {
+            let window = shared_initial_tutorial_window(step)
+            #expect([NUM_VIEW, NUM_TERRAIN, NUM_CONTROL].contains(Int32(window)))
+            #expect((0...1000).contains(Int(shared_initial_tutorial_anchor_x(step))))
+            #expect((0...1000).contains(Int(shared_initial_tutorial_anchor_y(step))))
+            #expect((1...1000).contains(Int(shared_initial_tutorial_anchor_width(step))))
+            #expect((1...1000).contains(Int(shared_initial_tutorial_anchor_height(step))))
+            #expect((0...3).contains(Int(shared_initial_tutorial_edge(step))))
+
+            if let title = shared_initial_tutorial_title(step) {
+                #expect(String(cString: title).isEmpty == false)
+            } else {
+                Issue.record("Tutorial title pointer was nil")
+            }
+
+            if let text = shared_initial_tutorial_text(step) {
+                #expect(String(cString: text).isEmpty == false)
+            } else {
+                Issue.record("Tutorial text pointer was nil")
+            }
+        }
+
+        #expect(shared_initial_tutorial_window(-1) == NUM_NIL)
+        #expect(String(cString: shared_initial_tutorial_title(count)).isEmpty)
+        #expect(String(cString: shared_initial_tutorial_text(count)).isEmpty)
     }
 
     @Test("Menu constants and file routes keep their contracts")
@@ -247,6 +283,51 @@ struct SimMacParityTests {
         shared_saveFileName(savePath)
         #expect(shared_simulation_started() == 1)
         try? FileManager.default.removeItem(atPath: savePath)
+    }
+
+    @Test("Simulation save route writes a sandbox temporary file")
+    func sandboxTemporarySaveWritesFile() throws {
+        shared_close()
+        defer { shared_close() }
+
+        #expect(shared_init(n_int(NUM_CONTROL), 0x12738291) == n_int(NUM_CONTROL))
+        _ = shared_cycle(1, n_int(NUM_CONTROL))
+
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("apesdk-sim-mac-roundtrip-\(UUID().uuidString)")
+            .appendingPathExtension("txt")
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        shared_saveFileName(url.path)
+        #expect(FileManager.default.fileExists(atPath: url.path))
+        let data = try Data(contentsOf: url)
+        #expect(data.isEmpty == false)
+        #expect(shared_simulation_started() == 1)
+    }
+
+    @Test("New simulation commands and iOS wrappers keep the shared engine usable")
+    func resetCommandsAndMobileWrappers() {
+        shared_close()
+        defer { shared_close() }
+
+        #expect(shared_init(n_int(NUM_CONTROL), 0x12738291) == n_int(NUM_CONTROL))
+        #expect(shared_being_number() > 0)
+
+        #expect(shared_new(0x22334455) == 0)
+        #expect(shared_simulation_started() == 1)
+        #expect(shared_being_number() > 0)
+
+        #expect(shared_new_agents(0x55667788) == 0)
+        #expect(shared_simulation_started() == 1)
+        #expect(shared_being_number() > 0)
+
+        var mobileBuffer = [n_byte4](repeating: 0, count: 512 * 512)
+        mobileBuffer.withUnsafeMutableBufferPointer { buffer in
+            shared_draw_ios(buffer.baseAddress, 512, 512)
+        }
+        shared_mouseReceived_ios(128.0, 192.0)
+        _ = shared_cycle_ios(1)
+        #expect(shared_simulation_started() == 1)
     }
 
     @Test("Keyboard, mouse, drag, and gesture routes stay safe")

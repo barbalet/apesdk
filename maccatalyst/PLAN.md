@@ -1,6 +1,6 @@
 # ApeSDK Mac Catalyst Plan
 
-Last updated: 2026-07-06
+Last updated: 2026-07-07
 
 ## Goal
 
@@ -60,11 +60,19 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done with note: Smoke-tested rebuilt `maccatalyst` Mac mouse input with normal click and option-click against the View window. System Events in this environment cannot synthesize drag events, so drag remains source-covered and build-covered but not UI-automation-covered.
 - Done: Added a hosted Swift Testing target, `SimMacTests`, to `maccatalyst/maccatalyst.xcodeproj`.
 - Done: Added one grouped Swift Testing source file, `maccatalyst/Tests/SimMacParityTests.swift`, covering the Mac functionality inventory with grouped behavioral checks for lifecycle/drawing, windows, panels, menu constants, file routes, keyboard input, mouse/drag/gesture routing, disabled tutorial popovers, and selected-ape find/select/drag/move through the UI event route.
+- Done: Expanded the grouped Swift Testing source with tutorial-data checks, all three wrapper view types, mobile draw/cycle wrapper coverage, new simulation/new apes reset coverage, and sandbox temporary save-file creation.
+- Done: Stabilized the AppKit window test harness after two attached crash reports from derived `/private/tmp/.../Simulated Ape.app` test runs showed the same main-thread AppKit `_NSWindowTransformAnimation` release crash. The test now inspects launch windows instead of creating and closing extra Terrain/Control windows.
 - Done: Added read-only shared test/diagnostic accessors for selected ape followed location and actual selected being location.
+- Done: Fixed `command_base_open` so failed/missing opens clear `command_file_interaction`; this unblocked later save calls after a missing-file route.
 - Done: Updated the Mac app sandbox entitlement from user-selected read-only to user-selected read-write so the Save As panel is valid for the app's advertised save behavior.
+- Done: Performed a visible File menu panel smoke test from the derived `maccatalyst` Mac build. Save As opened a `Save` dialog, Open opened an `Open` dialog, Open Script opened an `Open` dialog, and the app quit cleanly afterward.
+- Done with note: Investigated stronger automated scroll/magnify/rotate gesture event tests. The local AppKit SDK exposes the responder methods and event properties, but synthetic gesture `NSEvent` construction is not reliable in this environment; this remains covered at shared-route smoke level and still needs real-device/manual or better UI automation validation.
+- Done: Rebuilt `ApeSim-iOS` for a generic iOS Simulator destination from the `maccatalyst` project. The generated Info.plist has `UIApplicationSupportsMultipleScenes = true` in `UIApplicationSceneManifest`.
+- Done: Built the existing `ApeSim-iOS` scheme as Mac Catalyst into `Debug-maccatalyst` from the `maccatalyst` project. The generated Catalyst Info.plist has `UIDeviceFamily = [6]` and `UIApplicationSupportsMultipleScenes = true`.
 - Decision: The user replaced `/Applications/Simulated Ape.app` with the mentioned build, but future process testing should avoid the `/Applications` copy until the app is 100% production/release compilable.
 - Decision: Keep the inherited `sim-mac` target and scheme name for now to preserve traceability to the known-good Mac baseline. Revisit renaming after the mobile target is more usable.
-- Not done: No Mac Catalyst-specific target has been added yet.
+- Decision: Do not add a separate Mac Catalyst target yet. The existing `ApeSim-iOS` target already builds as Mac Catalyst; add a dedicated Catalyst target only when Catalyst-specific menus/windows/settings need to diverge from the iOS/iPadOS app.
+- Not done: No separate Mac Catalyst-specific target has been added yet.
 
 ## Baseline Evidence
 
@@ -439,6 +447,53 @@ xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -config
 
 Result on 2026-07-06: both commands produced `BUILD SUCCEEDED`.
 
+Visible File menu panel smoke test:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-maccatalyst-ui-cycle-derived build
+open -n /private/tmp/apesdk-maccatalyst-ui-cycle-derived/Build/Products/Debug/Simulated\ Ape.app
+osascript -e '...' # System Events clicked File > Save As…, File > Open…, File > Open Script…, then Quit Simulated Ape.
+```
+
+Result on 2026-07-07: build produced `BUILD SUCCEEDED`. System Events observed:
+
+```text
+windows=ControlTerrainView
+fileMenu=New Simulation...Open…Open Script…Save As…
+afterSaveAs.windows=SaveControlTerrainView
+afterOpen.windows=OpenControlTerrainView
+afterOpenScript.windows=OpenControlTerrainView
+remaining=false
+```
+
+Interpretation: the user-facing File menu items are present, their panels can be shown and canceled in the derived build, and the process exits cleanly through the app menu. This remains a panel smoke test, not an end-to-end file read/write content validation.
+
+Gesture automation investigation:
+
+```sh
+xcrun swift -module-cache-path /private/tmp/apesdk-swift-probe-modules -e '...NSEvent scroll/magnify/rotate construction probes...'
+```
+
+Result on 2026-07-07: `NSEvent.scrollWheel(...)` is not available under that Swift name in the local SDK, and synthetic `.magnify` / `.rotate` events through `NSEvent.otherEvent(...)` abort with an AppKit internal assertion. Keep gesture behavior covered by the existing shared-route Swift Testing smoke checks until real gesture UI automation or manual validation is available.
+
+Four-cycle pass on 2026-07-07:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-plan-four-cycles-tests test
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath /private/tmp/apesdk-plan-four-cycles-iossim build
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -destination 'generic/platform=macOS,variant=Mac Catalyst' -derivedDataPath /private/tmp/apesdk-plan-four-cycles-catalyst CODE_SIGNING_ALLOWED=NO build
+```
+
+Results:
+
+- `sim-mac` Swift Testing produced `TEST SUCCEEDED`: 9 tests in 1 suite passed.
+- The two crash reports attached during this pass were both from derived `/private/tmp/.../Simulated Ape.app` test runs and had the same main-thread AppKit stack: `objc_release` -> `-[_NSWindowTransformAnimation dealloc]`. This was addressed by changing the AppKit test to inspect the launch Terrain/Control windows rather than creating and closing extra test windows; the full suite passed afterward.
+- `ApeSim-iOS` iOS Simulator build produced `BUILD SUCCEEDED`. Product: `/private/tmp/apesdk-plan-four-cycles-iossim/Build/Products/Debug-iphonesimulator/ApeSim-iOS.app`.
+- The generated iOS Simulator Info.plist includes `UIApplicationSceneManifest` with `UIApplicationSupportsMultipleScenes = true`, and `UIDeviceFamily = [1, 2]`.
+- `ApeSim-iOS` Mac Catalyst build produced `BUILD SUCCEEDED`. Product: `/private/tmp/apesdk-plan-four-cycles-catalyst/Build/Products/Debug-maccatalyst/ApeSim-iOS.app`.
+- The generated Catalyst Info.plist includes `UIApplicationSceneManifest` with `UIApplicationSupportsMultipleScenes = true`, and `UIDeviceFamily = [6]`.
+- The save route now writes a non-empty sandbox temporary file under test. Root cause found and fixed: `command_base_open` left `command_file_interaction` set after missing-file opens, causing later saves to no-op.
+
 ## Canonical Source Map
 
 - Current Mac app baseline:
@@ -479,6 +534,7 @@ Result on 2026-07-06: both commands produced `BUILD SUCCEEDED`.
   - `script/`
   - `render/`
   - `shared.h`
+  - `universe/command.c` now clears `command_file_interaction` after missing or failed opens so later save/open routes are not blocked.
 - Existing Catalyst-oriented reference material, not adopted yet:
   - `june13/SimulatedUniverse.xcodeproj`
   - `june13/SimulatedUniverse-200-Cycle-Plan.md`
@@ -581,9 +637,9 @@ Status: In progress.
 - Done by decision: Disable initial help/tutorial popovers on macOS and Mac Catalyst per user request.
 - Done: Recreate or validate keyboard shortcuts and focused letter/arrow key routing.
 - Done with note: Recreate or validate mouse down/up/drag/right/option routing. Source and build are covered; drag/right-click UI automation remains limited by available tooling.
-- Done with note: Add initial Swift Testing coverage for the Mac parity checklist in one grouped test file. This covers panel construction, command constants, file-route smoke checks, and input/event routing, but does not replace manual UI validation for every visible command.
-- Done with note: Recreate or validate file open/save behavior at panel/entitlement and shared-route smoke level. Full end-to-end user-selected file open/save should still get manual or UI automation validation.
-- Done with note: Recreate or validate scroll wheel, magnify, and rotate gestures at shared-route smoke level. Full visible gesture behavior should still get manual or UI automation validation.
+- Done with note: Add initial Swift Testing coverage for the Mac parity checklist in one grouped test file. This now covers panel construction, tutorial data, command constants, file-route smoke checks, save-file creation, input/event routing, mobile wrappers, reset commands, and ape selection/drag movement, but does not replace manual UI validation for every visible command.
+- Done with note: Recreate or validate file open/save behavior at panel/entitlement and shared-route smoke level. Visible Save As/Open/Open Script panels are UI-smoke-tested and direct sandbox save-file creation is Swift-tested; full end-to-end user-selected open/read-back validation should still get manual or stronger UI automation validation.
+- Done with note: Recreate or validate scroll wheel, magnify, and rotate gestures at shared-route smoke level. Synthetic AppKit gesture event construction is unreliable in this environment, so full visible gesture behavior still needs manual or better UI automation validation.
 
 ### Phase 3: iOS/iPadOS Usability
 
@@ -595,7 +651,8 @@ Status: In progress.
 - Done: Confirm touch, simulation cycling, and redraw behavior at smoke-test level.
 - Done with note: Touch automation used Computer Use against the Simulator UI; `simctl io tap` is unavailable in the current toolchain.
 - Done: Exercise the mobile overlay commands (`New Simulation`, `Next Ape`, `Previous Ape`) through the Simulator UI.
-- Next: Investigate optional iPad multi-window scene behavior.
+- Done: Investigate optional iPad multi-window scene behavior. The generated iOS Simulator Info.plist already sets `UIApplicationSupportsMultipleScenes = true` for the SwiftUI `WindowGroup` app.
+- Next: Add actual multi-window UI/UX only if we decide the iPad app should expose more than the current single simulation surface per scene.
 
 ### Phase 4: Transition
 
@@ -607,10 +664,10 @@ Status: Not started.
 
 ## Immediate Next Steps
 
-1. Expand `SimMacTests` where useful with more assertions from user feedback on the functionality inventory.
-2. Add manual or stronger UI automation validation for visible file open/save and scroll/magnify/rotate behavior.
-3. Investigate optional iPad multi-window scene behavior.
-4. Decide when to add a true Mac Catalyst target in addition to the native `sim-mac` target and `ApeSim-iOS` target.
+1. Add manual or stronger UI automation validation for end-to-end user-selected file open/read-back and visible scroll/magnify/rotate behavior.
+2. Decide whether iPad should expose explicit multi-window controls beyond the existing SwiftUI `WindowGroup` scene support.
+3. Decide what Mac Catalyst-specific behavior is needed before adding a separate Catalyst target; the current `ApeSim-iOS` target already builds as Catalyst.
+4. Continue expanding `SimMacTests` only where new user feedback or regressions identify missing parity assertions.
 
 ## Open Questions
 
