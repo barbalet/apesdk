@@ -586,6 +586,32 @@ void shared_being_select( n_int number)
     }
 }
 
+n_int shared_selected_location( n_int *x, n_int *y )
+{
+    n_vect2 *being_location = draw_selected_location();
+    if ( ( being_location == 0L ) || ( x == 0L ) || ( y == 0L ) )
+    {
+        return 0;
+    }
+
+    *x = being_location->x;
+    *y = being_location->y;
+    return 1;
+}
+
+n_int shared_selected_being_location( n_int *x, n_int *y )
+{
+    simulated_group *group = sim_group();
+    if ( ( group == 0L ) || ( group->select == 0L ) || ( x == 0L ) || ( y == 0L ) )
+    {
+        return 0;
+    }
+
+    *x = being_location_x( group->select );
+    *y = being_location_y( group->select );
+    return 1;
+}
+
 static n_byte4         colorLookUp[256][256];
 static n_uint          old_hash = 0;
 

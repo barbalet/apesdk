@@ -3,6 +3,7 @@ contents.xcworkspacedata
 *.xccheckout
 UserInterfaceState.xcuserstate
 *.xcscheme
+!maccatalyst/maccatalyst.xcodeproj/xcshareddata/xcschemes/sim-mac.xcscheme
 xcschememanagement.plist
 *.xcbkptlist
 

@@ -144,6 +144,8 @@ n_constant_string shared_initial_tutorial_text( n_int step );
 n_int shared_being_number( void );
 void shared_being_name( n_int number, n_string name );
 void shared_being_select( n_int number);
+n_int shared_selected_location( n_int *x, n_int *y );
+n_int shared_selected_being_location( n_int *x, n_int *y );
 
 #ifndef    _WIN32
 

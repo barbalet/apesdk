@@ -53,6 +53,7 @@ class CustomDrawingView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         window?.acceptsMouseMovedEvents = true
+        window?.makeFirstResponder(self)
     }
 
     override func updateTrackingAreas() {
@@ -124,6 +125,14 @@ class CustomDrawingView: NSView {
         return true
     }
 
+    override func becomeFirstResponder() -> Bool {
+        return true
+    }
+
+    override func resignFirstResponder() -> Bool {
+        return true
+    }
+
     override func keyDown(with event: NSEvent) {
         var localKey: UInt = 0
 
@@ -150,10 +159,11 @@ class CustomDrawingView: NSView {
             }
         }
 
-        if let characters = event.characters {
-            let firstChar = characters.first!
-            if CharacterSet.letters.contains(firstChar.unicodeScalars.first!) {
-                shared_keyReceived(Int(firstChar.unicodeScalars.first!.value), n_int(self.viewType))
+        if let characters = event.characters,
+           let firstChar = characters.first,
+           let scalar = firstChar.unicodeScalars.first {
+            if CharacterSet.letters.contains(scalar) {
+                shared_keyReceived(Int(scalar.value), n_int(self.viewType))
             }
         }
     }
@@ -178,10 +188,11 @@ class CustomDrawingView: NSView {
         tutorialPointerInside = false
     }
 
-    override func mouseDown(with event: NSEvent) {
+    private func receiveMouseDown(with event: NSEvent, forceOption: Bool = false) {
+        window?.makeFirstResponder(self)
         noteTutorialPointerEntered()
         let location = convert(event.locationInWindow, from: nil)
-        let value = event.modifierFlags.contains(.control) || event.modifierFlags.contains(.option)
+        let value = forceOption || event.modifierFlags.contains(.control) || event.modifierFlags.contains(.option)
         if value {
             shared_mouseOption(1)
         } else {
@@ -190,13 +201,16 @@ class CustomDrawingView: NSView {
         shared_mouseReceived(location.x, bounds.height - location.y, n_int(self.viewType))
     }
 
+    override func mouseDown(with event: NSEvent) {
+        receiveMouseDown(with: event)
+    }
+
     override func rightMouseDown(with event: NSEvent) {
-        mouseDown(with: event)
-        shared_mouseOption(1)
+        receiveMouseDown(with: event, forceOption: true)
     }
 
     override func otherMouseDown(with event: NSEvent) {
-        rightMouseDown(with: event)
+        receiveMouseDown(with: event, forceOption: true)
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -212,15 +226,15 @@ class CustomDrawingView: NSView {
     }
 
     override func mouseDragged(with event: NSEvent) {
-        mouseDown(with: event)
+        receiveMouseDown(with: event)
     }
 
     override func rightMouseDragged(with event: NSEvent) {
-        rightMouseDown(with: event)
+        receiveMouseDown(with: event, forceOption: true)
     }
 
     override func otherMouseDragged(with event: NSEvent) {
-        rightMouseDown(with: event)
+        receiveMouseDown(with: event, forceOption: true)
     }
 
     override func scrollWheel(with event: NSEvent) {

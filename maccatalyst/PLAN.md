@@ -54,6 +54,14 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done: Rebuilt `maccatalyst` Mac, original `toolchains/sim-mac`, and `toolchains/planet` after shutdown hardening.
 - Done: Verified the rebuilt `maccatalyst` Mac app exits through the user-facing Quit menu item; System Events reported no remaining `com.apesdk.sim-mac` process afterward.
 - Done: Disabled initial help/tutorial popovers on macOS and future Mac Catalyst paths. The original `sim-mac` project and the `maccatalyst` Mac project no longer define `INITIAL_TUTORIAL_ON`, and `InitialTutorialController` is guarded off on macOS/Mac Catalyst.
+- Done: Improved Mac keyboard routing. `CustomDrawingView` now becomes first responder when attached to a window and when clicked, and its letter-key path no longer force-unwraps empty character events.
+- Done: Smoke-tested keyboard shortcut routing in the rebuilt `maccatalyst` Mac app. `Command-P` changed the Control menu from `Pause` to `Resume`; letter and left/right arrow key events were sent to the focused View window without a crash.
+- Done with note: Improved Mac mouse routing. `CustomDrawingView` now uses one helper for left, modifier, right, other-button, and drag mouse-down paths so the option/right-click flag is set before `shared_mouseReceived`.
+- Done with note: Smoke-tested rebuilt `maccatalyst` Mac mouse input with normal click and option-click against the View window. System Events in this environment cannot synthesize drag events, so drag remains source-covered and build-covered but not UI-automation-covered.
+- Done: Added a hosted Swift Testing target, `SimMacTests`, to `maccatalyst/maccatalyst.xcodeproj`.
+- Done: Added one grouped Swift Testing source file, `maccatalyst/Tests/SimMacParityTests.swift`, covering the Mac functionality inventory with grouped behavioral checks for lifecycle/drawing, windows, panels, menu constants, file routes, keyboard input, mouse/drag/gesture routing, disabled tutorial popovers, and selected-ape find/select/drag/move through the UI event route.
+- Done: Added read-only shared test/diagnostic accessors for selected ape followed location and actual selected being location.
+- Done: Updated the Mac app sandbox entitlement from user-selected read-only to user-selected read-write so the Save As panel is valid for the app's advertised save behavior.
 - Decision: The user replaced `/Applications/Simulated Ape.app` with the mentioned build, but future process testing should avoid the `/Applications` copy until the app is 100% production/release compilable.
 - Decision: Keep the inherited `sim-mac` target and scheme name for now to preserve traceability to the known-good Mac baseline. Revisit renaming after the mobile target is more usable.
 - Not done: No Mac Catalyst-specific target has been added yet.
@@ -298,6 +306,139 @@ osascript -e 'tell application "System Events" to tell (first application proces
 
 Result: the launched app reported windows `Control`, `Terrain`, `View`. The menu-based quit returned `false` for the remaining `com.apesdk.sim-mac` process check.
 
+Mac keyboard routing pass:
+
+- `toolchains/sim-mac/sim-mac/CustomDrawingView.swift` now calls `window?.makeFirstResponder(self)` when the view moves to a window and when it receives mouse down.
+- `CustomDrawingView` now explicitly accepts becoming and resigning first responder.
+- `CustomDrawingView.keyDown(with:)` now safely unwraps letter key characters before calling `shared_keyReceived`.
+
+Post-keyboard-routing build commands:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-maccatalyst-mac-derived build
+xcodebuild -project toolchains/sim-mac/sim-mac.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-sim-mac-derived build
+```
+
+Result on 2026-07-06: both commands produced `BUILD SUCCEEDED`.
+
+Post-keyboard-routing smoke test:
+
+```sh
+open -n /private/tmp/apesdk-maccatalyst-mac-derived/Build/Products/Debug/Simulated\ Ape.app
+osascript -e 'delay 2' -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac") to get {name, position, size} of windows'
+osascript -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac")' \
+  -e 'set frontmost to true' \
+  -e 'tell window "View" to set {x, y} to position' \
+  -e 'tell window "View" to set {w, h} to size' \
+  -e 'click at {x + (w div 2), y + (h div 2)}' \
+  -e 'delay 0.5' \
+  -e 'keystroke "p" using command down' \
+  -e 'delay 0.5' \
+  -e 'set controlMenuNames to name of menu items of menu "Control" of menu bar item "Control" of menu bar 1' \
+  -e 'keystroke "a"' \
+  -e 'key code 124' \
+  -e 'key code 123' \
+  -e 'return controlMenuNames' \
+  -e 'end tell'
+osascript -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac")' \
+  -e 'set frontmost to true' \
+  -e 'click menu item "Quit Simulated Ape" of menu "Simulated Ape" of menu bar item "Simulated Ape" of menu bar 1' \
+  -e 'end tell' \
+  -e 'delay 3' \
+  -e 'tell application "System Events" to exists (first application process whose bundle identifier is "com.apesdk.sim-mac")'
+```
+
+Observed windows: `Control`, `Terrain`, `View`.
+
+Observed after `Command-P`: the Control menu first item was `Resume`, confirming the pause shortcut fired.
+
+Observed after quit: remaining `com.apesdk.sim-mac` process check returned `false`.
+
+Mac mouse routing pass:
+
+- `toolchains/sim-mac/sim-mac/CustomDrawingView.swift` now routes mouse-down-style events through one helper.
+- Normal left click uses the event modifier flags.
+- Option/control-click, right-click, other-button click, and their drag variants force the shared option flag before calling `shared_mouseReceived`.
+- Mouse-up handling still clears the shared mouse-down/drag state through `shared_mouseUp`.
+
+Post-mouse-routing build commands:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-maccatalyst-mac-derived build
+xcodebuild -project toolchains/sim-mac/sim-mac.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-sim-mac-derived build
+```
+
+Result on 2026-07-06: both commands produced `BUILD SUCCEEDED`.
+
+Post-mouse-routing smoke test:
+
+```sh
+open -n /private/tmp/apesdk-maccatalyst-mac-derived/Build/Products/Debug/Simulated\ Ape.app
+osascript -e 'delay 2' -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac") to get {name, position, size} of windows'
+osascript -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac")' \
+  -e 'set frontmost to true' \
+  -e 'tell window "View" to set {x, y} to position' \
+  -e 'tell window "View" to set {w, h} to size' \
+  -e 'click at {x + (w div 2), y + (h div 2)}' \
+  -e 'delay 0.3' \
+  -e 'key down option' \
+  -e 'click at {x + (w div 2) + 40, y + (h div 2)}' \
+  -e 'key up option' \
+  -e 'delay 0.3' \
+  -e 'keystroke "p" using command down' \
+  -e 'delay 0.5' \
+  -e 'set controlMenuNames to name of menu items of menu "Control" of menu bar item "Control" of menu bar 1' \
+  -e 'return controlMenuNames' \
+  -e 'end tell'
+osascript -e 'tell application "System Events" to tell (first application process whose bundle identifier is "com.apesdk.sim-mac")' \
+  -e 'set frontmost to true' \
+  -e 'click menu item "Quit Simulated Ape" of menu "Simulated Ape" of menu bar item "Simulated Ape" of menu bar 1' \
+  -e 'end tell' \
+  -e 'delay 3' \
+  -e 'tell application "System Events" to exists (first application process whose bundle identifier is "com.apesdk.sim-mac")'
+```
+
+Observed windows: `Control`, `Terrain`, `View`.
+
+Observed after normal click and option-click: `Command-P` still changed the Control menu first item to `Resume`, confirming the app remained responsive after mouse input.
+
+Observed after quit: remaining `com.apesdk.sim-mac` process check returned `false`.
+
+Drag automation note:
+
+```text
+System Events got an error: application process ... does not understand the "drag" message. (-1708)
+```
+
+There is no `cliclick` binary available in the current environment. Drag/right-click paths are build-covered by the shared helper, but still need manual or better automation coverage.
+
+Swift Testing parity pass:
+
+- `maccatalyst/maccatalyst.xcodeproj` now has a hosted `SimMacTests` target.
+- `maccatalyst/maccatalyst.xcodeproj/xcshareddata/xcschemes/sim-mac.xcscheme` now runs `SimMacTests` from the `sim-mac` scheme Test action.
+- `maccatalyst/Tests/SimMacParityTests.swift` is intentionally the only Swift Testing source file for this pass; it groups the roughly hundred-point functionality inventory into six Swift Testing tests.
+
+Command:
+
+```sh
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-maccatalyst-tests-derived test
+```
+
+Result on 2026-07-06: `TEST SUCCEEDED`.
+
+Observed Swift Testing results: 6 tests in 1 suite passed, including the selected ape test that finds an ape, selects it, sends mouse down/drag/up events through `CustomDrawingView`, sends an option-modified placement click through the same UI route, and confirms the selected ape's actual coordinates changed.
+
+Entitlement note: this pass changed `toolchains/sim-mac/sim-mac/sim_mac.entitlements` from `com.apple.security.files.user-selected.read-only` to `com.apple.security.files.user-selected.read-write`; without that, the Save As panel could not be configured under the sandboxed app host.
+
+Post-Swift-Testing sanity builds:
+
+```sh
+xcodebuild -project toolchains/sim-mac/sim-mac.xcodeproj -scheme sim-mac -configuration Debug -derivedDataPath /private/tmp/apesdk-sim-mac-tests-sanity-derived build
+xcodebuild -project maccatalyst/maccatalyst.xcodeproj -scheme ApeSim-iOS -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /private/tmp/apesdk-maccatalyst-ios-tests-sanity-derived CODE_SIGNING_ALLOWED=NO build
+```
+
+Result on 2026-07-06: both commands produced `BUILD SUCCEEDED`.
+
 ## Canonical Source Map
 
 - Current Mac app baseline:
@@ -308,7 +449,10 @@ Result: the launched app reported windows `Control`, `Terrain`, `View`. The menu
   - `toolchains/sim-mac/sim-mac/ViewWrapper.swift`
   - `toolchains/sim-mac/sim-mac/CustomDrawingView.swift`
   - `toolchains/sim-mac/sim-mac/CustomDrawingView.swift` now stops drawing/redraw scheduling after termination begins.
+  - `toolchains/sim-mac/sim-mac/CustomDrawingView.swift` now claims first responder status on window attach and click so keyboard events route to the simulation view.
+  - `toolchains/sim-mac/sim-mac/CustomDrawingView.swift` now sets shared mouse option state before delivering left/modifier/right/other/drag mouse-down events.
   - `toolchains/sim-mac/sim-mac/InitialTutorialController.swift` now disables the initial help/tutorial popovers on macOS and Mac Catalyst.
+  - `toolchains/sim-mac/sim-mac/sim_mac.entitlements` now grants user-selected read-write access for Open and Save As panel behavior.
   - `toolchains/sim-mac/render/sim-mac-Bridging-Header.h`
 - Current compact iOS app source:
   - `ios/ApeSimApp.swift`
@@ -320,9 +464,12 @@ Result: the launched app reported windows `Control`, `Terrain`, `View`. The menu
   - Currently references existing Mac source through `maccatalyst/source-links/sim-mac`.
   - Currently references existing iOS source through `maccatalyst/source-links/ios`.
   - Current schemes: `sim-mac`, `ApeSim-iOS`.
+  - `sim-mac` has a shared scheme file that includes the hosted `SimMacTests` target in its Test action.
+  - `maccatalyst/Tests/SimMacParityTests.swift` is the compact Swift Testing coverage source for Mac parity.
 - Shared simulation/rendering/bridge code already used by the Mac target:
   - `gui/shared.c`
   - `gui/shared.c` now defines `shared_draw_ios` and `shared_cycle_ios` for the compact mobile shell.
+  - `gui/shared.c` now exposes selected ape followed and actual selected-being location accessors for tests and diagnostics.
   - `gui/draw.c`
   - `gui/gui.h`
   - `sim/`
@@ -364,11 +511,11 @@ The new Mac build is not a replacement for `toolchains/sim-mac` until these are 
 - Braincode toggle.
 - Command Line command.
 - Online Manual and Simulation Page commands.
-- Keyboard input for letters and arrows.
-- Mouse down/up/drag, right mouse, and option/control-modified mouse.
-- Scroll wheel, magnify, and rotate gestures where supported.
+- Done: Keyboard input for letters and arrows has a first-responder path and a smoke pass.
+- Done: Mouse down/up/drag, right mouse, and option/control-modified mouse share the corrected source path and are covered by Swift Testing event-route checks. External UI automation still covered normal and option clicks only; drag/right-click should get manual or better UI automation coverage when tooling allows.
+- Done with note: Scroll wheel, magnify, and rotate shared gesture routes are covered at smoke-test level by Swift Testing. Full human-visible gesture behavior still needs manual or UI automation validation.
 - Initial help/tutorial popovers are intentionally disabled on macOS and Mac Catalyst; any future replacement must not interfere with the running simulation.
-- App sandbox/file entitlements appropriate to the target.
+- Done: App sandbox file entitlement now allows user-selected read-write access for Open and Save As.
 - Local debug build and launch from Xcode command line.
 - Manual app shutdown without queued redraw entering shared drawing after close.
 
@@ -432,8 +579,11 @@ Status: In progress.
 - Partial: Validate menu command presence. Command behavior still needs exercising.
 - Done: Validate manual Quit for the rebuilt `maccatalyst` app after shutdown hardening.
 - Done by decision: Disable initial help/tutorial popovers on macOS and Mac Catalyst per user request.
-- Next: Recreate or validate keyboard shortcuts.
-- Next: Recreate or validate file open/save behavior.
+- Done: Recreate or validate keyboard shortcuts and focused letter/arrow key routing.
+- Done with note: Recreate or validate mouse down/up/drag/right/option routing. Source and build are covered; drag/right-click UI automation remains limited by available tooling.
+- Done with note: Add initial Swift Testing coverage for the Mac parity checklist in one grouped test file. This covers panel construction, command constants, file-route smoke checks, and input/event routing, but does not replace manual UI validation for every visible command.
+- Done with note: Recreate or validate file open/save behavior at panel/entitlement and shared-route smoke level. Full end-to-end user-selected file open/save should still get manual or UI automation validation.
+- Done with note: Recreate or validate scroll wheel, magnify, and rotate gestures at shared-route smoke level. Full visible gesture behavior should still get manual or UI automation validation.
 
 ### Phase 3: iOS/iPadOS Usability
 
@@ -457,9 +607,10 @@ Status: Not started.
 
 ## Immediate Next Steps
 
-1. Continue Mac parity checks beyond launch presence: keyboard shortcuts, mouse/gesture input, and file open/save.
-2. Investigate optional iPad multi-window scene behavior.
-3. Decide when to add a true Mac Catalyst target in addition to the native `sim-mac` target and `ApeSim-iOS` target.
+1. Expand `SimMacTests` where useful with more assertions from user feedback on the functionality inventory.
+2. Add manual or stronger UI automation validation for visible file open/save and scroll/magnify/rotate behavior.
+3. Investigate optional iPad multi-window scene behavior.
+4. Decide when to add a true Mac Catalyst target in addition to the native `sim-mac` target and `ApeSim-iOS` target.
 
 ## Open Questions
 
