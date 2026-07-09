@@ -302,6 +302,54 @@ static n_vect2 selected_location;
 
 static n_byte *local_offscreen = 0L;
 
+void draw_toggle_state_default( draw_toggle_state *state )
+{
+    if ( state == 0L )
+    {
+        return;
+    }
+
+    state->weather = 1;
+    state->brain = 1;
+    state->braincode = 0;
+    state->territory = 0;
+    state->tide_daylight = 0;
+    state->follow = 1;
+    state->social_web = 0;
+}
+
+void draw_toggle_state_get( draw_toggle_state *state )
+{
+    if ( state == 0L )
+    {
+        return;
+    }
+
+    state->weather = toggle_weather;
+    state->brain = toggle_brain;
+    state->braincode = toggle_braincode;
+    state->territory = toggle_territory;
+    state->tide_daylight = toggle_tidedaylight;
+    state->follow = toggle_follow;
+    state->social_web = toggle_social_web;
+}
+
+void draw_toggle_state_set( const draw_toggle_state *state )
+{
+    if ( state == 0L )
+    {
+        return;
+    }
+
+    toggle_weather = state->weather;
+    toggle_brain = state->brain;
+    toggle_braincode = state->braincode;
+    toggle_territory = state->territory;
+    toggle_tidedaylight = state->tide_daylight;
+    toggle_follow = state->follow;
+    toggle_social_web = state->social_web;
+}
+
 void draw_point( n_int x, n_int y )
 {
     n_byte *draw = VIEWWINDOW( local_offscreen );

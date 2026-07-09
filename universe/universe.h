@@ -1103,6 +1103,7 @@ void      sim_close( void );
 
 simulated_timing *sim_timing( void );
 simulated_group   *sim_group( void );
+n_int sim_state_restore( n_file *input_file, n_int selected_index );
 
 n_uint sim_memory_allocated( n_int max );
 

@@ -1,6 +1,6 @@
 # ApeSDK Mac Catalyst Plan
 
-Last updated: 2026-07-07
+Last updated: 2026-07-09
 
 ## Goal
 
@@ -89,7 +89,14 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Decision update: Add a dedicated Mac Catalyst target as its own priority after the remaining native Mac command/gesture validation and before any iPad multi-window session implementation. The existing `ApeSim-iOS` target already builds and launches as Mac Catalyst and remains the reference until the dedicated target exists.
 - Decision update: iPad multi-window UI is a priority, but it must be preceded by the per-scene iPad session model so each window owns an independent simulation session instead of competing over singleton state.
 - Done: Designed the iPad multi-window architecture. The path is to keep the current `WindowGroup` as one shared simulation surface only until a scene-owned session handle exists; then explicit iPad multi-window UI can create independent simulation sessions without forking iOS/Mac source.
-- Next: Implement the per-scene iPad session model before adding explicit iPad multi-window UI.
+- Done with note: Cycle 1 implemented the per-scene iPad session model. `ios/ApeSimApp.swift` now owns an `ApeSimulationSceneModel` per `WindowGroup` scene, and the model owns the timer, render dimensions, command routes, touch mapping, and an opaque `shared_session` handle. The C session API is layered over `gui/app_shell.*` and keeps the current global `shared_*` wrappers intact.
+- Done: Cycle 1 verification passed on 2026-07-09. The `sim-mac` Swift Testing suite passed with 10 tests, the `ApeSim-iOS` iOS Simulator build succeeded, the dedicated `ApeSim-MacCatalyst` build succeeded, the original `toolchains/sim-mac` build succeeded, and `toolchains/planet` still builds with the extended `gui/app_shell.*` helper. An iPad Air 13-inch (M4) Simulator launch rendered terrain through the new scene model; screenshot: `/private/tmp/apesdk-cycle1-ipad-session-smoke.png`.
+- Done with note: Cycle 2 added snapshot-backed `shared_session` isolation for the remaining shared/menu and world-state bridge. The legacy `shared_*` calls now route through a default context, each `shared_session` stores its own pause/menu draw state and in-memory transfer snapshot, and session activation restores that context before draw/cycle/menu/file/input routes. This is still a bridge over the existing singleton engine internals, not the final context-pointer engine refactor.
+- Done: Cycle 2 verification passed on 2026-07-09. The `sim-mac` Swift Testing suite passed with 11 tests, including a two-session regression that verifies pause toggles, selected ape state, and `New Simulation` stay scoped to the active session. The `ApeSim-iOS` iOS Simulator build, dedicated `ApeSim-MacCatalyst` build, original `toolchains/sim-mac` build, and `toolchains/planet` build all succeeded. An iPad Air 13-inch (M4) Simulator launch rendered terrain through the session path; screenshot: `/private/tmp/apesdk-cycle2-ipad-session-smoke.png`.
+- Done with note: Added explicit iPad multi-window UI. The iPad regular-width command panel now exposes a `New Window` button with accessibility id `NewSimulationWindowButton`, the app uses a named `WindowGroup(id: ApeSimulationWindow.id)`, and the button calls `openWindow(id:)` so each new iPad window constructs a fresh `ContentView`, `ApeSimulationSceneModel`, and opaque `shared_session`.
+- Done with note: Expanded the two-session regression to cover the full iPad multi-window isolation contract: selected ape, pause state, terrain rotation/facing, touch input state, and world mutations all stay scoped to the session being acted on. This also fixed session activation so a session only becomes active after its saved world restores successfully.
+- Done: Final multi-window verification passed on 2026-07-09. The `sim-mac` Swift Testing suite passed with 12 tests; the `ApeSim-iOS`, dedicated `ApeSim-MacCatalyst`, original `toolchains/sim-mac`, and `toolchains/planet` Xcode builds all succeeded with `CODE_SIGNING_ALLOWED=NO`.
+- Done with note: Final iPad simulator smoke validation on iPad Air 13-inch (M4), iOS 26.5, installed and launched the app, rendered terrain, exposed the new-window control, and iPadOS reported `1 Hidden Window` for the app. Screenshot: `/private/tmp/apesdk-ipad-multiwindow-final.png`. The local `simctl` runtime has no tap/keyboard injection and macOS `System Events` click injection is blocked, so arranging the two iPad windows visually side-by-side remains a manual/real-device validation step even though the side-by-side state isolation contract is now automated.
 
 ## Baseline Evidence
 
@@ -705,9 +712,12 @@ Result on 2026-07-07: `TEST SUCCEEDED`. Observed Swift Testing results: 9 tests 
   - `toolchains/sim-mac/render/sim-mac-Bridging-Header.h`
 - Current compact iOS app source:
   - `ios/ApeSimApp.swift`
-  - Initializes through `NUM_CONTROL` so the shared simulation starts before the terrain view draws.
+  - Creates an `ApeSimulationSceneModel` per SwiftUI `WindowGroup` scene.
+  - The scene model owns the draw timer, render buffer dimensions, command routing, touch mapping, and opaque C `shared_session` handle.
+  - Initializes each scene session through `NUM_CONTROL` so the shared simulation starts before the terrain view draws.
   - Uses an adaptive SwiftUI overlay: compact width keeps the small bottom-trailing controls, regular iPad width uses a wider trailing command panel.
-  - Maps touch locations to the render buffer scale before passing them to `shared_mouseReceived`.
+  - The regular-width iPad command panel exposes `New Window`, backed by `openWindow(id:)` on the named simulation `WindowGroup`, so every iPad window gets a new scene model and session.
+  - Maps touch locations to the render buffer scale before passing them to `shared_session_mouseReceived`.
 - New `maccatalyst` project metadata:
   - `maccatalyst/maccatalyst.xcodeproj`
   - Currently references existing Mac source through `maccatalyst/source-links/sim-mac`.
@@ -718,6 +728,9 @@ Result on 2026-07-07: `TEST SUCCEEDED`. Observed Swift Testing results: 9 tests 
 - Shared simulation/rendering/bridge code already used by the Mac target:
   - `gui/shared.c`
   - `gui/shared.c` now defines `shared_draw_ios` and `shared_cycle_ios` for the compact mobile shell.
+  - `gui/shared.c` now defines an opaque `shared_session` API for per-scene shell ownership while retaining the existing global `shared_*` wrappers.
+  - `gui/shared.c` now keeps session activation guarded by successful restore and exposes session diagnostics for pause state, selected ape index/facing, and active input state.
+  - `gui/app_shell.c` is now included by the `maccatalyst` app targets and the original `toolchains/sim-mac` target so session-owned shell state is available everywhere `gui/shared.c` is built.
   - `gui/shared.c` now exposes selected ape followed and actual selected-being location accessors for tests and diagnostics.
   - `gui/draw.c`
   - `gui/gui.h`
@@ -802,24 +815,27 @@ Reasoning:
 
 Target architecture before explicit iPad multi-window UI:
 
-1. Add a Swift scene model, tentatively `ApeSimulationSceneModel`, owned by each `WindowGroup` scene. It should own the timer, view identity, render buffer metadata, selected command state, and an opaque C session handle.
-2. Extend the existing `gui/app_shell.*` instance helper first. It already models per-shell lifecycle, input, and output-buffer state, so it is the safest bridge between the current global app shell and a later per-simulation session.
-3. Introduce a C session API alongside the existing global API, not as a hard replacement:
+1. Done: Add a Swift scene model, `ApeSimulationSceneModel`, owned by each `WindowGroup` scene. It owns the timer, view identity, render buffer metadata, command routes, touch mapping, and an opaque C session handle.
+2. Done with note: Extend the existing `gui/app_shell.*` instance helper first. It now carries enough mouse/session state for the first session bridge, but shared/menu and simulation world state still need to move in later layers.
+3. Done with note: Introduce a C session API alongside the existing global API, not as a hard replacement:
    - `shared_session_create(random)`
    - `shared_session_destroy(session)`
    - `shared_session_init(session, view, random)`
    - `shared_session_cycle(session, ticks, identification)`
+   - `shared_session_cycle_ios(session, ticks)`
    - `shared_session_draw(session, identification, width, height, size_changed)`
+   - `shared_session_draw_ios(session, outputBuffer, width, height)`
    - `shared_session_menu(session, menu_id)`
-   - `shared_session_mouse_received(session, x, y, identification)`
-   - `shared_session_mouse_up(session)`
-   - `shared_session_open_file(session, path, is_script)`
-   - `shared_session_save_file(session, path)`
+   - `shared_session_new(session, seed)`
+   - `shared_session_mouseReceived(session, x, y, identification)`
+   - `shared_session_mouseUp(session)`
+   - `shared_session_openFileName(session, path, is_script)`
+   - `shared_session_saveFileName(session, path)`
 4. Keep the current `shared_*` functions as wrappers around one default process session until native Mac parity is complete. This avoids breaking `toolchains/sim-mac`, `maccatalyst` Mac, tests, or older wrappers during the migration.
 5. Move singleton state in layers:
    - First: shell state already represented by `ape_app_shell` and the iOS render/input buffers.
-   - Second: shared/menu state in `gui/shared.c`, including pause and display toggles.
-   - Third: simulation core state in `universe/sim.c`, especially `simulated_group group`, `simulated_timing timing`, and any interpreter/session-adjacent state.
+   - Done with note: shared/menu state in `gui/shared.c`, including pause and display toggles, now saves/restores through a per-session context.
+   - Done with note: simulation world state now switches through an in-memory transfer snapshot per session. `universe/sim.c` has a restore hook that reloads a snapshot without advancing the world, but deeper engine internals still need a future context-pointer refactor.
 6. Prefer explicit context/session pointers over thread-local storage. iPad scenes can share the main thread, so thread-local state would not make scenes independent.
 7. Once independent sessions exist, add iPad UI for multi-window behavior. This is priority work after the dedicated Mac Catalyst target phase. The first user-facing version should create a fresh simulation per new window; duplicating an existing simulation should be a separate, explicit command because it needs save/clone semantics.
 
@@ -888,7 +904,9 @@ Status: In progress.
 - Done: Investigate optional iPad multi-window scene behavior. The generated iOS Simulator Info.plist already sets `UIApplicationSupportsMultipleScenes = true` for the SwiftUI `WindowGroup` app.
 - Decision update: iPad multi-window UI is a priority. Do not add explicit controls until the per-scene session model exists because the underlying shared simulation engine currently uses singleton state.
 - Done: Designed scene-instance simulation/app-shell isolation before exposing explicit iPad multi-window controls. The accepted direction is a per-scene Swift model plus an opaque C session API, with current `shared_*` calls retained as wrappers around a default process session during migration.
-- Next: Implement the per-scene iPad session model before adding multi-window UI.
+- Done with note: Implemented the per-scene iPad session model and opaque C session API for cycle 1. The session owns shell/render/input lifecycle through `gui/app_shell.*`; deeper shared/menu and simulation world state remains singleton-backed and must move before explicit multi-window controls are safe.
+- Done with note: Implemented snapshot-backed `shared_session` isolation for cycle 2. Session activation now saves/restores per-session pause/menu draw state and world snapshots, while the default `shared_*` wrappers remain functional through their own context.
+- Next: Add explicit iPad multi-window UI and validate two windows side-by-side.
 
 ### Phase 4: Dedicated Mac Catalyst Target
 
@@ -911,7 +929,7 @@ Status: Not started.
 
 ## Immediate Next Steps
 
-1. Implement the per-scene iPad session model. iPad multi-window UI is a priority, and the per-scene session model must come before user-facing window controls.
+1. Perform a manual or better-automation iPadOS window arrangement pass to visually place the two app windows side-by-side; the state-isolation contract is already covered by Swift Testing.
 2. Start Phase 5 transition work only after parity is proven: compare against `toolchains/sim-mac`, keep both builds during proof, and ask before removing or moving old source.
 3. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
 

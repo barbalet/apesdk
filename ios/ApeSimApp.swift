@@ -33,12 +33,20 @@ import SwiftUI
 import UIKit
 
 // MARK: - SwiftUI App Entry Point
+private enum ApeSimulationWindow {
+    static let id = "simulation-window"
+
+    static var supportsAdditionalWindows: Bool {
+        UIApplication.shared.supportsMultipleScenes && UIDevice.current.userInterfaceIdiom == .pad
+    }
+}
+
 @main
 struct ApeSimApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: ApeSimulationWindow.id) {
             ContentView()
         }
     }
@@ -67,50 +75,155 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 // MARK: - Main ContentView
 struct ContentView: View {
+    @Environment(\.openWindow) private var openWindow
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @StateObject private var sceneModel = ApeSimulationSceneModel()
 
     private var isWideLayout: Bool {
         horizontalSizeClass == .regular
     }
 
     var body: some View {
-        ASiOSViewRepresentable()
+        ASiOSViewRepresentable(sceneModel: sceneModel)
             .ignoresSafeArea()
             .overlay(alignment: isWideLayout ? .trailing : .bottomTrailing) {
-                CommandPanel(isWideLayout: isWideLayout)
+                CommandPanel(isWideLayout: isWideLayout,
+                             sceneModel: sceneModel,
+                             canOpenNewWindow: isWideLayout && ApeSimulationWindow.supportsAdditionalWindows) {
+                    openWindow(id: ApeSimulationWindow.id)
+                }
                     .padding(isWideLayout ? 24 : 16)
             }
+    }
+}
+
+// MARK: - Scene-owned Simulation Model
+final class ApeSimulationSceneModel: ObservableObject {
+    private let session = shared_session_create(n_uint(CFAbsoluteTimeGetCurrent()))
+    private var timer: Timer?
+    private weak var renderView: ASiOSView?
+    private var renderWidth: Int = -1
+    private var renderHeight: Int = -1
+
+    init() {
+        shared_session_init(session, n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))
+    }
+
+    deinit {
+        timer?.invalidate()
+        shared_session_destroy(session)
+    }
+
+    func attach(view: ASiOSView) {
+        renderView = view
+        startTimerIfNeeded()
+    }
+
+    func detach(view: ASiOSView) {
+        if renderView === view {
+            renderView = nil
+        }
+    }
+
+    func updateRenderDimensions(width: Int, height: Int) {
+        renderWidth = width
+        renderHeight = height
+    }
+
+    func draw(into outputBuffer: UnsafeMutablePointer<n_byte4>?, width: Int, height: Int) {
+        shared_session_draw_ios(session, outputBuffer, n_int(Int32(width)), n_int(Int32(height)))
+    }
+
+    func cycle() {
+        _ = shared_session_cycle_ios(session, n_uint(CFAbsoluteTimeGetCurrent()))
+    }
+
+    func newSimulation() {
+        shared_session_new(session, n_uint(CFAbsoluteTimeGetCurrent()))
+    }
+
+    func previousApe() {
+        shared_session_menu(session, NA_MENU_PREVIOUS_APE)
+    }
+
+    func nextApe() {
+        shared_session_menu(session, NA_MENU_NEXT_APE)
+    }
+
+    func mouseReceived(at location: CGPoint, in bounds: CGRect) {
+        let simulationLocation = simulationPoint(for: location, in: bounds)
+        shared_session_mouseReceived(session,
+                                     n_double(Float(simulationLocation.x)),
+                                     n_double(Float(simulationLocation.y)),
+                                     n_int(NUM_TERRAIN))
+    }
+
+    func mouseUp() {
+        shared_session_mouseUp(session)
+    }
+
+    private func startTimerIfNeeded() {
+        guard timer == nil else { return }
+
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.renderView?.setNeedsDisplay()
+            }
+        }
+    }
+
+    func simulationPoint(for location: CGPoint, in bounds: CGRect) -> CGPoint {
+        guard bounds.width > 0, bounds.height > 0, renderWidth > 0, renderHeight > 0 else {
+            return location
+        }
+
+        let scaleX = CGFloat(renderWidth) / bounds.width
+        let scaleY = CGFloat(renderHeight) / bounds.height
+        let rotatedX = CGFloat(renderWidth - 1) - (location.x * scaleX)
+        let rotatedY = CGFloat(renderHeight - 1) - (location.y * scaleY)
+
+        return CGPoint(x: min(max(rotatedX, 0), CGFloat(renderWidth - 1)),
+                       y: min(max(rotatedY, 0), CGFloat(renderHeight - 1)))
     }
 }
 
 // MARK: - Command Panel
 struct CommandPanel: View {
     let isWideLayout: Bool
+    let sceneModel: ApeSimulationSceneModel
+    let canOpenNewWindow: Bool
+    let openNewWindow: () -> Void
 
     var body: some View {
         Group {
             if isWideLayout {
                 VStack(spacing: 10) {
+                    if canOpenNewWindow {
+                        commandButton(title: "New Window",
+                                      systemImage: "plus.rectangle.on.rectangle",
+                                      accessibilityIdentifier: "NewSimulationWindowButton",
+                                      action: openNewWindow)
+                    }
                     commandButton(title: "Previous Ape", systemImage: "chevron.left") {
-                        shared_menu(NA_MENU_PREVIOUS_APE)
+                        sceneModel.previousApe()
                     }
                     commandButton(title: "New Simulation", systemImage: "arrow.triangle.2.circlepath", isPrimary: true) {
-                        shared_new(n_uint(CFAbsoluteTimeGetCurrent()))
+                        sceneModel.newSimulation()
                     }
                     commandButton(title: "Next Ape", systemImage: "chevron.right") {
-                        shared_menu(NA_MENU_NEXT_APE)
+                        sceneModel.nextApe()
                     }
                 }
             } else {
                 HStack(spacing: 8) {
                     commandButton(title: "Previous Ape", systemImage: "chevron.left") {
-                        shared_menu(NA_MENU_PREVIOUS_APE)
+                        sceneModel.previousApe()
                     }
                     commandButton(title: "New Simulation", systemImage: "arrow.triangle.2.circlepath", isPrimary: true) {
-                        shared_new(n_uint(CFAbsoluteTimeGetCurrent()))
+                        sceneModel.newSimulation()
                     }
                     commandButton(title: "Next Ape", systemImage: "chevron.right") {
-                        shared_menu(NA_MENU_NEXT_APE)
+                        sceneModel.nextApe()
                     }
                 }
             }
@@ -122,6 +235,7 @@ struct CommandPanel: View {
     private func commandButton(title: String,
                                systemImage: String,
                                isPrimary: Bool = false,
+                               accessibilityIdentifier: String? = nil,
                                action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemImage)
@@ -136,59 +250,54 @@ struct CommandPanel: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Text(title))
+        .accessibilityIdentifier(accessibilityIdentifier ?? title.replacingOccurrences(of: " ", with: ""))
         .help(title)
     }
 }
 
 // MARK: - ASiOSView Wrapper
 struct ASiOSViewRepresentable: UIViewRepresentable {
+    let sceneModel: ApeSimulationSceneModel
+
     func makeUIView(context: Context) -> ASiOSView {
-        let view = ASiOSView()
+        let view = ASiOSView(sceneModel: sceneModel)
         view.isMultipleTouchEnabled = true
-        Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { _ in
-            view.animationTimer()
-        }
+        sceneModel.attach(view: view)
         return view
     }
 
     func updateUIView(_ uiView: ASiOSView, context: Context) { }
+
+    static func dismantleUIView(_ uiView: ASiOSView, coordinator: ()) {
+        uiView.detachFromSceneModel()
+    }
 }
 
 // MARK: - ASiOSView (Original UIView Logic)
 class ASiOSView: UIView {
+    private let sceneModel: ApeSimulationSceneModel
     private var offscreenBuffer = [UInt32](repeating: 0, count: 2000 * 3000)
     private var drawRef: CGContext?
     private var oldDimensionX: Int = -1
     private var oldDimensionY: Int = -1
 
-    override init(frame: CGRect) {
+    init(sceneModel: ApeSimulationSceneModel, frame: CGRect = .zero) {
+        self.sceneModel = sceneModel
         super.init(frame: frame)
-        shared_init(n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))
     }
 
     required init?(coder: NSCoder) {
+        self.sceneModel = ApeSimulationSceneModel()
         super.init(coder: coder)
-        shared_init(n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))
+        self.sceneModel.attach(view: self)
     }
 
-    @objc func animationTimer() {
-        DispatchQueue.main.async { [weak self] in
-            self?.setNeedsDisplay()
-        }
+    func detachFromSceneModel() {
+        sceneModel.detach(view: self)
     }
 
     func simulationPoint(for location: CGPoint) -> CGPoint {
-        guard bounds.width > 0, bounds.height > 0, oldDimensionX > 0, oldDimensionY > 0 else {
-            return location
-        }
-
-        let scaleX = CGFloat(oldDimensionX) / bounds.width
-        let scaleY = CGFloat(oldDimensionY) / bounds.height
-        let rotatedX = CGFloat(oldDimensionX - 1) - (location.x * scaleX)
-        let rotatedY = CGFloat(oldDimensionY - 1) - (location.y * scaleY)
-
-        return CGPoint(x: min(max(rotatedX, 0), CGFloat(oldDimensionX - 1)),
-                       y: min(max(rotatedY, 0), CGFloat(oldDimensionY - 1)))
+        sceneModel.simulationPoint(for: location, in: bounds)
     }
 
     override func draw(_ rect: CGRect) {
@@ -212,8 +321,12 @@ class ASiOSView: UIView {
             oldDimensionY = dimensionY
         }
 
+        sceneModel.updateRenderDimensions(width: dimensionX, height: dimensionY)
+
         context.saveGState()
-        shared_draw_ios(&offscreenBuffer, n_int(Int32(dimensionX)), n_int(Int32(dimensionY)))
+        offscreenBuffer.withUnsafeMutableBufferPointer { buffer in
+            sceneModel.draw(into: buffer.baseAddress, width: dimensionX, height: dimensionY)
+        }
 
         if let image = drawRef?.makeImage() {
             context.setBlendMode(.copy)
@@ -221,7 +334,7 @@ class ASiOSView: UIView {
         }
 
         context.restoreGState()
-        _ = shared_cycle_ios(n_uint(CFAbsoluteTimeGetCurrent()))
+        sceneModel.cycle()
         DispatchQueue.main.async { [weak self] in
             self?.setNeedsDisplay()
         }
@@ -239,8 +352,7 @@ class ASiOSView: UIView {
         for touch in allTouches {
             let location = touch.location(in: self)
             print("Touch moved to: \(location)")
-            let simulationLocation = simulationPoint(for: location)
-            shared_mouseReceived(n_double(Float(simulationLocation.x)), n_double(Float(simulationLocation.y)), n_int(NUM_TERRAIN))
+            sceneModel.mouseReceived(at: location, in: bounds)
         }
     }
 
@@ -254,13 +366,13 @@ class ASiOSView: UIView {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        shared_mouseUp()
+        sceneModel.mouseUp()
     }
 
     // MARK: - Motion Events
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
         if motion == .motionShake {
-            shared_menu(NA_MENU_NEXT_APE)
+            sceneModel.nextApe()
         }
     }
 }

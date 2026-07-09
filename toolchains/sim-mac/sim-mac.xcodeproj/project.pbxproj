@@ -13,6 +13,7 @@
 		4A212E9E2DCCB339001F26AA /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212E9B2DCCB339001F26AA /* shared.c */; };
 		4A212EDF2E9A00001F26AA00 /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EE02E9A00001F26AA00 /* buffer.c */; };
 		4A212EE12E9A01001F26AA00 /* tutorial.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EE22E9A01001F26AA00 /* tutorial.c */; };
+		4A91E0012F10000000000001 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A91E0022F10000000000001 /* app_shell.c */; };
 		4A212EA52DCCB35C001F26AA /* command.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212E9F2DCCB35C001F26AA /* command.c */; };
 		4A212EA62DCCB35C001F26AA /* sim.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EA12DCCB35C001F26AA /* sim.c */; };
 		4A212EA72DCCB35C001F26AA /* loop.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A212EA02DCCB35C001F26AA /* loop.c */; };
@@ -54,6 +55,7 @@
 		4A212E9B2DCCB339001F26AA /* shared.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = shared.c; path = ../../gui/shared.c; sourceTree = SOURCE_ROOT; };
 		4A212EE02E9A00001F26AA00 /* buffer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = buffer.c; path = ../../gui/buffer.c; sourceTree = SOURCE_ROOT; };
 		4A212EE22E9A01001F26AA00 /* tutorial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = tutorial.c; path = ../../gui/tutorial.c; sourceTree = SOURCE_ROOT; };
+		4A91E0022F10000000000001 /* app_shell.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = app_shell.c; path = ../../gui/app_shell.c; sourceTree = SOURCE_ROOT; };
 		4A212E9F2DCCB35C001F26AA /* command.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = command.c; path = ../../universe/command.c; sourceTree = SOURCE_ROOT; };
 		4A212EA02DCCB35C001F26AA /* loop.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = loop.c; path = ../../universe/loop.c; sourceTree = SOURCE_ROOT; };
 		4A212EA12DCCB35C001F26AA /* sim.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = sim.c; path = ../../universe/sim.c; sourceTree = SOURCE_ROOT; };
@@ -138,6 +140,7 @@
 		4A212E8D2DCCB29A001F26AA /* gui */ = {
 			isa = PBXGroup;
 			children = (
+				4A91E0022F10000000000001 /* app_shell.c */,
 				4A212E982DCCB339001F26AA /* draw.c */,
 				4A212E992DCCB339001F26AA /* gui.h */,
 				4A212E9A2DCCB339001F26AA /* message.c */,
@@ -334,6 +337,7 @@
 				4A212ED02DCCB3B1001F26AA /* parse.c in Sources */,
 				4A212E9D2DCCB339001F26AA /* message.c in Sources */,
 				4A212E9E2DCCB339001F26AA /* shared.c in Sources */,
+				4A91E0012F10000000000001 /* app_shell.c in Sources */,
 				4A212EDF2E9A00001F26AA00 /* buffer.c in Sources */,
 				4A212EE12E9A01001F26AA00 /* tutorial.c in Sources */,
 			);

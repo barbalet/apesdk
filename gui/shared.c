@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 
+#include "app_shell.h"
 #include "buffer.h"
 #include "gui.h"
 
@@ -48,6 +49,10 @@
 #endif
 
 static n_int   simulation_started = 0;
+static n_int   shared_session_initializing = 0;
+static n_int   shared_session_started_count = 0;
+static n_int   shared_default_uses_core = 0;
+static n_int   shared_core_memory_ready = 0;
 
 static n_int   mouse_x, mouse_y;
 static n_byte  mouse_option, mouse_identification;
@@ -76,6 +81,250 @@ static n_int    ios_dimension_y = 0;
 
 static n_int toggle_pause = 0;
 
+typedef struct
+{
+    n_file *snapshot;
+    n_int simulation_started;
+    n_int selected_index;
+    n_int toggle_pause;
+    draw_toggle_state draw_state;
+} shared_core_context;
+
+struct shared_session
+{
+    ape_app_shell shell;
+    n_uint initial_random;
+    shared_core_context core;
+};
+
+static shared_core_context shared_default_core;
+static n_byte shared_default_core_ready = 0;
+static shared_core_context *shared_active_core = 0L;
+
+static void shared_core_context_release_snapshot( shared_core_context *context )
+{
+    if ( context == 0L )
+    {
+        return;
+    }
+
+    io_file_free( &context->snapshot );
+}
+
+static void shared_core_context_reset_values( shared_core_context *context )
+{
+    if ( context == 0L )
+    {
+        return;
+    }
+
+    context->simulation_started = 0;
+    context->selected_index = -1;
+    context->toggle_pause = 0;
+    draw_toggle_state_default( &context->draw_state );
+}
+
+static void shared_default_core_ensure( void )
+{
+    if ( shared_default_core_ready )
+    {
+        return;
+    }
+
+    memory_erase( ( n_byte * )&shared_default_core, sizeof( shared_default_core ) );
+    shared_core_context_reset_values( &shared_default_core );
+    shared_default_core_ready = 1;
+}
+
+static n_int shared_current_selected_index( void )
+{
+    simulated_group *group = sim_group();
+
+    if ( ( group == 0L ) || ( group->select == 0L ) )
+    {
+        return -1;
+    }
+
+    return being_index( group, group->select );
+}
+
+static void shared_select_index( n_int selected_index )
+{
+    simulated_group *group = sim_group();
+
+    if ( ( group == 0L ) || ( selected_index < 0 ) || ( selected_index >= ( n_int )group->num ) )
+    {
+        return;
+    }
+
+    sim_set_select( &( group->beings[selected_index] ) );
+}
+
+static void shared_core_context_sync_from_globals( shared_core_context *context )
+{
+    if ( context == 0L )
+    {
+        return;
+    }
+
+    context->simulation_started = simulation_started;
+    context->toggle_pause = toggle_pause;
+    context->selected_index = shared_current_selected_index();
+    draw_toggle_state_get( &context->draw_state );
+}
+
+static void shared_core_context_apply_globals( shared_core_context *context )
+{
+    if ( context == 0L )
+    {
+        return;
+    }
+
+    simulation_started = context->simulation_started;
+    toggle_pause = context->toggle_pause;
+    draw_toggle_state_set( &context->draw_state );
+}
+
+static void shared_core_context_capture( shared_core_context *context )
+{
+    n_file *snapshot;
+
+    if ( context == 0L )
+    {
+        return;
+    }
+
+    shared_core_context_sync_from_globals( context );
+    if ( context->simulation_started == 0 )
+    {
+        return;
+    }
+
+    if ( sim_new() )
+    {
+        sim_cycle();
+        sim_update_output();
+        context->selected_index = shared_current_selected_index();
+    }
+
+    snapshot = tranfer_out();
+    if ( snapshot != 0L )
+    {
+        shared_core_context_release_snapshot( context );
+        context->snapshot = snapshot;
+    }
+}
+
+static n_int shared_core_context_restore( shared_core_context *context )
+{
+    if ( context == 0L )
+    {
+        return 0;
+    }
+
+    if ( context->simulation_started )
+    {
+        n_file *snapshot = 0L;
+
+        if ( context->snapshot == 0L )
+        {
+            return 0;
+        }
+
+        snapshot = io_file_duplicate( context->snapshot );
+        if ( snapshot == 0L )
+        {
+            return 0;
+        }
+
+        if ( sim_state_restore( snapshot, context->selected_index ) != 0 )
+        {
+            io_file_free( &snapshot );
+            return 0;
+        }
+        io_file_free( &snapshot );
+        shared_core_context_apply_globals( context );
+        shared_select_index( context->selected_index );
+        return 1;
+    }
+
+    shared_core_context_apply_globals( context );
+    return 1;
+}
+
+static n_int shared_core_activate( shared_core_context *context )
+{
+    shared_default_core_ensure();
+
+    if ( context == 0L )
+    {
+        return 0;
+    }
+
+    if ( shared_active_core == context )
+    {
+        return 1;
+    }
+
+    if ( shared_active_core != 0L )
+    {
+        shared_core_context_capture( shared_active_core );
+    }
+
+    if ( context->simulation_started )
+    {
+        if ( shared_core_context_restore( context ) == 0 )
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        shared_core_context_apply_globals( context );
+    }
+
+    shared_active_core = context;
+    return 1;
+}
+
+static void shared_core_context_became_current( shared_core_context *context )
+{
+    if ( context == 0L )
+    {
+        return;
+    }
+
+    shared_core_context_release_snapshot( context );
+    shared_active_core = context;
+    shared_core_context_sync_from_globals( context );
+}
+
+static n_int shared_core_started_count( void )
+{
+    n_int count = shared_session_started_count;
+
+    shared_default_core_ensure();
+    if ( shared_default_core.simulation_started )
+    {
+        count++;
+    }
+
+    return count;
+}
+
+static void shared_core_close_if_unused( void )
+{
+    if ( ( shared_core_memory_ready == 0 ) || ( shared_core_started_count() != 0 ) )
+    {
+        return;
+    }
+
+    sim_close();
+    shared_core_memory_ready = 0;
+    simulation_started = 0;
+    shared_active_core = 0L;
+}
+
 static n_int control_toggle_pause( n_byte actual_toggle )
 {
     if ( io_command_line_execution() )
@@ -102,15 +351,50 @@ extern n_uint	tilt_z;
 
 static n_int control_mouse_was_down = 0;
 
-static void control_mouse( n_byte wwind, n_int px, n_int py, n_byte option )
+static n_byte control_mouse_down( ape_app_shell_mouse *session_mouse )
+{
+    if ( session_mouse != 0L )
+    {
+        return session_mouse->down;
+    }
+    return mouse_down;
+}
+
+static n_byte control_mouse_drag( ape_app_shell_mouse *session_mouse )
+{
+    if ( session_mouse != 0L )
+    {
+        return session_mouse->drag;
+    }
+    return mouse_drag;
+}
+
+static void control_mouse_set_drag( ape_app_shell_mouse *session_mouse, n_int px, n_int py )
+{
+    if ( session_mouse != 0L )
+    {
+        session_mouse->drag_x = px;
+        session_mouse->drag_y = py;
+        session_mouse->drag = 1;
+        return;
+    }
+
+    mouse_drag_x = px;
+    mouse_drag_y = py;
+    mouse_drag = 1;
+}
+
+static void control_mouse( ape_app_shell_mouse *session_mouse, n_byte wwind, n_int px, n_int py, n_byte option )
 {
     if ( wwind == NUM_CONTROL )
     {
-        if ( !mouse_down && control_mouse_was_down )
+        n_int *was_down = ( session_mouse != 0L ) ? &session_mouse->control_was_down : &control_mouse_was_down;
+
+        if ( !control_mouse_down( session_mouse ) && *was_down )
         {
             sim_control_regular( px, py );
         }
-        control_mouse_was_down = mouse_down;
+        *was_down = control_mouse_down( session_mouse );
     }
 
     if ( wwind == NUM_VIEW )
@@ -123,11 +407,9 @@ static void control_mouse( n_byte wwind, n_int px, n_int py, n_byte option )
         {
             if ( sim_view_regular( px, py ) )
             {
-                if ( mouse_drag == 0 )
+                if ( control_mouse_drag( session_mouse ) == 0 )
                 {
-                    mouse_drag_x = px;
-                    mouse_drag_y = py;
-                    mouse_drag = 1;
+                    control_mouse_set_drag( session_mouse, px, py );
                 }
             }
         }
@@ -234,7 +516,7 @@ static void *control_init( KIND_OF_USE kind, n_uint randomise )
 {
     void *sim_return = 0L;
 
-    shared_menu( NA_MENU_CLEAR_ERRORS );
+    ( void )draw_error( 0L, 0L, 0 );
     draw_undraw_clear();
 
     sim_return = sim_init( kind, randomise, OFFSCREENSIZE, VIEWWINDOW( 0 ) );
@@ -254,9 +536,19 @@ void shared_dimensions( n_int *dimensions )
     dimensions[3] = 1;
 }
 
-shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification )
+static shared_cycle_state shared_cycle_core( n_uint ticks, n_int localIdentification, ape_app_shell *shell )
 {
     shared_cycle_state return_value = SHARED_CYCLE_OK;
+    ape_app_shell_mouse *session_mouse = ( shell != 0L ) ? &shell->mouse : 0L;
+    ape_app_shell_key *session_key = ( shell != 0L ) ? &shell->key : 0L;
+    n_byte current_mouse_identification = ( session_mouse != 0L ) ? session_mouse->identification : mouse_identification;
+    n_byte current_mouse_down = ( session_mouse != 0L ) ? session_mouse->down : mouse_down;
+    n_byte current_mouse_option = ( session_mouse != 0L ) ? session_mouse->option : mouse_option;
+    n_int current_mouse_x = ( session_mouse != 0L ) ? session_mouse->x : mouse_x;
+    n_int current_mouse_y = ( session_mouse != 0L ) ? session_mouse->y : mouse_y;
+    n_byte current_key_down = ( session_key != 0L ) ? session_key->down : key_down;
+    n_byte current_key_identification = ( session_key != 0L ) ? session_key->identification : key_identification;
+    n_byte2 current_key_value = ( session_key != 0L ) ? session_key->value : key_value;
 
     if ( simulation_started == 0 )
     {
@@ -268,34 +560,34 @@ shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification )
 #ifndef	_WIN32
     sim_thread_console();
 #endif
-    if ( mouse_identification == localIdentification )
+    if ( current_mouse_identification == localIdentification )
     {
         if ( localIdentification == NUM_CONTROL )
         {
-            control_mouse( mouse_identification, mouse_x, mouse_y, mouse_option );
+            control_mouse( session_mouse, current_mouse_identification, current_mouse_x, current_mouse_y, current_mouse_option );
         }
-        else if ( mouse_down == 1 )
+        else if ( current_mouse_down == 1 )
         {
             if ( localIdentification == NUM_VIEW )
             {
 #if (MAP_BITS == 8)
-                control_mouse( mouse_identification, mouse_x / 2, mouse_y / 2, mouse_option );
+                control_mouse( session_mouse, current_mouse_identification, current_mouse_x / 2, current_mouse_y / 2, current_mouse_option );
 #else
-                control_mouse( mouse_identification, mouse_x, mouse_y, mouse_option );
+                control_mouse( session_mouse, current_mouse_identification, current_mouse_x, current_mouse_y, current_mouse_option );
 #endif
             }
             else
             {
-                control_mouse( mouse_identification, mouse_x, mouse_y, mouse_option );
+                control_mouse( session_mouse, current_mouse_identification, current_mouse_x, current_mouse_y, current_mouse_option );
             }
         }
     }
 
-    if ( ( key_down == 1 ) && ( key_identification == localIdentification ) )
+    if ( ( current_key_down == 1 ) && ( current_key_identification == localIdentification ) )
     {
-        if ( ( key_identification == NUM_VIEW ) || ( key_identification == NUM_TERRAIN ) )
+        if ( ( current_key_identification == NUM_VIEW ) || ( current_key_identification == NUM_TERRAIN ) )
         {
-            control_key( key_identification, key_value );
+            control_key( current_key_identification, current_key_value );
         }
     }
     if ( localIdentification == WINDOW_PROCESSING )
@@ -328,42 +620,108 @@ shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification )
     return return_value;
 }
 
-n_int shared_init( n_int view, n_uint random )
+shared_cycle_state shared_cycle( n_uint ticks, n_int localIdentification )
+{
+    shared_cycle_state state;
+
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return SHARED_CYCLE_OK;
+    }
+
+    state = shared_cycle_core( ticks, localIdentification, 0L );
+    shared_core_context_sync_from_globals( &shared_default_core );
+    return state;
+}
+
+static n_int shared_init_core( n_int view, n_uint random )
 {
     key_down = 0;
     mouse_down = 0;
     mouse_drag = 0;
     if ( view == WINDOW_PROCESSING )
     {
-        if ( control_init( KIND_START_UP, random ) == 0L )
+        KIND_OF_USE init_type = shared_core_memory_ready ? KIND_NEW_SIMULATION : KIND_START_UP;
+
+        if ( control_init( init_type, random ) == 0L )
         {
             return SHOW_ERROR( "Initialization failed lack of memory" );
         }
+        shared_core_memory_ready = 1;
         simulation_started = 1;
+        if ( shared_session_initializing == 0 )
+        {
+            shared_default_uses_core = 1;
+        }
     }
     return view;
 }
 
+n_int shared_init( n_int view, n_uint random )
+{
+    n_int result;
+
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return -1;
+    }
+
+    result = shared_init_core( view, random );
+    if ( result == view )
+    {
+        shared_default_core.simulation_started = simulation_started;
+        shared_default_core.selected_index = shared_current_selected_index();
+        shared_core_context_became_current( &shared_default_core );
+    }
+    return result;
+}
+
 void shared_close( void )
 {
-    if ( simulation_started == 0 )
+    shared_default_core_ensure();
+
+    if ( shared_default_core.simulation_started == 0 )
     {
+        shared_core_close_if_unused();
         return;
     }
 
+    if ( shared_active_core != &shared_default_core )
+    {
+        ( void )shared_core_activate( &shared_default_core );
+    }
+
     simulation_started = 0;
+    shared_default_uses_core = 0;
+    shared_default_core.simulation_started = 0;
+    shared_default_core.selected_index = -1;
+    shared_core_context_release_snapshot( &shared_default_core );
     ape_buffer_free( &outputBuffer );
 
-    sim_close();
+    if ( shared_active_core == &shared_default_core )
+    {
+        shared_active_core = 0L;
+    }
+
+    shared_core_close_if_unused();
 }
 
 n_int shared_simulation_started(void)
 {
-    return simulation_started;
+    shared_default_core_ensure();
+    if ( shared_active_core == &shared_default_core )
+    {
+        shared_core_context_sync_from_globals( &shared_default_core );
+    }
+    return shared_default_core.simulation_started;
 }
 
 void shared_keyReceived( n_int value, n_int fIdentification )
 {
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
     key_down = 1;
     key_value = value;
     key_identification = fIdentification;
@@ -371,34 +729,55 @@ void shared_keyReceived( n_int value, n_int fIdentification )
 
 void shared_keyUp( void )
 {
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
     key_down = 0;
 }
 
 void shared_mouseOption( n_byte option )
 {
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
     mouse_option = option;
+}
+
+static void shared_mouse_coordinates( n_double valX, n_double valY, n_int fIdentification, n_int *x, n_int *y )
+{
+    if ( ( x == 0L ) || ( y == 0L ) )
+    {
+        return;
+    }
+
+    if ( fIdentification == NUM_VIEW )
+    {
+        n_vect2 *being_location = draw_selected_location();
+        if ( being_location != 0L )
+        {
+            *x = ( n_int )( valX + 256 + being_location->x ) & 511;
+            *y = ( n_int )( valY + 256 + being_location->y ) & 511;
+            return;
+        }
+    }
+
+    *x = ( n_int )valX;
+    *y = ( n_int )valY;
 }
 
 void shared_mouseReceived( n_double valX, n_double valY, n_int fIdentification )
 {
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
     mouse_down = 1;
     mouse_identification = fIdentification;
-    if ( fIdentification == NUM_VIEW )
-    {
-        n_vect2 *being_location = draw_selected_location();
-        mouse_x = ( n_int )( valX + 256 + being_location->x ) & 511;
-        mouse_y = ( n_int )( valY + 256 + being_location->y ) & 511;
-    }
-    else
-    {
-        mouse_x = ( n_int )valX;
-        mouse_y = ( n_int )valY;
-    }
+    shared_mouse_coordinates( valX, valY, fIdentification, &mouse_x, &mouse_y );
 }
 
 void shared_mouseReceived_ios( n_double valX, n_double valY )
 {
     n_int new_rotation_vertical = ( valX < valY );
+
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
 
     if (new_rotation_vertical) printf("port\n"); else printf("land\n");
     printf("mouse %f x %f\n", valX, valY);
@@ -414,6 +793,8 @@ void shared_mouseReceived_ios( n_double valX, n_double valY )
 
 void shared_mouseUp( void )
 {
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
     mouse_down = 0;
     mouse_drag = 0;
 }
@@ -445,15 +826,35 @@ static n_int shared_new_type( KIND_OF_USE type, n_uint seed )
 
 n_int shared_new( n_uint seed )
 {
-    return shared_new_type( KIND_NEW_SIMULATION, seed );
+    n_int result;
+
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return -1;
+    }
+
+    result = shared_new_type( KIND_NEW_SIMULATION, seed );
+    shared_core_context_became_current( &shared_default_core );
+    return result;
 }
 
 n_int shared_new_agents( n_uint seed )
 {
-    return shared_new_type( KIND_NEW_APES, seed );
+    n_int result;
+
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return -1;
+    }
+
+    result = shared_new_type( KIND_NEW_APES, seed );
+    shared_core_context_became_current( &shared_default_core );
+    return result;
 }
 
-n_byte shared_openFileName( n_constant_string cStringFileName, n_int isScript )
+static n_byte shared_openFileName_core( n_constant_string cStringFileName, n_int isScript )
 {
     ( void )control_toggle_pause( 0 );
 
@@ -464,10 +865,37 @@ n_byte shared_openFileName( n_constant_string cStringFileName, n_int isScript )
     return ( command_open( 0L, (n_string) cStringFileName, 0L ) == 0 );
 }
 
-void shared_saveFileName( n_constant_string cStringFileName )
+n_byte shared_openFileName( n_constant_string cStringFileName, n_int isScript )
+{
+    n_byte result;
+
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return 0;
+    }
+
+    result = shared_openFileName_core( cStringFileName, isScript );
+    shared_core_context_became_current( &shared_default_core );
+    return result;
+}
+
+static void shared_saveFileName_core( n_constant_string cStringFileName )
 {
     ( void )control_toggle_pause( 0 );
     ( void )command_save( 0L, (n_string) cStringFileName, 0L );
+}
+
+void shared_saveFileName( n_constant_string cStringFileName )
+{
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return;
+    }
+
+    shared_saveFileName_core( cStringFileName );
+    shared_core_context_became_current( &shared_default_core );
 }
 
 void shared_delta( n_double delta_x, n_double delta_y, n_int wwind )
@@ -482,12 +910,17 @@ void shared_zoom( n_double num, n_int wwind )
 
 void shared_rotate( n_double num, n_int wwind )
 {
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
+
     if ( wwind == NUM_TERRAIN )
     {
         n_int integer_rotation_256 = ( n_int )( ( num * 256 ) / 360 );
         sim_rotate( integer_rotation_256 );
 
     }
+
+    shared_core_context_sync_from_globals( &shared_default_core );
 }
 
 n_uint shared_max_fps( void )
@@ -495,7 +928,7 @@ n_uint shared_max_fps( void )
     return 60;
 }
 
-n_int shared_menu( n_int menuVal )
+static n_int shared_menu_core( n_int menuVal )
 {
     switch ( menuVal )
     {
@@ -534,8 +967,26 @@ n_int shared_menu( n_int menuVal )
     return -1;
 }
 
+n_int shared_menu( n_int menuVal )
+{
+    n_int result;
+
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return -1;
+    }
+
+    result = shared_menu_core( menuVal );
+    shared_core_context_sync_from_globals( &shared_default_core );
+    return result;
+}
+
 n_byte *shared_legacy_draw( n_byte fIdentification, n_int dim_x, n_int dim_y )
 {
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
+
     if ( fIdentification == NUM_TERRAIN )
     {
         draw_window( dim_x, dim_y );
@@ -553,6 +1004,9 @@ void shared_color_8_bit_to_48_bit( n_byte2 *fit )
 n_int shared_being_number( void )
 {
     simulated_group *group = sim_group();
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
+    group = sim_group();
     if ( group )
     {
         return group->num;
@@ -564,6 +1018,9 @@ void shared_being_name( n_int number, n_string name )
 {
     simulated_group *group = sim_group();
     simulated_being *being = 0L;
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
+    group = sim_group();
     if ( group )
     {
         if (number < group->num)
@@ -577,6 +1034,9 @@ void shared_being_name( n_int number, n_string name )
 void shared_being_select( n_int number)
 {
     simulated_group *group = sim_group();
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
+    group = sim_group();
     if ( group )
     {
         if (number < group->num)
@@ -584,11 +1044,15 @@ void shared_being_select( n_int number)
             sim_set_select(&group->beings[number]);
         }
     }
+    shared_core_context_sync_from_globals( &shared_default_core );
 }
 
 n_int shared_selected_location( n_int *x, n_int *y )
 {
     n_vect2 *being_location = draw_selected_location();
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
+    being_location = draw_selected_location();
     if ( ( being_location == 0L ) || ( x == 0L ) || ( y == 0L ) )
     {
         return 0;
@@ -602,6 +1066,9 @@ n_int shared_selected_location( n_int *x, n_int *y )
 n_int shared_selected_being_location( n_int *x, n_int *y )
 {
     simulated_group *group = sim_group();
+    shared_default_core_ensure();
+    ( void )shared_core_activate( &shared_default_core );
+    group = sim_group();
     if ( ( group == 0L ) || ( group->select == 0L ) || ( x == 0L ) || ( y == 0L ) )
     {
         return 0;
@@ -782,44 +1249,59 @@ static void shared_bitcopy(n_byte *outputBuffer, n_int dim_x, n_int dim_y,
     }
 }
 
+static void shared_draw_into_buffer( n_byte *drawBuffer, n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed )
+{
+    if ( drawBuffer == 0L )
+    {
+        return;
+    }
+
+#ifdef	_WIN32
+    {
+        n_byte *index = draw_pointer( fIdentification );
+        memory_copy( index, drawBuffer, dim_x * dim_y );
+    }
+#else
+
+    draw_window( dim_x, dim_y );
+    draw_cycle( size_changed, ( n_byte )( 1 << fIdentification ) );
+    shared_color_update();
+
+#ifdef ALPHA_WEATHER_DRAW
+    if ( fIdentification == NUM_VIEW )
+    { // fix here for MacOS 26
+        dim_y -= 4;
+
+        shared_bitcopy_view( drawBuffer, dim_x, dim_y, 0, 0, dim_x );
+    }
+    else
+#endif
+    {
+        shared_bitcopy( drawBuffer, dim_x, dim_y, 0, 0, dim_x, fIdentification );
+    }
+#endif
+}
 
 n_byte * shared_draw( n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed )
 {
-    n_byte * outputBuffer = shared_output_buffer(dim_x, dim_y);
-    
+    n_byte *drawBuffer = shared_output_buffer( dim_x, dim_y );
+
+    shared_default_core_ensure();
+    if ( shared_core_activate( &shared_default_core ) == 0 )
+    {
+        return drawBuffer;
+    }
+
     if ( simulation_started == 0 )
     {
         SHOW_ERROR( "draw - simulation not started" );
-        return outputBuffer;
-    }
-    {
-#ifdef	_WIN32
-        {
-            n_byte *index = draw_pointer( fIdentification );
-            memory_copy( index, outputBuffer, dim_x * dim_y );
-        }
-#else
-        
-        draw_window( dim_x, dim_y );
-        draw_cycle( size_changed, ( n_byte )( 1 << fIdentification ) );
-        shared_color_update();
-
-#ifdef ALPHA_WEATHER_DRAW
-        if ( fIdentification == NUM_VIEW )
-        { // fix here for MacOS 26
-            dim_y -= 4;
-            
-            shared_bitcopy_view( outputBuffer, dim_x, dim_y, 0, 0, dim_x );
-        }
-        else
-#endif
-        {
-            shared_bitcopy( outputBuffer, dim_x, dim_y, 0, 0, dim_x, fIdentification );
-        }
-#endif
+        return drawBuffer;
     }
 
-    return outputBuffer;
+    shared_draw_into_buffer( drawBuffer, fIdentification, dim_x, dim_y, size_changed );
+
+    shared_core_context_sync_from_globals( &shared_default_core );
+    return drawBuffer;
 }
 
 void shared_copy_rotate_180( n_byte4 *outputBuffer, const n_byte4 *source, n_int dim_x, n_int dim_y )
@@ -839,6 +1321,421 @@ void shared_copy_rotate_180( n_byte4 *outputBuffer, const n_byte4 *source, n_int
             outputBuffer[row_offset + lx] = source[source_row_offset + ( dim_x - 1 - lx )];
         }
     }
+}
+
+static n_int shared_session_init_callback( void *context, n_int view, n_uint random )
+{
+    ( void )context;
+    return ( shared_init_core( view, random ) == view );
+}
+
+static shared_cycle_state shared_session_cycle_callback( void *context, n_uint ticks, n_int identification )
+{
+    shared_session *session = ( shared_session * )context;
+    return shared_cycle_core( ticks, identification, ( session != 0L ) ? &session->shell : 0L );
+}
+
+static void shared_session_draw_callback( void *context, n_byte *drawBuffer, n_int identification, n_int dim_x, n_int dim_y, n_byte size_changed )
+{
+    ( void )context;
+    shared_draw_into_buffer( drawBuffer, identification, dim_x, dim_y, size_changed );
+}
+
+shared_session *shared_session_create( n_uint random )
+{
+    shared_session *session = ( shared_session * )memory_new( sizeof( shared_session ) );
+
+    if ( session != 0L )
+    {
+        memory_erase( ( n_byte * )session, sizeof( shared_session ) );
+        session->initial_random = random;
+        ape_app_shell_reset( &session->shell );
+        shared_core_context_reset_values( &session->core );
+    }
+
+    return session;
+}
+
+void shared_session_destroy( shared_session *session )
+{
+    if ( session == 0L )
+    {
+        return;
+    }
+
+    if ( ape_app_shell_simulation_started( &session->shell ) )
+    {
+        if ( shared_session_started_count > 0 )
+        {
+            shared_session_started_count--;
+        }
+    }
+
+    if ( shared_active_core == &session->core )
+    {
+        shared_active_core = 0L;
+    }
+
+    ape_app_shell_shutdown( &session->shell, 0L, 0L );
+    session->core.simulation_started = 0;
+    shared_core_context_release_snapshot( &session->core );
+    shared_core_close_if_unused();
+
+    memory_free( ( void ** )&session );
+}
+
+n_int shared_session_init( shared_session *session, n_int view, n_uint random )
+{
+    n_int was_started;
+
+    if ( session == 0L )
+    {
+        return -1;
+    }
+
+    was_started = ape_app_shell_simulation_started( &session->shell );
+    session->initial_random = random;
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return -1;
+    }
+
+    shared_session_initializing++;
+    ( void )ape_app_shell_init( &session->shell, view, random, shared_session_init_callback, session );
+    shared_session_initializing--;
+
+    if ( ape_app_shell_simulation_started( &session->shell ) )
+    {
+        if ( was_started == 0 )
+        {
+            shared_session_started_count++;
+        }
+        session->core.simulation_started = simulation_started;
+        session->core.selected_index = shared_current_selected_index();
+        shared_core_context_became_current( &session->core );
+        return view;
+    }
+
+    if ( was_started && ( shared_session_started_count > 0 ) )
+    {
+        shared_session_started_count--;
+    }
+    session->core.simulation_started = 0;
+
+    return -1;
+}
+
+n_int shared_session_simulation_started( const shared_session *session )
+{
+    if ( session == 0L )
+    {
+        return 0;
+    }
+
+    return ape_app_shell_simulation_started( &session->shell );
+}
+
+shared_cycle_state shared_session_cycle( shared_session *session, n_uint ticks, n_int localIdentification )
+{
+    shared_cycle_state state;
+
+    if ( session == 0L )
+    {
+        return SHARED_CYCLE_OK;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return SHARED_CYCLE_OK;
+    }
+
+    state = ape_app_shell_cycle( &session->shell, ticks, localIdentification, shared_session_cycle_callback, session );
+    shared_core_context_sync_from_globals( &session->core );
+    return state;
+}
+
+shared_cycle_state shared_session_cycle_ios( shared_session *session, n_uint ticks )
+{
+    return shared_session_cycle( session, ticks, WINDOW_PROCESSING );
+}
+
+n_byte *shared_session_draw( shared_session *session, n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed )
+{
+    n_byte *buffer;
+
+    if ( session == 0L )
+    {
+        return 0L;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return 0L;
+    }
+
+    buffer = ape_app_shell_draw( &session->shell, fIdentification, dim_x, dim_y, size_changed, shared_session_draw_callback, session );
+    shared_core_context_sync_from_globals( &session->core );
+    return buffer;
+}
+
+void shared_session_draw_ios( shared_session *session, n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
+{
+    n_byte *buffer;
+
+    if ( outputBuffer == 0L )
+    {
+        return;
+    }
+
+    buffer = shared_session_draw( session, NUM_TERRAIN, dim_x, dim_y, 0 );
+    if ( buffer == 0L )
+    {
+        return;
+    }
+
+    shared_copy_rotate_180( outputBuffer, ( const n_byte4 * )buffer, dim_x, dim_y );
+}
+
+static n_byte shared_session_is_started( shared_session *session )
+{
+    return ( n_byte )( ( session != 0L ) && ape_app_shell_simulation_started( &session->shell ) );
+}
+
+n_int shared_session_menu( shared_session *session, n_int menuValue )
+{
+    n_int result;
+
+    if ( shared_session_is_started( session ) == 0 )
+    {
+        return -1;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return -1;
+    }
+
+    result = shared_menu_core( menuValue );
+    shared_core_context_sync_from_globals( &session->core );
+    return result;
+}
+
+n_int shared_session_new( shared_session *session, n_uint seed )
+{
+    n_int result;
+
+    if ( shared_session_is_started( session ) == 0 )
+    {
+        return -1;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return -1;
+    }
+
+    result = shared_new_type( KIND_NEW_SIMULATION, seed );
+    shared_core_context_became_current( &session->core );
+    return result;
+}
+
+n_int shared_session_pause_state( shared_session *session )
+{
+    if ( session == 0L )
+    {
+        return 0;
+    }
+
+    return session->core.toggle_pause;
+}
+
+n_int shared_session_selected_being_index( shared_session *session )
+{
+    if ( session == 0L )
+    {
+        return -1;
+    }
+
+    return session->core.selected_index;
+}
+
+n_int shared_session_selected_being_facing( shared_session *session )
+{
+    simulated_group *group;
+    n_int facing;
+
+    if ( shared_session_is_started( session ) == 0 )
+    {
+        return -1;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return -1;
+    }
+
+    group = sim_group();
+    if ( ( group == 0L ) || ( group->select == 0L ) )
+    {
+        return -1;
+    }
+
+    facing = ( n_int )being_facing( group->select );
+    shared_core_context_sync_from_globals( &session->core );
+    return facing;
+}
+
+n_int shared_session_being_number( shared_session *session )
+{
+    simulated_group *group;
+
+    if ( shared_session_is_started( session ) == 0 )
+    {
+        return 0;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return 0;
+    }
+
+    group = sim_group();
+    shared_core_context_sync_from_globals( &session->core );
+    if ( group == 0L )
+    {
+        return 0;
+    }
+    return group->num;
+}
+
+n_int shared_session_selected_being_location( shared_session *session, n_int *x, n_int *y )
+{
+    simulated_group *group;
+
+    if ( ( shared_session_is_started( session ) == 0 ) || ( x == 0L ) || ( y == 0L ) )
+    {
+        return 0;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return 0;
+    }
+
+    group = sim_group();
+    if ( ( group == 0L ) || ( group->select == 0L ) )
+    {
+        return 0;
+    }
+
+    *x = being_location_x( group->select );
+    *y = being_location_y( group->select );
+    shared_core_context_sync_from_globals( &session->core );
+    return 1;
+}
+
+void shared_session_rotate( shared_session *session, n_double num, n_int wwind )
+{
+    if ( shared_session_is_started( session ) == 0 )
+    {
+        return;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return;
+    }
+
+    shared_rotate( num, wwind );
+    shared_core_context_sync_from_globals( &session->core );
+}
+
+n_int shared_session_input_is_active( shared_session *session )
+{
+    if ( session == 0L )
+    {
+        return 0;
+    }
+
+    return ( session->shell.key.down != 0 ) ||
+           ( session->shell.mouse.down != 0 ) ||
+           ( session->shell.mouse.drag != 0 );
+}
+
+void shared_session_mouseOption( shared_session *session, n_byte option )
+{
+    if ( session == 0L )
+    {
+        return;
+    }
+
+    ape_app_shell_mouse_option( &session->shell, option );
+}
+
+void shared_session_mouseReceived( shared_session *session, n_double valX, n_double valY, n_int localIdentification )
+{
+    n_int session_x = 0;
+    n_int session_y = 0;
+
+    if ( session == 0L )
+    {
+        return;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return;
+    }
+
+    shared_mouse_coordinates( valX, valY, localIdentification, &session_x, &session_y );
+    ape_app_shell_mouse_received( &session->shell, session_x, session_y, localIdentification );
+    shared_core_context_sync_from_globals( &session->core );
+}
+
+void shared_session_mouseUp( shared_session *session )
+{
+    if ( session == 0L )
+    {
+        return;
+    }
+
+    ape_app_shell_mouse_up( &session->shell );
+}
+
+n_byte shared_session_openFileName( shared_session *session, n_constant_string cStringFileName, n_int isScript )
+{
+    n_byte result;
+
+    if ( shared_session_is_started( session ) == 0 )
+    {
+        return 0;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return 0;
+    }
+
+    result = shared_openFileName_core( cStringFileName, isScript );
+    shared_core_context_became_current( &session->core );
+    return result;
+}
+
+void shared_session_saveFileName( shared_session *session, n_constant_string cStringFileName )
+{
+    if ( shared_session_is_started( session ) == 0 )
+    {
+        return;
+    }
+
+    if ( shared_core_activate( &session->core ) == 0 )
+    {
+        return;
+    }
+
+    shared_saveFileName_core( cStringFileName );
+    shared_core_context_sync_from_globals( &session->core );
 }
 
 void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )

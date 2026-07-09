@@ -236,6 +236,8 @@ static n_int        sim_writing_output = 0;
 
 static n_string_block sim_console_output;
 
+static KIND_OF_USE local_execution = KIND_PRE_STARTUP;
+
 #ifndef    _WIN32
 
 static n_int      sim_quit_value = 0;
@@ -442,6 +444,29 @@ simulated_timing *sim_timing( void )
 simulated_group *sim_group( void )
 {
     return &group;
+}
+
+n_int sim_state_restore( n_file *input_file, n_int selected_index )
+{
+    simulated_group *local_group;
+
+    if ( tranfer_in( input_file ) != 0 )
+    {
+        return -1;
+    }
+
+    local_execution = KIND_NOTHING_TO_RUN;
+    sim_new_progress = 0;
+    sim_new_run = 0;
+    sim_writing_output = 0;
+
+    local_group = sim_group();
+    if ( ( local_group != 0L ) && ( selected_index >= 0 ) && ( selected_index < ( n_int )local_group->num ) )
+    {
+        sim_set_select( &( local_group->beings[selected_index] ) );
+    }
+
+    return 0;
 }
 
 
@@ -1533,8 +1558,6 @@ void sim_update_output( void )
     watch_control( &group, being_get_select_name( &group ), group.select, sim_console_output );
     sim_writing_output = 0;
 }
-
-static KIND_OF_USE local_execution = KIND_PRE_STARTUP;
 
 void sim_cycle( void )
 {

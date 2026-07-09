@@ -55,6 +55,13 @@ typedef struct
 {
     n_byte down;
     n_byte option;
+    n_byte identification;
+    n_byte drag;
+    n_int  x;
+    n_int  y;
+    n_int  drag_x;
+    n_int  drag_y;
+    n_int  control_was_down;
 } ape_app_shell_mouse;
 
 typedef struct
@@ -90,6 +97,7 @@ n_byte ape_app_shell_key_active(const ape_app_shell *shell, n_int identification
 
 void ape_app_shell_mouse_option(ape_app_shell *shell, n_byte option);
 n_byte ape_app_shell_mouse_begin(ape_app_shell *shell);
+void ape_app_shell_mouse_received(ape_app_shell *shell, n_int x, n_int y, n_int identification);
 void ape_app_shell_mouse_up(ape_app_shell *shell);
 
 #endif /* SIMULATEDAPE_APP_SHELL_H */

@@ -53,6 +53,8 @@ typedef enum
     SHARED_CYCLE_NEW_APES
 } shared_cycle_state;
 
+typedef struct shared_session shared_session;
+
 #define    NUM_VIEW    (0)
 #define    NUM_TERRAIN (1)
 #define    NUM_CONTROL (2)
@@ -126,6 +128,29 @@ n_int shared_new_agents( n_uint seed );
 n_byte shared_openFileName( n_constant_string cStringFileName, n_int isScript );
 
 void shared_saveFileName( n_constant_string cStringFileName );
+
+shared_session *shared_session_create( n_uint random );
+void shared_session_destroy( shared_session *session );
+n_int shared_session_init( shared_session *session, n_int view, n_uint random );
+n_int shared_session_simulation_started( const shared_session *session );
+shared_cycle_state shared_session_cycle( shared_session *session, n_uint ticks, n_int localIdentification );
+shared_cycle_state shared_session_cycle_ios( shared_session *session, n_uint ticks );
+n_byte *shared_session_draw( shared_session *session, n_int fIdentification, n_int dim_x, n_int dim_y, n_byte size_changed );
+void shared_session_draw_ios( shared_session *session, n_byte4 *outputBuffer, n_int dim_x, n_int dim_y );
+n_int shared_session_menu( shared_session *session, n_int menuValue );
+n_int shared_session_new( shared_session *session, n_uint seed );
+n_int shared_session_pause_state( shared_session *session );
+n_int shared_session_selected_being_index( shared_session *session );
+n_int shared_session_selected_being_facing( shared_session *session );
+n_int shared_session_being_number( shared_session *session );
+n_int shared_session_selected_being_location( shared_session *session, n_int *x, n_int *y );
+void shared_session_rotate( shared_session *session, n_double num, n_int wwind );
+n_int shared_session_input_is_active( shared_session *session );
+void shared_session_mouseOption( shared_session *session, n_byte option );
+void shared_session_mouseReceived( shared_session *session, n_double valX, n_double valY, n_int localIdentification );
+void shared_session_mouseUp( shared_session *session );
+n_byte shared_session_openFileName( shared_session *session, n_constant_string cStringFileName, n_int isScript );
+void shared_session_saveFileName( shared_session *session, n_constant_string cStringFileName );
 
 void shared_script_debug_handle( n_constant_string cStringFileName );
 

@@ -92,6 +92,21 @@ n_int draw_toggle_territory( void );
 n_int draw_toggle_tide_daylight( void );
 n_int draw_toggle_tide_daylight_value( void );
 
+typedef struct
+{
+    n_int weather;
+    n_int brain;
+    n_int braincode;
+    n_int territory;
+    n_int tide_daylight;
+    n_int follow;
+    n_int social_web;
+} draw_toggle_state;
+
+void draw_toggle_state_default( draw_toggle_state *state );
+void draw_toggle_state_get( draw_toggle_state *state );
+void draw_toggle_state_set( const draw_toggle_state *state );
+
 void  draw_terrain_coord( n_int *co_x, n_int *co_y );
 
 void draw_undraw_clear( void );
@@ -113,4 +128,3 @@ void  draw_cycle( n_byte size_changed, n_byte kind );
 n_byte *draw_offscreen( n_byte *value );
 
 #endif /* SIMULATEDAPE_GUI_H */
-

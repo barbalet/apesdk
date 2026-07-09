@@ -118,8 +118,18 @@ struct SimMacParityTests {
         point("mobile-ios-initializes-processing", "Mobile", "iOS initializes the processing/control window"),
         point("mobile-ios-terrain-renders", "Mobile", "iOS terrain render remains represented"),
         point("mobile-ios-touch-scaling", "Mobile", "iOS touch scaling remains represented"),
+        point("mobile-ios-scene-session-model", "Mobile", "iOS scene model owns an opaque shared session"),
+        point("mobile-ios-session-draw-wrapper", "Mobile", "iOS session draw wrapper renders through a session handle"),
+        point("mobile-ios-session-input-routes", "Mobile", "iOS session input routes through a session handle"),
+        point("mobile-ios-session-pause-isolated", "Mobile", "Scene sessions keep pause menu state isolated"),
+        point("mobile-ios-session-rotation-isolated", "Mobile", "Scene sessions keep terrain rotation state isolated"),
+        point("mobile-ios-session-input-isolated", "Mobile", "Scene sessions keep touch/input state isolated"),
+        point("mobile-ios-session-world-isolated", "Mobile", "Scene sessions keep selection and new-simulation state isolated"),
+        point("mobile-ipad-named-window-group", "Mobile", "iPad app exposes a named simulation window group"),
+        point("mobile-ipad-new-window-command", "Mobile", "iPad command panel exposes a new-window command"),
+        point("mobile-ipad-fresh-window-session", "Mobile", "Each iPad window creates a fresh scene model and session"),
         point("mobile-ipad-command-panel", "Mobile", "iPad command panel remains represented"),
-        point("mobile-maccatalyst-target-pending", "Mobile", "Dedicated Mac Catalyst target remains pending"),
+        point("mobile-maccatalyst-target-done", "Mobile", "Dedicated Mac Catalyst target remains represented"),
     ]
 
     @Test("Functionality inventory covers the requested UI surface")
@@ -343,6 +353,131 @@ struct SimMacParityTests {
         shared_mouseReceived_ios(128.0, 192.0)
         _ = shared_cycle_ios(1)
         #expect(shared_simulation_started() == 1)
+
+        let session = shared_session_create(0x66778899)
+        #expect(session != nil)
+        defer { shared_session_destroy(session) }
+
+        #expect(shared_session_simulation_started(session) == 0)
+        #expect(shared_session_init(session, n_int(NUM_CONTROL), 0x66778899) == n_int(NUM_CONTROL))
+        #expect(shared_session_simulation_started(session) == 1)
+
+        var sessionBuffer = [n_byte4](repeating: 0, count: 512 * 512)
+        sessionBuffer.withUnsafeMutableBufferPointer { buffer in
+            shared_session_draw_ios(session, buffer.baseAddress, 512, 512)
+        }
+        shared_session_mouseReceived(session, 128.0, 192.0, n_int(NUM_TERRAIN))
+        _ = shared_session_cycle_ios(session, 2)
+        #expect(shared_session_menu(session, n_int(NA_MENU_NEXT_APE)) == 0)
+        #expect(shared_session_menu(session, n_int(NA_MENU_PREVIOUS_APE)) == 0)
+        #expect(shared_session_new(session, 0x77665544) == 0)
+        shared_session_mouseUp(session)
+        #expect(shared_session_simulation_started(session) == 1)
+    }
+
+    @Test("Shared sessions isolate pause, selection, rotation, input, and world state")
+    func sharedSessionsIsolateSceneState() {
+        shared_close()
+        defer { shared_close() }
+
+        let first = shared_session_create(0x10203040)
+        let second = shared_session_create(0x50607080)
+        #expect(first != nil)
+        #expect(second != nil)
+        defer {
+            shared_session_destroy(second)
+            shared_session_destroy(first)
+        }
+
+        #expect(shared_session_init(first, n_int(NUM_CONTROL), 0x10203040) == n_int(NUM_CONTROL))
+        _ = shared_session_cycle_ios(first, 1)
+        #expect(shared_session_being_number(first) > 1)
+
+        #expect(shared_session_init(second, n_int(NUM_CONTROL), 0x50607080) == n_int(NUM_CONTROL))
+        _ = shared_session_cycle_ios(second, 2)
+        #expect(shared_session_being_number(second) > 0)
+
+        let firstInitialIndex = shared_session_selected_being_index(first)
+        let secondInitialIndex = shared_session_selected_being_index(second)
+        let firstInitialFacing = shared_session_selected_being_facing(first)
+        let secondFacing = shared_session_selected_being_facing(second)
+        #expect(firstInitialIndex >= 0)
+        #expect(secondInitialIndex >= 0)
+        #expect(firstInitialFacing >= 0)
+        #expect(secondFacing >= 0)
+
+        var secondX: n_int = 0
+        var secondY: n_int = 0
+        #expect(shared_session_selected_being_location(second, &secondX, &secondY) == 1)
+
+        #expect(shared_session_pause_state(first) == 0)
+        #expect(shared_session_pause_state(second) == 0)
+        #expect(shared_session_menu(first, n_int(NA_MENU_PAUSE)) == 1)
+        #expect(shared_session_pause_state(first) == 1)
+        #expect(shared_session_pause_state(second) == 0)
+        #expect(shared_session_menu(second, n_int(NA_MENU_PAUSE)) == 1)
+        #expect(shared_session_pause_state(first) == 1)
+        #expect(shared_session_pause_state(second) == 1)
+        #expect(shared_session_menu(first, n_int(NA_MENU_PAUSE)) == 0)
+        #expect(shared_session_pause_state(first) == 0)
+        #expect(shared_session_pause_state(second) == 1)
+        #expect(shared_session_menu(second, n_int(NA_MENU_PAUSE)) == 0)
+        #expect(shared_session_pause_state(first) == 0)
+        #expect(shared_session_pause_state(second) == 0)
+
+        #expect(shared_session_menu(first, n_int(NA_MENU_NEXT_APE)) == 0)
+        #expect(shared_session_selected_being_index(first) != firstInitialIndex)
+        #expect(shared_session_selected_being_index(second) == secondInitialIndex)
+
+        var secondAfterSelectionX: n_int = 0
+        var secondAfterSelectionY: n_int = 0
+        #expect(shared_session_selected_being_location(second, &secondAfterSelectionX, &secondAfterSelectionY) == 1)
+        #expect(secondAfterSelectionX == secondX)
+        #expect(secondAfterSelectionY == secondY)
+
+        let firstFacingBeforeRotate = shared_session_selected_being_facing(first)
+        shared_session_rotate(first, 45.0, n_int(NUM_TERRAIN))
+        #expect(shared_session_selected_being_facing(first) != firstFacingBeforeRotate)
+        #expect(shared_session_selected_being_facing(second) == secondFacing)
+
+        #expect(shared_session_input_is_active(first) == 0)
+        #expect(shared_session_input_is_active(second) == 0)
+        shared_session_mouseReceived(first, 128.0, 192.0, n_int(NUM_TERRAIN))
+        #expect(shared_session_input_is_active(first) == 1)
+        #expect(shared_session_input_is_active(second) == 0)
+        shared_session_mouseUp(first)
+        #expect(shared_session_input_is_active(first) == 0)
+        #expect(shared_session_input_is_active(second) == 0)
+
+        #expect(shared_session_new(first, 0x90ABCDEF) == 0)
+        _ = shared_session_cycle_ios(first, 3)
+
+        var secondAfterNewX: n_int = 0
+        var secondAfterNewY: n_int = 0
+        #expect(shared_session_selected_being_location(second, &secondAfterNewX, &secondAfterNewY) == 1)
+        #expect(secondAfterNewX == secondX)
+        #expect(secondAfterNewY == secondY)
+        #expect(shared_session_selected_being_index(second) == secondInitialIndex)
+        #expect(shared_session_selected_being_facing(second) == secondFacing)
+    }
+
+    @Test("iPad app exposes explicit new-window UI backed by fresh scene sessions")
+    func iPadNewWindowUISourceContracts() throws {
+        let testFileURL = URL(fileURLWithPath: #filePath)
+        let rootURL = testFileURL
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let appSourceURL = rootURL.appendingPathComponent("ios/ApeSimApp.swift")
+        let appSource = try String(contentsOf: appSourceURL)
+
+        #expect(appSource.contains("WindowGroup(id: ApeSimulationWindow.id)"))
+        #expect(appSource.contains("@Environment(\\.openWindow)"))
+        #expect(appSource.contains("openWindow(id: ApeSimulationWindow.id)"))
+        #expect(appSource.contains("plus.rectangle.on.rectangle"))
+        #expect(appSource.contains("NewSimulationWindowButton"))
+        #expect(appSource.contains("@StateObject private var sceneModel = ApeSimulationSceneModel()"))
+        #expect(appSource.contains("shared_session_create"))
     }
 
     @Test("iOS draw wrapper rotates terrain for UIKit display")

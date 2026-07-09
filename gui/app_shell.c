@@ -48,6 +48,13 @@ static void ape_app_shell_input_reset(ape_app_shell *shell)
 
     shell->mouse.down = 0;
     shell->mouse.option = 0;
+    shell->mouse.identification = 0;
+    shell->mouse.drag = 0;
+    shell->mouse.x = 0;
+    shell->mouse.y = 0;
+    shell->mouse.drag_x = 0;
+    shell->mouse.drag_y = 0;
+    shell->mouse.control_was_down = 0;
 }
 
 void ape_app_shell_reset(ape_app_shell *shell)
@@ -213,6 +220,19 @@ n_byte ape_app_shell_mouse_begin(ape_app_shell *shell)
     return 1;
 }
 
+void ape_app_shell_mouse_received(ape_app_shell *shell, n_int x, n_int y, n_int identification)
+{
+    if (shell == 0L)
+    {
+        return;
+    }
+
+    shell->mouse.down = 1;
+    shell->mouse.identification = (n_byte)identification;
+    shell->mouse.x = x;
+    shell->mouse.y = y;
+}
+
 void ape_app_shell_mouse_up(ape_app_shell *shell)
 {
     if (shell == 0L)
@@ -221,4 +241,5 @@ void ape_app_shell_mouse_up(ape_app_shell *shell)
     }
 
     shell->mouse.down = 0;
+    shell->mouse.drag = 0;
 }
