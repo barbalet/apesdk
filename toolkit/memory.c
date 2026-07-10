@@ -140,6 +140,11 @@ memory_list *memory_list_new( n_uint size, n_uint number )
 
 void memory_list_copy( memory_list *list, n_byte *data, n_uint size)
 {
+    if ( list->unit_size == 0 || list->count > ( (n_uint)-1 ) / list->unit_size )
+    {
+        (void)SHOW_ERROR("integer overflow in offset calculation");
+        return;
+    }
     memory_copy( data, &( list->data[list->unit_size * list->count] ), size );
     list->count += (size /(list->unit_size));
     if (size % (list->unit_size))
@@ -150,6 +155,11 @@ void memory_list_copy( memory_list *list, n_byte *data, n_uint size)
     if ( list->count >= list->max )
     {
         n_uint   new_max = ( list->max * 2 );
+        if ( new_max == 0 || new_max > ( (n_uint)-1 ) / list->unit_size )
+        {
+            (void)SHOW_ERROR("integer overflow in size calculation");
+            return;
+        }
         n_uint   new_size = new_max * list->unit_size;
         n_byte *new_range = memory_new( new_size );
         NA_ASSERT( new_range, "range failed to allocate" );
