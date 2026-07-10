@@ -115,6 +115,7 @@
 		4A91F0012F10000000000001 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A91F0042F10000000000001 /* app_shell.c */; };
 		4A91F0022F10000000000001 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A91F0042F10000000000001 /* app_shell.c */; };
 		4A91F0032F10000000000001 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A91F0042F10000000000001 /* app_shell.c */; };
+		4AB0F0013000000000000001 /* SimMacParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A70F0022EC1000000000001 /* SimMacParityTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -124,6 +125,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 4A212E6F2DCCAF95001F26AA;
 			remoteInfo = "sim-mac";
+		};
+		4AB0F00C3000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4A212E682DCCAF95001F26AA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4A80F0062ED0000000000001;
+			remoteInfo = "ApeSim-MacCatalyst";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -180,6 +188,7 @@
 		4A70F0032EC1000000000001 /* SimMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SimMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A80F0032ED0000000000001 /* Simulated Ape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Simulated Ape.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A91F0042F10000000000001 /* app_shell.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = app_shell.c; path = ../gui/app_shell.c; sourceTree = SOURCE_ROOT; };
+		4AB0F0033000000000000001 /* ApeSim-MacCatalystTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ApeSim-MacCatalystTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -219,6 +228,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4AB0F0053000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -248,6 +264,7 @@
 				4A60F0032EAA000000000001 /* Simulated Ape.app */,
 				4A80F0032ED0000000000001 /* Simulated Ape.app */,
 				4A70F0032EC1000000000001 /* SimMacTests.xctest */,
+				4AB0F0033000000000000001 /* ApeSim-MacCatalystTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -452,6 +469,26 @@
 			productReference = 4A80F0032ED0000000000001 /* Simulated Ape.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4AB0F0083000000000000001 /* ApeSim-MacCatalystTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4AB0F0093000000000000001 /* Build configuration list for PBXNativeTarget "ApeSim-MacCatalystTests" */;
+			buildPhases = (
+				4AB0F0073000000000000001 /* Sources */,
+				4AB0F0053000000000000001 /* Frameworks */,
+				4AB0F0063000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4AB0F00D3000000000000001 /* PBXTargetDependency */,
+			);
+			name = "ApeSim-MacCatalystTests";
+			packageProductDependencies = (
+			);
+			productName = "ApeSim-MacCatalystTests";
+			productReference = 4AB0F0033000000000000001 /* ApeSim-MacCatalystTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -479,6 +516,11 @@
 						CreatedOnToolsVersion = 16.3;
 						LastSwiftMigration = 1630;
 					};
+					4AB0F0083000000000000001 = {
+						CreatedOnToolsVersion = 16.3;
+						LastSwiftMigration = 1630;
+						TestTargetID = 4A80F0062ED0000000000001;
+					};
 				};
 			};
 			buildConfigurationList = 4A212E6B2DCCAF95001F26AA /* Build configuration list for PBXProject "maccatalyst" */;
@@ -498,6 +540,7 @@
 				4A212E6F2DCCAF95001F26AA /* sim-mac */,
 				4A60F0062EAA000000000001 /* ApeSim-iOS */,
 				4A80F0062ED0000000000001 /* ApeSim-MacCatalyst */,
+				4AB0F0083000000000000001 /* ApeSim-MacCatalystTests */,
 				4A70F0082EC1000000000001 /* SimMacTests */,
 			);
 		};
@@ -526,6 +569,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4A80F0082ED0000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4AB0F0063000000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -671,6 +721,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4AB0F0073000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4AB0F0013000000000000001 /* SimMacParityTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -678,6 +736,11 @@
 			isa = PBXTargetDependency;
 			target = 4A212E6F2DCCAF95001F26AA /* sim-mac */;
 			targetProxy = 4A70F00C2EC1000000000001 /* PBXContainerItemProxy */;
+		};
+		4AB0F00D3000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4A80F0062ED0000000000001 /* ApeSim-MacCatalyst */;
+			targetProxy = 4AB0F00C3000000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1043,6 +1106,68 @@
 			};
 			name = Release;
 		};
+		4AB0F00A3000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = R9M79846SQ;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-catalyst.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "source-links/sim-mac/render/sim-mac-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 6;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Simulated Ape.app/Contents/MacOS/Simulated Ape";
+			};
+			name = Debug;
+		};
+		4AB0F00B3000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = R9M79846SQ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apesdk.sim-catalyst.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "source-links/sim-mac/render/sim-mac-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 6;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Simulated Ape.app/Contents/MacOS/Simulated Ape";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1087,6 +1212,15 @@
 			buildConfigurations = (
 				4A80F00A2ED0000000000001 /* Debug */,
 				4A80F00B2ED0000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4AB0F0093000000000000001 /* Build configuration list for PBXNativeTarget "ApeSim-MacCatalystTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4AB0F00A3000000000000001 /* Debug */,
+				4AB0F00B3000000000000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

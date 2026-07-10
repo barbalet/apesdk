@@ -432,9 +432,10 @@ static n_int  sim_control_string_offset[255];
 static n_byte sim_control[MAX_POSSIBLE_CONTROL_CHARACTER_X * MAX_POSSIBLE_CONTROL_CHARACTER_Y];
 
 static n_int  sim_control_max_x;
+static n_int  sim_control_max_y;
 
 static n_byte sim_control_previous_character;
-static n_byte sim_control_character_location;
+static n_int  sim_control_character_location;
 
 simulated_timing *sim_timing( void )
 {
@@ -473,10 +474,10 @@ n_int sim_state_restore( n_file *input_file, n_int selected_index )
 n_int sim_control_translate( n_int px, n_int py, n_int *character_x, n_int *character_y )
 {
     *character_x = ( px - CHARACTER_WIDTH ) / CHARACTER_WIDTH;
-    if ( ( *character_x > -1 ) && ( *character_x < MAX_POSSIBLE_CONTROL_CHARACTER_X ) )
+    if ( ( *character_x > -1 ) && ( *character_x < sim_control_max_x ) && ( *character_x < MAX_POSSIBLE_CONTROL_CHARACTER_X ) )
     {
         *character_y = ( py - CHARACTER_WIDTH ) / CHARACTER_HEIGHT;
-        if ( ( *character_y > -1 ) && ( *character_y < MAX_POSSIBLE_CONTROL_CHARACTER_Y ) )
+        if ( ( *character_y > -1 ) && ( *character_y < sim_control_max_y ) && ( *character_y < MAX_POSSIBLE_CONTROL_CHARACTER_Y ) )
         {
             return 1;
         }
@@ -489,30 +490,67 @@ void sim_control_set( n_int px, n_int py, n_byte value, n_byte character )
     n_int character_x, character_y;
     if ( sim_control_translate( px, py, &character_x, &character_y ) )
     {
-        sim_control[( character_y * sim_control_max_x ) + character_x] = value;
+        n_int control_index = ( character_y * sim_control_max_x ) + character_x;
+
+        if ( ( control_index < 0 ) || ( control_index >= ( MAX_POSSIBLE_CONTROL_CHARACTER_X * MAX_POSSIBLE_CONTROL_CHARACTER_Y ) ) )
+        {
+            return;
+        }
+
+        sim_control[control_index] = value;
         if ( value != sim_control_previous_character )
         {
             if ( sim_control_previous_character )
             {
-                sim_control_string[sim_control_character_location] = 0;
-                sim_control_character_location++;
+                if ( sim_control_character_location < ( n_int )sizeof( sim_control_string ) )
+                {
+                    sim_control_string[sim_control_character_location] = 0;
+                    sim_control_character_location++;
+                }
             }
-            sim_control_string_offset[sim_control_previous_character] = sim_control_character_location;
+            if ( sim_control_previous_character < 255 )
+            {
+                sim_control_string_offset[sim_control_previous_character] = sim_control_character_location;
+            }
             sim_control_previous_character = value;
         }
-        sim_control_string[sim_control_character_location] = character;
-        sim_control_character_location++;
+        if ( sim_control_character_location < ( ( n_int )sizeof( sim_control_string ) - 1 ) )
+        {
+            sim_control_string[sim_control_character_location] = character;
+            sim_control_character_location++;
+            sim_control_string[sim_control_character_location] = 0;
+        }
     }
 }
 
 void sim_control_erase( n_int size_x, n_int size_y, n_int max_characters )
 {
     n_int max_y = ( size_y - CHARACTER_WIDTH ) / CHARACTER_HEIGHT;
+
+    if ( max_characters < 0 )
+    {
+        max_characters = 0;
+    }
+    if ( max_characters > MAX_POSSIBLE_CONTROL_CHARACTER_X )
+    {
+        max_characters = MAX_POSSIBLE_CONTROL_CHARACTER_X;
+    }
+    if ( max_y < 0 )
+    {
+        max_y = 0;
+    }
+    if ( max_y > MAX_POSSIBLE_CONTROL_CHARACTER_Y )
+    {
+        max_y = MAX_POSSIBLE_CONTROL_CHARACTER_Y;
+    }
+
     sim_control_max_x = max_characters;
+    sim_control_max_y = max_y;
     sim_control_previous_character = 0;
     sim_control_character_location = 0;
-    memory_erase( sim_control, ( n_uint )( sim_control_max_x * max_y ) );
-    memory_erase( sim_control_string, 255 * 40 );
+    memory_erase( sim_control, ( n_uint )sizeof( sim_control ) );
+    memory_erase( sim_control_string, ( n_uint )sizeof( sim_control_string ) );
+    memory_erase( ( n_byte * )sim_control_string_offset, ( n_uint )sizeof( sim_control_string_offset ) );
 }
 
 static simulated_being *sim_select_name( n_string name )
@@ -566,7 +604,15 @@ void sim_control_regular( n_int px, n_int py )
     n_int character_x, character_y;
     if ( sim_control_translate( px, py, &character_x, &character_y ) )
     {
-        n_byte value = sim_control[( character_y * sim_control_max_x ) + character_x];
+        n_int control_index = ( character_y * sim_control_max_x ) + character_x;
+        n_byte value;
+
+        if ( ( control_index < 0 ) || ( control_index >= ( MAX_POSSIBLE_CONTROL_CHARACTER_X * MAX_POSSIBLE_CONTROL_CHARACTER_Y ) ) )
+        {
+            return;
+        }
+
+        value = sim_control[control_index];
 #ifdef DEBUG_CONTROL_WINDOW
         printf( "p(%ld, %ld) c(%ld, %ld) sim_control_max_x %ld value %d\n", px, py, character_x, character_y, sim_control_max_x, value );
         sim_control_debug_sim_control( character_y );

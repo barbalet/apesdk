@@ -97,6 +97,18 @@ Create a `maccatalyst` home for the next Apple-platform simulation app:
 - Done with note: Expanded the two-session regression to cover the full iPad multi-window isolation contract: selected ape, pause state, terrain rotation/facing, touch input state, and world mutations all stay scoped to the session being acted on. This also fixed session activation so a session only becomes active after its saved world restores successfully.
 - Done: Final multi-window verification passed on 2026-07-09. The `sim-mac` Swift Testing suite passed with 12 tests; the `ApeSim-iOS`, dedicated `ApeSim-MacCatalyst`, original `toolchains/sim-mac`, and `toolchains/planet` Xcode builds all succeeded with `CODE_SIGNING_ALLOWED=NO`.
 - Done with note: Final iPad simulator smoke validation on iPad Air 13-inch (M4), iOS 26.5, installed and launched the app, rendered terrain, exposed the new-window control, and iPadOS reported `1 Hidden Window` for the app. Screenshot: `/private/tmp/apesdk-ipad-multiwindow-final.png`. The local `simctl` runtime has no tap/keyboard injection and macOS `System Events` click injection is blocked, so arranging the two iPad windows visually side-by-side remains a manual/real-device validation step even though the side-by-side state isolation contract is now automated.
+- Done with note: User credentials now allow signed `ApeSim-MacCatalyst` development builds. The signed target builds as bundle id `com.apesdk.sim-catalyst` with the existing Apple Development identity from project settings.
+- Done with note: `ApeSim-MacCatalyst` now has a Catalyst-specific desktop shell in `ios/ApeSimApp.swift`: separate SwiftUI windows for `View`, `Terrain`, and `Control`, one shared Catalyst scene model/session across those three surfaces, automatic opening of the auxiliary Terrain and Control windows, default/minimum desktop window sizing, and a desktop Control command menu.
+- Done with note: The iOS/iPadOS path remains a named `WindowGroup(id: ApeSimulationWindow.id)` where every new iPad window constructs a fresh `ContentView`, scene model, and `shared_session`. The Catalyst path is intentionally different: it uses multiple windows for one desktop simulation session, matching the current `sim-mac` mental model.
+- Done with note: Catalyst surface drawing now calls `shared_session_draw(session, NUM_VIEW/NUM_TERRAIN/NUM_CONTROL, ...)` directly and skips the UIKit mobile 180-degree terrain rotation. The view registry is weak so all Catalyst surfaces sharing one session can refresh without retaining stale views.
+- Done with note: Hardened the `universe/sim.c` Control hit-map/string buffers after direct Catalyst Control drawing exposed out-of-range writes that could corrupt later session restore operations.
+- Done: Signed Catalyst desktop-shell verification passed on 2026-07-09. `sim-mac` Swift Testing passed with 13 tests, the signed `ApeSim-MacCatalyst` build succeeded, the shared `ApeSim-iOS` iOS Simulator build still succeeded, and runtime inspection of the signed product reported windows `Control`, `Terrain`, and `View` with distinct desktop sizes. Screenshot: `/private/tmp/apesdk-catalyst-desktop-windows-title-size.png`.
+- Done with note: Follow-up Catalyst visual pass fixed the first-pass upside-down graphics by applying a Catalyst-only Core Graphics presentation flip, and fixed the huge black moving-map region by rendering the `View` surface at its native 512x512 map buffer before scaling it into the Catalyst window. Screenshot: `/private/tmp/apesdk-catalyst-visual-fix.png`.
+- Done: Catalyst visual-fix verification passed on 2026-07-09. The signed `ApeSim-MacCatalyst` build succeeded, `sim-mac` Swift Testing passed with 13 tests, and the shared `ApeSim-iOS` iOS Simulator build still succeeded.
+- Done with note: Fixed the Catalyst moving-map selection/noise follow-up. The Catalyst draw path now fills the full view bounds, draws into the same centered display rect that input uses, and maps Catalyst View clicks through a flipped Y coordinate against the displayed 512x512 map buffer so selecting an ape on the map routes to the displayed point.
+- Done with note: Moved the shared Swift Testing parity source over to the dedicated Mac Catalyst scheme by adding a hosted `ApeSim-MacCatalystTests` target. `SimMacParityTests.swift` now compiles for both AppKit and Mac Catalyst, guards AppKit-only event/window tests, and adds a Catalyst map-input regression that verifies top/bottom displayed map coordinates route to the expected flipped simulation coordinates.
+- Done with note: Hosted Catalyst unit tests exposed that the running Catalyst SwiftUI app session could compete with direct C session-isolation tests. `ApeSimulationSceneModel` now stays inert while hosted unit tests are running unless a test explicitly opts into automatic session start, preserving normal app behavior while keeping the shared session tests deterministic.
+- Done: Catalyst Swift Testing verification passed on 2026-07-09. `ApeSim-MacCatalyst` ran `ApeSim-MacCatalystTests` with 11 tests passing, the original native `sim-mac` Swift Testing suite still passed with 13 tests, and a runtime screenshot of the signed Catalyst product showed the raised `View` map upright and filled at the bottom edge. Screenshot: `/private/tmp/apesdk-catalyst-view-window.png`.
 
 ## Baseline Evidence
 
@@ -717,12 +729,13 @@ Result on 2026-07-07: `TEST SUCCEEDED`. Observed Swift Testing results: 9 tests 
   - Initializes each scene session through `NUM_CONTROL` so the shared simulation starts before the terrain view draws.
   - Uses an adaptive SwiftUI overlay: compact width keeps the small bottom-trailing controls, regular iPad width uses a wider trailing command panel.
   - The regular-width iPad command panel exposes `New Window`, backed by `openWindow(id:)` on the named simulation `WindowGroup`, so every iPad window gets a new scene model and session.
+  - Under Mac Catalyst, the same file exposes separate `View`, `Terrain`, and `Control` windows backed by one shared Catalyst scene model/session, with Catalyst-specific default/minimum sizes and desktop Control menu commands.
   - Maps touch locations to the render buffer scale before passing them to `shared_session_mouseReceived`.
 - New `maccatalyst` project metadata:
   - `maccatalyst/maccatalyst.xcodeproj`
   - Currently references existing Mac source through `maccatalyst/source-links/sim-mac`.
   - Currently references existing iOS source through `maccatalyst/source-links/ios`.
-  - Current schemes: `sim-mac`, `ApeSim-iOS`.
+  - Current schemes: `sim-mac`, `ApeSim-iOS`, `ApeSim-MacCatalyst`.
   - `sim-mac` has a shared scheme file that includes the hosted `SimMacTests` target in its Test action.
   - `maccatalyst/Tests/SimMacParityTests.swift` is the compact Swift Testing coverage source for Mac parity.
 - Shared simulation/rendering/bridge code already used by the Mac target:
@@ -796,22 +809,21 @@ The mobile build should at least provide:
 2. Treat Swift as a platform shell:
    - Native macOS can use AppKit/SwiftUI where needed for full window and menu parity.
    - iOS/iPadOS can use UIKit/SwiftUI wrappers.
-   - Mac Catalyst can share the UIKit/SwiftUI path where it is sufficient.
+   - Mac Catalyst can share the UIKit/SwiftUI path where it is sufficient, with `targetEnvironment(macCatalyst)` forks for desktop-style windows, menus, and rendering orientation where the Mac experience needs them.
 3. Prefer one Apple-platform Xcode project or workspace under `maccatalyst/` that references canonical source files instead of copying them.
 4. Introduce new Swift files under `maccatalyst/` only when they are truly shared wrappers or intentional platform forks.
 5. Only retire or move `toolchains/sim-mac` after the parity checklist is complete and the user approves the transition.
 
 ## iPad Multi-Window Architecture
 
-Decision: iPad multi-window UI is a priority, but keep the current iPad `WindowGroup` as a single shared simulation surface until the simulation can be owned by a scene instance instead of process-global state. Do not expose an explicit New Window / duplicate simulation command before that per-scene model exists.
+Decision update: iPad multi-window UI is now exposed because each SwiftUI scene owns its own `ApeSimulationSceneModel` and opaque `shared_session`. `New Window` creates a fresh simulation session rather than duplicating an existing one; duplicating an existing simulation remains a separate future command because it needs save/clone semantics.
 
 Reasoning:
 
 - SwiftUI `WindowGroup` and the generated iOS/iPadOS scene manifest already permit multiple scenes.
-- `ios/ApeSimApp.swift` currently creates `ContentView()` with no scene-owned simulation model, and each `ASiOSView` calls the global `shared_init`, `shared_draw_ios`, `shared_cycle_ios`, `shared_mouseReceived`, and `shared_menu` APIs.
-- The C simulation is still singleton-oriented: `universe/sim.c` owns `static simulated_group group` and `static simulated_timing timing`; `sim_group()` and `sim_timing()` return those globals.
-- `gui/shared.c` also owns global shell/input/render state such as `simulation_started`, mouse/key state, iOS draw dimensions, output buffer, and menu toggles.
-- Opening multiple iPad windows today would therefore show multiple views competing over one global simulation, not independent simulations.
+- `ios/ApeSimApp.swift` now creates scene-owned models and sessions for iOS/iPadOS windows instead of having every `ASiOSView` compete over the global `shared_*` wrappers.
+- The C simulation is still singleton-oriented internally, so session isolation currently works through activation and in-memory world snapshots. A future engine-context refactor can make this deeper and cleaner, but it is no longer blocking the explicit iPad multi-window UI.
+- Mac Catalyst deliberately uses a different scene topology: three windows share one Catalyst session to mirror `sim-mac`, while iPad windows get independent sessions.
 
 Target architecture before explicit iPad multi-window UI:
 
@@ -837,7 +849,7 @@ Target architecture before explicit iPad multi-window UI:
    - Done with note: shared/menu state in `gui/shared.c`, including pause and display toggles, now saves/restores through a per-session context.
    - Done with note: simulation world state now switches through an in-memory transfer snapshot per session. `universe/sim.c` has a restore hook that reloads a snapshot without advancing the world, but deeper engine internals still need a future context-pointer refactor.
 6. Prefer explicit context/session pointers over thread-local storage. iPad scenes can share the main thread, so thread-local state would not make scenes independent.
-7. Once independent sessions exist, add iPad UI for multi-window behavior. This is priority work after the dedicated Mac Catalyst target phase. The first user-facing version should create a fresh simulation per new window; duplicating an existing simulation should be a separate, explicit command because it needs save/clone semantics.
+7. Done: Independent sessions exist and the regular-width iPad command panel exposes `New Window`. The first user-facing version creates a fresh simulation per new window; duplicating an existing simulation should remain a separate, explicit command because it needs save/clone semantics.
 
 Acceptance criteria for exposing explicit iPad multi-window controls:
 
@@ -906,7 +918,7 @@ Status: In progress.
 - Done: Designed scene-instance simulation/app-shell isolation before exposing explicit iPad multi-window controls. The accepted direction is a per-scene Swift model plus an opaque C session API, with current `shared_*` calls retained as wrappers around a default process session during migration.
 - Done with note: Implemented the per-scene iPad session model and opaque C session API for cycle 1. The session owns shell/render/input lifecycle through `gui/app_shell.*`; deeper shared/menu and simulation world state remains singleton-backed and must move before explicit multi-window controls are safe.
 - Done with note: Implemented snapshot-backed `shared_session` isolation for cycle 2. Session activation now saves/restores per-session pause/menu draw state and world snapshots, while the default `shared_*` wrappers remain functional through their own context.
-- Next: Add explicit iPad multi-window UI and validate two windows side-by-side.
+- Done with note: Added explicit iPad multi-window UI and automated the side-by-side state-isolation contract. Swift Testing verifies two sessions do not share selected ape, pause state, terrain rotation/facing, input state, or world mutations. Manual or better-automation visual arrangement of two iPad windows side-by-side remains outstanding because local Simulator/UI injection cannot arrange the scene windows here.
 
 ### Phase 4: Dedicated Mac Catalyst Target
 
@@ -917,21 +929,26 @@ Status: Done.
 - Done: Kept shared simulation, rendering, iOS/iPadOS Swift, and Mac Swift source references canonical. The new target forks target metadata only.
 - Done: Built the dedicated Mac Catalyst target into `/private/tmp/apesdk-dedicated-catalyst-derived`.
 - Done: Launched the dedicated Mac Catalyst product from `/private/tmp`, verified the expected one-window standard Catalyst menu surface, confirmed bundle id `com.apesdk.sim-catalyst`, and quit it cleanly.
+- Done: Built the dedicated Mac Catalyst target as a signed development product after user credentials were configured.
+- Done with note: Reworked the dedicated Mac Catalyst app from the earlier one-window iPad-style surface into a desktop-style three-window shell for `View`, `Terrain`, and `Control`, with a shared Catalyst scene model/session and a desktop Control command menu.
+- Done: Runtime inspection of the signed Catalyst product reported windows `Control`, `Terrain`, and `View`; screenshot evidence is `/private/tmp/apesdk-catalyst-desktop-windows-title-size.png`.
+- Done with note: Added the hosted `ApeSim-MacCatalystTests` Swift Testing bundle to the dedicated Catalyst scheme. It reuses `maccatalyst/Tests/SimMacParityTests.swift` with platform guards for AppKit-only checks and Catalyst-specific source/input regressions.
+- Done with note: The Catalyst `View` map now renders and hit-tests through the same displayed 512x512 map rect, removing the bottom garbage/noise symptom and fixing displayed-point ape selection.
 - Done: Kept the native `sim-mac` target and current `ApeSim-iOS` target in place.
 
 ### Phase 5: Transition
 
-Status: Not started.
+Status: Started.
 
-- Compare the new Mac build against `toolchains/sim-mac`.
+- Started: Compare the new Mac build against `toolchains/sim-mac`. The Catalyst product now matches the headline desktop shape with separate `View`, `Terrain`, and `Control` windows, but deeper parity still needs visual polish and route coverage.
 - Keep both builds until parity is proven.
 - Ask the user before removing, archiving, or physically moving old source.
 
 ## Immediate Next Steps
 
-1. Perform a manual or better-automation iPadOS window arrangement pass to visually place the two app windows side-by-side; the state-isolation contract is already covered by Swift Testing.
-2. Start Phase 5 transition work only after parity is proven: compare against `toolchains/sim-mac`, keep both builds during proof, and ask before removing or moving old source.
-3. Define signing/team expectations for Mac Catalyst, or continue using `CODE_SIGNING_ALLOWED=NO` for development smoke builds until release signing is planned.
+1. Continue tuning the Catalyst desktop appearance against `toolchains/sim-mac`: initial window placement, exact sizing, Control layout/empty space, and any differences introduced by Catalyst window restoration.
+2. Add or validate the remaining Catalyst desktop parity routes that the current Catalyst shell still lacks compared with native `sim-mac`, especially File/Open/Save behavior, Online commands, and deeper keyboard/mouse/gesture routing. The shared Swift Testing source now runs under both the native and Catalyst schemes, but some AppKit-only UI event tests remain native-only until equivalent Catalyst UI automation exists.
+3. Perform a manual or better-automation iPadOS window arrangement pass to visually place two app windows side-by-side; the state-isolation contract is already covered by Swift Testing.
 
 ## Open Questions
 

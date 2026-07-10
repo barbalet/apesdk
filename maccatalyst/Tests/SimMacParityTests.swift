@@ -1,4 +1,8 @@
+#if targetEnvironment(macCatalyst)
+import UIKit
+#else
 import AppKit
+#endif
 import Testing
 import UniformTypeIdentifiers
 @testable import Simulated_Ape
@@ -130,6 +134,11 @@ struct SimMacParityTests {
         point("mobile-ipad-fresh-window-session", "Mobile", "Each iPad window creates a fresh scene model and session"),
         point("mobile-ipad-command-panel", "Mobile", "iPad command panel remains represented"),
         point("mobile-maccatalyst-target-done", "Mobile", "Dedicated Mac Catalyst target remains represented"),
+        point("mobile-maccatalyst-view-window", "Mobile", "Mac Catalyst exposes the native View surface"),
+        point("mobile-maccatalyst-terrain-window", "Mobile", "Mac Catalyst exposes the native Terrain surface"),
+        point("mobile-maccatalyst-control-window", "Mobile", "Mac Catalyst exposes the native Control surface"),
+        point("mobile-maccatalyst-shared-session", "Mobile", "Mac Catalyst desktop windows share one simulation session"),
+        point("mobile-maccatalyst-desktop-menus", "Mobile", "Mac Catalyst exposes desktop-oriented simulation commands"),
     ]
 
     @Test("Functionality inventory covers the requested UI surface")
@@ -176,6 +185,7 @@ struct SimMacParityTests {
         #expect(shared_simulation_started() == 0)
     }
 
+#if !targetEnvironment(macCatalyst)
     @Test("AppKit window, panel, tutorial, and wrapper contracts")
     func appKitContracts() {
         if NSApp.windows.contains(where: { $0.title == "Terrain" }) == false ||
@@ -220,6 +230,7 @@ struct SimMacParityTests {
         #expect(ViewWrapper(viewType: Int32(NUM_VIEW)).viewType == Int32(NUM_VIEW))
         #expect(AppDelegate.isTerminating == false)
     }
+#endif
 
     @Test("Tutorial step data remains valid while Mac popovers stay disabled")
     func tutorialStepDataContracts() {
@@ -366,6 +377,9 @@ struct SimMacParityTests {
         sessionBuffer.withUnsafeMutableBufferPointer { buffer in
             shared_session_draw_ios(session, buffer.baseAddress, 512, 512)
         }
+        for viewType in [NUM_VIEW, NUM_TERRAIN, NUM_CONTROL] {
+            #expect(shared_session_draw(session, n_int(viewType), 512, 512, 0) != nil)
+        }
         shared_session_mouseReceived(session, 128.0, 192.0, n_int(NUM_TERRAIN))
         _ = shared_session_cycle_ios(session, 2)
         #expect(shared_session_menu(session, n_int(NA_MENU_NEXT_APE)) == 0)
@@ -469,7 +483,7 @@ struct SimMacParityTests {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let appSourceURL = rootURL.appendingPathComponent("ios/ApeSimApp.swift")
-        let appSource = try String(contentsOf: appSourceURL)
+        let appSource = try String(contentsOf: appSourceURL, encoding: .utf8)
 
         #expect(appSource.contains("WindowGroup(id: ApeSimulationWindow.id)"))
         #expect(appSource.contains("@Environment(\\.openWindow)"))
@@ -479,6 +493,72 @@ struct SimMacParityTests {
         #expect(appSource.contains("@StateObject private var sceneModel = ApeSimulationSceneModel()"))
         #expect(appSource.contains("shared_session_create"))
     }
+
+    @Test("Mac Catalyst app exposes sim-mac surface windows")
+    func macCatalystDesktopWindowSourceContracts() throws {
+        let testFileURL = URL(fileURLWithPath: #filePath)
+        let rootURL = testFileURL
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let appSourceURL = rootURL.appendingPathComponent("ios/ApeSimApp.swift")
+        let appSource = try String(contentsOf: appSourceURL, encoding: .utf8)
+
+        #expect(appSource.contains("#if targetEnvironment(macCatalyst)"))
+        #expect(appSource.contains("WindowGroup(\"View\", id: ApeCatalystWindow.viewID)"))
+        #expect(appSource.contains("WindowGroup(\"Terrain\", id: ApeCatalystWindow.terrainID)"))
+        #expect(appSource.contains("WindowGroup(\"Control\", id: ApeCatalystWindow.controlID)"))
+        #expect(appSource.contains(".defaultSize(width: ApeSimulationSurface.view.defaultSize.width"))
+        #expect(appSource.contains(".defaultSize(width: ApeSimulationSurface.terrain.defaultSize.width"))
+        #expect(appSource.contains(".defaultSize(width: ApeSimulationSurface.control.defaultSize.width"))
+        #expect(appSource.contains("openWindow(id: ApeCatalystWindow.terrainID)"))
+        #expect(appSource.contains("openWindow(id: ApeCatalystWindow.controlID)"))
+        #expect(appSource.contains("@StateObject private var catalystSceneModel = ApeSimulationSceneModel()"))
+        #expect(appSource.contains("surface: .view"))
+        #expect(appSource.contains("surface: .terrain"))
+        #expect(appSource.contains("surface: .control"))
+        #expect(appSource.contains("rotatesForUIKit: false"))
+        #expect(appSource.contains("shared_session_draw(session,"))
+        #expect(appSource.contains("shared_session_cycle(session,"))
+        #expect(appSource.contains("NSHashTable<ASiOSView>.weakObjects()"))
+        #expect(appSource.contains("windowScene.title = surface.title"))
+        #expect(appSource.contains("windowScene.sizeRestrictions?.minimumSize = surface.minimumSize"))
+        #expect(appSource.contains("catalystMapRenderDimension = 512"))
+        #expect(appSource.contains("if surface == .view"))
+        #expect(appSource.contains("let renderBounds = bounds"))
+        #expect(appSource.contains("context.translateBy(x: 0, y: renderBounds.height)"))
+        #expect(appSource.contains("context.scaleBy(x: 1, y: -1)"))
+        #expect(appSource.contains("context.draw(image, in: displayRect)"))
+        #expect(appSource.contains("displayRect(renderDimensions: renderDimensions"))
+        #expect(appSource.contains("inputRect.height - localY"))
+    }
+
+#if targetEnvironment(macCatalyst)
+    @Test("Mac Catalyst map input follows the flipped displayed map")
+    func macCatalystMapInputFollowsFlippedDisplayedMap() {
+        let sceneModel = ApeSimulationSceneModel()
+        let view = ASiOSView(sceneModel: sceneModel,
+                             surface: .view,
+                             rotatesForUIKit: false,
+                             frame: CGRect(x: 0, y: 0, width: 512, height: 544))
+        sceneModel.attach(view: view)
+        defer { view.detachFromSceneModel() }
+
+        sceneModel.updateRenderDimensions(width: 512, height: 512, surface: .view)
+
+        let displayedTop = view.simulationPoint(for: CGPoint(x: 256, y: 16))
+        let displayedBottom = view.simulationPoint(for: CGPoint(x: 256, y: 528))
+        let displayedCenter = view.simulationPoint(for: CGPoint(x: 256, y: 272))
+
+        #expect(Int(displayedTop.x.rounded()) == 256)
+        #expect(Int(displayedCenter.x.rounded()) == 256)
+        #expect(Int(displayedBottom.x.rounded()) == 256)
+        #expect(displayedTop.y > displayedCenter.y)
+        #expect(displayedCenter.y > displayedBottom.y)
+        #expect(Int(displayedTop.y.rounded()) == 511)
+        #expect(Int(displayedBottom.y.rounded()) == 0)
+    }
+#endif
 
     @Test("iOS draw wrapper rotates terrain for UIKit display")
     func mobileDrawWrapperRotatesRowsForUIKitDisplay() {
@@ -506,6 +586,7 @@ struct SimMacParityTests {
         }
     }
 
+#if !targetEnvironment(macCatalyst)
     @Test("Keyboard, mouse, drag, and gesture routes stay safe")
     func keyboardMouseDragAndGestureRoutes() {
         shared_close()
@@ -592,11 +673,13 @@ struct SimMacParityTests {
         #expect(shared_selected_being_location(&afterX, &afterY) == 1)
         #expect(afterX != beforeX || afterY != beforeY)
     }
+#endif
 
     private static func point(_ id: String, _ area: String, _ name: String) -> FunctionalityPoint {
         FunctionalityPoint(id: id, area: area, name: name)
     }
 
+#if !targetEnvironment(macCatalyst)
     private static func makeView(_ viewType: Int32 = Int32(NUM_VIEW)) -> CustomDrawingView {
         let view = CustomDrawingView(viewType: viewType)
         view.frame = NSRect(x: 0, y: 0, width: 512, height: 512)
@@ -644,4 +727,5 @@ struct SimMacParityTests {
     private static func functionKeyString(_ functionKey: Int) -> String {
         String(UnicodeScalar(functionKey)!)
     }
+#endif
 }
