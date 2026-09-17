@@ -234,8 +234,84 @@ static void *periodic_thread( void *arg )
 
 #endif
 
+#ifdef PYTHON_BUILD
+
+/*
+ * Python drives the console one command at a time through ctypes.  Keep this
+ * adapter here, beside the normal executable entry point, so it is compiled
+ * against the canonical ApeSDK sources rather than a reduced source copy.
+ */
+static n_string_block python_input_string;
+static volatile n_int python_input_pending;
+
+static n_string python_input( n_string value, n_int length )
+{
+    if ( python_input_pending )
+    {
+        memory_copy( ( n_byte * )python_input_string, ( n_byte * )value, length );
+        python_input_pending = 2;
+    }
+    return value;
+}
+
+static void python_output( n_constant_string value )
+{
+    printf( "%s\n", value );
+}
+
+void python_init( void )
+{
+    sim_set_console_input( &python_input );
+    sim_set_console_output( &python_output );
+
+    srand( ( unsigned int )time( NULL ) );
+
+    printf( "\n *** %sConsole, %s ***\n", SHORT_VERSION_NAME, FULL_DATE );
+    printf( "      For a list of commands type 'help'\n\n" );
+
+    io_command_line_execution_set();
+    sim_init( KIND_START_UP, rand(), MAP_AREA, 0 );
+}
+
+void python_close( void )
+{
+    sim_close();
+}
+
+n_int python_quit_check( void )
+{
+    return ( sim_thread_console_quit() == 0 );
+}
+
+void python_check_string( n_string incoming )
+{
+    memory_erase( ( n_byte * )python_input_string, STRING_BLOCK_SIZE );
+    memory_copy( ( n_byte * )incoming, ( n_byte * )python_input_string,
+                 strlen( incoming ) );
+    python_input_pending = 1;
+    sim_thread_console();
+
+    /* Do not let the next Python input overwrite this line before one of the
+       console workers has collected it.  A long-running command still returns
+       as soon as its worker has accepted the command, leaving another worker
+       available for commands such as "stop". */
+    while ( python_input_pending == 1 )
+    {
+    }
+
+    if ( python_input_pending == 2 )
+    {
+        memory_erase( ( n_byte * )python_input_string, STRING_BLOCK_SIZE );
+        python_input_pending = 0;
+    }
+}
+
+#else
+
 int main( int argc, n_string argv[] )
 {
     return command_line_run();
 }
+
+#endif /* PYTHON_BUILD */
 
