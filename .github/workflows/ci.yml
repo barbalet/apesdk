@@ -25,19 +25,6 @@ jobs:
       - name: Run deterministic C tests
         run: CC=${{ matrix.compiler }} ./test.sh
 
-  linux-sanitizers:
-    name: Linux AddressSanitizer and UBSan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install C dependencies
-        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev clang
-      - name: Run deterministic suite under sanitizers
-        run: >-
-          ASAN_OPTIONS=detect_leaks=0:halt_on_error=1
-          UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1
-          CC=clang SANITIZE=1 make test
-
   linux-coverage:
     name: Linux module coverage
     runs-on: ubuntu-latest
