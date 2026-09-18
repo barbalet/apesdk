@@ -12,40 +12,43 @@
 #define WEB_EXPORT
 #endif
 
-WEB_EXPORT n_int apesdk_start(n_uint seed)
+/* Keep this ABI strictly i32. Emscripten's C long can be i64, while the
+ * browser UI deliberately passes ordinary JavaScript Numbers. */
+WEB_EXPORT int apesdk_start(uint32_t seed)
 {
-    return shared_init(NUM_VIEW, seed);
+    /* NUM_CONTROL is the processing view: it creates the simulation. */
+    return (int)shared_init(WINDOW_PROCESSING, (n_uint)seed);
 }
-WEB_EXPORT void apesdk_cycle(n_uint ticks)
+WEB_EXPORT void apesdk_cycle(uint32_t ticks)
 {
-    (void)shared_cycle(ticks, NUM_VIEW);
+    (void)shared_cycle((n_uint)ticks, WINDOW_PROCESSING);
 }
-WEB_EXPORT n_int apesdk_draw(n_int view, n_int width, n_int height)
+WEB_EXPORT int apesdk_draw(int view, int width, int height)
 {
-    return (n_int)(intptr_t)shared_draw(view, width, height, 0);
+    return (int)(intptr_t)shared_draw((n_int)view, (n_int)width, (n_int)height, 0);
 }
-WEB_EXPORT void apesdk_mouse(n_int view, n_int x, n_int y, n_int option)
+WEB_EXPORT void apesdk_mouse(int view, int x, int y, int option)
 {
     shared_mouseOption((n_byte)option);
     shared_mouseReceived((n_double)x, (n_double)y, view);
 }
 WEB_EXPORT void apesdk_mouse_up(void) { shared_mouseUp(); }
-WEB_EXPORT void apesdk_key(n_int view, n_int key) { shared_keyReceived(key, view); }
+WEB_EXPORT void apesdk_key(int view, int key) { shared_keyReceived((n_int)key, (n_int)view); }
 WEB_EXPORT void apesdk_key_up(void) { shared_keyUp(); }
-WEB_EXPORT void apesdk_menu(n_int menu) { (void)shared_menu(menu); }
-WEB_EXPORT n_int apesdk_population(void)
+WEB_EXPORT void apesdk_menu(int menu) { (void)shared_menu((n_int)menu); }
+WEB_EXPORT int apesdk_population(void)
 {
     simulated_group *group = sim_group();
-    return group ? group->num : 0;
+    return group ? (int)group->num : 0;
 }
-WEB_EXPORT n_int apesdk_selected_x(void)
+WEB_EXPORT int apesdk_selected_x(void)
 {
     simulated_group *group = sim_group();
-    return (group && group->select) ? being_location_x(group->select) : -1;
+    return (group && group->select) ? (int)being_location_x(group->select) : -1;
 }
-WEB_EXPORT n_int apesdk_selected_y(void)
+WEB_EXPORT int apesdk_selected_y(void)
 {
     simulated_group *group = sim_group();
-    return (group && group->select) ? being_location_y(group->select) : -1;
+    return (group && group->select) ? (int)being_location_y(group->select) : -1;
 }
 WEB_EXPORT void apesdk_stop(void) { shared_close(); }

@@ -146,8 +146,11 @@ static void math_bilinear_8_times( n_byte *side512, n_byte *data, n_byte double_
             n_uint point = ( n_uint )( loop_x + ( loop_y * HI_RES_MAP_DIMENSION ) );
             n_byte value;
 
-            z01 = ( z01 - z00 ) << 3;
-            z10 = z10 << 3;
+            /* Signed left shifts of terrain deltas are undefined when a
+             * delta is negative.  The range here is small, so use defined
+             * arithmetic for the equivalent scale-by-eight operation. */
+            z01 = ( z01 - z00 ) * 8;
+            z10 = z10 * 8;
 
             value = ( n_byte )( ( z00 + ( ( ( z01 * mic_x ) + ( z10 * mic_y ) + ( z11 * mic_x * mic_y ) ) >> 6 ) ) );
             if ( double_spread )
@@ -549,7 +552,7 @@ void land_init_high_def( n_byte double_spread )
         n_byte val = m_land.topography_highdef[lp << 1];
         if ( ( val > 105 ) && ( val < 151 ) )
         {
-            value_setting |= 1 << ( lp & 31 );
+            value_setting |= ( n_byte4 )1 << ( lp & 31 );
         }
 
         if ( ( lp & 31 ) == 31 )

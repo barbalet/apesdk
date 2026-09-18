@@ -9,8 +9,8 @@ EXPORTS := _apesdk_start,_apesdk_cycle,_apesdk_draw,_apesdk_mouse,_apesdk_mouse_
 build: check-toolchain $(SITE)/apesdk.js
 check-toolchain:
 	@command -v $(EMCC) >/dev/null || { echo 'emcc is not installed/activated. Source emsdk_env.sh only configures an installed SDK.'; echo 'Install the compiler with: TMPDIR="/Volumes/500GB HDD/apesdk-emsdk-tmp" "/Volumes/500GB HDD/apesdk-emsdk/emsdk" install sdk-releases-f04ea239d533260dd1db760dd2d668d5f9a88d6b-64bit'; echo 'Then activate it with the same emsdk path and source emsdk_env.sh again.'; exit 1; }
-$(SITE)/apesdk.js: src/apesdk_web.c $(ENGINE_SOURCES)
-	$(EMCC) $(COMMON_FLAGS) $< $(ENGINE_SOURCES) -o $@ -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS='[$(EXPORTS)]' -sEXPORTED_RUNTIME_METHODS='["cwrap"]' -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=67108864 -sNO_EXIT_RUNTIME=1
+$(SITE)/apesdk.js: Makefile src/apesdk_web.c $(ENGINE_SOURCES)
+	$(EMCC) $(COMMON_FLAGS) $< $(ENGINE_SOURCES) -o $@ -sWASM=1 -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS='[$(EXPORTS)]' -sEXPORTED_RUNTIME_METHODS='["cwrap","HEAPU8"]' -sINITIAL_MEMORY=268435456 -sEMULATE_FUNCTION_POINTER_CASTS=1 -sNO_EXIT_RUNTIME=1
 serve: build
 	cd $(SITE) && python3 -m http.server 8080
 clean:
