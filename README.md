@@ -108,6 +108,17 @@ For a simple command-line build on macOS or Linux:
 That script builds the command-line simulation binary `simape` one directory
 above the repository root.
 
+For the browser/WebAssembly package, install Emscripten and run:
+
+```bash
+cd web
+make build
+```
+
+The deployable static site is [`web/web`](web/web/); the build compiles the
+shared C engine from this repository with `WASM_BUILD` rather than maintaining
+a web-specific copy.
+
 For the current macOS application:
 
 1. Open [`toolchains/sim-mac/sim-mac.xcodeproj`](toolchains/sim-mac/sim-mac.xcodeproj)

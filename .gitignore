@@ -45,3 +45,9 @@ xcschememanagement.plist
 # Test products are created atomically by the build scripts and are never
 # source artifacts.
 *.tmp
+
+# Generated WebAssembly site assets (the source site remains tracked).
+/web/web/apesdk.js
+/web/web/apesdk.wasm
+/web/web/apesdk.worker.js
+/web/.toolchains/
