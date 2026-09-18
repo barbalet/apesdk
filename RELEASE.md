@@ -1,185 +1,146 @@
 # ApeSDK Release Procedure
 
-This checklist describes the release flow for ApeSDK when shipping the macOS Simulated Ape application built from `toolchains/sim-mac`. It creates Apple Silicon and Intel DMG packages from the `sim-mac` Xcode project, plus a source archive for the exact tagged source used to build those artifacts.
+This procedure releases the two supported desktop variants from
+`maccatalyst/maccatalyst.xcodeproj`:
 
-Before starting, decide the new release number and use it as the `VERSION` input throughout this checklist. Set `VERSION` without a leading `v`; the Git tag adds the leading `v` separately. For example, the current Simulated Ape engine version `0.711` uses `VERSION=0.711` and tag `v0.711`.
+- **Native macOS** — the `sim-mac` scheme. This is the Mac-specific AppKit product.
+- **Mac Catalyst** — the `ApeSim-MacCatalyst` scheme. This is the iOS-derived product packaged to run on macOS through Mac Catalyst.
+
+They are separate products and must remain separate ZIP files. Do not replace the native package with the Catalyst package, or combine their app bundles in one archive. `toolchains/sim-mac` remains a reference project; release builds come from `maccatalyst`.
+
+Set `VERSION` without a leading `v`. For example, engine version `0.711` uses `VERSION=0.711` and Git tag `v0.711`.
 
 ## 1. Prepare the Version
 
-Update the Simulated Ape engine version in `sim/sim.h`:
+Update the engine version in `sim/sim.h` (`SHORT_VERSION_NAME` and `VERSION_NUMBER`) and the `MARKETING_VERSION` values for both `sim-mac` and `ApeSim-MacCatalyst` in `maccatalyst/maccatalyst.xcodeproj/project.pbxproj`. The same value belongs in both desktop artifacts and their filenames.
 
-```text
-SHORT_VERSION_NAME
-VERSION_NUMBER
-```
-
-Update the Xcode marketing version in `toolchains/sim-mac/sim-mac.xcodeproj/project.pbxproj` for the `sim-mac` target:
-
-```text
-MARKETING_VERSION = <VERSION>;
-```
-
-Use the same `VERSION` value in artifact names without the leading `v`. The Xcode target and scheme remain `sim-mac`, but the built app bundle and executable are `Simulated Ape`.
-
-## 2. Write the Release Synopsis
-
-Create an approximately 200-word synopsis for this version before packaging the release. Summarize the user-facing Simulated Ape changes first, then call out major ApeSDK, file-format, source-compatibility, or platform changes that matter to downstream users. Use this synopsis as the GitHub release description.
-
-## 3. Tag the Source
-
-After the version number is decided and the final release commit is ready, tag the source code with the matching version number. The tag must point at the exact commit used to build the DMGs and source archive.
+Before packaging, run the C suite and the two hosted Swift Testing suites:
 
 ```bash
-VERSION="<VERSION>"
-git tag -a "v${VERSION}" -m "ApeSDK ${VERSION}"
-git push origin "v${VERSION}"
+./test.sh
+
+xcodebuild \
+  -project maccatalyst/maccatalyst.xcodeproj \
+  -scheme sim-mac \
+  -configuration Debug \
+  -destination 'platform=macOS' \
+  -derivedDataPath .build/test-native-macos \
+  CODE_SIGNING_ALLOWED=NO \
+  test
+
+xcodebuild \
+  -project maccatalyst/maccatalyst.xcodeproj \
+  -scheme ApeSim-MacCatalyst \
+  -configuration Debug \
+  -destination 'platform=macOS,variant=Mac Catalyst' \
+  -derivedDataPath .build/test-maccatalyst \
+  CODE_SIGNING_ALLOWED=NO \
+  test
 ```
 
-If the release version changes, update `VERSION` and recreate the tag before publishing it.
+The shared `maccatalyst/Tests/SimMacParityTests.swift` source is intentionally compiled by both test bundles: `SimMacTests` for native macOS and `ApeSim-MacCatalystTests` for Catalyst. A release is not ready if either test command fails.
 
-## 4. Build Apple Silicon
+## 2. Build and Run-check Native macOS
 
 From the repository root:
 
 ```bash
+VERSION="<VERSION>"
 mkdir -p dist
-VERSION="<VERSION>"
+
 xcodebuild \
-  -project toolchains/sim-mac/sim-mac.xcodeproj \
+  -project maccatalyst/maccatalyst.xcodeproj \
   -scheme sim-mac \
   -configuration Release \
-  -destination "generic/platform=macOS" \
-  -derivedDataPath .build/release-derived-data-arm64 \
-  ARCHS=arm64 \
-  ONLY_ACTIVE_ARCH=NO \
+  -destination 'generic/platform=macOS' \
+  -derivedDataPath .build/release-native-macos \
   CODE_SIGNING_ALLOWED=NO \
   build
+
+NATIVE_APP='.build/release-native-macos/Build/Products/Release/Simulated Ape.app'
+test -d "$NATIVE_APP"
+codesign --force --deep --sign - "$NATIVE_APP"
+open -W "$NATIVE_APP"
 ```
 
-The unsigned build output is:
+`open -W` verifies that macOS can launch the generated native product and that it returns after the application quits. Perform the normal visible smoke check before quitting: the `View`, `Terrain`, and `Control` windows appear; a cycle runs; and Quit closes the process.
 
-```text
-.build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app
-```
-
-Ad-hoc sign the generated app if Developer ID signing is not available:
+For Developer ID distribution, replace the ad-hoc signing command with your Developer ID signing, notarization, and stapling flow before creating the ZIP.
 
 ```bash
-codesign --force --deep --sign - ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app"
+ditto -c -k --keepParent "$NATIVE_APP" \
+  "dist/simulated-ape-native-macos-${VERSION}.zip"
 ```
 
-If you have Developer ID and notarization credentials, sign and notarize instead of ad-hoc signing:
+## 3. Build and Run-check Mac Catalyst
+
+Build the dedicated Catalyst scheme separately. Its app bundle is a different product even though its displayed name is also `Simulated Ape`.
 
 ```bash
-VERSION="<VERSION>"
-codesign --force --deep --options runtime --timestamp --sign "$DEVELOPER_ID_APPLICATION" ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app"
-ditto -c -k --keepParent ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app" "dist/simulated-ape-mac-silicon-${VERSION}-notary.zip"
-xcrun notarytool submit "dist/simulated-ape-mac-silicon-${VERSION}-notary.zip" --keychain-profile "$NOTARY_PROFILE" --wait
-xcrun stapler staple ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app"
-```
-
-Package the DMG:
-
-```bash
-VERSION="<VERSION>"
-hdiutil create \
-  -volname "Simulated Ape ${VERSION} Apple Silicon" \
-  -srcfolder ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app" \
-  -format UDZO \
-  -ov \
-  "dist/simulated-ape-mac-silicon-${VERSION}.dmg"
-```
-
-Verify the architecture:
-
-```bash
-lipo -info ".build/release-derived-data-arm64/Build/Products/Release/Simulated Ape.app/Contents/MacOS/Simulated Ape"
-```
-
-## 5. Build Intel
-
-```bash
-VERSION="<VERSION>"
 xcodebuild \
-  -project toolchains/sim-mac/sim-mac.xcodeproj \
-  -scheme sim-mac \
+  -project maccatalyst/maccatalyst.xcodeproj \
+  -scheme ApeSim-MacCatalyst \
   -configuration Release \
-  -destination "generic/platform=macOS" \
-  -derivedDataPath .build/release-derived-data-x86_64 \
-  ARCHS=x86_64 \
-  ONLY_ACTIVE_ARCH=NO \
+  -destination 'generic/platform=macOS,variant=Mac Catalyst' \
+  -derivedDataPath .build/release-maccatalyst \
   CODE_SIGNING_ALLOWED=NO \
   build
+
+CATALYST_APP='.build/release-maccatalyst/Build/Products/Release-maccatalyst/Simulated Ape.app'
+test -d "$CATALYST_APP"
+codesign --force --deep --sign - "$CATALYST_APP"
+open -W "$CATALYST_APP"
 ```
 
-The unsigned build output is:
+The Catalyst run-check must launch the Catalyst app, verify its `View`, `Terrain`, and `Control` windows and a running simulation, then quit cleanly. It must not substitute the native product. Use Developer ID signing and notarization rather than ad-hoc signing for external distribution.
 
-```text
-.build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app
-```
-
-Ad-hoc sign the generated app if Developer ID signing is not available:
+Package it independently:
 
 ```bash
-codesign --force --deep --sign - ".build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app"
+ditto -c -k --keepParent "$CATALYST_APP" \
+  "dist/simulated-ape-maccatalyst-${VERSION}.zip"
 ```
 
-If you have Developer ID and notarization credentials, use the same signing, notary submission, and stapling flow described in the Apple Silicon section, with the x86_64 app path and an Intel-specific notary zip name.
-
-Package the DMG:
+## 4. Create the Source Package
 
 ```bash
-VERSION="<VERSION>"
-hdiutil create \
-  -volname "Simulated Ape ${VERSION} Intel" \
-  -srcfolder ".build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app" \
-  -format UDZO \
-  -ov \
-  "dist/simulated-ape-mac-intel-${VERSION}.dmg"
-```
-
-Verify the architecture:
-
-```bash
-lipo -info ".build/release-derived-data-x86_64/Build/Products/Release/Simulated Ape.app/Contents/MacOS/Simulated Ape"
-```
-
-## 6. Create the Source Package
-
-Stage the source into a versioned folder so the archive has a stable top-level directory. Exclude VCS folders, build outputs, release artifacts, local Xcode user state, and Finder metadata.
-
-```bash
-VERSION="<VERSION>"
 SRC_ROOT="apesdk-${VERSION}"
 SRC_STAGE="$(mktemp -d)/${SRC_ROOT}"
 rsync -a ./ "$SRC_STAGE"/ \
   --exclude .git \
   --exclude .build \
   --exclude dist \
-  --exclude "*.xcuserstate" \
-  --exclude "xcuserdata" \
-  --exclude ".DS_Store"
+  --exclude '*.xcuserstate' \
+  --exclude xcuserdata \
+  --exclude .DS_Store
 ditto -c -k --keepParent "$SRC_STAGE" "dist/apesdk-src-${VERSION}.zip"
 ```
 
-## 7. Verify Release Artifacts
+## 5. Verify and Publish
+
+Verify that each archive contains exactly its intended app bundle and has a distinct checksum:
 
 ```bash
-VERSION="<VERSION>"
-ls -lh \
-  "dist/simulated-ape-mac-silicon-${VERSION}.dmg" \
-  "dist/simulated-ape-mac-intel-${VERSION}.dmg" \
-  "dist/apesdk-src-${VERSION}.zip"
+unzip -l "dist/simulated-ape-native-macos-${VERSION}.zip"
+unzip -l "dist/simulated-ape-maccatalyst-${VERSION}.zip"
+
 shasum -a 256 \
-  "dist/simulated-ape-mac-silicon-${VERSION}.dmg" \
-  "dist/simulated-ape-mac-intel-${VERSION}.dmg" \
+  "dist/simulated-ape-native-macos-${VERSION}.zip" \
+  "dist/simulated-ape-maccatalyst-${VERSION}.zip" \
   "dist/apesdk-src-${VERSION}.zip"
 ```
 
-Attach these files to the GitHub release:
+Attach these three files to the GitHub release:
 
 ```text
-dist/simulated-ape-mac-silicon-<VERSION>.dmg
-dist/simulated-ape-mac-intel-<VERSION>.dmg
+dist/simulated-ape-native-macos-<VERSION>.zip
+dist/simulated-ape-maccatalyst-<VERSION>.zip
 dist/apesdk-src-<VERSION>.zip
+```
+
+After the final release commit and successful checks, create the matching tag:
+
+```bash
+git tag -a "v${VERSION}" -m "ApeSDK ${VERSION}"
+git push origin "v${VERSION}"
 ```

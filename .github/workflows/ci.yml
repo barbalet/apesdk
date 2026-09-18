@@ -3,27 +3,99 @@ name: ApeSDK CI
 on:
   push:
   pull_request:
+  schedule:
+    - cron: '23 3 * * *'
 
 jobs:
   linux-c:
-    name: Linux C build and tests
+    name: Linux ${{ matrix.compiler }} deterministic suite
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install C dependencies
+        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
+      - name: Build the Linux command-line product
+        run: |
+          CC=${{ matrix.compiler }} ./build.sh
+          test -x ../simape
+      - name: Run deterministic C tests
+        run: CC=${{ matrix.compiler }} ./test.sh
+
+  linux-sanitizers:
+    name: Linux AddressSanitizer and UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install C dependencies
+        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev clang
+      - name: Run deterministic suite under sanitizers
+        run: ASAN_OPTIONS=detect_leaks=1 SANITIZE=1 make test
+
+  linux-coverage:
+    name: Linux module coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install C dependencies
+        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev lcov
+      - name: Generate coverage data
+        run: make coverage
+      - name: Summarize module coverage
+        run: lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: c-module-coverage
+          path: coverage.info
+
+  nightly-multi-seed:
+    name: Nightly multi-seed regression scenarios
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install C dependencies
         run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
-      - name: Run deterministic C tests
-        run: ./test.sh
+      - name: Run extended deterministic scenarios
+        run: make test-nightly
 
-  macos-xcode:
-    name: macOS Swift toolchain builds
+  maccatalyst-desktop:
+    name: ${{ matrix.name }} build and Swift Testing
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - project: toolchains/sim-mac/sim-mac.xcodeproj
+          - name: Native macOS
+            project: maccatalyst/maccatalyst.xcodeproj
             scheme: sim-mac
+            destination: platform=macOS
+          - name: Mac Catalyst
+            project: maccatalyst/maccatalyst.xcodeproj
+            scheme: ApeSim-MacCatalyst
+            destination: platform=macOS,variant=Mac Catalyst
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test ${{ matrix.name }}
+        run: |
+          xcodebuild \
+            -project "${{ matrix.project }}" \
+            -scheme "${{ matrix.scheme }}" \
+            -configuration Debug \
+            -destination "${{ matrix.destination }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
+  apple-reference-builds:
+    name: macOS reference toolchain builds
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
           - project: toolchains/war-mac/war-mac.xcodeproj
             scheme: war-mac
           - project: toolchains/urban-mac/urban-mac.xcodeproj

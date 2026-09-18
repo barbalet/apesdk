@@ -27,40 +27,41 @@
 #   OTHER DEALINGS IN THE SOFTWARE.
 
 
+set -euo pipefail
+
 SOURCEDIR=..
 
-if [ $# -ge 1 -a "$1" == "--debug" ]
+if [ "${1:-}" == "--debug" ]
 then
     CFLAGS=-g
 else
     CFLAGS=-O2 
 fi
 
-if [ $# -ge 1 -a "$1" == "--coverage" ]
+: "${CC:=gcc}"
+: "${TEST_WARNINGS:=-Wall -Wextra}"
+: "${WERROR:=0}"
+if [ "$WERROR" = 1 ]; then TEST_WARNINGS="$TEST_WARNINGS -Werror"; fi
+rm -f ./*.o ./test_immune ./test_immune.tmp
+
+if { [ $# -ge 1 ] && [ "$1" == "--coverage" ]; } || [ "${COVERAGE:-0}" = 1 ]
 then
 COMMANDLINEE="-ftest-coverage -fprofile-arcs"
 else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c ../../toolkit/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ../../script/*.c -lz -lm -lpthread -w
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -c ../../toolkit/*.c -lz -lm -lpthread
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -c ../../script/*.c -lz -lm -lpthread
 
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../../render/graph.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../../sim/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../../entity/*.c -lz -lm -lpthread -w
-gcc  ${CFLAGS} ${COMMANDLINEE} -c ../../universe/*.c -lz -lm -lpthread -w
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -c ../../render/graph.c -lz -lm -lpthread
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -c ../../sim/*.c -lz -lm -lpthread
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -c ../../entity/*.c -lz -lm -lpthread
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -c ../../universe/*.c -lz -lm -lpthread
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c test_immune.c -o test_immune.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -c test_immune.c -o test_immune.o -lz -lm -lpthread
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o test_immune *.o -lz -lm -lpthread -w
-if [ $? -ne 0 ]
-then
-exit 1
-fi
+${CC} ${CFLAGS} ${COMMANDLINEE} ${TEST_WARNINGS} -I/usr/include -o test_immune.tmp *.o -lz -lm -lpthread
+mv test_immune.tmp test_immune
 
 rm *.o

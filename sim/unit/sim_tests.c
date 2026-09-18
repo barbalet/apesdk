@@ -115,6 +115,60 @@ static n_int extract_last_year(n_constant_string value, char year[5]) {
     return 0;
 }
 
+/* A compact, deterministic regression scenario.  These assertions exercise
+ * the real terrain and weather state rather than just its declarations. */
+static n_uint hash_bytes(const n_byte *bytes, n_uint length) {
+    n_uint hash = 2166136261u;
+    n_uint index;
+    for (index = 0; index < length; index++) {
+        hash = (hash ^ bytes[index]) * 16777619u;
+    }
+    return hash;
+}
+
+void test_seeded_land_weather_scenario(void) {
+    n_byte2 seed[2] = { 0x1234, 0x5678 };
+    n_byte2 repeated_seed[2] = { 0x1234, 0x5678 };
+    n_uint first_topography;
+    n_uint repeated_topography;
+    n_uint cycled_weather;
+    weather_values initial_sky;
+    weather_values later_sky = WEATHER_SEVEN_ERROR;
+    n_int cycle;
+
+    printf("\n--- Testing Seeded Land/Weather Scenario ---\n");
+    land_load_state(42, 0, seed);
+    weather_init();
+    first_topography = hash_bytes(land_topography(), MAP_AREA);
+    initial_sky = weather_seven_values(0, 0);
+    TEST_ASSERT(first_topography != 0, "Seeded terrain produces observable topography");
+    TEST_EQUALS_INT(42, land_date(), "Loaded scenario date is retained");
+    TEST_EQUALS_INT(0, land_time(), "Loaded scenario time is retained");
+
+    for (cycle = 0; cycle < 10000; cycle++) {
+        land_cycle();
+        weather_cycle();
+        if (cycle == 999) {
+            later_sky = weather_seven_values(0, 0);
+        }
+        if (cycle == 0 || cycle == 99 || cycle == 999 || cycle == 9999) {
+            TEST_EQUALS_INT((cycle + 1) % TIME_DAY_MINUTES, land_time(),
+                            "Scenario checkpoint preserves deterministic clock state");
+        }
+    }
+    cycled_weather = hash_bytes((n_byte *)land_weather(0), MAP_AREA * sizeof(n_c_int));
+    TEST_EQUALS_INT(10000 % TIME_DAY_MINUTES, land_time(), "Land cycle advances simulation time");
+    TEST_EQUALS_INT(42 + (10000 / TIME_DAY_MINUTES), land_date(), "Land cycle advances simulation date");
+    TEST_ASSERT(cycled_weather != 0, "Weather cycle maintains observable weather state");
+    TEST_ASSERT(initial_sky != later_sky, "Time transition changes reported sky state");
+
+    land_load_state(42, 0, repeated_seed);
+    repeated_topography = hash_bytes(land_topography(), MAP_AREA);
+    TEST_EQUALS_INT(first_topography, repeated_topography, "Fixed seed produces stable terrain hash");
+    TEST_ASSERT(land_location(-1, -1) >= 0, "Wrapped terrain lookup remains valid");
+    TEST_ASSERT(land_location(APESPACE_BOUNDS, APESPACE_BOUNDS) >= 0, "Maximum terrain lookup remains valid");
+}
+
 // Test constants and defines
 void test_constants(void) {
     printf("\n--- Testing Constants ---\n");
@@ -339,6 +393,7 @@ int main(void) {
     test_string_constants();
     test_drawing_flags();
     test_hires_calculations();
+    test_seeded_land_weather_scenario();
     
     // Print final summary
     print_test_summary();

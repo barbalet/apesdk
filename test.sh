@@ -5,11 +5,22 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Common knobs used by Make and CI.  Sanitizers are applied to every module
+# build, not just the final link, so stale unsanitized objects cannot mask bugs.
+if [ "${SANITIZE:-0}" = 1 ]; then
+    export TEST_WARNINGS="${TEST_WARNINGS:--Wall -Wextra} -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined"
+fi
+if [ "${COVERAGE:-0}" = 1 ]; then
+    export COMMANDLINEE="${COMMANDLINEE:-} -fprofile-arcs -ftest-coverage"
+fi
+
 cleanup() {
     find "${ROOT_DIR}" -name "*.o" -delete
-    find "${ROOT_DIR}" -name "*.gcda" -delete
-    find "${ROOT_DIR}" -name "*.gcno" -delete
-    find "${ROOT_DIR}" -name "*.gcov" -delete
+    if [ "${COVERAGE:-0}" != 1 ]; then
+        find "${ROOT_DIR}" -name "*.gcda" -delete
+        find "${ROOT_DIR}" -name "*.gcno" -delete
+        find "${ROOT_DIR}" -name "*.gcov" -delete
+    fi
     rm -f "${ROOT_DIR}/toolkit/json"/2*.json
 }
 

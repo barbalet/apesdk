@@ -36,6 +36,13 @@ class CustomDrawingView: NSView {
     let viewType: Int32
     private var tutorialTrackingArea: NSTrackingArea?
     private var tutorialPointerInside = false
+    private var redrawTimer: Timer?
+
+    private static var isRunningUnderUnitTests: Bool {
+        let environment = ProcessInfo.processInfo.environment
+        return environment["XCTestConfigurationFilePath"] != nil ||
+               environment["XCTestBundlePath"] != nil
+    }
 
     init(viewType: Int32) {
         self.viewType = viewType
@@ -54,6 +61,18 @@ class CustomDrawingView: NSView {
         super.viewDidMoveToWindow()
         window?.acceptsMouseMovedEvents = true
         window?.makeFirstResponder(self)
+
+        guard Self.isRunningUnderUnitTests == false, redrawTimer == nil, window != nil else {
+            return
+        }
+
+        redrawTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            self?.needsDisplay = true
+        }
+    }
+
+    deinit {
+        redrawTimer?.invalidate()
     }
 
     override func updateTrackingAreas() {
@@ -84,6 +103,9 @@ class CustomDrawingView: NSView {
         }
         
         if shared_simulation_started() == 0 {
+            if Self.isRunningUnderUnitTests {
+                return
+            }
             shared_init(n_int(self.viewType), UInt.random(in: 0 ..< 4294967295))
         } else {
             guard let context = NSGraphicsContext.current?.cgContext else {

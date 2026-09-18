@@ -41,3 +41,7 @@ xcschememanagement.plist
 /entity/test/test_immune
 /entity/unit/entity_tests
 /universe/unit/universe_tests
+
+# Test products are created atomically by the build scripts and are never
+# source artifacts.
+*.tmp

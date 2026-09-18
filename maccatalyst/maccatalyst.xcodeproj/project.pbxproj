@@ -116,6 +116,8 @@
 		4A91F0022F10000000000001 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A91F0042F10000000000001 /* app_shell.c */; };
 		4A91F0032F10000000000001 /* app_shell.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A91F0042F10000000000001 /* app_shell.c */; };
 		4AB0F0013000000000000001 /* SimMacParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A70F0022EC1000000000001 /* SimMacParityTests.swift */; };
+		4AC000012026091800000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4AC000022026091800000001 /* Assets.xcassets */; };
+		4AC000032026091800000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4AC000022026091800000001 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -189,6 +191,7 @@
 		4A80F0032ED0000000000001 /* Simulated Ape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Simulated Ape.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A91F0042F10000000000001 /* app_shell.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = app_shell.c; path = ../gui/app_shell.c; sourceTree = SOURCE_ROOT; };
 		4AB0F0033000000000000001 /* ApeSim-MacCatalystTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ApeSim-MacCatalystTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4AC000022026091800000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "source-links/sim-mac/sim-mac/Assets.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -558,6 +561,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4AC000012026091800000001 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -572,6 +576,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4AC000032026091800000001 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -925,6 +930,7 @@
 		4A60F00A2EAA000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -958,6 +964,7 @@
 		4A60F00B2EAA000000000001 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1040,6 +1047,7 @@
 		4A80F00A2ED0000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -1075,6 +1083,7 @@
 		4A80F00B2ED0000000000001 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
