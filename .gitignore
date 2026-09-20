@@ -51,3 +51,6 @@ xcschememanagement.plist
 /web/web/apesdk.wasm
 /web/web/apesdk.worker.js
 /web/.toolchains/
+
+# Release archives are generated locally and published as GitHub release assets.
+/dist/
