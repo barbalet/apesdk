@@ -96,7 +96,6 @@ class CustomDrawingView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        dirtyRect.fill()
 
         if AppDelegate.isTerminating {
             return
@@ -114,12 +113,13 @@ class CustomDrawingView: NSView {
             let time_info : UInt = UInt(CFAbsoluteTimeGetCurrent())
             _ = shared_cycle(time_info, n_int(self.viewType))
             context.saveGState()
-            var dimY = Int(dirtyRect.height)
-            let dimX = Int(dirtyRect.width)
-                        
-            if #available(macOS 14, *) {
-                dimY -= 28
-            }
+            // NSView.bounds is already the content area: AppKit excludes the
+            // title bar before calling draw(_:) on every supported macOS.
+            // Keep the shared raster and the destination rectangle identical;
+            // title-bar offsets leave unpainted rows at the bottom.
+            let renderBounds = bounds.integral
+            let dimX = max(1, Int(renderBounds.width))
+            let dimY = max(1, Int(renderBounds.height))
             let colorSpace: CGColorSpace = CGColorSpaceCreateDeviceRGB()
             let optionalDrawRef: CGContext? = CGContext.init(data: shared_draw(n_int(self.viewType), dimX, dimY, 0), width: dimX, height: dimY, bitsPerComponent: 8, bytesPerRow: dimX * 4, space: colorSpace, bitmapInfo: UInt32(CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue))
             
@@ -127,11 +127,10 @@ class CustomDrawingView: NSView {
                 context.setBlendMode(.normal)
                 context.setShouldAntialias(false)
                 context.setAllowsAntialiasing(false)
+                context.interpolationQuality = .none
                 let optionalImage: CGImage? = drawRef.makeImage()
                 if let image = optionalImage {
-                    let newRect = NSRect(x: 0, y: 0, width: CGFloat(dimX), height: CGFloat(dimY))
-
-                    context.draw(image, in: newRect)
+                    context.draw(image, in: renderBounds)
                 }
             }
             context.restoreGState()

@@ -188,6 +188,21 @@ struct SimMacParityTests {
 #if !targetEnvironment(macCatalyst)
     @Test("AppKit window, panel, tutorial, and wrapper contracts")
     func appKitContracts() {
+        let testFileURL = URL(fileURLWithPath: #filePath)
+        let rootURL = testFileURL
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let drawingSourceURL = rootURL.appendingPathComponent("maccatalyst/source-links/sim-mac/sim-mac/CustomDrawingView.swift")
+        let sharedSourceURL = rootURL.appendingPathComponent("gui/shared.c")
+        let drawingSource = try! String(contentsOf: drawingSourceURL, encoding: .utf8)
+        let sharedSource = try! String(contentsOf: sharedSourceURL, encoding: .utf8)
+
+        #expect(drawingSource.contains("let renderBounds = bounds.integral"))
+        #expect(drawingSource.contains("context.draw(image, in: renderBounds)"))
+        #expect(drawingSource.contains("dimY -= 28") == false)
+        #expect(sharedSource.contains("dim_y -= 4") == false)
+
         if NSApp.windows.contains(where: { $0.title == "Terrain" }) == false ||
             NSApp.windows.contains(where: { $0.title == "Control" }) == false {
             let delegate = AppDelegate()

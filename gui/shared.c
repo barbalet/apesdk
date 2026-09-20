@@ -1269,9 +1269,7 @@ static void shared_draw_into_buffer( n_byte *drawBuffer, n_int fIdentification, 
 
 #ifdef ALPHA_WEATHER_DRAW
     if ( fIdentification == NUM_VIEW )
-    { // fix here for MacOS 26
-        dim_y -= 4;
-
+    {
         shared_bitcopy_view( drawBuffer, dim_x, dim_y, 0, 0, dim_x );
     }
     else

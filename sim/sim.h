@@ -55,13 +55,13 @@
 #endif
 
 /*! @define */
-#define	SHORT_VERSION_NAME		 "Simulated Ape 0.711 "
+#define	SHORT_VERSION_NAME		 "Simulated Ape 0.712 "
 #ifndef FULL_DATE
 #define	FULL_DATE				 __DATE__
 #endif
 
 /*! @define */
-#define	VERSION_NUMBER		     711
+#define	VERSION_NUMBER		     712
 #define	COPYRIGHT_DATE		     "Copyright 1996 - 2026 "
 
 #define FULL_VERSION_COPYRIGHT "Copyright Tom Barbalet, 1996-2026."
