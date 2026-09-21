@@ -924,6 +924,27 @@ static void draw_terrain( simulated_group *group, n_vect2 *dimensions )
 #define GENDER_X        (window_dim_x-110)
 #define GENDER_Y        (10)
 
+static weather_values weather_icon_base( weather_values weather )
+{
+    if ( weather == WEATHER_SEVEN_LIGHTNING_DAY ) return WEATHER_SEVEN_SUNNY_DAY;
+    if ( weather == WEATHER_SEVEN_LIGHTNING_CLOUDY_DAY ) return WEATHER_SEVEN_CLOUDY_DAY;
+    if ( weather == WEATHER_SEVEN_LIGHTNING_NIGHT ) return WEATHER_SEVEN_CLEAR_NIGHT;
+    if ( weather == WEATHER_SEVEN_LIGHTNING_CLOUDY_NIGHT ) return WEATHER_SEVEN_CLOUDY_NIGHT;
+    return weather;
+}
+
+static void draw_weather_lightning_symbol( weather_values weather, n_join *icon )
+{
+    if ( weather >= WEATHER_SEVEN_LIGHTNING_DAY )
+    {
+        /* One compact bolt layered over the original weather bitmap. */
+        math_join( 77, 19, -4, 6, icon );
+        math_join( 73, 25, 4, 0, icon );
+        math_join( 77, 25, -3, 7, icon );
+        math_join( 74, 32, 6, -7, icon );
+    }
+}
+
 static void draw_meters( simulated_group *group )
 {
     n_pixel	  *local_draw_yellow = &pixel_white;
@@ -935,6 +956,7 @@ static void draw_meters( simulated_group *group )
     n_join		   local_kind_yellow_checker;
     n_join		   local_kind_black;
     const n_byte *local_icon;
+    weather_values local_weather;
     n_int		   ha1 = 6;
     n_int		   ha2 = 0;
     n_int		   hr = 0;
@@ -1092,14 +1114,16 @@ static void draw_meters( simulated_group *group )
             {
                 YELLOW_LINE( 106 + 18 + SP_EN_OFFSIDE, ( 45 - ( local_energy >> 7 ) ), 6, 0 );
             }
-            local_icon = &icns[weather_seven_values( local_x, local_y ) << 7];
+            local_weather = weather_seven_values( local_x, local_y );
+            local_icon = &icns[weather_icon_base( local_weather ) << 7];
         }
 
     }
     else
     {
         /* still give weather even with no Simulated Apes */
-        local_icon = &icns[weather_seven_values( 0, 0 ) << 7];
+        local_weather = weather_seven_values( 0, 0 );
+        local_icon = &icns[weather_icon_base( local_weather ) << 7];
     }
 
     {
@@ -1162,6 +1186,7 @@ static void draw_meters( simulated_group *group )
 
         ha1++;
     }
+    draw_weather_lightning_symbol( local_weather, &local_kind_yellow );
 
 }
 
@@ -1496,20 +1521,19 @@ static void draw_weather( n_int toggle )
     if ( toggle )
     {
         n_c_int *local_pressure = land_weather( 0 );
-        n_byte  *local_lightnight = land_weather_lightning( 0 );
-        n_byte  timer3 = land_time() & 7;
+        n_byte  *local_lightning = land_weather_lightning( 0 );
         n_int loop = 0;
         while ( loop < MAP_AREA )
         {
-            n_int value = local_pressure[ loop ] >> 7;;
+            n_int value = local_pressure[ loop ] >> 7;
             
-            if ( timer3 )
+            if ( local_lightning[ loop ] )
             {
-                n_byte valuelight = local_lightnight[ loop ];
-                if ( timer3 == valuelight )
-                {
-                    value = 255;
-                }
+                n_int alpha = local_lightning[ loop ];
+                /* Full-alpha lightning is a solid white flash.  The mask
+                 * decays in simulation time, so it then fades naturally
+                 * back into the atmospheric pressure texture. */
+                value = value + ( ( 255 - value ) * alpha ) / 255;
             }
 
             if ( value < 0 )

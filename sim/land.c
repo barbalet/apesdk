@@ -352,11 +352,24 @@ weather_values    weather_seven_values( n_int px, n_int py )
 
     if ( val > WEATHER_RAIN )
     {
+        if ( weather_lightning( map_x, map_y ) > 127 )
+        {
+            return ( ret_val == WEATHER_SEVEN_CLEAR_NIGHT ) ? WEATHER_SEVEN_LIGHTNING_CLOUDY_NIGHT : WEATHER_SEVEN_LIGHTNING_CLOUDY_DAY;
+        }
         return ret_val + 2;
     }
     if ( val > WEATHER_CLOUD )
     {
+        if ( weather_lightning( map_x, map_y ) > 127 )
+        {
+            return ( ret_val == WEATHER_SEVEN_CLEAR_NIGHT ) ? WEATHER_SEVEN_LIGHTNING_CLOUDY_NIGHT : WEATHER_SEVEN_LIGHTNING_CLOUDY_DAY;
+        }
         return ret_val + 1;
+    }
+
+    if ( weather_lightning( map_x, map_y ) > 127 )
+    {
+        return ( ret_val == WEATHER_SEVEN_CLEAR_NIGHT ) ? WEATHER_SEVEN_LIGHTNING_NIGHT : WEATHER_SEVEN_LIGHTNING_DAY;
     }
 
     return ret_val;
@@ -420,11 +433,8 @@ n_byte *land_weather_lightning( n_int tile )
 void weather_cycle( void )
 {
     tile_cycle( &m_land );
-//    tile_cycle(&m_land);
-//    tile_cycle(&m_land);
-
     tile_wind( &m_land );
-//    tile_lightning( &m_land );
+    tile_lightning( &m_land );
 }
 
 void weather_init( void )
@@ -435,6 +445,12 @@ void weather_init( void )
 n_int weather_pressure( n_int px, n_int py )
 {
     return tiles_atmosphere( &m_land, 0, 0, px, py );
+}
+
+n_byte weather_lightning( n_int px, n_int py )
+{
+    n_uint location = ( n_uint )( ( px & ( MAP_DIMENSION - 1 ) ) | ( ( py & ( MAP_DIMENSION - 1 ) ) * MAP_DIMENSION ) );
+    return m_land.tiles[0].lightning[location];
 }
 
 /*
@@ -480,9 +496,9 @@ void weather_lightning_test( n_int tile )
 
 void weather_set_lightning( n_int tile,  n_int px, n_int py, n_byte value)
 {
-    n_uint lp = (py * MAP_DIMENSION) + px;
+    n_uint lp = ( n_uint )( ( px & ( MAP_DIMENSION - 1 ) ) | ( ( py & ( MAP_DIMENSION - 1 ) ) * MAP_DIMENSION ) );
     
-    m_land.tiles[ tile ].lightning [ lp ] = value & 3;
+    m_land.tiles[ tile ].lightning [ lp ] = value;
 }
 
 

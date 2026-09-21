@@ -187,7 +187,12 @@ typedef enum
     WEATHER_SEVEN_CLEAR_NIGHT = 3,
     WEATHER_SEVEN_CLOUDY_NIGHT = 4,
     WEATHER_SEVEN_RAINY_NIGHT = 5,
-    WEATHER_SEVEN_DAWN_DUSK = 6
+    WEATHER_SEVEN_DAWN_DUSK = 6,
+    WEATHER_SEVEN_LIGHTNING_DAY = 7,
+    WEATHER_SEVEN_LIGHTNING_CLOUDY_DAY = 8,
+    WEATHER_SEVEN_LIGHTNING_NIGHT = 9,
+    WEATHER_SEVEN_LIGHTNING_CLOUDY_NIGHT = 10,
+    WEATHER_SEVEN_COUNT = 11
 } weather_values;
 
 typedef enum
@@ -328,6 +333,7 @@ n_int weather_pressure( n_int px, n_int py );
 void  weather_cycle( void );
 void  weather_wind( void );
 weather_values weather_seven_values( n_int px, n_int py );
+n_byte weather_lightning( n_int px, n_int py );
 
 void weather_lightning_test( n_int tile );
 

@@ -545,6 +545,11 @@ void tile_cycle( n_land *land )
     }
 }
 
+/* Scratch storage for connected atmospheric cloud components.  Lightning is
+ * generated state, so this is intentionally not part of the saved land data. */
+static n_byte lightning_cloud_seen[MAP_AREA];
+static n_byte4 lightning_cloud_queue[MAP_AREA];
+
 void tile_lightning( n_land *land )
 {
     n_int tile = 0;
@@ -552,19 +557,117 @@ void tile_lightning( n_land *land )
     {
         n_byte2 lowest = land->tiles[ tile ].delta_pressure_lowest;
         n_byte2 highest = land->tiles[ tile ].delta_pressure_highest;
+        n_byte2 pressure_cut = ( n_byte2 )( lowest + ( ( highest - lowest ) * 3 ) / 4 );
+        n_uint location = 0;
 
-        n_byte2 pressure_cut = ( lowest + ( highest * 3 ) ) / 4;
-        
-        n_uint lp = 0;
-        while (lp < MAP_AREA)
+        memory_erase( lightning_cloud_seen, MAP_AREA );
+        location = 0;
+        while ( location < MAP_AREA )
         {
-            n_byte value = 0;
-            if (land->tiles[ tile ].delta_pressure[ lp ] > pressure_cut)
+            if ( ( lightning_cloud_seen[location] == 0 ) &&
+                 ( land->tiles[tile].delta_pressure[location] >= pressure_cut ) )
             {
-                value = (lp >> 4) & 7;
+                n_uint queue_read = 0;
+                n_uint queue_write = 1;
+                n_int leftmost_x = ( n_int )( location & ( MAP_DIMENSION - 1 ) );
+                n_int rightmost_x = leftmost_x;
+                n_int lowest_y = ( n_int )( location >> MAP_BITS );
+                n_int highest_y = ( n_int )( location >> MAP_BITS );
+
+                lightning_cloud_seen[location] = 1;
+                lightning_cloud_queue[0] = ( n_byte4 )location;
+                while ( queue_read < queue_write )
+                {
+                    n_uint cloud_location = lightning_cloud_queue[queue_read++];
+                    n_int cloud_x = ( n_int )( cloud_location & ( MAP_DIMENSION - 1 ) );
+                    n_int cloud_y = ( n_int )( cloud_location >> MAP_BITS );
+                    n_uint neighbour[4];
+                    n_int neighbour_loop = 0;
+
+                    if ( cloud_x < leftmost_x ) leftmost_x = cloud_x;
+                    if ( cloud_x > rightmost_x ) rightmost_x = cloud_x;
+                    if ( cloud_y < lowest_y ) lowest_y = cloud_y;
+                    if ( cloud_y > highest_y ) highest_y = cloud_y;
+                    neighbour[0] = tiles_non_planet( cloud_x - 1, cloud_y );
+                    neighbour[1] = tiles_non_planet( cloud_x + 1, cloud_y );
+                    neighbour[2] = tiles_non_planet( cloud_x, cloud_y - 1 );
+                    neighbour[3] = tiles_non_planet( cloud_x, cloud_y + 1 );
+                    while ( neighbour_loop < 4 )
+                    {
+                        n_uint next = neighbour[neighbour_loop++];
+                        if ( ( lightning_cloud_seen[next] == 0 ) &&
+                             ( land->tiles[tile].delta_pressure[next] >= pressure_cut ) )
+                        {
+                            lightning_cloud_seen[next] = 1;
+                            lightning_cloud_queue[queue_write++] = ( n_byte4 )next;
+                        }
+                    }
+                }
+
+                {
+                    n_int flash_count = 1 + ( n_int )( ( queue_write * 29 ) / MAP_AREA );
+                    n_int column_count = flash_count < 6 ? flash_count : 6;
+                    n_int row_count = ( flash_count + column_count - 1 ) / column_count;
+                    n_uint storm_seed = ( n_uint )( ( leftmost_x * 1103515245u ) ^
+                                                      ( highest_y * 2654435761u ) ^ queue_write );
+                    n_int flash_interval = 8 + ( n_int )( storm_seed % 13u );
+                    n_int selected_flash = ( n_int )( ( storm_seed + ( land->time / flash_interval ) ) % flash_count );
+                    n_int fade_divisor = flash_count + 4;
+
+                    /* A large cloud is divided into a bounded grid of flash
+                     * areas.  One-cell clouds get one area; a map-sized
+                     * cloud gets thirty.  Its seed provides an independent
+                     * interval and rotation offset, so storm clocks cannot
+                     * synchronise.  Its area also controls how long a flash
+                     * remains visible before that subarea can reappear. */
+                    queue_read = 0;
+                    while ( queue_read < queue_write )
+                    {
+                        n_uint cloud_location = lightning_cloud_queue[queue_read++];
+                        n_byte alpha = land->tiles[tile].lightning[cloud_location];
+
+                        /* Blend one share of unlit atmosphere into the mask.
+                         * Integer division deliberately rounds down: a
+                         * one-area storm fades quickly, while a 30-area storm
+                         * has a much longer, smooth return to invisibility. */
+                        land->tiles[tile].lightning[cloud_location] =
+                            ( n_byte )( ( alpha * ( fade_divisor - 1 ) ) / fade_divisor );
+                    }
+                    if ( ( ( land->time + storm_seed ) % flash_interval ) == 0 )
+                    {
+                        queue_read = 0;
+                        while ( queue_read < queue_write )
+                        {
+                            n_uint cloud_location = lightning_cloud_queue[queue_read++];
+                            n_int cloud_x = ( n_int )( cloud_location & ( MAP_DIMENSION - 1 ) );
+                            n_int cloud_y = ( n_int )( cloud_location >> MAP_BITS );
+                            n_int column = ( ( cloud_x - leftmost_x ) * column_count ) / ( rightmost_x - leftmost_x + 1 );
+                            n_int row = ( ( cloud_y - lowest_y ) * row_count ) / ( highest_y - lowest_y + 1 );
+                            n_int flash_area = column + ( row * column_count );
+
+                            if ( flash_area >= flash_count ) flash_area = flash_count - 1;
+                            if ( ( flash_area == selected_flash ) &&
+                                 ( land->tiles[tile].lightning[cloud_location] == 0 ) )
+                            {
+                                land->tiles[tile].lightning[cloud_location] = 255;
+                            }
+                        }
+                    }
+                }
             }
-            land->tiles[ tile ].lightning[ lp ] = value;
-            lp++;
+            location++;
+        }
+        /* A mask fragment left behind by a moving atmosphere has no active
+         * cloud area to support it, so it falls away at the normal rate. */
+        location = 0;
+        while ( location < MAP_AREA )
+        {
+            if ( lightning_cloud_seen[location] == 0 )
+            {
+                n_byte alpha = land->tiles[tile].lightning[location];
+                land->tiles[tile].lightning[location] = alpha > 48 ? alpha - 48 : 0;
+            }
+            location++;
         }
         tile++;
     }
@@ -760,6 +863,7 @@ void tile_weather_init( n_land *land )
 
         memory_erase( ( n_byte * )tilePtr->atmosphere, sizeof( n_c_int ) * MAP_AREA );
         memory_erase( ( n_byte * )tilePtr->delta_pressure, sizeof( n_byte2 ) * MAP_AREA );
+        memory_erase( tilePtr->lightning, MAP_AREA );
 
         tile_atmosphere_topography( land, tile );
 

@@ -213,6 +213,8 @@ void test_enums(void) {
     TEST_EQUALS_INT(0, WEATHER_SEVEN_SUNNY_DAY, "Sunny day weather value");
     TEST_EQUALS_INT(1, WEATHER_SEVEN_CLOUDY_DAY, "Cloudy day weather value");
     TEST_EQUALS_INT(6, WEATHER_SEVEN_DAWN_DUSK, "Dawn/dusk weather value");
+    TEST_EQUALS_INT(7, WEATHER_SEVEN_LIGHTNING_DAY, "Fine day lightning weather value");
+    TEST_EQUALS_INT(10, WEATHER_SEVEN_LIGHTNING_CLOUDY_NIGHT, "Cloudy night lightning weather value");
     
     // Test entity types
     TEST_EQUALS_INT(0, ET_SIMULATED_APE, "Simulated ape entity type");
@@ -230,6 +232,18 @@ void test_enums(void) {
     TEST_EQUALS_INT(0, COLOR_BLACK, "Black color");
     TEST_EQUALS_INT(255, COLOR_RED, "Red color");
     TEST_EQUALS_INT(252, COLOR_WHITE, "White color");
+}
+
+void test_lightning_mask(void) {
+    n_byte2 seed[2] = { 0x4321, 0xabcd };
+
+    printf("\n--- Testing Lightning Mask ---\n");
+    land_load_state(7, 600, seed);
+    weather_init();
+    weather_set_lightning(0, 3, 5, 255);
+    TEST_EQUALS_INT(255, weather_lightning(3, 5), "Lightning mask preserves full flash alpha");
+    weather_cycle();
+    TEST_ASSERT(weather_lightning(3, 5) <= 255, "Lightning mask remains an 8-bit alpha value");
 }
 
 // Test data structures
@@ -393,6 +407,7 @@ int main(void) {
     test_string_constants();
     test_drawing_flags();
     test_hires_calculations();
+    test_lightning_mask();
     test_seeded_land_weather_scenario();
     
     // Print final summary
