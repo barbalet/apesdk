@@ -131,6 +131,15 @@ typedef enum
     EVENT_POINTED,
     EVENT_TICKLED,
     EVENT_TICKLED_BY,
+    /* Civilian livelihood extensions.  These retain the paired-event
+       convention used by social and body interactions above. */
+    EVENT_PROFESSION_WORK,
+    EVENT_PROFESSION_SERVICE,
+    EVENT_PROFESSION_SERVICE_BY,
+    EVENT_PROFESSION_TRAIN,
+    EVENT_PROFESSION_TRAINED,
+    EVENT_PROFESSION_RESOURCE,
+    EVENT_PROFESSION_RESOURCE_RECEIVED,
     EVENTS
 } being_episodic_event_type;
 

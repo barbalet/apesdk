@@ -170,6 +170,9 @@ ApeSDK is a practical codebase for exploring:
 - autonomous behavior systems;
 - social and language simulation;
 - episodic memory and social graph modeling;
+- optional civilian-profession records and paired work, service, resource, and
+  supervised-training episodic events (`entity/profession.{h,c}`), kept outside
+  the core being layout for save compatibility;
 - environmental simulation with terrain, tide, weather, and resources;
 - scriptable simulation control through ApeScript;
 - compact JSON/object serialization;
