@@ -38,7 +38,9 @@ else
 fi
 
 : "${CC:=gcc}"
-: "${BUILD_WARNINGS:=-Wall -Wextra}"
+# Keep useful general diagnostics enabled while suppressing warnings emitted by
+# intentional legacy callback signatures and aggregate initializers.
+: "${BUILD_WARNINGS:=-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable -Wno-sign-compare -Wno-missing-braces -Wno-missing-field-initializers -Wno-cast-function-type-mismatch}"
 rm -f ./*.o ./../simape ./../simape.tmp
 
 if [ "${1:-}" == "--additional" ]
@@ -48,12 +50,12 @@ else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./toolkit/*.c -lz -lm -lpthread
-${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./script/*.c -lz -lm -lpthread
-${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./render/*.c -lz -lm -lpthread
-${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./sim/*.c -lz -lm -lpthread
-${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./entity/*.c -lz -lm -lpthread
-${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./universe/*.c -lz -lm -lpthread
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./toolkit/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./script/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./render/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./sim/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./entity/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./universe/*.c
 
 ${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./longterm.c -o longterm.o
 
