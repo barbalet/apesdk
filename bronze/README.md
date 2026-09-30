@@ -25,3 +25,10 @@ does not add occupation or market fields to `simulated_being`.
 The harness executes that slice twice from fresh ApeSDK initialization and
 requires all event fields to match.  This is the extension's deterministic
 trace gate; the eventual compiled `.bronze` runner must retain it.
+
+`content/vertical_slice.bronze` is parsed and compiled using the copied
+Bronze DSL package in `dsl/`. Its farmer, fisher, and smith tasks drive all
+six vertical-slice actions—`move_to`, `gather`, `craft`, `deposit`, `eat`, and
+`rest`—through the adapter. Economic state remains a Bronze sidecar; the next
+extension step is a versioned sidecar-state/event persistence format that does
+not alter ApeSDK's existing save compatibility.

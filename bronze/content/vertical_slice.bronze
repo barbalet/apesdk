@@ -1,0 +1,52 @@
+kinds {
+  resources { grain fish wood copper tin charcoal }
+  items { tool }
+}
+actions {
+  action gather 1 2
+  action craft 1 2
+  action rest 0 0
+  action move_to 1 1
+  action deposit 1 2
+  action eat 1 2
+}
+resources {
+  resource grain { habitat field capacity 10 renew 0 nutrition 1 market_target 10 }
+  resource fish { habitat coast capacity 10 renew 0 nutrition 1 market_target 10 }
+  resource wood { habitat forest capacity 10 renew 0 nutrition 0 market_target 10 }
+  resource copper { habitat mine_copper capacity 10 renew 0 nutrition 0 market_target 10 }
+  resource tin { habitat mine_tin capacity 10 renew 0 nutrition 0 market_target 10 }
+  resource charcoal { habitat forest capacity 10 renew 0 nutrition 0 market_target 10 }
+}
+recipes { recipe tool { output tool 1 input copper 1 input tin 1 input charcoal 1 } }
+vocations {
+  vocation farmer {
+    task work {
+      move_to field
+      gather grain 2
+      deposit grain 1
+    }
+    rule always { when true do work }
+  }
+  vocation fisher {
+    task work {
+      move_to coast
+      gather fish 1
+      eat fish 1
+    }
+    rule always { when true do work }
+  }
+  vocation smith {
+    task work {
+      move_to mine_copper
+      gather copper 1
+      move_to mine_tin
+      gather tin 1
+      move_to forest
+      gather charcoal 1
+      craft tool 1
+      rest
+    }
+    rule always { when true do work }
+  }
+}

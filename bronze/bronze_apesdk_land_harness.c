@@ -1,4 +1,6 @@
 #include "bronze_apesdk_adapter.h"
+#include "bronze_apesdk_compiled.h"
+#include "dsl/brz_parser.h"
 #include "../sim/sim.h"
 #include <assert.h>
 #include <stdio.h>
@@ -14,7 +16,7 @@ n_int draw_error(n_constant_string error_text, n_constant_string location,
     return 0;
 }
 
-enum { TRACE_LEN=7 };
+enum { TRACE_LEN=14 };
 
 static void run_slice(ScenarioEvent trace[TRACE_LEN])
 {
@@ -24,6 +26,8 @@ static void run_slice(ScenarioEvent trace[TRACE_LEN])
     BronzeApeSidecar sidecar;
     BronzeApeSettlement settlement;
     simulated_group *group;
+    ParsedConfig config;
+    int count=0;
     bronze_ape_world_view(&world);
     assert(sim_init(KIND_START_UP,0x42u,MAP_AREA,0)!=0);
     sim_cycle(); /* ApeSDK creates the initial group on this first cycle. */
@@ -35,23 +39,23 @@ static void run_slice(ScenarioEvent trace[TRACE_LEN])
     assert(actor_port.position(actor_port.context).x==being_location_x(actor.being));
     assert(actor_port.position(actor_port.context).y==being_location_y(actor.being));
 
+    brz_cfg_init(&config);
+    assert(brz_parse_file(BRONZE_APE_CONTENT_PATH,&config));
+    assert(brz_cfg_compile(&config,stderr));
     bronze_ape_sidecar_init(&sidecar);
     settlement=(BronzeApeSettlement){{7,{320,-80},"River settlement"},{0}};
     sidecar.hunger=2; sidecar.fatigue=2;
-    assert(bronze_ape_action_run(&world,&actor_port,&sidecar,&settlement,BRONZE_APE_MOVE,-1,1,&trace[0])==SCENARIO_RESULT_COMPLETED);
-    assert(bronze_ape_action_run(&world,&actor_port,&sidecar,&settlement,BRONZE_APE_GATHER,BRONZE_APE_GRAIN,2,&trace[1])==SCENARIO_RESULT_COMPLETED);
-    assert(bronze_ape_action_run(&world,&actor_port,&sidecar,&settlement,BRONZE_APE_GATHER,BRONZE_APE_FISH,1,&trace[2])==SCENARIO_RESULT_COMPLETED);
-    bronze_ape_sidecar_add(&sidecar,BRONZE_APE_COPPER,1);
-    bronze_ape_sidecar_add(&sidecar,BRONZE_APE_TIN,1);
-    bronze_ape_sidecar_add(&sidecar,BRONZE_APE_CHARCOAL,1);
-    assert(bronze_ape_action_run(&world,&actor_port,&sidecar,&settlement,BRONZE_APE_CRAFT,-1,1,&trace[3])==SCENARIO_RESULT_COMPLETED);
-    assert(bronze_ape_action_run(&world,&actor_port,&sidecar,&settlement,BRONZE_APE_DEPOSIT,BRONZE_APE_GRAIN,1,&trace[4])==SCENARIO_RESULT_COMPLETED);
-    assert(bronze_ape_action_run(&world,&actor_port,&sidecar,&settlement,BRONZE_APE_EAT,BRONZE_APE_FISH,1,&trace[5])==SCENARIO_RESULT_COMPLETED);
-    assert(bronze_ape_action_run(&world,&actor_port,&sidecar,&settlement,BRONZE_APE_REST,-1,1,&trace[6])==SCENARIO_RESULT_COMPLETED);
+    count+=bronze_ape_execute_compiled_task(&config,"farmer","work",&world,&actor_port,&sidecar,&settlement,&trace[count],TRACE_LEN-count);
+    count+=bronze_ape_execute_compiled_task(&config,"fisher","work",&world,&actor_port,&sidecar,&settlement,&trace[count],TRACE_LEN-count);
+    count+=bronze_ape_execute_compiled_task(&config,"smith","work",&world,&actor_port,&sidecar,&settlement,&trace[count],TRACE_LEN-count);
+    assert(count==TRACE_LEN);
     assert(settlement.resources[BRONZE_APE_GRAIN]==1);
-    assert(sidecar.hunger==1 && sidecar.resources[BRONZE_APE_FISH]==0 && sidecar.fatigue==1);
-    assert(strcmp(trace[3].action_id,"craft")==0 && trace[3].completed_amount==1);
-    assert(trace[0].tick==trace[6].tick && trace[0].actor_id==23);
+    assert(sidecar.hunger==1);
+    assert(sidecar.resources[BRONZE_APE_FISH]==0);
+    assert(sidecar.fatigue==1);
+    assert(strcmp(trace[12].action_id,"craft")==0 && trace[12].completed_amount==1);
+    assert(trace[0].tick==trace[TRACE_LEN-1].tick && trace[0].actor_id==23);
+    brz_cfg_free(&config);
     sim_close();
 }
 
