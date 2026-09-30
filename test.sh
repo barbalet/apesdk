@@ -54,4 +54,8 @@ run_in "${ROOT_DIR}/entity/unit" ./entity_tests
 run_in "${ROOT_DIR}/universe/unit" bash universe_tests.sh
 run_in "${ROOT_DIR}/universe/unit" ./universe_tests
 
+if [ -f "${ROOT_DIR}/bronze/test.sh" ]; then
+    run_in "${ROOT_DIR}/bronze" bash ./test.sh
+fi
+
 printf "\nAll deterministic tests passed.\n"
