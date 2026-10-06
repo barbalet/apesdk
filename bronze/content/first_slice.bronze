@@ -1,0 +1,58 @@
+# First apeSDK vertical slice: a food source, a production input, and a craft.
+kinds {
+  resources { grain fish wood copper tin charcoal clay }
+  items { tool pot }
+}
+
+actions {
+  action gather 1 2
+  action craft 1 2
+  action move_to 1 1
+  action rest 0 0
+}
+
+resources {
+  resource grain { habitat field capacity 200 renew 0.09 nutrition 0.20 market_target 100 }
+  resource fish { habitat coast capacity 200 renew 0.12 nutrition 0.20 market_target 100 }
+  resource wood { habitat forest capacity 100 renew 0.05 nutrition 0 market_target 50 }
+  resource copper { habitat mine_copper capacity 100 renew 0.005 nutrition 0 market_target 20 }
+  resource tin { habitat mine_tin capacity 100 renew 0.002 nutrition 0 market_target 20 }
+  resource charcoal { habitat forest capacity 50 renew 0.02 nutrition 0 market_target 25 }
+  resource clay { habitat claypit capacity 100 renew 0.02 nutrition 0 market_target 25 }
+}
+
+recipes {
+  recipe tool { output tool 1 input copper 1 input tin 1 input charcoal 1 }
+  recipe pot { output pot 1 input clay 2 }
+}
+
+settlement_policy {
+  deposit_threshold 2
+  rest_recovery 0.04
+}
+
+vocations {
+  vocation farmer {
+    task work {
+      move_to field
+      gather grain 4
+    }
+    rule hungry_work { when hunger > 0.25 and fatigue < 0.90 do work weight 6 }
+  }
+  vocation fisher {
+    task work {
+      move_to coast
+      gather fish 3
+    }
+    rule hungry_work { when hunger > 0.25 and fatigue < 0.90 do work weight 6 }
+  }
+  vocation bronze_smith {
+    task work {
+      move_to mine_copper
+      gather copper 1
+      gather tin 1
+      craft tool 1
+    }
+    rule hungry_work { when hunger > 0.25 and fatigue < 0.90 do work weight 6 }
+  }
+}

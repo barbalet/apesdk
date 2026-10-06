@@ -43,4 +43,6 @@ run_in "${ROOT_DIR}/entity/unit" ./entity_tests
 run_in "${ROOT_DIR}/universe/unit" bash universe_tests.sh
 run_in "${ROOT_DIR}/universe/unit" ./universe_tests
 
+run_in "${ROOT_DIR}/bronze" make test
+
 printf "\nAll deterministic tests passed.\n"
