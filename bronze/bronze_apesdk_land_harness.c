@@ -18,7 +18,7 @@ n_int draw_error(n_constant_string error_text, n_constant_string location,
 
 enum { TRACE_LEN=14 };
 
-static void run_slice(ScenarioEvent trace[TRACE_LEN])
+static void run_slice(ScenarioEvent trace[TRACE_LEN], BronzeApeSnapshot* snapshot)
 {
     ScenarioWorldPort world;
     ScenarioActorPort actor_port;
@@ -55,6 +55,7 @@ static void run_slice(ScenarioEvent trace[TRACE_LEN])
     assert(sidecar.fatigue==1);
     assert(strcmp(trace[12].action_id,"craft")==0 && trace[12].completed_amount==1);
     assert(trace[0].tick==trace[TRACE_LEN-1].tick && trace[0].actor_id==23);
+    bronze_ape_snapshot_capture(23,&sidecar,&settlement,snapshot);
     brz_cfg_free(&config);
     sim_close();
 }
@@ -66,7 +67,12 @@ int main(void)
     ScenarioPlacePort place_port;
     BronzeApePlace place={7,{320,-80},"River settlement"};
     BronzeApeSidecar sidecar;
-    ScenarioEvent first[TRACE_LEN], second[TRACE_LEN];
+    ScenarioEvent first[TRACE_LEN], second[TRACE_LEN], restored_events[TRACE_LEN];
+    BronzeApeSnapshot first_snapshot, second_snapshot, restored_snapshot;
+    BronzeApeSidecar restored_sidecar;
+    BronzeApeSettlement restored_settlement={{7,{320,-80},"River settlement"},{0}};
+    FILE* stream;
+    size_t restored_count;
     int i;
     land_load_state(42,0,seed); bronze_ape_world_view(&world);
     assert(world.tick(world.context)==((ScenarioTick)42*1440u));
@@ -78,9 +84,27 @@ int main(void)
     assert(place_port.position(place_port.context).y==-80);
     assert(strcmp(place_port.name(place_port.context),"River settlement")==0);
 
-    run_slice(first);
-    run_slice(second);
+    run_slice(first,&first_snapshot);
+    run_slice(second,&second_snapshot);
     for(i=0;i<TRACE_LEN;i++) assert(scenario_event_equivalent(&first[i],&second[i]));
+    assert(bronze_ape_snapshot_equal(&first_snapshot,&second_snapshot));
+    stream=tmpfile(); assert(stream!=0);
+    assert(bronze_ape_snapshot_write(stream,&first_snapshot));
+    rewind(stream);
+    assert(bronze_ape_snapshot_read(stream,&restored_snapshot));
+    assert(bronze_ape_snapshot_equal(&first_snapshot,&restored_snapshot));
+    bronze_ape_sidecar_init(&restored_sidecar);
+    assert(bronze_ape_snapshot_apply(&restored_snapshot,23,&restored_sidecar,&restored_settlement));
+    bronze_ape_snapshot_capture(23,&restored_sidecar,&restored_settlement,&second_snapshot);
+    assert(bronze_ape_snapshot_equal(&first_snapshot,&second_snapshot));
+    fclose(stream);
+    stream=tmpfile(); assert(stream!=0);
+    assert(bronze_ape_events_write(stream,first,TRACE_LEN));
+    rewind(stream);
+    assert(bronze_ape_events_read(stream,restored_events,TRACE_LEN,&restored_count));
+    assert(restored_count==TRACE_LEN);
+    for(i=0;i<TRACE_LEN;i++) assert(scenario_event_equivalent(&first[i],&restored_events[i]));
+    fclose(stream);
     bronze_ape_sidecar_init(&sidecar);
     assert(bronze_ape_sidecar_add(&sidecar,BRONZE_APE_GRAIN,2)==2);
     assert(bronze_ape_sidecar_add(&sidecar,BRONZE_APE_FISH,1)==1);

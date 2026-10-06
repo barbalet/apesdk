@@ -1,5 +1,7 @@
 #include "bronze_apesdk_adapter.h"
 
+#include <string.h>
+
 static ScenarioTick ape_tick(const void* context)
 { (void)context; return ((ScenarioTick)land_date()*1440u)+(ScenarioTick)land_time(); }
 static ScenarioActorId ape_id(const void* context)
@@ -72,4 +74,43 @@ ScenarioResult bronze_ape_action_run(const ScenarioWorldPort* world,
 done:
     scenario_event_init(event,tick,actor_id,SCENARIO_ID_NONE,place_id,action_name(action),amount,completed,result);
     return result;
+}
+
+void bronze_ape_snapshot_capture(ScenarioActorId actor_id, const BronzeApeSidecar* sidecar,
+                                 const BronzeApeSettlement* settlement, BronzeApeSnapshot* snapshot)
+{
+    if(!snapshot) return;
+    memset(snapshot,0,sizeof(*snapshot)); snapshot->version=BRONZE_APE_STATE_VERSION; snapshot->actor_id=actor_id;
+    if(sidecar) { snapshot->hunger=sidecar->hunger; snapshot->fatigue=sidecar->fatigue; memcpy(snapshot->actor_resources,sidecar->resources,sizeof(snapshot->actor_resources)); }
+    if(settlement) memcpy(snapshot->settlement_resources,settlement->resources,sizeof(snapshot->settlement_resources));
+}
+int bronze_ape_snapshot_apply(const BronzeApeSnapshot* snapshot, ScenarioActorId actor_id,
+                              BronzeApeSidecar* sidecar, BronzeApeSettlement* settlement)
+{
+    if(!snapshot || !sidecar || !settlement || snapshot->version!=BRONZE_APE_STATE_VERSION || snapshot->actor_id!=actor_id) return 0;
+    sidecar->hunger=snapshot->hunger; sidecar->fatigue=snapshot->fatigue;
+    memcpy(sidecar->resources,snapshot->actor_resources,sizeof(sidecar->resources));
+    memcpy(settlement->resources,snapshot->settlement_resources,sizeof(settlement->resources)); return 1;
+}
+int bronze_ape_snapshot_equal(const BronzeApeSnapshot* left, const BronzeApeSnapshot* right)
+{ return left && right && memcmp(left,right,sizeof(*left))==0; }
+int bronze_ape_snapshot_write(FILE* stream, const BronzeApeSnapshot* snapshot)
+{ return stream && snapshot && snapshot->version==BRONZE_APE_STATE_VERSION && fwrite(snapshot,sizeof(*snapshot),1,stream)==1; }
+int bronze_ape_snapshot_read(FILE* stream, BronzeApeSnapshot* snapshot)
+{ return stream && snapshot && fread(snapshot,sizeof(*snapshot),1,stream)==1 && snapshot->version==BRONZE_APE_STATE_VERSION; }
+
+typedef struct { uint32_t version; ScenarioTick tick; ScenarioActorId actor_id, counterpart_id; ScenarioPlaceId place_id; uint32_t action; double requested, completed; ScenarioResult result; } BronzeApeEventDisk;
+static uint32_t event_action(const char* action) { int i; static const char* names[]={"move","gather","craft","deposit","eat","rest","invalid"}; for(i=0;i<7;i++) if(action && strcmp(action,names[i])==0) return (uint32_t)i; return 6; }
+static const char* event_action_name(uint32_t action) { static const char* names[]={"move","gather","craft","deposit","eat","rest","invalid"}; return action<7 ? names[action] : names[6]; }
+int bronze_ape_events_write(FILE* stream, const ScenarioEvent* events, size_t count)
+{
+    size_t i; uint32_t disk_count=(uint32_t)count;
+    if(!stream || (!events && count) || fwrite(&disk_count,sizeof(disk_count),1,stream)!=1) return 0;
+    for(i=0;i<count;i++){ BronzeApeEventDisk disk={SCENARIO_RUNTIME_VERSION,events[i].tick,events[i].actor_id,events[i].counterpart_id,events[i].place_id,event_action(events[i].action_id),events[i].requested_amount,events[i].completed_amount,events[i].result}; if(fwrite(&disk,sizeof(disk),1,stream)!=1) return 0; } return 1;
+}
+int bronze_ape_events_read(FILE* stream, ScenarioEvent* events, size_t capacity, size_t* count)
+{
+    uint32_t disk_count; size_t i; if(count) *count=0;
+    if(!stream || !count || fread(&disk_count,sizeof(disk_count),1,stream)!=1 || disk_count>capacity) return 0;
+    for(i=0;i<disk_count;i++){ BronzeApeEventDisk disk; if(fread(&disk,sizeof(disk),1,stream)!=1 || disk.version!=SCENARIO_RUNTIME_VERSION) return 0; scenario_event_init(&events[i],disk.tick,disk.actor_id,disk.counterpart_id,disk.place_id,event_action_name(disk.action),disk.requested,disk.completed,disk.result); } *count=disk_count; return 1;
 }

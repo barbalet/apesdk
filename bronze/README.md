@@ -30,5 +30,9 @@ trace gate; the eventual compiled `.bronze` runner must retain it.
 Bronze DSL package in `dsl/`. Its farmer, fisher, and smith tasks drive all
 six vertical-slice actions—`move_to`, `gather`, `craft`, `deposit`, `eat`, and
 `rest`—through the adapter. Economic state remains a Bronze sidecar; the next
-extension step is a versioned sidecar-state/event persistence format that does
-not alter ApeSDK's existing save compatibility.
+extension step is expanding vocation coverage.
+
+The extension persists economic sidecar state in `BronzeApeSnapshot` and
+scenario events in a versioned fixed-format log. The harness proves
+write/read/apply restoration and event-log equivalence. These files are owned
+by the extension and do not change ApeSDK's native save format.

@@ -3,6 +3,7 @@
 
 #include "scenario-runtime/include/scenario_runtime.h"
 #include "../universe/universe.h"
+#include <stdio.h>
 
 typedef struct { simulated_being* being; ScenarioActorId id; } BronzeApeActor;
 typedef struct {
@@ -21,6 +22,14 @@ typedef enum {
     BRONZE_APE_DEPOSIT, BRONZE_APE_EAT, BRONZE_APE_REST
 } BronzeApeAction;
 #define BRONZE_APE_CYCLES_PER_DAY 1440u
+#define BRONZE_APE_STATE_VERSION 1u
+typedef struct {
+    uint32_t version;
+    ScenarioActorId actor_id;
+    double hunger, fatigue;
+    double actor_resources[BRONZE_APE_RESOURCE_COUNT];
+    double settlement_resources[BRONZE_APE_RESOURCE_COUNT];
+} BronzeApeSnapshot;
 void bronze_ape_world_view(ScenarioWorldPort* port);
 void bronze_ape_actor_view(BronzeApeActor* actor, ScenarioActorPort* port);
 void bronze_ape_place_view(BronzeApePlace* place, ScenarioPlacePort* port);
@@ -33,5 +42,14 @@ ScenarioResult bronze_ape_action_run(const ScenarioWorldPort* world,
                                      BronzeApeSettlement* settlement,
                                      BronzeApeAction action, int resource,
                                      double amount, ScenarioEvent* event);
+void bronze_ape_snapshot_capture(ScenarioActorId actor_id, const BronzeApeSidecar* sidecar,
+                                 const BronzeApeSettlement* settlement, BronzeApeSnapshot* snapshot);
+int bronze_ape_snapshot_apply(const BronzeApeSnapshot* snapshot, ScenarioActorId actor_id,
+                              BronzeApeSidecar* sidecar, BronzeApeSettlement* settlement);
+int bronze_ape_snapshot_equal(const BronzeApeSnapshot* left, const BronzeApeSnapshot* right);
+int bronze_ape_snapshot_write(FILE* stream, const BronzeApeSnapshot* snapshot);
+int bronze_ape_snapshot_read(FILE* stream, BronzeApeSnapshot* snapshot);
+int bronze_ape_events_write(FILE* stream, const ScenarioEvent* events, size_t count);
+int bronze_ape_events_read(FILE* stream, ScenarioEvent* events, size_t capacity, size_t* count);
 
 #endif
