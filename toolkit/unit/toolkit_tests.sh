@@ -26,19 +26,27 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #   OTHER DEALINGS IN THE SOFTWARE.
 
-if [ $# -ge 1 -a "$1" == "--debug" ]
+set -euo pipefail
+
+if [ $# -ge 1 ] && [ "$1" == "--debug" ]
 then
     CFLAGS=-g
 else
     CFLAGS=-O2 
 fi
 
+: "${CC:=gcc}"
+: "${TEST_WARNINGS:=-Wall -Wextra}"
+: "${WERROR:=0}"
+if [ "$WERROR" = 1 ]; then TEST_WARNINGS="$TEST_WARNINGS -Werror"; fi
+rm -f ./*.o ./toolkit_tests ./toolkit_tests.tmp
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c ../*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c toolkit_tests.c -lz -lm -lpthread -w
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o toolkit_tests *.o -lz -lm -lpthread
+${CC} ${CFLAGS} ${COMMANDLINEE:-} ${TEST_WARNINGS} -c ../*.c -lz -lm -lpthread
+${CC} ${CFLAGS} ${COMMANDLINEE:-} ${TEST_WARNINGS} -c toolkit_tests.c -lz -lm -lpthread
+
+${CC} ${CFLAGS} ${COMMANDLINEE:-} ${TEST_WARNINGS} -I/usr/include -o toolkit_tests.tmp *.o -lz -lm -lpthread
+mv toolkit_tests.tmp toolkit_tests
 
 rm *.o
-
 

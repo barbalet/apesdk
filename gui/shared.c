@@ -557,7 +557,7 @@ static shared_cycle_state shared_cycle_core( n_uint ticks, n_int localIdentifica
 
     ticks = ticks & 67108863; /* 71 58 27 88 */
     ticks *= 60;
-#ifndef	_WIN32
+#if !defined(_WIN32) && !defined(WASM_BUILD)
     sim_thread_console();
 #endif
     if ( current_mouse_identification == localIdentification )
@@ -598,7 +598,7 @@ static shared_cycle_state shared_cycle_core( n_uint ticks, n_int localIdentifica
             sim_cycle();
             sim_update_output();
         }
-#ifndef    _WIN32
+#if !defined(_WIN32) && !defined(WASM_BUILD)
         if ( sim_new_run_condition() )
         {
             return_value = SHARED_CYCLE_NEW_APES;
@@ -610,7 +610,7 @@ static shared_cycle_state shared_cycle_core( n_uint ticks, n_int localIdentifica
             return_value = SHARED_CYCLE_DEBUG_OUTPUT;
         }
 #endif
-#ifndef	_WIN32
+#if !defined(_WIN32) && !defined(WASM_BUILD)
         if ( sim_thread_console_quit() )
         {
             return_value = SHARED_CYCLE_QUIT;
@@ -1269,9 +1269,7 @@ static void shared_draw_into_buffer( n_byte *drawBuffer, n_int fIdentification, 
 
 #ifdef ALPHA_WEATHER_DRAW
     if ( fIdentification == NUM_VIEW )
-    { // fix here for MacOS 26
-        dim_y -= 4;
-
+    {
         shared_bitcopy_view( drawBuffer, dim_x, dim_y, 0, 0, dim_x );
     }
     else

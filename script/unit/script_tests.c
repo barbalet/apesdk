@@ -385,6 +385,43 @@ void test_apescript_error(void) {
                "apescript_error should handle a NULL individual");
 }
 
+/* Exercise the parser with real source text, including its bounded failure
+ * paths.  The previous tests only checked the declarations around this API. */
+void test_parse_convert_inputs(void) {
+    n_byte valid_program[] = "function(main){}";
+    n_byte invalid_program[] = "function(main){@}";
+    n_byte oversized[VARIABLE_WIDTH + 8];
+    variable_string variables[VARIABLE_MAX];
+    n_file input;
+    n_interpret *program;
+
+    memset(variables, 0, sizeof(variables));
+    input.data = valid_program;
+    input.size = sizeof(valid_program) - 1;
+    input.location = 0;
+    program = parse_convert(&input, 0, variables);
+    TEST_ASSERT(program != NULL, "parse_convert accepts a minimal executable program");
+    if (program != NULL) {
+        TEST_ASSERT(program->binary_code->location > SIZEOF_NUMBER_WRITE,
+                    "parsed program contains bytecode");
+        interpret_cleanup(&program);
+        TEST_ASSERT(program == NULL, "interpret_cleanup releases parsed program");
+    }
+
+    input.data = invalid_program;
+    input.size = sizeof(invalid_program) - 1;
+    input.location = 0;
+    TEST_ASSERT(parse_convert(&input, 0, variables) == NULL,
+                "parse_convert rejects malformed source");
+
+    memset(oversized, 'a', sizeof(oversized));
+    input.data = oversized;
+    input.size = sizeof(oversized);
+    input.location = 0;
+    TEST_ASSERT(parse_convert(&input, 0, variables) == NULL,
+                "parse_convert rejects an oversized token");
+}
+
 // Main test runner
 int main(void) {
     printf("Starting ApeScript Unit Tests\n");
@@ -401,6 +438,7 @@ int main(void) {
     TEST_FUNCTION(test_function_pointers);
     TEST_FUNCTION(test_byte_conversion);
     TEST_FUNCTION(test_apescript_error);
+    TEST_FUNCTION(test_parse_convert_inputs);
     
     printf("\n============================\n");
     printf("Test Results:\n");

@@ -6,7 +6,7 @@ simulation of autonomous ape-like beings living in a changing landscape with
 weather, biology, movement, memory, language, social relationships, immune
 behavior, and braincode-driven control.
 
-The current engine version is **Simulated Ape 0.711**, defined in
+The current engine version is **Simulated Ape 0.712**, defined in
 [`sim/sim.h`](sim/sim.h). The project continues the older **Noble Ape** and
 **Nervana** lineage while keeping the simulation core portable across command
 line builds, native app wrappers, and test harnesses.
@@ -34,7 +34,7 @@ modules, documentation, tests, and toolchains around a shared simulation model.
 
 - **Reader documentation.**
   [`book/`](book/) contains a long-form guide to understanding the current
-  ApeSDK source tree, including the Noble Ape lineage and the 0.711 testing and
+  ApeSDK source tree, including the Noble Ape lineage and the 0.712 testing and
   release workflow.
 
 - **Future interface proposal.**
@@ -108,6 +108,17 @@ For a simple command-line build on macOS or Linux:
 That script builds the command-line simulation binary `simape` one directory
 above the repository root.
 
+For the browser/WebAssembly package, install Emscripten and run:
+
+```bash
+cd web
+make build
+```
+
+The deployable static site is [`web/web`](web/web/); the build compiles the
+shared C engine from this repository with `WASM_BUILD` rather than maintaining
+a web-specific copy.
+
 For the current macOS application:
 
 1. Open [`toolchains/sim-mac/sim-mac.xcodeproj`](toolchains/sim-mac/sim-mac.xcodeproj)
@@ -159,6 +170,9 @@ ApeSDK is a practical codebase for exploring:
 - autonomous behavior systems;
 - social and language simulation;
 - episodic memory and social graph modeling;
+- optional civilian-profession records and paired work, service, resource, and
+  supervised-training episodic events (`entity/profession.{h,c}`), kept outside
+  the core being layout for save compatibility;
 - environmental simulation with terrain, tide, weather, and resources;
 - scriptable simulation control through ApeScript;
 - compact JSON/object serialization;

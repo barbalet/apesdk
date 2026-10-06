@@ -115,11 +115,65 @@ static n_int extract_last_year(n_constant_string value, char year[5]) {
     return 0;
 }
 
+/* A compact, deterministic regression scenario.  These assertions exercise
+ * the real terrain and weather state rather than just its declarations. */
+static n_uint hash_bytes(const n_byte *bytes, n_uint length) {
+    n_uint hash = 2166136261u;
+    n_uint index;
+    for (index = 0; index < length; index++) {
+        hash = (hash ^ bytes[index]) * 16777619u;
+    }
+    return hash;
+}
+
+void test_seeded_land_weather_scenario(void) {
+    n_byte2 seed[2] = { 0x1234, 0x5678 };
+    n_byte2 repeated_seed[2] = { 0x1234, 0x5678 };
+    n_uint first_topography;
+    n_uint repeated_topography;
+    n_uint cycled_weather;
+    weather_values initial_sky;
+    weather_values later_sky = WEATHER_SEVEN_ERROR;
+    n_int cycle;
+
+    printf("\n--- Testing Seeded Land/Weather Scenario ---\n");
+    land_load_state(42, 0, seed);
+    weather_init();
+    first_topography = hash_bytes(land_topography(), MAP_AREA);
+    initial_sky = weather_seven_values(0, 0);
+    TEST_ASSERT(first_topography != 0, "Seeded terrain produces observable topography");
+    TEST_EQUALS_INT(42, land_date(), "Loaded scenario date is retained");
+    TEST_EQUALS_INT(0, land_time(), "Loaded scenario time is retained");
+
+    for (cycle = 0; cycle < 10000; cycle++) {
+        land_cycle();
+        weather_cycle();
+        if (cycle == 999) {
+            later_sky = weather_seven_values(0, 0);
+        }
+        if (cycle == 0 || cycle == 99 || cycle == 999 || cycle == 9999) {
+            TEST_EQUALS_INT((cycle + 1) % TIME_DAY_MINUTES, land_time(),
+                            "Scenario checkpoint preserves deterministic clock state");
+        }
+    }
+    cycled_weather = hash_bytes((n_byte *)land_weather(0), MAP_AREA * sizeof(n_c_int));
+    TEST_EQUALS_INT(10000 % TIME_DAY_MINUTES, land_time(), "Land cycle advances simulation time");
+    TEST_EQUALS_INT(42 + (10000 / TIME_DAY_MINUTES), land_date(), "Land cycle advances simulation date");
+    TEST_ASSERT(cycled_weather != 0, "Weather cycle maintains observable weather state");
+    TEST_ASSERT(initial_sky != later_sky, "Time transition changes reported sky state");
+
+    land_load_state(42, 0, repeated_seed);
+    repeated_topography = hash_bytes(land_topography(), MAP_AREA);
+    TEST_EQUALS_INT(first_topography, repeated_topography, "Fixed seed produces stable terrain hash");
+    TEST_ASSERT(land_location(-1, -1) >= 0, "Wrapped terrain lookup remains valid");
+    TEST_ASSERT(land_location(APESPACE_BOUNDS, APESPACE_BOUNDS) >= 0, "Maximum terrain lookup remains valid");
+}
+
 // Test constants and defines
 void test_constants(void) {
     printf("\n--- Testing Constants ---\n");
     
-    TEST_EQUALS_INT(711, VERSION_NUMBER, "Version number should be 711");
+    TEST_EQUALS_INT(712, VERSION_NUMBER, "Version number should be 712");
     TEST_ASSERT(SIMULATED_APE_SIGNATURE == (('N'<< 8) | 'A'), "Simulated Ape signature");
     TEST_ASSERT(SIMULATED_WAR_SIGNATURE == (('N'<< 8) | 'W'), "Simulated War signature");
     
@@ -159,6 +213,8 @@ void test_enums(void) {
     TEST_EQUALS_INT(0, WEATHER_SEVEN_SUNNY_DAY, "Sunny day weather value");
     TEST_EQUALS_INT(1, WEATHER_SEVEN_CLOUDY_DAY, "Cloudy day weather value");
     TEST_EQUALS_INT(6, WEATHER_SEVEN_DAWN_DUSK, "Dawn/dusk weather value");
+    TEST_EQUALS_INT(7, WEATHER_SEVEN_LIGHTNING_DAY, "Fine day lightning weather value");
+    TEST_EQUALS_INT(10, WEATHER_SEVEN_LIGHTNING_CLOUDY_NIGHT, "Cloudy night lightning weather value");
     
     // Test entity types
     TEST_EQUALS_INT(0, ET_SIMULATED_APE, "Simulated ape entity type");
@@ -176,6 +232,18 @@ void test_enums(void) {
     TEST_EQUALS_INT(0, COLOR_BLACK, "Black color");
     TEST_EQUALS_INT(255, COLOR_RED, "Red color");
     TEST_EQUALS_INT(252, COLOR_WHITE, "White color");
+}
+
+void test_lightning_mask(void) {
+    n_byte2 seed[2] = { 0x4321, 0xabcd };
+
+    printf("\n--- Testing Lightning Mask ---\n");
+    land_load_state(7, 600, seed);
+    weather_init();
+    weather_set_lightning(0, 3, 5, 255);
+    TEST_EQUALS_INT(255, weather_lightning(3, 5), "Lightning mask preserves full flash alpha");
+    weather_cycle();
+    TEST_ASSERT(weather_lightning(3, 5) <= 255, "Lightning mask remains an 8-bit alpha value");
 }
 
 // Test data structures
@@ -289,7 +357,7 @@ void test_string_constants(void) {
     TEST_NOT_NULL(FULL_VERSION_COPYRIGHT, "Full version copyright exists");
     
     // Basic string content tests
-    TEST_ASSERT(strstr(SHORT_VERSION_NAME, "0.711") != NULL, "Version in short name");
+    TEST_ASSERT(strstr(SHORT_VERSION_NAME, "0.712") != NULL, "Version in short name");
     TEST_ASSERT(strstr(COPYRIGHT_NAME, "Tom Barbalet") != NULL, "Author in copyright");
     TEST_ASSERT(extract_last_year(COPYRIGHT_DATE, copyright_year), "Copyright date includes an end year");
     TEST_ASSERT(strstr(FULL_VERSION_COPYRIGHT, copyright_year) != NULL, "Date range in copyright");
@@ -339,6 +407,8 @@ int main(void) {
     test_string_constants();
     test_drawing_flags();
     test_hires_calculations();
+    test_lightning_mask();
+    test_seeded_land_weather_scenario();
     
     // Print final summary
     print_test_summary();

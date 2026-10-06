@@ -76,6 +76,11 @@ static n_uint group_digest(void)
     return digest;
 }
 
+static n_uint weather_digest(void)
+{
+    return math_hash((n_byte *)land_weather(0), MAP_AREA * sizeof(n_c_int));
+}
+
 static n_uint run_deterministic_digest(void)
 {
     n_int loop;
@@ -104,6 +109,32 @@ static void test_sim_cycle_is_deterministic(void)
 
     TEST_ASSERT(first != 0, "deterministic digest has simulation data");
     TEST_ASSERT(first == second, "sim_cycle is deterministic for a fixed seed");
+}
+
+/* Weather must advance through the production simulation loop, not only when
+ * weather_cycle is invoked directly by a unit test.  Desktop applications
+ * drive this same sim_cycle path from their processing/control surface. */
+static void test_sim_cycle_advances_weather(void)
+{
+    n_uint before;
+    n_uint after;
+    n_int loop;
+
+    TEST_ASSERT(sim_init(KIND_START_UP, 0x12738291, MAP_AREA, 0) != 0L,
+                "weather simulation initializes");
+    sim_cycle();
+    before = weather_digest();
+
+    for (loop = 0; loop < 60; loop++)
+    {
+        sim_cycle();
+    }
+    after = weather_digest();
+
+    TEST_ASSERT(before != 0, "weather simulation has an initial atmosphere");
+    TEST_ASSERT(after != 0, "weather simulation retains an atmosphere");
+    TEST_ASSERT(before != after, "weather advances through the live simulation cycle");
+    sim_close();
 }
 
 static void test_save_load_and_transfer(void)
@@ -192,6 +223,7 @@ int main(void)
     printf("Universe unit tests\n");
 
     test_sim_cycle_is_deterministic();
+    test_sim_cycle_advances_weather();
     test_save_load_and_transfer();
     test_command_parsing();
     test_selection_and_control();

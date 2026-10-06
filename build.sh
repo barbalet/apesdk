@@ -28,37 +28,38 @@
 
 cd "$(dirname "$0")"
 
-if [ $# -ge 1 -a "$1" == "--debug" ]
+set -euo pipefail
+
+if [ "${1:-}" == "--debug" ]
 then
     CFLAGS=-g
 else
     CFLAGS=-O2 
 fi
 
-if [ $# -ge 1 -a "$1" == "--additional" ]
+: "${CC:=gcc}"
+# Keep useful general diagnostics enabled while suppressing warnings emitted by
+# intentional legacy callback signatures and aggregate initializers.
+: "${BUILD_WARNINGS:=-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-unused-but-set-variable -Wno-sign-compare -Wno-missing-braces -Wno-missing-field-initializers -Wno-cast-function-type-mismatch}"
+rm -f ./*.o ./../simape ./../simape.tmp
+
+if [ "${1:-}" == "--additional" ]
 then
 COMMANDLINEE=-DNOTHING_NEEDED_HERE
 else
 COMMANDLINEE=-DCOMMAND_LINE_EXPLICIT
 fi
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./toolkit/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./script/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./render/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./sim/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./entity/*.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./universe/*.c -lz -lm -lpthread -w
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./toolkit/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./script/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./render/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./sim/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./entity/*.c
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./universe/*.c
 
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./longterm.c -o longterm.o
-if [ $? -ne 0 ]
-then
-exit 1
-fi
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -c ./longterm.c -o longterm.o
 
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o ./../simape *.o -lz -lm -lpthread
-if [ $? -ne 0 ]
-then
-exit 1
-fi
+${CC} ${CFLAGS} ${COMMANDLINEE} ${BUILD_WARNINGS} -I/usr/include -o ./../simape.tmp *.o -lz -lm -lpthread
+mv ./../simape.tmp ./../simape
 
 rm *.o

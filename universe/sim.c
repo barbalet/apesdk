@@ -306,6 +306,14 @@ void sim_thread_console( void )
         return;
     }
 
+#ifdef PYTHON_BUILD
+    /* Python supplies commands serially.  Wait for a console worker when both
+       slots are busy so its one-command input buffer is never abandoned. */
+    while ( threads_running[0] && threads_running[1] )
+    {
+    }
+#endif
+
     if ( ( threads_running[0] == 0 ) || ( threads_running[1] == 0 ) )
     {
         n_int loop = 0;
@@ -321,8 +329,6 @@ void sim_thread_console( void )
         }
     }
 }
-
-#endif
 
 void sim_console( n_string simulation_filename, n_uint randomise )
 {
@@ -628,6 +634,7 @@ void sim_control_regular( n_int px, n_int py )
             }
         }
     }
+#endif /* PYTHON_BUILD */
 }
 
 n_int sim_view_regular( n_int px, n_int py )
