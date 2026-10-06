@@ -1,4 +1,5 @@
 CC ?= cc
+<<<<<<< HEAD
 CFLAGS ?= -std=c99 -Wall -Wextra
 RUNTIME = runtime/brz_agent.c runtime/brz_dsl.c runtime/brz_kinds.c \
 	runtime/brz_land.c runtime/brz_parser.c runtime/brz_port.c \
@@ -22,3 +23,15 @@ clean:
 	rm -f bronze-sim
 
 .PHONY: adapter-check bronze-sim test clean
+=======
+.PHONY: test clean
+
+test:
+	bash ./test.sh
+
+# Linked by the ApeSDK test runner/source closure, not this lightweight target.
+land-harness: test
+
+clean:
+	rm -f bronze_apesdk_adapter.o bronze_apesdk_adapter_test
+>>>>>>> 847267d99cfa24727cff33d68eda154f63b4962b
