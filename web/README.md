@@ -38,3 +38,17 @@ The generated module exports the shared GUI lifecycle, drawing, mouse, keyboard,
 and menu routes. The included site has interactive View, Terrain, and Control
 canvases rendered by the same `gui/shared.c` and `gui/draw.c` path used by the
 desktop wrappers; it is not a statistics-only viewer.
+
+## Crash and movement-stall reports
+
+The browser UI records WebAssembly load failures, uncaught exceptions,
+unhandled promise rejections, and visible-tab animation stalls longer than five
+seconds. A report contains browser/version information, simulation phase,
+frame number, last cycle/draw durations, selected ape state, and recent
+failure details. On failure—or through **Email diagnostic report**—the site
+opens a pre-addressed `mailto:` message to `barbalet@gmail.com` with subject
+`WASM crash` and shows the full report in the page for copying.
+
+A static site cannot send email directly without exposing credentials. For
+unattended delivery, configure a server-side reporting endpoint or an
+authenticated mail service, then replace the `mailto:` call in `web/app.js`.
