@@ -37,9 +37,13 @@
 
 #include "toolkit.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <math.h>
 
-static void object_write_object( n_file *file, n_object *start );
-static void object_write_array( n_file *file, n_array *start );
+static n_int object_write_object( n_file *file, n_object *start );
+static n_int object_write_array( n_file *file, n_array *start );
 
 #undef OBJECT_DEBUG
 
@@ -53,7 +57,7 @@ static void object_write_array( n_file *file, n_array *start );
 
 #endif
 
-static n_object *object_file_base( n_file *file );
+
 
 static number_array_list    * object_number_array_list = 0L;
 
@@ -82,6 +86,7 @@ void object_ptr_debug(void * ptr)
 
 void object_close(void)
 {
+    if (!object_number_array_list) return;
     number_array * checkptr = (number_array *)object_number_array_list->data;
     n_int          loop = 0, array_count = object_number_array_list->count;
     printf("\n array_count %ld\n", array_count);
@@ -168,127 +173,111 @@ static n_object *object_new( void )
 
 void obj_free( n_object **object );
 
-static void obj_free_array( n_int is_array, void **payload, n_object_type type )
+static void obj_free_array(n_int is_array, void **payload);
+
+/* Release only this value's owned payload, leaving the sibling link intact. */
+static void object_release_data(n_array *value)
 {
-    if (!payload || !(*payload))
+    switch (value->type)
     {
-        return;
-    }
-    
-    n_array *array = 0L;
-
-    if ( is_array )
-    {
-        array = ( n_array * )( *payload );
-    }
-    else
-    {
-        n_object *array_object =  ( n_object * )( *payload );
-        array = ( n_array * ) & ( array_object->primitive );
-    }
-
-
-    if ( type == OBJECT_NUMBER )
-    {
-
-    }
-    if ( type == OBJECT_BOOLEAN )
-    {
-
-    }
-    if ( type == OBJECT_STRING )
-    {
-        memory_free( ( void ** )&array->data );
-    }
-    if ( type == OBJECT_ARRAY )
-    {
-        n_array *local_array = obj_get_array( array->data );
-        obj_free_array( 1, ( void ** )&local_array, local_array->type );
-    }
-    if ( type == OBJECT_OBJECT )
-    {
-        n_object *object = obj_get_object( array->data );
-        obj_free( &object );
-    }
-    if ( array->next )
-    {
-        if ( is_array )
-        {
-            n_array *next_array = ( n_array * )array->next;
-            obj_free_array( 1, ( void ** )&next_array, next_array->type );
-        }
-        else
-        {
-            obj_free( ( n_object ** )&array->next );
-        }
-    }
-    memory_free( payload );
-}
-
-void obj_free( n_object **object )
-{
-    n_array *string_primitive = &( ( *object )->primitive );
-    memory_free( ( void ** ) & ( *object )->name );
-    obj_free_array( 0, ( void ** ) object, string_primitive->type );
-}
-
-void object_top_object( n_file *file, n_object *top_level )
-{
-    io_write( file, "{", 0 );
-    object_write_object( file, top_level );
-    io_write( file, "}", 0 );
-}
-
-static void object_top_array( n_file *file, n_array *top_level )
-{
-    io_write( file, "[", 0 );
-    object_write_array( file, top_level );
-    io_write( file, "]", 0 );
-}
-
-static void *object_write_primitive( n_file *file, n_array *primitive )
-{
-    switch ( object_type( primitive ) )
-    {
-    case OBJECT_NUMBER:
-    {
-        n_int *int_data = ( n_int * )&primitive->data;
-        io_writenumber( file, int_data[0], 1, 0 );
-    }
-    break;
-    case OBJECT_BOOLEAN:
-    {
-        n_int *int_data = ( n_int * )&primitive->data;
-        if ( int_data[0] )
-        {
-            io_write( file, "true", 0 );
-        }
-        else
-        {
-            io_write( file, "false", 0 );
-        }
-    }
-    break;
     case OBJECT_STRING:
-        io_write( file, "\"", 0 );
-        io_write( file, primitive->data, 0 );
-        io_write( file, "\"", 0 );
-        break;
-    case OBJECT_OBJECT:
-        object_top_object( file, ( n_object * )primitive->data );
+    case OBJECT_DECIMAL:
+        memory_free((void **)&value->data);
         break;
     case OBJECT_ARRAY:
-        object_top_array( file, ( n_array * )primitive->data );
+        obj_free_array(1, (void **)&value->data);
+        break;
+    case OBJECT_OBJECT:
+        obj_free((n_object **)&value->data);
         break;
     default:
-        ( void )SHOW_ERROR( "Object kind not found" );
-        return 0L;
+        break;
     }
-    if ( primitive->next )
+    value->data = 0L;
+}
+
+static void obj_free_array(n_int is_array, void **payload)
+{
+    void *current;
+    if (!payload) return;
+    current = *payload;
+    while (current)
     {
-        io_write( file, ",", 0 );
+        n_array *value = is_array ? (n_array *)current : &((n_object *)current)->primitive;
+        void *next = value->next;
+        object_release_data(value);
+        if (!is_array) memory_free((void **)&((n_object *)current)->name);
+        memory_free(&current);
+        current = next;
     }
-    return primitive->next;
+    *payload = 0L;
+}
+
+void obj_free(n_object **object)
+{
+    obj_free_array(0, (void **)object);
+}
+
+/* Propagate write failures so unknown_json never returns partial JSON. */
+#define JSON_WRITE(text) do { if (io_write(file, (text), 0) == -1) return -1; } while (0)
+
+static n_int object_write_top_object(n_file *file, n_object *value)
+{
+    JSON_WRITE("{");
+    if (object_write_object(file, value) == -1) return -1;
+    JSON_WRITE("}");
+    return 0;
+}
+
+void object_top_object(n_file *file, n_object *value)
+{
+    (void)object_write_top_object(file, value);
+}
+
+static n_int object_top_array(n_file *file, n_array *value)
+{
+    JSON_WRITE("[");
+    if (object_write_array(file, value) == -1) return -1;
+    JSON_WRITE("]");
+    return 0;
+}
+
+static n_int object_write_primitive(n_file *file, n_array *value)
+{
+    switch (value->type)
+    {
+    case OBJECT_NULL:
+        JSON_WRITE("null");
+        break;
+    case OBJECT_DECIMAL:
+        JSON_WRITE(value->data);
+        break;
+    case OBJECT_NUMBER:
+    {
+        char text[32];
+        snprintf(text, sizeof(text), "%lld", (long long)obj_get_number(value->data));
+        JSON_WRITE(text);
+        break;
+    }
+    case OBJECT_BOOLEAN:
+        JSON_WRITE(obj_get_boolean(value->data) ? "true" : "false");
+        break;
+    case OBJECT_STRING:
+        JSON_WRITE("\"");
+        JSON_WRITE(value->data);
+        JSON_WRITE("\"");
+        break;
+    case OBJECT_OBJECT:
+        if (object_write_top_object(file, (n_object *)value->data) == -1) return -1;
+        break;
+    case OBJECT_ARRAY:
+        if (object_top_array(file, (n_array *)value->data) == -1) return -1;
+        break;
+    default:
+        return SHOW_ERROR("Object kind not found");
+    }
+    if (value->next) JSON_WRITE(",");
+    return 0;
 }
 
 n_array *obj_get_array( n_string array )
@@ -312,53 +301,51 @@ n_int obj_get_boolean( n_string object )
     return obj_get_number( object );
 }
 
-static void object_write_object( n_file *file, n_object *start )
+static n_int object_write_object(n_file *file, n_object *current)
 {
-    n_object *current = start;
-    do
+    while (current && current->primitive.type != OBJECT_EMPTY)
     {
-        if (current)
-        {
-            io_write( file, "\"", 0 );
-            io_write( file, current->name, 0 );
-            io_write( file, "\":", 0 );
-            current = ( n_object * )object_write_primitive( file, &current->primitive );
-        }
+        JSON_WRITE("\"");
+        JSON_WRITE(current->name);
+        JSON_WRITE("\":");
+        if (object_write_primitive(file, &current->primitive) == -1) return -1;
+        current = current->primitive.next;
     }
-    while ( current );
+    return 0;
 }
 
-static void object_write_array( n_file *file, n_array *start )
+static n_int object_write_array(n_file *file, n_array *current)
 {
-    n_array *current = start;
-    do
+    while (current && current->type != OBJECT_EMPTY)
     {
-        current = ( n_array * )object_write_primitive( file, current );
+        if (object_write_primitive(file, current) == -1) return -1;
+        current = current->next;
     }
-    while ( current );
+    return 0;
 }
 
-n_file *unknown_json( void *unknown, n_object_type type )
+#undef JSON_WRITE
+
+n_file *unknown_json(void *unknown, n_object_type type)
 {
-    n_file *output_file = 0L;
-    if ( type == OBJECT_OBJECT )
-    {
-        output_file = io_file_new();
-        object_top_object( output_file, ( n_object * )unknown );
-    }
-    if ( type == OBJECT_ARRAY )
-    {
-        output_file = io_file_new();
-        object_top_array( output_file, ( n_array * )unknown );
-    }
-    return output_file;
+    n_file *output;
+    n_int status;
+    if (type < OBJECT_STRING || type > OBJECT_NULL) return 0L;
+    if (!unknown && type != OBJECT_OBJECT && type != OBJECT_ARRAY) return 0L;
+    output = io_file_new();
+    if (!output) return 0L;
+    if (type == OBJECT_OBJECT) status = object_write_top_object(output, (n_object *)unknown);
+    else if (type == OBJECT_ARRAY) status = object_top_array(output, (n_array *)unknown);
+    else status = object_write_primitive(output, (n_array *)unknown);
+    if (status == -1) io_file_free(&output);
+    return output;
 }
 
 static n_object *object_end_or_find( n_object *object, n_string name )
 {
     n_object *previous_object = 0L;
     n_int      string_length = io_length( name, STRING_BLOCK_SIZE );
-    if ( string_length > 0 )
+    if ( string_length >= 0 )
     {
         n_uint     hash = math_hash( ( n_byte * )name, ( n_uint ) string_length );
         if ( object == 0L )
@@ -367,7 +354,7 @@ static n_object *object_end_or_find( n_object *object, n_string name )
         }
         do
         {
-            if ( hash == object->name_hash )
+            if ( hash == object->name_hash && !strcmp(name, object->name) )
             {
                 return previous_object;
             }
@@ -382,14 +369,16 @@ static n_object *object_end_or_find( n_object *object, n_string name )
 static n_object *obj_get( n_object *object, n_string name )
 {
     n_object *set_object;
+    if (!name) return 0L;
     n_int      string_length = io_length( name, STRING_BLOCK_SIZE );
 
-    if ( string_length > 0 )
+    if ( string_length >= 0 )
     {
         n_uint     hash = math_hash( ( n_byte * )name, ( n_uint )string_length );
         if ( object == 0L )
         {
             object = object_new();
+            if (!object) { memory_free((void **)&name); return 0L; }
         }
         if ( object_type( &object->primitive ) == OBJECT_EMPTY )
         {
@@ -408,11 +397,17 @@ static n_object *obj_get( n_object *object, n_string name )
                 if ( set_object == 0L )
                 {
                     set_object = object_new();
+                    if (!set_object) { memory_free((void **)&name); return 0L; }
                 }
                 previous_object->primitive.next = set_object;
             }
         }
 
+        if (set_object->name)
+        {
+            object_release_data(&set_object->primitive);
+            memory_free((void **)&set_object->name);
+        }
         set_object->name = name;
         set_object->name_hash = hash;
 
@@ -423,6 +418,12 @@ static n_object *obj_get( n_object *object, n_string name )
 
 n_array *array_add( n_array *array, n_array * element )
 {
+    if (array && array->type == OBJECT_EMPTY && element)
+    {
+        *array = *element;
+        memory_free((void **)&element);
+        return array;
+    }
     if ( array )
     {
         n_array *next = array;
@@ -491,15 +492,16 @@ static void *ar_boolean( void *ptr, n_int set_boolean )
     return ( void * )cleaned;
 }
 
-static void *ar_string( void *ptr, n_string set_string )
+static void *ar_string(void *ptr, n_string text)
 {
-    n_array *cleaned = ( n_array * )ar_pass_through( ptr );
-    if ( cleaned )
-    {
-        cleaned->type = OBJECT_STRING;
-        cleaned->data = io_string_copy( set_string );
-    }
-    return ( void * )cleaned;
+    n_string copy = io_string_copy(text);
+    n_array *value;
+    if (!copy) return 0L;
+    value = ar_pass_through(ptr);
+    if (!value) { memory_free((void **)&copy); return 0L; }
+    value->type = OBJECT_STRING;
+    value->data = copy;
+    return value;
 }
 
 static void *ar_object( void *ptr, n_object *set_object )
@@ -551,27 +553,64 @@ n_array *array_array( n_array *set_array )
 
 static n_object *obj_boolean( n_object *obj, n_string name, n_int boolean )
 {
-    return ar_boolean( obj_get( obj, name ), boolean );
+    n_object *entry = obj_get(obj, name);
+    return entry ? ar_boolean(entry, boolean) : 0L;
 }
 
 static n_object *obj_number( n_object *obj, n_string name, n_int number )
 {
-    return ar_number( obj_get( obj, name ), number );
+    n_object *entry = obj_get(obj, name);
+    return entry ? ar_number(entry, number) : 0L;
 }
 
 static n_object *obj_string( n_object *obj, n_string name, n_string string )
 {
-    return ar_string( obj_get( obj, name ), string );
+    n_string copy;
+    n_object *entry;
+    if (!name) return 0L;
+    copy = io_string_copy(string);
+    if (!copy) { memory_free((void **)&name); return 0L; }
+    entry = obj_get(obj, name);
+    if (!entry) { memory_free((void **)&copy); return 0L; }
+    entry->primitive.type = OBJECT_STRING;
+    entry->primitive.data = copy;
+    return entry;
+}
+
+/* Reattaching the same owned child is an idempotent operation. The incoming
+ * name is owned by the setter even when the existing entry is retained. */
+static n_object *obj_same_child(n_object *obj, n_string name,
+                                n_object_type type, void *child)
+{
+    if (!name) return 0L;
+    while (obj)
+    {
+        if (obj->name && !strcmp(obj->name, name))
+        {
+            if (obj->primitive.type == type && obj->primitive.data == child)
+            {
+                memory_free((void **)&name);
+                return obj;
+            }
+            return 0L;
+        }
+        obj = obj->primitive.next;
+    }
+    return 0L;
 }
 
 static n_object *obj_object( n_object *obj, n_string name, n_object *object )
 {
-    return ar_object( obj_get( obj, name ), object );
+    n_object *same = obj_same_child(obj, name, OBJECT_OBJECT, object);
+    n_object *entry = same ? same : obj_get(obj, name);
+    return entry ? ar_object(entry, object) : 0L;
 }
 
 static n_object *obj_array( n_object *obj, n_string name, n_array *array )
 {
-    return ar_array( obj_get( obj, name ), array );
+    n_object *same = obj_same_child(obj, name, OBJECT_ARRAY, array);
+    n_object *entry = same ? same : obj_get(obj, name);
+    return entry ? ar_array(entry, array) : 0L;
 }
 
 n_object *object_number( n_object *obj, n_string name, n_int number )
@@ -598,709 +637,358 @@ n_object *object_array( n_object *obj, n_string name, n_array *array )
     return obj_array( obj, io_string_copy( name ), array );
 }
 
-static n_int tracking_array_open;
-static n_int tracking_object_open;
-static n_int tracking_string_quote;
-
-#define CHECK_FILE_SIZE(error_string)   if (file->location >= file->size) \
-                                        { \
-                                            (void)SHOW_ERROR(error_string); \
-                                            return 0L; \
-                                        }
-
-static n_string object_file_read_string( n_file *file )
+/* JSON decimal text is owned, just like a string payload. */
+static n_array *array_decimal_text(n_string text)
 {
-    n_string return_string = 0L;
-    n_string_block block_string = {0};
-    n_int          location = 0;
-    if ( file->data[file->location] != '"' ) // TODO: Replace with smart char handling
+    n_array *value = ar_pass_through(0L);
+    size_t length = strlen(text);
+    if (!value) return 0L;
+    /* JSON numbers have no fixed token length. io_string_copy is capped at
+     * STRING_BLOCK_SIZE, so it would silently change longer numeric values. */
+    value->data = memory_new(length + 1);
+    if (!value->data)
     {
-        ( void )SHOW_ERROR( "json not string as expected" );
-        return return_string;
-    }
-
-    tracking_string_quote = 1;
-
-    file->location ++;
-    do
-    {
-        CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-        if ( file->data[file->location] != '"' )
-        {
-            block_string[location] = ( n_char )file->data[file->location];
-            location++;
-            file->location++;
-        }
-    }
-    while ( file->data[file->location] != '"' );
-    if ( location == 0 )
-    {
-        ( void )SHOW_ERROR( "blank string in json file" );
+        memory_free((void **)&value);
         return 0L;
     }
-    tracking_string_quote = 0;
-    file->location++;
-    CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-    return_string = io_string_copy( block_string );
-    return return_string;
+    memcpy(value->data, text, length + 1);
+    value->type = OBJECT_DECIMAL;
+    return value;
 }
 
-
-static n_int object_file_read_number( n_file *file, n_int *with_error )
+n_array *array_decimal(double value)
 {
-    n_int return_number = 0;
-    n_string_block block_string = {0};
-    n_int          location = 0;
-    n_byte         read_char = file->data[file->location];
-    n_int          char_okay = ( ASCII_NUMBER( read_char ) || ( read_char == '-' ) );
-    *with_error = 1;
-
-    if ( !char_okay )
-    {
-        ( void )SHOW_ERROR( "first character not number or minus" );
-        return 0;
-    }
-
-    CHECK_FILE_SIZE( "end of json file reach unexpectedly for number" );
-
-    block_string[location] = ( n_char )read_char;
-    file->location++;
-    location++;
-
-
-    do
-    {
-        read_char = file->data[file->location];
-        char_okay = ASCII_NUMBER( read_char );
-
-        CHECK_FILE_SIZE( "end of json file reach unexpectedly for number" );
-
-        if ( char_okay )
-        {
-            block_string[location] = ( n_char )read_char;
-            location++;
-            file->location++;
-        }
-
-    }
-    while ( char_okay );
-
-    {
-        n_int actual_value = 1;
-        n_int decimal_divisor = 1;
-        n_int error_number = io_number( ( n_string )block_string, &actual_value, &decimal_divisor );
-
-        if ( error_number == -1 )
-        {
-            return 0;
-        }
-
-        if ( decimal_divisor != 0 )
-        {
-            ( void )SHOW_ERROR( "decimal number in json file" );
-            return 0;
-        }
-        return_number = actual_value;
-    }
-    *with_error = 0;
-    return return_number;
+    char text[64];
+    if (!isfinite(value)) return 0L;
+    snprintf(text, sizeof(text), "%.17g", value);
+    if (!strchr(text, '.') && !strchr(text, 'e') && !strchr(text, 'E'))
+        strcat(text, ".0");
+    return array_decimal_text(text);
 }
 
-static n_int object_file_read_boolean( n_file *file, n_int *with_error )
+n_array *array_null(void)
 {
-    n_int          return_number = 0;
-    n_byte         read_char = file->data[file->location];
-    n_int          char_okay;
-    n_char        *allowed[2] = {"fals", "true"};
-    n_int          allowed_advance = 1;
-    *with_error = 1;
-
-    if ( read_char == allowed[0][0] )
-    {
-        return_number = 0;
-    }
-    else if ( read_char == allowed[1][0] )
-    {
-        return_number = 1;
-    }
-    else
-    {
-        ( void )SHOW_ERROR( "not valid boolean (first character)" );
-        return 0;
-    }
-
-    file->location++;
-
-    while ( allowed_advance < 4 )
-    {
-        CHECK_FILE_SIZE( "end of json file reach unexpectedly for boolean" );
-
-        read_char = file->data[file->location];
-        char_okay = allowed[return_number][allowed_advance] == read_char;
-
-        if ( char_okay )
-        {
-            file->location++;
-        }
-        else
-        {
-            ( void )SHOW_ERROR( "not valid boolean" );
-            return 0;
-        }
-        allowed_advance++;
-    }
-
-    if ( return_number == 0 )
-    {
-        read_char = file->data[file->location];
-        char_okay = 'e' == read_char;
-
-        CHECK_FILE_SIZE( "end of json file reach unexpectedly for number" );
-
-        if ( char_okay )
-        {
-            file->location++;
-        }
-        else
-        {
-            ( void )SHOW_ERROR( "not valid boolean (false)" );
-            return 0;
-        }
-    }
-    *with_error = 0;
-    return return_number;
+    n_array *value = ar_pass_through(0L);
+    if (value) value->type = OBJECT_NULL;
+    return value;
 }
 
-static n_object_stream_type object_stream_char( n_byte value )
+static n_object *object_value(n_object *obj, n_string name, n_array *value)
 {
-    if ( value == '{' )
-    {
-        return OBJ_TYPE_OBJECT_OPEN;
-    }
-    if ( value == '}' )
-    {
-        return OBJ_TYPE_OBJECT_CLOSE;
-    }
-    if ( value == '[' )
-    {
-        return OBJ_TYPE_ARRAY_OPEN;
-    }
-    if ( value == ']' )
-    {
-        return OBJ_TYPE_ARRAY_CLOSE;
-    }
-    if ( ( value == 't' ) || ( value == 'f' ) )
-    {
-        return OBJ_TYPE_BOOLEAN;
-    }
-    if ( ASCII_NUMBER( value ) || ( value == '-' ) )
-    {
-        return OBJ_TYPE_NUMBER;
-    }
-    if ( ASCII_COMMA( value ) )
-    {
-        return OBJ_TYPE_COMMA;
-    }
-    if ( ASCII_COLON( value ) )
-    {
-        return OBJ_TYPE_COLON;
-    }
-    if ( ASCII_QUOTE( value ) )
-    {
-        return OBJ_TYPE_STRING_NOTATION;
-    }
-    return OBJ_TYPE_EMPTY;
+    n_object *entry;
+    if (!value) { memory_free((void **)&name); return 0L; }
+    entry = obj_get(obj, name);
+    if (!entry) { obj_free_array(1, (void **)&value); return 0L; }
+    entry->primitive.type = value->type;
+    entry->primitive.data = value->data;
+    memory_free((void **)&value);
+    return entry;
 }
 
-n_array *number_base_array = 0L;
-
-
-static n_array *object_file_array( n_file *file )
+n_object *object_decimal(n_object *obj, n_string name, double value)
 {
-    n_array *base_array = 0L;
-
-    n_object_stream_type stream_type;
-    n_object_stream_type stream_type_in_this_array = OBJ_TYPE_EMPTY;
-
-    if ( object_stream_char( file->data[file->location] ) != OBJ_TYPE_ARRAY_OPEN )
-    {
-        ( void )SHOW_ERROR( "json not array as expected" );
-        return base_array;
-    }
-
-    tracking_array_open ++;
-
-    file->location ++;
-    do
-    {
-        CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-        stream_type = object_stream_char( file->data[file->location] );
-
-        if ( stream_type_in_this_array == OBJ_TYPE_EMPTY )
-        {
-            stream_type_in_this_array = stream_type;
-        }
-        else if ( stream_type_in_this_array != stream_type )
-        {
-            ( void )SHOW_ERROR( "array contains multiple types" );
-            return 0L;
-        }
-
-        if ( stream_type == OBJ_TYPE_ARRAY_OPEN )
-        {
-            n_array *array_value = object_file_array( file );
-            if ( array_value )
-            {
-                stream_type = object_stream_char( file->data[file->location] );
-
-                if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                {
-                    if ( base_array == 0L )
-                    {
-                        base_array = array_array( array_value );
-                    }
-                    else
-                    {
-                        array_add( base_array, array_array( array_value ) );
-                    }
-                }
-            }
-            stream_type = object_stream_char( file->data[file->location] );
-        }
-        if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
-        {
-            n_object *object_value = object_file_base( file );
-            OBJ_DBG( object_value, "object value is nil?" );
-            if ( object_value )
-            {
-                file->location++;
-                CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-                stream_type = object_stream_char( file->data[file->location] );
-
-                if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                {
-                    if ( base_array == 0L )
-                    {
-                        base_array = array_object( object_value );
-                    }
-                    else
-                    {
-                        array_add( base_array, array_object( object_value ) );
-                    }
-                }
-            }
-
-            OBJ_DBG( base_array, "base array still nil?" );
-
-            CHECK_FILE_SIZE( "end of json file reach unexpectedly" );
-            stream_type = object_stream_char( file->data[file->location] );
-        }
-        if ( stream_type == OBJ_TYPE_STRING_NOTATION )
-        {
-            n_string string_value = object_file_read_string( file );
-            if ( string_value )
-            {
-                stream_type = object_stream_char( file->data[file->location] );
-
-                if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                {
-                    if ( base_array == 0L )
-                    {
-                        base_array = array_string( string_value );
-                    }
-                    else
-                    {
-                        array_add( base_array, array_string( string_value ) );
-                    }
-                }
-            }
-        }
-        if ( stream_type == OBJ_TYPE_NUMBER )
-        {
-            n_int with_error;
-            n_int number_value = object_file_read_number( file, &with_error );
-
-            if ( with_error == 0 )
-            {
-                stream_type = object_stream_char( file->data[file->location] );
-
-                if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                {
-                    if ( base_array == 0L )
-                    {
-                        base_array = array_number( number_value );
-                    }
-                    else
-                    {
-                        array_add( base_array, array_number( number_value ) );
-                    }
-                }
-
-                if (number_base_array == 0L)
-                {
-                    number_base_array = base_array;
-                }
-
-                object_array_add_number(number_base_array, number_value);
-            }
-        }
-        if ( stream_type == OBJ_TYPE_BOOLEAN )
-        {
-            n_int with_error;
-            n_int boolean_value = object_file_read_boolean( file, &with_error );
-
-            if ( with_error == 0 )
-            {
-                stream_type = object_stream_char( file->data[file->location] );
-
-                if ( ( stream_type == OBJ_TYPE_ARRAY_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                {
-                    if ( base_array == 0L )
-                    {
-                        base_array = array_boolean( boolean_value );
-                    }
-                    else
-                    {
-                        array_add( base_array, array_boolean( boolean_value ) );
-                    }
-                }
-            }
-        }
-        if ( stream_type == OBJ_TYPE_ARRAY_CLOSE )
-        {
-            tracking_array_open --;
-
-            /* TODO: This is based on a sign array layer then getting to the data */
-            if (tracking_array_open == 2)
-            {
-                object_array_add_number(number_base_array, BIG_INTEGER);
-            }
-            if (tracking_array_open == 1)
-            {
-                number_base_array = 0L;
-            }
-        }
-        file->location ++;
-
-        OBJ_DBG( base_array, "base array nil check?" );
-    }
-    while ( stream_type == OBJ_TYPE_COMMA );
-
-    OBJ_DBG( base_array, "base array really nil?" );
-
-    return base_array;
+    n_array *decimal = array_decimal(value);
+    if (!decimal) return 0L;
+    return object_value(obj, io_string_copy(name), decimal);
 }
 
-static n_int object_string_key(n_string string_key)
+n_object *object_null(n_object *obj, n_string name)
 {
-    n_uint string_hash = math_hash((n_byte *)string_key, io_length(string_key, STRING_BLOCK_SIZE));
-    /*
-     static n_uint * object_hashes = 0L;
-     static n_uint object_hash_count = 0;
-     */
-
-    if (object_hash_count == 0)
-    {
-        return -2;
-    }
-    if (object_hashes)
-    {
-        n_uint loop = 0;
-        while (loop < object_hash_count)
-        {
-            if (object_hashes[loop] == string_hash)
-            {
-                return loop;
-            }
-            loop++;
-        }
-        return -3;
-    }
-    return -1;
+    return object_value(obj, io_string_copy(name), array_null());
 }
 
-static n_object *object_file_base( n_file *file )
+double obj_get_decimal(n_string data) { return data ? strtod(data, 0L) : 0.0; }
+
+n_int obj_contains_decimal(n_object *obj, n_string name, double *value)
 {
-    n_object *base_object = 0L;
-    n_object_stream_type stream_type;
-    CHECK_FILE_SIZE( "file read outside end of file" );
-
-    stream_type = object_stream_char( file->data[file->location] );
-
-    if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
-    {
-        tracking_object_open++;
-        do
-        {
-            file->location++;
-            CHECK_FILE_SIZE( "file read outside end of file" );
-            stream_type = object_stream_char( file->data[file->location] );
-            if ( stream_type == OBJ_TYPE_STRING_NOTATION )
-            {
-                n_string string_key = object_file_read_string( file );
-                if ( string_key )
-                {
-                    stream_type = object_stream_char( file->data[file->location] );
-                    if ( stream_type == OBJ_TYPE_COLON )
-                    {
-                        file->location++;
-                        CHECK_FILE_SIZE( "file read outside end of file" );
-                        stream_type = object_stream_char( file->data[file->location] );
-
-                        if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
-                        {
-                            n_object *insert_object = object_file_base( file );
-                            if ( insert_object )
-                            {
-                                if ( base_object )
-                                {
-                                    obj_object( base_object, string_key, insert_object );
-                                }
-                                else
-                                {
-                                    base_object = obj_object( base_object, string_key, insert_object );
-                                }
-                                file->location++;
-                                CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( file->data[file->location] );
-                            }
-                        }
-                        if ( stream_type == OBJ_TYPE_NUMBER )
-                        {
-                            n_int number_error;
-                            n_int number_value = object_file_read_number( file, &number_error );
-                            if ( number_error == 0 )
-                            {
-                                stream_type = object_stream_char( file->data[file->location] );
-                                if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                                {
-                                    if ( base_object )
-                                    {
-                                        obj_number( base_object, string_key, number_value );
-                                    }
-                                    else
-                                    {
-                                        base_object = obj_number( base_object, string_key, number_value );
-                                    }
-                                }
-                                CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( file->data[file->location] );
-                            }
-                        }
-                        if ( stream_type == OBJ_TYPE_BOOLEAN )
-                        {
-                            n_int number_error;
-                            n_int boolean_value = object_file_read_boolean( file, &number_error );
-                            if ( number_error == 0 )
-                            {
-                                stream_type = object_stream_char( file->data[file->location] );
-                                if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                                {
-                                    if ( base_object )
-                                    {
-                                        obj_boolean( base_object, string_key, boolean_value );
-                                    }
-                                    else
-                                    {
-                                        base_object = obj_boolean( base_object, string_key, boolean_value );
-                                    }
-                                }
-                                CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( file->data[file->location] );
-                            }
-                        }
-                        if ( stream_type == OBJ_TYPE_STRING_NOTATION )
-                        {
-                            n_string string_value = object_file_read_string( file );
-                            if ( string_value )
-                            {
-                                stream_type = object_stream_char( file->data[file->location] );
-                                if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                                {
-                                    if ( base_object )
-                                    {
-                                        obj_string( base_object, string_key, string_value );
-                                    }
-                                    else
-                                    {
-                                        base_object = obj_string( base_object, string_key, string_value );
-                                    }
-                                }
-                                CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( file->data[file->location] );
-                            }
-                        }
-                        if ( stream_type == OBJ_TYPE_ARRAY_OPEN )
-                        {
-                            n_array *array_value = object_file_array( file ); // TODO: rename object_file_read_array
-                            if ( array_value )
-                            {
-                                stream_type = object_stream_char( file->data[file->location] );
-                                if ( ( stream_type == OBJ_TYPE_OBJECT_CLOSE ) || ( stream_type == OBJ_TYPE_COMMA ) )
-                                {
-                                    n_int string_key_output = object_string_key(string_key);
-
-                                    if (string_key_output > -1)
-                                    {
-                                        object_array_add_number(number_base_array, BIG_NEGATIVE_INTEGER + string_key_output);
-                                    }
-
-                                    if ( base_object )
-                                    {
-                                        obj_array( base_object, string_key, array_value );
-                                    }
-                                    else
-                                    {
-                                        base_object = obj_array( base_object, string_key, array_value );
-                                    }
-                                }
-                                CHECK_FILE_SIZE( "file read outside end of file" );
-                                stream_type = object_stream_char( file->data[file->location] );
-                            }
-                            OBJ_DBG( array_value, "array value nil?" );
-                        }
-                    }
-                }
-            }
-            if ( stream_type == OBJ_TYPE_OBJECT_CLOSE )
-            {
-                tracking_object_open--;
-            }
-        }
-        while ( stream_type == OBJ_TYPE_COMMA );
-    }
-    return base_object;
+    n_string data = obj_contains(obj, name, OBJECT_DECIMAL);
+    if (!data || !value) return 0;
+    *value = obj_get_decimal(data);
+    return 1;
 }
 
-void unknown_free( void **unknown, n_object_type type )
+n_int obj_contains_null(n_object *obj, n_string name)
 {
-    if ( type == OBJECT_ARRAY )
+    if (!name) return 0L;
+    while (obj)
     {
-        n_array **found_array = ( n_array ** )unknown;
-        obj_free_array( 1, ( void ** )found_array, ( *found_array )->type );
+        if (obj->name && !strcmp(obj->name, name)) return obj->primitive.type == OBJECT_NULL;
+        obj = obj->primitive.next;
     }
-    if ( type == OBJECT_OBJECT )
-    {
-        n_object **found_object = ( n_object ** )unknown;
-        obj_free( found_object );
-    }
+    return 0;
 }
 
-#define    JSON_WHITESPACE(num) ((((num)>8)&&((num)<14))||((num)==32))
-
-void io_whitespace_json( n_file *input )
+void unknown_free(void **unknown, n_object_type type)
 {
-    n_uint    loop = 0, out_loop = 0;
-    n_uint    end_loop = input->size;
-    n_byte    *local_data = input->data;
-    n_int     inside_string = 0;
-
-    while ( loop < end_loop )
-    {
-        n_byte    temp = local_data[loop++];
-        if ( temp == '"' )
-        {
-            inside_string ^= 1;
-            local_data[out_loop++] = temp;
-        }
-        else if ( ( JSON_WHITESPACE( temp ) == 0 ) || inside_string )
-        {
-            local_data[out_loop++] = temp;
-        }
-    }
-
-    loop = out_loop;
-
-    while ( loop < end_loop )
-    {
-        local_data[loop++] = 0;
-    }
-    input->size = out_loop;
-    input->location = 0;
+    if (!unknown || !*unknown) return;
+    if (type == OBJECT_OBJECT) obj_free((n_object **)unknown);
+    else obj_free_array(1, unknown);
 }
 
-void *unknown_file_to_tree( n_file *file, n_object_type *type )
+#define JSON_WHITESPACE(c) ((c) == 9 || (c) == 10 || (c) == 13 || (c) == 32)
+
+void io_whitespace_json(n_file *file)
 {
-    n_object  *base_object = 0L;
-    n_array   *base_array = 0L;
-    n_int      something_wrong = 0;
-
-    n_object_stream_type stream_type;
-
-    tracking_array_open = 0;
-    tracking_object_open = 0;
-    tracking_string_quote = 0;
-    io_whitespace_json( file );
+    n_uint i, out = 0;
+    int quoted = 0, escaped = 0;
+    n_uint length = file->location && file->location <= file->size ? file->location : file->size;
+    for (i = 0; i < length; i++)
+    {
+        n_byte c = file->data[i];
+        if (!quoted && JSON_WHITESPACE(c))
+        {
+            /* Keep a separator inside a malformed token: removing it would
+             * turn inputs such as [1 e2] into valid JSON with a different value. */
+            n_uint next = i + 1;
+            while (next < length && JSON_WHITESPACE(file->data[next])) next++;
+            if (out && next < length && file->data[next] &&
+                !strchr("{}[],:", file->data[out - 1]) &&
+                !strchr("{}[],:", file->data[next]))
+                file->data[out++] = ' ';
+            i = next - 1;
+            continue;
+        }
+        file->data[out++] = c;
+        if (c == '"' && !escaped) quoted = !quoted;
+        escaped = quoted && c == '\\' && !escaped;
+    }
+    file->size = out;
     file->location = 0;
+}
 
-    stream_type = object_stream_char( file->data[file->location] );
+static int json_peek(n_file *f)
+{
+    return f->location < f->size ? f->data[f->location] : -1;
+}
 
-    if ( stream_type == OBJ_TYPE_OBJECT_OPEN )
+static void json_space(n_file *f)
+{
+    while (json_peek(f) != -1 && JSON_WHITESPACE(json_peek(f))) f->location++;
+}
+
+static int json_digit(int c) { return c >= '0' && c <= '9'; }
+
+/* Keep escape sequences verbatim, matching the serializer's string interface. */
+static n_string json_string(n_file *f)
+{
+    n_uint start, length;
+    n_string text;
+    if (json_peek(f) != '"') return 0L;
+    start = ++f->location;
+    while (json_peek(f) != -1 && json_peek(f) != '"')
     {
-        *type = OBJECT_OBJECT;
-        base_object = object_file_base( file );
-    }
-
-    if ( stream_type == OBJ_TYPE_ARRAY_OPEN )
-    {
-        *type = OBJECT_ARRAY;
-        base_array = object_file_array( file );
-    }
-
-    if ( tracking_array_open != 0 )
-    {
-        ( void )SHOW_ERROR( "Array json does not match up" );
-        something_wrong = 1;
-    }
-    if ( tracking_object_open != 0 )
-    {
-        ( void )SHOW_ERROR( "Object json does not match up" );
-        something_wrong = 1;
-    }
-    if ( tracking_string_quote != 0 )
-    {
-        ( void )SHOW_ERROR( "String quote json does not match up" );
-        something_wrong = 1;
-    }
-    if ( something_wrong )
-    {
-        printf("\n\n");
-
-        printf("%c", file->data[file->location-3]);
-        printf("%c", file->data[file->location-2]);
-        printf("%c", file->data[file->location-1]);
-
-        printf("~%c~", file->data[file->location]);
-
-        printf("%c", file->data[file->location+1]);
-        printf("%c", file->data[file->location+2]);
-        printf("%c", file->data[file->location+3]);
-
-        printf("\n\n");
-
-        if ( base_object )
+        int c = json_peek(f);
+        if (c < 32) return 0L;
+        f->location++;
+        if (c == '\\')
         {
-            obj_free( &base_object );
+            c = json_peek(f);
+            if (c == -1 || !strchr("\"\\/bfnrtu", c)) return 0L;
+            f->location++;
+            if (c == 'u')
+            {
+                int i;
+                for (i = 0; i < 4; i++)
+                {
+                    c = json_peek(f);
+                    if (!json_digit(c) && !(c >= 'a' && c <= 'f') && !(c >= 'A' && c <= 'F')) return 0L;
+                    f->location++;
+                }
+            }
         }
-        if ( base_array )
+    }
+    if (json_peek(f) != '"') return 0L;
+    length = f->location - start;
+    text = memory_new(length + 1);
+    if (!text) return 0L;
+    memcpy(text, f->data + start, length);
+    text[length] = 0;
+    f->location++;
+    return text;
+}
+
+static n_array *number_base_array;
+static unsigned json_array_depth;
+
+static void json_array_key(n_string key)
+{
+    n_uint i, hash = math_hash((n_byte *)key, strlen(key));
+    for (i = 0; object_hashes && i < object_hash_count; i++)
+        if (object_hashes[i] == hash)
         {
-            obj_free_array( 1, ( void ** )&base_array, base_array->type );
+            object_array_add_number(number_base_array, BIG_NEGATIVE_INTEGER + i);
+            break;
         }
+}
+
+static n_array *json_value(n_file *f, unsigned depth)
+{
+    int c;
+    json_space(f);
+    c = json_peek(f);
+    n_array *result = 0L;
+    if (depth > 256) return 0L;
+    if (c == '{' || c == '[')
+    {
+        int object = c == '{', close = object ? '}' : ']';
+        n_object *head = 0L;
+        n_array *array = 0L;
+        f->location++;
+        if (!object) json_array_depth++;
+        json_space(f);
+        if (json_peek(f) != close)
+        {
+            for (;;)
+            {
+                n_string key = 0L;
+                n_array *child;
+                if (object)
+                {
+                    json_space(f);
+                    key = json_string(f);
+                    json_space(f);
+                    if (!key || json_peek(f) != ':') { memory_free((void **)&key); goto failed; }
+                    f->location++;
+                }
+                child = json_value(f, depth + 1);
+                if (!child) { memory_free((void **)&key); goto failed; }
+                if (object)
+                {
+                    if (child->type == OBJECT_ARRAY) json_array_key(key);
+                    n_object *entry = object_value(head, key, child);
+                    if (!entry) goto failed;
+                    if (!head) head = entry;
+                }
+                else
+                {
+                    array_add_empty(&array, child);
+                    if (child->type == OBJECT_NUMBER)
+                    {
+                        if (!number_base_array) number_base_array = array;
+                        object_array_add_number(number_base_array, obj_get_number(child->data));
+                    }
+                    else if (child->type != OBJECT_ARRAY && child->type != OBJECT_OBJECT)
+                        object_array_not_number(number_base_array);
+                }
+                json_space(f);
+                if (json_peek(f) != ',') break;
+                f->location++;
+            }
+        }
+        if (json_peek(f) != close) goto failed;
+        f->location++;
+        if (!object && !array)
+        {
+            array = ar_pass_through(0L);
+            if (!array) goto failed;
+        }
+        if (!object)
+        {
+            json_array_depth--;
+            if (json_array_depth == 2) object_array_add_number(number_base_array, BIG_INTEGER);
+            if (json_array_depth == 1) number_base_array = 0L;
+        }
+        result = object ? array_object(head) : array_array(array);
+        if (!result) goto failed;
+        return result;
+failed:
+        obj_free(&head);
+        if (array) obj_free_array(1, (void **)&array);
         return 0L;
     }
-    if ( *type == OBJECT_ARRAY )
+    if (c == '"')
     {
-        return ( void * )base_array;
+        n_string text = json_string(f);
+        if (!text) return 0L;
+        result = array_string(text);
+        memory_free((void **)&text);
+        return result;
     }
+    if (c == 'n' || c == 't' || c == 'f')
+    {
+        const char *word = c == 'n' ? "null" : c == 't' ? "true" : "false";
+        size_t length = strlen(word);
+        if (f->size - f->location < length || memcmp(f->data + f->location, word, length)) return 0L;
+        f->location += length;
+        return c == 'n' ? array_null() : array_boolean(c == 't');
+    }
+    if (c == '-' || json_digit(c))
+    {
+        n_uint start = f->location, length;
+        int decimal = 0;
+        char *text, *end;
+        long long integer;
+        if (c == '-') f->location++;
+        c = json_peek(f);
+        if (!json_digit(c)) return 0L;
+        f->location++;
+        if (c != '0') while (json_digit(json_peek(f))) f->location++;
+        if (json_peek(f) == '.')
+        {
+            decimal = 1; f->location++;
+            if (!json_digit(json_peek(f))) return 0L;
+            while (json_digit(json_peek(f))) f->location++;
+        }
+        if (json_peek(f) == 'e' || json_peek(f) == 'E')
+        {
+            decimal = 1; f->location++;
+            if (json_peek(f) == '+' || json_peek(f) == '-') f->location++;
+            if (!json_digit(json_peek(f))) return 0L;
+            while (json_digit(json_peek(f))) f->location++;
+        }
+        length = f->location - start;
+        text = memory_new(length + 1);
+        if (!text) return 0L;
+        memcpy(text, f->data + start, length); text[length] = 0;
+        errno = 0;
+        integer = strtoll(text, &end, 10);
+        /* Large integers retain their exact text through the decimal interface. */
+        {
+            n_int maximum = (n_int)(~((n_uint)0) >> 1);
+            int outside_integer = errno == ERANGE || *end ||
+                                  integer < -maximum - 1 || integer > maximum;
+            result = decimal || outside_integer ? array_decimal_text(text) : array_number((n_int)integer);
+        }
+        memory_free((void **)&text);
+        return result;
+    }
+    return 0L;
+}
 
-    return ( void * )base_object;
+void *unknown_file_to_tree(n_file *file, n_object_type *type)
+{
+    n_array *value;
+    void *result;
+    if (!file || !type || !file->data) return 0L;
+    *type = OBJECT_EMPTY;
+    number_base_array = 0L;
+    json_array_depth = 0;
+    /* n_file size is capacity; disk reads and writers expose length in location. */
+    if (file->location > 0 && file->location <= file->size) file->size = file->location;
+    file->location = 0;
+    value = json_value(file, 0);
+    json_space(file);
+    if (!value || file->location != file->size)
+    {
+        if (value) obj_free_array(1, (void **)&value);
+        return 0L;
+    }
+    *type = value->type;
+    if (*type == OBJECT_OBJECT || *type == OBJECT_ARRAY)
+    {
+        result = value->data;
+        if (!result && *type == OBJECT_OBJECT) result = object_new();
+        memory_free((void **)&value);
+        return result;
+    }
+    return value;
 }
 
 n_string obj_contains( n_object *base, n_string name, n_object_type type )
 {
     n_object *return_object = base;
     n_int      string_length = io_length( name, STRING_BLOCK_SIZE );
-    if ( string_length > 0 )
+    if ( string_length >= 0 )
     {
         n_uint     hash = math_hash( ( n_byte * )name, ( n_uint )string_length );
         if ( return_object == 0L )
@@ -1309,7 +997,7 @@ n_string obj_contains( n_object *base, n_string name, n_object_type type )
         }
         do
         {
-            if ( ( hash == return_object->name_hash ) && ( type == object_type( &return_object->primitive ) ) )
+            if ( return_object->name && ( hash == return_object->name_hash ) && !strcmp(name, return_object->name) && ( type == object_type( &return_object->primitive ) ) )
             {
                 return return_object->primitive.data;
             }
@@ -1324,7 +1012,7 @@ n_int obj_contains_number( n_object *base, n_string name, n_int *number )
 {
     n_object *return_object = base;
     n_int      string_length = io_length( name, STRING_BLOCK_SIZE );
-    if ( string_length > 0 )
+    if ( string_length >= 0 )
     {
         n_uint     hash = math_hash( ( n_byte * )name, ( n_uint )string_length );
         if ( return_object == 0L )
@@ -1333,7 +1021,7 @@ n_int obj_contains_number( n_object *base, n_string name, n_int *number )
         }
         do
         {
-            if ( ( hash == return_object->name_hash ) && ( OBJECT_NUMBER == object_type( &return_object->primitive ) ) )
+            if ( return_object->name && ( hash == return_object->name_hash ) && !strcmp(name, return_object->name) && ( OBJECT_NUMBER == object_type( &return_object->primitive ) ) )
             {
                 n_int *data = ( n_int * )&return_object->primitive.data;
                 number[0] = data[0];
@@ -1350,7 +1038,7 @@ n_array *obj_array_next( n_array *array, n_array *element )
 {
     if ( element == 0L )
     {
-        return array;
+        return array && array->type != OBJECT_EMPTY ? array : 0L;
     }
     return ( n_array * )element->next;
 }

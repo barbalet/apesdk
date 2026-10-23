@@ -1,0 +1,1 @@
+{"positive":12.5,"negative":-12.5,"integer":-42,"zero":0,"negativeZero":-0.0,"small":1.25e-12,"large":6.022E+23,"precision":0.123456789012345678901,"values":[0.5,-0.5,1e3,-2E-3]}

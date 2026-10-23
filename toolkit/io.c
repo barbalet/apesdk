@@ -387,6 +387,7 @@ n_string io_string_copy( n_string string )
     if ( string_length > 0 )
     {
         return_string = ( n_string )memory_new( string_length );
+        if (!return_string) return 0L;
         memory_copy( ( n_byte * )string, ( n_byte * )return_string, string_length - 1 );
         return_string[string_length - 1] = 0;
     }

@@ -8,6 +8,7 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # Common knobs used by Make and CI.  Sanitizers are applied to every module
 # build, not just the final link, so stale unsanitized objects cannot mask bugs.
 if [ "${SANITIZE:-0}" = 1 ]; then
+    export UBSAN_OPTIONS="${UBSAN_OPTIONS:-halt_on_error=1:print_stacktrace=1}"
     export TEST_WARNINGS="${TEST_WARNINGS:--Wall -Wextra} -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined"
 fi
 if [ "${COVERAGE:-0}" = 1 ]; then
@@ -35,6 +36,8 @@ trap cleanup EXIT
 
 run_in "${ROOT_DIR}/toolkit/unit" bash toolkit_tests.sh
 run_in "${ROOT_DIR}/toolkit/unit" ./toolkit_tests
+run_in "${ROOT_DIR}/toolkit/test" bash test_object_json.sh
+run_in "${ROOT_DIR}/toolkit/test" bash test_object_file.sh
 
 run_in "${ROOT_DIR}/script/unit" bash script_tests.sh
 run_in "${ROOT_DIR}/script/unit" ./script_tests

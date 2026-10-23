@@ -153,6 +153,7 @@ static n_int check_vector_from_array(void)
     {
         exit(EXIT_FAILURE);
     }
+    return return_information;
 }
 
 static n_object *check_element( n_int value )

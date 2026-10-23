@@ -27,19 +27,19 @@
 #   OTHER DEALINGS IN THE SOFTWARE.
 
 
-if [ $# -ge 1 -a "$1" == "--debug" ]
-then
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BUILD_DIR="$(mktemp -d)"
+trap 'rm -rf "$BUILD_DIR"' EXIT
+
+if [[ "${1:-}" == "--debug" ]]; then
     CFLAGS=-g
 else
-    CFLAGS=-O2 
+    CFLAGS=-O2
 fi
 
-
-gcc ${CFLAGS} ${COMMANDLINEE} -c *.c -lz -lm -lpthread -w
-gcc ${CFLAGS} ${COMMANDLINEE} -c ./test/test_object_file.c -lz -lm -lpthread -w
-
-gcc ${CFLAGS} ${COMMANDLINEE} -I/usr/include -o apesdk-json *.o -lz -lm -lpthread
-
-rm *.o
-
-
+cd "$BUILD_DIR"
+# COMMANDLINEE retains the existing optional compiler flags interface.
+"${CC:-cc}" ${CFLAGS} ${COMMANDLINEE:-} -c "${SCRIPT_DIR}"/*.c     "${SCRIPT_DIR}/test/test_object_file.c"
+"${CC:-cc}" ${CFLAGS} ${COMMANDLINEE:-} -o "${SCRIPT_DIR}/apesdk-json"     ./*.o -lz -lm -lpthread

@@ -101,7 +101,7 @@ n_file * io_file_new_from_string(n_string string, n_uint string_length)
         memory_free( ( void ** )&output );
         return 0L;
     }
-    output->location = 0;
+    output->location = string_length;
 
     memory_copy((n_byte*)string, (n_byte*)output->data, string_length);
 

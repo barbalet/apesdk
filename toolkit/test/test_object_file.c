@@ -131,7 +131,7 @@ void tof_gather( n_string file_in )
                 printf( "no returned output file\n" );
                 exit(EXIT_FAILURE);
             }
-            // unknown_free( &returned_blob, type_of );
+            unknown_free( &returned_blob, type_of );
         }
         else
         {

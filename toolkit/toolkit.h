@@ -349,16 +349,20 @@ typedef enum
     OBJECT_BOOLEAN,
     OBJECT_OBJECT,
     OBJECT_ARRAY = 5,
+    OBJECT_DECIMAL,
+    OBJECT_NULL,
 } n_object_type;
 
-static const n_string n_object_type_string[OBJECT_ARRAY+1] =
+static const n_string n_object_type_string[OBJECT_NULL+1] =
 {
     "OBJECT_EMPTY",
     "OBJECT_STRING",
     "OBJECT_NUMBER",
     "OBJECT_BOOLEAN",
     "OBJECT_OBJECT",
-    "OBJECT_ARRAY"
+    "OBJECT_ARRAY",
+    "OBJECT_DECIMAL",
+    "OBJECT_NULL"
 };
 
 typedef enum
@@ -395,6 +399,18 @@ typedef void (memory_execute)(void);
 void memory_execute_set(memory_execute * value);
 void memory_execute_run(void);
 
+/* Decimal payloads retain JSON text; numeric access uses double.
+ * Constructors reject non-finite doubles. obj_contains_null distinguishes an
+ * explicit JSON null from an absent property (both have a NULL data pointer).
+ */
+n_array *array_decimal( double value );
+n_array *array_null( void );
+n_object *object_decimal( n_object *obj, n_string name, double value );
+n_object *object_null( n_object *obj, n_string name );
+double obj_get_decimal( n_string data );
+n_int obj_contains_decimal( n_object *obj, n_string name, double *value );
+n_int obj_contains_null( n_object *obj, n_string name );
+
 n_array *array_number( n_int set_number );
 n_array *array_boolean( n_int set_boolean );
 n_array *array_string( n_string set_string );
@@ -407,11 +423,18 @@ void array_add_empty( n_array ** array, n_array * element );
 n_object *object_number( n_object *obj, n_string name, n_int number );
 n_object *object_boolean( n_object *obj, n_string name, n_int boolean );
 n_object *object_string( n_object *obj, n_string name, n_string string );
+/* Child objects/arrays transfer ownership to the parent. Reassigning the same
+ * child to the same property preserves it; replacing it releases the old child. */
 n_object *object_object( n_object *obj, n_string name, n_object *object );
 n_object *object_array( n_object *obj, n_string name, n_array *array );
 
 void object_top_object( n_file *file, n_object *top_level );
 
+/* Object/array roots retain their existing representation. Scalar roots are
+ * n_array nodes; pass the returned type to unknown_json and unknown_free.
+ * Input location supplies the loaded byte count when nonzero; otherwise size
+ * must be the exact input length. Embedded NUL bytes are invalid JSON.
+ */
 void *unknown_file_to_tree( n_file *file, n_object_type *type );
 n_file *unknown_json( void *unknown, n_object_type type );
 void unknown_free( void **unknown, n_object_type type );

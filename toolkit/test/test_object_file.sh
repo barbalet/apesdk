@@ -30,8 +30,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TOOLKIT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 JSON_DIR="${TOOLKIT_DIR}/json"
+INVALID_WORK_DIR="$(mktemp -d)"
 
 cleanup() {
+    rm -rf "${INVALID_WORK_DIR}"
     rm -f "${JSON_DIR}"/2*.json "${TOOLKIT_DIR}/apesdk-json"
 }
 
@@ -76,3 +78,30 @@ round_trip random2.json
 round_trip neighborhood.json
 round_trip new_ashford.json
 round_trip new_folkestone.json
+
+round_trip json_numbers.json
+round_trip json_nulls.json
+round_trip json_mixed.json
+round_trip json_number_boundaries.json
+round_trip json_empty_containers.json
+
+round_trip json_root_null.json
+round_trip json_root_decimal.json
+round_trip json_root_negative.json
+round_trip json_null_positions.json
+
+# Work in a temporary directory: rejection must not create serialized output.
+for invalid_file in "${JSON_DIR}"/invalid/*.json; do
+    cp "${invalid_file}" "${INVALID_WORK_DIR}/input.json"
+    if "${TOOLKIT_DIR}/apesdk-json" "${INVALID_WORK_DIR}/input.json" > "${INVALID_WORK_DIR}/result.log" 2>&1; then
+        status=0
+    else
+        status=$?
+    fi
+    if [[ "$status" != 1 || -e "${INVALID_WORK_DIR}/2nput.json" ]]; then
+        echo "Expected clean rejection: ${invalid_file} (exit ${status})" >&2
+        cat "${INVALID_WORK_DIR}/result.log" >&2
+        exit 1
+    fi
+done
+echo "JSON file tests passed (valid round trips and invalid-input rejection)"
