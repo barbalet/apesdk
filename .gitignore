@@ -54,6 +54,3 @@ xcschememanagement.plist
 
 # Release archives are generated locally and published as GitHub release assets.
 /dist/
-
-# Shared Urban/PRA local build products.
-/urban/build/

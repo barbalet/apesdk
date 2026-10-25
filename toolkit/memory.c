@@ -39,7 +39,6 @@
 #include <stdio.h>
 
 
-#ifndef APESDK_URBAN_ONLY
 static memory_execute * static_execution = 0;
 
 void memory_execute_set(memory_execute * value)
@@ -61,8 +60,6 @@ void memory_execute_run(void)
  * @param to pointer to copy to.
  * @param number the number of bytes to copy.
  */
-#endif /* APESDK_URBAN_ONLY */
-
 void memory_copy( n_byte *from, n_byte *to, n_uint number )
 {
     memcpy( to, from, number );
@@ -102,8 +99,6 @@ void memory_free( void **ptr )
  * @param memory_allocated the starting value for memory size and returning the actual size.
  * @return a void* pointer of the allocated bytes.
  */
-#ifndef APESDK_URBAN_ONLY
-
 void *memory_new_range( n_uint memory_min, n_uint *memory_allocated )
 {
     void *memory_buffer = 0L;
@@ -350,5 +345,3 @@ n_int number_array_get_size(number_array * na)
     }
     return SHOW_ERROR("number array not present (size)");
 }
-
-#endif /* APESDK_URBAN_ONLY */

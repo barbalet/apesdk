@@ -57,7 +57,6 @@ static const n_int	new_sd[256] =
     -10286, -9673, -9055, -8431, -7802, -7169, -6531, -5889, -5244, -4595, -3944, -3290, -2634, -1977, -1318, -659
 };
 
-#ifndef APESDK_URBAN_ONLY
 void area2_add( n_area2 *area, n_vect2 *vect, n_byte first )
 {
     if ( first )
@@ -118,8 +117,6 @@ void vect2_byte2( n_vect2 *converter, n_byte2 *input )
  * @param initial the first vector to be added.
  * @param second the second vector to be added.
  */
-#endif /* APESDK_URBAN_ONLY */
-
 void vect2_add( n_vect2 *equals, n_vect2 *initial, n_vect2 *second )
 {
     NA_ASSERT( equals, "equals NULL" );
@@ -151,7 +148,6 @@ void vect2_center( n_vect2 *center, n_vect2 *initial, n_vect2 *second )
     center->y = center->y / 2;
 }
 
-#ifndef APESDK_URBAN_ONLY
 void vect2_scalar_multiply( n_vect2 *value, n_int multiplier )
 {
     value->x = value->x * multiplier;
@@ -176,8 +172,6 @@ void vect2_scalar_bitshiftdown( n_vect2 *value, n_int bitshiftdown )
  * @param initial the first vector.
  * @param second the second vector to be subtracted.
  */
-#endif /* APESDK_URBAN_ONLY */
-
 void vect2_subtract( n_vect2 *equals, n_vect2 *initial, n_vect2 *second )
 {
     NA_ASSERT( equals, "equals NULL" );
@@ -201,7 +195,6 @@ void vect2_subtract( n_vect2 *equals, n_vect2 *initial, n_vect2 *second )
     equals->y = initial->y - second->y;
 }
 
-#ifndef APESDK_URBAN_ONLY
 void vect2_divide( n_vect2 *equals, n_vect2 *initial, n_vect2 *second, n_int divisor )
 {
     vect2_subtract( equals, second, initial );
@@ -343,8 +336,6 @@ void vect2_rotate90( n_vect2 *rotation )
  @param direction 256 units per rotation
  @param divisor The divisor for the output value
  */
-#endif /* APESDK_URBAN_ONLY */
-
 void vect2_direction( n_vect2 *initial, n_int direction, n_int divisor )
 {
     NA_ASSERT( initial, "initial NULL" );
@@ -371,7 +362,6 @@ void vect2_delta( n_vect2 *initial, n_vect2 *delta )
     initial->y += delta->y;
 }
 
-#ifndef APESDK_URBAN_ONLY
 void vect2_offset( n_vect2 *initial, n_int dx, n_int dy )
 {
     NA_ASSERT( initial, "initial NULL" );
@@ -426,8 +416,6 @@ void  vect2_copy( n_vect2 *to, n_vect2 *from )
     to->y = from->y;
 }
 
-#endif /* APESDK_URBAN_ONLY */
-
 void  vect2_populate( n_vect2 *value, n_int x, n_int y )
 {
     value->x = x;
@@ -445,7 +433,6 @@ void vect2_rotation( n_vect2 *location, n_vect2 *rotation )
     location->y = temp.y;
 }
 
-#ifndef APESDK_URBAN_ONLY
 void vect2_rotation_bitshift( n_vect2 *location, n_vect2 *rotation )
 {
     n_vect2 temp;
@@ -456,8 +443,6 @@ void vect2_rotation_bitshift( n_vect2 *location, n_vect2 *rotation )
     location->x = temp.x;
     location->y = temp.y;
 }
-
-#endif /* APESDK_URBAN_ONLY */
 
 n_int vect2_nonzero( n_vect2 *nonzero )
 {
@@ -528,7 +513,6 @@ void vect2_min_max( n_vect2 *points, n_int number, n_vect2 *maxmin )
     }
 }
 
-#ifndef APESDK_URBAN_ONLY
 void vect3_double( n_vect3 *converter, n_double *input )
 {
     NA_ASSERT( converter, "converter NULL" );
@@ -821,6 +805,4 @@ n_int vect2_unwrap_line( n_string pass_through, n_byte * buffer)
 {
     return vect2_unwrap_number_entry( pass_through, buffer, 2);
 }
-
-#endif /* APESDK_URBAN_ONLY */
 
