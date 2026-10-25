@@ -37,6 +37,8 @@
 
 #include "toolkit.h"
 
+#ifndef APESDK_URBAN_ONLY
+
 /**
  This is used to produce a series of steps between two points useful for drawing
  a line or a line of sight test.
@@ -346,6 +348,8 @@ n_int math_spread_byte( n_byte val )
     return result;
 }
 
+#endif /* APESDK_URBAN_ONLY */
+
 #ifdef DEBUG_RANDOM
 
 n_uint debug_random_count = 0;
@@ -410,6 +414,8 @@ n_byte2 math_random( n_byte2 *seed )
 
     return ( tmp1 );
 }
+
+#ifndef APESDK_URBAN_ONLY
 
 #ifndef DEBUG_RANDOM
 
@@ -538,3 +544,5 @@ n_byte math_do_intersect(n_vect2 *p1, n_vect2 *q1, n_vect2 *p2, n_vect2 *q2)
                 t2_numerator <= 0 && t2_numerator >= cross_product);
     }
 }
+
+#endif /* APESDK_URBAN_ONLY */
