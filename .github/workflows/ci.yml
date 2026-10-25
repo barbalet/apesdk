@@ -79,6 +79,8 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             test
 
+  # Native Urban requires the separately supplied original Urban source tree.
+  # Validate it locally as documented in README.md; do not use a stand-in renderer.
   apple-reference-builds:
     name: macOS reference toolchain builds
     runs-on: macos-latest
@@ -88,8 +90,6 @@ jobs:
         include:
           - project: toolchains/war-mac/war-mac.xcodeproj
             scheme: war-mac
-          - project: toolchains/urban-mac/urban-mac.xcodeproj
-            scheme: urban-mac
           - project: toolchains/planet/planet.xcodeproj
             scheme: planet
     steps:

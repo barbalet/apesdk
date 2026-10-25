@@ -29,7 +29,7 @@ modules, documentation, tests, and toolchains around a shared simulation model.
   `entity`, and `universe`.
 
 - **Current macOS app builds.**
-  GitHub Actions currently builds the `sim-mac`, `war-mac`, `urban-mac`, and
+  GitHub Actions currently builds the `sim-mac`, `war-mac`, and
   `planet` Xcode projects from this checkout.
 
 - **Reader documentation.**
@@ -91,8 +91,8 @@ without needing a large framework stack.
 | --- | --- | --- |
 | **Simulated Ape for macOS** | [`toolchains/sim-mac`](toolchains/sim-mac/) | Active macOS Swift/Xcode wrapper. CI builds the `sim-mac` scheme, producing `Simulated Ape.app`. |
 | **Simulated Planet** | [`toolchains/planet`](toolchains/planet/) | Active macOS Xcode project in CI. Demonstrates broader weather, terrain, and movement concepts. |
-| **Simulated War** | [`toolchains/war-mac`](toolchains/war-mac/) | Reference macOS wrapper with a local bridge so CI can build it from a clean checkout. |
-| **Simulated Urban** | [`toolchains/urban-mac`](toolchains/urban-mac/) | Reference macOS wrapper with a local bridge so CI can build it from a clean checkout. |
+| **Simulated War** | [`toolchains/war-mac`](toolchains/war-mac/) | Native macOS wrapper using the original Urban game and renderer sources; requires the sibling Urban checkout described below. |
+| **Simulated Urban** | [`toolchains/urban-mac`](toolchains/urban-mac/) | Native macOS wrapper using the original Urban game and renderer sources; requires the sibling Urban checkout described below. |
 
 The toolchains show how the C simulation modules connect to native front ends,
 especially on macOS through Swift, Xcode projects, and C bridging layers.
@@ -125,6 +125,17 @@ For the current macOS application:
    in Xcode.
 2. Build the `sim-mac` scheme.
 3. The product name is `Simulated Ape.app`.
+
+For native Urban, place the `urban/` directory from
+[apesdk/urbanscribble](https://gitlab.com/apesdk/urbanscribble) beside this ApeSDK
+checkout, so the layout is `parent/apesdk` and `parent/urban`. The tested Urban
+source revision is `695a981e92161f8ad32d07c5f916f1cc19f5d8ed`. Build
+`toolchains/urban-mac/urban-mac.xcodeproj`, scheme `urban-mac`. This target compiles
+the original Urban renderer and game sources directly. The matrix source alone
+uses `gui/urban-compat.h` to supply the element size required by the current
+ApeSDK memory-list API; the external sources are not modified or vendored.
+The Urban source repository requires access, so native Urban is validated locally
+with that checkout and is not included in the self-contained CI build matrix.
 
 For release packaging of Simulated Ape DMGs and source archives, follow
 [`RELEASE.md`](RELEASE.md).

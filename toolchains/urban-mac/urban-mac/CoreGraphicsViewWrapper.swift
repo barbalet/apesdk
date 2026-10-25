@@ -18,6 +18,8 @@ struct CoreGraphicsViewWrapper: NSViewRepresentable {
 
 @MainActor class CoreGraphicsView: NSView {
 
+    private var started = false
+
     override var isFlipped: Bool { true }
 
     override init(frame frameRect: NSRect) {
@@ -161,8 +163,8 @@ struct CoreGraphicsViewWrapper: NSViewRepresentable {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
 
-        if shared_simulation_started() == 0 {
-            shared_init(0, UInt.random(in: 0 ..< 4294967295))
+        if !started {
+            started = shared_init(0, UInt.random(in: 0 ..< 4294967295)) == 0
         }
 
         guard let context = NSGraphicsContext.current?.cgContext else {
@@ -173,7 +175,7 @@ struct CoreGraphicsViewWrapper: NSViewRepresentable {
         let dimY = Int(bounds.height)
         let dimX = Int(bounds.width)
 
-        if shared_simulation_started() == 0 {
+        if !started {
             context.restoreGState()
             return
         }
