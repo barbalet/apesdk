@@ -35,6 +35,10 @@
  *          JSON format.
  */
 
+#include "object_json.h"
+#include "object_json_impl.h"
+
+#ifndef APESDK_OBJECT_JSON_ONLY
 #include "toolkit.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -1340,3 +1344,5 @@ n_array * object_onionskin(n_object * top, n_string value)
     }
     return 0L;
 }
+
+#endif /* APESDK_OBJECT_JSON_ONLY */
