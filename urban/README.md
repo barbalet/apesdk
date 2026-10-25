@@ -1,8 +1,10 @@
 # PRA — Procedural Residential Architecture
 
 Shared ApeSDK C11 component, extracted from the house, tree and fence generators used by
-ApeSDK's `toolchains/urban-mac` Xcode project. No graphics library, SDK runtime,
-or global state is required by the core library. The included browser host renders
+ApeSDK's `toolchains/urban-mac` Xcode project. No graphics library or global simulation state is required. The library links
+ApeSDK toolkit/math.c, toolkit/vect.c and toolkit/memory.c directly with
+APESDK_URBAN_ONLY=1; it has no private copies of their types, functions or sine table.
+Normal SDK builds omit this define and retain the complete toolkit. The included browser host renders
 the same C code compiled to WebAssembly.
 
 ```sh
@@ -30,8 +32,9 @@ to float. Scene queries use absolute metric positions.
 
 ## Original C validation
 
-`vendor/urban/` retains verbatim originals. `PROVENANCE.json` records source
-revisions and SHA-256 values. The Xcode project expects a sibling `urban` directory;
+`PROVENANCE.json` records original source revisions and SHA-256 values.
+The parity test reads originals from an explicitly supplied external checkout;
+no second copy of those generator files is stored in this component. The Xcode project expects a sibling `urban` directory;
 the available source checkout was `urbanscribble/urban`. The reference test compiles
 those external original C files independently against the **full original current
 ApeSDK toolkit**, and compares 10,000 seeds with the extracted code. It checks every
@@ -50,7 +53,8 @@ retained for validation but are not treated as physical wall thickness (that wou
 leave the narrow original hallway impassable at this scale). Metric geometry may
 differ from quantized source records by less than one source unit per coordinate.
 
-Compatibility types use 64-bit integers on native and WASM. Room capacity is 16,
+The generators use the toolkit’s native integer/vector types on each target.
+The public room-coordinate ABI remains int64_t on native and WASM. Room capacity is 16,
 rather than the original 8, which overflows for some valid seeds. The reference shim
 uses that capacity too; it does not change the original algorithm. Seed pair
 `(130, 10)` is an explicit ten-room regression. The SDK also has fixed random

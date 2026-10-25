@@ -1,4 +1,35 @@
-/* Copyright 2026 Tom Barbalet. MIT; see object.c.
+/****************************************************************
+
+ object_json_impl.h
+
+ =============================================================
+
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
+
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+ ****************************************************************/
+
+/*
  * Strict, allocator-aware extension of the linked n_object/n_array model.
  * No process-global parser or allocator state. Maximum nesting: 128.
  */
@@ -103,17 +134,9 @@ void object_json_doc_free(object_json_doc *d)
     object_json_alc a = d->allocator;
     a.free(a.ctx, d);
 }
-void object_json_mut_doc_free(object_json_doc *d)
-{
-    object_json_doc_free(d);
-}
 object_json_val *object_json_doc_get_root(object_json_doc *d)
 {
     return d ? d->root : NULL;
-}
-object_json_val *object_json_mut_doc_get_root(object_json_doc *d)
-{
-    return object_json_doc_get_root(d);
 }
 void object_json_mut_doc_set_root(object_json_doc *d, object_json_val *v)
 {
@@ -148,8 +171,9 @@ static object_json_val *oj_new(object_json_doc *d, unsigned tag)
 OJ_IS(obj, OJ_OBJ)
 OJ_IS(arr, OJ_ARR)
 OJ_IS(str, OJ_STR)
-OJ_IS(raw, OJ_RAW) OJ_IS(uint, OJ_UINT) OJ_IS(sint, OJ_SINT) OJ_IS(real, OJ_REAL)
-    OJ_IS(bool, OJ_BOOL) OJ_IS(null, OJ_NULL)
+OJ_IS(raw, OJ_RAW)
+OJ_IS(uint, OJ_UINT) OJ_IS(sint, OJ_SINT) OJ_IS(real, OJ_REAL) OJ_IS(bool, OJ_BOOL)
+    OJ_IS(null, OJ_NULL)
 #undef OJ_IS
         bool object_json_is_int(const object_json_val *v)
 {
@@ -195,10 +219,6 @@ double object_json_get_real(const object_json_val *v)
 const char *object_json_get_str(const object_json_val *v)
 {
     return object_json_is_str(v) ? v->model.primitive.data : NULL;
-}
-const char *object_json_mut_get_str(const object_json_val *v)
-{
-    return object_json_get_str(v);
 }
 const char *object_json_get_raw(const object_json_val *v)
 {
@@ -251,10 +271,6 @@ object_json_val *object_json_arr_get(object_json_val *v, size_t i)
     v->cursor_index = i;
     return p;
 }
-object_json_val *object_json_mut_arr_get(object_json_val *v, size_t i)
-{
-    return object_json_arr_get(v, i);
-}
 object_json_val *object_json_obj_getn(object_json_val *v, const char *s, size_t n)
 {
     if (!s || !object_json_is_obj(v))
@@ -267,10 +283,6 @@ object_json_val *object_json_obj_getn(object_json_val *v, const char *s, size_t 
 object_json_val *object_json_obj_get(object_json_val *v, const char *s)
 {
     return s ? object_json_obj_getn(v, s, strlen(s)) : NULL;
-}
-object_json_val *object_json_mut_obj_get(object_json_val *v, const char *s)
-{
-    return object_json_obj_get(v, s);
 }
 object_json_val *object_json_mut_obj(object_json_doc *d)
 {
@@ -337,10 +349,6 @@ object_json_val *object_json_mut_strncpy(object_json_doc *d, const char *s, size
 object_json_val *object_json_mut_strcpy(object_json_doc *d, const char *s)
 {
     return oj_text(d, s, s ? strlen(s) : 0, OJ_STR);
-}
-object_json_val *object_json_mut_str(object_json_doc *d, const char *s)
-{
-    return object_json_mut_strcpy(d, s);
 }
 object_json_val *object_json_mut_rawcpy(object_json_doc *d, const char *s)
 {
@@ -411,11 +419,11 @@ bool object_json_mut_obj_add_val(object_json_doc *d, object_json_val *v, const c
 OJ_ADD(uint, uint64_t, object_json_mut_uint)
 OJ_ADD(sint, int64_t, object_json_mut_sint)
 OJ_ADD(int, int64_t, object_json_mut_sint)
-OJ_ADD(real, double, object_json_mut_real) OJ_ADD(bool, bool, object_json_mut_bool)
-    OJ_ADD(str, const char *, object_json_mut_str)
-        OJ_ADD(strcpy, const char *, object_json_mut_strcpy)
+OJ_ADD(real, double, object_json_mut_real)
+OJ_ADD(bool, bool, object_json_mut_bool) OJ_ADD(str, const char *, object_json_mut_str)
+    OJ_ADD(strcpy, const char *, object_json_mut_strcpy)
 #undef OJ_ADD
-            bool object_json_mut_obj_add_null(object_json_doc *d, object_json_val *v, const char *k)
+        bool object_json_mut_obj_add_null(object_json_doc *d, object_json_val *v, const char *k)
 {
     return object_json_mut_obj_add_val(d, v, k, object_json_mut_null(d));
 }
@@ -484,10 +492,6 @@ static object_json_val *oj_copy(object_json_doc *d, object_json_val *v, unsigned
     return copy;
 }
 object_json_val *object_json_val_mut_copy(object_json_doc *d, object_json_val *v)
-{
-    return oj_copy(d, v, 0);
-}
-object_json_val *object_json_mut_val_mut_copy(object_json_doc *d, object_json_val *v)
 {
     return oj_copy(d, v, 0);
 }
@@ -590,10 +594,11 @@ typedef struct
     size_t length, at;
     object_json_doc *doc;
 } oj_parser;
+#define JSON_WHITESPACE(c) ((c) == 9 || (c) == 10 || (c) == 13 || (c) == 32)
+
 static void oj_space(oj_parser *p)
 {
-    while (p->at < p->length && (p->source[p->at] == ' ' || p->source[p->at] == '\t' ||
-                                 p->source[p->at] == '\r' || p->source[p->at] == '\n'))
+    while (p->at < p->length && JSON_WHITESPACE(p->source[p->at]))
         p->at++;
 }
 static int oj_hex(unsigned c)
@@ -617,23 +622,77 @@ static int oj_hex4(oj_parser *p)
     }
     return n;
 }
+/* Token boundaries are shared with the legacy reader, which keeps escaped
+ * strings and decimal text rather than the document API's decoded values. */
+static bool oj_digit(unsigned c)
+{
+    return c >= '0' && c <= '9';
+}
+static size_t oj_number_end(const unsigned char *s, size_t length, size_t at, bool *real)
+{
+    *real = false;
+    if (at < length && s[at] == '-')
+        at++;
+    if (at == length || !oj_digit(s[at]))
+        return SIZE_MAX;
+    if (s[at++] != '0')
+        while (at < length && oj_digit(s[at]))
+            at++;
+    if (at < length && s[at] == '.')
+    {
+        *real = true;
+        size_t start = ++at;
+        while (at < length && oj_digit(s[at]))
+            at++;
+        if (at == start)
+            return SIZE_MAX;
+    }
+    if (at < length && (s[at] == 'e' || s[at] == 'E'))
+    {
+        *real = true;
+        at++;
+        if (at < length && (s[at] == '+' || s[at] == '-'))
+            at++;
+        size_t start = at;
+        while (at < length && oj_digit(s[at]))
+            at++;
+        if (at == start)
+            return SIZE_MAX;
+    }
+    return at;
+}
+static size_t oj_string_end(const unsigned char *s, size_t length, size_t at)
+{
+    if (at == length || s[at++] != '"')
+        return SIZE_MAX;
+    while (at < length)
+    {
+        unsigned c = s[at++];
+        if (c == '"')
+            return at - 1;
+        if (c < 32)
+            return SIZE_MAX;
+        if (c == '\\')
+        {
+            if (at == length)
+                return SIZE_MAX;
+            c = s[at++];
+            if (!c || !strchr("\"\\/bfnrtu", (int)c))
+                return SIZE_MAX;
+            if (c == 'u')
+                for (unsigned i = 0; i < 4; i++)
+                    if (at == length || oj_hex(s[at++]) < 0)
+                        return SIZE_MAX;
+        }
+    }
+    return SIZE_MAX;
+}
 static object_json_val *oj_string(oj_parser *p)
 {
     if (p->at >= p->length || p->source[p->at++] != '"')
         return NULL;
-    size_t start = p->at, end = start;
-    while (end < p->length)
-    {
-        if (p->source[end] == '"')
-            break;
-        if (p->source[end] == '\\')
-        {
-            if (++end == p->length)
-                return NULL;
-        }
-        end++;
-    }
-    if (end == p->length)
+    size_t start = p->at, end = oj_string_end(p->source, p->length, start - 1);
+    if (end == SIZE_MAX)
         return NULL;
     char *text = oj_alloc(p->doc, end - start + 1);
     if (!text)
@@ -719,10 +778,6 @@ static object_json_val *oj_string(oj_parser *p)
     }
     return v;
 }
-static bool oj_digit(unsigned c)
-{
-    return c >= '0' && c <= '9';
-}
 static object_json_val *oj_parse(oj_parser *p, unsigned depth)
 {
     if (depth > 128)
@@ -792,38 +847,11 @@ static object_json_val *oj_parse(oj_parser *p, unsigned depth)
     if (c == '-' || oj_digit(c))
     {
         size_t start = p->at;
-        bool negative = c == '-', real = false;
-        if (negative && ++p->at == p->length)
+        bool negative = c == '-', real;
+        size_t end = oj_number_end(p->source, p->length, start, &real);
+        if (end == SIZE_MAX)
             return NULL;
-        c = p->source[p->at];
-        if (!oj_digit(c))
-            return NULL;
-        p->at++;
-        if (c != '0')
-            while (p->at < p->length && oj_digit(p->source[p->at]))
-                p->at++;
-        if (p->at < p->length && p->source[p->at] == '.')
-        {
-            real = true;
-            p->at++;
-            size_t at = p->at;
-            while (p->at < p->length && oj_digit(p->source[p->at]))
-                p->at++;
-            if (at == p->at)
-                return NULL;
-        }
-        if (p->at < p->length && (p->source[p->at] == 'e' || p->source[p->at] == 'E'))
-        {
-            real = true;
-            p->at++;
-            if (p->at < p->length && (p->source[p->at] == '+' || p->source[p->at] == '-'))
-                p->at++;
-            size_t at = p->at;
-            while (p->at < p->length && oj_digit(p->source[p->at]))
-                p->at++;
-            if (at == p->at)
-                return NULL;
-        }
+        p->at = end;
         size_t n = p->at - start;
         uint64_t integer = 0;
         bool overflow = false;

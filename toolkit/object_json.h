@@ -1,4 +1,35 @@
-/* Copyright 2026 Tom Barbalet. MIT; see object.c.
+/****************************************************************
+
+ object_json.h
+
+ =============================================================
+
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
+
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+ ****************************************************************/
+
+/*
  * Additive, document-owned object.c JSON model. Existing n_object/n_array APIs
  * retain their ownership and escaped-string behavior. This API decodes strings,
  * tracks byte lengths (including embedded NUL), and owns every value in a doc.
@@ -46,9 +77,9 @@ object_json_doc *object_json_read_opts(char *, size_t, unsigned, const object_js
 object_json_doc *object_json_read(const char *, size_t, unsigned);
 object_json_mut_doc *object_json_mut_doc_new(const object_json_alc *);
 void object_json_doc_free(object_json_doc *);
-void object_json_mut_doc_free(object_json_mut_doc *);
+#define object_json_mut_doc_free object_json_doc_free
 object_json_val *object_json_doc_get_root(object_json_doc *);
-object_json_val *object_json_mut_doc_get_root(object_json_doc *);
+#define object_json_mut_doc_get_root object_json_doc_get_root
 void object_json_mut_doc_set_root(object_json_doc *, object_json_val *);
 bool object_json_is_obj(const object_json_val *);
 bool object_json_is_arr(const object_json_val *);
@@ -69,17 +100,17 @@ double object_json_get_num(const object_json_val *);
 double object_json_get_real(const object_json_val *);
 bool object_json_get_bool(const object_json_val *);
 const char *object_json_get_str(const object_json_val *);
-const char *object_json_mut_get_str(const object_json_val *);
+#define object_json_mut_get_str object_json_get_str
 const char *object_json_get_raw(const object_json_val *);
 size_t object_json_get_len(const object_json_val *);
 bool object_json_equals_str(const object_json_val *, const char *);
 size_t object_json_arr_size(const object_json_val *);
 size_t object_json_obj_size(const object_json_val *);
 object_json_val *object_json_arr_get(object_json_val *, size_t);
-object_json_val *object_json_mut_arr_get(object_json_val *, size_t);
+#define object_json_mut_arr_get object_json_arr_get
 object_json_val *object_json_obj_get(object_json_val *, const char *);
 object_json_val *object_json_obj_getn(object_json_val *, const char *, size_t);
-object_json_val *object_json_mut_obj_get(object_json_val *, const char *);
+#define object_json_mut_obj_get object_json_obj_get
 object_json_val *object_json_first(object_json_val *);
 object_json_val *object_json_next(object_json_val *);
 object_json_val *object_json_key(object_json_val *);
@@ -99,7 +130,7 @@ object_json_val *object_json_mut_sint(object_json_doc *, int64_t);
 object_json_val *object_json_mut_real(object_json_doc *, double);
 object_json_val *object_json_mut_strncpy(object_json_doc *, const char *, size_t);
 object_json_val *object_json_mut_strcpy(object_json_doc *, const char *);
-object_json_val *object_json_mut_str(object_json_doc *, const char *);
+#define object_json_mut_str object_json_mut_strcpy
 object_json_val *object_json_mut_rawcpy(object_json_doc *, const char *);
 bool object_json_mut_obj_add(object_json_val *, object_json_val *, object_json_val *);
 bool object_json_mut_arr_append(object_json_val *, object_json_val *);
@@ -109,7 +140,7 @@ bool object_json_mut_obj_add_val(object_json_doc *, object_json_val *, const cha
 size_t object_json_mut_obj_remove_key(object_json_val *, const char *);
 size_t object_json_mut_obj_remove_keyn(object_json_val *, const char *, size_t);
 object_json_val *object_json_val_mut_copy(object_json_doc *, object_json_val *);
-object_json_val *object_json_mut_val_mut_copy(object_json_doc *, object_json_val *);
+#define object_json_mut_val_mut_copy object_json_val_mut_copy
 #define APESDK_JSON_ADD_DECL(name, type)                                                           \
     bool object_json_mut_obj_add_##name(object_json_doc *, object_json_val *, const char *, type); \
     bool object_json_mut_arr_add_##name(object_json_doc *, object_json_val *, type)

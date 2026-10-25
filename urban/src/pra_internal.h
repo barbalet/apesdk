@@ -1,36 +1,41 @@
+/****************************************************************
+
+ pra_internal.h
+
+ =============================================================
+
+ Copyright 1996-2026 Tom Barbalet. All rights reserved.
+
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+ ****************************************************************/
+
 #ifndef WASM_Z_PRA_INTERNAL_H
 #define WASM_Z_PRA_INTERNAL_H
 #include "pra.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef PRA_REFERENCE_SDK
-#include PRA_REFERENCE_SDK
-#else
-typedef int64_t n_int;
-typedef uint8_t n_byte;
-typedef uint16_t n_byte2;
-typedef union
-{
-    struct
-    {
-        n_int x, y;
-    };
-    n_int data[2];
-} n_vect2;
-#define math_random pra_compat_random
-#define vect2_add pra_compat_add
-#define vect2_subtract pra_compat_subtract
-#define vect2_center pra_compat_center
-#define vect2_populate pra_compat_populate
-#define vect2_direction pra_compat_direction
-#define vect2_rotation pra_compat_rotation
-#define vect2_delta pra_compat_delta
-#define vect2_nonzero pra_compat_nonzero
-#define vect2_min_max_init pra_compat_min_max_init
-#define vect2_min_max pra_compat_min_max
-#define memory_free pra_compat_free
-#endif
+#include "toolkit.h"
 #ifdef PRA_REFERENCE
 #define house_create pra_original_house_create
 #define house_init pra_original_house_init
@@ -97,20 +102,6 @@ typedef struct
     n_vect2 pivot, direction;
     int captured;
 } simulated_building;
-#ifndef PRA_REFERENCE_SDK
-n_byte2 math_random(n_byte2 *seed);
-void vect2_add(n_vect2 *, n_vect2 *, n_vect2 *);
-void vect2_subtract(n_vect2 *, n_vect2 *, n_vect2 *);
-void vect2_center(n_vect2 *, n_vect2 *, n_vect2 *);
-void vect2_populate(n_vect2 *, n_int, n_int);
-void vect2_direction(n_vect2 *, n_int, n_int);
-void vect2_rotation(n_vect2 *, n_vect2 *);
-void vect2_delta(n_vect2 *, n_vect2 *);
-n_int vect2_nonzero(n_vect2 *);
-n_vect2 *vect2_min_max_init(void);
-void vect2_min_max(n_vect2 *, n_int, n_vect2 *);
-void memory_free(void **);
-#endif
 void house_create(simulated_building *, n_byte2 *, n_vect2 *);
 void house_init(n_byte2 *, n_vect2 *, simulated_building *);
 n_int house_window_present(n_vect2 *);
