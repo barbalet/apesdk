@@ -1,6 +1,6 @@
 /****************************************************************
 
- reference.h
+ urban-compat.h
 
  =============================================================
 
@@ -29,21 +29,14 @@
 
  ****************************************************************/
 
-/* Fixed-width records keep SDK-private C types inside the reference translation units. */
-#ifndef PRA_TEST_REFERENCE_H
-#define PRA_TEST_REFERENCE_H
-#include <stdint.h>
-typedef struct
+#ifndef APESDK_URBAN_COMPAT_H
+#define APESDK_URBAN_COMPAT_H
+#include "../../../toolkit/toolkit.h"
+
+/* The original Urban matrix stores one element per two-argument call. */
+static inline void urban_memory_list_copy(memory_list *list, n_byte *data)
 {
-    int64_t rooms, genetics[64], points[16][32][2];
-} reference_house;
-typedef struct
-{
-    int64_t points[32], radius, center[2];
-} reference_tree;
-void reference_create_house(uint16_t seed[2], const int64_t center[2], reference_house *out);
-void reference_create_tree(uint16_t seed[2], const int64_t center[2], reference_tree *out);
-void reference_create_fence(uint16_t seed[2], uint8_t direction, const int64_t center[2],
-                            int64_t out[8][2][2]);
-uint16_t reference_random(uint16_t seed[2]);
+    memory_list_copy(list, data, list->unit_size);
+}
+#define memory_list_copy urban_memory_list_copy
 #endif

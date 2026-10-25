@@ -35,10 +35,6 @@
  *          JSON format.
  */
 
-#include "object_json.h"
-#include "object_json_impl.h"
-
-#ifndef APESDK_OBJECT_JSON_ONLY
 #include "toolkit.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -729,6 +725,7 @@ void unknown_free(void **unknown, n_object_type type)
     else obj_free_array(1, unknown);
 }
 
+#define JSON_WHITESPACE(c) ((c) == 9 || (c) == 10 || (c) == 13 || (c) == 32)
 
 void io_whitespace_json(n_file *file)
 {
@@ -769,18 +766,44 @@ static void json_space(n_file *f)
     while (json_peek(f) != -1 && JSON_WHITESPACE(json_peek(f))) f->location++;
 }
 
+static int json_digit(int c) { return c >= '0' && c <= '9'; }
 
 /* Keep escape sequences verbatim, matching the serializer's string interface. */
 static n_string json_string(n_file *f)
 {
-    size_t end = oj_string_end(f->data, f->size, f->location);
-    if (end == SIZE_MAX) return 0L;
-    n_uint start = f->location + 1, length = (n_uint)end - start;
-    n_string text = memory_new(length + 1);
+    n_uint start, length;
+    n_string text;
+    if (json_peek(f) != '"') return 0L;
+    start = ++f->location;
+    while (json_peek(f) != -1 && json_peek(f) != '"')
+    {
+        int c = json_peek(f);
+        if (c < 32) return 0L;
+        f->location++;
+        if (c == '\\')
+        {
+            c = json_peek(f);
+            if (c == -1 || !strchr("\"\\/bfnrtu", c)) return 0L;
+            f->location++;
+            if (c == 'u')
+            {
+                int i;
+                for (i = 0; i < 4; i++)
+                {
+                    c = json_peek(f);
+                    if (!json_digit(c) && !(c >= 'a' && c <= 'f') && !(c >= 'A' && c <= 'F')) return 0L;
+                    f->location++;
+                }
+            }
+        }
+    }
+    if (json_peek(f) != '"') return 0L;
+    length = f->location - start;
+    text = memory_new(length + 1);
     if (!text) return 0L;
     memcpy(text, f->data + start, length);
     text[length] = 0;
-    f->location = (n_uint)end + 1;
+    f->location++;
     return text;
 }
 
@@ -889,15 +912,30 @@ failed:
         f->location += length;
         return c == 'n' ? array_null() : array_boolean(c == 't');
     }
-    if (c == '-' || oj_digit((unsigned)c))
+    if (c == '-' || json_digit(c))
     {
         n_uint start = f->location, length;
-        bool decimal;
+        int decimal = 0;
         char *text, *end;
         long long integer;
-        size_t finish = oj_number_end(f->data, f->size, start, &decimal);
-        if (finish == SIZE_MAX) return 0L;
-        f->location = (n_uint)finish;
+        if (c == '-') f->location++;
+        c = json_peek(f);
+        if (!json_digit(c)) return 0L;
+        f->location++;
+        if (c != '0') while (json_digit(json_peek(f))) f->location++;
+        if (json_peek(f) == '.')
+        {
+            decimal = 1; f->location++;
+            if (!json_digit(json_peek(f))) return 0L;
+            while (json_digit(json_peek(f))) f->location++;
+        }
+        if (json_peek(f) == 'e' || json_peek(f) == 'E')
+        {
+            decimal = 1; f->location++;
+            if (json_peek(f) == '+' || json_peek(f) == '-') f->location++;
+            if (!json_digit(json_peek(f))) return 0L;
+            while (json_digit(json_peek(f))) f->location++;
+        }
         length = f->location - start;
         text = memory_new(length + 1);
         if (!text) return 0L;
@@ -1302,5 +1340,3 @@ n_array * object_onionskin(n_object * top, n_string value)
     }
     return 0L;
 }
-
-#endif /* APESDK_OBJECT_JSON_ONLY */

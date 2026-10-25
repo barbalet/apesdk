@@ -817,7 +817,5 @@ void       io_help_line( simulated_console_command *specific, n_console_output o
 
 void       io_console_quit( void );
 
-#include "object_json.h"
-
 #endif /* _TOOLKIT_H_ */
 

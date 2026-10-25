@@ -78,13 +78,11 @@ n_file *io_file_new( void )
 
 n_file * io_file_new_from_string_block(n_string_block contents)
 {
-    if (!contents) return 0L;
     n_file * new_file = io_file_new();
     if (new_file)
     {
-        n_uint length = (n_uint)io_length((n_string)contents, STRING_BLOCK_SIZE);
-        memory_copy((n_byte*)contents, (n_byte*)new_file->data, length);
-        new_file->location = length;
+        memory_copy((n_byte*)contents, (n_byte*)new_file->data, STRING_BLOCK_SIZE);
+        new_file->location = io_length((n_string)contents, STRING_BLOCK_SIZE);
     }
     return new_file;
 }
