@@ -17,6 +17,7 @@ test: bronze-sim adapter-check
 	./bronze-sim content/first_slice.bronze >/tmp/apesdk-bronze-first-slice.log
 	./bronze-sim content/bronze_age_full.bronze >/tmp/apesdk-bronze-full.log
 	bash ./test.sh
+	bash ./hybrid/test.sh
 	@echo "Bronze package scenarios and ApeSDK harness passed"
 
 land-harness: test

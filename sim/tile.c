@@ -545,6 +545,7 @@ void tile_cycle( n_land *land )
     }
 }
 
+#ifndef HIDE_THUNDER
 /* Scratch storage for connected atmospheric cloud components.  Lightning is
  * generated state, so this is intentionally not part of the saved land data. */
 static n_byte lightning_cloud_seen[MAP_AREA];
@@ -672,6 +673,13 @@ void tile_lightning( n_land *land )
         tile++;
     }
 }
+
+#else
+void tile_lightning( n_land *land )
+{
+    (void)land;
+}
+#endif
 
 static void tile_wind_pp( n_land *land )
 {

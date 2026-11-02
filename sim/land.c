@@ -449,8 +449,14 @@ n_int weather_pressure( n_int px, n_int py )
 
 n_byte weather_lightning( n_int px, n_int py )
 {
+#ifdef HIDE_THUNDER
+    (void)px;
+    (void)py;
+    return 0;
+#else
     n_uint location = ( n_uint )( ( px & ( MAP_DIMENSION - 1 ) ) | ( ( py & ( MAP_DIMENSION - 1 ) ) * MAP_DIMENSION ) );
     return m_land.tiles[0].lightning[location];
+#endif
 }
 
 /*

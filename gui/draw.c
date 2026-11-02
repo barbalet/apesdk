@@ -49,6 +49,10 @@
 
 #include "gui.h"
 
+#ifdef BRONZE_SIM
+#include "../bronze/hybrid/bronze_hybrid.h"
+#endif
+
 #include <stdio.h>
 
 /* the weather/time of day icons hard coded */
@@ -467,6 +471,19 @@ static n_byte pixel_color8( n_int px, n_int py, n_int dx, n_int dy, void *inform
     local_col->screen[ px | ( py << MAP_BITS ) ] = local_col->color;
     return 0;
 }
+
+#ifdef BRONZE_SIM
+/* Reuse native indexed pixels, including terrain undraw bookkeeping. */
+static void draw_bronze_pixel(n_int x, n_int y, n_byte color, void *context)
+{
+    n_color8 *col = context;
+    col->color = color;
+    if (col->screen == land_topography_highdef())
+        pixel_color8_hires(x, y, 0, 0, col);
+    else
+        pixel_color8(x, y, 0, 0, col);
+}
+#endif
 
 static n_int window_dim_x = 512;
 static n_int window_dim_y = 511;
@@ -933,6 +950,7 @@ static weather_values weather_icon_base( weather_values weather )
     return weather;
 }
 
+#ifndef HIDE_THUNDER
 static void draw_weather_lightning_symbol( weather_values weather, n_join *icon )
 {
     if ( weather >= WEATHER_SEVEN_LIGHTNING_DAY )
@@ -944,6 +962,8 @@ static void draw_weather_lightning_symbol( weather_values weather, n_join *icon 
         math_join( 74, 32, 6, -7, icon );
     }
 }
+
+#endif
 
 static void draw_meters( simulated_group *group )
 {
@@ -1186,7 +1206,9 @@ static void draw_meters( simulated_group *group )
 
         ha1++;
     }
+#ifndef HIDE_THUNDER
     draw_weather_lightning_symbol( local_weather, &local_kind_yellow );
+#endif
 
 }
 
@@ -1521,12 +1543,15 @@ static void draw_weather( n_int toggle )
     if ( toggle )
     {
         n_c_int *local_pressure = land_weather( 0 );
+#ifndef HIDE_THUNDER
         n_byte  *local_lightning = land_weather_lightning( 0 );
+#endif
         n_int loop = 0;
         while ( loop < MAP_AREA )
         {
             n_int value = local_pressure[ loop ] >> 7;
             
+#ifndef HIDE_THUNDER
             if ( local_lightning[ loop ] )
             {
                 n_int alpha = local_lightning[ loop ];
@@ -1535,6 +1560,8 @@ static void draw_weather( n_int toggle )
                  * back into the atmospheric pressure texture. */
                 value = value + ( ( 255 - value ) * alpha ) / 255;
             }
+
+#endif
 
             if ( value < 0 )
             {
@@ -2041,6 +2068,11 @@ static void draw_apes( simulated_group *group, n_byte lores )
         }
     }
 
+#ifdef BRONZE_SIM
+    bronze_hybrid_draw(lores ? MAP_DIMENSION : HI_RES_MAP_DIMENSION,
+                      draw_bronze_pixel, &local_col);
+#endif
+
     if ( group->select )
     {
         loop_no_thread( group, 0L, draw_apes_loop, &local_col );
@@ -2373,6 +2405,7 @@ void  draw_cycle( n_byte size_changed, n_byte kind )
 #ifdef WEATHER_ON
         draw_weather( toggle_weather ); /* 10 */
 #endif
+
     }
     if ( CHECK_DRAW_WINDOW( kind, DRAW_WINDOW_TERRAIN ) )
     {

@@ -46,6 +46,10 @@
 
 #include "universe_internal.h"
 
+#ifdef BRONZE_SIM
+#include "../bronze/hybrid/bronze_hybrid.h"
+#endif
+
 #ifndef    _WIN32
 
 #include <pthread.h>
@@ -1650,6 +1654,9 @@ void sim_cycle( void )
 
         sim_set_select( group.beings );
 
+#ifdef BRONZE_SIM
+        bronze_hybrid_reset();
+#endif
         sim_new_progress = 0;
         local_execution = KIND_NOTHING_TO_RUN;
     }
@@ -1734,6 +1741,9 @@ void sim_cycle( void )
         }
     }
 
+#ifdef BRONZE_SIM
+    bronze_hybrid_cycle( &group );
+#endif
     sim_time( &group );
 }
 

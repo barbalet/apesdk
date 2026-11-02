@@ -37,6 +37,9 @@
 #include "app_shell.h"
 #include "buffer.h"
 #include "gui.h"
+#ifdef BRONZE_SIM
+#include "../bronze/hybrid/bronze_hybrid.h"
+#endif
 
 #ifndef    _WIN32
 
@@ -1277,6 +1280,10 @@ static void shared_draw_into_buffer( n_byte *drawBuffer, n_int fIdentification, 
     {
         shared_bitcopy( drawBuffer, dim_x, dim_y, 0, 0, dim_x, fIdentification );
     }
+#endif
+#ifdef BRONZE_SIM
+    if (fIdentification == NUM_VIEW)
+        bronze_hybrid_draw_hud((n_byte4 *)drawBuffer, dim_x, dim_y);
 #endif
 }
 
