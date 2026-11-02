@@ -78,15 +78,13 @@
 				<key>TARGETED_DEVICE_FAMILY</key>
 				<string>6</string>
 				<key>CODE_SIGN_STYLE</key>
-				<string>Automatic</string>
+				<string>Manual</string>
 				<key>INFOPLIST_KEY_CFBundleName</key>
 				<string>BronzeSim</string>
 				<key>ASSETCATALOG_COMPILER_APPICON_NAME</key>
 				<string>AppIcon</string>
 				<key>SWIFT_OPTIMIZATION_LEVEL</key>
 				<string>-Onone</string>
-				<key>CODE_SIGN_IDENTITY[sdk=macosx*]</key>
-				<string>Apple Development</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<array>
 					<string>$(inherited)</string>
@@ -130,6 +128,12 @@
 					<string>BRONZE_SIM=1</string>
 					<string>HIDE_THUNDER=1</string>
 				</array>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string></string>
+				<key>CODE_SIGNING_ALLOWED</key>
+				<string>NO</string>
+				<key>CODE_SIGNING_REQUIRED</key>
+				<string>NO</string>
 			</dict>
 			<key>name</key>
 			<string>Debug</string>
@@ -161,13 +165,11 @@
 				<key>TARGETED_DEVICE_FAMILY</key>
 				<string>6</string>
 				<key>CODE_SIGN_STYLE</key>
-				<string>Automatic</string>
+				<string>Manual</string>
 				<key>INFOPLIST_KEY_CFBundleName</key>
 				<string>BronzeSim</string>
 				<key>ASSETCATALOG_COMPILER_APPICON_NAME</key>
 				<string>AppIcon</string>
-				<key>CODE_SIGN_IDENTITY[sdk=macosx*]</key>
-				<string>Apple Development</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<array>
 					<string>$(inherited)</string>
@@ -211,6 +213,12 @@
 					<string>BRONZE_SIM=1</string>
 					<string>HIDE_THUNDER=1</string>
 				</array>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string></string>
+				<key>CODE_SIGNING_ALLOWED</key>
+				<string>NO</string>
+				<key>CODE_SIGNING_REQUIRED</key>
+				<string>NO</string>
 			</dict>
 			<key>name</key>
 			<string>Release</string>

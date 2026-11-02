@@ -497,3 +497,11 @@ These results describe the initial hybrid, not completion of the full plan.
 - Existing compiler/SDK warnings remain. Full occupation integration, terrain
   land-use areas, full-scenario graphical execution, economic persistence and
   signed distribution are not implemented or validated by these results.
+
+## Local build signing correction (2026-11-02)
+
+The bronze-mac target now disables signing in both Debug and Release with
+`CODE_SIGNING_ALLOWED=NO`, `CODE_SIGNING_REQUIRED=NO`, manual signing style
+and an empty signing identity. The inherited Apple Development identity was
+removed. Local Xcode builds must not require a development team or a command-line
+signing override. Distribution signing remains an explicit future configuration.

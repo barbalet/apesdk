@@ -22,8 +22,8 @@ ApeSDK's native save format.
 
 Open `../toolchains/bronze-mac/bronze-mac.xcodeproj`, select the shared
 `bronze-mac` scheme and **My Mac (Mac Catalyst)**, then Run or Debug. The product
-is `BronzeSim.app` with its own bundle identifier. Select your development team
-in Xcode when signing is needed.
+is `BronzeSim.app` with its own bundle identifier. Debug and Release disable code signing by default; no development team is
+required for local builds. Distribution signing must be configured separately.
 
 The target shares ApeSDK's Catalyst View, Terrain and Control windows and all
 native rendering/being behavior. It defines `BRONZE_SIM=1` and compiles the
@@ -40,13 +40,13 @@ are session state, reconstructed when creating/loading a native world. Native
 save files do not persist them. See `PLAN.md` for the implementation boundary
 and follow-up work.
 
-Unsigned command-line validation:
+Command-line validation (signing is disabled in the project settings):
 
 ```sh
 xcodebuild -project ../toolchains/bronze-mac/bronze-mac.xcodeproj \
   -scheme bronze-mac -configuration Debug \
   -destination 'platform=macOS,variant=Mac Catalyst' \
-  -derivedDataPath /private/tmp/bronze-mac-derived CODE_SIGNING_ALLOWED=NO build
+  -derivedDataPath /private/tmp/bronze-mac-derived build
 ```
 
 `make test` includes `hybrid/test.sh`, which links the hybrid against the real
