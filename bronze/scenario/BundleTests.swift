@@ -16,15 +16,18 @@ struct BundleTests {
         precondition(model.load("vertical_slice", onCommit: commit))
         precondition(resets == 1 && resetSeed == model.seed)
         precondition(model.activeName == "vertical_slice.bronze")
+        let activeProgram = model.program
+        precondition(activeProgram != nil)
         precondition(!model.load("bronze_age_full", onCommit: commit))
         precondition(resets == 1)
         precondition(model.activeName == "vertical_slice.bronze" && model.showDiagnostics)
+        precondition(model.program == activeProgram)
         precondition(model.diagnostics.contains("ValidationError:136"))
         precondition(!model.load("missing", onCommit: commit))
         precondition(resets == 1)
         precondition(model.activeName == "vertical_slice.bronze")
         precondition(model.load("first_slice"))
-        precondition(!model.lastAttemptFailed && model.diagnostics.contains("not active yet"))
+        precondition(!model.lastAttemptFailed && model.program != nil)
         print("Packaged Bundle resource/controller tests passed outside the repository working directory.")
     }
 }

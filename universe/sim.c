@@ -50,6 +50,7 @@
 #include "../bronze/hybrid/bronze_hybrid.h"
 #include "../bronze/actors/bronze_actors.h"
 #include "../bronze/work/bronze_work.h"
+#include "../bronze/tasks/bronze_tasks.h"
 #endif
 
 #ifndef    _WIN32
@@ -1677,6 +1678,7 @@ void sim_cycle( void )
 
 #ifdef BRONZE_SIM
     bronze_work_begin(&group);
+    bronze_tasks_begin(&group);
 #endif
     loop_being_no_sim_no_data( group.beings, group.num, sim_being_awake_loop_no_sim );
     loop_being_no_sim_no_data( group.beings, group.num, being_cycle_universal );
@@ -1752,6 +1754,7 @@ void sim_cycle( void )
 
 #ifdef BRONZE_SIM
     bronze_work_end(&group);
+    bronze_tasks_end(&group);
     bronze_hybrid_cycle( &group );
 #endif
     sim_time( &group );

@@ -20,6 +20,7 @@ shared engine C hooks. No independent authoritative time, needs or position is
 introduced by loading. Cycle 06 also applies validated terrain thresholds. See the
 [landscape policy](../hybrid/README.md) for terrain keys and bounds. Cycle 08
 adds [occupation settings](../actors/PROFESSIONS.md) and a validated roster.
+Cycle 09 stages the retained compiled program for the [task executor](../tasks/README.md).
 
 ## Authoring checks and diagnostics
 

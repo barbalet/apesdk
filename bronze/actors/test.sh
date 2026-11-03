@@ -14,11 +14,11 @@ if [ "${SANITIZE:-0}" = 1 ]; then
     # sources, division checks on native code, and UBSan on the new layers.
     "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} -fsanitize=address,integer-divide-by-zero -fno-omit-frame-pointer -c "${native_sources[@]}"
     "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} -fsanitize=address,undefined -fno-omit-frame-pointer -c \
-        "$root/bronze/work/bronze_work.c" "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" "$root/bronze/work/test_work.c"
+        "$root/bronze/tasks/bronze_tasks.c" "$root/bronze/work/bronze_work.c" "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" "$root/bronze/work/test_work.c"
     "${CC:-cc}" -fsanitize=address,undefined ./*.o -lz -lm -lpthread -o actor-tests
 else
     "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} "${native_sources[@]}" \
-        "$root/bronze/work/bronze_work.c" "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" "$root/bronze/work/test_work.c" \
+        "$root/bronze/tasks/bronze_tasks.c" "$root/bronze/work/bronze_work.c" "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" "$root/bronze/work/test_work.c" \
         -lz -lm -lpthread -o actor-tests
 fi
 ./actor-tests

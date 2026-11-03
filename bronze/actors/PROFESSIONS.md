@@ -46,11 +46,9 @@ assignment history follow actor identity through compaction and session
 switches. Actors retain previously learned vocation skills if they change
 jobs. History keeps up to 32 vocation transitions.
 
-Prototype gathering requires a valid assigned worker on their own production
-patch and a grant from the existing native work gate. Successful gathering
-adds skill up to the configured cap. A service assignment has a workplace
-but awaits task dispatch. Automatic township tool crafting is suspended
-until the task executor can attribute the action to a worker.
+The [task scheduler](../tasks/README.md) can gather when an assigned worker
+runs the operation on their own production patch. Successful gathering adds
+skill up to the configured cap.
 
 The Bronze panel shows the selected being’s actor ID, vocation, current skill
 and scale, home ID and workplace ID. Unassigned actors show their reason and

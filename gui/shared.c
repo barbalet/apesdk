@@ -38,7 +38,10 @@
 #include "buffer.h"
 #include "gui.h"
 #ifdef BRONZE_SIM
+#include <string.h>
 #include "../bronze/hybrid/bronze_hybrid.h"
+#include "../bronze/tasks/bronze_tasks.h"
+#include "../bronze/work/bronze_work.h"
 #include "../bronze/actors/bronze_actors.h"
 #endif
 
@@ -1818,9 +1821,18 @@ void shared_session_bronze_professions(shared_session* session, const BronzeProf
     bronze_actors_stage_professions(session->core.bronze_registry, policy);
 }
 
-void shared_session_bronze_actor_summary(shared_session* session, char* buffer, size_t size)
+void shared_session_bronze_program(shared_session* session, BronzeProgram* program)
 {
-    if (!buffer || !size) return;
+    if (!session) return;
+    if (!session->core.bronze_registry)
+        session->core.bronze_registry = bronze_actors_create();
+    bronze_actors_stage_program(session->core.bronze_registry, program);
+}
+
+void shared_session_bronze_actor_summary(shared_session* session, char* buffer, n_uint capacity)
+{
+    if (!buffer || !capacity || capacity > SIZE_MAX) return;
+    size_t size = (size_t)capacity;
     snprintf(buffer, size, "No registered being selected");
     if (!shared_session_is_started(session) || !shared_core_activate(&session->core)) return;
     BronzeActorRegistry* registry = session->core.bronze_registry;
@@ -1832,6 +1844,18 @@ void shared_session_bronze_actor_summary(shared_session* session, char* buffer, 
                  (unsigned long long)actor->id, policy->vocations[actor->vocation].name,
                  bronze_actor_skill(actor, actor->vocation), policy->skill_max,
                  (unsigned long long)actor->home, (unsigned long long)actor->workplace);
+        const BronzeTaskState* task = &actor->execution;
+        const char* status = bronze_task_status_name(task->status);
+        if (task->operation && actor->remaining_ticks && actor->work.reason != BRONZE_WORK_READY)
+            status = bronze_work_reason_name(actor->work.reason);
+        size_t used = strlen(buffer);
+        if (task->name)
+            snprintf(buffer + used, size - used, " · %s: %s%s%s (line %d, step %u, %llu min left)",
+                     task->name, status, task->action ? " / " : "",
+                     task->action ? task->action : "", task->line, actor->instruction,
+                     (unsigned long long)actor->remaining_ticks);
+        else if (task->status != BRONZE_TASK_IDLE)
+            snprintf(buffer + used, size - used, " · %s", status);
     } else {
         static const char* reasons[] = {
             "no enabled occupations", "awaiting assignment", "below working age",

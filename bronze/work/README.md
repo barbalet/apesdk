@@ -2,8 +2,8 @@
 
 This module is the production Bronze work gate. The separate legacy CLI and
 compiled-task pilot retain their compatibility semantics and are not called by
-this scheduler. Professions, DSL instruction dispatch, navigation and accounted
-food/inventory effects remain their later plan cycles.
+this scheduler. The [task scheduler](../tasks/README.md) uses this gate for resumable work.
+Navigation and accounted food and inventory effects remain later cycles.
 
 ## One clock
 
@@ -46,7 +46,7 @@ are also observed. Precedence is:
 4. Biological/social obligations: social or sex drive >= 0.90, or grooming,
    suckling, aggression/showforce, speaking or shouting state.
 5. Available stationary work; otherwise native movement has priority over
-   opportunistic prototype production.
+   work that would otherwise overlap native movement.
 
 Both the initial and post-native-action observations apply. An urgent initial
 need cannot be cleared to authorize work during the same tick by a later meal
@@ -66,17 +66,10 @@ teleport or implement economic navigation. Existing native movement remains
 unchanged when there is no intention.
 
 At the end of the native cycle, work is permitted only if needs allow it and
-the being actually stayed in place with zero speed. One unit decrements
-`remaining_ticks` once and charges one energy through `being_energy_delta`;
-normal native metabolic costs still apply. There is no second movement
-executor. On completion the task becomes unassigned; advancing a DSL program
-counter remains the future task dispatcher.
-
-The hourly proximity economy uses `bronze_work_claim()` for the same per-actor
-budget: a task and prototype gathering cannot both consume one tick. Mere
-proximity or wakefulness no longer suffices. Site renewal and the aggregate
-prototype recipe remain prototype behavior, not actor inventory accounting.
-Cycle 06 gives the prototype landscape and economy world ownership.
+the being stayed in place with zero speed. One unit decrements
+`remaining_ticks` once and normally charges one energy through
+`being_energy_delta`. Rest has zero additional work energy cost. The task
+scheduler applies operation effects after the final granted unit.
 
 Each actor records current reason/phase, last blocking reason, transition tick,
 transition/interruption/resumption counts, work units and duration remaining.

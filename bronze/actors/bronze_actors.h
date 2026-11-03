@@ -6,6 +6,7 @@
 #include "../work/bronze_work_types.h"
 #include "../hybrid/bronze_hybrid.h"
 #include "bronze_profession_policy.h"
+#include "../tasks/bronze_task_state.h"
 
 /* IDs are scoped to the owning registry/world, never native slots or names. */
 typedef uint64_t BronzeActorId;
@@ -32,6 +33,7 @@ typedef struct {
     BronzeReservation* reservations; size_t reservation_count;
     BronzeAssignment* history; size_t history_count;
     BronzeWorkState work;
+    BronzeTaskState execution;
 } BronzeActor;
 typedef struct BronzeActorRegistry BronzeActorRegistry;
 typedef void (*BronzeReleaseClaim)(void* context, BronzeActorId actor, const BronzeReservation* claim);
@@ -47,6 +49,8 @@ simulated_being* bronze_actors_resolve(BronzeActorRegistry*, BronzeActorId);
 size_t bronze_actors_count(const BronzeActorRegistry*);
 uint64_t bronze_actors_generation(const BronzeActorRegistry*);
 BronzeLandscape* bronze_actors_landscape(BronzeActorRegistry*);
+void bronze_actors_stage_program(BronzeActorRegistry*, BronzeProgram*);
+const BronzeProgram* bronze_actors_program(const BronzeActorRegistry*);
 void bronze_actors_stage_professions(BronzeActorRegistry*, const BronzeProfessionPolicy*);
 const BronzeProfessionPolicy* bronze_actors_professions(const BronzeActorRegistry*);
 int bronze_actor_set_job(BronzeActor*, uint32_t vocation, uint64_t workplace, unsigned skill_start, uint64_t tick);

@@ -185,8 +185,10 @@ void sim_thread_console( void );
 /* Registry-scoped identity for the selected real being; zero means none. */
 #include "bronze/hybrid/bronze_land_policy.h"
 #include "bronze/actors/bronze_profession_policy.h"
+struct BronzeProgram;
+void shared_session_bronze_program(shared_session* session, struct BronzeProgram* program);
 void shared_session_bronze_professions(shared_session* session, const BronzeProfessionPolicy* policy);
-void shared_session_bronze_actor_summary(shared_session* session, char* buffer, size_t size);
+void shared_session_bronze_actor_summary(shared_session* session, char* buffer, n_uint capacity);
 void shared_session_bronze_land_policy(shared_session* session, BronzeLandPolicy policy);
 uint64_t shared_session_bronze_actor_id(shared_session* session);
 #endif

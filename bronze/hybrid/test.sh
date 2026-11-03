@@ -8,7 +8,8 @@ cd "$work"
     "$root"/toolkit/*.c "$root"/script/*.c "$root"/render/*.c \
     "$root"/sim/*.c "$root"/entity/*.c "$root"/universe/*.c \
     "$root"/gui/{draw,buffer,tutorial}.c \
-    "$root"/bronze/work/bronze_work.c "$root"/bronze/actors/bronze_actors.c \
+    "$root"/bronze/dsl/*.c "$root"/bronze/scenario/bronze_scenario.c \
+    "$root"/bronze/tasks/bronze_tasks.c "$root"/bronze/work/bronze_work.c "$root"/bronze/actors/bronze_actors.c \
     "$root"/bronze/hybrid/{bronze_hybrid,test_hybrid}.c \
     -lz -lm -lpthread -o hybrid-test
 ./hybrid-test

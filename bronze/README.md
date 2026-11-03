@@ -43,19 +43,12 @@ active file and offers **Details**. Failed loads show filename/line diagnostics
 and retain the active scenario and world. `vertical_slice.bronze` also validates;
 `bronze_age_full.bronze` is bundled but still fails strict compilation.
 
-The graphical host applies the scenario seed and terrain thresholds. Eligible
-stationary actors can gather on terrain-derived field, woodland and ore patches.
-Townships own reachable production sites and their stores. Actors receive homes,
-scenario-defined vocations and matching workplaces as capacity allows. Their
-skills grow through successful work. The DSL task executor and paired economic
-saves are later cycles. See the [landscape rules](hybrid/README.md),
-[occupation policy](actors/PROFESSIONS.md) and [implementation plan](PLAN.md).
-
-Cycle 05 adds [native clock and work arbitration](work/README.md): stationary
-intentions yield to survival, sleep and social obligations; task progress and
-hourly prototype gathering share one per-actor native-tick budget. Drawing and
-pausing cannot advance work. The app still does not assign professions or
-dispatch the full scenario's tasks.
+The graphical host applies the scenario seed, terrain thresholds, vocation
+roster and compiled task program. Actors execute supported tasks through the
+native work gate and the overview shows their progress. Travel and paired
+economic saves are later cycles. See the [landscape rules](hybrid/README.md),
+[occupation policy](actors/PROFESSIONS.md), [task execution](tasks/README.md)
+and [implementation plan](PLAN.md).
 
 Command-line validation (signing is disabled in the project settings):
 
@@ -99,8 +92,8 @@ Cycle 04 adds a [per-world actor registry](actors/README.md). The overview shows
 an actor ID for the selected real ApeSDK being. IDs and linked sidecar state
 survive native births, deaths, population compaction, reordering and session
 switches. Death/reset releases claim records and clears mentorship links.
-The registry does not yet assign professions or replace prototype work with
-per-being inventory/task execution; those remain later cycles.
+The registry owns vocation, skill and resumable task state. Actor inventories
+and transport remain later cycles.
 
 `bash test.sh` now includes the actor lifecycle/session harness. Targeted memory
 and undefined-behavior checks run with `SANITIZE=1 bash bronze/actors/test.sh`;

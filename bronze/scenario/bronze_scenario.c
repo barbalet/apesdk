@@ -1,5 +1,6 @@
 #include "bronze_scenario.h"
 #include "../dsl/brz_parser.h"
+#include "../tasks/bronze_program.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +8,7 @@
 #include <stdarg.h>
 
 struct BronzeScenario {
-    ParsedConfig* active;
+    BronzeProgram* active;
     BronzeLandPolicy land_policy;
     BronzeProfessionPolicy professions;
     char name[128];
@@ -179,6 +180,8 @@ static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* poli
         return error(report,0,"occupation starting skill and gain must fit the skill scale");
     for(i=0;i<c->vocations.len;i++) {
         const VocationDef* v=brz_vec_cat(&c->vocations,i);
+        if (v->tasks.len > 256 || v->rules.len > 256)
+            return error(report,0,"vocation %s exceeds the 256 task/rule limit",v->name);
         if(professions->vocations[i].weight && !professions->vocations[i].workplace)
             return error(report,0,"enabled occupation '%s' requires a workplace",v->name);
         for(j=0;j<v->rules.len;j++) { const RuleDef* r=brz_vec_cat(&v->rules,j); if(r->weight<1 || !conditions(&r->condition,r->line,report)) return error(report,r->line,"invalid rule weight or condition"); }
@@ -186,8 +189,21 @@ static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* poli
     }
     return 1;
 }
+static void destroy_program(BronzeProgram* program)
+{
+    ParsedConfig* config = (ParsedConfig*)program->config;
+    brz_cfg_free(config);
+    free(config);
+    free(program);
+}
+
 BronzeScenario* bronze_scenario_create(void) { return calloc(1,sizeof(BronzeScenario)); }
-void bronze_scenario_destroy(BronzeScenario* s) { if(s) { if(s->active) { brz_cfg_free(s->active); free(s->active); } free(s); } }
+void bronze_scenario_destroy(BronzeScenario* s)
+{
+    if (!s) return;
+    bronze_program_release(s->active);
+    free(s);
+}
 int bronze_scenario_load(BronzeScenario* s, const char* path, const char* name)
 {
     ParsedConfig* next; FILE* report; FILE* input; long size; int accepted=0;
@@ -207,12 +223,15 @@ int bronze_scenario_load(BronzeScenario* s, const char* path, const char* name)
         .site_capacity=32, .retry_minutes=60, .skill_max=100, .skill_gain=1
     };
     accepted=brz_parse_file_report(path,next,report) && admission(next,report,&policy,&professions);
+    BronzeProgram* program = accepted ? malloc(sizeof(*program)) : NULL;
+    if (accepted && !program) accepted = error(report, 0, "unable to retain task program");
     if(accepted) {
-        if(s->active) { brz_cfg_free(s->active); free(s->active); }
+        *program = (BronzeProgram){next, 1, destroy_program};
+        bronze_program_release(s->active);
         s->land_policy=policy;
         s->professions=professions;
-        s->active=next; snprintf(s->name,sizeof(s->name),"%s",name);
-        snprintf(s->diagnostics,sizeof(s->diagnostics),"%s: validated %zu vocations. Scenario-driven profession tasks are not active yet; the native simulation and prototype economy continue.",name,next->vocations.len);
+        s->active=program; snprintf(s->name,sizeof(s->name),"%s",name);
+        snprintf(s->diagnostics,sizeof(s->diagnostics),"%s: validated %zu vocations. Task execution uses the native work gate. See the selected actor for progress or blocked operations.",name,next->vocations.len);
     } else {
         size_t offset=(size_t)snprintf(s->diagnostics,sizeof(s->diagnostics),"%s:0: load rejected; previous scenario retained.\n",name);
         rewind(report);
@@ -226,11 +245,14 @@ int bronze_scenario_load(BronzeScenario* s, const char* path, const char* name)
 }
 const char* bronze_scenario_name(const BronzeScenario* s) { return s?s->name:""; }
 const char* bronze_scenario_diagnostics(const BronzeScenario* s) { return s?s->diagnostics:"Scenario allocation failed"; }
-uint32_t bronze_scenario_seed(const BronzeScenario* s) { return s && s->active?s->active->seed:0; }
-size_t bronze_scenario_vocations(const BronzeScenario* s) { return s && s->active?s->active->vocations.len:0; }
+uint32_t bronze_scenario_seed(const BronzeScenario* s) { return s && s->active?s->active->config->seed:0; }
+size_t bronze_scenario_vocations(const BronzeScenario* s) { return s && s->active?s->active->config->vocations.len:0; }
 
 BronzeLandPolicy bronze_scenario_land_policy(const BronzeScenario* s)
 { return s && s->active ? s->land_policy : bronze_land_defaults(); }
 
 const BronzeProfessionPolicy* bronze_scenario_professions(const BronzeScenario* s)
 { return s && s->active ? &s->professions : NULL; }
+
+BronzeProgram* bronze_scenario_program(const BronzeScenario* s)
+{ return s ? s->active : NULL; }

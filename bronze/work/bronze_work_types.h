@@ -23,6 +23,6 @@ typedef struct {
     uint64_t sampled_tick, transition_tick, transitions, units;
     uint64_t interruptions, resumptions;
     long x, y;
-    int sampled, eligible, consumed, running, ever_ran;
+    int sampled, eligible, consumed, running, ever_ran, resting;
 } BronzeWorkState;
 #endif

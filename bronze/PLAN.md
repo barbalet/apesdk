@@ -18,8 +18,8 @@ interactions affect individuals, and saving/resuming restores the combined
 world deterministically. A large occupation list or decorative map markers
 alone does not satisfy this goal.
 
-This document defines 18 ordered development cycles. Cycles 01–08 are completed
-(2026-11-02–03); cycles 09–18 remain planned. The existing prototype is a starting point, not proof
+This document defines 18 ordered development cycles. Cycles 01–09 are completed
+(2026-11-02–03); cycles 10–18 remain planned. The existing prototype is a starting point, not proof
 that the full scenario works. Each cycle should finish with working code,
 focused validation, updated documentation and a recorded result before its
 dependents begin. These are units of development, not calendar estimates.
@@ -89,14 +89,14 @@ The snippet shows the boundary, not an existing API or implementation.
   Cycle 04 links actor IDs and sidecar records to real beings. Cycle 08 uses
   those records for declared vocations, individual skills and job history.
   The counters do not represent a completed settlement logistics model.
-- Cycle 05 now gates both duration intentions and prototype gathering through
-  native clock/needs/action arbitration. Native movement no longer earns
+- Cycle 05 gates stationary work through native clock/needs/action arbitration.
+  Cycle 09 uses that gate for resumable DSL task operations. Native movement no longer earns
   opportunistic work simultaneously. Explicit stationary intentions are
   exercised by real-engine tests.
 - The graphical app now strictly validates bundled `first_slice.bronze` on
   startup and provides selection, active-file status and diagnostics. Successful
   loads reset native state with the scenario seed and apply terrain policy.
-  Declared occupations drive workplace assignments. Task dispatch is cycle 09.
+  Declared occupations drive workplace assignments and resumable task dispatch.
   The full scenario still fails strict compilation.
   The separate legacy `bronze-sim` CLI defaults to `content/bronze_age_full.bronze`
   when run from `bronze/`.
@@ -302,6 +302,9 @@ is inspectable in diagnostics; assignments survive compaction and do not fall
 back to anonymous proximity-based labor.
 
 ## Cycle 09 — Execute resumable profession rules and tasks
+
+**Status:** completed 2026-11-03. See [task execution](tasks/README.md)
+and [validation record](contract/RESULTS-CYCLE09.md).
 
 **Depends on:** cycles 03, 05 and 08.
 

@@ -14,6 +14,8 @@ struct BronzeActorRegistry {
     BronzeClock clock;
     BronzeLandscape landscape;
     BronzeProfessionPolicy professions, pending_professions;
+    BronzeProgram *program, *pending_program;
+    BronzeActorId first_world_id;
     BronzeReleaseClaim release;
     void* release_context;
 };
@@ -46,6 +48,8 @@ void bronze_actors_destroy(BronzeActorRegistry* r)
     if(active==r) active=NULL;
     if(direct_world==r) direct_world=NULL;
     for(i=0;i<LARGE_SIM;i++) dispose(r,&r->records[i]);
+    bronze_program_release(r->program);
+    bronze_program_release(r->pending_program);
     free(r);
 }
 static int is_current(const BronzeActorRegistry* r)
@@ -90,6 +94,9 @@ static int add(BronzeActorRegistry* r, simulated_being* being)
         BronzeActor* actor=&r->records[i];
         actor->id=r->next_id++; actor->vocation=BRONZE_KIND_NONE;
         actor->task=BRONZE_KIND_NONE;
+        if (r->program)
+            actor->execution.rng = ((uint64_t)r->program->config->seed << 32) ^
+                                   (actor->id - r->first_world_id);
         r->slots[slot]=actor; r->count++; return 1;
     }
     return 0;
@@ -114,6 +121,10 @@ int bronze_actors_reset(BronzeActorRegistry* r, simulated_group* group)
        (active ? active!=r : direct_world!=r)) return 0;
     r->group=group; r->native_bound=1;
     r->professions=r->pending_professions;
+    BronzeProgram *program = bronze_program_retain(r->pending_program);
+    bronze_program_release(r->program);
+    r->program = program;
+    r->first_world_id = r->next_id;
     r->clock.origin=r->clock.tick=(uint64_t)land_date()*TIME_DAY_MINUTES+land_time();
     for(i=0;i<group->num;i++) if(!add(r,&group->beings[i])) return 0;
     return 1;
@@ -243,12 +254,25 @@ int bronze_actor_set_job(BronzeActor* actor, uint32_t vocation, uint64_t workpla
             history[actor->history_count++] = (BronzeAssignment){tick, actor->vocation, vocation};
         }
     }
+    if (actor->execution.depth || actor->execution.operation) {
+        actor->execution.depth = 0;
+        actor->execution.operation = NULL;
+        actor->execution.target = 0;
+        actor->execution.status = BRONZE_TASK_CANCELLED;
+        actor->execution.retry_at = tick + TIME_HOUR_MINUTES;
+    } else {
+        actor->execution.name = actor->execution.action = NULL;
+        actor->execution.line = 0;
+        actor->execution.target = 0;
+        actor->execution.status = BRONZE_TASK_IDLE;
+        actor->execution.retry_at = 0;
+    }
     actor->vocation = vocation;
     actor->workplace = workplace;
     actor->task = BRONZE_KIND_NONE;
     actor->instruction = 0;
     actor->remaining_ticks = 0;
-    actor->work.running = actor->work.ever_ran = 0;
+    actor->work.running = actor->work.ever_ran = actor->work.resting = 0;
     return 1;
 }
 
@@ -258,4 +282,18 @@ void bronze_actor_practice(BronzeActor* actor, const BronzeProfessionPolicy* pol
     if (!skill) return;
     skill->value += policy->skill_gain;
     if (skill->value > policy->skill_max) skill->value = policy->skill_max;
+}
+
+
+void bronze_actors_stage_program(BronzeActorRegistry* registry, BronzeProgram* program)
+{
+    if (!registry) return;
+    bronze_program_retain(program);
+    bronze_program_release(registry->pending_program);
+    registry->pending_program = program;
+}
+
+const BronzeProgram* bronze_actors_program(const BronzeActorRegistry* registry)
+{
+    return registry ? registry->program : NULL;
 }

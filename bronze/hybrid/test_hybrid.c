@@ -1,5 +1,7 @@
 #include "bronze_hybrid.h"
 #include "../work/bronze_work.h"
+#include "../tasks/bronze_tasks.h"
+#include "../scenario/bronze_scenario.h"
 #include "../../universe/universe.h"
 #include "../../gui/gui.h"
 #include "../../shared.h"
@@ -19,6 +21,47 @@ static void check_pixel(n_int x, n_int y, n_byte color, void *context)
 static void advance_minutes(unsigned minutes)
 {
     for (unsigned minute = 0; minute < minutes; minute++) land_cycle();
+}
+
+static void task_tick(simulated_group *group)
+{
+    land_cycle();
+    bronze_work_begin(group);
+    bronze_tasks_begin(group);
+    bronze_work_end(group);
+    bronze_tasks_end(group);
+}
+
+static BronzeScenario *task_scenario(void)
+{
+    FILE *file = fopen("tasks.bronze", "w");
+    assert(file);
+    fputs("kinds { resources { grain } }\n"
+          "actions { action gather 1 2 action eat 1 2 action rest 0 0 action move_to 1 1 }\n"
+          "resources { resource grain { habitat field capacity 32 renew 0 nutrition 1 market_target 32 } }\n"
+          "world { seed 42 occupation_field_worker_weight 1 occupation_field_worker_workplace field "
+          "occupation_skill_start 2 occupation_skill_max 3 occupation_skill_gain 2 occupation_site_capacity 256 }\n"
+          "vocations { vocation field_worker {\n"
+          "task work {\n"
+          "move_to field\n"
+          "when hunger < 0.90 { chance 100 {\n"
+          "gather grain 4\n"
+          "} }\n"
+          "rest\n"
+          "when hunger > 0.25 {\n"
+          "eat grain 1\n"
+          "}\n"
+          "}\n"
+          "rule first { when prob 1 do work weight 3 }\n"
+          "rule backup { when prob 1 do work weight 1 }\n"
+          "rule never { when prob 0 do work weight 100 }\n"
+          "} }\n", file);
+    assert(!fclose(file));
+    BronzeScenario *scenario = bronze_scenario_create();
+    int loaded = bronze_scenario_load(scenario, "tasks.bronze", "task fixture");
+    if (!loaded) fprintf(stderr, "%s\n", bronze_scenario_diagnostics(scenario));
+    assert(loaded);
+    return scenario;
 }
 
 int main(void)
@@ -137,12 +180,11 @@ int main(void)
     being_set_state(&group->beings[0],BEING_STATE_AWAKE);
     being_energy_delta(&group->beings[0],BEING_FULL-being_energy(&group->beings[0]));
     memset(being_drives(&group->beings[0]),0,DRIVES);
-    BronzeProfessionPolicy professions = {
-        .count = 1, .min_age_days = AGE_OF_MATURITY, .site_capacity = 256,
-        .retry_minutes = 60, .skill_start = 2, .skill_max = 5, .skill_gain = 1,
-        .vocations = {{"field_worker", 1, BRONZE_JOB_FIELD}}
-    };
+    BronzeScenario *scenario = task_scenario();
+    BronzeProfessionPolicy professions = *bronze_scenario_professions(scenario);
     bronze_actors_stage_professions(bronze_actors_current(), &professions);
+    bronze_actors_stage_program(bronze_actors_current(), bronze_scenario_program(scenario));
+    bronze_scenario_destroy(scenario); /* The world owns the pending program now. */
     advance_minutes(720 - land_time());
     assert(bronze_actors_world_reset(group));
     bronze_hybrid_reset();
@@ -154,22 +196,39 @@ int main(void)
     location[0] = MAPSPACE_TO_APESPACE(sites[field].x);
     location[1] = MAPSPACE_TO_APESPACE(sites[field].y);
     being_set_location(&group->beings[0], location);
-    assert(being_awake(&group->beings[0]));
-    bronze_work_begin(group); bronze_work_end(group);
-    bronze_hybrid_cycle(group);
-    {
-        double before = bronze_hybrid_economy().grain;
-        bronze_hybrid_cycle(group);
-        assert(bronze_hybrid_economy().grain == before);
-    }
-    for (i = 0; i < 4; i++)
-    {
-        advance_minutes(TIME_HOUR_MINUTES);
-        bronze_work_begin(group); bronze_work_end(group);
-        bronze_hybrid_cycle(group);
-    }
-    assert(bronze_hybrid_economy().grain > 0);
-    assert(bronze_actor_skill(worker, 0) == 5);
+    uint64_t initial_rng = worker->execution.rng;
+    task_tick(group);
+    assert(worker->instruction == 1 && worker->remaining_ticks == 0);
+    assert(!strcmp(worker->execution.action, "move_to"));
+    task_tick(group);
+    assert(worker->remaining_ticks == 3 && worker->execution.target == worker->workplace);
+    uint64_t selected_rng = worker->execution.rng;
+    assert(selected_rng == initial_rng + UINT64_C(0x9e3779b97f4a7c15) * 5);
+    double before = sites[field].stock;
+    being_energy_delta(&group->beings[0], BEING_HUNGRY - being_energy(&group->beings[0]));
+    task_tick(group);
+    assert(worker->remaining_ticks == 3 && sites[field].stock == before);
+    assert(worker->execution.rng == selected_rng);
+    being_energy_delta(&group->beings[0], BEING_FULL - being_energy(&group->beings[0]));
+    for (i = 0; i < 3; i++) task_tick(group);
+    assert(worker->instruction == 2 && sites[field].stock == before - 4);
+    assert(worker->work.interruptions && worker->work.resumptions);
+    assert(bronze_actor_skill(worker, 0) == 3);
+    bronze_tasks_end(group);
+    assert(bronze_hybrid_economy().grain == 4 && sites[field].stock == before - 4);
+    being_drives(&group->beings[0])[DRIVE_FATIGUE] = 4;
+    n_int energy_before_rest = being_energy(&group->beings[0]);
+    task_tick(group);
+    assert(worker->remaining_ticks == 1);
+    task_tick(group);
+    assert(worker->instruction == 3 && being_drive(&group->beings[0], DRIVE_FATIGUE) == 3);
+    assert(being_energy(&group->beings[0]) == energy_before_rest);
+    being_drives(&group->beings[0])[DRIVE_HUNGER] = 100;
+    task_tick(group);
+    assert(worker->execution.status == BRONZE_TASK_UNSUPPORTED);
+    assert(!strcmp(worker->execution.action, "eat") && worker->instruction == 3);
+    task_tick(group);
+    assert(worker->execution.rng == selected_rng && bronze_hybrid_economy().grain == 4);
     const BronzePlace *production = bronze_hybrid_place(sites[field].place_id);
     assert(production && production->kind == BRONZE_PLACE_PRODUCTION && production->owner);
     for (unsigned i = 0; i < landscape->town_count; i++) {
@@ -184,17 +243,28 @@ int main(void)
     being_set_location(&group->beings[0], location);
     landscape->sites[copper].stock = 1;
     advance_minutes(TIME_HOUR_MINUTES);
-    bronze_work_begin(group); bronze_work_end(group);
-    bronze_hybrid_cycle(group);
-    assert(sites[copper].stock == 1);
-    double copper_stock = bronze_hybrid_economy().copper;
-    advance_minutes(TIME_DAY_MINUTES);
-    bronze_work_begin(group); bronze_work_end(group);
-    bronze_hybrid_cycle(group);
-    assert(sites[copper].stock == 1 && bronze_hybrid_economy().copper == copper_stock);
+    task_tick(group);
+    assert(worker->execution.status == BRONZE_TASK_TRAVEL);
+    assert(sites[copper].stock == 1 && bronze_hybrid_economy().copper == 0);
+
+    /* A reset with the same program, native actor ordering and needs replays
+       the same stochastic selection, despite new external actor/place IDs. */
+    location[0] = MAPSPACE_TO_APESPACE(sites[field].x);
+    location[1] = MAPSPACE_TO_APESPACE(sites[field].y);
+    being_set_location(&group->beings[0], location);
+    being_energy_delta(&group->beings[0], BEING_FULL - being_energy(&group->beings[0]));
+    memset(being_drives(&group->beings[0]), 0, DRIVES);
+    assert(bronze_actors_world_reset(group));
     bronze_hybrid_reset();
-    assert(bronze_hybrid_economy().grain == 0);
-    assert(bronze_hybrid_economy().tools == 0);
+    worker = bronze_actors_for_being(bronze_actors_current(), &group->beings[0]);
+    assert(worker->execution.rng == initial_rng);
+    task_tick(group);
+    task_tick(group);
+    assert(worker->execution.rng == selected_rng && worker->remaining_ticks == 3);
+    for (i = 0; i < 6; i++) task_tick(group);
+    assert(worker->execution.status == BRONZE_TASK_COMPLETE && worker->instruction == 3);
+    assert(bronze_hybrid_economy().grain == 4 && bronze_hybrid_economy().tools == 0);
+
     /* Force a housing shortage on the same dry cell. Existing homes are
        cleared by the world rebuild and only the available slots are filled. */
     const BronzePlace *home = bronze_hybrid_place(landscape->towns[0].home);
@@ -231,6 +301,7 @@ int main(void)
     assert(housed == reachable && housed > 0 && housed < group->num);
     /* Assign four service slots in a 3:1 ratio. The first being is a child
        and an unavailable coastal vocation cannot consume a slot. */
+    bronze_actors_stage_program(bronze_actors_current(), NULL);
     professions.count = 3;
     professions.site_capacity = 4;
     professions.vocations[0] = (BronzeVocation){"speaker", 3, BRONZE_JOB_SERVICE};

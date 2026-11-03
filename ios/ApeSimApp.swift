@@ -363,9 +363,9 @@ final class ApeSimulationSceneModel: ObservableObject {
             _ = shared_session_cycle(session, ticks, surface.identifier)
         }
 #if BRONZE_SIM
-        var buffer = [CChar](repeating: 0, count: 256)
+        var buffer = [CChar](repeating: 0, count: 512)
         let summary = buffer.withUnsafeMutableBufferPointer {
-            shared_session_bronze_actor_summary(session, $0.baseAddress, $0.count)
+            shared_session_bronze_actor_summary(session, $0.baseAddress, n_uint($0.count))
             return String(cString: $0.baseAddress!)
         }
         if bronzeSelectedActorSummary != summary { bronzeSelectedActorSummary = summary }
@@ -377,6 +377,7 @@ final class ApeSimulationSceneModel: ObservableObject {
 #if BRONZE_SIM
         shared_session_bronze_land_policy(session, bronzeScenario.landPolicy)
         shared_session_bronze_professions(session, bronzeScenario.professions)
+        shared_session_bronze_program(session, bronzeScenario.program)
         shared_session_new(session, bronzeScenario.seed)
 #else
         shared_session_new(session, n_uint(CFAbsoluteTimeGetCurrent()))
@@ -440,6 +441,7 @@ final class ApeSimulationSceneModel: ObservableObject {
 #if BRONZE_SIM
         shared_session_bronze_land_policy(session, bronzeScenario.landPolicy)
         shared_session_bronze_professions(session, bronzeScenario.professions)
+        shared_session_bronze_program(session, bronzeScenario.program)
         shared_session_init(session, n_int(NUM_CONTROL), bronzeScenario.seed)
 #else
         shared_session_init(session, n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))

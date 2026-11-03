@@ -115,8 +115,9 @@ static void consume(BronzeActor* a, simulated_being* b, uint64_t tick)
     BronzeWorkPhase phase=a->work.running?BRONZE_WORK_RUNNING:
         a->work.ever_ran?BRONZE_WORK_RESUMED:BRONZE_WORK_STARTED;
     a->work.consumed=1; a->work.units++; a->work.running=a->work.ever_ran=1;
-    being_energy_delta(b,-1); /* Real native cost; no second fatigue/energy store. */
+    if (!a->work.resting) being_energy_delta(b,-1); /* Real native cost; no second fatigue/energy store. */
     if(!a->remaining_ticks || --a->remaining_ticks==0) {
+        a->work.resting=0;
         phase=BRONZE_WORK_COMPLETED; a->task=BRONZE_KIND_NONE; a->work.running=0;
     }
     record(a,BRONZE_WORK_READY,phase,tick);

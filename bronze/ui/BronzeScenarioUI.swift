@@ -12,6 +12,7 @@ final class BronzeScenarioController: ObservableObject {
     @Published var showDiagnostics = false
     var landPolicy: BronzeLandPolicy { bronze_scenario_land_policy(storage) }
     var professions: UnsafePointer<BronzeProfessionPolicy>? { bronze_scenario_professions(storage) }
+    var program: OpaquePointer? { bronze_scenario_program(storage) }
     var seed: UInt { UInt(bronze_scenario_seed(storage)) }
 
     init(bundle: Bundle = .main) { self.bundle = bundle; _ = load("first_slice") }
@@ -61,7 +62,7 @@ struct BronzeScenarioPanel: View {
             VStack(alignment: .leading) {
                 Text(controller.activeName).font(.caption.bold())
                 Text(controller.lastAttemptFailed ? "Load failed; active scenario unchanged." :
-                     "Validated content; profession tasks are not active yet.")
+                     "Profession tasks run on the native simulation clock.")
                     .font(.caption)
                 Text(actorSummary)
                     .font(.caption).accessibilityIdentifier("BronzeActorIdentity")

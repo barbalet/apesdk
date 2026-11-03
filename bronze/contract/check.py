@@ -52,12 +52,15 @@ def audit():
     for path in ROOT.rglob('project.pbxproj'):
         if path != project:
             assert not re.search(r'\b(?:BRONZE_SIM|HIDE_THUNDER)\b', path.read_text()), path
+    # Compile the public header without relying on platform-specific transitive includes.
+    run(CC + ['-std=c99', '-x', 'c', '-fsyntax-only', '-DCOMMAND_LINE_EXPLICIT',
+              '-DBRONZE_SIM=1', ROOT / 'shared.h'])
     # This checks the compiler's actual result rather than trusting indentation.
     for name in ['universe/sim.c', 'universe/loop.c', 'universe/command.c', 'gui/draw.c', 'gui/shared.c', 'shared.h']:
         ordinary = run(CC + ['-E', '-P', '-DCOMMAND_LINE_EXPLICIT', ROOT / name])
         bronze = run(CC + ['-E', '-P', '-DCOMMAND_LINE_EXPLICIT', '-DBRONZE_SIM=1', ROOT / name])
-        assert not re.search(r'\b(?:bronze_\w+|shared_session_bronze_(?:actor_id|land_policy|professions|actor_summary))\b', ordinary), f'Bronze symbols leaked into {name}'
-        assert re.search(r'\b(?:bronze_(?:hybrid|actors)_\w+|shared_session_bronze_(?:actor_id|land_policy|professions|actor_summary))\b', bronze), f'Bronze hook absent in {name}'
+        assert not re.search(r'\b(?:bronze_\w+|shared_session_bronze_(?:actor_id|land_policy|professions|actor_summary|program))\b', ordinary), f'Bronze symbols leaked into {name}'
+        assert re.search(r'\b(?:bronze_(?:hybrid|actors)_\w+|shared_session_bronze_(?:actor_id|land_policy|professions|actor_summary|program))\b', bronze), f'Bronze hook absent in {name}'
     # One implementation of compiler support and native adapters, not forwarded C copies.
     for stem in ['brz_parser', 'brz_dsl', 'brz_kinds', 'brz_vec', 'brz_util']:
         assert not list((ROOT / 'bronze/runtime').glob(stem + '.*')), stem
@@ -68,7 +71,7 @@ def audit():
     paths = [objects[objects[x]['fileRef']]['path'] for x in sources['files']]
     for name in ['dsl/brz_parser.c', 'dsl/brz_dsl.c', 'dsl/brz_kinds.c', 'dsl/brz_vec.c', 'dsl/brz_util.c',
                  'adapter/bronze_apesdk_adapter.c', 'adapter/bronze_apesdk_compiled.c',
-                 'scenario/bronze_scenario.c', 'ui/BronzeScenarioUI.swift', 'actors/bronze_actors.c', 'work/bronze_work.c']:
+                 'scenario/bronze_scenario.c', 'ui/BronzeScenarioUI.swift', 'actors/bronze_actors.c', 'work/bronze_work.c', 'tasks/bronze_tasks.c']:
         assert paths.count('../../bronze/' + name) == 1, name
     resources = next(objects[x] for x in target['buildPhases'] if objects[x]['isa'] == 'PBXResourcesBuildPhase')
     bundled = [objects[objects[x]['fileRef']]['path'] for x in resources['files']]
@@ -136,7 +139,7 @@ def baselines(work, record):
         binary = work / mode
         extra = []
         if mode == 'bronze':
-            extra = [ROOT / 'bronze/hybrid/bronze_hybrid.c', ROOT / 'bronze/actors/bronze_actors.c', ROOT / 'bronze/work/bronze_work.c'] + [ROOT / 'gui' / (f + '.c') for f in ['draw','buffer','tutorial']]
+            extra = [ROOT / 'bronze/hybrid/bronze_hybrid.c', ROOT / 'bronze/actors/bronze_actors.c', ROOT / 'bronze/work/bronze_work.c', ROOT / 'bronze/tasks/bronze_tasks.c'] + [ROOT / 'gui' / (f + '.c') for f in ['draw','buffer','tutorial']]
         build(binary, sources + extra + [HERE / 'baseline.c'], flags)
         traces[mode] = []
         for seed in [42, 1337]:

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "../../gui/gui.h"
 #include "../work/bronze_work.h"
+#include "../tasks/bronze_tasks.h"
 
 /* Map analysis uses low-resolution cells and native toroidal coordinates. */
 typedef struct { n_byte slope, coast, moisture, relief; } TerrainCell;
@@ -478,56 +479,81 @@ void bronze_hybrid_cycle(simulated_group *group)
     if (!landscape) return;
     update_membership(landscape, group);
     update_professions(landscape, group, 0);
-    BronzeActorRegistry *registry = bronze_actors_current();
-    const BronzeProfessionPolicy *policy = bronze_actors_professions(registry);
-    n_uint i, j;
-    /* One economic sampling interval per simulated hour, independent of frames. */
     uint64_t tick = bronze_native_tick();
-    if (land_time() % 60 != 0 || tick == landscape->last_tick) return;
+    if (land_time() % TIME_HOUR_MINUTES != 0 || tick == landscape->last_tick) return;
     landscape->last_tick = tick;
-    if (land_date() != landscape->last_day)
-    {
-        for (j = 0; j < landscape->site_count; j++)
-            if (landscape->sites[j].kind == BRONZE_FIELD || landscape->sites[j].kind == BRONZE_WOODLAND)
-            {
-                landscape->sites[j].stock += 5;
-                if (landscape->sites[j].stock > landscape->sites[j].capacity) landscape->sites[j].stock = landscape->sites[j].capacity;
-            }
-        landscape->last_day = land_date();
+    if (land_date() == landscape->last_day) return;
+    for (n_uint i = 0; i < landscape->site_count; i++) {
+        bronze_site *site = &landscape->sites[i];
+        if (site->kind != BRONZE_FIELD && site->kind != BRONZE_WOODLAND) continue;
+        site->stock += 5;
+        if (site->stock > site->capacity) site->stock = site->capacity;
     }
-    for (i = 0; i < group->num; i++)
-    {
-        simulated_being *being = &group->beings[i];
-        BronzeActor *actor = bronze_actors_for_being(registry, being);
-        if (!actor || actor->job_status != BRONZE_JOB_ASSIGNED || !actor->home ||
-            actor->vocation >= policy->count || !being_awake(being)) continue;
-        n_int x = APESPACE_TO_MAPSPACE(being_location_x(being));
-        n_int y = APESPACE_TO_MAPSPACE(being_location_y(being));
-        for (j = 0; j < landscape->site_count; j++)
-        {
-            bronze_site *site = &landscape->sites[j];
-            if (site->place_id != actor->workplace || site->kind == BRONZE_TOWN || site->stock < 1) continue;
-            n_uint cell = 0;
-            while (cell < site->area && (site->cells[cell].x != x || site->cells[cell].y != y)) cell++;
-            if (cell == site->area) continue;
-            const BronzePlace *place = bronze_hybrid_place(site->place_id);
-            BronzeTownship *owner = place ? town_by_home(landscape, place->owner) : NULL;
-            if (!owner || owner->home != actor->home || !bronze_work_claim(being)) break;
-            site->stock -= 1;
-            switch (site->kind)
-            {
-                case BRONZE_FIELD: owner->stores.grain += 1; break;
-                case BRONZE_COPPER_MINE: owner->stores.copper += 1; break;
-                case BRONZE_TIN_MINE: owner->stores.tin += 1; break;
-                case BRONZE_WOODLAND: owner->stores.charcoal += 1; break;
-                default: break;
-            }
-            owner->stores.work_events++;
-            bronze_actor_practice(actor, policy);
-            break;
+    landscape->last_day = land_date();
+}
+
+static bronze_site *work_site(BronzeLandscape *landscape, uint64_t id)
+{
+    if (!landscape || !id) return NULL;
+    for (n_uint i = 0; i < landscape->site_count; i++)
+        if (landscape->sites[i].place_id == id && landscape->sites[i].kind != BRONZE_TOWN)
+            return &landscape->sites[i];
+    return NULL;
+}
+
+const bronze_site *bronze_task_work_site(uint64_t id)
+{
+    return work_site(current_landscape(), id);
+}
+
+const bronze_site *bronze_task_move_site(uint64_t home, uint64_t workplace, const char *terrain)
+{
+    BronzeLandscape *landscape = current_landscape();
+    if (!landscape || !home || !terrain) return NULL;
+    const BronzeTownship *town = town_by_home(landscape, home);
+    if (!town) return NULL;
+    const bronze_site *best = NULL;
+    uint32_t best_distance = UINT32_MAX;
+    static const char *types[] = {"", "field", "mine_copper", "mine_tin", "forest"};
+    for (n_uint i = 0; i < landscape->site_count; i++) {
+        const bronze_site *site = &landscape->sites[i];
+        if (site->kind == BRONZE_TOWN || strcmp(types[site->kind], terrain)) continue;
+        const BronzePlace *place = bronze_hybrid_place(site->place_id);
+        if (!place || place->owner != home) continue;
+        uint32_t distance = town->distance[map_cell(site->x, site->y)];
+        if (!distance) continue;
+        if (site->place_id == workplace) return site;
+        if (distance < best_distance) {
+            best = site;
+            best_distance = distance;
         }
     }
+    return best;
+}
 
+BronzeTaskStatus bronze_task_gather(uint64_t home, uint64_t target, const char *resource,
+                                   double quantity, int commit)
+{
+    BronzeLandscape *landscape = current_landscape();
+    bronze_site *site = work_site(landscape, target);
+    const BronzePlace *place = bronze_hybrid_place(target);
+    BronzeTownship *town = site && place && place->owner == home ? town_by_home(landscape, home) : NULL;
+    if (!town) return BRONZE_TASK_TARGET;
+    static const char *names[] = {"", "grain", "copper", "tin", "charcoal"};
+    if (!resource || strcmp(names[site->kind], resource)) return BRONZE_TASK_UNSUPPORTED;
+    if (!(quantity > 0) || quantity > site->stock) return BRONZE_TASK_STOCK;
+    if (commit) {
+        site->stock -= quantity;
+        switch (site->kind) {
+            case BRONZE_FIELD: town->stores.grain += quantity; break;
+            case BRONZE_COPPER_MINE: town->stores.copper += quantity; break;
+            case BRONZE_TIN_MINE: town->stores.tin += quantity; break;
+            case BRONZE_WOODLAND: town->stores.charcoal += quantity; break;
+            case BRONZE_TOWN: break;
+        }
+        town->stores.work_events++;
+    }
+    return BRONZE_TASK_RUNNING;
 }
 
 void bronze_hybrid_draw(n_int dimension, bronze_plot plot, void *context)

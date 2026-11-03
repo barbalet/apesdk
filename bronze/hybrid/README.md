@@ -77,11 +77,9 @@ capacity. Actors can have housing while waiting for work. See
 [occupation policy](../actors/PROFESSIONS.md).
 
 The township store is the source for grain, copper, tin, charcoal and tools.
-Prototype gathering reduces patch stock and credits the owner’s store when
-an assigned worker is on their own patch. Tool crafting awaits task dispatch.
-HUD figures are derived totals across the stores. The existing hourly
-prototype transfers goods directly to storage. Actor cargo and transport
-remain later cycles.
+The [task scheduler](../tasks/README.md) gathers through the assigned worker
+on their own patch and credits the owning township. HUD figures total the
+stores. Actor cargo, crafting and transport remain later cycles.
 
 | Optional `world` setting | Default | Range |
 | --- | ---: | --- |
