@@ -4,13 +4,14 @@
 #include <string.h>
 #include <stdio.h>
 #include "../../gui/gui.h"
+#include "../work/bronze_work.h"
 
 enum { SITE_COUNT = 10 };
 static bronze_site sites[SITE_COUNT];
 static bronze_economy economy;
 static n_uint site_count;
 static n_uint last_day;
-static n_uint last_tick;
+static uint64_t last_tick;
 
 void bronze_hybrid_reset(void)
 {
@@ -19,7 +20,7 @@ void bronze_hybrid_reset(void)
     memset(&economy, 0, sizeof(economy));
     site_count = 0;
     last_day = land_date();
-    last_tick = (n_uint)-1;
+    last_tick = UINT64_MAX;
     /* Fixed scan ordering makes placement repeatable for a given terrain.
        Keep every site above the maximum waterline, including tidal changes. */
     for (i = 0; i < SITE_COUNT; i++)
@@ -54,7 +55,7 @@ void bronze_hybrid_cycle(simulated_group *group)
 {
     n_uint i, j;
     /* One economic sampling interval per simulated hour, independent of frames. */
-    n_uint tick = (n_uint)land_date() * 1440u + land_time();
+    uint64_t tick = bronze_native_tick();
     if (land_time() % 60 != 0 || tick == last_tick) return;
     last_tick = tick;
     if (land_date() != last_day)
@@ -78,6 +79,7 @@ void bronze_hybrid_cycle(simulated_group *group)
             bronze_site *site = &sites[j];
             n_int dx = x - site->x, dy = y - site->y;
             if (dx * dx + dy * dy > 100 || site->kind == BRONZE_TOWN || site->stock < 1) continue;
+            if (!bronze_work_claim(being)) break;
             site->stock -= 1;
             switch (site->kind)
             {

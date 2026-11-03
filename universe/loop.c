@@ -34,6 +34,7 @@
 #include "universe.h"
 #ifdef BRONZE_SIM
 #include "../bronze/actors/bronze_actors.h"
+#include "../bronze/work/bronze_work.h"
 #endif
 
 #include <stdio.h>
@@ -1998,6 +1999,9 @@ void being_cycle_awake( simulated_group *group, simulated_being *local )
     being_territory_index( local );
 #endif
     being_mass_calculation( group, local, loc_state );
+#ifdef BRONZE_SIM
+    bronze_work_hold_position(local);
+#endif
 }
 
 void being_tidy_loop_no_sim( simulated_being *local_being, void *data )

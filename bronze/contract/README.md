@@ -233,3 +233,10 @@ has a resolvable registry identity, without changing the recorded scalar traces.
 The default suite includes actors/test.sh for real lifecycle, file-import and
 shared-session binding tests. See ../actors/README.md for the schema and the
 explicit full-native UBSan limitation.
+
+Cycle 05 audits unique work-module ownership in the Bronze Xcode target and
+links that module only into Bronze probes. The actor integration harness now
+also runs native-clock/needs/arbitration and real pause/redraw schedule tests.
+Only four Bronze resource rows were updated for movement/needs deferral;
+original native, CLI and AST baselines remain unchanged. See
+[cycle 05 evidence](RESULTS-CYCLE05.md) and [work policy](../work/README.md).

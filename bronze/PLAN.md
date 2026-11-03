@@ -1,6 +1,6 @@
 # BronzeSim on ApeSDK: full implementation plan
 
-Updated: 2026-11-02
+Updated: 2026-11-03
 
 ## Goal and completion criteria
 
@@ -18,8 +18,8 @@ interactions affect individuals, and saving/resuming restores the combined
 world deterministically. A large occupation list or decorative map markers
 alone does not satisfy this goal.
 
-This document defines 18 ordered development cycles. Cycles 01–04 are completed
-(2026-11-02); cycles 05–18 remain planned. The existing prototype is a starting point, not proof
+This document defines 18 ordered development cycles. Cycles 01–05 are completed
+(2026-11-02–03); cycles 06–18 remain planned. The existing prototype is a starting point, not proof
 that the full scenario works. Each cycle should finish with working code,
 focused validation, updated documentation and a recorded result before its
 dependents begin. These are units of development, not calendar estimates.
@@ -89,6 +89,10 @@ The snippet shows the boundary, not an existing API or implementation.
   schema for future professions, inventories and tasks. Those fields are
   unassigned/empty; production behavior is not implemented by adding the schema.
   The counters do not represent a completed settlement logistics model.
+- Cycle 05 now gates both duration intentions and prototype gathering through
+  native clock/needs/action arbitration. Native movement no longer earns
+  opportunistic work simultaneously. Professions and DSL dispatch remain
+  unassigned; explicit stationary intentions are exercised by real-engine tests.
 - The graphical app now strictly validates bundled `first_slice.bronze` on
   startup and provides selection, active-file status and diagnostics. Successful
   loads reset native state with the scenario seed; other scenario behavior is
@@ -205,6 +209,11 @@ live population, with Bronze records linked to its members.
 reordering or selection changes; deterministic identity allocation is tested.
 
 ## Cycle 05 — Build one clock, needs adapter and action arbitration policy
+
+**Status:** completed 2026-11-03. See [clock/needs/action contract](work/README.md)
+and [validation record](contract/RESULTS-CYCLE05.md). Stationary intentions and
+prototype gathering share a bounded native-tick budget; full task dispatch
+and navigation remain their later cycles.
 
 **Depends on:** cycle 04.
 
@@ -635,3 +644,26 @@ signing override. Distribution signing remains an explicit future configuration.
   allocator and actor records are not yet persisted across process/native-only
   loads. Full paired save/resume remains cycle 16. Prototype global economics
   and visual acceptance remain separately documented limitations.
+
+## Cycle 05 completion record (2026-11-03)
+
+- Added work/ with registry-owned native clock observations, day/duration
+  conversion, a native needs adapter, and explicit survival/sleep/obligation
+  precedence. No parallel biological or time integrator was introduced.
+- `#ifdef BRONZE_SIM` brackets work around native cycles and allows a safe
+  pending stationary intention to hold locomotion after native awake decisions.
+  Native feeding, reproduction, social actions, brains and metabolism continue;
+  without `BRONZE_SIM` the original path is retained exactly.
+- Sidecars record reasons, transitions, interruptions/resumptions, consumed
+  units and duration remaining. At most one unit per actor/native tick is
+  charged through native energy APIs; one-unit resumption/completion is covered.
+- Hourly prototype gathering uses the same grant. Only four Bronze resource
+  baseline rows change because moving/occupied beings no longer gather; native,
+  lightning, CLI and AST golden values remain unchanged.
+- Added real-engine tests for duration bounds, day rollover, discontinuities,
+  starvation/sleep/social interruption, actual feeding/resumption, locomotion
+  ownership, pause and differing real map/terrain draw schedules. Existing
+  identity/lifecycle/multi-session checks remain enabled with allocator poisoning.
+- Professions, DSL instruction scheduling, geographic navigation, actor cargo
+  and accounted food effects remain later work. Clock/sidecar persistence is
+  still paired-save cycle 16; prototype site/economy globals remain a limitation.

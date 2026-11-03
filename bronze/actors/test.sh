@@ -14,14 +14,16 @@ if [ "${SANITIZE:-0}" = 1 ]; then
     # sources and UBSan on the new identity layer and its integration harness.
     "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} -fsanitize=address -fno-omit-frame-pointer -c "${native_sources[@]}"
     "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} -fsanitize=address,undefined -fno-omit-frame-pointer -c \
-        "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c"
+        "$root/bronze/work/bronze_work.c" "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" "$root/bronze/work/test_work.c"
     "${CC:-cc}" -fsanitize=address,undefined ./*.o -lz -lm -lpthread -o actor-tests
 else
     "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} "${native_sources[@]}" \
-        "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" \
+        "$root/bronze/work/bronze_work.c" "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" "$root/bronze/work/test_work.c" \
         -lz -lm -lpthread -o actor-tests
 fi
 ./actor-tests
 # Exercise restores with nonzero allocation tails on both CI Linux and macOS.
 # Snapshots must not depend on malloc returning zero-filled storage.
 MALLOC_PERTURB_=165 MallocScribble=1 ./actor-tests sessions
+
+MALLOC_PERTURB_=165 MallocScribble=1 ./actor-tests work

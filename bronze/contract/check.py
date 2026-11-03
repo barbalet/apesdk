@@ -68,7 +68,7 @@ def audit():
     paths = [objects[objects[x]['fileRef']]['path'] for x in sources['files']]
     for name in ['dsl/brz_parser.c', 'dsl/brz_dsl.c', 'dsl/brz_kinds.c', 'dsl/brz_vec.c', 'dsl/brz_util.c',
                  'adapter/bronze_apesdk_adapter.c', 'adapter/bronze_apesdk_compiled.c',
-                 'scenario/bronze_scenario.c', 'ui/BronzeScenarioUI.swift', 'actors/bronze_actors.c']:
+                 'scenario/bronze_scenario.c', 'ui/BronzeScenarioUI.swift', 'actors/bronze_actors.c', 'work/bronze_work.c']:
         assert paths.count('../../bronze/' + name) == 1, name
     resources = next(objects[x] for x in target['buildPhases'] if objects[x]['isa'] == 'PBXResourcesBuildPhase')
     bundled = [objects[objects[x]['fileRef']]['path'] for x in resources['files']]
@@ -136,7 +136,7 @@ def baselines(work, record):
         binary = work / mode
         extra = []
         if mode == 'bronze':
-            extra = [ROOT / 'bronze/hybrid/bronze_hybrid.c', ROOT / 'bronze/actors/bronze_actors.c'] + [ROOT / 'gui' / (f + '.c') for f in ['draw','buffer','tutorial']]
+            extra = [ROOT / 'bronze/hybrid/bronze_hybrid.c', ROOT / 'bronze/actors/bronze_actors.c', ROOT / 'bronze/work/bronze_work.c'] + [ROOT / 'gui' / (f + '.c') for f in ['draw','buffer','tutorial']]
         build(binary, sources + extra + [HERE / 'baseline.c'], flags)
         traces[mode] = []
         for seed in [42, 1337]:

@@ -298,6 +298,7 @@
 				<string>A63E2A23A031E2CB04CBE016</string>
 				<string>D9CE04144962DC2B3182128E</string>
 				<string>A4A1485E513AC1CA7886328C</string>
+				<string>832B3616279368286CA948BF</string>
 			</array>
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<string>0</string>
@@ -1406,6 +1407,7 @@
 				<string>A96121392D0E070DF6CE8984</string>
 				<string>5D19DC78967BC5509AEED52F</string>
 				<string>4FE839768A27EB53AFA7BD9C</string>
+				<string>AEFEFF6BD4AA6530B7D39946</string>
 			</array>
 		</dict>
 		<key>4A212E682DCCAF95001F26AA</key>
@@ -1700,6 +1702,24 @@
 			<string>PBXBuildFile</string>
 			<key>fileRef</key>
 			<string>4FE839768A27EB53AFA7BD9C</string>
+		</dict>
+		<key>AEFEFF6BD4AA6530B7D39946</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/work/bronze_work.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>832B3616279368286CA948BF</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>AEFEFF6BD4AA6530B7D39946</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>

@@ -11,6 +11,7 @@ struct BronzeActorRegistry {
     uint64_t generation;
     size_t count;
     int native_bound;
+    BronzeClock clock;
     BronzeReleaseClaim release;
     void* release_context;
 };
@@ -97,6 +98,7 @@ void bronze_actors_invalidate(BronzeActorRegistry* r)
     r->native_bound=0; r->group=NULL;
     for(i=0;i<LARGE_SIM;i++) dispose(r,&r->records[i]);
     memset(r->slots,0,sizeof(r->slots)); r->count=0; r->generation++;
+    memset(&r->clock,0,sizeof(r->clock));
 }
 int bronze_actors_reset(BronzeActorRegistry* r, simulated_group* group)
 {
@@ -106,6 +108,7 @@ int bronze_actors_reset(BronzeActorRegistry* r, simulated_group* group)
     if(!group || group->num>LARGE_SIM || r->next_id>UINT64_MAX-group->num-1 ||
        (active ? active!=r : direct_world!=r)) return 0;
     r->group=group; r->native_bound=1;
+    r->clock.origin=r->clock.tick=(uint64_t)land_date()*TIME_DAY_MINUTES+land_time();
     for(i=0;i<group->num;i++) if(!add(r,&group->beings[i])) return 0;
     return 1;
 }
@@ -113,6 +116,7 @@ void bronze_actors_release_handler(BronzeActorRegistry* r, BronzeReleaseClaim ha
 { if(r) { r->release=handler; r->release_context=context; } }
 size_t bronze_actors_count(const BronzeActorRegistry* r) { return r?r->count:0; }
 uint64_t bronze_actors_generation(const BronzeActorRegistry* r) { return r?r->generation:0; }
+BronzeClock* bronze_actors_clock(BronzeActorRegistry* r) { return r?&r->clock:NULL; }
 BronzeActorId bronze_actors_next_id(const BronzeActorRegistry* r) { return r?r->next_id:0; }
 int bronze_actors_bind_order(BronzeActorRegistry* r, simulated_group* group, const BronzeActorId* ids, size_t count)
 {

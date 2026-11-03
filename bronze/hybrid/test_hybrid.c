@@ -1,4 +1,5 @@
 #include "bronze_hybrid.h"
+#include "../work/bronze_work.h"
 #include "../../universe/universe.h"
 #include "../../gui/gui.h"
 #include "../../shared.h"
@@ -59,8 +60,14 @@ int main(void)
     location[0] = MAPSPACE_TO_APESPACE(sites[1].x);
     location[1] = MAPSPACE_TO_APESPACE(sites[1].y);
     being_set_location(&group->beings[0], location);
+    being_set_speed(&group->beings[0],0);
+    being_set_state(&group->beings[0],BEING_STATE_AWAKE);
+    being_energy_delta(&group->beings[0],BEING_FULL-being_energy(&group->beings[0]));
+    memset(being_drives(&group->beings[0]),0,DRIVES);
     land_load_state(42, 720, seed);
+    assert(bronze_actors_world_reset(group));
     assert(being_awake(&group->beings[0]));
+    bronze_work_begin(group); bronze_work_end(group);
     bronze_hybrid_cycle(group);
     {
         double before = bronze_hybrid_economy()->grain;
@@ -69,7 +76,8 @@ int main(void)
     }
     for (i = 1; i < 220; i++)
     {
-        land_load_state(42 + i / 24, (720 + (i % 24) * 60) % 1440, seed);
+        land_load_state(43 + i / 8, 480 + (i % 8) * 60, seed);
+        bronze_work_begin(group); bronze_work_end(group);
         bronze_hybrid_cycle(group);
     }
     assert(bronze_hybrid_economy()->grain > 0);

@@ -192,5 +192,11 @@ static void sessions(void)
     shared_session_destroy(b); shared_close();
     puts("Independent shared-session registry, selection, reset and destruction tests passed.");
 }
+void bronze_test_work(void);
 int main(int argc, char** argv)
-{ if(argc>1 && !strcmp(argv[1],"sessions")) sessions(); else lifecycle(); return 0; }
+{
+    if(argc>1 && !strcmp(argv[1],"sessions")) sessions();
+    else if(argc>1 && !strcmp(argv[1],"work")) bronze_test_work();
+    else lifecycle();
+    return 0;
+}

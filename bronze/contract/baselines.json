@@ -6,19 +6,19 @@
       "BASE bronze 42 1 10 5bdccbfd7963d8ce 0 0 0 0 0 0",
       "BASE native 42 60 4368 360 128 70292 a82a5c8920fb5d8b 6c5d94b9d04c586e ea84ed357a2df7f9",
       "BASE lightning 42 60 7ab6a128b6a22325",
-      "BASE bronze 42 60 10 fdf8ed01f356b061 2 0 1 0 0 3",
+      "BASE bronze 42 60 10 5bdccbfd7963d8ce 0 0 0 0 0 0",
       "BASE native 42 120 4368 420 128 70292 ee6154de2b4e408e 6c5d94b9d04c586e 40534c18bf2e58b8",
       "BASE lightning 42 120 7ab6a128b6a22325",
-      "BASE bronze 42 120 10 fc8f1fec3a5a2a9b 5 0 2 0 0 7",
+      "BASE bronze 42 120 10 5bdccbfd7963d8ce 0 0 0 0 0 0",
       "BASE native 1337 1 4368 301 128 70292 54abe6af32b96cfa 5b9162328ca3a25b 2d04f5050cbb2142",
       "BASE lightning 1337 1 7ab6a128b6a22325",
       "BASE bronze 1337 1 10 1a6b0446aa153a1a 0 0 0 0 0 0",
       "BASE native 1337 60 4368 360 128 70292 10f9fb91deb6dbef 5b9162328ca3a25b 06344341773bd31c",
       "BASE lightning 1337 60 7ab6a128b6a22325",
-      "BASE bronze 1337 60 10 e53d10b0290df7b3 3 0 0 0 0 3",
+      "BASE bronze 1337 60 10 1a6b0446aa153a1a 0 0 0 0 0 0",
       "BASE native 1337 120 4368 420 128 70292 d220b72907459874 5b9162328ca3a25b 56f84de1e63d22fe",
       "BASE lightning 1337 120 7ab6a128b6a22325",
-      "BASE bronze 1337 120 10 c8f39ab7935a2bf3 3 1 0 1 0 5"
+      "BASE bronze 1337 120 10 1a6b0446aa153a1a 0 0 0 0 0 0"
     ],
     "native": [
       "BASE native 42 1 4368 301 128 70292 eab5dabcc1084e2b 6c5d94b9d04c586e 8f7d49d8ecb7dfe0",

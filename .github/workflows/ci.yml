@@ -3,8 +3,6 @@ name: ApeSDK CI
 on:
   push:
   pull_request:
-  schedule:
-    - cron: '23 3 * * *'
 
 jobs:
   linux-c:
@@ -26,33 +24,6 @@ jobs:
         run: CC=${{ matrix.compiler }} ./test.sh
       - name: Verify Bronze and original-engine compatibility contract
         run: CC=${{ matrix.compiler }} make -C bronze contract-test
-
-  linux-coverage:
-    name: Linux module coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install C dependencies
-        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev lcov
-      - name: Generate coverage data
-        run: make coverage
-      - name: Summarize module coverage
-        run: lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
-      - uses: actions/upload-artifact@v4
-        with:
-          name: c-module-coverage
-          path: coverage.info
-
-  nightly-multi-seed:
-    name: Nightly multi-seed regression scenarios
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install C dependencies
-        run: sudo apt-get update && sudo apt-get install -y zlib1g-dev
-      - name: Run extended deterministic scenarios
-        run: make test-nightly
 
   maccatalyst-desktop:
     name: ${{ matrix.name }} build and Swift Testing

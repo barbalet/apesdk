@@ -15,6 +15,7 @@ cycle 01. The original ApeSDK engine remains independent of these modules.
 | `adapter/bronze_apesdk_compiled.{h,c}` | Restricted compiled-task pilot executor | Native harness and bronze-mac build |
 | `actors/` | Registry-scoped native being IDs, owned sidecar schema and lifecycle/binding APIs | BRONZE_SIM hooks, native adapter factory and selected-being bridge |
 | `hybrid/` | Current graphical site/economy/HUD prototype | BRONZE_SIM native hooks only |
+| `work/` | Native clock/needs observation, bounded stationary intentions and action arbitration | Guarded sim-cycle/awake hooks; registry-owned state |
 | `scenario-runtime/` | Small neutral view/event/service-fixture contract | Adapter; source-only, no ApeSDK-owned structs |
 
 The old root `bronze_apesdk_adapter.h` and `bronze_apesdk_compiled.h` are
@@ -74,7 +75,9 @@ scenario loading must choose strict compilation and report its actual failures.
   historical `runtime` and `dsl` keys now mean compatibility and strict profiles
   of the canonical compiler; the full file remains rejected in strict mode.
 - `contract/baselines.json` remains unchanged for original native, native with
-  HIDE_THUNDER, and the Bronze graphical prototype.
+  HIDE_THUNDER, and (through cycle 04) the Bronze graphical prototype. Cycle 05
+  updates only Bronze resource rows for the new work gate; original values
+  remain pinned.
 - No resource identifiers, action meanings, native being layout or native save
   fields changed. Parameter-prefix mismatches and incomplete explicit eat/deposit
   behavior are still documented gaps, not fixed incidentally by this refactor.

@@ -123,6 +123,12 @@ prototype economy remains separate, including its previously documented
 file-static site/economy limitation for independent worlds. This cycle isolates
 actor records, not all future Bronze world state.
 
+Cycle 05 adds registry-owned native clock observations and per-actor work
+diagnostics/budget state. Duration intentions can now progress through guarded
+native arbitration without implementing the DSL occupation scheduler. These
+fields follow the same identity, world-switch and retirement rules described
+above; see [work policy](../work/README.md).
+
 ```sh
 bash bronze/actors/test.sh
 SANITIZE=1 UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 bash bronze/actors/test.sh

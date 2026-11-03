@@ -3,6 +3,7 @@
 #include "../../universe/universe.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "../work/bronze_work_types.h"
 
 /* IDs are scoped to the owning registry/world, never native slots or names. */
 typedef uint64_t BronzeActorId;
@@ -23,6 +24,7 @@ typedef struct {
     BronzeStock* items; size_t item_count;
     BronzeReservation* reservations; size_t reservation_count;
     BronzeAssignment* history; size_t history_count;
+    BronzeWorkState work;
 } BronzeActor;
 typedef struct BronzeActorRegistry BronzeActorRegistry;
 typedef void (*BronzeReleaseClaim)(void* context, BronzeActorId actor, const BronzeReservation* claim);
@@ -37,6 +39,7 @@ BronzeActor* bronze_actors_for_being(BronzeActorRegistry*, const simulated_being
 simulated_being* bronze_actors_resolve(BronzeActorRegistry*, BronzeActorId);
 size_t bronze_actors_count(const BronzeActorRegistry*);
 uint64_t bronze_actors_generation(const BronzeActorRegistry*);
+BronzeClock* bronze_actors_clock(BronzeActorRegistry*);
 BronzeActorId bronze_actors_next_id(const BronzeActorRegistry*);
 /* Explicit permutation for hosts that reorder a complete native population.
    The ordered IDs must match the resulting native array; validate before use. */
