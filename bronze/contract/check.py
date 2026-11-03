@@ -56,8 +56,8 @@ def audit():
     for name in ['universe/sim.c', 'universe/loop.c', 'universe/command.c', 'gui/draw.c', 'gui/shared.c', 'shared.h']:
         ordinary = run(CC + ['-E', '-P', '-DCOMMAND_LINE_EXPLICIT', ROOT / name])
         bronze = run(CC + ['-E', '-P', '-DCOMMAND_LINE_EXPLICIT', '-DBRONZE_SIM=1', ROOT / name])
-        assert not re.search(r'\b(?:bronze_\w+|shared_session_bronze_actor_id)\b', ordinary), f'Bronze symbols leaked into {name}'
-        assert re.search(r'\b(?:bronze_(?:hybrid|actors)_\w+|shared_session_bronze_actor_id)\b', bronze), f'Bronze hook absent in {name}'
+        assert not re.search(r'\b(?:bronze_\w+|shared_session_bronze_(?:actor_id|land_policy|professions|actor_summary))\b', ordinary), f'Bronze symbols leaked into {name}'
+        assert re.search(r'\b(?:bronze_(?:hybrid|actors)_\w+|shared_session_bronze_(?:actor_id|land_policy|professions|actor_summary))\b', bronze), f'Bronze hook absent in {name}'
     # One implementation of compiler support and native adapters, not forwarded C copies.
     for stem in ['brz_parser', 'brz_dsl', 'brz_kinds', 'brz_vec', 'brz_util']:
         assert not list((ROOT / 'bronze/runtime').glob(stem + '.*')), stem

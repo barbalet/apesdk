@@ -412,6 +412,9 @@ void tile_cycle( n_land *land );
 void tile_lightning( n_land *land );
 
 void tile_weather_init( n_land *land );
+#ifdef BRONZE_SIM
+void tile_weather_restore_pressure(n_land *land);
+#endif
 
 void tile_land_init( n_land *land );
 void tile_land_erase( n_land *land );

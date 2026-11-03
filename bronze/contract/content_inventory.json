@@ -1610,7 +1610,7 @@
   "first_slice.bronze": {
     "dsl": {
       "accepted": true,
-      "ast_sha256": "e1b42b7a76bcb914a5af56fd4fd5be1fbf7456fa07e1a8e99ae10b7d2cd7e56b",
+      "ast_sha256": "b49c5bed849a9686a100ffdf97312a236f09eb4407a3854017f1ecb7dec2b8c4",
       "constructs": [
         [
           "accepted",
@@ -1739,6 +1739,90 @@
           "",
           "0",
           "0"
+        ],
+        [
+          "param",
+          "world_field_coast",
+          "48",
+          ""
+        ],
+        [
+          "param",
+          "world_field_moisture",
+          "64",
+          ""
+        ],
+        [
+          "param",
+          "world_field_slope",
+          "6",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_bronze_smith_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_bronze_smith_workplace",
+          "0",
+          "service"
+        ],
+        [
+          "param",
+          "world_occupation_farmer_weight",
+          "3",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_farmer_workplace",
+          "0",
+          "field"
+        ],
+        [
+          "param",
+          "world_occupation_fisher_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_fisher_workplace",
+          "0",
+          "coast"
+        ],
+        [
+          "param",
+          "world_ore_relief",
+          "12",
+          ""
+        ],
+        [
+          "param",
+          "world_patch_initial_per_cell",
+          "8",
+          ""
+        ],
+        [
+          "param",
+          "world_tin_height",
+          "205",
+          ""
+        ],
+        [
+          "param",
+          "world_woodland_moisture",
+          "45",
+          ""
+        ],
+        [
+          "param",
+          "world_woodland_slope",
+          "18",
+          ""
         ],
         [
           "policy",
@@ -1870,6 +1954,7 @@
         "input": 4,
         "item_kind": 2,
         "op": 8,
+        "param": 14,
         "policy": 1,
         "recipe": 2,
         "resource": 7,
@@ -1888,7 +1973,7 @@
     },
     "runtime": {
       "accepted": true,
-      "ast_sha256": "e1b42b7a76bcb914a5af56fd4fd5be1fbf7456fa07e1a8e99ae10b7d2cd7e56b",
+      "ast_sha256": "b49c5bed849a9686a100ffdf97312a236f09eb4407a3854017f1ecb7dec2b8c4",
       "constructs": [
         [
           "accepted",
@@ -2017,6 +2102,90 @@
           "",
           "0",
           "0"
+        ],
+        [
+          "param",
+          "world_field_coast",
+          "48",
+          ""
+        ],
+        [
+          "param",
+          "world_field_moisture",
+          "64",
+          ""
+        ],
+        [
+          "param",
+          "world_field_slope",
+          "6",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_bronze_smith_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_bronze_smith_workplace",
+          "0",
+          "service"
+        ],
+        [
+          "param",
+          "world_occupation_farmer_weight",
+          "3",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_farmer_workplace",
+          "0",
+          "field"
+        ],
+        [
+          "param",
+          "world_occupation_fisher_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_fisher_workplace",
+          "0",
+          "coast"
+        ],
+        [
+          "param",
+          "world_ore_relief",
+          "12",
+          ""
+        ],
+        [
+          "param",
+          "world_patch_initial_per_cell",
+          "8",
+          ""
+        ],
+        [
+          "param",
+          "world_tin_height",
+          "205",
+          ""
+        ],
+        [
+          "param",
+          "world_woodland_moisture",
+          "45",
+          ""
+        ],
+        [
+          "param",
+          "world_woodland_slope",
+          "18",
+          ""
         ],
         [
           "policy",
@@ -2148,6 +2317,7 @@
         "input": 4,
         "item_kind": 2,
         "op": 8,
+        "param": 14,
         "policy": 1,
         "recipe": 2,
         "resource": 7,
@@ -2164,12 +2334,12 @@
         "bronze_smith"
       ]
     },
-    "sha256": "86f8252bc69ec0ba5da165a0b4fade8a83a14cc8cc59268e0b529e7d3043d97c"
+    "sha256": "9922dedf805a6916548bfe7845a444fd95f989305fe5f9b72103f46089a47691"
   },
   "vertical_slice.bronze": {
     "dsl": {
       "accepted": true,
-      "ast_sha256": "7d4fbf1694fab5f77af45c4c9eac4fd26f572a7aeb7f2558db2f435068ff6a75",
+      "ast_sha256": "505624ffedca79efdda4c64f5e6de815609b41fa05b4f1b9ad92db5e83b1e840",
       "constructs": [
         [
           "accepted",
@@ -2355,6 +2525,48 @@
           "",
           "0",
           "0"
+        ],
+        [
+          "param",
+          "world_occupation_farmer_weight",
+          "3",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_farmer_workplace",
+          "0",
+          "field"
+        ],
+        [
+          "param",
+          "world_occupation_fisher_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_fisher_workplace",
+          "0",
+          "coast"
+        ],
+        [
+          "param",
+          "world_occupation_smith_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_smith_workplace",
+          "0",
+          "service"
+        ],
+        [
+          "param",
+          "world_patch_initial_per_cell",
+          "8",
+          ""
         ],
         [
           "policy",
@@ -2467,6 +2679,7 @@
         "input": 3,
         "item_kind": 1,
         "op": 14,
+        "param": 7,
         "policy": 1,
         "recipe": 1,
         "resource": 6,
@@ -2485,7 +2698,7 @@
     },
     "runtime": {
       "accepted": true,
-      "ast_sha256": "6ec9ee0ca2ce643ed2cb34c42b37a885365e94867963141e53c8d3924d946c55",
+      "ast_sha256": "e6941763d362e4be4df1432ce6b2f10568ae47121f3fcfd132d6b07620a6fc2e",
       "constructs": [
         [
           "accepted",
@@ -2673,6 +2886,48 @@
           "0"
         ],
         [
+          "param",
+          "world_occupation_farmer_weight",
+          "3",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_farmer_workplace",
+          "0",
+          "field"
+        ],
+        [
+          "param",
+          "world_occupation_fisher_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_fisher_workplace",
+          "0",
+          "coast"
+        ],
+        [
+          "param",
+          "world_occupation_smith_weight",
+          "1",
+          ""
+        ],
+        [
+          "param",
+          "world_occupation_smith_workplace",
+          "0",
+          "service"
+        ],
+        [
+          "param",
+          "world_patch_initial_per_cell",
+          "8",
+          ""
+        ],
+        [
           "policy",
           "",
           "0",
@@ -2783,6 +3038,7 @@
         "input": 3,
         "item_kind": 1,
         "op": 14,
+        "param": 7,
         "policy": 1,
         "recipe": 1,
         "resource": 6,
@@ -2799,6 +3055,6 @@
         "smith"
       ]
     },
-    "sha256": "2b11ecc67880a53dda73c2be8175e42c0f1ba01b0b75fe7e74bdb5851233f977"
+    "sha256": "fe4273ba4ff918df309da166faef8e4795ba63fb7bbc5d4ee8b094242475b451"
   }
 }

@@ -11,8 +11,8 @@ native_sources=("$root"/toolkit/*.c "$root"/script/*.c "$root"/render/*.c
     "$root/bronze/scenario-runtime/src/scenario_runtime.c")
 if [ "${SANITIZE:-0}" = 1 ]; then
     # Original native genetics has known signed-shift UB. Keep ASan across all
-    # sources and UBSan on the new identity layer and its integration harness.
-    "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} -fsanitize=address -fno-omit-frame-pointer -c "${native_sources[@]}"
+    # sources, division checks on native code, and UBSan on the new layers.
+    "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} -fsanitize=address,integer-divide-by-zero -fno-omit-frame-pointer -c "${native_sources[@]}"
     "${CC:-cc}" "${common[@]}" ${ACTOR_TEST_FLAGS:-} -fsanitize=address,undefined -fno-omit-frame-pointer -c \
         "$root/bronze/work/bronze_work.c" "$root/bronze/actors/bronze_actors.c" "$root/bronze/actors/test_actors.c" "$root/bronze/work/test_work.c"
     "${CC:-cc}" -fsanitize=address,undefined ./*.o -lz -lm -lpthread -o actor-tests

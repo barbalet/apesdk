@@ -66,17 +66,37 @@ static void sample(unsigned seed, unsigned cycle)
     {
         n_uint count;
         const bronze_site *sites = bronze_hybrid_sites(&count);
-        const bronze_economy *economy = bronze_hybrid_economy();
+        bronze_economy economy = bronze_hybrid_economy();
         uint64_t hash = UINT64_C(14695981039346656037);
+        const BronzeLandscape *landscape = bronze_actors_landscape(registry);
+        for (unsigned j = 0; j < landscape->place_count; j++) {
+            const BronzePlace *place = &landscape->places[j];
+            hash = mix(hash, place->id);
+            hash = mix(hash, place->owner);
+            hash = mix(hash, place->kind);
+        }
+        for (i = 0; i < group->num; i++) {
+            const BronzeActor *actor = bronze_actors_for_being(registry, &group->beings[i]);
+            assert(!actor->home || bronze_hybrid_place(actor->home));
+            assert(!actor->workplace || bronze_hybrid_place(actor->workplace));
+            hash = mix(hash, actor->home);
+            hash = mix(hash, actor->workplace);
+        }
         for (i = 0; i < count; i++)
         {
             hash = mix(hash, sites[i].x); hash = mix(hash, sites[i].y);
             hash = mix(hash, sites[i].kind); hash = mix(hash, (uint64_t)sites[i].stock);
+            hash = mix(hash, (uint64_t)sites[i].capacity);
+            hash = mix(hash, sites[i].area);
+            for (n_uint j = 0; j < sites[i].area; j++) {
+                hash = mix(hash, sites[i].cells[j].x);
+                hash = mix(hash, sites[i].cells[j].y);
+            }
         }
         printf("BASE bronze %u %u %lu %016llx %.0f %.0f %.0f %.0f %.0f %lu\n",
                seed, cycle, (unsigned long)count, (unsigned long long)hash,
-               economy->grain, economy->copper, economy->tin, economy->charcoal,
-               economy->tools, (unsigned long)economy->work_events);
+               economy.grain, economy.copper, economy.tin, economy.charcoal,
+               economy.tools, (unsigned long)economy.work_events);
     }
 #endif
 }

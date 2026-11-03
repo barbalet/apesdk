@@ -432,6 +432,11 @@ n_byte *land_weather_lightning( n_int tile )
 
 void weather_cycle( void )
 {
+#ifdef BRONZE_SIM
+    /* A native load clears derived weather state for every tile. */
+    if (!m_land.tiles[0].delta_pressure_highest)
+        tile_weather_restore_pressure(&m_land);
+#endif
     tile_cycle( &m_land );
     tile_wind( &m_land );
     tile_lightning( &m_land );

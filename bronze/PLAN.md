@@ -18,8 +18,8 @@ interactions affect individuals, and saving/resuming restores the combined
 world deterministically. A large occupation list or decorative map markers
 alone does not satisfy this goal.
 
-This document defines 18 ordered development cycles. Cycles 01–05 are completed
-(2026-11-02–03); cycles 06–18 remain planned. The existing prototype is a starting point, not proof
+This document defines 18 ordered development cycles. Cycles 01–08 are completed
+(2026-11-02–03); cycles 09–18 remain planned. The existing prototype is a starting point, not proof
 that the full scenario works. Each cycle should finish with working code,
 focused validation, updated documentation and a recorded result before its
 dependents begin. These are units of development, not calendar estimates.
@@ -81,22 +81,23 @@ The snippet shows the boundary, not an existing API or implementation.
 - `bronze-mac` builds a separate `BronzeSim.app`, bundle identifier
   `com.apesdk.bronze-mac`, using the existing Catalyst Swift shell and native C
   sources. It has a shared Debug/Release scheme with LLDB Run support.
-- `hybrid/` currently places ten point sites by scan order above height 150,
-  with spacing. Site types repeat; slope, moisture and geography do not yet
-  distinguish fields, woodland, mines or townships.
-- Nearby awake native beings contribute to aggregate resource counters.
-  Cycle 04 now links actor IDs and sidecar records to real beings, with the
-  schema for future professions, inventories and tasks. Those fields are
-  unassigned/empty; production behavior is not implemented by adding the schema.
+- `hybrid/` derives connected field, woodland, copper and tin patches from
+  native terrain. Each world owns its patches, townships and finite stocks.
+- Townships reserve housing on reachable dry land near food, woodland and water.
+  Assigned workers can gather at their own production patches and credit the
+  owner’s stores. The HUD totals those stores.
+  Cycle 04 links actor IDs and sidecar records to real beings. Cycle 08 uses
+  those records for declared vocations, individual skills and job history.
   The counters do not represent a completed settlement logistics model.
 - Cycle 05 now gates both duration intentions and prototype gathering through
   native clock/needs/action arbitration. Native movement no longer earns
-  opportunistic work simultaneously. Professions and DSL dispatch remain
-  unassigned; explicit stationary intentions are exercised by real-engine tests.
+  opportunistic work simultaneously. Explicit stationary intentions are
+  exercised by real-engine tests.
 - The graphical app now strictly validates bundled `first_slice.bronze` on
   startup and provides selection, active-file status and diagnostics. Successful
-  loads reset native state with the scenario seed; other scenario behavior is
-  staged, not executed. The full scenario still fails strict compilation.
+  loads reset native state with the scenario seed and apply terrain policy.
+  Declared occupations drive workplace assignments. Task dispatch is cycle 09.
+  The full scenario still fails strict compilation.
   The separate legacy `bronze-sim` CLI defaults to `content/bronze_age_full.bronze`
   when run from `bronze/`.
 - Cycle 02 consolidated compiler/AST/support ownership in `dsl/` and native
@@ -234,6 +235,9 @@ starvation/sleep interrupt work; changing render rate does not change outcomes.
 
 ## Cycle 06 — Derive a coherent Bronze landscape from ApeSDK terrain
 
+**Status:** completed 2026-11-03. See [landscape rules](hybrid/README.md)
+and [validation record](contract/RESULTS-CYCLE06.md).
+
 **Depends on:** cycles 03 and 05.
 
 Replace scan-order site typing with deterministic terrain analysis. Derive
@@ -252,6 +256,9 @@ in scenario content; do not treat elevation alone as geology or forest cover.
 constraints; woodland is an area; deposits are bounded and have explicit types.
 
 ## Cycle 07 — Place townships, workplaces and settlement ownership
+
+**Status:** completed 2026-11-03. See [township rules](hybrid/README.md)
+and [validation record](contract/RESULTS-CYCLE07.md).
 
 **Depends on:** cycles 04 and 06.
 
@@ -272,6 +279,9 @@ reset clears assignments; no resources appear merely from site creation unless
 specified as initial scenario stock.
 
 ## Cycle 08 — Assign professions and track individual skills
+
+**Status:** completed 2026-11-03. See [occupation policy](actors/PROFESSIONS.md)
+and [validation record](contract/RESULTS-CYCLE08.md).
 
 **Depends on:** cycles 04, 05 and 07.
 

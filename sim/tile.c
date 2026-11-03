@@ -845,6 +845,29 @@ void tile_wind( n_land *land )
     }
 }
 
+#ifdef BRONZE_SIM
+void tile_weather_restore_pressure(n_land *land)
+{
+    /* Native saves carry height and atmosphere, but omit this derived map. */
+    for (n_int tile = 0; tile < MAP_TILES; tile++) {
+        n_tile *current = &land->tiles[tile];
+        current->delta_pressure_lowest = 0xffff;
+        current->delta_pressure_highest = 1;
+        for (n_int y = 0; y < MAP_DIMENSION; y++) {
+            for (n_int x = 0; x < MAP_DIMENSION; x++) {
+                n_int gradient = tiles_topography(land, tile, 0, x + 1, y)
+                               - tiles_topography(land, tile, 0, x - 1, y)
+                               + tiles_topography(land, tile, 0, x, y + 1)
+                               - tiles_topography(land, tile, 0, x, y - 1);
+                n_byte2 pressure = (n_byte2)(512 + 4 * gradient);
+                tiles_set_pressure(land, tile, x, y, pressure);
+                tile_pressure_range(current, pressure);
+            }
+        }
+    }
+}
+#endif
+
 void tile_weather_init( n_land *land )
 {
     n_int tile = 0;

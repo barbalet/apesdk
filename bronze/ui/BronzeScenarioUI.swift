@@ -10,6 +10,8 @@ final class BronzeScenarioController: ObservableObject {
     @Published private(set) var diagnostics = ""
     @Published private(set) var lastAttemptFailed = false
     @Published var showDiagnostics = false
+    var landPolicy: BronzeLandPolicy { bronze_scenario_land_policy(storage) }
+    var professions: UnsafePointer<BronzeProfessionPolicy>? { bronze_scenario_professions(storage) }
     var seed: UInt { UInt(bronze_scenario_seed(storage)) }
 
     init(bundle: Bundle = .main) { self.bundle = bundle; _ = load("first_slice") }
@@ -53,7 +55,7 @@ struct BronzeScenarioCommands: Commands {
 
 struct BronzeScenarioPanel: View {
     @ObservedObject var controller: BronzeScenarioController
-    var actorID: UInt64 = 0
+    var actorSummary = "No registered being selected"
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -61,7 +63,7 @@ struct BronzeScenarioPanel: View {
                 Text(controller.lastAttemptFailed ? "Load failed; active scenario unchanged." :
                      "Validated content; profession tasks are not active yet.")
                     .font(.caption)
-                Text(actorID == 0 ? "No registered being selected" : "Actor #\(actorID) · profession unassigned")
+                Text(actorSummary)
                     .font(.caption).accessibilityIdentifier("BronzeActorIdentity")
             }
             Spacer()

@@ -1661,7 +1661,7 @@ void sim_cycle( void )
             (void)SHOW_ERROR("Bronze actor registry initialization failed");
             return;
         }
-        bronze_hybrid_reset();
+        if (local_execution != KIND_LOAD_FILE) bronze_hybrid_reset();
 #endif
         sim_new_progress = 0;
         local_execution = KIND_NOTHING_TO_RUN;
@@ -1881,9 +1881,12 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     being_remains_init( &( group.remains ) ); /* Eventually this should be captured through the file handling and moved into the code below */
 
 #ifdef BRONZE_SIM
-    if (kind == KIND_LOAD_FILE && !bronze_actors_world_reset(&group)) {
-        (void)SHOW_ERROR("Bronze actor registry import failed");
-        return 0L;
+    if (kind == KIND_LOAD_FILE) {
+        if (!bronze_actors_world_reset(&group)) {
+            (void)SHOW_ERROR("Bronze actor registry import failed");
+            return 0L;
+        }
+        bronze_hybrid_reset();
     }
 #endif
     local_execution = kind;

@@ -56,3 +56,26 @@ vocations {
     rule hungry_work { when hunger > 0.25 and fatigue < 0.90 do work weight 6 }
   }
 }
+
+
+# Terrain policy in native map cells and byte-height units.
+world {
+  field_slope 6
+  field_coast 48
+  field_moisture 64
+  woodland_slope 18
+  woodland_moisture 45
+  ore_relief 12
+  tin_height 205
+  patch_initial_per_cell 8
+}
+
+
+world {
+  occupation_farmer_weight 3
+  occupation_farmer_workplace field
+  occupation_fisher_weight 1
+  occupation_fisher_workplace coast
+  occupation_bronze_smith_weight 1
+  occupation_bronze_smith_workplace service
+}

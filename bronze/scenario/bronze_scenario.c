@@ -8,6 +8,8 @@
 
 struct BronzeScenario {
     ParsedConfig* active;
+    BronzeLandPolicy land_policy;
+    BronzeProfessionPolicy professions;
     char name[128];
     char diagnostics[16384];
 };
@@ -58,10 +60,66 @@ static int known_parameter(const ParsedConfig* c, const char* key)
     }
     return 0;
 }
-static int admission(const ParsedConfig* c, FILE* report)
+/* The roster index is the compiled vocation index, including disabled jobs. */
+static int occupation_parameter(const ParamDef* param, BronzeProfessionPolicy* policy, FILE* report)
+{
+    const char* key = param->key + strlen("world_occupation_");
+    struct { const char* key; unsigned* value; unsigned min, max; } settings[] = {
+        {"min_age_days", &policy->min_age_days, 0, 1000000},
+        {"site_capacity", &policy->site_capacity, 1, 256},
+        {"retry_minutes", &policy->retry_minutes, 1, 1440},
+        {"skill_start", &policy->skill_start, 0, 1000},
+        {"skill_max", &policy->skill_max, 1, 1000},
+        {"skill_gain", &policy->skill_gain, 0, 1000},
+    };
+    for (size_t i = 0; i < sizeof(settings)/sizeof(settings[0]); i++) {
+        if (strcmp(key, settings[i].key)) continue;
+        if (param->has_svalue || !bounded(param->value, settings[i].max) ||
+            param->value < settings[i].min || floor(param->value) != param->value)
+            return error(report, 0, "invalid occupation setting '%s'", key);
+        *settings[i].value = (unsigned)param->value;
+        return 1;
+    }
+    for (unsigned i = 0; i < policy->count; i++) {
+        BronzeVocation* vocation = &policy->vocations[i];
+        size_t length = strlen(vocation->name);
+        if (strncmp(key, vocation->name, length)) continue;
+        const char* suffix = key + length;
+        if (!strcmp(suffix, "_weight")) {
+            if (param->has_svalue || !bounded(param->value, 10000) || floor(param->value) != param->value)
+                return error(report, 0, "occupation weight must be a whole number in 0..10000 for '%s'", vocation->name);
+            vocation->weight = (unsigned)param->value;
+            return 1;
+        }
+        if (!strcmp(suffix, "_workplace")) {
+            static const char* names[] = {"", "field", "forest", "mine_copper", "mine_tin", "service", "coast"};
+            if (param->has_svalue) {
+                for (unsigned j = 1; j < sizeof(names)/sizeof(names[0]); j++) {
+                    if (strcmp(param->svalue, names[j])) continue;
+                    vocation->workplace = (BronzeJobPlace)j;
+                    return 1;
+                }
+            }
+            return error(report, 0, "invalid workplace for occupation '%s'", vocation->name);
+        }
+    }
+    return error(report, 0, "unknown occupation setting '%s'", key);
+}
+static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* policy,
+                     BronzeProfessionPolicy* professions)
 {
     size_t i,j;
-    if(!c->vocations.len) return error(report,0,"scenario requires at least one vocation");
+    if(!c->vocations.len || c->vocations.len>BRONZE_VOCATION_LIMIT)
+        return error(report,0,"scenario requires 1..%d vocations",BRONZE_VOCATION_LIMIT);
+    professions->count = (unsigned)c->vocations.len;
+    for (i=0;i<c->vocations.len;i++) {
+        const VocationDef* v=brz_vec_cat(&c->vocations,i);
+        if(strlen(v->name)>=BRONZE_VOCATION_NAME_LIMIT)
+            return error(report,0,"vocation name exceeds %d characters",BRONZE_VOCATION_NAME_LIMIT-1);
+        for(j=0;j<i;j++) if(!strcmp(v->name,professions->vocations[j].name))
+            return error(report,0,"duplicate vocation '%s'",v->name);
+        strcpy(professions->vocations[i].name,v->name);
+    }
     if(c->scenario_profile || c->map_refs.len || c->places.len || c->roles.len || c->needs.len || c->services.len || c->disruptions.len)
         return error(report,0,"service-profile declarations are not supported by the Bronze graphical host");
     if(c->agent_count>100000 || c->settlement_count>10000) return error(report,0,"population/place count exceeds host limits");
@@ -80,8 +138,34 @@ static int admission(const ParsedConfig* c, FILE* report)
     }
     if(!bounded(c->settlement_policy.deposit_threshold,1e9) || !bounded(c->settlement_policy.rest_recovery,1))
         return error(report,0,"settlement policy is outside stock/normalized-recovery bounds");
+    struct { const char* name; unsigned* value; unsigned min, max; } landscape[] = {
+        {"world_field_slope", &policy->field_slope, 0, 255},
+        {"world_field_coast", &policy->field_coast, 1, 254},
+        {"world_field_moisture", &policy->field_moisture, 0, 255},
+        {"world_woodland_slope", &policy->woodland_slope, 0, 255},
+        {"world_woodland_moisture", &policy->woodland_moisture, 0, 255},
+        {"world_ore_relief", &policy->ore_relief, 1, 255},
+        {"world_tin_height", &policy->tin_height, 151, 255},
+        {"world_town_capacity", &policy->town_capacity, 1, 256},
+        {"world_town_initial_grain", &policy->town_initial_grain, 0, 1000000},
+        {"world_patch_initial_per_cell", &policy->patch_initial_per_cell, 0, 8},
+    };
     for(i=0;i<c->params.len;i++) {
         const ParamDef* p=brz_vec_cat(&c->params,i);
+        if(!strncmp(p->key,"world_occupation_",strlen("world_occupation_"))) {
+            if(!occupation_parameter(p,professions,report)) return 0;
+            continue;
+        }
+        for(j=0;j<sizeof(landscape)/sizeof(landscape[0]);j++) {
+            if(strcmp(p->key,landscape[j].name)) continue;
+            if(p->has_svalue || !bounded(p->value,landscape[j].max) ||
+               p->value<landscape[j].min || floor(p->value)!=p->value)
+                return error(report,0,"parameter '%s' must be a whole number in %u..%u",
+                             p->key,landscape[j].min,landscape[j].max);
+            *landscape[j].value=(unsigned)p->value;
+            break;
+        }
+        if(j<sizeof(landscape)/sizeof(landscape[0])) continue;
         if(p->has_svalue || !known_parameter(c,p->key)) return error(report,0,"unsupported or nonnumeric parameter '%s'",p->key);
         if(!p->has_svalue && (strstr(p->key,"map_w") || strstr(p->key,"map_h")) &&
            (p->value<1 || p->value>4096 || floor(p->value)!=p->value))
@@ -91,8 +175,12 @@ static int admission(const ParsedConfig* c, FILE* report)
             return error(report,0,"durations/report intervals must be whole days in 0..1000000");
         if(!p->has_svalue && !bounded(p->value,4294967295.0)) return error(report,0,"parameter '%s' is outside supported scalar bounds",p->key);
     }
+    if(professions->skill_start>professions->skill_max || professions->skill_gain>professions->skill_max)
+        return error(report,0,"occupation starting skill and gain must fit the skill scale");
     for(i=0;i<c->vocations.len;i++) {
         const VocationDef* v=brz_vec_cat(&c->vocations,i);
+        if(professions->vocations[i].weight && !professions->vocations[i].workplace)
+            return error(report,0,"enabled occupation '%s' requires a workplace",v->name);
         for(j=0;j<v->rules.len;j++) { const RuleDef* r=brz_vec_cat(&v->rules,j); if(r->weight<1 || !conditions(&r->condition,r->line,report)) return error(report,r->line,"invalid rule weight or condition"); }
         for(j=0;j<v->tasks.len;j++) if(!statements(c,&((const TaskDef*)brz_vec_cat(&v->tasks,j))->stmts,report)) return 0;
     }
@@ -114,9 +202,15 @@ int bronze_scenario_load(BronzeScenario* s, const char* path, const char* name)
     next=calloc(1,sizeof(*next)); report=tmpfile();
     if(!next || !report) { free(next); if(report) fclose(report); return 0; }
     brz_cfg_init(next);
-    accepted=brz_parse_file_report(path,next,report) && admission(next,report);
+    BronzeLandPolicy policy=bronze_land_defaults();
+    BronzeProfessionPolicy professions={
+        .site_capacity=32, .retry_minutes=60, .skill_max=100, .skill_gain=1
+    };
+    accepted=brz_parse_file_report(path,next,report) && admission(next,report,&policy,&professions);
     if(accepted) {
         if(s->active) { brz_cfg_free(s->active); free(s->active); }
+        s->land_policy=policy;
+        s->professions=professions;
         s->active=next; snprintf(s->name,sizeof(s->name),"%s",name);
         snprintf(s->diagnostics,sizeof(s->diagnostics),"%s: validated %zu vocations. Scenario-driven profession tasks are not active yet; the native simulation and prototype economy continue.",name,next->vocations.len);
     } else {
@@ -134,3 +228,9 @@ const char* bronze_scenario_name(const BronzeScenario* s) { return s?s->name:"";
 const char* bronze_scenario_diagnostics(const BronzeScenario* s) { return s?s->diagnostics:"Scenario allocation failed"; }
 uint32_t bronze_scenario_seed(const BronzeScenario* s) { return s && s->active?s->active->seed:0; }
 size_t bronze_scenario_vocations(const BronzeScenario* s) { return s && s->active?s->active->vocations.len:0; }
+
+BronzeLandPolicy bronze_scenario_land_policy(const BronzeScenario* s)
+{ return s && s->active ? s->land_policy : bronze_land_defaults(); }
+
+const BronzeProfessionPolicy* bronze_scenario_professions(const BronzeScenario* s)
+{ return s && s->active ? &s->professions : NULL; }

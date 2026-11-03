@@ -262,7 +262,7 @@ struct CatalystSimulationWindow: View {
             .safeAreaInset(edge: .bottom) {
                 if surface == .view {
                     BronzeScenarioPanel(controller: sceneModel.bronzeScenario,
-                                        actorID: sceneModel.bronzeSelectedActorID)
+                                        actorSummary: sceneModel.bronzeSelectedActorSummary)
                 }
             }
 #endif
@@ -290,7 +290,7 @@ struct CatalystSimulationWindow: View {
 #endif
 final class ApeSimulationSceneModel: ObservableObject {
 #if BRONZE_SIM
-    @Published private(set) var bronzeSelectedActorID: UInt64 = 0
+    @Published private(set) var bronzeSelectedActorSummary = "No registered being selected"
     let bronzeScenario = BronzeScenarioController()
     func selectBronzeScenario(_ name: String) {
         bronzeScenario.load(name) { [weak self] _ in self?.newSimulation() }
@@ -363,14 +363,20 @@ final class ApeSimulationSceneModel: ObservableObject {
             _ = shared_session_cycle(session, ticks, surface.identifier)
         }
 #if BRONZE_SIM
-        let actorID = shared_session_bronze_actor_id(session)
-        if bronzeSelectedActorID != actorID { bronzeSelectedActorID = actorID }
+        var buffer = [CChar](repeating: 0, count: 256)
+        let summary = buffer.withUnsafeMutableBufferPointer {
+            shared_session_bronze_actor_summary(session, $0.baseAddress, $0.count)
+            return String(cString: $0.baseAddress!)
+        }
+        if bronzeSelectedActorSummary != summary { bronzeSelectedActorSummary = summary }
 #endif
     }
 
     func newSimulation() {
         startSessionIfNeeded()
 #if BRONZE_SIM
+        shared_session_bronze_land_policy(session, bronzeScenario.landPolicy)
+        shared_session_bronze_professions(session, bronzeScenario.professions)
         shared_session_new(session, bronzeScenario.seed)
 #else
         shared_session_new(session, n_uint(CFAbsoluteTimeGetCurrent()))
@@ -432,6 +438,8 @@ final class ApeSimulationSceneModel: ObservableObject {
         }
 
 #if BRONZE_SIM
+        shared_session_bronze_land_policy(session, bronzeScenario.landPolicy)
+        shared_session_bronze_professions(session, bronzeScenario.professions)
         shared_session_init(session, n_int(NUM_CONTROL), bronzeScenario.seed)
 #else
         shared_session_init(session, n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))

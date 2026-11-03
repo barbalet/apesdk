@@ -43,14 +43,13 @@ active file and offers **Details**. Failed loads show filename/line diagnostics
 and retain the active scenario and world. `vertical_slice.bronze` also validates;
 `bronze_age_full.bronze` is bundled but still fails strict compilation.
 
-Loading is currently validation and configuration staging. The hybrid still
-uses proximity-based resource work through the native-needs/action gate; it does not yet
-bind the full Bronze DSL occupation scheduler. Only the scenario seed is applied
-to the native world at this stage; population, workplaces and task behavior are
-not inferred from a successfully loaded file. Economic stores
-are session state, reconstructed when creating/loading a native world. Native
-save files do not persist them. See `PLAN.md` for the implementation boundary
-and follow-up work.
+The graphical host applies the scenario seed and terrain thresholds. Eligible
+stationary actors can gather on terrain-derived field, woodland and ore patches.
+Townships own reachable production sites and their stores. Actors receive homes,
+scenario-defined vocations and matching workplaces as capacity allows. Their
+skills grow through successful work. The DSL task executor and paired economic
+saves are later cycles. See the [landscape rules](hybrid/README.md),
+[occupation policy](actors/PROFESSIONS.md) and [implementation plan](PLAN.md).
 
 Cycle 05 adds [native clock and work arbitration](work/README.md): stationary
 intentions yield to survival, sleep and social obligations; task progress and

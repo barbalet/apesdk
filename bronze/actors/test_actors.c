@@ -138,26 +138,57 @@ static void sessions(void)
     shared_session* a=shared_session_create(42); shared_session* b=shared_session_create(1337);
     assert(a && b);
     assert(!shared_session_bronze_actor_id(NULL) && !shared_session_bronze_actor_id(a));
+    BronzeLandPolicy policy=bronze_land_defaults();
+    policy.field_moisture=255;
+    shared_session_bronze_land_policy(b,policy);
+    BronzeProfessionPolicy jobs={
+        .count=1, .site_capacity=256, .retry_minutes=60, .skill_start=4, .skill_max=10,
+        .vocations={{"host", 1, BRONZE_JOB_SERVICE}}
+    };
+    shared_session_bronze_professions(a,&jobs);
     assert(shared_session_init(a,NUM_CONTROL,42)==NUM_CONTROL);
     shared_session_cycle(a,1,NUM_CONTROL);
     BronzeActorId aid=shared_session_bronze_actor_id(a); assert(aid);
     BronzeActorRegistry* ar=bronze_actors_current();
-    BronzeActor* actor_a=bronze_actors_find(ar,aid); assert(actor_a); actor_a->vocation=11;
+    BronzeActor* actor_a=bronze_actors_find(ar,aid); assert(actor_a);
+    BronzeLandscape* landscape_a=bronze_actors_landscape(ar);
+    assert(landscape_a->town_count>0);
+    const BronzePlace* home=bronze_hybrid_place(landscape_a->towns[0].home);
+    n_byte2 location[2]={MAPSPACE_TO_APESPACE(home->location.x), MAPSPACE_TO_APESPACE(home->location.y)};
+    being_set_location(bronze_actors_resolve(ar,aid),location);
+    bronze_hybrid_reset();
+    char summary[256];
+    shared_session_bronze_actor_summary(a,summary,sizeof(summary));
+    assert(strstr(summary,"host") && strstr(summary,"skill 4/10") &&
+           strstr(summary,"home #") && strstr(summary,"workplace #"));
+    strcpy(jobs.vocations[0].name,"next_world");
+    shared_session_bronze_professions(a,&jobs);
+    shared_session_bronze_actor_summary(a,summary,sizeof(summary));
+    assert(strstr(summary,"host") && !strstr(summary,"next_world"));
     n_int ax=being_location_x(bronze_actors_resolve(ar,aid)), ay=being_location_y(bronze_actors_resolve(ar,aid));
     assert(shared_session_init(b,NUM_CONTROL,1337)==NUM_CONTROL);
     shared_session_cycle(b,1,NUM_CONTROL);
     BronzeActorId bid=shared_session_bronze_actor_id(b); assert(bid);
     BronzeActorRegistry* br=bronze_actors_current(); assert(ar!=br);
+    n_uint site_count;
+    const bronze_site* b_sites=bronze_hybrid_sites(&site_count);
+    assert(site_count>0);
+    for(n_uint i=0;i<site_count;i++) assert(b_sites[i].kind!=BRONZE_FIELD);
+    assert(bronze_actors_landscape(br)->town_count==0);
+    assert(bronze_actors_landscape(ar)->town_count>0);
+    bronze_actors_landscape(ar)->towns[0].stores.grain=7;
     assert(!bronze_actors_resolve(ar,aid) && !bronze_actors_for_being(ar,sim_group()->select));
     BronzeActor* actor_b=bronze_actors_find(br,bid); assert(actor_b); actor_b->vocation=22;
     n_int bx=being_location_x(bronze_actors_resolve(br,bid)), by=being_location_y(bronze_actors_resolve(br,bid));
     for(int i=0;i<4;i++) {
         assert(shared_session_bronze_actor_id(a)==aid && bronze_actors_current()==ar);
-        assert(bronze_actors_find(ar,aid)->vocation==11);
+        assert(bronze_actors_find(ar,aid)->vocation==0);
+        assert(bronze_hybrid_sites(NULL)!=b_sites && bronze_hybrid_economy().grain==7);
         assert(!bronze_actors_resolve(br,bid));
         assert(being_location_x(bronze_actors_resolve(ar,aid))==ax && being_location_y(bronze_actors_resolve(ar,aid))==ay);
         assert(shared_session_bronze_actor_id(b)==bid && bronze_actors_current()==br);
         assert(bronze_actors_find(br,bid)->vocation==22);
+        assert(bronze_hybrid_sites(NULL)==b_sites && bronze_hybrid_economy().grain==0);
         assert(being_location_x(bronze_actors_resolve(br,bid))==bx && being_location_y(bronze_actors_resolve(br,bid))==by);
     }
     assert(shared_session_bronze_actor_id(a)==aid);

@@ -17,8 +17,9 @@ behavior. Failed selection never requests a reset.
 Both C and Swift BRONZE_SIM compilation conditions exist only on bronze-mac.
 The shared Swift shell's additions are all `#if BRONZE_SIM`. There are no new
 shared engine C hooks. No independent authoritative time, needs or position is
-introduced by loading. Other parameters are staged for future host integration;
-the current native population and prototype production do not execute them.
+introduced by loading. Cycle 06 also applies validated terrain thresholds. See the
+[landscape policy](../hybrid/README.md) for terrain keys and bounds. Cycle 08
+adds [occupation settings](../actors/PROFESSIONS.md) and a validated roster.
 
 ## Authoring checks and diagnostics
 
@@ -38,7 +39,7 @@ the current native population and prototype production do not execute them.
   must be positive. Renew/nutrition/recovery/need and probability values use
   0..1; chance blocks use 0..100 percent. Map dimensions are whole cells in
   1..4096; durations/report intervals are whole days up to 1,000,000.
-- Supported scalar parameter names are enumerated in known_parameter(). Unknown
+- Supported scalar parameters are checked by graphical scenario admission. Unknown
   names and string-valued parameters are rejected rather than silently ignored
   by this host. Service-profile/map/place/role/need/service/disruption declarations
   are rejected until their execution integration exists.

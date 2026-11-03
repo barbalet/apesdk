@@ -1801,6 +1801,49 @@ shared_cycle_state shared_cycle_ios( n_uint ticks )
 }
 
 #ifdef BRONZE_SIM
+void shared_session_bronze_land_policy(shared_session* session, BronzeLandPolicy policy)
+{
+    if (!session) return;
+    if (!session->core.bronze_registry)
+        session->core.bronze_registry = bronze_actors_create();
+    BronzeLandscape *landscape = bronze_actors_landscape(session->core.bronze_registry);
+    if (landscape) landscape->policy = policy;
+}
+
+void shared_session_bronze_professions(shared_session* session, const BronzeProfessionPolicy* policy)
+{
+    if (!session) return;
+    if (!session->core.bronze_registry)
+        session->core.bronze_registry = bronze_actors_create();
+    bronze_actors_stage_professions(session->core.bronze_registry, policy);
+}
+
+void shared_session_bronze_actor_summary(shared_session* session, char* buffer, size_t size)
+{
+    if (!buffer || !size) return;
+    snprintf(buffer, size, "No registered being selected");
+    if (!shared_session_is_started(session) || !shared_core_activate(&session->core)) return;
+    BronzeActorRegistry* registry = session->core.bronze_registry;
+    const BronzeActor* actor = bronze_actors_for_being(registry, sim_group()->select);
+    if (!actor) return;
+    const BronzeProfessionPolicy* policy = bronze_actors_professions(registry);
+    if (actor->job_status == BRONZE_JOB_ASSIGNED && actor->vocation < policy->count) {
+        snprintf(buffer, size, "Actor #%llu · %s · skill %.0f/%u · home #%llu · workplace #%llu",
+                 (unsigned long long)actor->id, policy->vocations[actor->vocation].name,
+                 bronze_actor_skill(actor, actor->vocation), policy->skill_max,
+                 (unsigned long long)actor->home, (unsigned long long)actor->workplace);
+    } else {
+        static const char* reasons[] = {
+            "no enabled occupations", "awaiting assignment", "below working age",
+            "no reachable home", "no reachable matching workplace", "workplaces full",
+            "skill record unavailable"
+        };
+        snprintf(buffer, size, "Actor #%llu · unassigned (%s) · home #%llu",
+                 (unsigned long long)actor->id, reasons[actor->job_status],
+                 (unsigned long long)actor->home);
+    }
+}
+
 uint64_t shared_session_bronze_actor_id(shared_session* session)
 {
     if(!shared_session_is_started(session) || !shared_core_activate(&session->core)) return BRONZE_ACTOR_NONE;

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "../work/bronze_work_types.h"
+#include "../hybrid/bronze_hybrid.h"
+#include "bronze_profession_policy.h"
 
 /* IDs are scoped to the owning registry/world, never native slots or names. */
 typedef uint64_t BronzeActorId;
@@ -14,9 +16,14 @@ typedef struct { uint32_t kind; double value; } BronzeSkill;
 typedef struct { uint32_t kind; double amount; } BronzeStock;
 typedef struct { uint64_t place; uint32_t kind; double amount; } BronzeReservation;
 typedef struct { uint64_t tick; uint32_t from_vocation, to_vocation; } BronzeAssignment;
+typedef enum {
+    BRONZE_JOB_DISABLED, BRONZE_JOB_ASSIGNED, BRONZE_JOB_CHILD, BRONZE_JOB_NO_HOME,
+    BRONZE_JOB_NO_WORKPLACE, BRONZE_JOB_FULL, BRONZE_JOB_MEMORY
+} BronzeJobStatus;
 typedef struct {
     BronzeActorId id;
     uint32_t vocation, task, instruction;
+    BronzeJobStatus job_status;
     uint64_t home, workplace, remaining_ticks;
     BronzeActorId mentor, apprentice;
     BronzeSkill* skills; size_t skill_count;
@@ -39,6 +46,12 @@ BronzeActor* bronze_actors_for_being(BronzeActorRegistry*, const simulated_being
 simulated_being* bronze_actors_resolve(BronzeActorRegistry*, BronzeActorId);
 size_t bronze_actors_count(const BronzeActorRegistry*);
 uint64_t bronze_actors_generation(const BronzeActorRegistry*);
+BronzeLandscape* bronze_actors_landscape(BronzeActorRegistry*);
+void bronze_actors_stage_professions(BronzeActorRegistry*, const BronzeProfessionPolicy*);
+const BronzeProfessionPolicy* bronze_actors_professions(const BronzeActorRegistry*);
+int bronze_actor_set_job(BronzeActor*, uint32_t vocation, uint64_t workplace, unsigned skill_start, uint64_t tick);
+double bronze_actor_skill(const BronzeActor*, uint32_t vocation);
+void bronze_actor_practice(BronzeActor*, const BronzeProfessionPolicy*);
 BronzeClock* bronze_actors_clock(BronzeActorRegistry*);
 BronzeActorId bronze_actors_next_id(const BronzeActorRegistry*);
 /* Explicit permutation for hosts that reorder a complete native population.

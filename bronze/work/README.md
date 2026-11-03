@@ -76,7 +76,7 @@ The hourly proximity economy uses `bronze_work_claim()` for the same per-actor
 budget: a task and prototype gathering cannot both consume one tick. Mere
 proximity or wakefulness no longer suffices. Site renewal and the aggregate
 prototype recipe remain prototype behavior, not actor inventory accounting.
-The known file-static site/economy ownership limitation is unchanged.
+Cycle 06 gives the prototype landscape and economy world ownership.
 
 Each actor records current reason/phase, last blocking reason, transition tick,
 transition/interruption/resumption counts, work units and duration remaining.

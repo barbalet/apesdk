@@ -12,6 +12,8 @@ struct BronzeActorRegistry {
     size_t count;
     int native_bound;
     BronzeClock clock;
+    BronzeLandscape landscape;
+    BronzeProfessionPolicy professions, pending_professions;
     BronzeReleaseClaim release;
     void* release_context;
 };
@@ -31,7 +33,10 @@ static void dispose(BronzeActorRegistry* r, BronzeActor* actor)
 BronzeActorRegistry* bronze_actors_create(void)
 {
     BronzeActorRegistry* r=calloc(1,sizeof(*r));
-    if(r) r->next_id=1;
+    if(r) {
+        r->next_id=1;
+        r->landscape.policy=bronze_land_defaults();
+    }
     return r;
 }
 void bronze_actors_destroy(BronzeActorRegistry* r)
@@ -108,6 +113,7 @@ int bronze_actors_reset(BronzeActorRegistry* r, simulated_group* group)
     if(!group || group->num>LARGE_SIM || r->next_id>UINT64_MAX-group->num-1 ||
        (active ? active!=r : direct_world!=r)) return 0;
     r->group=group; r->native_bound=1;
+    r->professions=r->pending_professions;
     r->clock.origin=r->clock.tick=(uint64_t)land_date()*TIME_DAY_MINUTES+land_time();
     for(i=0;i<group->num;i++) if(!add(r,&group->beings[i])) return 0;
     return 1;
@@ -116,6 +122,7 @@ void bronze_actors_release_handler(BronzeActorRegistry* r, BronzeReleaseClaim ha
 { if(r) { r->release=handler; r->release_context=context; } }
 size_t bronze_actors_count(const BronzeActorRegistry* r) { return r?r->count:0; }
 uint64_t bronze_actors_generation(const BronzeActorRegistry* r) { return r?r->generation:0; }
+BronzeLandscape* bronze_actors_landscape(BronzeActorRegistry* r) { return r?&r->landscape:NULL; }
 BronzeClock* bronze_actors_clock(BronzeActorRegistry* r) { return r?&r->clock:NULL; }
 BronzeActorId bronze_actors_next_id(const BronzeActorRegistry* r) { return r?r->next_id:0; }
 int bronze_actors_bind_order(BronzeActorRegistry* r, simulated_group* group, const BronzeActorId* ids, size_t count)
@@ -186,4 +193,69 @@ void bronze_actors_relocated(simulated_group* group, simulated_being* from, simu
     int source=slot_of(r,from), target=slot_of(r,to);
     if(source<0 || target<0) return;
     r->slots[target]=r->slots[source]; r->slots[source]=NULL;
+}
+
+
+void bronze_actors_stage_professions(BronzeActorRegistry* registry, const BronzeProfessionPolicy* policy)
+{
+    if (!registry) return;
+    if (policy && policy->count <= BRONZE_VOCATION_LIMIT) registry->pending_professions = *policy;
+    else memset(&registry->pending_professions, 0, sizeof(registry->pending_professions));
+}
+
+const BronzeProfessionPolicy* bronze_actors_professions(const BronzeActorRegistry* registry)
+{
+    return registry ? &registry->professions : NULL;
+}
+
+static BronzeSkill* skill_for(const BronzeActor* actor, uint32_t vocation)
+{
+    for (size_t i = 0; i < actor->skill_count; i++)
+        if (actor->skills[i].kind == vocation) return &actor->skills[i];
+    return NULL;
+}
+
+double bronze_actor_skill(const BronzeActor* actor, uint32_t vocation)
+{
+    const BronzeSkill* skill = skill_for(actor, vocation);
+    return skill ? skill->value : 0;
+}
+
+int bronze_actor_set_job(BronzeActor* actor, uint32_t vocation, uint64_t workplace,
+                         unsigned skill_start, uint64_t tick)
+{
+    if (actor->vocation == vocation && actor->workplace == workplace) return 1;
+    if (vocation != BRONZE_KIND_NONE && !skill_for(actor, vocation)) {
+        BronzeSkill* skills = realloc(actor->skills, (actor->skill_count + 1) * sizeof(*skills));
+        if (!skills) return 0;
+        actor->skills = skills;
+        skills[actor->skill_count++] = (BronzeSkill){vocation, skill_start};
+    }
+    if (actor->vocation != vocation) {
+        enum { HISTORY_LIMIT = 32 };
+        if (actor->history_count >= HISTORY_LIMIT) {
+            memmove(actor->history, actor->history + 1, (HISTORY_LIMIT - 1) * sizeof(*actor->history));
+            actor->history_count = HISTORY_LIMIT - 1;
+        }
+        BronzeAssignment* history = realloc(actor->history, (actor->history_count + 1) * sizeof(*history));
+        if (history) {
+            actor->history = history;
+            history[actor->history_count++] = (BronzeAssignment){tick, actor->vocation, vocation};
+        }
+    }
+    actor->vocation = vocation;
+    actor->workplace = workplace;
+    actor->task = BRONZE_KIND_NONE;
+    actor->instruction = 0;
+    actor->remaining_ticks = 0;
+    actor->work.running = actor->work.ever_ran = 0;
+    return 1;
+}
+
+void bronze_actor_practice(BronzeActor* actor, const BronzeProfessionPolicy* policy)
+{
+    BronzeSkill* skill = skill_for(actor, actor->vocation);
+    if (!skill) return;
+    skill->value += policy->skill_gain;
+    if (skill->value > policy->skill_max) skill->value = policy->skill_max;
 }

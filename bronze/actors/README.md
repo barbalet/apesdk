@@ -116,12 +116,10 @@ Never retain a native pointer as the persistent actor handle.
 
 ## Inspection, tests and remaining limits
 
-The overview shows the selected native being's actor ID through the guarded
-session bridge. Vocation is still unassigned; schema fields do not implement
-profession assignment, inventories, services or a task scheduler. The aggregate
-prototype economy remains separate, including its previously documented
-file-static site/economy limitation for independent worlds. This cycle isolates
-actor records, not all future Bronze world state.
+The overview shows the selected native being’s identity, vocation, skill,
+home and workplace. Cycle 08 adds assignment and practice through the
+[occupation policy](PROFESSIONS.md). The world registry also owns the
+landscape and township stores introduced in cycles 06 and 07.
 
 Cycle 05 adds registry-owned native clock observations and per-actor work
 diagnostics/budget state. Duration intentions can now progress through guarded

@@ -50,3 +50,16 @@ vocations {
     rule always { when true do work }
   }
 }
+
+# Starting reserves on generated resource patches.
+world { patch_initial_per_cell 8 }
+
+
+world {
+  occupation_farmer_weight 3
+  occupation_farmer_workplace field
+  occupation_fisher_weight 1
+  occupation_fisher_workplace coast
+  occupation_smith_weight 1
+  occupation_smith_workplace service
+}
