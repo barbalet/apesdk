@@ -1,5 +1,23 @@
 # Cycle 04 validation record
 
+## Linux CI follow-up (2026-11-03)
+
+The gcc, clang and coverage jobs in [run 41584858068](https://github.com/barbalet/apesdk/actions/runs/41584858068)
+all failed at the same repeated-session selection assertion in test_actors.c.
+Transfer output uses `n_file.size` as allocation capacity, while the restore
+parser reads it as content length. Unwritten allocation tails were therefore
+parsed as native state. Reproduced locally with `MallocScribble=1` before the
+fix. Bronze snapshot capture now sets size to the written location, guarded
+by `BRONZE_SIM`; historical builds and serialization stay unchanged.
+
+The session harness now enables both macOS allocation scribbling and Linux
+allocation perturbation. Local Apple-clang checks passed: the full deterministic
+suite (`/private/tmp/ci-suite-fixed.log`), compatibility contract with unchanged
+baselines (`/private/tmp/ci-contract-fixed.log`), and targeted actor sanitizers
+(`/private/tmp/ci-actors-sanitized-fixed.log`). These are local checks; the fixed
+Linux GitHub jobs have not yet run. The installed local gcc 14 cannot compile
+against the current macOS SDK, so it supplied no additional validation.
+
 Date: 2026-11-02 (America/Los_Angeles). Darwin arm64, Apple clang 21.0.0,
 Xcode 27.1. No scenario content, pinned native/CLI/AST baseline, simulated_being
 layout or native serialization format was changed.

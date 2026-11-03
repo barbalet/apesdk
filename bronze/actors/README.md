@@ -139,6 +139,11 @@ invalidation/recovery. It is included in make test and therefore the normal CI
 suite; source/preprocessor/link audits and existing snapshots remain in the
 contract gate.
 
+Session tests enable Linux `MALLOC_PERTURB_` and macOS `MallocScribble` so
+unwritten allocation tails contain nonzero bytes. Bronze snapshots bound their
+readable size to the writer's actual byte count before storage; parsing spare
+capacity previously caused repeated session restores to fail on Linux CI.
+
 Sanitizer mode uses ASan across the full native integration and UBSan on the
 new registry and harness. Full-engine UBSan independently fails without
 BRONZE_SIM at the existing signed shift in entity/being.c:1599; it has not been

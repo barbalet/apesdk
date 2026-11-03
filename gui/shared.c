@@ -217,6 +217,11 @@ static void shared_core_context_capture( shared_core_context *context )
     snapshot = tranfer_out();
     if ( snapshot != 0L )
     {
+#ifdef BRONZE_SIM
+        /* Writers use size as capacity; readers treat it as content length.
+           Never parse the unwritten allocation tail when restoring a world. */
+        snapshot->size = snapshot->location;
+#endif
         shared_core_context_release_snapshot( context );
         context->snapshot = snapshot;
     }

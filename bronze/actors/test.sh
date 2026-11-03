@@ -22,4 +22,6 @@ else
         -lz -lm -lpthread -o actor-tests
 fi
 ./actor-tests
-./actor-tests sessions
+# Exercise restores with nonzero allocation tails on both CI Linux and macOS.
+# Snapshots must not depend on malloc returning zero-filled storage.
+MALLOC_PERTURB_=165 MallocScribble=1 ./actor-tests sessions
