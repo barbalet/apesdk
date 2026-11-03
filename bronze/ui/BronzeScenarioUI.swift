@@ -64,8 +64,16 @@ struct BronzeScenarioPanel: View {
                 Text(controller.lastAttemptFailed ? "Load failed; active scenario unchanged." :
                      "Profession tasks run on the native simulation clock.")
                     .font(.caption)
-                Text(actorSummary)
-                    .font(.caption).accessibilityIdentifier("BronzeActorIdentity")
+                ScrollView {
+                    Text(actorSummary)
+                        .font(.caption)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("BronzeActorIdentity")
+                }
+                .frame(maxHeight: 88)
+                Text("Map legend · Roof township · Cross copper · Dot tin · Rows field · Tree woodland")
+                    .font(.caption2)
             }
             Spacer()
             Button("Details") { controller.showDiagnostics = true }

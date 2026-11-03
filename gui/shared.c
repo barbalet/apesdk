@@ -1829,6 +1829,26 @@ void shared_session_bronze_program(shared_session* session, BronzeProgram* progr
     bronze_actors_stage_program(session->core.bronze_registry, program);
 }
 
+static void bronze_summary_stock(char *buffer, size_t size, const char *label,
+                                 const BronzeStock *stock, size_t count, const KindTable *kinds)
+{
+    size_t used = strlen(buffer);
+    snprintf(buffer + used, size - used, "\n%s", label);
+    if (!count) {
+        used = strlen(buffer);
+        snprintf(buffer + used, size - used, " empty");
+    }
+    for (size_t i = 0; i < count; ++i) {
+        const char *const *names = kinds ? kinds->names.data : NULL;
+        const char *name = names && stock[i].kind < kinds->names.len ? names[stock[i].kind] : NULL;
+        used = strlen(buffer);
+        if (name)
+            snprintf(buffer + used, size - used, " · %s %.2f", name, stock[i].amount);
+        else
+            snprintf(buffer + used, size - used, " · kind %u %.2f", stock[i].kind, stock[i].amount);
+    }
+}
+
 void shared_session_bronze_actor_summary(shared_session* session, char* buffer, n_uint capacity)
 {
     if (!buffer || !capacity || capacity > SIZE_MAX) return;
@@ -1865,6 +1885,40 @@ void shared_session_bronze_actor_summary(shared_session* session, char* buffer, 
         snprintf(buffer, size, "Actor #%llu · unassigned (%s) · home #%llu",
                  (unsigned long long)actor->id, reasons[actor->job_status],
                  (unsigned long long)actor->home);
+    }
+    simulated_being *being = sim_group()->select;
+    size_t used = strlen(buffer);
+    snprintf(buffer + used, size - used, "\nEnergy %d/%d · Hunger %u · Fatigue %u",
+             (int)being_energy(being), BEING_FULL, (unsigned)being_drives(being)[DRIVE_HUNGER],
+             (unsigned)being_drives(being)[DRIVE_FATIGUE]);
+    const BronzeProgram *program = bronze_actors_program(registry);
+    bronze_summary_stock(buffer, size, "Cargo", actor->resources, actor->resource_count,
+                         program ? &program->config->resource_kinds : NULL);
+    bronze_summary_stock(buffer, size, "Items", actor->items, actor->item_count,
+                         program ? &program->config->item_kinds : NULL);
+
+    const BronzeLandscape *landscape = bronze_actors_landscape(registry);
+    for (n_uint i = 0; i < landscape->site_count; ++i) {
+        const bronze_site *site = &landscape->sites[i];
+        if (site->place_id != actor->workplace) continue;
+        used = strlen(buffer);
+        snprintf(buffer + used, size - used, "\nWorkplace (%ld, %ld) · stock %.2f/%.2f",
+                 (long)site->x, (long)site->y, site->stock, site->capacity);
+        break;
+    }
+    for (unsigned i = 0; i < landscape->town_count; ++i) {
+        const BronzeTownship *town = &landscape->towns[i];
+        if (town->home != actor->home) continue;
+        double available = 0, reserved = 0;
+        for (unsigned kind = 0; kind < BRONZE_RESOURCE_LIMIT; ++kind) {
+            reserved += town->reserved_resources[kind];
+            available += town->resources[kind] - town->reserved_resources[kind];
+        }
+        used = strlen(buffer);
+        snprintf(buffer + used, size - used,
+                 "\nTown store #%llu · %.2f resource units available · %.2f reserved",
+                 (unsigned long long)town->storage, available, reserved);
+        break;
     }
 }
 

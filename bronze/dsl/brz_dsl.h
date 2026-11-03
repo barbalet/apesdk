@@ -40,7 +40,8 @@ typedef enum {
     BRZ_ACTION_ROAM,
     BRZ_ACTION_WANDER,
     BRZ_ACTION_DEPOSIT,
-    BRZ_ACTION_EAT
+    BRZ_ACTION_EAT,
+    BRZ_ACTION_FETCH
 } BrzActionCode;
 
 typedef enum {

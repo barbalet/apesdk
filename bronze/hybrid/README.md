@@ -40,9 +40,9 @@ Omitted values use the defaults shown here.
 | `ore_relief` | 12 | 1–255 |
 | `tin_height` | 205 | 151–255 |
 
-Patch cells define gathering eligibility and support eight stock units per cell.
-Fields and woodland renew up to five units per observed day change, capped at
-capacity. Ore stocks deplete without renewal.
+Patch cells define gathering eligibility. Active scenario resource definitions
+set capacity and renewal for each matching resource and habitat.
+
 The overlay draws the footprint and an anchor glyph over the native map.
 It uses the existing palette and undraw path.
 
@@ -78,8 +78,8 @@ capacity. Actors can have housing while waiting for work. See
 
 The township store is the source for grain, copper, tin, charcoal and tools.
 The [task scheduler](../tasks/README.md) gathers through the assigned worker
-on their own patch and credits the owning township. HUD figures total the
-stores. Actor cargo, crafting and transport remain later cycles.
+on their own patch and transfers stock into cargo. Workers deposit at their
+township storage entrance. HUD figures total the township stores.
 
 | Optional `world` setting | Default | Range |
 | --- | ---: | --- |
@@ -87,5 +87,56 @@ stores. Actor cargo, crafting and transport remain later cycles.
 | `town_initial_grain` | 0 | 0–1,000,000 grain per township |
 | `patch_initial_per_cell` | 0 | 0–8 stock units per resource cell |
 
-First Slice and Vertical Slice explicitly start resource patches at capacity.
+First Slice and Vertical Slice explicitly seed resource patches with starting stock.
 Township stores start empty in both bundled scenarios.
+
+
+## Inventory, claims and renewal
+
+The graphical host supports up to 64 declared resource kinds. Each patch
+has a separate stock for every definition that matches its habitat. A
+definition’s capacity applies per patch and resource. Explicit initial stock
+from `patch_initial_per_cell` is capped by that capacity.
+
+Each observed native day applies one renewal update. Fields and woodland
+renew by capacity × scenario renewal rate × mean patch moisture on a 0–1
+scale. Minerals use only their declared rate, without the moisture factor.
+An omitted or zero mineral rate produces no renewal. Every update caps stock
+at capacity. Headless worlds without a loaded program retain the compatibility
+landscape defaults.
+
+| Optional `world` setting | Default | Range |
+| --- | ---: | --- |
+| `carry_capacity` | 32 | 1–1,024 total cargo units |
+| `storage_capacity` | 512 | 1–1,000,000 resource and item units per township |
+
+A gather request reserves available stock in native actor processing order.
+The reservation does not change patch stock. The final granted work minute
+debits the patch and credits the same quantity to cargo. Death, reassignment,
+rerouting and cancellation release a claim. A stalled claim expires roughly one native hour after its expected work duration. Deposit debits cargo and
+credits storage only at the owned entrance and within capacity. Both transfers
+use the requested quantity or fail with their source stock intact.
+
+### Storage and consumption
+
+Personal cargo travels with its owner. Communal storage is available to
+township residents at the storage entrance. With a positive
+`world_household_capacity`, each actor gets a private locker tied to their
+first valid home. The actor can use that locker while resident there and
+physically at the home entrance. Other residents have separate lockers.
+Use the optional `household` operand with `deposit` or `fetch` to select
+private storage.
+
+Communal fetches respect recipe reservations. A positive
+`world_ration_daily` limits communal food withdrawals per actor per native
+day. A positive `world_food_spoilage` sets the fraction of stored food lost
+each day. Spoilage applies to private and unreserved communal food stock.
+The three settings default to zero, which disables private storage, ration
+limits and spoilage respectively.
+
+Eating uses personal cargo and credits native energy up to the energy deficit.
+The native drive cycle handles hunger and fatigue. Native feeding takes
+priority over Bronze eating in the same tick, and an unavailable meal yields
+no Bronze energy. Consumption, spoilage and losses on death have separate
+accounting ledgers. Deposits and fetches transfer stock between owners.
+See the [recipe and task rules](../tasks/README.md).

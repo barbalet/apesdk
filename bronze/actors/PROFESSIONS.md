@@ -56,3 +56,24 @@ home ID. The native civilian profession helpers in `entity/profession` emit
 social memory events and use a fixed civilian type enum. Bronze uses its
 existing registry and work gate for assignment and skill accounting. Those
 episodic helpers remain available for later service and mentorship integration.
+
+A positive `occupation_mentor_skill` sets the skill threshold for
+independent practice. Below it, completed work grants skill only if an
+eligible worker of the same vocation and workplace is present at the work
+site with skill at or above the threshold. Zero preserves independent
+practice at every skill level. The threshold cannot exceed the skill cap.
+At world creation, the first assigned worker of each vocation at each
+workplace starts at least at the mentor threshold. Later hires use the
+normal starting skill and retain any previously learned skill. Below the
+threshold, the lowest-ID eligible mentor present at completion supervises
+the practice. Reaching qualification records one native training interaction.
+Supervision stores no persistent mentor reference. Native sleep, survival
+needs and other work interruptions defer practice through the work gate.
+
+Maturation makes an actor eligible on the next occupation review. A missing
+workplace releases the assignment and its work reservations at review, and
+previously learned skills and personal cargo follow the actor. Temporary
+native incapacity pauses work and supervision while the actor retains their
+slot. Death releases the slot and outstanding work claims. Personal cargo
+and private household stock are booked as losses, and communal stock stays
+with its township.

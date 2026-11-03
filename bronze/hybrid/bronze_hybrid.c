@@ -3,6 +3,7 @@
 #include "../../sim/sim.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "../../gui/gui.h"
 #include "../work/bronze_work.h"
 #include "../tasks/bronze_tasks.h"
@@ -292,6 +293,11 @@ const BronzePlace *bronze_hybrid_place(uint64_t id)
     return NULL;
 }
 
+static void bind_household(BronzeActor *actor)
+{
+    if (!actor->household_home) actor->household_home = actor->home;
+}
+
 static void update_membership(BronzeLandscape *landscape, simulated_group *group)
 {
     BronzeActorRegistry *registry = bronze_actors_current();
@@ -306,6 +312,7 @@ static void update_membership(BronzeLandscape *landscape, simulated_group *group
             actor->home = 0;
             actor->workplace = 0;
         }
+        bind_household(actor);
     }
     if (!landscape->town_count) return;
     for (n_uint i = 0; i < group->num; i++) {
@@ -317,6 +324,7 @@ static void update_membership(BronzeLandscape *landscape, simulated_group *group
         BronzeTownship *town = nearest_town(landscape, cell, 1);
         if (!town) continue;
         actor->home = town->home;
+        bind_household(actor);
         town->residents++;
     }
 }
@@ -369,6 +377,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
     landscape->next_profession_tick = tick + policy->retry_minutes;
     unsigned counts[BRONZE_VOCATION_LIMIT] = {0};
     unsigned occupancy[BRONZE_PLACE_LIMIT] = {0};
+    uint64_t founding_vocations[BRONZE_PLACE_LIMIT] = {0};
     int enabled = 0;
     for (unsigned i = 0; i < policy->count; i++) enabled |= policy->vocations[i].weight != 0;
 
@@ -400,7 +409,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
                 }
             }
         }
-        bronze_actor_set_job(actor, BRONZE_KIND_NONE, 0, 0, tick);
+        bronze_actor_set_job(registry, actor, BRONZE_KIND_NONE, 0, 0, tick);
     }
     for (n_uint i = 0; i < group->num; i++) {
         simulated_being *being = &group->beings[i];
@@ -430,14 +439,69 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
             if (reachable) actor->job_status = BRONZE_JOB_FULL;
             continue;
         }
-        if (!bronze_actor_set_job(actor, best, landscape->places[workplace].id,
-                                 policy->skill_start, tick)) {
+        unsigned starting_skill = policy->skill_start;
+        uint64_t vocation_bit = UINT64_C(1) << best;
+        if (reset && !(founding_vocations[workplace] & vocation_bit) &&
+            starting_skill < policy->mentor_skill)
+            starting_skill = policy->mentor_skill;
+        if (!bronze_actor_set_job(registry, actor, best, landscape->places[workplace].id,
+                                 starting_skill, tick)) {
             actor->job_status = BRONZE_JOB_MEMORY;
             continue;
         }
         actor->job_status = BRONZE_JOB_ASSIGNED;
+        founding_vocations[workplace] |= vocation_bit;
         occupancy[workplace]++;
         counts[best]++;
+    }
+}
+
+static void patch_totals(bronze_site *site)
+{
+    site->stock = site->capacity = 0;
+    for (unsigned kind = 0; kind < BRONZE_RESOURCE_LIMIT; kind++) {
+        site->stock += site->resources[kind].amount;
+        site->capacity += site->resources[kind].capacity;
+    }
+}
+
+static const char *resource_name(const ParsedConfig *config, unsigned kind)
+{
+    const char *const *names = config->resource_kinds.names.data;
+    return kind < config->resource_kinds.names.len ? names[kind] : "";
+}
+
+static void configure_stocks(BronzeLandscape *landscape, const ParsedConfig *config)
+{
+    const ResourceDef *definitions = config->resources.data;
+    static const char *habitats[] = {"", "field", "mine_copper", "mine_tin", "forest"};
+    for (n_uint i = 0; i < landscape->site_count; i++) {
+        bronze_site *site = &landscape->sites[i];
+        if (site->kind == BRONZE_TOWN) continue;
+        unsigned moisture = 0;
+        for (n_uint cell = 0; cell < site->area; cell++)
+            moisture += terrain[map_cell(site->cells[cell].x, site->cells[cell].y)].moisture;
+        double environment = 1;
+        if (site->kind == BRONZE_FIELD || site->kind == BRONZE_WOODLAND)
+            environment = (double)moisture / (255 * site->area);
+        for (size_t r = 0; r < config->resources.len; r++) {
+            const ResourceDef *definition = &definitions[r];
+            if (definition->kind_id < 0 || definition->kind_id >= BRONZE_RESOURCE_LIMIT ||
+                !definition->habitat || strcmp(definition->habitat, habitats[site->kind])) continue;
+            BronzePatchStock *stock = &site->resources[definition->kind_id];
+            stock->capacity = definition->capacity;
+            double initial = landscape->policy.patch_initial_per_cell * site->area;
+            stock->amount = initial < stock->capacity ? initial : stock->capacity;
+            stock->daily_renewal = stock->capacity * definition->renew * environment;
+        }
+        patch_totals(site);
+    }
+    for (unsigned i = 0; i < landscape->town_count; i++) {
+        BronzeTownship *town = &landscape->towns[i];
+        town->stores.grain = 0;
+        for (unsigned kind = 0; kind < config->resource_kinds.names.len; kind++)
+            if (!strcmp(resource_name(config, kind), "grain"))
+                town->resources[kind] = landscape->policy.town_initial_grain;
     }
 }
 
@@ -447,6 +511,10 @@ void bronze_hybrid_reset(void)
     if (!landscape) return;
     memset(landscape->sites, 0, sizeof(landscape->sites));
     memset(occupied, 0, sizeof(occupied));
+    memset(landscape->consumed, 0, sizeof(landscape->consumed));
+    memset(landscape->spoiled, 0, sizeof(landscape->spoiled));
+    memset(landscape->lost, 0, sizeof(landscape->lost));
+    memset(landscape->lost_items, 0, sizeof(landscape->lost_items));
     landscape->place_count = 0;
     landscape->town_count = 0;
     landscape->site_count = 0;
@@ -469,8 +537,39 @@ void bronze_hybrid_reset(void)
     place_patches(landscape, BRONZE_COPPER_MINE, height, preferred_distance);
     place_patches(landscape, BRONZE_TIN_MINE, height, preferred_distance);
     assign_workplaces(landscape);
+    const BronzeProgram *program = bronze_actors_program(bronze_actors_current());
+    if (program) configure_stocks(landscape, program->config);
     update_membership(landscape, sim_group());
     update_professions(landscape, sim_group(), 1);
+}
+
+static void spoil_stores(BronzeLandscape *landscape, simulated_group *group,
+                         const ParsedConfig *config)
+{
+    if (!(landscape->policy.food_spoilage > 0)) return;
+    unsigned char seen[BRONZE_RESOURCE_LIMIT] = {0};
+    const ResourceDef *definitions = config->resources.data;
+    for (size_t r = 0; r < config->resources.len; r++) {
+        int kind = definitions[r].kind_id;
+        if (kind < 0 || kind >= BRONZE_RESOURCE_LIMIT || !(definitions[r].nutrition > 0)) continue;
+        if (seen[kind]) continue;
+        seen[kind] = 1;
+        for (unsigned i = 0; i < landscape->town_count; i++) {
+            BronzeTownship *town = &landscape->towns[i];
+            double available = town->resources[kind] - town->reserved_resources[kind];
+            if (!(available > 0)) continue;
+            double loss = available * landscape->policy.food_spoilage;
+            town->resources[kind] -= loss;
+            landscape->spoiled[kind] += loss;
+        }
+        for (n_uint i = 0; i < group->num; i++) {
+            BronzeActor *actor = bronze_actors_for_being(bronze_actors_current(), &group->beings[i]);
+            if (!actor) continue;
+            double loss = actor->household_resources[kind] * landscape->policy.food_spoilage;
+            actor->household_resources[kind] -= loss;
+            landscape->spoiled[kind] += loss;
+        }
+    }
 }
 
 void bronze_hybrid_cycle(simulated_group *group)
@@ -482,13 +581,24 @@ void bronze_hybrid_cycle(simulated_group *group)
     uint64_t tick = bronze_native_tick();
     if (land_time() % TIME_HOUR_MINUTES != 0 || tick == landscape->last_tick) return;
     landscape->last_tick = tick;
-    if (land_date() == landscape->last_day) return;
+    if (land_date() <= landscape->last_day) return;
+    const BronzeProgram *program = bronze_actors_program(bronze_actors_current());
     for (n_uint i = 0; i < landscape->site_count; i++) {
         bronze_site *site = &landscape->sites[i];
+        if (program) {
+            for (unsigned kind = 0; kind < BRONZE_RESOURCE_LIMIT; kind++) {
+                BronzePatchStock *stock = &site->resources[kind];
+                stock->amount += stock->daily_renewal;
+                if (stock->amount > stock->capacity) stock->amount = stock->capacity;
+            }
+            patch_totals(site);
+            continue;
+        }
         if (site->kind != BRONZE_FIELD && site->kind != BRONZE_WOODLAND) continue;
         site->stock += 5;
         if (site->stock > site->capacity) site->stock = site->capacity;
     }
+    if (program) spoil_stores(landscape, group, program->config);
     landscape->last_day = land_date();
 }
 
@@ -531,29 +641,310 @@ const bronze_site *bronze_task_move_site(uint64_t home, uint64_t workplace, cons
     return best;
 }
 
-BronzeTaskStatus bronze_task_gather(uint64_t home, uint64_t target, const char *resource,
-                                   double quantity, int commit)
+static BronzeStock *cargo_slot(BronzeActor *actor, unsigned kind, int item, int create)
+{
+    BronzeStock **cargo = item ? &actor->items : &actor->resources;
+    size_t *count = item ? &actor->item_count : &actor->resource_count;
+    for (size_t i = 0; i < *count; i++)
+        if ((*cargo)[i].kind == kind) return &(*cargo)[i];
+    if (!create) return NULL;
+    BronzeStock *next = realloc(*cargo, (*count + 1) * sizeof(*next));
+    if (!next) return NULL;
+    *cargo = next;
+    next[*count] = (BronzeStock){kind, 0};
+    return &next[(*count)++];
+}
+
+static double carried_total(const BronzeActor *actor)
+{
+    double total = 0;
+    for (size_t i = 0; i < actor->resource_count; i++) total += actor->resources[i].amount;
+    for (size_t i = 0; i < actor->item_count; i++) total += actor->items[i].amount;
+    return total;
+}
+
+static double recipe_quantities(const RecipeDef *recipe, unsigned batches,
+                                double *resources, double *items)
+{
+    const RecipeInputDef *inputs = recipe->inputs.data;
+    double consumed = 0;
+    for (size_t i = 0; i < recipe->inputs.len; i++) {
+        const RecipeInputDef *input = &inputs[i];
+        double quantity = input->amount * batches;
+        if (input->item_id >= 0) items[input->item_id] += quantity;
+        else resources[input->resource_id] += quantity;
+        consumed += quantity;
+    }
+    return consumed;
+}
+
+void bronze_task_release_claim(BronzeLandscape *landscape, BronzeActor *actor)
+{
+    BronzeTaskState *state = &actor->execution;
+    if (state->claim_place) {
+        bronze_site *site = work_site(landscape, state->claim_place);
+        if (site) {
+            BronzePatchStock *stock = &site->resources[state->claim_kind];
+            stock->reserved -= state->claim_amount;
+            if (stock->reserved < 0) stock->reserved = 0;
+        }
+        state->claim_place = 0;
+        state->claim_amount = 0;
+    }
+    if (state->craft_recipe && state->craft_town && landscape) {
+        BronzeTownship *town = town_by_home(landscape, state->craft_town);
+        if (town) {
+            double resources[BRONZE_RESOURCE_LIMIT] = {0}, items[BRONZE_ITEM_LIMIT] = {0};
+            recipe_quantities(state->craft_recipe, state->craft_batches, resources, items);
+            for (unsigned i = 0; i < BRONZE_RESOURCE_LIMIT; i++) {
+                town->reserved_resources[i] -= resources[i];
+                if (town->reserved_resources[i] < 0) town->reserved_resources[i] = 0;
+            }
+            for (unsigned i = 0; i < BRONZE_ITEM_LIMIT; i++) {
+                town->reserved_items[i] -= items[i];
+                if (town->reserved_items[i] < 0) town->reserved_items[i] = 0;
+            }
+        }
+    }
+    state->craft_recipe = NULL;
+    state->craft_town = 0;
+    state->craft_batches = 0;
+    state->claim_until = 0;
+}
+
+static int at_location(simulated_being *being, bronze_land_cell location)
+{
+    return APESPACE_TO_MAPSPACE(being_location_x(being)) == location.x &&
+           APESPACE_TO_MAPSPACE(being_location_y(being)) == location.y;
+}
+
+BronzeTaskStatus bronze_task_gather(BronzeActor *actor, simulated_being *being,
+                                   uint64_t target, int kind, double quantity, int commit)
 {
     BronzeLandscape *landscape = current_landscape();
     bronze_site *site = work_site(landscape, target);
     const BronzePlace *place = bronze_hybrid_place(target);
-    BronzeTownship *town = site && place && place->owner == home ? town_by_home(landscape, home) : NULL;
-    if (!town) return BRONZE_TASK_TARGET;
-    static const char *names[] = {"", "grain", "copper", "tin", "charcoal"};
-    if (!resource || strcmp(names[site->kind], resource)) return BRONZE_TASK_UNSUPPORTED;
-    if (!(quantity > 0) || quantity > site->stock) return BRONZE_TASK_STOCK;
+    BronzeTownship *town = site && place && place->owner == actor->home ?
+                           town_by_home(landscape, actor->home) : NULL;
+    if (!town || target != actor->workplace) return BRONZE_TASK_TARGET;
+    if (actor->execution.craft_recipe) return BRONZE_TASK_STOCK;
+    n_uint cell = 0;
+    while (cell < site->area && !at_location(being, site->cells[cell])) cell++;
+    if (cell == site->area) return BRONZE_TASK_TRAVEL;
+    if (kind < 0 || kind >= BRONZE_RESOURCE_LIMIT || !site->resources[kind].capacity)
+        return BRONZE_TASK_UNSUPPORTED;
+    if (!(quantity > 0)) return BRONZE_TASK_STOCK;
+    if (quantity > landscape->policy.carry_capacity - carried_total(actor))
+        return BRONZE_TASK_CAPACITY;
+
+    BronzeTaskState *state = &actor->execution;
+    BronzePatchStock *stock = &site->resources[kind];
+    if (state->claim_place) {
+        if (state->claim_place != target || state->claim_kind != (unsigned)kind ||
+            state->claim_amount != quantity || stock->amount < quantity)
+            return BRONZE_TASK_STOCK;
+    } else {
+        if (commit || quantity > stock->amount - stock->reserved) return BRONZE_TASK_STOCK;
+        stock->reserved += quantity;
+        state->claim_place = target;
+        state->claim_kind = (unsigned)kind;
+        state->claim_amount = quantity;
+        state->claim_until = bronze_native_tick() + TIME_HOUR_MINUTES + (uint64_t)quantity + 1;
+    }
     if (commit) {
-        site->stock -= quantity;
-        switch (site->kind) {
-            case BRONZE_FIELD: town->stores.grain += quantity; break;
-            case BRONZE_COPPER_MINE: town->stores.copper += quantity; break;
-            case BRONZE_TIN_MINE: town->stores.tin += quantity; break;
-            case BRONZE_WOODLAND: town->stores.charcoal += quantity; break;
-            case BRONZE_TOWN: break;
-        }
+        BronzeStock *cargo = cargo_slot(actor, (unsigned)kind, 0, 1);
+        if (!cargo) return BRONZE_TASK_CAPACITY;
+        cargo->amount += quantity;
+        stock->amount -= quantity;
+        bronze_task_release_claim(landscape, actor);
+        patch_totals(site);
         town->stores.work_events++;
     }
     return BRONZE_TASK_RUNNING;
+}
+
+uint64_t bronze_task_storage(uint64_t home)
+{
+    BronzeLandscape *landscape = current_landscape();
+    BronzeTownship *town = landscape ? town_by_home(landscape, home) : NULL;
+    return town ? town->storage : 0;
+}
+
+static int nutritious_resource(unsigned kind)
+{
+    const BronzeProgram *program = bronze_actors_program(bronze_actors_current());
+    if (!program) return 0;
+    const ResourceDef *definitions = program->config->resources.data;
+    for (size_t i = 0; i < program->config->resources.len; i++)
+        if (definitions[i].kind_id == (int)kind) return definitions[i].nutrition > 0;
+    return 0;
+}
+
+BronzeTaskStatus bronze_task_store_transfer(BronzeActor *actor, simulated_being *being,
+                                            uint64_t target, int kind, double quantity,
+                                            int item, int household, int fetch, int commit)
+{
+    BronzeLandscape *landscape = current_landscape();
+    BronzeTownship *town = landscape ? town_by_home(landscape, actor->home) : NULL;
+    const BronzePlace *place = bronze_hybrid_place(target);
+    if (!town || !place || target != (household ? town->home : town->storage))
+        return BRONZE_TASK_TARGET;
+    if (household && !landscape->policy.household_capacity) return BRONZE_TASK_TARGET;
+    if (!at_location(being, place->location)) return BRONZE_TASK_TRAVEL;
+    if (kind < 0 || kind >= (item ? BRONZE_ITEM_LIMIT : BRONZE_RESOURCE_LIMIT))
+        return BRONZE_TASK_UNSUPPORTED;
+    if (actor->execution.craft_recipe || !(quantity > 0)) return BRONZE_TASK_STOCK;
+    if (household && actor->household_home != actor->home) return BRONZE_TASK_TARGET;
+
+    double *resources = household ? actor->household_resources : town->resources;
+    double *items = household ? actor->household_items : town->items;
+    double *stock = &(item ? items : resources)[kind];
+    if (fetch) {
+        double reserved = household ? 0 : (item ? town->reserved_items : town->reserved_resources)[kind];
+        if (quantity > *stock - reserved) return BRONZE_TASK_STOCK;
+        if (quantity > landscape->policy.carry_capacity - carried_total(actor)) return BRONZE_TASK_CAPACITY;
+        double ration = actor->ration_day == land_date() ? actor->ration_used : 0;
+        int food_ration = !household && !item && landscape->policy.ration_daily && nutritious_resource((unsigned)kind);
+        if (food_ration && quantity > landscape->policy.ration_daily - ration) return BRONZE_TASK_RATION;
+        if (commit) {
+            BronzeStock *cargo = cargo_slot(actor, (unsigned)kind, item, 1);
+            if (!cargo) return BRONZE_TASK_CAPACITY;
+            cargo->amount += quantity;
+            *stock -= quantity;
+            if (food_ration) {
+                actor->ration_day = land_date();
+                actor->ration_used = ration + quantity;
+            }
+        }
+    } else {
+        BronzeStock *cargo = cargo_slot(actor, (unsigned)kind, item, 0);
+        if (!cargo || quantity > cargo->amount) return BRONZE_TASK_STOCK;
+        double total = 0;
+        for (unsigned i = 0; i < BRONZE_RESOURCE_LIMIT; i++) total += resources[i];
+        for (unsigned i = 0; i < BRONZE_ITEM_LIMIT; i++) total += items[i];
+        unsigned capacity = household ? landscape->policy.household_capacity : landscape->policy.storage_capacity;
+        if (quantity > capacity - total) return BRONZE_TASK_CAPACITY;
+        if (commit) {
+            cargo->amount -= quantity;
+            *stock += quantity;
+        }
+    }
+    return BRONZE_TASK_RUNNING;
+}
+
+BronzeTaskStatus bronze_task_deposit(BronzeActor *actor, simulated_being *being,
+                                    uint64_t target, int kind, double quantity, int commit)
+{
+    return bronze_task_store_transfer(actor, being, target, kind, quantity, 0, 0, 0, commit);
+}
+
+BronzeTaskStatus bronze_task_deposit_item(BronzeActor *actor, simulated_being *being,
+                                         uint64_t target, int kind, double quantity, int commit)
+{
+    return bronze_task_store_transfer(actor, being, target, kind, quantity, 1, 0, 0, commit);
+}
+
+static double available_input(BronzeActor *actor, const double *stocks, const double *reserved,
+                              unsigned kind, int item, double own_reservation)
+{
+    if (stocks) {
+        double competing = reserved[kind] - own_reservation;
+        return stocks[kind] - (competing > 0 ? competing : 0);
+    }
+    const BronzeStock *cargo = cargo_slot(actor, kind, item, 0);
+    return cargo ? cargo->amount : 0;
+}
+
+static void apply_inputs(BronzeActor *actor, double *stock, double *reserved,
+                         const double *required, unsigned count, int item, int commit)
+{
+    for (unsigned kind = 0; kind < count; kind++) {
+        if (!required[kind]) continue;
+        if (!commit) {
+            if (reserved) reserved[kind] += required[kind];
+        } else if (stock) {
+            stock[kind] -= required[kind];
+        } else {
+            cargo_slot(actor, kind, item, 0)->amount -= required[kind];
+        }
+    }
+}
+
+BronzeTaskStatus bronze_task_craft(BronzeActor *actor, simulated_being *being, uint64_t target,
+                                  const RecipeDef *recipe, const BronzeRecipePolicy *policy,
+                                  unsigned batches, int commit)
+{
+    BronzeLandscape *landscape = current_landscape();
+    BronzeTownship *town = landscape ? town_by_home(landscape, actor->home) : NULL;
+    const BronzePlace *place = bronze_hybrid_place(target);
+    if (!town || !place || place->owner != town->home ||
+        target != (policy->at_workplace ? actor->workplace : town->service))
+        return BRONZE_TASK_TARGET;
+    /* Production workplaces may cover several cells. */
+    bronze_site *site = work_site(landscape, target);
+    if (site) {
+        n_uint cell = 0;
+        while (cell < site->area && !at_location(being, site->cells[cell])) cell++;
+        if (cell == site->area) return BRONZE_TASK_TRAVEL;
+    } else if (!at_location(being, place->location)) return BRONZE_TASK_TRAVEL;
+    if (!batches) return BRONZE_TASK_STOCK;
+    if (bronze_actor_skill(actor, actor->vocation) < policy->minimum_skill) return BRONZE_TASK_SKILL;
+
+    BronzeTaskState *state = &actor->execution;
+    uint64_t stock_home = policy->at_workplace ? 0 : town->home;
+    int owns_claim = state->craft_recipe != NULL;
+    if ((commit && !owns_claim) || (owns_claim &&
+        (state->craft_recipe != recipe || state->craft_batches != batches ||
+         state->craft_town != stock_home))) return BRONZE_TASK_STOCK;
+
+    double resources[BRONZE_RESOURCE_LIMIT] = {0}, items[BRONZE_ITEM_LIMIT] = {0};
+    double consumed = recipe_quantities(recipe, batches, resources, items);
+    if (policy->tool >= 0) {
+        const BronzeStock *tool = cargo_slot(actor, (unsigned)policy->tool, 1, 0);
+        double tool_and_inputs = 1 + (stock_home ? 0 : items[policy->tool]);
+        if (!tool || tool->amount < tool_and_inputs) return BRONZE_TASK_TOOL;
+    }
+    double *resource_stock = stock_home ? town->resources : NULL;
+    double *item_stock = stock_home ? town->items : NULL;
+    double *resource_reserved = stock_home ? town->reserved_resources : NULL;
+    double *item_reserved = stock_home ? town->reserved_items : NULL;
+    for (unsigned i = 0; i < BRONZE_RESOURCE_LIMIT; i++)
+        if (resources[i] && resources[i] > available_input(actor, resource_stock, resource_reserved, i, 0, owns_claim ? resources[i] : 0))
+            return BRONZE_TASK_STOCK;
+    for (unsigned i = 0; i < BRONZE_ITEM_LIMIT; i++)
+        if (items[i] && items[i] > available_input(actor, item_stock, item_reserved, i, 1, owns_claim ? items[i] : 0))
+            return BRONZE_TASK_STOCK;
+
+    double output = recipe->output_amount * batches;
+    if (carried_total(actor) - (stock_home ? 0 : consumed) + output > landscape->policy.carry_capacity)
+        return BRONZE_TASK_CAPACITY;
+    if (commit) {
+        int item = recipe->output_item_id >= 0;
+        unsigned kind = item ? (unsigned)recipe->output_item_id : (unsigned)recipe->output_resource_id;
+        BronzeStock *result = cargo_slot(actor, kind, item, 1);
+        if (!result) return BRONZE_TASK_CAPACITY;
+        apply_inputs(actor, resource_stock, NULL, resources, BRONZE_RESOURCE_LIMIT, 0, 1);
+        apply_inputs(actor, item_stock, NULL, items, BRONZE_ITEM_LIMIT, 1, 1);
+        result->amount += output;
+        bronze_task_release_claim(landscape, actor);
+        town->stores.work_events++;
+    } else if (!owns_claim) {
+        apply_inputs(actor, NULL, resource_reserved, resources, BRONZE_RESOURCE_LIMIT, 0, 0);
+        apply_inputs(actor, NULL, item_reserved, items, BRONZE_ITEM_LIMIT, 1, 0);
+        state->craft_recipe = recipe;
+        state->craft_batches = batches;
+        state->craft_town = stock_home;
+        state->claim_until = bronze_native_tick() + (uint64_t)policy->minutes * batches + TIME_HOUR_MINUTES;
+    }
+    return BRONZE_TASK_RUNNING;
+}
+
+static void draw_map_cell(bronze_plot plot, void *context, n_int x, n_int y,
+                          n_int scale, n_byte color)
+{
+    for (n_int dy = 0; dy < scale; ++dy)
+        for (n_int dx = 0; dx < scale; ++dx)
+            plot(x * scale + dx, y * scale + dy, color, context);
 }
 
 void bronze_hybrid_draw(n_int dimension, bronze_plot plot, void *context)
@@ -573,7 +964,7 @@ void bronze_hybrid_draw(n_int dimension, bronze_plot plot, void *context)
                        (site->kind == BRONZE_COPPER_MINE || site->kind == BRONZE_TIN_MINE) ? COLOR_BLACK : COLOR_BLUE;
         if (site->kind != BRONZE_TOWN) {
             for (n_uint cell = 0; cell < site->area; cell++)
-                plot(site->cells[cell].x * scale, site->cells[cell].y * scale, color, context);
+                draw_map_cell(plot, context, site->cells[cell].x, site->cells[cell].y, scale, color);
         }
         for (y = -radius; y <= radius; y++)
             for (x = -radius; x <= radius; x++)
@@ -588,15 +979,21 @@ void bronze_hybrid_draw(n_int dimension, bronze_plot plot, void *context)
                     edge = ax == radius || y == -radius || y == radius ||
                            (site->kind == BRONZE_FIELD && y == 0);
                 if (edge)
-                    plot((site->x * scale + x + dimension) % dimension,
-                         (site->y * scale + y + dimension) % dimension, color, context);
+                    draw_map_cell(plot, context, (site->x + x + MAP_DIMENSION) % MAP_DIMENSION,
+                                  (site->y + y + MAP_DIMENSION) % MAP_DIMENSION, scale, color);
             }
         /* Tin mines have a central white point; copper mines a white cross. */
         if (site->kind == BRONZE_TIN_MINE || site->kind == BRONZE_COPPER_MINE)
         {
-            plot(site->x * scale, site->y * scale, COLOR_WHITE, context);
-            if (site->kind == BRONZE_COPPER_MINE)
-                plot((site->x * scale + 1) % dimension, site->y * scale, COLOR_WHITE, context);
+            draw_map_cell(plot, context, site->x, site->y, scale, COLOR_WHITE);
+            if (site->kind == BRONZE_COPPER_MINE) {
+                for (n_int delta = -1; delta <= 1; delta += 2) {
+                    draw_map_cell(plot, context, (site->x + delta + MAP_DIMENSION) % MAP_DIMENSION,
+                                  site->y, scale, COLOR_WHITE);
+                    draw_map_cell(plot, context, site->x,
+                                  (site->y + delta + MAP_DIMENSION) % MAP_DIMENSION, scale, COLOR_WHITE);
+                }
+            }
         }
     }
 }
@@ -612,6 +1009,7 @@ bronze_economy bronze_hybrid_economy(void)
     bronze_economy total = {0};
     const BronzeLandscape *landscape = current_landscape();
     if (!landscape) return total;
+    const BronzeProgram *program = bronze_actors_program(bronze_actors_current());
     for (unsigned i = 0; i < landscape->town_count; i++) {
         const bronze_economy *stores = &landscape->towns[i].stores;
         total.grain += stores->grain;
@@ -620,6 +1018,20 @@ bronze_economy bronze_hybrid_economy(void)
         total.charcoal += stores->charcoal;
         total.tools += stores->tools;
         total.work_events += stores->work_events;
+        if (program) {
+            const ParsedConfig *config = program->config;
+            const char *const *item_names = config->item_kinds.names.data;
+            for (unsigned kind = 0; kind < config->item_kinds.names.len; kind++)
+                if (!strcmp(item_names[kind], "tool")) total.tools += landscape->towns[i].items[kind];
+            for (unsigned kind = 0; kind < config->resource_kinds.names.len; kind++) {
+                const char *name = resource_name(config, kind);
+                double stock = landscape->towns[i].resources[kind];
+                if (!strcmp(name, "grain")) total.grain += stock;
+                else if (!strcmp(name, "copper")) total.copper += stock;
+                else if (!strcmp(name, "tin")) total.tin += stock;
+                else if (!strcmp(name, "charcoal")) total.charcoal += stock;
+            }
+        }
     }
     return total;
 }

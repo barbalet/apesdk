@@ -268,6 +268,7 @@
 				<string>4A80F01E2ED0000000000001</string>
 				<string>4A80F01F2ED0000000000001</string>
 				<string>4A80F0202ED0000000000001</string>
+				<string>4A80F0202ED0000000000015</string>
 				<string>4A80F0212ED0000000000001</string>
 				<string>4A80F0222ED0000000000001</string>
 				<string>4A80F0232ED0000000000001</string>
@@ -657,6 +658,26 @@
 			<string>PBXFileReference</string>
 			<key>name</key>
 			<string>episodic.c</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+		</dict>
+		<key>4A80F0202ED0000000000015</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>4A80F0202ED0000000000016</string>
+		</dict>
+		<key>4A80F0202ED0000000000016</key>
+		<dict>
+			<key>path</key>
+			<string>../../entity/profession.c</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>name</key>
+			<string>profession.c</string>
 			<key>lastKnownFileType</key>
 			<string>sourcecode.c.c</string>
 			<key>sourceTree</key>
@@ -1373,6 +1394,7 @@
 				<string>4A212EAB2DCCB377001F26AA</string>
 				<string>4A212EA92DCCB377001F26AA</string>
 				<string>4A212EAF2DCCB377001F26AA</string>
+				<string>4A80F0202ED0000000000016</string>
 				<string>4A212EB02DCCB377001F26AA</string>
 				<string>4A212EB12DCCB377001F26AA</string>
 				<string>4A212EB22DCCB377001F26AA</string>

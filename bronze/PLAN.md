@@ -18,8 +18,8 @@ interactions affect individuals, and saving/resuming restores the combined
 world deterministically. A large occupation list or decorative map markers
 alone does not satisfy this goal.
 
-This document defines 18 ordered development cycles. Cycles 01–09 are completed
-(2026-11-02–03); cycles 10–18 remain planned. The existing prototype is a starting point, not proof
+This document defines 18 ordered development cycles. Cycles 01–13 are completed
+(2026-11-02–03); cycles 14–18 remain planned. The existing prototype is a starting point, not proof
 that the full scenario works. Each cycle should finish with working code,
 focused validation, updated documentation and a recorded result before its
 dependents begin. These are units of development, not calendar estimates.
@@ -84,8 +84,8 @@ The snippet shows the boundary, not an existing API or implementation.
 - `hybrid/` derives connected field, woodland, copper and tin patches from
   native terrain. Each world owns its patches, townships and finite stocks.
 - Townships reserve housing on reachable dry land near food, woodland and water.
-  Assigned workers can gather at their own production patches and credit the
-  owner’s stores. The HUD totals those stores.
+  Workers gather into bounded cargo and deposit at their township’s storage.
+  The HUD totals deposited stock.
   Cycle 04 links actor IDs and sidecar records to real beings. Cycle 08 uses
   those records for declared vocations, individual skills and job history.
   The counters do not represent a completed settlement logistics model.
@@ -326,6 +326,9 @@ than reporting false completion.
 
 ## Cycle 10 — Route workers to real places and resources
 
+**Status:** completed 2026-11-03. See [routing policy](tasks/README.md)
+and [validation record](contract/RESULTS-CYCLE10.md).
+
 **Depends on:** cycles 06, 07 and 09.
 
 Implement movement intentions and route progress using native positions and
@@ -342,6 +345,9 @@ second authoritative Bronze position. Preserve manual selection/input routes.
 are deferred; native survival can interrupt travel without corrupting task state.
 
 ## Cycle 11 — Implement inventories, gathering and renewable resources
+
+**Status:** completed 2026-11-03. See [inventory and stock rules](hybrid/README.md)
+and [validation record](contract/RESULTS-CYCLE11.md).
 
 **Depends on:** cycles 09 and 10.
 
@@ -361,6 +367,9 @@ regrowth, deterministic contention and no remote gathering/depositing.
 
 ## Cycle 12 — Implement recipes, tools and production chains
 
+**Status:** completed 2026-11-03. See [recipe execution](tasks/README.md)
+and [validation record](contract/RESULTS-CYCLE12.md).
+
 **Depends on:** cycle 11.
 
 Execute data-defined recipes with resource/item inputs, output quantities,
@@ -378,6 +387,9 @@ Bronze inventory units must not be confused with native body-slot inventory.
 reservations appropriately, and no item appears without accounted inputs.
 
 ## Cycle 13 — Complete household, communal storage and consumption rules
+
+**Status:** Completed 2026-11-03. See the [storage rules](hybrid/README.md)
+and [verification results](contract/RESULTS-CYCLE13.md).
 
 **Depends on:** cycles 07, 11 and 12.
 
@@ -416,6 +428,9 @@ completed interactions identify the right beings and influence their histories.
 
 ## Cycle 15 — Add apprenticeship and lifetime profession transitions
 
+**Status:** Implemented using the native training interaction. The cycle 14
+economic interactions remain open. See the [profession rules](actors/PROFESSIONS.md).
+
 **Depends on:** cycles 08, 09 and 14.
 
 Implement mentor selection, supervised practice, skill gains and occupational
@@ -433,6 +448,9 @@ Without it, native birth/death/aging behavior remains the original code path.
 within bounds, and death/reassignment leaves no dangling links or reservations.
 
 ## Cycle 16 — Save and resume the combined native and Bronze world
+
+**Status:** The Bronze package envelope has a tested codec. State
+serialization, restore and replay tests remain open. See the [save format proposal](SAVE-FORMAT.md).
 
 **Depends on:** cycles 04–15.
 
@@ -458,6 +476,9 @@ event traces; truncated, mismatched and unsupported saves fail safely.
 
 ## Cycle 17 — Complete inspection, uniform graphics and authoring feedback
 
+**Status:** Scalable map symbols and selected-being inspection are implemented.
+Full-resume inspection and economic outcomes depend on cycles 14 and 16.
+
 **Depends on:** cycles 06–16; use read-only diagnostics in earlier cycles.
 
 Present selected being's vocation, skills, home, workplace, cargo, task/progress,
@@ -482,6 +503,10 @@ visible workplace and actual inventory; overlays survive resize, movement,
 new/load and multi-window use without stale pixels or mixed identities.
 
 ## Cycle 18 — Enable the full scenario and qualify the release
+
+**Status:** Local qualification of the supported scenarios is recorded. Full
+scenario admission and release acceptance remain open. See the
+[qualification results](contract/RESULTS-CYCLE18.md).
 
 **Depends on:** cycles 01–17.
 

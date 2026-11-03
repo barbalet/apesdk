@@ -363,7 +363,7 @@ final class ApeSimulationSceneModel: ObservableObject {
             _ = shared_session_cycle(session, ticks, surface.identifier)
         }
 #if BRONZE_SIM
-        var buffer = [CChar](repeating: 0, count: 512)
+        var buffer = [CChar](repeating: 0, count: 4096)
         let summary = buffer.withUnsafeMutableBufferPointer {
             shared_session_bronze_actor_summary(session, $0.baseAddress, n_uint($0.count))
             return String(cString: $0.baseAddress!)
@@ -604,7 +604,7 @@ class ASiOSView: UIView {
     private let sceneModel: ApeSimulationSceneModel
     private let surface: ApeSimulationSurface
     private let rotatesForUIKit: Bool
-    private var offscreenBuffer = [UInt32](repeating: 0, count: 512 * 512)
+    private var offscreenBuffer = [UInt32](repeating: 0, count: 4096 * 512)
     private var drawRef: CGContext?
     private var oldDimensionX: Int = -1
     private var oldDimensionY: Int = -1

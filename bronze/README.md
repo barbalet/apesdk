@@ -45,8 +45,8 @@ and retain the active scenario and world. `vertical_slice.bronze` also validates
 
 The graphical host applies the scenario seed, terrain thresholds, vocation
 roster and compiled task program. Actors execute supported tasks through the
-native work gate and the overview shows their progress. Travel and paired
-economic saves are later cycles. See the [landscape rules](hybrid/README.md),
+native work gate and the overview shows their progress. Workers follow dry-land
+routes to real sites. Paired economic saves are a later cycle. See the [landscape rules](hybrid/README.md),
 [occupation policy](actors/PROFESSIONS.md), [task execution](tasks/README.md)
 and [implementation plan](PLAN.md).
 

@@ -157,10 +157,12 @@ static void sessions(void)
     n_byte2 location[2]={MAPSPACE_TO_APESPACE(home->location.x), MAPSPACE_TO_APESPACE(home->location.y)};
     being_set_location(bronze_actors_resolve(ar,aid),location);
     bronze_hybrid_reset();
-    char summary[256];
+    char summary[512];
     shared_session_bronze_actor_summary(a,summary,sizeof(summary));
     assert(strstr(summary,"host") && strstr(summary,"skill 4/10") &&
            strstr(summary,"home #") && strstr(summary,"workplace #"));
+    assert(strstr(summary,"Energy ") && strstr(summary,"Cargo empty") &&
+           strstr(summary,"Town store #"));
     strcpy(jobs.vocations[0].name,"next_world");
     shared_session_bronze_professions(a,&jobs);
     shared_session_bronze_actor_summary(a,summary,sizeof(summary));

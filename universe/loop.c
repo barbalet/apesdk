@@ -35,6 +35,7 @@
 #ifdef BRONZE_SIM
 #include "../bronze/actors/bronze_actors.h"
 #include "../bronze/work/bronze_work.h"
+#include "../bronze/tasks/bronze_tasks.h"
 #endif
 
 #include <stdio.h>
@@ -2017,6 +2018,9 @@ void being_tidy_loop_no_sim( simulated_being *local_being, void *data )
     }
     if ( local_being->delta.awake != FULLY_ASLEEP )
     {
+#ifdef BRONZE_SIM
+        bronze_tasks_steer(local_being);
+#endif
         delta_e = being_move_energy( local_being, &conductance );
     }
     else

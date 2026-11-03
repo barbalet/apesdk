@@ -7,6 +7,7 @@
 enum { BRONZE_PATCH_LIMIT = 32, BRONZE_SITE_LIMIT = 10, BRONZE_TOWN_LIMIT = 2,
        BRONZE_PLACE_LIMIT = BRONZE_SITE_LIMIT + 2 * BRONZE_TOWN_LIMIT };
 typedef struct { n_int x, y; } bronze_land_cell;
+typedef struct { double amount, capacity, reserved, daily_renewal; } BronzePatchStock;
 
 typedef enum { BRONZE_TOWN, BRONZE_FIELD, BRONZE_COPPER_MINE,
                BRONZE_TIN_MINE, BRONZE_WOODLAND } bronze_site_kind;
@@ -14,7 +15,8 @@ typedef struct {
     n_int x, y; /* ApeSDK low-resolution map coordinates */
     bronze_site_kind kind;
     uint64_t place_id;
-    double stock, capacity;
+    double stock, capacity; /* Totals across scenario resources. */
+    BronzePatchStock resources[BRONZE_RESOURCE_LIMIT];
     n_uint area;
     bronze_land_cell cells[BRONZE_PATCH_LIMIT];
 } bronze_site;
@@ -36,6 +38,8 @@ typedef struct {
     uint64_t home, storage, service;
     unsigned residents, capacity;
     bronze_economy stores;
+    double resources[BRONZE_RESOURCE_LIMIT], reserved_resources[BRONZE_RESOURCE_LIMIT];
+    double items[BRONZE_ITEM_LIMIT], reserved_items[BRONZE_ITEM_LIMIT];
     /* Native map walk distances plus one, with zero for unreachable cells. */
     uint32_t distance[MAP_AREA];
 } BronzeTownship;
@@ -46,6 +50,8 @@ typedef struct {
     bronze_site sites[BRONZE_SITE_LIMIT];
     BronzePlace places[BRONZE_PLACE_LIMIT];
     BronzeTownship towns[BRONZE_TOWN_LIMIT];
+    double consumed[BRONZE_RESOURCE_LIMIT], lost[BRONZE_RESOURCE_LIMIT], spoiled[BRONZE_RESOURCE_LIMIT];
+    double lost_items[BRONZE_ITEM_LIMIT];
     unsigned place_count, town_count;
     uint64_t next_place_id, next_profession_tick;
     n_uint site_count, last_day;

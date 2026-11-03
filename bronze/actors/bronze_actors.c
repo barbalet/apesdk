@@ -1,4 +1,5 @@
 #include "bronze_actors.h"
+#include "../tasks/bronze_tasks.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -26,6 +27,7 @@ static void dispose(BronzeActorRegistry* r, BronzeActor* actor)
 {
     size_t i;
     if(!actor->id) return;
+    bronze_task_release_claim(&r->landscape, actor);
     for(i=0;i<actor->reservation_count;i++)
         if(r->release) r->release(r->release_context,actor->id,&actor->reservations[i]);
     free(actor->skills); free(actor->resources); free(actor->items);
@@ -195,6 +197,16 @@ void bronze_actors_death(simulated_group* group, simulated_being* dead)
         if(r->records[i].mentor==id) r->records[i].mentor=BRONZE_ACTOR_NONE;
         if(r->records[i].apprentice==id) r->records[i].apprentice=BRONZE_ACTOR_NONE;
     }
+    for (i=0;i<actor->resource_count;i++) {
+        const BronzeStock *cargo=&actor->resources[i];
+        if (cargo->kind<BRONZE_RESOURCE_LIMIT) r->landscape.lost[cargo->kind]+=cargo->amount;
+    }
+    for (i=0;i<actor->item_count;i++) {
+        const BronzeStock *item=&actor->items[i];
+        if (item->kind<BRONZE_ITEM_LIMIT) r->landscape.lost_items[item->kind]+=item->amount;
+    }
+    for (i=0;i<BRONZE_RESOURCE_LIMIT;i++) r->landscape.lost[i]+=actor->household_resources[i];
+    for (i=0;i<BRONZE_ITEM_LIMIT;i++) r->landscape.lost_items[i]+=actor->household_items[i];
     dispose(r,actor); r->count--;
 }
 void bronze_actors_relocated(simulated_group* group, simulated_being* from, simulated_being* to)
@@ -232,7 +244,7 @@ double bronze_actor_skill(const BronzeActor* actor, uint32_t vocation)
     return skill ? skill->value : 0;
 }
 
-int bronze_actor_set_job(BronzeActor* actor, uint32_t vocation, uint64_t workplace,
+int bronze_actor_set_job(BronzeActorRegistry* registry, BronzeActor* actor, uint32_t vocation, uint64_t workplace,
                          unsigned skill_start, uint64_t tick)
 {
     if (actor->vocation == vocation && actor->workplace == workplace) return 1;
@@ -254,6 +266,7 @@ int bronze_actor_set_job(BronzeActor* actor, uint32_t vocation, uint64_t workpla
             history[actor->history_count++] = (BronzeAssignment){tick, actor->vocation, vocation};
         }
     }
+    bronze_task_release_claim(bronze_actors_landscape(registry), actor);
     if (actor->execution.depth || actor->execution.operation) {
         actor->execution.depth = 0;
         actor->execution.operation = NULL;
@@ -267,6 +280,7 @@ int bronze_actor_set_job(BronzeActor* actor, uint32_t vocation, uint64_t workpla
         actor->execution.status = BRONZE_TASK_IDLE;
         actor->execution.retry_at = 0;
     }
+    actor->execution.route = (BronzeRoute){0};
     actor->vocation = vocation;
     actor->workplace = workplace;
     actor->task = BRONZE_KIND_NONE;

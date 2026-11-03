@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
     unsigned count, min_age_days, site_capacity, retry_minutes;
-    unsigned skill_start, skill_max, skill_gain;
+    unsigned skill_start, skill_max, skill_gain, mentor_skill;
     BronzeVocation vocations[BRONZE_VOCATION_LIMIT];
 } BronzeProfessionPolicy;
 

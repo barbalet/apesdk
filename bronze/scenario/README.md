@@ -21,6 +21,7 @@ introduced by loading. Cycle 06 also applies validated terrain thresholds. See t
 [landscape policy](../hybrid/README.md) for terrain keys and bounds. Cycle 08
 adds [occupation settings](../actors/PROFESSIONS.md) and a validated roster.
 Cycle 09 stages the retained compiled program for the [task executor](../tasks/README.md).
+Cycle 12 validates recipe workplace, duration, skill and tool settings.
 
 ## Authoring checks and diagnostics
 

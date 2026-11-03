@@ -357,6 +357,7 @@ int brz_action_code(const char* name)
     if(brz_streq(name,"wander")) return BRZ_ACTION_WANDER;
     if(brz_streq(name,"deposit")) return BRZ_ACTION_DEPOSIT;
     if(brz_streq(name,"eat")) return BRZ_ACTION_EAT;
+    if(brz_streq(name,"fetch")) return BRZ_ACTION_FETCH;
     return BRZ_ACTION_INVALID;
 }
 
@@ -555,7 +556,9 @@ static int compile_stmts(ParsedConfig* cfg, BrzVec* statements, const char* voca
         if(op->action_code==BRZ_ACTION_INVALID){
             fprintf(errors,"ValidationError:%d: vocation '%s' uses unsupported action '%s'\n",st->line,vocation,op->op); ok=0; continue;
         }
-        if(op->action_code==BRZ_ACTION_GATHER || op->action_code==BRZ_ACTION_DEPOSIT || op->action_code==BRZ_ACTION_EAT){
+        if((op->action_code==BRZ_ACTION_DEPOSIT || op->action_code==BRZ_ACTION_FETCH) && op->arg0_item_id>=0){
+            /* The graphical executor supports depositing declared item kinds. */
+        } else if(op->action_code==BRZ_ACTION_GATHER || op->action_code==BRZ_ACTION_DEPOSIT || op->action_code==BRZ_ACTION_FETCH || op->action_code==BRZ_ACTION_EAT){
             if(op->arg0_resource_id<0){ fprintf(errors,"ValidationError:%d: action '%s' requires a declared resource '%s'\n",st->line,op->op,op->a0); ok=0; }
         } else if(op->action_code==BRZ_ACTION_CRAFT){
             for(size_t ri=0;ri<cfg->recipes.len;ri++){
@@ -569,6 +572,10 @@ static int compile_stmts(ParsedConfig* cfg, BrzVec* statements, const char* voca
             }
         } else if(op->action_code==BRZ_ACTION_MOVE_TO || op->action_code==BRZ_ACTION_ROAM || op->action_code==BRZ_ACTION_WANDER){
             op->terrain_query=brz_terrain_query(op->a0);
+            if(op->action_code==BRZ_ACTION_MOVE_TO && brz_streq(op->a0,"workplace"))
+                op->terrain_query=128u;
+            if(op->action_code==BRZ_ACTION_MOVE_TO && brz_streq(op->a0,"service"))
+                op->terrain_query=256u;
             if(!op->terrain_query){ fprintf(errors,"ValidationError:%d: action '%s' has unknown terrain query '%s'\n",st->line,op->op,op->a0); ok=0; }
         }
     }

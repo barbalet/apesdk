@@ -38,7 +38,9 @@ static int statements(const ParsedConfig* cfg, const BrzVec* list, FILE* report)
             int count=(op->a0?1:0)+(op->a1?1:0)+(op->a2?1:0)+(op->has_n0?1:0);
             if(!action || count<action->min_args || count>action->max_args)
                 return error(report,s->line,"action '%s' has unsupported argument count/units",op->op);
-            if(op->a2 || (op->action_code!=BRZ_ACTION_TRADE && op->a1))
+            int storage_scope = (op->action_code==BRZ_ACTION_FETCH || op->action_code==BRZ_ACTION_DEPOSIT) &&
+                                op->a1 && !strcmp(op->a1,"household");
+            if(op->a2 || (op->action_code!=BRZ_ACTION_TRADE && op->a1 && !storage_scope))
                 return error(report,s->line,"action '%s' requires numeric quantities, not extra word arguments",op->op);
             if(s->as.op.has_n0 && !bounded(s->as.op.n0,1000000000)) return error(report,s->line,"quantity must be in 0..1000000000 economic units");
         } else if(s->kind==ST_CHANCE) {
@@ -71,6 +73,7 @@ static int occupation_parameter(const ParamDef* param, BronzeProfessionPolicy* p
         {"retry_minutes", &policy->retry_minutes, 1, 1440},
         {"skill_start", &policy->skill_start, 0, 1000},
         {"skill_max", &policy->skill_max, 1, 1000},
+        {"mentor_skill", &policy->mentor_skill, 0, 1000},
         {"skill_gain", &policy->skill_gain, 0, 1000},
     };
     for (size_t i = 0; i < sizeof(settings)/sizeof(settings[0]); i++) {
@@ -106,8 +109,44 @@ static int occupation_parameter(const ParamDef* param, BronzeProfessionPolicy* p
     }
     return error(report, 0, "unknown occupation setting '%s'", key);
 }
+static int recipe_parameter(const ParsedConfig *config, const ParamDef *param,
+                            BronzeRecipePolicy *policies, FILE *report)
+{
+    const char *key = param->key + strlen("world_recipe_");
+    for (size_t i = 0; i < config->recipes.len; i++) {
+        const RecipeDef *recipe = brz_vec_cat(&config->recipes, i);
+        size_t length = strlen(recipe->name);
+        if (strncmp(key, recipe->name, length)) continue;
+        const char *suffix = key + length;
+        BronzeRecipePolicy *policy = &policies[i];
+        if (!strcmp(suffix, "_minutes") && !param->has_svalue &&
+            bounded(param->value, 1440) && param->value >= 1 && floor(param->value) == param->value) {
+            policy->minutes = (unsigned)param->value;
+            return 1;
+        }
+        if (!strcmp(suffix, "_minimum_skill") && !param->has_svalue &&
+            bounded(param->value, 1000) && floor(param->value) == param->value) {
+            policy->minimum_skill = (unsigned)param->value;
+            return 1;
+        }
+        if (!strcmp(suffix, "_workplace") && param->has_svalue &&
+            (!strcmp(param->svalue, "service") || !strcmp(param->svalue, "workplace"))) {
+            policy->at_workplace = !strcmp(param->svalue, "workplace");
+            return 1;
+        }
+        if (!strcmp(suffix, "_tool") && param->has_svalue) {
+            int kind = kind_table_find(&config->item_kinds, param->svalue);
+            if (kind >= 0) {
+                policy->tool = kind;
+                return 1;
+            }
+        }
+    }
+    return error(report, 0, "invalid recipe setting '%s'", key);
+}
+
 static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* policy,
-                     BronzeProfessionPolicy* professions)
+                     BronzeProfessionPolicy* professions, BronzeRecipePolicy *recipes)
 {
     size_t i,j;
     if(!c->vocations.len || c->vocations.len>BRONZE_VOCATION_LIMIT)
@@ -124,16 +163,30 @@ static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* poli
     if(c->scenario_profile || c->map_refs.len || c->places.len || c->roles.len || c->needs.len || c->services.len || c->disruptions.len)
         return error(report,0,"service-profile declarations are not supported by the Bronze graphical host");
     if(c->agent_count>100000 || c->settlement_count>10000) return error(report,0,"population/place count exceeds host limits");
+    if(kind_table_count(&c->resource_kinds)>BRONZE_RESOURCE_LIMIT)
+        return error(report,0,"scenario exceeds the %d resource kind limit",BRONZE_RESOURCE_LIMIT);
     for(i=0;i<c->resources.len;i++) {
         const ResourceDef* r=brz_vec_cat(&c->resources,i);
         if(!bounded(r->capacity,1e9) || !bounded(r->renew,1) || !bounded(r->nutrition,1) || !bounded(r->market_target,1e9))
             return error(report,r->line,"resource capacity/market target use 0..1e9 units; renew/nutrition use 0..1");
     }
+    if(kind_table_count(&c->item_kinds)>BRONZE_ITEM_LIMIT || c->recipes.len>BRONZE_RECIPE_LIMIT)
+        return error(report,0,"scenario exceeds the graphical recipe or item limit");
     for(i=0;i<c->recipes.len;i++) {
         const RecipeDef* r=brz_vec_cat(&c->recipes,i);
+        recipes[i]=(BronzeRecipePolicy){.minutes=4,.tool=-1};
+        if(!r->inputs.len || r->inputs.len>BRONZE_RESOURCE_LIMIT+BRONZE_ITEM_LIMIT ||
+           (r->output_resource_id>=0)==(r->output_item_id>=0))
+            return error(report,r->line,"recipe requires inputs and an unambiguous output kind");
+        for(j=0;j<i;j++) {
+            const RecipeDef *prior=brz_vec_cat(&c->recipes,j);
+            if(!strcmp(r->name,prior->name)) return error(report,r->line,"duplicate recipe '%s'",r->name);
+        }
         if(!bounded(r->output_amount,1e9) || r->output_amount==0) return error(report,r->line,"recipe output must be positive and at most 1e9 units");
         for(j=0;j<r->inputs.len;j++) {
             const RecipeInputDef* in=brz_vec_cat(&r->inputs,j);
+            if((in->resource_id>=0)==(in->item_id>=0))
+                return error(report,r->line,"recipe input requires an unambiguous kind");
             if(!bounded(in->amount,1e9) || in->amount==0) return error(report,r->line,"recipe input must be positive and at most 1e9 units");
         }
     }
@@ -148,11 +201,25 @@ static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* poli
         {"world_ore_relief", &policy->ore_relief, 1, 255},
         {"world_tin_height", &policy->tin_height, 151, 255},
         {"world_town_capacity", &policy->town_capacity, 1, 256},
+        {"world_carry_capacity", &policy->carry_capacity, 1, 1024},
+        {"world_storage_capacity", &policy->storage_capacity, 1, 1000000},
+        {"world_household_capacity", &policy->household_capacity, 0, 1000000},
+        {"world_ration_daily", &policy->ration_daily, 0, 1024},
         {"world_town_initial_grain", &policy->town_initial_grain, 0, 1000000},
         {"world_patch_initial_per_cell", &policy->patch_initial_per_cell, 0, 8},
     };
     for(i=0;i<c->params.len;i++) {
         const ParamDef* p=brz_vec_cat(&c->params,i);
+        if (!strcmp(p->key,"world_food_spoilage")) {
+            if (p->has_svalue || !bounded(p->value,1))
+                return error(report,0,"food spoilage must be a fraction in 0..1");
+            policy->food_spoilage=p->value;
+            continue;
+        }
+        if(!strncmp(p->key,"world_recipe_",strlen("world_recipe_"))) {
+            if(!recipe_parameter(c,p,recipes,report)) return 0;
+            continue;
+        }
         if(!strncmp(p->key,"world_occupation_",strlen("world_occupation_"))) {
             if(!occupation_parameter(p,professions,report)) return 0;
             continue;
@@ -176,7 +243,13 @@ static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* poli
             return error(report,0,"durations/report intervals must be whole days in 0..1000000");
         if(!p->has_svalue && !bounded(p->value,4294967295.0)) return error(report,0,"parameter '%s' is outside supported scalar bounds",p->key);
     }
-    if(professions->skill_start>professions->skill_max || professions->skill_gain>professions->skill_max)
+    for(i=0;i<c->recipes.len;i++)
+        if(recipes[i].minimum_skill>professions->skill_max)
+            return error(report,0,"recipe minimum skill exceeds occupation skill scale");
+    if(policy->town_initial_grain>policy->storage_capacity)
+        return error(report,0,"initial grain exceeds township storage capacity");
+    if(professions->skill_start>professions->skill_max || professions->skill_gain>professions->skill_max ||
+       professions->mentor_skill>professions->skill_max)
         return error(report,0,"occupation starting skill and gain must fit the skill scale");
     for(i=0;i<c->vocations.len;i++) {
         const VocationDef* v=brz_vec_cat(&c->vocations,i);
@@ -222,11 +295,13 @@ int bronze_scenario_load(BronzeScenario* s, const char* path, const char* name)
     BronzeProfessionPolicy professions={
         .site_capacity=32, .retry_minutes=60, .skill_max=100, .skill_gain=1
     };
-    accepted=brz_parse_file_report(path,next,report) && admission(next,report,&policy,&professions);
+    BronzeRecipePolicy recipes[BRONZE_RECIPE_LIMIT]={0};
+    accepted=brz_parse_file_report(path,next,report) && admission(next,report,&policy,&professions,recipes);
     BronzeProgram* program = accepted ? malloc(sizeof(*program)) : NULL;
     if (accepted && !program) accepted = error(report, 0, "unable to retain task program");
     if(accepted) {
-        *program = (BronzeProgram){next, 1, destroy_program};
+        *program = (BronzeProgram){.config=next,.references=1,.destroy=destroy_program};
+        memcpy(program->recipes,recipes,sizeof(recipes));
         bronze_program_release(s->active);
         s->land_policy=policy;
         s->professions=professions;
