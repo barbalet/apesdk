@@ -35,7 +35,7 @@ int bronze_ape_execute_compiled_task(const ParsedConfig* config,
     TaskDef* task;
     int count=0;
     size_t i;
-    if(!config || !vocation_name || !task_name || !events || event_capacity<1) return -1;
+    if(!config || !config->compiled || config->legacy_runtime || !vocation_name || !task_name || !events || event_capacity<1) return -1;
     vocation=NULL;
     for(i=0;i<config->vocations.len;i++) {
         VocationDef* candidate=(VocationDef*)brz_vec_at((BrzVec*)&config->vocations,i);

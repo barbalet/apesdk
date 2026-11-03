@@ -39,6 +39,7 @@
 #include "gui.h"
 #ifdef BRONZE_SIM
 #include "../bronze/hybrid/bronze_hybrid.h"
+#include "../bronze/actors/bronze_actors.h"
 #endif
 
 #ifndef    _WIN32
@@ -91,6 +92,9 @@ typedef struct
     n_int selected_index;
     n_int toggle_pause;
     draw_toggle_state draw_state;
+#ifdef BRONZE_SIM
+    BronzeActorRegistry* bronze_registry;
+#endif
 } shared_core_context;
 
 struct shared_session
@@ -246,6 +250,9 @@ static n_int shared_core_context_restore( shared_core_context *context )
             return 0;
         }
         io_file_free( &snapshot );
+#ifdef BRONZE_SIM
+        if (!bronze_actors_rebind(context->bronze_registry,sim_group())) return 0;
+#endif
         shared_core_context_apply_globals( context );
         shared_select_index( context->selected_index );
         return 1;
@@ -274,10 +281,19 @@ static n_int shared_core_activate( shared_core_context *context )
         shared_core_context_capture( shared_active_core );
     }
 
+#ifdef BRONZE_SIM
+    if (!context->bronze_registry) context->bronze_registry=bronze_actors_create();
+    if (!context->bronze_registry) return 0;
+    bronze_actors_activate(context->bronze_registry);
+#endif
     if ( context->simulation_started )
     {
         if ( shared_core_context_restore( context ) == 0 )
         {
+#ifdef BRONZE_SIM
+            bronze_actors_activate(NULL);
+            shared_active_core=NULL; /* Force the next owner to restore its snapshot. */
+#endif
             return 0;
         }
     }
@@ -687,6 +703,11 @@ void shared_close( void )
 
     if ( shared_default_core.simulation_started == 0 )
     {
+#ifdef BRONZE_SIM
+        bronze_actors_destroy(shared_default_core.bronze_registry);
+        shared_default_core.bronze_registry=NULL;
+        if(shared_active_core==&shared_default_core) shared_active_core=NULL;
+#endif
         shared_core_close_if_unused();
         return;
     }
@@ -701,6 +722,10 @@ void shared_close( void )
     shared_default_core.simulation_started = 0;
     shared_default_core.selected_index = -1;
     shared_core_context_release_snapshot( &shared_default_core );
+#ifdef BRONZE_SIM
+    bronze_actors_destroy(shared_default_core.bronze_registry);
+    shared_default_core.bronze_registry=NULL;
+#endif
     ape_buffer_free( &outputBuffer );
 
     if ( shared_active_core == &shared_default_core )
@@ -1384,6 +1409,10 @@ void shared_session_destroy( shared_session *session )
     ape_app_shell_shutdown( &session->shell, 0L, 0L );
     session->core.simulation_started = 0;
     shared_core_context_release_snapshot( &session->core );
+#ifdef BRONZE_SIM
+    bronze_actors_destroy(session->core.bronze_registry);
+    session->core.bronze_registry=NULL;
+#endif
     shared_core_close_if_unused();
 
     memory_free( ( void ** )&session );
@@ -1765,3 +1794,12 @@ shared_cycle_state shared_cycle_ios( n_uint ticks )
 {
     return shared_cycle( ticks, WINDOW_PROCESSING );
 }
+
+#ifdef BRONZE_SIM
+uint64_t shared_session_bronze_actor_id(shared_session* session)
+{
+    if(!shared_session_is_started(session) || !shared_core_activate(&session->core)) return BRONZE_ACTOR_NONE;
+    BronzeActor* actor=bronze_actors_for_being(session->core.bronze_registry,sim_group()->select);
+    return actor?actor->id:BRONZE_ACTOR_NONE;
+}
+#endif

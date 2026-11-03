@@ -1,0 +1,14 @@
+{
+  "bronze_age_full.bronze": {
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "f517382c6c82e6ae739fad8a6ef26fa03996ad2d764cd558a77cd498d17b2517"
+  },
+  "first_slice.bronze": {
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "aacdb764041c1a31754a21aab800286cd5dc1cc0d64c99e194b88f9dd4342c58"
+  },
+  "vertical_slice.bronze": {
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "0961d078a8a5d49e1ee80bdd6c5110bc34a5a0348a2420a7482e975e36cf0864"
+  }
+}

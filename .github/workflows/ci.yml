@@ -24,6 +24,8 @@ jobs:
           test -x ../simape
       - name: Run deterministic C tests
         run: CC=${{ matrix.compiler }} ./test.sh
+      - name: Verify Bronze and original-engine compatibility contract
+        run: CC=${{ matrix.compiler }} make -C bronze contract-test
 
   linux-coverage:
     name: Linux module coverage
@@ -78,6 +80,26 @@ jobs:
             -destination "${{ matrix.destination }}" \
             CODE_SIGNING_ALLOWED=NO \
             test
+
+  bronze-maccatalyst:
+    name: Bronze Catalyst ${{ matrix.configuration }} and bundled scenarios
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build without a development team or signing override
+        run: |
+          xcodebuild -project toolchains/bronze-mac/bronze-mac.xcodeproj \
+            -scheme bronze-mac -configuration "${{ matrix.configuration }}" \
+            -destination 'platform=macOS,variant=Mac Catalyst' \
+            -derivedDataPath "$RUNNER_TEMP/bronze-derived" build
+      - name: Verify real packaged resources and scenario controller
+        run: |
+          bash bronze/scenario/test_bundle.sh \
+            "$RUNNER_TEMP/bronze-derived/Build/Products/${{ matrix.configuration }}-maccatalyst/BronzeSim.app"
 
   # Native Urban requires the separately supplied original Urban source tree.
   # Validate it locally as documented in README.md; do not use a stand-in renderer.

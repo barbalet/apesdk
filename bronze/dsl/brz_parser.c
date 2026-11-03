@@ -1,8 +1,12 @@
 #include "brz_parser.h"
+#include "brz_dsl_internal.h"
 #include "brz_util.h"
 #include "brz_vec.h"
 
 #include <ctype.h>
+#include <math.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +35,7 @@ typedef struct {
     int line;
     int col;
     BrzVec toks; /* Token */
+    FILE* errors;
 } Lexer;
 
 static int peekc(Lexer* lx)
@@ -149,6 +154,12 @@ static bool lex_all(Lexer* lx)
             }
             char* s = dup_span(lx->src + start, lx->pos - start);
             if(!s) return false;
+            errno = 0;
+            double value = strtod(s, NULL);
+            if (errno == ERANGE || !isfinite(value)) {
+                fprintf(lx->errors, "LexError:%d:%d: number is outside the finite range\n", line, col);
+                free(s); return false;
+            }
             if(!push_tok(lx, TK_NUM, s, line, col)) return false;
             continue;
         }
@@ -169,7 +180,7 @@ static bool lex_all(Lexer* lx)
             continue;
         }
 
-        fprintf(stderr, "LexError:%d:%d: Unexpected character '%c'\n", line, col, (char)c);
+        fprintf(lx->errors, "LexError:%d:%d: Unexpected character '%c'\n", line, col, (char)c);
         return false;
     }
 }
@@ -189,6 +200,8 @@ typedef struct {
     Token* toks;
     size_t count;
     size_t pos;
+    unsigned depth;
+    FILE* errors;
 } Parser;
 
 static Token* cur(Parser* p)
@@ -206,14 +219,14 @@ static bool expect(Parser* p, TokKind k, const char* what)
 {
     Token* t = cur(p);
     if(t && t->kind==k){ p->pos++; return true; }
-    fprintf(stderr, "SyntaxError:%d:%d: Expected %s\n", t?t->line:0, t?t->col:0, what);
+    fprintf(p->errors, "SyntaxError:%d:%d: Expected %s\n", t?t->line:0, t?t->col:0, what);
     return false;
 }
 static bool expect_word(Parser* p, const char** out)
 {
     Token* t = cur(p);
     if(t && t->kind==TK_WORD){ *out = t->text; p->pos++; return true; }
-    fprintf(stderr, "SyntaxError:%d:%d: Expected identifier\n", t?t->line:0, t?t->col:0);
+    fprintf(p->errors, "SyntaxError:%d:%d: Expected identifier\n", t?t->line:0, t?t->col:0);
     return false;
 }
 static bool accept_word(Parser* p, const char* w)
@@ -226,7 +239,15 @@ static bool expect_num(Parser* p, double* out)
 {
     Token* t = cur(p);
     if(t && t->kind==TK_NUM){ *out = strtod(t->text, NULL); p->pos++; return true; }
-    fprintf(stderr, "SyntaxError:%d:%d: Expected number\n", t?t->line:0, t?t->col:0);
+    fprintf(p->errors, "SyntaxError:%d:%d: Expected number\n", t?t->line:0, t?t->col:0);
+    return false;
+}
+
+static bool integer_range(Parser* p, double value, double maximum)
+{
+    if (value >= 0 && value <= maximum && floor(value) == value) return true;
+    Token* t = cur(p);
+    fprintf(p->errors, "ValidationError:%d:%d: expected an integer in 0..%.0f\n", t?t->line:0, t?t->col:0, maximum);
     return false;
 }
 
@@ -269,7 +290,7 @@ static bool parse_kinds(Parser* p, ParsedConfig* cfg)
                 const char* name=NULL;
                 if(!expect_word(p, &name)) return false;
                 if(kind_table_add(&cfg->resource_kinds, name) < 0) {
-                    fprintf(stderr, "Error: OOM adding resource kind '%s'\n", name);
+                    fprintf(p->errors, "Error: OOM adding resource kind '%s'\n", name);
                     return false;
                 }
             }
@@ -282,7 +303,7 @@ static bool parse_kinds(Parser* p, ParsedConfig* cfg)
                 const char* name=NULL;
                 if(!expect_word(p, &name)) return false;
                 if(kind_table_add(&cfg->item_kinds, name) < 0) {
-                    fprintf(stderr, "Error: OOM adding item kind '%s'\n", name);
+                    fprintf(p->errors, "Error: OOM adding item kind '%s'\n", name);
                     return false;
                 }
             }
@@ -295,7 +316,7 @@ static bool parse_kinds(Parser* p, ParsedConfig* cfg)
         else
         {
             Token* t = cur(p);
-            fprintf(stderr, "SyntaxError:%d:%d: Unknown kinds section '%s'\n", t?t->line:0, t?t->col:0, section);
+            fprintf(p->errors, "SyntaxError:%d:%d: Unknown kinds section '%s'\n", t?t->line:0, t?t->col:0, section);
             return false;
         }
     }
@@ -339,7 +360,7 @@ static bool parse_resources_block(Parser* p, ParsedConfig* cfg)
                     else if(brz_streq(key,"renew")) rd.renew=number;
                     else if(brz_streq(key,"nutrition")) rd.nutrition=number;
                     else if(brz_streq(key,"market_target")) rd.market_target=number;
-                    else { fprintf(stderr,"SyntaxError:%d:%d: Unknown resource field '%s'\n",value->line,value->col,key); goto resource_free; }
+                    else { fprintf(p->errors,"SyntaxError:%d:%d: Unknown resource field '%s'\n",value->line,value->col,key); goto resource_free; }
                 }
             }
             if(kind_table_add(&cfg->resource_kinds,resource_name)<0 || !brz_vec_push(&cfg->resources,&rd)) goto resource_free;
@@ -349,7 +370,7 @@ resource_free:
         }
 
         Token* t = cur(p);
-        if(!t){ fprintf(stderr, "SyntaxError: Unexpected EOF\n"); return false; }
+        if(!t){ fprintf(p->errors, "SyntaxError: Unexpected EOF\n"); return false; }
 
         if(t->kind==TK_NUM)
         {
@@ -369,13 +390,13 @@ resource_free:
             if(!expect_word(p, &kind)) return false;
             (void)kind;
             if(kind_table_add(&cfg->resource_kinds, name) < 0){
-                fprintf(stderr, "Error: OOM adding resource kind '%s'\n", name);
+                fprintf(p->errors, "Error: OOM adding resource kind '%s'\n", name);
                 return false;
             }
         }
         else
         {
-            fprintf(stderr, "SyntaxError:%d:%d: Expected number or identifier\n", t->line, t->col);
+            fprintf(p->errors, "SyntaxError:%d:%d: Expected number or identifier\n", t->line, t->col);
             return false;
         }
     }
@@ -396,12 +417,12 @@ static bool parse_recipes_block(Parser* p, ParsedConfig* cfg)
             const char* key=NULL; const char* kind=NULL; double amount=0;
             if(!expect_word(p,&key) || !expect_word(p,&kind) || !expect_num(p,&amount)) goto recipe_fail;
             if(brz_streq(key,"output")){
-                if(r.output) { fprintf(stderr,"SyntaxError:%d: duplicate recipe output\n",r.line); goto recipe_fail; }
+                if(r.output) { fprintf(p->errors,"SyntaxError:%d: duplicate recipe output\n",r.line); goto recipe_fail; }
                 r.output=brz_strdup(kind); r.output_amount=amount; if(!r.output) goto recipe_fail;
             } else if(brz_streq(key,"input")) {
                 RecipeInputDef in; in.kind=brz_strdup(kind); in.amount=amount;
                 if(!in.kind || !brz_vec_push(&r.inputs,&in)){ free(in.kind); goto recipe_fail; }
-            } else { fprintf(stderr,"SyntaxError:%d: expected recipe input or output\n",r.line); goto recipe_fail; }
+            } else { fprintf(p->errors,"SyntaxError:%d: expected recipe input or output\n",r.line); goto recipe_fail; }
         }
         if(!r.output || r.inputs.len==0 || !brz_vec_push(&cfg->recipes,&r)) goto recipe_fail;
         continue;
@@ -420,6 +441,7 @@ static bool parse_actions_block(Parser* p, ParsedConfig* cfg)
     while(!accept(p,TK_RBRACE)){
         Token* t=cur(p); const char* kw=NULL; const char* name=NULL; double min=0,max=0;
         if(!expect_word(p,&kw) || !brz_streq(kw,"action") || !expect_word(p,&name) || !expect_num(p,&min) || !expect_num(p,&max)) return false;
+        if (!integer_range(p,min,3) || !integer_range(p,max,3) || min>max) return false;
         ActionDef a; a.name=brz_strdup(name); a.min_args=(int)min; a.max_args=(int)max; a.line=t?t->line:0;
         if(!a.name || !brz_vec_push(&cfg->actions,&a)){ free(a.name); return false; }
     }
@@ -454,7 +476,7 @@ static bool parse_scenario_block(Parser* p, ParsedConfig* cfg)
     while(!accept(p,TK_RBRACE)){
         const char* key=NULL;
         if(!expect_word(p,&key)) return false;
-        if(brz_streq(key,"version")){ double v=0; if(!expect_num(p,&v)) return false; cfg->language_version=(int)v; }
+        if(brz_streq(key,"version")){ double v=0; if(!expect_num(p,&v)) return false; if (!integer_range(p,v,INT_MAX)) return false; cfg->language_version=(int)v; }
         else if(brz_streq(key,"profile")){ const char* value=NULL; if(!expect_word(p,&value)) return false; free(cfg->scenario_profile); cfg->scenario_profile=brz_strdup(value); if(!cfg->scenario_profile) return false; }
         else return false;
     }
@@ -571,7 +593,7 @@ static bool parse_items_block(Parser* p, ParsedConfig* cfg)
         if(!expect_word(p, &name)) return false;
 
         Token* t = cur(p);
-        if(!t){ fprintf(stderr, "SyntaxError: Unexpected EOF\n"); return false; }
+        if(!t){ fprintf(p->errors, "SyntaxError: Unexpected EOF\n"); return false; }
 
         if(t->kind==TK_WORD)
         {
@@ -580,13 +602,13 @@ static bool parse_items_block(Parser* p, ParsedConfig* cfg)
             if(!expect_word(p, &kind)) return false;
             (void)kind;
             if(kind_table_add(&cfg->item_kinds, name) < 0){
-                fprintf(stderr, "Error: OOM adding item kind '%s'\n", name);
+                fprintf(p->errors, "Error: OOM adding item kind '%s'\n", name);
                 return false;
             }
         }
         else
         {
-            fprintf(stderr, "SyntaxError:%d:%d: Expected identifier\n", t->line, t->col);
+            fprintf(p->errors, "SyntaxError:%d:%d: Expected identifier\n", t->line, t->col);
             return false;
         }
     }
@@ -603,7 +625,7 @@ static bool parse_simple_kv_block(Parser* p, const char* block_name, ParsedConfi
         if(!expect_word(p, &key)) return false;
 
         Token* vtok = cur(p);
-        if(!vtok){ fprintf(stderr, "SyntaxError: Unexpected EOF\n"); return false; }
+        if(!vtok){ fprintf(p->errors, "SyntaxError: Unexpected EOF\n"); return false; }
 
         bool is_num = (vtok->kind==TK_NUM);
         bool is_word = (vtok->kind==TK_WORD);
@@ -621,10 +643,14 @@ static bool parse_simple_kv_block(Parser* p, const char* block_name, ParsedConfi
         }
         else
         {
-            fprintf(stderr, "SyntaxError:%d:%d: Expected number or word\n", vtok->line, vtok->col);
+            fprintf(p->errors, "SyntaxError:%d:%d: Expected number or word\n", vtok->line, vtok->col);
             return false;
         }
 
+        if (is_num && ((brz_streq(block_name,"world") && (brz_streq(key,"seed") || brz_streq(key,"years"))) ||
+            ((brz_streq(block_name,"agents") || brz_streq(block_name,"settlements")) && brz_streq(key,"count")))) {
+            if (!integer_range(p,num,brz_streq(key,"seed") ? UINT32_MAX : INT_MAX)) return false;
+        }
         /* typed fields we care about */
         if(brz_streq(block_name, "world") && is_num)
         {
@@ -696,7 +722,7 @@ static bool parse_op_only(Parser* p, OpDef* out_op)
     if(!t) return false;
     if(t->kind!=TK_WORD)
     {
-        fprintf(stderr, "SyntaxError:%d:%d: Expected operation\n", t->line, t->col);
+        fprintf(p->errors, "SyntaxError:%d:%d: Expected operation\n", t->line, t->col);
         return false;
     }
 
@@ -785,7 +811,7 @@ static char* collect_expr_until_lbrace(Parser* p)
 static bool parse_stmt(Parser* p, StmtDef* out_stmt)
 {
     Token* t = cur(p);
-    if(!t){ fprintf(stderr, "SyntaxError: Unexpected EOF\n"); return false; }
+    if(!t){ fprintf(p->errors, "SyntaxError: Unexpected EOF\n"); return false; }
 
     if(t->kind==TK_WORD && t->text && brz_streq(t->text, "chance"))
     {
@@ -803,7 +829,7 @@ static bool parse_stmt(Parser* p, StmtDef* out_stmt)
         st.as.chance.chance_pct = pct;
         brz_vec_init(&st.as.chance.body, sizeof(StmtDef));
 
-        if(!parse_stmt_list(p, &st.as.chance.body)) return false;
+        if(!parse_stmt_list(p, &st.as.chance.body)) { brz_stmt_dispose(&st); return false; }
 
         *out_stmt = st;
         return true;
@@ -815,7 +841,7 @@ static bool parse_stmt(Parser* p, StmtDef* out_stmt)
         p->pos++;
 
         char* expr = collect_expr_until_lbrace(p);
-        if(!expr){ fprintf(stderr, "Error: OOM collecting when expr\n"); return false; }
+        if(!expr){ fprintf(p->errors, "Error: OOM collecting when expr\n"); return false; }
 
         if(!expect(p, TK_LBRACE, "'{'")){ free(expr); return false; }
 
@@ -826,7 +852,7 @@ static bool parse_stmt(Parser* p, StmtDef* out_stmt)
         st.as.when_stmt.when_expr = expr;
         brz_vec_init(&st.as.when_stmt.body, sizeof(StmtDef));
 
-        if(!parse_stmt_list(p, &st.as.when_stmt.body)) return false;
+        if(!parse_stmt_list(p, &st.as.when_stmt.body)) { brz_stmt_dispose(&st); return false; }
 
         *out_stmt = st;
         return true;
@@ -847,22 +873,26 @@ static bool parse_stmt(Parser* p, StmtDef* out_stmt)
 /* Parses statements until matching '}' (consumes the '}' as terminator) */
 static bool parse_stmt_list(Parser* p, BrzVec* out_stmts)
 {
-    while(1)
-    {
-        Token* t = cur(p);
-        if(!t){ fprintf(stderr, "SyntaxError: Unexpected EOF in block\n"); return false; }
-
-        if(t->kind==TK_RBRACE)
-        {
-            p->pos++; /* consume */
-            return true;
-        }
-
-        StmtDef st;
-        memset(&st, 0, sizeof(st));
-        if(!parse_stmt(p, &st)) return false;
-        if(!brz_vec_push(out_stmts, &st)) return false;
+    bool ok=false;
+    if(p->depth>=64) {
+        Token* t=cur(p);
+        fprintf(p->errors,"SyntaxError:%d:%d: task nesting exceeds 64 blocks\n",t?t->line:0,t?t->col:0);
+        return false;
     }
+    p->depth++;
+    while(1) {
+        Token* t=cur(p);
+        StmtDef st;
+        if(!t || t->kind==TK_EOF) {
+            fprintf(p->errors,"SyntaxError:%d:%d: Unexpected EOF in block\n",t?t->line:0,t?t->col:0); break;
+        }
+        if(t->kind==TK_RBRACE) { p->pos++; ok=true; break; }
+        memset(&st,0,sizeof(st));
+        if(!parse_stmt(p,&st)) break;
+        if(!brz_vec_push(out_stmts,&st)) { brz_stmt_dispose(&st); break; }
+    }
+    p->depth--;
+    return ok;
 }
 
 /* task NAME { ... } */
@@ -877,11 +907,14 @@ static bool parse_task(Parser* p, VocationDef* voc)
     if(!t.name) return false;
     brz_vec_init(&t.stmts, sizeof(StmtDef));
 
-    if(!expect(p, TK_LBRACE, "'{'")) return false;
-    if(!parse_stmt_list(p, &t.stmts)) return false;
+    if(!expect(p, TK_LBRACE, "'{'")) goto fail;
+    if(!parse_stmt_list(p, &t.stmts)) goto fail;
 
-    if(!brz_vec_push(&voc->tasks, &t)) return false;
+    if(!brz_vec_push(&voc->tasks, &t)) goto fail;
     return true;
+fail:
+    brz_task_dispose(&t);
+    return false;
 }
 
 
@@ -903,7 +936,7 @@ static bool parse_rule(Parser* p, VocationDef* voc)
     while(1)
     {
         Token* t = cur(p);
-        if(!t){ fprintf(stderr, "SyntaxError: Unexpected EOF in rule\n"); return false; }
+        if(!t){ fprintf(p->errors, "SyntaxError: Unexpected EOF in rule\n"); goto fail; }
 
         if(t->kind==TK_LBRACE)
         {
@@ -933,14 +966,14 @@ static bool parse_rule(Parser* p, VocationDef* voc)
             while(1)
             {
                 Token* u = cur(p);
-                if(!u){ fprintf(stderr, "SyntaxError: Unexpected EOF in when\n"); return false; }
+                if(!u){ fprintf(p->errors, "SyntaxError: Unexpected EOF in when\n"); goto fail; }
                 if(u->kind==TK_LBRACE || u->kind==TK_RBRACE) break;
                 if(u->kind==TK_WORD && brz_streq(u->text, "do")) break;
                 p->pos++;
             }
             free(when_expr);
             when_expr = join_tokens(p->toks, start, p->pos);
-            if(!when_expr) return false;
+            if(!when_expr) goto fail;
             continue;
         }
 
@@ -950,8 +983,8 @@ static bool parse_rule(Parser* p, VocationDef* voc)
             const char* task=NULL;
             if(cur(p) && cur(p)->kind==TK_WORD)
             {
-                if(!expect_word(p, &task)) return false;
-                if(!do_task) { do_task = brz_strdup(task); if(!do_task) return false; }
+                if(!expect_word(p, &task)) goto fail;
+                if(!do_task) { do_task = brz_strdup(task); if(!do_task) goto fail; }
             }
             continue;
         }
@@ -961,7 +994,8 @@ static bool parse_rule(Parser* p, VocationDef* voc)
             p->pos++;
             if(cur(p) && cur(p)->kind==TK_NUM)
             {
-                double n=0; if(!expect_num(p, &n)) return false;
+                double n=0; if(!expect_num(p, &n)) goto fail;
+                if (!integer_range(p,n,INT_MAX)) goto fail;
                 weight = (int)n;
             }
             continue;
@@ -978,10 +1012,13 @@ static bool parse_rule(Parser* p, VocationDef* voc)
     r.do_task = do_task ? do_task : brz_strdup("");
     r.weight = weight;
     r.line = start ? start->line : 0;
-    if(!r.name || !r.when_expr || !r.do_task) return false;
+    if(!r.name || !r.when_expr || !r.do_task) { brz_rule_dispose(&r); return false; }
 
-    if(!brz_vec_push(&voc->rules, &r)) return false;
+    if(!brz_vec_push(&voc->rules, &r)) { brz_rule_dispose(&r); return false; }
     return true;
+fail:
+    free(when_expr); free(do_task);
+    return false;
 }
 
 
@@ -999,28 +1036,31 @@ static bool parse_vocation(Parser* p, ParsedConfig* cfg)
     brz_vec_init(&v.tasks, sizeof(TaskDef));
     brz_vec_init(&v.rules, sizeof(RuleDef));
 
-    if(!expect(p, TK_LBRACE, "'{'")) return false;
+    if(!expect(p, TK_LBRACE, "'{'")) goto fail;
 
     while(!accept(p, TK_RBRACE))
     {
         if(accept_word(p, "task"))
         {
-            if(!parse_task(p, &v)) return false;
+            if(!parse_task(p, &v)) goto fail;
             continue;
         }
         if(accept_word(p, "rule"))
         {
-            if(!parse_rule(p, &v)) return false;
+            if(!parse_rule(p, &v)) goto fail;
             continue;
         }
 
         Token* t = cur(p);
-        fprintf(stderr, "SyntaxError:%d:%d: Expected 'task' or 'rule' in vocation\n", t?t->line:0, t?t->col:0);
-        return false;
+        fprintf(p->errors, "SyntaxError:%d:%d: Expected 'task' or 'rule' in vocation\n", t?t->line:0, t?t->col:0);
+        goto fail;
     }
 
-    if(!brz_vec_push(&cfg->vocations, &v)) return false;
+    if(!brz_vec_push(&cfg->vocations, &v)) goto fail;
     return true;
+fail:
+    brz_vocation_dispose(&v);
+    return false;
 }
 
 /* vocations { vocation X { ... } ... } */
@@ -1032,7 +1072,7 @@ static bool parse_vocations(Parser* p, ParsedConfig* cfg)
         if(!accept_word(p, "vocation"))
         {
             Token* t = cur(p);
-            fprintf(stderr, "SyntaxError:%d:%d: Expected 'vocation'\n", t?t->line:0, t?t->col:0);
+            fprintf(p->errors, "SyntaxError:%d:%d: Expected 'vocation'\n", t?t->line:0, t?t->col:0);
             return false;
         }
         if(!parse_vocation(p, cfg)) return false;
@@ -1042,18 +1082,34 @@ static bool parse_vocations(Parser* p, ParsedConfig* cfg)
 
 /* ---------- public API ---------- */
 
-bool brz_parse_file(const char* path, ParsedConfig* out_cfg)
+static bool section_failed(Parser* p, char* source, Lexer* lexer)
 {
+    Token* t=cur(p);
+    fprintf(p->errors,"SyntaxError:%d:%d: unable to parse section\n",t?t->line:0,t?t->col:0);
+    free(source); free_lexer(lexer); return false;
+}
+
+static bool parse_file_profile(const char* path, ParsedConfig* out_cfg, int legacy, FILE* errors)
+{
+    if (!errors) errors = stderr;
+    out_cfg->compiled = false;
+    out_cfg->legacy_runtime = legacy != 0;
+    if (legacy) {
+        /* The pre-consolidation standalone runtime had zero policy defaults. */
+        out_cfg->settlement_policy.deposit_threshold = 0;
+        out_cfg->settlement_policy.rest_recovery = 0;
+    }
     size_t n=0;
     char* src = brz_read_entire_file(path, &n);
     if(!src)
     {
-        fprintf(stderr, "Error: failed to read '%s'\n", path);
+        fprintf(errors, "Error: failed to read '%s'\n", path);
         return false;
     }
 
     Lexer lx;
     memset(&lx, 0, sizeof(lx));
+    lx.errors = errors;
     lx.src = src;
     lx.len = n;
     lx.pos = 0;
@@ -1069,6 +1125,8 @@ bool brz_parse_file(const char* path, ParsedConfig* out_cfg)
     p.toks = (Token*)lx.toks.data;
     p.count = lx.toks.len;
     p.pos = 0;
+    p.depth = 0;
+    p.errors = errors;
 
     while(1)
     {
@@ -1081,87 +1139,103 @@ bool brz_parse_file(const char* path, ParsedConfig* out_cfg)
 
         if(brz_streq(top, "kinds"))
         {
-            if(!parse_kinds(&p, out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_kinds(&p, out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top,"scenario"))
         {
-            if(!parse_scenario_block(&p,out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_scenario_block(&p,out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top,"map_refs"))
         {
-            if(!parse_map_refs_block(&p,out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_map_refs_block(&p,out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top,"places"))
         {
-            if(!parse_places_block(&p,out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_places_block(&p,out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top,"roles"))
         {
-            if(!parse_roles_block(&p,out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_roles_block(&p,out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top,"needs"))
         {
-            if(!parse_needs_block(&p,out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_needs_block(&p,out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top,"services"))
         {
-            if(!parse_services_block(&p,out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_services_block(&p,out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top,"disruptions"))
         {
-            if(!parse_disruptions_block(&p,out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_disruptions_block(&p,out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "world"))
         {
-            if(!parse_simple_kv_block(&p, "world", out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_simple_kv_block(&p, "world", out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "sim"))
         {
-            if(!parse_simple_kv_block(&p, "sim", out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_simple_kv_block(&p, "sim", out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "agents"))
         {
-            if(!parse_simple_kv_block(&p, "agents", out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_simple_kv_block(&p, "agents", out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "settlements"))
         {
-            if(!parse_simple_kv_block(&p, "settlements", out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_simple_kv_block(&p, "settlements", out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "resources"))
         {
-            if(!parse_resources_block(&p, out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_resources_block(&p, out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "items"))
         {
-            if(!parse_items_block(&p, out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_items_block(&p, out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "vocations"))
         {
-            if(!parse_vocations(&p, out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_vocations(&p, out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "recipes"))
         {
-            if(!parse_recipes_block(&p, out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_recipes_block(&p, out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "actions"))
         {
-            if(!parse_actions_block(&p, out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_actions_block(&p, out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else if(brz_streq(top, "settlement_policy"))
         {
-            if(!parse_settlement_policy(&p, out_cfg)){ free(src); free_lexer(&lx); return false; }
+            if(!parse_settlement_policy(&p, out_cfg)){ return section_failed(&p,src,&lx); }
         }
         else
         {
-            fprintf(stderr, "SyntaxError:%d:%d: Unknown top-level section '%s'\n", t->line, t->col, top);
+            fprintf(errors, "SyntaxError:%d:%d: Unknown top-level section '%s'\n", t->line, t->col, top);
             free(src);
             free_lexer(&lx);
             return false;
         }
     }
 
-    if(!brz_cfg_validate(out_cfg, stderr) || !brz_cfg_compile(out_cfg, stderr)){ free(src); free_lexer(&lx); return false; }
+    if(legacy ? !brz_cfg_validate_legacy_runtime(out_cfg, errors) :
+       (!brz_cfg_validate(out_cfg, errors) || !brz_cfg_compile(out_cfg, errors))){ free(src); free_lexer(&lx); return false; }
     free(src);
     free_lexer(&lx);
     return true;
+}
+
+bool brz_parse_file(const char* path, ParsedConfig* out_cfg)
+{
+    return parse_file_profile(path, out_cfg, 0, stderr);
+}
+
+bool brz_parse_file_legacy_runtime(const char* path, ParsedConfig* out_cfg)
+{
+    return parse_file_profile(path, out_cfg, 1, stderr);
+}
+
+bool brz_parse_file_report(const char* path, ParsedConfig* out_cfg, FILE* errors)
+{
+    return parse_file_profile(path, out_cfg, 0, errors);
 }

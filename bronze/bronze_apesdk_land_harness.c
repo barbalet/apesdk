@@ -34,6 +34,21 @@ static void run_slice(ScenarioEvent trace[TRACE_LEN], BronzeApeSnapshot* snapsho
     group=sim_group();
     assert(group!=0 && group->num>0);
     actor=(BronzeApeActor){&group->beings[0],23};
+    {
+        bronze_ape_actor access;
+        bronze_ape_world native;
+        bronze_ape_position position;
+        bronze_ape_actor_init(&access, actor.being);
+        assert(access.id == SCENARIO_ID_NONE);
+        position=bronze_ape_actor_position(&access);
+        assert(position.x==being_location_x(actor.being) && position.y==being_location_y(actor.being));
+        bronze_ape_actor_set_position(&access, position);
+        assert(bronze_ape_actor_energy(&access)==being_energy(actor.being));
+        assert(bronze_ape_actor_fatigue(&access)==being_drive(actor.being,DRIVE_FATIGUE));
+        bronze_ape_world_init(&native);
+        assert(native.date()==land_date() && native.time()==land_time());
+        assert(native.terrain_height(0,0)==land_location(0,0));
+    }
     bronze_ape_actor_view(&actor,&actor_port);
     assert(actor_port.id(actor_port.context)==23);
     assert(actor_port.position(actor_port.context).x==being_location_x(actor.being));
@@ -56,6 +71,13 @@ static void run_slice(ScenarioEvent trace[TRACE_LEN], BronzeApeSnapshot* snapsho
     assert(strcmp(trace[12].action_id,"craft")==0 && trace[12].completed_amount==1);
     assert(trace[0].tick==trace[TRACE_LEN-1].tick && trace[0].actor_id==23);
     bronze_ape_snapshot_capture(23,&sidecar,&settlement,snapshot);
+    /* A legacy AST must not be mistaken for compiled action code zero/gather. */
+    config.legacy_runtime=true;
+    assert(bronze_ape_execute_compiled_task(&config,"farmer","work",&world,&actor_port,
+           &sidecar,&settlement,trace,TRACE_LEN)==-1);
+    config.legacy_runtime=false; config.compiled=false;
+    assert(bronze_ape_execute_compiled_task(&config,"farmer","work",&world,&actor_port,
+           &sidecar,&settlement,trace,TRACE_LEN)==-1);
     brz_cfg_free(&config);
     sim_close();
 }

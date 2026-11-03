@@ -48,6 +48,7 @@
 
 #ifdef BRONZE_SIM
 #include "../bronze/hybrid/bronze_hybrid.h"
+#include "../bronze/actors/bronze_actors.h"
 #endif
 
 #ifndef    _WIN32
@@ -1655,6 +1656,10 @@ void sim_cycle( void )
         sim_set_select( group.beings );
 
 #ifdef BRONZE_SIM
+        if (local_execution != KIND_LOAD_FILE && !bronze_actors_world_reset(&group)) {
+            (void)SHOW_ERROR("Bronze actor registry initialization failed");
+            return;
+        }
         bronze_hybrid_reset();
 #endif
         sim_new_progress = 0;
@@ -1870,12 +1875,21 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
     being_remains_init( &( group.remains ) ); /* Eventually this should be captured through the file handling and moved into the code below */
 
+#ifdef BRONZE_SIM
+    if (kind == KIND_LOAD_FILE && !bronze_actors_world_reset(&group)) {
+        (void)SHOW_ERROR("Bronze actor registry import failed");
+        return 0L;
+    }
+#endif
     local_execution = kind;
     return ( ( void * ) offbuffer );
 }
 
 void sim_close( void )
 {
+#ifdef BRONZE_SIM
+    bronze_actors_close_default();
+#endif
     command_quit( 0L, 0L, 0L );
     io_console_quit();
 #ifndef _WIN32

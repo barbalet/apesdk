@@ -236,6 +236,10 @@ static void print_day_summary(int day, const ParsedConfig* cfg,
 
 int brz_run_with_events(const ParsedConfig* cfg, const BronzeEventSink* events)
 {
+    if (!cfg || !cfg->legacy_runtime) {
+        fprintf(stderr, "Standalone runtime requires the explicit legacy runtime profile\n");
+        return 1;
+    }
     if(!cfg) return 1;
 
     const size_t res_n  = kind_table_count(&cfg->resource_kinds);

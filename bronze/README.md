@@ -3,20 +3,22 @@
 This optional package is ApeSDK's landing zone for the BronzeSim economic and
 cultural scenario. It depends on ApeSDK; ApeSDK core has no dependency on it.
 
-It contains the migrated runtime and content plus an adapter over ApeSDK land,
-clock, and `simulated_being` identity/position. Economic inventory,
-occupations, and settlement stores remain Bronze sidecar state, preserving
-ApeSDK's core types and native save compatibility.
+It contains a canonical compiler/AST in `dsl/`, the standalone interpreter in
+`runtime/`, and the single native binding implementation in `adapter/`.
+See [source ownership and compatibility profiles](OWNERSHIP.md).
+The root adapter headers are compatibility includes; implementation lives only
+in `adapter/`. The standalone runtime no longer owns duplicate compiler sources.
 
-The initial deterministic farmer/fisher/smith slice executes `move`,
-`gather`, `craft`, `deposit`, `eat`, and `rest` from compiled `.bronze`
-content. One Bronze day is exactly 1,440 ApeSDK land-time cycles.
+The standalone CLI explicitly uses the legacy-runtime parse profile, preserving
+its previous scenario behavior. Native compiled-task callers use strict parsing;
+there is no automatic fallback when strict compilation fails. The full scenario
+still needs semantic reconciliation before strict graphical execution is possible.
 
-`make test` runs both migrated Bronze scenarios and the headless harness
-linked against real ApeSDK sources. The harness compares event traces from two
-fresh runs, and verifies versioned Bronze sidecar snapshot/event-log round
-trips. These persistence files belong to this package; they do not alter
-ApeSDK's native save format.
+`make test` runs migrated Bronze scenarios and the native/hybrid harnesses.
+Pilot economic snapshots are separate from ApeSDK native saves; the pilot's
+reported movement and craft events do not establish complete travel/item semantics.
+One native day is 1,440 land-time cycles. Economic inventories and future
+occupations remain Bronze sidecar state, preserving native being/save layouts.
 
 ## BronzeSim Mac Catalyst app
 
@@ -34,8 +36,18 @@ woodland appear on the native maps; the overview adds an economic status panel.
 Townships use white roof outlines, mines dark boxes with white ore marks,
 fields blue rows, and woodland blue tree outlines.
 
-This first hybrid uses proximity-based resource work alongside native behavior;
-it does not yet bind the full Bronze DSL occupation scheduler. Economic stores
+On startup the app loads and strictly validates bundled `first_slice.bronze`.
+Use the **Bronze Scenario** menu to select a bundled file; successful selection
+resets the native world using that file's seed. The overview identifies the
+active file and offers **Details**. Failed loads show filename/line diagnostics
+and retain the active scenario and world. `vertical_slice.bronze` also validates;
+`bronze_age_full.bronze` is bundled but still fails strict compilation.
+
+Loading is currently validation and configuration staging. The hybrid still
+uses proximity-based resource work alongside native behavior; it does not yet
+bind the full Bronze DSL occupation scheduler. Only the scenario seed is applied
+to the native world at this stage; population, workplaces and task behavior are
+not inferred from a successfully loaded file. Economic stores
 are session state, reconstructed when creating/loading a native world. Native
 save files do not persist them. See `PLAN.md` for the implementation boundary
 and follow-up work.
@@ -52,3 +64,39 @@ xcodebuild -project ../toolchains/bronze-mac/bronze-mac.xcodeproj \
 `make test` includes `hybrid/test.sh`, which links the hybrid against the real
 ApeSDK engine and checks deterministic placement, symbol bounds, bounded
 production, economic cadence, reset behavior, and the HUD buffer boundary.
+
+## Compatibility and regression contract
+
+Cycle 01's [contract](contract/README.md) distinguishes the standalone runtime,
+compiled adapter and graphical hybrid, and records their current capability
+gaps. Run `make -C bronze contract-test` from the repository root in addition to
+`bash test.sh` after Bronze/shared-core changes. The contract test checks native
+build isolation, all three scenario inventories and fixed-seed native/Bronze
+baselines. CI runs it under gcc and clang. Baseline updates require explicit
+review and `python3 bronze/contract/check.py --record`; never refresh them merely
+to clear a regression.
+
+The scenario loader tests are included in `make -C bronze contract-test`.
+On macOS, verify an actual built app's resources and the same Swift controller
+used by the UI, from an independent temporary working directory:
+
+```sh
+bash bronze/scenario/test_bundle.sh \
+  /private/tmp/bronze-mac-derived/Build/Products/Debug-maccatalyst/BronzeSim.app
+```
+
+CI builds Bronze Debug/Release and runs this packaged-resource check in addition
+to the original Catalyst tests. This does not replace visual UI acceptance.
+
+## Native being identities
+
+Cycle 04 adds a [per-world actor registry](actors/README.md). The overview shows
+an actor ID for the selected real ApeSDK being. IDs and linked sidecar state
+survive native births, deaths, population compaction, reordering and session
+switches. Death/reset releases claim records and clears mentorship links.
+The registry does not yet assign professions or replace prototype work with
+per-being inventory/task execution; those remain later cycles.
+
+`bash test.sh` now includes the actor lifecycle/session harness. Targeted memory
+and undefined-behavior checks run with `SANITIZE=1 bash bronze/actors/test.sh`;
+see the registry documentation for the existing native UBSan limitation.

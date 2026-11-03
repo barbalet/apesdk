@@ -130,6 +130,11 @@ struct ApeSimApp: App {
                 .keyboardShortcut("n", modifiers: [.command])
             }
 
+#if BRONZE_SIM
+            BronzeScenarioCommands(controller: catalystSceneModel.bronzeScenario) { name in
+                catalystSceneModel.selectBronzeScenario(name)
+            }
+#endif
             CommandMenu("Control") {
                 Button(isPaused ? "Resume" : "Pause") {
                     isPaused = catalystSceneModel.menu(n_int(NA_MENU_PAUSE)) == 1
@@ -253,6 +258,14 @@ struct CatalystSimulationWindow: View {
                    minHeight: surface.minimumSize.height,
                    idealHeight: surface.defaultSize.height)
             .ignoresSafeArea()
+#if BRONZE_SIM
+            .safeAreaInset(edge: .bottom) {
+                if surface == .view {
+                    BronzeScenarioPanel(controller: sceneModel.bronzeScenario,
+                                        actorID: sceneModel.bronzeSelectedActorID)
+                }
+            }
+#endif
             .accessibilityIdentifier("Catalyst\(surface.title)Surface")
             .onAppear {
                 openAuxiliaryWindowsIfNeeded()
@@ -272,7 +285,17 @@ struct CatalystSimulationWindow: View {
 #endif
 
 // MARK: - Scene-owned Simulation Model
+#if BRONZE_SIM
+@MainActor
+#endif
 final class ApeSimulationSceneModel: ObservableObject {
+#if BRONZE_SIM
+    @Published private(set) var bronzeSelectedActorID: UInt64 = 0
+    let bronzeScenario = BronzeScenarioController()
+    func selectBronzeScenario(_ name: String) {
+        bronzeScenario.load(name) { [weak self] _ in self?.newSimulation() }
+    }
+#endif
     private let session = shared_session_create(n_uint(CFAbsoluteTimeGetCurrent()))
     private let startsSessionAutomatically: Bool
     private var hasStartedSession = false
@@ -339,11 +362,19 @@ final class ApeSimulationSceneModel: ObservableObject {
         } else {
             _ = shared_session_cycle(session, ticks, surface.identifier)
         }
+#if BRONZE_SIM
+        let actorID = shared_session_bronze_actor_id(session)
+        if bronzeSelectedActorID != actorID { bronzeSelectedActorID = actorID }
+#endif
     }
 
     func newSimulation() {
         startSessionIfNeeded()
+#if BRONZE_SIM
+        shared_session_new(session, bronzeScenario.seed)
+#else
         shared_session_new(session, n_uint(CFAbsoluteTimeGetCurrent()))
+#endif
     }
 
     func menu(_ menuValue: n_int) -> n_int {
@@ -379,18 +410,32 @@ final class ApeSimulationSceneModel: ObservableObject {
         shared_session_mouseUp(session)
     }
 
+#if BRONZE_SIM
+    private nonisolated static var isRunningUnderUnitTests: Bool {
+        let environment = ProcessInfo.processInfo.environment
+        return environment["XCTestConfigurationFilePath"] != nil ||
+               environment["XCTestBundlePath"] != nil
+    }
+
+#else
     private static var isRunningUnderUnitTests: Bool {
         let environment = ProcessInfo.processInfo.environment
         return environment["XCTestConfigurationFilePath"] != nil ||
                environment["XCTestBundlePath"] != nil
     }
 
+#endif
+
     private func startSessionIfNeeded() {
         guard startsSessionAutomatically, hasStartedSession == false else {
             return
         }
 
+#if BRONZE_SIM
+        shared_session_init(session, n_int(NUM_CONTROL), bronzeScenario.seed)
+#else
         shared_session_init(session, n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))
+#endif
         hasStartedSession = true
     }
 

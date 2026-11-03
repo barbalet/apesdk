@@ -32,6 +32,9 @@
 #include "../entity/entity.h"
 
 #include "universe.h"
+#ifdef BRONZE_SIM
+#include "../bronze/actors/bronze_actors.h"
+#endif
 
 #include <stdio.h>
 
@@ -1594,6 +1597,10 @@ static n_int being_conception_child_mass( simulated_group *group, simulated_bein
                             episodic_close( local, being_child, EVENT_BIRTH, AFFECT_BIRTH, 0 );
 #endif
                             being_create_family_links( local, being_child, group );
+#ifdef BRONZE_SIM
+                            if (!bronze_actors_birth(group,being_child))
+                                (void)SHOW_ERROR("Bronze newborn registration failed");
+#endif
                             if ( group->ext_birth != 0 )
                             {
                                 group->ext_birth( being_child, local, group );
@@ -2078,12 +2085,18 @@ void being_remove_loop2( simulated_group *group, simulated_being *local, void *d
         if ( local != brls->being_count )
         {
             memory_copy( ( n_byte * )local, ( n_byte * )brls->being_count, sizeof( simulated_being ) );
+#ifdef BRONZE_SIM
+            bronze_actors_relocated(group,local,brls->being_count);
+#endif
         }
         brls->being_count++;
         brls->count++;
     }
     else
     {
+#ifdef BRONZE_SIM
+        bronze_actors_death(group,local);
+#endif
         being_remains( group, local );
         if ( local == brls->reference )
         {

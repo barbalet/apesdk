@@ -148,6 +148,8 @@ typedef struct {
 } SettlementPolicyDef;
 
 typedef struct {
+    bool compiled;       /* Set only after successful strict compilation. */
+    bool legacy_runtime; /* Explicit standalone compatibility profile. */
     /* common knobs */
     uint32_t seed;
     int years;
@@ -188,6 +190,7 @@ const ResourceDef* brz_resource_find(const ParsedConfig* cfg, const char* name);
 const RecipeDef* brz_recipe_find(const ParsedConfig* cfg, const char* name);
 const ActionDef* brz_action_find(const ParsedConfig* cfg, const char* name);
 bool brz_cfg_validate(const ParsedConfig* cfg, FILE* errors);
+bool brz_cfg_validate_legacy_runtime(const ParsedConfig* cfg, FILE* errors);
 bool brz_cfg_compile(ParsedConfig* cfg, FILE* errors);
 int brz_action_code(const char* name);
 uint16_t brz_terrain_query(const char* name);

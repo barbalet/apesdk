@@ -34,6 +34,9 @@
 #define REMOVE_BOLDING_TEXT
 
 #include "../entity/entity.h"
+#ifdef BRONZE_SIM
+#include "../bronze/actors/bronze_actors.h"
+#endif
 
 #include "universe_internal.h"
 
@@ -2389,6 +2392,11 @@ static n_int command_base_open( void *ptr, n_string response, n_console_output o
         {
             if ( tranfer_in( file_opened ) != 0 )
             {
+#ifdef BRONZE_SIM
+                /* The native reader can mutate before failing. Never attach
+                   old identities to partially replaced native beings. */
+                bronze_actors_invalidate(bronze_actors_current());
+#endif
                 io_file_free( &file_opened );
                 command_file_interaction = 0;
                 return SHOW_ERROR( "Failed to read in file" );

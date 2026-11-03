@@ -121,6 +121,7 @@
 					<string>$(SRCROOT)/../../universe</string>
 					<string>$(SRCROOT)/../../render</string>
 					<string>$(SRCROOT)/../../gui</string>
+					<string>$(SRCROOT)/../../bronze/scenario-runtime/include</string>
 				</array>
 				<key>GCC_PREPROCESSOR_DEFINITIONS</key>
 				<array>
@@ -134,6 +135,8 @@
 				<string>NO</string>
 				<key>CODE_SIGNING_REQUIRED</key>
 				<string>NO</string>
+				<key>SWIFT_ACTIVE_COMPILATION_CONDITIONS</key>
+				<string>$(inherited) BRONZE_SIM</string>
 			</dict>
 			<key>name</key>
 			<string>Debug</string>
@@ -206,6 +209,7 @@
 					<string>$(SRCROOT)/../../universe</string>
 					<string>$(SRCROOT)/../../render</string>
 					<string>$(SRCROOT)/../../gui</string>
+					<string>$(SRCROOT)/../../bronze/scenario-runtime/include</string>
 				</array>
 				<key>GCC_PREPROCESSOR_DEFINITIONS</key>
 				<array>
@@ -219,6 +223,8 @@
 				<string>NO</string>
 				<key>CODE_SIGNING_REQUIRED</key>
 				<string>NO</string>
+				<key>SWIFT_ACTIVE_COMPILATION_CONDITIONS</key>
+				<string>$(inherited) BRONZE_SIM</string>
 			</dict>
 			<key>name</key>
 			<string>Release</string>
@@ -281,6 +287,17 @@
 				<string>4A80F0302ED0000000000001</string>
 				<string>4A80F0312ED0000000000001</string>
 				<string>E78C9A85E2F66846A8F19DD8</string>
+				<string>56A71C611719DCE7252F4F28</string>
+				<string>F9353051F0859CF2043397AD</string>
+				<string>DE3671F47A65424CC6E622F9</string>
+				<string>AB5B43EFDFE0D0D7DAC26C01</string>
+				<string>C211B8617A990FA4AE63D324</string>
+				<string>17A4B86492EBF736DEF7C921</string>
+				<string>6318F3264EDB1EF43919E63C</string>
+				<string>DD7AD54593E4F615331B5BB3</string>
+				<string>A63E2A23A031E2CB04CBE016</string>
+				<string>D9CE04144962DC2B3182128E</string>
+				<string>A4A1485E513AC1CA7886328C</string>
 			</array>
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<string>0</string>
@@ -1023,6 +1040,9 @@
 			<key>files</key>
 			<array>
 				<string>4AC000032026091800000001</string>
+				<string>0B91AFAFEC6F4DE00F546570</string>
+				<string>2A2AFA0A8A9A7D4FE2B0A78E</string>
+				<string>4F409D90C52DF816EDDB8184</string>
 			</array>
 			<key>runOnlyForDeploymentPostprocessing</key>
 			<string>0</string>
@@ -1372,6 +1392,20 @@
 				<string>4AC000022026091800000001</string>
 				<string>4D74291CFAAC2050552A8CF7</string>
 				<string>9ED174F068B2CA54508AB920</string>
+				<string>EC0A30C640EE80F0F666E78C</string>
+				<string>11A97ACBB13ECD5AE5814EC1</string>
+				<string>80494E5310C7AF23085830FF</string>
+				<string>A41903875EEC1E2B414A94B8</string>
+				<string>8C3AA6853FB62B3651DF4806</string>
+				<string>CC5E29169611D0BC5B04E658</string>
+				<string>421EF8DA53D7E1E54DB1FD75</string>
+				<string>A0C65E77847041ABA2307189</string>
+				<string>638D8FC2252911F2BFCCD42B</string>
+				<string>47FF450104A5C2F78057049C</string>
+				<string>21FB197698E596AF759EFD23</string>
+				<string>A96121392D0E070DF6CE8984</string>
+				<string>5D19DC78967BC5509AEED52F</string>
+				<string>4FE839768A27EB53AFA7BD9C</string>
 			</array>
 		</dict>
 		<key>4A212E682DCCAF95001F26AA</key>
@@ -1414,6 +1448,258 @@
 			<string>77</string>
 			<key>mainGroup</key>
 			<string>051DC1B9561884A5E0698A9A</string>
+		</dict>
+		<key>EC0A30C640EE80F0F666E78C</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/dsl/brz_dsl.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>56A71C611719DCE7252F4F28</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>EC0A30C640EE80F0F666E78C</string>
+		</dict>
+		<key>11A97ACBB13ECD5AE5814EC1</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/dsl/brz_kinds.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>F9353051F0859CF2043397AD</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>11A97ACBB13ECD5AE5814EC1</string>
+		</dict>
+		<key>80494E5310C7AF23085830FF</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/dsl/brz_parser.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>DE3671F47A65424CC6E622F9</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>80494E5310C7AF23085830FF</string>
+		</dict>
+		<key>A41903875EEC1E2B414A94B8</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/dsl/brz_util.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>AB5B43EFDFE0D0D7DAC26C01</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>A41903875EEC1E2B414A94B8</string>
+		</dict>
+		<key>8C3AA6853FB62B3651DF4806</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/dsl/brz_vec.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>C211B8617A990FA4AE63D324</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>8C3AA6853FB62B3651DF4806</string>
+		</dict>
+		<key>CC5E29169611D0BC5B04E658</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/adapter/bronze_apesdk_adapter.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>17A4B86492EBF736DEF7C921</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>CC5E29169611D0BC5B04E658</string>
+		</dict>
+		<key>421EF8DA53D7E1E54DB1FD75</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/adapter/bronze_apesdk_compiled.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>6318F3264EDB1EF43919E63C</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>421EF8DA53D7E1E54DB1FD75</string>
+		</dict>
+		<key>A0C65E77847041ABA2307189</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/scenario-runtime/src/scenario_runtime.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>DD7AD54593E4F615331B5BB3</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>A0C65E77847041ABA2307189</string>
+		</dict>
+		<key>638D8FC2252911F2BFCCD42B</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/scenario/bronze_scenario.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>A63E2A23A031E2CB04CBE016</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>638D8FC2252911F2BFCCD42B</string>
+		</dict>
+		<key>47FF450104A5C2F78057049C</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/ui/BronzeScenarioUI.swift</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.swift</string>
+		</dict>
+		<key>D9CE04144962DC2B3182128E</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>47FF450104A5C2F78057049C</string>
+		</dict>
+		<key>21FB197698E596AF759EFD23</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/content/bronze_age_full.bronze</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>text</string>
+		</dict>
+		<key>0B91AFAFEC6F4DE00F546570</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>21FB197698E596AF759EFD23</string>
+		</dict>
+		<key>A96121392D0E070DF6CE8984</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/content/first_slice.bronze</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>text</string>
+		</dict>
+		<key>2A2AFA0A8A9A7D4FE2B0A78E</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>A96121392D0E070DF6CE8984</string>
+		</dict>
+		<key>5D19DC78967BC5509AEED52F</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/content/vertical_slice.bronze</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>text</string>
+		</dict>
+		<key>4F409D90C52DF816EDDB8184</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>5D19DC78967BC5509AEED52F</string>
+		</dict>
+		<key>4FE839768A27EB53AFA7BD9C</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/actors/bronze_actors.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>A4A1485E513AC1CA7886328C</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>4FE839768A27EB53AFA7BD9C</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>

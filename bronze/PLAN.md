@@ -18,8 +18,8 @@ interactions affect individuals, and saving/resuming restores the combined
 world deterministically. A large occupation list or decorative map markers
 alone does not satisfy this goal.
 
-This document defines 18 ordered development cycles. All cycles below are
-planned, not completed. The existing prototype is a starting point, not proof
+This document defines 18 ordered development cycles. Cycles 01–04 are completed
+(2026-11-02); cycles 05–18 remain planned. The existing prototype is a starting point, not proof
 that the full scenario works. Each cycle should finish with working code,
 focused validation, updated documentation and a recorded result before its
 dependents begin. These are units of development, not calendar estimates.
@@ -85,13 +85,21 @@ The snippet shows the boundary, not an existing API or implementation.
   with spacing. Site types repeat; slope, moisture and geography do not yet
   distinguish fields, woodland, mines or townships.
 - Nearby awake native beings contribute to aggregate resource counters.
-  There are no per-being Bronze professions, inventories or task states yet.
+  Cycle 04 now links actor IDs and sidecar records to real beings, with the
+  schema for future professions, inventories and tasks. Those fields are
+  unassigned/empty; production behavior is not implemented by adding the schema.
   The counters do not represent a completed settlement logistics model.
-- The graphical app loads no `.bronze` file. The separate `bronze-sim` CLI
-  defaults to `content/bronze_age_full.bronze` when run from `bronze/`.
-- `runtime/` and `dsl/` contain overlapping migrated sources. Root-level and
-  `adapter/` APIs also overlap. Some pilot actions are placeholders; for
-  example, reporting movement completion is not evidence of actual travel.
+- The graphical app now strictly validates bundled `first_slice.bronze` on
+  startup and provides selection, active-file status and diagnostics. Successful
+  loads reset native state with the scenario seed; other scenario behavior is
+  staged, not executed. The full scenario still fails strict compilation.
+  The separate legacy `bronze-sim` CLI defaults to `content/bronze_age_full.bronze`
+  when run from `bronze/`.
+- Cycle 02 consolidated compiler/AST/support ownership in `dsl/` and native
+  binding ownership in `adapter/`. The CLI explicitly chooses the legacy-runtime
+  profile; strict compiled callers share the same parser with stricter semantics.
+  See `OWNERSHIP.md`. Some pilot actions remain placeholders: reporting movement
+  completion is not evidence of actual travel.
 - Existing `entity/profession.{h,c}` offers optional interaction/training
   helpers, but its fixed civilian profession enum is not the Bronze vocation
   registry and must not silently substitute for it.
@@ -99,6 +107,10 @@ The snippet shows the boundary, not an existing API or implementation.
   persist it. The full implementation will replace that provisional contract.
 
 ## Cycle 01 — Establish the compatibility and scenario contract
+
+**Status:** completed 2026-11-02. See [compatibility and testing contract](contract/README.md),
+[parsed capability inventory](contract/content_inventory.json) and
+[fixed-seed baselines](contract/baselines.json).
 
 **Depends on:** the existing prototype only.
 
@@ -119,6 +131,11 @@ Do not claim unimplemented content verbs work because parsing succeeds.
 
 ## Cycle 02 — Reconcile the Bronze compiler, runtime and adapter ownership
 
+**Status:** completed 2026-11-02. See [canonical source ownership](OWNERSHIP.md)
+and [validation record](contract/RESULTS-CYCLE02.md). Standalone compatibility
+is explicit; the graphical app compiles the shared compiler but loading remains
+cycle 03. The full scenario's strict rejection has not been hidden or relaxed.
+
 **Depends on:** cycle 01.
 
 Choose one canonical parser/compiler and one set of domain types inside
@@ -136,6 +153,11 @@ compile or link the Bronze runtime to satisfy ordinary engine symbols.
 no ambiguous ownership of actions or competing adapter implementations remains.
 
 ## Cycle 03 — Load and validate bundled scenarios in bronze-mac
+
+**Status:** completed 2026-11-02. Bundled strict loading, explicit reset-on-load
+selection, active-file status and captured diagnostics are implemented. See
+[validation record](contract/RESULTS-CYCLE03.md). Validation/staging does not
+claim that scenario-defined professions, resources or tasks drive the prototype.
 
 **Depends on:** cycle 02.
 
@@ -156,6 +178,10 @@ directory, reports malformed/missing scenarios, and identifies the active file.
 Loading does not yet imply full behavior support.
 
 ## Cycle 04 — Give every real being a stable Bronze identity and sidecar
+
+**Status:** completed 2026-11-02. See [identity/schema contract](actors/README.md)
+and [validation record](contract/RESULTS-CYCLE04.md). Real beings now have
+registry-scoped IDs; professions and economic behaviors remain later cycles.
 
 **Depends on:** cycles 01–03.
 
@@ -505,3 +531,107 @@ The bronze-mac target now disables signing in both Debug and Release with
 and an empty signing identity. The inherited Apple Development identity was
 removed. Local Xcode builds must not require a development team or a command-line
 signing override. Distribution signing remains an explicit future configuration.
+
+## Cycle 01 completion record (2026-11-02)
+
+- Completed audit of all current shared-core Bronze hooks, independent
+  HIDE_THUNDER guards, both adapters and both DSL/runtime paths. No production
+  engine behavior, content or historical save layout was changed in this cycle.
+- Documented state ownership, units, time/coordinate conversions, actual hosts,
+  identity/compaction risks and the per-world registry investigation for cycle 04.
+- Inventoried all three content files through both real parsers, including
+  operations, arguments, rules, resources, recipes, policies and parameters.
+  The newer compiler rejects the full scenario; accepted explicit deposit/eat
+  statements lack standalone execution handlers; some runner parameter names
+  do not match parsed names. These are recorded gaps for subsequent cycles,
+  not claims of full support or reasons to silently weaken the tests.
+- Added `make -C bronze contract-test` and a gcc/clang CI gate. It checks
+  definitions/preprocessor/link boundaries, reviewed content inventory,
+  repeatability and pinned observable snapshots. It isolates HIDE_THUNDER with
+  a native-only control; the original engine links without Bronze sources.
+- PASS: `bash test.sh` with default native stages, existing Bronze scenario and
+  adapter tests, and BRONZE_SIM/HIDE_THUNDER hybrid checks.
+- PASS: fixed seeds 42/1337 at cycles 1/60/120, repeated fresh-process native,
+  native-hide and Bronze probes. Native sampled state and being layout match
+  across variants; separate lightning and Bronze state traces are captured.
+- PASS: bronze-mac Debug and Release Mac Catalyst builds, no signing override;
+  original sim-mac Debug and Release builds without BRONZE_SIM, signing disabled
+  only for local build validation. Compiler/SDK warnings remain.
+- This baseline is the current checkout, not a recovered historical release.
+  It does not prove full memory/social/save-format or lifetime equivalence.
+  No new GUI acceptance claim is made for this documentation/test-only cycle.
+
+## Cycle 02 completion record (2026-11-02)
+
+- Removed duplicated parser/AST/kind/vector/utility sources and headers from
+  runtime/. `dsl/` is the sole compiler and shared domain definition owner.
+- Preserved strict compilation and standalone behavior through explicit
+  consumer profiles in one parser. No silent strict-to-legacy fallback. The
+  standalone runner and compiled executor reject the wrong profile.
+- Merged basic native access and scenario views into the adapter/ implementation.
+  Root headers only forward to canonical headers; duplicate root C files are
+  removed. The shared neutral scenario contract remains source-only.
+- Migrated CLI/harness build lists and added canonical compiler/adapter sources
+  to the Catalyst target exactly once. Scenario loading remains cycle 03.
+- Added profile/AST/error-path tests, wrong-profile native dispatch checks,
+  source-ownership audit and pre-migration CLI output snapshots for all three
+  scenarios. Existing cycle 01 inventories and native/Bronze baselines passed
+  unchanged; no re-recording was used to mask differences.
+- PASS: full default suite, compatibility contract, compiler ASan/UBSan tests,
+  Bronze Catalyst Debug/Release without signing overrides, original sim-mac
+  Debug/Release without BRONZE_SIM. No shared engine C changes were needed.
+- See OWNERSHIP.md and contract/RESULTS-CYCLE02.md for exact ownership,
+  compatibility policy, evidence and remaining limitations.
+
+## Cycle 03 completion record (2026-11-02)
+
+- Bundled all three .bronze resources. The scene-owned Swift controller loads
+  first_slice through Bundle.main, not a repository-relative working directory.
+- Added Bronze Scenario selection/reset commands, an active-file status panel
+  and scrollable filename/source-line diagnostics. Successful commits reset with
+  the compiled seed; rejected loads leave the active config/world unchanged.
+- Added transactional strict config ownership in scenario/, bounds/units and
+  host-capability admission, per-parser diagnostic streams, numeric conversion
+  checks, nesting limits and partial AST cleanup. No legacy fallback is used.
+- UI and shared-shell changes are #if BRONZE_SIM; both C and Swift definitions
+  are target-owned. The original shell's startup/New/file behavior is unchanged
+  when the symbol is absent. No shared engine C hooks were needed.
+- PASS: full default suite; unchanged contract/native/CLI snapshots; loader
+  ASan/UBSan tests; real Debug/Release bundle/controller tests outside the repo
+  cwd; Bronze Debug/Release without signing overrides; original native sim-mac
+  Debug/Release and original Catalyst Debug builds.
+- Added Mac CI packaged-resource/controller checks alongside portable contract
+  tests. UI layout still requires visual acceptance; automated controller tests
+  do not claim that a live menu/sheet was manually inspected.
+- The full scenario remains strictly rejected with diagnostics. Config loading
+  applies only the seed today; professions, inventories, places and task-driven
+  native behavior remain cycles 04 onward. See scenario/README.md and
+  contract/RESULTS-CYCLE03.md for scope, commands and results.
+
+## Cycle 04 completion record (2026-11-02)
+
+- Added actors/ with a world/session-owned registry, monotonic scoped 64-bit
+  actor IDs and the sidecar schema for vocation, skills, home/workplace, cargo,
+  task/progress, reservations, assignment history and mentoring. Defaults are
+  unassigned/empty; these are not implementations of later profession behavior.
+- Added guarded native bootstrap/import, birth, death and compaction hooks.
+  Existing native callbacks remain in place. No ID derives from a pointer,
+  array slot, display name, birth date or genetics; no native being/save field
+  was added. Claim cleanup and cross-actor mentor/apprentice cleanup are tested.
+- Added per-shared-core-context registry ownership and restore/rebind/teardown.
+  Inactive worlds cannot resolve their IDs to another world's native array.
+  Native imports allocate fresh IDs; malformed transfer invalidates records.
+- Added a checked registry-backed adapter factory and a guarded selected-ID
+  bridge/status line. Neutral v1's narrower IDs are never silently truncated.
+- PASS: actual native birth/death/compaction/reorder and two-session tests,
+  full default suite, unchanged contract/CLI/native snapshots, Bronze and
+  original Debug/Release app builds, original Catalyst build and packaged
+  scenario/controller tests.
+- PASS: ASan across actor integration and UBSan on new registry/harness code.
+  Full-engine UBSan independently fails in original entity/being.c:1599 without
+  BRONZE_SIM. That native signed-shift issue is recorded, not silently fixed or
+  claimed clean. See contract/RESULTS-CYCLE04.md for the instrumentation split.
+- Skills/jobs/inventories are ready to populate in their owning cycles; the
+  allocator and actor records are not yet persisted across process/native-only
+  loads. Full paired save/resume remains cycle 16. Prototype global economics
+  and visual acceptance remain separately documented limitations.

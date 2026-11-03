@@ -1,4 +1,5 @@
 #include "brz_dsl.h"
+#include "brz_dsl_internal.h"
 #include "brz_util.h"
 #include <stdlib.h>
 #include <string.h>
@@ -114,7 +115,7 @@ static void op_free(OpDef* op)
     memset(op, 0, sizeof(*op));
 }
 
-static void stmt_free(StmtDef* st);
+void brz_stmt_dispose(StmtDef* st);
 
 static void stmt_vec_free(BrzVec* v)
 {
@@ -122,12 +123,12 @@ static void stmt_vec_free(BrzVec* v)
     for(size_t i=0;i<v->len;i++)
     {
         StmtDef* s = (StmtDef*)brz_vec_at(v, i);
-        stmt_free(s);
+        brz_stmt_dispose(s);
     }
     brz_vec_destroy(v);
 }
 
-static void stmt_free(StmtDef* st)
+void brz_stmt_dispose(StmtDef* st)
 {
     if(!st) return;
     switch(st->kind)
@@ -148,20 +149,20 @@ static void stmt_free(StmtDef* st)
     memset(st, 0, sizeof(*st));
 }
 
-static void task_free(TaskDef* t)
+void brz_task_dispose(TaskDef* t)
 {
     if(!t) return;
     free(t->name);
     for(size_t i=0;i<t->stmts.len;i++)
     {
         StmtDef* s = (StmtDef*)brz_vec_at(&t->stmts, i);
-        stmt_free(s);
+        brz_stmt_dispose(s);
     }
     brz_vec_destroy(&t->stmts);
     memset(t, 0, sizeof(*t));
 }
 
-static void rule_free(RuleDef* r)
+void brz_rule_dispose(RuleDef* r)
 {
     if(!r) return;
     free(r->name);
@@ -170,7 +171,7 @@ static void rule_free(RuleDef* r)
     memset(r, 0, sizeof(*r));
 }
 
-static void voc_free(VocationDef* v)
+void brz_vocation_dispose(VocationDef* v)
 {
     if(!v) return;
     free(v->name);
@@ -178,14 +179,14 @@ static void voc_free(VocationDef* v)
     for(size_t i=0;i<v->tasks.len;i++)
     {
         TaskDef* t = (TaskDef*)brz_vec_at(&v->tasks, i);
-        task_free(t);
+        brz_task_dispose(t);
     }
     brz_vec_destroy(&v->tasks);
 
     for(size_t i=0;i<v->rules.len;i++)
     {
         RuleDef* r = (RuleDef*)brz_vec_at(&v->rules, i);
-        rule_free(r);
+        brz_rule_dispose(r);
     }
     brz_vec_destroy(&v->rules);
 
@@ -294,7 +295,7 @@ void brz_cfg_free(ParsedConfig* cfg)
     for(size_t i=0;i<cfg->vocations.len;i++)
     {
         VocationDef* v = (VocationDef*)brz_vec_at(&cfg->vocations, i);
-        voc_free(v);
+        brz_vocation_dispose(v);
     }
     brz_vec_destroy(&cfg->vocations);
 
@@ -436,7 +437,7 @@ static int validate_stmts(const ParsedConfig* cfg, const BrzVec* statements, con
     return ok;
 }
 
-bool brz_cfg_validate(const ParsedConfig* cfg, FILE* errors)
+static bool validate_profile(const ParsedConfig* cfg, FILE* errors, int strict)
 {
     int ok=1;
     if(!errors) errors=stderr;
@@ -446,16 +447,16 @@ bool brz_cfg_validate(const ParsedConfig* cfg, FILE* errors)
         if(kind_table_find(&cfg->resource_kinds,r->name)<0){
             fprintf(errors,"ValidationError:%d: resource '%s' is not declared in kinds.resources\n",r->line,r->name); ok=0;
         }
-        if(r->habitat && !brz_terrain_query(r->habitat)){
+        if(strict && r->habitat && !brz_terrain_query(r->habitat)){
             fprintf(errors,"ValidationError:%d: resource '%s' has unknown terrain query '%s'\n",r->line,r->name,r->habitat); ok=0;
         }
     }
-    if(cfg->settlement_policy.food_fallback &&
+    if(strict && cfg->settlement_policy.food_fallback &&
        kind_table_find(&cfg->resource_kinds,cfg->settlement_policy.food_fallback)<0){
         fprintf(errors,"ValidationError: settlement food_fallback '%s' is not a declared resource\n",
                 cfg->settlement_policy.food_fallback); ok=0;
     }
-    if(cfg->settlement_policy.deposit_threshold<0 || cfg->settlement_policy.rest_recovery<0){
+    if(strict && (cfg->settlement_policy.deposit_threshold<0 || cfg->settlement_policy.rest_recovery<0)){
         fprintf(errors,"ValidationError: settlement policy values must be non-negative\n"); ok=0;
     }
     for(size_t i=0;i<cfg->recipes.len;i++){
@@ -520,6 +521,22 @@ bool brz_cfg_validate(const ParsedConfig* cfg, FILE* errors)
     return ok!=0;
 }
 
+bool brz_cfg_validate(const ParsedConfig* cfg, FILE* errors)
+{
+    return validate_profile(cfg, errors, 1);
+}
+
+bool brz_cfg_validate_legacy_runtime(const ParsedConfig* cfg, FILE* errors)
+{
+    if (!cfg || cfg->scenario_profile || cfg->map_refs.len || cfg->places.len ||
+        cfg->roles.len || cfg->needs.len || cfg->services.len || cfg->disruptions.len)
+    {
+        if (errors) fprintf(errors, "ValidationError: standalone runtime does not execute scenario service declarations\n");
+        return false;
+    }
+    return validate_profile(cfg, errors, 0);
+}
+
 static int compile_stmts(ParsedConfig* cfg, BrzVec* statements, const char* vocation, FILE* errors)
 {
     int ok=1;
@@ -562,6 +579,11 @@ bool brz_cfg_compile(ParsedConfig* cfg, FILE* errors)
 {
     int ok=1;
     if(!cfg) return false;
+    cfg->compiled = false;
+    if(cfg->legacy_runtime) {
+        if(errors) fprintf(errors, "ValidationError: legacy runtime profile is not a compiled program\n");
+        return false;
+    }
     if(!errors) errors=stderr;
     for(size_t i=0;i<cfg->actions.len;i++){
         ActionDef* action=(ActionDef*)brz_vec_at(&cfg->actions,i);
@@ -594,5 +616,6 @@ bool brz_cfg_compile(ParsedConfig* cfg, FILE* errors)
         for(size_t j=0;j<vocation->tasks.len;j++)
             if(!compile_stmts(cfg,&((TaskDef*)brz_vec_at(&vocation->tasks,j))->stmts,vocation->name,errors)) ok=0;
     }
+    cfg->compiled = ok != 0;
     return ok;
 }

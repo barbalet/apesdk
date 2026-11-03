@@ -180,4 +180,10 @@ void sim_thread_console( void );
 
 #endif
 
+#ifdef BRONZE_SIM
+#include <stdint.h>
+/* Registry-scoped identity for the selected real being; zero means none. */
+uint64_t shared_session_bronze_actor_id(shared_session* session);
+#endif
+
 #endif /* SIMULATEDAPE_SHARED_H */
