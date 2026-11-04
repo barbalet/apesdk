@@ -77,6 +77,7 @@ without needing a large framework stack.
 - [`render/`](render/) - graph and OpenGL-oriented rendering support.
 - [`gui/`](gui/) - shared GUI drawing, buffers, messages, tutorials, and
   application shell logic.
+- [`bronze/`](bronze/) - Bronze scenarios, occupation and economy rules, and save support.
 - [`toolchains/`](toolchains/) - application projects built around ApeSDK.
 - [`book/`](book/) - long-form guide to the current ApeSDK architecture.
 - [`june13/`](june13/) - proposal notes for a possible Simulated Universe interface.
@@ -90,6 +91,7 @@ without needing a large framework stack.
 | Toolchain | Location | Current status |
 | --- | --- | --- |
 | **Simulated Ape for macOS** | [`toolchains/sim-mac`](toolchains/sim-mac/) | Active macOS Swift/Xcode wrapper. CI builds the `sim-mac` scheme, producing `Simulated Ape.app`. |
+| **BronzeSim** | [`toolchains/bronze-mac`](toolchains/bronze-mac/) | Mac Catalyst app built with `BRONZE_SIM=1`. Starts with the full Bronze Age scenario. |
 | **Simulated Planet** | [`toolchains/planet`](toolchains/planet/) | Active macOS Xcode project in CI. Demonstrates broader weather, terrain, and movement concepts. |
 | **Simulated War** | [`toolchains/war-mac`](toolchains/war-mac/) | Native macOS wrapper using the original Urban game and renderer sources; requires the sibling Urban checkout described below. |
 | **Simulated Urban** | [`toolchains/urban-mac`](toolchains/urban-mac/) | Native macOS wrapper using the original Urban game and renderer sources; requires the sibling Urban checkout described below. |
@@ -125,6 +127,18 @@ For the current macOS application:
    in Xcode.
 2. Build the `sim-mac` scheme.
 3. The product name is `Simulated Ape.app`.
+
+For **BronzeSim**, open the Xcode project, select the `bronze-mac` scheme
+and **My Mac (Mac Catalyst)**, then run `BronzeSim.app`. Debug and Release
+build locally without a signing team.
+[BronzeSim Xcode project](toolchains/bronze-mac/bronze-mac.xcodeproj)
+
+The target sets `BRONZE_SIM=1` to run occupations, gathering, crafting,
+and trade on ApeSDK's native agents, terrain, and clock. It starts with
+`bronze_age_full.bronze`. The **Bronze Scenario** menu offers the two
+smaller scenarios, and **Save Bronze World** preserves the simulation
+and its economy together. [BronzeSim guide](bronze/README.md) ·
+[Save and resume](bronze/SAVE-FORMAT.md)
 
 For native Urban, place the `urban/` directory from
 [apesdk/urbanscribble](https://gitlab.com/apesdk/urbanscribble) beside this ApeSDK
