@@ -597,6 +597,28 @@ n_int episode_description( simulated_being *local_being,
 
         switch ( local_episodic[index].event & ( EVENT_INTENTION - 1 ) )
         {
+#ifdef BRONZE_SIM
+        case EVENT_PROFESSION_WORK:
+            io_string_write( str, "Completed profession work", &string_index );
+            break;
+        case EVENT_PROFESSION_SERVICE:
+        case EVENT_PROFESSION_SERVICE_BY:
+        case EVENT_PROFESSION_RESOURCE:
+        case EVENT_PROFESSION_RESOURCE_RECEIVED:
+        {
+            n_string verb;
+            switch ( local_episodic[index].event & ( EVENT_INTENTION - 1 ) )
+            {
+            case EVENT_PROFESSION_SERVICE: verb = "Served "; break;
+            case EVENT_PROFESSION_SERVICE_BY: verb = "Received service from "; break;
+            default: verb = "Traded with "; break;
+            }
+            io_string_write( str, verb, &string_index );
+            io_string_write( str, name_str, &string_index );
+            social = 1;
+            break;
+        }
+#endif
         case EVENT_EAT:
         {
             io_string_write( str, "Was eating ", &string_index );

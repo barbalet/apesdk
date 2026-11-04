@@ -2,6 +2,7 @@
 #include "bronze_hybrid.h"
 #include "../../sim/sim.h"
 #include <string.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../gui/gui.h"
@@ -661,6 +662,49 @@ static double carried_total(const BronzeActor *actor)
     for (size_t i = 0; i < actor->resource_count; i++) total += actor->resources[i].amount;
     for (size_t i = 0; i < actor->item_count; i++) total += actor->items[i].amount;
     return total;
+}
+
+BronzeTaskStatus bronze_task_exchange(BronzeActor *actor, BronzeActor *partner,
+                                     BronzeExchangeLeg give, BronzeExchangeLeg want, int commit)
+{
+    if (!actor || !partner || actor == partner ||
+        give.kind < 0 || give.kind >= (give.item ? BRONZE_ITEM_LIMIT : BRONZE_RESOURCE_LIMIT) ||
+        want.kind < 0 || want.kind >= (want.item ? BRONZE_ITEM_LIMIT : BRONZE_RESOURCE_LIMIT) ||
+        (give.kind == want.kind && give.item == want.item) ||
+        !isfinite(give.quantity) || !isfinite(want.quantity) ||
+        give.quantity <= 0 || want.quantity <= 0)
+        return BRONZE_TASK_STOCK;
+
+    BronzeStock *outgoing = cargo_slot(actor, give.kind, give.item, 0);
+    BronzeStock *payment = cargo_slot(partner, want.kind, want.item, 0);
+    if (!outgoing || outgoing->amount < give.quantity ||
+        !payment || payment->amount < want.quantity)
+        return BRONZE_TASK_STOCK;
+
+    const BronzeLandscape *landscape = current_landscape();
+    if (!landscape) return BRONZE_TASK_TARGET;
+    double capacity = landscape->policy.carry_capacity;
+    if (carried_total(actor) - give.quantity + want.quantity > capacity ||
+        carried_total(partner) - want.quantity + give.quantity > capacity)
+        return BRONZE_TASK_CAPACITY;
+    if (!commit) return BRONZE_TASK_RUNNING;
+
+    /* Allocate both destinations before any debit. The first allocation may
+       move the source array, so resolve both source slots again afterward. */
+    size_t *count = want.item ? &actor->item_count : &actor->resource_count;
+    size_t original_count = *count;
+    BronzeStock *received = cargo_slot(actor, want.kind, want.item, 1);
+    if (!received) return BRONZE_TASK_CAPACITY;
+    BronzeStock *delivered = cargo_slot(partner, give.kind, give.item, 1);
+    if (!delivered) {
+        *count = original_count;
+        return BRONZE_TASK_CAPACITY;
+    }
+    cargo_slot(actor, give.kind, give.item, 0)->amount -= give.quantity;
+    cargo_slot(partner, want.kind, want.item, 0)->amount -= want.quantity;
+    received->amount += want.quantity;
+    delivered->amount += give.quantity;
+    return BRONZE_TASK_RUNNING;
 }
 
 static double recipe_quantities(const RecipeDef *recipe, unsigned batches,

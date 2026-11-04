@@ -49,9 +49,9 @@ Cycle 12 validates recipe workplace, duration, skill and tool settings.
   at the maximum values or persistent actor/place identities. Numeric kind IDs
   are scoped to the compiled config; later save integration must fingerprint it.
 
-The full scenario remains rejected for the cycle 01 semantic mismatches. The
-other two bundled files compile. Success is labeled as validated content with
-profession tasks inactive; it does not substitute for cycles 04–18.
+All three bundled scenarios pass strict graphical admission.
+The app starts with the full scenario. Its vocation roster shares the native
+work, production, and rest mechanics described in the release results.
 
 ## Reproducible checks
 
@@ -62,7 +62,7 @@ profiles/parameters, seed changes and unchanged cycle 01/02 snapshots.
 `test_bundle.sh /absolute/path/to/BronzeSim.app` compiles the real Swift
 controller/UI source with a small Foundation/SwiftUI test driver. It resolves the
 actual Debug/Release bundle resources from a temporary working directory,
-verifies startup, selection, full-scenario rejection and successful-only reset
+verifies full-scenario startup, slice selection, missing-resource rejection and successful-only reset
 callbacks. It exercises the controller, not mouse clicks or live window layout.
 The Mac CI build matrix runs it after packaging. The original Catalyst target
 is also built separately without BRONZE_SIM to verify the shared shell split.

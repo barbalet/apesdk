@@ -1090,6 +1090,15 @@ void      sim_cycle( void );
 void      sim_update_output( void );
 
 /* This is the new way. Please continue forwards. */
+#ifdef BRONZE_SIM
+typedef struct BronzeNativeStage BronzeNativeStage;
+BronzeNativeStage *bronze_native_stage(n_file *, const n_file *, n_uint, n_uint);
+void bronze_native_stage_free(BronzeNativeStage **);
+void bronze_native_install(BronzeNativeStage *, n_int);
+void bronze_sim_finish_restore(void);
+n_file *bronze_native_continuation_capture(void);
+int bronze_native_continuation_restore(const n_file *file);
+#endif
 n_file   *tranfer_out( void );
 n_file   *tranfer_out_json( void );
 n_int     tranfer_in( n_file *input_file );

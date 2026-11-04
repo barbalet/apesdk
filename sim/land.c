@@ -430,6 +430,29 @@ n_byte *land_weather_lightning( n_int tile )
     return ( n_byte * )m_land.tiles[tile].lightning;
 }
 
+#ifdef BRONZE_SIM
+void land_bronze_weather_capture(BronzeWeatherContinuation *weather)
+{
+    *weather = (BronzeWeatherContinuation){
+        m_land.wind_value_x, m_land.wind_value_y, m_land.wind_aim_x, m_land.wind_aim_y,
+        m_land.wind_dissipation, m_land.tiles[0].local_delta,
+        {m_land.genetics[0], m_land.genetics[1]}
+    };
+}
+
+void land_bronze_weather_restore(const BronzeWeatherContinuation *weather)
+{
+    m_land.wind_value_x = weather->wind_x;
+    m_land.wind_value_y = weather->wind_y;
+    m_land.wind_aim_x = weather->aim_x;
+    m_land.wind_aim_y = weather->aim_y;
+    m_land.wind_dissipation = weather->dissipation;
+    m_land.tiles[0].local_delta = weather->local_delta;
+    m_land.genetics[0] = weather->weather_random[0];
+    m_land.genetics[1] = weather->weather_random[1];
+}
+#endif
+
 void weather_cycle( void )
 {
 #ifdef BRONZE_SIM

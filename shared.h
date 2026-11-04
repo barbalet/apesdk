@@ -150,6 +150,10 @@ void shared_session_mouseOption( shared_session *session, n_byte option );
 void shared_session_mouseReceived( shared_session *session, n_double valX, n_double valY, n_int localIdentification );
 void shared_session_mouseUp( shared_session *session );
 n_byte shared_session_openFileName( shared_session *session, n_constant_string cStringFileName, n_int isScript );
+#if defined(BRONZE_SIM) && defined(BRONZE_DISK_SAVE)
+n_file *shared_session_bronze_save(shared_session *, const n_byte *scenario_digest);
+int shared_session_bronze_open(shared_session *, const n_byte *, n_uint, const n_byte *scenario_digest);
+#endif
 void shared_session_saveFileName( shared_session *session, n_constant_string cStringFileName );
 
 void shared_script_debug_handle( n_constant_string cStringFileName );

@@ -1,4 +1,6 @@
 import SwiftUI
+import CryptoKit
+import UniformTypeIdentifiers
 
 // This file belongs only to bronze-mac; shared shell call sites are #if BRONZE_SIM.
 @MainActor
@@ -10,12 +12,17 @@ final class BronzeScenarioController: ObservableObject {
     @Published private(set) var diagnostics = ""
     @Published private(set) var lastAttemptFailed = false
     @Published var showDiagnostics = false
+    private(set) var digest: [UInt8] = []
+    func reportFileError(_ message: String) {
+        diagnostics = message
+        showDiagnostics = true
+    }
     var landPolicy: BronzeLandPolicy { bronze_scenario_land_policy(storage) }
     var professions: UnsafePointer<BronzeProfessionPolicy>? { bronze_scenario_professions(storage) }
     var program: OpaquePointer? { bronze_scenario_program(storage) }
     var seed: UInt { UInt(bronze_scenario_seed(storage)) }
 
-    init(bundle: Bundle = .main) { self.bundle = bundle; _ = load("first_slice") }
+    init(bundle: Bundle = .main) { self.bundle = bundle; _ = load("bronze_age_full") }
     deinit { bronze_scenario_destroy(storage) }
 
     @discardableResult
@@ -30,6 +37,8 @@ final class BronzeScenarioController: ObservableObject {
         }
         diagnostics = String(cString: bronze_scenario_diagnostics(storage))
         if accepted {
+            digest = path.flatMap { try? Data(contentsOf: URL(fileURLWithPath: $0)) }
+                .map { Array(SHA256.hash(data: $0)) } ?? []
             activeName = String(cString: bronze_scenario_name(storage))
             showDiagnostics = false
             onCommit?(seed)
@@ -93,5 +102,24 @@ struct BronzeScenarioPanel: View {
             .padding().frame(minWidth: 520, minHeight: 320)
             .accessibilityIdentifier("BronzeScenarioDiagnostics")
         }
+    }
+}
+
+
+struct BronzeSaveDocument: FileDocument {
+    static let readableContentTypes: [UTType] = [.data]
+    var data: Data
+
+    init(data: Data) { self.data = data }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let bytes = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        data = bytes
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
     }
 }

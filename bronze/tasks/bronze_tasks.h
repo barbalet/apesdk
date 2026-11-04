@@ -4,6 +4,9 @@
 
 const bronze_site *bronze_task_work_site(uint64_t id);
 const bronze_site *bronze_task_move_site(uint64_t home, uint64_t workplace, const char *terrain);
+typedef struct { int kind, item; double quantity; } BronzeExchangeLeg;
+BronzeTaskStatus bronze_task_exchange(BronzeActor *actor, BronzeActor *partner,
+                                     BronzeExchangeLeg give, BronzeExchangeLeg want, int commit);
 void bronze_task_release_claim(BronzeLandscape *landscape, BronzeActor *actor);
 uint64_t bronze_task_storage(uint64_t home);
 BronzeTaskStatus bronze_task_gather(BronzeActor *actor, simulated_being *being,

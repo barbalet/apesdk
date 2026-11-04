@@ -30,6 +30,9 @@
  ****************************************************************/
 
 import SwiftUI
+#if BRONZE_SIM
+import UniformTypeIdentifiers
+#endif
 import UIKit
 
 // MARK: - SwiftUI App Entry Point
@@ -128,6 +131,13 @@ struct ApeSimApp: App {
                     catalystSceneModel.newSimulation()
                 }
                 .keyboardShortcut("n", modifiers: [.command])
+#if BRONZE_SIM
+                Button("Save Bronze World…") { catalystSceneModel.prepareBronzeSave() }
+                    .keyboardShortcut("s", modifiers: [.command])
+                Button("Open Bronze World…") { catalystSceneModel.chooseBronzeOpen(nativeOnly: false) }
+                    .keyboardShortcut("o", modifiers: [.command])
+                Button("Import Native World…") { catalystSceneModel.chooseBronzeOpen(nativeOnly: true) }
+#endif
             }
 
 #if BRONZE_SIM
@@ -136,10 +146,17 @@ struct ApeSimApp: App {
             }
 #endif
             CommandMenu("Control") {
+#if BRONZE_SIM
+                Button(catalystSceneModel.bronzePaused ? "Resume" : "Pause") {
+                    _ = catalystSceneModel.menu(n_int(NA_MENU_PAUSE))
+                }
+                .keyboardShortcut("p", modifiers: [.command])
+#else
                 Button(isPaused ? "Resume" : "Pause") {
                     isPaused = catalystSceneModel.menu(n_int(NA_MENU_PAUSE)) == 1
                 }
                 .keyboardShortcut("p", modifiers: [.command])
+#endif
                 Divider()
                 Button("Previous Ape") {
                     _ = catalystSceneModel.menu(n_int(NA_MENU_PREVIOUS_APE))
@@ -263,6 +280,17 @@ struct CatalystSimulationWindow: View {
                 if surface == .view {
                     BronzeScenarioPanel(controller: sceneModel.bronzeScenario,
                                         actorSummary: sceneModel.bronzeSelectedActorSummary)
+                        .fileExporter(isPresented: $sceneModel.showBronzeSave,
+                                      document: sceneModel.bronzeSaveDocument,
+                                      contentType: .data, defaultFilename: "World.bronzesave") { result in
+                            if case .failure(let error) = result {
+                                sceneModel.bronzeScenario.reportFileError(error.localizedDescription)
+                            }
+                        }
+                        .fileImporter(isPresented: $sceneModel.showBronzeOpen,
+                                      allowedContentTypes: [.data]) { result in
+                            sceneModel.openBronzeSave(result)
+                        }
                 }
             }
 #endif
@@ -292,6 +320,79 @@ final class ApeSimulationSceneModel: ObservableObject {
 #if BRONZE_SIM
     @Published private(set) var bronzeSelectedActorSummary = "No registered being selected"
     let bronzeScenario = BronzeScenarioController()
+    @Published var showBronzeOpen = false
+    @Published private(set) var bronzePaused = false
+    private var bronzeNativeImport = false
+
+    func chooseBronzeOpen(nativeOnly: Bool) {
+        bronzeNativeImport = nativeOnly
+        showBronzeOpen = true
+    }
+    @Published var showBronzeSave = false
+    private(set) var bronzeSaveDocument: BronzeSaveDocument?
+
+    func prepareBronzeSave() {
+        startSessionIfNeeded()
+        guard bronzeScenario.digest.count == 32,
+              let file = bronzeScenario.digest.withUnsafeBufferPointer({
+                  shared_session_bronze_save(session, $0.baseAddress)
+              }) else {
+            bronzeScenario.reportFileError("The Bronze world could not be saved. Wait for the world to finish loading and try again.")
+            return
+        }
+        bronzeSaveDocument = BronzeSaveDocument(data: Data(bytes: file.pointee.data,
+                                                            count: Int(file.pointee.location)))
+        var ownedFile: UnsafeMutablePointer<n_file>? = file
+        io_file_free(&ownedFile)
+        showBronzeSave = true
+    }
+
+    func openBronzeSave(_ result: Result<URL, Error>) {
+        startSessionIfNeeded()
+        do {
+            let url = try result.get()
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            let handle = try FileHandle(forReadingFrom: url)
+            defer { try? handle.close() }
+            let size = try handle.seekToEnd()
+            guard size <= 64 * 1024 * 1024 else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            try handle.seek(toOffset: 0)
+            if bronzeNativeImport {
+                let signature = try handle.read(upToCount: 7) ?? Data()
+                if signature == Data("BRZSAVE".utf8) {
+                    bronzeScenario.reportFileError("Use Open Bronze World to resume this save.")
+                    return
+                }
+                let imported = url.path.withCString { shared_session_openFileName(session, $0, 0) }
+                bronzePaused = shared_session_pause_state(session) != 0
+                if imported == 0 {
+                    bronzeScenario.reportFileError("The native world could not be imported.")
+                }
+                return
+            }
+            guard bronzeScenario.digest.count == 32 else {
+                throw CocoaError(.fileReadCorruptFile)
+            }
+            let bytes = try handle.read(upToCount: Int(size)) ?? Data()
+            let restored = bronzeScenario.digest.withUnsafeBufferPointer { digest in
+                bytes.withUnsafeBytes { raw in
+                    shared_session_bronze_open(session, raw.bindMemory(to: UInt8.self).baseAddress,
+                                               n_uint(bytes.count), digest.baseAddress)
+                }
+            }
+            if restored != 0 {
+                bronzePaused = true
+            } else {
+                bronzeScenario.reportFileError("The Bronze save is invalid or belongs to a different scenario. Load the matching scenario and try again.")
+            }
+        } catch {
+            bronzeScenario.reportFileError(error.localizedDescription)
+        }
+    }
+
     func selectBronzeScenario(_ name: String) {
         bronzeScenario.load(name) { [weak self] _ in self?.newSimulation() }
     }
@@ -386,7 +487,11 @@ final class ApeSimulationSceneModel: ObservableObject {
 
     func menu(_ menuValue: n_int) -> n_int {
         startSessionIfNeeded()
-        return shared_session_menu(session, menuValue)
+        let result = shared_session_menu(session, menuValue)
+#if BRONZE_SIM
+        if menuValue == n_int(NA_MENU_PAUSE) { bronzePaused = result != 0 }
+#endif
+        return result
     }
 
     func previousApe() {

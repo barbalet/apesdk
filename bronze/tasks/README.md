@@ -38,6 +38,8 @@ Normal completion allows selection again on the next native tick.
 | `deposit` | Routes to communal storage or the actor’s household store. Transfers carried resources or items after one granted minute at the entrance if storage has room. |
 | `fetch` | Uses the same entrances and work gate to transfer available resources or items into personal cargo, subject to capacity and communal food rations. |
 | `eat` | Consumes carried food after one granted minute and applies its scenario nutrition through native energy. |
+| `trade` | Exchanges carried goods with another eligible actor at the township service entrance. |
+| `serve` | Delivers a carried good for payment at the provider’s assigned service entrance. |
 | `rest` | Takes two stationary minutes. The native drive cycle handles recovery, with zero additional work energy cost. |
 
 Gathering follows the active resource definitions and patch habitat. Stock,
@@ -46,8 +48,34 @@ prevent competing actors from reserving the same stock. See the
 [inventory and renewal rules](../hybrid/README.md).
 
 Other admitted operations report their name and an unavailable status when
-reached. Trade is a later cycle. The selected-actor panel
+reached. The selected-actor panel
 shows task, operation, source line, progress and reason.
+
+## Trade and paid delivery
+
+Declare `action trade 2 3` or `action serve 2 3` in the scenario. Both
+operations take two distinct declared resource or item names and an optional
+positive quantity that defaults to one.
+
+- `trade copper grain 2` exchanges two copper for one grain.
+- `serve meal copper 2` delivers one carried meal for two copper. The
+  provider must be assigned to the service entrance.
+
+The scenario author authorizes these exchanges for eligible township
+participants. Both beings must be assigned, ready for native work, stationary,
+and present at the entrance. The lowest stable actor ID among participants
+who can complete the exchange takes part. Both inventories are checked again
+after the work gate grants a minute. Missing participants, insufficient
+stock, and full cargo defer delivery and leave both inventories intact.
+
+The actor sidecar records the latest exchange outcome and partner separately
+from the beings’ episodic memories. Successful exchanges can add a paired
+memory at most once per native hour per participant. Successful gathering
+and crafting have a separate hourly limit for work memories.
+
+The graphical executor supports paid delivery through `serve`. The separate
+service-profile declarations, disruption simulation and the full scenario
+remain outside the graphical admission rules.
 
 ## Routing
 

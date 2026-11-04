@@ -460,6 +460,16 @@ simulated_group *sim_group( void )
     return &group;
 }
 
+#ifdef BRONZE_SIM
+void bronze_sim_finish_restore(void)
+{
+    local_execution = KIND_NOTHING_TO_RUN;
+    sim_new_progress = 0;
+    sim_new_run = 0;
+    sim_writing_output = 0;
+}
+#endif
+
 n_int sim_state_restore( n_file *input_file, n_int selected_index )
 {
     simulated_group *local_group;

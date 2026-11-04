@@ -36,6 +36,11 @@ typedef struct {
     double household_resources[BRONZE_RESOURCE_LIMIT], household_items[BRONZE_ITEM_LIMIT];
     n_byte4 ration_day;
     double ration_used;
+    /* Diagnostic outcome and memory rate limits follow actor identity. */
+    BronzeActorId economic_partner;
+    uint64_t economic_memory_after, work_memory_after;
+    BronzeTaskStatus economic_status;
+    int economic_action;
     BronzeWorkState work;
     BronzeTaskState execution;
 } BronzeActor;
@@ -62,6 +67,14 @@ double bronze_actor_skill(const BronzeActor*, uint32_t vocation);
 void bronze_actor_practice(BronzeActor*, const BronzeProfessionPolicy*);
 BronzeClock* bronze_actors_clock(BronzeActorRegistry*);
 BronzeActorId bronze_actors_next_id(const BronzeActorRegistry*);
+enum { BRONZE_SCENARIO_DIGEST_BYTES = 32 };
+/* The caller supplies the digest of the active scenario and pairs the payload
+   with its native snapshot. Pass content length in n_file.location when
+   staging. The staged registry is independent and remains unbound until
+   the caller activates it and rebinds it to the matching native population. */
+n_file *bronze_actors_capture_sidecar(BronzeActorRegistry *, const n_byte *scenario_digest);
+BronzeActorRegistry *bronze_actors_stage_sidecar(const BronzeActorRegistry *scenario,
+                                                const n_file *, const n_byte *scenario_digest);
 /* Explicit permutation for hosts that reorder a complete native population.
    The ordered IDs must match the resulting native array; validate before use. */
 int bronze_actors_bind_order(BronzeActorRegistry*, simulated_group*, const BronzeActorId*, size_t);

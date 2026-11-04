@@ -40,7 +40,10 @@ static int statements(const ParsedConfig* cfg, const BrzVec* list, FILE* report)
                 return error(report,s->line,"action '%s' has unsupported argument count/units",op->op);
             int storage_scope = (op->action_code==BRZ_ACTION_FETCH || op->action_code==BRZ_ACTION_DEPOSIT) &&
                                 op->a1 && !strcmp(op->a1,"household");
-            if(op->a2 || (op->action_code!=BRZ_ACTION_TRADE && op->a1 && !storage_scope))
+            int exchange = op->action_code==BRZ_ACTION_TRADE || op->action_code==BRZ_ACTION_SERVE;
+            if(exchange && (!strcmp(op->a0,op->a1) || (op->has_n0 && op->n0<=0)))
+                return error(report,s->line,"exchange requires distinct goods and a positive quantity");
+            if(op->a2 || (!exchange && op->a1 && !storage_scope))
                 return error(report,s->line,"action '%s' requires numeric quantities, not extra word arguments",op->op);
             if(s->as.op.has_n0 && !bounded(s->as.op.n0,1000000000)) return error(report,s->line,"quantity must be in 0..1000000000 economic units");
         } else if(s->kind==ST_CHANCE) {

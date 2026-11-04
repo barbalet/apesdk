@@ -18,11 +18,10 @@ interactions affect individuals, and saving/resuming restores the combined
 world deterministically. A large occupation list or decorative map markers
 alone does not satisfy this goal.
 
-This document defines 18 ordered development cycles. Cycles 01–13 are completed
-(2026-11-02–03); cycles 14–18 remain planned. The existing prototype is a starting point, not proof
-that the full scenario works. Each cycle should finish with working code,
-focused validation, updated documentation and a recorded result before its
-dependents begin. These are units of development, not calendar estimates.
+Cycles 01–18 are complete for the qualified graphical model. Cycle 18
+records the supported behaviors, simplified vocation roles, and unsigned
+build qualification.
+
 
 ## Non-negotiable split: original ApeSDK versus BRONZE_SIM
 
@@ -409,6 +408,10 @@ shortages affect real beings, and accounting distinguishes transfers from sinks.
 
 ## Cycle 14 — Add trade, services and economic social memory
 
+**Status:** Implemented for graphical task scenarios. The hybrid harness
+verifies balanced trade, paid delivery, deferred delivery and paired native
+memories. See the [authoring and execution rules](tasks/README.md).
+
 **Depends on:** cycles 08, 10, 12 and 13.
 
 Implement exchange quantities/prices from scenario policy, stock checks,
@@ -428,8 +431,9 @@ completed interactions identify the right beings and influence their histories.
 
 ## Cycle 15 — Add apprenticeship and lifetime profession transitions
 
-**Status:** Implemented using the native training interaction. The cycle 14
-economic interactions remain open. See the [profession rules](actors/PROFESSIONS.md).
+**Status:** Implemented using the native training interaction. The hybrid
+harness verifies both participant memories on qualification. See the
+[profession rules](actors/PROFESSIONS.md).
 
 **Depends on:** cycles 08, 09 and 14.
 
@@ -449,8 +453,11 @@ within bounds, and death/reassignment leaves no dangling links or reservations.
 
 ## Cycle 16 — Save and resume the combined native and Bronze world
 
-**Status:** The Bronze package envelope has a tested codec. State
-serialization, restore and replay tests remain open. See the [save format proposal](SAVE-FORMAT.md).
+**Status:** Combined Save and Open are available in Bronze Mac Catalyst.
+Open validates and stages both layers before installing a paused world.
+Session tests compare uninterrupted and restored native ticks, and hybrid
+tests replay an active recipe with its reservations. See the
+[save format and usage](SAVE-FORMAT.md).
 
 **Depends on:** cycles 04–15.
 
@@ -477,7 +484,13 @@ event traces; truncated, mismatched and unsupported saves fail safely.
 ## Cycle 17 — Complete inspection, uniform graphics and authoring feedback
 
 **Status:** Scalable map symbols and selected-being inspection are implemented.
-Full-resume inspection and economic outcomes depend on cycles 14 and 16.
+The inspector shows the latest trade or paid delivery outcome, including the
+partner’s stable actor ID when available and the reason an exchange could not
+proceed. The Catalyst Save and Open check restored the selected actor and
+inspector values with View, Terrain, and Control open. Terrain overlays
+stayed aligned with the restored land as selection recentered the view
+and the window switched to full screen. See the
+[interactive qualification notes](contract/RESULTS-CYCLE18.md).
 
 **Depends on:** cycles 06–16; use read-only diagnostics in earlier cycles.
 
@@ -504,9 +517,10 @@ new/load and multi-window use without stale pixels or mixed identities.
 
 ## Cycle 18 — Enable the full scenario and qualify the release
 
-**Status:** Local qualification of the supported scenarios is recorded. Full
-scenario admission and release acceptance remain open. See the
-[qualification results](contract/RESULTS-CYCLE18.md).
+**Status:** Complete for unsigned local builds. The full scenario passes
+strict admission and is the packaged default. Both qualification seeds ran
+one native day and matched the uninterrupted run after a 30-tick restore.
+See the [qualification results](contract/RESULTS-CYCLE18.md).
 
 **Depends on:** cycles 01–17.
 

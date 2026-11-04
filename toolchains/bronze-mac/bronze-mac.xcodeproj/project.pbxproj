@@ -127,6 +127,7 @@
 				<array>
 					<string>$(inherited)</string>
 					<string>BRONZE_SIM=1</string>
+					<string>BRONZE_DISK_SAVE=1</string>
 					<string>HIDE_THUNDER=1</string>
 				</array>
 				<key>CODE_SIGN_IDENTITY</key>
@@ -215,6 +216,7 @@
 				<array>
 					<string>$(inherited)</string>
 					<string>BRONZE_SIM=1</string>
+					<string>BRONZE_DISK_SAVE=1</string>
 					<string>HIDE_THUNDER=1</string>
 				</array>
 				<key>CODE_SIGN_IDENTITY</key>
@@ -297,6 +299,7 @@
 				<string>6318F3264EDB1EF43919E63C</string>
 				<string>DD7AD54593E4F615331B5BB3</string>
 				<string>A63E2A23A031E2CB04CBE016</string>
+				<string>4A80F0202ED0000000000018</string>
 				<string>D9CE04144962DC2B3182128E</string>
 				<string>A4A1485E513AC1CA7886328C</string>
 				<string>832B3616279368286CA948BF</string>
@@ -1425,6 +1428,7 @@
 				<string>421EF8DA53D7E1E54DB1FD75</string>
 				<string>A0C65E77847041ABA2307189</string>
 				<string>638D8FC2252911F2BFCCD42B</string>
+				<string>4A80F0202ED0000000000017</string>
 				<string>47FF450104A5C2F78057049C</string>
 				<string>21FB197698E596AF759EFD23</string>
 				<string>A96121392D0E070DF6CE8984</string>
@@ -1636,6 +1640,24 @@
 			<string>PBXBuildFile</string>
 			<key>fileRef</key>
 			<string>638D8FC2252911F2BFCCD42B</string>
+		</dict>
+		<key>4A80F0202ED0000000000017</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/save/bronze_save.c</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>sourcecode.c.c</string>
+		</dict>
+		<key>4A80F0202ED0000000000018</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>4A80F0202ED0000000000017</string>
 		</dict>
 		<key>47FF450104A5C2F78057049C</key>
 		<dict>

@@ -350,6 +350,7 @@ int brz_action_code(const char* name)
 {
     if(brz_streq(name,"gather")) return BRZ_ACTION_GATHER;
     if(brz_streq(name,"craft")) return BRZ_ACTION_CRAFT;
+    if(brz_streq(name,"serve")) return BRZ_ACTION_SERVE;
     if(brz_streq(name,"trade")) return BRZ_ACTION_TRADE;
     if(brz_streq(name,"rest")) return BRZ_ACTION_REST;
     if(brz_streq(name,"move_to")) return BRZ_ACTION_MOVE_TO;
@@ -566,9 +567,9 @@ static int compile_stmts(ParsedConfig* cfg, BrzVec* statements, const char* voca
                 if(brz_streq(recipe->name,op->a0)){ op->recipe_index=(int)ri; break; }
             }
             if(op->recipe_index<0 && op->arg0_item_id<0){ fprintf(errors,"ValidationError:%d: craft requires a declared recipe or item '%s'\n",st->line,op->a0); ok=0; }
-        } else if(op->action_code==BRZ_ACTION_TRADE){
+        } else if(op->action_code==BRZ_ACTION_TRADE || op->action_code==BRZ_ACTION_SERVE){
             if((op->arg0_resource_id<0 && op->arg0_item_id<0) || (op->arg1_resource_id<0 && op->arg1_item_id<0)){
-                fprintf(errors,"ValidationError:%d: trade requires declared give and want kinds\n",st->line); ok=0;
+                fprintf(errors,"ValidationError:%d: %s requires declared give and want kinds\n",st->line,op->op); ok=0;
             }
         } else if(op->action_code==BRZ_ACTION_MOVE_TO || op->action_code==BRZ_ACTION_ROAM || op->action_code==BRZ_ACTION_WANDER){
             op->terrain_query=brz_terrain_query(op->a0);

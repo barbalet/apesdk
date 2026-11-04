@@ -18,8 +18,9 @@ int main(int argc, char** argv)
     assert(jobs && jobs->count==3 && !strcmp(jobs->vocations[0].name,"farmer"));
     assert(jobs->vocations[0].weight==3 && jobs->vocations[0].workplace==BRONZE_JOB_FIELD);
     uint32_t seed=bronze_scenario_seed(s);
-    assert(!bronze_scenario_load(s,argv[3],"bronze_age_full.bronze"));
-    assert(strstr(bronze_scenario_diagnostics(s),"ValidationError:136"));
+    assert(bronze_scenario_load(s,argv[3],"bronze_age_full.bronze"));
+    assert(bronze_scenario_vocations(s)==63);
+    assert(bronze_scenario_load(s,argv[1],"first_slice.bronze"));
     assert(!strcmp(bronze_scenario_name(s),"first_slice.bronze") && bronze_scenario_seed(s)==seed);
     assert(!bronze_scenario_load(s,"no-such-file","missing.bronze"));
     assert(strstr(bronze_scenario_diagnostics(s),"missing"));

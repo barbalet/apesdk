@@ -399,6 +399,15 @@ typedef struct
     n_byte      topography_highdef[HI_RES_MAP_AREA * 2]; /* generated */
     n_byte4     highres_tide[HI_RES_MAP_AREA / 32];      /* generated */
 } n_land;
+#ifdef BRONZE_SIM
+typedef struct {
+    n_int wind_x, wind_y, aim_x, aim_y, dissipation, local_delta;
+    n_byte2 weather_random[2];
+} BronzeWeatherContinuation;
+void land_bronze_weather_capture(BronzeWeatherContinuation *);
+void land_bronze_weather_restore(const BronzeWeatherContinuation *);
+#endif
+
 
 typedef struct
 {

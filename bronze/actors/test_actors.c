@@ -1,3 +1,6 @@
+#ifdef BRONZE_DISK_SAVE
+#include "../save/bronze_save.h"
+#endif
 #include "bronze_actors.h"
 #include "../../entity/entity.h"
 #include "../../shared.h"
@@ -163,11 +166,45 @@ static void sessions(void)
            strstr(summary,"home #") && strstr(summary,"workplace #"));
     assert(strstr(summary,"Energy ") && strstr(summary,"Cargo empty") &&
            strstr(summary,"Town store #"));
+    assert(!strstr(summary, "Latest exchange"));
+    actor_a->economic_action = BRZ_ACTION_TRADE;
+    actor_a->economic_status = BRONZE_TASK_COMPLETE;
+    actor_a->economic_partner = 42;
+    shared_session_bronze_actor_summary(a, summary, sizeof(summary));
+    assert(strstr(summary, "Trade · complete · partner #42"));
+    actor_a->economic_action = BRZ_ACTION_SERVE;
+    actor_a->economic_status = BRONZE_TASK_PARTNER;
+    actor_a->economic_partner = BRONZE_ACTOR_NONE;
+    shared_session_bronze_actor_summary(a, summary, sizeof(summary));
+    assert(strstr(summary, "Paid delivery · no eligible partner at the service entrance"));
+    assert(!strstr(summary, "partner #"));
     strcpy(jobs.vocations[0].name,"next_world");
     shared_session_bronze_professions(a,&jobs);
     shared_session_bronze_actor_summary(a,summary,sizeof(summary));
     assert(strstr(summary,"host") && !strstr(summary,"next_world"));
     n_int ax=being_location_x(bronze_actors_resolve(ar,aid)), ay=being_location_y(bronze_actors_resolve(ar,aid));
+    simulated_being *native_a = bronze_actors_resolve(ar, aid);
+    n_byte2 native_name = native_a->constant.name[0];
+    assert(native_name);
+    native_a->delta.velocity[9] = 71;
+    native_a->changes.father_name[0] = 0x1234;
+    native_a->changes.mother_name[1] = 0xabcd;
+#ifdef BRAIN_ON
+    native_a->braindata.brain[DOUBLE_BRAIN - 1] = 93;
+#endif
+    n_file *continuation = bronze_native_continuation_capture();
+    assert(continuation);
+    n_file truncated = *continuation;
+    --truncated.size;
+    native_a->delta.velocity[9] = 0;
+    assert(!bronze_native_continuation_restore(&truncated));
+    assert(native_a->delta.velocity[9] == 0);
+    native_a->delta.location[0] ^= 1;
+    assert(!bronze_native_continuation_restore(continuation));
+    assert(native_a->delta.velocity[9] == 0);
+    native_a->delta.location[0] ^= 1;
+    assert(bronze_native_continuation_restore(continuation));
+    io_file_free(&continuation);
     assert(shared_session_init(b,NUM_CONTROL,1337)==NUM_CONTROL);
     shared_session_cycle(b,1,NUM_CONTROL);
     BronzeActorId bid=shared_session_bronze_actor_id(b); assert(bid);
@@ -188,12 +225,82 @@ static void sessions(void)
         assert(bronze_hybrid_sites(NULL)!=b_sites && bronze_hybrid_economy().grain==7);
         assert(!bronze_actors_resolve(br,bid));
         assert(being_location_x(bronze_actors_resolve(ar,aid))==ax && being_location_y(bronze_actors_resolve(ar,aid))==ay);
+        native_a = bronze_actors_resolve(ar, aid);
+        assert(native_a->delta.velocity[9] == 71);
+        assert(native_a->constant.name[0] == native_name);
+        assert(native_a->changes.father_name[0] == 0x1234);
+        assert(native_a->changes.mother_name[1] == 0xabcd);
+#ifdef BRAIN_ON
+        assert(native_a->braindata.brain[DOUBLE_BRAIN - 1] == 93);
+#endif
         assert(shared_session_bronze_actor_id(b)==bid && bronze_actors_current()==br);
         assert(bronze_actors_find(br,bid)->vocation==22);
         assert(bronze_hybrid_sites(NULL)==b_sites && bronze_hybrid_economy().grain==0);
         assert(being_location_x(bronze_actors_resolve(br,bid))==bx && being_location_y(bronze_actors_resolve(br,bid))==by);
     }
     assert(shared_session_bronze_actor_id(a)==aid);
+#ifdef BRONZE_DISK_SAVE
+    n_byte digest[BRONZE_SCENARIO_DIGEST_BYTES] = {24};
+    /* The native remains counter can reach one above the ring size. */
+    sim_group()->remains.count = NUMBER_OF_BODIES + 1;
+    sim_group()->remains.location = 4;
+    n_file *package = shared_session_bronze_save(a, digest);
+    assert(package);
+    assert(bronze_save_publish("combined.bronzesave", (BronzeSaveSection){package->data, package->location}));
+    n_file *disk = io_file_new();
+    assert(disk && io_disk_read(disk, "combined.bronzesave") == FILE_OKAY);
+    io_file_free(&package);
+    package = disk;
+    bronze_actors_landscape(ar)->towns[0].stores.grain = 91;
+    sim_group()->remains.count = 0;
+    n_byte wrong_digest[BRONZE_SCENARIO_DIGEST_BYTES] = {25};
+    assert(!shared_session_bronze_open(a, package->data, package->location, wrong_digest));
+    assert(!shared_session_bronze_open(a, package->data, package->location - 1, digest));
+    BronzeSaveSection native, sidecar;
+    assert(bronze_save_read((BronzeSaveSection){package->data, package->location}, &native, &sidecar));
+    n_byte *altered_native = malloc(native.length);
+    n_byte *mismatched = malloc(package->location);
+    assert(altered_native && mismatched);
+    memcpy(altered_native, native.data, native.length);
+    /* The continuation header sits after the native transfer. Change its
+       version and rebuild the checksum so this reaches staged validation. */
+    n_uint transfer_length = 0;
+    for (unsigned i = 0; i < 4; ++i)
+        transfer_length |= (n_uint)altered_native[i] << (8 * i);
+    altered_native[8 + transfer_length] ^= 1;
+    assert(bronze_save_write(mismatched, package->location,
+                             (BronzeSaveSection){altered_native, native.length}, sidecar));
+    assert(!shared_session_bronze_open(a, mismatched, package->location, digest));
+    free(mismatched);
+    free(altered_native);
+    assert(bronze_actors_current() == ar);
+    assert(bronze_hybrid_economy().grain == 91 && sim_group()->remains.count == 0);
+    assert(shared_session_bronze_open(a, package->data, package->location, digest));
+    ar = bronze_actors_current();
+    assert(shared_session_bronze_actor_id(a) == aid);
+    assert(bronze_hybrid_economy().grain == 7);
+    assert(sim_group()->remains.count == NUMBER_OF_BODIES + 1 && sim_group()->remains.location == 4);
+    assert(bronze_actors_resolve(ar, aid)->delta.velocity[9] == 71);
+    n_file *restored_package = shared_session_bronze_save(a, digest);
+    assert(restored_package);
+    assert(restored_package->location == package->location);
+    assert(!memcmp(restored_package->data, package->data, package->location));
+    io_file_free(&restored_package);
+
+    for (unsigned tick = 0; tick < 3; ++tick) sim_cycle();
+    n_file *uninterrupted = shared_session_bronze_save(a, digest);
+    assert(uninterrupted);
+    assert(shared_session_bronze_open(a, package->data, package->location, digest));
+    ar = bronze_actors_current();
+    for (unsigned tick = 0; tick < 3; ++tick) sim_cycle();
+    n_file *resumed = shared_session_bronze_save(a, digest);
+    assert(resumed && resumed->location == uninterrupted->location);
+    assert(!memcmp(resumed->data, uninterrupted->data, resumed->location));
+    io_file_free(&uninterrupted);
+    io_file_free(&resumed);
+    io_file_free(&package);
+    if (shared_session_pause_state(a)) shared_session_menu(a, NA_MENU_PAUSE);
+#endif
     n_uint count=sim_group()->num;
     assert(count>1); sim_set_select(&sim_group()->beings[1]);
     BronzeActorId other=shared_session_bronze_actor_id(a); assert(other && other!=aid);

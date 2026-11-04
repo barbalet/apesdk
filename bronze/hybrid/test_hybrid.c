@@ -81,7 +81,7 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
     FILE *file = fopen("recipes.bronze", "w");
     assert(file);
     fputs("kinds { resources { grain meal clay copper tin charcoal } items { pot tool glazed_pot } }\n"
-          "actions { action craft 1 2 action eat 1 2 action deposit 1 3 action fetch 1 3 }\n"
+          "actions { action craft 1 2 action eat 1 2 action deposit 1 3 action fetch 1 3 action trade 2 3 action serve 2 3 }\n"
           "resources { resource meal { habitat field capacity 0 renew 0 nutrition 0.5 market_target 0 } }\n"
           "recipes {\n"
           "recipe cook { output meal 2 input grain 1 input grain 1 }\n"
@@ -94,7 +94,7 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
           "recipe_pot_minutes 2 recipe_pot_tool tool recipe_glaze_tool tool "
           "recipe_glaze_minimum_skill 2 recipe_ration_workplace workplace }\n"
           "vocations { vocation maker { task work {\n"
-          "craft cook\n"
+          "when true { craft cook }\n"
           "eat meal\n"
           "craft tool 2\n"
           "craft pot\n"
@@ -105,6 +105,9 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
           "fetch meal household 1\n"
           "deposit meal 1\n"
           "fetch meal 1\n"
+          "trade glazed_pot grain\n"
+          "serve meal glazed_pot 0.5\n"
+          "serve meal glazed_pot 0.5\n"
           "} rule always { when true do work } } }\n", file);
     assert(!fclose(file));
     BronzeScenario *scenario = bronze_scenario_create();
@@ -112,7 +115,9 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
     if (!loaded) fprintf(stderr, "%s\n", bronze_scenario_diagnostics(scenario));
     assert(loaded);
     BronzeActorRegistry *registry = bronze_actors_current();
-    bronze_actors_stage_professions(registry, bronze_scenario_professions(scenario));
+    BronzeProfessionPolicy professions = *bronze_scenario_professions(scenario);
+    professions.mentor_skill = 4;
+    bronze_actors_stage_professions(registry, &professions);
     bronze_actors_stage_program(registry, bronze_scenario_program(scenario));
     landscape->policy = bronze_scenario_land_policy(scenario);
     bronze_scenario_destroy(scenario);
@@ -128,6 +133,7 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
         being_set_location(being, location);
         being_set_speed(being, 0);
         being_set_state(being, BEING_STATE_AWAKE);
+        being->delta.awake = FULLY_AWAKE;
         being_set_goal_none(being);
         being_energy_delta(being, BEING_FULL - being_energy(being));
         memset(being_drives(being), 0, DRIVES);
@@ -146,6 +152,10 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
     for (unsigned i = 0; i < landscape->town_count; i++)
         if (landscape->towns[i].home == worker->home) town = &landscape->towns[i];
     assert(town && worker->workplace == town->service);
+    assert(competitor->vocation == worker->vocation && competitor->workplace == worker->workplace);
+    worker->skills[0].value = 0;
+    competitor->skills[0].value = professions.mentor_skill;
+    competitor->execution.retry_at = UINT64_MAX;
     const BronzeProgram *program = bronze_actors_program(registry);
     const RecipeDef *recipes = program->config->recipes.data;
     assert(bronze_task_craft(worker, being, town->service, &recipes[0], &program->recipes[0], 1, 0) == BRONZE_TASK_STOCK);
@@ -166,6 +176,74 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
 
     task_tick(group);
     assert(worker->remaining_ticks == 3 && town->resources[0] == 2 && town->reserved_resources[0] == 2);
+    n_byte digest[BRONZE_SCENARIO_DIGEST_BYTES] = {19};
+    n_file *saved = bronze_actors_capture_sidecar(registry, digest);
+    assert(saved && io_disk_write(saved, "sidecar.bin") == FILE_OKAY);
+    n_file *loaded_sidecar = io_file_new();
+    assert(loaded_sidecar && io_disk_read(loaded_sidecar, "sidecar.bin") == FILE_OKAY);
+    n_byte wrong_digest[BRONZE_SCENARIO_DIGEST_BYTES] = {20};
+    assert(!bronze_actors_stage_sidecar(registry, loaded_sidecar, wrong_digest));
+    --loaded_sidecar->location;
+    assert(!bronze_actors_stage_sidecar(registry, loaded_sidecar, digest));
+    ++loaded_sidecar->location;
+    BronzeActorRegistry *staged = bronze_actors_stage_sidecar(registry, loaded_sidecar, digest);
+    assert(staged && bronze_actors_current() == registry);
+    assert(bronze_actors_next_id(staged) == bronze_actors_next_id(registry));
+    const BronzeActor *restored = bronze_actors_find(staged, worker->id);
+    assert(restored && restored->remaining_ticks == 3);
+    assert(restored->execution.operation == worker->execution.operation);
+    assert(restored->execution.frames[0].statements == worker->execution.frames[0].statements);
+    assert(restored->execution.craft_recipe == &recipes[0]);
+    assert(cargo_amount(restored->resources, restored->resource_count, 0) == 1);
+    assert(bronze_actors_landscape(staged)->towns[0].reserved_resources[0] == 2);
+    bronze_actors_activate(staged);
+    assert(bronze_actors_rebind(staged, group));
+    assert(bronze_actors_for_being(staged, being) == restored);
+    n_file *roundtrip = bronze_actors_capture_sidecar(staged, digest);
+    assert(roundtrip && saved->location == roundtrip->location);
+    assert(!memcmp(saved->data, roundtrip->data, saved->location));
+    n_file *native = tranfer_out();
+    n_file *continuation = bronze_native_continuation_capture();
+    assert(native && continuation);
+    native->size = native->location;
+    BronzeNativeStage *native_stage = bronze_native_stage(native, continuation, group->num,
+                                                          bronze_actors_clock(staged)->tick);
+    assert(native_stage);
+    for (unsigned i = 0; i < 3; ++i) task_tick(group);
+    assert(!restored->execution.craft_recipe);
+    assert(cargo_amount(restored->resources, restored->resource_count, 1) == 2);
+    n_file *uninterrupted = bronze_actors_capture_sidecar(staged, digest);
+    n_file *uninterrupted_native = tranfer_out();
+    assert(uninterrupted && uninterrupted_native);
+
+    BronzeActorRegistry *replay = bronze_actors_stage_sidecar(registry, loaded_sidecar, digest);
+    assert(replay);
+    bronze_native_install(native_stage, 0);
+    bronze_actors_activate(replay);
+    assert(bronze_actors_rebind(replay, group));
+    for (unsigned i = 0; i < 3; ++i) task_tick(group);
+    n_file *resumed = bronze_actors_capture_sidecar(replay, digest);
+    assert(resumed && resumed->location == uninterrupted->location);
+    assert(!memcmp(resumed->data, uninterrupted->data, resumed->location));
+    n_file *resumed_native = tranfer_out();
+    assert(resumed_native && resumed_native->location == uninterrupted_native->location);
+    assert(!memcmp(resumed_native->data, uninterrupted_native->data, resumed_native->location));
+    io_file_free(&resumed_native);
+    io_file_free(&uninterrupted_native);
+
+    bronze_native_install(native_stage, 0);
+    bronze_native_stage_free(&native_stage);
+    bronze_actors_destroy(replay);
+    io_file_free(&resumed);
+    io_file_free(&uninterrupted);
+    io_file_free(&native);
+    io_file_free(&continuation);
+    bronze_actors_activate(registry);
+    assert(bronze_actors_rebind(registry, group));
+    bronze_actors_destroy(staged);
+    io_file_free(&roundtrip);
+    io_file_free(&loaded_sidecar);
+    io_file_free(&saved);
     assert(bronze_task_craft(competitor, &group->beings[1], town->service,
                              &recipes[0], &program->recipes[0], 1, 0) == BRONZE_TASK_STOCK);
     assert(bronze_task_store_transfer(competitor, &group->beings[1], town->storage,
@@ -179,8 +257,9 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
     assert(bronze_actor_set_job(registry, worker, 0, town->service, 0, bronze_native_tick()));
     being_energy_delta(being, BEING_FULL - being_energy(being));
 
+    being_drives(&group->beings[1])[DRIVE_FATIGUE] = 0;
     int native_meal = 0;
-    for (unsigned i = 0; i < 40 && worker->execution.status != BRONZE_TASK_COMPLETE; i++) {
+    for (unsigned i = 0; i < 40 && worker->instruction < 11; i++) {
         land_cycle();
         bronze_work_begin(group);
         bronze_tasks_begin(group);
@@ -195,7 +274,7 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
             native_meal = 1;
         }
     }
-    assert(native_meal && worker->execution.status == BRONZE_TASK_COMPLETE && worker->instruction == 11);
+    assert(native_meal && worker->instruction == 11);
     assert(worker->ration_used == 1 && worker->household_resources[1] == 0 && town->resources[1] == 0);
     assert(town->resources[0] == 0 && town->resources[2] == 0 && town->resources[3] == 0 &&
            town->resources[4] == 0 && town->resources[5] == 0);
@@ -203,6 +282,22 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
     assert(cargo_amount(worker->items, worker->item_count, 2) == 1);
     assert(cargo_amount(worker->resources, worker->resource_count, 1) == 1 && landscape->consumed[1] == 1);
     assert(bronze_actor_skill(worker, 0) == 4);
+    for (unsigned role = 0; role < 2; ++role) {
+        simulated_being *owner = &group->beings[role];
+        simulated_being *other = &group->beings[1 - role];
+        unsigned expected = role ? EVENT_PROFESSION_TRAIN : EVENT_PROFESSION_TRAINED;
+        unsigned matches = 0;
+        for (unsigned entry = 0; entry < EPISODIC_SIZE; ++entry) {
+            simulated_iepisodic *memory = &being_episodic(owner)[entry];
+            if (memory->event != expected) continue;
+            assert(being_name_comparison(owner, memory->first_name[BEING_MEETER],
+                                         memory->family_name[BEING_MEETER]));
+            assert(being_name_comparison(other, memory->first_name[BEING_MET],
+                                         memory->family_name[BEING_MET]));
+            ++matches;
+        }
+        assert(matches == 1);
+    }
     assert(bronze_hybrid_economy().tools == 2);
 
     /* The workplace variant consumes personal cargo instead of the warehouse. */
@@ -232,10 +327,153 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
     assert(cargo_amount(worker->resources, worker->resource_count, 1) +
            worker->household_resources[1] + landscape->spoiled[1] + landscape->consumed[1] == 3);
 
+    BronzeExchangeLeg pot = {2, 1, 1}, grain = {0, 0, 1};
+    assert(bronze_task_exchange(worker, competitor, pot, grain, 1) == BRONZE_TASK_STOCK);
+    assert(cargo_amount(worker->items, worker->item_count, 2) == 1);
+    competitor->resources = malloc(sizeof(*competitor->resources));
+    assert(competitor->resources);
+    competitor->resources[0] = (BronzeStock){0, 1};
+    competitor->resource_count = 1;
+    double capacity = landscape->policy.carry_capacity;
+    landscape->policy.carry_capacity = 1;
+    assert(bronze_task_exchange(worker, competitor, pot, grain, 1) == BRONZE_TASK_CAPACITY);
+    assert(cargo_amount(worker->items, worker->item_count, 2) == 1);
+    assert(cargo_amount(competitor->resources, competitor->resource_count, 0) == 1);
+    landscape->policy.carry_capacity = capacity;
+    advance_minutes(720);
+    task_tick(group);
+    assert(worker->instruction == 12 && worker->economic_partner == competitor->id);
+    assert(worker->economic_status == BRONZE_TASK_COMPLETE && competitor->economic_partner == worker->id);
+    assert(cargo_amount(worker->items, worker->item_count, 2) == 0);
+    assert(cargo_amount(competitor->items, competitor->item_count, 2) == 1);
+    assert(cargo_amount(worker->resources, worker->resource_count, 0) == 1);
+    assert(cargo_amount(competitor->resources, competitor->resource_count, 0) == 0);
+
+    assert(bronze_task_store_transfer(worker, being, worker->home, 1, 0.5, 0, 1, 1, 1) == BRONZE_TASK_RUNNING);
+    advance_minutes(TIME_HOUR_MINUTES);
+    task_tick(group);
+    assert(worker->instruction == 13 && worker->economic_action == BRZ_ACTION_SERVE);
+    assert(cargo_amount(worker->items, worker->item_count, 2) == 0.5);
+    assert(cargo_amount(competitor->items, competitor->item_count, 2) == 0.5);
+    assert(cargo_amount(competitor->resources, competitor->resource_count, 1) == 1);
+    assert(cargo_amount(worker->resources, worker->resource_count, 1) == 0);
+    being_set_location(&group->beings[1], away);
+    task_tick(group);
+    assert(worker->instruction == 13 && worker->economic_status == BRONZE_TASK_PARTNER);
+    assert(worker->economic_partner == BRONZE_ACTOR_NONE);
+    assert(cargo_amount(competitor->items, competitor->item_count, 2) == 0.5);
+    assert(cargo_amount(competitor->resources, competitor->resource_count, 1) == 1);
+    for (unsigned role = 0; role < 2; ++role) {
+        unsigned events[] = {EVENT_PROFESSION_RESOURCE, EVENT_PROFESSION_SERVICE};
+        if (role) {
+            events[0] = EVENT_PROFESSION_RESOURCE_RECEIVED;
+            events[1] = EVENT_PROFESSION_SERVICE_BY;
+        }
+        for (unsigned event = 0; event < 2; ++event) {
+            unsigned count = 0;
+            for (unsigned i = 0; i < EPISODIC_SIZE; ++i) {
+                const simulated_iepisodic *memory = &being_episodic(&group->beings[role])[i];
+                if (memory->event != events[event]) continue;
+                assert(being_name_comparison(&group->beings[1 - role],
+                       memory->first_name[BEING_MET], memory->family_name[BEING_MET]));
+                ++count;
+            }
+            assert(count == 1);
+        }
+    }
+
 }
 
-int main(void)
+static void qualify_full_scenario(const char *path, n_uint seed)
 {
+    BronzeScenario *scenario = bronze_scenario_create();
+    assert(scenario);
+    int loaded = bronze_scenario_load(scenario, path, "bronze_age_full.bronze");
+    if (!loaded) fprintf(stderr, "%s\n", bronze_scenario_diagnostics(scenario));
+    assert(loaded && bronze_scenario_vocations(scenario) == 63);
+    BronzeActorRegistry *registry = bronze_actors_create();
+    assert(registry);
+    bronze_actors_activate(registry);
+    bronze_actors_stage_program(registry, bronze_scenario_program(scenario));
+    bronze_actors_stage_professions(registry, bronze_scenario_professions(scenario));
+    bronze_actors_landscape(registry)->policy = bronze_scenario_land_policy(scenario);
+    assert(draw_offscreen(sim_init(KIND_START_UP, seed, MAP_AREA + TERRAIN_WINDOW_AREA + CONTROL_WINDOW_AREA, 0)));
+    sim_cycle();
+    simulated_group *group = sim_group();
+    assert(group->num > 1);
+    BronzeActorId departed = bronze_actors_for_being(registry, &group->beings[0])->id;
+    being_dead(&group->beings[0]);
+
+    for (unsigned tick = 0; tick < TIME_DAY_MINUTES; ++tick) sim_cycle();
+    assert(!bronze_actors_find(registry, departed));
+    assert(bronze_actors_count(registry) == group->num);
+    unsigned assigned = 0;
+    uint64_t work = 0;
+    for (n_uint i = 0; i < group->num; ++i) {
+        const BronzeActor *actor = bronze_actors_for_being(registry, &group->beings[i]);
+        assert(actor && actor->execution.status != BRONZE_TASK_UNSUPPORTED);
+        if (actor->job_status == BRONZE_JOB_ASSIGNED) {
+            assert(actor->vocation < 63 && bronze_hybrid_place(actor->workplace));
+            ++assigned;
+        }
+        work += actor->work.units;
+    }
+    assert(assigned && work);
+    const BronzeLandscape *landscape = bronze_actors_landscape(registry);
+    for (n_uint i = 0; i < landscape->site_count; ++i) {
+        for (unsigned kind = 0; kind < BRONZE_RESOURCE_LIMIT; ++kind) {
+            const BronzePatchStock *stock = &landscape->sites[i].resources[kind];
+            assert(stock->reserved >= 0 && stock->reserved <= stock->amount &&
+                   stock->amount <= stock->capacity);
+        }
+    }
+    n_byte digest[BRONZE_SCENARIO_DIGEST_BYTES] = {18};
+    n_file *sidecar = bronze_actors_capture_sidecar(registry, digest);
+    n_file *native = tranfer_out();
+    n_file *continuation = bronze_native_continuation_capture();
+    assert(sidecar && native && continuation);
+    native->size = native->location;
+    BronzeNativeStage *staged = bronze_native_stage(native, continuation, group->num,
+                                                    bronze_actors_clock(registry)->tick);
+    BronzeActorRegistry *restored = bronze_actors_stage_sidecar(registry, sidecar, digest);
+    assert(staged && restored);
+
+    for (unsigned tick = 0; tick < 30; ++tick) sim_cycle();
+    n_file *reference = bronze_actors_capture_sidecar(registry, digest);
+    n_file *reference_native = tranfer_out();
+    bronze_native_install(staged, -1);
+    bronze_actors_activate(restored);
+    assert(bronze_actors_rebind(restored, group));
+    for (unsigned tick = 0; tick < 30; ++tick) sim_cycle();
+    n_file *replay = bronze_actors_capture_sidecar(restored, digest);
+    n_file *replay_native = tranfer_out();
+    assert(reference && replay && reference->location == replay->location);
+    assert(!memcmp(reference->data, replay->data, replay->location));
+    assert(reference_native && replay_native && reference_native->location == replay_native->location);
+    assert(!memcmp(reference_native->data, replay_native->data, replay_native->location));
+    printf("Full scenario seed %lu passed one native day, %u assigned actors, %llu work units, death and 30-tick replay.\n",
+           (unsigned long)seed, assigned, (unsigned long long)work);
+    io_file_free(&replay_native);
+    io_file_free(&reference_native);
+    io_file_free(&replay);
+    io_file_free(&reference);
+    bronze_native_stage_free(&staged);
+    io_file_free(&continuation);
+    io_file_free(&native);
+    io_file_free(&sidecar);
+    sim_close();
+    bronze_actors_destroy(restored);
+    bronze_actors_destroy(registry);
+    bronze_scenario_destroy(scenario);
+}
+
+int main(int argc, char **argv)
+{
+    if (argc == 3) {
+        qualify_full_scenario(argv[1], (n_uint)strtoul(argv[2], NULL, 10));
+        return 0;
+    }
+    assert(argc == 1);
     bronze_site first[10];
     const bronze_site *sites;
     n_uint count, i;

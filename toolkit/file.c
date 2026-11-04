@@ -582,12 +582,12 @@ void io_whitespace( n_file *input )
             {
                 check_twice[0] = 0;
                 check_twice[1] = 0;
-                do
+                while ( loop < end_loop )
                 {
                     check_twice[0] = check_twice[1];
                     check_twice[1] = local_data[loop++];
+                    if ( check_twice[0] == '*' && check_twice[1] == '/' ) break;
                 }
-                while ( ( loop != end_loop ) && !( ( check_twice[0] == '*' ) && ( check_twice[1] == '/' ) ) );
             }
         }
         else if ( ASCII_WHITESPACE( temp ) == 0 )

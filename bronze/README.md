@@ -36,17 +36,16 @@ woodland appear on the native maps; the overview adds an economic status panel.
 Townships use white roof outlines, mines dark boxes with white ore marks,
 fields blue rows, and woodland blue tree outlines.
 
-On startup the app loads and strictly validates bundled `first_slice.bronze`.
+On startup the app loads and strictly validates bundled `bronze_age_full.bronze`.
 Use the **Bronze Scenario** menu to select a bundled file; successful selection
 resets the native world using that file's seed. The overview identifies the
 active file and offers **Details**. Failed loads show filename/line diagnostics
-and retain the active scenario and world. `vertical_slice.bronze` also validates;
-`bronze_age_full.bronze` is bundled but still fails strict compilation.
+and retain the active scenario and world. Both smaller slices are also selectable.
 
 The graphical host applies the scenario seed, terrain thresholds, vocation
 roster and compiled task program. Actors execute supported tasks through the
 native work gate and the overview shows their progress. Workers follow dry-land
-routes to real sites. Paired economic saves are a later cycle. See the [landscape rules](hybrid/README.md),
+routes to real sites. Combined saves preserve native and Bronze state. See the [landscape rules](hybrid/README.md),
 [occupation policy](actors/PROFESSIONS.md), [task execution](tasks/README.md)
 and [implementation plan](PLAN.md).
 

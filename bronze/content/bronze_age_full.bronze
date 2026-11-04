@@ -3,14 +3,7 @@ kinds {
     fish grain wood clay copper tin
     fire plant_fiber cattle sheep pig charcoal religion tribalism
   }
-  items {
-    // resources can also appear as items in inventories
-    fish grain wood clay copper tin
-    fire plant_fiber cattle sheep pig charcoal religion tribalism
-
-    // crafted items
-    bronze tool pot
-  }
+  items { bronze tool pot }
 }
 
 # Runtime verbs are declared by content.  The engine supplies handlers for
@@ -18,11 +11,12 @@ kinds {
 actions {
   action gather 1 2
   action craft 1 2
-  action trade 0 2
+  action trade 2 3
   action rest 0 0
   action move_to 1 1
-  action roam 0 1
-  action wander 0 1
+  action deposit 1 2
+  action fetch 1 2
+  action eat 1 2
 }
 
 # BRONZESIM example.bronze
@@ -43,7 +37,13 @@ actions {
 
 # BRONZESIM scriptable occupations demo
 
+# Graphical host uses the native map, clock and population. The vocation labels
+# are retained, with shared production and rest tasks where specialized work
+# has no native implementation. Field fish and clay are stock proxies.
 world {
+    patch_initial_per_cell 8
+    town_initial_grain 8
+    occupation_site_capacity 64
     seed 1337
     sim_map_w 160
     sim_map_h 80
@@ -82,13 +82,13 @@ resources {
   tribalism_renew 0.0005
 
   # Resource ecology and social value are scenario data, not C branches.
-  resource fish { habitat coast capacity 200 renew 0.12 nutrition 0.20 market_target 100 }
+  resource fish { habitat field capacity 200 renew 0.12 nutrition 0.20 market_target 100 }
   resource grain { habitat field capacity 200 renew 0.09 nutrition 0.20 market_target 100 }
   resource wood { habitat forest capacity 100 renew 0.05 nutrition 0 market_target 50 }
-  resource clay { habitat claypit capacity 100 renew 0.02 nutrition 0 market_target 25 }
+  resource clay { habitat field capacity 100 renew 0.02 nutrition 0 market_target 25 }
   resource copper { habitat mine_copper capacity 100 renew 0.005 nutrition 0 market_target 20 }
   resource tin { habitat mine_tin capacity 100 renew 0.002 nutrition 0 market_target 20 }
-  resource fire { habitat fire capacity 100 renew 0.12 nutrition 0 market_target 10 }
+  resource fire { habitat forest capacity 100 renew 0.12 nutrition 0 market_target 10 }
   resource plant_fiber { habitat field capacity 50 renew 0.06 nutrition 0 market_target 25 }
   resource cattle { habitat field capacity 25 renew 0.02 nutrition 0.25 market_target 20 }
   resource sheep { habitat field capacity 25 renew 0.02 nutrition 0.20 market_target 20 }
@@ -101,6 +101,7 @@ resources {
 recipes {
   recipe tool { output tool 1 input copper 1 input tin 1 input charcoal 1 }
   recipe pot { output pot 1 input clay 2 }
+  recipe bronze { output bronze 1 input copper 1 input tin 1 input charcoal 1 }
 }
 
 settlement_policy {
@@ -113,19 +114,21 @@ vocations {
   # Farmer / crop tender  [Food]
   vocation farmer_crop_tender {
     task work {
-      move_to field
       gather grain 4
+      deposit grain 4
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -133,20 +136,21 @@ vocations {
   # Cattle herder  [Food]
   vocation cattle_herder {
     task work {
-      roam 2
-      move_to field
-      gather grain 1
+      gather cattle 1
+      deposit cattle 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -154,20 +158,21 @@ vocations {
   # Sheep and goat herder  [Food]
   vocation sheep_and_goat_herder {
     task work {
-      roam 2
-      move_to field
-      gather grain 1
+      gather sheep 1
+      deposit sheep 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -175,20 +180,21 @@ vocations {
   # Pig keeper  [Food]
   vocation pig_keeper {
     task work {
-      roam 2
-      move_to field
-      gather grain 1
+      gather pig 1
+      deposit pig 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -196,20 +202,21 @@ vocations {
   # Dairy producer (milk/cheese maker)  [Food]
   vocation dairy_producer_milk_cheese_maker {
     task work {
-      roam 2
-      move_to field
-      gather grain 1
+      gather cattle 1
+      deposit cattle 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -217,19 +224,21 @@ vocations {
   # Grain grinder / quern operator  [Food]
   vocation grain_grinder_quern_operator {
     task work {
-      move_to field
       gather grain 4
+      deposit grain 4
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -237,19 +246,21 @@ vocations {
   # Brewer (ale maker)  [Food]
   vocation brewer_ale_maker {
     task work {
-      move_to field
       gather grain 2
+      deposit grain 2
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -257,19 +268,21 @@ vocations {
   # Salt worker (evaporating seawater)  [Food]
   vocation salt_worker_evaporating_seawater {
     task work {
-      move_to coast
       gather wood 1
+      deposit wood 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -277,19 +290,21 @@ vocations {
   # Fisher  [Food]
   vocation fisher {
     task work {
-      move_to coast
       gather fish 3
+      deposit fish 3
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -297,19 +312,21 @@ vocations {
   # Shellfish collector  [Foraging]
   vocation shellfish_collector {
     task work {
-      move_to beach
       gather fish 2
+      deposit fish 2
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -317,18 +334,20 @@ vocations {
   # Deer hunter  [Hunting]
   vocation deer_hunter {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -336,18 +355,20 @@ vocations {
   # Wild fowler (birds and eggs)  [Foraging]
   vocation wild_fowler_birds_and_eggs {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -355,18 +376,20 @@ vocations {
   # Trapper/snare setter  [Hunting]
   vocation trapper_snare_setter {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -374,18 +397,20 @@ vocations {
   # Forager (berries, nuts, plants)  [Foraging]
   vocation forager_berries_nuts_plants {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -393,18 +418,20 @@ vocations {
   # Medicinal herb gatherer  [Gathering]
   vocation medicinal_herb_gatherer {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -412,20 +439,21 @@ vocations {
   # Flint knapper (for tools not replaced by bronze yet)  [Craft]
   vocation flint_knapper_for_tools_not_replaced_by_bronze_yet {
     task work {
-      move_to beach
-      gather wood 1
-      craft tool 1
+      craft tool
+      deposit tool
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -433,21 +461,21 @@ vocations {
   # Bronze smith (axes, daggers, ornaments)  [Metalwork]
   vocation bronze_smith_axes_daggers_ornaments {
     task work {
-      move_to hill
-      gather copper 1
-      gather tin 1
-      craft tool 1
+      craft bronze
+      deposit bronze
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -455,19 +483,21 @@ vocations {
   # Metallurgical smelter/charcoal furnace operator  [Metalwork]
   vocation metallurgical_smelter_charcoal_furnace_operator {
     task work {
-      move_to forest
-      gather wood 3
+      gather copper 2
+      deposit copper 2
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -475,19 +505,21 @@ vocations {
   # Charcoal burner  [Metalwork]
   vocation charcoal_burner {
     task work {
-      move_to forest
-      gather wood 3
+      gather charcoal 3
+      deposit charcoal 3
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -495,18 +527,20 @@ vocations {
   # Gold worker (ornaments, beads)  [Metalwork]
   vocation gold_worker_ornaments_beads {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -514,18 +548,21 @@ vocations {
   # Stone polisher / grinder  [Stonework]
   vocation stone_polisher_grinder {
     task work {
-      roam 2
+      gather tin 2
+      deposit tin 2
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -533,20 +570,23 @@ vocations {
   # Pottery maker  [Crafts]
   vocation pottery_maker {
     task work {
-      move_to river
       gather clay 3
-      craft pot 1
+      deposit clay 3
+      craft pot
+      deposit pot
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -554,20 +594,23 @@ vocations {
   # Pot kiln tender  [Crafts]
   vocation pot_kiln_tender {
     task work {
-      move_to river
       gather clay 3
-      craft pot 1
+      deposit clay 3
+      craft pot
+      deposit pot
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -575,19 +618,21 @@ vocations {
   # Basket weaver  [Crafts]
   vocation basket_weaver {
     task work {
-      move_to field
-      gather grain 1
+      gather plant_fiber 1
+      deposit plant_fiber 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -595,18 +640,20 @@ vocations {
   # Leatherworker  [Crafts]
   vocation leatherworker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -614,18 +661,20 @@ vocations {
   # Tanner  [Crafts]
   vocation tanner {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -633,19 +682,21 @@ vocations {
   # Textile weaver  [Crafts]
   vocation textile_weaver {
     task work {
-      move_to field
-      gather grain 1
+      gather plant_fiber 1
+      deposit plant_fiber 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -653,19 +704,21 @@ vocations {
   # Spinner (wool, flax)  [Crafts]
   vocation spinner_wool_flax {
     task work {
-      move_to field
-      gather grain 1
+      gather plant_fiber 1
+      deposit plant_fiber 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -673,18 +726,20 @@ vocations {
   # Dye-maker  [Crafts]
   vocation dye_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -692,18 +747,20 @@ vocations {
   # Rope maker (hemp, flax, sea grasses)  [Crafts]
   vocation rope_maker_hemp_flax_sea_grasses {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -711,18 +768,20 @@ vocations {
   # Carpenter  [Woodworking]
   vocation carpenter {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -730,18 +789,20 @@ vocations {
   # Bowyer (bow maker)  [Woodworking]
   vocation bowyer_bow_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -749,18 +810,20 @@ vocations {
   # Fletcher (arrow maker)  [Woodworking]
   vocation fletcher_arrow_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -768,19 +831,21 @@ vocations {
   # Woodcarver  [Woodworking]
   vocation woodcarver {
     task work {
-      move_to forest
       gather wood 3
+      deposit wood 3
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -788,19 +853,21 @@ vocations {
   # Boat builder (skin, plank, or dugout boats)  [Construction]
   vocation boat_builder_skin_plank_or_dugout_boats {
     task work {
-      move_to coast
       gather wood 2
+      deposit wood 2
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -808,18 +875,20 @@ vocations {
   # Oar/paddle maker  [Construction]
   vocation oar_paddle_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -827,18 +896,20 @@ vocations {
   # House builder / wattle-and-daub specialist  [Construction]
   vocation house_builder_wattle_and_daub_specialist {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -846,18 +917,20 @@ vocations {
   # Thatch roofer  [Construction]
   vocation thatch_roofer {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -865,19 +938,21 @@ vocations {
   # Sailor / paddler / navigator  [Maritime]
   vocation sailor_paddler_navigator {
     task work {
-      move_to coast
       gather wood 2
+      deposit wood 2
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -885,18 +960,20 @@ vocations {
   # Net maker  [Maritime]
   vocation net_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -904,19 +981,21 @@ vocations {
   # Fish-smoker / preserver  [nan]
   vocation fish_smoker_preserver {
     task work {
-      move_to coast
       gather fish 3
+      deposit fish 3
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -924,19 +1003,21 @@ vocations {
   # Boat repairer  [Construction]
   vocation boat_repairer {
     task work {
-      move_to coast
       gather wood 2
+      deposit wood 2
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -944,18 +1025,22 @@ vocations {
   # Coastal trader / barge operator  [Maritime]
   vocation coastal_trader_barge_operator {
     task work {
-      trade
+      fetch wood
+      trade wood grain
+      deposit grain
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -963,18 +1048,20 @@ vocations {
   # Landing-place coordinator  [Maritime]
   vocation landing_place_coordinator {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -982,18 +1069,20 @@ vocations {
   # Chieftain / village leader  [Community]
   vocation chieftain_village_leader {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1001,18 +1090,20 @@ vocations {
   # Speaker / diplomat between settlements  [Community]
   vocation speaker_diplomat_between_settlements {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1023,15 +1114,17 @@ vocations {
       rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1039,18 +1132,20 @@ vocations {
   # Burial mound constructor  [Construction]
   vocation burial_mound_constructor {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1058,18 +1153,20 @@ vocations {
   # Storyteller / oral historian  [Social]
   vocation storyteller_oral_historian {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1077,18 +1174,20 @@ vocations {
   # Musician (lyre, pipes, drums)  [Social]
   vocation musician_lyre_pipes_drums {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1099,15 +1198,17 @@ vocations {
       rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1115,20 +1216,21 @@ vocations {
   # Peacekeeper / watchman  [Social]
   vocation peacekeeper_watchman {
     task work {
-      roam 2
-      move_to field
       gather grain 1
+      deposit grain 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1136,18 +1238,20 @@ vocations {
   # Warrior / defender  [Community]
   vocation warrior_defender {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1155,18 +1259,20 @@ vocations {
   # Bone tool maker  [Tools]
   vocation bone_tool_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1174,18 +1280,20 @@ vocations {
   # Antler tool maker  [Tools]
   vocation antler_tool_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1193,18 +1301,20 @@ vocations {
   # Millstone maker  [Construction]
   vocation millstone_maker {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1212,20 +1322,21 @@ vocations {
   # Fire-keeper / hearth manager  [Daily Life]
   vocation fire_keeper_hearth_manager {
     task work {
-      roam 2
-      move_to field
-      gather grain 1
+      gather fire 1
+      deposit fire 1
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1233,18 +1344,20 @@ vocations {
   # Cook / communal feast preparer  [Daily Life]
   vocation cook_communal_feast_preparer {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1252,18 +1365,20 @@ vocations {
   # Water carrier  [Daily Life]
   vocation water_carrier {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1271,18 +1386,20 @@ vocations {
   # Clothing maker / garment assembler  [Crafts]
   vocation clothing_maker_garment_assembler {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1290,18 +1407,20 @@ vocations {
   # Infant  [Misc]
   vocation infant {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1309,18 +1428,20 @@ vocations {
   # Children  [Misc]
   vocation children {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
@@ -1328,20 +1449,151 @@ vocations {
   # Elderly  [Misc]
   vocation elderly {
     task work {
-      roam 2
+      rest
     }
 
+    task recover { rest }
+
     rule hungry_work {
-      when hunger > 0.25 and fatigue < 0.90
+      when hunger < 0.65 and fatigue < 0.75
       do work
       weight 6
     }
 
     rule idle_wander {
       when fatigue < 0.90 and prob 0.25
-      do wander
+      do recover
       weight 1
     }
   }
 
+}
+
+world {
+  occupation_farmer_crop_tender_weight 4
+  occupation_farmer_crop_tender_workplace field
+  occupation_cattle_herder_weight 1
+  occupation_cattle_herder_workplace field
+  occupation_sheep_and_goat_herder_weight 1
+  occupation_sheep_and_goat_herder_workplace field
+  occupation_pig_keeper_weight 1
+  occupation_pig_keeper_workplace forest
+  occupation_dairy_producer_milk_cheese_maker_weight 1
+  occupation_dairy_producer_milk_cheese_maker_workplace field
+  occupation_grain_grinder_quern_operator_weight 1
+  occupation_grain_grinder_quern_operator_workplace field
+  occupation_brewer_ale_maker_weight 1
+  occupation_brewer_ale_maker_workplace field
+  occupation_salt_worker_evaporating_seawater_weight 1
+  occupation_salt_worker_evaporating_seawater_workplace forest
+  occupation_fisher_weight 1
+  occupation_fisher_workplace field
+  occupation_shellfish_collector_weight 1
+  occupation_shellfish_collector_workplace field
+  occupation_deer_hunter_weight 1
+  occupation_deer_hunter_workplace service
+  occupation_wild_fowler_birds_and_eggs_weight 1
+  occupation_wild_fowler_birds_and_eggs_workplace service
+  occupation_trapper_snare_setter_weight 1
+  occupation_trapper_snare_setter_workplace service
+  occupation_forager_berries_nuts_plants_weight 1
+  occupation_forager_berries_nuts_plants_workplace service
+  occupation_medicinal_herb_gatherer_weight 1
+  occupation_medicinal_herb_gatherer_workplace service
+  occupation_flint_knapper_for_tools_not_replaced_by_bronze_yet_weight 1
+  occupation_flint_knapper_for_tools_not_replaced_by_bronze_yet_workplace service
+  occupation_bronze_smith_axes_daggers_ornaments_weight 1
+  occupation_bronze_smith_axes_daggers_ornaments_workplace service
+  occupation_metallurgical_smelter_charcoal_furnace_operator_weight 1
+  occupation_metallurgical_smelter_charcoal_furnace_operator_workplace mine_copper
+  occupation_charcoal_burner_weight 1
+  occupation_charcoal_burner_workplace forest
+  occupation_gold_worker_ornaments_beads_weight 1
+  occupation_gold_worker_ornaments_beads_workplace service
+  occupation_stone_polisher_grinder_weight 1
+  occupation_stone_polisher_grinder_workplace mine_tin
+  occupation_pottery_maker_weight 1
+  occupation_pottery_maker_workplace field
+  occupation_pot_kiln_tender_weight 1
+  occupation_pot_kiln_tender_workplace field
+  occupation_basket_weaver_weight 1
+  occupation_basket_weaver_workplace field
+  occupation_leatherworker_weight 1
+  occupation_leatherworker_workplace service
+  occupation_tanner_weight 1
+  occupation_tanner_workplace service
+  occupation_textile_weaver_weight 1
+  occupation_textile_weaver_workplace field
+  occupation_spinner_wool_flax_weight 1
+  occupation_spinner_wool_flax_workplace field
+  occupation_dye_maker_weight 1
+  occupation_dye_maker_workplace service
+  occupation_rope_maker_hemp_flax_sea_grasses_weight 1
+  occupation_rope_maker_hemp_flax_sea_grasses_workplace service
+  occupation_carpenter_weight 1
+  occupation_carpenter_workplace service
+  occupation_bowyer_bow_maker_weight 1
+  occupation_bowyer_bow_maker_workplace service
+  occupation_fletcher_arrow_maker_weight 1
+  occupation_fletcher_arrow_maker_workplace service
+  occupation_woodcarver_weight 1
+  occupation_woodcarver_workplace forest
+  occupation_boat_builder_skin_plank_or_dugout_boats_weight 1
+  occupation_boat_builder_skin_plank_or_dugout_boats_workplace forest
+  occupation_oar_paddle_maker_weight 1
+  occupation_oar_paddle_maker_workplace service
+  occupation_house_builder_wattle_and_daub_specialist_weight 1
+  occupation_house_builder_wattle_and_daub_specialist_workplace service
+  occupation_thatch_roofer_weight 1
+  occupation_thatch_roofer_workplace service
+  occupation_sailor_paddler_navigator_weight 1
+  occupation_sailor_paddler_navigator_workplace forest
+  occupation_net_maker_weight 1
+  occupation_net_maker_workplace service
+  occupation_fish_smoker_preserver_weight 1
+  occupation_fish_smoker_preserver_workplace field
+  occupation_boat_repairer_weight 1
+  occupation_boat_repairer_workplace forest
+  occupation_coastal_trader_barge_operator_weight 1
+  occupation_coastal_trader_barge_operator_workplace service
+  occupation_landing_place_coordinator_weight 1
+  occupation_landing_place_coordinator_workplace service
+  occupation_chieftain_village_leader_weight 1
+  occupation_chieftain_village_leader_workplace service
+  occupation_speaker_diplomat_between_settlements_weight 1
+  occupation_speaker_diplomat_between_settlements_workplace service
+  occupation_ritual_specialist_priest_seer_weight 1
+  occupation_ritual_specialist_priest_seer_workplace service
+  occupation_burial_mound_constructor_weight 1
+  occupation_burial_mound_constructor_workplace service
+  occupation_storyteller_oral_historian_weight 1
+  occupation_storyteller_oral_historian_workplace service
+  occupation_musician_lyre_pipes_drums_weight 1
+  occupation_musician_lyre_pipes_drums_workplace service
+  occupation_carver_of_ritual_ceremonial_objects_weight 1
+  occupation_carver_of_ritual_ceremonial_objects_workplace service
+  occupation_peacekeeper_watchman_weight 1
+  occupation_peacekeeper_watchman_workplace field
+  occupation_warrior_defender_weight 1
+  occupation_warrior_defender_workplace service
+  occupation_bone_tool_maker_weight 1
+  occupation_bone_tool_maker_workplace service
+  occupation_antler_tool_maker_weight 1
+  occupation_antler_tool_maker_workplace service
+  occupation_millstone_maker_weight 1
+  occupation_millstone_maker_workplace service
+  occupation_fire_keeper_hearth_manager_weight 1
+  occupation_fire_keeper_hearth_manager_workplace forest
+  occupation_cook_communal_feast_preparer_weight 1
+  occupation_cook_communal_feast_preparer_workplace service
+  occupation_water_carrier_weight 1
+  occupation_water_carrier_workplace service
+  occupation_clothing_maker_garment_assembler_weight 1
+  occupation_clothing_maker_garment_assembler_workplace service
+  occupation_infant_weight 0
+  occupation_infant_workplace service
+  occupation_children_weight 0
+  occupation_children_workplace service
+  occupation_elderly_weight 0
+  occupation_elderly_workplace service
 }

@@ -64,7 +64,7 @@ usable compiled program.
 | --- | --- | --- | --- | --- | --- |
 | `first_slice.bronze` | 3 / 3 / 3 | 8 | 7 / 2 / 2 | Accepted | Accepted |
 | `vertical_slice.bronze` | 3 / 3 / 3 | 14 | 6 / 1 / 1 | Accepted | Accepted |
-| `bronze_age_full.bronze` | 63 / 63 / 126 | 100 | 14 / 17 / 2 | Accepted | **Rejected** |
+| `bronze_age_full.bronze` | 63 / 126 / 126 | 159 | 14 / 3 / 3 | Accepted | Accepted |
 
 None contains nested task `when` or `chance` blocks. Their absence is a
 coverage gap, not evidence that either interpreter handles every nesting case.
@@ -93,12 +93,12 @@ the promised effect; rejected = compiler refuses it; missing = no binding.
 | Snapshot/map/report parameters | Partial; see parameter mismatches below | Raw struct sidecar snapshot/event round trips, not combined native save/resume | Reset on new/load; no economic persistence |
 | Professions, skills, services, apprenticeship, social/economic memory | Named occupations exist; no full real-being integration | No scheduler binding; optional entity profession helpers are separate | Missing |
 
-### Specific mismatches to carry into cycles 02–03
+### Historical mismatches recorded in cycles 01–03
 
-- The compiled parser rejects the full scenario for numeric `roam` without a
-  terrain name, `move_to beach/hill/river`, and argument-free `trade`. The exact
-  line diagnostics are pinned in `content_inventory.json`. Do not relax checks
-  without defining the intended semantics.
+- The original full scenario was rejected for numeric `roam` without a
+  terrain name, `move_to beach/hill/river`, and argument-free `trade`. Cycle 18
+  replaced those forms with supported graphical tasks and refreshed the
+  reviewed inventory.
 - `world { sim_map_w/h ... }` becomes `world_sim_map_w/h`, while the standalone
   runner reads `sim_map_w/h`; the full scenario therefore uses the runner's
   default 80×40, not the apparent 160×80 in the source.
@@ -171,8 +171,7 @@ Bronze/shared-core changes. CI runs it with both gcc and clang. It:
 2. Preprocesses every shared source containing Bronze hooks with and without
    BRONZE_SIM, checking that native output contains no Bronze symbols.
 3. Parses all three files through both parser copies, comparing a reviewed
-   inventory including known rejections. This intentionally passes when the
-   known full-scenario rejection remains unchanged, not because it is supported.
+   inventory covering acceptance, diagnostics, and parsed content.
 4. Builds independent `native`, `native_hide` and `bronze` probes from real C
    sources. Native probes do not link Bronze sources; `nm` checks for leaked
    Bronze symbols. The middle variant isolates HIDE_THUNDER from BRONZE_SIM.

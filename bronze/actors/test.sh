@@ -9,6 +9,10 @@ native_sources=("$root"/toolkit/*.c "$root"/script/*.c "$root"/render/*.c
     "$root"/sim/*.c "$root"/entity/*.c "$root"/universe/*.c "$root"/gui/*.c
     "$root/bronze/hybrid/bronze_hybrid.c" "$root/bronze/adapter/bronze_apesdk_adapter.c"
     "$root/bronze/scenario-runtime/src/scenario_runtime.c")
+if [ "$(uname -s)" = Darwin ]; then
+    common+=(-DBRONZE_DISK_SAVE=1)
+    native_sources+=("$root/bronze/save/bronze_save.c")
+fi
 if [ "${SANITIZE:-0}" = 1 ]; then
     # Original native genetics has known signed-shift UB. Keep ASan across all
     # sources, division checks on native code, and UBSan on the new layers.

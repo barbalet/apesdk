@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 struct BronzeActorRegistry {
     simulated_group* group; /* Runtime binding, not a world/actor identity. */
@@ -311,3 +312,5 @@ const BronzeProgram* bronze_actors_program(const BronzeActorRegistry* registry)
 {
     return registry ? registry->program : NULL;
 }
+
+#include "bronze_sidecar.inc"

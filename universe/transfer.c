@@ -685,7 +685,22 @@ n_file *tranfer_out( void )
     return returnFile;
 }
 
-n_int    tranfer_in( n_file *input_file )
+#ifdef BRONZE_SIM
+struct BronzeNativeStage {
+    simulated_group population;
+    n_byte land[10];
+    n_byte topography[TOPOGRAPHY_BYTES];
+    n_byte weather[WEATHER_LIGHTNING_OFFSET + MAP_AREA];
+    unsigned sections;
+    BronzeWeatherContinuation weather_state;
+};
+#endif
+
+static n_int transfer_read_native(n_file *input_file, simulated_group *group
+#ifdef BRONZE_SIM
+                                  , BronzeNativeStage *stage
+#endif
+)
 {
     n_int  ret_val;
     n_byte *temp_store = 0L;
@@ -694,7 +709,6 @@ n_int    tranfer_in( n_file *input_file )
     n_uint episodic_count = 0;
     n_int current_being = -1;
 
-    simulated_group *group = sim_group();
     n_uint  size_buffer = io_find_size_data( ( simulated_file_entry * )simulated_file_format );
 
     if ( input_file == 0L )
@@ -739,6 +753,14 @@ n_int    tranfer_in( n_file *input_file )
 
     do
     {
+#ifdef BRONZE_SIM
+        if (stage) {
+            /* The historical reader reuses the weather buffer. Fields
+               absent from a being record must not inherit previous bytes. */
+            n_uint record_prefix = TRANSFER_BEING_NAME + 4;
+            memory_erase(temp_store, record_prefix < size_buffer ? record_prefix : size_buffer);
+        }
+#endif
         ret_val = io_read_buff( input_file, temp_store, simulated_file_format );
         if ( ret_val == -1 )
         {
@@ -750,12 +772,45 @@ n_int    tranfer_in( n_file *input_file )
             switch ( ret_val )
             {
             case FIL_LAN:
+#ifdef BRONZE_SIM
+                if (stage) {
+                    if (stage->sections != 0 || ape_count) {
+                        memory_free((void **)&temp_store);
+                        return -1;
+                    }
+                    memory_copy(temp_store, stage->land, sizeof(stage->land));
+                    ++stage->sections;
+                    break;
+                }
+#endif
                 transfer_unpack_land( temp_store );
                 break;
             case FIL_TOP:
+#ifdef BRONZE_SIM
+                if (stage) {
+                    if (stage->sections != 1 || ape_count) {
+                        memory_free((void **)&temp_store);
+                        return -1;
+                    }
+                    memory_copy(temp_store, stage->topography, sizeof(stage->topography));
+                    ++stage->sections;
+                    break;
+                }
+#endif
                 transfer_unpack_topography( temp_store );
                 break;
             case FIL_WEA:
+#ifdef BRONZE_SIM
+                if (stage) {
+                    if (stage->sections != 2 || ape_count) {
+                        memory_free((void **)&temp_store);
+                        return -1;
+                    }
+                    memory_copy(temp_store, stage->weather, sizeof(stage->weather));
+                    ++stage->sections;
+                    break;
+                }
+#endif
                 transfer_unpack_weather( temp_store );
                 break;
             case FIL_BEI:
@@ -766,6 +821,13 @@ n_int    tranfer_in( n_file *input_file )
                     return SHOW_ERROR( "Too many apes for memory" );
                 }
                 transfer_unpack_being( temp_store, &( group->beings[ape_count] ) );
+#if defined(BRONZE_SIM) && defined(TERRITORY_ON)
+                /* Current saves write territory as separate sparse records. */
+                if (stage) {
+                    simulated_being *being = &group->beings[ape_count];
+                    memory_erase((n_byte *)being->events.territory, sizeof(being->events.territory));
+                }
+#endif
                 current_being = ( n_int )ape_count;
                 ape_count ++;
                 social_count = 0;
@@ -829,6 +891,13 @@ n_int    tranfer_in( n_file *input_file )
     }
     while ( ret_val < FILE_EOF );
 
+#ifdef BRONZE_SIM
+    if (stage && (stage->sections != 3 ||
+                  transfer_read_byte2(stage->land, TRANSFER_LAND_TIME) >= TIME_DAY_MINUTES)) {
+        memory_free((void **)&temp_store);
+        return -1;
+    }
+#endif
     if ( ret_val == FILE_EOF )
     {
         group->num = ape_count;
@@ -839,3 +908,292 @@ n_int    tranfer_in( n_file *input_file )
     memory_free( ( void ** )&temp_store );
     return SHOW_ERROR( "Process file failed" );
 }
+
+n_int tranfer_in(n_file *input_file)
+{
+    return transfer_read_native(input_file, sim_group()
+#ifdef BRONZE_SIM
+                                , 0L
+#endif
+    );
+}
+
+#ifdef BRONZE_SIM
+/* Versioned companion to the historical native transfer. Records are in
+   native population order and carry the identity fields needed to bind them. */
+enum {
+    BRONZE_NATIVE_HEADER = 52 + 4 * NUMBER_OF_BODIES,
+    BRONZE_NATIVE_VELOCITY = 10,
+    BRONZE_NATIVE_RECORD_V2 = 12 + BRONZE_NATIVE_VELOCITY + 8
+#ifdef BRAIN_ON
+        + DOUBLE_BRAIN
+#endif
+    ,
+    BRONZE_SOCIAL_RECORD = 4
+#ifdef FEATURE_SET
+        + 4 + 5 * MAX_FEATURESET_SIZE
+#endif
+    ,
+    BRONZE_NATIVE_RECORD = BRONZE_NATIVE_RECORD_V2 + SOCIAL_SIZE * BRONZE_SOCIAL_RECORD
+#ifdef IMMUNE_ON
+        + 2 * IMMUNE_ANTIGENS + 2 * IMMUNE_POPULATION + 4
+#endif
+};
+
+static void bronze_native_put(n_byte *bytes, n_byte4 value, unsigned width)
+{
+    for (unsigned i = 0; i < width; ++i)
+        bytes[i] = (n_byte)(value >> (8 * i));
+}
+
+static n_byte4 bronze_native_get(const n_byte *bytes, unsigned width)
+{
+    n_byte4 value = 0;
+    for (unsigned i = 0; i < width; ++i)
+        value |= (n_byte4)bytes[i] << (8 * i);
+    return value;
+}
+
+n_file *bronze_native_continuation_capture(void)
+{
+    simulated_group *group = sim_group();
+    if (group->num > LARGE_SIM) return 0L;
+    n_uint length = BRONZE_NATIVE_HEADER + group->num * BRONZE_NATIVE_RECORD;
+    n_file *file = memory_new(sizeof(*file));
+    if (!file) return 0L;
+    file->data = memory_new(length);
+    if (!file->data) {
+        io_file_free(&file);
+        return 0L;
+    }
+    file->size = file->location = length;
+    bronze_native_put(file->data + 0, 3, 4);
+    bronze_native_put(file->data + 4, BRONZE_NATIVE_RECORD, 4);
+    bronze_native_put(file->data + 8, (n_byte4)group->num, 4);
+    bronze_native_put(file->data + 12, land_date(), 4);
+    bronze_native_put(file->data + 16, land_time(), 4);
+    BronzeWeatherContinuation weather;
+    land_bronze_weather_capture(&weather);
+    bronze_native_put(file->data + 20, (n_byte4)weather.wind_x, 4);
+    bronze_native_put(file->data + 24, (n_byte4)weather.wind_y, 4);
+    bronze_native_put(file->data + 28, (n_byte4)weather.aim_x, 4);
+    bronze_native_put(file->data + 32, (n_byte4)weather.aim_y, 4);
+    bronze_native_put(file->data + 36, (n_byte4)weather.dissipation, 4);
+    bronze_native_put(file->data + 40, (n_byte4)weather.local_delta, 4);
+    bronze_native_put(file->data + 44, weather.weather_random[0], 2);
+    bronze_native_put(file->data + 46, weather.weather_random[1], 2);
+    bronze_native_put(file->data + 48, group->remains.count, 2);
+    bronze_native_put(file->data + 50, group->remains.location, 2);
+    for (unsigned i = 0; i < NUMBER_OF_BODIES; ++i) {
+        bronze_native_put(file->data + 52 + i * 4, group->remains.bodies[i].location[0], 2);
+        bronze_native_put(file->data + 54 + i * 4, group->remains.bodies[i].location[1], 2);
+    }
+
+    for (n_uint i = 0; i < group->num; ++i) {
+        simulated_being *being = &group->beings[i];
+        n_byte *record = file->data + BRONZE_NATIVE_HEADER + i * BRONZE_NATIVE_RECORD;
+        bronze_native_put(record + 0, being_dob(being), 4);
+        for (unsigned name = 0; name < 2; ++name)
+            bronze_native_put(record + 4 + 2 * name, being->delta.location[name], 2);
+        memory_copy(being->delta.velocity, record + 12, BRONZE_NATIVE_VELOCITY);
+        for (unsigned name = 0; name < 2; ++name) {
+            bronze_native_put(record + 8 + 2 * name, being->constant.name[name], 2);
+            bronze_native_put(record + 22 + 2 * name, being->changes.father_name[name], 2);
+            bronze_native_put(record + 26 + 2 * name, being->changes.mother_name[name], 2);
+        }
+#ifdef BRAIN_ON
+        memory_copy(being->braindata.brain, record + 30, DOUBLE_BRAIN);
+#endif
+        for (unsigned j = 0; j < SOCIAL_SIZE; ++j) {
+            const simulated_isocial *social = &being->events.social[j];
+            n_byte *entry = record + BRONZE_NATIVE_RECORD_V2 + j * BRONZE_SOCIAL_RECORD;
+            bronze_native_put(entry, social->first_name[BEING_MEETER], 2);
+            bronze_native_put(entry + 2, social->family_name[BEING_MEETER], 2);
+#ifdef FEATURE_SET
+            const simulated_featureset *features = &social->classification;
+            bronze_native_put(entry + 4, features->feature_number, 2);
+            bronze_native_put(entry + 6, features->observations, 2);
+            for (unsigned k = 0; k < MAX_FEATURESET_SIZE; ++k) {
+                const simulated_feature *feature = &features->features[k];
+                n_byte *encoded = entry + 8 + k * 5;
+                bronze_native_put(encoded, feature->value, 2);
+                bronze_native_put(encoded + 2, feature->frequency, 2);
+                encoded[4] = feature->type;
+            }
+#endif
+        }
+#ifdef IMMUNE_ON
+        const simulated_immune_system *immune = &being->immune_system;
+        n_byte *immune_bytes = record + BRONZE_NATIVE_RECORD_V2 + SOCIAL_SIZE * BRONZE_SOCIAL_RECORD;
+        memory_copy((n_byte *)immune->antigens, immune_bytes, IMMUNE_ANTIGENS);
+        immune_bytes += IMMUNE_ANTIGENS;
+        memory_copy((n_byte *)immune->shape_antigen, immune_bytes, IMMUNE_ANTIGENS);
+        immune_bytes += IMMUNE_ANTIGENS;
+        memory_copy((n_byte *)immune->antibodies, immune_bytes, IMMUNE_POPULATION);
+        immune_bytes += IMMUNE_POPULATION;
+        memory_copy((n_byte *)immune->shape_antibody, immune_bytes, IMMUNE_POPULATION);
+        immune_bytes += IMMUNE_POPULATION;
+        bronze_native_put(immune_bytes, immune->random_seed[0], 2);
+        bronze_native_put(immune_bytes + 2, immune->random_seed[1], 2);
+#endif
+    }
+    return file;
+}
+
+static n_int bronze_native_signed(const n_byte *bytes)
+{
+    n_byte4 word = bronze_native_get(bytes, 4);
+    return (word & 0x80000000u) ? -1 - (n_int)(0xffffffffu - word) : (n_int)word;
+}
+
+static int bronze_native_apply_continuation(const n_file *file, simulated_group *group,
+                                             n_byte4 date, n_byte4 time, BronzeWeatherContinuation *weather)
+{
+    if (!file || !file->data || file->size < BRONZE_NATIVE_HEADER || group->num > LARGE_SIM)
+        return 0;
+    n_byte4 version = bronze_native_get(file->data, 4);
+    n_uint stride = version == 2 ? BRONZE_NATIVE_RECORD_V2 : BRONZE_NATIVE_RECORD;
+    if ((version != 2 && version != 3) ||
+        file->size != BRONZE_NATIVE_HEADER + group->num * stride ||
+        bronze_native_get(file->data + 4, 4) != stride ||
+        bronze_native_get(file->data + 8, 4) != group->num ||
+        bronze_native_get(file->data + 12, 4) != date ||
+        bronze_native_get(file->data + 16, 4) != time)
+        return 0;
+
+    BronzeWeatherContinuation decoded = {
+        bronze_native_signed(file->data + 20), bronze_native_signed(file->data + 24),
+        bronze_native_signed(file->data + 28), bronze_native_signed(file->data + 32),
+        bronze_native_signed(file->data + 36), bronze_native_signed(file->data + 40),
+        {(n_byte2)bronze_native_get(file->data + 44, 2), (n_byte2)bronze_native_get(file->data + 46, 2)}
+    };
+    n_byte4 bodies = bronze_native_get(file->data + 48, 2);
+    n_byte4 next_body = bronze_native_get(file->data + 50, 2);
+    if (decoded.wind_x < -96 || decoded.wind_x > 97 || decoded.wind_y < -96 || decoded.wind_y > 97 ||
+        decoded.aim_x < -96 || decoded.aim_x > 97 || decoded.aim_y < -96 || decoded.aim_y > 97 ||
+        decoded.dissipation < 0 || decoded.dissipation > 3 ||
+        bodies > NUMBER_OF_BODIES + 1 || next_body >= NUMBER_OF_BODIES)
+        return 0;
+
+    for (n_uint i = 0; i < group->num; ++i) {
+        simulated_being *being = &group->beings[i];
+        n_byte *record = file->data + BRONZE_NATIVE_HEADER + i * stride;
+        if (bronze_native_get(record + 0, 4) != being_dob(being) ||
+            bronze_native_get(record + 4, 2) != being->delta.location[0] ||
+            bronze_native_get(record + 6, 2) != being->delta.location[1])
+            return 0;
+#ifdef FEATURE_SET
+        if (version == 3) {
+            for (unsigned j = 0; j < SOCIAL_SIZE; ++j) {
+                const n_byte *entry = record + BRONZE_NATIVE_RECORD_V2 + j * BRONZE_SOCIAL_RECORD;
+                if (bronze_native_get(entry + 4, 2) > MAX_FEATURESET_SIZE) return 0;
+            }
+        }
+#endif
+    }
+    for (n_uint i = 0; i < group->num; ++i) {
+        simulated_being *being = &group->beings[i];
+        n_byte *record = file->data + BRONZE_NATIVE_HEADER + i * stride;
+        memory_copy(record + 12, being->delta.velocity, BRONZE_NATIVE_VELOCITY);
+        for (unsigned name = 0; name < 2; ++name) {
+            being->constant.name[name] = (n_byte2)bronze_native_get(record + 8 + 2 * name, 2);
+            being->changes.father_name[name] = (n_byte2)bronze_native_get(record + 22 + 2 * name, 2);
+            being->changes.mother_name[name] = (n_byte2)bronze_native_get(record + 26 + 2 * name, 2);
+        }
+#ifdef BRAIN_ON
+        memory_copy(record + 30, being->braindata.brain, DOUBLE_BRAIN);
+#endif
+        if (version == 3) {
+            for (unsigned j = 0; j < SOCIAL_SIZE; ++j) {
+                simulated_isocial *social = &being->events.social[j];
+                const n_byte *entry = record + BRONZE_NATIVE_RECORD_V2 + j * BRONZE_SOCIAL_RECORD;
+                social->first_name[BEING_MEETER] = (n_byte2)bronze_native_get(entry, 2);
+                social->family_name[BEING_MEETER] = (n_byte2)bronze_native_get(entry + 2, 2);
+#ifdef FEATURE_SET
+                simulated_featureset *features = &social->classification;
+                features->feature_number = (n_byte2)bronze_native_get(entry + 4, 2);
+                features->observations = (n_byte2)bronze_native_get(entry + 6, 2);
+                for (unsigned k = 0; k < MAX_FEATURESET_SIZE; ++k) {
+                    simulated_feature *feature = &features->features[k];
+                    const n_byte *encoded = entry + 8 + k * 5;
+                    feature->value = (n_byte2)bronze_native_get(encoded, 2);
+                    feature->frequency = (n_byte2)bronze_native_get(encoded + 2, 2);
+                    feature->type = encoded[4];
+                }
+#endif
+            }
+#ifdef IMMUNE_ON
+            simulated_immune_system *immune = &being->immune_system;
+            n_byte *immune_bytes = record + BRONZE_NATIVE_RECORD_V2 + SOCIAL_SIZE * BRONZE_SOCIAL_RECORD;
+            memory_copy(immune_bytes, immune->antigens, IMMUNE_ANTIGENS);
+            immune_bytes += IMMUNE_ANTIGENS;
+            memory_copy(immune_bytes, immune->shape_antigen, IMMUNE_ANTIGENS);
+            immune_bytes += IMMUNE_ANTIGENS;
+            memory_copy(immune_bytes, immune->antibodies, IMMUNE_POPULATION);
+            immune_bytes += IMMUNE_POPULATION;
+            memory_copy(immune_bytes, immune->shape_antibody, IMMUNE_POPULATION);
+            immune_bytes += IMMUNE_POPULATION;
+            immune->random_seed[0] = (n_byte2)bronze_native_get(immune_bytes, 2);
+            immune->random_seed[1] = (n_byte2)bronze_native_get(immune_bytes + 2, 2);
+#endif
+        }
+    }
+    group->remains.count = (n_byte2)bodies;
+    group->remains.location = (n_byte2)next_body;
+    for (unsigned i = 0; i < NUMBER_OF_BODIES; ++i) {
+        group->remains.bodies[i].location[0] = (n_byte2)bronze_native_get(file->data + 52 + i * 4, 2);
+        group->remains.bodies[i].location[1] = (n_byte2)bronze_native_get(file->data + 54 + i * 4, 2);
+    }
+    *weather = decoded;
+    return 1;
+}
+int bronze_native_continuation_restore(const n_file *file)
+{
+    BronzeWeatherContinuation weather;
+    if (!bronze_native_apply_continuation(file, sim_group(), land_date(), land_time(), &weather))
+        return 0;
+    land_bronze_weather_restore(&weather);
+    return 1;
+}
+
+BronzeNativeStage *bronze_native_stage(n_file *native, const n_file *continuation,
+                                      n_uint expected_count, n_uint expected_tick)
+{
+    BronzeNativeStage *stage = memory_new(sizeof(*stage));
+    if (!stage) return 0L;
+    memory_erase((n_byte *)stage, sizeof(*stage));
+    stage->population.max = sim_group()->max;
+    if (transfer_read_native(native, &stage->population, stage) == 0) {
+        n_byte4 date = transfer_read_byte4(stage->land, TRANSFER_LAND_DATE);
+        n_byte4 time = transfer_read_byte2(stage->land, TRANSFER_LAND_TIME);
+        if (stage->population.num == expected_count &&
+            (n_uint)date * TIME_DAY_MINUTES + time == expected_tick &&
+            bronze_native_apply_continuation(continuation, &stage->population, date, time, &stage->weather_state))
+            return stage;
+    }
+    bronze_native_stage_free(&stage);
+    return 0L;
+}
+
+void bronze_native_stage_free(BronzeNativeStage **stage)
+{
+    memory_free((void **)stage);
+}
+
+void bronze_native_install(BronzeNativeStage *stage, n_int selected_index)
+{
+    simulated_group *group = sim_group();
+    transfer_unpack_land(stage->land);
+    transfer_unpack_topography(stage->topography);
+    transfer_unpack_weather(stage->weather);
+    land_bronze_weather_restore(&stage->weather_state);
+    group->remains = stage->population.remains;
+    group->num = stage->population.num;
+    memory_copy((n_byte *)stage->population.beings, (n_byte *)group->beings,
+                group->num * sizeof(group->beings[0]));
+    group->select = 0L;
+    if (selected_index >= 0 && (n_uint)selected_index < group->num)
+        sim_set_select(&group->beings[selected_index]);
+    bronze_sim_finish_restore();
+}
+#endif

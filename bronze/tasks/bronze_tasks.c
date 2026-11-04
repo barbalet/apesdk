@@ -1,6 +1,7 @@
 #include "bronze_tasks.h"
 #ifdef BRONZE_SIM
 #include "../../entity/profession.h"
+#include "../../entity/entity_internal.h"
 #endif
 #include "../work/bronze_work.h"
 #include <math.h>
@@ -367,7 +368,73 @@ static int recipe_index(const ParsedConfig *config, const OpDef *op)
     return match;
 }
 
-static BronzeTaskStatus operation_status(BronzeActor *actor, simulated_being *being, int commit)
+static BronzeTaskStatus exchange_at_site(simulated_group *group, BronzeActor *actor,
+                                          simulated_being *being, const OpDef *op, int commit)
+{
+    BronzeActorRegistry *registry = bronze_actors_current();
+    int service = op->action_code == BRZ_ACTION_SERVE;
+    uint64_t site = actor->execution.target;
+    if (service && actor->workplace != site) return BRONZE_TASK_TARGET;
+    BronzeExchangeLeg give = {op->arg0_resource_id, op->arg0_resource_id < 0,
+                              service ? 1 : amount(op)};
+    BronzeExchangeLeg want = {op->arg1_resource_id, op->arg1_resource_id < 0,
+                              service ? amount(op) : 1};
+    if (give.item) give.kind = op->arg0_item_id;
+    if (want.item) want.kind = op->arg1_item_id;
+    BronzeActor *partner = NULL;
+    simulated_being *other = NULL;
+    BronzeTaskStatus failure = BRONZE_TASK_PARTNER;
+    uint64_t tick = bronze_native_tick();
+    for (n_uint i = 0; i < group->num; ++i) {
+        simulated_being *candidate = &group->beings[i];
+        BronzeActor *participant = bronze_actors_for_being(registry, candidate);
+        if (!participant || participant == actor || participant->home != actor->home ||
+            participant->job_status != BRONZE_JOB_ASSIGNED ||
+            !target_contains(site, being_cell(candidate)) || being_speed(candidate) ||
+            !participant->work.sampled || participant->work.sampled_tick != tick ||
+            (commit ? !participant->work.eligible :
+                      participant->work.initial_reason != BRONZE_WORK_READY))
+            continue;
+        BronzeTaskStatus status = bronze_task_exchange(actor, participant, give, want, 0);
+        if (status != BRONZE_TASK_RUNNING) {
+            if (failure == BRONZE_TASK_PARTNER || status == BRONZE_TASK_CAPACITY)
+                failure = status;
+            continue;
+        }
+        if (!partner || participant->id < partner->id) {
+            partner = participant;
+            other = candidate;
+        }
+    }
+    if (!partner) return failure;
+    if (!commit) return BRONZE_TASK_RUNNING;
+
+    BronzeTaskStatus status = bronze_task_exchange(actor, partner, give, want, 1);
+    if (status != BRONZE_TASK_RUNNING) return status;
+    actor->economic_partner = partner->id;
+    partner->economic_partner = actor->id;
+    partner->economic_action = op->action_code;
+    partner->economic_status = BRONZE_TASK_COMPLETE;
+#ifdef BRONZE_SIM
+    if (tick >= actor->economic_memory_after && tick >= partner->economic_memory_after) {
+        if (service) {
+            profession_interaction(being, other, 0);
+        } else {
+            episodic_interaction(being, other, EVENT_PROFESSION_RESOURCE, EPISODIC_AFFECT_ZERO, 0);
+            episodic_interaction(other, being, EVENT_PROFESSION_RESOURCE_RECEIVED, AFFECT_RECEIVE, 0);
+        }
+        actor->economic_memory_after = partner->economic_memory_after = tick + TIME_HOUR_MINUTES;
+    }
+#endif
+    return status;
+}
+
+static int is_exchange(const OpDef *op)
+{
+    return op->action_code == BRZ_ACTION_TRADE || op->action_code == BRZ_ACTION_SERVE;
+}
+
+static BronzeTaskStatus operation_status(simulated_group *group, BronzeActor *actor, simulated_being *being, int commit)
 {
     BronzeTaskState *state = &actor->execution;
     const OpDef *op = state->operation;
@@ -383,13 +450,14 @@ static BronzeTaskStatus operation_status(BronzeActor *actor, simulated_being *be
     }
     if (op->action_code != BRZ_ACTION_MOVE_TO && op->action_code != BRZ_ACTION_GATHER &&
         op->action_code != BRZ_ACTION_DEPOSIT && op->action_code != BRZ_ACTION_FETCH &&
-        op->action_code != BRZ_ACTION_CRAFT)
+        op->action_code != BRZ_ACTION_CRAFT && !is_exchange(op))
         return BRONZE_TASK_UNSUPPORTED;
     const BronzePlace *place = bronze_hybrid_place(state->target);
     if (!place || place->owner != actor->home) return BRONZE_TASK_TARGET;
     uint32_t cell = being_cell(being);
     if (land_topography()[cell] <= TIDE_MAX || !target_contains(state->target, cell))
         return BRONZE_TASK_TRAVEL;
+    if (is_exchange(op)) return exchange_at_site(group, actor, being, op, commit);
     if (op->action_code == BRZ_ACTION_GATHER)
         return bronze_task_gather(actor, being, state->target, op->arg0_resource_id, amount(op), commit);
     if (op->action_code == BRZ_ACTION_DEPOSIT || op->action_code == BRZ_ACTION_FETCH) {
@@ -467,6 +535,11 @@ void bronze_tasks_begin(simulated_group *group)
                 state->target = actor->workplace;
             } else if (op->action_code == BRZ_ACTION_DEPOSIT || op->action_code == BRZ_ACTION_FETCH) {
                 state->target = op->a1 ? actor->home : bronze_task_storage(actor->home);
+            } else if (is_exchange(op)) {
+                const BronzeLandscape *landscape = bronze_actors_landscape(registry);
+                for (unsigned i = 0; i < landscape->town_count; ++i)
+                    if (landscape->towns[i].home == actor->home)
+                        state->target = landscape->towns[i].service;
             } else if (op->action_code == BRZ_ACTION_CRAFT) {
                 int recipe = recipe_index(program->config, op);
                 if (recipe >= 0 && program->recipes[recipe].at_workplace) {
@@ -478,13 +551,18 @@ void bronze_tasks_begin(simulated_group *group)
                 }
             }
         }
-        BronzeTaskStatus status = operation_status(actor, being, 0);
+        BronzeTaskStatus status = operation_status(group, actor, being, 0);
         if (status == BRONZE_TASK_TRAVEL) {
             bronze_task_release_claim(bronze_actors_landscape(registry), actor);
             actor->task = BRONZE_KIND_NONE;
             actor->remaining_ticks = 0;
             prepare_route(actor, being, tick, &searches);
             continue;
+        }
+        if (is_exchange(state->operation) && status != BRONZE_TASK_RUNNING) {
+            actor->economic_action = state->operation->action_code;
+            actor->economic_partner = BRONZE_ACTOR_NONE;
+            actor->economic_status = status;
         }
         if (status != BRONZE_TASK_RUNNING) {
             finish(actor, status, tick);
@@ -549,7 +627,12 @@ void bronze_tasks_end(simulated_group *group)
         if (!actor || !actor->execution.operation || actor->remaining_ticks ||
             actor->execution.prepared_tick != tick || actor->work.sampled_tick != tick || !actor->work.consumed) continue;
         BronzeTaskState *state = &actor->execution;
-        BronzeTaskStatus status = operation_status(actor, being, 1);
+        BronzeTaskStatus status = operation_status(group, actor, being, 1);
+        if (is_exchange(state->operation)) {
+            actor->economic_action = state->operation->action_code;
+            actor->economic_status = status == BRONZE_TASK_RUNNING ? BRONZE_TASK_COMPLETE : status;
+            if (status != BRONZE_TASK_RUNNING) actor->economic_partner = BRONZE_ACTOR_NONE;
+        }
         if (status != BRONZE_TASK_RUNNING) {
             finish(actor, status, tick);
             continue;
@@ -557,6 +640,12 @@ void bronze_tasks_end(simulated_group *group)
         const BronzeProfessionPolicy *policy = bronze_actors_professions(registry);
         if (state->operation->action_code == BRZ_ACTION_GATHER ||
             state->operation->action_code == BRZ_ACTION_CRAFT) {
+#ifdef BRONZE_SIM
+            if (tick >= actor->work_memory_after) {
+                episodic_self(being, EVENT_PROFESSION_WORK, EPISODIC_AFFECT_ZERO, 0);
+                actor->work_memory_after = tick + TIME_HOUR_MINUTES;
+            }
+#endif
             double previous_skill = bronze_actor_skill(actor, actor->vocation);
             int apprentice = previous_skill < policy->mentor_skill;
             simulated_being *mentor = apprentice ? find_mentor(registry, group, actor, policy, tick) : NULL;
@@ -591,6 +680,7 @@ const char *bronze_task_status_name(BronzeTaskStatus status)
         case BRONZE_TASK_SKILL: return "recipe skill too low";
         case BRONZE_TASK_RATION: return "daily ration exhausted";
         case BRONZE_TASK_CAPACITY: return "inventory full or unavailable";
+        case BRONZE_TASK_PARTNER: return "no eligible partner at the service entrance";
         case BRONZE_TASK_STOCK: return "quantity unavailable";
         case BRONZE_TASK_UNSUPPORTED: return "operation unavailable";
         case BRONZE_TASK_CANCELLED: return "cancelled";

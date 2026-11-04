@@ -12,4 +12,9 @@ cd "$work"
     "$root"/bronze/tasks/bronze_tasks.c "$root"/bronze/work/bronze_work.c "$root"/bronze/actors/bronze_actors.c \
     "$root"/bronze/hybrid/{bronze_hybrid,test_hybrid}.c \
     -lz -lm -lpthread -o hybrid-test
-./hybrid-test
+if [ "${1:-}" = "--qualify-full" ]; then
+    ./hybrid-test "$root/bronze/content/bronze_age_full.bronze" 42
+    ./hybrid-test "$root/bronze/content/bronze_age_full.bronze" 1337
+else
+    ./hybrid-test
+fi

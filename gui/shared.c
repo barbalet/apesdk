@@ -45,6 +45,10 @@
 #include "../bronze/actors/bronze_actors.h"
 #endif
 
+#if defined(BRONZE_SIM) && defined(BRONZE_DISK_SAVE)
+#include "../bronze/save/bronze_save.h"
+#endif
+
 #ifndef    _WIN32
 
 #include "../shared.h"
@@ -97,6 +101,7 @@ typedef struct
     draw_toggle_state draw_state;
 #ifdef BRONZE_SIM
     BronzeActorRegistry* bronze_registry;
+    n_file *native_continuation;
 #endif
 } shared_core_context;
 
@@ -119,6 +124,9 @@ static void shared_core_context_release_snapshot( shared_core_context *context )
     }
 
     io_file_free( &context->snapshot );
+#ifdef BRONZE_SIM
+    io_file_free( &context->native_continuation );
+#endif
 }
 
 static void shared_core_context_reset_values( shared_core_context *context )
@@ -195,19 +203,19 @@ static void shared_core_context_apply_globals( shared_core_context *context )
     draw_toggle_state_set( &context->draw_state );
 }
 
-static void shared_core_context_capture( shared_core_context *context )
+static n_int shared_core_context_capture( shared_core_context *context )
 {
     n_file *snapshot;
 
     if ( context == 0L )
     {
-        return;
+        return 1;
     }
 
     shared_core_context_sync_from_globals( context );
     if ( context->simulation_started == 0 )
     {
-        return;
+        return 1;
     }
 
     if ( sim_new() )
@@ -224,10 +232,19 @@ static void shared_core_context_capture( shared_core_context *context )
         /* Writers use size as capacity; readers treat it as content length.
            Never parse the unwritten allocation tail when restoring a world. */
         snapshot->size = snapshot->location;
+        n_file *continuation = bronze_native_continuation_capture();
+        if (!continuation) {
+            io_file_free(&snapshot);
+            return 0;
+        }
 #endif
         shared_core_context_release_snapshot( context );
         context->snapshot = snapshot;
+#ifdef BRONZE_SIM
+        context->native_continuation = continuation;
+#endif
     }
+    return snapshot != 0L;
 }
 
 static n_int shared_core_context_restore( shared_core_context *context )
@@ -259,6 +276,7 @@ static n_int shared_core_context_restore( shared_core_context *context )
         }
         io_file_free( &snapshot );
 #ifdef BRONZE_SIM
+        if (!bronze_native_continuation_restore(context->native_continuation)) return 0;
         if (!bronze_actors_rebind(context->bronze_registry,sim_group())) return 0;
 #endif
         shared_core_context_apply_globals( context );
@@ -286,7 +304,11 @@ static n_int shared_core_activate( shared_core_context *context )
 
     if ( shared_active_core != 0L )
     {
+#ifdef BRONZE_SIM
+        if (!shared_core_context_capture(shared_active_core)) return 0;
+#else
         shared_core_context_capture( shared_active_core );
+#endif
     }
 
 #ifdef BRONZE_SIM
@@ -1780,6 +1802,107 @@ void shared_session_saveFileName( shared_session *session, n_constant_string cSt
     shared_core_context_sync_from_globals( &session->core );
 }
 
+#if defined(BRONZE_SIM) && defined(BRONZE_DISK_SAVE)
+enum { BRONZE_NATIVE_PREFIX = 8, BRONZE_PACKAGE_LIMIT = 64 * 1024 * 1024 };
+
+static uint32_t bronze_package_read_word(const n_byte *bytes)
+{
+    uint32_t value = 0;
+    for (unsigned i = 0; i < 4; ++i) value |= (uint32_t)bytes[i] << (8 * i);
+    return value;
+}
+
+static void bronze_package_write_word(n_byte *bytes, uint32_t value)
+{
+    for (unsigned i = 0; i < 4; ++i) bytes[i] = (n_byte)(value >> (8 * i));
+}
+
+n_file *shared_session_bronze_save(shared_session *session, const n_byte *digest)
+{
+    if (!digest || !shared_session_is_started(session) ||
+        !shared_core_activate(&session->core) || sim_new()) return NULL;
+    BronzeActorRegistry *registry = session->core.bronze_registry;
+    n_file *sidecar = bronze_actors_capture_sidecar(registry, digest);
+    if (!sidecar) return NULL;
+    n_file *native = tranfer_out();
+    n_file *continuation = bronze_native_continuation_capture();
+    n_file *package = NULL;
+    n_byte *combined = NULL;
+    if (native && continuation) {
+        n_uint length = BRONZE_NATIVE_PREFIX + native->location + continuation->location;
+        n_uint total = BRONZE_SAVE_HEADER + length + sidecar->location;
+        if (total <= BRONZE_PACKAGE_LIMIT) {
+            combined = memory_new(length);
+            package = memory_new(sizeof(*package));
+            if (package) {
+                package->data = combined ? memory_new(total) : NULL;
+                package->size = package->location = total;
+                if (package->data) {
+                    bronze_package_write_word(combined, (uint32_t)native->location);
+                    n_int selected = shared_current_selected_index();
+                    bronze_package_write_word(combined + 4, selected < 0 ? UINT32_MAX : (uint32_t)selected);
+                    memcpy(combined + BRONZE_NATIVE_PREFIX, native->data, native->location);
+                    memcpy(combined + BRONZE_NATIVE_PREFIX + native->location,
+                           continuation->data, continuation->location);
+                }
+                if (!package->data ||
+                    !bronze_save_write(package->data, total, (BronzeSaveSection){combined, length},
+                                       (BronzeSaveSection){sidecar->data, sidecar->location}))
+                    io_file_free(&package);
+            }
+        }
+    }
+    memory_free((void **)&combined);
+    io_file_free(&native);
+    io_file_free(&continuation);
+    io_file_free(&sidecar);
+    return package;
+}
+
+int shared_session_bronze_open(shared_session *session, const n_byte *bytes, n_uint length,
+                               const n_byte *digest)
+{
+    BronzeSaveSection native, sidecar;
+    if (!digest || length > BRONZE_PACKAGE_LIMIT || !shared_session_is_started(session) ||
+        !bronze_save_read((BronzeSaveSection){bytes, length}, &native, &sidecar) ||
+        native.length <= BRONZE_NATIVE_PREFIX || !shared_core_activate(&session->core) || sim_new())
+        return 0;
+    uint32_t transfer_length = bronze_package_read_word(native.data);
+    uint32_t selected = bronze_package_read_word(native.data + 4);
+    if (!transfer_length || transfer_length >= native.length - BRONZE_NATIVE_PREFIX) return 0;
+
+    n_file sidecar_file = {sidecar.length, sidecar.length, (n_byte *)sidecar.data};
+    BronzeActorRegistry *staged = bronze_actors_stage_sidecar(session->core.bronze_registry,
+                                                             &sidecar_file, digest);
+    if (!staged) return 0;
+    n_uint count = bronze_actors_count(staged);
+    n_uint extra = native.length - BRONZE_NATIVE_PREFIX - transfer_length;
+    n_file continuation = {extra, extra, (n_byte *)native.data + BRONZE_NATIVE_PREFIX + transfer_length};
+    n_file transfer = {transfer_length, transfer_length, memory_new(transfer_length)};
+    BronzeNativeStage *native_stage = NULL;
+    if (transfer.data && (selected == UINT32_MAX || selected < count)) {
+        memcpy(transfer.data, native.data + BRONZE_NATIVE_PREFIX, transfer_length);
+        native_stage = bronze_native_stage(&transfer, &continuation, count, bronze_actors_clock(staged)->tick);
+    }
+    memory_free((void **)&transfer.data);
+    if (!native_stage) {
+        bronze_actors_destroy(staged);
+        return 0;
+    }
+
+    BronzeActorRegistry *previous = session->core.bronze_registry;
+    bronze_native_install(native_stage, selected == UINT32_MAX ? -1 : (n_int)selected);
+    bronze_native_stage_free(&native_stage);
+    bronze_actors_activate(staged);
+    bronze_actors_rebind(staged, sim_group()); /* Staging established count and slot validity. */
+    session->core.bronze_registry = staged;
+    bronze_actors_destroy(previous);
+    control_toggle_pause(0);
+    shared_core_context_became_current(&session->core);
+    return 1;
+}
+#endif
+
 void shared_draw_ios( n_byte4 *outputBuffer, n_int dim_x, n_int dim_y )
 {
     n_byte *buffer;
@@ -1885,6 +2008,16 @@ void shared_session_bronze_actor_summary(shared_session* session, char* buffer, 
         snprintf(buffer, size, "Actor #%llu · unassigned (%s) · home #%llu",
                  (unsigned long long)actor->id, reasons[actor->job_status],
                  (unsigned long long)actor->home);
+    }
+    if (actor->economic_status != BRONZE_TASK_IDLE) {
+        const char *action = actor->economic_action == BRZ_ACTION_SERVE ? "Paid delivery" : "Trade";
+        const char *outcome = bronze_task_status_name(actor->economic_status);
+        size_t used = strlen(buffer);
+        if (actor->economic_partner != BRONZE_ACTOR_NONE)
+            snprintf(buffer + used, size - used, "\nLatest exchange · %s · %s · partner #%llu",
+                     action, outcome, (unsigned long long)actor->economic_partner);
+        else
+            snprintf(buffer + used, size - used, "\nLatest exchange · %s · %s", action, outcome);
     }
     simulated_being *being = sim_group()->select;
     size_t used = strlen(buffer);

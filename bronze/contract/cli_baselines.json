@@ -1,7 +1,7 @@
 {
   "bronze_age_full.bronze": {
     "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "stdout_sha256": "f517382c6c82e6ae739fad8a6ef26fa03996ad2d764cd558a77cd498d17b2517"
+    "stdout_sha256": "1d31ff3310895f60af0cc44fd0cf617abbf62206cb82b8d4fe852f354ad280ed"
   },
   "first_slice.bronze": {
     "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
