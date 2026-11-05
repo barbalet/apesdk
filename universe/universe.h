@@ -1093,6 +1093,7 @@ void      sim_update_output( void );
 #ifdef BRONZE_SIM
 typedef struct BronzeNativeStage BronzeNativeStage;
 BronzeNativeStage *bronze_native_stage(n_file *, const n_file *, n_uint, n_uint);
+const n_byte *bronze_native_stage_heights(const BronzeNativeStage *);
 void bronze_native_stage_free(BronzeNativeStage **);
 void bronze_native_install(BronzeNativeStage *, n_int);
 void bronze_sim_finish_restore(void);

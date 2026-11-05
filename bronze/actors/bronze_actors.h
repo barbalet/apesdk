@@ -24,6 +24,7 @@ typedef enum {
 typedef struct {
     BronzeActorId id;
     uint32_t vocation, task, instruction;
+    uint32_t occupation; /* Selected social role; does not grant task eligibility. */
     BronzeJobStatus job_status;
     uint64_t home, workplace, remaining_ticks;
     BronzeActorId mentor, apprentice;
@@ -72,6 +73,9 @@ enum { BRONZE_SCENARIO_DIGEST_BYTES = 32 };
    with its native snapshot. Pass content length in n_file.location when
    staging. The staged registry is independent and remains unbound until
    the caller activates it and rebinds it to the matching native population. */
+#ifdef BRONZE_SIDECAR_TEST
+n_file *bronze_actors_capture_legacy_sidecar(BronzeActorRegistry *,const n_byte *);
+#endif
 n_file *bronze_actors_capture_sidecar(BronzeActorRegistry *, const n_byte *scenario_digest);
 BronzeActorRegistry *bronze_actors_stage_sidecar(const BronzeActorRegistry *scenario,
                                                 const n_file *, const n_byte *scenario_digest);

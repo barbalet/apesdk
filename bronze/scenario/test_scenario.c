@@ -60,10 +60,16 @@ int main(int argc, char** argv)
     fixture("actions { action rest 0 0 } vocations { vocation worker { task work { rest 3 } rule always { when true do work } } }");
     assert(!bronze_scenario_load(s,"bad.bronze","units.bronze"));
     assert(strstr(bronze_scenario_diagnostics(s),"argument count/units"));
-    fixture("world { seed 42 field_slope 3 town_capacity 2 town_initial_grain 3 patch_initial_per_cell 4 } actions { action rest 0 0 } vocations { vocation worker { task work { rest } rule always { when true do work } } }");
+    fixture("world { town_work_yards 5 }");
+    assert(!bronze_scenario_load(s,"bad.bronze","township-bounds.bronze"));
+    fixture("world { town_house_capacity 4.5 }");
+    assert(!bronze_scenario_load(s,"bad.bronze","township-fraction.bronze"));
+    fixture("world { seed 42 field_slope 3 town_capacity 2 town_house_capacity 12 town_work_yards 2 town_initial_grain 3 patch_initial_per_cell 4 } actions { action rest 0 0 } vocations { vocation worker { task work { rest } rule always { when true do work } } }");
     assert(bronze_scenario_load(s,"bad.bronze","seeded.bronze"));
     assert(bronze_scenario_seed(s)==42);
     assert(bronze_scenario_land_policy(s).town_capacity==2);
+    assert(bronze_scenario_land_policy(s).town_house_capacity==12);
+    assert(bronze_scenario_land_policy(s).town_work_yards==2);
     assert(bronze_scenario_land_policy(s).town_initial_grain==3);
     assert(bronze_scenario_land_policy(s).patch_initial_per_cell==4);
     assert(bronze_scenario_land_policy(s).field_slope==3);

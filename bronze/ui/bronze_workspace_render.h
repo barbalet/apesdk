@@ -17,6 +17,7 @@ typedef struct {
     unsigned count;
     int tide;
     const n_byte *heights;
+    const BronzeSettlementLayout *settlement;
 } BronzeRenderLand;
 
 typedef struct {
@@ -73,6 +74,8 @@ static int bronze_render_tree_ground(const BronzeRenderLand *land, int x, int y)
     int wx = bronze_render_wrap(x), wy = bronze_render_wrap(y);
     int east = bronze_render_wrap(wx + 1), north = bronze_render_wrap(wy + 1);
     int dry_height = (land->tide > TIDE_MAX ? land->tide : TIDE_MAX) + BRONZE_RENDER_BEACH_HEIGHT;
+    if (land->settlement && (land->settlement->building_at[wy*MAP_DIMENSION+wx] ||
+                             land->settlement->track[wy*MAP_DIMENSION+wx])) return 0;
     /* A tree's complete cell footprint must clear the beach and water.
      * Use native ground heights before water clamping or site decoration. */
     return land->heights[wy * MAP_DIMENSION + wx] > dry_height
@@ -101,6 +104,80 @@ static BronzeRenderSample bronze_render_ground_vertex(const BronzeRenderLand *la
         sample.r += 22; sample.g += 15; sample.b += 13;
     }
     return sample;
+}
+
+/* Both cameras sample the authoritative spatial records in native map cells. */
+static int bronze_render_settlement(const BronzeRenderLand *land,double x,double y,
+                                     BronzeRenderSample *sample)
+{
+    const BronzeSettlementLayout *layout=land->settlement;
+    if (!layout) return 0;
+    int ix=(int)floor(x),iy=(int)floor(y);
+    unsigned cell=(unsigned)(bronze_render_wrap(iy)*MAP_DIMENSION+bronze_render_wrap(ix));
+    unsigned index=layout->building_at[cell];
+    double u=x-floor(x),v=y-floor(y);
+    int grain=(int)(bronze_render_noise((int)floor(x*19),(int)floor(y*19))%11)-5;
+    if (index && index<=layout->building_count) {
+        const BronzeBuilding *building=&layout->buildings[index-1];
+        double a=bronze_render_delta(bronze_render_wrap(ix),(int)building->cells[0].x)+u;
+        double b=bronze_render_delta(bronze_render_wrap(iy),(int)building->cells[0].y)+v;
+        sample->r=155+grain; sample->g=127+grain; sample->b=87+grain;
+        if (building->kind==BRONZE_BUILDING_HOME) {
+            double radius=hypot(a-1,b-1);
+            if (radius<0.94) {
+                int shade=(int)((a+b-2)*19)+grain;
+                sample->height+=1.0+(0.94-radius)*1.8;
+                sample->r=163-shade; sample->g=124-shade; sample->b=66-shade/2;
+            }
+        } else if (building->kind==BRONZE_BUILDING_STORE) {
+            double ridge=1-fabs(a-1);
+            sample->height+=1.1+fmax(0,ridge)*1.0;
+            int shade=(int)(a*17)+grain+(int)(5*sin(b*34));
+            sample->r=171-shade; sample->g=131-shade; sample->b=75-shade/2;
+        } else if (building->kind==BRONZE_BUILDING_WORK_YARD) {
+            double radius=hypot(a-1,b-1);
+            if (building->profession==BRONZE_PREMISE_METAL && radius<0.37) {
+                sample->height+=0.38;
+                sample->r=radius<0.16?193:63; sample->g=radius<0.16?91:58; sample->b=39;
+            } else if (building->profession==BRONZE_PREMISE_POTTERY &&
+                       hypot(fmod(a+0.1,0.65)-0.3,fmod(b+0.1,0.65)-0.3)<0.17) {
+                sample->height+=0.35; sample->r=171+grain; sample->g=91+grain; sample->b=51;
+            } else if (building->profession==BRONZE_PREMISE_WOOD && fabs(b-1)<0.3) {
+                sample->height+=0.38; sample->r=110+grain; sample->g=73+grain; sample->b=40;
+            } else if (building->profession==BRONZE_PREMISE_FOOD && radius<0.48) {
+                sample->height+=0.65*(1-radius/0.6); sample->r=132+grain; sample->g=83+grain; sample->b=52;
+            }
+        }
+        return 1;
+    }
+    unsigned door=layout->entrance_at[cell];
+    if (door && door<=layout->building_count && layout->solid[
+        bronze_render_wrap((int)layout->buildings[door-1].cells[0].y)*MAP_DIMENSION+
+        bronze_render_wrap((int)layout->buildings[door-1].cells[0].x)]) {
+        sample->r=116+grain; sample->g=89+grain; sample->b=55+grain;
+        if (fabs(u-0.5)>0.33 && fabs(v-0.5)<0.16) {
+            sample->height+=0.65; sample->r=90; sample->g=63; sample->b=36;
+        }
+        return 1;
+    }
+    if (layout->track[cell]) {
+        unsigned links=layout->track_links[cell];
+        double half=layout->track[cell]==2?0.48:0.23;
+        int drawn=layout->track[cell]==2 || hypot(u-0.5,v-0.5)<half;
+        if ((links&1) && u>=0.5 && fabs(v-0.5)<half) drawn=1;
+        if ((links&2) && v>=0.5 && fabs(u-0.5)<half) drawn=1;
+        if ((links&4) && u<=0.5 && fabs(v-0.5)<half) drawn=1;
+        if ((links&8) && v<=0.5 && fabs(u-0.5)<half) drawn=1;
+        if (drawn) { sample->r=153+grain; sample->g=126+grain; sample->b=86+grain; }
+        return 1;
+    }
+    unsigned shade_cell=(unsigned)(bronze_render_wrap((int)floor(y-0.9))*MAP_DIMENSION+
+                                    bronze_render_wrap((int)floor(x-1.4)));
+    unsigned caster=layout->building_at[shade_cell];
+    if (caster && layout->solid[shade_cell]) {
+        sample->r=sample->r*4/5; sample->g=sample->g*4/5; sample->b=sample->b*4/5;
+    }
+    return 0;
 }
 
 static BronzeRenderSample bronze_render_sample(const BronzeRenderLand *land, double x, double y, int canopy)
@@ -133,8 +210,10 @@ static BronzeRenderSample bronze_render_sample(const BronzeRenderLand *land, dou
         sample.r = (int)lround(sand_r * (1 - grass) + sample.r * grass);
         sample.g = (int)lround(sand_g * (1 - grass) + sample.g * grass);
         sample.b = (int)lround(sand_b * (1 - grass) + sample.b * grass);
+        bronze_render_settlement(land,x,y,&sample);
         return sample;
     }
+    if (bronze_render_settlement(land,x,y,&sample)) return sample;
     unsigned noise = bronze_render_noise(wx, wy);
     int grain = (int)(bronze_render_noise((int)floor(x * 8), (int)floor(y * 8)) % 13) - 6;
     int green = (int)(noise % 19);
@@ -151,24 +230,7 @@ static BronzeRenderSample bronze_render_sample(const BronzeRenderLand *land, dou
             return (BronzeRenderSample){sample.height, 131 + furrow + light + headland,
                                        103 + furrow + light + headland, 52 + furrow / 2 + light};
         }
-        if (site->kind == BRONZE_TOWN) {
-            double a = dx + u, b = dy + v;
-            /* A small cluster of round houses with conical roofs. */
-            static const int houses[][2] = {{0, 0}, {-3, -2}, {3, -1}, {-2, 3}, {2, 3}};
-            for (unsigned j = 0; j < sizeof(houses) / sizeof(houses[0]); ++j) {
-                double hx = a - houses[j][0], hy = b - houses[j][1];
-                double squared = hx * hx + hy * hy;
-                if (squared > 1.28) continue;
-                double radius = sqrt(squared);
-                int roof = (int)(20 * (hx + hy)) + grain;
-                return (BronzeRenderSample){sample.height + 1.1 + (1.14 - radius) * 1.7,
-                                           151 - roof, 110 - roof, 59 - roof};
-            }
-            if (fabs(a) < 0.38 || fabs(b + a * 0.25) < 0.32 || a * a + b * b < 3)
-                return (BronzeRenderSample){sample.height, 143 + light, 119 + light, 76 + light};
-            sample.r += 9;
-            break;
-        }
+        if (site->kind == BRONZE_TOWN) continue;
         if (site->kind == BRONZE_WOODLAND) {
             green += 30;
             break;
@@ -204,15 +266,21 @@ typedef struct {
     double x, y, fx, fy, eye;
 } BronzeRenderCamera;
 
-static BronzeRenderCamera bronze_render_camera(double ax, double ay, double bearing,
-                                               const BronzeRenderLand *land)
+static BronzeRenderCamera bronze_render_camera_distance(double ax, double ay, double bearing,
+                                               const BronzeRenderLand *land, double distance, double lift)
 {
     double fx = cos(bearing), fy = sin(bearing);
-    double x = ax - fx * 12, y = ay - fy * 12;
+    double x = ax - fx * distance, y = ay - fy * distance;
     double eye = fmax(land->tide * bronze_render_height_scale,
                       fmax(bronze_render_sample(land, x, y, 0).height,
-                           bronze_render_sample(land, ax, ay, 0).height)) + 4.2;
+                           bronze_render_sample(land, ax, ay, 0).height)) + lift;
     return (BronzeRenderCamera){x, y, fx, fy, eye};
+}
+
+static BronzeRenderCamera bronze_render_camera(double ax,double ay,double bearing,
+                                               const BronzeRenderLand *land)
+{
+    return bronze_render_camera_distance(ax,ay,bearing,land,12,4.2);
 }
 
 static void bronze_render_marker(n_byte4 *pixels, int width, int height, int x, int y,
@@ -269,6 +337,15 @@ static void bronze_render_map(n_byte4 *pixels, int width, int height, const Bron
         bronze_render_marker(pixels, width, height, x, y, 5, 30, 27, 23, 0);
         bronze_render_marker(pixels, width, height, x, y, 5, color[0], color[1], color[2], 1);
         bronze_render_marker(pixels, width, height, x, y, 2, color[0], color[1], color[2], 0);
+    }
+    if ((selected_site>>63) && land->settlement) {
+        for (unsigned b=0;b<land->settlement->building_count;++b) {
+            const BronzeBuilding *building=&land->settlement->buildings[b];
+            if (building->id!=(selected_site & ~(UINT64_C(1)<<63))) continue;
+            int x=width/2+(int)((bronze_render_delta((int)building->entrance.x,cx)+0.5)/units);
+            int y=height/2+(int)((bronze_render_delta((int)building->entrance.y,cy)+0.5)/units);
+            bronze_render_marker(pixels,width,height,x,y,8,247,183,99,1);
+        }
     }
     for (n_uint i = 0; i < group->num; ++i) {
         simulated_being *being = &group->beings[i];

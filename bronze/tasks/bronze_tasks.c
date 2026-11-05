@@ -6,6 +6,7 @@
 #include "../work/bronze_work.h"
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 enum { BRONZE_TASK_RETRY = TIME_HOUR_MINUTES, BRONZE_TASK_WALK_BUDGET = 32 };
 
@@ -154,7 +155,38 @@ enum { ROUTE_SEARCH_LIMIT = 16384, ROUTE_SEARCHES_PER_TICK = 2,
 /* Scratch is reused by the serial task preparation pass. Actors own only
    their waypoints and progress, with all position reads coming from ApeSDK. */
 static uint32_t route_marks[MAP_AREA], route_parent[MAP_AREA];
-static uint32_t route_queue[ROUTE_SEARCH_LIMIT], route_epoch;
+static uint32_t route_queue[MAP_AREA], route_epoch;
+static uint32_t route_cost[MAP_AREA], route_position[MAP_AREA];
+static unsigned route_heap_count;
+static void route_swap(unsigned a,unsigned b)
+{
+    uint32_t v=route_queue[a]; route_queue[a]=route_queue[b]; route_queue[b]=v;
+    route_position[route_queue[a]]=a+1; route_position[route_queue[b]]=b+1;
+}
+static int route_less(unsigned a,unsigned b)
+{
+    uint32_t x=route_queue[a],y=route_queue[b];
+    return route_cost[x]<route_cost[y] || (route_cost[x]==route_cost[y] && x<y);
+}
+static void route_offer(uint32_t cell)
+{
+    unsigned p=route_position[cell];
+    if (!p) { p=++route_heap_count; route_queue[p-1]=cell; route_position[cell]=p; }
+    --p;
+    while (p && route_less(p,(p-1)/2)) { route_swap(p,(p-1)/2); p=(p-1)/2; }
+}
+static uint32_t route_pop(void)
+{
+    uint32_t cell=route_queue[0]; route_swap(0,route_heap_count-1); --route_heap_count;
+    route_position[cell]=0; unsigned p=0;
+    while (p*2+1<route_heap_count) {
+        unsigned child=p*2+1;
+        if (child+1<route_heap_count && route_less(child+1,child)) ++child;
+        if (!route_less(child,p)) break;
+        route_swap(child,p); p=child;
+    }
+    return cell;
+}
 
 static uint32_t route_cell(n_int x, n_int y)
 {
@@ -182,13 +214,14 @@ static int dry_edge(uint32_t from, uint32_t to)
 {
     const n_byte *height = land_topography();
     int delta = (int)height[from] - height[to];
-    return height[from] > TIDE_MAX && height[to] > TIDE_MAX &&
+    const BronzeLandscape *land=bronze_actors_landscape(bronze_actors_current());
+    return (!land || !land->settlement.solid[to]) && height[from] > TIDE_MAX && height[to] > TIDE_MAX &&
            delta >= -ROUTE_SLOPE_LIMIT && delta <= ROUTE_SLOPE_LIMIT;
 }
 
-static int build_route(BronzeRoute *route, uint32_t start, uint64_t target)
+int bronze_task_plan_route(BronzeRoute *route, uint32_t start, uint64_t target)
 {
-    if (land_topography()[start] <= TIDE_MAX) return 0;
+    if (!route || start>=MAP_AREA || land_topography()[start] <= TIDE_MAX) return 0;
     if (++route_epoch == 0) {
         memset(route_marks, 0, sizeof(route_marks));
         route_epoch = 1;
@@ -202,11 +235,11 @@ static int build_route(BronzeRoute *route, uint32_t start, uint64_t target)
         bronze_land_cell location = site ? site->cells[i] : place->location;
         goals[i] = route_cell(location.x, location.y);
     }
-    unsigned tail = 1;
-    route_marks[start] = route_epoch;
-    route_queue[0] = start;
-    for (unsigned head = 0; head < tail; head++) {
-        uint32_t cell = route_queue[head];
+    const BronzeSettlementLayout *layout=bronze_hybrid_settlement();
+    memset(route_position,0,sizeof(route_position));
+    route_heap_count=0; route_marks[start]=route_epoch; route_cost[start]=0; route_offer(start);
+    for (unsigned visited=0; route_heap_count && visited<ROUTE_SEARCH_LIMIT; ++visited) {
+        uint32_t cell=route_pop();
         n_uint goal = 0;
         while (goal < goal_count && goals[goal] != cell) goal++;
         if (goal < goal_count) {
@@ -228,12 +261,14 @@ static int build_route(BronzeRoute *route, uint32_t start, uint64_t target)
         n_int x = cell % MAP_DIMENSION, y = cell / MAP_DIMENSION;
         uint32_t neighbors[] = {route_cell(x + 1, y), route_cell(x, y + 1),
                                 route_cell(x - 1, y), route_cell(x, y - 1)};
-        for (unsigned i = 0; i < 4 && tail < ROUTE_SEARCH_LIMIT; i++) {
+        for (unsigned i = 0; i < 4; i++) {
             uint32_t next = neighbors[i];
-            if (route_marks[next] == route_epoch || !dry_edge(cell, next)) continue;
-            route_marks[next] = route_epoch;
-            route_parent[next] = cell;
-            route_queue[tail++] = next;
+            if (!dry_edge(cell,next)) continue;
+            uint32_t cost=route_cost[cell]+(layout && layout->track[next] ? 2 : 6)
+                +(unsigned)abs((int)land_topography()[next]-land_topography()[cell]);
+            if (route_marks[next]==route_epoch && route_cost[next]<=cost) continue;
+            route_marks[next]=route_epoch; route_cost[next]=cost; route_parent[next]=cell;
+            route_offer(next);
         }
     }
     return 0;
@@ -263,7 +298,7 @@ static void prepare_route(BronzeActor *actor, simulated_being *being, uint64_t t
         state->status = BRONZE_TASK_TRAVEL;
         if (*searches >= ROUTE_SEARCHES_PER_TICK) return;
         (*searches)++;
-        if (!build_route(route, cell, state->target)) {
+        if (!bronze_task_plan_route(route, cell, state->target)) {
             finish(actor, BRONZE_TASK_ROUTE_BLOCKED, tick);
             return;
         }
@@ -530,10 +565,9 @@ void bronze_tasks_begin(simulated_group *group)
                     state->target = actor->workplace;
                 } else if (!strcmp(op->a0, "service")) {
                     const BronzeLandscape *landscape = bronze_actors_landscape(registry);
-                    for (unsigned place = 0; place < landscape->place_count; place++)
-                        if (landscape->places[place].kind == BRONZE_PLACE_SERVICE &&
-                            landscape->places[place].owner == actor->home)
-                            state->target = landscape->places[place].id;
+                    for (unsigned town=0; town<landscape->town_count; ++town)
+                        if (landscape->towns[town].home == actor->home)
+                            state->target=landscape->towns[town].service;
                 } else {
                     const bronze_site *site = bronze_task_move_site(actor->home, actor->workplace, op->a0);
                     if (site) state->target = site->place_id;
@@ -549,13 +583,7 @@ void bronze_tasks_begin(simulated_group *group)
                         state->target = landscape->towns[i].service;
             } else if (op->action_code == BRZ_ACTION_CRAFT) {
                 int recipe = recipe_index(program->config, op);
-                if (recipe >= 0 && program->recipes[recipe].at_workplace) {
-                    state->target = actor->workplace;
-                } else if (recipe >= 0) {
-                    const BronzeLandscape *landscape = bronze_actors_landscape(registry);
-                    for (unsigned i = 0; i < landscape->town_count; i++)
-                        if (landscape->towns[i].home == actor->home) state->target = landscape->towns[i].service;
-                }
+                if (recipe >= 0) state->target = bronze_task_craft_target(actor,&program->recipes[recipe]);
             }
         }
         BronzeTaskStatus status = operation_status(group, actor, being, 0);

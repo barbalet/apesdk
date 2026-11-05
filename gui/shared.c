@@ -1885,6 +1885,9 @@ int shared_session_bronze_open(shared_session *session, const n_byte *bytes, n_u
         native_stage = bronze_native_stage(&transfer, &continuation, count, bronze_actors_clock(staged)->tick);
     }
     memory_free((void **)&transfer.data);
+    if (native_stage && !bronze_townships_validate_heights(&bronze_actors_landscape(staged)->settlement,
+                                                          bronze_native_stage_heights(native_stage)))
+        bronze_native_stage_free(&native_stage);
     if (!native_stage) {
         bronze_actors_destroy(staged);
         return 0;
@@ -2032,6 +2035,7 @@ void shared_session_bronze_workspace_draw(shared_session* session, n_byte4* pixe
         !shared_session_is_started(session) || !shared_core_activate(&session->core)) return;
 
     BronzeRenderLand land = {0};
+    land.settlement = bronze_hybrid_settlement();
     land.tide = (int)land_tide_level();
     land.heights = land_location_tile(0);
     if (!land.heights) return;
@@ -2054,14 +2058,26 @@ void shared_session_bronze_workspace_draw(shared_session* session, n_byte4* pixe
             target.x = APESPACE_TO_MAPSPACE(being_location_x(actor));
             target.y = APESPACE_TO_MAPSPACE(being_location_y(actor));
         }
+        int settlement_view = 0;
+        if ((selected_site>>63) && land.settlement) {
+            for (unsigned b=0;b<land.settlement->building_count;++b) {
+                const BronzeBuilding *building=&land.settlement->buildings[b];
+                if (building->id==(selected_site & ~(UINT64_C(1)<<63))) {
+                    target=(BronzeWorkspacePoint){building->entrance.x,building->entrance.y};
+                    settlement_view=1; break;
+                }
+            }
+        }
         for (unsigned i = 0; selected_site && i < land.count; ++i) {
             if (land.sites[i].id == selected_site) {
                 target = (BronzeWorkspacePoint){land.sites[i].x, land.sites[i].y};
+                settlement_view = land.sites[i].kind == BRONZE_TOWN;
                 break;
             }
         }
-        BronzeRenderCamera camera = bronze_render_camera(target.x, target.y,
-                                                         isfinite(bearing) ? bearing : 0, &land);
+        BronzeRenderCamera camera = settlement_view
+            ? bronze_render_camera_distance(target.x,target.y,isfinite(bearing)?bearing:0,&land,32,8)
+            : bronze_render_camera(target.x,target.y,isfinite(bearing)?bearing:0,&land);
         bronze_render_terrain(pixels, (int)width, (int)height, &land, sim_group(), camera);
     }
 }
@@ -2101,12 +2117,23 @@ BronzeWorkspaceSite shared_session_bronze_workspace_select(shared_session* sessi
             }
         }
     }
+    /* Footprint picking is exact and has priority over a nearby site pin. */
+    const BronzeSettlementLayout *layout=bronze_hybrid_settlement();
+    if (layout) {
+        int px=bronze_render_wrap((int)floor(center.x+dx));
+        int py=bronze_render_wrap((int)floor(center.y+dy));
+        unsigned b=layout->building_at[py*MAP_DIMENSION+px];
+        if (b && b<=layout->building_count)
+            picked=(BronzeWorkspaceSite){layout->buildings[b-1].id | (UINT64_C(1)<<63),5};
+    }
     if (!picked.id && nearest) {
         sim_set_select(nearest);
         shared_core_context_sync_from_globals(&session->core);
     }
     return picked;
 }
+
+#include "../bronze/ui/bronze_settlement_inspector.inc"
 
 static const char *bronze_inspector_task_status(const BronzeActor *actor)
 {
@@ -2164,7 +2191,15 @@ BronzeInspectorActor shared_session_bronze_inspector_actor(shared_session* sessi
         break;
     }
     const BronzeProfessionPolicy *policy = bronze_actors_professions(registry);
-    if (actor->job_status != BRONZE_JOB_ASSIGNED || actor->vocation >= policy->count) return result;
+    if (actor->job_status != BRONZE_JOB_ASSIGNED || actor->vocation >= policy->count) {
+        if (actor->occupation<policy->count) {
+            static const char *reasons[]={"occupations disabled","awaiting assignment","below working age",
+                "no reachable home","no matching workplace","workplaces full","skill record unavailable"};
+            snprintf(result.vocation,sizeof(result.vocation),"%s",policy->vocations[actor->occupation].name);
+            snprintf(result.status,sizeof(result.status),"Selected occupation · %s",reasons[actor->job_status]);
+        }
+        return result;
+    }
     snprintf(result.vocation, sizeof(result.vocation), "%s", policy->vocations[actor->vocation].name);
     const BronzeTaskState *task = &actor->execution;
     snprintf(result.status, sizeof(result.status), "%s", bronze_inspector_task_status(actor));
@@ -2205,6 +2240,11 @@ void shared_session_bronze_actor_summary(shared_session* session, char* buffer, 
             "no reachable home", "no reachable matching workplace", "workplaces full",
             "skill record unavailable"
         };
+        if (actor->occupation<policy->count)
+            snprintf(buffer,size,"Actor #%llu · %s · selected occupation (%s) · home #%llu",
+                     (unsigned long long)actor->id,policy->vocations[actor->occupation].name,
+                     reasons[actor->job_status],(unsigned long long)actor->home);
+        else
         snprintf(buffer, size, "Actor #%llu · unassigned (%s) · home #%llu",
                  (unsigned long long)actor->id, reasons[actor->job_status],
                  (unsigned long long)actor->home);

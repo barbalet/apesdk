@@ -152,6 +152,22 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
     for (unsigned i = 0; i < landscape->town_count; i++)
         if (landscape->towns[i].home == worker->home) town = &landscape->towns[i];
     assert(town && worker->workplace == town->service);
+    /* This transaction/teaching fixture deliberately co-locates its counters.
+     * Spatial travel and distinct workplaces have separate tests below. */
+    const BronzePlace *counter = bronze_hybrid_place(town->service);
+    for (unsigned p=0;p<landscape->place_count;++p)
+        if (landscape->places[p].owner==town->home && landscape->places[p].kind!=BRONZE_PLACE_PRODUCTION)
+            landscape->places[p].location=counter->location;
+    for (unsigned b=0;b<landscape->settlement.building_count;++b) {
+        BronzeBuilding *building=&landscape->settlement.buildings[b];
+        if (building->owner==town->home && building->kind==BRONZE_BUILDING_STORE)
+            building->entrance=counter->location;
+    }
+    bronze_townships_paths(landscape,land_topography());
+    location[0]=MAPSPACE_TO_APESPACE(counter->location.x);
+    location[1]=MAPSPACE_TO_APESPACE(counter->location.y);
+    being_set_location(being,location); being_set_location(&group->beings[1],location);
+
     assert(competitor->vocation == worker->vocation && competitor->workplace == worker->workplace);
     worker->skills[0].value = 0;
     competitor->skills[0].value = professions.mentor_skill;
@@ -467,8 +483,17 @@ static void qualify_full_scenario(const char *path, n_uint seed)
     bronze_scenario_destroy(scenario);
 }
 
+#include "test_townships.inc"
+#include "test_paths.inc"
+#include "test_premises.inc"
+#include "test_routes.inc"
+#include "test_gather_delivery.inc"
+#include "test_starting_occupations.inc"
+
 int main(int argc, char **argv)
 {
+    spatial_townships_test();
+    township_paths_test();
     if (argc == 3) {
         qualify_full_scenario(argv[1], (n_uint)strtoul(argv[2], NULL, 10));
         return 0;
@@ -874,6 +899,10 @@ int main(int argc, char **argv)
         free(hud);
     }
     recipe_chains(group, landscape);
+    professional_premises_test(group,landscape);
+    weighted_routes_test();
+    gather_delivery_test(group,landscape);
+    starting_occupations_test(group);
     sim_close();
     puts("Bronze hybrid terrain, symbols, bounded economy and reset checks passed.");
     return 0;

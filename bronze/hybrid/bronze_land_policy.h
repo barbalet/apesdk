@@ -11,10 +11,11 @@ typedef struct {
     unsigned carry_capacity, storage_capacity;
     unsigned household_capacity, ration_daily;
     double food_spoilage;
+    unsigned town_house_capacity, town_work_yards;
 } BronzeLandPolicy;
 
 static inline BronzeLandPolicy bronze_land_defaults(void)
 {
-    return (BronzeLandPolicy){6, 48, 64, 18, 45, 12, 205, 128, 0, 0, 32, 512, 0, 0, 0};
+    return (BronzeLandPolicy){6, 48, 64, 18, 45, 12, 205, 128, 0, 0, 32, 512, 0, 0, 0, 8, 4};
 }
 #endif

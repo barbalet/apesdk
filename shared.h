@@ -215,6 +215,9 @@ BronzeInspectorActor shared_session_bronze_inspector_actor(shared_session* sessi
 void shared_session_bronze_surface_key(shared_session* session, n_int surface, n_int key);
 typedef struct { n_int x, y; } BronzeWorkspacePoint;
 typedef struct { uint64_t id; n_int kind; } BronzeWorkspaceSite;
+#include "bronze/ui/bronze_settlement_inspector.h"
+BronzeSettlementInspection shared_session_bronze_settlement_inspection(shared_session *session,
+                                                                      uint64_t selection, n_int kind);
 BronzeWorkspacePoint shared_session_bronze_workspace_center(shared_session* session, n_int selected);
 n_int shared_bronze_workspace_map_dimension(void);
 n_uint shared_session_bronze_workspace_day(shared_session* session);

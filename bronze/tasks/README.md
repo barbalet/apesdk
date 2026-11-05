@@ -131,3 +131,13 @@ operations.
 Resources and items use Bronze inventory units. The native body-slot inventory
 continues to serve native being behavior. A crafted item can be deposited at
 township storage, where items and resources share capacity.
+
+## Township walking costs (township cycle 5)
+
+Bronze route selection now uses deterministic weighted search: recorded track
+cells cost 2, other ground costs 6, and height differences add to either cost.
+Solid settlement footprints cannot be entered. Paths are a preference; a
+shorter off-path route can beat a long track detour. Existing search, waypoint,
+steering and retry bounds remain, including revalidation of a cached next step.
+Native movement and energy accounting are unchanged. See the
+[township rules](../hybrid/README.md) for world ownership and rendering.

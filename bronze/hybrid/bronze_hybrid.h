@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 enum { BRONZE_PATCH_LIMIT = 32, BRONZE_SITE_LIMIT = 10, BRONZE_TOWN_LIMIT = 2,
-       BRONZE_PLACE_LIMIT = BRONZE_SITE_LIMIT + 2 * BRONZE_TOWN_LIMIT };
+       BRONZE_PLACE_LIMIT = BRONZE_SITE_LIMIT + 6 * BRONZE_TOWN_LIMIT };
 typedef struct { n_int x, y; } bronze_land_cell;
 typedef struct { double amount, capacity, reserved, daily_renewal; } BronzePatchStock;
 
@@ -44,8 +44,51 @@ typedef struct {
     uint32_t distance[MAP_AREA];
 } BronzeTownship;
 
+/* Spatial records are Bronze-owned derived layout data (version 1).
+ * IDs are scoped to the landscape; owner is the existing home place ID. */
+enum { BRONZE_BUILDINGS_PER_TOWN = 40,
+       BRONZE_BUILDING_LIMIT = BRONZE_TOWN_LIMIT * BRONZE_BUILDINGS_PER_TOWN,
+       BRONZE_FOOTPRINT_LIMIT = 9, BRONZE_PATH_LIMIT = 128,
+       BRONZE_PATH_CELL_LIMIT = 256, BRONZE_LAYOUT_RADIUS = 14,
+       BRONZE_HOUSE_CAPACITY = 8, BRONZE_LAYOUT_SLOPE = 6 };
+typedef enum { BRONZE_BUILDING_PLAZA, BRONZE_BUILDING_STORE,
+               BRONZE_BUILDING_HOME, BRONZE_BUILDING_WORK_YARD } BronzeBuildingKind;
+typedef enum { BRONZE_PREMISE_NONE, BRONZE_PREMISE_METAL, BRONZE_PREMISE_POTTERY,
+               BRONZE_PREMISE_WOOD, BRONZE_PREMISE_FOOD } BronzePremiseKind;
+typedef struct {
+    uint64_t id, owner, compatibility_place;
+    BronzeBuildingKind kind;
+    BronzePremiseKind profession;
+    unsigned area, capacity;
+    bronze_land_cell cells[BRONZE_FOOTPRINT_LIMIT];
+    bronze_land_cell entrance, work_position;
+} BronzeBuilding;
+typedef enum { BRONZE_PATH_FOOT, BRONZE_PATH_EARTH_ROAD } BronzePathSurface;
+typedef struct {
+    uint64_t id, owner, from_building, to_building, to_place;
+    BronzePathSurface surface;
+    unsigned width, count;
+    bronze_land_cell cells[BRONZE_PATH_CELL_LIMIT];
+} BronzePath;
+typedef struct {
+    uint64_t owner;
+    unsigned requested_housing, placed_housing, missing_housing;
+    unsigned missing_store, missing_plaza, missing_work_yards;
+    unsigned missing_premises, unreachable_paths, limited_paths;
+} BronzeLayoutReport;
+typedef struct {
+    unsigned version, building_count, path_count;
+    BronzeBuilding buildings[BRONZE_BUILDING_LIMIT];
+    BronzePath paths[BRONZE_PATH_LIMIT];
+    BronzeLayoutReport reports[BRONZE_TOWN_LIMIT];
+    /* Derived O(1) lookups, rebuilt with the immutable layout. */
+    uint16_t building_at[MAP_AREA], entrance_at[MAP_AREA];
+    n_byte solid[MAP_AREA], track[MAP_AREA], track_links[MAP_AREA];
+} BronzeSettlementLayout;
+
 typedef void (*bronze_plot)(n_int x, n_int y, n_byte color, void *context);
 typedef struct {
+    BronzeSettlementLayout settlement;
     BronzeLandPolicy policy;
     bronze_site sites[BRONZE_SITE_LIMIT];
     BronzePlace places[BRONZE_PLACE_LIMIT];
@@ -57,6 +100,16 @@ typedef struct {
     n_uint site_count, last_day;
     uint64_t last_tick;
 } BronzeLandscape;
+/* Deterministic, bounded layout generation. Does not move compatibility places,
+ * change membership capacity, or change native terrain/movement. */
+void bronze_townships_layout(BronzeLandscape *land, const n_byte *heights);
+const BronzeSettlementLayout *bronze_hybrid_settlement(void);
+int bronze_townships_validate_heights(const BronzeSettlementLayout *layout,const n_byte *heights);
+void bronze_townships_index(BronzeSettlementLayout *layout);
+void bronze_townships_paths(BronzeLandscape *land, const n_byte *heights);
+/* Service jobs may use a specific premise; zero means unavailable. */
+uint64_t bronze_township_premise(uint64_t home, unsigned vocation);
+void bronze_townships_prepare(void);
 void bronze_hybrid_reset(void);
 void bronze_hybrid_cycle(simulated_group *group);
 void bronze_hybrid_draw(n_int dimension, bronze_plot plot, void *context);

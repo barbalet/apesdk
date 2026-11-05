@@ -4,7 +4,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd)"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 cd "$work"
-common=(-DBRONZE_EXTENDED_CONTENT=\"$root/bronze/content/example_large.bronze\" -std=c99 -O1 -g -DBRONZE_SIM=1 -DHIDE_THUNDER=1 -DCOMMAND_LINE_EXPLICIT -I"$root/bronze/scenario-runtime/include")
+common=(-DBRONZE_EXTENDED_CONTENT=\"$root/bronze/content/example_large.bronze\" -std=c99 -O1 -g -DBRONZE_SIDECAR_TEST=1 -DBRONZE_SIM=1 -DHIDE_THUNDER=1 -DCOMMAND_LINE_EXPLICIT -I"$root/bronze/scenario-runtime/include")
 native_sources=("$root"/bronze/dsl/*.c "$root/bronze/scenario/bronze_scenario.c" "$root"/toolkit/*.c "$root"/script/*.c "$root"/render/*.c
     "$root"/sim/*.c "$root"/entity/*.c "$root"/universe/*.c "$root"/gui/*.c
     "$root/bronze/hybrid/bronze_hybrid.c" "$root/bronze/adapter/bronze_apesdk_adapter.c"
@@ -33,3 +33,5 @@ MALLOC_PERTURB_=165 MallocScribble=1 ./actor-tests sessions
 MALLOC_PERTURB_=165 MallocScribble=1 ./actor-tests work
 
 ./actor-tests extended
+
+./actor-tests townships

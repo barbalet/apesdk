@@ -15,12 +15,14 @@ BronzeTaskStatus bronze_task_deposit(BronzeActor *actor, simulated_being *being,
                                     uint64_t target, int kind, double quantity, int commit);
 BronzeTaskStatus bronze_task_deposit_item(BronzeActor *actor, simulated_being *being,
                                          uint64_t target, int kind, double quantity, int commit);
+uint64_t bronze_task_craft_target(const BronzeActor *actor, const BronzeRecipePolicy *policy);
 BronzeTaskStatus bronze_task_craft(BronzeActor *actor, simulated_being *being, uint64_t target,
                                   const RecipeDef *recipe, const BronzeRecipePolicy *policy,
                                   unsigned batches, int commit);
 BronzeTaskStatus bronze_task_store_transfer(BronzeActor *actor, simulated_being *being,
                                             uint64_t target, int kind, double quantity,
                                             int item, int household, int fetch, int commit);
+int bronze_task_plan_route(BronzeRoute *route, uint32_t start, uint64_t target);
 void bronze_tasks_begin(simulated_group *group);
 void bronze_tasks_steer(simulated_being *being);
 void bronze_tasks_end(simulated_group *group);

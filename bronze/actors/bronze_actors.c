@@ -95,7 +95,7 @@ static int add(BronzeActorRegistry* r, simulated_being* being)
     if(!r->next_id || r->next_id==UINT64_MAX) return 0;
     for(i=0;i<LARGE_SIM;i++) if(!r->records[i].id) {
         BronzeActor* actor=&r->records[i];
-        actor->id=r->next_id++; actor->vocation=BRONZE_KIND_NONE;
+        actor->id=r->next_id++; actor->vocation=BRONZE_KIND_NONE; actor->occupation=BRONZE_KIND_NONE;
         actor->task=BRONZE_KIND_NONE;
         if (r->program)
             actor->execution.rng = ((uint64_t)r->program->config->seed << 32) ^

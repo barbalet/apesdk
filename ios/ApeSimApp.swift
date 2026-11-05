@@ -404,6 +404,10 @@ final class ApeSimulationSceneModel: ObservableObject {
     }
 #endif
 
+    func bronzeSettlementInspection(_ selection: BronzeWorkspaceSite) -> BronzeSettlementInspection {
+        shared_session_bronze_settlement_inspection(session, selection.id, selection.kind)
+    }
+
     private func refreshBronzeWorkspaceSnapshot() {
         var buffer = [CChar](repeating: 0, count: 4096)
         let summary = buffer.withUnsafeMutableBufferPointer {

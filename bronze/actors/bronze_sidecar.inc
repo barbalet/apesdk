@@ -6,6 +6,7 @@ typedef struct {
     const n_byte *input;
     n_uint size, position;
     int reading, valid;
+    unsigned version;
 } Sidecar;
 
 static uint64_t sidecar_word(Sidecar *codec, uint64_t value, unsigned width)
@@ -237,6 +238,10 @@ static void sidecar_task(Sidecar *codec, BronzeActor *actor, const BronzeProgram
 static void sidecar_actor(Sidecar *codec, BronzeActor *actor, const BronzeProgram *program)
 {
     U64(actor->id); U32(actor->vocation); U32(actor->task); U32(actor->instruction);
+    if (codec->version>=3) {
+        U32(actor->occupation);
+        if (actor->occupation!=BRONZE_KIND_NONE && (actor->occupation>=BRONZE_VOCATION_LIMIT || (program && actor->occupation>=program->config->vocations.len))) codec->valid=0;
+    } else if (codec->reading) actor->occupation=actor->vocation;
     BOUNDED(actor->job_status, BRONZE_JOB_MEMORY);
     U64(actor->home); U64(actor->workplace); U64(actor->remaining_ticks);
     U64(actor->mentor); U64(actor->apprentice);
@@ -318,11 +323,14 @@ static int sidecar_land_links(const BronzeLandscape *land)
     return 1;
 }
 
+#include "bronze_settlement_sidecar.inc"
+
 static void sidecar_registry(Sidecar *codec, BronzeActorRegistry *registry, const n_byte *hash)
 {
-    uint32_t version = 1;
+    uint32_t version = codec->version ? codec->version : 3;
     U32(version);
-    if (version != 1) codec->valid = 0;
+    if (version != 1 && version != 2 && version != 3) codec->valid = 0;
+    codec->version=version;
     for (unsigned i = 0; i < BRONZE_SCENARIO_DIGEST_BYTES; ++i) {
         n_byte byte = hash[i];
         SIDECAR_FIELD(byte, 1);
@@ -337,6 +345,13 @@ static void sidecar_registry(Sidecar *codec, BronzeActorRegistry *registry, cons
         codec->valid = 0;
     if (!codec->valid) return;
     sidecar_landscape(codec, &registry->landscape);
+    if (version>=2) sidecar_settlement(codec,&registry->landscape);
+    else if (codec->reading) {
+        registry->landscape.policy.town_house_capacity=8;
+        registry->landscape.policy.town_work_yards=4;
+        /* Legacy geometry is rebuilt only after its native world is installed. */
+        registry->landscape.settlement.version=0;
+    }
     const BronzeLandscape *land = &registry->landscape;
     if (codec->valid && !sidecar_land_links(land)) codec->valid = 0;
     for (unsigned i = 0; codec->valid && i < registry->count; ++i) {
@@ -358,11 +373,14 @@ static void sidecar_registry(Sidecar *codec, BronzeActorRegistry *registry, cons
     }
 }
 
-n_file *bronze_actors_capture_sidecar(BronzeActorRegistry *registry, const n_byte *scenario_digest)
+static n_file *sidecar_capture(BronzeActorRegistry *registry, const n_byte *scenario_digest,unsigned version)
 {
     if (!is_current(registry) || !scenario_digest || registry->clock.open ||
         registry->count != registry->group->num) return NULL;
-    Sidecar codec = {.size = SIDECAR_LIMIT, .valid = 1};
+    if (!registry->landscape.settlement.version) bronze_townships_prepare();
+    if (!registry->landscape.policy.town_house_capacity) registry->landscape.policy.town_house_capacity=8;
+    if (!registry->landscape.policy.town_work_yards) registry->landscape.policy.town_work_yards=4;
+    Sidecar codec = {.size = SIDECAR_LIMIT, .valid = 1, .version=version};
     sidecar_registry(&codec, registry, scenario_digest);
     if (!codec.valid) return NULL;
     n_file *file = memory_new(sizeof(*file));
@@ -370,11 +388,22 @@ n_file *bronze_actors_capture_sidecar(BronzeActorRegistry *registry, const n_byt
     file->size = file->location = codec.position;
     file->data = memory_new(file->size);
     if (!file->data) { io_file_free(&file); return NULL; }
-    codec = (Sidecar){.output = file->data, .size = file->size, .valid = 1};
+    codec = (Sidecar){.output = file->data, .size = file->size, .valid = 1, .version=version};
     sidecar_registry(&codec, registry, scenario_digest);
     if (!codec.valid || codec.position != file->size) io_file_free(&file);
     return file;
 }
+
+n_file *bronze_actors_capture_sidecar(BronzeActorRegistry *registry,const n_byte *digest)
+{
+    return sidecar_capture(registry,digest,3);
+}
+#ifdef BRONZE_SIDECAR_TEST
+n_file *bronze_actors_capture_legacy_sidecar(BronzeActorRegistry *registry,const n_byte *digest)
+{
+    return sidecar_capture(registry,digest,1);
+}
+#endif
 
 BronzeActorRegistry *bronze_actors_stage_sidecar(const BronzeActorRegistry *scenario,
                                                 const n_file *file, const n_byte *scenario_digest)

@@ -199,3 +199,10 @@ show the same selected actor as the inspector. Selection, commands, and file ope
 the new layout at both laptop and desktop widths. The separate Bronze windows
 remain available, existing saves still open, and shared-shell changes pass
 the relevant historical target checks with `BRONZE_SIM` undefined.
+
+## Next settlement development phase
+
+Develop spatial townships, professional premises and agent-usable footpaths
+before the Victorian extension. See the [township implementation plan](../TOWNSHIPS-PLAN.md).
+This is additional work; existing decorative houses and tracks do not satisfy
+its simulation or visual acceptance criteria. All integration remains Bronze-only.

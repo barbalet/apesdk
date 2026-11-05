@@ -77,3 +77,21 @@ native incapacity pauses work and supervision while the actor retains their
 slot. Death releases the slot and outstanding work claims. Personal cargo
 and private household stock are booked as losses, and communal stock stays
 with its township.
+
+## Starting occupations
+
+At world creation, at least `ceil(population × 0.60)` registered agents receive
+an occupation selected from the scenario's enabled roles. Existing employed
+agents count toward that minimum. Remaining labels are distributed in stable
+native population order using the declared occupation weights; ties use scenario
+order. Disabled roles are excluded, and a scenario with no enabled roles keeps
+occupations disabled. Reviews retain valid labels and top up the minimum.
+
+`BronzeActor.occupation` stores this social role separately from `vocation` and
+`workplace`, which continue to describe detailed employment. A child or an agent
+without housing or an available workplace can display a selected occupation
+without becoming a worker. Labels do not grant skill, inventory, production,
+mentor qualification or task execution. Once an agent has a detailed job, its
+occupation label follows that job. The inspector shows the selected role and
+its current eligibility reason instead of presenting every non-worker as
+unassigned. Saves preserve these labels in sidecar schema 3.

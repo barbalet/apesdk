@@ -4,7 +4,12 @@ root="$(cd "$(dirname "$0")/../.." && pwd)"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 cd "$work"
-"${CC:-cc}" -std=c99 -O1 -g -DBRONZE_SIM=1 -DHIDE_THUNDER=1 -DCOMMAND_LINE_EXPLICIT \
+compiler=("${CC:-cc}")
+if [ "${SANITIZE:-0}" = 1 ]; then
+    # Native genetics has existing signed-shift UB; check memory and division.
+    compiler+=(-fsanitize=address,integer-divide-by-zero -fno-omit-frame-pointer)
+fi
+"${compiler[@]}" -std=c99 -O1 -g -DBRONZE_SIDECAR_TEST=1 -DBRONZE_SIM=1 -DHIDE_THUNDER=1 -DCOMMAND_LINE_EXPLICIT \
     "$root"/toolkit/*.c "$root"/script/*.c "$root"/render/*.c \
     "$root"/sim/*.c "$root"/entity/*.c "$root"/universe/*.c \
     "$root"/gui/{draw,buffer,tutorial}.c \

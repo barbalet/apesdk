@@ -1175,6 +1175,11 @@ BronzeNativeStage *bronze_native_stage(n_file *native, const n_file *continuatio
     return 0L;
 }
 
+const n_byte *bronze_native_stage_heights(const BronzeNativeStage *stage)
+{
+    return stage ? stage->topography : 0L;
+}
+
 void bronze_native_stage_free(BronzeNativeStage **stage)
 {
     memory_free((void **)stage);

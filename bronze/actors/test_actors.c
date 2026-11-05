@@ -15,6 +15,8 @@
 #include "../tasks/bronze_tasks.h"
 #include "../work/bronze_work.h"
 
+#include "test_settlement_render.inc"
+
 static void awake_status_text(void)
 {
     n_string_block description;
@@ -249,6 +251,10 @@ static void sessions(void)
     BronzeActor* actor_a=bronze_actors_find(ar,aid); assert(actor_a);
     BronzeLandscape* landscape_a=bronze_actors_landscape(ar);
     assert(landscape_a->town_count>0);
+    uint64_t inspected_building=bronze_hybrid_settlement()->buildings[0].id;
+    BronzeSettlementInspection settlement_a=shared_session_bronze_settlement_inspection(a,inspected_building | (UINT64_C(1)<<63),5);
+    assert(settlement_a.building_id==inspected_building && settlement_a.township_id);
+
     const BronzePlace* home=bronze_hybrid_place(landscape_a->towns[0].home);
     n_byte2 location[2]={MAPSPACE_TO_APESPACE(home->location.x), MAPSPACE_TO_APESPACE(home->location.y)};
     being_set_location(bronze_actors_resolve(ar,aid),location);
@@ -325,6 +331,12 @@ static void sessions(void)
     assert(site_count>0);
     for(n_uint i=0;i<site_count;i++) assert(b_sites[i].kind!=BRONZE_FIELD);
     assert(bronze_actors_landscape(br)->town_count==0);
+    assert(!shared_session_bronze_settlement_inspection(b,inspected_building | (UINT64_C(1)<<63),5).township_id);
+    BronzeSettlementInspection isolated=shared_session_bronze_settlement_inspection(a,inspected_building | (UINT64_C(1)<<63),5);
+    /* a was deliberately rebuilt above; retired selections must not bind to b. */
+    assert(!isolated.building_id);
+    assert(shared_session_bronze_actor_id(b)==bid);
+
     assert(bronze_actors_landscape(ar)->town_count>0);
     bronze_actors_landscape(ar)->towns[0].stores.grain=7;
     assert(!bronze_actors_resolve(ar,aid) && !bronze_actors_for_being(ar,sim_group()->select));
@@ -355,6 +367,9 @@ static void sessions(void)
     /* The native remains counter can reach one above the ring size. */
     sim_group()->remains.count = NUMBER_OF_BODIES + 1;
     sim_group()->remains.location = 4;
+    BronzeSettlementLayout *saved_layout = malloc(sizeof(*saved_layout));
+    assert(saved_layout);
+    *saved_layout = *bronze_hybrid_settlement();
     n_file *package = shared_session_bronze_save(a, digest);
     assert(package);
     assert(bronze_save_publish("combined.bronzesave", (BronzeSaveSection){package->data, package->location}));
@@ -388,6 +403,8 @@ static void sessions(void)
     assert(bronze_hybrid_economy().grain == 91 && sim_group()->remains.count == 0);
     assert(shared_session_bronze_open(a, package->data, package->location, digest));
     ar = bronze_actors_current();
+    assert(!memcmp(saved_layout, bronze_hybrid_settlement(), sizeof(*saved_layout)));
+    free(saved_layout);
     assert(shared_session_bronze_actor_id(a) == aid);
     assert(bronze_hybrid_economy().grain == 7);
     assert(sim_group()->remains.count == NUMBER_OF_BODIES + 1 && sim_group()->remains.location == 4);
@@ -518,6 +535,21 @@ static void extended_scenario(void)
     puts("Awake native status output regression passed.");
     BronzeActorRegistry *registry = bronze_actors_current();
     assert(bronze_actors_professions(registry)->count == 120);
+    const BronzeSettlementLayout *layout = bronze_hybrid_settlement();
+    assert(layout && layout->version == 1 && layout->building_count);
+    BronzeLandscape *layout_land = bronze_actors_landscape(registry);
+    for (unsigned t = 0; t < layout_land->town_count; ++t) {
+        const BronzeLayoutReport *report = &layout->reports[t];
+        assert(report->owner == layout_land->towns[t].home);
+        assert(report->requested_housing == layout_land->towns[t].capacity);
+        assert(report->placed_housing + report->missing_housing == report->requested_housing);
+        printf("Large-default township %llu: housing %u/%u, missing store %u, plaza %u, yards %u\n",
+               (unsigned long long)report->owner, report->placed_housing, report->requested_housing,
+               report->missing_store, report->missing_plaza, report->missing_work_yards);
+        printf("Township paths: unreachable %u, limited %u; missing professional premises %u\n",
+               report->unreachable_paths,report->limited_paths,report->missing_premises);
+    }
+
     BronzeActor *actor = NULL;
     simulated_being *being = NULL;
     simulated_group *group = sim_group();
@@ -575,12 +607,16 @@ static void extended_scenario(void)
     puts("Extended 120-vocation scenario, task sequences, resource conditions and high-role restore passed.");
 }
 
+#include "test_township_qualification.inc"
+
 void bronze_test_work(void);
 int main(int argc, char** argv)
 {
     awake_status_text();
     terrain_interpolation();
-    if(argc>1 && !strcmp(argv[1],"extended")) extended_scenario();
+    settlement_render_test();
+    if(argc>1 && !strcmp(argv[1],"townships")) township_qualification();
+    else if(argc>1 && !strcmp(argv[1],"extended")) extended_scenario();
     else if(argc>1 && !strcmp(argv[1],"sessions")) sessions();
     else if(argc>1 && !strcmp(argv[1],"work")) bronze_test_work();
     else lifecycle();

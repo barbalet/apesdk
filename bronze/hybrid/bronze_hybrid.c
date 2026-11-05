@@ -33,6 +33,9 @@ static n_uint neighbor(n_uint cell, unsigned direction)
                     (n_int)(cell / MAP_DIMENSION) + dy[direction]);
 }
 
+#include "bronze_townships.inc"
+#include "bronze_paths.inc"
+
 static void analyze_terrain(const n_byte *height)
 {
     n_uint head = 0, tail = 0;
@@ -330,10 +333,18 @@ static void update_membership(BronzeLandscape *landscape, simulated_group *group
     }
 }
 
+#include "bronze_premises.inc"
+
 static int job_matches(const BronzeLandscape *landscape, const BronzePlace *place,
-                       BronzeJobPlace requirement)
+                       BronzeJobPlace requirement, unsigned vocation)
 {
-    if (requirement == BRONZE_JOB_SERVICE) return place->kind == BRONZE_PLACE_SERVICE;
+    if (requirement == BRONZE_JOB_SERVICE) {
+        if (place->kind != BRONZE_PLACE_SERVICE) return 0;
+        if (premise_vocation(vocation))
+            return place->id == bronze_township_premise(place->owner,vocation);
+        const BronzeTownship *town=town_by_home((BronzeLandscape *)landscape,place->owner);
+        return town && place->id == town->service;
+    }
     if (place->kind != BRONZE_PLACE_PRODUCTION) return 0;
     for (n_uint i = 0; i < landscape->site_count; i++) {
         const bronze_site *site = &landscape->sites[i];
@@ -351,13 +362,13 @@ static int job_matches(const BronzeLandscape *landscape, const BronzePlace *plac
 
 static int job_site(const BronzeLandscape *landscape, const BronzeTownship *town,
                     BronzeJobPlace requirement, const unsigned *occupancy,
-                    unsigned capacity, int *reachable)
+                    unsigned capacity, int *reachable, unsigned vocation)
 {
     int best = -1;
     uint32_t best_distance = UINT32_MAX;
     for (unsigned i = 0; i < landscape->place_count; i++) {
         const BronzePlace *place = &landscape->places[i];
-        if (place->owner != town->home || !job_matches(landscape, place, requirement)) continue;
+        if (place->owner != town->home || !job_matches(landscape, place, requirement, vocation)) continue;
         uint32_t distance = town->distance[map_cell(place->location.x, place->location.y)];
         if (!distance) continue;
         *reachable = 1;
@@ -366,6 +377,36 @@ static int job_site(const BronzeLandscape *landscape, const BronzeTownship *town
         best_distance = distance;
     }
     return best;
+}
+
+/* A starting social role is independent of employment and native maturity.
+ * Keep labels stable and distribute new labels by scenario occupation weights. */
+static void seed_occupations(BronzeActorRegistry *registry,simulated_group *group,
+                              const BronzeProfessionPolicy *policy)
+{
+    unsigned counts[BRONZE_VOCATION_LIMIT]={0},selected=0;
+    for (n_uint i=0;i<group->num;++i) {
+        BronzeActor *actor=bronze_actors_for_being(registry,&group->beings[i]);
+        if (!actor) continue;
+        if (actor->job_status==BRONZE_JOB_ASSIGNED) actor->occupation=actor->vocation;
+        if (actor->occupation<policy->count && policy->vocations[actor->occupation].weight) {
+            counts[actor->occupation]++; selected++;
+        } else actor->occupation=BRONZE_KIND_NONE;
+    }
+    n_uint target=(group->num*3+4)/5; /* ceil(60%), including small populations */
+    for (n_uint i=0;i<group->num && selected<target;++i) {
+        BronzeActor *actor=bronze_actors_for_being(registry,&group->beings[i]);
+        if (!actor || actor->occupation!=BRONZE_KIND_NONE) continue;
+        unsigned best=BRONZE_VOCATION_LIMIT;
+        for (unsigned v=0;v<policy->count;++v) {
+            if (!policy->vocations[v].weight) continue;
+            if (best==BRONZE_VOCATION_LIMIT ||
+                (uint64_t)(counts[v]+1)*policy->vocations[best].weight <
+                (uint64_t)(counts[best]+1)*policy->vocations[v].weight) best=v;
+        }
+        if (best==BRONZE_VOCATION_LIMIT) break;
+        actor->occupation=best; counts[best]++; selected++;
+    }
 }
 
 static void update_professions(BronzeLandscape *landscape, simulated_group *group, int reset)
@@ -399,7 +440,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
             policy->vocations[actor->vocation].weight) {
             const BronzePlace *place = bronze_hybrid_place(actor->workplace);
             if (place && place->owner == town->home &&
-                job_matches(landscape, place, policy->vocations[actor->vocation].workplace) &&
+                job_matches(landscape, place, policy->vocations[actor->vocation].workplace, actor->vocation) &&
                 town->distance[map_cell(place->location.x, place->location.y)]) {
                 size_t index = (size_t)(place - landscape->places);
                 if (occupancy[index] < policy->site_capacity) {
@@ -426,7 +467,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
             const BronzeVocation *vocation = &policy->vocations[job];
             if (!vocation->weight) continue;
             int place = job_site(landscape, town, vocation->workplace, occupancy,
-                                 policy->site_capacity, &reachable);
+                                 policy->site_capacity, &reachable, job);
             if (place < 0) continue;
             /* Minimize the resulting worker/weight ratio, with ties in DSL order. */
             if (best == BRONZE_KIND_NONE ||
@@ -454,6 +495,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
         occupancy[workplace]++;
         counts[best]++;
     }
+    seed_occupations(registry,group,policy);
 }
 
 static void patch_totals(bronze_site *site)
@@ -515,6 +557,7 @@ void bronze_hybrid_reset(void)
     memset(landscape->spoiled, 0, sizeof(landscape->spoiled));
     memset(landscape->lost, 0, sizeof(landscape->lost));
     memset(landscape->lost_items, 0, sizeof(landscape->lost_items));
+    memset(&landscape->settlement, 0, sizeof(landscape->settlement));
     landscape->place_count = 0;
     landscape->town_count = 0;
     landscape->site_count = 0;
@@ -537,6 +580,7 @@ void bronze_hybrid_reset(void)
     place_patches(landscape, BRONZE_COPPER_MINE, height, preferred_distance);
     place_patches(landscape, BRONZE_TIN_MINE, height, preferred_distance);
     assign_workplaces(landscape);
+    bronze_townships_prepare();
     const BronzeProgram *program = bronze_actors_program(bronze_actors_current());
     if (program) configure_stocks(landscape, program->config);
     update_membership(landscape, sim_group());
@@ -576,6 +620,7 @@ void bronze_hybrid_cycle(simulated_group *group)
 {
     BronzeLandscape *landscape = current_landscape();
     if (!landscape) return;
+    if (!landscape->settlement.version) bronze_townships_prepare();
     update_membership(landscape, group);
     update_professions(landscape, group, 0);
     uint64_t tick = bronze_native_tick();
@@ -913,6 +958,16 @@ static void apply_inputs(BronzeActor *actor, double *stock, double *reserved,
     }
 }
 
+uint64_t bronze_task_craft_target(const BronzeActor *actor, const BronzeRecipePolicy *policy)
+{
+    if (!actor || !policy) return 0;
+    if (policy->at_workplace) return actor->workplace;
+    if (premise_vocation(actor->vocation)) return bronze_township_premise(actor->home,actor->vocation);
+    BronzeLandscape *land=current_landscape();
+    BronzeTownship *town=land ? town_by_home(land,actor->home) : NULL;
+    return town ? town->service : 0;
+}
+
 BronzeTaskStatus bronze_task_craft(BronzeActor *actor, simulated_being *being, uint64_t target,
                                   const RecipeDef *recipe, const BronzeRecipePolicy *policy,
                                   unsigned batches, int commit)
@@ -921,7 +976,7 @@ BronzeTaskStatus bronze_task_craft(BronzeActor *actor, simulated_being *being, u
     BronzeTownship *town = landscape ? town_by_home(landscape, actor->home) : NULL;
     const BronzePlace *place = bronze_hybrid_place(target);
     if (!town || !place || place->owner != town->home ||
-        target != (policy->at_workplace ? actor->workplace : town->service))
+        target != bronze_task_craft_target(actor,policy))
         return BRONZE_TASK_TARGET;
     /* Production workplaces may cover several cells. */
     bronze_site *site = work_site(landscape, target);

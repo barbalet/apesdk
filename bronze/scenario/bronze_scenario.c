@@ -206,6 +206,8 @@ static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* poli
         {"world_ore_relief", &policy->ore_relief, 1, 255},
         {"world_tin_height", &policy->tin_height, 151, 255},
         {"world_town_capacity", &policy->town_capacity, 1, 256},
+        {"world_town_house_capacity", &policy->town_house_capacity, 4, 16},
+        {"world_town_work_yards", &policy->town_work_yards, 1, 4},
         {"world_carry_capacity", &policy->carry_capacity, 1, 1024},
         {"world_storage_capacity", &policy->storage_capacity, 1, 1000000},
         {"world_household_capacity", &policy->household_capacity, 0, 1000000},

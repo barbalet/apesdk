@@ -140,3 +140,164 @@ priority over Bronze eating in the same tick, and an unavailable meal yields
 no Bronze energy. Consumption, spoilage and losses on death have separate
 accounting ledgers. Deposits and fetches transfer stock between owners.
 See the [recipe and task rules](../tasks/README.md).
+
+## Spatial township layout (township cycles 1–2)
+
+`bronze_townships_layout` creates a world-owned `BronzeSettlementLayout` after
+patch and township generation. `bronze_hybrid_settlement` exposes the current
+world's records and placement diagnostics. No mutable process-global occupancy
+is retained. The existing home, storage and service IDs and coordinates are
+compatibility references; this phase does not change agent jobs or movement.
+
+Each township requests a 3×3 open center, a 2×2 store, up to 32 houses of 2×2
+cells (eight housing slots each, with the final house capped to the requested
+capacity), and four 2×2 reserved work yards. Work yards are unassigned plots,
+not invented workshops or production recipes. Building IDs combine the home
+place ID and a bounded ordinal; entrances and working positions belong to
+that building. Repeating the same layout preserves IDs and geometry; a new
+home ID retires the prior building identities. Paths have bounded records and
+surface/width fields but remain empty until township cycle 4.
+
+Deterministic expanding rings search within 14 wrapped map cells of the home
+anchor. Every footprint and entrance must remain above the maximum tide;
+footprint relief and doorway height differences may not exceed six native
+height units. Resource patches, earlier footprints and reserved entrances
+cannot be overwritten. A bounded local flood check uses the native walking
+limit of 18 height units per edge and rejects solid footprints that disconnect
+any placed entrance, including a neighboring township's entrance. Open centers
+and yards remain walkable. Land heights are never modified.
+
+`BronzeLayoutReport` distinguishes missing housing slots, store, open center
+and work yards. A shortage leaves the requested legacy membership capacity
+unchanged; callers must use the placed-housing report when describing physical
+housing. No submerged or overlapping buildings are substituted. Existing
+scenario files need no new declarations.
+
+These immutable version-1 layouts are derived data. The current disk sidecar
+format is unchanged; the first settlement query or Bronze tick after restore
+rebuilds the layout from restored terrain and places. Actor session/save tests
+compare the complete regenerated layout. Cycle 7 must add versioned persistence
+before structures or paths become mutable. Rendering remains the existing
+preview until cycle 6, and professional premises bind to agents in cycle 3.
+
+Validation: `bash bronze/hybrid/test.sh` covers dense housing, wrapped seams,
+resource exclusion, entrance accessibility, adjacent settlements, small
+islands, wet/steep terrain, deterministic IDs and isolated worlds.
+`bash bronze/actors/test.sh` covers native sessions, save/Open and the large
+default scenario; `make -C bronze contract-test` checks historical behavior.
+
+## Professional premises and paths (township cycles 3–4)
+
+Work plots are now reserved before housing, so houses do not consume all the
+level ground needed for production. Their shortage reports remain explicit.
+`bronze_premises.inc` binds enabled smith/metalworking, pottery, woodworking
+and food preparation occupations to the four available open work yards. The
+initial compatibility mapping recognizes lowercase vocation names containing
+`smith`/`smelt`/`metal`, `potter`/`pot_`, `carpent`/`woodcarv`/`bowyer`, or
+`cook`/`baker`/`brewer`/`food`, respectively. A matching vocation must also have
+an actual craft operation with a recipe present in the scenario, including
+inside nested conditionals. Other occupations retain their existing policy.
+This mapping labels the premises; recipes and inputs remain authored content.
+
+Each active professional yard has a distinct owned service place ID, capacity,
+entrance and working position. Service-based professional jobs use that place
+as their actual workplace; jobs explicitly requiring a resource patch keep
+their patch assignment but use their township's professional yard for shared-
+stock crafting. Shared-stock crafting for these professions targets the yard;
+recipes explicitly configured to craft at the workplace keep their original
+cargo-based behavior. A missing yard produces no matching workplace or craft
+target. No recipe, inventory or output is synthesized. Existing worker review,
+incumbency, capacity, claim release and death handling apply to these places.
+The shared store and central service place move to their actual entrances;
+`move_to service` still means the common service area, not the last workshop.
+
+`bronze_paths.inc` builds a deterministic network from the open center (or home
+anchor if no center fits) to each building entrance and owned production place.
+Search uses four-way wrapped adjacency, dry land above maximum tide, a maximum
+height step of 18, and solid home/store footprints as obstacles. Dijkstra costs
+are positive: 6 for new ground or 2 for an existing track, plus height change.
+This favors shared track segments while retaining distance and slope costs.
+Each search visits at most `MAP_AREA` cells. There are at most 128 paths of 256
+cells each; unreachable endpoints and length/allocation limits are reported.
+
+Store and production connections request earth roads. A road is two cells wide
+only when its complete +Y verge is dry, clear of solid buildings and within
+six height units of the centerline, with at most an 18-unit step along the verge.
+Otherwise the connection remains a one-cell footpath. A path's `to_place`
+identifies a production endpoint; building endpoints additionally carry
+`to_building`. Multiple paths may share segments. No water crossings or bridges
+are generated. Paths are network data until route preference in cycle 5 and
+live rendering in cycle 6.
+
+Dedicated premises use the existing serialized owned-service-place records.
+Derived buildings and paths reconstruct from the restored terrain, places and
+scenario. A sidecar roundtrip test checks exact place IDs, complete layout and
+network reconstruction, and unchanged serialized bytes. Mutable building and
+road persistence remains cycle 7 work.
+
+The professional regression follows a smith using the native movement
+integrator to the distinct station, verifies input consumption and tool output,
+checks incumbent retention, and fills vacancies after death and loss of age
+eligibility. Path tests independently check doors, solids, dry ground, slopes,
+wrapped steps, shared segments, wide-road verges, unreachable destinations,
+length limits, deterministic regeneration and world isolation. The older
+recipe transaction fixture explicitly co-locates its counters to isolate its
+inventory and teaching assertions; the smith fixture does not teleport arrivals.
+Both focused suites support `SANITIZE=1`.
+
+## Agent routes and shared rendering (township cycles 5–6)
+
+The settlement derives constant-time cell indexes for footprints, solid walls,
+entrances, tracks and track connections. These belong to the world and rebuild
+with its layout after import. Agent searches use positive weighted travel costs:
+2 on a track or 6 on other dry ground, plus native height change. Off-path travel
+remains legal; long track detours can lose to a shorter cross-country route.
+A deterministic heap search visits at most 16,384 cells per request. The existing
+two searches per tick, 256-waypoint bound, retry policy and steering/needs limits
+remain. Searches and steering reject solid destination cells, including a
+cached next step that has become blocked. A being already inside a solid cell
+may leave it; no actor is relocated to resolve old-save or initial occupancy.
+Native movement, energy accounting, capability checks and observed arrival
+remain authoritative. There is no road speed bonus.
+
+Both workspace cameras now read the same settlement indexes and records.
+Decorative township house arrays are removed. Live footprints produce round
+thatched homes, ridged store roofs, open centers, professional yard fixtures,
+entrance thresholds and worn tracks. Roof shading and simple directional ground
+shadows distinguish structures; existing terrain depth handles occlusion.
+Tracked roads use their actual width and footpaths follow recorded connections.
+Ground under tracks retains its interpolated height. Trees are excluded from
+building and track cells, while fixed sandy beaches, translucent tides and the
+half-height native relief scale are preserved. Selecting a township uses a
+32-cell camera setback and higher view to show the settlement instead of
+placing the camera among houses. Actor views retain their closer camera.
+
+The only shared C change is workspace snapshot/camera wiring inside the
+existing `#ifdef BRONZE_SIM` region of `gui/shared.c`. All model, route and
+rendering implementation stays under `bronze/`.
+
+Regression coverage checks useful path preference, rejection of excessive
+track detours, solid avoidance, obstructed replanning and unreachable sources.
+Rendering tests check roofs, thresholds, track height, vegetation exclusion,
+wrapped footprints, frame bounds, viewport sizes, panned centers and moving
+actor positions. Actor/session save checks still compare full rebuilt layouts,
+including the cell indexes. Sanitized actor and hybrid suites, the native
+observable-equivalence contract and the Bronze Catalyst Release build pass.
+The live app was inspected with Example Large, site selection and map zoom.
+
+Visual qualification remains limited: this is procedural settlement rendering,
+not the reference image's photographic material/detail quality. Interactive
+pan/resize attempts were interrupted by changing UI state; their geometry and
+frame bounds were checked automatically. Full visual polish and broader live
+scenario qualification remain work for the final integrated acceptance cycle.
+
+
+## Township inspection and schema 2
+
+Cycle 7 adds exact footprint picking and copied township/building inspection
+records, optional validated `town_house_capacity` and `town_work_yards` settings,
+and schema 2 geometry persistence. Earlier notes about immutable regeneration
+are historical: new saves preserve explicit records; only version 1 saves
+regenerate geometry. See [save format](../SAVE-FORMAT.md) and the
+[cycle 8 qualification report](../validation/townships/README.md) for migration,
+validation, measured costs, image evidence and remaining live/visual checks.

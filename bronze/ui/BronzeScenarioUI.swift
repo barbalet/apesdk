@@ -278,6 +278,7 @@ struct BronzeWorkspacePreview: View {
 
     private var siteCaption: String? {
         if selectedSite.id != 0 {
+            if selectedSite.kind == 5 { return "Building #\(selectedSite.id & ~(UInt64(1) << 63))" }
             let kinds = ["Township", "Field", "Copper mine", "Tin mine", "Woodland"]
             if kinds.indices.contains(Int(selectedSite.kind)) {
                 return "\(kinds[Int(selectedSite.kind)]) #\(selectedSite.id)"
@@ -327,7 +328,7 @@ struct BronzeWorkspacePreview: View {
                             Spacer(minLength: 0)
                         }
                         if showsInspector {
-                            BronzeWorkspaceInspector(actor: snapshot.actor)
+                            BronzeWorkspaceInspector(actor: snapshot.actor, settlement: sceneModel.bronzeSettlementInspection(selectedSite))
                                 .frame(height: showsTerrain ? max(wide ? 175 : 104, geometry.size.height * (wide ? 0.40 : 0.22)) : nil)
                         }
                     }
@@ -341,6 +342,9 @@ struct BronzeWorkspacePreview: View {
         .onChange(of: snapshot.scenario) { _, _ in
             selectedSite = BronzeWorkspaceSite(id: 0, kind: 0)
             mapCenter = sceneModel.bronzeWorkspaceCenter(selected: false)
+        }
+        .onChange(of: snapshot.actor?.id) { old, new in
+            if old == nil && new != nil { mapCenter = sceneModel.bronzeWorkspaceCenter(selected: false) }
         }
         .onAppear {
             if mapCenter == nil { mapCenter = sceneModel.bronzeWorkspaceCenter(selected: false) }
@@ -493,6 +497,10 @@ struct BronzeWorkspacePreview: View {
             }
             .frame(width: scaleWidth)
             .accessibilityLabel("Map scale, \(cells) cells")
+            Button("Recenter on township", systemImage: "house") {
+                selectedSite = BronzeWorkspaceSite(id: 0, kind: 0)
+                mapCenter = sceneModel.bronzeWorkspaceCenter(selected: false)
+            }
             Button("Recenter on selected actor", systemImage: "scope") {
                 selectedSite = BronzeWorkspaceSite(id: 0, kind: 0)
                 mapCenter = sceneModel.bronzeWorkspaceCenter(selected: true)
@@ -681,11 +689,29 @@ private struct BronzeWorkspaceLegend: View {
 
 private struct BronzeWorkspaceInspector: View {
     let actor: BronzeWorkspaceActor?
+    let settlement: BronzeSettlementInspection
+    private func text<T>(_ value: T) -> String {
+        withUnsafeBytes(of: value) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 Label("Inspector", systemImage: "list.bullet.rectangle").font(.subheadline.weight(.semibold)).accessibilityAddTraits(.isHeader)
+                if settlement.township_id != 0 {
+                    Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
+                        row("Township", "#\(settlement.township_id)")
+                        row("Members", "\(settlement.members)")
+                        row("Housing", "\(settlement.housing) / \(settlement.requested_housing)")
+                        if settlement.building_id != 0 {
+                            row("Building", "\(text(settlement.building)) #\(settlement.building_id)")
+                            row("Professional area", text(settlement.occupation))
+                            row("Assigned workers", "\(settlement.assigned_workers) / \(settlement.capacity)")
+                        }
+                        row("Access", text(settlement.access))
+                    }
+                    Divider()
+                }
                 if let actor {
                     Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
                         row("Identity", "Actor #\(actor.id)")
