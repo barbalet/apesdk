@@ -10,6 +10,81 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../ui/bronze_workspace_render.h"
+
+static void terrain_interpolation(void)
+{
+    n_byte *heights = malloc(MAP_AREA);
+    assert(heights);
+    memset(heights, 180, MAP_AREA);
+    heights[10 * MAP_DIMENSION + 10] = 180;
+    heights[10 * MAP_DIMENSION + 11] = 200;
+    heights[11 * MAP_DIMENSION + 10] = 220;
+    heights[11 * MAP_DIMENSION + 11] = 240;
+    BronzeRenderLand land = {0};
+    land.heights = heights;
+    land.tide = 40;
+    BronzeRenderSample corners[4] = {
+        bronze_render_sample(&land, 10, 10, 0), bronze_render_sample(&land, 11, 10, 0),
+        bronze_render_sample(&land, 10, 11, 0), bronze_render_sample(&land, 11, 11, 0)
+    };
+    BronzeRenderSample center = bronze_render_sample(&land, 10.5, 10.5, 0);
+    assert(fabs(center.height - 210 * 0.31) < 1e-9);
+    assert(center.r == (int)lround((corners[0].r + corners[1].r + corners[2].r + corners[3].r) / 4.0));
+    assert(center.g == (int)lround((corners[0].g + corners[1].g + corners[2].g + corners[3].g) / 4.0));
+    assert(center.b == (int)lround((corners[0].b + corners[1].b + corners[2].b + corners[3].b) / 4.0));
+    assert(fabs(bronze_render_sample(&land, 10.25, 10.75, 0).height - 215 * 0.31) < 1e-9);
+    const double epsilon = 1e-7;
+    for (unsigned axis = 0; axis < 2; ++axis) {
+        for (unsigned seam = 0; seam < 2; ++seam) {
+            double edge = seam ? MAP_DIMENSION : 11;
+            double x = axis ? 10.37 : edge;
+            double y = axis ? edge : 10.37;
+            BronzeRenderSample left = bronze_render_sample(&land, x - (axis ? 0 : epsilon),
+                                                           y - (axis ? epsilon : 0), 0);
+            BronzeRenderSample right = bronze_render_sample(&land, x + (axis ? 0 : epsilon),
+                                                            y + (axis ? epsilon : 0), 0);
+            assert(fabs(left.height - right.height) < 1e-4);
+            assert(abs(left.r - right.r) <= 1 && abs(left.g - right.g) <= 1 && abs(left.b - right.b) <= 1);
+        }
+    }
+    BronzeRenderSample wrapped = bronze_render_sample(&land, 10.5 - MAP_DIMENSION, 10.5, 0);
+    assert(fabs(wrapped.height - center.height) < 1e-9 && wrapped.r == center.r);
+    /* A sloping shoreline may have a dry center and a submerged corner. */
+    land.tide = TIDE_MAX;
+    memset(heights, land.tide + 20, MAP_AREA);
+    assert(bronze_render_tree_ground(&land, 10, 10));
+    heights[11 * MAP_DIMENSION + 11] = land.tide - 1;
+    assert(!bronze_render_tree_ground(&land, 10, 10));
+    assert(!bronze_tree_allowed(&land, 10, 10, 0));
+    heights[11 * MAP_DIMENSION + 11] = land.tide + BRONZE_RENDER_BEACH_HEIGHT;
+    assert(!bronze_render_tree_ground(&land, 10, 10));
+    heights[11 * MAP_DIMENSION + 11] += 1;
+    assert(bronze_render_tree_ground(&land, 10, 10));
+    land.tide = TIDE_MAX;
+    memset(heights, TIDE_MAX + 1, MAP_AREA);
+    BronzeRenderSample beach = bronze_render_sample(&land, 10.5, 10.5, 0);
+    BronzeRenderSample beach_map = bronze_render_sample(&land, 10.5, 10.5, 1);
+    assert(beach.r > beach.g && beach.g > beach.b);
+    assert(beach.height == beach_map.height && beach.r == beach_map.r);
+    assert(!bronze_render_tree_ground(&land, -1, -1));
+    memset(heights, land.tide - 1, MAP_AREA);
+    assert(!bronze_tree_allowed(&land, 10, 10, 0));
+    BronzeRenderSample seabed = bronze_render_sample(&land, 10.5, 10.5, 0);
+    assert(fabs(seabed.height - (land.tide - 1) * 0.31) < 1e-9);
+    assert(seabed.r > seabed.g && seabed.g > seabed.b);
+    BronzeRenderSample shallow = bronze_render_water(seabed, seabed.height + 0.1, 10.5, 10.5);
+    BronzeRenderSample deep = bronze_render_water(seabed, seabed.height + 10, 10.5, 10.5);
+    assert(shallow.height == seabed.height && deep.height == seabed.height);
+    assert(shallow.r > deep.r && deep.b > deep.r);
+    land.tide += 10;
+    BronzeRenderSample raised_tide = bronze_render_sample(&land, 10.5, 10.5, 0);
+    assert(raised_tide.height == seabed.height && raised_tide.r == seabed.r
+           && raised_tide.g == seabed.g && raised_tide.b == seabed.b);
+    puts("Sandy seabed, translucent water and tide-independent ground tests passed.");
+    free(heights);
+    puts("Bronze bilinear height, color, cell-edge and wrapped-seam tests passed.");
+}
 
 static int claims, deaths, births;
 static BronzeActorId newborn;
@@ -166,18 +241,36 @@ static void sessions(void)
            strstr(summary,"home #") && strstr(summary,"workplace #"));
     assert(strstr(summary,"Energy ") && strstr(summary,"Cargo empty") &&
            strstr(summary,"Town store #"));
+    BronzeInspectorActor inspector = shared_session_bronze_inspector_actor(a);
+    assert(inspector.actor_id == aid && inspector.workplace_id == actor_a->workplace);
+    assert(strcmp(inspector.vocation, "host") == 0);
+    assert(strcmp(inspector.cargo, "Empty") == 0 && strcmp(inspector.items, "Empty") == 0);
+    assert(inspector.energy == being_energy(sim_group()->select) && inspector.energy_full == BEING_FULL);
+    assert(strstr(inspector.site, "Township #") && inspector.exchange[0] == '\0');
+    simulated_being *selected = sim_group()->select;
+    sim_group()->select = NULL;
+    BronzeInspectorActor empty_inspector = shared_session_bronze_inspector_actor(a);
+    assert(empty_inspector.actor_id == 0 && empty_inspector.workplace_id == 0);
+    assert(empty_inspector.vocation[0] == '\0' && empty_inspector.task[0] == '\0');
+    assert(empty_inspector.cargo[0] == '\0' && empty_inspector.site[0] == '\0' &&
+           empty_inspector.exchange_partner_id == 0);
+    sim_group()->select = selected;
     assert(!strstr(summary, "Latest exchange"));
     actor_a->economic_action = BRZ_ACTION_TRADE;
     actor_a->economic_status = BRONZE_TASK_COMPLETE;
     actor_a->economic_partner = 42;
     shared_session_bronze_actor_summary(a, summary, sizeof(summary));
     assert(strstr(summary, "Trade · complete · partner #42"));
+    inspector = shared_session_bronze_inspector_actor(a);
+    assert(inspector.exchange_partner_id == 42 && strcmp(inspector.exchange, "Trade · complete") == 0);
     actor_a->economic_action = BRZ_ACTION_SERVE;
     actor_a->economic_status = BRONZE_TASK_PARTNER;
     actor_a->economic_partner = BRONZE_ACTOR_NONE;
     shared_session_bronze_actor_summary(a, summary, sizeof(summary));
     assert(strstr(summary, "Paid delivery · no eligible partner at the service entrance"));
     assert(!strstr(summary, "partner #"));
+    inspector = shared_session_bronze_inspector_actor(a);
+    assert(inspector.exchange_partner_id == 0 && strstr(inspector.exchange, "no eligible partner"));
     strcpy(jobs.vocations[0].name,"next_world");
     shared_session_bronze_professions(a,&jobs);
     shared_session_bronze_actor_summary(a,summary,sizeof(summary));
@@ -328,6 +421,30 @@ static void sessions(void)
     assert(shared_session_new(b,1337)==0);
     if(shared_session_pause_state(b)) shared_session_menu(b,NA_MENU_PAUSE);
     shared_session_cycle(b,3,NUM_CONTROL); assert(shared_session_bronze_actor_id(b));
+    /* Workspace drawing and input must use the active world without advancing it. */
+    enum { workspace_width = 80, workspace_height = 48 };
+    n_byte4 overhead[workspace_width * workspace_height] = {0};
+    n_byte4 terrain[workspace_width * workspace_height] = {0};
+    n_byte4 repeat[workspace_width * workspace_height] = {0};
+    BronzeWorkspacePoint center = shared_session_bronze_workspace_center(b, 1);
+    n_uint before = (n_uint)land_date() * TIME_DAY_MINUTES + land_time();
+    shared_session_bronze_workspace_draw(b, overhead, workspace_width, workspace_height, NUM_VIEW, center, 64, 0, 0);
+    shared_session_bronze_workspace_draw(b, terrain, workspace_width, workspace_height, NUM_TERRAIN, center, 64, 0, 0);
+    shared_session_bronze_workspace_draw(b, repeat, workspace_width, workspace_height, NUM_VIEW, center, 64, 0, 0);
+    for (unsigned i = 0; i < sizeof(overhead); i += 4) {
+        const n_byte *map_rgba = (const n_byte *)overhead + i;
+        const n_byte *terrain_rgba = (const n_byte *)terrain + i;
+        assert(map_rgba[3] == 255 && terrain_rgba[3] == 255);
+    }
+    assert(memcmp(overhead, terrain, sizeof(overhead)));
+    assert(!memcmp(overhead, repeat, sizeof(overhead)));
+    assert((n_uint)land_date() * TIME_DAY_MINUTES + land_time() == before);
+    assert(!shared_session_bronze_workspace_step(b));
+    assert(shared_session_menu(b, NA_MENU_PAUSE));
+    assert(shared_session_bronze_workspace_step(b));
+    assert(shared_session_pause_state(b));
+    assert((n_uint)land_date() * TIME_DAY_MINUTES + land_time() == before + 1);
+    puts("Bronze workspace rendering and single paused step passed.");
     remove("native-only.txt"); remove("bad-native.txt");
     shared_session_destroy(b); shared_close();
     puts("Independent shared-session registry, selection, reset and destruction tests passed.");
@@ -335,6 +452,7 @@ static void sessions(void)
 void bronze_test_work(void);
 int main(int argc, char** argv)
 {
+    terrain_interpolation();
     if(argc>1 && !strcmp(argv[1],"sessions")) sessions();
     else if(argc>1 && !strcmp(argv[1],"work")) bronze_test_work();
     else lifecycle();

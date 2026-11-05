@@ -23,6 +23,10 @@ struct BundleTests {
         precondition(!model.load("missing", onCommit: commit))
         precondition(resets == 2 && model.showDiagnostics)
         precondition(model.activeName == "bronze_age_full.bronze" && model.program == activeProgram)
+        model.showDiagnostics = false
+        precondition(!model.load("missing", presentsDiagnostics: false, onCommit: commit))
+        precondition(resets == 2 && model.lastAttemptFailed && !model.showDiagnostics)
+        precondition(!model.diagnostics.isEmpty && model.program == activeProgram)
         precondition(model.load("first_slice"))
         precondition(!model.lastAttemptFailed && model.program != nil)
         print("Packaged Bundle resource/controller tests passed outside the repository working directory.")

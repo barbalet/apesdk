@@ -1956,20 +1956,222 @@ static void bronze_summary_stock(char *buffer, size_t size, const char *label,
                                  const BronzeStock *stock, size_t count, const KindTable *kinds)
 {
     size_t used = strlen(buffer);
-    snprintf(buffer + used, size - used, "\n%s", label);
+    if (label) snprintf(buffer + used, size - used, "\n%s", label);
     if (!count) {
         used = strlen(buffer);
-        snprintf(buffer + used, size - used, " empty");
+        snprintf(buffer + used, size - used, "%s", label ? " empty" : "Empty");
     }
     for (size_t i = 0; i < count; ++i) {
         const char *const *names = kinds ? kinds->names.data : NULL;
         const char *name = names && stock[i].kind < kinds->names.len ? names[stock[i].kind] : NULL;
+        const char *separator = label || i ? " · " : "";
         used = strlen(buffer);
         if (name)
-            snprintf(buffer + used, size - used, " · %s %.2f", name, stock[i].amount);
+            snprintf(buffer + used, size - used, "%s%s %.2f", separator, name, stock[i].amount);
         else
-            snprintf(buffer + used, size - used, " · kind %u %.2f", stock[i].kind, stock[i].amount);
+            snprintf(buffer + used, size - used, "%skind %u %.2f", separator, stock[i].kind, stock[i].amount);
     }
+}
+
+void shared_session_bronze_surface_key(shared_session* session, n_int surface, n_int key)
+{
+    if ((surface != NUM_VIEW && surface != NUM_TERRAIN) || key < 28 || key > 31 ||
+        !shared_session_is_started(session) || !shared_core_activate(&session->core)) return;
+    control_key((n_byte)surface, (n_byte2)key);
+    shared_core_context_sync_from_globals(&session->core);
+}
+
+#include "../bronze/ui/bronze_workspace_render.h"
+
+BronzeWorkspacePoint shared_session_bronze_workspace_center(shared_session* session, n_int selected)
+{
+    BronzeWorkspacePoint point = {MAP_DIMENSION / 2, MAP_DIMENSION / 2};
+    if (!shared_session_is_started(session) || !shared_core_activate(&session->core)) return point;
+    const BronzeLandscape *land = bronze_actors_landscape(session->core.bronze_registry);
+    if (!selected && land) {
+        for (n_uint i = 0; i < land->site_count; ++i) {
+            if (land->sites[i].kind == BRONZE_TOWN)
+                return (BronzeWorkspacePoint){land->sites[i].x, land->sites[i].y};
+        }
+    }
+    simulated_being *actor = sim_group()->select;
+    if (actor) {
+        point.x = APESPACE_TO_MAPSPACE(being_location_x(actor));
+        point.y = APESPACE_TO_MAPSPACE(being_location_y(actor));
+    }
+    return point;
+}
+
+n_int shared_bronze_workspace_map_dimension(void)
+{
+    return MAP_DIMENSION;
+}
+
+n_uint shared_session_bronze_workspace_day(shared_session* session)
+{
+    if (!shared_session_is_started(session) || !shared_core_activate(&session->core)) return 0;
+    return land_date();
+}
+
+n_int shared_session_bronze_workspace_step(shared_session* session)
+{
+    if (!shared_session_is_started(session) || !shared_core_activate(&session->core) ||
+        !toggle_pause || io_command_line_execution() == 1) return 0;
+    sim_cycle();
+    sim_update_output();
+    shared_core_context_sync_from_globals(&session->core);
+    return 1;
+}
+
+void shared_session_bronze_workspace_draw(shared_session* session, n_byte4* pixels,
+                                          n_int width, n_int height, n_int surface,
+                                          BronzeWorkspacePoint center, n_double span, n_double bearing, uint64_t selected_site)
+{
+    if (!pixels || width <= 0 || width > 768 || height <= 0 || height > 768 ||
+        (surface != NUM_VIEW && surface != NUM_TERRAIN) ||
+        !shared_session_is_started(session) || !shared_core_activate(&session->core)) return;
+
+    BronzeRenderLand land = {0};
+    land.tide = (int)land_tide_level();
+    land.heights = land_location_tile(0);
+    if (!land.heights) return;
+    const BronzeLandscape *landscape = bronze_actors_landscape(session->core.bronze_registry);
+    if (landscape) {
+        for (n_uint i = 0; i < landscape->site_count && i < BRONZE_SITE_LIMIT; ++i) {
+            const bronze_site *site = &landscape->sites[i];
+            int radius = site->kind == BRONZE_TOWN ? 5 : 3;
+            land.sites[land.count++] = (BronzeRenderSite){(int)site->x, (int)site->y, radius, site->kind, site->place_id};
+        }
+    }
+    if (surface == NUM_VIEW) {
+        bronze_render_map(pixels, (int)width, (int)height, &land, sim_group(),
+                          bronze_render_wrap((int)center.x), bronze_render_wrap((int)center.y),
+                          isfinite(span) ? fmin(MAP_DIMENSION, fmax(12, span)) : 64, selected_site);
+    } else {
+        BronzeWorkspacePoint target = {MAP_DIMENSION / 2, MAP_DIMENSION / 2};
+        simulated_being *actor = sim_group()->select;
+        if (actor) {
+            target.x = APESPACE_TO_MAPSPACE(being_location_x(actor));
+            target.y = APESPACE_TO_MAPSPACE(being_location_y(actor));
+        }
+        for (unsigned i = 0; selected_site && i < land.count; ++i) {
+            if (land.sites[i].id == selected_site) {
+                target = (BronzeWorkspacePoint){land.sites[i].x, land.sites[i].y};
+                break;
+            }
+        }
+        BronzeRenderCamera camera = bronze_render_camera(target.x, target.y,
+                                                         isfinite(bearing) ? bearing : 0, &land);
+        bronze_render_terrain(pixels, (int)width, (int)height, &land, sim_group(), camera);
+    }
+}
+
+BronzeWorkspaceSite shared_session_bronze_workspace_select(shared_session* session, BronzeWorkspacePoint center,
+                                            n_double dx, n_double dy, n_double radius)
+{
+    if (!isfinite(dx) || !isfinite(dy) || !isfinite(radius) ||
+        fabs(dx) > 768 || fabs(dy) > 768 || radius <= 0 || radius > 32 ||
+        !shared_session_is_started(session) || !shared_core_activate(&session->core)) return (BronzeWorkspaceSite){0};
+    simulated_group *group = sim_group();
+    simulated_being *nearest = NULL;
+    double best = radius * radius;
+    for (n_uint i = 0; i < group->num; ++i) {
+        simulated_being *actor = &group->beings[i];
+        int x = (int)APESPACE_TO_MAPSPACE(being_location_x(actor));
+        int y = (int)APESPACE_TO_MAPSPACE(being_location_y(actor));
+        double ax = bronze_render_delta(x, (int)center.x) - dx;
+        double ay = bronze_render_delta(y, (int)center.y) - dy;
+        double distance = ax * ax + ay * ay;
+        if (distance < best) {
+            best = distance;
+            nearest = actor;
+        }
+    }
+    BronzeWorkspaceSite picked = {0};
+    const BronzeLandscape *land = bronze_actors_landscape(session->core.bronze_registry);
+    if (land) {
+        for (n_uint i = 0; i < land->site_count; ++i) {
+            const bronze_site *site = &land->sites[i];
+            double ax = bronze_render_delta((int)site->x, (int)center.x) - dx;
+            double ay = bronze_render_delta((int)site->y, (int)center.y) - dy;
+            double distance = ax * ax + ay * ay;
+            if (distance < best) {
+                best = distance;
+                picked = (BronzeWorkspaceSite){site->place_id, site->kind};
+            }
+        }
+    }
+    if (!picked.id && nearest) {
+        sim_set_select(nearest);
+        shared_core_context_sync_from_globals(&session->core);
+    }
+    return picked;
+}
+
+static const char *bronze_inspector_task_status(const BronzeActor *actor)
+{
+    const BronzeTaskState *task = &actor->execution;
+    if (task->operation && actor->remaining_ticks && actor->work.reason != BRONZE_WORK_READY)
+        return bronze_work_reason_name(actor->work.reason);
+    return bronze_task_status_name(task->status);
+}
+
+BronzeInspectorActor shared_session_bronze_inspector_actor(shared_session* session)
+{
+    BronzeInspectorActor result = {0};
+    if (!shared_session_is_started(session) || !shared_core_activate(&session->core)) return result;
+    BronzeActorRegistry *registry = session->core.bronze_registry;
+    const BronzeActor *actor = bronze_actors_for_being(registry, sim_group()->select);
+    if (!actor) return result;
+    result.actor_id = actor->id;
+    result.workplace_id = actor->workplace;
+    simulated_being *being = sim_group()->select;
+    result.energy = being_energy(being);
+    result.energy_full = BEING_FULL;
+    result.hunger = being_drives(being)[DRIVE_HUNGER];
+    result.fatigue = being_drives(being)[DRIVE_FATIGUE];
+    const BronzeProgram *program = bronze_actors_program(registry);
+    bronze_summary_stock(result.cargo, sizeof(result.cargo), NULL, actor->resources,
+                         actor->resource_count, program ? &program->config->resource_kinds : NULL);
+    bronze_summary_stock(result.items, sizeof(result.items), NULL, actor->items,
+                         actor->item_count, program ? &program->config->item_kinds : NULL);
+    if (actor->economic_status != BRONZE_TASK_IDLE) {
+        snprintf(result.exchange, sizeof(result.exchange), "%s · %s",
+                 actor->economic_action == BRZ_ACTION_SERVE ? "Paid delivery" : "Trade",
+                 bronze_task_status_name(actor->economic_status));
+        result.exchange_partner_id = actor->economic_partner;
+    }
+    const BronzeLandscape *landscape = bronze_actors_landscape(registry);
+    uint64_t site_id = actor->workplace ? actor->workplace : actor->home;
+    for (unsigned i = 0; i < landscape->place_count; ++i) {
+        const BronzePlace *place = &landscape->places[i];
+        if (place->id == site_id &&
+            (place->kind == BRONZE_PLACE_STORAGE || place->kind == BRONZE_PLACE_SERVICE)) {
+            site_id = place->owner;
+            break;
+        }
+    }
+    for (n_uint i = 0; i < landscape->site_count; ++i) {
+        const bronze_site *site = &landscape->sites[i];
+        if (site->place_id != site_id) continue;
+        static const char *const names[] = {
+            [BRONZE_TOWN] = "Township", [BRONZE_FIELD] = "Field",
+            [BRONZE_COPPER_MINE] = "Copper mine", [BRONZE_TIN_MINE] = "Tin mine",
+            [BRONZE_WOODLAND] = "Woodland"
+        };
+        snprintf(result.site, sizeof(result.site), "%s #%llu · (%ld, %ld)",
+                 names[site->kind], (unsigned long long)site->place_id, (long)site->x, (long)site->y);
+        break;
+    }
+    const BronzeProfessionPolicy *policy = bronze_actors_professions(registry);
+    if (actor->job_status != BRONZE_JOB_ASSIGNED || actor->vocation >= policy->count) return result;
+    snprintf(result.vocation, sizeof(result.vocation), "%s", policy->vocations[actor->vocation].name);
+    const BronzeTaskState *task = &actor->execution;
+    snprintf(result.status, sizeof(result.status), "%s", bronze_inspector_task_status(actor));
+    if (task->name) snprintf(result.task, sizeof(result.task), "%s", task->name);
+    if (task->action) snprintf(result.action, sizeof(result.action), "%s", task->action);
+    result.remaining_minutes = actor->remaining_ticks;
+    return result;
 }
 
 void shared_session_bronze_actor_summary(shared_session* session, char* buffer, n_uint capacity)
@@ -1988,9 +2190,7 @@ void shared_session_bronze_actor_summary(shared_session* session, char* buffer, 
                  bronze_actor_skill(actor, actor->vocation), policy->skill_max,
                  (unsigned long long)actor->home, (unsigned long long)actor->workplace);
         const BronzeTaskState* task = &actor->execution;
-        const char* status = bronze_task_status_name(task->status);
-        if (task->operation && actor->remaining_ticks && actor->work.reason != BRONZE_WORK_READY)
-            status = bronze_work_reason_name(actor->work.reason);
+        const char* status = bronze_inspector_task_status(actor);
         size_t used = strlen(buffer);
         if (task->name)
             snprintf(buffer + used, size - used, " · %s: %s%s%s (line %d, step %u, %llu min left)",

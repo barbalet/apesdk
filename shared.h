@@ -195,6 +195,36 @@ void shared_session_bronze_professions(shared_session* session, const BronzeProf
 void shared_session_bronze_actor_summary(shared_session* session, char* buffer, n_uint capacity);
 void shared_session_bronze_land_policy(shared_session* session, BronzeLandPolicy policy);
 uint64_t shared_session_bronze_actor_id(shared_session* session);
+typedef struct {
+    uint64_t actor_id;
+    uint64_t workplace_id;
+    uint64_t remaining_minutes;
+    int energy, energy_full;
+    unsigned hunger, fatigue;
+    uint64_t exchange_partner_id;
+    char vocation[128];
+    char task[128];
+    char status[128];
+    char action[128];
+    char cargo[1024];
+    char items[1024];
+    char exchange[256];
+    char site[128];
+} BronzeInspectorActor;
+BronzeInspectorActor shared_session_bronze_inspector_actor(shared_session* session);
+void shared_session_bronze_surface_key(shared_session* session, n_int surface, n_int key);
+typedef struct { n_int x, y; } BronzeWorkspacePoint;
+typedef struct { uint64_t id; n_int kind; } BronzeWorkspaceSite;
+BronzeWorkspacePoint shared_session_bronze_workspace_center(shared_session* session, n_int selected);
+n_int shared_bronze_workspace_map_dimension(void);
+n_uint shared_session_bronze_workspace_day(shared_session* session);
+n_int shared_session_bronze_workspace_step(shared_session* session);
+void shared_session_bronze_workspace_draw(shared_session* session, n_byte4* pixels,
+                                          n_int width, n_int height, n_int surface,
+                                          BronzeWorkspacePoint center, n_double span, n_double bearing, uint64_t selected_site);
+BronzeWorkspaceSite shared_session_bronze_workspace_select(shared_session* session, BronzeWorkspacePoint center,
+                                            n_double dx, n_double dy, n_double radius);
+
 #endif
 
 #endif /* SIMULATEDAPE_SHARED_H */

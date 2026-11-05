@@ -97,7 +97,7 @@ enum ApeSimulationSurface {
 }
 
 #if targetEnvironment(macCatalyst)
-private enum ApeCatalystWindow {
+enum ApeCatalystWindow {
     static let viewID = "catalyst-view-window"
     static let terrainID = "catalyst-terrain-window"
     static let controlID = "catalyst-control-window"
@@ -116,8 +116,15 @@ struct ApeSimApp: App {
     @State private var isBraincode = false
 #endif
 
-    var body: some Scene {
 #if targetEnvironment(macCatalyst)
+    private var primaryCatalystScene: some Scene {
+#if BRONZE_SIM
+        WindowGroup("BronzeSim", id: BronzeWorkspacePreview.windowID) {
+            BronzeWorkspacePreview(sceneModel: catalystSceneModel,
+                                   controlWindowID: ApeCatalystWindow.controlID)
+        }
+        .defaultSize(width: 1100, height: 700)
+#else
         WindowGroup("View", id: ApeCatalystWindow.viewID) {
             CatalystSimulationWindow(sceneModel: catalystSceneModel,
                                      surface: .view,
@@ -125,25 +132,30 @@ struct ApeSimApp: App {
         }
         .defaultSize(width: ApeSimulationSurface.view.defaultSize.width,
                      height: ApeSimulationSurface.view.defaultSize.height)
+#endif
+    }
+#endif
+
+    var body: some Scene {
+#if targetEnvironment(macCatalyst)
+        primaryCatalystScene
         .commands {
+#if BRONZE_SIM
+            BronzeWorldCommands(sceneModel: catalystSceneModel)
+#else
             CommandGroup(replacing: CommandGroupPlacement.newItem) {
                 Button("New Simulation") {
                     catalystSceneModel.newSimulation()
                 }
                 .keyboardShortcut("n", modifiers: [.command])
-#if BRONZE_SIM
-                Button("Save Bronze World…") { catalystSceneModel.prepareBronzeSave() }
-                    .keyboardShortcut("s", modifiers: [.command])
-                Button("Open Bronze World…") { catalystSceneModel.chooseBronzeOpen(nativeOnly: false) }
-                    .keyboardShortcut("o", modifiers: [.command])
-                Button("Import Native World…") { catalystSceneModel.chooseBronzeOpen(nativeOnly: true) }
-#endif
             }
+#endif
 
 #if BRONZE_SIM
             BronzeScenarioCommands(controller: catalystSceneModel.bronzeScenario) { name in
                 catalystSceneModel.selectBronzeScenario(name)
             }
+            BronzeWorkspaceCommands()
 #endif
             CommandMenu("Control") {
 #if BRONZE_SIM
@@ -202,6 +214,15 @@ struct ApeSimApp: App {
         }
         .defaultSize(width: ApeSimulationSurface.control.defaultSize.width,
                      height: ApeSimulationSurface.control.defaultSize.height)
+#if BRONZE_SIM
+        WindowGroup("View", id: ApeCatalystWindow.viewID) {
+            CatalystSimulationWindow(sceneModel: catalystSceneModel,
+                                     surface: .view,
+                                     opensAuxiliaryWindows: false)
+        }
+        .defaultSize(width: ApeSimulationSurface.view.defaultSize.width,
+                     height: ApeSimulationSurface.view.defaultSize.height)
+#endif
 #else
         WindowGroup(id: ApeSimulationWindow.id) {
             ContentView()
@@ -283,7 +304,7 @@ struct CatalystSimulationWindow: View {
                         .fileExporter(isPresented: $sceneModel.showBronzeSave,
                                       document: sceneModel.bronzeSaveDocument,
                                       contentType: .data, defaultFilename: "World.bronzesave") { result in
-                            if case .failure(let error) = result {
+                            if case .failure(let error) = result, !BronzeSaveDocument.isCancellation(error) {
                                 sceneModel.bronzeScenario.reportFileError(error.localizedDescription)
                             }
                         }
@@ -318,7 +339,84 @@ struct CatalystSimulationWindow: View {
 #endif
 final class ApeSimulationSceneModel: ObservableObject {
 #if BRONZE_SIM
-    @Published private(set) var bronzeSelectedActorSummary = "No registered being selected"
+    @Published private(set) var bronzeWorkspaceSnapshot = BronzeWorkspaceSnapshot()
+    var bronzeSelectedActorSummary: String { bronzeWorkspaceSnapshot.actorSummary }
+#if targetEnvironment(macCatalyst)
+    private var bronzeLastDisplayTime: TimeInterval = 0
+    private var bronzeLastInspectorTime: TimeInterval = 0
+    private var bronzePlaybackCredit = 0.0
+    @Published var bronzePlaybackSpeed = 1.0
+
+    func bronzeWorkspaceCenter(selected: Bool) -> BronzeWorkspacePoint {
+        startSessionIfNeeded()
+        return shared_session_bronze_workspace_center(session, selected ? 1 : 0)
+    }
+
+    func drawBronzeWorkspace(into pixels: UnsafeMutablePointer<n_byte4>?, width: Int, height: Int,
+                             surface: ApeSimulationSurface, center: BronzeWorkspacePoint,
+                             span: Double, bearing: Double, selectedSite: UInt64) {
+        shared_session_bronze_workspace_draw(session, pixels, n_int(width), n_int(height),
+                                            surface.identifier, center, span, bearing, selectedSite)
+    }
+
+    func pickBronzeWorkspaceMap(center: BronzeWorkspacePoint, dx: Double, dy: Double,
+                               radius: Double) -> BronzeWorkspaceSite {
+        let site = shared_session_bronze_workspace_select(session, center, dx, dy, radius)
+        refreshBronzeWorkspaceSnapshot()
+        return site
+    }
+
+    func stepBronzeWorkspace() {
+        if shared_session_bronze_workspace_step(session) != 0 {
+            refreshBronzeWorkspaceSnapshot()
+        }
+    }
+    private let bronzeWorkspaceViews = NSHashTable<ASiOSView>.weakObjects()
+    private weak var bronzeInputView: ASiOSView?
+
+    func attachBronzeWorkspace(view: ASiOSView) {
+        bronzeWorkspaceViews.add(view)
+        attach(view: view)
+    }
+
+    func bronzeSurfaceDidDraw(_ view: ASiOSView, surface: ApeSimulationSurface) {
+        if bronzeWorkspaceViews.allObjects.isEmpty ||
+            (surface != .control && bronzeInputView === view) {
+            cycle(surface: surface, rotatesForUIKit: false)
+        }
+    }
+
+    func bronzePointer(at point: CGPoint, surface: ApeSimulationSurface, view: ASiOSView) {
+        if bronzeInputView !== view { mouseUp() }
+        bronzeInputView = view
+        shared_session_mouseReceived(session, n_double(point.x), n_double(point.y), surface.identifier)
+    }
+
+    func endBronzePointer(in view: ASiOSView) {
+        guard bronzeInputView === view else { return }
+        mouseUp()
+        bronzeInputView = nil
+    }
+
+    func bronzeNavigate(_ key: n_int, surface: ApeSimulationSurface) {
+        shared_session_bronze_surface_key(session, surface.identifier, key)
+        refreshBronzeWorkspaceSnapshot()
+    }
+#endif
+
+    private func refreshBronzeWorkspaceSnapshot() {
+        var buffer = [CChar](repeating: 0, count: 4096)
+        let summary = buffer.withUnsafeMutableBufferPointer {
+            shared_session_bronze_actor_summary(session, $0.baseAddress, n_uint($0.count))
+            return String(cString: $0.baseAddress!)
+        }
+        let actor = BronzeWorkspaceActor(shared_session_bronze_inspector_actor(session))
+        let snapshot = BronzeWorkspaceSnapshot(scenario: bronzeScenario.activeName,
+                                               actor: actor,
+                                               actorSummary: summary, paused: bronzePaused,
+                                               day: UInt64(shared_session_bronze_workspace_day(session)))
+        if snapshot != bronzeWorkspaceSnapshot { bronzeWorkspaceSnapshot = snapshot }
+    }
     let bronzeScenario = BronzeScenarioController()
     @Published var showBronzeOpen = false
     @Published private(set) var bronzePaused = false
@@ -332,22 +430,31 @@ final class ApeSimulationSceneModel: ObservableObject {
     private(set) var bronzeSaveDocument: BronzeSaveDocument?
 
     func prepareBronzeSave() {
+        bronzeSaveDocument = makeBronzeSaveDocument(reportError: bronzeScenario.reportFileError)
+        showBronzeSave = bronzeSaveDocument != nil
+    }
+
+    func makeBronzeSaveDocument(reportError: (String) -> Void) -> BronzeSaveDocument? {
         startSessionIfNeeded()
         guard bronzeScenario.digest.count == 32,
               let file = bronzeScenario.digest.withUnsafeBufferPointer({
                   shared_session_bronze_save(session, $0.baseAddress)
               }) else {
-            bronzeScenario.reportFileError("The Bronze world could not be saved. Wait for the world to finish loading and try again.")
-            return
+            reportError("The Bronze world could not be saved. Wait for the world to finish loading and try again.")
+            return nil
         }
-        bronzeSaveDocument = BronzeSaveDocument(data: Data(bytes: file.pointee.data,
+        let document = BronzeSaveDocument(data: Data(bytes: file.pointee.data,
                                                             count: Int(file.pointee.location)))
         var ownedFile: UnsafeMutablePointer<n_file>? = file
         io_file_free(&ownedFile)
-        showBronzeSave = true
+        return document
     }
 
     func openBronzeSave(_ result: Result<URL, Error>) {
+        openBronzeSave(result, nativeOnly: bronzeNativeImport, reportError: bronzeScenario.reportFileError)
+    }
+
+    func openBronzeSave(_ result: Result<URL, Error>, nativeOnly: Bool, reportError: (String) -> Void) {
         startSessionIfNeeded()
         do {
             let url = try result.get()
@@ -360,17 +467,18 @@ final class ApeSimulationSceneModel: ObservableObject {
                 throw CocoaError(.fileReadCorruptFile)
             }
             try handle.seek(toOffset: 0)
-            if bronzeNativeImport {
+            if nativeOnly {
                 let signature = try handle.read(upToCount: 7) ?? Data()
                 if signature == Data("BRZSAVE".utf8) {
-                    bronzeScenario.reportFileError("Use Open Bronze World to resume this save.")
+                    reportError("Use Open Bronze World to resume this save.")
                     return
                 }
                 let imported = url.path.withCString { shared_session_openFileName(session, $0, 0) }
                 bronzePaused = shared_session_pause_state(session) != 0
                 if imported == 0 {
-                    bronzeScenario.reportFileError("The native world could not be imported.")
+                    reportError("The native world could not be imported.")
                 }
+                refreshBronzeWorkspaceSnapshot()
                 return
             }
             guard bronzeScenario.digest.count == 32 else {
@@ -385,16 +493,22 @@ final class ApeSimulationSceneModel: ObservableObject {
             }
             if restored != 0 {
                 bronzePaused = true
+                refreshBronzeWorkspaceSnapshot()
             } else {
-                bronzeScenario.reportFileError("The Bronze save is invalid or belongs to a different scenario. Load the matching scenario and try again.")
+                reportError("The Bronze save is invalid or belongs to a different scenario. Load the matching scenario and try again.")
             }
+        } catch where BronzeSaveDocument.isCancellation(error) {
+            return
         } catch {
-            bronzeScenario.reportFileError(error.localizedDescription)
+            reportError(error.localizedDescription)
         }
     }
 
-    func selectBronzeScenario(_ name: String) {
-        bronzeScenario.load(name) { [weak self] _ in self?.newSimulation() }
+    @discardableResult
+    func selectBronzeScenario(_ name: String, presentsDiagnostics: Bool = true) -> Bool {
+        bronzeScenario.load(name, presentsDiagnostics: presentsDiagnostics) { [weak self] _ in
+            self?.newSimulation()
+        }
     }
 #endif
     private let session = shared_session_create(n_uint(CFAbsoluteTimeGetCurrent()))
@@ -420,6 +534,9 @@ final class ApeSimulationSceneModel: ObservableObject {
     }
 
     func detach(view: ASiOSView) {
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        bronzeWorkspaceViews.remove(view)
+#endif
         renderViews.remove(view)
     }
 
@@ -455,6 +572,27 @@ final class ApeSimulationSceneModel: ObservableObject {
         }
     }
 
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+    private func advanceBronzeWorkspace(now: TimeInterval) {
+        startSessionIfNeeded()
+        let ticks = n_uint(CFAbsoluteTimeGetCurrent())
+        if bronzePaused {
+            bronzePlaybackCredit = 0
+            _ = shared_session_cycle(session, ticks, ApeSimulationSurface.control.identifier)
+        } else {
+            bronzePlaybackCredit += bronzePlaybackSpeed
+            while bronzePlaybackCredit >= 1 {
+                _ = shared_session_cycle(session, ticks, ApeSimulationSurface.control.identifier)
+                bronzePlaybackCredit -= 1
+            }
+        }
+        if now - bronzeLastInspectorTime >= 0.1 {
+            bronzeLastInspectorTime = now
+            refreshBronzeWorkspaceSnapshot()
+        }
+    }
+#endif
+
     func cycle(surface: ApeSimulationSurface, rotatesForUIKit: Bool) {
         startSessionIfNeeded()
         let ticks = n_uint(CFAbsoluteTimeGetCurrent())
@@ -464,12 +602,7 @@ final class ApeSimulationSceneModel: ObservableObject {
             _ = shared_session_cycle(session, ticks, surface.identifier)
         }
 #if BRONZE_SIM
-        var buffer = [CChar](repeating: 0, count: 4096)
-        let summary = buffer.withUnsafeMutableBufferPointer {
-            shared_session_bronze_actor_summary(session, $0.baseAddress, n_uint($0.count))
-            return String(cString: $0.baseAddress!)
-        }
-        if bronzeSelectedActorSummary != summary { bronzeSelectedActorSummary = summary }
+        refreshBronzeWorkspaceSnapshot()
 #endif
     }
 
@@ -480,6 +613,8 @@ final class ApeSimulationSceneModel: ObservableObject {
         shared_session_bronze_professions(session, bronzeScenario.professions)
         shared_session_bronze_program(session, bronzeScenario.program)
         shared_session_new(session, bronzeScenario.seed)
+        bronzePaused = shared_session_pause_state(session) != 0
+        refreshBronzeWorkspaceSnapshot()
 #else
         shared_session_new(session, n_uint(CFAbsoluteTimeGetCurrent()))
 #endif
@@ -490,6 +625,7 @@ final class ApeSimulationSceneModel: ObservableObject {
         let result = shared_session_menu(session, menuValue)
 #if BRONZE_SIM
         if menuValue == n_int(NA_MENU_PAUSE) { bronzePaused = result != 0 }
+        refreshBronzeWorkspaceSnapshot()
 #endif
         return result
     }
@@ -507,6 +643,9 @@ final class ApeSimulationSceneModel: ObservableObject {
                        surface: ApeSimulationSurface,
                        rotatesForUIKit: Bool) {
         startSessionIfNeeded()
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        if let owner = bronzeInputView { endBronzePointer(in: owner) }
+#endif
         let simulationLocation = simulationPoint(for: location,
                                                  in: bounds,
                                                  surface: surface,
@@ -552,11 +691,37 @@ final class ApeSimulationSceneModel: ObservableObject {
         shared_session_init(session, n_int(NUM_CONTROL), n_uint(CFAbsoluteTimeGetCurrent()))
 #endif
         hasStartedSession = true
+#if BRONZE_SIM
+        refreshBronzeWorkspaceSnapshot()
+#endif
     }
 
     private func startTimerIfNeeded() {
         guard timer == nil else { return }
 
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        let driver = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                let now = ProcessInfo.processInfo.systemUptime
+                let workspaceOpen = !self.bronzeWorkspaceViews.allObjects.isEmpty
+                if workspaceOpen {
+                    self.advanceBronzeWorkspace(now: now)
+                }
+                let displayInterval = workspaceOpen ? 1.0 / 20.0 : 1.0 / 32.0
+                if now - self.bronzeLastDisplayTime >= displayInterval {
+                    self.bronzeLastDisplayTime = now
+                    self.renderViews.allObjects.forEach { view in
+                        if let window = view.window, !window.isHidden, !view.isHidden {
+                            view.setNeedsDisplay()
+                        }
+                    }
+                }
+            }
+        }
+        timer = driver
+        RunLoop.main.add(driver, forMode: .common)
+#else
         timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
             DispatchQueue.main.async {
                 self?.renderViews.allObjects.forEach { view in
@@ -564,6 +729,7 @@ final class ApeSimulationSceneModel: ObservableObject {
                 }
             }
         }
+#endif
     }
 
     func simulationPoint(for location: CGPoint,
@@ -709,6 +875,38 @@ class ASiOSView: UIView {
     private let sceneModel: ApeSimulationSceneModel
     private let surface: ApeSimulationSurface
     private let rotatesForUIKit: Bool
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+    var isBronzeWorkspaceSurface = false
+    var onBronzeSurfaceFocus: (() -> Void)?
+    var bronzeMapCenter = BronzeWorkspacePoint(x: 0, y: 0)
+    var bronzeMapSpan = Double(shared_bronze_workspace_map_dimension()) / 2
+    var bronzeTerrainBearing = 0.0
+    var bronzeSelectedSite: UInt64 = 0
+    var onBronzeWorkspaceSite: ((BronzeWorkspaceSite) -> Void)?
+    var onBronzeWorkspaceDrag: ((Double, Double) -> Void)?
+    private var bronzeWorkspaceTouchStart: CGPoint?
+    private var bronzePointerLocation: CGPoint?
+    private var bronzePointerEnded = false
+
+    func enableBronzeMapScrolling() {
+        let scroll = UIPanGestureRecognizer(target: self, action: #selector(scrollBronzeMap(_:)))
+        scroll.allowedScrollTypesMask = [.continuous, .discrete]
+        scroll.allowedTouchTypes = []
+        addGestureRecognizer(scroll)
+    }
+
+    @objc private func scrollBronzeMap(_ scroll: UIPanGestureRecognizer) {
+        guard scroll.state == .changed || scroll.state == .ended, bounds.width > 0 else { return }
+        let translation = scroll.translation(in: self)
+        let cellsPerPoint = bronzeMapSpan / Double(bounds.width)
+        let x = (Double(translation.x) * cellsPerPoint).rounded(.towardZero)
+        let y = (Double(translation.y) * cellsPerPoint).rounded(.towardZero)
+        guard x != 0 || y != 0 else { return }
+        scroll.setTranslation(CGPoint(x: translation.x - x / cellsPerPoint,
+                                      y: translation.y - y / cellsPerPoint), in: self)
+        onBronzeWorkspaceDrag?(x / bronzeMapSpan, y / bronzeMapSpan)
+    }
+#endif
     private var offscreenBuffer = [UInt32](repeating: 0, count: 4096 * 512)
     private var drawRef: CGContext?
     private var oldDimensionX: Int = -1
@@ -740,12 +938,18 @@ class ASiOSView: UIView {
             return
         }
 
+#if BRONZE_SIM
+        guard !isBronzeWorkspaceSurface else { return }
+#endif
         windowScene.title = surface.title
         windowScene.sizeRestrictions?.minimumSize = surface.minimumSize
     }
 #endif
 
     func detachFromSceneModel() {
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        sceneModel.endBronzePointer(in: self)
+#endif
         sceneModel.detach(view: self)
     }
 
@@ -760,6 +964,12 @@ class ASiOSView: UIView {
     }
 
     private func renderDimensions(for bounds: CGRect) -> (width: Int, height: Int) {
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        if isBronzeWorkspaceSurface {
+            let scale = min(1, 384 / max(1, bounds.width, bounds.height))
+            return (max(1, Int(bounds.width * scale)), max(1, Int(bounds.height * scale)))
+        }
+#endif
 #if targetEnvironment(macCatalyst)
         if surface == .view {
             return (Self.catalystMapRenderDimension, Self.catalystMapRenderDimension)
@@ -795,6 +1005,32 @@ class ASiOSView: UIView {
 
         guard dimensionX > 0, dimensionY > 0 else { return }
         guard let context = UIGraphicsGetCurrentContext() else { return }
+
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        if isBronzeWorkspaceSurface {
+            let bytesPerRow = dimensionX * MemoryLayout<n_byte4>.stride
+            var frame = Data(count: bytesPerRow * dimensionY)
+            frame.withUnsafeMutableBytes { bytes in
+                sceneModel.drawBronzeWorkspace(into: bytes.bindMemory(to: n_byte4.self).baseAddress,
+                                              width: dimensionX, height: dimensionY,
+                                              surface: surface, center: bronzeMapCenter,
+                                              span: bronzeMapSpan, bearing: bronzeTerrainBearing,
+                                              selectedSite: bronzeSelectedSite)
+            }
+            guard let provider = CGDataProvider(data: frame as CFData),
+                  let image = CGImage(width: dimensionX, height: dimensionY, bitsPerComponent: 8,
+                                      bitsPerPixel: 32, bytesPerRow: bytesPerRow,
+                                      space: CGColorSpaceCreateDeviceRGB(),
+                                      bitmapInfo: [.byteOrder32Big,
+                                                   CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)],
+                                      provider: provider, decode: nil, shouldInterpolate: true,
+                                      intent: .defaultIntent) else { return }
+            // Render rows run from bottom to top. UIKit images start at the top.
+            UIImage(cgImage: image, scale: 1, orientation: .downMirrored)
+                .draw(in: displayRect, blendMode: .copy, alpha: 1)
+            return
+        }
+#endif
 
         let pixelCount = dimensionX * dimensionY
         if offscreenBuffer.count < pixelCount {
@@ -843,7 +1079,24 @@ class ASiOSView: UIView {
         }
 
         context.restoreGState()
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        if !rotatesForUIKit {
+            if let location = bronzePointerLocation {
+                sceneModel.bronzePointer(at: simulationPoint(for: location), surface: surface, view: self)
+                bronzePointerLocation = nil
+            }
+            sceneModel.bronzeSurfaceDidDraw(self, surface: surface)
+            if bronzePointerEnded {
+                sceneModel.endBronzePointer(in: self)
+                bronzePointerEnded = false
+            }
+            return // The Bronze timer invalidates Catalyst surfaces.
+        } else {
+            sceneModel.cycle(surface: surface, rotatesForUIKit: true)
+        }
+#else
         sceneModel.cycle(surface: surface, rotatesForUIKit: rotatesForUIKit)
+#endif
         DispatchQueue.main.async { [weak self] in
             self?.setNeedsDisplay()
         }
@@ -852,14 +1105,33 @@ class ASiOSView: UIView {
     // MARK: - Touch Handling
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        onBronzeSurfaceFocus?()
+        if isBronzeWorkspaceSurface {
+            bronzeWorkspaceTouchStart = touches.first?.location(in: self)
+            return
+        }
+#endif
         touchesMoved(touches, with: event)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        if isBronzeWorkspaceSurface { return }
+#endif
         guard let allTouches = event?.touches(for: self) else { return }
 
         for touch in allTouches {
             let location = touch.location(in: self)
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+            if !rotatesForUIKit && surface != .control {
+                if !isBronzeWorkspaceSurface || displayRect(renderDimensions: renderDimensions(for: bounds), in: bounds).contains(location) {
+                    bronzePointerLocation = location
+                    setNeedsDisplay()
+                }
+                continue
+            }
+#endif
             print("Touch moved to: \(location)")
             sceneModel.mouseReceived(at: location,
                                      in: bounds,
@@ -869,6 +1141,12 @@ class ASiOSView: UIView {
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        bronzeWorkspaceTouchStart = nil
+        bronzePointerLocation = nil
+        bronzePointerEnded = false
+        sceneModel.endBronzePointer(in: self)
+#endif
         guard let allTouches = event?.touches(for: self) else { return }
 
         for touch in allTouches {
@@ -878,6 +1156,30 @@ class ASiOSView: UIView {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+#if BRONZE_SIM && targetEnvironment(macCatalyst)
+        if isBronzeWorkspaceSurface {
+            defer { bronzeWorkspaceTouchStart = nil }
+            guard let start = bronzeWorkspaceTouchStart, let end = touches.first?.location(in: self),
+                  bounds.width > 0 else { return }
+            let dx = end.x - start.x
+            let dy = end.y - start.y
+            if abs(dx) + abs(dy) > 5 {
+                onBronzeWorkspaceDrag?(dx / bounds.width, dy / bounds.width)
+            } else if surface == .view {
+                let units = bronzeMapSpan / Double(bounds.width)
+                let site = sceneModel.pickBronzeWorkspaceMap(center: bronzeMapCenter,
+                    dx: Double(end.x - bounds.midX) * units,
+                    dy: Double(bounds.midY - end.y) * units, radius: min(32, max(0.8, 12 * units)))
+                onBronzeWorkspaceSite?(site)
+            }
+            return
+        }
+        if !rotatesForUIKit && surface != .control {
+            bronzePointerEnded = true
+            setNeedsDisplay()
+            return
+        }
+#endif
         sceneModel.mouseUp()
     }
 

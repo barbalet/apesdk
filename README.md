@@ -140,6 +140,15 @@ smaller scenarios, and **Save Bronze World** preserves the simulation
 and its economy together. [BronzeSim guide](bronze/README.md) ·
 [Save and resume](bronze/SAVE-FORMAT.md)
 
+BronzeSim opens the workspace on a fresh launch. Reopen it with
+**Window → Open Bronze Workspace** (⌘⇧U). Scroll or drag over the map to pan, and use **−**, **+**, or
+**Recenter** in the footer to change the view. Click a map marker to select
+an actor or site. Drag Terrain to rotate around the selected actor.
+**Step** advances one tick while paused. **Layout** controls panel
+visibility and resets the split. Choose **Window → Open Separate Simulation
+Windows** for the classic View, Terrain, and Control windows.
+[Workspace redesign plan](bronze/ui-redesign/PLAN.md)
+
 For native Urban, place the `urban/` directory from
 [apesdk/urbanscribble](https://gitlab.com/apesdk/urbanscribble) beside this ApeSDK
 checkout, so the layout is `parent/apesdk` and `parent/urban`. The tested Urban
