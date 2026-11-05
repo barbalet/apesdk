@@ -47,16 +47,10 @@ Render dimensions remain bounded by the existing workspace limit of 768.
 
 ## Visual evidence and limits
 
-The PNG pairs in this directory are unmodified outputs from the actual native
-workspace renderer, with rows reversed to match UIKit presentation. They show
-the first township at a 48-cell map span and the selected township's Terrain
-camera, under each scenario's geography. They are rendered-world captures,
-not screenshots of window chrome and not generated illustrations.
-
-- [Example Large map](example_large-map.png), [Terrain](example_large-terrain.png)
-- [First Slice map](first_slice-map.png), [Terrain](first_slice-terrain.png)
-- [Vertical Slice map](vertical_slice-map.png), [Terrain](vertical_slice-terrain.png)
-- [Bronze Age Full map](bronze_age_full-map.png), [Terrain](bronze_age_full-terrain.png)
+The previous map, Terrain and agent PNG captures have been removed because
+they predate the separate building/mine geometry and current partially
+transparent water rendering. Inspect the running app for the current output;
+the historical qualification results below remain as recorded.
 
 Live Catalyst inspection showed township membership, housing and access data
 beside the actor's occupation/task, the new township recenter control, and the
@@ -86,5 +80,4 @@ make -C bronze contract-test
 ```
 
 Set `BRONZE_TOWNSHIP_EVIDENCE` to an existing temporary directory when running
-the actor suite to export the same raw PPM frames and timing log. PNG files here
-were produced by lossless PPM-to-PNG conversion with Python's standard library.
+the actor suite to export fresh raw PPM frames and a timing log from the current renderer.

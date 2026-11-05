@@ -96,7 +96,21 @@ static void terrain_interpolation(void)
     BronzeRenderSample shallow = bronze_render_water(seabed, seabed.height + 0.1, 10.5, 10.5);
     BronzeRenderSample deep = bronze_render_water(seabed, seabed.height + 10, 10.5, 10.5);
     assert(shallow.height == seabed.height && deep.height == seabed.height);
-    assert(shallow.r > deep.r && deep.b > deep.r);
+    assert(shallow.r > deep.r && shallow.g > deep.g);
+    /* Deep water must preserve visible bottom contrast, not converge to an
+     * opaque sea color. This also applies to the overhead map. */
+    BronzeRenderSample dark_bottom = {seabed.height, 40, 50, 30};
+    BronzeRenderSample light_bottom = {seabed.height, 200, 190, 160};
+    BronzeRenderSample dark_water = bronze_render_water(dark_bottom,seabed.height+30,10.5,10.5);
+    BronzeRenderSample light_water = bronze_render_water(light_bottom,seabed.height+30,10.5,10.5);
+    assert(light_water.r-dark_water.r >= 70 && light_water.g-dark_water.g >= 60);
+    /* A neutral seabed must acquire a visible blue surface tint. */
+    BronzeRenderSample neutral = {seabed.height,160,160,160};
+    BronzeRenderSample blue_water = bronze_render_water(neutral,seabed.height+10,10.5,10.5);
+    assert(blue_water.b>blue_water.g && blue_water.g>blue_water.r);
+    assert(blue_water.r<neutral.r && blue_water.b<neutral.b);
+    BronzeRenderSample dry = bronze_render_water(seabed,seabed.height-1,10.5,10.5);
+    assert(dry.r==seabed.r && dry.g==seabed.g && dry.b==seabed.b);
     land.tide += 10;
     BronzeRenderSample raised_tide = bronze_render_sample(&land, 10.5, 10.5, 0);
     assert(raised_tide.height == seabed.height && raised_tide.r == seabed.r

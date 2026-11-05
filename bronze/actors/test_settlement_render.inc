@@ -12,8 +12,11 @@ static void settlement_render_test(void)
     layout->paths[0].cells[2]=home->entrance;
     bronze_townships_index(layout);
     BronzeRenderLand land={.heights=heights,.tide=TIDE_MAX,.settlement=layout};
-    BronzeRenderSample roof=bronze_render_sample(&land,11,11,0);
+    BronzeRenderSample roof=bronze_render_sample(&land,11,11,1);
     assert(roof.height>heights[0]*0.155+1);
+    /* Perspective ground height stays authoritative under roofs and thresholds. */
+    assert(bronze_render_sample(&land,11,11,0).height==heights[0]*0.155);
+    assert(bronze_render_sample(&land,10.1,9.5,0).height==heights[0]*0.155);
     assert(!bronze_render_tree_ground(&land,10,10) && !bronze_render_tree_ground(&land,10,8));
     assert(bronze_render_tree_ground(&land,20,20));
     BronzeRenderSample track=bronze_render_sample(&land,10.5,8.5,1);
@@ -28,11 +31,35 @@ static void settlement_render_test(void)
     BronzeRenderCamera camera=bronze_render_camera(11,11,0.4,&land);
     bronze_render_terrain(pixels+1,width,height,&land,group,camera);
     assert(pixels[0]==123 && pixels[width*height+1]==456);
+    /* Standalone geometry writes depth without changing ground samples. */
+    float depths[width*height]; memset(depths,0,sizeof(depths));
+    memset(pixels+1,0,width*height*sizeof(*pixels));
+    BronzeRenderFrame objects={pixels+1,depths,width,height};
+    bronze_render_structures(&objects,&land,camera,width*0.72,height*0.61);
+    unsigned covered=0;
+    for (unsigned i=0;i<width*height;++i) if (depths[i]>0) covered++;
+    assert(covered>0);
+    /* A nearer surface must hide the same object regardless of draw order. */
+    for (unsigned i=0;i<width*height;++i) { depths[i]=0.5; pixels[i+1]=123; }
+    bronze_render_structures(&objects,&land,camera,width*0.72,height*0.61);
+    for (unsigned i=0;i<width*height;++i) assert(pixels[i+1]==123);
+    /* Mine geometry is present independently of settlement footprints. */
+    land.settlement=NULL; land.count=1;
+    land.sites[0]=(BronzeRenderSite){11,11,3,BRONZE_COPPER_MINE,7};
+    memset(depths,0,sizeof(depths));
+    bronze_render_structures(&objects,&land,camera,width*0.72,height*0.61);
+    covered=0; for (unsigned i=0;i<width*height;++i) if (depths[i]>0) covered++;
+    assert(covered>0 && bronze_render_sample(&land,11,11,0).height==heights[0]*0.155);
+    land.settlement=layout; land.count=0;
+    /* Near-plane clipping and cameras inside premises keep frame bounds. */
+    camera=bronze_render_camera_distance(11,11,0.4,&land,0,1);
+    bronze_render_terrain(pixels+1,width,height,&land,group,camera);
+    assert(pixels[0]==123 && pixels[width*height+1]==456);
     /* Cached seam footprints retain their world-space geometry in both cameras. */
     home->cells[0]=(bronze_land_cell){MAP_DIMENSION-1,10}; home->cells[1]=(bronze_land_cell){0,10};
     home->cells[2]=(bronze_land_cell){MAP_DIMENSION-1,11}; home->cells[3]=(bronze_land_cell){0,11};
     bronze_townships_index(layout);
-    assert(bronze_render_sample(&land,0,11,0).height>heights[0]*0.155+1);
+    assert(bronze_render_sample(&land,0,11,1).height>heights[0]*0.155+1);
     /* Exercise shared world coordinates across resize, pan and actor movement. */
     group->num=1; group->select=group->beings;
     const int widths[]={96,127,320}, heights_px[]={72,96,240};

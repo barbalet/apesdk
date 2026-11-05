@@ -108,7 +108,7 @@ static BronzeRenderSample bronze_render_ground_vertex(const BronzeRenderLand *la
 
 /* Both cameras sample the authoritative spatial records in native map cells. */
 static int bronze_render_settlement(const BronzeRenderLand *land,double x,double y,
-                                     BronzeRenderSample *sample)
+                                     BronzeRenderSample *sample, int overhead)
 {
     const BronzeSettlementLayout *layout=land->settlement;
     if (!layout) return 0;
@@ -126,26 +126,26 @@ static int bronze_render_settlement(const BronzeRenderLand *land,double x,double
             double radius=hypot(a-1,b-1);
             if (radius<0.94) {
                 int shade=(int)((a+b-2)*19)+grain;
-                sample->height+=1.0+(0.94-radius)*1.8;
+                if (overhead) sample->height+=1.0+(0.94-radius)*1.8;
                 sample->r=163-shade; sample->g=124-shade; sample->b=66-shade/2;
             }
         } else if (building->kind==BRONZE_BUILDING_STORE) {
             double ridge=1-fabs(a-1);
-            sample->height+=1.1+fmax(0,ridge)*1.0;
+            if (overhead) sample->height+=1.1+fmax(0,ridge)*1.0;
             int shade=(int)(a*17)+grain+(int)(5*sin(b*34));
             sample->r=171-shade; sample->g=131-shade; sample->b=75-shade/2;
         } else if (building->kind==BRONZE_BUILDING_WORK_YARD) {
             double radius=hypot(a-1,b-1);
             if (building->profession==BRONZE_PREMISE_METAL && radius<0.37) {
-                sample->height+=0.38;
+                if (overhead) sample->height+=0.38;
                 sample->r=radius<0.16?193:63; sample->g=radius<0.16?91:58; sample->b=39;
             } else if (building->profession==BRONZE_PREMISE_POTTERY &&
                        hypot(fmod(a+0.1,0.65)-0.3,fmod(b+0.1,0.65)-0.3)<0.17) {
-                sample->height+=0.35; sample->r=171+grain; sample->g=91+grain; sample->b=51;
+                if (overhead) sample->height+=0.35; sample->r=171+grain; sample->g=91+grain; sample->b=51;
             } else if (building->profession==BRONZE_PREMISE_WOOD && fabs(b-1)<0.3) {
-                sample->height+=0.38; sample->r=110+grain; sample->g=73+grain; sample->b=40;
+                if (overhead) sample->height+=0.38; sample->r=110+grain; sample->g=73+grain; sample->b=40;
             } else if (building->profession==BRONZE_PREMISE_FOOD && radius<0.48) {
-                sample->height+=0.65*(1-radius/0.6); sample->r=132+grain; sample->g=83+grain; sample->b=52;
+                if (overhead) sample->height+=0.65*(1-radius/0.6); sample->r=132+grain; sample->g=83+grain; sample->b=52;
             }
         }
         return 1;
@@ -156,7 +156,7 @@ static int bronze_render_settlement(const BronzeRenderLand *land,double x,double
         bronze_render_wrap((int)layout->buildings[door-1].cells[0].x)]) {
         sample->r=116+grain; sample->g=89+grain; sample->b=55+grain;
         if (fabs(u-0.5)>0.33 && fabs(v-0.5)<0.16) {
-            sample->height+=0.65; sample->r=90; sample->g=63; sample->b=36;
+            if (overhead) sample->height+=0.65; sample->r=90; sample->g=63; sample->b=36;
         }
         return 1;
     }
@@ -210,10 +210,10 @@ static BronzeRenderSample bronze_render_sample(const BronzeRenderLand *land, dou
         sample.r = (int)lround(sand_r * (1 - grass) + sample.r * grass);
         sample.g = (int)lround(sand_g * (1 - grass) + sample.g * grass);
         sample.b = (int)lround(sand_b * (1 - grass) + sample.b * grass);
-        bronze_render_settlement(land,x,y,&sample);
+        bronze_render_settlement(land,x,y,&sample,canopy);
         return sample;
     }
-    if (bronze_render_settlement(land,x,y,&sample)) return sample;
+    if (bronze_render_settlement(land,x,y,&sample,canopy)) return sample;
     unsigned noise = bronze_render_noise(wx, wy);
     int grain = (int)(bronze_render_noise((int)floor(x * 8), (int)floor(y * 8)) % 13) - 6;
     int green = (int)(noise % 19);
@@ -303,12 +303,15 @@ static BronzeRenderSample bronze_render_water(BronzeRenderSample bottom, double 
 {
     double depth = water_height - bottom.height;
     if (depth <= 0) return bottom;
-    double transmission = exp(-depth * 0.13);
-    double ripple = (sin(x * 1.7 + sin(y * 0.41)) + sin(y * 1.3 - x * 0.25)) * 1.5;
-    double reflection = 0.12 * fmin(1, depth / 0.5);
-    bottom.r = (int)lround((bottom.r * transmission + 20 * (1 - transmission)) * (1 - reflection) + (105 + ripple) * reflection);
-    bottom.g = (int)lround((bottom.g * transmission + 67 * (1 - transmission)) * (1 - reflection) + (145 + ripple) * reflection);
-    bottom.b = (int)lround((bottom.b * transmission + 77 * (1 - transmission)) * (1 - reflection) + (163 + ripple) * reflection);
+    /* Blend a visible dark blue surface over the seabed. Keep at least
+     * half the bottom contribution, with a soft fade at the shoreline. */
+    double opacity = 0.45 * fmin(1, depth / 1.2) + 0.05 * (1 - exp(-depth * 0.1));
+    double transmission = 1 - opacity;
+    double ripple = (sin(x * 1.7 + sin(y * 0.41)) + sin(y * 1.3 - x * 0.25)) * 2;
+    double shade = 1 - 0.08 * fmin(1, depth / 0.8);
+    bottom.r = (int)lround(bottom.r * shade * transmission + (5 + ripple) * opacity);
+    bottom.g = (int)lround(bottom.g * shade * transmission + (33 + ripple) * opacity);
+    bottom.b = (int)lround(bottom.b * shade * transmission + (74 + ripple) * opacity);
     return bottom;
 }
 
@@ -454,6 +457,8 @@ static void bronze_render_trees(BronzeRenderFrame *frame, const BronzeRenderLand
     }
 }
 
+#include "bronze_workspace_objects.h"
+
 static void bronze_render_terrain(n_byte4 *pixels, int width, int height, const BronzeRenderLand *land,
                                  simulated_group *group, BronzeRenderCamera camera)
 {
@@ -512,13 +517,22 @@ static void bronze_render_terrain(n_byte4 *pixels, int width, int height, const 
             /* The ground pass supplies the visible bottom through the water.
              * The plane supplies its independent surface depth for occlusion. */
             const n_byte *rgba = (const n_byte *)(pixels + index);
-            BronzeRenderSample under = {bed.height, rgba[0], rgba[1], rgba[2]};
+            /* Absorption follows the bottom actually visible along this ray,
+             * not the unrelated ground directly beneath the surface crossing. */
+            double bottom_depth = frame.depths[index];
+            double bottom_height = bottom_depth > 0
+                ? bronze_render_sample(land,
+                    camera.x + (camera.fx - camera.fy * right) * bottom_depth,
+                    camera.y + (camera.fy + camera.fx * right) * bottom_depth, 0).height
+                : bed.height;
+            BronzeRenderSample under = {bottom_height, rgba[0], rgba[1], rgba[2]};
             if (frame.depths[index] == 0) under = bed;
             BronzeRenderSample water = bronze_render_water(under, water_height, wx, wy);
             bronze_render_pixel(pixels + index, water.r, water.g, water.b);
             frame.depths[index] = (float)depth;
         }
     }
+    bronze_render_structures(&frame, land, camera, focal, horizon);
     bronze_render_trees(&frame, land, camera, focal, horizon);
     simulated_being *actor = group->select;
     if (actor) {

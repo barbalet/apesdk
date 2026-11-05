@@ -50,6 +50,28 @@ static void township_qualification(void)
         begin=clock(); shared_session_bronze_workspace_draw(session,pixels,768,432,NUM_TERRAIN,center,48,0.7,town);
         double terrain_ms=township_ms(begin);
         snprintf(image_name,sizeof(image_name),"%s-terrain",names[scenario_index]); township_frame_file(image_name,pixels,768,432);
+        /* Optional inspection captures: put the generated selected agent at a
+           real entrance and show the same world through the follow camera. */
+        if (getenv("BRONZE_TOWNSHIP_EVIDENCE") && land->settlement.building_count) {
+            const BronzeBuilding *building=&land->settlement.buildings[0];
+            simulated_being *agent=sim_group()->select; assert(agent);
+            n_byte2 original[2]={being_location_x(agent),being_location_y(agent)};
+            n_byte2 entrance[2]={MAPSPACE_TO_APESPACE(building->entrance.x),
+                                MAPSPACE_TO_APESPACE(building->entrance.y)};
+            being_set_location(agent,entrance);
+            BronzeWorkspacePoint agent_center=shared_session_bronze_workspace_center(session,1);
+            assert(agent_center.x==building->entrance.x && agent_center.y==building->entrance.y);
+            shared_session_bronze_workspace_draw(session,pixels,768,512,NUM_VIEW,agent_center,32,0.7,town);
+            snprintf(image_name,sizeof(image_name),"%s-agent-map",names[scenario_index]); township_frame_file(image_name,pixels,768,512);
+            shared_session_bronze_workspace_draw(session,pixels,768,432,NUM_TERRAIN,agent_center,32,0.7,0);
+            snprintf(image_name,sizeof(image_name),"%s-agent-terrain",names[scenario_index]); township_frame_file(image_name,pixels,768,432);
+            shared_session_bronze_workspace_draw(session,pixels,768,432,NUM_TERRAIN,agent_center,32,3.84,0);
+            snprintf(image_name,sizeof(image_name),"%s-agent-terrain-reverse",names[scenario_index]); township_frame_file(image_name,pixels,768,432);
+            printf("Township agent %s: entrance (%u,%u), building %llu, township %llu\n",
+                   names[scenario_index],(unsigned)building->entrance.x,(unsigned)building->entrance.y,
+                   (unsigned long long)building->id,(unsigned long long)building->owner);
+            being_set_location(agent,original);
+        }
         double route_ms=0;
         if (land->town_count) {
             const BronzePlace *home=bronze_hybrid_place(town); BronzeRoute route={0};
