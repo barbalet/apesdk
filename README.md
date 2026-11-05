@@ -91,7 +91,7 @@ without needing a large framework stack.
 | Toolchain | Location | Current status |
 | --- | --- | --- |
 | **Simulated Ape for macOS** | [`toolchains/sim-mac`](toolchains/sim-mac/) | Active macOS Swift/Xcode wrapper. CI builds the `sim-mac` scheme, producing `Simulated Ape.app`. |
-| **BronzeSim** | [`toolchains/bronze-mac`](toolchains/bronze-mac/) | Mac Catalyst app built with `BRONZE_SIM=1`. Starts with the full Bronze Age scenario. |
+| **BronzeSim** | [`toolchains/bronze-mac`](toolchains/bronze-mac/) | Mac Catalyst app built with `BRONZE_SIM=1`. Starts with the extended 120-vocation scenario. |
 | **Simulated Planet** | [`toolchains/planet`](toolchains/planet/) | Active macOS Xcode project in CI. Demonstrates broader weather, terrain, and movement concepts. |
 | **Simulated War** | [`toolchains/war-mac`](toolchains/war-mac/) | Native macOS wrapper using the original Urban game and renderer sources; requires the sibling Urban checkout described below. |
 | **Simulated Urban** | [`toolchains/urban-mac`](toolchains/urban-mac/) | Native macOS wrapper using the original Urban game and renderer sources; requires the sibling Urban checkout described below. |
@@ -135,8 +135,8 @@ build locally without a signing team.
 
 The target sets `BRONZE_SIM=1` to run occupations, gathering, crafting,
 and trade on ApeSDK's native agents, terrain, and clock. It starts with
-`bronze_age_full.bronze`. The **Bronze Scenario** menu offers the two
-smaller scenarios, and **Save Bronze World** preserves the simulation
+`example_large.bronze`, the extended 120-vocation scenario. The **Bronze Scenario**
+menu also offers `bronze_age_full` and the two smaller scenarios, and **Save Bronze World** preserves the simulation
 and its economy together. [BronzeSim guide](bronze/README.md) ·
 [Save and resume](bronze/SAVE-FORMAT.md)
 

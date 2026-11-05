@@ -75,7 +75,7 @@ def audit():
         assert paths.count('../../bronze/' + name) == 1, name
     resources = next(objects[x] for x in target['buildPhases'] if objects[x]['isa'] == 'PBXResourcesBuildPhase')
     bundled = [objects[objects[x]['fileRef']]['path'] for x in resources['files']]
-    for name in ['first_slice', 'vertical_slice', 'bronze_age_full']:
+    for name in ['example_large', 'first_slice', 'vertical_slice', 'bronze_age_full']:
         assert bundled.count('../../bronze/content/' + name + '.bronze') == 1
     print('PASS build definitions, hook isolation, canonical ownership and bundled resource references', flush=True)
 
@@ -106,7 +106,7 @@ def inventory(work, record):
     # JSON normalizes tuples; compare the same representation when checking.
     results = json.loads(json.dumps(results))
     snapshot(HERE / 'content_inventory.json', results, record)
-    print('PASS parsed inventory of every construct in all three scenarios, through both explicit profiles of the canonical compiler', flush=True)
+    print('PASS parsed inventory of every construct in all bundled scenarios, through both explicit profiles of the canonical compiler', flush=True)
 
 
 def compiler_and_cli(work):

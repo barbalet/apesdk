@@ -201,6 +201,7 @@ typedef struct {
     size_t count;
     size_t pos;
     unsigned depth;
+    int legacy;
     FILE* errors;
 } Parser;
 
@@ -310,7 +311,7 @@ static bool parse_kinds(Parser* p, ParsedConfig* cfg)
         }
         else if(brz_streq(section, "resource") || brz_streq(section, "item"))
         {
-            /* example_large.bronze uses: kinds { resource; item; } -- accept/ignore */
+            /* Declaration-only documents use: kinds { resource; item; }. */
             continue;
         }
         else
@@ -928,6 +929,45 @@ static bool parse_rule(Parser* p, VocationDef* voc)
 
     if(!expect(p, TK_LBRACE, "'{'")) return false;
 
+    /* Block-style rules are executable sequences, including conditional calls.
+     * Keep the historical interpreter's rule interpretation in its own profile. */
+    unsigned calls = 0, nested = 0;
+    int sequence = 0;
+    for (size_t at = p->pos; !p->legacy && at < p->count; ++at) {
+        const Token* token = &p->toks[at];
+        if (token->kind == TK_RBRACE && nested == 0) break;
+        if (token->kind == TK_LBRACE) { ++nested; sequence = 1; }
+        if (token->kind == TK_RBRACE) --nested;
+        if (token->kind == TK_WORD && brz_streq(token->text, "do") && ++calls > 1) sequence = 1;
+    }
+    if (sequence) {
+        char task_name[256];
+        snprintf(task_name, sizeof(task_name), "__rule_%s", name);
+        if (strlen(name) + strlen("__rule_") >= sizeof(task_name) || brz_voc_find_task(voc, task_name)) {
+            fprintf(p->errors, "SyntaxError: generated rule task name is too long or already declared\n");
+            return false;
+        }
+        TaskDef task = {0};
+        task.name = brz_strdup(task_name);
+        brz_vec_init(&task.stmts, sizeof(StmtDef));
+        if (!task.name || !parse_stmt_list(p, &task.stmts)) {
+            brz_task_dispose(&task);
+            return false;
+        }
+        if (!brz_vec_push(&voc->tasks, &task)) { brz_task_dispose(&task); return false; }
+        RuleDef rule = {0};
+        rule.name = brz_strdup(name);
+        rule.when_expr = brz_strdup("true");
+        rule.do_task = brz_strdup(task_name);
+        rule.weight = 1;
+        rule.line = start ? start->line : 0;
+        if (!rule.name || !rule.when_expr || !rule.do_task || !brz_vec_push(&voc->rules, &rule)) {
+            brz_rule_dispose(&rule);
+            return false;
+        }
+        return true;
+    }
+
     int depth = 0; /* nested braces inside rule */
     char* when_expr = NULL;
     char* do_task = NULL;
@@ -1126,6 +1166,7 @@ static bool parse_file_profile(const char* path, ParsedConfig* out_cfg, int lega
     p.count = lx.toks.len;
     p.pos = 0;
     p.depth = 0;
+    p.legacy = legacy;
     p.errors = errors;
 
     while(1)
@@ -1218,6 +1259,7 @@ static bool parse_file_profile(const char* path, ParsedConfig* out_cfg, int lega
         }
     }
 
+    if (!legacy && !brz_expand_task_calls(out_cfg, errors)) { free(src); free_lexer(&lx); return false; }
     if(legacy ? !brz_cfg_validate_legacy_runtime(out_cfg, errors) :
        (!brz_cfg_validate(out_cfg, errors) || !brz_cfg_compile(out_cfg, errors))){ free(src); free_lexer(&lx); return false; }
     free(src);

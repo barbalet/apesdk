@@ -378,7 +378,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
     landscape->next_profession_tick = tick + policy->retry_minutes;
     unsigned counts[BRONZE_VOCATION_LIMIT] = {0};
     unsigned occupancy[BRONZE_PLACE_LIMIT] = {0};
-    uint64_t founding_vocations[BRONZE_PLACE_LIMIT] = {0};
+    n_byte founding_vocations[BRONZE_PLACE_LIMIT][BRONZE_VOCATION_LIMIT] = {{0}};
     int enabled = 0;
     for (unsigned i = 0; i < policy->count; i++) enabled |= policy->vocations[i].weight != 0;
 
@@ -441,8 +441,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
             continue;
         }
         unsigned starting_skill = policy->skill_start;
-        uint64_t vocation_bit = UINT64_C(1) << best;
-        if (reset && !(founding_vocations[workplace] & vocation_bit) &&
+        if (reset && !founding_vocations[workplace][best] &&
             starting_skill < policy->mentor_skill)
             starting_skill = policy->mentor_skill;
         if (!bronze_actor_set_job(registry, actor, best, landscape->places[workplace].id,
@@ -451,7 +450,7 @@ static void update_professions(BronzeLandscape *landscape, simulated_group *grou
             continue;
         }
         actor->job_status = BRONZE_JOB_ASSIGNED;
-        founding_vocations[workplace] |= vocation_bit;
+        founding_vocations[workplace][best] = 1;
         occupancy[workplace]++;
         counts[best]++;
     }

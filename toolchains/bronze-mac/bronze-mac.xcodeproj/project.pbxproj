@@ -1067,6 +1067,7 @@
 			<array>
 				<string>4AC000032026091800000001</string>
 				<string>0B91AFAFEC6F4DE00F546570</string>
+				<string>B20E00012026110500000002</string>
 				<string>2A2AFA0A8A9A7D4FE2B0A78E</string>
 				<string>4F409D90C52DF816EDDB8184</string>
 			</array>
@@ -1431,6 +1432,7 @@
 				<string>4A80F0202ED0000000000017</string>
 				<string>47FF450104A5C2F78057049C</string>
 				<string>21FB197698E596AF759EFD23</string>
+				<string>B20E00012026110500000001</string>
 				<string>A96121392D0E070DF6CE8984</string>
 				<string>5D19DC78967BC5509AEED52F</string>
 				<string>4FE839768A27EB53AFA7BD9C</string>
@@ -1676,6 +1678,24 @@
 			<string>PBXBuildFile</string>
 			<key>fileRef</key>
 			<string>47FF450104A5C2F78057049C</string>
+		</dict>
+		<key>B20E00012026110500000001</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>../../bronze/content/example_large.bronze</string>
+			<key>sourceTree</key>
+			<string>SOURCE_ROOT</string>
+			<key>lastKnownFileType</key>
+			<string>text</string>
+		</dict>
+		<key>B20E00012026110500000002</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+			<key>fileRef</key>
+			<string>B20E00012026110500000001</string>
 		</dict>
 		<key>21FB197698E596AF759EFD23</key>
 		<dict>

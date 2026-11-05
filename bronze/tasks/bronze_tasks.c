@@ -30,7 +30,7 @@ static uint64_t roll_below(BronzeTaskState *state, uint64_t bound)
 }
 
 static int condition_term(const CompiledCondition *condition, unsigned index,
-                          const BronzeNeeds *needs, BronzeTaskState *state)
+                          const BronzeNeeds *needs, BronzeTaskState *state, const BronzeActor *actor)
 {
     double actual, expected = condition->value[index];
     switch (condition->kind[index]) {
@@ -39,6 +39,13 @@ static int condition_term(const CompiledCondition *condition, unsigned index,
         case BRZ_COND_PROB: return chance(state, expected);
         case BRZ_COND_HUNGER: actual = needs->hunger; break;
         case BRZ_COND_FATIGUE: actual = needs->fatigue; break;
+        case BRZ_COND_RESOURCE:
+            actual = 0;
+            for (size_t i = 0; i < actor->resource_count; ++i) {
+                if (actor->resources[i].kind == (unsigned)condition->resource_id[index])
+                    actual += actor->resources[i].amount;
+            }
+            break;
         default: return 0;
     }
     switch (condition->comparison[index]) {
@@ -54,23 +61,23 @@ static int condition_term(const CompiledCondition *condition, unsigned index,
 }
 
 static int condition_met(const CompiledCondition *condition, const BronzeNeeds *needs,
-                         BronzeTaskState *state)
+                         BronzeTaskState *state, const BronzeActor *actor)
 {
-    int first = condition_term(condition, 0, needs, state);
+    int first = condition_term(condition, 0, needs, state, actor);
     if (condition->terms == 1) return first;
-    if (condition->join_or) return first || condition_term(condition, 1, needs, state);
-    return first && condition_term(condition, 1, needs, state);
+    if (condition->join_or) return first || condition_term(condition, 1, needs, state, actor);
+    return first && condition_term(condition, 1, needs, state, actor);
 }
 
 static const RuleDef *choose_rule(const VocationDef *vocation, const BronzeNeeds *needs,
-                                  BronzeTaskState *state)
+                                  BronzeTaskState *state, const BronzeActor *actor)
 {
     const RuleDef *rules = vocation->rules.data, *selected = NULL;
     uint64_t weight = 0;
     /* Weighted reservoir: eligibility and each probability are visited once. */
     for (size_t i = 0; i < vocation->rules.len; i++) {
         const RuleDef *rule = &rules[i];
-        if (!condition_met(&rule->condition, needs, state)) continue;
+        if (!condition_met(&rule->condition, needs, state, actor)) continue;
         weight += (unsigned)rule->weight;
         if (!selected || roll_below(state, weight) < (unsigned)rule->weight) selected = rule;
     }
@@ -98,7 +105,7 @@ static int start_task(BronzeActor *actor, const VocationDef *vocation, const Bro
     state->name = state->action = NULL;
     state->line = 0;
     state->target = 0;
-    const RuleDef *rule = choose_rule(vocation, needs, state);
+    const RuleDef *rule = choose_rule(vocation, needs, state, actor);
     if (rule) {
         const TaskDef *tasks = vocation->tasks.data;
         for (size_t i = 0; i < vocation->tasks.len; i++) {
@@ -116,7 +123,7 @@ static int start_task(BronzeActor *actor, const VocationDef *vocation, const Bro
     return 0;
 }
 
-static const OpDef *next_operation(BronzeTaskState *state, const BronzeNeeds *needs)
+static const OpDef *next_operation(BronzeTaskState *state, const BronzeNeeds *needs, const BronzeActor *actor)
 {
     for (unsigned step = 0; step < BRONZE_TASK_WALK_BUDGET && state->depth; step++) {
         BronzeTaskFrame *frame = &state->frames[state->depth - 1];
@@ -128,7 +135,7 @@ static const OpDef *next_operation(BronzeTaskState *state, const BronzeNeeds *ne
         const StmtDef *stmt = &statements[frame->index++];
         if (stmt->kind == ST_OP) return &stmt->as.op;
         const BrzVec *body = NULL;
-        if (stmt->kind == ST_WHEN && condition_met(&stmt->as.when_stmt.condition, needs, state))
+        if (stmt->kind == ST_WHEN && condition_met(&stmt->as.when_stmt.condition, needs, state, actor))
             body = &stmt->as.when_stmt.body;
         if (stmt->kind == ST_CHANCE && chance(state, stmt->as.chance.chance_pct / 100.0))
             body = &stmt->as.chance.body;
@@ -509,7 +516,7 @@ void bronze_tasks_begin(simulated_group *group)
         BronzeNeeds needs = bronze_needs_read(being);
         if (!state->depth && !start_task(actor, &vocations[actor->vocation], &needs, tick)) continue;
         if (!state->operation) {
-            const OpDef *op = next_operation(state, &needs);
+            const OpDef *op = next_operation(state, &needs, actor);
             if (!op) {
                 if (!state->depth) finish(actor, BRONZE_TASK_COMPLETE, tick);
                 continue;

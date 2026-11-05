@@ -11,6 +11,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../ui/bronze_workspace_render.h"
+#include "../scenario/bronze_scenario.h"
+#include "../tasks/bronze_tasks.h"
+#include "../work/bronze_work.h"
+
+static void awake_status_text(void)
+{
+    n_string_block description;
+    memset(description, 'X', sizeof(description));
+    being_state_description(BEING_STATE_AWAKE, description);
+    assert(!strcmp(description, "Awake"));
+    memset(description, 'X', sizeof(description));
+    being_state_description(BEING_STATE_ASLEEP, description);
+    assert(!strcmp(description, "Sleeping"));
+    memset(description, 'X', sizeof(description));
+    being_state_description(BEING_STATE_AWAKE | BEING_STATE_HUNGRY, description);
+    assert(!strcmp(description, "Hungry"));
+    puts("Awake, sleeping and compound state description tests passed.");
+}
 
 static void terrain_interpolation(void)
 {
@@ -29,11 +47,11 @@ static void terrain_interpolation(void)
         bronze_render_sample(&land, 10, 11, 0), bronze_render_sample(&land, 11, 11, 0)
     };
     BronzeRenderSample center = bronze_render_sample(&land, 10.5, 10.5, 0);
-    assert(fabs(center.height - 210 * 0.31) < 1e-9);
+    assert(fabs(center.height - 210 * 0.155) < 1e-9);
     assert(center.r == (int)lround((corners[0].r + corners[1].r + corners[2].r + corners[3].r) / 4.0));
     assert(center.g == (int)lround((corners[0].g + corners[1].g + corners[2].g + corners[3].g) / 4.0));
     assert(center.b == (int)lround((corners[0].b + corners[1].b + corners[2].b + corners[3].b) / 4.0));
-    assert(fabs(bronze_render_sample(&land, 10.25, 10.75, 0).height - 215 * 0.31) < 1e-9);
+    assert(fabs(bronze_render_sample(&land, 10.25, 10.75, 0).height - 215 * 0.155) < 1e-9);
     const double epsilon = 1e-7;
     for (unsigned axis = 0; axis < 2; ++axis) {
         for (unsigned seam = 0; seam < 2; ++seam) {
@@ -71,7 +89,7 @@ static void terrain_interpolation(void)
     memset(heights, land.tide - 1, MAP_AREA);
     assert(!bronze_tree_allowed(&land, 10, 10, 0));
     BronzeRenderSample seabed = bronze_render_sample(&land, 10.5, 10.5, 0);
-    assert(fabs(seabed.height - (land.tide - 1) * 0.31) < 1e-9);
+    assert(fabs(seabed.height - (land.tide - 1) * 0.155) < 1e-9);
     assert(seabed.r > seabed.g && seabed.g > seabed.b);
     BronzeRenderSample shallow = bronze_render_water(seabed, seabed.height + 0.1, 10.5, 10.5);
     BronzeRenderSample deep = bronze_render_water(seabed, seabed.height + 10, 10.5, 10.5);
@@ -449,11 +467,121 @@ static void sessions(void)
     shared_session_destroy(b); shared_close();
     puts("Independent shared-session registry, selection, reset and destruction tests passed.");
 }
+static void extended_scenario(void)
+{
+    BronzeScenario *scenario = bronze_scenario_create();
+    assert(scenario && bronze_scenario_load(scenario, BRONZE_EXTENDED_CONTENT, "example_large.bronze"));
+    assert(bronze_scenario_vocations(scenario) == 120);
+    BronzeProgram *program = bronze_scenario_program(scenario);
+    assert(program && program->config->resource_kinds.names.len == 19);
+    const VocationDef *vocations = program->config->vocations.data;
+    for (unsigned i = 0; i < 120; ++i) {
+        assert(vocations[i].tasks.len == 9 && vocations[i].rules.len == 2);
+        const TaskDef *daily = brz_voc_find_task((VocationDef *)&vocations[i], "__rule_daily_cycle");
+        const TaskDef *crisis = brz_voc_find_task((VocationDef *)&vocations[i], "__rule_crisis");
+        assert(daily && daily->stmts.len == 7);
+        const StmtDef *daily_ops = daily->stmts.data;
+        assert(!strcmp(daily_ops[0].as.op.a0, "grain") && !strcmp(daily_ops[3].as.op.a0, "cattle"));
+        assert(daily_ops[6].kind == ST_CHANCE && daily_ops[6].as.chance.body.len == 3);
+        assert(crisis && crisis->stmts.len == 1);
+        const StmtDef *when = crisis->stmts.data;
+        assert(when->kind == ST_WHEN && when->as.when_stmt.body.len == 6);
+        assert(when->as.when_stmt.condition.kind[0] == BRZ_COND_RESOURCE);
+        assert(when->as.when_stmt.condition.resource_id[0] == kind_table_find(&program->config->resource_kinds, "grain"));
+    }
+    shared_session *session = shared_session_create(bronze_scenario_seed(scenario));
+    assert(session);
+    shared_session_bronze_land_policy(session, bronze_scenario_land_policy(scenario));
+    shared_session_bronze_professions(session, bronze_scenario_professions(scenario));
+    shared_session_bronze_program(session, program);
+    assert(shared_session_init(session, NUM_CONTROL, bronze_scenario_seed(scenario)) == NUM_CONTROL);
+    if (shared_session_pause_state(session)) shared_session_menu(session, NA_MENU_PAUSE);
+    for (unsigned tick = 0; tick < 4; ++tick) shared_session_cycle(session, tick, NUM_CONTROL);
+    /* Exercise the exact timer-to-status path from the crash report while
+     * the selected being is awake with no activity bits. */
+    simulated_being *status_being = sim_group()->select;
+    assert(status_being);
+    n_byte2 prior_state = being_state(status_being);
+    being_set_state(status_being, BEING_STATE_AWAKE);
+    struct {
+        n_string_block text;
+        unsigned char guard[32];
+    } output;
+    memset(&output, 0xA5, sizeof(output));
+    watch_control(sim_group(), being_get_select_name(sim_group()), status_being, output.text);
+    assert(strstr(output.text, ": Awake\n"));
+    for (unsigned i = 0; i < sizeof(output.guard); ++i) assert(output.guard[i] == 0xA5);
+    sim_set_output(1);
+    for (unsigned i = 0; i < 128; ++i) sim_update_output();
+    sim_set_output(0);
+    being_set_state(status_being, prior_state);
+    puts("Awake native status output regression passed.");
+    BronzeActorRegistry *registry = bronze_actors_current();
+    assert(bronze_actors_professions(registry)->count == 120);
+    BronzeActor *actor = NULL;
+    simulated_being *being = NULL;
+    simulated_group *group = sim_group();
+    for (n_uint i = 0; i < group->num; ++i) {
+        BronzeActor *candidate = bronze_actors_for_being(registry, &group->beings[i]);
+        if (candidate && candidate->job_status == BRONZE_JOB_ASSIGNED) {
+            actor = candidate; being = &group->beings[i]; break;
+        }
+    }
+    assert(actor && being);
+    assert(bronze_actor_set_job(registry, actor, 119, actor->workplace, 17, 4));
+    actor->job_status = BRONZE_JOB_ASSIGNED;
+    sim_set_select(being);
+    assert(!strcmp(shared_session_bronze_inspector_actor(session).vocation, "clan_role_120"));
+    /* Isolate the crisis rule and check its inventory comparison in execution. */
+    RuleDef *rules = ((VocationDef *)program->config->vocations.data)[119].rules.data;
+    CompiledCondition daily_condition = rules[0].condition;
+    rules[0].condition.kind[0] = BRZ_COND_FALSE;
+    free(actor->resources);
+    actor->resources = calloc(1, sizeof(*actor->resources));
+    assert(actor->resources);
+    actor->resource_count = 1;
+    actor->resources[0].kind = (unsigned)kind_table_find(&program->config->resource_kinds, "grain");
+    BronzeClock *clock = bronze_actors_clock(registry);
+    clock->tick = bronze_native_tick();
+    clock->open = 1;
+    actor->work.initial_reason = BRONZE_WORK_READY;
+    actor->execution.prepared_tick = UINT64_MAX;
+    bronze_tasks_begin(group);
+    assert(actor->execution.operation && actor->execution.operation->has_n0
+           && actor->execution.operation->n0 == 2);
+    uint64_t workplace = actor->workplace;
+    assert(bronze_actor_set_job(registry, actor, 118, workplace, 17, 4));
+    assert(bronze_actor_set_job(registry, actor, 119, workplace, 17, 4));
+    actor->job_status = BRONZE_JOB_ASSIGNED;
+    actor->resources[0].amount = 3;
+    actor->work.initial_reason = BRONZE_WORK_READY;
+    actor->execution.prepared_tick = UINT64_MAX;
+    bronze_tasks_begin(group);
+    assert(!actor->execution.operation && actor->execution.status == BRONZE_TASK_COMPLETE);
+    clock->open = 0;
+    rules[0].condition = daily_condition;
+#ifdef BRONZE_DISK_SAVE
+    unsigned char digest[32] = {120, 19};
+    n_file *saved = shared_session_bronze_save(session, digest);
+    assert(saved);
+    assert(bronze_actor_set_job(registry, actor, 0, actor->workplace, 0, 5));
+    assert(shared_session_bronze_open(session, saved->data, saved->location, digest));
+    assert(!strcmp(shared_session_bronze_inspector_actor(session).vocation, "clan_role_120"));
+    io_file_free(&saved);
+#endif
+    shared_session_destroy(session);
+    bronze_scenario_destroy(scenario);
+    shared_close();
+    puts("Extended 120-vocation scenario, task sequences, resource conditions and high-role restore passed.");
+}
+
 void bronze_test_work(void);
 int main(int argc, char** argv)
 {
+    awake_status_text();
     terrain_interpolation();
-    if(argc>1 && !strcmp(argv[1],"sessions")) sessions();
+    if(argc>1 && !strcmp(argv[1],"extended")) extended_scenario();
+    else if(argc>1 && !strcmp(argv[1],"sessions")) sessions();
     else if(argc>1 && !strcmp(argv[1],"work")) bronze_test_work();
     else lifecycle();
     return 0;

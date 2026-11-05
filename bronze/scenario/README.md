@@ -7,7 +7,7 @@ frees the candidate and retains the previous config/name/seed. It does not run
 an agent loop or dispatch pilot economic actions.
 
 The Swift controller in `../ui/` resolves the three known filenames through its
-Bundle (production default: Bundle.main). It starts with first_slice, exposes
+Bundle (production default: Bundle.main). It starts with example_large, exposes
 active-file/error state, and invokes the world-reset callback only after success.
 The guarded shared shell uses the active seed for native startup/New Simulation.
 The default and selected configurations are owned for the scene model's lifetime.
@@ -49,8 +49,9 @@ Cycle 12 validates recipe workplace, duration, skill and tool settings.
   at the maximum values or persistent actor/place identities. Numeric kind IDs
   are scoped to the compiled config; later save integration must fingerprint it.
 
-All three bundled scenarios pass strict graphical admission.
-The app starts with the full scenario. Its vocation roster shares the native
+All four bundled scenarios pass graphical admission.
+The app starts with the extended example scenario. See the declaration-only
+compatibility defaults in [the Bronze guide](../README.md). Its vocation roster shares the native
 work, production, and rest mechanics described in the release results.
 
 ## Reproducible checks

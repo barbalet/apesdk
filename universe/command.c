@@ -1220,7 +1220,12 @@ static void watch_stats( void *ptr, n_string beingname, simulated_being *local_b
     being_state_description( being_state( local_being ), status );
     being_relationship_description( being_attention( local_being, ATTENTION_RELATIONSHIP ), relationship_str );
 
-    sprintf( str, "%s (%ld %ld) %s\n%s: %s\nGen %lu:%lu  %s  ERG:%ld SPD:%ld\nHonor:%d  HEI:%ld  Old(Years:%ld  Days:%ld)\n",
+#ifdef BRONZE_SIM
+    snprintf( str, sizeof(str),
+#else
+    sprintf( str,
+#endif
+             "%s (%ld %ld) %s\n%s: %s\nGen %lu:%lu  %s  ERG:%ld SPD:%ld\nHonor:%d  HEI:%ld  Old(Years:%ld  Days:%ld)\n",
              beingname,
              being_location_x( local_being ) / 16, being_location_y( local_being ) / 16,
              watch_sixteenth_wind( being_facing( local_being ) ),
@@ -1241,11 +1246,20 @@ static void watch_stats( void *ptr, n_string beingname, simulated_being *local_b
 
     if ( being_pregnant( local_being ) )
     {
+#ifdef BRONZE_SIM
+        snprintf( str, sizeof(str), "Days Preg: %ld\n", land_date() - being_pregnant( local_being ) );
+#else
         sprintf( str, "Days Preg: %ld\n", land_date() - being_pregnant( local_being ) );
+#endif
         io_string_write( result, str, &watch_string_length );
     }
+#ifdef BRONZE_SIM
+    snprintf( str, sizeof(str), "Aware Body: %s Link: %s\n", being_body_inventory_description( being_attention( local_being, ATTENTION_BODY ) ),
+             relationship_str );
+#else
     sprintf( str, "Aware Body: %s Link: %s\n", being_body_inventory_description( being_attention( local_being, ATTENTION_BODY ) ),
              relationship_str );
+#endif
 
     io_string_write( result, str, &watch_string_length );
 

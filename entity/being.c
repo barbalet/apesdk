@@ -629,6 +629,9 @@ void being_state_description( n_byte2 state, n_string result )
     n_int string_length = 0;
     n_int n = 2;
 
+#ifdef BRONZE_SIM
+    result[0] = 0;
+#endif
     if ( state == BEING_STATE_ASLEEP )
     {
         io_string_write( result, state_description[0], &string_length );
@@ -647,6 +650,13 @@ void being_state_description( n_byte2 state, n_string result )
         }
         n++;
     }
+#ifdef BRONZE_SIM
+    /* Awake alone has no activity bits, but still needs a terminated label. */
+    if (string_length == 0)
+    {
+        io_string_write(result, state_description[1], &string_length);
+    }
+#endif
 }
 
 /**

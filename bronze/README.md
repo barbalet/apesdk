@@ -36,7 +36,7 @@ woodland appear on the native maps; the overview adds an economic status panel.
 Townships use white roof outlines, mines dark boxes with white ore marks,
 fields blue rows, and woodland blue tree outlines.
 
-On startup the app loads and strictly validates bundled `bronze_age_full.bronze`.
+On startup the app loads and validates bundled `example_large.bronze` with its declaration-only compatibility defaults.
 Use the **Bronze Scenario** menu to select a bundled file; successful selection
 resets the native world using that file's seed. The overview identifies the
 active file and offers **Details**. Failed loads show filename/line diagnostics
@@ -97,3 +97,31 @@ and transport remain later cycles.
 `bash test.sh` now includes the actor lifecycle/session harness. Targeted memory
 and undefined-behavior checks run with `SANITIZE=1 bash bronze/actors/test.sh`;
 see the registry documentation for the existing native UBSan limitation.
+
+### Extended default scenario
+
+The graphical default is `content/example_large.bronze`, copied unchanged from
+BronzeSim's graphical resource. It contains 120 vocations and 840 authored
+tasks. The native vocation limit is 128. Block-style rules preserve multiple
+task calls and nested chance/stock conditions through bounded compiler
+expansion. Resource comparisons read the actor's carried resource inventory.
+
+The declaration-only format omits ecology, occupation placement, action
+signatures, and crafting recipes. The graphical compatibility defaults give
+its resources capacity 10, daily renewal 0.01, and market target 1. Wood and
+charcoal use woodland, copper and tin use their mines, and other resources
+use field stocks. Food resources have nutrition 0.20. Vocations have equal
+weight and field workplaces, with up to 256 workers per workplace and
+eight initial resource units per patch cell.
+
+The source's world terrain/climate/river/politics labels are retained as
+validated descriptive annotations. Native ApeSDK geography and population
+generation govern the graphical world, as with the other scenarios. The
+`ritual_token` item has no recipe in this source, so its craft operation
+reports an unsupported recipe. No recipe is fabricated by the compatibility
+defaults. The original three scenarios remain selectable.
+
+Local coverage includes the 120-role load, expanded daily/crisis sequences,
+resource-condition compilation, and save/restore of vocation 119
+(`clan_role_120`). The contract inventory retains the historical three
+scenario entries and adds the extended document.

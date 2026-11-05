@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 // This file belongs only to bronze-mac; shared shell call sites are #if BRONZE_SIM.
 @MainActor
 final class BronzeScenarioController: ObservableObject {
-    static let names = ["first_slice", "vertical_slice", "bronze_age_full"]
+    static let names = ["example_large", "first_slice", "vertical_slice", "bronze_age_full"]
     private let bundle: Bundle
     private let storage = bronze_scenario_create()
     @Published private(set) var activeName = "No scenario loaded"
@@ -22,7 +22,7 @@ final class BronzeScenarioController: ObservableObject {
     var program: OpaquePointer? { bronze_scenario_program(storage) }
     var seed: UInt { UInt(bronze_scenario_seed(storage)) }
 
-    init(bundle: Bundle = .main) { self.bundle = bundle; _ = load("bronze_age_full") }
+    init(bundle: Bundle = .main) { self.bundle = bundle; _ = load("example_large") }
     deinit { bronze_scenario_destroy(storage) }
 
     @discardableResult

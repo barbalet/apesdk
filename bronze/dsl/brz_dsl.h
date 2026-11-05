@@ -51,9 +51,9 @@ typedef enum {
     ST_WHEN
 } StmtKind;
 
-typedef enum { BRZ_COND_INVALID=-1, BRZ_COND_TRUE, BRZ_COND_FALSE, BRZ_COND_HUNGER, BRZ_COND_FATIGUE, BRZ_COND_PROB } BrzConditionKind;
+typedef enum { BRZ_COND_INVALID=-1, BRZ_COND_TRUE, BRZ_COND_FALSE, BRZ_COND_HUNGER, BRZ_COND_FATIGUE, BRZ_COND_PROB, BRZ_COND_RESOURCE } BrzConditionKind;
 typedef enum { BRZ_CMP_TRUTHY, BRZ_CMP_GT, BRZ_CMP_LT, BRZ_CMP_GE, BRZ_CMP_LE, BRZ_CMP_EQ, BRZ_CMP_NE } BrzCompareCode;
-typedef struct { BrzConditionKind kind[2]; BrzCompareCode comparison[2]; double value[2]; int join_or; int terms; } CompiledCondition;
+typedef struct { BrzConditionKind kind[2]; BrzCompareCode comparison[2]; double value[2]; int resource_id[2]; int join_or; int terms; } CompiledCondition;
 
 typedef struct StmtDef StmtDef;
 
@@ -196,6 +196,7 @@ bool brz_cfg_validate_legacy_runtime(const ParsedConfig* cfg, FILE* errors);
 bool brz_cfg_compile(ParsedConfig* cfg, FILE* errors);
 int brz_action_code(const char* name);
 uint16_t brz_terrain_query(const char* name);
+bool brz_expand_task_calls(ParsedConfig* cfg, FILE* errors);
 int brz_condition_compile(const char* expression, CompiledCondition* condition, int line, FILE* errors);
 
 #endif /* BRZ_DSL_H */

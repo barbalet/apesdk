@@ -6,6 +6,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdarg.h>
+#include "../dsl/brz_util.h"
+#include "bronze_declaration_defaults.h"
 
 struct BronzeScenario {
     BronzeProgram* active;
@@ -24,7 +26,7 @@ static int bounded(double value, double max) { return isfinite(value) && value>=
 static int conditions(const CompiledCondition* c, int line, FILE* report)
 {
     int i;
-    for(i=0;i<c->terms;i++) if(!bounded(c->value[i],1)) return error(report,line,"need/probability values must be in 0..1");
+    for(i=0;i<c->terms;i++) if(!bounded(c->value[i],c->kind[i]==BRZ_COND_RESOURCE?1e9:1)) return error(report,line,"need/probability values must be in 0..1");
     return 1;
 }
 static int statements(const ParsedConfig* cfg, const BrzVec* list, FILE* report)
@@ -56,7 +58,7 @@ static int statements(const ParsedConfig* cfg, const BrzVec* list, FILE* report)
 static int known_parameter(const ParsedConfig* c, const char* key)
 {
     static const char* names[]={"world_seed","world_years","world_sim_map_w","world_sim_map_h",
-        "agents_count","settlements_count","sim_days","sim_cache_max","sim_snapshot_every","sim_map_every","sim_report_every"};
+        "world_population","agents_count","settlements_count","sim_days","sim_cache_max","sim_snapshot_every","sim_map_every","sim_report_every"};
     size_t i;
     for(i=0;i<sizeof(names)/sizeof(names[0]);i++) if(!strcmp(key,names[i])) return 1;
     for(i=0;i<kind_table_count(&c->resource_kinds);i++) {
@@ -237,6 +239,13 @@ static int admission(const ParsedConfig* c, FILE* report, BronzeLandPolicy* poli
             break;
         }
         if(j<sizeof(landscape)/sizeof(landscape[0])) continue;
+        /* Descriptive world annotations from the original extended format.
+         * The native host supplies its own landscape and population. */
+        if (p->has_svalue &&
+            ((!strcmp(p->key,"world_terrain") && !strcmp(p->svalue,"coast")) ||
+             (!strcmp(p->key,"world_climate") && !strcmp(p->svalue,"temperate")) ||
+             (!strcmp(p->key,"world_river") && !strcmp(p->svalue,"yes")) ||
+             (!strcmp(p->key,"world_politics") && !strcmp(p->svalue,"tribal")))) continue;
         if(p->has_svalue || !known_parameter(c,p->key)) return error(report,0,"unsupported or nonnumeric parameter '%s'",p->key);
         if(!p->has_svalue && (strstr(p->key,"map_w") || strstr(p->key,"map_h")) &&
            (p->value<1 || p->value>4096 || floor(p->value)!=p->value))
@@ -299,7 +308,18 @@ int bronze_scenario_load(BronzeScenario* s, const char* path, const char* name)
         .site_capacity=32, .retry_minutes=60, .skill_max=100, .skill_gain=1
     };
     BronzeRecipePolicy recipes[BRONZE_RECIPE_LIMIT]={0};
-    accepted=brz_parse_file_report(path,next,report) && admission(next,report,&policy,&professions,recipes);
+    accepted=brz_parse_file_report(path,next,report);
+    int declarations = accepted && !next->resources.len && !next->recipes.len && !next->actions.len;
+    if (declarations) {
+        accepted = declaration_defaults(next) && brz_cfg_compile(next, report);
+        policy.patch_initial_per_cell = 8;
+        professions.site_capacity = 256;
+        for (size_t i = 0; i < next->vocations.len && i < BRONZE_VOCATION_LIMIT; ++i) {
+            professions.vocations[i].weight = 1;
+            professions.vocations[i].workplace = BRONZE_JOB_FIELD;
+        }
+    }
+    accepted = accepted && admission(next,report,&policy,&professions,recipes);
     BronzeProgram* program = accepted ? malloc(sizeof(*program)) : NULL;
     if (accepted && !program) accepted = error(report, 0, "unable to retain task program");
     if(accepted) {

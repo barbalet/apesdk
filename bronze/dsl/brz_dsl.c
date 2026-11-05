@@ -384,7 +384,7 @@ static int named_exists(const BrzVec* values, size_t name_offset, const char* na
     return 0;
 }
 
-static int condition_atom(const char* text, BrzConditionKind* kind, BrzCompareCode* cmp, double* value)
+static int condition_atom(const ParsedConfig* cfg, const char* text, BrzConditionKind* kind, BrzCompareCode* cmp, double* value, int* resource_id)
 {
     char name[32]={0}, op[3]={0}; double number=0;
     while(*text==' ') text++;
@@ -395,6 +395,8 @@ static int condition_atom(const char* text, BrzConditionKind* kind, BrzCompareCo
     if(sscanf(text,"%31s %2[<>=!] %lf",name,op,&number)!=3) return 0;
     if(brz_streq(name,"hunger")) *kind=BRZ_COND_HUNGER;
     else if(brz_streq(name,"fatigue")) *kind=BRZ_COND_FATIGUE;
+    else if(cfg && (*resource_id=kind_table_find(&cfg->resource_kinds,name))>=0)
+        *kind=BRZ_COND_RESOURCE;
     else return 0;
     if(strcmp(op,">")==0) *cmp=BRZ_CMP_GT; else if(strcmp(op,"<")==0) *cmp=BRZ_CMP_LT;
     else if(strcmp(op,">=")==0) *cmp=BRZ_CMP_GE; else if(strcmp(op,"<=")==0) *cmp=BRZ_CMP_LE;
@@ -402,7 +404,7 @@ static int condition_atom(const char* text, BrzConditionKind* kind, BrzCompareCo
     *value=number; return 1;
 }
 
-int brz_condition_compile(const char* expression, CompiledCondition* condition, int line, FILE* errors)
+static int condition_compile(const ParsedConfig* cfg, const char* expression, CompiledCondition* condition, int line, FILE* errors)
 {
     const char* join; char left[128], right[128]; size_t n;
     if(!condition) return 0; memset(condition,0,sizeof(*condition));
@@ -411,10 +413,92 @@ int brz_condition_compile(const char* expression, CompiledCondition* condition, 
     if(!join){ join=strstr(expression," or "); condition->join_or=1; }
     if(join){ n=(size_t)(join-expression); if(n>=sizeof(left)) goto bad; memcpy(left,expression,n); left[n]=0;
         strncpy(right,join+(condition->join_or?4:5),sizeof(right)-1); right[sizeof(right)-1]=0; condition->terms=2;
-        if(!condition_atom(left,&condition->kind[0],&condition->comparison[0],&condition->value[0]) || !condition_atom(right,&condition->kind[1],&condition->comparison[1],&condition->value[1])) goto bad;
-    } else { condition->terms=1; if(!condition_atom(expression,&condition->kind[0],&condition->comparison[0],&condition->value[0])) goto bad; }
+        if(!condition_atom(cfg,left,&condition->kind[0],&condition->comparison[0],&condition->value[0],&condition->resource_id[0]) || !condition_atom(cfg,right,&condition->kind[1],&condition->comparison[1],&condition->value[1],&condition->resource_id[1])) goto bad;
+    } else { condition->terms=1; if(!condition_atom(cfg,expression,&condition->kind[0],&condition->comparison[0],&condition->value[0],&condition->resource_id[0])) goto bad; }
     return 1;
 bad: if(errors) fprintf(errors,"ValidationError:%d: invalid or unknown condition '%s'\n",line,expression); return 0;
+}
+
+int brz_condition_compile(const char* expression, CompiledCondition* condition, int line, FILE* errors)
+{
+    return condition_compile(NULL, expression, condition, line, errors);
+}
+
+/* Inline task calls so the existing executor and saved frame locations retain
+ * their normal task/statement representation. Bounds also reject recursion. */
+static int copy_task_statements(const VocationDef* vocation, const BrzVec* input,
+                                BrzVec* output, unsigned depth, unsigned* budget, FILE* errors)
+{
+    if (depth >= 64) {
+        fprintf(errors, "ValidationError: recursive task call or nesting exceeds 64 levels in '%s'\n", vocation->name);
+        return 0;
+    }
+    for (size_t i = 0; i < input->len; ++i) {
+        const StmtDef* source = brz_vec_cat(input, i);
+        if (!*budget) {
+            fprintf(errors, "ValidationError: expanded task exceeds 4096 statements\n");
+            return 0;
+        }
+        --*budget;
+        if (source->kind == ST_OP && brz_streq(source->as.op.op, "do")) {
+            const TaskDef* target = brz_voc_find_task((VocationDef*)vocation, source->as.op.a0);
+            if (!target || source->as.op.a1 || source->as.op.has_n0) {
+                fprintf(errors, "ValidationError:%d: unknown or invalid task call\n", source->line);
+                return 0;
+            }
+            if (!copy_task_statements(vocation, &target->stmts, output, depth + 1, budget, errors)) return 0;
+            continue;
+        }
+        StmtDef copy = *source;
+        if (source->kind == ST_OP) {
+            copy.as.op.op = brz_strdup(source->as.op.op);
+            copy.as.op.a0 = source->as.op.a0 ? brz_strdup(source->as.op.a0) : NULL;
+            copy.as.op.a1 = source->as.op.a1 ? brz_strdup(source->as.op.a1) : NULL;
+            copy.as.op.a2 = source->as.op.a2 ? brz_strdup(source->as.op.a2) : NULL;
+            if (!copy.as.op.op || (source->as.op.a0 && !copy.as.op.a0) ||
+                (source->as.op.a1 && !copy.as.op.a1) || (source->as.op.a2 && !copy.as.op.a2)) {
+                brz_stmt_dispose(&copy); return 0;
+            }
+        } else {
+            BrzVec* body = source->kind == ST_CHANCE ? &copy.as.chance.body : &copy.as.when_stmt.body;
+            const BrzVec* original = source->kind == ST_CHANCE ? &source->as.chance.body : &source->as.when_stmt.body;
+            brz_vec_init(body, sizeof(StmtDef));
+            if (source->kind == ST_WHEN) {
+                copy.as.when_stmt.when_expr = brz_strdup(source->as.when_stmt.when_expr);
+                if (!copy.as.when_stmt.when_expr) { brz_stmt_dispose(&copy); return 0; }
+            }
+            if (!copy_task_statements(vocation, original, body, depth + 1, budget, errors)) {
+                brz_stmt_dispose(&copy); return 0;
+            }
+        }
+        if (!brz_vec_push(output, &copy)) { brz_stmt_dispose(&copy); return 0; }
+    }
+    return 1;
+}
+
+bool brz_expand_task_calls(ParsedConfig* cfg, FILE* errors)
+{
+    if (!errors) errors = stderr;
+    for (size_t vi = 0; vi < cfg->vocations.len; ++vi) {
+        VocationDef* vocation = brz_vec_at(&cfg->vocations, vi);
+        BrzVec* expanded = calloc(vocation->tasks.len, sizeof(*expanded));
+        if (vocation->tasks.len && !expanded) return false;
+        int ok = 1;
+        for (size_t ti = 0; ti < vocation->tasks.len; ++ti) {
+            brz_vec_init(&expanded[ti], sizeof(StmtDef));
+            unsigned budget = 4096;
+            const TaskDef* task = brz_vec_cat(&vocation->tasks, ti);
+            if (ok && !copy_task_statements(vocation, &task->stmts, &expanded[ti], 0, &budget, errors)) ok = 0;
+        }
+        for (size_t ti = 0; ti < vocation->tasks.len; ++ti) {
+            TaskDef* task = brz_vec_at(&vocation->tasks, ti);
+            if (ok) { stmt_vec_free(&task->stmts); task->stmts = expanded[ti]; }
+            else stmt_vec_free(&expanded[ti]);
+        }
+        free(expanded);
+        if (!ok) return false;
+    }
+    return true;
 }
 
 static int validate_stmts(const ParsedConfig* cfg, const BrzVec* statements, const char* vocation, FILE* errors)
@@ -545,7 +629,7 @@ static int compile_stmts(ParsedConfig* cfg, BrzVec* statements, const char* voca
     for(size_t i=0;i<statements->len;i++){
         StmtDef* st=(StmtDef*)brz_vec_at(statements,i);
         if(st->kind==ST_CHANCE){ if(!compile_stmts(cfg,&st->as.chance.body,vocation,errors)) ok=0; continue; }
-        if(st->kind==ST_WHEN){ if(!brz_condition_compile(st->as.when_stmt.when_expr,&st->as.when_stmt.condition,st->line,errors)) ok=0; if(!compile_stmts(cfg,&st->as.when_stmt.body,vocation,errors)) ok=0; continue; }
+        if(st->kind==ST_WHEN){ if(!condition_compile(cfg,st->as.when_stmt.when_expr,&st->as.when_stmt.condition,st->line,errors)) ok=0; if(!compile_stmts(cfg,&st->as.when_stmt.body,vocation,errors)) ok=0; continue; }
         OpDef* op=&st->as.op;
         op->action_code=brz_action_code(op->op);
         op->arg0_resource_id=kind_table_find(&cfg->resource_kinds,op->a0);
@@ -619,7 +703,7 @@ bool brz_cfg_compile(ParsedConfig* cfg, FILE* errors)
         VocationDef* vocation=(VocationDef*)brz_vec_at(&cfg->vocations,i);
         for(size_t j=0;j<vocation->rules.len;j++){
             RuleDef* rule=(RuleDef*)brz_vec_at(&vocation->rules,j);
-            if(!brz_condition_compile(rule->when_expr,&rule->condition,rule->line,errors)) ok=0;
+            if(!condition_compile(cfg,rule->when_expr,&rule->condition,rule->line,errors)) ok=0;
         }
         for(size_t j=0;j<vocation->tasks.len;j++)
             if(!compile_stmts(cfg,&((TaskDef*)brz_vec_at(&vocation->tasks,j))->stmts,vocation->name,errors)) ok=0;

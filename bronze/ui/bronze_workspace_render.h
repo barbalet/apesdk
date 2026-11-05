@@ -65,6 +65,9 @@ static double bronze_render_bilinear(double southwest, double southeast,
 
 enum { BRONZE_RENDER_BEACH_HEIGHT = 8 };
 
+/* Half-height relief for Bronze presentation; native simulation heights stay intact. */
+static const double bronze_render_height_scale = 0.155;
+
 static int bronze_render_tree_ground(const BronzeRenderLand *land, int x, int y)
 {
     int wx = bronze_render_wrap(x), wy = bronze_render_wrap(y);
@@ -92,7 +95,7 @@ static BronzeRenderSample bronze_render_ground_vertex(const BronzeRenderLand *la
     int green = (int)(noise % 19);
     int meadow = (int)(11 * sin(wx * 0.19 + sin(wy * 0.12)) + 7 * sin(wy * 0.37 - wx * 0.13));
     int relief = (int)fmin(18, fmax(0, (z - WATER_MAP) * 0.32));
-    BronzeRenderSample sample = {z * 0.31, 94 + light - green / 2 + meadow + relief,
+    BronzeRenderSample sample = {z * bronze_render_height_scale, 94 + light - green / 2 + meadow + relief,
                                  105 + light + green / 3 + meadow / 2, 48 + light + relief};
     if (fabs(slope) > 38) {
         sample.r += 22; sample.g += 15; sample.b += 13;
@@ -119,7 +122,7 @@ static BronzeRenderSample bronze_render_sample(const BronzeRenderLand *land, dou
     };
     /* The seabed and beach use a fixed datum. Only the water surface follows
      * the current tide, so exposed or submerged sand keeps its material. */
-    double elevation = sample.height / 0.31 - TIDE_MAX;
+    double elevation = sample.height / bronze_render_height_scale - TIDE_MAX;
     if (elevation <= BRONZE_RENDER_BEACH_HEIGHT) {
         double grass = fmax(0, (elevation - 3) / (BRONZE_RENDER_BEACH_HEIGHT - 3));
         grass = grass * grass * (3 - 2 * grass);
@@ -206,7 +209,7 @@ static BronzeRenderCamera bronze_render_camera(double ax, double ay, double bear
 {
     double fx = cos(bearing), fy = sin(bearing);
     double x = ax - fx * 12, y = ay - fy * 12;
-    double eye = fmax(land->tide * 0.31,
+    double eye = fmax(land->tide * bronze_render_height_scale,
                       fmax(bronze_render_sample(land, x, y, 0).height,
                            bronze_render_sample(land, ax, ay, 0).height)) + 4.2;
     return (BronzeRenderCamera){x, y, fx, fy, eye};
@@ -249,7 +252,7 @@ static void bronze_render_map(n_byte4 *pixels, int width, int height, const Bron
         for (int x = 0; x < width; ++x) {
             BronzeRenderSample p = bronze_render_sample(land, cx + (x - width / 2) * units,
                                                         cy + (y - height / 2) * units, 1);
-            p = bronze_render_water(p, land->tide * 0.31, cx + (x - width / 2) * units,
+            p = bronze_render_water(p, land->tide * bronze_render_height_scale, cx + (x - width / 2) * units,
                                     cy + (y - height / 2) * units);
             bronze_render_pixel(pixels + y * width + x, p.r, p.g, p.b);
         }
@@ -417,7 +420,7 @@ static void bronze_render_terrain(n_byte4 *pixels, int width, int height, const 
         }
     }
     if (!frame.depths) return;
-    double water_height = land->tide * 0.31;
+    double water_height = land->tide * bronze_render_height_scale;
     for (int y = 0; y < height && y + 0.5 < horizon; ++y) {
         double depth = (camera.eye - water_height) * focal / (horizon - y - 0.5);
         if (depth < 1.1 || depth >= 118) continue;

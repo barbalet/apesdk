@@ -9,7 +9,8 @@ struct BundleTests {
             precondition(bundle.url(forResource: name, withExtension: "bronze") != nil)
         }
         let model = BronzeScenarioController(bundle: bundle)
-        precondition(model.activeName == "bronze_age_full.bronze" && !model.lastAttemptFailed)
+        precondition(model.activeName == "example_large.bronze" && !model.lastAttemptFailed)
+        precondition(model.professions?.pointee.count == 120 && model.seed == 90210)
         var resets = 0
         var resetSeed: UInt = 0
         let commit: (UInt) -> Void = { seed in resets += 1; resetSeed = seed }
