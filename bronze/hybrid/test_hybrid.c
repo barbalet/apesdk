@@ -163,6 +163,13 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
         if (building->owner==town->home && building->kind==BRONZE_BUILDING_STORE)
             building->entrance=counter->location;
     }
+    /* The plaza may now sit off the original township anchor. Keep the
+     * deliberately co-located fixture's site and home place consistent. */
+    for (unsigned site=0;site<landscape->site_count;++site)
+        if (landscape->sites[site].place_id==town->home) {
+            landscape->sites[site].x=counter->location.x;
+            landscape->sites[site].y=counter->location.y;
+        }
     bronze_townships_paths(landscape,land_topography());
     location[0]=MAPSPACE_TO_APESPACE(counter->location.x);
     location[1]=MAPSPACE_TO_APESPACE(counter->location.y);

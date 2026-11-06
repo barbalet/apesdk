@@ -95,6 +95,15 @@ static int township_candidate(BronzeLandscape *land, BronzeLayoutScratch *scratc
     return 1;
 }
 
+typedef struct { int x,y; unsigned score; } BronzeLayoutCandidate;
+static int township_candidate_order(const void *a,const void *b)
+{
+    const BronzeLayoutCandidate *left=a,*right=b;
+    if (left->score!=right->score) return left->score<right->score?-1:1;
+    if (left->y!=right->y) return left->y<right->y?-1:1;
+    return left->x<right->x?-1:left->x>right->x;
+}
+
 static int township_place(BronzeLandscape *land, BronzeLayoutScratch *scratch,
                            const n_byte *height, bronze_land_cell center,
                            uint64_t owner, unsigned ordinal, BronzeBuildingKind kind,
@@ -107,17 +116,50 @@ static int township_place(BronzeLandscape *land, BronzeLayoutScratch *scratch,
     building.owner = owner; building.compatibility_place = compatibility;
     building.kind = kind; building.capacity = capacity;
     int width = kind == BRONZE_BUILDING_PLAZA ? 3 : 2;
-    /* Stable rings give compact layouts while terrain and doors break up grids.
-     * The open center may move to nearby level ground, retaining anchor access. */
-    for (int radius = 0; radius <= BRONZE_LAYOUT_RADIUS; ++radius) {
-        for (int dy = -radius; dy <= radius; ++dy) for (int dx = -radius; dx <= radius; ++dx) {
-            if (abs(dx) != radius && abs(dy) != radius) continue;
-            for (unsigned d = 0; d < 4; ++d) {
-                if (township_candidate(land, scratch, height, center, &building,
-                                       center.x + dx, center.y + dy, width, (d + owner % 4) % 4)) {
-                    land->settlement.buildings[land->settlement.building_count++] = building;
-                    return 1;
+    /* Rank a circular neighborhood by terrain, spacing and a stable organic
+     * offset. Avoid row-by-row square rings that pack every village into rows. */
+    enum { side=BRONZE_LAYOUT_RADIUS*2+1 };
+    BronzeLayoutCandidate candidates[side*side]; unsigned count=0;
+    for (int dy=-BRONZE_LAYOUT_RADIUS;dy<=BRONZE_LAYOUT_RADIUS;++dy)
+        for (int dx=-BRONZE_LAYOUT_RADIUS;dx<=BRONZE_LAYOUT_RADIUS;++dx) {
+            int distance=dx*dx+dy*dy;
+            if (distance>BRONZE_LAYOUT_RADIUS*BRONZE_LAYOUT_RADIUS) continue;
+            n_int x=center.x+dx,y=center.y+dy; int low=255,high=0,valid=1;
+            for (int cy=0;cy<width;++cy) for (int cx=0;cx<width;++cx) {
+                n_uint cell=map_cell(x+cx,y+cy);
+                if (scratch->used[cell] || scratch->forbidden[cell] || height[cell]<=TIDE_MAX ||
+                    !township_local(cell,center)) valid=0;
+                if (height[cell]<low) low=height[cell];
+                if (height[cell]>high) high=height[cell];
+            }
+            if (!valid || high-low>BRONZE_LAYOUT_SLOPE) continue;
+            unsigned alignment=0,nearby=0;
+            for (unsigned i=0;i<land->settlement.building_count;++i) {
+                const BronzeBuilding *other=&land->settlement.buildings[i];
+                int ax=abs(township_delta(x,other->cells[0].x));
+                int ay=abs(township_delta(y,other->cells[0].y));
+                if (ax<5 && ay<5) {
+                    alignment+=(ax==0 || ay==0);
+                    nearby+=(ax<=2 && ay<=2);
                 }
+            }
+            uint64_t noise=(uint64_t)map_cell(x,y)*UINT64_C(374761393)+building.id*UINT64_C(668265263);
+            noise=(noise^(noise>>13))*UINT64_C(1274126177); noise^=noise>>16;
+            unsigned score=(unsigned)distance*12+(unsigned)(high-low)*20+
+                           alignment*100+nearby*110+(unsigned)(noise%140);
+            candidates[count++]=(BronzeLayoutCandidate){dx,dy,score};
+        }
+    qsort(candidates,count,sizeof(*candidates),township_candidate_order);
+    for (unsigned i=0;i<count;++i) {
+        int dx=candidates[i].x,dy=candidates[i].y;
+        /* Prefer doors facing the township center; diagonally staggered homes
+         * do not inherit a common street-facing cardinal direction. */
+        unsigned preferred=abs(dx)>abs(dy)?(dx>0?3:1):(dy>0?0:2);
+        for (unsigned d=0;d<4;++d) {
+            if (township_candidate(land,scratch,height,center,&building,
+                                   center.x+dx,center.y+dy,width,(preferred+d)%4)) {
+                land->settlement.buildings[land->settlement.building_count++]=building;
+                return 1;
             }
         }
     }

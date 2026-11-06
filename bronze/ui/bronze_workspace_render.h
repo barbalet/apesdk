@@ -121,6 +121,12 @@ static int bronze_render_settlement(const BronzeRenderLand *land,double x,double
         const BronzeBuilding *building=&layout->buildings[index-1];
         double a=bronze_render_delta(bronze_render_wrap(ix),(int)building->cells[0].x)+u;
         double b=bronze_render_delta(bronze_render_wrap(iy),(int)building->cells[0].y)+v;
+        double angle=bronze_building_bearing(building)*0.017453292519943295;
+        double local_x=cos(angle)*(a-1)+sin(angle)*(b-1);
+        double local_y=-sin(angle)*(a-1)+cos(angle)*(b-1);
+        double clearing=building->kind==BRONZE_BUILDING_PLAZA?1.45:0.98;
+        double center=building->kind==BRONZE_BUILDING_PLAZA?1.5:1;
+        if (hypot(a-center,b-center)>clearing) return 0;
         sample->r=155+grain; sample->g=127+grain; sample->b=87+grain;
         if (building->kind==BRONZE_BUILDING_HOME) {
             double radius=hypot(a-1,b-1);
@@ -130,11 +136,14 @@ static int bronze_render_settlement(const BronzeRenderLand *land,double x,double
                 sample->r=163-shade; sample->g=124-shade; sample->b=66-shade/2;
             }
         } else if (building->kind==BRONZE_BUILDING_STORE) {
-            double ridge=1-fabs(a-1);
-            if (overhead) sample->height+=1.1+fmax(0,ridge)*1.0;
-            int shade=(int)(a*17)+grain+(int)(5*sin(b*34));
-            sample->r=171-shade; sample->g=131-shade; sample->b=75-shade/2;
+            if (fabs(local_x)<0.65 && fabs(local_y)<0.7) {
+                double ridge=1-fabs(local_x)/0.65;
+                if (overhead) sample->height+=1.1+ridge*0.75;
+                int shade=(int)((local_x+1)*17)+grain+(int)(5*sin(local_y*34));
+                sample->r=171-shade; sample->g=131-shade; sample->b=75-shade/2;
+            }
         } else if (building->kind==BRONZE_BUILDING_WORK_YARD) {
+            a=local_x+1; b=local_y+1;
             double radius=hypot(a-1,b-1);
             if (building->profession==BRONZE_PREMISE_METAL && radius<0.37) {
                 if (overhead) sample->height+=0.38;
@@ -162,12 +171,29 @@ static int bronze_render_settlement(const BronzeRenderLand *land,double x,double
     }
     if (layout->track[cell]) {
         unsigned links=layout->track_links[cell];
-        double half=layout->track[cell]==2?0.48:0.23;
-        int drawn=layout->track[cell]==2 || hypot(u-0.5,v-0.5)<half;
-        if ((links&1) && u>=0.5 && fabs(v-0.5)<half) drawn=1;
-        if ((links&2) && v>=0.5 && fabs(u-0.5)<half) drawn=1;
-        if ((links&4) && u<=0.5 && fabs(v-0.5)<half) drawn=1;
-        if ((links&8) && v<=0.5 && fabs(u-0.5)<half) drawn=1;
+        double half=layout->track[cell]==2?0.44:0.23;
+        int drawn=hypot(u-0.5,v-0.5)<half;
+        /* Round two-way bends through a quadratic centerline instead of
+         * painting an L-shaped right angle into every corner cell. */
+        if (links==3 || links==6 || links==12 || links==9) {
+            static const double ex[]={1,0.5,0,0.5},ey[]={0.5,1,0.5,0};
+            int first=-1,second=-1;
+            for (int d=0;d<4;++d) if (links&(1u<<d)) {
+                if (first<0) first=d; else second=d;
+            }
+            drawn=0;
+            for (int step=0;step<=12;++step) {
+                double t=step/12.0,one=1-t;
+                double px=one*one*ex[first]+one*t+t*t*ex[second];
+                double py=one*one*ey[first]+one*t+t*t*ey[second];
+                if (hypot(u-px,v-py)<half) { drawn=1;break; }
+            }
+        } else {
+            if ((links&1) && u>=0.5 && fabs(v-0.5)<half) drawn=1;
+            if ((links&2) && v>=0.5 && fabs(u-0.5)<half) drawn=1;
+            if ((links&4) && u<=0.5 && fabs(v-0.5)<half) drawn=1;
+            if ((links&8) && v<=0.5 && fabs(u-0.5)<half) drawn=1;
+        }
         if (drawn) { sample->r=153+grain; sample->g=126+grain; sample->b=86+grain; }
         return 1;
     }
@@ -175,7 +201,13 @@ static int bronze_render_settlement(const BronzeRenderLand *land,double x,double
                                     bronze_render_wrap((int)floor(x-1.4)));
     unsigned caster=layout->building_at[shade_cell];
     if (caster && layout->solid[shade_cell]) {
-        sample->r=sample->r*4/5; sample->g=sample->g*4/5; sample->b=sample->b*4/5;
+        const BronzeBuilding *building=&layout->buildings[caster-1];
+        double sx=bronze_render_delta(bronze_render_wrap((int)floor(x-1.4)),building->cells[0].x)+
+                  (x-1.4-floor(x-1.4))-1;
+        double sy=bronze_render_delta(bronze_render_wrap((int)floor(y-0.9)),building->cells[0].y)+
+                  (y-0.9-floor(y-0.9))-1;
+        double shade=1-0.2*fmax(0,1-hypot(sx,sy));
+        sample->r=(int)(sample->r*shade); sample->g=(int)(sample->g*shade); sample->b=(int)(sample->b*shade);
     }
     return 0;
 }

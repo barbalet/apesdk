@@ -80,6 +80,38 @@ static void spatial_townships_test(void)
     bronze_townships_layout(a, height);
     validate_layout(a, height);
     assert(a->settlement.reports[0].placed_housing == 256);
+    unsigned oblique=0,pairs=0;
+    for (unsigned i=0;i<a->settlement.building_count;++i) {
+        const BronzeBuilding *building=&a->settlement.buildings[i];
+        unsigned bearing=bronze_building_bearing(building);
+        assert(bearing<360 && bearing%90>=12 && bearing%90<=78);
+        for (unsigned j=0;j<i;++j) {
+            const BronzeBuilding *other=&a->settlement.buildings[j];
+            int dx=(int)(building->cells[0].x-other->cells[0].x);
+            int dy=(int)(building->cells[0].y-other->cells[0].y);
+            dx=(dx+MAP_DIMENSION*3/2)%MAP_DIMENSION-MAP_DIMENSION/2;
+            dy=(dy+MAP_DIMENSION*3/2)%MAP_DIMENSION-MAP_DIMENSION/2;
+            if (dx || dy) { pairs++; oblique+=(dx!=0 && dy!=0); }
+        }
+    }
+    unsigned diagonal_neighbors=0;
+    for (unsigned i=0;i<a->settlement.building_count;++i) {
+        int best=MAP_AREA,diagonal=0;
+        for (unsigned j=0;j<a->settlement.building_count;++j) if (i!=j) {
+            int dx=(int)(a->settlement.buildings[i].cells[0].x-a->settlement.buildings[j].cells[0].x);
+            int dy=(int)(a->settlement.buildings[i].cells[0].y-a->settlement.buildings[j].cells[0].y);
+            dx=(dx+MAP_DIMENSION*3/2)%MAP_DIMENSION-MAP_DIMENSION/2;
+            dy=(dy+MAP_DIMENSION*3/2)%MAP_DIMENSION-MAP_DIMENSION/2;
+            int distance=dx*dx+dy*dy;
+            if (distance<best) { best=distance;diagonal=(dx!=0 && dy!=0); }
+            else if (distance==best && (!dx || !dy)) diagonal=0;
+        }
+        diagonal_neighbors+=diagonal;
+    }
+    printf("Organic layout: %u/%u nearest neighbors oblique\n",diagonal_neighbors,a->settlement.building_count);
+    assert(diagonal_neighbors*2>a->settlement.building_count);
+    assert(pairs && oblique*4>pairs*3); /* Most inter-building axes are not cardinal. */
+
     assert(!a->settlement.reports[0].missing_store && !a->settlement.reports[0].missing_plaza);
     assert(!a->settlement.reports[0].missing_work_yards);
     bronze_townships_layout(b, height);

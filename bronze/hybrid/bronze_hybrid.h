@@ -63,6 +63,16 @@ typedef struct {
     bronze_land_cell cells[BRONZE_FOOTPRINT_LIMIT];
     bronze_land_cell entrance, work_position;
 } BronzeBuilding;
+
+/* Stable world-space bearing, derived from persisted identity. Keeping the
+ * full rotated structure inside its reserved cells preserves save geometry. */
+static inline unsigned bronze_building_bearing(const BronzeBuilding *building)
+{
+    uint64_t seed=building->id*UINT64_C(0x9e3779b97f4a7c15);
+    seed^=seed>>29; seed*=UINT64_C(0xbf58476d1ce4e5b9); seed^=seed>>31;
+    return (unsigned)((seed>>16)%4)*90+12+(unsigned)(seed%67);
+}
+
 typedef enum { BRONZE_PATH_FOOT, BRONZE_PATH_EARTH_ROAD } BronzePathSurface;
 typedef struct {
     uint64_t id, owner, from_building, to_building, to_place;

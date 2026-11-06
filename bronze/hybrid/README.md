@@ -301,3 +301,19 @@ are historical: new saves preserve explicit records; only version 1 saves
 regenerate geometry. See [save format](../SAVE-FORMAT.md) and the
 [cycle 8 qualification report](../validation/townships/README.md) for migration,
 validation, measured costs, image evidence and remaining live/visual checks.
+
+## Organic township placement
+
+New layouts rank a circular search area by slope, spacing, and deterministic
+variation, with a penalty for lining up neighboring buildings in rows or
+columns. Doorways prefer the township center. Structures use stable bearings
+between 12 and 78 degrees away from the cardinal axes, derived from their saved
+building IDs. Map and Terrain share those bearings; rotated store roofs remain
+inside their reserved footprint. Clearings and shadows are rounded, and walking
+track bends use rounded centerlines rather than painted square corners.
+
+Simulation occupancy and movement retain the native cell grid. Existing saved
+building positions and routes are preserved; start a new world or reload a
+scenario to generate the new placement. Bearings need no additional save fields.
+The flat-land regression checks that a majority of nearest neighbors are
+oblique, alongside dry ground, slope, access, capacity, determinism and seam tests.

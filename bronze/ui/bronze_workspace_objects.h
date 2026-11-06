@@ -91,6 +91,12 @@ static void bronze_render_structures(BronzeRenderFrame *frame,const BronzeRender
         double x=camera.x+remainder(building->cells[0].x-camera.x,MAP_DIMENSION);
         double y=camera.y+remainder(building->cells[0].y-camera.y,MAP_DIMENSION);
         if (hypot(x-camera.x,y-camera.y)>120) continue;
+        double angle=bronze_building_bearing(building)*0.017453292519943295;
+        double cosine=cos(angle),sine=sin(angle);
+        double dx_camera=camera.x-(x+1),dy_camera=camera.y-(y+1);
+        BronzeRenderCamera view={x+1+cosine*dx_camera+sine*dy_camera,
+            y+1-sine*dx_camera+cosine*dy_camera,
+            cosine*camera.fx+sine*camera.fy,-sine*camera.fx+cosine*camera.fy,camera.eye};
         double ground=bronze_render_sample(land,x+1,y+1,0).height;
         /* A level floor rests on the highest footprint corner; foundations
          * extend down through the slope instead of warping the roof. */
@@ -106,34 +112,36 @@ static void bronze_render_structures(BronzeRenderFrame *frame,const BronzeRender
                 BronzeObjectVertex q={x+1+0.87*cos(b),y+1+0.87*sin(b),ground-0.8};
                 BronzeObjectVertex u={p.x,p.y,floor+1},v={q.x,q.y,floor+1};
                 int shade=(int)(14*cos(a)+9*sin(a));
-                bronze_object_quad(frame,camera,focal,horizon,p,q,v,u,143+shade,114+shade,76+shade);
+                bronze_object_quad(frame,view,focal,horizon,p,q,v,u,143+shade,114+shade,76+shade);
                 u.x=x+1+cos(a);u.y=y+1+sin(a);
                 v.x=x+1+cos(b);v.y=y+1+sin(b);
-                bronze_object_triangle(frame,camera,focal,horizon,u,v,peak,173+shade,136+shade,73+shade);
+                bronze_object_triangle(frame,view,focal,horizon,u,v,peak,173+shade,136+shade,73+shade);
             }
             double dx=bronze_render_delta(building->entrance.x,building->cells[0].x)+0.5-1;
             double dy=bronze_render_delta(building->entrance.y,building->cells[0].y)+0.5-1;
             double length=hypot(dx,dy); if (length<0.01) length=1;
             dx/=length; dy/=length;
+            double local_dx=cosine*dx+sine*dy;
+            dy=-sine*dx+cosine*dy; dx=local_dx;
             double cx=x+1+dx*0.88,cy=y+1+dy*0.88;
             BronzeObjectVertex a={cx-dy*0.23,cy+dx*0.23,floor};
             BronzeObjectVertex b={cx+dy*0.23,cy-dx*0.23,floor};
             BronzeObjectVertex c=b,d=a; c.z+=0.82;d.z+=0.82;
-            bronze_object_quad(frame,camera,focal,horizon,a,b,c,d,49,36,24);
+            bronze_object_quad(frame,view,focal,horizon,a,b,c,d,49,36,24);
         } else if (building->kind==BRONZE_BUILDING_STORE) {
-            bronze_object_box(frame,camera,focal,horizon,x+0.12,y+0.12,ground-0.8,1.76,1.76,floor-ground+1.9,145,112,71);
-            BronzeObjectVertex a={x,y,floor+1.1},b={x+2,y,floor+1.1},c={x+2,y+2,floor+1.1},d={x,y+2,floor+1.1};
-            BronzeObjectVertex e={x+1,y,floor+2.1},f={x+1,y+2,floor+2.1};
-            bronze_object_quad(frame,camera,focal,horizon,a,e,f,d,170,131,70);
-            bronze_object_quad(frame,camera,focal,horizon,e,b,c,f,145,106,57);
-            bronze_object_triangle(frame,camera,focal,horizon,a,b,e,154,120,77);
-            bronze_object_triangle(frame,camera,focal,horizon,d,c,f,140,107,68);
+            bronze_object_box(frame,view,focal,horizon,x+0.44,y+0.39,ground-0.8,1.12,1.22,floor-ground+1.9,145,112,71);
+            BronzeObjectVertex a={x+0.35,y+0.3,floor+1.1},b={x+1.65,y+0.3,floor+1.1},c={x+1.65,y+1.7,floor+1.1},d={x+0.35,y+1.7,floor+1.1};
+            BronzeObjectVertex e={x+1,y+0.3,floor+1.85},f={x+1,y+1.7,floor+1.85};
+            bronze_object_quad(frame,view,focal,horizon,a,e,f,d,170,131,70);
+            bronze_object_quad(frame,view,focal,horizon,e,b,c,f,145,106,57);
+            bronze_object_triangle(frame,view,focal,horizon,a,b,e,154,120,77);
+            bronze_object_triangle(frame,view,focal,horizon,d,c,f,140,107,68);
         } else if (building->kind==BRONZE_BUILDING_WORK_YARD) {
             int metal=building->profession==BRONZE_PREMISE_METAL;
             int pottery=building->profession==BRONZE_PREMISE_POTTERY;
-            bronze_object_box(frame,camera,focal,horizon,x+0.6,y+0.6,ground,0.8,0.8,
+            bronze_object_box(frame,view,focal,horizon,x+0.6,y+0.6,ground,0.8,0.8,
                               metal?0.65:0.45,metal?69:155,metal?61:91,metal?48:50);
-            if (pottery) bronze_object_box(frame,camera,focal,horizon,x+0.2,y+1.3,ground,0.35,0.35,0.5,170,94,54);
+            if (pottery) bronze_object_box(frame,view,focal,horizon,x+0.4,y+1.3,ground,0.3,0.3,0.5,170,94,54);
         }
     }
     for (unsigned i=0;i<land->count;++i) {
