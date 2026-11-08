@@ -647,3 +647,8 @@ void land_vect2( n_vect2 *output, n_int *actual_z, n_vect2 *location )
     output->x = ( z - land_location( ( APESPACE_TO_MAPSPACE( loc_x ) + 1 ), APESPACE_TO_MAPSPACE( loc_y ) ) );
     output->y = ( z - land_location( APESPACE_TO_MAPSPACE( loc_x ), ( APESPACE_TO_MAPSPACE( loc_y ) + 1 ) ) );
 }
+
+#ifdef CANTERBURY_SIM
+const n_land *land_canterbury_snapshot(void) { return &m_land; }
+void land_canterbury_install(const n_land *state) { m_land = *state; }
+#endif

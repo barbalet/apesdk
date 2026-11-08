@@ -485,6 +485,23 @@ static void draw_bronze_pixel(n_int x, n_int y, n_byte color, void *context)
 }
 #endif
 
+#ifdef CANTERBURY_SIM
+typedef struct { n_byte *pixels; n_int dimension; } CanterburyMapTarget;
+static void draw_canterbury_pixel(n_int x,n_int y,n_byte color,void *context)
+{
+    CanterburyMapTarget *target=context;
+    if(x>=0&&y>=0&&x<target->dimension&&y<target->dimension)
+        target->pixels[y*target->dimension+x]=color;
+}
+int draw_canterbury_map(n_byte *pixels,n_int dimension)
+{
+    if(!pixels||dimension<MAP_DIMENSION||dimension>4096)return 0;
+    CanterburyMapTarget target={pixels,dimension};
+    bronze_hybrid_draw(dimension,draw_canterbury_pixel,&target);
+    return 1;
+}
+#endif
+
 static n_int window_dim_x = 512;
 static n_int window_dim_y = 511;
 
@@ -2073,6 +2090,11 @@ static void draw_apes( simulated_group *group, n_byte lores )
                       draw_bronze_pixel, &local_col);
 #endif
 
+#ifdef CANTERBURY_SIM
+    /* City camera/aggregation owns marks on this same map surface. */
+    extern bronze_canterbury_overlay canterbury_overlay_callback;
+    if (canterbury_overlay_callback) return;
+#endif
     if ( group->select )
     {
         loop_no_thread( group, 0L, draw_apes_loop, &local_col );

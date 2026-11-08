@@ -838,6 +838,11 @@ n_int episode_description( simulated_being *local_being,
  */
 n_byte being_awake( simulated_being *local )
 {
+#ifdef CANTERBURY_SIM
+    /* Human sleep is assigned once by the city needs scheduler. Do not infer
+       wakefulness again from island daylight, terrain water or ape drives. */
+    return local && being_energy(local)>BEING_DEAD ? local->delta.awake : FULLY_ASLEEP;
+#endif
     if ( local )
     {
         if ( being_energy_less_than( local, BEING_DEAD + 1 ) )

@@ -1,5 +1,9 @@
 /* Included by bronze_actors.c so only the registry owner can install records. */
+#ifdef CANTERBURY_SIM
+enum { SIDECAR_LIMIT = 256 * 1024 * 1024, SIDECAR_RESERVATION_LIMIT = 256 };
+#else
 enum { SIDECAR_LIMIT = 16 * 1024 * 1024, SIDECAR_RESERVATION_LIMIT = 256 };
+#endif
 
 typedef struct {
     n_byte *output;
@@ -357,6 +361,9 @@ static void sidecar_registry(Sidecar *codec, BronzeActorRegistry *registry, cons
     for (unsigned i = 0; codec->valid && i < registry->count; ++i) {
         BronzeActor *actor = codec->reading ? &registry->records[i] : registry->slots[i];
         if (!actor) { codec->valid = 0; return; }
+#ifdef CANTERBURY_SIM
+        if (!codec->reading && city_find(registry,actor->id)!=actor) { codec->valid=0; return; }
+#endif
         sidecar_actor(codec, actor, registry->program);
         if (codec->reading) registry->slots[i] = actor;
         if (!actor->id || actor->id < registry->first_world_id || actor->id >= registry->next_id ||
@@ -368,8 +375,12 @@ static void sidecar_registry(Sidecar *codec, BronzeActorRegistry *registry, cons
             codec->valid = 0;
         for (size_t j = 0; codec->valid && j < actor->reservation_count; ++j)
             if (!sidecar_place_exists(land, actor->reservations[j].place)) codec->valid = 0;
+#ifdef CANTERBURY_SIM
+        if (codec->reading && codec->valid && !city_index(registry,actor,i)) codec->valid=0;
+#else
         for (unsigned j = 0; j < i; ++j)
             if (actor->id == registry->slots[j]->id) codec->valid = 0;
+#endif
     }
 }
 

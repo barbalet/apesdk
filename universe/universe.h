@@ -1018,7 +1018,16 @@ typedef struct
 typedef void ( being_birth_event )( simulated_being *born, simulated_being *mother, void *sim );
 typedef void ( being_death_event )( simulated_being *deceased, void *sim );
 
+#ifdef CANTERBURY_SIM
+#ifndef BRONZE_SIM
+#error CANTERBURY_SIM requires BRONZE_SIM
+#endif
+/* Full 1939-proxy Canterbury population plus one spare native slot. */
+#define CANTERBURY_POPULATION 26999
+#define LARGE_SIM 27000
+#else
 #define LARGE_SIM 256
+#endif
 
 typedef struct
 {
@@ -1087,6 +1096,13 @@ void console_capture_death( simulated_being *deceased, void *sim );
 
 void     *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size );
 void      sim_cycle( void );
+#ifdef CANTERBURY_SIM
+/* A city host owns human routines/movement at one serialized native minute.
+ * This replaces island foraging/biology; it does not run a second population.
+ * Configure before sim_init; NULL callbacks are rejected. */
+typedef void (*canterbury_cycle_handler)(simulated_group *, void *);
+int sim_canterbury_configure(n_uint population, canterbury_cycle_handler, void *);
+#endif
 void      sim_update_output( void );
 
 /* This is the new way. Please continue forwards. */

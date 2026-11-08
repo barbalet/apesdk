@@ -154,3 +154,29 @@ int bronze_work_claim(simulated_being* b)
        a->work.sampled_tick!=c->tick || !a->work.eligible || a->work.consumed) return 0;
     consume(a,b,c->tick); return 1;
 }
+
+#ifdef CANTERBURY_SIM
+int bronze_work_canterbury_claim(simulated_being* b, BronzeWorkReason city_reason)
+{
+    BronzeActorRegistry* r=bronze_actors_current(); BronzeClock* c=bronze_actors_clock(r);
+    BronzeActor* a=bronze_actors_for_being(r,b);
+    if(city_reason<BRONZE_WORK_READY || city_reason>BRONZE_WORK_CLOCK) return 0;
+    if(!a || !c || !c->open || c->tick!=bronze_native_tick() || !a->work.sampled ||
+       a->work.sampled_tick!=c->tick || a->work.consumed) return 0;
+    BronzeNeeds n=bronze_needs_read(b);
+    BronzeWorkReason reason=bronze_needs_reason(&n);
+    if(reason==BRONZE_WORK_READY && a->work.initial_reason!=BRONZE_WORK_READY) reason=a->work.initial_reason;
+    if(reason==BRONZE_WORK_READY && (a->work.x!=being_location_x(b) || a->work.y!=being_location_y(b))) reason=BRONZE_WORK_NATIVE_MOVEMENT;
+    if(city_reason!=BRONZE_WORK_READY) reason=city_reason;
+    a->work.eligible=reason==BRONZE_WORK_READY;
+    if(reason!=BRONZE_WORK_READY) {
+        record(a,reason,a->work.running?BRONZE_WORK_INTERRUPTED:BRONZE_WORK_BLOCKED,c->tick);
+        a->work.running=0; return 0;
+    }
+    consume(a,b,c->tick); return 1;
+}
+void bronze_work_canterbury_close(void)
+{
+    BronzeClock* c=bronze_actors_clock(bronze_actors_current()); if(c) c->open=0;
+}
+#endif

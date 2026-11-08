@@ -9,6 +9,12 @@ struct BronzeActorRegistry {
     simulated_group* group; /* Runtime binding, not a world/actor identity. */
     BronzeActor records[LARGE_SIM];
     BronzeActor* slots[LARGE_SIM];
+#ifdef CANTERBURY_SIM
+    /* Open-addressed stable-ID index; zero empty, UINT64_MAX tombstone. */
+    BronzeActorId id_keys[65536];
+    uint32_t id_records[65536];
+    size_t native_slots[LARGE_SIM], allocation_hint, tombstones;
+#endif
     BronzeActorId next_id;
     uint64_t generation;
     size_t count;
@@ -24,6 +30,55 @@ struct BronzeActorRegistry {
 static BronzeActorRegistry* active;
 static BronzeActorRegistry* direct_world;
 
+#ifdef CANTERBURY_SIM
+static size_t city_bucket(BronzeActorId id) { return (size_t)((id * UINT64_C(11400714819323198485)) >> 48); }
+static BronzeActor *city_find(BronzeActorRegistry *r, BronzeActorId id)
+{
+    if (!id || id == UINT64_MAX) return NULL;
+    size_t bucket=city_bucket(id);
+    for (size_t n=0;n<65536;n++,bucket=(bucket+1)&65535) {
+        if (!r->id_keys[bucket]) return NULL;
+        if (r->id_keys[bucket]==id) return &r->records[r->id_records[bucket]];
+    }
+    return NULL;
+}
+static int city_insert(BronzeActorRegistry *r, BronzeActor *actor, size_t slot)
+{
+    size_t bucket=city_bucket(actor->id), empty=SIZE_MAX;
+    for (size_t n=0;n<65536;n++,bucket=(bucket+1)&65535) {
+        if (r->id_keys[bucket]==actor->id) return 0;
+        if (r->id_keys[bucket]==UINT64_MAX && empty==SIZE_MAX) empty=bucket;
+        if (!r->id_keys[bucket]) { if(empty==SIZE_MAX) empty=bucket; break; }
+    }
+    if (empty==SIZE_MAX) return 0;
+    size_t record=(size_t)(actor-r->records);
+    if(r->id_keys[empty]==UINT64_MAX) r->tombstones--;
+    r->id_keys[empty]=actor->id; r->id_records[empty]=(uint32_t)record;
+    r->native_slots[record]=slot;
+    return 1;
+}
+/* Reclaim deleted buckets so long-running birth/death churn cannot turn every
+ * successful or missing-ID lookup into a scan of the entire hash table. */
+static int city_index(BronzeActorRegistry *r, BronzeActor *actor, size_t slot)
+{
+    if(r->tombstones>16384) {
+        memset(r->id_keys,0,sizeof(r->id_keys));r->tombstones=0;
+        for(size_t i=0;i<LARGE_SIM;i++) {
+            BronzeActor *existing=&r->records[i];
+            if(existing!=actor && existing->id && !city_insert(r,existing,r->native_slots[i])) return 0;
+        }
+    }
+    return city_insert(r,actor,slot);
+}
+static void city_unindex(BronzeActorRegistry *r, BronzeActor *actor)
+{
+    size_t bucket=city_bucket(actor->id);
+    for (size_t n=0;n<65536 && r->id_keys[bucket];n++,bucket=(bucket+1)&65535)
+        if (r->id_keys[bucket]==actor->id) { r->id_keys[bucket]=UINT64_MAX; r->tombstones++; break; }
+    r->native_slots[actor-r->records]=SIZE_MAX;
+}
+#endif
+
 static void dispose(BronzeActorRegistry* r, BronzeActor* actor)
 {
     size_t i;
@@ -31,6 +86,9 @@ static void dispose(BronzeActorRegistry* r, BronzeActor* actor)
     bronze_task_release_claim(&r->landscape, actor);
     for(i=0;i<actor->reservation_count;i++)
         if(r->release) r->release(r->release_context,actor->id,&actor->reservations[i]);
+#ifdef CANTERBURY_SIM
+    city_unindex(r,actor);
+#endif
     free(actor->skills); free(actor->resources); free(actor->items);
     free(actor->reservations); free(actor->history);
     memset(actor,0,sizeof(*actor));
@@ -63,6 +121,12 @@ static int slot_of(const BronzeActorRegistry* r, const simulated_being* being)
 {
     size_t i;
     if(!is_current(r) || !r->group || !being) return -1;
+#ifdef CANTERBURY_SIM
+    uintptr_t start=(uintptr_t)r->group->beings, address=(uintptr_t)being;
+    if(address<start || address-start>=sizeof(r->group->beings) ||
+       (address-start)%sizeof(*being)) return -1;
+    return (int)((address-start)/sizeof(*being));
+#endif
     /* Equality search avoids undefined subtraction of unrelated pointers. */
     for(i=0;i<LARGE_SIM;i++) if(being==&r->group->beings[i]) return (int)i;
     return -1;
@@ -76,6 +140,9 @@ BronzeActor* bronze_actors_find(BronzeActorRegistry* r, BronzeActorId id)
 {
     size_t i;
     if(!r || !id) return NULL;
+#ifdef CANTERBURY_SIM
+    return city_find(r,id);
+#endif
     for(i=0;i<LARGE_SIM;i++) if(r->records[i].id==id) return &r->records[i];
     return NULL;
 }
@@ -84,6 +151,10 @@ simulated_being* bronze_actors_resolve(BronzeActorRegistry* r, BronzeActorId id)
     size_t i;
     BronzeActor* actor=bronze_actors_find(r,id);
     if(!actor || !is_current(r) || !r->group) return NULL;
+#ifdef CANTERBURY_SIM
+    size_t slot=r->native_slots[actor-r->records];
+    return slot<LARGE_SIM && r->slots[slot]==actor ? &r->group->beings[slot] : NULL;
+#endif
     for(i=0;i<LARGE_SIM;i++) if(r->slots[i]==actor) return &r->group->beings[i];
     return NULL;
 }
@@ -93,13 +164,23 @@ static int add(BronzeActorRegistry* r, simulated_being* being)
     if(slot<0) return 0;
     if(r->slots[slot]) return 1; /* Birth notifications are idempotent. */
     if(!r->next_id || r->next_id==UINT64_MAX) return 0;
+#ifdef CANTERBURY_SIM
+    for(size_t search=0;search<LARGE_SIM;search++) {
+        i=(r->allocation_hint+search)%LARGE_SIM;
+        if(r->records[i].id) continue;
+#else
     for(i=0;i<LARGE_SIM;i++) if(!r->records[i].id) {
+#endif
         BronzeActor* actor=&r->records[i];
         actor->id=r->next_id++; actor->vocation=BRONZE_KIND_NONE; actor->occupation=BRONZE_KIND_NONE;
         actor->task=BRONZE_KIND_NONE;
         if (r->program)
             actor->execution.rng = ((uint64_t)r->program->config->seed << 32) ^
                                    (actor->id - r->first_world_id);
+#ifdef CANTERBURY_SIM
+        if(!city_index(r,actor,(size_t)slot)) { actor->id=0; return 0; }
+        r->allocation_hint=(i+1)%LARGE_SIM;
+#endif
         r->slots[slot]=actor; r->count++; return 1;
     }
     return 0;
@@ -113,12 +194,20 @@ void bronze_actors_invalidate(BronzeActorRegistry* r)
     r->native_bound=0; r->group=NULL;
     for(i=0;i<LARGE_SIM;i++) dispose(r,&r->records[i]);
     memset(r->slots,0,sizeof(r->slots)); r->count=0; r->generation++;
+#ifdef CANTERBURY_SIM
+    memset(r->id_keys,0,sizeof(r->id_keys)); r->allocation_hint=0; r->tombstones=0;
+#endif
     memset(&r->clock,0,sizeof(r->clock));
 }
 int bronze_actors_reset(BronzeActorRegistry* r, simulated_group* group)
 {
     size_t i;
     if(!r) return 0;
+#ifdef CANTERBURY_SIM
+    /* A rejected city reset must not destroy the active registry. */
+    if(!group || group->max>LARGE_SIM || group->num>LARGE_SIM || group->num>group->max ||
+       r->next_id>UINT64_MAX-group->num-1 || (active ? active!=r : direct_world!=r)) return 0;
+#endif
     bronze_actors_invalidate(r);
     if(!group || group->num>LARGE_SIM || r->next_id>UINT64_MAX-group->num-1 ||
        (active ? active!=r : direct_world!=r)) return 0;
@@ -141,15 +230,30 @@ BronzeClock* bronze_actors_clock(BronzeActorRegistry* r) { return r?&r->clock:NU
 BronzeActorId bronze_actors_next_id(const BronzeActorRegistry* r) { return r?r->next_id:0; }
 int bronze_actors_bind_order(BronzeActorRegistry* r, simulated_group* group, const BronzeActorId* ids, size_t count)
 {
+#ifdef CANTERBURY_SIM
+    BronzeActor* ordered[LARGE_SIM]; size_t i;
+    unsigned char seen[LARGE_SIM]={0};
+#else
     BronzeActor* ordered[LARGE_SIM]; size_t i,j;
+#endif
     if(!r || (active ? active!=r : direct_world!=r) || !group || !ids || count!=r->count || count!=group->num || count>LARGE_SIM) return 0;
     for(i=0;i<count;i++) {
         ordered[i]=bronze_actors_find(r,ids[i]);
         if(!ordered[i]) return 0;
+#ifdef CANTERBURY_SIM
+        size_t record=(size_t)(ordered[i]-r->records);
+        if(seen[record]) return 0;
+        seen[record]=1;
+#else
         for(j=0;j<i;j++) if(ordered[j]==ordered[i]) return 0;
+#endif
     }
     memset(r->slots,0,sizeof(r->slots));
-    memcpy(r->slots,ordered,count*sizeof(*ordered)); r->group=group; r->native_bound=1; return 1;
+    memcpy(r->slots,ordered,count*sizeof(*ordered));
+#ifdef CANTERBURY_SIM
+    for(i=0;i<count;i++) r->native_slots[ordered[i]-r->records]=i;
+#endif
+    r->group=group; r->native_bound=1; return 1;
 }
 int bronze_actors_rebind(BronzeActorRegistry* r, simulated_group* group)
 {
@@ -194,10 +298,19 @@ void bronze_actors_death(simulated_group* group, simulated_being* dead)
     if(!actor) return;
     BronzeActorId id=actor->id; int slot=slot_of(r,dead);
     r->slots[slot]=NULL;
+#ifdef CANTERBURY_SIM
+    for(i=0;i<group->num;i++) {
+        BronzeActor *other=r->slots[i];
+        if(!other) continue;
+        if(other->mentor==id) other->mentor=BRONZE_ACTOR_NONE;
+        if(other->apprentice==id) other->apprentice=BRONZE_ACTOR_NONE;
+    }
+#else
     for(i=0;i<LARGE_SIM;i++) {
         if(r->records[i].mentor==id) r->records[i].mentor=BRONZE_ACTOR_NONE;
         if(r->records[i].apprentice==id) r->records[i].apprentice=BRONZE_ACTOR_NONE;
     }
+#endif
     for (i=0;i<actor->resource_count;i++) {
         const BronzeStock *cargo=&actor->resources[i];
         if (cargo->kind<BRONZE_RESOURCE_LIMIT) r->landscape.lost[cargo->kind]+=cargo->amount;
@@ -217,6 +330,9 @@ void bronze_actors_relocated(simulated_group* group, simulated_being* from, simu
     int source=slot_of(r,from), target=slot_of(r,to);
     if(source<0 || target<0) return;
     r->slots[target]=r->slots[source]; r->slots[source]=NULL;
+#ifdef CANTERBURY_SIM
+    if(r->slots[target]) r->native_slots[r->slots[target]-r->records]=(size_t)target;
+#endif
 }
 
 
@@ -314,3 +430,13 @@ const BronzeProgram* bronze_actors_program(const BronzeActorRegistry* registry)
 }
 
 #include "bronze_sidecar.inc"
+
+#ifdef CANTERBURY_SIM
+BronzeActorId bronze_actors_canterbury_slot_id(const BronzeActorRegistry *r,size_t slot)
+{ return r && slot<r->count && r->slots[slot] ? r->slots[slot]->id : 0; }
+#endif
+
+#ifdef CANTERBURY_SIM
+int bronze_actors_canterbury_seed_ids(BronzeActorRegistry *r,BronzeActorId next)
+{ if(!r||r->count||!next||next>=UINT64_MAX-LARGE_SIM-1)return 0;r->next_id=next;return 1; }
+#endif

@@ -57,6 +57,11 @@ BronzeActor* bronze_actors_find(BronzeActorRegistry*, BronzeActorId);
 BronzeActor* bronze_actors_for_being(BronzeActorRegistry*, const simulated_being*);
 simulated_being* bronze_actors_resolve(BronzeActorRegistry*, BronzeActorId);
 size_t bronze_actors_count(const BronzeActorRegistry*);
+#ifdef CANTERBURY_SIM
+int bronze_actors_canterbury_seed_ids(BronzeActorRegistry *,BronzeActorId);
+/* Read staged serialization order without activating or binding a registry. */
+BronzeActorId bronze_actors_canterbury_slot_id(const BronzeActorRegistry *,size_t);
+#endif
 uint64_t bronze_actors_generation(const BronzeActorRegistry*);
 BronzeLandscape* bronze_actors_landscape(BronzeActorRegistry*);
 void bronze_actors_stage_program(BronzeActorRegistry*, BronzeProgram*);

@@ -123,6 +123,10 @@ void bronze_townships_prepare(void);
 void bronze_hybrid_reset(void);
 void bronze_hybrid_cycle(simulated_group *group);
 void bronze_hybrid_draw(n_int dimension, bronze_plot plot, void *context);
+#ifdef CANTERBURY_SIM
+typedef void (*bronze_canterbury_overlay)(n_int dimension, bronze_plot plot, void *plot_context, void *world_context);
+void bronze_hybrid_canterbury_overlay_register(bronze_canterbury_overlay overlay, void *context);
+#endif
 void bronze_hybrid_draw_hud(n_byte4 *rgba, n_int width, n_int height);
 const bronze_site *bronze_hybrid_sites(n_uint *count);
 const BronzePlace *bronze_hybrid_place(uint64_t id);

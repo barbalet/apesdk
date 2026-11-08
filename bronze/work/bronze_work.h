@@ -31,4 +31,10 @@ void bronze_work_hold_position(simulated_being* being);
 void bronze_work_end(simulated_group* group);
 /* Prototype production consumes the same one-unit budget as a task. */
 int bronze_work_claim(simulated_being* being);
+#ifdef CANTERBURY_SIM
+/* Serialized city callback only. Sample with bronze_work_begin, explicitly
+   nominate stationary work after city needs, then close without auto-dispatch. */
+int bronze_work_canterbury_claim(simulated_being*, BronzeWorkReason);
+void bronze_work_canterbury_close(void);
+#endif
 #endif

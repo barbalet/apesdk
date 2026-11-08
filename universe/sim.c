@@ -1629,6 +1629,21 @@ void sim_update_output( void )
     sim_writing_output = 0;
 }
 
+#ifdef CANTERBURY_SIM
+static n_uint canterbury_population = CANTERBURY_POPULATION;
+static canterbury_cycle_handler canterbury_handler;
+static void *canterbury_context;
+static int canterbury_started;
+int sim_canterbury_configure(n_uint population, canterbury_cycle_handler handler, void *context)
+{
+    if (canterbury_started || !population || population >= LARGE_SIM || !handler) return 0;
+    canterbury_population = population;
+    canterbury_handler = handler;
+    canterbury_context = context;
+    return 1;
+}
+#endif
+
 void sim_cycle( void )
 {
     if ( local_execution == KIND_PRE_STARTUP )
@@ -1661,7 +1676,11 @@ void sim_cycle( void )
                 weather_init();
 #endif
                 /* Sets the number of Simulated Apes initially created, and creates them */
+#ifdef CANTERBURY_SIM
+                group.num = being_init_group(group.beings, local_random, canterbury_population, group.max);
+#else
                 group.num = being_init_group( group.beings, local_random, group.max >> 1, group.max );
+#endif
             }
         }
 
@@ -1672,7 +1691,9 @@ void sim_cycle( void )
             (void)SHOW_ERROR("Bronze actor registry initialization failed");
             return;
         }
+#ifndef CANTERBURY_SIM
         if (local_execution != KIND_LOAD_FILE) bronze_hybrid_reset();
+#endif
 #endif
         sim_new_progress = 0;
         local_execution = KIND_NOTHING_TO_RUN;
@@ -1682,6 +1703,16 @@ void sim_cycle( void )
     n_int       max_honor = 0;
 
     land_cycle();
+#ifdef CANTERBURY_SIM
+    /* The city layer supplies explicit routines and human needs. Never also
+       integrate the native island's autonomous movement for these beings. */
+    if (canterbury_handler) {
+        bronze_work_begin(&group);
+        canterbury_handler(&group, canterbury_context);
+        bronze_work_canterbury_close();
+    }
+    return;
+#endif
 #ifdef WEATHER_ON
     weather_cycle();
 #endif
@@ -1838,6 +1869,10 @@ static void debug_death_event( simulated_being *deceased, void *sim )
 void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uint landbuffer_size )
 {
     n_byte2    local_random[2];
+#ifdef CANTERBURY_SIM
+    if (!canterbury_handler || canterbury_started) { (void)SHOW_ERROR("Canterbury host is not configured or already running"); return 0L; }
+    canterbury_started=1;
+#endif
 
     sim_writing_output = 1;
     sim_new_progress = 1;
@@ -1877,6 +1912,9 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     {
         if ( sim_memory( offscreen_size ) != 0 )
         {
+#ifdef CANTERBURY_SIM
+            canterbury_started=0;
+#endif
             return 0L;
         }
     }
@@ -1908,6 +1946,12 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
 
 void sim_close( void )
 {
+#ifdef CANTERBURY_SIM
+    canterbury_started=0;
+    canterbury_handler=NULL;
+    canterbury_context=NULL;
+    group.num=0;
+#endif
 #ifdef BRONZE_SIM
     bronze_actors_close_default();
 #endif

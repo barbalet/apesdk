@@ -399,6 +399,11 @@ typedef struct
     n_byte      topography_highdef[HI_RES_MAP_AREA * 2]; /* generated */
     n_byte4     highres_tide[HI_RES_MAP_AREA / 32];      /* generated */
 } n_land;
+#ifdef CANTERBURY_SIM
+/* Serialized city checkpoints only; restore is called after project validation. */
+const n_land *land_canterbury_snapshot(void);
+void land_canterbury_install(const n_land *);
+#endif
 #ifdef BRONZE_SIM
 typedef struct {
     n_int wind_x, wind_y, aim_x, aim_y, dissipation, local_delta;

@@ -1621,12 +1621,23 @@ n_uint being_init_group( simulated_being *beings, n_byte2 *local_random, n_uint 
     n_uint num = 0;
     math_random3( local_random );
 
+#ifdef CANTERBURY_SIM
+    while ( num < count_to && (num + 1) < max )
+#else
     while ( num < count_to )
+#endif
     {
         math_random3( local_random );
         if ( ( num + 1 ) < max )
         {
+            /* City identities live in stable actor IDs and project person records.
+             * Native display names may repeat, avoiding quadratic uniqueness
+             * scans across 27,000 residents. Ordinary builds are unchanged. */
+#ifdef CANTERBURY_SIM
+            if ( being_init( beings, 0, &beings[num], 0L, local_random ) != 0 )
+#else
             if ( being_init( beings, ( n_int )num, &beings[num], 0L, local_random ) != 0 )
+#endif
             {
                 being_erase( &beings[num] );
                 break;

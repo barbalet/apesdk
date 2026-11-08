@@ -1094,7 +1094,24 @@ void bronze_hybrid_draw(n_int dimension, bronze_plot plot, void *context)
             }
         }
     }
+#ifdef CANTERBURY_SIM
+    /* The city owns its map presentation; this guarded hook lets it share the
+       existing ApeSDK map surface without adding Canterbury state to Bronze. */
+    extern bronze_canterbury_overlay canterbury_overlay_callback;
+    extern void *canterbury_overlay_context;
+    if (canterbury_overlay_callback)
+        canterbury_overlay_callback(dimension, plot, context, canterbury_overlay_context);
+#endif
 }
+#ifdef CANTERBURY_SIM
+bronze_canterbury_overlay canterbury_overlay_callback;
+void *canterbury_overlay_context;
+void bronze_hybrid_canterbury_overlay_register(bronze_canterbury_overlay overlay, void *context)
+{
+    canterbury_overlay_callback = overlay;
+    canterbury_overlay_context = context;
+}
+#endif
 const bronze_site *bronze_hybrid_sites(n_uint *count)
 {
     const BronzeLandscape *landscape = current_landscape();
