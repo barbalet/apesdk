@@ -470,24 +470,25 @@ static int city_plain_actor(const BronzeActor *a)
 {
     if(a->skills||a->resources||a->items||a->reservations||a->history||a->skill_count||a->resource_count||a->item_count||a->reservation_count||a->history_count||a->execution.craft_recipe||a->execution.operation||a->execution.name||a->execution.action||a->execution.depth)return 0;
     for(unsigned i=0;i<65;i++)if(a->execution.frames[i].statements)return 0;
-    return a->work.reason<=BRONZE_WORK_CLOCK && a->work.initial_reason<=BRONZE_WORK_CLOCK && a->work.phase<=BRONZE_WORK_RUNNING && a->work.last_block_reason<=BRONZE_WORK_CLOCK;
+    if(a->execution.claim_place||a->execution.claim_amount||a->execution.craft_town||a->execution.route.length||a->execution.depth)return 0;
+    return (unsigned)a->work.reason<=BRONZE_WORK_CLOCK && (unsigned)a->work.initial_reason<=BRONZE_WORK_CLOCK && (unsigned)a->work.phase<=BRONZE_WORK_RUNNING && (unsigned)a->work.last_block_reason<=BRONZE_WORK_CLOCK;
 }
 size_t bronze_actors_canterbury_checkpoint_bytes(size_t count)
 { return count<=LARGE_SIM?sizeof(BronzeCityHeader)+count*sizeof(BronzeActor):0; }
 int bronze_actors_canterbury_checkpoint(BronzeActorRegistry *r,void *data,size_t bytes)
 {
-    if(!r||!is_current(r)||r->clock.open||r->program||r->pending_program||r->release||bytes!=bronze_actors_canterbury_checkpoint_bytes(r->count)||!data)return 0;
-    BronzeCityHeader h={0};h.magic=UINT64_C(0x31435443415);h.next_id=r->next_id;h.generation=r->generation;h.first_world_id=r->first_world_id;h.count=r->count;h.clock=r->clock;h.landscape=r->landscape;h.professions=r->professions;h.pending_professions=r->pending_professions;
-    memcpy(data,&h,sizeof h);
-    for(size_t i=0;i<r->count;i++){BronzeActor *a=r->slots[i];if(!a||!city_plain_actor(a))return 0;memcpy((unsigned char *)data+sizeof h+i*sizeof *a,a,sizeof *a);}return 1;
+    if(!r||!is_current(r)||r->clock.open||r->program||r->pending_program||r->release||bytes!=bronze_actors_canterbury_checkpoint_bytes(r->count)||!data||((uintptr_t)data%_Alignof(BronzeCityHeader)))return 0;
+    BronzeCityHeader *h=data;memset(h,0,sizeof *h);h->magic=UINT64_C(0x31435443415);h->next_id=r->next_id;h->generation=r->generation;h->first_world_id=r->first_world_id;h->count=r->count;h->clock=r->clock;h->landscape=r->landscape;h->professions=r->professions;h->pending_professions=r->pending_professions;
+    
+    for(size_t i=0;i<r->count;i++){BronzeActor *a=r->slots[i];if(!a||!city_plain_actor(a))return 0;memcpy((unsigned char *)data+sizeof *h+i*sizeof *a,a,sizeof *a);}return 1;
 }
 int bronze_actors_canterbury_checkpoint_stage(BronzeActorRegistry *r,const void *data,size_t bytes,simulated_group *group)
 {
-    if(!r||r==active||!data||bytes<sizeof(BronzeCityHeader)||!group||r->count)return 0;
-    BronzeCityHeader h;memcpy(&h,data,sizeof h);
-    if(h.magic!=UINT64_C(0x31435443415)||h.count>LARGE_SIM||h.count!=group->num||bytes!=bronze_actors_canterbury_checkpoint_bytes(h.count)||!h.next_id||h.next_id==UINT64_MAX||h.first_world_id>h.next_id||h.clock.open||h.clock.tick<h.clock.origin||h.clock.elapsed!=h.clock.tick-h.clock.origin||h.professions.count>BRONZE_VOCATION_LIMIT||h.pending_professions.count>BRONZE_VOCATION_LIMIT)return 0;
-    for(size_t i=0;i<h.count;i++){BronzeActor a;memcpy(&a,(const unsigned char *)data+sizeof h+i*sizeof a,sizeof a);if(!a.id||a.id<h.first_world_id||a.id>=h.next_id||!city_plain_actor(&a)||a.work.sampled_tick>h.clock.tick)return 0;r->records[i]=a;r->slots[i]=&r->records[i];if(!city_index(r,&r->records[i],i))return 0;}
-    r->count=h.count;r->next_id=h.next_id;r->generation=h.generation;r->first_world_id=h.first_world_id;r->clock=h.clock;r->landscape=h.landscape;r->professions=h.professions;r->pending_professions=h.pending_professions;r->allocation_hint=h.count%LARGE_SIM;r->group=group;r->native_bound=0;return 1;
+    if(!r||r==active||!data||bytes<sizeof(BronzeCityHeader)||!group||r->count||((uintptr_t)data%_Alignof(BronzeCityHeader)))return 0;
+    const BronzeCityHeader *h=data;
+    if(h->magic!=UINT64_C(0x31435443415)||h->count>LARGE_SIM||h->count!=group->num||bytes!=bronze_actors_canterbury_checkpoint_bytes(h->count)||!h->next_id||h->next_id==UINT64_MAX||h->first_world_id>h->next_id||h->clock.open||h->clock.tick<h->clock.origin||h->clock.elapsed!=h->clock.tick-h->clock.origin||h->professions.count>BRONZE_VOCATION_LIMIT||h->pending_professions.count>BRONZE_VOCATION_LIMIT||h->landscape.town_count>BRONZE_TOWN_LIMIT||h->landscape.site_count>BRONZE_SITE_LIMIT||h->landscape.place_count>BRONZE_PLACE_LIMIT)return 0;
+    for(size_t i=0;i<h->count;i++){BronzeActor a;memcpy(&a,(const unsigned char *)data+sizeof *h+i*sizeof a,sizeof a);if(!a.id||a.id<h->first_world_id||a.id>=h->next_id||!city_plain_actor(&a)||a.work.sampled_tick>h->clock.tick)return 0;r->records[i]=a;r->slots[i]=&r->records[i];if(!city_index(r,&r->records[i],i))return 0;}
+    r->count=h->count;r->next_id=h->next_id;r->generation=h->generation;r->first_world_id=h->first_world_id;r->clock=h->clock;r->landscape=h->landscape;r->professions=h->professions;r->pending_professions=h->pending_professions;r->allocation_hint=h->count%LARGE_SIM;r->group=group;r->native_bound=0;return 1;
 }
 size_t bronze_actors_canterbury_record_slot(const BronzeActorRegistry *r,BronzeActorId id)
 { BronzeActor *a=r?city_find((BronzeActorRegistry *)r,id):NULL;return a?r->native_slots[a-r->records]:SIZE_MAX; }
