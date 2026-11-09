@@ -811,3 +811,62 @@ void episodic_store_memory(
 #endif
 
 
+
+#ifdef BRONZE_SIM
+#include <stdio.h>
+#include <string.h>
+int episodic_simulation_food(simulated_being *being, n_int energy, const char *food)
+{
+    if (!being || energy <= 0 || being->delta.awake == FULLY_ASLEEP || !being_episodic(being)) return 0;
+    n_byte kind = FOOD_OTHER;
+    if (food) {
+        if (!strcmp(food,"grain") || !strcmp(food,"wheat")) kind=FOOD_GRAIN;
+        else if (!strcmp(food,"fish")) kind=FOOD_FISH;
+        else if (!strcmp(food,"meal") || !strcmp(food,"meals") || !strcmp(food,"bread")) kind=FOOD_PREPARED;
+        else if (!strcmp(food,"fruit")) kind=FOOD_FRUIT;
+        else if (!strcmp(food,"vegetables")) kind=FOOD_VEGETABLE;
+        else if (!strcmp(food,"shellfish")) kind=FOOD_SHELLFISH;
+        else if (!strcmp(food,"seaweed")) kind=FOOD_SEAWEED;
+        else if (!strcmp(food,"eggs")) kind=FOOD_BIRD_EGGS;
+    }
+    episodic_food(being,energy > 65535-EPISODIC_AFFECT_ZERO ? 65535-EPISODIC_AFFECT_ZERO : energy,kind);
+    return 1;
+}
+int episodic_simulation_chat(simulated_being *a, simulated_being *b)
+{
+    if (!a || !b || a==b || a->delta.awake==FULLY_ASLEEP || b->delta.awake==FULLY_ASLEEP ||
+        !being_episodic(a) || !being_episodic(b)) return 0;
+    episodic_interaction(a,b,EVENT_CHAT,AFFECT_CHAT,0);
+    episodic_interaction(b,a,EVENT_CHAT,AFFECT_CHAT,0);
+    return 1;
+}
+n_uint episodic_simulation_summary(simulated_being *being, char *buffer, n_uint capacity)
+{
+    if (!buffer || !capacity) return 0;
+    buffer[0]=0;
+    if (!being) return 0;
+    const simulated_iepisodic *memory=being_episodic(being);
+    if (!memory) return 0;
+    unsigned slots[EPISODIC_SIZE], count=0;
+    for (unsigned i=0;i<EPISODIC_SIZE;i++) {
+        if (!memory[i].event || memory[i].event>=EVENTS) continue;
+        unsigned j=count;
+        while (j && (memory[slots[j-1]].space_time.date<memory[i].space_time.date ||
+            (memory[slots[j-1]].space_time.date==memory[i].space_time.date &&
+             memory[slots[j-1]].space_time.time<memory[i].space_time.time))) {
+            slots[j]=slots[j-1];j--;
+        }
+        slots[j]=i;count++;
+    }
+    size_t used=0;
+    for (unsigned i=0;i<count && used+1<capacity;i++) {
+        n_string_block description={0};
+        episode_description(being,(n_int)slots[i],description);
+        int n=snprintf(buffer+used,(size_t)capacity-used,"%s%s",used?"\n":"",description);
+        if (n<0) break;
+        if ((size_t)n >= (size_t)capacity-used) break;
+        used+=(size_t)n;
+    }
+    return count;
+}
+#endif

@@ -654,6 +654,12 @@ n_int episode_description( simulated_being *local_being,
                 io_string_write( str, "lizard eggs", &string_index );
                 break;
             }
+#ifdef BRONZE_SIM
+            case FOOD_GRAIN: io_string_write(str,"grain",&string_index); break;
+            case FOOD_FISH: io_string_write(str,"fish",&string_index); break;
+            case FOOD_PREPARED: io_string_write(str,"a prepared meal",&string_index); break;
+            case FOOD_OTHER: io_string_write(str,"food",&string_index); break;
+#endif
             }
             break;
         }

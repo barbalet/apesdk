@@ -298,6 +298,10 @@ static void recipe_chains(simulated_group *group, BronzeLandscape *landscape)
         }
     }
     assert(native_meal && worker->instruction == 11);
+    int remembered_meal=0;
+    for(unsigned i=0;i<EPISODIC_SIZE;i++)
+        if(being_episodic(being)[i].event==EVENT_EAT && being_episodic(being)[i].food==FOOD_PREPARED) remembered_meal=1;
+    assert(remembered_meal); /* A successful task meal creates native EVENT_EAT. */
     assert(worker->ration_used == 1 && worker->household_resources[1] == 0 && town->resources[1] == 0);
     assert(town->resources[0] == 0 && town->resources[2] == 0 && town->resources[3] == 0 &&
            town->resources[4] == 0 && town->resources[5] == 0);
@@ -496,6 +500,45 @@ static void qualify_full_scenario(const char *path, n_uint seed)
 #include "test_routes.inc"
 #include "test_gather_delivery.inc"
 #include "test_starting_occupations.inc"
+
+static void activity_memories_test(void)
+{
+    simulated_being *bodies=calloc(2,sizeof *bodies);
+    assert(bodies);
+    simulated_being *a=&bodies[0], *b=&bodies[1];
+    being_set_family_name(a,1,2);being_set_family_name(b,3,4);
+    memset(being_episodic(a),0,sizeof(simulated_iepisodic)*EPISODIC_SIZE);
+    memset(being_episodic(b),0,sizeof(simulated_iepisodic)*EPISODIC_SIZE);
+    a->delta.awake=b->delta.awake=FULLY_AWAKE;
+    n_int energy=being_energy(a);
+    n_byte4 date=land_date(), time=land_time();
+    assert(!episodic_simulation_food(a,0,"grain"));
+    assert(!episodic_simulation_chat(a,a));
+    b->delta.awake=FULLY_ASLEEP;
+    assert(!episodic_simulation_food(b,100,"grain"));
+    assert(!episodic_simulation_chat(a,b));
+    b->delta.awake=FULLY_AWAKE;
+    assert(episodic_simulation_chat(a,b));
+    assert(being_episodic(a)[0].event==EVENT_CHAT && being_episodic(b)[0].event==EVENT_CHAT);
+    assert(being_episodic(a)[0].first_name[BEING_MET]==being_gender_name(b));
+    assert(being_episodic(b)[0].family_name[BEING_MET]==being_family_name(a));
+    assert(episodic_simulation_food(a,100,"grain"));
+    int found=0;
+    for(unsigned i=0;i<EPISODIC_SIZE;i++)
+        if(being_episodic(a)[i].event==EVENT_EAT) {assert(being_episodic(a)[i].food==FOOD_GRAIN);found=1;}
+    assert(found && being_energy(a)==energy && land_date()==date && land_time()==time);
+    simulated_being before=*a;
+    char text[2048];
+    assert(episodic_simulation_summary(a,text,sizeof text)==2);
+    assert(strstr(text,"grain") && strstr(text,"Chatted with"));
+    assert(!memcmp(&before,a,sizeof before));
+    char tiny[2];assert(episodic_simulation_summary(a,tiny,sizeof tiny)==2 && tiny[1]==0);
+    for(unsigned i=0;i<100;i++) assert(episodic_simulation_food(a,100,"fish"));
+    assert(episodic_simulation_summary(a,text,sizeof text)<=EPISODIC_SIZE);
+    assert(strstr(text,"fish"));
+    free(bodies);
+    puts("PASS native eating/chat codes, paired identities, bounded memory and pure inspection");
+}
 
 int main(int argc, char **argv)
 {
@@ -910,6 +953,7 @@ int main(int argc, char **argv)
     weighted_routes_test();
     gather_delivery_test(group,landscape);
     starting_occupations_test(group);
+    activity_memories_test();
     sim_close();
     puts("Bronze hybrid terrain, symbols, bounded economy and reset checks passed.");
     return 0;

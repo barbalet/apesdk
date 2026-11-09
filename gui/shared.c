@@ -2293,6 +2293,11 @@ void shared_session_bronze_actor_summary(shared_session* session, char* buffer, 
                  (unsigned long long)town->storage, available, reserved);
         break;
     }
+    char memories[2048];
+    n_uint remembered=episodic_simulation_summary(being,memories,sizeof memories);
+    used=strlen(buffer);
+    if (remembered && used<size)
+        snprintf(buffer+used,size-used,"\nNative activity memories (%lu retained)\n%s",(unsigned long)remembered,memories);
 }
 
 uint64_t shared_session_bronze_actor_id(shared_session* session)

@@ -1721,6 +1721,8 @@ void sim_cycle( void )
        integrate the native island's autonomous movement for these beings. */
     if (canterbury_handler) {
         bronze_work_begin(&GLOBAL_GROUP);
+        for (n_uint i=0;i<GLOBAL_GROUP.num;i++)
+            episodic_cycle_no_sim(&GLOBAL_GROUP.beings[i]);
         canterbury_handler(&GLOBAL_GROUP, canterbury_context);
         bronze_work_canterbury_close();
     }

@@ -328,7 +328,7 @@ struct BronzeWorkspacePreview: View {
                             Spacer(minLength: 0)
                         }
                         if showsInspector {
-                            BronzeWorkspaceInspector(actor: snapshot.actor, settlement: sceneModel.bronzeSettlementInspection(selectedSite))
+                            BronzeWorkspaceInspector(actor: snapshot.actor, settlement: sceneModel.bronzeSettlementInspection(selectedSite), actorSummary: snapshot.actorSummary)
                                 .frame(height: showsTerrain ? max(wide ? 175 : 104, geometry.size.height * (wide ? 0.40 : 0.22)) : nil)
                         }
                     }
@@ -690,6 +690,11 @@ private struct BronzeWorkspaceLegend: View {
 private struct BronzeWorkspaceInspector: View {
     let actor: BronzeWorkspaceActor?
     let settlement: BronzeSettlementInspection
+    let actorSummary: String
+    private var activityMemories: String {
+        guard let range = actorSummary.range(of: "Native activity memories") else { return "No activity memories retained yet." }
+        return String(actorSummary[range.lowerBound...])
+    }
     private func text<T>(_ value: T) -> String {
         withUnsafeBytes(of: value) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }
     }
@@ -735,6 +740,11 @@ private struct BronzeWorkspaceInspector: View {
                         row("Fatigue", String(actor.fatigue))
                         row("Last exchange", actor.exchange.isEmpty ? "None recorded" : actor.exchange)
                     }
+                    Divider()
+                    Text("Activity memories").font(.caption.weight(.semibold))
+                    Text(activityMemories).font(.caption).textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("BronzeActivityMemories")
                 } else {
                     Text("No registered being selected").foregroundStyle(.secondary)
                 }

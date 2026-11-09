@@ -390,6 +390,9 @@ static BronzeTaskStatus eat_cargo(BronzeActor *actor, simulated_being *being,
             BronzeLandscape *landscape = bronze_actors_landscape(bronze_actors_current());
             landscape->consumed[cargo->kind] += quantity;
             being_energy_delta(being, energy > deficit ? deficit : (n_int)energy);
+            const char *const *names=program->config->resource_kinds.names.data;
+            const char *food=cargo->kind<program->config->resource_kinds.names.len?names[cargo->kind]:NULL;
+            episodic_simulation_food(being,energy > deficit ? deficit : (n_int)energy,food);
         }
         return BRONZE_TASK_RUNNING;
     }

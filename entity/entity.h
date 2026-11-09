@@ -206,6 +206,13 @@ typedef enum
     FOOD_SEAWEED,
     FOOD_BIRD_EGGS,
     FOOD_LIZARD_EGGS,
+#ifdef BRONZE_SIM
+    /* Append only: original food codes and native being/save layouts stay fixed. */
+    FOOD_GRAIN,
+    FOOD_FISH,
+    FOOD_PREPARED,
+    FOOD_OTHER,
+#endif
     FOOD_TYPES
 } FOOD_KINDS;
 
@@ -679,5 +686,15 @@ void being_brain_cycle( n_byte *local, n_byte2 *constants );
 void being_reset_drive( simulated_being *value, enum drives_definition drive );
 n_uint being_genetic_comparison( n_genetics *primary, n_genetics *secondary, n_int parse_requirements );
 n_int being_move_energy( simulated_being *local_being, n_int *conductance );
+
+
+#ifdef BRONZE_SIM
+/* Call only after real consumption/delivered interaction; these record memories,
+ * never grant food, energy, time, resources or work. The caller owns proximity. */
+int episodic_simulation_food(simulated_being *, n_int energy, const char *food);
+int episodic_simulation_chat(simulated_being *, simulated_being *);
+/* Copied, newest-first native memories; no clock/RNG/state mutation. */
+n_uint episodic_simulation_summary(simulated_being *, char *, n_uint capacity);
+#endif
 
 #endif /* SIMULATEDAPE_ENTITY_H */

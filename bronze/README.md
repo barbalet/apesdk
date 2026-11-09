@@ -125,3 +125,25 @@ Local coverage includes the 120-role load, expanded daily/crisis sequences,
 resource-condition compilation, and save/restore of vocation 119
 (`clan_role_120`). The contract inventory retains the historical three
 scenario entries and adds the extended document.
+
+## Native activity memories
+
+Bronze uses the existing native episodic event codes, not a separate event clock.
+Successful explicit food consumption now records `EVENT_EAT` after cargo is
+actually debited and native energy is restored. Grain, fish, prepared meals and
+ordinary native food types have readable descriptions; unclassified resource
+names are described as food rather than being guessed to be vegetation. Failed,
+blocked, preview-only or deferred eating produces no successful eating memory.
+The helpers never grant stock, energy or work themselves.
+
+The explicit paired-conversation helper uses `EVENT_CHAT` for both participants.
+Bronze's existing native social loop retains its original respect, dialogue and
+subjective-memory rules; it is not replaced by the host conversation helper.
+Existing completed work, delivered service, trade and training memories retain
+the profession event codes. `episodic_simulation_summary` copies retained native
+memories newest first for the selected actor inspector without changing the
+clock, RNG or memories. This is bounded subjective native memory (currently 12
+slots with normal replacement/forgetting), not an exhaustive global event log.
+These APIs and appended food codes are guarded by `BRONZE_SIM`, also used by
+`CANTERBURY_SIM`. Historical event codes and native being/save layouts are not
+renumbered or enlarged.
