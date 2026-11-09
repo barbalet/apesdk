@@ -58,6 +58,13 @@ BronzeActor* bronze_actors_for_being(BronzeActorRegistry*, const simulated_being
 simulated_being* bronze_actors_resolve(BronzeActorRegistry*, BronzeActorId);
 size_t bronze_actors_count(const BronzeActorRegistry*);
 #ifdef CANTERBURY_SIM
+size_t bronze_actors_canterbury_storage_bytes(void);
+size_t bronze_actors_canterbury_checkpoint_bytes(size_t);
+int bronze_actors_canterbury_checkpoint(BronzeActorRegistry *,void *,size_t);
+int bronze_actors_canterbury_checkpoint_stage(BronzeActorRegistry *,const void *,size_t,simulated_group *);
+size_t bronze_actors_canterbury_record_slot(const BronzeActorRegistry *,BronzeActorId);
+/* Initialize zeroed caller storage; destroy clears sidecars but does not free it. */
+BronzeActorRegistry *bronze_actors_canterbury_init_storage(void *,size_t);
 int bronze_actors_canterbury_seed_ids(BronzeActorRegistry *,BronzeActorId);
 /* Read staged serialization order without activating or binding a registry. */
 BronzeActorId bronze_actors_canterbury_slot_id(const BronzeActorRegistry *,size_t);

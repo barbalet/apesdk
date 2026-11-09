@@ -1622,13 +1622,17 @@ n_uint being_init_group( simulated_being *beings, n_byte2 *local_random, n_uint 
     math_random3( local_random );
 
 #ifdef CANTERBURY_SIM
-    while ( num < count_to && (num + 1) < max )
+    while ( num < count_to && num < max )
 #else
     while ( num < count_to )
 #endif
     {
         math_random3( local_random );
+#ifdef CANTERBURY_SIM
+        if ( num < max )
+#else
         if ( ( num + 1 ) < max )
+#endif
         {
             /* City identities live in stable actor IDs and project person records.
              * Native display names may repeat, avoiding quadratic uniqueness

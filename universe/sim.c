@@ -43,6 +43,9 @@
 
 
 #include <stdio.h>
+#ifdef CANTERBURY_SIM
+#include <stdlib.h>
+#endif
 
 #include "universe_internal.h"
 
@@ -225,7 +228,14 @@ n_byte     *offbuffer = 0L;
 /* Twice the minimum number of apes the Simulation will allow to run */
 #define MIN_BEINGS        4
 
-static  simulated_group group;
+#ifdef CANTERBURY_SIM
+static simulated_group *city_group;
+static int city_group_borrowed, city_buffer_borrowed;
+#define GLOBAL_GROUP (*city_group)
+#else
+static simulated_group group;
+#define GLOBAL_GROUP group
+#endif
 static  simulated_timing timing;
 
 #ifdef APESCRIPT_INCLUDED
@@ -298,7 +308,7 @@ void sim_set_console_output( n_console_output *local_output_function )
 static void *sim_thread_posix( void *threadid )
 {
     n_byte *local = ( n_byte * )threadid;
-    if ( io_console( &group, ( simulated_console_command * ) control_commands, *input_function, *output_function ) != 0 )
+    if ( io_console( &GLOBAL_GROUP, ( simulated_console_command * ) control_commands, *input_function, *output_function ) != 0 )
     {
         sim_console_clean_up();
     }
@@ -365,7 +375,7 @@ void sim_console( n_string simulation_filename, n_uint randomise )
     {
         do
         {}
-        while ( io_console( &group,
+        while ( io_console( &GLOBAL_GROUP,
                             ( simulated_console_command * )control_commands,
                             io_console_entry,
                             io_console_out ) == 0 );
@@ -457,7 +467,7 @@ simulated_timing *sim_timing( void )
 
 simulated_group *sim_group( void )
 {
-    return &group;
+    return &GLOBAL_GROUP;
 }
 
 #ifdef BRONZE_SIM
@@ -1345,7 +1355,7 @@ n_int     sim_interpret( n_file *input_file )
     }
     else
     {
-        SC_DEBUG_ON( group.select ); /* turn on debugging after script loading */
+        SC_DEBUG_ON( GLOBAL_GROUP.select ); /* turn on debugging after script loading */
     }
 
     interpret->sc_input  = &sim_input;
@@ -1619,13 +1629,13 @@ void sim_update_output( void )
         return;
     }
 
-    if ( group.select == 0L )
+    if ( GLOBAL_GROUP.select == 0L )
     {
         return;
     }
     sim_writing_output = 1;
     memory_erase( ( n_byte * )sim_console_output, STRING_BLOCK_SIZE );
-    watch_control( &group, being_get_select_name( &group ), group.select, sim_console_output );
+    watch_control( &GLOBAL_GROUP, being_get_select_name( &GLOBAL_GROUP ), GLOBAL_GROUP.select, sim_console_output );
     sim_writing_output = 0;
 }
 
@@ -1636,7 +1646,7 @@ static void *canterbury_context;
 static int canterbury_started;
 int sim_canterbury_configure(n_uint population, canterbury_cycle_handler handler, void *context)
 {
-    if (canterbury_started || !population || population >= LARGE_SIM || !handler) return 0;
+    if (canterbury_started || !population || population > LARGE_SIM || !handler) return 0;
     canterbury_population = population;
     canterbury_handler = handler;
     canterbury_context = context;
@@ -1646,6 +1656,9 @@ int sim_canterbury_configure(n_uint population, canterbury_cycle_handler handler
 
 void sim_cycle( void )
 {
+#ifdef CANTERBURY_SIM
+    if(!city_group)return;
+#endif
     if ( local_execution == KIND_PRE_STARTUP )
     {
         return;
@@ -1677,17 +1690,17 @@ void sim_cycle( void )
 #endif
                 /* Sets the number of Simulated Apes initially created, and creates them */
 #ifdef CANTERBURY_SIM
-                group.num = being_init_group(group.beings, local_random, canterbury_population, group.max);
+                GLOBAL_GROUP.num = being_init_group(GLOBAL_GROUP.beings, local_random, canterbury_population, GLOBAL_GROUP.max);
 #else
-                group.num = being_init_group( group.beings, local_random, group.max >> 1, group.max );
+                GLOBAL_GROUP.num = being_init_group( GLOBAL_GROUP.beings, local_random, GLOBAL_GROUP.max >> 1, GLOBAL_GROUP.max );
 #endif
             }
         }
 
-        sim_set_select( group.beings );
+        sim_set_select( GLOBAL_GROUP.beings );
 
 #ifdef BRONZE_SIM
-        if (local_execution != KIND_LOAD_FILE && !bronze_actors_world_reset(&group)) {
+        if (local_execution != KIND_LOAD_FILE && !bronze_actors_world_reset(&GLOBAL_GROUP)) {
             (void)SHOW_ERROR("Bronze actor registry initialization failed");
             return;
         }
@@ -1707,8 +1720,8 @@ void sim_cycle( void )
     /* The city layer supplies explicit routines and human needs. Never also
        integrate the native island's autonomous movement for these beings. */
     if (canterbury_handler) {
-        bronze_work_begin(&group);
-        canterbury_handler(&group, canterbury_context);
+        bronze_work_begin(&GLOBAL_GROUP);
+        canterbury_handler(&GLOBAL_GROUP, canterbury_context);
         bronze_work_canterbury_close();
     }
     return;
@@ -1718,75 +1731,75 @@ void sim_cycle( void )
 #endif
 
 #ifdef BRONZE_SIM
-    bronze_work_begin(&group);
-    bronze_tasks_begin(&group);
+    bronze_work_begin(&GLOBAL_GROUP);
+    bronze_tasks_begin(&GLOBAL_GROUP);
 #endif
-    loop_being_no_sim_no_data( group.beings, group.num, sim_being_awake_loop_no_sim );
-    loop_being_no_sim_no_data( group.beings, group.num, being_cycle_universal );
+    loop_being_no_sim_no_data( GLOBAL_GROUP.beings, GLOBAL_GROUP.num, sim_being_awake_loop_no_sim );
+    loop_being_no_sim_no_data( GLOBAL_GROUP.beings, GLOBAL_GROUP.num, being_cycle_universal );
 
 #ifdef APESCRIPT_INCLUDED
     if ( interpret )
     {
-        loop_being( &group, sim_being_interpret, PROCESSING_WELTER_WEIGHT );
+        loop_being( &GLOBAL_GROUP, sim_being_interpret, PROCESSING_WELTER_WEIGHT );
     }
     else
 #endif
     {
         /** Listen for any shouts */
-        loop_being( &group, being_listen, PROCESSING_FEATHER_WEIGHT );
+        loop_being( &GLOBAL_GROUP, being_listen, PROCESSING_FEATHER_WEIGHT );
 #ifdef EPISODIC_ON
-        loop_being_no_sim_no_data( group.beings, group.num, episodic_cycle_no_sim );
+        loop_being_no_sim_no_data( GLOBAL_GROUP.beings, GLOBAL_GROUP.num, episodic_cycle_no_sim );
 #endif
-        loop_being( &group, sim_being_cycle, PROCESSING_MIDDLE_WEIGHT );
-        loop_being( &group, drives_cycle, PROCESSING_LIGHT_WEIGHT );
+        loop_being( &GLOBAL_GROUP, sim_being_cycle, PROCESSING_MIDDLE_WEIGHT );
+        loop_being( &GLOBAL_GROUP, drives_cycle, PROCESSING_LIGHT_WEIGHT );
     }
 
     if ( land_time() & 1 )
     {
 #ifdef BRAIN_ON
-        loop_being( &group, sim_brain_loop, PROCESSING_WELTER_WEIGHT );
+        loop_being( &GLOBAL_GROUP, sim_brain_loop, PROCESSING_WELTER_WEIGHT );
 #endif
     }
 #ifdef BRAINCODE_ON
     else
     {
-        loop_being( &group, sim_brain_dialogue_loop, PROCESSING_MIDDLE_WEIGHT );
+        loop_being( &GLOBAL_GROUP, sim_brain_dialogue_loop, PROCESSING_MIDDLE_WEIGHT );
     }
 #endif
 
-    loop_being_no_sim( group.beings, group.num, being_tidy_loop_no_sim, &max_honor );
+    loop_being_no_sim( GLOBAL_GROUP.beings, GLOBAL_GROUP.num, being_tidy_loop_no_sim, &max_honor );
 
-    loop_being( &group, social_initial_loop, PROCESSING_LIGHT_WEIGHT );
+    loop_being( &GLOBAL_GROUP, social_initial_loop, PROCESSING_LIGHT_WEIGHT );
 
     if ( max_honor )
     {
-        loop_being_no_sim_no_data( group.beings, group.num, being_recalibrate_honor_loop_no_sim );
+        loop_being_no_sim_no_data( GLOBAL_GROUP.beings, GLOBAL_GROUP.num, being_recalibrate_honor_loop_no_sim );
     }
 
-    loop_being_no_sim_no_data( group.beings, group.num, social_secondary_loop_no_sim );
+    loop_being_no_sim_no_data( GLOBAL_GROUP.beings, GLOBAL_GROUP.num, social_secondary_loop_no_sim );
 
     {
         n_string_block selected_name = {0};
         n_int          selected_lives = 1;
-        being_remove_loop2_struct *brls = being_remove_initial( &group );
-        if ( group.select )
+        being_remove_loop2_struct *brls = being_remove_initial( &GLOBAL_GROUP );
+        if ( GLOBAL_GROUP.select )
         {
-            being_name_simple( group.select, selected_name );
+            being_name_simple( GLOBAL_GROUP.select, selected_name );
         }
-        if ( group.ext_death != 0L )
+        if ( GLOBAL_GROUP.ext_death != 0L )
         {
-            loop_no_thread( &group, 0L, being_remove_loop1, 0L );
+            loop_no_thread( &GLOBAL_GROUP, 0L, being_remove_loop1, 0L );
         }
-        loop_no_thread( &group, 0L, being_remove_loop2, brls );
+        loop_no_thread( &GLOBAL_GROUP, 0L, being_remove_loop2, brls );
         selected_lives = brls->selected_died == 0;
-        sim_being_remove_final( &group, &brls );
+        sim_being_remove_final( &GLOBAL_GROUP, &brls );
 
-        loop_being_no_sim_no_data( group.beings, group.num, being_speed_advance );
+        loop_being_no_sim_no_data( GLOBAL_GROUP.beings, GLOBAL_GROUP.num, being_speed_advance );
 
         if ( selected_lives )
         {
             simulated_being *new_select = sim_select_name( selected_name );
-            if ( new_select != group.select )
+            if ( new_select != GLOBAL_GROUP.select )
             {
                 sim_set_select( new_select );
             }
@@ -1794,11 +1807,11 @@ void sim_cycle( void )
     }
 
 #ifdef BRONZE_SIM
-    bronze_work_end(&group);
-    bronze_tasks_end(&group);
-    bronze_hybrid_cycle( &group );
+    bronze_work_end(&GLOBAL_GROUP);
+    bronze_tasks_end(&GLOBAL_GROUP);
+    bronze_hybrid_cycle( &GLOBAL_GROUP );
 #endif
-    sim_time( &group );
+    sim_time( &GLOBAL_GROUP );
 }
 
 #define    MINIMAL_ALLOCATION    ((512*512)+(TERRAIN_WINDOW_AREA)+(CONTROL_WINDOW_AREA)+(sizeof(simulated_being) * MIN_BEINGS)+sizeof(simulated_remains)+1)
@@ -1832,11 +1845,34 @@ static n_int being_memory( simulated_group *group, n_byte *buffer, n_uint *locat
     return 0;
 }
 
+#ifdef CANTERBURY_SIM
+n_uint sim_canterbury_storage_bytes(n_uint offscreen_size)
+{
+    if(offscreen_size > MAXIMUM_ALLOCATION-MINIMAL_ALLOCATION)return 0;
+    return MAXIMUM_ALLOCATION;
+}
+int sim_canterbury_attach_storage(simulated_group *storage,void *buffer,n_uint bytes)
+{
+    if(canterbury_started||city_group||offbuffer||!storage||!buffer||bytes!=MAXIMUM_ALLOCATION)return 0;
+    city_group=storage;city_group_borrowed=1;offbuffer=buffer;city_buffer_borrowed=1;return 1;
+}
+int sim_canterbury_install_storage(simulated_group *storage,void *buffer,n_uint bytes,canterbury_cycle_handler handler,void *context)
+{
+    if(!handler||!storage||storage->num>LARGE_SIM||storage->max!=LARGE_SIM||!sim_canterbury_attach_storage(storage,buffer,bytes))return 0;
+    canterbury_handler=handler;canterbury_context=context;canterbury_population=storage->num;canterbury_started=1;
+    local_execution=KIND_NOTHING_TO_RUN;sim_new_progress=sim_new_run=sim_writing_output=0;return 1;
+}
+
+#endif
+
 static n_int sim_memory( n_uint offscreen_size )
 {
     n_uint    current_location = 0;
     n_uint  memory_allocated = MAXIMUM_ALLOCATION;
 
+#ifdef CANTERBURY_SIM
+    if(!city_buffer_borrowed)
+#endif
     offbuffer = memory_new_range( offscreen_size + MINIMAL_ALLOCATION, &memory_allocated );
 
     if ( offbuffer == 0L )
@@ -1845,9 +1881,9 @@ static n_int sim_memory( n_uint offscreen_size )
     }
 
     memory_erase( offbuffer, memory_allocated );
-    memory_erase( ( void * )&group.remains, sizeof( simulated_remains ) );
+    memory_erase( ( void * )&GLOBAL_GROUP.remains, sizeof( simulated_remains ) );
 
-    return being_memory( &group, offbuffer, &current_location, memory_allocated );
+    return being_memory( &GLOBAL_GROUP, offbuffer, &current_location, memory_allocated );
 }
 
 static void debug_birth_event( simulated_being *born, simulated_being *mother, void *sim )
@@ -1871,6 +1907,7 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     n_byte2    local_random[2];
 #ifdef CANTERBURY_SIM
     if (!canterbury_handler || canterbury_started) { (void)SHOW_ERROR("Canterbury host is not configured or already running"); return 0L; }
+    if(!city_group){city_group=calloc(1,sizeof *city_group);city_group_borrowed=0;if(!city_group)return 0L;}
     canterbury_started=1;
 #endif
 
@@ -1901,11 +1938,11 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
     timing.count_frames = 0;
 
 #if 1
-    group.ext_birth = &debug_birth_event;
-    group.ext_death = &debug_death_event;
+    GLOBAL_GROUP.ext_birth = &debug_birth_event;
+    GLOBAL_GROUP.ext_death = &debug_death_event;
 #else
-    group.ext_birth = 0L;
-    group.ext_death = 0L;
+    GLOBAL_GROUP.ext_birth = 0L;
+    GLOBAL_GROUP.ext_death = 0L;
 #endif
 
     if ( ( kind == KIND_START_UP ) || ( kind == KIND_MEMORY_SETUP ) )
@@ -1929,11 +1966,11 @@ void *sim_init( KIND_OF_USE kind, n_uint randomise, n_uint offscreen_size, n_uin
         land_seed_genetics( local_random );
     }
 
-    being_remains_init( &( group.remains ) ); /* Eventually this should be captured through the file handling and moved into the code below */
+    being_remains_init( &( GLOBAL_GROUP.remains ) ); /* Eventually this should be captured through the file handling and moved into the code below */
 
 #ifdef BRONZE_SIM
     if (kind == KIND_LOAD_FILE) {
-        if (!bronze_actors_world_reset(&group)) {
+        if (!bronze_actors_world_reset(&GLOBAL_GROUP)) {
             (void)SHOW_ERROR("Bronze actor registry import failed");
             return 0L;
         }
@@ -1950,7 +1987,8 @@ void sim_close( void )
     canterbury_started=0;
     canterbury_handler=NULL;
     canterbury_context=NULL;
-    group.num=0;
+    if(!city_group)return;
+    GLOBAL_GROUP.num=0;
 #endif
 #ifdef BRONZE_SIM
     bronze_actors_close_default();
@@ -1963,13 +2001,20 @@ void sim_close( void )
 #ifdef APESCRIPT_INCLUDED
     interpret_cleanup( &interpret );
 #endif
+#ifdef CANTERBURY_SIM
+    if(!city_buffer_borrowed)memory_free((void **)&offbuffer);
+    offbuffer=NULL;city_buffer_borrowed=0;
+    if(!city_group_borrowed)free(city_group);
+    city_group=NULL;city_group_borrowed=0;
+#else
     memory_free( ( void ** ) &offbuffer );
+#endif
     /*death_record_file_cleanup();*/
 }
 
 void sim_set_select( simulated_being *select )
 {
-    group.select = select;
+    GLOBAL_GROUP.select = select;
 }
 
 static void sim_flood_loop( simulated_group *group, simulated_being *local, void *data )
@@ -1987,16 +2032,16 @@ static void sim_flood_loop( simulated_group *group, simulated_being *local, void
 
 void sim_flood( void )
 {
-    loop_no_thread( &group, 0L, sim_flood_loop, 0L );
+    loop_no_thread( &GLOBAL_GROUP, 0L, sim_flood_loop, 0L );
 }
 
 void sim_healthy_carrier( void )
 {
-    n_uint  loop = ( group.num >> 2 );
+    n_uint  loop = ( GLOBAL_GROUP.num >> 2 );
 
-    while ( loop < group.num )
+    while ( loop < GLOBAL_GROUP.num )
     {
-        simulated_being *local = &group.beings[loop];
+        simulated_being *local = &GLOBAL_GROUP.beings[loop];
         being_dead( local );
         loop++;
     }

@@ -1022,9 +1022,10 @@ typedef void ( being_death_event )( simulated_being *deceased, void *sim );
 #ifndef BRONZE_SIM
 #error CANTERBURY_SIM requires BRONZE_SIM
 #endif
-/* Full 1939-proxy Canterbury population plus one spare native slot. */
-#define CANTERBURY_POPULATION 26999
-#define LARGE_SIM 27000
+/* Default city population and growth capacity are separate. */
+#define CANTERBURY_POPULATION 27000
+#define CANTERBURY_CAPACITY 30000
+#define LARGE_SIM CANTERBURY_CAPACITY
 #else
 #define LARGE_SIM 256
 #endif
@@ -1102,6 +1103,13 @@ void      sim_cycle( void );
  * Configure before sim_init; NULL callbacks are rejected. */
 typedef void (*canterbury_cycle_handler)(simulated_group *, void *);
 int sim_canterbury_configure(n_uint population, canterbury_cycle_handler, void *);
+/* Serialized host-owned startup storage, attached only while stopped. Host
+ * retains ownership and frees it after sim_close. Zero size means unsupported. */
+n_uint sim_canterbury_storage_bytes(n_uint offscreen_size);
+int sim_canterbury_attach_storage(simulated_group *,void *buffer,n_uint bytes);
+/* Install an already validated staged city without startup, a clock tick, or
+ * native population regeneration. Caller owns all supplied storage. */
+int sim_canterbury_install_storage(simulated_group *,void *,n_uint,canterbury_cycle_handler,void *);
 #endif
 void      sim_update_output( void );
 

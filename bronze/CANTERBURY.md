@@ -6,16 +6,16 @@ use the same definitions: they change the native group/registry layout.
 
 Ordinary builds retain `LARGE_SIM=256`, their original autonomous native loop,
 Bronze township generation and existing save bounds. Canterbury defines
-`LARGE_SIM=27000`, defaults to 26,999 initial residents and reserves one additional slot.
-The parent rules host now fills that slot with a native Count: 27,000 total
-bodies by default. Progeny conversion reuses existing bodies and stable IDs.
-Its current native body array occupies about 1.90 GB; actor storage adds about
-96 MB. This is not a compact/mobile-memory implementation.
+`CANTERBURY_CAPACITY=30000` and `LARGE_SIM=30000`, defaults to 27,000 initial residents with no special reserved slot.
+Canterbury Details starts with 27,000 ordinary people and reserves 3,000 slots for growth. Other hosts may
+request a smaller initial population; actor semantics remain host-owned.
+Its current native body array occupies about 2.11 GB; actor storage adds about
+113 MB. This is not a compact/mobile-memory implementation.
 
 ## Host contract
 
 Call `sim_canterbury_configure(population, handler, context)` before `sim_init`.
-Valid initial counts are 1 through 26,999; a NULL handler, invalid count or live
+Valid initial counts are 1 through 27,000; a NULL handler, invalid count or live
 host reconfiguration fails. Call `sim_cycle` to initialize and advance the native
 minute. The callback receives the actual `simulated_group`, after native time and
 its BronzeClock advance. The city owns routines, human needs policy and movement
@@ -116,3 +116,8 @@ project policy, basemap palette/resource, camera and picking remain in `rules/`.
 The overlay receives distinct plot-buffer and world contexts. Canterbury returns
 before default island-agent compositing so camera-transformed city agents are
 not drawn a second time in island coordinates. Ordinary profiles are unchanged.
+
+City checkpoints may use the guarded caller-owned registry checkpoint and stopped
+`sim_canterbury_install_storage` seams. They reject dynamic DSL/program pointers,
+preserve complete pointer-free actor records, native bodies, land and closed work
+clock, and install staged storage without a startup tick. Other profiles are unchanged.
