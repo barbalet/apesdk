@@ -9,6 +9,16 @@ The world is not a free-floating scene. It is a grid with conversion rules, a
 clock with fixed periods, and topology that affects what beings can see, reach,
 remember, and revisit.
 
+## Time in the Extended Profiles
+
+Bronze measures task duration against the native clock, with 1,440 minute
+cycles per day. A pending economic action earns time only through the work
+gate. Canterbury advances that same clock before invoking its city callback,
+then returns before autonomous island updates. A host's civil calendar and
+route progress are interpretations of native time and body position. They
+must not become a second clock or coordinate authority. The integration
+sequence is described in [Chapter 15](chapter_15.md).
+
 ## Noble Ape Initial-Condition Context
 
 The [Noble Ape talk](https://nobleape.com/) repeatedly returns to initial

@@ -12,6 +12,16 @@ It has four biological drives:
 Drives are not emotions in the literary sense. They are bounded internal
 pressures that make some actions more likely and suppress others.
 
+## Economic Intentions and City Policy
+
+In Bronze, a valid task remains subordinate to native needs, sleep, social
+obligations and movement. The work gate records interruptions and grants
+stationary time only when the body is eligible. Canterbury uses a guarded
+claim interface inside its host callback, where city survival, care and travel
+policy determine availability. It does not run all of the island drive behavior
+described below. Use [Chapter 14](chapter_14.md) for interrupted Bronze tasks
+and [Chapter 15](chapter_15.md) for city work arbitration.
+
 ## Noble Ape Drive Context
 
 The [Noble Ape reference](https://nobleape.com/) names the same four motivation

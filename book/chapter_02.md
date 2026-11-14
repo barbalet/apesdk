@@ -10,6 +10,16 @@ number means. ApeSDK reduces that risk by putting common assumptions in
 [`toolkit/toolkit.h`](../toolkit/toolkit.h) and by reusing those structures
 across simulation, entities, rendering, transfer, and scripting.
 
+## Build Profiles and Shared Layouts
+
+`BRONZE_SIM` adds registry-owned economic sidecars while retaining the native
+being layout. `CANTERBURY_SIM` also changes the native group's population
+capacity, which changes its embedded array size and subsequent offsets. Every
+linked translation unit must agree on the profile; a shared type name alone
+does not establish binary compatibility. Read [Chapter 14](chapter_14.md) for
+sidecar ownership and [Chapter 15](chapter_15.md) for the capacity and host
+contract. Ordinary builds omit both presence-tested definitions.
+
 ## Noble Ape Portability Context
 
 The [Noble Ape historical reference](https://nobleape.com/) gives an additional

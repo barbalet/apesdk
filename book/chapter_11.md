@@ -9,6 +9,16 @@ This chapter is about evidence. A simulation can look persuasive while still
 being misread. ApeSDK gives several ways to see and ask about state, but the
 reader must separate visualization from proof.
 
+## Observing Extended Worlds
+
+Bronze inspectors join selected native beings to stable actor IDs, tasks,
+inventories and settlement records. Combined saves preserve both native and
+economic continuation state. Canterbury supplies an indexed map draw boundary
+while leaving the basemap, camera, picking and complete save coordinator to
+the host. A successful image or native-only save is insufficient evidence for
+a resumed city. [Chapter 14](chapter_14.md) covers Bronze observation and saves;
+[Chapter 15](chapter_15.md) explains the city boundaries.
+
 ## Noble Ape Observation Context
 
 The [Noble Ape reference](https://nobleape.com/) describes demonstrations that

@@ -7,6 +7,16 @@ in [`universe/universe.h`](../universe/universe.h).
 This layer answers the question: what kind of world do the beings inhabit before
 any being makes a decision?
 
+## Landscapes in Bronze and Canterbury
+
+Bronze attaches finite economic patches and township geometry to native terrain;
+its routing still respects dry ground, slopes and actual native movement.
+`HIDE_THUNDER` is independent of `BRONZE_SIM`. Canterbury instead lets a host
+supply qualified city geometry and environmental policy, and skips the ordinary
+island weather loop after the city callback. A historical basemap or modern
+road overlay does not itself authorize traversal. See [Chapter 14](chapter_14.md)
+for native settlements and [Chapter 15](chapter_15.md) for host-owned maps.
+
 ## Noble Ape Landscape Context
 
 The [Noble Ape reference](https://nobleape.com/) describes the older simulation

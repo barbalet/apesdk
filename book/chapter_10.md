@@ -10,6 +10,16 @@ ApeScript is useful because it lets a user express controlled changes without
 immediately editing the C engine. That makes it a bridge between experiment and
 implementation.
 
+## ApeScript and the Bronze Scenario Language
+
+Bronze's scenario language has its own canonical parser, AST and semantic
+compiler in `bronze/dsl/`. It describes occupations and economic tasks, with
+explicit strict and standalone compatibility contracts. It does not replace
+ApeScript, and parsing a declaration does not prove that a graphical host can
+execute it. Canterbury hosts can also define their own content languages
+outside the SDK. [Chapter 14](chapter_14.md) explains Bronze admission and
+execution; [Chapter 15](chapter_15.md) defines the city-host boundary.
+
 ## Noble Ape Scripting Context
 
 The [Noble Ape 2012 talk](https://nobleape.com/) describes ApeScript as an

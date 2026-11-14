@@ -10,6 +10,16 @@ A being in ApeSDK is not a character script. It is a bundle of bounded state:
 energy, body, genetics, drives, social graph, episodic memory, territory
 familiarity, immune state, brain state, and braincode.
 
+## Bodies and Actor Sidecars
+
+Bronze occupations, skills, tasks and economic inventories belong to actor
+sidecars; physical position and energy remain on the native being. Registry
+IDs survive body-array compaction, so pointers, indexes and display names are
+not durable identities. Canterbury reuses these bodies while assigning human
+needs and lifecycle policy to its host; the island biological loop does not
+run a second update. [Chapters 14](chapter_14.md) and [15](chapter_15.md)
+explain how those additions preserve one physical population.
+
 ## Noble Ape Body Context
 
 The [Noble Ape 2012 transcript](https://nobleape.com/) describes ape internals

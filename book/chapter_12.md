@@ -9,6 +9,17 @@ The current workflow is documented across [`README.md`](../README.md),
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml), and
 [`RELEASE.md`](../RELEASE.md).
 
+## Extending the Build and Validation Matrix
+
+The new profiles need explicit compatibility checks. Alongside `bash test.sh`,
+run `make -C bronze test` and `make -C bronze contract-test` for Bronze work.
+Canterbury hosts must additionally qualify their actual capacity, callback,
+movement, lifecycle and complete checkpoint behavior. Shared-core changes
+need ordinary-profile checks with Canterbury absent; linking one city build
+does not establish baseline compatibility. [Chapter 14](chapter_14.md) gives
+Bronze build entry points and [Chapter 15](chapter_15.md) explains city layout
+and ownership constraints.
+
 ## Noble Ape Stewardship Context
 
 The [Noble Ape 2012 talk](https://nobleape.com/) describes the project as open

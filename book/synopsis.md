@@ -50,6 +50,24 @@ specific directories.
 10. [Language as Computation, Not Narrative](chapter_10.md)
 11. [Seeing, Measuring, and Talking to the Model](chapter_11.md)
 12. [Building, Extending, and Stress-Testing a Living System](chapter_12.md)
+13. [Building and Running the Python Library](chapter_13.md)
+14. [Bronze: Occupations and Economies on Native Beings](chapter_14.md)
+15. [Canterbury: Hosting a City on the Native Engine](chapter_15.md)
+
+## Native, Bronze and Canterbury Profiles
+
+The original chapters explain native island behavior. `BRONZE_SIM` adds
+world-owned actor identities, occupations, resumable tasks, finite inventories,
+townships and paired saves around that native simulation. `CANTERBURY_SIM`
+requires Bronze and supplies a city callback in place of the autonomous island
+loop. The host then owns human routines, movement policy, institutions and
+complete city persistence while reusing native bodies, energy and time.
+
+These are build contracts, not interchangeable scenario names. All linked units
+must agree on their definitions. This checkout has a Canterbury capacity of
+27,000 and initial population default of 26,999; later consumers can pin a
+different capacity profile. Chapter 15 explains that revision boundary. The
+original native and ordinary Bronze capacity here remains 256.
 
 ## Current Repository Anchors
 
@@ -64,15 +82,21 @@ The important directories are:
 - [`universe/`](../universe/) - simulation loop, command interface, save/load
   transfer, and cross-module constants.
 - [`script/`](../script/) - ApeScript parser and interpreter.
+- [`bronze/`](../bronze/) - optional scenario compiler, native actor sidecars,
+  work arbitration, tasks, settlements and save support; its
+  [Canterbury contract](../bronze/CANTERBURY.md) describes city-host seams.
 - [`render/`](../render/) and [`gui/`](../gui/) - low-level graphing, buffers,
   drawing, messages, and shared UI support.
 - [`toolchains/`](../toolchains/) - current macOS app projects for `sim-mac`,
-  `war-mac`, `urban-mac`, and `planet`.
+  `war-mac`, `urban-mac`, and `planet`, plus the `bronze-mac` Catalyst target.
 
 The important workflows are:
 
 - Build the command-line simulation with [`build.sh`](../build.sh).
 - Run deterministic C tests with [`test.sh`](../test.sh).
+- Exercise Bronze scenarios with `make -C bronze test` and profile/baseline
+  contracts with `make -C bronze contract-test`. City hosts add their own
+  population, lifecycle, map, callback and complete-checkpoint qualification.
 - Use GitHub Actions as the current CI boundary: Linux runs deterministic C
   tests, while macOS builds the `sim-mac` and `planet` Xcode projects.
 - Follow [`RELEASE.md`](../RELEASE.md) for the macOS release process and
